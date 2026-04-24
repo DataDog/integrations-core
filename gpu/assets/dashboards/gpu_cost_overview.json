@@ -1,0 +1,1329 @@
+{
+  "title": "GPU Cost Overview",
+  "description": "Use this dashboard to investigate GPU compute spend across AWS, Azure, and GCP, understand where your spend is concentrated by team and cloud, and correlate costs with GPU fleet utilization and health.",
+  "widgets": [
+    {
+      "id": 6079930088570001,
+      "definition": {
+        "title": "Total GPU Spend",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "hide_incomplete_cost_data": true
+        },
+        "type": "query_value",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1 + query2 + query3 + query4",
+                "number_format": {
+                  "unit": {
+                    "type": "canonical_unit",
+                    "unit_name": "dollar"
+                  }
+                }
+              }
+            ],
+            "queries": [
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query1",
+                "query": "sum:aws.cost.net.amortized.shared.resources.allocated{(aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\")) AND $team}"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query2",
+                "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $team}"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query3",
+                "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND NOT google_usage_type:*Vertex* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND $team}"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query4",
+                "query": "sum:aws.cost.net.unblended{aws_usage_type:*CapacityBlock* AND $team}"
+              }
+            ],
+            "response_format": "scalar"
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 6079930088570002,
+      "definition": {
+        "title": "Total GPU Spend (past 30d)",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "type": "live",
+          "unit": "month",
+          "value": 1,
+          "hide_incomplete_cost_data": true
+        },
+        "type": "query_value",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1 + query2 + query3 + query4",
+                "number_format": {
+                  "unit": {
+                    "type": "canonical_unit",
+                    "unit_name": "dollar"
+                  }
+                }
+              }
+            ],
+            "queries": [
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query1",
+                "query": "sum:aws.cost.net.amortized.shared.resources.allocated{(aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\")) AND $team}"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query2",
+                "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $team}"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query3",
+                "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND NOT google_usage_type:*Vertex* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND $team}"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query4",
+                "query": "sum:aws.cost.net.unblended{aws_usage_type:*CapacityBlock* AND $team}"
+              }
+            ],
+            "response_format": "scalar"
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 3,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 6079930088570003,
+      "definition": {
+        "title": "Total GPU Spend (30d prior)",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "type": "live",
+          "unit": "month",
+          "value": 1,
+          "hide_incomplete_cost_data": true
+        },
+        "type": "query_value",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "timeshift(query1, -2592000) + timeshift(query2, -2592000) + timeshift(query3, -2592000) + timeshift(query4, -2592000)",
+                "number_format": {
+                  "unit": {
+                    "type": "canonical_unit",
+                    "unit_name": "dollar"
+                  }
+                }
+              }
+            ],
+            "queries": [
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query1",
+                "query": "sum:aws.cost.net.amortized.shared.resources.allocated{(aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\")) AND $team}"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query2",
+                "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $team}"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query3",
+                "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND NOT google_usage_type:*Vertex* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND $team}"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query4",
+                "query": "sum:aws.cost.net.unblended{aws_usage_type:*CapacityBlock* AND $team}"
+              }
+            ],
+            "response_format": "scalar"
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 6079930088570004,
+      "definition": {
+        "title": "Month-over-month Change",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "type": "live",
+          "unit": "month",
+          "value": 1,
+          "hide_incomplete_cost_data": true
+        },
+        "type": "query_value",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "number_format": {
+                  "unit": {
+                    "type": "canonical_unit",
+                    "unit_name": "percent"
+                  }
+                },
+                "formula": "((query1 + query2 + query3 + query7) - (timeshift(query4, -2592000) + timeshift(query5, -2592000) + timeshift(query6, -2592000) + timeshift(query7, -2592000))) / (timeshift(query4, -2592000) + timeshift(query5, -2592000) + timeshift(query6, -2592000) + timeshift(query7, -2592000)) * 100"
+              }
+            ],
+            "queries": [
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query1",
+                "query": "sum:aws.cost.net.amortized.shared.resources.allocated{(aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\")) AND $team}"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query2",
+                "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $team}"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query3",
+                "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND NOT google_usage_type:*Vertex* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND $team}"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query4",
+                "query": "sum:aws.cost.net.amortized.shared.resources.allocated{(aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\")) AND $team}"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query5",
+                "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $team}"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query6",
+                "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND NOT google_usage_type:*Vertex* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND $team}"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query7",
+                "query": "sum:aws.cost.net.unblended{aws_usage_type:*CapacityBlock* AND $team}"
+              }
+            ],
+            "response_format": "scalar",
+            "conditional_formats": [
+              {
+                "comparator": "<",
+                "value": 1,
+                "palette": "black_on_light_green"
+              },
+              {
+                "comparator": "<",
+                "value": 10,
+                "palette": "black_on_light_yellow"
+              },
+              {
+                "comparator": "<",
+                "value": 100,
+                "palette": "black_on_light_red"
+              },
+              {
+                "comparator": ">=",
+                "value": 100,
+                "palette": "white_on_red"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 9,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 1050736273930266,
+      "definition": {
+        "title": "GPU Spend",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2937782131983032,
+            "definition": {
+              "title": "Total GPU Spend by Cloud Provider",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "comparison_time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "cloud_cost_summary",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{((providername:aws AND aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\")) OR (providername:azure AND azure_product:VirtualMachines AND metersubcategory:*N* AND chargetype IN (Usage)) OR (providername:gcp AND NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND NOT google_usage_type:*Vertex* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*))) AND $team} by {providername}.rollup(sum, daily)"
+                    }
+                  ],
+                  "formulas": [
+                    {"formula": "query1"}
+                  ]
+                }
+              ],
+              "graph_options": [
+                {"type": "query_value", "view": "total"},
+                {"type": "query_value", "view": "change"},
+                {"type": "timeseries", "display_type": "bars"},
+                {"type": "cloud_cost_table", "view": "summary", "sort": {"type": "formula", "index": 0, "order": "desc"}}
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 7700000000000042,
+            "definition": {
+              "title": "GPU Spend by Team (Monthly)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "type": "live",
+                "unit": "year",
+                "value": 1,
+                "hide_incomplete_cost_data": true
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1 + query2 + query3",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "dollar"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\") AND $team} by {team}.rollup(sum, monthly)"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query2",
+                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $team} by {team}.rollup(sum, monthly)"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query3",
+                      "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND NOT google_usage_type:*Vertex* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND $team} by {team}.rollup(sum, monthly)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "color_order": "shuffled",
+                    "order_by": "values",
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 2,
+        "width": 12,
+        "height": 9
+      }
+    },
+    {
+      "id": 7700000000000010,
+      "definition": {
+        "title": "Cost & Efficiency",
+        "background_color": "vivid_green",
+        "layout_type": "ordered",
+        "show_title": true,
+        "type": "group",
+        "widgets": [
+          {
+            "id": 7700000000000070,
+            "definition": {
+              "type": "note",
+              "content": "Cost data reflects total cloud spend. Utilization values reflect only hosts reporting the Datadog Agent — [set up GPU Monitoring](https://docs.datadoghq.com/gpu_monitoring/setup/) to populate utilization widgets.",
+              "background_color": "vivid_green",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "bottom",
+              "has_padding": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 7700000000000040,
+            "definition": {
+              "title": "Cost per Active GPU (past 30d)",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "type": "live",
+                "unit": "month",
+                "value": 1,
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "(query1 + query2 + query3 + query5) / query4",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "dollar"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{(aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\")) AND $team}"
+                    },
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query2",
+                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $team}"
+                    },
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query3",
+                      "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND NOT google_usage_type:*Vertex* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND $team}"
+                    },
+                    {
+                      "aggregator": "avg",
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:gpu.device.total{cloud_provider IN (aws,azure,gcp) AND $team}"
+                    },
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query5",
+                      "query": "sum:aws.cost.net.unblended{aws_usage_type:*CapacityBlock* AND $team}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 7700000000000043,
+            "definition": {
+              "title": "Active GPU Devices",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:gpu.device.total{cloud_provider IN (aws,azure,gcp) AND $team}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 1,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 7700000000000041,
+            "definition": {
+              "title": "Avg GPU Compute Utilization",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "avg",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:gpu.sm_active{cloud_provider IN (aws,azure,gcp) AND $team}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 60,
+                      "palette": "white_on_green"
+                    },
+                    {
+                      "comparator": ">=",
+                      "value": 30,
+                      "palette": "white_on_yellow"
+                    },
+                    {
+                      "comparator": "<",
+                      "value": 30,
+                      "palette": "white_on_red"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 1,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 1,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 7700000000000080,
+            "definition": {
+              "title": "% of Spend Untagged by Team (30d)",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "type": "live",
+                "unit": "month",
+                "value": 1,
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "(query1 + query2 + query3 + query4) / (query5 + query6 + query7 + query8) * 100",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 30,
+                          "palette": "white_on_red"
+                        },
+                        {
+                          "comparator": ">",
+                          "value": 10,
+                          "palette": "white_on_yellow"
+                        },
+                        {
+                          "comparator": "<=",
+                          "value": 10,
+                          "palette": "white_on_green"
+                        }
+                      ]
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "aggregator": "sum",
+                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\") AND NOT team:* AND $team}"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query2",
+                      "aggregator": "sum",
+                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND NOT team:* AND $team}"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query3",
+                      "aggregator": "sum",
+                      "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND NOT google_usage_type:*Vertex* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND NOT team:* AND $team}"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query4",
+                      "aggregator": "sum",
+                      "query": "sum:aws.cost.net.unblended{aws_usage_type:*CapacityBlock* AND NOT team:* AND $team}"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query5",
+                      "aggregator": "sum",
+                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{(aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\")) AND $team}"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query6",
+                      "aggregator": "sum",
+                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $team}"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query7",
+                      "aggregator": "sum",
+                      "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND NOT google_usage_type:*Vertex* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND $team}"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query8",
+                      "aggregator": "sum",
+                      "query": "sum:aws.cost.net.unblended{aws_usage_type:*CapacityBlock* AND $team}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": false,
+              "precision": 1
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 7700000000000081,
+            "definition": {
+              "title": "% of Spend Untagged by Environment (30d)",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "type": "live",
+                "unit": "month",
+                "value": 1,
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "(query1 + query2 + query3 + query4) / (query5 + query6 + query7 + query8) * 100",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 30,
+                          "palette": "white_on_red"
+                        },
+                        {
+                          "comparator": ">",
+                          "value": 10,
+                          "palette": "white_on_yellow"
+                        },
+                        {
+                          "comparator": "<=",
+                          "value": 10,
+                          "palette": "white_on_green"
+                        }
+                      ]
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "aggregator": "sum",
+                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\") AND NOT env:* AND $team}"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query2",
+                      "aggregator": "sum",
+                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND NOT env:* AND $team}"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query3",
+                      "aggregator": "sum",
+                      "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND NOT google_usage_type:*Vertex* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND NOT env:* AND $team}"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query4",
+                      "aggregator": "sum",
+                      "query": "sum:aws.cost.net.unblended{aws_usage_type:*CapacityBlock* AND NOT env:* AND $team}"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query5",
+                      "aggregator": "sum",
+                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{(aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\")) AND $team}"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query6",
+                      "aggregator": "sum",
+                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $team}"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query7",
+                      "aggregator": "sum",
+                      "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND NOT google_usage_type:*Vertex* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND $team}"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query8",
+                      "aggregator": "sum",
+                      "query": "sum:aws.cost.net.unblended{aws_usage_type:*CapacityBlock* AND $team}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": false,
+              "precision": 1
+            },
+            "layout": {
+              "x": 6,
+              "y": 3,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 7700000000000082,
+            "definition": {
+              "title": "Spend by Team (30d)",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "type": "live",
+                "unit": "month",
+                "value": 1,
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_table",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Spend",
+                      "formula": "query1 + query2 + query3",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "dollar"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "% of Total Spend",
+                      "cell_display_mode": "bar",
+                      "formula": "(query1 + query2 + query3) / (query7 + query8 + query9) * 100",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "Avg Utilization",
+                      "cell_display_mode": "bar",
+                      "formula": "query4",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "aggregator": "sum",
+                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\") AND $team AND team:*} by {team}"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query2",
+                      "aggregator": "sum",
+                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $team AND team:*} by {team}"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query3",
+                      "aggregator": "sum",
+                      "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND NOT google_usage_type:*Vertex* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND $team AND team:*} by {team}"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query7",
+                      "aggregator": "sum",
+                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{(aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\")) AND $team}"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query8",
+                      "aggregator": "sum",
+                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $team}"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query9",
+                      "aggregator": "sum",
+                      "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND NOT google_usage_type:*Vertex* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND $team}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "aggregator": "avg",
+                      "query": "avg:gpu.sm_active{cloud_provider IN (aws,azure,gcp) AND $team AND team:*} by {team}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 7700000000000022,
+            "definition": {
+              "title": "GPU Daily Spend vs Compute Utilization",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "AWS Spend",
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "dollar"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "AWS Capacity Blocks",
+                      "formula": "query5",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "dollar"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "Azure Spend",
+                      "formula": "query2",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "dollar"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "GCP Spend",
+                      "formula": "query3",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "dollar"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\") AND $team}.rollup(sum, daily)"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query2",
+                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $team}.rollup(sum, daily)"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query3",
+                      "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND NOT google_usage_type:*Vertex* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND $team}.rollup(sum, daily)"
+                    },
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query5",
+                      "query": "sum:aws.cost.net.unblended{aws_usage_type:*CapacityBlock* AND $team}.rollup(sum, daily)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars",
+                  "on_right_yaxis": false
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "query4"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "avg:gpu.sm_active{cloud_provider IN (aws,azure,gcp) AND $team} by {cloud_provider}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "thick"
+                  },
+                  "display_type": "line",
+                  "on_right_yaxis": true
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear"
+              },
+              "right_yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "min": "-5",
+                "max": "100",
+                "label": "Compute Utilization %"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 9,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 7700000000000084,
+            "definition": {
+              "title": "Spend by Environment (30d)",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "type": "live",
+                "unit": "month",
+                "value": 1,
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_table",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Spend",
+                      "formula": "query1 + query2 + query3",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "dollar"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "% of Total Spend",
+                      "cell_display_mode": "bar",
+                      "formula": "(query1 + query2 + query3) / (query7 + query8 + query9) * 100",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "Avg Utilization",
+                      "cell_display_mode": "bar",
+                      "formula": "query4",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "aggregator": "sum",
+                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\") AND $team AND env:*} by {env}"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query2",
+                      "aggregator": "sum",
+                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $team AND env:*} by {env}"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query3",
+                      "aggregator": "sum",
+                      "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND NOT google_usage_type:*Vertex* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND $team AND env:*} by {env}"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query7",
+                      "aggregator": "sum",
+                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{(aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\")) AND $team}"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query8",
+                      "aggregator": "sum",
+                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $team}"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query9",
+                      "aggregator": "sum",
+                      "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND NOT google_usage_type:*Vertex* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND $team}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "aggregator": "avg",
+                      "query": "avg:gpu.sm_active{cloud_provider IN (aws,azure,gcp) AND $team AND env:*} by {env}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 13,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 7700000000000062,
+            "definition": {
+              "title": "GPU Utilization by Type",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Active Devices",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "% of Total Devices",
+                      "cell_display_mode": "bar",
+                      "formula": "query2 / query3 * 100",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "Avg Utilization",
+                      "cell_display_mode": "bar",
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg",
+                      "query": "avg:gpu.sm_active{cloud_provider IN (aws,azure,gcp) AND $team} by {gpu_type}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "avg",
+                      "query": "sum:gpu.device.total{cloud_provider IN (aws,azure,gcp) AND $team} by {gpu_type}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "aggregator": "avg",
+                      "query": "sum:gpu.device.total{cloud_provider IN (aws,azure,gcp) AND $team}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 100,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 6,
+              "y": 13,
+              "width": 6,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 11,
+        "width": 12,
+        "height": 17
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "team",
+      "prefix": "team",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}
