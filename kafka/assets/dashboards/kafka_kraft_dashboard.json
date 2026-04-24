@@ -1,5 +1,5 @@
 {
-  "title": "Kafka, KRaft and Kafka Consumer Overview",
+  "title": "Kafka KRaft Overview",
   "description": "## Kafka KRaft Overview Dashboard\n\nThis dashboard provides an overview of your Kafka environment running in KRaft mode (without ZooKeeper). It displays metrics from Kafka and Kafka Consumer Integrations with Datadog, including KRaft quorum health, metadata replication, and controller state.\n\nIf you would benefit from visualizing the topology of your streaming data pipelines, or from investigating localized bottlenecks within your data streams setup, check out [Data Streams Monitoring](https://www.datadoghq.com/product/data-streams-monitoring/).\n\nFor more information, read:\n* [Kafka integration documentation](https://docs.datadoghq.com/integrations/kafka/?tab=host)\n* [Monitoring Kafka blog post](https://www.datadoghq.com/blog/monitor-kafka-with-datadog/)\n* [KRaft documentation](https://kafka.apache.org/documentation/#kraft)",
   "widgets": [
     {

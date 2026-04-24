@@ -37,8 +37,12 @@ def test_kraft_metrics(dd_agent_check):
     aggregator = dd_agent_check(instance, rate=True)
 
     for metric in KAFKA_COMMON_E2E_METRICS + KAFKA_KRAFT_E2E_METRICS + JVM_E2E_METRICS_NEW:
-        at_least = 0 if metric in OPTIONAL_KRAFT_E2E_METRICS else 1
-        aggregator.assert_metric(metric, at_least=at_least)
+        aggregator.assert_metric(metric)
+
+    # Registers the metric name so assert_all_metrics_covered passes; presence is not enforced
+    # because single-node KRaft clusters never trigger an election.
+    for metric in OPTIONAL_KRAFT_E2E_METRICS:
+        aggregator.assert_metric(metric, at_least=0)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=JVM_E2E_METRICS_NEW)

@@ -20,4 +20,3 @@ matrix.compose-file.env-vars = "COMPOSE_FILE"
 
 [envs.latest.env-vars]
 CONFLUENT_VERSION = "latest"
-COMPOSE_FILE = "kraft.yml"
