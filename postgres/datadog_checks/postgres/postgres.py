@@ -71,6 +71,7 @@ from .util import (
     QUERY_PG_UPTIME,
     QUERY_PG_WAIT_EVENT_METRICS,
     REPLICATION_METRICS,
+    SEQUENCE_METRICS,
     SLRU_METRICS,
     SNAPSHOT_TXID_METRICS,
     SNAPSHOT_TXID_METRICS_LT_13,
@@ -281,6 +282,26 @@ class PostgreSql(DatabaseCheck):
             )
         )
 
+    # Some queries depend on functions being defined in the database
+    # We only run those queries if the necessary functions are present
+    def _get_conditional_queries(self, db):
+        conditional_queries = []
+        if self._config.collect_sequence_metrics:
+            has_sequence_function = self.execute_query_raw(
+                """SELECT 1 FROM pg_catalog.pg_proc p
+LEFT JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+WHERE proname='pg_sequences' AND n.nspname='datadog';""",
+                db=db,
+            )
+            if has_sequence_function:
+                conditional_queries.append(SEQUENCE_METRICS)
+            else:
+                self.log.warning(
+                    "datadog.pg_sequences function not present for db %s, sequence metrics won't be generated",
+                    db,
+                )
+        return conditional_queries
+
     def _new_query_executor(self, queries, db):
         return QueryExecutor(
             functools.partial(self.execute_query_raw, db=db),
@@ -457,6 +478,10 @@ class PostgreSql(DatabaseCheck):
         if self.autodiscovery:
             self._collect_dynamic_queries_autodiscovery(per_database_queries)
         else:
+            # No autodiscovery, add the conditional queries to the main db if there's any
+            conditional_queries = self._get_conditional_queries(self.db)
+            queries.extend(conditional_queries)
+            # and the per_database_queries
             queries.extend(per_database_queries)
         self._dynamic_queries.append(self._new_query_executor(queries, db=self.db))
         for dynamic_query in self._dynamic_queries:
@@ -847,13 +872,12 @@ class PostgreSql(DatabaseCheck):
             )
 
     def _collect_dynamic_queries_autodiscovery(self, queries):
-        if not self.autodiscovery:
-            return
-
         databases = self.autodiscovery.get_items()
         for dbname in databases:
             db = functools.partial(self.db_pool.get_connection, dbname=dbname)
-            self._dynamic_queries.append(self._new_query_executor(queries, db=db))
+            # Build the per db conditional queries
+            conditional_queries = self._get_conditional_queries(db)
+            self._dynamic_queries.append(self._new_query_executor(queries + conditional_queries, db=db))
 
     def _emit_running_metric(self):
         self.gauge("running", 1, tags=self.tags_without_db, hostname=self.reported_hostname)
