@@ -10,11 +10,11 @@ from typing import Any
 import anthropic
 
 from ddev.ai.agent.anthropic_client import AnthropicAgent
+from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import AgentConfig, CheckpointConfig, PhaseConfig, TaskConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.template import render_inline, render_prompt
-from ddev.ai.react.callbacks import CallbackSet
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.tools.core.registry import ToolRegistry
 from ddev.ai.tools.fs.file_registry import FileRegistry
@@ -90,7 +90,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         runtime_variables: dict[str, str],
         flow_variables: dict[str, str],
         config_dir: Path,
-        callback_sets: list[CallbackSet] | None = None,
+        callbacks: Callbacks | None = None,
         file_registry: FileRegistry | None = None,
     ) -> None:
         super().__init__(name=phase_id)
@@ -104,7 +104,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         self._runtime_variables = runtime_variables
         self._flow_variables = flow_variables
         self._config_dir = config_dir
-        self._callback_sets: list[CallbackSet] = callback_sets or []
+        self._callbacks: Callbacks = callbacks or Callbacks()
         self._file_registry = file_registry
         self._started_at: datetime | None = None
         self._resolver: Callable[[str], str] | None = None
@@ -162,8 +162,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         """Full phase pipeline. Not intended to be overridden -- customise via the extension points."""
         # 1. Record start time and notify observers
         self._started_at = datetime.now(UTC)
-        for cb_set in self._callback_sets:
-            await cb_set.fire_phase_start(self._phase_id)
+        await self._callbacks.fire_phase_start(self._phase_id)
 
         # 2. Build template context and memory resolver
         context: dict[str, Any] = {
@@ -207,7 +206,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         process = ReActProcess(
             agent=agent,
             tool_registry=tool_registry,
-            callback_sets=self._callback_sets,
+            callbacks=self._callbacks,
         )
 
         # 6. Call run_tasks()
