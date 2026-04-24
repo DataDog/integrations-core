@@ -49,7 +49,7 @@ class LPARStats(AgentCheck):
 
     def check(self, instance: dict) -> None:
         sudo = instance.get('sudo', False)
-        root = (os.getuid() == 0) or sudo
+        root = (hasattr(os, 'getuid') and os.getuid() == 0) or sudo
         if not root:
             self.log.info('Not running as root or sudo - entitlement and hypervisor metrics might be unavailable')
 
