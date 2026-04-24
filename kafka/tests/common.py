@@ -128,7 +128,7 @@ KAFKA_KRAFT_E2E_METRICS = [
 # Single-node KRaft clusters never trigger a leader election, so election-latency metrics
 # remain NaN. They are registered here so assert_all_metrics_covered passes without enforcing
 # presence.
-OPTIONAL_KRAFT_E2E_METRICS = {
+OPTIONAL_KRAFT_E2E_METRICS = [
     "kafka.kraft.election_latency_avg",
     "kafka.kraft.election_latency_max",
-}
+]
