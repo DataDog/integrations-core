@@ -17,6 +17,7 @@ from ddev.ai.phases.template import render_inline, render_prompt
 from ddev.ai.react.callbacks import CallbackSet
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.tools.core.registry import ToolRegistry
+from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.event_bus.orchestrator import AsyncProcessor, BaseMessage
 
 
@@ -90,6 +91,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         flow_variables: dict[str, str],
         config_dir: Path,
         callback_sets: list[CallbackSet] | None = None,
+        file_registry: FileRegistry | None = None,
     ) -> None:
         super().__init__(name=phase_id)
         self._phase_id = phase_id
@@ -102,7 +104,8 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         self._runtime_variables = runtime_variables
         self._flow_variables = flow_variables
         self._config_dir = config_dir
-        self._callback_sets = callback_sets
+        self._callback_sets: list[CallbackSet] = callback_sets or []
+        self._file_registry = file_registry
         self._started_at: datetime | None = None
         self._resolver: Callable[[str], str] | None = None
         self._executed = False
@@ -157,8 +160,10 @@ class Phase(AsyncProcessor[PhaseTrigger]):
 
     async def process_message(self, message: PhaseTrigger) -> None:
         """Full phase pipeline. Not intended to be overridden -- customise via the extension points."""
-        # 1. Record start time
+        # 1. Record start time and notify observers
         self._started_at = datetime.now(UTC)
+        for cb_set in self._callback_sets:
+            await cb_set.fire_phase_start(self._phase_id)
 
         # 2. Build template context and memory resolver
         context: dict[str, Any] = {
@@ -178,7 +183,11 @@ class Phase(AsyncProcessor[PhaseTrigger]):
             context,
             self._resolver,
         )
-        tool_registry = ToolRegistry.from_names(self._agent_config.tools)
+        tool_registry = ToolRegistry.from_names(
+            self._agent_config.tools,
+            owner_id=self._phase_id,
+            file_registry=self._file_registry,
+        )
 
         agent_kwargs: dict[str, Any] = {}
         if self._agent_config.model is not None:
@@ -207,7 +216,21 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         # 7. Call after_react()
         self.after_react()
 
-        # 8. Write success checkpoint — task work is done
+        # 8. Build memory prompt (template errors fail the phase)
+        user_additions = None
+        if self._config.checkpoint is not None:
+            user_additions = render_memory_prompt(self._config.checkpoint, self._config_dir, context)
+        memory_prompt = self._checkpoint_manager.build_memory_prompt(user_additions)
+
+        # 9. Call the agent for the summary — text-only (allowed_tools=[])
+        response = await agent.send(memory_prompt, allowed_tools=[])
+        total_input += response.usage.input_tokens
+        total_output += response.usage.output_tokens
+
+        # 10. Persist the memory file
+        memory_path = self._checkpoint_manager.write_memory(self._phase_id, response.text)
+
+        # 11. Write the success checkpoint (with memory_path and final token totals)
         self._checkpoint_manager.write_phase_checkpoint(
             self._phase_id,
             {
@@ -215,23 +238,9 @@ class Phase(AsyncProcessor[PhaseTrigger]):
                 "started_at": self._started_at.isoformat(),
                 "finished_at": datetime.now(UTC).isoformat(),
                 "tokens": {"total_input": total_input, "total_output": total_output},
+                "memory_path": str(memory_path),
             },
         )
-
-        # 9. Best-effort memory step — failure here doesn't invalidate a completed phase
-        user_additions = None
-        if self._config.checkpoint is not None:
-            user_additions = render_memory_prompt(self._config.checkpoint, self._config_dir, context)
-
-        try:
-            prompt = self._checkpoint_manager.build_memory_prompt(user_additions)
-            # allowed_tools=[] forces a text-only response
-            response = await agent.send(prompt, allowed_tools=[])
-            total_input += response.usage.input_tokens
-            total_output += response.usage.output_tokens
-            self._checkpoint_manager.write_memory(self._phase_id, response.text)
-        except Exception:
-            pass
 
     async def on_success(self, message: PhaseTrigger) -> None:
         """Emit PhaseTrigger to unblock dependent phases."""

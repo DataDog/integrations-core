@@ -26,6 +26,8 @@ class AppendFileTool(FileRegistryTool[AppendFileInput]):
         return "append_file"
 
     async def __call__(self, tool_input: AppendFileInput) -> ToolResult:
+        if fail := self._assert_writable(tool_input.path):
+            return fail
         path = Path(tool_input.path).resolve()
 
         async with self._registry.lock_for(str(path)):

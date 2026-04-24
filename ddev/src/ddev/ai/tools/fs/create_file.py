@@ -29,15 +29,17 @@ class CreateFileTool(FileRegistryTool[CreateFileInput]):
         return "create_file"
 
     async def __call__(self, tool_input: CreateFileInput) -> ToolResult:
+        if fail := self._assert_writable(tool_input.path):
+            return fail
         path = Path(tool_input.path).resolve()
 
         async with self._registry.lock_for(str(path)):
-            if path.exists():
-                return ToolResult(success=False, error=f"File already exists: {path}")
-
             try:
                 path.parent.mkdir(parents=True, exist_ok=True)
-                path.write_text(tool_input.content, encoding="utf-8")
+                with open(path, "x", encoding="utf-8") as fh:
+                    fh.write(tool_input.content)
+            except FileExistsError:
+                return ToolResult(success=False, error=f"File already exists: {path}")
             except OSError as e:
                 return ToolResult(success=False, error=str(e))
             self._register(str(path), tool_input.content)
