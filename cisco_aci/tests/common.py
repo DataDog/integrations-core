@@ -170,8 +170,6 @@ FIXTURE_LIST = [
     # 0d6ca781810665156211b355129ba2f1 - Api.get_eqpt_capacity
     '_api_mo_topology_json_query_target_subtree_target_subtree_class_fabricPod',
     # 643d217904f09445fbc9f7b43cd131f0 - Api.get_fabric_pods
-    '_api_node_mo_uni_tn_DataDog_json_rsp_subtree_include_event_logs_no_scoped_subtree_order_by_eventRecord_created_desc_page_0_page_size_15',  # noqa: E501
-    # d0260e4832537b43b1acb38bcfa58063 - Api.get_tenant_events
     '_api_mo_uni_tn_DataDog_json_query_target_subtree_target_subtree_class_fvAp',
     # 4efe80304d50330f5ed0f79252ef0a84 - Api.get_apps
     '_api_mo_uni_tn_DataDog_json_rsp_subtree_include_stats_no_scoped',
