@@ -162,11 +162,11 @@ class GitHubManager:
             return None
         return [file_data['filename'] for file_data in response.json().get('files', [])]
 
-    def get_pr_head(self, pr_number: int) -> tuple[str, str]:
-        """Return the (head SHA, head branch ref) of a pull request."""
+    def get_pr_refs(self, pr_number: int) -> tuple[str, str, str]:
+        """Return the (head SHA, head branch ref, base branch ref) of a pull request."""
         response = self.__api_get(self.PULL_REQUEST_API.format(repo_id=self.repo_id, pr_number=pr_number))
         data = response.json()
-        return data['head']['sha'], data['head']['ref']
+        return data['head']['sha'], data['head']['ref'], data['base']['ref']
 
     def dispatch_workflow(self, workflow_id: str, ref: str, inputs: dict[str, Any]) -> None:
         """Trigger a workflow_dispatch event."""
