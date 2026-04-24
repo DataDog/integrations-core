@@ -53,11 +53,14 @@ class SqlserverDatabaseReplicationStatsMetrics(SqlserverDatabaseMetricsBase):
         query = DATABASE_REPLICATION_STATS_METRICS_QUERY.copy()
         if self.availability_group or self.only_emit_local:
             where_clauses = []
+            params = []
             if self.availability_group:
-                where_clauses.append(f"resource_group_id = '{self.availability_group}'")
+                where_clauses.append("resource_group_id = ?")
+                params.append(self.availability_group)
             if self.only_emit_local:
                 where_clauses.append("is_local = 1")
             query['query'] += f" where {' and '.join(where_clauses)}"
+            query['params'] = tuple(params)
         return [query]
 
     def __repr__(self) -> str:
