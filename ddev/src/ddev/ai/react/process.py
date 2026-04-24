@@ -8,7 +8,7 @@ from typing import Any
 from ddev.ai.agent.base import BaseAgent
 from ddev.ai.agent.exceptions import AgentError
 from ddev.ai.agent.types import AgentResponse, StopReason, ToolResultMessage
-from ddev.ai.react.callbacks import CallbackSet
+from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.core.registry import ToolRegistry
 from ddev.ai.tools.core.types import ToolResult
@@ -26,20 +26,20 @@ class ReActProcess:
         self,
         agent: BaseAgent[Any],
         tool_registry: ToolRegistry,
-        callback_sets: list[CallbackSet] | None = None,
+        callbacks: Callbacks | None = None,
         compact_threshold_pct: float | None = 75.0,
     ) -> None:
         """
         Args:
             agent: A BaseAgent subclass (e.g. AnthropicAgent).
             tool_registry: Registry of tools available in this loop.
-            callback_sets: Optional CallbackSet instances to observe loop events.
+            callbacks: Optional Callbacks instance to observe loop events.
             compact_threshold_pct: Context usage percentage at which the loop auto-compacts.
                 None disables auto-compaction entirely.
         """
         self._agent = agent
         self._tool_registry = tool_registry
-        self._callback_sets: list[CallbackSet] = callback_sets or []
+        self._callbacks: Callbacks = callbacks or Callbacks()
         self._compact_threshold_pct = compact_threshold_pct
 
     def reset(self) -> None:
@@ -55,8 +55,7 @@ class ReActProcess:
         Returns (input_tokens, output_tokens) from the compaction API call.
         Returns (0, 0) if history was already compact and no API call was made.
         """
-        for cb_set in self._callback_sets:
-            await cb_set.fire_before_compact()
+        await self._callbacks.fire_before_compact()
 
         compact_response = None
         if response is None or response.stop_reason != StopReason.TOOL_USE:
@@ -64,8 +63,7 @@ class ReActProcess:
         else:
             compact_response = await self._agent.compact_preserving_last_turn()
 
-        for cb_set in self._callback_sets:
-            await cb_set.fire_after_compact()
+        await self._callbacks.fire_after_compact()
         if compact_response is None:
             return 0, 0
         return compact_response.usage.input_tokens, compact_response.usage.output_tokens
@@ -93,16 +91,14 @@ class ReActProcess:
             Every exception is forwarded after notifying callbacks.
         """
         try:
-            for cb_set in self._callback_sets:
-                await cb_set.fire_before_agent_send(1)
+            await self._callbacks.fire_before_agent_send(1)
 
             response = await self._agent.send(prompt, allowed_tools)
             iterations = 1
             total_input = response.usage.input_tokens
             total_output = response.usage.output_tokens
 
-            for cb_set in self._callback_sets:
-                await cb_set.fire_agent_response(response, iterations)
+            await self._callbacks.fire_agent_response(response, iterations)
 
             # No iteration cap — this is an interactive CLI tool; the user can Ctrl+C to stop.
             while response.stop_reason == StopReason.TOOL_USE:
@@ -121,21 +117,18 @@ class ReActProcess:
                 tool_call_results = list(zip(response.tool_calls, tool_results, strict=True))
 
                 for tc, result in tool_call_results:
-                    for cb_set in self._callback_sets:
-                        await cb_set.fire_tool_call(tc, result, iterations)
+                    await self._callbacks.fire_tool_call(tc, result, iterations)
 
                 messages = [ToolResultMessage(tool_call_id=tc.id, result=result) for tc, result in tool_call_results]
 
-                for cb_set in self._callback_sets:
-                    await cb_set.fire_before_agent_send(iterations + 1)
+                await self._callbacks.fire_before_agent_send(iterations + 1)
 
                 response = await self._agent.send(messages, allowed_tools)
                 iterations += 1
                 total_input += response.usage.input_tokens
                 total_output += response.usage.output_tokens
 
-                for cb_set in self._callback_sets:
-                    await cb_set.fire_agent_response(response, iterations)
+                await self._callbacks.fire_agent_response(response, iterations)
 
                 if self._is_compact_needed(response):
                     compact_in, compact_out = await self.compact(response)
@@ -150,12 +143,10 @@ class ReActProcess:
                 context_usage=response.usage.context_usage,
             )
 
-            for cb_set in self._callback_sets:
-                await cb_set.fire_complete(react_result)
+            await self._callbacks.fire_complete(react_result)
 
             return react_result
 
         except BaseException as e:
-            for cb_set in self._callback_sets:
-                await cb_set.fire_error(e)
+            await self._callbacks.fire_error(e)
             raise

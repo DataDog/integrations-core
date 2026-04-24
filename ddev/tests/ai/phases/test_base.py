@@ -135,7 +135,7 @@ def _make_phase(
         runtime_variables=runtime_variables or {},
         flow_variables=flow_variables or {},
         config_dir=flow_dir,
-        callback_sets=None,
+        callbacks=None,
     )
     phase.queue = message_queue
     return phase, checkpoint_manager
@@ -668,3 +668,46 @@ async def test_write_memory_disk_failure_fails_phase(flow_dir, monkeypatch, mess
         await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     assert mgr.read() == {}
+
+
+# ---------------------------------------------------------------------------
+# Phase.process_message — on_phase_start callback
+# ---------------------------------------------------------------------------
+
+
+async def test_phase_start_is_fired_on_process_message(flow_dir, monkeypatch, message_queue):
+    from ddev.ai.callbacks.callbacks import Callbacks
+
+    responses = [
+        make_response("task done", 100, 50),
+        make_response("summary", 10, 5),
+    ]
+    mock_agent = MockAgent(responses)
+    monkeypatch.setattr("ddev.ai.phases.base.AnthropicAgent", make_agent_factory(mock_agent))
+    monkeypatch.setattr(ToolRegistry, "from_names", classmethod(_empty_registry_from_names))
+
+    fired_ids: list[str] = []
+    callbacks = Callbacks()
+
+    @callbacks.on_phase_start
+    async def record(phase_id: str) -> None:
+        fired_ids.append(phase_id)
+
+    config = PhaseConfig(agent="writer", tasks=[TaskConfig(name="t1", prompt="Do it.")])
+    phase = Phase(
+        phase_id="draft",
+        dependencies=[],
+        config=config,
+        agent_config=AgentConfig(),
+        anthropic_client=MagicMock(),
+        checkpoint_manager=CheckpointManager(flow_dir / "checkpoints.yaml"),
+        runtime_variables={},
+        flow_variables={},
+        config_dir=flow_dir,
+        callbacks=callbacks,
+    )
+    phase.queue = message_queue
+
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert fired_ids == ["draft"]
