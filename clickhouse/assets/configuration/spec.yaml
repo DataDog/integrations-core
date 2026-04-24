@@ -296,6 +296,99 @@ files:
           value:
             type: boolean
             example: false
+    - name: parts_and_merges
+      description: Configure parts and merges monitoring
+      options:
+        - name: enabled
+          description: |
+            Enable collection of parts and merges monitoring. Requires `dbm: true`.
+            Emits per-table gauge metrics (clickhouse.table.parts.*, clickhouse.merges.*, clickhouse.mutations.*,
+            clickhouse.replication.*) for trend dashboards and alerting, plus a row-level event payload per
+            collection cycle consumed by the DBM Storage Health timeline view.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the parts and merges collection interval (in seconds). All four system tables
+            (parts, merges, mutations, replication_queue) are queried on each run.
+          value:
+            type: number
+            example: 60
+        - name: max_parts_rows
+          description: |
+            Maximum number of rows to include in the per-cycle event payload from system.parts,
+            ordered by active_part_count descending. With `table_metrics_include_partition_tag`
+            disabled (default) rows are aggregated per-table server-side, so this caps tables.
+            When partition tagging is enabled, rows are per-partition and this caps partitions.
+          value:
+            type: integer
+            example: 500
+        - name: max_mutations_rows
+          description: |
+            Maximum number of rows to include in the per-cycle event payload from system.mutations,
+            ordered by create_time ascending. Caps payload size when many mutations are pending.
+          value:
+            type: integer
+            example: 200
+        - name: max_detached_parts_rows
+          description: |
+            Maximum number of rows returned from system.detached_parts per cycle.
+            Applied as a raw SQL LIMIT; increase only if your cluster has a pathological number
+            of (database, table, reason) combinations in detached storage.
+          value:
+            type: integer
+            example: 1000
+        - name: max_replication_queue_rows
+          description: |
+            Maximum number of rows returned from system.replication_queue per cycle,
+            ordered by position ascending. Busy replicated clusters can exceed the default
+            during incidents; raise this if replication queue backlogs are being truncated.
+          value:
+            type: integer
+            example: 1000
+        - name: table_metrics_include_partition_tag
+          description: |
+            Add a partition tag to parts gauges (clickhouse.table.parts.*).
+            Disabled by default to avoid high cardinality: a table partitioned by day over two years
+            yields ~730 partitions and hundreds of additional metric series per table.
+            Enable only when per-partition alerting is explicitly needed.
+          value:
+            type: boolean
+            example: false
+        - name: table_metrics_max_tables
+          description: |
+            Cap per-table gauge emission to the top N tables by active part count.
+            Guards against pathological schemas with very large numbers of tables or partitions.
+          value:
+            type: integer
+            example: 200
+        - name: stalled_merge_elapsed_threshold_seconds
+          description: |
+            Number of seconds a merge must be running before it is counted as stalled
+            in the `clickhouse.merges.stalled` gauge. Raise this threshold if long-running
+            merges are expected in your environment (e.g. large Wide-part merges on spinning
+            disks) to avoid false-positive stall alerts.
+          value:
+            type: integer
+            example: 3600
+        - name: stuck_replication_num_tries
+          description: |
+            Minimum number of failed attempts (num_tries) before a replication queue entry
+            is counted as stuck in the `clickhouse.replication.stuck` gauge. Entries below
+            this threshold are still counted in `clickhouse.replication.queue.depth`.
+            Increase this value if transient failures routinely exceed the default before
+            self-healing.
+          value:
+            type: integer
+            example: 3
+        - name: run_sync
+          hidden: true
+          description: |
+            Run the parts and merges collection synchronously. For testing only.
+          value:
+            type: boolean
+            example: false
     - template: instances/db
       overrides:
         custom_queries.value.example:
