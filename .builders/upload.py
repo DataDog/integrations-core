@@ -12,6 +12,8 @@ from zipfile import ZipFile
 
 from google.cloud import storage
 
+import inputs_hash
+
 if TYPE_CHECKING:
     from google.cloud.storage.bucket import Bucket as GCSBucket
 
@@ -311,30 +313,33 @@ def generate_lockfiles(targets_dir, lockfiles):
         contents = json.dumps(image_digests, indent=2, sort_keys=True)
         f.write(f'{contents}\n')
 
-    _write_builder_inputs(RESOLUTION_DIR / 'builder_inputs.toml', builder_inputs)
+    _write_builder_inputs(RESOLUTION_DIR / 'builder_inputs.toml', inputs_hash.compute_resolution(), builder_inputs)
 
 
 _BUILDER_INPUTS_HEADER = """\
-# Content hashes of the inputs that determine each builder image.
+# Content hashes of the inputs that determine the resolution pipeline and each
+# builder image.
 #
-# The `Resolve Dependencies and Build Wheels` workflow compares these
-# hashes against hashes computed from the working tree (via
-# .builders/inputs_hash.py) to decide whether to rebuild a builder image
-# from scratch or pull the existing one by digest from image_digests.json.
+# The `Resolve Dependencies and Build Wheels` workflow uses these hashes to
+# gate the full pipeline (resolution.hash) and to decide whether to rebuild a
+# builder image from scratch or pull the existing one by digest (images.*).
+# The `verify-deps-pin` workflow checks resolution.hash on merge-queue refs.
 #
-# This file is rewritten by .builders/upload.py whenever dependency
-# resolution publishes new artifacts and should not be edited by hand.
-# The set of files covered by each hash is defined by COMMON_INPUTS in
-# .builders/inputs_hash.py plus everything under .builders/images/<target>/.
-
-[inputs]
+# This file is rewritten by .builders/upload.py whenever dependency resolution
+# publishes new artifacts and should not be edited by hand.
+# Hash inputs are defined in .builders/inputs_hash.py (SHARED_INPUTS,
+# RESOLUTION_INPUTS).
 """
 
 
-def _write_builder_inputs(path: Path, hashes: dict[str, str]) -> None:
+def _write_builder_inputs(path: Path, resolution_hash: str, image_hashes: dict[str, str]) -> None:
     lines = [_BUILDER_INPUTS_HEADER.rstrip('\n')]
-    for target in sorted(hashes):
-        lines.append(f'{target} = "{hashes[target]}"')
+    lines.append('[resolution]')
+    lines.append(f'hash = "{resolution_hash}"')
+    lines.append('')
+    lines.append('[images]')
+    for target in sorted(image_hashes):
+        lines.append(f'{target} = "{image_hashes[target]}"')
     path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
 
 
