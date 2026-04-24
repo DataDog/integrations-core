@@ -63,6 +63,7 @@ KAFKA_COMMON_E2E_METRICS = [
     "kafka.replication.isr_shrinks.rate",
     "kafka.request.fetch.failed.rate",
     "kafka.request.produce.failed.rate",
+    "kafka.request.produce.rate",
     # Session:
     "kafka.session.fetch.count",
     "kafka.session.fetch.eviction",
@@ -89,7 +90,6 @@ KAFKA_ZK_E2E_METRICS = [
     "kafka.session.zookeeper.sync.rate",
     "kafka.replication.leader_elections.rate",
     "kafka.replication.unclean_leader_elections.rate",
-    "kafka.request.produce.rate",
     "kafka.request.update_metadata.time.99percentile",
     "kafka.request.update_metadata.time.avg",
 ]
