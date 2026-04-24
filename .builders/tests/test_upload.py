@@ -4,6 +4,8 @@ from unittest import mock
 from zipfile import ZipFile
 
 import pytest
+
+import inputs_hash
 import upload
 
 
@@ -517,6 +519,42 @@ def test_generate_lockfiles_accepts_string_path(tmp_path):
          mock.patch.object(upload, "LOCK_FILE_DIR", fake_resolved_dir):
         # Should not raise TypeError: unsupported operand type(s) for /: 'str' and 'str'
         upload.generate_lockfiles(str(tmp_path / "targets"), lockfile)
+
+
+def test_generate_lockfiles_writes_resolution_pin(tmp_path):
+    """generate_lockfiles writes builder_inputs.toml with the current resolution hash.
+
+    After the resolution workflow succeeds, the pin must reflect the tree that
+    produced the run so the next push with an unchanged tree skips resolution.
+    The test asserts the written [resolution].hash equals compute_resolution()
+    so a refactor that forgets to pass the fresh hash would fail here.
+    """
+    import tomllib
+
+    lockfile = {'linux-x86_64': ['dep @ https://example.com/dep.whl#sha256=abc', '']}
+
+    fake_deps_dir = tmp_path / ".deps"
+    fake_resolved_dir = fake_deps_dir / "resolved"
+    fake_deps_dir.mkdir()
+    fake_resolved_dir.mkdir()
+    targets_dir = tmp_path / "targets"
+    targets_dir.mkdir()
+    (targets_dir / "linux-x86_64").mkdir()
+    (targets_dir / "linux-x86_64" / "inputs_sha256").write_text("image-hash-for-linux-x86_64", encoding="utf-8")
+    (targets_dir / "linux-x86_64" / "image_digest").write_text("sha256:digest", encoding="utf-8")
+
+    with mock.patch.object(upload, "RESOLUTION_DIR", fake_deps_dir), \
+         mock.patch.object(upload, "LOCK_FILE_DIR", fake_resolved_dir):
+        upload.generate_lockfiles(targets_dir, lockfile)
+
+    pin_path = fake_deps_dir / "builder_inputs.toml"
+    assert pin_path.is_file(), "generate_lockfiles must write builder_inputs.toml"
+
+    with pin_path.open("rb") as f:
+        pin = tomllib.load(f)
+
+    assert pin["resolution"]["hash"] == inputs_hash.compute_resolution()
+    assert pin["images"]["linux-x86_64"] == "image-hash-for-linux-x86_64"
 
 
 def test_collect_and_validate_wheels(tmp_path):

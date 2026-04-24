@@ -174,6 +174,54 @@ def test_verify_resolution_returns_false_with_bootstrap_message(tmp_path: Path, 
 
 
 # ---------------------------------------------------------------------------
+# Bot-commit neutrality
+# ---------------------------------------------------------------------------
+
+def test_bot_commit_paths_do_not_affect_resolution_hash(tmp_path: Path) -> None:
+    """Editing files the bot commit writes must not change the resolution hash.
+
+    The resolution workflow's bot commit writes `.deps/resolved/*.txt` and
+    `.deps/builder_inputs.toml`. If either path contributed to the resolution
+    hash, the bot's own push would re-trigger the workflow, looping. This test
+    pins that contract by constructing two trees that differ only in those
+    paths and asserting hash_paths() returns the same value for both.
+    """
+    def _build_tree(root: Path, bot_output_contents: str) -> None:
+        deps = root / '.deps'
+        resolved = deps / 'resolved'
+        resolved.mkdir(parents=True)
+        (resolved / 'linux-x86_64_3.13.txt').write_text(bot_output_contents, encoding='utf-8')
+        (deps / 'builder_inputs.toml').write_text(
+            f'[resolution]\nhash = "{bot_output_contents}"\n', encoding='utf-8',
+        )
+        (root / 'agent_requirements.in').write_text('requests==2.31.0\n', encoding='utf-8')
+
+    tree_a = tmp_path / 'a'
+    tree_b = tmp_path / 'b'
+    _build_tree(tree_a, 'before')
+    _build_tree(tree_b, 'after')
+
+    patterns = ['agent_requirements.in']
+    assert inputs_hash.hash_paths(tree_a, patterns) == inputs_hash.hash_paths(tree_b, patterns)
+
+
+def test_resolution_inputs_do_not_glob_into_deps_directory() -> None:
+    """No RESOLUTION_INPUTS or SHARED_INPUTS pattern matches anything under .deps/.
+
+    Belt-and-braces companion to test_bot_commit_paths_do_not_affect_resolution_hash:
+    rather than construct a fixture tree, assert the pattern lists themselves
+    cannot reach .deps/. A future refactor that adds `.deps/**` or similar to
+    either list would silently re-introduce the re-trigger loop.
+    """
+    all_patterns = inputs_hash.RESOLUTION_INPUTS + [f'.builders/{p}' for p in inputs_hash.SHARED_INPUTS]
+    offenders = [p for p in all_patterns if p.startswith('.deps/') or p.startswith('.deps')]
+    assert not offenders, (
+        f'Patterns that glob into .deps/ will cause the bot commit to re-trigger the '
+        f'resolution workflow: {offenders}'
+    )
+
+
+# ---------------------------------------------------------------------------
 # status
 # ---------------------------------------------------------------------------
 

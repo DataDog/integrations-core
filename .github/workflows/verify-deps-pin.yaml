@@ -3,7 +3,14 @@ name: Verify dependency resolution pin
 on:
   push:
     branches:
+    # gh-readonly-queue/** is the blocking case: a failing run here keeps the
+    # merge queue from landing a commit with a stale resolution pin.
+    # master and 7.*.* are informational: direct pushes have no gate to fail,
+    # so a red check on those refs surfaces drift (e.g. a reverted pin commit)
+    # without preventing anything.
     - gh-readonly-queue/**
+    - master
+    - 7.*.*
 
 defaults:
   run:
