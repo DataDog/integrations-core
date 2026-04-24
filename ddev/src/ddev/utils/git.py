@@ -3,7 +3,41 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+from fnmatch import fnmatch
+
 from ddev.utils.fs import Path
+
+
+class GitignoreSpec:
+    def __init__(self, gitignore_file: Path):
+        self.__patterns: list[str] = []
+
+        if gitignore_file.is_file():
+            with open(gitignore_file, encoding='utf-8') as f:
+                self.__patterns = [line.strip() for line in f if line.strip() and not line.startswith('#')]
+
+    def match(self, path: str) -> bool:
+        return any(self.__match_pattern(path, p) for p in self.__patterns)
+
+    @staticmethod
+    def __match_pattern(path: str, pattern: str) -> bool:
+        if pattern.startswith('/'):
+            pattern = pattern[1:]
+            return fnmatch(path, pattern) or path.startswith(pattern + '/')
+
+        if pattern.endswith('/'):
+            pattern = pattern[:-1]
+            return path == pattern or path.startswith(pattern + '/')
+
+        if fnmatch(path, pattern):
+            return True
+
+        if '/' not in pattern:
+            for part in path.split('/'):
+                if fnmatch(part, pattern):
+                    return True
+
+        return False
 
 
 class GitCommit:
@@ -25,6 +59,7 @@ class GitRepository:
         self.__repo_root = repo_root
 
         self.__filtered_tags: dict[str, list[str]] = {}
+        self.__gitignore = GitignoreSpec(repo_root / '.gitignore')
 
     @property
     def repo_root(self) -> Path:
@@ -202,6 +237,12 @@ class GitRepository:
 
     def merge_base(self, ref_a: str, ref_b: str | None = "HEAD") -> str:
         return self.capture('merge-base', ref_a, ref_b).splitlines()[0]
+
+    def is_ignored(self, path: Path) -> bool:
+        if not path.is_relative_to(self.repo_root):
+            return False
+
+        return self.__gitignore.match(path.relative_to(self.repo_root).as_posix())
 
     @staticmethod
     def __is_warning_line(line):
