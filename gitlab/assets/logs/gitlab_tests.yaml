@@ -1038,21 +1038,53 @@ tests:
  -
   sample: "2026-03-08T15:08:33.635990Z 01E {\"event\": \"pikepdf C++ to Python logger bridge initialized\", \"level\": \"info\", \"timestamp\": \"2026-03-08T15:08:33.628330Z\", \"logger\": \"pikepdf._core\", \"file\": \"<frozen importlib._bootstrap>:488\", \"TraceId\": \"0\", \"SpanId\": \"0\", \"service_environment\": \"test-docker\"}"
   result:
-    custom: {}
+    custom: 
+      SpanId: "0"
+      TraceId: "0"
+      date: 1772982513635
+      event: "pikepdf C++ to Python logger bridge initialized"
+      file: "<frozen importlib._bootstrap>:488"
+      level: "info"
+      line_number: "01E"
+      logger: "pikepdf._core"
+      service_environment: "test-docker"
+      timestamp: "2026-03-08T15:08:33.628330Z"
     message: "2026-03-08T15:08:33.635990Z 01E {\"event\": \"pikepdf C++ to Python logger bridge initialized\", \"level\": \"info\", \"timestamp\": \"2026-03-08T15:08:33.628330Z\", \"logger\": \"pikepdf._core\", \"file\": \"<frozen importlib._bootstrap>:488\", \"TraceId\": \"0\", \"SpanId\": \"0\", \"service_environment\": \"test-docker\"}"
     tags:
      - "source:LOGS_SOURCE"
  -
   sample: "2026-03-08T15:08:37.699056Z 01E {\"event\": \"Creating database. Use `-v/--verbose` to see all logs\", \"logger\": \"app.cli\", \"level\": \"info\", \"timestamp\": \"2026-03-08T15:08:37.698374Z\", \"TraceId\": \"0\", \"SpanId\": \"0\", \"service_environment\": \"test-docker\"}"
   result:
-    custom: {}
+    custom: 
+      SpanId: "0"
+      TraceId: "0"
+      date: 1772982517699
+      event: "Creating database. Use `-v/--verbose` to see all logs"
+      level: "info"
+      line_number: "01E"
+      logger: "app.cli"
+      service_environment: "test-docker"
+      timestamp: "2026-03-08T15:08:37.698374Z"
     message: "2026-03-08T15:08:37.699056Z 01E {\"event\": \"Creating database. Use `-v/--verbose` to see all logs\", \"logger\": \"app.cli\", \"level\": \"info\", \"timestamp\": \"2026-03-08T15:08:37.698374Z\", \"TraceId\": \"0\", \"SpanId\": \"0\", \"service_environment\": \"test-docker\"}"
     tags:
      - "source:LOGS_SOURCE"
  -
   sample: "2026-03-08T15:08:47.505749Z 01E {\"customer_fk_count\": 73, \"customer_col_count\": 49, \"customer_endpoint_count\": 251, \"event\": \"shared money stats\", \"pg_backend_pid\": 71, \"logger\": \"__main__\", \"level\": \"info\", \"timestamp\": \"2026-03-08T15:08:47.505258Z\", \"TraceId\": \"0\", \"SpanId\": \"0\", \"service_environment\": \"test-docker\"}"
   result:
-    custom: {}
+    custom: 
+      SpanId: "0"
+      TraceId: "0"
+      customer_col_count: 49
+      customer_endpoint_count: 251
+      customer_fk_count: 73
+      date: 1772982527505
+      event: "shared money stats"
+      level: "info"
+      line_number: "01E"
+      logger: "__main__"
+      pg_backend_pid: 71
+      service_environment: "test-docker"
+      timestamp: "2026-03-08T15:08:47.505258Z"
     message: "2026-03-08T15:08:47.505749Z 01E {\"customer_fk_count\": 73, \"customer_col_count\": 49, \"customer_endpoint_count\": 251, \"event\": \"shared money stats\", \"pg_backend_pid\": 71, \"logger\": \"__main__\", \"level\": \"info\", \"timestamp\": \"2026-03-08T15:08:47.505258Z\", \"TraceId\": \"0\", \"SpanId\": \"0\", \"service_environment\": \"test-docker\"}"
     tags:
      - "source:LOGS_SOURCE"
