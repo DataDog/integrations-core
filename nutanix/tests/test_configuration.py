@@ -4,6 +4,7 @@
 
 
 import pytest
+import requests
 
 from datadog_checks.nutanix import NutanixCheck
 
@@ -113,7 +114,5 @@ def test_category_tags_with_prefix_for_system_and_user_types(dd_run_check, aggre
 
 
 def test_mock_fails_on_unregistered_url(mock_http_get):
-    import requests
-
     with pytest.raises(pytest.fail.Exception, match="not registered"):
         requests.Session().get("http://10.0.0.197:9440/api/nonexistent/v1/endpoint")
