@@ -466,6 +466,7 @@ jobs:
     - should-sign-and-upload
     - binaries
     runs-on: macos-14-large
+    environment: ddev-sign-upload
     permissions:
       # needed for dd-sts
       id-token: write
