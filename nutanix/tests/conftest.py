@@ -348,9 +348,6 @@ def mock_http_get(mocker):
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
-        print(f"[MOCK ERROR] No matching endpoint for URL: {url}")
-        mock_resp.status_code = 404
-        mock_resp.raise_for_status = mocker.Mock(side_effect=Exception("404 Not Found"))
-        return mock_resp
+        pytest.fail(f"url `{url}` not registered")
 
     return mocker.patch('requests.Session.get', side_effect=mock_response)

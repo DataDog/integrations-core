@@ -110,3 +110,10 @@ def test_category_tags_with_prefix_for_system_and_user_types(dd_run_check, aggre
         category_tags = [t for t in metric.tags if "Environment:" in t or "Team:" in t]
         unprefixed_tags = [t for t in category_tags if not t.startswith("ntnx_")]
         assert not unprefixed_tags, f"Category tags must have ntnx_ prefix, found without: {unprefixed_tags}"
+
+
+def test_mock_fails_on_unregistered_url(mock_http_get):
+    import requests
+
+    with pytest.raises(pytest.fail.Exception, match="not registered"):
+        requests.Session().get("http://10.0.0.197:9440/api/nonexistent/v1/endpoint")
