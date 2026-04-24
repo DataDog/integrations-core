@@ -8,7 +8,7 @@ palo_alto_networks_cortex_xsoar.playbook_execution.count,count,300,,,Total numbe
 palo_alto_networks_cortex_xsoar.playbook_execution.failed_count,count,300,,,Total number of failed playbook executions.,0,palo_alto_networks_cortex_xsoar,playbook exec fail cnt,,
 palo_alto_networks_cortex_xsoar.sla.late_count,count,300,,,Total number of late SLA incidents.,0,palo_alto_networks_cortex_xsoar,sla late cnt,,
 palo_alto_networks_cortex_xsoar.sla.mean_time_to_containment,gauge,,second,,Average time taken to control incidents as per SLA.,0,palo_alto_networks_cortex_xsoar,sla mttc,,
-palo_alto_networks_cortex_xsoar.sla.mean_time_to_detection,gauge,,second,,Average time taken to detect incidents  as per SLA.,0,palo_alto_networks_cortex_xsoar,sla mttd,,
+palo_alto_networks_cortex_xsoar.sla.mean_time_to_detection,gauge,,second,,Average time taken to detect incidents as per SLA.,0,palo_alto_networks_cortex_xsoar,sla mttd,,
 palo_alto_networks_cortex_xsoar.sla.mean_time_to_resolution,gauge,,second,,Average time taken to resolve incidents as per SLA.,0,palo_alto_networks_cortex_xsoar,sla mttr,,
 palo_alto_networks_cortex_xsoar.sla.mean_time_to_triage,gauge,,second,,Average time taken to triage incidents as per SLA.,0,palo_alto_networks_cortex_xsoar,sla mttt,,
 palo_alto_networks_cortex_xsoar.sla.within_count,count,300,,,Total number of incidents within SLA.,0,palo_alto_networks_cortex_xsoar,sla within cnt,,

@@ -3,7 +3,7 @@
 	"created_at": "2026-04-16",
 	"last_updated_at": "2026-04-16",
 	"title": "Anomalous spikes in playbook execution failure",
-	"description": "It monitors anomalous spikes in playbook failure rates by comparing failed vs total executions over time. Sudden increases may signal logic issues, integration failures, or dependency problems, impacting automation reliability and efficiency.",
+	"description": "Monitors anomalous spikes in playbook failure rates by comparing failed executions against total executions over time. Sudden increases may signal logic issues, integration failures, or dependency problems that impact automation reliability.",
 	"definition": {
 		"id": 272993798,
 		"name": "Anomalous spikes in playbook execution failure",

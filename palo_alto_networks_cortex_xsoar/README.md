@@ -1,21 +1,21 @@
 ## Overview
 
-[Palo Alto Networks Cortex XSOAR][1] is a security orchestration, automation, and unifying incident response (SOAR) platform that helps teams automate incident handling and integrate security tools to enhance SOC efficiency and reduce remediation time.
+[Palo Alto Networks Cortex XSOAR][1] is a security orchestration, automation, and unifying incident response (SOAR) platform that helps teams automate incident handling, integrate security tools, and reduce remediation time.
 
 This integration parses and ingests the following types of logs:
 
 - **Audit Logs**: Capture all administrative user activities within Palo Alto Networks Cortex XSOAR.
-- **Incidents**: Capture key details of incidents, including severity, status, type, and ownership, to support tracking and investigation activities in Palo Alto Networks Cortex XSOAR.
+- **Incidents**: Capture incident details, including severity, status, type, and ownership, to support tracking and investigation in Palo Alto Networks Cortex XSOAR.
 
-You can visualize detailed insights into these logs through the out-of-the-box dashboards. Additionally, ready-to-use Cloud SIEM detection rules are available to help you monitor and respond to potential security threats effectively.
+Visualize detailed insights into these logs with out-of-the-box dashboards. This integration also includes Cloud SIEM detection rules to help you monitor and respond to potential security threats.
 
 This integration collects the following metrics:
 
-- **Automation Insight Metrics**: Provide visibility into playbook, task, and command execution activity, including counts, failures, and execution duration, to help monitor automation performance, identify errors, and evaluate operational efficiency.
-- **API Execution Metrics**: Provide visibility into API execution activity, including total calls and rate-limited requests, to help monitor integration usage, detect throttling events, and evaluate API performance.
-- **SLA Metrics**: Provide visibility into incident response timelines, including mean time to detection, triage, containment, and resolution, along with counts of items within and outside SLA thresholds, helping monitor response performance and compliance.
+- **Automation Insight Metrics**: Track playbook, task, and command execution activity, including counts, failures, and execution duration.
+- **API Execution Metrics**: Track API execution activity, including total calls and rate-limited requests.
+- **SLA Metrics**: Track incident response timelines, including mean time to detection, triage, containment, and resolution, along with counts of items within and outside SLA thresholds.
 
-Visualize detailed insights into these metrics through the out-of-the-box dashboards. Additionally, monitors are provided to alert you to any potential issues.
+Visualize detailed insights into these metrics with out-of-the-box dashboards. This integration also includes monitors to alert you to any potential issues.
 
 ## Setup
 
@@ -33,7 +33,7 @@ Visualize detailed insights into these metrics through the out-of-the-box dashbo
 
 ### Connect your Palo Alto Networks Cortex XSOAR account to Datadog
 
-1. Add your `API Key`, `API Key ID` and `API URL`.
+1. Add the following parameters:
    | Parameter | Description |
    | ---------- | ---------------------------------------------- |
    | API Key | The Palo Alto Networks Cortex XSOAR API key. |
@@ -50,7 +50,7 @@ Visualize detailed insights into these metrics through the out-of-the-box dashbo
 
 ### Logs
 
-The Palo Alto Networks Cortex XSOAR integration collects incidents and audit logs and forwards them to Datadog.
+The Palo Alto Networks Cortex XSOAR integration collects and forwards incidents and audit logs to Datadog.
 
 ### Metrics
 
