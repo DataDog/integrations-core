@@ -53,9 +53,7 @@ class LPARStats(AgentCheck):
         if not root:
             self.log.info('Not running as root or sudo - entitlement and hypervisor metrics might be unavailable')
 
-        timeout = None
-        if sudo:
-            timeout = self.DEFAULT_TIMEOUT  # protect against bad sudo settings
+        timeout = self.DEFAULT_TIMEOUT
 
         if instance.get('memory_stats', True):
             self.collect_memory(instance.get('page_stats', True), sudo, timeout)
