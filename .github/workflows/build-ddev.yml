@@ -459,14 +459,12 @@ jobs:
         if-no-files-found: error
 
   macos-packaging:
-    name: Build macOS installer and sign/notarize artifacts
+    name: Build macOS artifacts
     if: github.event_name == 'push' || github.event_name == 'schedule' || github.event.pull_request.head.repo.full_name == github.repository
     needs:
     - define-tags
-    - should-sign-and-upload
     - binaries
     runs-on: macos-14-large
-    environment: ddev-sign-upload
     permissions:
       # needed for dd-sts
       id-token: write
@@ -498,110 +496,12 @@ jobs:
     - name: Install PyOxidizer ${{ env.PYOXIDIZER_VERSION }}
       run: pip install pyoxidizer==${{ env.PYOXIDIZER_VERSION }}
 
-    - name: Install rcodesign
-      env:
-        ARCHIVE_NAME: "apple-codesign-0.27.0-x86_64-apple-darwin"
-      run: >-
-        curl -L
-        "https://github.com/indygreg/apple-platform-rs/releases/download/apple-codesign%2F0.27.0/$ARCHIVE_NAME.tar.gz"
-        |
-        tar --strip-components=1 -xzf - -C /usr/local/bin "$ARCHIVE_NAME/rcodesign"
-
-    - name: Write credentials
-      if: needs.should-sign-and-upload.outputs.result == 'true'
-      env:
-        APPLE_DEVELOPER_ID_APPLICATION_CERTIFICATE: "${{ secrets.APPLE_DEVELOPER_ID_APPLICATION_CERTIFICATE }}"
-        APPLE_DEVELOPER_ID_APPLICATION_PRIVATE_KEY: "${{ secrets.APPLE_DEVELOPER_ID_APPLICATION_PRIVATE_KEY }}"
-        APPLE_DEVELOPER_ID_INSTALLER_CERTIFICATE: "${{ secrets.APPLE_DEVELOPER_ID_INSTALLER_CERTIFICATE }}"
-        APPLE_DEVELOPER_ID_INSTALLER_PRIVATE_KEY: "${{ secrets.APPLE_DEVELOPER_ID_INSTALLER_PRIVATE_KEY }}"
-        APPLE_APP_STORE_CONNECT_API_DATA: "${{ secrets.APPLE_APP_STORE_CONNECT_API_DATA }}"
-      run: |-
-        echo "$APPLE_DEVELOPER_ID_APPLICATION_CERTIFICATE" > /tmp/certificate-application.pem
-        echo "$APPLE_DEVELOPER_ID_APPLICATION_PRIVATE_KEY" > /tmp/private-key-application.pem
-        echo "$APPLE_DEVELOPER_ID_INSTALLER_CERTIFICATE" > /tmp/certificate-installer.pem
-        echo "$APPLE_DEVELOPER_ID_INSTALLER_PRIVATE_KEY" > /tmp/private-key-installer.pem
-        echo "$APPLE_APP_STORE_CONNECT_API_DATA" > /tmp/app-store-connect.json
-
-    # We cannot use anchors because of https://github.com/actions/runner/issues/1182 and
-    # other solutions like writing a composite action are burdensome
-    - name: Set reusable script - Extract binaries
-      id: script-extract
-      run: |-
-        cat <<"OUTER" >> $GITHUB_OUTPUT
-        script<<INNER
-        mkdir bin
-        for f in archives/*; do
-          tar -xzf "$f" -C bin
-        done
-        INNER
-        OUTER
-
-    - name: Set reusable script - Sign binaries
-      id: script-sign
-      # https://developer.apple.com/documentation/security/hardened_runtime
-      run: |-
-        cat <<"OUTER" >> $GITHUB_OUTPUT
-        script<<INNER
-        for f in bin/*; do
-          rcodesign sign -vv \
-          --pem-source /tmp/certificate-application.pem \
-          --pem-source /tmp/private-key-application.pem \
-          --code-signature-flags runtime \
-          "$f"
-        done
-        INNER
-        OUTER
-
-    - name: Set reusable script - Notarize binaries
-      id: script-notarize
-      # https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution
-      # We pass the --wait flag to catch problems with signing sooner at the cost of slowing down the job a little bit.
-      run: |-
-        cat <<"OUTER" >> $GITHUB_OUTPUT
-        script<<INNER
-        mkdir notarize-bin
-
-        cd bin
-        for f in *; do
-          zip "../notarize-bin/$f.zip" "$f"
-        done
-
-        cd ../notarize-bin
-        for f in *; do
-          rcodesign notary-submit -vv \
-          --wait \
-          --api-key-path /tmp/app-store-connect.json \
-          "$f"
-        done
-        INNER
-        OUTER
-
     - name: Download staged standalone binaries
       uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
       with:
         pattern: staged-standalone-${{ runner.os }}-*
         path: ddev/archives
         merge-multiple: true
-
-    - name: Extract staged standalone binaries
-      run: ${{ steps.script-extract.outputs.script }}
-
-    - name: Sign standalone binaries
-      if: needs.should-sign-and-upload.outputs.result == 'true'
-      run: ${{ steps.script-sign.outputs.script }}
-
-    - name: Notarize standalone binaries
-      if: needs.should-sign-and-upload.outputs.result == 'true'
-      run: ${{ steps.script-notarize.outputs.script }}
-
-    - name: Archive standalone binaries
-      run: |-
-        rm archives/*
-        cd bin
-
-        for f in *; do
-          tar -czf "../archives/$f.tar.gz" "$f"
-        done
 
     - name: Upload standalone binaries
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
@@ -611,7 +511,7 @@ jobs:
         if-no-files-found: error
 
     - name: Reset artifact directories
-      run: rm -rf archives bin notarize-bin
+      run: rm -rf archives
 
     - name: Download staged managed binaries
       uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
@@ -621,15 +521,11 @@ jobs:
         merge-multiple: true
 
     - name: Extract staged managed binaries
-      run: ${{ steps.script-extract.outputs.script }}
-
-    - name: Sign managed binaries
-      if: needs.should-sign-and-upload.outputs.result == 'true'
-      run: ${{ steps.script-sign.outputs.script }}
-
-    - name: Notarize managed binaries
-      if: needs.should-sign-and-upload.outputs.result == 'true'
-      run: ${{ steps.script-notarize.outputs.script }}
+      run: |-
+        mkdir bin
+        for f in archives/*; do
+          tar -xzf "$f" -C bin
+        done
 
     # bin/<APP_NAME>-<VERSION>-<TARGET> -> targets/<TARGET>/<APP_NAME>
     - name: Prepare managed binaries
@@ -663,7 +559,135 @@ jobs:
         --version ${{ env.VERSION }}
         staged
 
-    - name: Stage PKG
+    - name: Upload staged PKG
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      with:
+        name: staged-pkg-${{ runner.os }}
+        path: ddev/staged/*
+        if-no-files-found: error
+
+  macos-sign-notarize:
+    name: Sign and notarize macOS artifacts
+    if: needs.should-sign-and-upload.outputs.result == 'true'
+    needs:
+    - define-tags
+    - should-sign-and-upload
+    - macos-packaging
+    runs-on: macos-14-large
+    environment: ddev-sign-upload
+    permissions:
+      # needed for dd-sts
+      id-token: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+    - name: Get Datadog credentials
+      id: dd-sts
+      uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+      with:
+        policy: integrations-core-api-key
+
+    - name: Tag Job
+      uses: ./.github/actions/tag-job
+      if: ${{ github.event.pull_request.head.repo.fork != true }}
+      with:
+        tags: '${{ needs.define-tags.outputs.base_tags }},step:sign-macos,os:macos'
+        dd_api_key: ${{ steps.dd-sts.outputs.api_key }}
+
+    - name: Install rcodesign
+      env:
+        ARCHIVE_NAME: "apple-codesign-0.27.0-x86_64-apple-darwin"
+      run: >-
+        curl -L
+        "https://github.com/indygreg/apple-platform-rs/releases/download/apple-codesign%2F0.27.0/$ARCHIVE_NAME.tar.gz"
+        |
+        tar --strip-components=1 -xzf - -C /usr/local/bin "$ARCHIVE_NAME/rcodesign"
+
+    - name: Write credentials
+      env:
+        APPLE_DEVELOPER_ID_APPLICATION_CERTIFICATE: "${{ secrets.APPLE_DEVELOPER_ID_APPLICATION_CERTIFICATE }}"
+        APPLE_DEVELOPER_ID_APPLICATION_PRIVATE_KEY: "${{ secrets.APPLE_DEVELOPER_ID_APPLICATION_PRIVATE_KEY }}"
+        APPLE_DEVELOPER_ID_INSTALLER_CERTIFICATE: "${{ secrets.APPLE_DEVELOPER_ID_INSTALLER_CERTIFICATE }}"
+        APPLE_DEVELOPER_ID_INSTALLER_PRIVATE_KEY: "${{ secrets.APPLE_DEVELOPER_ID_INSTALLER_PRIVATE_KEY }}"
+        APPLE_APP_STORE_CONNECT_API_DATA: "${{ secrets.APPLE_APP_STORE_CONNECT_API_DATA }}"
+      run: |-
+        echo "$APPLE_DEVELOPER_ID_APPLICATION_CERTIFICATE" > /tmp/certificate-application.pem
+        echo "$APPLE_DEVELOPER_ID_APPLICATION_PRIVATE_KEY" > /tmp/private-key-application.pem
+        echo "$APPLE_DEVELOPER_ID_INSTALLER_CERTIFICATE" > /tmp/certificate-installer.pem
+        echo "$APPLE_DEVELOPER_ID_INSTALLER_PRIVATE_KEY" > /tmp/private-key-installer.pem
+        echo "$APPLE_APP_STORE_CONNECT_API_DATA" > /tmp/app-store-connect.json
+
+    - name: Download standalone binaries
+      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+      with:
+        name: standalone-${{ runner.os }}
+        path: ddev/archives
+
+    - name: Extract standalone binaries
+      run: |-
+        mkdir bin
+        for f in archives/*; do
+          tar -xzf "$f" -C bin
+        done
+
+    # https://developer.apple.com/documentation/security/hardened_runtime
+    - name: Sign standalone binaries
+      run: |-
+        for f in bin/*; do
+          rcodesign sign -vv \
+          --pem-source /tmp/certificate-application.pem \
+          --pem-source /tmp/private-key-application.pem \
+          --code-signature-flags runtime \
+          "$f"
+        done
+
+    # https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution
+    - name: Notarize standalone binaries
+      run: |-
+        mkdir notarize-bin
+
+        cd bin
+        for f in *; do
+          zip "../notarize-bin/$f.zip" "$f"
+        done
+
+        cd ../notarize-bin
+        for f in *; do
+          rcodesign notary-submit -vv \
+          --wait \
+          --api-key-path /tmp/app-store-connect.json \
+          "$f"
+        done
+
+    - name: Archive standalone binaries
+      run: |-
+        rm archives/*
+        cd bin
+
+        for f in *; do
+          tar -czf "../archives/$f.tar.gz" "$f"
+        done
+
+    - name: Upload standalone binaries
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      with:
+        name: standalone-${{ runner.os }}
+        path: ddev/archives/*
+        if-no-files-found: error
+        overwrite: true
+
+    - name: Reset artifact directories
+      run: rm -rf archives bin notarize-bin
+
+    - name: Download staged PKG
+      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+      with:
+        name: staged-pkg-${{ runner.os }}
+        path: ddev/staged
+
+    - name: Prepare PKG for signing
       id: pkg
       run: |-
         mkdir signed
@@ -671,7 +695,6 @@ jobs:
         echo "path=$pkg_file" >> "$GITHUB_OUTPUT"
 
     - name: Sign PKG
-      if: needs.should-sign-and-upload.outputs.result == 'true'
       run: >-
         rcodesign sign -vv
         --pem-source /tmp/certificate-installer.pem
@@ -680,7 +703,6 @@ jobs:
         "signed/${{ steps.pkg.outputs.path }}"
 
     - name: Notarize PKG
-      if: needs.should-sign-and-upload.outputs.result == 'true'
       run: >-
         rcodesign notary-submit
         --api-key-path /tmp/app-store-connect.json
@@ -688,7 +710,6 @@ jobs:
         "signed/${{ steps.pkg.outputs.path }}"
 
     - name: Upload installer
-      if: needs.should-sign-and-upload.outputs.result == 'true'
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: installers-${{ runner.os }}
@@ -703,7 +724,7 @@ jobs:
     - python-artifacts
     - binaries
     - windows-packaging
-    - macos-packaging
+    - macos-sign-notarize
     runs-on: ubuntu-latest
 
     permissions:
