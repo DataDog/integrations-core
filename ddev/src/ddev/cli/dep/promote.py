@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 
 PR_URL_RE = re.compile(r"https://github\.com/[^/]+/[^/]+/pull/(\d+)")
 PROMOTE_WORKFLOW = "dependency-wheel-promotion.yaml"
+PROMOTE_WORKFLOW_REF = "master"
 
 
 @click.command(short_help='Promote dependency wheels from dev to stable')
@@ -46,7 +47,7 @@ def promote(app: Application, pr_url: str):
     with app.status('Dispatching promote workflow...'):
         app.github.dispatch_workflow(
             workflow_id=PROMOTE_WORKFLOW,
-            ref=head_ref,
+            ref=PROMOTE_WORKFLOW_REF,
             inputs={'pr_number': str(pr_number), 'head_sha': head_sha},
         )
 

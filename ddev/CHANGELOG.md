@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 16.0.0 / 2026-04-21
+
+***Changed***:
+
+* Bump datadog_checks_dev requirement to ~=37.0 ([#23319](https://github.com/DataDog/integrations-core/pull/23319))
+
+***Added***:
+
+* - Support size computation for lockfiles in both new and old formats. New CLI param (and envvar) to switch between storage locations.
+  - Command to trigger the promotion of wheels for PRs that bump dependencies. ([#23063](https://github.com/DataDog/integrations-core/pull/23063))
+* Add conditional message filtering to EventBusOrchestrator ([#23344](https://github.com/DataDog/integrations-core/pull/23344))
+
+***Fixed***:
+
+* Harden dependency-wheel promotion workflow against untrusted PR code. ([#23372](https://github.com/DataDog/integrations-core/pull/23372))
+
 ## 15.0.0 / 2026-04-15
 
 ***Changed***:

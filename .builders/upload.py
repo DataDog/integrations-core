@@ -288,20 +288,54 @@ def generate_lockfiles(targets_dir, lockfiles):
         f.write(f'{contents}\n')
 
     image_digests = {}
+    builder_inputs = {}
     for target_name, lockfile_lines in lockfiles.items():
         # The lockfiles contain the major.minor Python version
         # so that the Agent can transition safely
         lock_file = LOCK_FILE_DIR / f'{target_name}_{CURRENT_PYTHON_VERSION}.txt'
+        if not any(line.strip() for line in lockfile_lines):
+            print(f'Skipping lockfile for {target_name}: no wheels were uploaded.')
+            lock_file.unlink(missing_ok=True)
+            continue
         lock_file.write_text('\n'.join(lockfile_lines), encoding='utf-8')
 
-        # these `image_digest` files are generated in the 'Save new image digest'
-        # step of the github workflow
+        # The `image_digest` and `inputs_sha256` files are written by the
+        # 'Save new image digest' / 'Persist current image digest' steps of
+        # the github workflow; macOS targets don't produce them.
         if (image_digest_file := targets_dir / target_name / 'image_digest').is_file():
             image_digests[target_name] = image_digest_file.read_text(encoding='utf-8').strip()
+        if (inputs_hash_file := targets_dir / target_name / 'inputs_sha256').is_file():
+            builder_inputs[target_name] = inputs_hash_file.read_text(encoding='utf-8').strip()
 
     with RESOLUTION_DIR.joinpath('image_digests.json').open('w', encoding='utf-8') as f:
         contents = json.dumps(image_digests, indent=2, sort_keys=True)
         f.write(f'{contents}\n')
+
+    _write_builder_inputs(RESOLUTION_DIR / 'builder_inputs.toml', builder_inputs)
+
+
+_BUILDER_INPUTS_HEADER = """\
+# Content hashes of the inputs that determine each builder image.
+#
+# The `Resolve Dependencies and Build Wheels` workflow compares these
+# hashes against hashes computed from the working tree (via
+# .builders/inputs_hash.py) to decide whether to rebuild a builder image
+# from scratch or pull the existing one by digest from image_digests.json.
+#
+# This file is rewritten by .builders/upload.py whenever dependency
+# resolution publishes new artifacts and should not be edited by hand.
+# The set of files covered by each hash is defined by COMMON_INPUTS in
+# .builders/inputs_hash.py plus everything under .builders/images/<target>/.
+
+[inputs]
+"""
+
+
+def _write_builder_inputs(path: Path, hashes: dict[str, str]) -> None:
+    lines = [_BUILDER_INPUTS_HEADER.rstrip('\n')]
+    for target in sorted(hashes):
+        lines.append(f'{target} = "{hashes[target]}"')
+    path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
 
 
 def upload(targets_dir: Path, bucket: Bucket | None = None) -> dict[str, list[str]]:

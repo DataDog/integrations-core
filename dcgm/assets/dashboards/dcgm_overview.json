@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "**DCGM Exporter**\n\nThe DCGM exporter is a tool to connect with Nvidia DCGM and exposes GPU telemetry in containerized environments. This dashboard gives you GPU metrics so you can monitor your GPU's health and performance effectively. \n\n\n**Useful Links**\n\n* [Blog Post](https://www.datadoghq.com/blog/monitor-nvidia-gpus-with-datadog/)\n* [List of GPUs supported](https://docs.nvidia.com/datacenter/dcgm/latest/user-guide/getting-started.html)\n",
+    "description": "**DCGM Exporter**\n\nThe DCGM exporter is a tool to connect with Nvidia DCGM and exposes GPU telemetry in containerized environments. This dashboard gives you GPU metrics so you can monitor your GPU's health and performance effectively. \n\n\n**Useful Links**\n\n* [Blog Post](https://www.datadoghq.com/blog/monitor-nvidia-gpus-with-datadog/)\n* [List of GPUs supported](https://docs.nvidia.com/datacenter/dcgm/latest/user-guide/getting-started.html)",
     "layout_type": "ordered",
     "template_variables": [
         {
@@ -16,8 +16,68 @@
             "prefix": "service"
         }
     ],
-    "title": "DCGM Exporter (Nvidia GPU Monitoring) Overview",
+    "title": "LEGACY - DCGM Exporter (Nvidia GPU Monitoring) Overview",
     "widgets": [
+        {
+            "definition": {
+                "background_color": "vivid_yellow",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "This is a legacy integration - Use Datadog's GPU Monitoring instead",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "This integration is no longer fully supported. Instead of enabling this integration, use Datadog's GPU Monitoring (now generally available) instead. \n\nDatadog's GPU Monitoring includes all of this integration's metrics and more. The product also provides proactive detection of device anomalies and guided recommended actions for how to maximize GPU efficiency and minimize GPU spend. ",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 3443863408063438,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "**Useful Links**\n\n* [What is Datadog's GPU Monitoring?](https://docs.datadoghq.com/gpu_monitoring/)\n* [Set up guide for GPU Monitoring](https://docs.datadoghq.com/gpu_monitoring/setup/?tab=datadogoperator)\n",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 5013994176334527,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 6,
+                            "y": 0
+                        }
+                    }
+                ]
+            },
+            "id": 3549967635694783,
+            "layout": {
+                "height": 3,
+                "width": 12,
+                "x": 0,
+                "y": 0
+            }
+        },
         {
             "definition": {
                 "banner_img": "/static/images/integration_dashboard/dcgm_hero_1.png",
@@ -72,10 +132,10 @@
             },
             "id": 6955576996753366,
             "layout": {
-                "height": 5,
+                "height": 7,
                 "width": 5,
                 "x": 0,
-                "y": 0
+                "y": 3
             }
         },
         {
@@ -113,9 +173,11 @@
                             "count": 50,
                             "display_format": "countsAndList",
                             "hide_zero_counts": true,
+                            "last_triggered_format": "relative",
                             "query": "tag:(integration:dcgm)",
                             "show_last_triggered": false,
                             "show_priority": false,
+                            "show_status": true,
                             "sort": "status,asc",
                             "start": 0,
                             "summary_type": "monitors",
@@ -148,11 +210,7 @@
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1",
-                                            "limit": {
-                                                "count": 10,
-                                                "order": "desc"
-                                            }
+                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
@@ -163,7 +221,17 @@
                                             "query": "sum:dcgm.vgpu_license_status{*} by {dcgm_fi_driver_version}"
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
                                 }
                             ],
                             "title": "DCGM Driver Version",
@@ -257,7 +325,7 @@
                 "height": 5,
                 "width": 7,
                 "x": 5,
-                "y": 0
+                "y": 3
             }
         },
         {
@@ -336,7 +404,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "GPU Temperature",
                             "title_align": "left",
                             "title_size": "16",
@@ -357,7 +424,7 @@
                 "height": 7,
                 "width": 12,
                 "x": 0,
-                "y": 5
+                "y": 10
             }
         },
         {
@@ -491,7 +558,7 @@
                 "height": 5,
                 "width": 12,
                 "x": 0,
-                "y": 12
+                "y": 17
             }
         },
         {
@@ -617,7 +684,7 @@
                 "is_column_break": true,
                 "width": 12,
                 "x": 0,
-                "y": 17
+                "y": 44
             }
         },
         {
@@ -658,10 +725,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1 + query2",
-                                            "limit": {
-                                                "order": "desc"
-                                            }
+                                            "formula": "query1 + query2"
                                         }
                                     ],
                                     "queries": [
@@ -679,6 +743,15 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "sort": {
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    },
                                     "style": {
                                         "palette": "datadog16"
                                     }
@@ -771,11 +844,7 @@
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1",
-                                            "limit": {
-                                                "count": 500,
-                                                "order": "desc"
-                                            }
+                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
@@ -786,7 +855,17 @@
                                             "query": "sum:dcgm.vgpu_license_status{*} by {dcgm_fi_process_name}"
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
                                 }
                             ],
                             "style": {},
@@ -865,7 +944,7 @@
                 "height": 9,
                 "width": 12,
                 "x": 0,
-                "y": 23
+                "y": 50
             }
         }
     ]
