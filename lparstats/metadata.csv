@@ -21,7 +21,7 @@ system.lpar.memory.iomin,gauge,,,,I/O memory minimum (GB).,0,lparstats,lpar memo
 system.lpar.memory.iomu,gauge,,,,I/O memory in use (GB).,0,lparstats,lpar memory iomu,
 system.lpar.memory.mpgcol,gauge,,,,Minor page collection rate.,0,lparstats,lpar memory mpgcol,
 system.lpar.memory.pgcol,gauge,,,,Page collection rate.,0,lparstats,lpar memory pgcol,
-system.lpar.memory.physb,gauge,,,,Physical memory busy (allocated).,0,lparstats,lpar memory physb,
+system.lpar.memory.physb,gauge,,,,Physical memory busy (allocated).,0,lparstats,lpar memory physb,core
 system.lpar.memory.pmem,gauge,,,,Physical memory in use (GB).,0,lparstats,lpar memory pmem,
 system.lpar.memory.vcsw,gauge,,,,Voluntary context switches.,0,lparstats,lpar memory vcsw,
 system.lpar.spurr.idle,gauge,,,,SPURR actual idle processor utilization.,0,lparstats,lpar spurr idle,
