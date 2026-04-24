@@ -131,6 +131,7 @@ class LPARStats(AgentCheck):
                 if idx + 1 >= len(values):
                     break
                 try:
+                    field = field.replace('%', '')
                     metric_name = f"system.lpar.memory.entitlement.{field}"
                     metric_value = float(values[idx + 1])
                     self.gauge(metric_name, metric_value, tags=[tag])
