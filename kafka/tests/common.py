@@ -63,7 +63,6 @@ KAFKA_COMMON_E2E_METRICS = [
     "kafka.replication.isr_shrinks.rate",
     "kafka.request.fetch.failed.rate",
     "kafka.request.produce.failed.rate",
-    "kafka.request.produce.rate",
     # Session:
     "kafka.session.fetch.count",
     "kafka.session.fetch.eviction",
@@ -76,8 +75,6 @@ KAFKA_COMMON_E2E_METRICS = [
     "kafka.broker.start_time",
     # Log directory:
     "kafka.log.directory.offline",
-    # Log flush (LogFlushStats exists on both ZK and KRaft brokers):
-    "kafka.log.flush_rate.rate",
     # Topic partition size:
     "kafka.log.partition.size",
     # Topic metrics:
@@ -92,6 +89,7 @@ KAFKA_ZK_E2E_METRICS = [
     "kafka.session.zookeeper.sync.rate",
     "kafka.replication.leader_elections.rate",
     "kafka.replication.unclean_leader_elections.rate",
+    "kafka.request.produce.rate",
     "kafka.request.update_metadata.time.99percentile",
     "kafka.request.update_metadata.time.avg",
 ]
@@ -123,6 +121,8 @@ KAFKA_KRAFT_E2E_METRICS = [
     # SnapshotEmitter:
     "kafka.kraft.snapshot_emitter.latest_snapshot_generated_age_ms",
     "kafka.kraft.snapshot_emitter.latest_snapshot_generated_bytes",
+    # Log flush:
+    "kafka.log.flush_rate.rate",
 ]
 
 # Single-node KRaft clusters never trigger a leader election, so election-latency metrics
