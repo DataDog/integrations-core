@@ -9,19 +9,20 @@ import pytest
 import requests
 
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.conditions import CheckEndpoints
+from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
 from datadog_checks.riak import Riak
 
 from . import common
 
 
 def populate():
-    requests.post(
+    post = requests.post(
         "{}/riak/bucket/german".format(common.BASE_URL),
         headers={"Content-Type": "text/plain"},
         data='herzlich willkommen',
     )
-    requests.get("{}/riak/bucket/german".format(common.BASE_URL))
+    get = requests.get("{}/riak/bucket/german".format(common.BASE_URL))
+    return post.ok and get.ok
 
 
 @pytest.fixture(scope="session")
@@ -30,7 +31,7 @@ def dd_environment():
     with docker_run(
         compose_file=os.path.join(common.HERE, 'compose', 'riak.yaml'),
         env_vars=env,
-        conditions=[CheckEndpoints(['{}/riak/bucket'.format(common.BASE_URL)]), populate],
+        conditions=[CheckEndpoints(['{}/riak/bucket'.format(common.BASE_URL)]), WaitFor(populate)],
         sleep=10,  # some stats require a bit of time before the test will capture them
     ):
         yield common.INSTANCE

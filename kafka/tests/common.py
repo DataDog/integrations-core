@@ -13,15 +13,14 @@ HOST_IP = socket.gethostbyname(HOST)
 
 
 """
-Metrics that do not work in our e2e:
+Metrics that require a consumer in our e2e:
     "kafka.consumer.bytes_in",
     "kafka.consumer.kafka_commits",
     "kafka.consumer.messages_in",
     "kafka.consumer.zookeeper_commits",
-    "kafka.request.produce.rate",
-    "kafka.request.fetch_follower.rate",
-    "kafka.request.fetch_consumer.rate",
     "kafka.consumer.fetch_rate",
+    "kafka.request.fetch_consumer.rate",
+    "kafka.request.fetch_follower.rate",
 """
 
 KAFKA_E2E_METRICS = [
@@ -60,6 +59,7 @@ KAFKA_E2E_METRICS = [
     "kafka.replication.unclean_leader_elections.rate",
     "kafka.request.fetch.failed.rate",
     "kafka.request.produce.failed.rate",
+    "kafka.request.produce.rate",
     "kafka.session.zookeeper.disconnect.rate",
     "kafka.session.zookeeper.expire.rate",
     "kafka.session.zookeeper.readonly.rate",
@@ -69,4 +69,13 @@ KAFKA_E2E_METRICS = [
     "kafka.session.fetch.eviction",
     # Listeners
     "kafka.server.socket.connection_count",
+    # Broker
+    "kafka.broker.start_time",
+    # Log directory
+    "kafka.log.directory.offline",
+    # Topic partition size
+    "kafka.log.partition.size",
+    # Topic metrics
+    "kafka.topic.messages_in.rate",
+    "kafka.topic.net.bytes_in.rate",
 ]

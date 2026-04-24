@@ -41,7 +41,7 @@ instances:
     #
     # username: default
 
-    ## @param password - string - optional
+    ## @param password - string - optional - default: 
     ## The password of `username`.
     #
     # password: <PASSWORD>
@@ -175,6 +175,27 @@ instances:
         ## This rate limiting prevents excessive data collection for frequently executed queries.
         #
         # samples_per_hour_per_query: 15
+
+    ## Configure collection of query errors from system.query_log
+    #
+    # query_errors:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of query errors. Requires `dbm: true`.
+        ## Collects ExceptionBeforeStart and ExceptionWhileProcessing events, which include
+        ## exception message, error code, and stack trace.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 10
+        ## Set the query errors collection interval (in seconds).
+        #
+        # collection_interval: 10
+
+        ## @param samples_per_hour_per_query - number - optional - default: 60
+        ## Set the maximum number of error samples to collect per hour per unique query signature.
+        #
+        # samples_per_hour_per_query: 60
 
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.

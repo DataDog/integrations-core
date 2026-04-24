@@ -6,6 +6,7 @@ files:
       - template: init_config
         options:
           - name: propagate_agent_tags
+            display_priority: 0
             description: |
               Set to `true` to propagate the tags from `datadog.yaml` to the check.
               When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
@@ -24,6 +25,7 @@ files:
       - template: instances
         options:
           - name: host
+            display_priority: 7
             description: |
               MySQL host to connect to.
               NOTE: Even if the host is "localhost", the agent connects to MySQL using TCP/IP, unless you also
@@ -35,7 +37,19 @@ files:
               example: localhost
               display_default: null
 
+          - name: port
+            display_priority: 6
+            description: |
+              Port to use when connecting to MySQL.
+            fleet_configurable: true
+            enabled: true
+            formats: ["port"]
+            value:
+              type: number
+              example: 3306
+
           - name: username
+            display_priority: 5
             description: |
               Username used to connect to MySQL.
             fleet_configurable: true
@@ -46,6 +60,7 @@ files:
               display_default: null
 
           - name: password
+            display_priority: 4
             description: |
               Password associated to the MySQL user.
             fleet_configurable: true
@@ -54,17 +69,18 @@ files:
             value:
               type: string
 
-          - name: port
-            description: |
-              Port to use when connecting to MySQL.
+          - name: dbm
+            display_priority: 2
             fleet_configurable: true
-            enabled: true
-            formats: ["port"]
+            description: |
+              Set to `true` to enable Database Monitoring.
+            enabled: false
             value:
-              type: number
-              example: 3306
-
+              type: boolean
+              example: false
+              display_default: false
           - name: propagate_agent_tags
+            display_priority: 0
             description: |
               Set to `true` to propagate the tags from `datadog.yaml` to the check.
               When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
@@ -73,6 +89,7 @@ files:
               type: boolean
 
           - name: reported_hostname
+            display_priority: 0
             description: |
               Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
               and can be useful to set a custom hostname when connecting to a remote database through a proxy.
@@ -80,6 +97,7 @@ files:
             value:
               type: string
           - name: exclude_hostname
+            display_priority: 0
             description: |
               Omit the hostname from tags and events. This is useful when the database host is not monitored by an agent.
             value:
@@ -87,6 +105,7 @@ files:
               example: false
               default: false
           - name: database_identifier
+            display_priority: 0
             description: |
               Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
               billable instance.
@@ -111,13 +130,16 @@ files:
                   - mysql_sock: The socket path of the instance.
                   In addition, you can use any key from the `tags` section of the configuration.
           - name: sock
+            display_priority: 0
             description: |
               Path to a Unix Domain Socket to use when connecting to MySQL (instead of a TCP socket).
               If you specify a socket you don't need to specify a host.
             fleet_configurable: true
             value:
               type: string
+              require_trusted_provider: true
           - name: charset
+            display_priority: 0
             description: Charset you want to use.
             fleet_configurable: true
             value:
@@ -125,13 +147,16 @@ files:
               example: utf8
               display_default: null
           - name: defaults_file
+            display_priority: 0
             description: |
               Path to an alternative configuration mechanism file.
               If providing this then there is no need to specify host, port, user, pass or socket.
             value:
               type: string
+              require_trusted_provider: true
 
           - name: connect_timeout
+            display_priority: 0
             description: |
               Maximum number of seconds to wait before timing out when connecting to MySQL.
               The default connection timeout is 10 seconds.
@@ -141,6 +166,7 @@ files:
               example: 10
 
           - name: read_timeout
+            display_priority: 0
             description: |
               The timeout for reading from the connection in seconds.
               By default, no read timeout is set.
@@ -151,6 +177,7 @@ files:
               display_default: null
 
           - name: ssl
+            display_priority: 0
             description: |
               Use this section to configure a TLS connection between the Agent and MySQL.
 
@@ -179,19 +206,8 @@ files:
                 cert: <CERT_FILE_PATH>
                 ca: <CA_PATH_FILE>
                 check_hostname: true
-          - template: instances/db
-            overrides:
-              custom_queries.value.example:
-                - query: "SELECT foo, COUNT(*) FROM table.events GROUP BY foo"
-                  columns:
-                    - name: foo
-                      type: tag
-                    - name: event.total
-                      type: gauge
-                  tags:
-                    - test:mysql
-                  metric_prefix: mysql
           - name: additional_status
+            display_priority: 0
             description: |
               Set this parameter to collect additional MySQL status variables as metrics
               from "SHOW GLOBAL STATUS"
@@ -213,6 +229,7 @@ files:
                   type: rate
 
           - name: additional_variable
+            display_priority: 0
             description: |
               Set this parameter to collect additional MySQL variables as metrics
               from "SHOW GLOBAL VARIABLES"
@@ -233,6 +250,7 @@ files:
                   type: gauge
 
           - name: max_custom_queries
+            display_priority: 0
             description: |
               Set the maximum number of custom queries to execute with this integration.
 
@@ -242,6 +260,7 @@ files:
               example: 20
 
           - name: queries
+            display_priority: 0
             description: |
               Define custom queries to collect custom metrics from your MySQL database.
 
@@ -262,6 +281,7 @@ files:
                   field: <FIELD_NAME>
 
           - name: options
+            display_priority: 0
             description: |
               Enable options to collect extra metrics from your MySQL integration.
 
@@ -397,16 +417,8 @@ files:
                   type: boolean
                   example: false
 
-          - name: dbm
-            fleet_configurable: true
-            description: |
-              Set to `true` to enable Database Monitoring.
-            enabled: false
-            value:
-              type: boolean
-              example: false
-              display_default: false
           - name: collect_settings
+            display_priority: 0
             description: Configure collection of performance_schema.global_variables.
             options:
               - name: enabled
@@ -423,6 +435,7 @@ files:
                   type: number
                   example: 600
           - name: collect_schemas
+            display_priority: 0
             description: |
               Configure collection of schemas (databases).
               Only tables and schemas for which the user has been granted SELECT privileges are collected.
@@ -447,6 +460,7 @@ files:
                   type: number
                   example: 60
           - name: schemas_collection
+            display_priority: 0
             deprecation:
               Agent version: 7.69.0
               Migration: Use `collect_schemas` instead.
@@ -475,6 +489,7 @@ files:
                   type: number
                   example: 60
           - name: query_metrics
+            display_priority: 0
             description: Configure collection of query metrics
             fleet_configurable: true
             options:
@@ -516,6 +531,7 @@ files:
                   display_default: true
 
           - name: query_samples
+            display_priority: 0
             description: Configure collection of query samples
             fleet_configurable: true
             options:
@@ -625,6 +641,7 @@ files:
                   type: integer
                   example: 300
           - name: query_activity
+            display_priority: 0
             description: Configure collection of active sessions monitoring
             options:
               - name: enabled
@@ -648,6 +665,7 @@ files:
                   example: false
                   display_default: false
           - name: index_metrics
+            display_priority: 0
             description: |
               Configure collection of index metrics.
               Metrics provided by the options:
@@ -680,6 +698,7 @@ files:
                   type: integer
                   example: 1000
           - name: aws
+            display_priority: 0
             description: |
               This block defines the configuration for AWS RDS and Aurora instances.
 
@@ -734,6 +753,7 @@ files:
                     type: string
                     example: arn:aws:iam::123456789012:role/MyRole
           - name: gcp
+            display_priority: 0
             description: |
               This block defines the configuration for Google Cloud SQL instances.
 
@@ -763,6 +783,7 @@ files:
                   example: foo-database
 
           - name: azure
+            display_priority: 0
             description: |
               This block defines the configuration for Azure Database for MySQL.
 
@@ -796,6 +817,7 @@ files:
                   example: mysql-database.database.windows.net
 
           - name: obfuscator_options
+            display_priority: 0
             description: |
               Configure how the SQL obfuscator behaves.
               Note: This option only applies when `dbm` is enabled.
@@ -901,6 +923,7 @@ files:
                   example: false
                   display_default: false
           - name: log_unobfuscated_queries
+            display_priority: 0
             hidden: true
             description: |
               Set to `true` to enable logging of original unobfuscated SQL queries when obfuscation errors occur.
@@ -911,6 +934,7 @@ files:
               example: false
               display_default: false
           - name: log_unobfuscated_plans
+            display_priority: 0
             hidden: true
             description: |
               Set to `true` to enable logging of original unobfuscated SQL plans when obfuscation errors occur.
@@ -921,6 +945,7 @@ files:
               example: false
               display_default: false
           - name: database_instance_collection_interval
+            display_priority: 0
             hidden: true
             description: |
               Set the database instance collection interval (in seconds). The database instance collection sends
@@ -930,6 +955,19 @@ files:
               type: number
               example: 1800
               display_default: false
+          - template: instances/db
+            overrides:
+              custom_queries.value.example:
+                - query: "SELECT foo, COUNT(*) FROM table.events GROUP BY foo"
+                  columns:
+                    - name: foo
+                      type: tag
+                    - name: event.total
+                      type: gauge
+                  tags:
+                    - test:mysql
+                  metric_prefix: mysql
+              custom_queries.display_priority: 1
           - template: instances/default
             overrides:
               disable_generic_tags.hidden: false
@@ -938,6 +976,7 @@ files:
                 Replaces generic tag such as `server` with `mysql_server` to avoid getting it mixed with
                 other integrations tags.
 
+              tags.display_priority: 3
       - template: logs
         example:
           - type: file

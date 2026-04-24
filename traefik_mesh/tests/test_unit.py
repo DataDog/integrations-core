@@ -12,6 +12,8 @@ from .common import (
     OM_METRICS,
     OM_MOCKED_INSTANCE,
     OM_MOCKED_INSTANCE_CONTROLLER,
+    OM_V3_METRICS,
+    OM_V3_OPTIONAL_METRICS,
     OPTIONAL_METRICS,
     get_fixture_path,
     read_json_fixture,
@@ -28,6 +30,23 @@ def test_check_mock_traefik_mesh_openmetrics(dd_run_check, aggregator, mock_http
             aggregator.assert_metric(metric)
             aggregator.assert_metric_has_tag(metric, 'test:traefik_mesh')
 
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_service_check('traefik_mesh.openmetrics.health', ServiceCheck.OK)
+    assert_service_checks(aggregator)
+
+
+def test_check_mock_traefik_mesh_openmetrics_v3(dd_run_check, aggregator, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('traefik_proxy_v3.txt'))
+    check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE])
+    dd_run_check(check)
+
+    for metric in OM_V3_METRICS:
+        if metric not in OM_V3_OPTIONAL_METRICS:
+            aggregator.assert_metric(metric)
+            aggregator.assert_metric_has_tag(metric, 'test:traefik_mesh')
+
+    aggregator.assert_metric('traefik_mesh.open_connections')
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check('traefik_mesh.openmetrics.health', ServiceCheck.OK)
@@ -87,6 +106,37 @@ def test_invalid_controller_service_check(aggregator, mock_http_response):
 
     check.submit_controller_readiness_service_check()
     aggregator.assert_service_check('traefik_mesh.controller.ready', ServiceCheck.CRITICAL)
+
+
+def test_get_version(datadog_agent, dd_run_check, mock_http_response_per_endpoint):
+    from datadog_checks.dev.http import MockResponse
+
+    instance = {
+        'openmetrics_endpoint': 'http://localhost:8080/metrics',
+        'traefik_proxy_api_endpoint': 'http://localhost:8080',
+        'tags': ['test:traefik_mesh'],
+    }
+    check = TraefikMeshCheck('traefik_mesh', {}, [instance])
+    check.check_id = 'test:123'
+
+    mock_http_response_per_endpoint(
+        {
+            'http://localhost:8080/metrics': [MockResponse(file_path=get_fixture_path('traefik_proxy.txt'))],
+            'http://localhost:8080/api/version': [MockResponse(file_path=get_fixture_path('mesh_proxy_version.json'))],
+        }
+    )
+    dd_run_check(check)
+
+    datadog_agent.assert_metadata(
+        'test:123',
+        {
+            'version.raw': '2.5.7',
+            'version.scheme': 'semver',
+            'version.major': '2',
+            'version.minor': '5',
+            'version.patch': '7',
+        },
+    )
 
 
 def test_submit_version(datadog_agent, dd_run_check, mock_http_response):

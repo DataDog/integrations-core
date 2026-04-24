@@ -20,6 +20,8 @@ files:
       legacy: true
       fleet_configurable: true
       display_priority: 1
+      formats:
+        - url
       description: |
         The check collects and parses metrics from the admin /status endpoint.
         For more info see:

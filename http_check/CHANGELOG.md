@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 12.6.1 / 2026-04-09 / Agent 7.78.0
+
+***Fixed***:
+
+* Bump `cryptography` to `==46.0.6` (CVE-2026-34073 / VULN-59768). ([#23223](https://github.com/DataDog/integrations-core/pull/23223))
+
+## 12.6.0 / 2026-04-01
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
 ## 12.5.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:

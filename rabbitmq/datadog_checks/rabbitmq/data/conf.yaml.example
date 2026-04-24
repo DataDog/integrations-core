@@ -151,6 +151,7 @@ instances:
     ## @param exclude_metrics - list of strings - optional
     ## A list of metrics to exclude, with each entry being either
     ## the exact metric name or a regular expression.
+    ##
     ## In order to exclude all metrics but the ones matching a specific filter,
     ## you can use a negative lookahead regex like:
     ##   - ^(?!foo).*$
@@ -734,8 +735,9 @@ instances:
 
     ## @param queues_regexes - list of strings - optional
     ## Use the `queues_regexes` parameters to specify which queues you would like to
-    ## collect using one or multiple Python regular expressions. The same limit applies
-    ## as for the `queues` field.
+    ## collect using one or multiple Python regular expressions.
+    ##
+    ## The same limit applies as for the `queues` field.
     ## If you have `tag_families` enabled, the first captured group in the pattern is used
     ## as the `queue_family` tag.
     ## Named groups in your pattern behave like in `nodes_regexes`.
@@ -760,7 +762,9 @@ instances:
 
     ## @param exchanges_regexes - list of strings - optional
     ## Use the `exchanges_regexes` parameters to specify which exchanges you would like to
-    ## collect using one or multiple Python regular expressions. The same limit applies
+    ## collect using one or multiple Python regular expressions.
+    ##
+    ## The same limit applies
     ## as for the `exchanges` field.
     ## If you have `tag_families` enabled, the first captured group in the pattern is used
     ## as the `exchange_family` tag.

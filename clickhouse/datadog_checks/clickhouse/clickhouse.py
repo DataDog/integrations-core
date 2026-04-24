@@ -18,6 +18,7 @@ from .__about__ import __version__
 from .config import build_config, sanitize
 from .health import ClickhouseHealth, HealthEvent, HealthStatus
 from .query_completions import ClickhouseQueryCompletions
+from .query_errors import ClickhouseQueryErrors
 from .statement_samples import ClickhouseStatementSamples
 from .statements import ClickhouseStatementMetrics
 from .utils import ErrorSanitizer
@@ -119,6 +120,12 @@ class ClickhouseCheck(DatabaseCheck):
             self.query_completions = ClickhouseQueryCompletions(self, self._config.query_completions)
         else:
             self.query_completions = None
+
+        # Initialize query errors (from system.query_log - failed queries)
+        if self._config.dbm and self._config.query_errors.enabled:
+            self.query_errors = ClickhouseQueryErrors(self, self._config.query_errors)
+        else:
+            self.query_errors = None
 
     @property
     def tags(self) -> list[str]:
@@ -243,6 +250,10 @@ class ClickhouseCheck(DatabaseCheck):
         # Run query completions if DBM is enabled (from system.query_log)
         if self.query_completions:
             self.query_completions.run_job_loop(self.tags)
+
+        # Run query errors if DBM is enabled (from system.query_log - failed queries)
+        if self.query_errors:
+            self.query_errors.run_job_loop(self.tags)
 
     @AgentCheck.metadata_entrypoint
     def collect_version(self):
@@ -461,6 +472,8 @@ class ClickhouseCheck(DatabaseCheck):
             self.statement_samples.cancel()
         if self.query_completions:
             self.query_completions.cancel()
+        if self.query_errors:
+            self.query_errors.cancel()
 
         # Wait for job loops to finish
         if self.statement_metrics and self.statement_metrics._job_loop_future:
@@ -469,6 +482,8 @@ class ClickhouseCheck(DatabaseCheck):
             self.statement_samples._job_loop_future.result()
         if self.query_completions and self.query_completions._job_loop_future:
             self.query_completions._job_loop_future.result()
+        if self.query_errors and self.query_errors._job_loop_future:
+            self.query_errors._job_loop_future.result()
 
         # Close main client
         if self._client:

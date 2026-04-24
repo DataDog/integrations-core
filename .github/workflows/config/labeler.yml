@@ -206,6 +206,10 @@ integration/bluecat_edge:
 - changed-files:
   - any-glob-to-any-file:
     - bluecat_edge/**/*
+integration/bluecat_integrity:
+- changed-files:
+  - any-glob-to-any-file:
+    - bluecat_integrity/**/*
 integration/boundary:
 - changed-files:
   - any-glob-to-any-file:
@@ -994,6 +998,10 @@ integration/nagios:
 - changed-files:
   - any-glob-to-any-file:
     - nagios/**/*
+integration/nifi:
+- changed-files:
+  - any-glob-to-any-file:
+    - nifi/**/*
 integration/network:
 - changed-files:
   - any-glob-to-any-file:
@@ -1326,10 +1334,6 @@ integration/snmp_netapp:
 - changed-files:
   - any-glob-to-any-file:
     - snmp_netapp/**/*
-integration/snowflake:
-- changed-files:
-  - any-glob-to-any-file:
-    - snowflake/**/*
 integration/solarwinds:
 - changed-files:
   - any-glob-to-any-file:

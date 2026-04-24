@@ -210,3 +210,60 @@ def test_missing_server_config():
     # The error should be in the validation result
     assert not check._validation_result.valid
     assert any('server' in str(error).lower() for error in check._validation_result.errors)
+
+
+def test_connect_no_password_uses_empty_string():
+    """
+    Regression test: when no password is configured, connect() must pass password=''
+    not password=None. clickhouse_connect encodes None as the literal string 'None'
+    in the Authorization header, causing ClickHouse error code 194 (auth failure).
+    """
+    instance = {
+        'server': 'localhost',
+        'port': 8123,
+        'username': 'default',
+        # 'password' intentionally omitted
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check.check_id = 'test-no-password'
+
+    assert check._config.password == '', (
+        "password must default to '' — None causes auth error 194 in clickhouse_connect"
+    )
+
+    with mock.patch('clickhouse_connect.get_client') as m:
+        mock_client = mock.MagicMock()
+        m.return_value = mock_client
+        check.connect()
+        _, kwargs = m.call_args
+        assert kwargs['password'] == '', "connect() must pass password='' not password=None to clickhouse_connect"
+
+
+@pytest.mark.parametrize("bad_value", [0, -1, -100])
+def test_query_errors_zero_samples_per_hour_defaults(bad_value):
+    """Zero or negative samples_per_hour_per_query must not crash the constructor via ZeroDivisionError."""
+    instance = {
+        'server': 'localhost',
+        'port': 9000,
+        'username': 'default',
+        'dbm': True,
+        'query_errors': {'enabled': True, 'samples_per_hour_per_query': bad_value},
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    assert check._config.query_errors.samples_per_hour_per_query > 0
+    assert any('query_errors.samples_per_hour_per_query' in w for w in check._validation_result.warnings)
+
+
+@pytest.mark.parametrize("bad_value", [0, -1, -100])
+def test_query_completions_zero_samples_per_hour_defaults(bad_value):
+    """Zero or negative samples_per_hour_per_query must not crash the constructor via ZeroDivisionError."""
+    instance = {
+        'server': 'localhost',
+        'port': 9000,
+        'username': 'default',
+        'dbm': True,
+        'query_completions': {'enabled': True, 'samples_per_hour_per_query': bad_value},
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    assert check._config.query_completions.samples_per_hour_per_query > 0
+    assert any('query_completions.samples_per_hour_per_query' in w for w in check._validation_result.warnings)
