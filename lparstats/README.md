@@ -52,7 +52,8 @@ See [metadata.csv][5] for a list of metrics provided by this check.
 
 ### Service Checks
 
-The LPARStats check does not include any service checks.
+`lparstats.can_collect`
+: Returns `CRITICAL` if any `lparstat` sub-command exits with a non-zero return code. Returns `OK` otherwise.
 
 ### Events
 

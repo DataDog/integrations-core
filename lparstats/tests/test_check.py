@@ -4,6 +4,7 @@
 
 from unittest.mock import MagicMock, patch
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.lparstats import LPARStats
 
 MEMORY_OUTPUT = """\
@@ -82,6 +83,19 @@ def test_check_runs(aggregator, dd_run_check, instance):
     aggregator.assert_metric('system.lpar.spurr.user', value=0.015, tags=[])
     aggregator.assert_metric('system.lpar.spurr.idle', value=0.172, tags=[])
     aggregator.assert_metric('system.lpar.spurr.user.pct', tags=[])
+
+    aggregator.assert_service_check('lparstats.can_collect', status=AgentCheck.OK)
+
+
+def test_lparstat_command_failure(aggregator, instance):
+    """Service check is CRITICAL when lparstat exits non-zero."""
+    check = LPARStats('lparstats', {}, [instance])
+    failed_proc = _make_proc('')
+    failed_proc.returncode = 1
+    with patch('datadog_checks.lparstats.lparstats.subprocess.run', return_value=failed_proc):
+        check.check(instance)
+    aggregator.assert_service_check('lparstats.can_collect', status=AgentCheck.CRITICAL)
+    assert len(aggregator.metrics('system.lpar.memory.physb')) == 0
 
 
 def test_hypervisor_and_entitlements(aggregator, dd_run_check):

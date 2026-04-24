@@ -34,6 +34,8 @@ def _run_cmd(cmd: list[str], sudo: bool = False, timeout: float | None = None) -
 
 
 class LPARStats(AgentCheck):
+    SERVICE_CHECK_NAME = 'lparstats.can_collect'
+
     MEMORY_METRICS_START_IDX = 1
     HYPERVISOR_METRICS_START_IDX = 4
     HYPERVISOR_METRICS = (
@@ -54,27 +56,38 @@ class LPARStats(AgentCheck):
             self.log.info('Not running as root or sudo - entitlement and hypervisor metrics might be unavailable')
 
         timeout = self.DEFAULT_TIMEOUT
+        any_failed = False
 
         if instance.get('memory_stats', True):
-            self.collect_memory(instance.get('page_stats', True), sudo, timeout)
+            if not self.collect_memory(instance.get('page_stats', True), sudo, timeout):
+                any_failed = True
         if instance.get('memory_entitlements', True) and root:
-            self.collect_memory_entitlements(sudo, timeout)
+            if not self.collect_memory_entitlements(sudo, timeout):
+                any_failed = True
         if instance.get('hypervisor', True) and root:
-            self.collect_hypervisor(sudo, timeout)
+            if not self.collect_hypervisor(sudo, timeout):
+                any_failed = True
         if instance.get('spurr_utilization', True):
-            self.collect_spurr(sudo, timeout)
+            if not self.collect_spurr(sudo, timeout):
+                any_failed = True
 
-    def collect_memory(self, page_stats: bool = True, sudo: bool = False, timeout: float | None = None) -> None:
+        status = AgentCheck.CRITICAL if any_failed else AgentCheck.OK
+        self.service_check(self.SERVICE_CHECK_NAME, status)
+
+    def collect_memory(self, page_stats: bool = True, sudo: bool = False, timeout: float | None = None) -> bool:
         cmd = ['lparstat', '-m']
         if page_stats:
             cmd.append('-pw')
         cmd.extend(['1', '1'])
 
-        output, _, _ = _run_cmd(cmd, sudo=sudo, timeout=timeout)
+        output, stderr, rc = _run_cmd(cmd, sudo=sudo, timeout=timeout)
+        if rc != 0:
+            self.log.warning('lparstat -m failed (rc=%d): %s', rc, stderr.strip())
+            return False
         stats = [line for line in output.splitlines() if line][self.MEMORY_METRICS_START_IDX :]
         if len(stats) < 3:
             self.log.warning('lparstat -m output too short, skipping memory metrics')
-            return
+            return False
         fields = stats[0].split()
         values = stats[2].split()
         for idx, field in enumerate(fields):
@@ -87,14 +100,18 @@ class LPARStats(AgentCheck):
                 self.gauge(f'system.lpar.memory.{field}', m)
             except ValueError:
                 self.log.info("unable to convert %s to float - skipping", field)
+        return True
 
-    def collect_hypervisor(self, sudo: bool = False, timeout: float | None = None) -> None:
+    def collect_hypervisor(self, sudo: bool = False, timeout: float | None = None) -> bool:
         cmd = ['lparstat', '-H', '1', '1']
-        output, _, _ = _run_cmd(cmd, sudo=sudo, timeout=timeout)
+        output, stderr, rc = _run_cmd(cmd, sudo=sudo, timeout=timeout)
+        if rc != 0:
+            self.log.warning('lparstat -H failed (rc=%d): %s', rc, stderr.strip())
+            return False
         stats = [line for line in output.splitlines() if line][self.HYPERVISOR_METRICS_START_IDX :]
         if len(stats) < 1:
             self.log.warning('lparstat -H output too short, skipping hypervisor metrics')
-            return
+            return False
         for stat in stats:
             values = stat.split()
             if len(values) < 2:
@@ -113,14 +130,18 @@ class LPARStats(AgentCheck):
                         self.HYPERVISOR_METRICS[idx],
                         call_tag,
                     )
+        return True
 
-    def collect_memory_entitlements(self, sudo: bool = False, timeout: float | None = None) -> None:
+    def collect_memory_entitlements(self, sudo: bool = False, timeout: float | None = None) -> bool:
         cmd = ['lparstat', '-m', '-eR', '1', '1']
-        output, _, _ = _run_cmd(cmd, sudo=sudo, timeout=timeout)
+        output, stderr, rc = _run_cmd(cmd, sudo=sudo, timeout=timeout)
+        if rc != 0:
+            self.log.warning('lparstat -m -eR failed (rc=%d): %s', rc, stderr.strip())
+            return False
         stats = [line for line in output.splitlines() if line][self.MEMORY_ENTITLEMENTS_START_IDX :]
         if len(stats) < 2:
             self.log.warning('lparstat -m -eR output too short, skipping entitlement metrics')
-            return
+            return False
         fields = stats[0].split()[1:]
         for stat in stats[1:]:
             values = stat.split()
@@ -137,14 +158,18 @@ class LPARStats(AgentCheck):
                     self.gauge(metric_name, metric_value, tags=[tag])
                 except ValueError:
                     self.log.info("unable to convert %s to float for %s - skipping", field, tag)
+        return True
 
-    def collect_spurr(self, sudo: bool = False, timeout: float | None = None) -> None:
+    def collect_spurr(self, sudo: bool = False, timeout: float | None = None) -> bool:
         cmd = ['lparstat', '-E', '1', '1']
-        output, _, _ = _run_cmd(cmd, sudo=sudo, timeout=timeout)
+        output, stderr, rc = _run_cmd(cmd, sudo=sudo, timeout=timeout)
+        if rc != 0:
+            self.log.warning('lparstat -E failed (rc=%d): %s', rc, stderr.strip())
+            return False
         table = [line for line in output.splitlines() if line][self.SPURR_PROCESSOR_UTILIZATION_START_IDX :]
         if len(table) < 3:
             self.log.warning('lparstat -E output too short, skipping SPURR metrics')
-            return
+            return False
         fields = table[0].split()
         stats = table[2].split()
         metrics = {}
@@ -176,3 +201,4 @@ class LPARStats(AgentCheck):
                 denom = total
             if denom > 0:
                 self.gauge(f"{metric}.pct", val / denom)
+        return True
