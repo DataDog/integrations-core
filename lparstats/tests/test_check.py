@@ -74,18 +74,14 @@ def test_check_runs(aggregator, dd_run_check, instance):
     with patch('datadog_checks.lparstats.lparstats.subprocess.run', side_effect=_mock_subprocess_run):
         dd_run_check(check)
 
-    # Memory metrics
-    aggregator.assert_metric('system.lpar.memory.physb', value=1.20)
-    aggregator.assert_metric('system.lpar.memory.entc', value=15.2)
+    # Memory metrics (no tags expected)
+    aggregator.assert_metric('system.lpar.memory.physb', value=1.20, tags=[])
+    aggregator.assert_metric('system.lpar.memory.entc', value=15.2, tags=[])
 
-    # SPURR metrics
-    aggregator.assert_metric('system.lpar.spurr.user', value=0.015)
-    aggregator.assert_metric('system.lpar.spurr.idle', value=0.172)
-    aggregator.assert_metric('system.lpar.spurr.user.pct')
-
-    # Verify at least one metric was collected for each category
-    assert len(aggregator.metrics('system.lpar.memory.physb')) > 0
-    assert len(aggregator.metrics('system.lpar.spurr.user')) > 0
+    # SPURR metrics (no tags expected)
+    aggregator.assert_metric('system.lpar.spurr.user', value=0.015, tags=[])
+    aggregator.assert_metric('system.lpar.spurr.idle', value=0.172, tags=[])
+    aggregator.assert_metric('system.lpar.spurr.user.pct', tags=[])
 
 
 def test_hypervisor_and_entitlements(aggregator, dd_run_check):
