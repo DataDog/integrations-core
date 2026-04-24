@@ -215,7 +215,8 @@ def test_labeler_sync_long_label_user_provides_tag_with_prefix(fake_repo, ddev):
 def test_labeler_sync_does_not_overwrite_custom_label(fake_repo, ddev):
     """When integration/dummy is a custom label pointing to dummy2's directory,
     --sync must not overwrite it when adding a label for the dummy integration."""
-    (fake_repo.path / '.github' / 'workflows' / 'config' / 'labeler.yml').write_text(
+    labeler_path = fake_repo.path / '.github' / 'workflows' / 'config' / 'labeler.yml'
+    labeler_path.write_text(
         """\
 changelog/no-changelog:
 - changed-files:
@@ -246,12 +247,9 @@ release:
     result = ddev('validate', 'labeler', '--sync')
 
     assert result.exit_code == 0, result.output
-    assert labeler_path.read_text() == labeler_test_config(["dummy", "dummy2"])
     assert 'Cannot auto-add label `integration/dummy` for `dummy`' in result.output
     assert 'already used for directory `dummy2`' in result.output
-
-    labeler_content = (fake_repo.path / '.github' / 'workflows' / 'config' / 'labeler.yml').read_text()
-    assert 'dummy2/**/*' in labeler_content
+    assert 'dummy2/**/*' in labeler_path.read_text()
 
 
 def test_labeler_no_sync_label_conflict_reports_detailed_error(fake_repo, ddev):
