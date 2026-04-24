@@ -15,6 +15,7 @@ services:
         hard: 262144
     ports:
       - "8128:8123"
+      - "8134:8443"
       - "9001:9000"
     volumes:
       - ./override_configs/zookeeper.xml:/etc/clickhouse-server/config.d/zookeeper.xml
@@ -26,6 +27,10 @@ services:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./test_dictionary.xml:/etc/clickhouse-server/test_dictionary.xml
       - ./test.csv:/opt/dictionaries/test.csv
+      - ./tls_config.xml:/etc/clickhouse-server/config.d/tls.xml
+      - ./certs/server.crt:/etc/clickhouse-server/ssl/server.crt
+      - ./certs/server.key:/etc/clickhouse-server/ssl/server.key
+      - ./certs/dhparam.pem:/etc/clickhouse-server/dhparam.pem
     depends_on:
       clickhouse-zookeeper:
         condition: service_healthy
@@ -121,21 +126,6 @@ services:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./test_dictionary.xml:/etc/clickhouse-server/test_dictionary.xml
       - ./test.csv:/opt/dictionaries/test.csv
-
-  clickhouse-tls:
-    profiles: ["tls"]
-    image: ${CLICKHOUSE_REPOSITORY}:${CLICKHOUSE_VERSION}
-    hostname: clickhouse-tls
-    container_name: clickhouse-tls
-    ports:
-      - "8134:8443"
-    volumes:
-      - ./tls_config.xml:/etc/clickhouse-server/config.d/tls.xml
-      - ./certs/server.crt:/etc/clickhouse-server/ssl/server.crt
-      - ./certs/server.key:/etc/clickhouse-server/ssl/server.key
-      - ./users.xml:/etc/clickhouse-server/users.d/users.xml
-    networks:
-      - clickhouse-network
 
   clickhouse-zookeeper:
     # Using zookeeper `3.6.0` is raising this error:

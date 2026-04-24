@@ -1,11 +1,12 @@
-<clickhouse>
+<yandex>
     <https_port>8443</https_port>
     <openSSL>
         <server>
             <privateKeyFile>/etc/clickhouse-server/ssl/server.key</privateKeyFile>
             <certificateFile>/etc/clickhouse-server/ssl/server.crt</certificateFile>
+            <dhParamsFile>/etc/clickhouse-server/dhparam.pem</dhParamsFile>
             <verificationMode>none</verificationMode>
             <cacheSessions>true</cacheSessions>
         </server>
     </openSSL>
-</clickhouse>
+</yandex>

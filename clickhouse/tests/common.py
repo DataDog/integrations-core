@@ -15,7 +15,7 @@ TLS_ENABLED = 'tls' in os.getenv('COMPOSE_PROFILES', '').split(',')
 
 tls = pytest.mark.skipif(
     not TLS_ENABLED,
-    reason='TLS tests require a ClickHouse version that supports modern TLS (22.7+)',
+    reason='TLS tests require the tls compose profile',
 )
 
 HOST = get_docker_hostname()
