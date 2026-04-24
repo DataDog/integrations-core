@@ -11,7 +11,7 @@ import subprocess
 from datadog_checks.base import AgentCheck
 
 
-def _run_cmd(cmd, sudo=False, timeout=None):
+def _run_cmd(cmd: list[str], sudo: bool = False, timeout: float | None = None) -> tuple[str, str, int]:
     """Run a command, optionally via sudo. Returns (stdout, stderr, returncode)."""
     if sudo:
         cmd = ['sudo'] + list(cmd)
@@ -47,7 +47,7 @@ class LPARStats(AgentCheck):
     SPURR_PROCESSOR_UTILIZATION_START_IDX = 3
     DEFAULT_TIMEOUT = 5
 
-    def check(self, instance):
+    def check(self, instance: dict) -> None:
         sudo = instance.get('sudo', False)
         root = (os.getuid() == 0) or sudo
         if not root:
@@ -64,7 +64,7 @@ class LPARStats(AgentCheck):
         if instance.get('spurr_utilization', True):
             self.collect_spurr(sudo, timeout)
 
-    def collect_memory(self, page_stats=True, sudo=False, timeout=None):
+    def collect_memory(self, page_stats: bool = True, sudo: bool = False, timeout: float | None = None) -> None:
         cmd = ['lparstat', '-m']
         if page_stats:
             cmd.append('-pw')
@@ -88,7 +88,7 @@ class LPARStats(AgentCheck):
             except ValueError:
                 self.log.info("unable to convert %s to float - skipping", field)
 
-    def collect_hypervisor(self, sudo=False, timeout=None):
+    def collect_hypervisor(self, sudo: bool = False, timeout: float | None = None) -> None:
         cmd = ['lparstat', '-H', '1', '1']
         output, _, _ = _run_cmd(cmd, sudo=sudo, timeout=timeout)
         stats = [line for line in output.splitlines() if line][self.HYPERVISOR_METRICS_START_IDX :]
@@ -114,7 +114,7 @@ class LPARStats(AgentCheck):
                         call_tag,
                     )
 
-    def collect_memory_entitlements(self, sudo=False, timeout=None):
+    def collect_memory_entitlements(self, sudo: bool = False, timeout: float | None = None) -> None:
         cmd = ['lparstat', '-m', '-eR', '1', '1']
         output, _, _ = _run_cmd(cmd, sudo=sudo, timeout=timeout)
         stats = [line for line in output.splitlines() if line][self.MEMORY_ENTITLEMENTS_START_IDX :]
@@ -138,7 +138,7 @@ class LPARStats(AgentCheck):
                 except ValueError:
                     self.log.info("unable to convert %s to float for %s - skipping", field, tag)
 
-    def collect_spurr(self, sudo=False, timeout=None):
+    def collect_spurr(self, sudo: bool = False, timeout: float | None = None) -> None:
         cmd = ['lparstat', '-E', '1', '1']
         output, _, _ = _run_cmd(cmd, sudo=sudo, timeout=timeout)
         table = [line for line in output.splitlines() if line][self.SPURR_PROCESSOR_UTILIZATION_START_IDX :]
