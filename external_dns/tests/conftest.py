@@ -4,8 +4,9 @@
 import os
 from copy import deepcopy
 
-import mock
 import pytest
+
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 
 from .common import FIXTURE_DIR
 
@@ -13,18 +14,13 @@ INSTANCE = {'prometheus_url': 'http://localhost:7979/metrics', 'tags': ['custom:
 
 
 @pytest.fixture
-def mock_external_dns():
+def mock_external_dns(mock_openmetrics_http):
     f_name = os.path.join(FIXTURE_DIR, 'metrics.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
 
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split('\n'), headers={'Content-Type': 'text/plain'}
-        ),
-    ):
-        yield
+    mock_openmetrics_http.get.return_value = MockHTTPResponse(content=text_data, headers={'Content-Type': 'text/plain'})
+    yield
 
 
 @pytest.fixture(scope='session')

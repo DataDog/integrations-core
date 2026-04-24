@@ -3,11 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
-from unittest.mock import Mock
-
 import pytest
-from requests import HTTPError, Response
 
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.nutanix import NutanixCheck
 
 pytestmark = [pytest.mark.unit]
@@ -18,18 +17,14 @@ def test_retry_on_rate_limit_success_no_retry(dd_run_check, aggregator, mock_ins
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 
-    mock_response = Mock(spec=Response)
-    mock_response.status_code = 200
-    mock_response.json.return_value = {"data": {"test": "data"}}
-    mock_response.raise_for_status = Mock()
-    mock_response.content = b'{"data": {"test": "data"}}'
-
-    mock_get = mocker.patch('requests.Session.get', return_value=mock_response)
+    mock_http_get.reset_mock()
+    mock_http_get.side_effect = None
+    mock_http_get.return_value = MockHTTPResponse(json_data={"data": {"test": "data"}})
 
     result = check._get_request_data("api/test")
 
     assert result == {"test": "data"}
-    assert mock_get.call_count == 1
+    assert mock_http_get.call_count == 1
     aggregator.assert_metric("nutanix.api.rate_limited", count=0)
 
 
@@ -38,26 +33,17 @@ def test_retry_on_rate_limit_429_then_success(dd_run_check, aggregator, mock_ins
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 
-    # First response: 429 rate limited
-    mock_response_429 = Mock(spec=Response)
-    mock_response_429.status_code = 429
-    mock_response_429.raise_for_status.side_effect = HTTPError(response=mock_response_429)
-    mock_response_429.content = b''
-
-    # Second response: success
-    mock_response_200 = Mock(spec=Response)
-    mock_response_200.status_code = 200
-    mock_response_200.json.return_value = {"data": {"test": "data"}}
-    mock_response_200.raise_for_status = Mock()
-    mock_response_200.content = b'{"data": {"test": "data"}}'
-
-    mock_get = mocker.patch('requests.Session.get', side_effect=[mock_response_429, mock_response_200])
+    mock_http_get.reset_mock()
+    mock_http_get.side_effect = [
+        MockHTTPResponse(status_code=429),
+        MockHTTPResponse(json_data={"data": {"test": "data"}}),
+    ]
     mock_sleep = mocker.patch('time.sleep')
 
     result = check._get_request_data("api/test")
 
     assert result == {"test": "data"}
-    assert mock_get.call_count == 2
+    assert mock_http_get.call_count == 2
     assert mock_sleep.call_count == 1
 
     # First retry: base * 2^1 + jitter = 2 to 3
@@ -74,19 +60,16 @@ def test_retry_on_rate_limit_max_retries_exceeded(dd_run_check, aggregator, mock
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 
-    mock_response_429 = Mock(spec=Response)
-    mock_response_429.status_code = 429
-    mock_response_429.raise_for_status.side_effect = HTTPError(response=mock_response_429)
-    mock_response_429.content = b''
-
-    mock_get = mocker.patch('requests.Session.get', return_value=mock_response_429)
+    mock_http_get.reset_mock()
+    mock_http_get.side_effect = None
+    mock_http_get.return_value = MockHTTPResponse(status_code=429)
     mock_sleep = mocker.patch('time.sleep')
 
-    with pytest.raises(HTTPError):
+    with pytest.raises(HTTPStatusError):
         check._get_request_data("api/test")
 
     # Initial request + 1 retry (range(1, 2)) = 2 total
-    assert mock_get.call_count == 2
+    assert mock_http_get.call_count == 2
     assert mock_sleep.call_count == 1  # Sleep between retries (not after final failure)
 
     aggregator.assert_metric("nutanix.api.rate_limited", tags=['nutanix', 'prism_central:10.0.0.197'])
@@ -98,19 +81,16 @@ def test_retry_on_non_429_error_no_retry(dd_run_check, aggregator, mock_instance
     dd_run_check(check)
 
     # 500 Internal Server Error
-    mock_response_500 = Mock(spec=Response)
-    mock_response_500.status_code = 500
-    mock_response_500.raise_for_status.side_effect = HTTPError(response=mock_response_500)
-    mock_response_500.content = b''
-
-    mock_get = mocker.patch('requests.Session.get', return_value=mock_response_500)
+    mock_http_get.reset_mock()
+    mock_http_get.side_effect = None
+    mock_http_get.return_value = MockHTTPResponse(status_code=500)
     mock_sleep = mocker.patch('time.sleep')
 
-    with pytest.raises(HTTPError):
+    with pytest.raises(HTTPStatusError):
         check._get_request_data("api/test")
 
     # Should only try once, no retries for non-429 errors
-    assert mock_get.call_count == 1
+    assert mock_http_get.call_count == 1
     assert mock_sleep.call_count == 0
 
     aggregator.assert_metric("nutanix.api.rate_limited", count=0)
@@ -126,24 +106,17 @@ def test_retry_with_custom_config(dd_run_check, aggregator, mock_instance, mock_
     dd_run_check(check)
 
     # First two responses: 429, then success
-    mock_response_429 = Mock(spec=Response)
-    mock_response_429.status_code = 429
-    mock_response_429.raise_for_status.side_effect = HTTPError(response=mock_response_429)
-    mock_response_429.content = b''
-
-    mock_response_200 = Mock(spec=Response)
-    mock_response_200.status_code = 200
-    mock_response_200.json.return_value = {"data": {"test": "data"}}
-    mock_response_200.raise_for_status = Mock()
-    mock_response_200.content = b'{"data": {"test": "data"}}'
-
-    mock_get = mocker.patch('requests.Session.get', side_effect=[mock_response_429, mock_response_200])
+    mock_http_get.reset_mock()
+    mock_http_get.side_effect = [
+        MockHTTPResponse(status_code=429),
+        MockHTTPResponse(json_data={"data": {"test": "data"}}),
+    ]
     mock_sleep = mocker.patch('time.sleep')
 
     result = check._get_request_data("api/test")
 
     assert result == {"test": "data"}
-    assert mock_get.call_count == 2
+    assert mock_http_get.call_count == 2
 
     # First retry: base * 2^1 + jitter = 4 to 5 (base=2)
     sleep_time = mock_sleep.call_args[0][0]
@@ -160,26 +133,19 @@ def test_retry_exponential_backoff(dd_run_check, aggregator, mock_instance, mock
     dd_run_check(check)
 
     # Four 429 responses, then success
-    mock_response_429 = Mock(spec=Response)
-    mock_response_429.status_code = 429
-    mock_response_429.raise_for_status.side_effect = HTTPError(response=mock_response_429)
-    mock_response_429.content = b''
-
-    mock_response_200 = Mock(spec=Response)
-    mock_response_200.status_code = 200
-    mock_response_200.json.return_value = {"data": {"test": "data"}}
-    mock_response_200.raise_for_status = Mock()
-    mock_response_200.content = b'{"data": {"test": "data"}}'
-
-    mock_get = mocker.patch(
-        'requests.Session.get', side_effect=[mock_response_429, mock_response_429, mock_response_429, mock_response_200]
-    )
+    mock_http_get.reset_mock()
+    mock_http_get.side_effect = [
+        MockHTTPResponse(status_code=429),
+        MockHTTPResponse(status_code=429),
+        MockHTTPResponse(status_code=429),
+        MockHTTPResponse(json_data={"data": {"test": "data"}}),
+    ]
     mock_sleep = mocker.patch('time.sleep')
 
     result = check._get_request_data("api/test")
 
     assert result == {"test": "data"}
-    assert mock_get.call_count == 4
+    assert mock_http_get.call_count == 4
     assert mock_sleep.call_count == 3
 
     # Check exponential backoff pattern: base * 2^attempt + jitter (attempt starts at 1)
@@ -202,19 +168,16 @@ def test_retry_disabled_with_zero_max_retries(dd_run_check, aggregator, mock_ins
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 
-    mock_response_429 = Mock(spec=Response)
-    mock_response_429.status_code = 429
-    mock_response_429.raise_for_status.side_effect = HTTPError(response=mock_response_429)
-    mock_response_429.content = b''
-
-    mock_get = mocker.patch('requests.Session.get', return_value=mock_response_429)
+    mock_http_get.reset_mock()
+    mock_http_get.side_effect = None
+    mock_http_get.return_value = MockHTTPResponse(status_code=429)
     mock_sleep = mocker.patch('time.sleep')
 
-    with pytest.raises(HTTPError):
+    with pytest.raises(HTTPStatusError):
         check._get_request_data("api/test")
 
     # Should only try once when max_retries is 0
-    assert mock_get.call_count == 1
+    assert mock_http_get.call_count == 1
     assert mock_sleep.call_count == 0
 
     # Loop never runs with max_retries=0 (clamped to 1), so no rate_limited metric is emitted
@@ -226,25 +189,18 @@ def test_health_check_with_retry(dd_run_check, aggregator, mock_instance, mock_h
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 
-    # First response: 429 rate limited
-    mock_response_429 = Mock(spec=Response)
-    mock_response_429.status_code = 429
-    mock_response_429.raise_for_status.side_effect = HTTPError(response=mock_response_429)
-    mock_response_429.content = b''
-
-    # Second response: success
-    mock_response_200 = Mock(spec=Response)
-    mock_response_200.status_code = 200
-    mock_response_200.raise_for_status = Mock()
-    mock_response_200.content = b''
-
-    mock_get = mocker.patch('requests.Session.get', side_effect=[mock_response_429, mock_response_200])
+    # First response: 429 rate limited, second: success
+    mock_http_get.reset_mock()
+    mock_http_get.side_effect = [
+        MockHTTPResponse(status_code=429),
+        MockHTTPResponse(),
+    ]
     mock_sleep = mocker.patch('time.sleep')
 
     result = check._check_health()
 
     assert result is True
-    assert mock_get.call_count == 2
+    assert mock_http_get.call_count == 2
     assert mock_sleep.call_count == 1
 
     # Health check should report up after successful retry
