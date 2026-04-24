@@ -1,0 +1,1 @@
+Robust handling of audit log file rotation. The check can keep up with audit log files that get rotated every few seconds.
