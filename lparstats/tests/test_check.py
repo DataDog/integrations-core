@@ -44,10 +44,10 @@ def _mock_subprocess_run(cmd, **kwargs):
     return _make_proc()
 
 
-def test_check_runs(aggregator, instance):
+def test_check_runs(aggregator, dd_run_check, instance):
     check = LPARStats('lparstats', {}, [instance])
     with patch('datadog_checks.lparstats.lparstats.subprocess.run', side_effect=_mock_subprocess_run):
-        check.check(instance)
+        dd_run_check(check)
 
     # Memory metrics
     aggregator.assert_metric('system.lpar.memory.physb', value=1.20)
