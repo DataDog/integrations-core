@@ -121,7 +121,8 @@ KAFKA_KRAFT_E2E_METRICS = [
     # SnapshotEmitter:
     "kafka.kraft.snapshot_emitter.latest_snapshot_generated_age_ms",
     "kafka.kraft.snapshot_emitter.latest_snapshot_generated_bytes",
-    # Log flush:
+    # LogFlushStats bean exists on both ZK and KRaft brokers, but in the ZK single-node
+    # E2E the flush rate never lands in a scrape window. Asserted only for KRaft.
     "kafka.log.flush_rate.rate",
 ]
 
