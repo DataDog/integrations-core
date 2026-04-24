@@ -172,6 +172,11 @@ class LPARStats(AgentCheck):
             return False
         fields = table[0].split()
         stats = table[2].split()
+        try:
+            norm_start = fields.index('freq') + 1
+        except ValueError:
+            self.log.warning('lparstat -E output missing freq column; falling back to midpoint split')
+            norm_start = len(fields) // 2 + 1
         metrics = {}
         total = 0
         total_norm = 0
@@ -180,7 +185,7 @@ class LPARStats(AgentCheck):
             if idx >= len(stats):
                 break
             metric = metric_tpl.format(field)
-            if idx > len(fields) / 2:
+            if idx >= norm_start:
                 metric = f"{metric}.norm"
             try:
                 metrics[metric] = float(stats[idx])
