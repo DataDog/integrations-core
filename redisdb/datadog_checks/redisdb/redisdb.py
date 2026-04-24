@@ -42,6 +42,24 @@ class Redis(AgentCheck):
         self.collect_client_metrics = is_affirmative(self.instance.get('collect_client_metrics', False))
         if ("host" not in self.instance or "port" not in self.instance) and "unix_socket_path" not in self.instance:
             raise ConfigurationError("You must specify a host/port couple or a unix_socket_path")
+        gcp_config = self.instance.get('gcp', {})
+        managed_auth = gcp_config.get('managed_authentication', {})
+        if is_affirmative(managed_auth.get('enabled', False)):
+            if self.instance.get('username') or self.instance.get('password'):
+                raise ConfigurationError(
+                    "Cannot set 'username' or 'password' alongside gcp.managed_authentication. "
+                    "IAM auth injects credentials automatically."
+                )
+            if not self.instance.get('ssl'):
+                raise ConfigurationError(
+                    "GCP IAM auth requires SSL. Set 'ssl: true' in the instance configuration "
+                    "to prevent IAM tokens from being transmitted in plaintext."
+                )
+            from .gcp import GCPIAMTokenProvider
+
+            self._gcp_token_provider = GCPIAMTokenProvider(managed_auth.get('service_account'))
+        else:
+            self._gcp_token_provider = None
 
     def get_library_versions(self):
         return {"redis": redis.__version__}
@@ -72,9 +90,17 @@ class Redis(AgentCheck):
         no_cache = is_affirmative(instance_config.get('disable_connection_cache', False))
         key = self._generate_instance_key(instance_config)
 
+        if self._gcp_token_provider and self._gcp_token_provider.is_token_expired():
+            for conn in self.connections.values():
+                conn.connection_pool.disconnect()
+            self.connections.clear()
+
         if no_cache or key not in self.connections:
+            if no_cache:
+                old_conn = self.connections.pop(key, None)
+                if old_conn:
+                    old_conn.connection_pool.disconnect()
             try:
-                # Only send useful parameters to the redis client constructor
                 list_params = [
                     'host',
                     'port',
@@ -91,11 +117,13 @@ class Redis(AgentCheck):
                     'ssl_check_hostname',
                 ]
 
-                # Set a default timeout (in seconds) if no timeout is specified in the instance config
                 instance_config['socket_timeout'] = instance_config.get('socket_timeout', 5)
                 connection_params = {k: instance_config[k] for k in list_params if k in instance_config}
-                # If caching is disabled, we overwrite the dictionary value so the old connection
-                # will be closed as soon as the corresponding Python object gets garbage collected
+
+                if self._gcp_token_provider:
+                    connection_params['username'] = self._gcp_token_provider.username
+                    connection_params['password'] = self._gcp_token_provider.get_token()
+
                 self.connections[key] = redis.Redis(**connection_params)
 
             except TypeError:
@@ -114,6 +142,31 @@ class Redis(AgentCheck):
         return tags
 
     def _check_db(self):
+        try:
+            self._run_check_db()
+        except redis.AuthenticationError:
+            if self._gcp_token_provider:
+                self._force_iam_reconnect()
+                self._run_check_db()  # second failure propagates
+            else:
+                raise
+
+    def _safe_error_message(self, e: Exception) -> str:
+        """Return error message with IAM token redacted when IAM auth is active."""
+        msg = str(e)
+        if self._gcp_token_provider:
+            token = self._gcp_token_provider.current_token
+            if token:
+                msg = msg.replace(token, '<REDACTED>')
+        return msg
+
+    def _force_iam_reconnect(self):
+        for conn in self.connections.values():
+            conn.connection_pool.disconnect()
+        self.connections.clear()
+        self._gcp_token_provider.invalidate()
+
+    def _run_check_db(self):
         tags = list(self.tags)
         conn = self._get_conn(self.instance)
 
@@ -135,10 +188,14 @@ class Redis(AgentCheck):
 
             self._collect_metadata(info)
         except ValueError as e:
-            self.service_check('redis.can_connect', AgentCheck.CRITICAL, message=str(e), tags=self.tags)
+            self.service_check(
+                'redis.can_connect', AgentCheck.CRITICAL, message=self._safe_error_message(e), tags=self.tags
+            )
             raise
         except Exception as e:
-            self.service_check('redis.can_connect', AgentCheck.CRITICAL, message=str(e), tags=self.tags)
+            self.service_check(
+                'redis.can_connect', AgentCheck.CRITICAL, message=self._safe_error_message(e), tags=self.tags
+            )
             raise
         else:
             self.service_check('redis.can_connect', AgentCheck.OK, tags=tags)
