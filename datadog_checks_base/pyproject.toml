@@ -36,7 +36,7 @@ db = [
 deps = [
     "binary==1.0.2",
     "cachetools==7.0.1",
-    "cryptography==46.0.6",
+    "cryptography==46.0.7",
     "ddtrace==3.19.5",
     "jellyfish==1.2.1",
     "lazy-loader==0.4",
