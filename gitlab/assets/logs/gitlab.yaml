@@ -411,6 +411,7 @@ pipeline:
       enabled: true
       sources:
         - severity
+        - level
 
     # ruby/rails
     - type: attribute-remapper
