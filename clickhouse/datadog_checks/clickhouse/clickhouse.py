@@ -77,10 +77,16 @@ class ClickhouseCheck(DatabaseCheck):
         # We'll connect on the first check run
         self._client = None
 
-        # Shared HTTP connection pool for all ClickHouse clients (main + DBM jobs)
-        # This reduces connection overhead while maintaining client isolation
-        # See: https://clickhouse.com/docs/integrations/language-clients/python/advanced-usage#customizing-the-http-connection-pool
-        self._pool_manager = httputil.get_pool_manager(maxsize=8, num_pools=4)
+        # Shared HTTP connection pool for all ClickHouse clients (main + DBM jobs).
+        # TLS settings must be baked in here: when pool_mgr is provided to get_client(),
+        # clickhouse-connect assigns it immediately and skips its own TLS pool creation,
+        # so verify=False would be silently ignored if the pool was created without it.
+        self._pool_manager = httputil.get_pool_manager(
+            maxsize=8,
+            num_pools=4,
+            verify=self._config.verify,
+            ca_cert=self._config.tls_ca_cert,
+        )
 
         self._query_manager = QueryManager(
             self,
