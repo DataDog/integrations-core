@@ -33,6 +33,15 @@ def _run_cmd(cmd: list[str], sudo: bool = False, timeout: float | None = None) -
         return '', str(e), -1
 
 
+def _lparstat_rows(
+    cmd: list[str], start_idx: int, sudo: bool = False, timeout: float | None = None
+) -> tuple[list[str], str, int]:
+    """Run lparstat, filter blank lines, and return rows starting at start_idx."""
+    output, stderr, rc = _run_cmd(cmd, sudo=sudo, timeout=timeout)
+    rows = [line for line in output.splitlines() if line][start_idx:]
+    return rows, stderr, rc
+
+
 class LPARStats(AgentCheck):
     SERVICE_CHECK_NAME = 'lparstats.can_collect'
 
@@ -80,11 +89,10 @@ class LPARStats(AgentCheck):
             cmd.append('-pw')
         cmd.extend(['1', '1'])
 
-        output, stderr, rc = _run_cmd(cmd, sudo=sudo, timeout=timeout)
+        stats, stderr, rc = _lparstat_rows(cmd, self.MEMORY_METRICS_START_IDX, sudo=sudo, timeout=timeout)
         if rc != 0:
             self.log.warning('lparstat -m failed (rc=%d): %s', rc, stderr.strip())
             return False
-        stats = [line for line in output.splitlines() if line][self.MEMORY_METRICS_START_IDX :]
         if len(stats) < 3:
             self.log.warning('lparstat -m output too short, skipping memory metrics')
             return False
@@ -104,11 +112,10 @@ class LPARStats(AgentCheck):
 
     def collect_hypervisor(self, sudo: bool = False, timeout: float | None = None) -> bool:
         cmd = ['lparstat', '-H', '1', '1']
-        output, stderr, rc = _run_cmd(cmd, sudo=sudo, timeout=timeout)
+        stats, stderr, rc = _lparstat_rows(cmd, self.HYPERVISOR_METRICS_START_IDX, sudo=sudo, timeout=timeout)
         if rc != 0:
             self.log.warning('lparstat -H failed (rc=%d): %s', rc, stderr.strip())
             return False
-        stats = [line for line in output.splitlines() if line][self.HYPERVISOR_METRICS_START_IDX :]
         if len(stats) < 1:
             self.log.warning('lparstat -H output too short, skipping hypervisor metrics')
             return False
@@ -134,11 +141,10 @@ class LPARStats(AgentCheck):
 
     def collect_memory_entitlements(self, sudo: bool = False, timeout: float | None = None) -> bool:
         cmd = ['lparstat', '-m', '-eR', '1', '1']
-        output, stderr, rc = _run_cmd(cmd, sudo=sudo, timeout=timeout)
+        stats, stderr, rc = _lparstat_rows(cmd, self.MEMORY_ENTITLEMENTS_START_IDX, sudo=sudo, timeout=timeout)
         if rc != 0:
             self.log.warning('lparstat -m -eR failed (rc=%d): %s', rc, stderr.strip())
             return False
-        stats = [line for line in output.splitlines() if line][self.MEMORY_ENTITLEMENTS_START_IDX :]
         if len(stats) < 2:
             self.log.warning('lparstat -m -eR output too short, skipping entitlement metrics')
             return False
@@ -162,11 +168,10 @@ class LPARStats(AgentCheck):
 
     def collect_spurr(self, sudo: bool = False, timeout: float | None = None) -> bool:
         cmd = ['lparstat', '-E', '1', '1']
-        output, stderr, rc = _run_cmd(cmd, sudo=sudo, timeout=timeout)
+        table, stderr, rc = _lparstat_rows(cmd, self.SPURR_PROCESSOR_UTILIZATION_START_IDX, sudo=sudo, timeout=timeout)
         if rc != 0:
             self.log.warning('lparstat -E failed (rc=%d): %s', rc, stderr.strip())
             return False
-        table = [line for line in output.splitlines() if line][self.SPURR_PROCESSOR_UTILIZATION_START_IDX :]
         if len(table) < 3:
             self.log.warning('lparstat -E output too short, skipping SPURR metrics')
             return False
