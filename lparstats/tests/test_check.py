@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from datadog_checks.lparstats import LPARStats
 
@@ -28,17 +28,25 @@ Physical Processor Utilisation:
 """
 
 
-def _mock_run_cmd(cmd, sudo=False, timeout=None):
-    if '-m' in cmd:
-        return MEMORY_OUTPUT, '', 0
+def _make_proc(stdout=''):
+    proc = MagicMock()
+    proc.stdout = stdout.encode('utf-8')
+    proc.stderr = b''
+    proc.returncode = 0
+    return proc
+
+
+def _mock_subprocess_run(cmd, **kwargs):
+    if '-m' in cmd and '-eR' not in cmd:
+        return _make_proc(MEMORY_OUTPUT)
     if '-E' in cmd:
-        return SPURR_OUTPUT, '', 0
-    return '', '', 0
+        return _make_proc(SPURR_OUTPUT)
+    return _make_proc()
 
 
 def test_check_runs(aggregator, instance):
     check = LPARStats('lparstats', {}, [instance])
-    with patch('datadog_checks.lparstats.lparstats._run_cmd', side_effect=_mock_run_cmd):
+    with patch('datadog_checks.lparstats.lparstats.subprocess.run', side_effect=_mock_subprocess_run):
         check.check(instance)
 
     # Memory metrics
@@ -57,7 +65,7 @@ def test_check_runs(aggregator, instance):
 
 def test_memory_output_too_short(aggregator, instance):
     check = LPARStats('lparstats', {}, [instance])
-    with patch('datadog_checks.lparstats.lparstats._run_cmd', return_value=('', '', 0)):
+    with patch('datadog_checks.lparstats.lparstats.subprocess.run', return_value=_make_proc('')):
         check.check(instance)
     # No metrics should be emitted for empty output
     assert len(aggregator.metrics('system.lpar.memory.physb')) == 0
@@ -78,8 +86,8 @@ Physical Processor Utilisation:
 """
     check = LPARStats('lparstats', {}, [instance])
     with patch(
-        'datadog_checks.lparstats.lparstats._run_cmd',
-        side_effect=lambda cmd, **kw: (zero_spurr, '', 0) if '-E' in cmd else ('', '', 0),
+        'datadog_checks.lparstats.lparstats.subprocess.run',
+        side_effect=lambda cmd, **kw: _make_proc(zero_spurr) if '-E' in cmd else _make_proc(''),
     ):
         check.check(instance)
     # .pct metrics should not be emitted when total is 0
