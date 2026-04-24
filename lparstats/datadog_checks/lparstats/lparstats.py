@@ -36,13 +36,13 @@ def _run_cmd(cmd: list[str], sudo: bool = False, timeout: float | None = None) -
 class LPARStats(AgentCheck):
     MEMORY_METRICS_START_IDX = 1
     HYPERVISOR_METRICS_START_IDX = 4
-    HYPERVISOR_IDX_METRIC_MAP = {
-        0: 'system.lpar.hypervisor.n_calls',
-        1: 'system.lpar.hypervisor.time.spent.total',
-        2: 'system.lpar.hypervisor.time.spent.hyp',
-        3: 'system.lpar.hypervisor.time.call.avg',
-        4: 'system.lpar.hypervisor.time.call.max',
-    }
+    HYPERVISOR_METRICS = (
+        'system.lpar.hypervisor.n_calls',
+        'system.lpar.hypervisor.time.spent.total',
+        'system.lpar.hypervisor.time.spent.hyp',
+        'system.lpar.hypervisor.time.call.avg',
+        'system.lpar.hypervisor.time.call.max',
+    )
     MEMORY_ENTITLEMENTS_START_IDX = 4
     SPURR_PROCESSOR_UTILIZATION_START_IDX = 3
     DEFAULT_TIMEOUT = 5
@@ -101,16 +101,16 @@ class LPARStats(AgentCheck):
                 continue
             call_tag = f"call:{values[0]}"
             for idx, entry in enumerate(values[1:]):
-                if idx not in self.HYPERVISOR_IDX_METRIC_MAP:
+                if idx >= len(self.HYPERVISOR_METRICS):
                     break
                 try:
-                    metric_name = self.HYPERVISOR_IDX_METRIC_MAP[idx]
+                    metric_name = self.HYPERVISOR_METRICS[idx]
                     metric_value = float(entry)
                     self.gauge(metric_name, metric_value, tags=[call_tag])
                 except ValueError:
                     self.log.info(
                         "unable to convert %s to float for %s - skipping",
-                        self.HYPERVISOR_IDX_METRIC_MAP.get(idx, idx),
+                        self.HYPERVISOR_METRICS[idx],
                         call_tag,
                     )
 
