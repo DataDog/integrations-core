@@ -28,7 +28,7 @@ class MkdirTool(FileRegistryTool[MkdirInput]):
     async def __call__(self, tool_input: MkdirInput) -> ToolResult:
         if fail := self._assert_writable(tool_input.path):
             return fail
-        path = Path(tool_input.path).expanduser().resolve()
+        path = Path(tool_input.path).resolve()
         try:
             path.mkdir(parents=True, exist_ok=True)
         except OSError as e:

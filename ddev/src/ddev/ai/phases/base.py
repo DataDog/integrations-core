@@ -104,7 +104,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         self._runtime_variables = runtime_variables
         self._flow_variables = flow_variables
         self._config_dir = config_dir
-        self._callback_sets = callback_sets
+        self._callback_sets: list[CallbackSet] = callback_sets or []
         self._file_registry = file_registry
         self._started_at: datetime | None = None
         self._resolver: Callable[[str], str] | None = None
@@ -162,7 +162,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         """Full phase pipeline. Not intended to be overridden -- customise via the extension points."""
         # 1. Record start time and notify observers
         self._started_at = datetime.now(UTC)
-        for cb_set in self._callback_sets or []:
+        for cb_set in self._callback_sets:
             await cb_set.fire_phase_start(self._phase_id)
 
         # 2. Build template context and memory resolver

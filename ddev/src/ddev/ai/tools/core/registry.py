@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from importlib import import_module
 
@@ -16,26 +17,44 @@ from .types import ToolResult
 TOOLS_PACKAGE = "ddev.ai.tools"
 
 
+@dataclass
+class ToolContext:
+    """Shared resources passed to every tool factory during construction."""
+
+    file_registry: FileRegistry
+    owner_id: str
+
+
+def _plain_factory(tool_cls: type, ctx: ToolContext) -> ToolProtocol:
+    return tool_cls()
+
+
+def _file_registry_factory(tool_cls: type, ctx: ToolContext) -> ToolProtocol:
+    return tool_cls(ctx.file_registry, ctx.owner_id)
+
+
 @dataclass(frozen=True)
 class ToolSpec:
     """Lazy pointer to a tool class and how to construct it.
 
     ``module`` is relative to ``TOOLS_PACKAGE`` (e.g. ``"fs.read_file"``).
+    ``factory`` receives the already-imported class and the shared ToolContext
+    and returns a constructed tool instance.
     """
 
     module: str
     cls: str
-    requires_file_registry: bool = False
+    factory: Callable[[type, ToolContext], ToolProtocol] = _plain_factory
 
 
 TOOL_MANIFEST: dict[str, ToolSpec] = {
-    "read_file": ToolSpec("fs.read_file", "ReadFileTool", requires_file_registry=True),
-    "create_file": ToolSpec("fs.create_file", "CreateFileTool", requires_file_registry=True),
-    "edit_file": ToolSpec("fs.edit_file", "EditFileTool", requires_file_registry=True),
-    "append_file": ToolSpec("fs.append_file", "AppendFileTool", requires_file_registry=True),
+    "read_file": ToolSpec("fs.read_file", "ReadFileTool", factory=_file_registry_factory),
+    "create_file": ToolSpec("fs.create_file", "CreateFileTool", factory=_file_registry_factory),
+    "edit_file": ToolSpec("fs.edit_file", "EditFileTool", factory=_file_registry_factory),
+    "append_file": ToolSpec("fs.append_file", "AppendFileTool", factory=_file_registry_factory),
     "grep": ToolSpec("shell.grep", "GrepTool"),
     "list_files": ToolSpec("shell.list_files", "ListFilesTool"),
-    "mkdir": ToolSpec("fs.mkdir", "MkdirTool", requires_file_registry=True),
+    "mkdir": ToolSpec("fs.mkdir", "MkdirTool", factory=_file_registry_factory),
     "http_get": ToolSpec("http.http_get", "HttpGetTool"),
     "ddev_create": ToolSpec("shell.ddev.create", "DdevCreateTool"),
     "ddev_test": ToolSpec("shell.ddev.ddev_test", "DdevTestTool"),
@@ -73,17 +92,17 @@ class ToolRegistry:
         by owner_id so each owner must still read-before-write on its own.
         A new (unshared) FileRegistry is created if one is not supplied.
         """
+        ctx = ToolContext(
+            file_registry=file_registry if file_registry is not None else FileRegistry(),
+            owner_id=owner_id,
+        )
         tools: list[ToolProtocol] = []
-        shared_registry = file_registry if file_registry is not None else FileRegistry()
         for name in tool_names:
             spec = TOOL_MANIFEST.get(name)
             if spec is None:
                 raise ValueError(f"Unknown tool name: {name!r}")
             tool_cls = getattr(import_module(f"{TOOLS_PACKAGE}.{spec.module}"), spec.cls)
-            if spec.requires_file_registry:
-                tools.append(tool_cls(shared_registry, owner_id))
-            else:
-                tools.append(tool_cls())
+            tools.append(spec.factory(tool_cls, ctx))
         return cls(tools)
 
     @property

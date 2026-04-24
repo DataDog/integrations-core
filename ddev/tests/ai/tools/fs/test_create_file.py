@@ -50,7 +50,7 @@ async def test_create_file_fails_if_file_already_exists(
     result = await create_tool.run({"path": str(f), "content": "new"})
 
     assert result.success is False
-    assert result.error is not None
+    assert "File already exists" in result.error
     assert f.read_text(encoding="utf-8") == "original"
     assert not registry.is_known(OWNER_ID, str(f))
 
@@ -83,18 +83,4 @@ async def test_create_file_oserror_on_write(create_tool: CreateFileTool, registr
 
     assert result.success is False
     assert result.error is not None
-    assert not registry.is_known(OWNER_ID, str(f))
-
-
-async def test_create_file_fails_when_file_exists_externally(
-    create_tool: CreateFileTool, registry: FileRegistry, tmp_path
-) -> None:
-    f = tmp_path / "existing.txt"
-    f.write_text("original content", encoding="utf-8")
-
-    result = await create_tool.run({"path": str(f), "content": "new content"})
-
-    assert result.success is False
-    assert "File already exists" in result.error
-    assert f.read_text(encoding="utf-8") == "original content"
     assert not registry.is_known(OWNER_ID, str(f))
