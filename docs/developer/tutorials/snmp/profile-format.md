@@ -53,16 +53,28 @@ _(Optional)_
 
 This field can be used to include metrics and metric tags from other so-called _base profiles_. Base profiles can derive from other base profiles to build a hierarchy of reusable profile mixins.
 
+For device **`metadata`**, **`extends`** order is **first wins, later fallbacks**—same model as [Value from multiple OIDs (symbols)](#value-from-multiple-oids-symbols).
+
 !!! important
     All device profiles should extend from the `_base.yaml` profile, which defines items that should be collected for all devices.
+    List **`_base.yaml` last** in **`extends`** so vendor-specific fragments merged earlier override shared metadata from base.
 
 Example:
 
 ```yaml
 extends:
-  - _base.yaml
+  - device-specific-profile.yaml  # Vendor or device overrides (metadata, metrics, …).
   - _generic-if.yaml  # Include basic metrics from IF-MIB.
+  - _base.yaml
 ```
+
+#### Vendor mixins that `extend` `_base.yaml`
+
+Some underscore mixins (for example `_hp.yaml`, `_dell.yaml`, `_juniper.yaml`, `_opengear.yaml`, `_palo-alto.yaml`, `_ubiquiti.yaml`, `_vertiv.yaml`, `_apc.yaml`) list only `_base.yaml` under `extends` plus a `vendor` (or similar) field. Expanding that mixin still pulls in **`_base.yaml`’s full device metadata** (for example `serial_number` and `version` from ENTITY-MIB).
+
+Because metadata merge is **first wins**, any other mixin or profile fragment that defines the **same** metadata keys with vendor-specific OIDs must appear **before** that vendor bridge mixin in the device profile’s `extends` list. Otherwise ENTITY values from `_base.yaml` win and the vendor-specific sources are never used (for example list `_hp-base.yaml` before `_hp.yaml` on HP server profiles).
+
+Conversely, list the vendor bridge mixin **after** generic metric mixins that do not define overlapping device metadata, and keep an explicit **`_base.yaml` last** on the top-level profile when you include it, so shared fields remain fallbacks.
 
 ### `metrics`
 
@@ -608,6 +620,7 @@ metadata:
 
 All OID values are fetched, even if they might not be used in the end. In the example above, both `1.3.6.100.0` and `1.3.6.101.0` are retrieved.
 
+Merged **`metadata`** across **`extends`** follows the same first-wins / later-fallback ordering; see [`extends`](#extends).
 
 ### Symbol modifiers
 

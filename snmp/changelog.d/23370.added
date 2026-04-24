@@ -1,0 +1,1 @@
+List the shared SNMP base profile last in extends across default profiles so device metadata merges in the correct order; align ENTITY-MIB-based serial metadata on Cisco Catalyst and Arista with that base definition.

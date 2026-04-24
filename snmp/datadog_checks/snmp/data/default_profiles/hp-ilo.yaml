@@ -5,8 +5,8 @@
 # For more information, check: https://support.hpe.com/hpesc/public/docDisplay?docId=a00129448en_us&docLocale=en_US
 
 extends:
-  - _hp.yaml
   - _hp-base.yaml
+  - _hp.yaml
   - _hp-compaq-health.yaml
   - _hp-driver-stats.yaml
 

@@ -6,7 +6,6 @@
 #   BIG-IP Virtual Edition : Linux 3.10.0-862.14.4.el7.ve.x86_64 : BIG-IP software release 15.0.1, build 0.0.11
 
 extends:
-  - _base.yaml
   - _generic-if.yaml # F5-specific variants of the other metrics are provided in this profile.
   - _generic-bgp4.yaml
   - _generic-ospf.yaml
@@ -14,6 +13,7 @@ extends:
   - _generic-udp.yaml
   - _generic-ip.yaml
   - _f5-big-ip-cpu-memory.yaml
+  - _base.yaml
 
 device:
   vendor: "f5"

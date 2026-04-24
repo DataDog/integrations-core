@@ -1,5 +1,5 @@
 extends:
-  - _base.yaml
   - _hp-compaq-health.yaml
+  - _base.yaml
 
 sysobjectid: 1.2.3.1004

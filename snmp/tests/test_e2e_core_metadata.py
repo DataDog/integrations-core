@@ -221,6 +221,7 @@ def test_e2e_core_metadata_cisco_3850(dd_agent_check):
         'location': '4th floor',
         'name': 'Cat-3850-4th-Floor.companyname.local',
         'os_name': 'IOS',
+        'product_name': 'c38xx Stack',
         'profile': 'cisco-3850',
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.9.1.1745',

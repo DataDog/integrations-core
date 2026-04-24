@@ -1,24 +1,11 @@
-# Note related to use of index `1` of entPhysicalTable columns:
-# Based on snmpwalks of Arista, the main/chassis hardware have the index `1`
-# Librennms is also using index `1`: https://github.com/librenms/librenms/blob/1ac60e3b1d90616119f3c4adc28213e3c35c2477/includes/definitions/discovery/arista_eos.yaml#L4
+# Arista-specific device metadata. ENTITY-MIB chassis fields (serial_number, version,
+# product_name, primary model) are defined in _base.yaml.
+#
+# Model: try ENTITY-MIB entPhysicalModelName first; if empty, parse from sysDescr
+# (see Arista profile examples in arista.yaml).
 metadata:
   device:
     fields:
-      serial_number:
-        symbol:
-          OID: 1.3.6.1.2.1.47.1.1.1.1.11.1  # entPhysicalSerialNum OID at index `1`
-          name: entPhysicalSerialNum
-          # Examples: `HSH16195058`
-      version:
-        symbol:
-          OID: 1.3.6.1.2.1.47.1.1.1.1.8.1  # entPhysicalHardwareRev OID at index `1`
-          name: entPhysicalHardwareRev
-          # Examples: `12.00`
-      product_name:
-        symbol:
-          OID: 1.3.6.1.2.1.47.1.1.1.1.2.1  # entPhysicalDescr OID at index `1`
-          name: entPhysicalDescr
-          # Examples: `DCS-7504 Chassis`
       model:
         symbols:
           - OID: 1.3.6.1.2.1.47.1.1.1.1.13.1  # entPhysicalModelName OID at index `1`

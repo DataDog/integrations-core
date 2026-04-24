@@ -1,6 +1,6 @@
 extends:
-  - _base.yaml
   - _cisco-generic.yaml
+  - _base.yaml
 
 metadata:
   device:

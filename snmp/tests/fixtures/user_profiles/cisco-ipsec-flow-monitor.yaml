@@ -1,5 +1,5 @@
 extends:
-  - _base.yaml
   - _cisco-ipsec-flow-monitor.yaml
+  - _base.yaml
 
 sysobjectid: 1.2.3.1008.123
