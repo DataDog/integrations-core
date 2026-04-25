@@ -41,9 +41,6 @@ class ApiMock:
             {"other": {"attributes": {"attr": "3"}}},
         ]
 
-    def get_tenant_events(self, tenant, page=0, page_size=15):
-        return []
-
     def get_epg_meta(self, tenant, app, epg):
         return [{"fvCEp": {"attributes": {"ip": "ip1", "mac": "mac1", "encap": "encap1"}}}]
 

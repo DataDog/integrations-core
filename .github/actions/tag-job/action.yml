@@ -69,3 +69,8 @@ runs:
         done
 
         datadog-ci tag --level job $TAGS_ARGS
+
+        echo "Tags added to the job:"
+        for tag in "${TAG_ARRAY[@]}"; do
+          echo "  - $tag"
+        done

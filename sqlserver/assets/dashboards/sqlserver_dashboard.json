@@ -19,7 +19,8 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "sum:sqlserver.stats.connections{$scope}"
+                                "query": "sum:sqlserver.stats.connections{$scope}",
+                                "semantic_mode": "combined"
                             }
                         ],
                         "formulas": [
@@ -42,7 +43,8 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "avg:sqlserver.buffer.cache_hit_ratio{$scope}"
+                                "query": "avg:sqlserver.buffer.cache_hit_ratio{$scope}",
+                                "semantic_mode": "combined"
                             }
                         ],
                         "formulas": [
@@ -65,7 +67,8 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "sum:sqlserver.stats.procs_blocked{$scope}"
+                                "query": "sum:sqlserver.stats.procs_blocked{$scope}",
+                                "semantic_mode": "combined"
                             }
                         ],
                         "formulas": [
@@ -88,7 +91,8 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "sum:sqlserver.access.page_splits{$scope}"
+                                "query": "sum:sqlserver.access.page_splits{$scope}",
+                                "semantic_mode": "combined"
                             }
                         ],
                         "formulas": [
@@ -111,7 +115,8 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "sum:sqlserver.stats.batch_requests{$scope}"
+                                "query": "sum:sqlserver.stats.batch_requests{$scope}",
+                                "semantic_mode": "combined"
                             }
                         ],
                         "formulas": [
@@ -134,7 +139,8 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "sum:sqlserver.stats.sql_compilations{$scope}"
+                                "query": "sum:sqlserver.stats.sql_compilations{$scope}",
+                                "semantic_mode": "combined"
                             }
                         ],
                         "formulas": [
@@ -157,7 +163,8 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "sum:sqlserver.buffer.page_life_expectancy{$scope}"
+                                "query": "sum:sqlserver.buffer.page_life_expectancy{$scope}",
+                                "semantic_mode": "combined"
                             }
                         ],
                         "formulas": [
@@ -180,7 +187,8 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "sum:sqlserver.stats.lock_waits{$scope}"
+                                "query": "sum:sqlserver.stats.lock_waits{$scope}",
+                                "semantic_mode": "combined"
                             }
                         ],
                         "formulas": [

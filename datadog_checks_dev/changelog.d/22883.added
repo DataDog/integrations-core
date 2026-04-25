@@ -1,0 +1,1 @@
+Suppress "already exists" noise in `ddev release tag` output.
