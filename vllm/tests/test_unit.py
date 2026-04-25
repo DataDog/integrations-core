@@ -7,7 +7,7 @@ from unittest import mock
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.vllm import vLLMCheck
 
@@ -19,8 +19,8 @@ def test_check_vllm(dd_run_check, aggregator, datadog_agent, instance):
     check.check_id = "test:123"
 
     mock_responses = [
-        MockResponse(file_path=get_fixture_path("vllm_metrics.txt")),
-        MockResponse(file_path=get_fixture_path("vllm_version.json")),
+        MockHTTPResponse(file_path=get_fixture_path("vllm_metrics.txt")),
+        MockHTTPResponse(file_path=get_fixture_path("vllm_version.json")),
     ]
 
     with mock.patch('requests.Session.get', side_effect=mock_responses):
@@ -43,8 +43,8 @@ def test_check_vllm_w_ray_prefix(dd_run_check, aggregator, datadog_agent, ray_in
     check.check_id = "test:123"
 
     mock_responses = [
-        MockResponse(file_path=get_fixture_path("ray_vllm_metrics.txt")),
-        MockResponse(file_path=get_fixture_path("vllm_version.json")),
+        MockHTTPResponse(file_path=get_fixture_path("ray_vllm_metrics.txt")),
+        MockHTTPResponse(file_path=get_fixture_path("vllm_version.json")),
     ]
 
     with mock.patch('requests.Session.get', side_effect=mock_responses):
@@ -81,7 +81,7 @@ def test_emits_critical_openemtrics_service_check_when_service_is_down(
     """
     mock_http_response(status_code=404)
     check = vLLMCheck("vllm", {}, [instance])
-    with pytest.raises(Exception, match='requests.exceptions.HTTPError'):
+    with pytest.raises(Exception, match='HTTPStatusError'):
         dd_run_check(check)
 
     aggregator.assert_all_metrics_covered()

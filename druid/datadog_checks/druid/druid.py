@@ -5,6 +5,7 @@ import requests
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
 
 
 class DruidCheck(AgentCheck):
@@ -64,5 +65,5 @@ class DruidCheck(AgentCheck):
             self.warning(
                 "Couldn't connect to URL: %s with exception: %s. Please verify the address is reachable", url, e
             )
-        except requests.exceptions.Timeout as e:
+        except (requests.exceptions.Timeout, HTTPTimeoutError) as e:
             self.warning("Connection timeout when connecting to %s: %s", url, e)

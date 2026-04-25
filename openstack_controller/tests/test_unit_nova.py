@@ -15,7 +15,7 @@ from packaging.version import Version
 import tests.configs as configs
 import tests.metrics as metrics
 from datadog_checks.base import AgentCheck
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.openstack_controller.api.type import ApiType
 from tests.common import remove_service_from_catalog
 
@@ -441,12 +441,12 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
     ('mock_http_get', 'instance'),
     [
         pytest.param(
-            {'http_error': {'/compute/v2.1': MockResponse(status_code=500)}},
+            {'http_error': {'/compute/v2.1': MockHTTPResponse(status_code=500)}},
             configs.REST,
             id='api rest',
         ),
         pytest.param(
-            {'http_error': {'/compute/v2.1': MockResponse(status_code=500)}},
+            {'http_error': {'/compute/v2.1': MockHTTPResponse(status_code=500)}},
             configs.SDK,
             id='api sdk',
         ),
@@ -524,7 +524,7 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
         pytest.param(
             {
                 'http_error': {
-                    '/compute/v2.1/limits': MockResponse(status_code=500),
+                    '/compute/v2.1/limits': MockHTTPResponse(status_code=500),
                 }
             },
             None,
@@ -537,8 +537,8 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
             {
                 'http_error': {
                     'limits': {
-                        '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
-                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                        '1e6e233e637d4d55a50a62b63398ad15': MockHTTPResponse(status_code=500),
+                        '6e39099cccde4f809b003d9e0dd09304': MockHTTPResponse(status_code=500),
                     }
                 }
             },
@@ -842,7 +842,7 @@ def test_limits_metrics(aggregator, check, dd_run_check):
     ('mock_http_get', 'connection_compute', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/compute/v2.1/os-services': MockResponse(status_code=500)}},
+            {'http_error': {'/compute/v2.1/os-services': MockHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -850,7 +850,7 @@ def test_limits_metrics(aggregator, check, dd_run_check):
         ),
         pytest.param(
             None,
-            {'http_error': {'services': MockResponse(status_code=500)}},
+            {'http_error': {'services': MockHTTPResponse(status_code=500)}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -916,7 +916,7 @@ def test_services_metrics(aggregator, check, dd_run_check, metrics):
     ('mock_http_get', 'connection_compute', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/compute/v2.1/flavors/detail': MockResponse(status_code=500)}},
+            {'http_error': {'/compute/v2.1/flavors/detail': MockHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -924,7 +924,7 @@ def test_services_metrics(aggregator, check, dd_run_check, metrics):
         ),
         pytest.param(
             None,
-            {'http_error': {'flavors': MockResponse(status_code=500)}},
+            {'http_error': {'flavors': MockHTTPResponse(status_code=500)}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -1195,7 +1195,7 @@ def test_flavors_metrics(aggregator, check, dd_run_check):
     ('mock_http_get', 'connection_compute', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/compute/v2.1/os-hypervisors/detail': MockResponse(status_code=500)}},
+            {'http_error': {'/compute/v2.1/os-hypervisors/detail': MockHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -1203,7 +1203,7 @@ def test_flavors_metrics(aggregator, check, dd_run_check):
         ),
         pytest.param(
             None,
-            {'http_error': {'hypervisors': MockResponse(status_code=500)}},
+            {'http_error': {'hypervisors': MockHTTPResponse(status_code=500)}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -1232,7 +1232,7 @@ def test_hypervisors_exception(aggregator, check, dd_run_check, mock_http_get, c
     ('mock_http_get', 'connection_compute', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/compute/v2.1/os-hypervisors/1/uptime': MockResponse(status_code=500)}},
+            {'http_error': {'/compute/v2.1/os-hypervisors/1/uptime': MockHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -1240,7 +1240,7 @@ def test_hypervisors_exception(aggregator, check, dd_run_check, mock_http_get, c
         ),
         pytest.param(
             None,
-            {'http_error': {'hypervisor_uptime': {1: MockResponse(status_code=500)}}},
+            {'http_error': {'hypervisor_uptime': {1: MockHTTPResponse(status_code=500)}}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -1566,8 +1566,8 @@ def test_disable_diagnostics_collect_for_all_servers(aggregator, dd_run_check, i
         pytest.param(
             {
                 'http_error': {
-                    '/compute/v2.1/os-quota-sets/1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
-                    '/compute/v2.1/os-quota-sets/6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                    '/compute/v2.1/os-quota-sets/1e6e233e637d4d55a50a62b63398ad15': MockHTTPResponse(status_code=500),
+                    '/compute/v2.1/os-quota-sets/6e39099cccde4f809b003d9e0dd09304': MockHTTPResponse(status_code=500),
                 }
             },
             None,
@@ -1580,8 +1580,8 @@ def test_disable_diagnostics_collect_for_all_servers(aggregator, dd_run_check, i
             {
                 'http_error': {
                     'quota_sets': {
-                        '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
-                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                        '1e6e233e637d4d55a50a62b63398ad15': MockHTTPResponse(status_code=500),
+                        '6e39099cccde4f809b003d9e0dd09304': MockHTTPResponse(status_code=500),
                     }
                 }
             },
@@ -1692,7 +1692,7 @@ def test_quota_sets_metrics_excluding_demo_project(aggregator, check, dd_run_che
         pytest.param(
             {
                 'http_error': {
-                    '/compute/v2.1/servers/detail': MockResponse(status_code=500),
+                    '/compute/v2.1/servers/detail': MockHTTPResponse(status_code=500),
                 }
             },
             None,
@@ -1705,8 +1705,8 @@ def test_quota_sets_metrics_excluding_demo_project(aggregator, check, dd_run_che
             {
                 'http_error': {
                     'servers': {
-                        '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
-                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                        '1e6e233e637d4d55a50a62b63398ad15': MockHTTPResponse(status_code=500),
+                        '6e39099cccde4f809b003d9e0dd09304': MockHTTPResponse(status_code=500),
                     }
                 }
             },
@@ -2143,7 +2143,7 @@ def test_servers_metrics_excluding_dev_servers(aggregator, check, dd_run_check, 
         pytest.param(
             {
                 'http_error': {
-                    '/compute/v2.1/flavors/c1': MockResponse(status_code=500),
+                    '/compute/v2.1/flavors/c1': MockHTTPResponse(status_code=500),
                 }
             },
             None,
@@ -2156,7 +2156,7 @@ def test_servers_metrics_excluding_dev_servers(aggregator, check, dd_run_check, 
         pytest.param(
             {
                 'http_error': {
-                    '/compute/v2.1/flavors/c1': MockResponse(status_code=500),
+                    '/compute/v2.1/flavors/c1': MockHTTPResponse(status_code=500),
                 }
             },
             None,
@@ -2171,7 +2171,7 @@ def test_servers_metrics_excluding_dev_servers(aggregator, check, dd_run_check, 
             {
                 'http_error': {
                     'flavors': {
-                        'c1': MockResponse(status_code=500),
+                        'c1': MockHTTPResponse(status_code=500),
                     }
                 }
             },
@@ -2186,7 +2186,7 @@ def test_servers_metrics_excluding_dev_servers(aggregator, check, dd_run_check, 
             {
                 'http_error': {
                     'flavors': {
-                        'c1': MockResponse(status_code=500),
+                        'c1': MockHTTPResponse(status_code=500),
                     }
                 }
             },
@@ -2307,7 +2307,7 @@ def test_server_disable_flavors(
         pytest.param(
             {
                 'http_error': {
-                    '/compute/v2.1/servers/5102fbbf-7156-48dc-8355-af7ab992266f/diagnostics': MockResponse(
+                    '/compute/v2.1/servers/5102fbbf-7156-48dc-8355-af7ab992266f/diagnostics': MockHTTPResponse(
                         status_code=500
                     ),
                 }
@@ -2322,7 +2322,7 @@ def test_server_disable_flavors(
         pytest.param(
             {
                 'http_error': {
-                    '/compute/v2.1/servers/5102fbbf-7156-48dc-8355-af7ab992266f/diagnostics': MockResponse(
+                    '/compute/v2.1/servers/5102fbbf-7156-48dc-8355-af7ab992266f/diagnostics': MockHTTPResponse(
                         status_code=500
                     ),
                 }
@@ -2339,7 +2339,7 @@ def test_server_disable_flavors(
             {
                 'http_error': {
                     'server_diagnostics': {
-                        '5102fbbf-7156-48dc-8355-af7ab992266f': MockResponse(status_code=500),
+                        '5102fbbf-7156-48dc-8355-af7ab992266f': MockHTTPResponse(status_code=500),
                     }
                 }
             },
@@ -2354,7 +2354,7 @@ def test_server_disable_flavors(
             {
                 'http_error': {
                     'server_diagnostics': {
-                        '5102fbbf-7156-48dc-8355-af7ab992266f': MockResponse(status_code=500),
+                        '5102fbbf-7156-48dc-8355-af7ab992266f': MockHTTPResponse(status_code=500),
                     }
                 }
             },

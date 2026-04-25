@@ -5,11 +5,10 @@ import os
 
 import pytest
 import requests
-from mock import patch
 
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
-from datadog_checks.dev.http import MockResponse
 from datadog_checks.harbor import HarborCheck
 from datadog_checks.harbor.api import HarborAPI
 from datadog_checks.harbor.common import (
@@ -104,9 +103,10 @@ def harbor_api(harbor_check, admin_instance, patch_requests):
 
 
 @pytest.fixture
-def patch_requests():
-    with patch("requests.Session.request", side_effect=mocked_requests):
-        yield
+def patch_requests(mock_http):
+    mock_http.get.side_effect = mocked_requests
+    mock_http.post.side_effect = mocked_requests
+    yield
 
 
 def get_docker_compose_file():
@@ -115,7 +115,7 @@ def get_docker_compose_file():
     return os.path.join(HERE, 'compose', harbor_folder, 'docker-compose.yml')
 
 
-def mocked_requests(_, url, **kwargs):
+def mocked_requests(url, **kwargs):
     def match(url, *candidates_url):
         for c in candidates_url:
             if url == c.format(base_url=URL):
@@ -123,24 +123,24 @@ def mocked_requests(_, url, **kwargs):
         return False
 
     if match(url, LOGIN_URL):
-        return MockResponse()
+        return MockHTTPResponse()
     elif match(url, HEALTH_URL):
-        return MockResponse(json_data=HEALTH_FIXTURE)
+        return MockHTTPResponse(json_data=HEALTH_FIXTURE)
     elif match(url, PING_URL):
-        return MockResponse('Pong')
+        return MockHTTPResponse('Pong')
     elif match(url, CHARTREPO_HEALTH_URL):
-        return MockResponse(json_data=CHARTREPO_HEALTH_FIXTURE)
+        return MockHTTPResponse(json_data=CHARTREPO_HEALTH_FIXTURE)
     elif match(url, PROJECTS_URL):
-        return MockResponse(json_data=PROJECTS_FIXTURE)
+        return MockHTTPResponse(json_data=PROJECTS_FIXTURE)
     elif match(url, REGISTRIES_URL):
-        return MockResponse(json_data=REGISTRIES_FIXTURE)
+        return MockHTTPResponse(json_data=REGISTRIES_FIXTURE)
     elif match(url, REGISTRIES_PING_URL):
-        return MockResponse()
+        return MockHTTPResponse()
     elif match(url, VOLUME_INFO_URL):
         if HARBOR_VERSION < VERSION_2_2:
-            return MockResponse(json_data=VOLUME_INFO_PRE_2_2_FIXTURE)
-        return MockResponse(json_data=VOLUME_INFO_FIXTURE)
+            return MockHTTPResponse(json_data=VOLUME_INFO_PRE_2_2_FIXTURE)
+        return MockHTTPResponse(json_data=VOLUME_INFO_FIXTURE)
     elif match(url, SYSTEM_INFO_URL):
-        return MockResponse(json_data=SYSTEM_INFO_FIXTURE)
+        return MockHTTPResponse(json_data=SYSTEM_INFO_FIXTURE)
 
-    return MockResponse(status_code=404)
+    return MockHTTPResponse(status_code=404)

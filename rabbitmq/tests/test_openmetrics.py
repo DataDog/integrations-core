@@ -10,7 +10,7 @@ from packaging import version
 
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.types import ServiceCheck
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rabbitmq import RabbitMQ
 
@@ -203,7 +203,7 @@ def mock_http_responses(url, **_params):
         ): 'detailed-only-metrics.txt',
     }[parsed.path + (f"?{parsed.query}" if parsed.query else "")]
     with open(os.path.join(OM_RESPONSE_FIXTURES, fname)) as fh:
-        return MockResponse(content=fh.read())
+        return MockHTTPResponse(content=fh.read())
 
 
 @pytest.mark.parametrize(
@@ -352,6 +352,6 @@ def test_config(prom_plugin_settings, err):
 def test_service_check_critical(aggregator, dd_run_check, mock_http_response):
     mock_http_response(status_code=404)
     check = _rmq_om_check({'url': 'http://fail'})
-    with pytest.raises(Exception, match="requests.exceptions.HTTPError"):
+    with pytest.raises(Exception, match="HTTPStatusError"):
         dd_run_check(check)
     aggregator.assert_service_check('rabbitmq.openmetrics.health', status=check.CRITICAL)

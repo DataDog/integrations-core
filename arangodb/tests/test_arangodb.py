@@ -9,7 +9,7 @@ import pytest
 from requests import HTTPError
 
 from datadog_checks.arangodb import ArangodbCheck
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import METRICS
@@ -54,7 +54,7 @@ def test_check(instance, dd_run_check, aggregator, tag_condition, base_tags):
 
     def mock_requests_get(session, url, *args, **kwargs):
         fixture = url.rsplit('/', 1)[-1]
-        return MockResponse(file_path=os.path.join(os.path.dirname(__file__), 'fixtures', tag_condition, fixture))
+        return MockHTTPResponse(file_path=os.path.join(os.path.dirname(__file__), 'fixtures', tag_condition, fixture))
 
     with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
         dd_run_check(check)

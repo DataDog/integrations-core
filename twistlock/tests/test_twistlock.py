@@ -8,8 +8,8 @@ import mock
 import pytest
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev import get_here
-from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.twistlock import TwistlockCheck
 
@@ -38,7 +38,7 @@ def mock_get_factory(fixture_group):
     def mock_get(session, url, *args, **kwargs):
         split_url = url.split('/')
         path = split_url[-1]
-        return MockResponse(file_path=os.path.join(HERE, 'fixtures', fixture_group, '{}.json'.format(path)))
+        return MockHTTPResponse(file_path=os.path.join(HERE, 'fixtures', fixture_group, '{}.json'.format(path)))
 
     return mock_get
 
@@ -97,8 +97,8 @@ def test_report_image_scan_empty_instances(aggregator, instance, fixture_group):
         path = split_url[-1]
 
         if path != 'images':
-            return MockResponse(file_path=os.path.join(HERE, 'fixtures', fixture_group, '{}.json'.format(path)))
-        return MockResponse(file_path=os.path.join(HERE, 'fixtures', 'empty_images.json'))
+            return MockHTTPResponse(file_path=os.path.join(HERE, 'fixtures', fixture_group, '{}.json'.format(path)))
+        return MockHTTPResponse(file_path=os.path.join(HERE, 'fixtures', 'empty_images.json'))
 
     with mock.patch('requests.Session.get', side_effect=mock_get):
         check.check(instance)
@@ -110,7 +110,7 @@ def test_err_response(aggregator, instance):
 
     with pytest.raises(Exception, match='^Error in response'):
         with mock.patch(
-            'requests.Session.get', return_value=MockResponse('{"err": "invalid credentials"}'), autospec=True
+            'requests.Session.get', return_value=MockHTTPResponse('{"err": "invalid credentials"}'), autospec=True
         ):
             check.check(instance)
 
