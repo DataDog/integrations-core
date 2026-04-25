@@ -1,18 +1,11 @@
 name: Resolve Dependencies and Build Wheels
 
 on:
-  # We considered using pull_request as a trigger event, but then the diff will always contain all the changes compared to the target branch.
-  # Using the push target naturally limits the diff to the changes part of the push.
-  # This simplifies the decision whether to trigger the workflow or not.
   push:
     branches-ignore:
     - master
     - 7.*.*
     - gh-readonly-queue/**
-    paths:
-    - agent_requirements.in
-    - .builders/**
-    - .github/workflows/resolve-build-deps.yaml
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -30,8 +23,36 @@ env:
   SOURCE_DATE_EPOCH: "1580601600"
 
 jobs:
+  gate:
+    name: Check content hashes
+    runs-on: ubuntu-22.04
+    outputs:
+      needs_resolution: ${{ steps.hash-check.outputs.needs_resolution }}
+      rebuild_linux_x86_64: ${{ steps.hash-check.outputs.rebuild_linux_x86_64 }}
+      rebuild_linux_aarch64: ${{ steps.hash-check.outputs.rebuild_linux_aarch64 }}
+      rebuild_windows_x86_64: ${{ steps.hash-check.outputs.rebuild_windows_x86_64 }}
+      hashes: ${{ steps.hash-check.outputs.hashes }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Compute hashes
+        id: hash-check
+        run: |
+          python .builders/inputs_hash.py status \
+            --targets linux-x86_64 linux-aarch64 windows-x86_64 \
+            >> "$GITHUB_OUTPUT"
+
   test:
     name: Run tests
+    needs:
+      - gate
+    if: needs.gate.outputs.needs_resolution == 'true'
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
@@ -81,6 +102,13 @@ jobs:
           # are already pinned in agent_requirements.in, so they don't need
           # constraining. We only need to pin transitive deps, which all come
           # from PyPI.
+          #
+          # Note: rebasing a branch onto newer master (with no resolution input
+          # changes) will not re-resolve against a newer cutoff, because the
+          # content hash gate sees no change. The cutoff is per-commit, not
+          # per-branch-tip. This is intentional: the cutoff prevents PyPI race
+          # conditions within a build window, and the hash gate preserves that
+          # window.
           uv pip compile ${{ env.DIRECT_DEPENDENCY_FILE }} \
             --exclude-newer "${{ steps.timestamp.outputs.cutoff }}" \
             --python-version ${{ env.PYTHON_VERSION }} \
@@ -97,6 +125,7 @@ jobs:
   build:
     name: Target ${{ matrix.job.image }} on ${{ matrix.job.os }}
     needs:
+      - gate
       - pre-resolve
     runs-on: ${{ matrix.job.os }}
     strategy:
@@ -128,21 +157,19 @@ jobs:
         python-version: ${{ env.PYTHON_VERSION }}
 
     - name: Detect builder changes
-      # Hashing the builder code is more robust than any kind of dance with git when it comes to determining whether we need to rebuild the builder images.
       id: builder-check
+      env:
+        HASHES: ${{ needs.gate.outputs.hashes }}
+        TARGET: ${{ matrix.job.image }}
       run: |
-        current=$(python .builders/inputs_hash.py compute ${{ matrix.job.image }})
-        pinned=$(python .builders/inputs_hash.py pinned ${{ matrix.job.image }})
-        echo "current hash: $current"
-        echo "pinned  hash: $pinned"
-        echo "current=$current" >> "$GITHUB_OUTPUT"
-        if [[ "$current" == "$pinned" ]]; then
-          echo "=> builder unchanged, will pull image by digest"
-          echo "builder_changed=false" >> "$GITHUB_OUTPUT"
-        else
-          echo "=> builder changed, will rebuild image"
-          echo "builder_changed=true" >> "$GITHUB_OUTPUT"
-        fi
+        jq -er --arg t "$TARGET" '.[$t]' <<<"$HASHES" > /tmp/inputs_sha256
+        case "$TARGET" in
+          linux-x86_64)   changed="${{ needs.gate.outputs.rebuild_linux_x86_64 }}" ;;
+          linux-aarch64)  changed="${{ needs.gate.outputs.rebuild_linux_aarch64 }}" ;;
+          windows-x86_64) changed="${{ needs.gate.outputs.rebuild_windows_x86_64 }}" ;;
+          *) echo "unknown target: $TARGET" >&2; exit 1 ;;
+        esac
+        echo "builder_changed=$changed" >> "$GITHUB_OUTPUT"
 
     - name: Install management dependencies
       run: pip install -r .builders/deps/host_dependencies.txt
@@ -183,13 +210,13 @@ jobs:
         ${DOCKER} inspect --format "{{index .RepoDigests 0}}" ${{ env.BUILDER_IMAGE }} \
           | cut -d '@' -f 2 \
           > ${{ env.OUT_DIR }}/image_digest
-        echo "${{ steps.builder-check.outputs.current }}" > ${{ env.OUT_DIR }}/inputs_sha256
+        cp /tmp/inputs_sha256 ${{ env.OUT_DIR }}/inputs_sha256
 
     - name: Persist current image digest and inputs hash
       if: steps.builder-check.outputs.builder_changed == 'false'
       run: |
         jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json > ${{ env.OUT_DIR }}/image_digest
-        echo "${{ steps.builder-check.outputs.current }}" > ${{ env.OUT_DIR }}/inputs_sha256
+        cp /tmp/inputs_sha256 ${{ env.OUT_DIR }}/inputs_sha256
 
     - name: Upload artifacts
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0

@@ -1,0 +1,41 @@
+name: Verify dependency resolution pin
+
+on:
+  push:
+    branches:
+    # gh-readonly-queue/** is the blocking case: a failing run here keeps the
+    # merge queue from landing a commit with a stale resolution pin.
+    # master and 7.*.* are informational: direct pushes have no gate to fail,
+    # so a red check on those refs surfaces drift (e.g. a reverted pin commit)
+    # without preventing anything.
+    - gh-readonly-queue/**
+    - master
+    - 7.*.*
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  PYTHON_VERSION: "3.13"
+
+jobs:
+  verify:
+    name: Verify resolution hash matches pin
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Verify resolution pin
+        run: |
+          # Fails with exit 1 if the merged tree's resolution hash does not
+          # match the pinned hash in .deps/builder_inputs.toml.
+          # If this check fails, rebase your branch onto master to re-trigger
+          # dependency resolution and update the pin.
+          cd .builders && python inputs_hash.py verify-resolution
