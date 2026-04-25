@@ -121,6 +121,14 @@ files:
           - <SERVICE_1>
           - <SERVICE_2>
 
+    - name: services_tags_include_service_name
+      description: |
+        Whether to produce additional service tags, which include the service
+        name in the tag key, for each service.
+      value:
+        type: boolean
+        example: true
+
     - name: max_services
       description: |
         Increase the maximum number of queried services.
