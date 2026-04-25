@@ -360,6 +360,18 @@ def test_cloud_validations(mock_check, minimal_instance):
     assert config.azure.managed_authentication.enabled
 
 
+def test_cloud_validations_azure_workload_identity(mock_check, minimal_instance):
+    """Test that workload_identity auth_type is valid without client_id."""
+    instance = minimal_instance.copy()
+    instance['azure'] = {'managed_authentication': {'enabled': True, 'auth_type': 'workload_identity'}}
+    instance['password'] = None
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid
+    assert config.azure.managed_authentication.auth_type == 'workload_identity'
+
+
 @pytest.mark.parametrize(
     'rds_host, expected_rds_tag, expected_instance_endpoint',
     [
