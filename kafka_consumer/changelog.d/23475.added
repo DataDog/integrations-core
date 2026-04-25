@@ -1,0 +1,1 @@
+Include `bootstrap_servers` in the Kafka consumer cluster monitoring heartbeat payload.
