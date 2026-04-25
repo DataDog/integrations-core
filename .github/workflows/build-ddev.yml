@@ -458,14 +458,99 @@ jobs:
         path: ddev/installers/*
         if-no-files-found: error
 
+  test-macos-build:
+    name: Test macOS packaging
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    needs:
+    - define-tags
+    - binaries
+    runs-on: macos-14-large
+    permissions:
+      # needed for dd-sts
+      id-token: write
+    env:
+      VERSION: ${{ needs.binaries.outputs.version }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+    - name: Get Datadog credentials
+      id: dd-sts
+      uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+      with:
+        policy: integrations-core-api-key
+
+    - name: Tag Job
+      uses: ./.github/actions/tag-job
+      if: ${{ github.event.pull_request.head.repo.fork != true }}
+      with:
+        tags: '${{ needs.define-tags.outputs.base_tags }},step:test-package-macos,os:macos'
+        dd_api_key: ${{ steps.dd-sts.outputs.api_key }}
+
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install PyOxidizer ${{ env.PYOXIDIZER_VERSION }}
+      run: pip install pyoxidizer==${{ env.PYOXIDIZER_VERSION }}
+
+    - name: Download staged managed binaries
+      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+      with:
+        pattern: staged-managed-${{ runner.os }}-*
+        path: ddev/archives
+        merge-multiple: true
+
+    - name: Extract staged managed binaries
+      run: |-
+        mkdir bin
+        for f in archives/*; do
+          tar -xzf "$f" -C bin
+        done
+
+    # bin/<APP_NAME>-<VERSION>-<TARGET> -> targets/<TARGET>/<APP_NAME>
+    - name: Prepare managed binaries
+      run: |-
+        mkdir targets
+        for f in bin/*; do
+          if [[ "$f" =~ ${{ env.VERSION }}-(.+)$ ]]; then
+            target="${BASH_REMATCH[1]}"
+            mkdir "targets/$target"
+            mv "$f" "targets/$target/${{ env.APP_NAME }}"
+          fi
+        done
+
+    - name: Build universal binary
+      run: >-
+        pyoxidizer build macos_universal_binary
+        --release
+        --var version ${{ env.VERSION }}
+
+    - name: Prepare universal binary
+      id: binary
+      run: |-
+        binary=$(echo build/*/release/*/${{ env.APP_NAME }})
+        chmod +x "$binary"
+        echo "path=$binary" >> "$GITHUB_OUTPUT"
+
+    - name: Build PKG
+      run: >-
+        python release/macos/build_pkg.py
+        --binary ${{ steps.binary.outputs.path }}
+        --version ${{ env.VERSION }}
+        staged
+
   macos-packaging:
     name: Build macOS installer and sign/notarize artifacts
-    if: github.event_name == 'push' || github.event_name == 'schedule' || github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name == 'push' || github.event_name == 'schedule'
     needs:
     - define-tags
     - should-sign-and-upload
     - binaries
     runs-on: macos-14-large
+    environment: ddev-sign-upload
     permissions:
       # needed for dd-sts
       id-token: write
