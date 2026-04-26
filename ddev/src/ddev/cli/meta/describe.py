@@ -31,6 +31,13 @@ def describe(app: Application, targets: tuple[str, ...], *, json_output: bool) -
     class TargetDescription(BaseModel):
         path: str
         is_integration: bool
+        is_package: bool
+        is_tile: bool
+        is_testable: bool
+        is_shippable: bool
+        is_agent_check: bool
+        is_jmx_check: bool
+        has_metrics: bool
 
     def describe_target(target: str) -> TargetDescription:
         path = Path(target).expand()
@@ -38,7 +45,17 @@ def describe(app: Application, targets: tuple[str, ...], *, json_output: bool) -
             path = Path.cwd() / path
 
         integration = Integration(path, app.repo.path, app.repo.config)
-        return TargetDescription(path=str(Path(target)), is_integration=integration.is_integration)
+        return TargetDescription(
+            path=str(Path(target)),
+            is_integration=integration.is_integration,
+            is_package=integration.is_package,
+            is_tile=integration.is_tile,
+            is_testable=integration.is_testable,
+            is_shippable=integration.is_shippable,
+            is_agent_check=integration.is_agent_check,
+            is_jmx_check=integration.is_jmx_check,
+            has_metrics=integration.has_metrics,
+        )
 
     descriptions = [describe_target(target) for target in targets]
 
@@ -48,6 +65,13 @@ def describe(app: Application, targets: tuple[str, ...], *, json_output: bool) -
 
     columns = {
         'Target': {i: description.path for i, description in enumerate(descriptions)},
-        'Is Integration': {i: str(description.is_integration).lower() for i, description in enumerate(descriptions)},
+        'Integration': {i: str(description.is_integration).lower() for i, description in enumerate(descriptions)},
+        'Package': {i: str(description.is_package).lower() for i, description in enumerate(descriptions)},
+        'Tile': {i: str(description.is_tile).lower() for i, description in enumerate(descriptions)},
+        'Testable': {i: str(description.is_testable).lower() for i, description in enumerate(descriptions)},
+        'Shippable': {i: str(description.is_shippable).lower() for i, description in enumerate(descriptions)},
+        'Agent Check': {i: str(description.is_agent_check).lower() for i, description in enumerate(descriptions)},
+        'JMX Check': {i: str(description.is_jmx_check).lower() for i, description in enumerate(descriptions)},
+        'Metrics': {i: str(description.has_metrics).lower() for i, description in enumerate(descriptions)},
     }
     app.display_table('Targets', columns, show_lines=True)
