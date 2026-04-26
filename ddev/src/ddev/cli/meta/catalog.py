@@ -9,20 +9,16 @@ import click
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
+    from ddev.integration.core import Integration
 
 
-@click.command(short_help='Describe repository targets')
-@click.argument(
-    'targets',
-    nargs=-1,
-    required=True,
-    metavar='TARGETS',
-    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=str),
-)
-@click.option('--json', 'json_output', is_flag=True, help='Output the descriptions as JSON.')
+@click.command(short_help='Catalog repository targets')
+@click.argument('targets', nargs=-1, required=True, metavar='TARGETS')
+@click.option('--json', 'json_output', is_flag=True, help='Output the catalog as JSON.')
+@click.pass_context
 @click.pass_obj
-def describe(app: Application, targets: tuple[str, ...], *, json_output: bool) -> None:
-    """Describe repository targets."""
+def catalog(app: Application, ctx: click.Context, targets: tuple[str, ...], *, json_output: bool) -> None:
+    """Catalog repository targets."""
     from pydantic import BaseModel, TypeAdapter
 
     from ddev.integration.core import Integration
@@ -39,14 +35,9 @@ def describe(app: Application, targets: tuple[str, ...], *, json_output: bool) -
         is_jmx_check: bool
         has_metrics: bool
 
-    def describe_target(target: str) -> TargetDescription:
-        path = Path(target).expand()
-        if not path.is_absolute():
-            path = Path.cwd() / path
-
-        integration = Integration(path, app.repo.path, app.repo.config)
+    def describe_integration(integration: Integration, target: str) -> TargetDescription:
         return TargetDescription(
-            path=str(Path(target)),
+            path=target,
             is_integration=integration.is_integration,
             is_package=integration.is_package,
             is_tile=integration.is_tile,
@@ -57,7 +48,22 @@ def describe(app: Application, targets: tuple[str, ...], *, json_output: bool) -
             has_metrics=integration.has_metrics,
         )
 
-    descriptions = [describe_target(target) for target in targets]
+    def describe_target(target: str) -> TargetDescription:
+        click.Path(exists=True, file_okay=False, dir_okay=True, path_type=str).convert(target, None, ctx)
+        path = Path(target).expand()
+        if not path.is_absolute():
+            path = Path.cwd() / path
+
+        return describe_integration(Integration(path, app.repo.path, app.repo.config), str(Path(target)))
+
+    if targets == ('all',):
+        descriptions = [
+            describe_integration(integration, integration.name) for integration in app.repo.integrations.iter(['all'])
+        ]
+    elif 'all' in targets:
+        raise click.BadParameter('The `all` target cannot be combined with other targets.', param_hint='TARGETS')
+    else:
+        descriptions = [describe_target(target) for target in targets]
 
     if json_output:
         click.echo(TypeAdapter(list[TargetDescription]).dump_json(descriptions, indent=2).decode())

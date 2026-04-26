@@ -67,7 +67,7 @@ TARGET_DESCRIPTIONS = [
 
 @pytest.mark.parametrize('expected', TARGET_DESCRIPTIONS)
 def test_table_output(ddev, repository_as_cwd, expected):
-    result = ddev('meta', 'describe', expected['path'], env={'COLUMNS': '240'})
+    result = ddev('meta', 'catalog', expected['path'], env={'COLUMNS': '240'})
 
     assert result.exit_code == 0, result.output
     for header in (
@@ -86,7 +86,7 @@ def test_table_output(ddev, repository_as_cwd, expected):
 
 def test_preserves_target_order(ddev, repository_as_cwd):
     targets = ['docs', 'ddev', 'kubernetes', 'postgres']
-    result = ddev('meta', 'describe', '--json', *targets)
+    result = ddev('meta', 'catalog', '--json', *targets)
 
     assert result.exit_code == 0, result.output
     assert [description['path'] for description in json.loads(result.output)] == targets
@@ -94,21 +94,38 @@ def test_preserves_target_order(ddev, repository_as_cwd):
 
 @pytest.mark.parametrize('expected', TARGET_DESCRIPTIONS)
 def test_json_output(ddev, repository_as_cwd, expected):
-    result = ddev('meta', 'describe', '--json', expected['path'])
+    result = ddev('meta', 'catalog', '--json', expected['path'])
 
     assert result.exit_code == 0, result.output
     assert json.loads(result.output) == [expected]
 
 
 def test_json_output_with_multiple_targets(ddev, repository_as_cwd):
-    result = ddev('meta', 'describe', '--json', 'postgres', 'kubernetes', 'ddev', 'docs')
+    result = ddev('meta', 'catalog', '--json', 'postgres', 'kubernetes', 'ddev', 'docs')
 
     assert result.exit_code == 0, result.output
     assert json.loads(result.output) == [param.values[0] for param in TARGET_DESCRIPTIONS]
 
 
+def test_all_targets(ddev, repository_as_cwd):
+    result = ddev('meta', 'catalog', '--json', 'all')
+
+    assert result.exit_code == 0, result.output
+    descriptions = json.loads(result.output)
+    assert {'postgres', 'kubernetes'} <= {description['path'] for description in descriptions}
+    assert 'ddev' not in {description['path'] for description in descriptions}
+    assert all(description['is_integration'] for description in descriptions)
+
+
+def test_all_cannot_be_combined_with_other_targets(ddev, repository_as_cwd):
+    result = ddev('meta', 'catalog', 'all', 'postgres')
+
+    assert result.exit_code == 2, result.output
+    assert 'The `all` target cannot be combined with other targets.' in result.output
+
+
 def test_missing_directory(ddev, repository_as_cwd):
-    result = ddev('meta', 'describe', 'missing')
+    result = ddev('meta', 'catalog', 'missing')
 
     assert result.exit_code == 2, result.output
     assert "Directory 'missing' does not exist" in result.output
