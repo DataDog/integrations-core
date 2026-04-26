@@ -5,61 +5,68 @@ import json
 
 import pytest
 
+RAW_TARGET_DESCRIPTIONS = [
+    {
+        'path': 'postgres',
+        'is_integration': True,
+        'is_package': True,
+        'is_tile': False,
+        'is_testable': True,
+        'is_shippable': True,
+        'is_agent_check': True,
+        'is_jmx_check': False,
+        'has_metrics': True,
+    },
+    {
+        'path': 'kubernetes',
+        'is_integration': True,
+        'is_package': False,
+        'is_tile': True,
+        'is_testable': False,
+        'is_shippable': False,
+        'is_agent_check': False,
+        'is_jmx_check': False,
+        'has_metrics': True,
+    },
+    {
+        'path': 'ddev',
+        'is_integration': False,
+        'is_package': True,
+        'is_tile': False,
+        'is_testable': True,
+        'is_shippable': False,
+        'is_agent_check': False,
+        'is_jmx_check': False,
+        'has_metrics': False,
+    },
+    {
+        'path': 'docs',
+        'is_integration': False,
+        'is_package': False,
+        'is_tile': False,
+        'is_testable': False,
+        'is_shippable': False,
+        'is_agent_check': False,
+        'is_jmx_check': False,
+        'has_metrics': False,
+    },
+]
+
 TARGET_DESCRIPTIONS = [
     pytest.param(
-        {
-            'path': 'postgres',
-            'is_integration': True,
-            'is_package': True,
-            'is_tile': False,
-            'is_testable': True,
-            'is_shippable': True,
-            'is_agent_check': True,
-            'is_jmx_check': False,
-            'has_metrics': True,
-        },
+        RAW_TARGET_DESCRIPTIONS[0],
         id='integration-package',
     ),
     pytest.param(
-        {
-            'path': 'kubernetes',
-            'is_integration': True,
-            'is_package': False,
-            'is_tile': True,
-            'is_testable': False,
-            'is_shippable': False,
-            'is_agent_check': False,
-            'is_jmx_check': False,
-            'has_metrics': True,
-        },
+        RAW_TARGET_DESCRIPTIONS[1],
         id='integration-tile',
     ),
     pytest.param(
-        {
-            'path': 'ddev',
-            'is_integration': False,
-            'is_package': True,
-            'is_tile': False,
-            'is_testable': True,
-            'is_shippable': False,
-            'is_agent_check': False,
-            'is_jmx_check': False,
-            'has_metrics': False,
-        },
+        RAW_TARGET_DESCRIPTIONS[2],
         id='package-not-integration',
     ),
     pytest.param(
-        {
-            'path': 'docs',
-            'is_integration': False,
-            'is_package': False,
-            'is_tile': False,
-            'is_testable': False,
-            'is_shippable': False,
-            'is_agent_check': False,
-            'is_jmx_check': False,
-            'has_metrics': False,
-        },
+        RAW_TARGET_DESCRIPTIONS[3],
         id='non-package-not-integration',
     ),
 ]
@@ -77,44 +84,82 @@ def test_table_output(ddev, repository_as_cwd, expected):
         'Tile',
         'Testable',
         'Shippable',
-        'Agent',
-        'JMX',
+        'Agent Check',
+        'JMX Check',
         'Metrics',
     ):
         assert header in result.output
+    assert expected['path'] in result.output
+    assert ('true' if expected['is_integration'] else 'false') in result.output
 
 
 def test_preserves_target_order(ddev, repository_as_cwd):
     targets = ['docs', 'ddev', 'kubernetes', 'postgres']
-    result = ddev('meta', 'catalog', '--json', *targets)
+    result = ddev('meta', 'catalog', '--format', 'json', *targets)
 
     assert result.exit_code == 0, result.output
-    assert [description['path'] for description in json.loads(result.output)] == targets
+    assert [description['path'] for description in json.loads(result.output)['targets']] == targets
 
 
 @pytest.mark.parametrize('expected', TARGET_DESCRIPTIONS)
 def test_json_output(ddev, repository_as_cwd, expected):
-    result = ddev('meta', 'catalog', '--json', expected['path'])
+    result = ddev('meta', 'catalog', '--format', 'json', expected['path'])
 
     assert result.exit_code == 0, result.output
-    assert json.loads(result.output) == [expected]
+    assert json.loads(result.output) == {'targets': [expected], 'errors': []}
 
 
 def test_json_output_with_multiple_targets(ddev, repository_as_cwd):
-    result = ddev('meta', 'catalog', '--json', 'postgres', 'kubernetes', 'ddev', 'docs')
+    targets = [target['path'] for target in RAW_TARGET_DESCRIPTIONS]
+    result = ddev('meta', 'catalog', '--format', 'json', *targets)
 
     assert result.exit_code == 0, result.output
-    assert json.loads(result.output) == [param.values[0] for param in TARGET_DESCRIPTIONS]
+    assert json.loads(result.output) == {'targets': RAW_TARGET_DESCRIPTIONS, 'errors': []}
+
+
+def test_json_output_with_absolute_target(ddev, repository_as_cwd):
+    result = ddev('meta', 'catalog', '--format', 'json', str(repository_as_cwd.path / 'postgres'))
+
+    assert result.exit_code == 0, result.output
+    assert json.loads(result.output) == {'targets': [RAW_TARGET_DESCRIPTIONS[0]], 'errors': []}
 
 
 def test_all_targets(ddev, repository_as_cwd):
-    result = ddev('meta', 'catalog', '--json', 'all')
+    result = ddev('meta', 'catalog', '--format', 'json', 'all')
 
     assert result.exit_code == 0, result.output
-    descriptions = json.loads(result.output)
+    descriptions = json.loads(result.output)['targets']
     assert {'postgres', 'kubernetes'} <= {description['path'] for description in descriptions}
     assert 'ddev' not in {description['path'] for description in descriptions}
     assert all(description['is_integration'] for description in descriptions)
+    assert json.loads(result.output)['errors'] == []
+
+
+def test_all_table_output(ddev, repository_as_cwd):
+    result = ddev('meta', 'catalog', 'all', env={'COLUMNS': '240'})
+
+    assert result.exit_code == 0, result.output
+    assert 'postgres' in result.output
+    assert 'kubernetes' in result.output
+
+
+def test_all_targets_reports_errors_after_successes(ddev, repository_as_cwd, monkeypatch):
+    from ddev.integration.core import Integration
+
+    def has_metrics(self):
+        if self.name == 'postgres':
+            raise OSError('cannot read metadata')
+
+        return (self.path / 'metadata.csv').is_file()
+
+    monkeypatch.setattr(Integration, 'has_metrics', property(has_metrics))
+
+    result = ddev('meta', 'catalog', '--format', 'json', 'all')
+
+    assert result.exit_code == 1, result.output
+    catalog = json.loads(result.output)
+    assert 'kubernetes' in {description['path'] for description in catalog['targets']}
+    assert {'target': 'postgres', 'error': 'cannot read metadata'} in catalog['errors']
 
 
 def test_all_cannot_be_combined_with_other_targets(ddev, repository_as_cwd):
@@ -125,7 +170,42 @@ def test_all_cannot_be_combined_with_other_targets(ddev, repository_as_cwd):
 
 
 def test_missing_directory(ddev, repository_as_cwd):
-    result = ddev('meta', 'catalog', 'missing')
+    result = ddev('meta', 'catalog', 'postgres', 'missing', env={'COLUMNS': '240'})
+
+    assert result.exit_code == 1, result.output
+    assert 'postgres' in result.output
+    assert 'Errors' in result.output
+    assert "Directory 'missing' does not exist" in result.output
+
+
+def test_json_output_with_errors(ddev, repository_as_cwd):
+    result = ddev('meta', 'catalog', '--format', 'json', 'postgres', 'missing')
+
+    assert result.exit_code == 1, result.output
+    assert json.loads(result.output) == {
+        'targets': [RAW_TARGET_DESCRIPTIONS[0]],
+        'errors': [{'target': 'missing', 'error': "Directory 'missing' does not exist."}],
+    }
+
+
+def test_json_output_can_be_written_to_file(ddev, repository_as_cwd, tmp_path):
+    output_file = tmp_path / 'catalog.json'
+    result = ddev('meta', 'catalog', '--format', 'json', '--output', str(output_file), 'postgres')
+
+    assert result.exit_code == 0, result.output
+    assert result.output == ''
+    assert json.loads(output_file.read_text()) == {'targets': [RAW_TARGET_DESCRIPTIONS[0]], 'errors': []}
+
+
+def test_output_rejected_for_terminal_format(ddev, repository_as_cwd, tmp_path):
+    result = ddev('meta', 'catalog', '--output', str(tmp_path / 'catalog.txt'), 'postgres')
 
     assert result.exit_code == 2, result.output
-    assert "Directory 'missing' does not exist" in result.output
+    assert '`--output` can only be used with non-terminal formats.' in result.output
+
+
+def test_no_targets_exits_with_usage_error(ddev, repository_as_cwd):
+    result = ddev('meta', 'catalog')
+
+    assert result.exit_code == 2, result.output
+    assert 'Missing argument' in result.output
