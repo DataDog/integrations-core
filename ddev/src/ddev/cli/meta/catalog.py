@@ -95,7 +95,7 @@ def catalog_target(app: Application, target: str) -> tuple[TargetDescription | N
         return None, target_error(target, e)
 
 
-def all_integrations(app: Application) -> CatalogOutput:
+def all_targets(app: Application) -> CatalogOutput:
     descriptions: list[TargetDescription] = []
     errors: list[TargetError] = []
     for path in sorted(app.repo.path.iterdir()):
@@ -104,8 +104,7 @@ def all_integrations(app: Application) -> CatalogOutput:
 
         integration = Integration(path, app.repo.path, app.repo.config)
         try:
-            if integration.is_integration:
-                descriptions.append(describe_integration(integration, integration.name))
+            descriptions.append(describe_integration(integration, integration.name))
         except Exception as e:
             errors.append(target_error(path.name, e))
 
@@ -143,15 +142,16 @@ def catalog(
     """
     Catalog existing repository target directories.
 
-    Use `all` by itself to catalog all integrations. Explicit targets can be
-    any existing directories and are labeled by their basename in the output.
+    Use `all` by itself to catalog all non-hidden root directories in the repo.
+    Explicit targets can be any existing directories and are labeled by their
+    basename in the output.
     """
 
     if output_format == 'terminal' and output:
         raise click.BadOptionUsage('output', '`--output` can only be used with non-terminal formats.')
 
     if targets == ('all',):
-        catalog_output = all_integrations(app)
+        catalog_output = all_targets(app)
     elif 'all' in targets:
         raise click.BadParameter('The `all` target cannot be combined with other targets.', param_hint='TARGETS')
     else:

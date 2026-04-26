@@ -129,9 +129,10 @@ def test_all_targets(ddev, repository_as_cwd):
 
     assert result.exit_code == 0, result.output
     descriptions = json.loads(result.output)['targets']
-    assert {'postgres', 'kubernetes'} <= {description['path'] for description in descriptions}
-    assert 'ddev' not in {description['path'] for description in descriptions}
-    assert all(description['is_integration'] for description in descriptions)
+    descriptions_by_path = {description['path']: description for description in descriptions}
+    assert {'postgres', 'kubernetes', 'ddev', 'docs'} <= descriptions_by_path.keys()
+    assert descriptions_by_path['ddev']['is_integration'] is False
+    assert descriptions_by_path['docs']['is_integration'] is False
     assert json.loads(result.output)['errors'] == []
 
 
@@ -141,6 +142,8 @@ def test_all_table_output(ddev, repository_as_cwd):
     assert result.exit_code == 0, result.output
     assert 'postgres' in result.output
     assert 'kubernetes' in result.output
+    assert 'ddev' in result.output
+    assert 'docs' in result.output
 
 
 def test_all_targets_reports_errors_after_successes(ddev, repository_as_cwd, monkeypatch):
