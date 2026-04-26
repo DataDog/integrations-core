@@ -73,18 +73,28 @@ TARGET_DESCRIPTIONS = [
 ]
 
 
-def patch_has_metrics(monkeypatch):
+def patch_has_metrics(monkeypatch, error):
     from ddev.integration.core import Integration
 
     def has_metrics(self):
         if self.name == 'postgres':
-            raise OSError('cannot read metadata')
+            raise error
 
         return (self.path / 'metadata.csv').is_file()
 
     patched = cached_property(has_metrics)
     patched.__set_name__(Integration, 'has_metrics')
     monkeypatch.setattr(Integration, 'has_metrics', patched)
+
+
+@pytest.fixture
+def patched_has_metrics(monkeypatch):
+    patch_has_metrics(monkeypatch, OSError('cannot read metadata'))
+
+
+@pytest.fixture
+def patched_has_metrics_unicode_error(monkeypatch):
+    patch_has_metrics(monkeypatch, UnicodeDecodeError('utf-8', b'\x80', 0, 1, 'invalid start byte'))
 
 
 def test_bool_fields_match_output_model():
@@ -95,23 +105,16 @@ def test_bool_fields_match_output_model():
 
 @pytest.mark.parametrize('expected', TARGET_DESCRIPTIONS)
 def test_table_output(ddev, repository_as_cwd, expected):
+    from ddev.cli.meta.catalog import BOOL_FIELDS
+
     result = ddev('meta', 'catalog', expected['path'], env={'COLUMNS': '240'})
 
     assert result.exit_code == 0, result.output
-    for header in (
-        'Target',
-        'Integration',
-        'Package',
-        'Tile',
-        'Testable',
-        'Shippable',
-        'Agent Check',
-        'JMX Check',
-        'Metrics',
-    ):
-        assert header in result.output
+    assert 'Target' in result.output
     assert expected['path'] in result.output
-    assert ('true' if expected['is_integration'] else 'false') in result.output
+    for header, attr in BOOL_FIELDS:
+        assert header in result.output
+        assert ('true' if expected[attr] else 'false') in result.output
 
 
 def test_preserves_target_order(ddev, repository_as_cwd):
@@ -176,9 +179,7 @@ def test_all_table_output(ddev, repository_as_cwd):
     assert 'docs' in result.output
 
 
-def test_all_targets_reports_errors_after_successes(ddev, repository_as_cwd, monkeypatch):
-    patch_has_metrics(monkeypatch)
-
+def test_all_targets_reports_errors_after_successes(ddev, repository_as_cwd, patched_has_metrics):
     result = ddev('meta', 'catalog', '--format', 'json', 'all')
 
     assert result.exit_code == 1, result.output
@@ -187,9 +188,7 @@ def test_all_targets_reports_errors_after_successes(ddev, repository_as_cwd, mon
     assert {'target': 'postgres', 'error': 'cannot read metadata'} in catalog['errors']
 
 
-def test_all_table_output_reports_errors_after_successes(ddev, repository_as_cwd, monkeypatch):
-    patch_has_metrics(monkeypatch)
-
+def test_all_table_output_reports_errors_after_successes(ddev, repository_as_cwd, patched_has_metrics):
     result = ddev('meta', 'catalog', 'all', env={'COLUMNS': '240'})
 
     assert result.exit_code == 1, result.output
@@ -198,6 +197,18 @@ def test_all_table_output_reports_errors_after_successes(ddev, repository_as_cwd
     assert 'kubernetes' in result.output
     assert 'postgres' in result.output
     assert 'cannot read metadata' in result.output
+
+
+def test_explicit_targets_report_non_os_errors_after_successes(
+    ddev, repository_as_cwd, patched_has_metrics_unicode_error
+):
+    result = ddev('meta', 'catalog', '--format', 'json', 'postgres', 'kubernetes')
+
+    assert result.exit_code == 1, result.output
+    catalog = json.loads(result.output)
+    assert [description['path'] for description in catalog['targets']] == ['kubernetes']
+    assert catalog['errors'][0]['target'] == 'postgres'
+    assert "can't decode byte" in catalog['errors'][0]['error']
 
 
 def test_all_cannot_be_combined_with_other_targets(ddev, repository_as_cwd):

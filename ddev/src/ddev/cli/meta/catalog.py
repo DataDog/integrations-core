@@ -39,6 +39,10 @@ class TargetDescription(BaseModel):
     is_jmx_check: bool
     has_metrics: bool
 
+    @classmethod
+    def from_integration(cls, integration: Integration, path: str) -> TargetDescription:
+        return cls(path=path, **{attr: getattr(integration, attr) for _, attr in BOOL_FIELDS})
+
 
 class TargetError(BaseModel):
     target: str
@@ -54,20 +58,6 @@ def bool_str(value: bool) -> str:
     return 'true' if value else 'false'
 
 
-def describe_integration(integration: Integration, target: str) -> TargetDescription:
-    return TargetDescription(
-        path=target,
-        is_integration=integration.is_integration,
-        is_package=integration.is_package,
-        is_tile=integration.is_tile,
-        is_testable=integration.is_testable,
-        is_shippable=integration.is_shippable,
-        is_agent_check=integration.is_agent_check,
-        is_jmx_check=integration.is_jmx_check,
-        has_metrics=integration.has_metrics,
-    )
-
-
 def describe_target(app: Application, target: str) -> TargetDescription:
     path = Path(target).expand()
     if not path.is_absolute():
@@ -76,7 +66,7 @@ def describe_target(app: Application, target: str) -> TargetDescription:
     if not path.is_dir():
         raise click.BadParameter(f"Directory '{target}' does not exist.", param_hint='TARGETS')
 
-    return describe_integration(Integration(path, app.repo.path, app.repo.config), path.name)
+    return TargetDescription.from_integration(Integration(path, app.repo.path, app.repo.config), path.name)
 
 
 def target_error(target: str, error: Exception) -> TargetError:
@@ -97,7 +87,7 @@ def all_targets(app: Application) -> CatalogOutput:
 
         integration = Integration(path, app.repo.path, app.repo.config)
         try:
-            descriptions.append(describe_integration(integration, integration.name))
+            descriptions.append(TargetDescription.from_integration(integration, integration.name))
         except Exception as e:
             app.logger.debug("Failed to catalog target %s", path.name, exc_info=True)
             errors.append(target_error(path.name, e))
@@ -111,7 +101,8 @@ def catalog_targets(app: Application, targets: tuple[str, ...]) -> CatalogOutput
     for target in targets:
         try:
             descriptions.append(describe_target(app, target))
-        except (click.BadParameter, OSError) as e:
+        except Exception as e:
+            app.logger.debug("Failed to catalog target %s", target, exc_info=True)
             errors.append(target_error(target, e))
 
     return CatalogOutput(targets=descriptions, errors=errors)
@@ -138,11 +129,8 @@ def get_table_columns(descriptions: list[TargetDescription]) -> dict[str, dict[i
     help='Output format.',
 )
 @click.option('-o', '--output', help='Write non-terminal output to a file.', type=click.Path(dir_okay=False))
-@click.pass_context
 @click.pass_obj
-def catalog(
-    app: Application, ctx: click.Context, targets: tuple[str, ...], *, output_format: str, output: str | None
-) -> None:
+def catalog(app: Application, targets: tuple[str, ...], *, output_format: str, output: str | None) -> None:
     """
     Catalog existing repository target directories.
 
@@ -169,7 +157,7 @@ def catalog(
             click.echo(contents)
 
         if catalog_output.errors:
-            ctx.exit(1)
+            app.abort()
         return
 
     app.display_table('Targets', get_table_columns(catalog_output.targets), show_lines=True)
@@ -180,4 +168,4 @@ def catalog(
             'Error': {i: error.error for i, error in enumerate(catalog_output.errors)},
         }
         app.display_table('Errors', error_columns, show_lines=True)
-        ctx.exit(1)
+        app.abort()
