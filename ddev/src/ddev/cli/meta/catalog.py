@@ -3,10 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING
 
 import click
-from pydantic import BaseModel, TypeAdapter
+from pydantic import BaseModel
 
 from ddev.integration.core import Integration
 from ddev.utils.fs import Path
@@ -25,7 +25,7 @@ BOOL_FIELDS = (
     ('Metrics', 'has_metrics'),
 )
 
-OutputFormat = Literal['terminal', 'json']
+OUTPUT_FORMATS = ('terminal', 'json')
 
 
 class TargetDescription(BaseModel):
@@ -70,11 +70,11 @@ def describe_integration(integration: Integration, target: str) -> TargetDescrip
 
 def describe_target(app: Application, target: str) -> TargetDescription:
     path = Path(target).expand()
-    if not path.is_dir():
-        raise click.BadParameter(f"Directory '{target}' does not exist.", param_hint='TARGETS')
-
     if not path.is_absolute():
         path = Path.cwd() / path
+
+    if not path.is_dir():
+        raise click.BadParameter(f"Directory '{target}' does not exist.", param_hint='TARGETS')
 
     return describe_integration(Integration(path, app.repo.path, app.repo.config), path.name)
 
@@ -88,13 +88,6 @@ def target_error(target: str, error: Exception) -> TargetError:
     return TargetError(target=target, error=message)
 
 
-def catalog_target(app: Application, target: str) -> tuple[TargetDescription | None, TargetError | None]:
-    try:
-        return describe_target(app, target), None
-    except Exception as e:
-        return None, target_error(target, e)
-
-
 def all_targets(app: Application) -> CatalogOutput:
     descriptions: list[TargetDescription] = []
     errors: list[TargetError] = []
@@ -106,7 +99,20 @@ def all_targets(app: Application) -> CatalogOutput:
         try:
             descriptions.append(describe_integration(integration, integration.name))
         except Exception as e:
+            app.logger.debug("Failed to catalog target %s", path.name, exc_info=True)
             errors.append(target_error(path.name, e))
+
+    return CatalogOutput(targets=descriptions, errors=errors)
+
+
+def catalog_targets(app: Application, targets: tuple[str, ...]) -> CatalogOutput:
+    descriptions: list[TargetDescription] = []
+    errors: list[TargetError] = []
+    for target in targets:
+        try:
+            descriptions.append(describe_target(app, target))
+        except (click.BadParameter, OSError) as e:
+            errors.append(target_error(target, e))
 
     return CatalogOutput(targets=descriptions, errors=errors)
 
@@ -115,10 +121,8 @@ def get_table_columns(descriptions: list[TargetDescription]) -> dict[str, dict[i
     columns: dict[str, dict[int, str]] = {
         'Target': {i: description.path for i, description in enumerate(descriptions)},
     }
-    columns.update({title: {} for title, _ in BOOL_FIELDS})
-    for i, description in enumerate(descriptions):
-        for title, attr in BOOL_FIELDS:
-            columns[title][i] = bool_str(getattr(description, attr))
+    for title, attr in BOOL_FIELDS:
+        columns[title] = {i: bool_str(getattr(description, attr)) for i, description in enumerate(descriptions)}
 
     return columns
 
@@ -130,14 +134,14 @@ def get_table_columns(descriptions: list[TargetDescription]) -> dict[str, dict[i
     'output_format',
     default='terminal',
     show_default=True,
-    type=click.Choice(['terminal', 'json']),
+    type=click.Choice(OUTPUT_FORMATS),
     help='Output format.',
 )
 @click.option('-o', '--output', help='Write non-terminal output to a file.', type=click.Path(dir_okay=False))
 @click.pass_context
 @click.pass_obj
 def catalog(
-    app: Application, ctx: click.Context, targets: tuple[str, ...], *, output_format: OutputFormat, output: str | None
+    app: Application, ctx: click.Context, targets: tuple[str, ...], *, output_format: str, output: str | None
 ) -> None:
     """
     Catalog existing repository target directories.
@@ -155,19 +159,10 @@ def catalog(
     elif 'all' in targets:
         raise click.BadParameter('The `all` target cannot be combined with other targets.', param_hint='TARGETS')
     else:
-        descriptions = []
-        errors = []
-        for target in targets:
-            description, error = catalog_target(app, target)
-            if description is not None:
-                descriptions.append(description)
-            if error is not None:
-                errors.append(error)
-
-        catalog_output = CatalogOutput(targets=descriptions, errors=errors)
+        catalog_output = catalog_targets(app, targets)
 
     if output_format == 'json':
-        contents = TypeAdapter(CatalogOutput).dump_json(catalog_output, indent=2).decode()
+        contents = catalog_output.model_dump_json(indent=2)
         if output:
             Path(output).write_text(f'{contents}\n')
         else:
