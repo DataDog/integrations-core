@@ -12,7 +12,7 @@ from tests.helpers.runner import CliRunner
 
 RAW_TARGET_DESCRIPTIONS = [
     {
-        'path': 'postgres',
+        'name': 'postgres',
         'is_integration': True,
         'is_package': True,
         'is_tile': False,
@@ -23,7 +23,7 @@ RAW_TARGET_DESCRIPTIONS = [
         'has_metrics': True,
     },
     {
-        'path': 'kubernetes',
+        'name': 'kubernetes',
         'is_integration': True,
         'is_package': False,
         'is_tile': True,
@@ -34,7 +34,7 @@ RAW_TARGET_DESCRIPTIONS = [
         'has_metrics': True,
     },
     {
-        'path': 'ddev',
+        'name': 'ddev',
         'is_integration': False,
         'is_package': True,
         'is_tile': False,
@@ -45,7 +45,7 @@ RAW_TARGET_DESCRIPTIONS = [
         'has_metrics': False,
     },
     {
-        'path': 'docs',
+        'name': 'docs',
         'is_integration': False,
         'is_package': False,
         'is_tile': False,
@@ -104,18 +104,18 @@ def patched_has_metrics_unicode_error(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_bool_fields_match_output_model() -> None:
     from ddev.cli.meta.catalog import BOOL_FIELDS, TargetDescription
 
-    assert {attr for _, attr in BOOL_FIELDS} == set(TargetDescription.model_fields) - {'path'}
+    assert {attr for _, attr in BOOL_FIELDS} == set(TargetDescription.model_fields) - {'name'}
 
 
 @pytest.mark.parametrize('expected', TARGET_DESCRIPTIONS)
 def test_table_output(ddev: CliRunner, repository_as_cwd: ClonedRepo, expected: dict[str, bool | str]) -> None:
     from ddev.cli.meta.catalog import BOOL_FIELDS
 
-    result = ddev('meta', 'catalog', expected['path'], env={'COLUMNS': '240'})
+    result = ddev('meta', 'catalog', expected['name'], env={'COLUMNS': '240'})
 
     assert result.exit_code == 0, result.output
     assert 'Target' in result.output
-    assert expected['path'] in result.output
+    assert expected['name'] in result.output
     for header, attr in BOOL_FIELDS:
         assert header in result.output
         assert ('true' if expected[attr] else 'false') in result.output
@@ -126,19 +126,19 @@ def test_preserves_target_order(ddev: CliRunner, repository_as_cwd: ClonedRepo) 
     result = ddev('meta', 'catalog', '--format', 'json', *targets)
 
     assert result.exit_code == 0, result.output
-    assert [description['path'] for description in json.loads(result.output)['targets']] == targets
+    assert [description['name'] for description in json.loads(result.output)['targets']] == targets
 
 
 @pytest.mark.parametrize('expected', TARGET_DESCRIPTIONS)
 def test_json_output(ddev: CliRunner, repository_as_cwd: ClonedRepo, expected: dict[str, bool | str]) -> None:
-    result = ddev('meta', 'catalog', '--format', 'json', expected['path'])
+    result = ddev('meta', 'catalog', '--format', 'json', expected['name'])
 
     assert result.exit_code == 0, result.output
     assert json.loads(result.output) == {'targets': [expected], 'errors': []}
 
 
 def test_json_output_with_multiple_targets(ddev: CliRunner, repository_as_cwd: ClonedRepo) -> None:
-    targets = [target['path'] for target in RAW_TARGET_DESCRIPTIONS]
+    targets = [target['name'] for target in RAW_TARGET_DESCRIPTIONS]
     result = ddev('meta', 'catalog', '--format', 'json', *targets)
 
     assert result.exit_code == 0, result.output
@@ -157,10 +157,10 @@ def test_all_targets(ddev: CliRunner, repository_as_cwd: ClonedRepo) -> None:
 
     assert result.exit_code == 0, result.output
     descriptions = json.loads(result.output)['targets']
-    descriptions_by_path = {description['path']: description for description in descriptions}
-    assert {'postgres', 'kubernetes', 'ddev', 'docs'} <= descriptions_by_path.keys()
-    assert descriptions_by_path['ddev']['is_integration'] is False
-    assert descriptions_by_path['docs']['is_integration'] is False
+    descriptions_by_name = {description['name']: description for description in descriptions}
+    assert {'postgres', 'kubernetes', 'ddev', 'docs'} <= descriptions_by_name.keys()
+    assert descriptions_by_name['ddev']['is_integration'] is False
+    assert descriptions_by_name['docs']['is_integration'] is False
     assert json.loads(result.output)['errors'] == []
 
 
@@ -170,7 +170,7 @@ def test_all_targets_skips_hidden_directories(ddev: CliRunner, repository_as_cwd
     result = ddev('meta', 'catalog', '--format', 'json', 'all')
 
     assert result.exit_code == 0, result.output
-    assert '.hidden-target' not in {description['path'] for description in json.loads(result.output)['targets']}
+    assert '.hidden-target' not in {description['name'] for description in json.loads(result.output)['targets']}
 
 
 def test_all_table_output(ddev: CliRunner, repository_as_cwd: ClonedRepo) -> None:
@@ -190,7 +190,7 @@ def test_all_targets_reports_errors_after_successes(
 
     assert result.exit_code == 1, result.output
     catalog = json.loads(result.output)
-    assert 'kubernetes' in {description['path'] for description in catalog['targets']}
+    assert 'kubernetes' in {description['name'] for description in catalog['targets']}
     assert {'target': 'postgres', 'error': 'cannot read metadata'} in catalog['errors']
 
 
@@ -214,7 +214,7 @@ def test_explicit_targets_report_non_os_errors_after_successes(
 
     assert result.exit_code == 1, result.output
     catalog = json.loads(result.output)
-    assert [description['path'] for description in catalog['targets']] == ['kubernetes']
+    assert [description['name'] for description in catalog['targets']] == ['kubernetes']
     assert catalog['errors'][0]['target'] == 'postgres'
     assert "can't decode byte" in catalog['errors'][0]['error']
 
@@ -232,7 +232,16 @@ def test_missing_directory(ddev: CliRunner, repository_as_cwd: ClonedRepo) -> No
     assert result.exit_code == 1, result.output
     assert 'postgres' in result.output
     assert 'Errors' in result.output
-    assert "Directory 'missing' does not exist" in result.output
+    assert "Target 'missing' is not a directory or does not exist." in result.output
+
+
+def test_file_target_reports_directory_error(ddev: CliRunner, repository_as_cwd: ClonedRepo) -> None:
+    result = ddev('meta', 'catalog', 'postgres', 'pyproject.toml', env={'COLUMNS': '240'})
+
+    assert result.exit_code == 1, result.output
+    assert 'postgres' in result.output
+    assert 'Errors' in result.output
+    assert "Target 'pyproject.toml' is not a directory or does not exist." in result.output
 
 
 def test_json_output_with_errors(ddev: CliRunner, repository_as_cwd: ClonedRepo) -> None:
@@ -241,7 +250,7 @@ def test_json_output_with_errors(ddev: CliRunner, repository_as_cwd: ClonedRepo)
     assert result.exit_code == 1, result.output
     assert json.loads(result.output) == {
         'targets': [RAW_TARGET_DESCRIPTIONS[0]],
-        'errors': [{'target': 'missing', 'error': "Directory 'missing' does not exist."}],
+        'errors': [{'target': 'missing', 'error': "Target 'missing' is not a directory or does not exist."}],
     }
 
 
@@ -252,6 +261,20 @@ def test_json_output_can_be_written_to_file(ddev: CliRunner, repository_as_cwd: 
     assert result.exit_code == 0, result.output
     assert result.output == ''
     assert json.loads(output_file.read_text()) == {'targets': [RAW_TARGET_DESCRIPTIONS[0]], 'errors': []}
+
+
+def test_json_output_with_errors_can_be_written_to_file(
+    ddev: CliRunner, repository_as_cwd: ClonedRepo, tmp_path: FilePath
+) -> None:
+    output_file = tmp_path / 'catalog.json'
+    result = ddev('meta', 'catalog', '--format', 'json', '--output', str(output_file), 'postgres', 'missing')
+
+    assert result.exit_code == 1, result.output
+    assert 'Errors encountered; see output file for details.' in result.output
+    assert json.loads(output_file.read_text()) == {
+        'targets': [RAW_TARGET_DESCRIPTIONS[0]],
+        'errors': [{'target': 'missing', 'error': "Target 'missing' is not a directory or does not exist."}],
+    }
 
 
 def test_output_rejected_for_terminal_format(

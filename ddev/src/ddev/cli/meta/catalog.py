@@ -29,7 +29,7 @@ OUTPUT_FORMATS = ('terminal', 'json')
 
 
 class TargetDescription(BaseModel):
-    path: str
+    name: str
     is_integration: bool
     is_package: bool
     is_tile: bool
@@ -40,8 +40,12 @@ class TargetDescription(BaseModel):
     has_metrics: bool
 
     @classmethod
-    def from_integration(cls, integration: Integration, path: str) -> TargetDescription:
-        return cls(path=path, **{attr: getattr(integration, attr) for _, attr in BOOL_FIELDS})
+    def from_integration(cls, integration: Integration, name: str) -> TargetDescription:
+        return cls(name=name, **{attr: getattr(integration, attr) for _, attr in BOOL_FIELDS})
+
+
+class TargetNotFoundError(ValueError):
+    pass
 
 
 class TargetError(BaseModel):
@@ -64,18 +68,13 @@ def describe_target(app: Application, target: str) -> TargetDescription:
         path = Path.cwd() / path
 
     if not path.is_dir():
-        raise click.BadParameter(f"Directory '{target}' does not exist.", param_hint='TARGETS')
+        raise TargetNotFoundError(f"Target '{target}' is not a directory or does not exist.")
 
     return TargetDescription.from_integration(Integration(path, app.repo.path, app.repo.config), path.name)
 
 
 def target_error(target: str, error: Exception) -> TargetError:
-    if isinstance(error, click.BadParameter):
-        message = error.message
-    else:
-        message = str(error)
-
-    return TargetError(target=target, error=message)
+    return TargetError(target=target, error=str(error))
 
 
 def all_targets(app: Application) -> CatalogOutput:
@@ -110,12 +109,19 @@ def catalog_targets(app: Application, targets: tuple[str, ...]) -> CatalogOutput
 
 def get_table_columns(descriptions: list[TargetDescription]) -> dict[str, dict[int, str]]:
     columns: dict[str, dict[int, str]] = {
-        'Target': {i: description.path for i, description in enumerate(descriptions)},
+        'Target': {i: description.name for i, description in enumerate(descriptions)},
     }
     for title, attr in BOOL_FIELDS:
         columns[title] = {i: bool_str(getattr(description, attr)) for i, description in enumerate(descriptions)}
 
     return columns
+
+
+def get_error_columns(errors: list[TargetError]) -> dict[str, dict[int, str]]:
+    return {
+        'Target': {i: error.target for i, error in enumerate(errors)},
+        'Error': {i: error.error for i, error in enumerate(errors)},
+    }
 
 
 @click.command(short_help='Catalog repository targets')
@@ -153,6 +159,8 @@ def catalog(app: Application, targets: tuple[str, ...], *, output_format: str, o
         contents = catalog_output.model_dump_json(indent=2)
         if output:
             Path(output).write_text(f'{contents}\n')
+            if catalog_output.errors:
+                app.display_error('Errors encountered; see output file for details.')
         else:
             click.echo(contents)
 
@@ -163,9 +171,5 @@ def catalog(app: Application, targets: tuple[str, ...], *, output_format: str, o
     app.display_table('Targets', get_table_columns(catalog_output.targets), show_lines=True)
 
     if catalog_output.errors:
-        error_columns = {
-            'Target': {i: error.target for i, error in enumerate(catalog_output.errors)},
-            'Error': {i: error.error for i, error in enumerate(catalog_output.errors)},
-        }
-        app.display_table('Errors', error_columns, show_lines=True)
+        app.display_table('Errors', get_error_columns(catalog_output.errors), show_lines=True)
         app.abort()
