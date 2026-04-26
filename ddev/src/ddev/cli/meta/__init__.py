@@ -12,6 +12,7 @@ from datadog_checks.dev.tooling.commands.meta.prometheus import prom
 from datadog_checks.dev.tooling.commands.meta.snmp import snmp
 from datadog_checks.dev.tooling.commands.meta.windows import windows
 
+from ddev.cli.meta.describe import describe
 from ddev.cli.meta.scripts import scripts
 
 
@@ -28,6 +29,7 @@ meta.add_command(catalog)
 meta.add_command(changes)
 meta.add_command(create_example_commits)
 meta.add_command(dash)
+meta.add_command(describe)
 meta.add_command(jmx)
 meta.add_command(manifest)
 meta.add_command(prom)
