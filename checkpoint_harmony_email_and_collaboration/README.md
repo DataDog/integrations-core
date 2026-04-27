@@ -18,7 +18,7 @@ Follow the instructions below to configure this integration for your Check Point
 
 Configure the Datadog endpoint to forward Check Point Harmony Email & Collaboration events as logs to Datadog.
 
-1. Copy the generated URL inside the **Configuration** tab on the Datadog [Check Point Harmony Email & Collaboration integration tile][4].
+1. {{< integration-api-key-picker >}}
 2. Sign in to [Check Point Infinity Portal][5].
 3. If you are not already in the **Harmony Email & Collaboration** Administrator Portal:
    - Click the **Menu** icon in the top-left corner.

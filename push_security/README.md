@@ -14,7 +14,7 @@ Integrate Push Security with Datadog's pre-built dashboard visualizations to gai
 
 Configure the Datadog endpoint to forward Push Security events as logs to Datadog:
 
-1. Copy the generated URL inside the **Configuration** tab on the Datadog [Push Security][5] tile.
+1. {{< integration-api-key-picker >}}
 2. Sign in to [Push Security Portal][3].
 3. Go to **Settings** > **Webhooks**.
 4. Click **+ Webhook**.

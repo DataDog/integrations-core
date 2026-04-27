@@ -30,7 +30,7 @@ See [Postmark Webhook Overview][2] for more details.
 
 Perform the following steps to configure the webhook for both of the message streams mentioned above.
 
-1. Select an existing API key or create a new one by clicking one of the buttons below:<!-- UI Component to be added by DataDog team -->
+1. {{< integration-api-key-picker >}}
 2. Log in to your [Postmark account][3]. This redirects you to the [servers][4] page.
 3. Select the desired server. This redirects you to the **Message Streams** page.
 4. On the message streams page, select an existing broadcast or transactional message stream or create a new one. 

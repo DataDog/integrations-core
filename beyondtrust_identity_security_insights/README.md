@@ -16,7 +16,7 @@ This integration also includes ready-to-use Cloud SIEM detection rules for enhan
 
 Configure the Datadog endpoint to forward BeyondTrust Identity Security Insights detections as logs to Datadog.
 
-1. Copy the generated URL inside the **Configuration** tab on the Datadog [BeyondTrust Identity Security Insights][2] tile.
+1. {{< integration-api-key-picker >}}
 2. Sign in to [BeyondTrust Identity Security Insights Portal][3].
 3. Go to **Insights > Integrations** from the top left side main menu.
 4. Click **Webhooks**.

@@ -18,7 +18,7 @@ Follow the instructions below to configure this integration for your Intercom ac
 
 Configure the Datadog endpoint to forward Intercom events as logs to Datadog. See [Intercom webhook overview][3] for more details.
 
-1. Copy the generated URL inside the **Configuration** tab on the Datadog [Intercom integration tile][4].
+1. {{< integration-api-key-picker >}}
 2. Sign in to your [Intercom][2] account using a user account with full access to Apps and Integrations.
 3. Go to **Settings**.
 4. In the Integrations section, select **Developer Hub**.
