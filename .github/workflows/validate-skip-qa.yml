@@ -48,7 +48,7 @@ jobs:
       # in the composite action, never through a shell expansion.
       - name: Get files changed
         id: changed_files
-        uses: tj-actions/changed-files@22103cc46bda19c2b464ffe86db46df6922fd323 # v47.0.5
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
         with:
           json: true
           escape_json: false
@@ -102,7 +102,7 @@ jobs:
 
       - name: Upload comment artifact
         if: steps.render_add.outcome == 'success' || steps.render_remove.outcome == 'success'
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: pr-comment
           path: pr-comment/

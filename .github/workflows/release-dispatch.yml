@@ -100,7 +100,7 @@ jobs:
     steps:
       - name: Get GitHub token via dd-octo-sts
         id: octo-sts
-        uses: DataDog/dd-octo-sts-action@08f2144903ced3254a3dafec2592563409ba2aa0 # v1.0.1
+        uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
         with:
           scope: DataDog/agent-integration-wheels-release
           policy: integrations-core.dispatch-wheel-builds
