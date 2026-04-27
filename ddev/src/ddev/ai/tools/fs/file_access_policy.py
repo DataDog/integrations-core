@@ -44,9 +44,14 @@ class FileAccessPolicy:
     - Writes must resolve inside write_root (if set).
     - Reads and writes targeting denied paths are refused.
 
-    A path is denied if its basename matches any pattern in read_deny_names or
-    it resolves inside any directory in read_deny_roots. Paths are resolved
-    before comparison, so symlinks and ``..`` cannot bypass the checks.
+    A path is denied when either condition holds:
+    - Its basename matches any pattern in ``read_deny_names`` — this check is
+      global and applies regardless of where the file lives.
+    - It resolves inside any directory in ``read_deny_roots`` — this check is
+      location-based and restricts entire directory trees.
+
+    Paths are resolved before comparison, so symlinks and ``..`` cannot bypass
+    the checks.
     """
 
     def __init__(
@@ -70,7 +75,7 @@ class FileAccessPolicy:
     def _is_denied(self, resolved: Path) -> bool:
         if any(fnmatch(resolved.name, pat) for pat in self._deny_names):
             return True
-        return any(resolved == root or resolved.is_relative_to(root) for root in self._deny_roots)
+        return any(resolved.is_relative_to(root) for root in self._deny_roots)
 
     def assert_readable(self, path: str) -> None:
         resolved = self._resolve(path)

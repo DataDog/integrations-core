@@ -65,10 +65,14 @@ def test_read_allowed_for_regular_files(tmp_path, filename) -> None:
     policy.assert_readable(str(tmp_path / filename))
 
 
-def test_custom_deny_name_pattern(tmp_path) -> None:
+def test_custom_deny_name_pattern_denied(tmp_path) -> None:
     policy = FileAccessPolicy(read_deny_names=("*.secret",), read_deny_roots=())
     with pytest.raises(FileAccessError):
         policy.assert_readable(str(tmp_path / "api.secret"))
+
+
+def test_custom_deny_name_pattern_allowed(tmp_path) -> None:
+    policy = FileAccessPolicy(read_deny_names=("*.secret",), read_deny_roots=())
     policy.assert_readable(str(tmp_path / "api.public"))
 
 
@@ -79,6 +83,13 @@ def test_deny_root_blocks_nested_paths(tmp_path) -> None:
 
     with pytest.raises(FileAccessError):
         policy.assert_readable(str(denied_root / "a" / "b.txt"))
+
+
+def test_deny_root_blocks_root_itself(tmp_path) -> None:
+    denied_root = tmp_path / "private"
+    denied_root.mkdir()
+    policy = FileAccessPolicy(read_deny_names=(), read_deny_roots=(str(denied_root),))
+
     with pytest.raises(FileAccessError):
         policy.assert_readable(str(denied_root))
 
