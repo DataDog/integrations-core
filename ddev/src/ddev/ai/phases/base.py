@@ -241,6 +241,9 @@ class Phase(AsyncProcessor[PhaseTrigger]):
             },
         )
 
+        # 12. Notify observers that the phase completed successfully
+        await self._callbacks.fire_phase_finish(self._phase_id)
+
     async def on_success(self, message: PhaseTrigger) -> None:
         """Emit PhaseTrigger to unblock dependent phases."""
         self.submit_message(

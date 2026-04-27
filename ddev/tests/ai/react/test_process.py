@@ -10,7 +10,7 @@ import pytest
 from ddev.ai.agent.base import BaseAgent
 from ddev.ai.agent.exceptions import AgentConnectionError
 from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolCall, ToolResultMessage
-from ddev.ai.callbacks.callbacks import Callbacks
+from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.core.registry import ToolRegistry
@@ -97,7 +97,7 @@ class PerToolRegistry:
 
 
 class CallbackRecorder:
-    """Test helper that wires a Callbacks instance to record all lifecycle events."""
+    """Test helper that records all ReAct lifecycle events via a CallbackSet."""
 
     def __init__(self) -> None:
         self.agent_responses: list[tuple[AgentResponse, int]] = []
@@ -107,31 +107,33 @@ class CallbackRecorder:
         self.before_compacts: int = 0
         self.after_compacts: int = 0
 
-        self.callbacks = Callbacks()
+        cb = CallbackSet()
 
-        @self.callbacks.on_agent_response
+        @cb.on_agent_response
         async def _record_response(response: AgentResponse, iteration: int) -> None:
             self.agent_responses.append((response, iteration))
 
-        @self.callbacks.on_tool_call
+        @cb.on_tool_call
         async def _record_tool_call(tool_call: ToolCall, result: ToolResult, iteration: int) -> None:
             self.tool_calls_seen.append((tool_call, result, iteration))
 
-        @self.callbacks.on_complete
+        @cb.on_complete
         async def _record_complete(result: ReActResult) -> None:
             self.complete_results.append(result)
 
-        @self.callbacks.on_error
+        @cb.on_error
         async def _record_error(error: BaseException) -> None:
             self.errors.append(error)
 
-        @self.callbacks.on_before_compact
+        @cb.on_before_compact
         async def _record_before_compact() -> None:
             self.before_compacts += 1
 
-        @self.callbacks.on_after_compact
+        @cb.on_after_compact
         async def _record_after_compact() -> None:
             self.after_compacts += 1
+
+        self.callbacks = Callbacks([cb])
 
 
 def make_response(

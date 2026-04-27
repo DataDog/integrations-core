@@ -5,7 +5,7 @@
 import pytest
 
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall
-from ddev.ai.callbacks.callbacks import Callbacks
+from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.core.types import ToolResult
 
@@ -47,18 +47,19 @@ EVENTS: list[tuple[str, str, tuple]] = [
     ("on_after_compact", "fire_after_compact", ()),
     ("on_before_agent_send", "fire_before_agent_send", (3,)),
     ("on_phase_start", "fire_phase_start", ("draft",)),
+    ("on_phase_finish", "fire_phase_finish", ("draft",)),
 ]
 
-EVENT_IDS = [f"{on_name}" for on_name, _, _ in EVENTS]
+EVENT_IDS = [on_name for on_name, _, _ in EVENTS]
 
-# ---------------------------------------------------------------------------
-# Tests
-# ---------------------------------------------------------------------------
+# ===========================================================================
+# CallbackSet tests
+# ===========================================================================
 
 
 @pytest.mark.parametrize("on_name,_fire,_args", EVENTS, ids=EVENT_IDS)
 async def test_decorator_returns_original_function(on_name: str, _fire: str, _args: tuple) -> None:
-    cb = Callbacks()
+    cb = CallbackSet()
 
     async def handler(*args: object) -> None:
         pass
@@ -71,7 +72,7 @@ async def test_decorator_returns_original_function(on_name: str, _fire: str, _ar
 async def test_fire_dispatches_to_registered_handler_with_correct_args(
     on_name: str, fire_name: str, fire_args: tuple
 ) -> None:
-    cb = Callbacks()
+    cb = CallbackSet()
     received: list[tuple] = []
 
     async def handler(*args: object) -> None:
@@ -85,8 +86,50 @@ async def test_fire_dispatches_to_registered_handler_with_correct_args(
         assert actual is expected
 
 
+@pytest.mark.parametrize("on_name,fire_name,fire_args", EVENTS, ids=EVENT_IDS)
+async def test_empty_callback_set_fire_is_noop(on_name: str, fire_name: str, fire_args: tuple) -> None:
+    cb = CallbackSet()
+    await getattr(cb, fire_name)(*fire_args)
+
+
+@pytest.mark.parametrize("on_name,fire_name,fire_args", EVENTS, ids=EVENT_IDS)
+async def test_multiple_handlers_all_fire_in_order(on_name: str, fire_name: str, fire_args: tuple) -> None:
+    cb = CallbackSet()
+    order: list[int] = []
+
+    async def first(*args: object) -> None:
+        order.append(1)
+
+    async def second(*args: object) -> None:
+        order.append(2)
+
+    getattr(cb, on_name)(first)
+    getattr(cb, on_name)(second)
+    await getattr(cb, fire_name)(*fire_args)
+
+    assert order == [1, 2]
+
+
+@pytest.mark.parametrize("on_name,fire_name,fire_args", EVENTS, ids=EVENT_IDS)
+async def test_exception_swallowed_and_next_handler_fires(on_name: str, fire_name: str, fire_args: tuple) -> None:
+    cb = CallbackSet()
+    fired: list[bool] = []
+
+    async def bad(*args: object) -> None:
+        raise RuntimeError("handler failure")
+
+    async def good(*args: object) -> None:
+        fired.append(True)
+
+    getattr(cb, on_name)(bad)
+    getattr(cb, on_name)(good)
+    await getattr(cb, fire_name)(*fire_args)
+
+    assert fired == [True]
+
+
 async def test_handler_registered_on_one_event_not_fired_by_another() -> None:
-    cb = Callbacks()
+    cb = CallbackSet()
     invoked: list[bool] = []
 
     @cb.on_agent_response
@@ -98,23 +141,80 @@ async def test_handler_registered_on_one_event_not_fired_by_another() -> None:
     assert invoked == []
 
 
-async def test_multiple_events_share_instance_without_interference() -> None:
-    cb = Callbacks()
-    agent_response_calls: list[tuple] = []
-    phase_start_calls: list[str] = []
+# ===========================================================================
+# Callbacks container tests
+# ===========================================================================
 
-    @cb.on_agent_response
-    async def on_response(response: object, iteration: int) -> None:
-        agent_response_calls.append((response, iteration))
+
+async def test_empty_callbacks_fire_is_noop() -> None:
+    cb = Callbacks()
+    await cb.fire_agent_response(_RESPONSE, 1)
+    await cb.fire_tool_call(_TOOL_CALL, _TOOL_RESULT, 1)
+    await cb.fire_complete(_REACT_RESULT)
+    await cb.fire_error(_ERROR)
+    await cb.fire_before_compact()
+    await cb.fire_after_compact()
+    await cb.fire_before_agent_send(1)
+    await cb.fire_phase_start("p1")
+    await cb.fire_phase_finish("p1")
+
+
+async def test_single_set_receives_events() -> None:
+    fired: list[str] = []
+    cb = CallbackSet()
 
     @cb.on_phase_start
-    async def on_start(phase_id: str) -> None:
-        phase_start_calls.append(phase_id)
+    async def record_start(phase_id: str) -> None:
+        fired.append(f"start:{phase_id}")
 
-    await cb.fire_agent_response(_RESPONSE, 1)
-    await cb.fire_phase_start("draft")
+    @cb.on_phase_finish
+    async def record_finish(phase_id: str) -> None:
+        fired.append(f"finish:{phase_id}")
 
-    assert len(agent_response_calls) == 1
-    assert agent_response_calls[0][0] is _RESPONSE
-    assert len(phase_start_calls) == 1
-    assert phase_start_calls[0] == "draft"
+    callbacks = Callbacks([cb])
+    await callbacks.fire_phase_start("p1")
+    await callbacks.fire_phase_finish("p1")
+
+    assert fired == ["start:p1", "finish:p1"]
+
+
+async def test_two_sets_both_receive_events() -> None:
+    received_a: list[str] = []
+    received_b: list[str] = []
+
+    cb_a = CallbackSet()
+    cb_b = CallbackSet()
+
+    @cb_a.on_complete
+    async def record_a(result: ReActResult) -> None:
+        received_a.append("complete")
+
+    @cb_b.on_complete
+    async def record_b(result: ReActResult) -> None:
+        received_b.append("complete")
+
+    callbacks = Callbacks([cb_a, cb_b])
+    await callbacks.fire_complete(_REACT_RESULT)
+
+    assert received_a == ["complete"]
+    assert received_b == ["complete"]
+
+
+async def test_exception_in_one_set_does_not_block_other() -> None:
+    received: list[bool] = []
+
+    cb_bad = CallbackSet()
+    cb_good = CallbackSet()
+
+    @cb_bad.on_complete
+    async def raise_always(result: ReActResult) -> None:
+        raise RuntimeError("bad set")
+
+    @cb_good.on_complete
+    async def record(result: ReActResult) -> None:
+        received.append(True)
+
+    callbacks = Callbacks([cb_bad, cb_good])
+    await callbacks.fire_complete(_REACT_RESULT)
+
+    assert received == [True]
