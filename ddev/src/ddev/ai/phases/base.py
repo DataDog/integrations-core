@@ -11,7 +11,7 @@ import anthropic
 
 from ddev.ai.agent.anthropic_client import AnthropicAgent
 from ddev.ai.phases.checkpoint import CheckpointManager
-from ddev.ai.phases.config import AgentConfig, CheckpointConfig, PhaseConfig, TaskConfig
+from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.template import render_inline, render_prompt
 from ddev.ai.react.callbacks import CallbackSet
@@ -56,7 +56,8 @@ def render_task_prompt(
     """Render a task prompt -- from file if prompt_path is set, inline otherwise."""
     if task.prompt_path is not None:
         return render_prompt(config_dir / task.prompt_path, context, resolver)
-    assert task.prompt is not None
+    if task.prompt is None:
+        raise FlowConfigError("TaskConfig must set either 'prompt' or 'prompt_path'")
     return render_inline(task.prompt, context, resolver)
 
 
@@ -64,7 +65,8 @@ def render_memory_prompt(checkpoint: CheckpointConfig, config_dir: Path, context
     """Render a checkpoint memory prompt -- from file if memory_prompt_path is set, inline otherwise."""
     if checkpoint.memory_prompt_path is not None:
         return render_prompt(config_dir / checkpoint.memory_prompt_path, context)
-    assert checkpoint.memory_prompt is not None
+    if checkpoint.memory_prompt is None:
+        raise FlowConfigError("CheckpointConfig must set either 'memory_prompt' or 'memory_prompt_path'")
     return render_inline(checkpoint.memory_prompt, context)
 
 

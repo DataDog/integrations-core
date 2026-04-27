@@ -9,7 +9,7 @@ import pytest
 
 from ddev.ai.phases.base import Phase, _make_memory_resolver, render_memory_prompt, render_task_prompt
 from ddev.ai.phases.checkpoint import CheckpointManager
-from ddev.ai.phases.config import AgentConfig, CheckpointConfig, PhaseConfig, TaskConfig
+from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.tools.core.registry import ToolRegistry
 
@@ -90,6 +90,18 @@ def test_render_memory_prompt_inline():
     checkpoint = CheckpointConfig(memory_prompt="List files for ${phase_name}.")
     result = render_memory_prompt(checkpoint, None, {"phase_name": "draft"})
     assert result == "List files for draft."
+
+
+def test_render_task_prompt_raises_when_both_unset():
+    task = TaskConfig.model_construct(name="t1", prompt=None, prompt_path=None)
+    with pytest.raises(FlowConfigError, match="prompt"):
+        render_task_prompt(task, None, {})
+
+
+def test_render_memory_prompt_raises_when_both_unset():
+    checkpoint = CheckpointConfig.model_construct(memory_prompt=None, memory_prompt_path=None)
+    with pytest.raises(FlowConfigError, match="memory_prompt"):
+        render_memory_prompt(checkpoint, None, {})
 
 
 # ---------------------------------------------------------------------------

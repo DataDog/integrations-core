@@ -8,6 +8,10 @@ from typing import Any
 import yaml
 
 
+class CheckpointReadError(Exception):
+    """Raised when checkpoints.yaml exists but cannot be read or parsed."""
+
+
 class CheckpointManager:
     """Manages checkpoints.yaml and per-phase memory files for the full pipeline."""
 
@@ -18,7 +22,10 @@ class CheckpointManager:
         """Return full checkpoint data, keyed by phase_id. Empty dict if file absent."""
         if not self._path.exists():
             return {}
-        return yaml.safe_load(self._path.read_text()) or {}
+        try:
+            return yaml.safe_load(self._path.read_text()) or {}
+        except (OSError, yaml.YAMLError) as e:
+            raise CheckpointReadError(f"Failed to load checkpoints from {self._path}: {e}") from e
 
     def write_phase_checkpoint(self, phase_id: str, data: dict[str, Any]) -> None:
         """Write or overwrite one phase's section in checkpoints.yaml."""
