@@ -1,0 +1,36 @@
+{
+  "supported_auth_methods": [],
+  "additional_config_fields": [
+    {
+      "field_type": "text",
+      "field": {
+        "key": "api_base_url",
+        "label": "API base URL",
+        "help": "For example: production.plaid.com",
+        "editable": true,
+        "required": true,
+        "pattern": null
+      }
+    },
+    {
+      "field_type": "text",
+      "field": {
+        "key": "client_id",
+        "label": "Client ID",
+        "editable": true,
+        "required": true,
+        "pattern": null
+      }
+    },
+    {
+      "field_type": "password",
+      "field": {
+        "key": "secret",
+        "label": "Secret",
+        "editable": true,
+        "required": true
+      }
+    }
+  ],
+  "dataflow_config": []
+}
