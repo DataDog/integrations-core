@@ -107,15 +107,24 @@ The Nagios check does not include any service checks.
 
 ## Trigger on-call pages
 
-Configure Nagios notification commands to call the [Datadog On-Call Paging API][11] directly, bypassing the Agent. The script creates a page on `PROBLEM` notifications and automatically resolves it on `RECOVERY`.
+Configure Nagios notification commands to forward notifications to the [Datadog events intake][11], which routes them to [Datadog On-Call][12] using an `oncall_team` query parameter. Datadog deduplicates and auto-resolves events that share an `aggregation_key`, so a Nagios `RECOVERY` resolves the page created by its corresponding `PROBLEM` automatically.
 
-### How on-call pages work
+### Map Nagios events to on-call pages
 
-- `CRITICAL`, `DOWN`, or `WARNING` notifications create a page targeting the configured On-Call team.
-- `RECOVERY` notifications resolve the corresponding page.
-- `UNKNOWN` notifications are ignored.
+| Nagios state       | Datadog `alert_type` | On-Call effect                                       |
+| ------------------ | -------------------- | ---------------------------------------------------- |
+| `CRITICAL`, `DOWN` | `error`              | Pages the configured On-Call team                    |
+| `WARNING`          | `warning`            | Pages the configured On-Call team                    |
+| `OK`, `UP`         | `success`            | Resolves the page with the same `aggregation_key`    |
+| `UNKNOWN`          | `info`               | Sends an event without paging                        |
+
+To page on `UNKNOWN` instead, change its mapping in the script.
 
 ### Setup
+
+The script depends on `curl` and `python3`. Both are commonly available on Nagios hosts.
+
+Keep the Datadog API key out of `commands.cfg`. Set `DD_API_KEY` as an environment variable exported by the Nagios service, or load it from a Nagios resource file with restricted permissions.
 
 #### Create the notification script
 
@@ -125,74 +134,53 @@ Create `/usr/local/nagios/libexec/notify_datadog_oncall.sh`:
 #!/bin/bash
 set -u
 
-DD_API_KEY="<YOUR_DATADOG_API_KEY>"
-DD_APP_KEY="<YOUR_DATADOG_APP_KEY>"
-DD_SITE="datadoghq.com"  # Change to your Datadog site
+DD_API_KEY="${DD_API_KEY:-<YOUR_DATADOG_API_KEY>}"
+DD_SITE="${DD_SITE:-datadoghq.com}"  # for example, datadoghq.eu, us3.datadoghq.com
 
-NOTIF_TYPE="${1}"   # PROBLEM or RECOVERY
-HOSTNAME="${2}"
-SERVICEDESC="${3}"
-STATE="${4}"        # CRITICAL, WARNING, OK, UNKNOWN, UP, DOWN
-ONCALL_TEAM="${5}"  # Datadog On-Call team handle, e.g. "ops"
-OUTPUT="${6}"
+HOSTNAME="${1}"
+SERVICEDESC="${2}"
+STATE="${3}"        # CRITICAL, WARNING, OK, UNKNOWN, UP, DOWN
+ONCALL_TEAM="${4}"  # Datadog On-Call team handle, for example, "ops"
+OUTPUT="${5}"
 
-# Map DD_SITE to On-Call API endpoint
-case "$DD_SITE" in
-  datadoghq.com)      ONCALL_URL="https://navy.oncall.datadoghq.com" ;;
-  datadoghq.eu)       ONCALL_URL="https://beige.oncall.datadoghq.eu" ;;
-  us3.datadoghq.com)  ONCALL_URL="https://teal.oncall.datadoghq.com" ;;
-  us5.datadoghq.com)  ONCALL_URL="https://coral.oncall.datadoghq.com" ;;
-  ap1.datadoghq.com)  ONCALL_URL="https://saffron.oncall.datadoghq.com" ;;
-  ap2.datadoghq.com)  ONCALL_URL="https://lava.oncall.datadoghq.com" ;;
-  ddog-gov.com)       ONCALL_URL="https://navy.oncall.datadoghq.com" ;;
-  *)                  echo "Unknown DD_SITE: $DD_SITE" >&2; exit 1 ;;
+case "$STATE" in
+  CRITICAL|DOWN) ALERT_TYPE="error" ;;
+  WARNING)       ALERT_TYPE="warning" ;;
+  OK|UP)         ALERT_TYPE="success" ;;
+  *)             ALERT_TYPE="info" ;;
 esac
 
-STATE_DIR="/var/tmp/nagios_dd_oncall"
-mkdir -p "$STATE_DIR"
-PAGE_FILE="${STATE_DIR}/${HOSTNAME}-${SERVICEDESC}"
+TITLE_JSON=$(printf 'Nagios: %s / %s is %s' "$HOSTNAME" "$SERVICEDESC" "$STATE" \
+  | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')
+MESSAGE_JSON=$(printf '%s' "$OUTPUT" \
+  | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')
 
-# Escape special characters for safe JSON embedding
-OUTPUT=$(printf '%s' "$OUTPUT" | sed 's/\\/\\\\/g; s/"/\\"/g')
+PAYLOAD=$(cat <<EOF
+{
+  "title": $TITLE_JSON,
+  "message": $MESSAGE_JSON,
+  "alert_type": "$ALERT_TYPE",
+  "aggregation_key": "nagios:${HOSTNAME}:${SERVICEDESC}",
+  "source_type_name": "nagios",
+  "tags": ["integration:nagios", "host:${HOSTNAME}", "service:${SERVICEDESC}"]
+}
+EOF
+)
 
-if [ "$NOTIF_TYPE" = "RECOVERY" ] || [ "$STATE" = "OK" ] || [ "$STATE" = "UP" ]; then
-  # Resolve existing page
-  if [ -f "$PAGE_FILE" ]; then
-    PAGE_ID=$(cat "$PAGE_FILE")
-    curl -s -m 15 -X POST \
-      "${ONCALL_URL}/api/v2/on-call/pages/${PAGE_ID}/resolve" \
-      -H "DD-API-KEY: ${DD_API_KEY}" \
-      -H "DD-APPLICATION-KEY: ${DD_APP_KEY}"
-    rm -f "$PAGE_FILE"
-  fi
-elif [ "$STATE" = "CRITICAL" ] || [ "$STATE" = "DOWN" ] || [ "$STATE" = "WARNING" ]; then
-  # Create page
-  RESPONSE=$(curl -s -m 15 -X POST \
-    "${ONCALL_URL}/api/v2/on-call/pages" \
-    -H "DD-API-KEY: ${DD_API_KEY}" \
-    -H "DD-APPLICATION-KEY: ${DD_APP_KEY}" \
-    -H "Content-Type: application/json" \
-    -d "{
-      \"data\": {
-        \"type\": \"pages\",
-        \"attributes\": {
-          \"title\": \"Nagios: ${HOSTNAME} / ${SERVICEDESC} is ${STATE}\",
-          \"description\": \"${OUTPUT}\",
-          \"urgency\": \"high\",
-          \"tags\": [\"integration:nagios\", \"service:${SERVICEDESC}\", \"host:${HOSTNAME}\"],
-          \"target\": {
-            \"identifier\": \"${ONCALL_TEAM}\",
-            \"type\": \"team_handle\"
-          }
-        }
-      }
-    }")
+URL="https://event-management-intake.${DD_SITE}/api/v2/events/webhook?dd-api-key=${DD_API_KEY}&oncall_team=${ONCALL_TEAM}"
 
-  # Save page ID for later resolution
-  PAGE_ID=$(printf '%s' "$RESPONSE" | sed -n 's/.*"id":"\([^"]*\)".*/\1/p')
-  if [ -n "$PAGE_ID" ]; then
-    printf '%s' "$PAGE_ID" > "$PAGE_FILE"
-  fi
+RESPONSE_FILE=$(mktemp)
+trap 'rm -f "$RESPONSE_FILE"' EXIT
+
+HTTP_CODE=$(curl -s -m 15 -o "$RESPONSE_FILE" -w '%{http_code}' \
+  -X POST "$URL" \
+  -H "Content-Type: application/json" \
+  -d "$PAYLOAD")
+
+if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+  echo "Datadog On-Call notification failed: HTTP $HTTP_CODE" >&2
+  cat "$RESPONSE_FILE" >&2
+  exit 1
 fi
 ```
 
@@ -209,18 +197,18 @@ Add to `commands.cfg`. Use separate commands for service and host notifications 
 ```nagios
 define command {
     command_name    notify-datadog-oncall-service
-    command_line    /usr/local/nagios/libexec/notify_datadog_oncall.sh "$NOTIFICATIONTYPE$" "$HOSTALIAS$" "$SERVICEDESC$" "$SERVICESTATE$" "$_CONTACTONCALL_TEAM$" "$SERVICEOUTPUT$"
+    command_line    /usr/local/nagios/libexec/notify_datadog_oncall.sh "$HOSTALIAS$" "$SERVICEDESC$" "$SERVICESTATE$" "$_CONTACTONCALL_TEAM$" "$SERVICEOUTPUT$"
 }
 
 define command {
     command_name    notify-datadog-oncall-host
-    command_line    /usr/local/nagios/libexec/notify_datadog_oncall.sh "$NOTIFICATIONTYPE$" "$HOSTALIAS$" "Host" "$HOSTSTATE$" "$_CONTACTONCALL_TEAM$" "$HOSTOUTPUT$"
+    command_line    /usr/local/nagios/libexec/notify_datadog_oncall.sh "$HOSTALIAS$" "Host" "$HOSTSTATE$" "$_CONTACTONCALL_TEAM$" "$HOSTOUTPUT$"
 }
 ```
 
 #### Create contacts with the On-Call team handle
 
-The custom variable `_oncall_team` sets the Datadog On-Call team handle per contact. Add contacts to `contacts.cfg`:
+The custom variable `_oncall_team` maps to the Datadog On-Call team handle `@oncall-<handle>`. Set it to exactly the team handle configured in [Datadog On-Call][12], without the `@oncall-` prefix. Add contacts to `contacts.cfg`:
 
 ```nagios
 define contact {
@@ -235,8 +223,6 @@ define contact {
     _oncall_team                    ops
 }
 ```
-
-The `_oncall_team` value (for example, `ops`) must match the team handle configured in [Datadog On-Call][12].
 
 #### Assign the contact to services or hosts
 
@@ -277,5 +263,5 @@ Need help? Contact [Datadog support][9].
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://docs.datadoghq.com/help/
 [10]: https://www.datadoghq.com/blog/nagios-monitoring
-[11]: https://docs.datadoghq.com/api/latest/on-call-paging/
+[11]: https://docs.datadoghq.com/api/latest/events/
 [12]: https://docs.datadoghq.com/service_management/on-call/
