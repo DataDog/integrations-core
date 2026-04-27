@@ -158,7 +158,9 @@ def catalog(app: Application, targets: tuple[str, ...], *, output_format: str, o
     if output_format == 'json':
         contents = catalog_output.model_dump_json(indent=2)
         if output:
-            Path(output).write_text(f'{contents}\n')
+            output_file = Path(output)
+            output_file.ensure_parent_dir_exists()
+            output_file.write_atomic(f'{contents}\n', 'w')
             if catalog_output.errors:
                 app.display_error('Errors encountered; see output file for details.')
         else:

@@ -1,1 +1,1 @@
-Add ddev-native meta catalog command.
+Replace the legacy meta catalog command with a ddev-native implementation.

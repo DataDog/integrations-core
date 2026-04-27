@@ -255,7 +255,7 @@ def test_json_output_with_errors(ddev: CliRunner, repository_as_cwd: ClonedRepo)
 
 
 def test_json_output_can_be_written_to_file(ddev: CliRunner, repository_as_cwd: ClonedRepo, tmp_path: FilePath) -> None:
-    output_file = tmp_path / 'catalog.json'
+    output_file = tmp_path / 'reports' / 'catalog.json'
     result = ddev('meta', 'catalog', '--format', 'json', '--output', str(output_file), 'postgres')
 
     assert result.exit_code == 0, result.output
