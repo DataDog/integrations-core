@@ -11,7 +11,6 @@ from datadog_checks.cisco_aci.helpers import (
     get_bd_from_dn,
     get_cep_from_dn,
     get_epg_from_dn,
-    get_event_tags_from_dn,
     get_hostname_from_dn,
     get_ip_from_dn,
     get_node_from_dn,
@@ -115,27 +114,6 @@ def test_parse_capacity_tags():
     assert all(a == b for a, b in zip(res, ['node_id:2']))
     res = parse_capacity_tags("aa/pod-1/node-/aa")
     assert all(a == b for a, b in zip(res, ['fabric_pod_id:1']))
-
-
-def test_get_event_tags_from_dn():
-    assert get_event_tags_from_dn(None) == []
-    assert get_event_tags_from_dn("") == []
-    res = get_event_tags_from_dn("aa/ap-AA/epg-BB/pod-1/node-2/ip-CC/cep-DD/BD-EE/aa")
-    assert all(
-        a == b
-        for a, b in zip(
-            res,
-            [
-                'node:2',
-                'app:AA',
-                'bd:EE',
-                'mac:DD',
-                'ip:CC',
-                'epg:BB',
-                'pod:1',
-            ],
-        )
-    )
 
 
 def test_get_hostname_from_dn():

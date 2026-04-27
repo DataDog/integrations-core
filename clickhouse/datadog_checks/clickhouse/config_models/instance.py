@@ -12,7 +12,7 @@ from __future__ import annotations
 from types import MappingProxyType
 from typing import Any, Optional
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -52,6 +52,24 @@ class MetricPatterns(BaseModel):
     include: Optional[tuple[str, ...]] = None
 
 
+class PartsAndMerges(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_detached_parts_rows: Optional[int] = None
+    max_mutations_rows: Optional[int] = None
+    max_parts_rows: Optional[int] = None
+    max_replication_queue_rows: Optional[int] = None
+    run_sync: Optional[bool] = None
+    stalled_merge_elapsed_threshold_seconds: Optional[int] = None
+    stuck_replication_num_tries: Optional[int] = None
+    table_metrics_include_partition_tag: Optional[bool] = None
+    table_metrics_max_tables: Optional[int] = None
+
+
 class QueryCompletions(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -59,6 +77,8 @@ class QueryCompletions(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    explained_queries_cache_maxsize: Optional[float] = None
+    explained_queries_per_hour_per_query: Optional[float] = Field(None, ge=1.0)
     max_samples_per_collection: Optional[float] = None
     run_sync: Optional[bool] = None
     samples_per_hour_per_query: Optional[float] = None
@@ -119,6 +139,7 @@ class InstanceConfig(BaseModel):
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     only_custom_queries: Optional[bool] = None
+    parts_and_merges: Optional[PartsAndMerges] = None
     password: Optional[str] = None
     port: Optional[int] = None
     query_completions: Optional[QueryCompletions] = None

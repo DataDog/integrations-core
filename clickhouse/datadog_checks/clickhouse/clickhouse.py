@@ -17,6 +17,7 @@ from . import queries
 from .__about__ import __version__
 from .config import build_config, sanitize
 from .health import ClickhouseHealth, HealthEvent, HealthStatus
+from .parts_and_merges import ClickhousePartsAndMerges
 from .query_completions import ClickhouseQueryCompletions
 from .query_errors import ClickhouseQueryErrors
 from .statement_samples import ClickhouseStatementSamples
@@ -76,10 +77,16 @@ class ClickhouseCheck(DatabaseCheck):
         # We'll connect on the first check run
         self._client = None
 
-        # Shared HTTP connection pool for all ClickHouse clients (main + DBM jobs)
-        # This reduces connection overhead while maintaining client isolation
-        # See: https://clickhouse.com/docs/integrations/language-clients/python/advanced-usage#customizing-the-http-connection-pool
-        self._pool_manager = httputil.get_pool_manager(maxsize=8, num_pools=4)
+        # Shared HTTP connection pool for all ClickHouse clients (main + DBM jobs).
+        # TLS settings must be baked in here: when pool_mgr is provided to get_client(),
+        # clickhouse-connect assigns it immediately and skips its own TLS pool creation,
+        # so verify=False would be silently ignored if the pool was created without it.
+        self._pool_manager = httputil.get_pool_manager(
+            maxsize=8,
+            num_pools=4,
+            verify=self._config.verify,
+            ca_cert=self._config.tls_ca_cert,
+        )
 
         self._query_manager = QueryManager(
             self,
@@ -126,6 +133,12 @@ class ClickhouseCheck(DatabaseCheck):
             self.query_errors = ClickhouseQueryErrors(self, self._config.query_errors)
         else:
             self.query_errors = None
+
+        # Initialize parts and merges monitoring (from system.parts, merges, mutations, replication_queue)
+        if self._config.dbm and self._config.parts_and_merges.enabled:
+            self.parts_and_merges = ClickhousePartsAndMerges(self, self._config.parts_and_merges)
+        else:
+            self.parts_and_merges = None
 
     @property
     def tags(self) -> list[str]:
@@ -254,6 +267,10 @@ class ClickhouseCheck(DatabaseCheck):
         # Run query errors if DBM is enabled (from system.query_log - failed queries)
         if self.query_errors:
             self.query_errors.run_job_loop(self.tags)
+
+        # Run parts and merges monitoring if enabled
+        if self.parts_and_merges:
+            self.parts_and_merges.run_job_loop(self.tags)
 
     @AgentCheck.metadata_entrypoint
     def collect_version(self):
@@ -474,6 +491,8 @@ class ClickhouseCheck(DatabaseCheck):
             self.query_completions.cancel()
         if self.query_errors:
             self.query_errors.cancel()
+        if self.parts_and_merges:
+            self.parts_and_merges.cancel()
 
         # Wait for job loops to finish
         if self.statement_metrics and self.statement_metrics._job_loop_future:
@@ -484,6 +503,8 @@ class ClickhouseCheck(DatabaseCheck):
             self.query_completions._job_loop_future.result()
         if self.query_errors and self.query_errors._job_loop_future:
             self.query_errors._job_loop_future.result()
+        if self.parts_and_merges and self.parts_and_merges._job_loop_future:
+            self.parts_and_merges._job_loop_future.result()
 
         # Close main client
         if self._client:

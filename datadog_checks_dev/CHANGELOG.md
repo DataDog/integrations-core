@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 37.0.0 / 2026-04-15
+
+***Changed***:
+
+* Bump pytest to 9.0.3 and update pytest plugins to latest versions. ([#23306](https://github.com/DataDog/integrations-core/pull/23306))
+
+***Fixed***:
+
+* Bump `requests` to `>=2.33.0` (CVE-2026-25645 / VULN-59770). ([#23223](https://github.com/DataDog/integrations-core/pull/23223))
+
 ## 36.1.0 / 2026-04-06
 
 ***Added***:
