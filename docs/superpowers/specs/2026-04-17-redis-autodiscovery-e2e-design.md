@@ -79,7 +79,7 @@ services:
       - network1
 networks:
   network1:
-    name: autodiscovery_default_default
+    name: autodiscovery-default_default
 ```
 
 No published ports: the Agent reaches Redis on its bridge IP and default port
@@ -160,17 +160,17 @@ def test_e2e_autodiscovery_default_port(dd_agent_check, autodiscovery_ready):
         discovery_min_instances=1,
         discovery_timeout=30,
     )
-    aggregator.assert_service_check(
-        'redis.can_connect',
-        status=Redis.OK,
-        tags=['redis_port:6379'],
-        at_least=1,
-    )
+    service_checks = aggregator.service_checks('redis.can_connect')
+    assert any(sc.status == Redis.OK and 'redis_port:6379' in sc.tags for sc in service_checks), service_checks
 ```
 
 Assertion is deliberately minimal: one service check with `redis_port:6379`
-and `status=OK`. `redis_host` resolves to the container's bridge IP, which is
-not predictable — `at_least=1` avoids asserting on it.
+and `status=OK`. `redis_host` resolves to the container's bridge IP, and the
+Docker listener also emits `docker_image`, `image_id`, `image_name`,
+`image_tag`, and `short_image` tags. `assert_service_check` requires the
+`tags` argument to match the emitted tag list exactly, so we scan
+`service_checks()` and assert that any submission with status OK contains
+the `redis_port:6379` tag.
 
 ### 6. `redisdb/DEVELOPMENT.md`
 
