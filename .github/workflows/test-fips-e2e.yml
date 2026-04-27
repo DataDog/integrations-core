@@ -66,7 +66,7 @@ jobs:
         cache: 'pip'
 
     - name: Restore cache
-      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       with:
         path: '~/.cache/pip'
         key: >-
@@ -131,7 +131,7 @@ jobs:
 
     - name: Upload test results
       if: always()
-      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: "test-results-${{ inputs.target || 'tls' }}"
         path: "${{ env.TEST_RESULTS_BASE_DIR }}"
@@ -151,7 +151,7 @@ jobs:
         !github.event.repository.private &&
         always()
       continue-on-error: true
-      uses: DataDog/coverage-upload-github-action@9bbbf86d16f7db1b14c5b885e61cf0d96053686a # v1.0.0
+      uses: DataDog/coverage-upload-github-action@6c4bd935248daa6f0ef94e3e6ba71ad5ad079998 # v1.0.3
       with:
         api_key: ${{ secrets.DD_API_KEY }}
         files: "${{ inputs.target || 'tls' }}/coverage.xml"
