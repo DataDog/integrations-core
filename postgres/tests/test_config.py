@@ -89,6 +89,7 @@ def test_initialize_features_enabled_and_disabled(mock_check, minimal_instance):
             'collect_schemas': {'enabled': True},
             'query_activity': {'enabled': True},
             'query_metrics': {'enabled': True},
+            'data_observability': {'enabled': True},
         }
     )
     mock_check.instance = instance
@@ -102,6 +103,7 @@ def test_initialize_features_enabled_and_disabled(mock_check, minimal_instance):
         FeatureKey.COLLECT_SCHEMAS,
         FeatureKey.QUERY_ACTIVITY,
         FeatureKey.QUERY_METRICS,
+        FeatureKey.DATA_OBSERVABILITY,
     }
     for feature in result.features:
         assert feature['enabled'] is True

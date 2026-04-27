@@ -604,6 +604,7 @@ def test_check_ao_secondary_replica(aggregator, dd_run_check, init_config, insta
             'availability_group',
             'availability_group_name',
             'synchronization_state_desc',
+            'synchronization_state',
             'replica_server_name',
         ):
             aggregator.assert_metric_has_tag_prefix(metric_name, tag_prefix=tag_prefix)

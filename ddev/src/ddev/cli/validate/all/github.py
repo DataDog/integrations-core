@@ -12,7 +12,7 @@ from ddev.utils.fs import Path
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
-    from ddev.cli.validate.all.orchestrator import ValidationResult
+    from ddev.cli.validate.all.orchestrator import ValidationConfig, ValidationResult
 
 COMMENT_HEADING = "## Validation Report"
 
@@ -75,27 +75,112 @@ def write_step_summary(content: str) -> None:
                 f.write(content + "\n")
 
 
-def format_pr_comment(
-    results: dict[str, ValidationResult],
-    target: str | None,
-    *,
-    error: str | None = None,
-    warning: str | None = None,
-) -> str:
-    failures = {n for n, r in results.items() if not r.success}
-
-    parts = [f"{COMMENT_HEADING}\n"]
+def _build_preamble(error: str | None, warning: str | None) -> list[str]:
+    parts: list[str] = [f"{COMMENT_HEADING}\n"]
     if error:
         parts.append(f"> **Error:** {error}\n")
     if warning:
         parts.append(f"> **Warning:** {warning}\n")
+    return parts
 
-    parts.extend(("| Validation | Status |", "|---|---|"))
-    for name in sorted(results):
-        status = "❌" if name in failures else "✅"
-        parts.append(f"| `{name}` | {status} |")
+
+def _build_table(
+    rows: dict[str, ValidationResult],
+    configs: dict[str, ValidationConfig],
+) -> list[str]:
+    """Build a markdown table with Validation, Description, and Status columns."""
+    from ddev.cli.validate.all.orchestrator import ValidationConfig as _VC
+
+    lines = ["| Validation | Description | Status |", "|---|---|---|"]
+    for name in sorted(rows):
+        status = "✅" if rows[name].success else "❌"
+        description = configs.get(name, _VC()).description
+        lines.append(f"| `{name}` | {description} | {status} |")
+    return lines
+
+
+def _build_report_section(
+    rows: dict[str, ValidationResult],
+    configs: dict[str, ValidationConfig],
+    *,
+    header: str | None = None,
+    collapsed: bool = False,
+) -> list[str]:
+    table = _build_table(rows, configs)
+    if collapsed:
+        summary = header or "Details"
+        return [
+            "",
+            f"<details>\n<summary>{summary}</summary>\n",
+            *table,
+            "\n</details>",
+        ]
+    if header:
+        return [header, "", *table]
+    return table
+
+
+def _build_incomplete_warning(expected_validations: list[str], results: dict[str, ValidationResult]) -> list[str]:
+    missing = sorted(set(expected_validations) - set(results))
+    if not missing:
+        return []
+    names = ", ".join(f"`{n}`" for n in missing)
+    return [f"> **Warning:** {len(missing)} validation(s) did not complete: {names}\n"]
+
+
+def format_pr_comment(
+    results: dict[str, ValidationResult],
+    configs: dict[str, ValidationConfig],
+    target: str | None,
+    expected_validations: list[str],
+    *,
+    error: str | None = None,
+    warning: str | None = None,
+) -> str:
+    """Format a PR comment with collapsible sections to reduce clutter."""
+    failures: dict[str, ValidationResult] = {}
+    passed: dict[str, ValidationResult] = {}
+    for name, result in results.items():
+        (passed if result.success else failures)[name] = result
+
+    incomplete = _build_incomplete_warning(expected_validations, results)
+    parts = _build_preamble(error, warning)
+    parts.extend(incomplete)
 
     if failures:
+        parts.extend(_build_report_section(failures, configs))
+        fix_target = f" {target}" if target else ""
+        parts.append(f"\nRun `ddev validate all{fix_target} --fix` to attempt to auto-fix supported validations.")
+
+    if passed:
+        if failures or incomplete:
+            header = f"Passed validations ({len(passed)})"
+        else:
+            parts.append(f"All {len(passed)} validations passed.")
+            header = "Show details"
+        parts.extend(_build_report_section(passed, configs, header=header, collapsed=True))
+
+    return "\n".join(parts)
+
+
+def format_step_summary(
+    results: dict[str, ValidationResult],
+    configs: dict[str, ValidationConfig],
+    target: str | None,
+    expected_validations: list[str],
+    *,
+    error: str | None = None,
+    warning: str | None = None,
+) -> str:
+    """Format a flat summary table for the GitHub Actions step summary."""
+    has_failures = any(not r.success for r in results.values())
+
+    parts = _build_preamble(error, warning)
+    parts.extend(_build_incomplete_warning(expected_validations, results))
+
+    parts.extend(_build_table(results, configs))
+
+    if has_failures:
         fix_target = f" {target}" if target else ""
         fix_all_cmd = f"ddev validate all{fix_target} --fix"
         parts.append(f"\nRun `{fix_all_cmd}` to attempt to auto-fix supported validations.")

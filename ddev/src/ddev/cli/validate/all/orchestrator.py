@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING
 from ddev.cli.validate.all.github import (
     COMMENT_HEADING,
     format_pr_comment,
+    format_step_summary,
     get_workflow_run_url,
     write_step_summary,
 )
@@ -27,6 +28,7 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True)
 class ValidationConfig:
+    description: str = ""
     repo_wide: bool = False
     fix_flag: str | None = None
 
@@ -36,26 +38,81 @@ class ValidationConfig:
 # are migrated, we can improve the command structure so each validation
 # auto-registers itself instead of maintaining this manually.
 VALIDATIONS: dict[str, ValidationConfig] = {
-    "agent-reqs": ValidationConfig(),
-    "ci": ValidationConfig(repo_wide=True, fix_flag="--sync"),
-    "codeowners": ValidationConfig(repo_wide=True),
-    "config": ValidationConfig(fix_flag="--sync"),
-    "dep": ValidationConfig(repo_wide=True),
-    "http": ValidationConfig(),
-    "imports": ValidationConfig(),
-    "integration-style": ValidationConfig(),
-    "jmx-metrics": ValidationConfig(),
-    "labeler": ValidationConfig(repo_wide=True, fix_flag="--sync"),
-    "legacy-signature": ValidationConfig(),
-    "license-headers": ValidationConfig(fix_flag="--fix"),
-    "licenses": ValidationConfig(repo_wide=True, fix_flag="--sync"),
-    "metadata": ValidationConfig(fix_flag="--sync"),
-    "models": ValidationConfig(fix_flag="--sync"),
-    "openmetrics": ValidationConfig(),
-    "package": ValidationConfig(),
-    "readmes": ValidationConfig(),
-    "saved-views": ValidationConfig(),
-    "version": ValidationConfig(),
+    "agent-reqs": ValidationConfig(
+        description="Verify check versions match the Agent requirements file",
+    ),
+    "ci": ValidationConfig(
+        description="Validate CI configuration and Codecov settings",
+        repo_wide=True,
+        fix_flag="--sync",
+    ),
+    "codeowners": ValidationConfig(
+        description="Validate every integration has a CODEOWNERS entry",
+        repo_wide=True,
+    ),
+    "config": ValidationConfig(
+        description="Validate default configuration files against spec.yaml",
+        fix_flag="--sync",
+    ),
+    "dep": ValidationConfig(
+        description="Verify dependency pins are consistent and Agent-compatible",
+        repo_wide=True,
+    ),
+    "eula": ValidationConfig(
+        description="Validate EULA definition files",
+    ),
+    "http": ValidationConfig(
+        description="Validate integrations use the HTTP wrapper correctly",
+    ),
+    "imports": ValidationConfig(
+        description="Validate check imports do not use deprecated modules",
+    ),
+    "integration-style": ValidationConfig(
+        description="Validate check code style conventions",
+    ),
+    "jmx-metrics": ValidationConfig(
+        description="Validate JMX metrics definition files and config",
+    ),
+    "labeler": ValidationConfig(
+        description="Validate PR labeler config matches integration directories",
+        repo_wide=True,
+        fix_flag="--sync",
+    ),
+    "legacy-signature": ValidationConfig(
+        description="Validate no integration uses the legacy Agent check signature",
+    ),
+    "license-headers": ValidationConfig(
+        description="Validate Python files have proper license headers",
+        fix_flag="--fix",
+    ),
+    "licenses": ValidationConfig(
+        description="Validate third-party license attribution list",
+        repo_wide=True,
+        fix_flag="--sync",
+    ),
+    "metadata": ValidationConfig(
+        description="Validate metadata.csv metric definitions",
+        fix_flag="--sync",
+    ),
+    "models": ValidationConfig(
+        description="Validate configuration data models match spec.yaml",
+        fix_flag="--sync",
+    ),
+    "openmetrics": ValidationConfig(
+        description="Validate OpenMetrics integrations disable the metric limit",
+    ),
+    "package": ValidationConfig(
+        description="Validate Python package metadata and naming",
+    ),
+    "readmes": ValidationConfig(
+        description="Validate README files have required sections",
+    ),
+    "saved-views": ValidationConfig(
+        description="Validate saved view JSON file structure and fields",
+    ),
+    "version": ValidationConfig(
+        description="Validate version consistency between package and changelog",
+    ),
 }
 
 
@@ -166,10 +223,10 @@ class ValidationOrchestrator(EventBusOrchestrator):
         if exception is not None:
             self._app.display_error(f"Error running validations: {exception}")
 
-        self._post_pr_comment(exception)
+        self._publish_report(exception)
         self._print_console_output()
 
-    def _build_report_body(self, exception: Exception | None) -> str:
+    def _build_error_and_warning(self, exception: Exception | None) -> tuple[str | None, str | None]:
         error_msg = f"Error running validations: {exception}" if exception else None
 
         if self._pr_number is None and os.environ.get("GITHUB_EVENT_NAME") == "pull_request":
@@ -177,10 +234,7 @@ class ValidationOrchestrator(EventBusOrchestrator):
         else:
             extra_warning = None
 
-        body = format_pr_comment(self._results, self._target, error=error_msg, warning=extra_warning)
-        if run_url := get_workflow_run_url():
-            body += f"\n\n[View full run]({run_url})"
-        return body
+        return error_msg, extra_warning
 
     def _delete_previous_comments(self, pr_number: int) -> None:
         try:
@@ -191,9 +245,29 @@ class ValidationOrchestrator(EventBusOrchestrator):
         except Exception as exc:
             self._app.display_warning(f"Failed to clean up previous validation comments: {exc}")
 
-    def _post_pr_comment(self, exception: Exception | None) -> None:
-        body = self._build_report_body(exception)
-        write_step_summary(body)
+    def _publish_report(self, exception: Exception | None) -> None:
+        error_msg, extra_warning = self._build_error_and_warning(exception)
+
+        summary_body = format_step_summary(
+            self._results,
+            VALIDATIONS,
+            self._target,
+            self._validations,
+            error=error_msg,
+            warning=extra_warning,
+        )
+        write_step_summary(summary_body)
+
+        comment_body = format_pr_comment(
+            self._results,
+            VALIDATIONS,
+            self._target,
+            self._validations,
+            error=error_msg,
+            warning=extra_warning,
+        )
+        if run_url := get_workflow_run_url():
+            comment_body += f"\n\n[View full run]({run_url})"
 
         self._app.logger.debug("PR number: %s", self._pr_number)
         self._app.logger.debug("GitHub token configured: %s", bool(self._app.config.github.token))
@@ -212,11 +286,11 @@ class ValidationOrchestrator(EventBusOrchestrator):
             self._app.logger.debug("Deleting previous validation comments on PR #%s...", self._pr_number)
             self._delete_previous_comments(self._pr_number)
             self._app.logger.debug("Posting validation comment on PR #%s...", self._pr_number)
-            self._app.github.post_pull_request_comment(self._pr_number, body)
+            self._app.github.post_pull_request_comment(self._pr_number, comment_body)
             self._app.logger.debug("Comment posted successfully.")
         except Exception as exc:
-            self._app.display_warning(f"Failed to post PR comment: {exc}")
-            write_step_summary(f"\n> Failed to post PR comment: {exc}")
+            self._app.display_warning(f"Failed to post PR comment: {type(exc).__name__}: {exc}")
+            write_step_summary(f"\n> Failed to post PR comment: {type(exc).__name__}: {exc}")
         finally:
             httpx_logger.setLevel(previous_level)
 

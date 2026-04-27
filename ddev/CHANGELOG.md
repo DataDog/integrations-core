@@ -2,6 +2,40 @@
 
 <!-- towncrier release notes start -->
 
+## 16.0.0 / 2026-04-21
+
+***Changed***:
+
+* Bump datadog_checks_dev requirement to ~=37.0 ([#23319](https://github.com/DataDog/integrations-core/pull/23319))
+
+***Added***:
+
+* - Support size computation for lockfiles in both new and old formats. New CLI param (and envvar) to switch between storage locations.
+  - Command to trigger the promotion of wheels for PRs that bump dependencies. ([#23063](https://github.com/DataDog/integrations-core/pull/23063))
+* Add conditional message filtering to EventBusOrchestrator ([#23344](https://github.com/DataDog/integrations-core/pull/23344))
+
+***Fixed***:
+
+* Harden dependency-wheel promotion workflow against untrusted PR code. ([#23372](https://github.com/DataDog/integrations-core/pull/23372))
+
+## 15.0.0 / 2026-04-15
+
+***Changed***:
+
+* Bump datadog_checks_dev requirement ([#23100](https://github.com/DataDog/integrations-core/pull/23100))
+* Drop support for Python versions older than 3.13 by setting requires-python to >=3.13. ([#23206](https://github.com/DataDog/integrations-core/pull/23206))
+
+***Added***:
+
+* Automate milestone bump when cutting a release branch in ddev ([#23151](https://github.com/DataDog/integrations-core/pull/23151))
+* Bump datadog_checks_dev requirement. ([#23195](https://github.com/DataDog/integrations-core/pull/23195))
+* Add parallel validation orchestrator with ddev validate all command ([#23249](https://github.com/DataDog/integrations-core/pull/23249))
+
+***Fixed***:
+
+* Bump `requests` to `==2.33.0` (CVE-2026-25645 / VULN-59770). ([#23223](https://github.com/DataDog/integrations-core/pull/23223))
+* Add descriptions to validations and improve PR comment formatting with collapsible sections ([#23308](https://github.com/DataDog/integrations-core/pull/23308))
+
 ## 14.4.0 / 2026-03-27
 
 ***Added***:

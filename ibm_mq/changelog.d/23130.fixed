@@ -1,1 +1,0 @@
-Fix UnicodeDecodeError when IBM MQ queue manager returns channel or queue description fields in non-UTF-8 encoding.
