@@ -11,7 +11,17 @@ from datadog_checks.dev import LazyFunction, RetryError, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.redisdb import Redis
 
-from .common import DOCKER_COMPOSE_PATH, HERE, HOST, MASTER_PORT, PASSWORD, PORT, REPLICA_PORT
+from .common import (
+    AUTODISCOVERY,
+    AUTODISCOVERY_COMPOSE_PATH,
+    DOCKER_COMPOSE_PATH,
+    HERE,
+    HOST,
+    MASTER_PORT,
+    PASSWORD,
+    PORT,
+    REPLICA_PORT,
+)
 
 
 class CheckCluster(LazyFunction):
@@ -68,8 +78,27 @@ def redis_auth():
 @pytest.fixture(scope='session')
 def dd_environment(master_instance):
     """
-    Start a cluster with one master, one replica, and one unhealthy replica.
+    Start the Redis test environment.
+
+    In autodiscovery mode (`REDIS_AUTODISCOVERY=true`) run a single default-port
+    Redis container on the Docker bridge network and hand the Agent the Docker
+    socket so it can discover the container via the Docker listener. No static
+    instance config is yielded so the Agent relies purely on `auto_conf.yaml`.
+
+    Otherwise run the 1-master/2-replica cluster used by the existing e2e
+    tests.
     """
+    if AUTODISCOVERY:
+        e2e_metadata = {
+            'docker_volumes': ['/var/run/docker.sock:/var/run/docker.sock:ro'],
+        }
+        with docker_run(
+            AUTODISCOVERY_COMPOSE_PATH,
+            conditions=[CheckDockerLogs(AUTODISCOVERY_COMPOSE_PATH, 'Ready to accept connections', wait=5)],
+        ):
+            yield None, e2e_metadata
+        return
+
     with docker_run(
         DOCKER_COMPOSE_PATH,
         conditions=[
