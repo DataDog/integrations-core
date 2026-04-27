@@ -18,14 +18,19 @@ from ddev.event_bus.exceptions import FatalProcessingError
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
 
 
-def _discover_and_register_phases(registry: PhaseRegistry) -> None:
-    """Import all non-private modules in phases/ and register Phase subclasses."""
-    phases_dir = Path(__file__).parent
+def _discover_and_register_phases(
+    registry: PhaseRegistry,
+    phases_dir: Path | None = None,
+    import_prefix: str = "ddev.ai.phases",
+) -> None:
+    """Import all non-private modules in phases_dir and register Phase subclasses."""
+    if phases_dir is None:
+        phases_dir = Path(__file__).parent
     for py_file in phases_dir.glob("*.py"):
         if py_file.stem.startswith("_"):
             continue
         try:
-            module = importlib.import_module(f"ddev.ai.phases.{py_file.stem}")
+            module = importlib.import_module(f"{import_prefix}.{py_file.stem}")
         except Exception as e:
             raise FlowConfigError(f"Failed to import phase module '{py_file.stem}': {e}") from e
         for _, obj in inspect.getmembers(module, inspect.isclass):

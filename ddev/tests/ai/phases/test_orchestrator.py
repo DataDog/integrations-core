@@ -26,15 +26,46 @@ def test_discover_registers_phase_itself():
     assert registry.get("Phase") is Phase
 
 
-def test_discover_registers_custom_subclass():
-    """Directly registering a custom subclass makes it retrievable."""
+def test_discover_registers_custom_subclass(tmp_path, monkeypatch):
+    """Discovery imports a real .py file and registers the Phase subclass it defines."""
+    fake_dir = tmp_path / "fake_phases"
+    fake_dir.mkdir()
+    (fake_dir / "__init__.py").write_text("")
+    (fake_dir / "custom.py").write_text("from ddev.ai.phases.base import Phase\nclass CustomPhase(Phase):\n    pass\n")
+    monkeypatch.syspath_prepend(str(tmp_path))
+
     registry = PhaseRegistry()
+    _discover_and_register_phases(registry, phases_dir=fake_dir, import_prefix="fake_phases")
 
-    class CustomPhase(Phase):
-        pass
+    assert "CustomPhase" in registry.known_names()
+    assert issubclass(registry.get("CustomPhase"), Phase)
 
-    registry.register("CustomPhase", CustomPhase)
-    assert registry.get("CustomPhase") is CustomPhase
+
+def test_discover_ignores_module_without_phase_subclass(tmp_path, monkeypatch):
+    fake_dir = tmp_path / "no_phase_pkg"
+    fake_dir.mkdir()
+    (fake_dir / "__init__.py").write_text("")
+    (fake_dir / "helpers.py").write_text("CONSTANT = 42\n")
+    monkeypatch.syspath_prepend(str(tmp_path))
+
+    registry = PhaseRegistry()
+    _discover_and_register_phases(registry, phases_dir=fake_dir, import_prefix="no_phase_pkg")
+
+    assert registry.known_names() == []
+
+
+def test_discover_does_not_register_imported_phase_class(tmp_path, monkeypatch):
+    """A module that imports Phase but defines no subclass should not register Phase itself."""
+    fake_dir = tmp_path / "importer_pkg"
+    fake_dir.mkdir()
+    (fake_dir / "__init__.py").write_text("")
+    (fake_dir / "importer.py").write_text("from ddev.ai.phases.base import Phase\n")
+    monkeypatch.syspath_prepend(str(tmp_path))
+
+    registry = PhaseRegistry()
+    _discover_and_register_phases(registry, phases_dir=fake_dir, import_prefix="importer_pkg")
+
+    assert "Phase" not in registry.known_names()
 
 
 def test_discover_skips_underscore_prefixed_files():
