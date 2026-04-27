@@ -1,0 +1,1 @@
+Include `database_instance` tag in `mongodb.can_connect` service check.
