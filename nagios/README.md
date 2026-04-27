@@ -107,7 +107,7 @@ The Nagios check does not include any service checks.
 
 ## Trigger on-call pages
 
-Configure Nagios notification commands to forward notifications to the [Datadog events intake][11], which routes them to [Datadog On-Call][12] using an `oncall_team` query parameter. Datadog deduplicates and auto-resolves events that share an `aggregation_key`, so a Nagios `RECOVERY` resolves the page created by its corresponding `PROBLEM` automatically.
+Configure Nagios notification commands to forward notifications to the Datadog events intake, which routes them to [Datadog On-Call][11] using an `oncall_team` query parameter. Datadog deduplicates and auto-resolves events that share an `aggregation_key`, so a Nagios `RECOVERY` resolves the page created by its corresponding `PROBLEM` automatically.
 
 ### Map Nagios events to on-call pages
 
@@ -137,7 +137,7 @@ set -u
 DD_API_KEY="${DD_API_KEY:-<YOUR_DATADOG_API_KEY>}"
 DD_SITE="${DD_SITE:-datadoghq.com}"  # for example, datadoghq.eu, us3.datadoghq.com
 
-HOSTNAME="${1}"
+NAGIOS_HOST="${1}"
 SERVICEDESC="${2}"
 STATE="${3}"        # CRITICAL, WARNING, OK, UNKNOWN, UP, DOWN
 ONCALL_TEAM="${4}"  # Datadog On-Call team handle, for example, "ops"
@@ -150,7 +150,7 @@ case "$STATE" in
   *)             ALERT_TYPE="info" ;;
 esac
 
-TITLE_JSON=$(printf 'Nagios: %s / %s is %s' "$HOSTNAME" "$SERVICEDESC" "$STATE" \
+TITLE_JSON=$(printf 'Nagios: %s / %s is %s' "$NAGIOS_HOST" "$SERVICEDESC" "$STATE" \
   | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')
 MESSAGE_JSON=$(printf '%s' "$OUTPUT" \
   | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')
@@ -160,14 +160,14 @@ PAYLOAD=$(cat <<EOF
   "title": $TITLE_JSON,
   "message": $MESSAGE_JSON,
   "alert_type": "$ALERT_TYPE",
-  "aggregation_key": "nagios:${HOSTNAME}:${SERVICEDESC}",
+  "aggregation_key": "nagios:${NAGIOS_HOST}:${SERVICEDESC}",
   "source_type_name": "nagios",
-  "tags": ["integration:nagios", "host:${HOSTNAME}", "service:${SERVICEDESC}"]
+  "tags": ["integration:nagios", "host:${NAGIOS_HOST}", "service:${SERVICEDESC}"]
 }
 EOF
 )
 
-URL="https://event-management-intake.${DD_SITE}/api/v2/events/webhook?dd-api-key=${DD_API_KEY}&oncall_team=${ONCALL_TEAM}"
+URL="https://event-management-intake.${DD_SITE}/api/v2/events/webhook?dd-api-key=${DD_API_KEY}&integration_id=nagios&oncall_team=${ONCALL_TEAM}"
 
 RESPONSE_FILE=$(mktemp)
 trap 'rm -f "$RESPONSE_FILE"' EXIT
@@ -208,7 +208,7 @@ define command {
 
 #### Create contacts with the On-Call team handle
 
-The custom variable `_oncall_team` maps to the Datadog On-Call team handle `@oncall-<handle>`. Set it to exactly the team handle configured in [Datadog On-Call][12], without the `@oncall-` prefix. Add contacts to `contacts.cfg`:
+The custom variable `_oncall_team` maps to the Datadog On-Call team handle `@oncall-<handle>`. Set it to exactly the team handle configured in [Datadog On-Call][11], without the `@oncall-` prefix. Add contacts to `contacts.cfg`:
 
 ```nagios
 define contact {
@@ -263,5 +263,4 @@ Need help? Contact [Datadog support][9].
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://docs.datadoghq.com/help/
 [10]: https://www.datadoghq.com/blog/nagios-monitoring
-[11]: https://docs.datadoghq.com/api/latest/events/
-[12]: https://docs.datadoghq.com/service_management/on-call/
+[11]: https://docs.datadoghq.com/service_management/on-call/
