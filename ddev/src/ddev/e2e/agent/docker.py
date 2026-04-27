@@ -231,6 +231,13 @@ class DockerAgent(AgentInterface):
                 # We disable it when we start the agent container, then re-enable it before we restart the container
                 # which by then has the version from a local package.
                 ensure_local_pkg = partial(disable_integration_before_install, self.config_file)
+        else:
+            # No static config: in autodiscovery setups the Agent would otherwise use the `auto_conf.yaml`
+            # baked into its image. Override that with the integration's own shipped copy so e2e tests
+            # verify what we ship rather than what's currently in the Agent image.
+            auto_conf = self.integration.package_directory / 'data' / 'auto_conf.yaml'
+            if auto_conf.is_file():
+                volumes.append(f'{auto_conf}:{self._config_mount_dir}/auto_conf.yaml:ro')
 
         # It is safe to assume that the directory name is unique across all repos
         for local_package in local_packages:
