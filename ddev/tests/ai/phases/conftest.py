@@ -99,18 +99,6 @@ def resolve_key(key: str) -> str:
     return f"resolved({key})"
 
 
-@pytest.fixture(autouse=True)
-def _clean_phase_registry():
-    """Reset PhaseRegistry before each test to avoid cross-contamination."""
-    from ddev.ai.phases.base import PhaseRegistry
-
-    original = dict(PhaseRegistry._registry)
-    PhaseRegistry._registry.clear()
-    yield
-    PhaseRegistry._registry.clear()
-    PhaseRegistry._registry.update(original)
-
-
 @pytest.fixture
 def flow_dir(tmp_path):
     """Create a minimal flow directory with a system prompt."""

@@ -2,10 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import sys
 from pathlib import Path
 from textwrap import dedent
-from types import ModuleType
 from unittest.mock import MagicMock
 
 import pytest
@@ -22,63 +20,84 @@ from ddev.event_bus.exceptions import FatalProcessingError
 
 
 def test_discover_registers_phase_itself():
-    _discover_and_register_phases()
-    assert "Phase" in PhaseRegistry._registry
-    assert PhaseRegistry._registry["Phase"] is Phase
+    registry = PhaseRegistry()
+    _discover_and_register_phases(registry)
+    assert "Phase" in registry.known_names()
+    assert registry.get("Phase") is Phase
 
 
-def test_discover_registers_custom_subclass(tmp_path, monkeypatch):
-    """Simulate a custom phase module in the phases directory."""
-    # Create a temporary module that defines a Phase subclass
-    custom_module = ModuleType("ddev.ai.phases._test_custom")
-    custom_module.__name__ = "ddev.ai.phases._test_custom"
+def test_discover_registers_custom_subclass():
+    """Directly registering a custom subclass makes it retrievable."""
+    registry = PhaseRegistry()
 
     class CustomPhase(Phase):
         pass
 
-    CustomPhase.__module__ = "ddev.ai.phases._test_custom"
-    custom_module.CustomPhase = CustomPhase
-
-    # Register in sys.modules so importlib finds it
-    sys.modules["ddev.ai.phases._test_custom"] = custom_module
-
-    # Create a .py file that will be discovered (no underscore prefix)
-    # But since we can't easily write to the installed package dir,
-    # we test the registration logic directly
-    PhaseRegistry._registry["CustomPhase"] = CustomPhase
-
-    try:
-        assert PhaseRegistry.get("CustomPhase") is CustomPhase
-    finally:
-        del sys.modules["ddev.ai.phases._test_custom"]
+    registry.register("CustomPhase", CustomPhase)
+    assert registry.get("CustomPhase") is CustomPhase
 
 
 def test_discover_skips_underscore_prefixed_files():
     """After discovery, only non-underscore files are imported.
     __init__.py is underscore-prefixed and is skipped."""
-    _discover_and_register_phases()
-    # Phase should be registered from base.py
-    assert "Phase" in PhaseRegistry._registry
+    registry = PhaseRegistry()
+    _discover_and_register_phases(registry)
+    assert "Phase" in registry.known_names()
 
 
 def test_discover_idempotent():
-    _discover_and_register_phases()
-    first = dict(PhaseRegistry._registry)
-    _discover_and_register_phases()
-    second = dict(PhaseRegistry._registry)
+    registry = PhaseRegistry()
+    _discover_and_register_phases(registry)
+    first = registry.known_names()
+    _discover_and_register_phases(registry)
+    second = registry.known_names()
     assert first == second
 
 
 def test_registry_get_unknown_raises():
+    registry = PhaseRegistry()
     with pytest.raises(ValueError, match="Unknown phase type"):
-        PhaseRegistry.get("NonexistentPhase")
+        registry.get("NonexistentPhase")
 
 
 def test_imported_class_not_registered():
     """A class imported into a phases module but defined elsewhere should not be registered."""
-    _discover_and_register_phases()
+    registry = PhaseRegistry()
+    _discover_and_register_phases(registry)
     # BaseMessage is imported in messages.py but defined in event_bus — it should NOT be registered
-    assert "BaseMessage" not in PhaseRegistry._registry
+    assert "BaseMessage" not in registry.known_names()
+
+
+def test_two_orchestrators_have_independent_registries(tmp_path):
+    """Each PhaseOrchestrator owns its own registry; registering in one does not affect the other."""
+    o1 = PhaseOrchestrator(
+        flow_yaml_path=tmp_path / "flow.yaml",
+        checkpoint_path=tmp_path / "checkpoints.yaml",
+        runtime_variables={},
+        anthropic_client=MagicMock(),
+    )
+    o2 = PhaseOrchestrator(
+        flow_yaml_path=tmp_path / "flow.yaml",
+        checkpoint_path=tmp_path / "checkpoints.yaml",
+        runtime_variables={},
+        anthropic_client=MagicMock(),
+    )
+
+    class ExclusivePhase(Phase):
+        pass
+
+    o1._phase_registry.register("ExclusivePhase", ExclusivePhase)
+    assert "ExclusivePhase" in o1._phase_registry.known_names()
+    assert "ExclusivePhase" not in o2._phase_registry.known_names()
+
+
+def test_discover_does_not_mutate_global_state():
+    """_discover_and_register_phases only touches the registry passed to it."""
+    registry = PhaseRegistry()
+    _discover_and_register_phases(registry)
+    # No module-level / class-level container should have been touched.
+    # Verify by checking there is no class-level _registry attribute on PhaseRegistry.
+    assert not hasattr(PhaseRegistry, "_registry")
 
 
 # ---------------------------------------------------------------------------

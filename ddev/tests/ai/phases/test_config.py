@@ -213,11 +213,6 @@ def test_flow_config_extra_field_raises():
 
 
 def test_from_yaml_valid(tmp_path):
-    # Set up PhaseRegistry so _validate_files passes
-    from ddev.ai.phases.base import Phase, PhaseRegistry
-
-    PhaseRegistry._registry["Phase"] = Phase
-
     prompts_dir = tmp_path / "prompts"
     prompts_dir.mkdir()
     (prompts_dir / "writer.md").write_text("system prompt")
@@ -243,10 +238,6 @@ flow:
 
 
 def test_from_yaml_missing_system_prompt(tmp_path):
-    from ddev.ai.phases.base import Phase, PhaseRegistry
-
-    PhaseRegistry._registry["Phase"] = Phase
-
     (tmp_path / "prompts").mkdir()
 
     flow_yaml = tmp_path / "flow.yaml"
@@ -270,10 +261,6 @@ flow:
 
 
 def test_from_yaml_missing_task_prompt_path(tmp_path):
-    from ddev.ai.phases.base import Phase, PhaseRegistry
-
-    PhaseRegistry._registry["Phase"] = Phase
-
     prompts_dir = tmp_path / "prompts"
     prompts_dir.mkdir()
     (prompts_dir / "writer.md").write_text("system prompt")

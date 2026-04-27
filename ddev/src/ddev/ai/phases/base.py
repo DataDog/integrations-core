@@ -21,21 +21,19 @@ from ddev.event_bus.orchestrator import AsyncProcessor, BaseMessage
 
 
 class PhaseRegistry:
-    _registry: dict[str, type["Phase"]] = {}
+    def __init__(self) -> None:
+        self._registry: dict[str, type["Phase"]] = {}
 
-    @classmethod
-    def register(cls, name: str, phase_cls: type["Phase"]) -> None:
-        cls._registry[name] = phase_cls
+    def register(self, name: str, phase_cls: type["Phase"]) -> None:
+        self._registry[name] = phase_cls
 
-    @classmethod
-    def known_names(cls) -> list[str]:
-        return sorted(cls._registry)
+    def known_names(self) -> list[str]:
+        return sorted(self._registry)
 
-    @classmethod
-    def get(cls, name: str) -> type["Phase"]:
-        if name not in cls._registry:
-            raise ValueError(f"Unknown phase type: {name!r}. Known: {cls.known_names()}")
-        return cls._registry[name]
+    def get(self, name: str) -> type["Phase"]:
+        if name not in self._registry:
+            raise ValueError(f"Unknown phase type: {name!r}. Known: {self.known_names()}")
+        return self._registry[name]
 
 
 def _make_memory_resolver(checkpoint_manager: CheckpointManager) -> Callable[[str], str]:

@@ -18,10 +18,8 @@ from ddev.event_bus.exceptions import FatalProcessingError
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
 
 
-def _discover_and_register_phases() -> None:
-    """
-    Import all non-private modules in phases/ and register Phase subclasses in PhaseRegistry.
-    """
+def _discover_and_register_phases(registry: PhaseRegistry) -> None:
+    """Import all non-private modules in phases/ and register Phase subclasses."""
     phases_dir = Path(__file__).parent
     for py_file in phases_dir.glob("*.py"):
         if py_file.stem.startswith("_"):
@@ -32,7 +30,7 @@ def _discover_and_register_phases() -> None:
             raise FlowConfigError(f"Failed to import phase module '{py_file.stem}': {e}") from e
         for _, obj in inspect.getmembers(module, inspect.isclass):
             if issubclass(obj, Phase) and obj.__module__ == module.__name__:
-                PhaseRegistry.register(obj.__name__, obj)
+                registry.register(obj.__name__, obj)
 
 
 class PhaseOrchestrator(EventBusOrchestrator):
@@ -51,18 +49,19 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._runtime_variables = runtime_variables
         self._anthropic_client = anthropic_client
         self._callback_sets = callback_sets
+        self._phase_registry = PhaseRegistry()
 
     async def on_initialize(self) -> None:
         """Discover custom phases, parse flow.yaml, construct phases, submit PhaseTrigger."""
         config_dir = self._flow_yaml_path.parent
 
-        _discover_and_register_phases()
+        _discover_and_register_phases(self._phase_registry)
 
         config = FlowConfig.from_yaml(self._flow_yaml_path, config_dir)
 
         for _, phase_config in config.phases.items():
             try:
-                PhaseRegistry.get(phase_config.type)
+                self._phase_registry.get(phase_config.type)
             except ValueError as e:
                 raise FlowConfigError(str(e)) from e
 
@@ -76,7 +75,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
             agent_config = config.agents[phase_config.agent]
             dependencies = dependency_map[phase_id]
 
-            phase_cls = PhaseRegistry.get(phase_config.type)
+            phase_cls = self._phase_registry.get(phase_config.type)
             phase = phase_cls(
                 phase_id=phase_id,
                 dependencies=dependencies,
