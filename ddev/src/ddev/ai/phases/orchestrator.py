@@ -55,6 +55,8 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._anthropic_client = anthropic_client
         self._callback_sets = callback_sets
         self._phase_registry = PhaseRegistry()
+        self._failed_phase: str | None = None
+        self._failed_error: str | None = None
 
     async def on_initialize(self) -> None:
         """Discover custom phases, parse flow.yaml, construct phases, submit PhaseTrigger."""
@@ -105,7 +107,12 @@ class PhaseOrchestrator(EventBusOrchestrator):
     async def on_message_received(self, message: BaseMessage) -> None:
         """Stop the entire pipeline immediately when any phase fails."""
         if isinstance(message, PhaseFailedMessage):
+            self._failed_phase = message.phase_id
+            self._failed_error = message.error
             raise FatalProcessingError(f"Phase '{message.phase_id}' failed: {message.error}")
 
     async def on_finalize(self, exception: Exception | None) -> None:
-        pass
+        if self._failed_phase is not None:
+            raise RuntimeError(
+                f"Pipeline aborted: phase '{self._failed_phase}' failed: {self._failed_error or '<unknown>'}"
+            )

@@ -410,3 +410,71 @@ async def test_orphan_phase_logs_warning(tmp_path, caplog):
         await orchestrator.on_initialize()
 
     assert any("orphan" in record.message for record in caplog.records)
+
+
+# ---------------------------------------------------------------------------
+# PhaseOrchestrator.on_finalize
+# ---------------------------------------------------------------------------
+
+
+async def test_on_finalize_no_failure_is_noop():
+    orchestrator = PhaseOrchestrator(
+        flow_yaml_path=Path("/fake/flow.yaml"),
+        checkpoint_path=Path("/fake/checkpoints.yaml"),
+        runtime_variables={},
+        anthropic_client=MagicMock(),
+    )
+    await orchestrator.on_finalize(None)  # must not raise
+
+
+async def test_on_finalize_after_phase_failed_raises():
+    orchestrator = PhaseOrchestrator(
+        flow_yaml_path=Path("/fake/flow.yaml"),
+        checkpoint_path=Path("/fake/checkpoints.yaml"),
+        runtime_variables={},
+        anthropic_client=MagicMock(),
+    )
+    msg = PhaseFailedMessage(id="f1", phase_id="p1", error="boom")
+    with pytest.raises(FatalProcessingError):
+        await orchestrator.on_message_received(msg)
+
+    with pytest.raises(RuntimeError, match="Pipeline aborted.*p1.*boom"):
+        await orchestrator.on_finalize(None)
+
+
+def test_run_raises_runtime_error_when_phase_fails(tmp_path):
+    """Full pipeline: a failing phase must cause run() to raise RuntimeError."""
+    (tmp_path / "prompts").mkdir()
+    (tmp_path / "prompts" / "writer.md").write_text("system prompt")
+    (tmp_path / "flow.yaml").write_text(
+        dedent("""\
+        agents:
+          writer:
+            tools: []
+        phases:
+          failing:
+            type: FailingPhase
+            agent: writer
+            tasks:
+              - name: t1
+                prompt: do it
+        flow:
+          - phase: failing
+        """)
+    )
+
+    class FailingPhase(Phase):
+        async def process_message(self, message: PhaseTrigger) -> None:
+            raise RuntimeError("intentional failure")
+
+    orchestrator = PhaseOrchestrator(
+        flow_yaml_path=tmp_path / "flow.yaml",
+        checkpoint_path=tmp_path / "checkpoints.yaml",
+        runtime_variables={},
+        anthropic_client=MagicMock(),
+        grace_period=0.1,
+    )
+    orchestrator._phase_registry.register("FailingPhase", FailingPhase)
+
+    with pytest.raises(RuntimeError, match="Pipeline aborted"):
+        orchestrator.run()
