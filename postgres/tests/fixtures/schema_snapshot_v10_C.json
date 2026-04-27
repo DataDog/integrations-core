@@ -147,45 +147,6 @@
                 "owner": "postgres",
                 "tables": [
                     {
-                        "id": "16718",
-                        "name": "sample_foreign_d73a8c",
-                        "owner": "postgres",
-                        "columns": [
-                            {
-                                "name": "id",
-                                "data_type": "integer",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16718"
-                            },
-                            {
-                                "name": "name",
-                                "data_type": "text",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16718"
-                            }
-                        ],
-                        "indexes": [],
-                        "foreign_keys": []
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "id": "16390",
-        "name": "datadog_test",
-        "encoding": "SQL_ASCII",
-        "owner": "postgres",
-        "description": "Datadog test database",
-        "schemas": [
-            {
-                "id": "2200",
-                "name": "public",
-                "owner": "postgres",
-                "tables": [
-                    {
                         "id": "16654",
                         "name": "personsdup2",
                         "owner": "postgres",
@@ -301,7 +262,7 @@
         "description": "Datadog test database",
         "schemas": [
             {
-                "id": "16793",
+                "id": "16801",
                 "name": "datadog",
                 "owner": "postgres",
                 "tables": []
@@ -419,6 +380,45 @@
                                 "nullable": true,
                                 "default": null,
                                 "table_id": "16663"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": []
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "SQL_ASCII",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
+                        "id": "16720",
+                        "name": "sample_foreign_d73a8c",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "id",
+                                "data_type": "integer",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16720"
+                            },
+                            {
+                                "name": "name",
+                                "data_type": "text",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16720"
                             }
                         ],
                         "indexes": [],

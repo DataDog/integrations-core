@@ -101,6 +101,18 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" "$DBNAME" <<-'EOSQL'
     SECURITY DEFINER;
     ALTER FUNCTION dummy_function() OWNER TO datadog;
 EOSQL
+
+# pg_sequences was added in PG 10
+if [[ ! ("$PG_MAJOR" == 9.*) ]]; then
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" "$DBNAME" <<-'EOSQL'
+    CREATE OR REPLACE FUNCTION datadog.pg_sequences() RETURNS SETOF pg_sequences AS
+    $$ SELECT * FROM pg_catalog.pg_sequences; $$
+    LANGUAGE sql VOLATILE SECURITY DEFINER;
+
+    ALTER FUNCTION datadog.pg_sequences() owner to postgres;
+EOSQL
+fi
+
 done
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" dogs_nofunc <<-'EOSQL'

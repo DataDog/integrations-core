@@ -52,6 +52,10 @@ def instance_collect_function_metrics():
     return False
 
 
+def instance_collect_sequence_metrics():
+    return False
+
+
 def instance_data_directory():
     return '/usr/local/pgsql/data'
 

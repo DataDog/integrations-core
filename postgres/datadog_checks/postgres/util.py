@@ -704,6 +704,30 @@ SELECT v.datname, c.relname, v.phase,
     ],
 }
 
+SEQUENCE_METRICS = {
+    'name': 'sequence_metrics',
+    'query': """
+SELECT
+    current_database(),
+    schemaname, sequencename, sequenceowner, cycle,
+    min_value,
+    max_value,
+    last_value
+FROM datadog.pg_sequences()
+WHERE last_value IS NOT NULL;
+""",
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'schema', 'type': 'tag'},
+        {'name': 'sequence', 'type': 'tag'},
+        {'name': 'owner', 'type': 'tag'},
+        {'name': 'cycle', 'type': 'tag'},
+        {'name': 'sequence.min_value', 'type': 'gauge'},
+        {'name': 'sequence.max_value', 'type': 'gauge'},
+        {'name': 'sequence.last_value', 'type': 'gauge'},
+    ],
+}
+
 # Requires PG10+
 VACUUM_PROGRESS_METRICS_LT_17 = {
     'name': 'vacuum_progress_metrics',

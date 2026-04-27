@@ -37,6 +37,7 @@ from .common import (
     check_performance_metrics,
     check_physical_replication_slots,
     check_recovery_prefetch_metrics,
+    check_sequence_metrics,
     check_slru_metrics,
     check_snapshot_txid_metrics,
     check_stat_io_metrics,
@@ -466,6 +467,19 @@ def test_buffercache_metrics(aggregator, integration_check, pg_instance):
     unused_buffers_tags = base_tags + ['db:shared']
     unused_metric = 'postgresql.buffercache.unused_buffers'
     aggregator.assert_metric(unused_metric, count=1, tags=unused_buffers_tags)
+
+
+@requires_over_10
+def test_sequence_metrics(aggregator, integration_check, pg_instance):
+    pg_instance['collect_sequence_metrics'] = True
+    check = integration_check(pg_instance)
+
+    check.run()
+    expected_tags = _get_expected_tags(
+        check, pg_instance, schema='public', owner='postgres', cycle=False, sequence='dog_sequence', db=DB_NAME
+    )
+
+    check_sequence_metrics(aggregator, expected_tags)
 
 
 def test_locks_metrics_no_relations(aggregator, integration_check, pg_instance):

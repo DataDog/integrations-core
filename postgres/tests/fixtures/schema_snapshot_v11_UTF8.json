@@ -129,6 +129,63 @@
                 "owner": "postgres",
                 "tables": [
                     {
+                        "id": "16852",
+                        "name": "test_part_no_activity",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "filler",
+                                "data_type": "text",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16852"
+                            },
+                            {
+                                "name": "id",
+                                "data_type": "integer",
+                                "nullable": false,
+                                "default": "nextval('test_part_no_activity_id_seq'::regclass)",
+                                "table_id": "16852"
+                            }
+                        ],
+                        "indexes": [
+                            {
+                                "name": "test_part_no_activity_pkey",
+                                "table_id": "16852",
+                                "definition": "CREATE UNIQUE INDEX test_part_no_activity_pkey ON ONLY public.test_part_no_activity USING btree (id)",
+                                "is_unique": true,
+                                "is_exclusion": false,
+                                "is_immediate": true,
+                                "is_clustered": false,
+                                "is_valid": true,
+                                "is_checkxmin": false,
+                                "is_ready": true,
+                                "is_live": true,
+                                "is_replident": false,
+                                "is_partial": false
+                            }
+                        ],
+                        "foreign_keys": [],
+                        "num_partitions": 2,
+                        "partition_key": "RANGE (id)"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "UTF8",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
                         "id": "16747",
                         "name": "persons_indexed",
                         "owner": "postgres",
@@ -188,6 +245,62 @@
                         ],
                         "foreign_keys": [],
                         "toast_table": "pg_toast_16747"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "UTF8",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
+                        "id": "16844",
+                        "name": "test_part_no_children",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "filler",
+                                "data_type": "text",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16844"
+                            },
+                            {
+                                "name": "id",
+                                "data_type": "integer",
+                                "nullable": false,
+                                "default": "nextval('test_part_no_children_id_seq'::regclass)",
+                                "table_id": "16844"
+                            }
+                        ],
+                        "indexes": [
+                            {
+                                "name": "test_part_no_children_pkey",
+                                "table_id": "16844",
+                                "definition": "CREATE UNIQUE INDEX test_part_no_children_pkey ON ONLY public.test_part_no_children USING btree (id)",
+                                "is_unique": true,
+                                "is_exclusion": false,
+                                "is_immediate": true,
+                                "is_clustered": false,
+                                "is_valid": true,
+                                "is_checkxmin": false,
+                                "is_ready": true,
+                                "is_live": true,
+                                "is_replident": false,
+                                "is_partial": false
+                            }
+                        ],
+                        "foreign_keys": [],
+                        "partition_key": "RANGE (id)"
                     }
                 ]
             }
@@ -267,78 +380,6 @@
                 "owner": "postgres",
                 "tables": [
                     {
-                        "id": "16812",
-                        "name": "test_part",
-                        "owner": "postgres",
-                        "columns": [
-                            {
-                                "name": "filler",
-                                "data_type": "text",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16812"
-                            },
-                            {
-                                "name": "id",
-                                "data_type": "integer",
-                                "nullable": false,
-                                "default": "nextval('test_part_id_seq'::regclass)",
-                                "table_id": "16812"
-                            }
-                        ],
-                        "indexes": [
-                            {
-                                "name": "test_part_id",
-                                "table_id": "16812",
-                                "definition": "CREATE INDEX test_part_id ON ONLY public.test_part USING btree (id)",
-                                "is_unique": false,
-                                "is_exclusion": false,
-                                "is_immediate": true,
-                                "is_clustered": false,
-                                "is_valid": true,
-                                "is_checkxmin": false,
-                                "is_ready": true,
-                                "is_live": true,
-                                "is_replident": false,
-                                "is_partial": false
-                            },
-                            {
-                                "name": "test_part_pkey",
-                                "table_id": "16812",
-                                "definition": "CREATE UNIQUE INDEX test_part_pkey ON ONLY public.test_part USING btree (id)",
-                                "is_unique": true,
-                                "is_exclusion": false,
-                                "is_immediate": true,
-                                "is_clustered": false,
-                                "is_valid": true,
-                                "is_checkxmin": false,
-                                "is_ready": true,
-                                "is_live": true,
-                                "is_replident": false,
-                                "is_partial": false
-                            }
-                        ],
-                        "foreign_keys": [],
-                        "num_partitions": 2,
-                        "partition_key": "RANGE (id)"
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "id": "16390",
-        "name": "datadog_test",
-        "encoding": "UTF8",
-        "owner": "postgres",
-        "description": "Datadog test database",
-        "schemas": [
-            {
-                "id": "2200",
-                "name": "public",
-                "owner": "postgres",
-                "tables": [
-                    {
                         "id": "16705",
                         "name": "personsdup7",
                         "owner": "postgres",
@@ -384,21 +425,6 @@
                         "toast_table": "pg_toast_16705"
                     }
                 ]
-            }
-        ]
-    },
-    {
-        "id": "16390",
-        "name": "datadog_test",
-        "encoding": "UTF8",
-        "owner": "postgres",
-        "description": "Datadog test database",
-        "schemas": [
-            {
-                "id": "16926",
-                "name": "datadog",
-                "owner": "postgres",
-                "tables": []
             }
         ]
     },
@@ -537,62 +563,6 @@
                 "owner": "postgres",
                 "tables": [
                     {
-                        "id": "16842",
-                        "name": "test_part_no_children",
-                        "owner": "postgres",
-                        "columns": [
-                            {
-                                "name": "filler",
-                                "data_type": "text",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16842"
-                            },
-                            {
-                                "name": "id",
-                                "data_type": "integer",
-                                "nullable": false,
-                                "default": "nextval('test_part_no_children_id_seq'::regclass)",
-                                "table_id": "16842"
-                            }
-                        ],
-                        "indexes": [
-                            {
-                                "name": "test_part_no_children_pkey",
-                                "table_id": "16842",
-                                "definition": "CREATE UNIQUE INDEX test_part_no_children_pkey ON ONLY public.test_part_no_children USING btree (id)",
-                                "is_unique": true,
-                                "is_exclusion": false,
-                                "is_immediate": true,
-                                "is_clustered": false,
-                                "is_valid": true,
-                                "is_checkxmin": false,
-                                "is_ready": true,
-                                "is_live": true,
-                                "is_replident": false,
-                                "is_partial": false
-                            }
-                        ],
-                        "foreign_keys": [],
-                        "partition_key": "RANGE (id)"
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "id": "16390",
-        "name": "datadog_test",
-        "encoding": "UTF8",
-        "owner": "postgres",
-        "description": "Datadog test database",
-        "schemas": [
-            {
-                "id": "2200",
-                "name": "public",
-                "owner": "postgres",
-                "tables": [
-                    {
                         "id": "16681",
                         "name": "personsdup3",
                         "owner": "postgres",
@@ -699,6 +669,21 @@
                         "toast_table": "pg_toast_16699"
                     }
                 ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "UTF8",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "16934",
+                "name": "datadog",
+                "owner": "postgres",
+                "tables": []
             }
         ]
     },
@@ -941,45 +926,6 @@
                         "indexes": [],
                         "foreign_keys": [],
                         "toast_table": "pg_toast_16693"
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "id": "16390",
-        "name": "datadog_test",
-        "encoding": "UTF8",
-        "owner": "postgres",
-        "description": "Datadog test database",
-        "schemas": [
-            {
-                "id": "2200",
-                "name": "public",
-                "owner": "postgres",
-                "tables": [
-                    {
-                        "id": "16787",
-                        "name": "sample_foreign_d73a8c",
-                        "owner": "postgres",
-                        "columns": [
-                            {
-                                "name": "id",
-                                "data_type": "integer",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16787"
-                            },
-                            {
-                                "name": "name",
-                                "data_type": "text",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16787"
-                            }
-                        ],
-                        "indexes": [],
-                        "foreign_keys": []
                     }
                 ]
             }
@@ -1319,63 +1265,6 @@
                 "owner": "postgres",
                 "tables": [
                     {
-                        "id": "16850",
-                        "name": "test_part_no_activity",
-                        "owner": "postgres",
-                        "columns": [
-                            {
-                                "name": "filler",
-                                "data_type": "text",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16850"
-                            },
-                            {
-                                "name": "id",
-                                "data_type": "integer",
-                                "nullable": false,
-                                "default": "nextval('test_part_no_activity_id_seq'::regclass)",
-                                "table_id": "16850"
-                            }
-                        ],
-                        "indexes": [
-                            {
-                                "name": "test_part_no_activity_pkey",
-                                "table_id": "16850",
-                                "definition": "CREATE UNIQUE INDEX test_part_no_activity_pkey ON ONLY public.test_part_no_activity USING btree (id)",
-                                "is_unique": true,
-                                "is_exclusion": false,
-                                "is_immediate": true,
-                                "is_clustered": false,
-                                "is_valid": true,
-                                "is_checkxmin": false,
-                                "is_ready": true,
-                                "is_live": true,
-                                "is_replident": false,
-                                "is_partial": false
-                            }
-                        ],
-                        "foreign_keys": [],
-                        "num_partitions": 2,
-                        "partition_key": "RANGE (id)"
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "id": "16390",
-        "name": "datadog_test",
-        "encoding": "UTF8",
-        "owner": "postgres",
-        "description": "Datadog test database",
-        "schemas": [
-            {
-                "id": "2200",
-                "name": "public",
-                "owner": "postgres",
-                "tables": [
-                    {
                         "id": "16766",
                         "name": "pg_newtable",
                         "owner": "postgres",
@@ -1419,6 +1308,117 @@
                         "indexes": [],
                         "foreign_keys": [],
                         "toast_table": "pg_toast_16766"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "UTF8",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
+                        "id": "16814",
+                        "name": "test_part",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "filler",
+                                "data_type": "text",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16814"
+                            },
+                            {
+                                "name": "id",
+                                "data_type": "integer",
+                                "nullable": false,
+                                "default": "nextval('test_part_id_seq'::regclass)",
+                                "table_id": "16814"
+                            }
+                        ],
+                        "indexes": [
+                            {
+                                "name": "test_part_id",
+                                "table_id": "16814",
+                                "definition": "CREATE INDEX test_part_id ON ONLY public.test_part USING btree (id)",
+                                "is_unique": false,
+                                "is_exclusion": false,
+                                "is_immediate": true,
+                                "is_clustered": false,
+                                "is_valid": true,
+                                "is_checkxmin": false,
+                                "is_ready": true,
+                                "is_live": true,
+                                "is_replident": false,
+                                "is_partial": false
+                            },
+                            {
+                                "name": "test_part_pkey",
+                                "table_id": "16814",
+                                "definition": "CREATE UNIQUE INDEX test_part_pkey ON ONLY public.test_part USING btree (id)",
+                                "is_unique": true,
+                                "is_exclusion": false,
+                                "is_immediate": true,
+                                "is_clustered": false,
+                                "is_valid": true,
+                                "is_checkxmin": false,
+                                "is_ready": true,
+                                "is_live": true,
+                                "is_replident": false,
+                                "is_partial": false
+                            }
+                        ],
+                        "foreign_keys": [],
+                        "num_partitions": 2,
+                        "partition_key": "RANGE (id)"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "UTF8",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
+                        "id": "16789",
+                        "name": "sample_foreign_d73a8c",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "id",
+                                "data_type": "integer",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16789"
+                            },
+                            {
+                                "name": "name",
+                                "data_type": "text",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16789"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": []
                     }
                 ]
             }

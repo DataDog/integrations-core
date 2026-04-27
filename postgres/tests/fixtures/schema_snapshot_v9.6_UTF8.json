@@ -532,45 +532,6 @@
                 "owner": "postgres",
                 "tables": [
                     {
-                        "id": "16775",
-                        "name": "sample_foreign_d73a8c",
-                        "owner": "postgres",
-                        "columns": [
-                            {
-                                "name": "id",
-                                "data_type": "integer",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16775"
-                            },
-                            {
-                                "name": "name",
-                                "data_type": "text",
-                                "nullable": true,
-                                "default": null,
-                                "table_id": "16775"
-                            }
-                        ],
-                        "indexes": [],
-                        "foreign_keys": []
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "id": "16390",
-        "name": "datadog_test",
-        "encoding": "UTF8",
-        "owner": "postgres",
-        "description": "Datadog test database",
-        "schemas": [
-            {
-                "id": "2200",
-                "name": "public",
-                "owner": "postgres",
-                "tables": [
-                    {
                         "id": "16657",
                         "name": "personsdup1",
                         "owner": "postgres",
@@ -810,21 +771,6 @@
         "description": "Datadog test database",
         "schemas": [
             {
-                "id": "16844",
-                "name": "datadog",
-                "owner": "postgres",
-                "tables": []
-            }
-        ]
-    },
-    {
-        "id": "16390",
-        "name": "datadog_test",
-        "encoding": "UTF8",
-        "owner": "postgres",
-        "description": "Datadog test database",
-        "schemas": [
-            {
                 "id": "2200",
                 "name": "public",
                 "owner": "postgres",
@@ -1008,6 +954,45 @@
                 "owner": "postgres",
                 "tables": [
                     {
+                        "id": "16777",
+                        "name": "sample_foreign_d73a8c",
+                        "owner": "postgres",
+                        "columns": [
+                            {
+                                "name": "id",
+                                "data_type": "integer",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16777"
+                            },
+                            {
+                                "name": "name",
+                                "data_type": "text",
+                                "nullable": true,
+                                "default": null,
+                                "table_id": "16777"
+                            }
+                        ],
+                        "indexes": [],
+                        "foreign_keys": []
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "UTF8",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "2200",
+                "name": "public",
+                "owner": "postgres",
+                "tables": [
+                    {
                         "id": "16729",
                         "name": "personsdup13",
                         "owner": "postgres",
@@ -1114,6 +1099,21 @@
                         "toast_table": "pg_toast_16754"
                     }
                 ]
+            }
+        ]
+    },
+    {
+        "id": "16390",
+        "name": "datadog_test",
+        "encoding": "UTF8",
+        "owner": "postgres",
+        "description": "Datadog test database",
+        "schemas": [
+            {
+                "id": "16852",
+                "name": "datadog",
+                "owner": "postgres",
+                "tables": []
             }
         ]
     },

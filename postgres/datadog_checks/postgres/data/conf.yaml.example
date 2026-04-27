@@ -273,6 +273,12 @@ instances:
     #
     collect_bloat_metrics: false
 
+    ## @param collect_sequence_metrics - boolean - optional - default: false
+    ## If set to true, collects metrics regarding sequence from pg_sequences.
+    ## The function datadog.pg_sequences must be created to allow agent to read the last sequence value.
+    #
+    # collect_sequence_metrics: false
+
     ## @param collect_wal_metrics - boolean - optional
     ## Collect metrics about WAL file age.
     ##

@@ -393,6 +393,14 @@ files:
       value:
         type: boolean
         example: false
+    - name: collect_sequence_metrics
+      fleet_configurable: true
+      description: |
+        If set to true, collects metrics regarding sequence from pg_sequences.
+        The function datadog.pg_sequences must be created to allow agent to read the last sequence value.
+      value:
+        type: boolean
+        example: false
     - name: collect_wal_metrics
       fleet_configurable: true
       description: |
