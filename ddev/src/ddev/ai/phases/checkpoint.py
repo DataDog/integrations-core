@@ -36,14 +36,16 @@ class CheckpointManager:
         base_prompt = "Write a brief summary of what you accomplished in this phase."
         return f"{user_additions}\n\n{base_prompt}" if user_additions else base_prompt
 
-    def write_memory(self, phase_id: str, text: str) -> Path:
-        """Write agent-authored text to this phase's memory file."""
-        memory_path = self._path.parent / f"{phase_id}_memory.md"
-        self._ensure_dir()
-        memory_path.write_text(text, encoding="utf-8")
-        return memory_path.resolve()
+    def memory_path(self, phase_id: str) -> Path:
+        """Return the resolved path to a phase's memory file."""
+        return (self._path.parent / f"{phase_id}_memory.md").resolve()
 
-    def get_memory(self, phase_id: str) -> str:
+    def write_memory(self, phase_id: str, text: str) -> None:
+        """Write agent-authored text to this phase's memory file."""
+        self._ensure_dir()
+        self.memory_path(phase_id).write_text(text, encoding="utf-8")
+
+    def memory_content(self, phase_id: str) -> str:
         """Return the contents of a phase's memory file, or a NOT FOUND placeholder."""
-        memory_path = self._path.parent / f"{phase_id}_memory.md"
-        return memory_path.read_text(encoding="utf-8") if memory_path.exists() else f"<MEMORY NOT FOUND: {phase_id}>"
+        path = self.memory_path(phase_id)
+        return path.read_text(encoding="utf-8") if path.exists() else f"<MEMORY NOT FOUND: {phase_id}>"
