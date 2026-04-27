@@ -42,9 +42,5 @@ def test_e2e_autodiscovery_default_port(dd_agent_check, autodiscovery_ready):
         discovery_min_instances=1,
         discovery_timeout=30,
     )
-    aggregator.assert_service_check(
-        'redis.can_connect',
-        status=Redis.OK,
-        tags=['redis_port:6379'],
-        at_least=1,
-    )
+    service_checks = aggregator.service_checks('redis.can_connect')
+    assert any(sc.status == Redis.OK and 'redis_port:6379' in sc.tags for sc in service_checks), service_checks

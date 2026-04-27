@@ -10,7 +10,10 @@ from datadog_checks.redisdb import Redis
 from . import common
 from .common import REDIS_VERSION
 
-pytestmark = pytest.mark.e2e
+pytestmark = [
+    pytest.mark.e2e,
+    pytest.mark.skipif(common.AUTODISCOVERY, reason='Cluster e2e is not run in the autodiscovery env'),
+]
 
 
 def assert_common_metrics(aggregator):
