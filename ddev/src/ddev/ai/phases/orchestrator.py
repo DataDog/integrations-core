@@ -64,7 +64,11 @@ class PhaseOrchestrator(EventBusOrchestrator):
 
         config = FlowConfig.from_yaml(self._flow_yaml_path, config_dir)
 
-        for _, phase_config in config.phases.items():
+        flow_phase_ids = {entry.phase for entry in config.flow}
+        for phase_id, phase_config in config.phases.items():
+            if phase_id not in flow_phase_ids:
+                self._logger.warning("Phase %r is defined but not referenced in flow — it will not run", phase_id)
+                continue
             try:
                 self._phase_registry.get(phase_config.type)
             except ValueError as e:

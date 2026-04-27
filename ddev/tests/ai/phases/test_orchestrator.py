@@ -297,3 +297,116 @@ async def test_on_initialize_missing_agent_raises(tmp_path):
     )
     with pytest.raises(FlowConfigError):
         await orchestrator.on_initialize()
+
+
+# ---------------------------------------------------------------------------
+# PhaseOrchestrator.on_initialize — orphan-phase validation
+# ---------------------------------------------------------------------------
+
+
+async def test_orphan_phase_with_unknown_type_does_not_block_init(tmp_path):
+    """A phase defined in phases: but absent from flow: may have an unknown type — no error."""
+    (tmp_path / "prompts").mkdir()
+    (tmp_path / "prompts" / "writer.md").write_text("system prompt")
+    (tmp_path / "flow.yaml").write_text(
+        dedent("""\
+        agents:
+          writer:
+            tools: []
+        phases:
+          real:
+            type: Phase
+            agent: writer
+            tasks:
+              - name: t1
+                prompt: do it
+          orphan:
+            type: BogusType
+            agent: writer
+            tasks:
+              - name: t2
+                prompt: ignored
+        flow:
+          - phase: real
+        """)
+    )
+    orchestrator = PhaseOrchestrator(
+        flow_yaml_path=tmp_path / "flow.yaml",
+        checkpoint_path=tmp_path / "checkpoints.yaml",
+        runtime_variables={},
+        anthropic_client=MagicMock(),
+    )
+    await orchestrator.on_initialize()
+
+    processors = orchestrator._subscribers.get(PhaseTrigger, [])
+    assert {p.name for p in processors} == {"real"}
+
+
+async def test_phase_in_flow_with_unknown_type_raises(tmp_path):
+    """A phase referenced from flow: with an unknown type must still raise FlowConfigError."""
+    (tmp_path / "prompts").mkdir()
+    (tmp_path / "prompts" / "writer.md").write_text("system prompt")
+    (tmp_path / "flow.yaml").write_text(
+        dedent("""\
+        agents:
+          writer:
+            tools: []
+        phases:
+          a:
+            type: NotARealPhase
+            agent: writer
+            tasks:
+              - name: t1
+                prompt: do it
+        flow:
+          - phase: a
+        """)
+    )
+    orchestrator = PhaseOrchestrator(
+        flow_yaml_path=tmp_path / "flow.yaml",
+        checkpoint_path=tmp_path / "checkpoints.yaml",
+        runtime_variables={},
+        anthropic_client=MagicMock(),
+    )
+    with pytest.raises(FlowConfigError, match="Unknown phase type"):
+        await orchestrator.on_initialize()
+
+
+async def test_orphan_phase_logs_warning(tmp_path, caplog):
+    """An orphan phase must emit a warning containing its phase id."""
+    import logging
+
+    (tmp_path / "prompts").mkdir()
+    (tmp_path / "prompts" / "writer.md").write_text("system prompt")
+    (tmp_path / "flow.yaml").write_text(
+        dedent("""\
+        agents:
+          writer:
+            tools: []
+        phases:
+          real:
+            type: Phase
+            agent: writer
+            tasks:
+              - name: t1
+                prompt: do it
+          orphan:
+            type: Phase
+            agent: writer
+            tasks:
+              - name: t2
+                prompt: ignored
+        flow:
+          - phase: real
+        """)
+    )
+    orchestrator = PhaseOrchestrator(
+        flow_yaml_path=tmp_path / "flow.yaml",
+        checkpoint_path=tmp_path / "checkpoints.yaml",
+        runtime_variables={},
+        anthropic_client=MagicMock(),
+    )
+    with caplog.at_level(logging.WARNING):
+        await orchestrator.on_initialize()
+
+    assert any("orphan" in record.message for record in caplog.records)
