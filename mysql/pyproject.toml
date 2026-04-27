@@ -36,9 +36,9 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "boto3==1.42.72",
-    "cachetools==7.0.5",
-    "cryptography==46.0.7",
+    "boto3==1.42.96",
+    "cachetools==7.0.6",
+    "cryptography==47.0.0",
     "pymysql==1.1.2",
 ]
 
