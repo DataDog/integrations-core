@@ -4,12 +4,14 @@
 
 import sys
 from pathlib import Path
+from textwrap import dedent
 from types import ModuleType
 from unittest.mock import MagicMock
 
 import pytest
 
 from ddev.ai.phases.base import Phase, PhaseRegistry
+from ddev.ai.phases.config import FlowConfigError
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.orchestrator import PhaseOrchestrator, _discover_and_register_phases
 from ddev.event_bus.exceptions import FatalProcessingError
@@ -107,3 +109,141 @@ async def test_on_message_received_ignores_other_messages():
     # These should not raise
     await orchestrator.on_message_received(PhaseTrigger(id="start", phase_id=None))
     await orchestrator.on_message_received(PhaseTrigger(id="f1", phase_id="p1"))
+
+
+# ---------------------------------------------------------------------------
+# PhaseOrchestrator.on_initialize
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def minimal_flow(tmp_path):
+    """Two-phase flow: 'a' is root, 'b' depends on 'a'."""
+    (tmp_path / "prompts").mkdir()
+    (tmp_path / "prompts" / "writer.md").write_text("system prompt")
+    (tmp_path / "flow.yaml").write_text(
+        dedent("""\
+        agents:
+          writer:
+            tools: []
+        phases:
+          a:
+            type: Phase
+            agent: writer
+            tasks:
+              - name: task_a
+                prompt: task a
+          b:
+            type: Phase
+            agent: writer
+            tasks:
+              - name: task_b
+                prompt: task b
+        flow:
+          - phase: a
+          - phase: b
+            dependencies: [a]
+        """)
+    )
+    return tmp_path
+
+
+async def test_on_initialize_registers_all_flow_phases(minimal_flow):
+    orchestrator = PhaseOrchestrator(
+        flow_yaml_path=minimal_flow / "flow.yaml",
+        checkpoint_path=minimal_flow / "checkpoints.yaml",
+        runtime_variables={},
+        anthropic_client=MagicMock(),
+    )
+    await orchestrator.on_initialize()
+
+    processors = orchestrator._subscribers.get(PhaseTrigger, [])
+    phase_names = {p.name for p in processors}
+    assert phase_names == {"a", "b"}
+
+
+async def test_on_initialize_wires_dependencies(minimal_flow):
+    orchestrator = PhaseOrchestrator(
+        flow_yaml_path=minimal_flow / "flow.yaml",
+        checkpoint_path=minimal_flow / "checkpoints.yaml",
+        runtime_variables={},
+        anthropic_client=MagicMock(),
+    )
+    await orchestrator.on_initialize()
+
+    processors = orchestrator._subscribers.get(PhaseTrigger, [])
+    phases_by_name = {p.name: p for p in processors}
+    assert phases_by_name["a"]._dependencies == set()
+    assert phases_by_name["b"]._dependencies == {"a"}
+
+
+async def test_on_initialize_submits_initial_phase_trigger(minimal_flow):
+    orchestrator = PhaseOrchestrator(
+        flow_yaml_path=minimal_flow / "flow.yaml",
+        checkpoint_path=minimal_flow / "checkpoints.yaml",
+        runtime_variables={},
+        anthropic_client=MagicMock(),
+    )
+    await orchestrator.on_initialize()
+
+    assert not orchestrator._queue.empty()
+    msg = orchestrator._queue.get_nowait()
+    assert isinstance(msg, PhaseTrigger)
+    assert msg.phase_id is None
+
+
+async def test_on_initialize_unknown_phase_type_raises_flow_config_error(tmp_path):
+    (tmp_path / "prompts").mkdir()
+    (tmp_path / "prompts" / "writer.md").write_text("system prompt")
+    (tmp_path / "flow.yaml").write_text(
+        dedent("""\
+        agents:
+          writer:
+            tools: []
+        phases:
+          a:
+            type: NotARealPhase
+            agent: writer
+            tasks:
+              - name: task_a
+                prompt: task a
+        flow:
+          - phase: a
+        """)
+    )
+    orchestrator = PhaseOrchestrator(
+        flow_yaml_path=tmp_path / "flow.yaml",
+        checkpoint_path=tmp_path / "checkpoints.yaml",
+        runtime_variables={},
+        anthropic_client=MagicMock(),
+    )
+    with pytest.raises(FlowConfigError, match="Unknown phase type"):
+        await orchestrator.on_initialize()
+
+
+async def test_on_initialize_missing_agent_raises(tmp_path):
+    (tmp_path / "prompts").mkdir()
+    (tmp_path / "flow.yaml").write_text(
+        dedent("""\
+        agents:
+          writer:
+            tools: []
+        phases:
+          a:
+            type: Phase
+            agent: nonexistent_agent
+            tasks:
+              - name: task_a
+                prompt: task a
+        flow:
+          - phase: a
+        """)
+    )
+    orchestrator = PhaseOrchestrator(
+        flow_yaml_path=tmp_path / "flow.yaml",
+        checkpoint_path=tmp_path / "checkpoints.yaml",
+        runtime_variables={},
+        anthropic_client=MagicMock(),
+    )
+    with pytest.raises(FlowConfigError):
+        await orchestrator.on_initialize()
