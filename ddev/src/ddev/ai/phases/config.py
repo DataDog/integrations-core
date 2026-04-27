@@ -88,6 +88,7 @@ class FlowConfig(BaseModel):
     @model_validator(mode="after")
     def cross_references(self) -> "FlowConfig":
         """Validate all cross-references between agents, phases, and dependencies."""
+        scheduled = {entry.phase for entry in self.flow}
         seen: set[str] = set()
         for entry in self.flow:
             if entry.phase in seen:
@@ -98,6 +99,8 @@ class FlowConfig(BaseModel):
             for dep in entry.dependencies:
                 if dep not in self.phases:
                     raise ValueError(f"Phase {entry.phase!r} depends on unknown phase: {dep!r}")
+                if dep not in scheduled:
+                    raise ValueError(f"Phase {entry.phase!r} depends on {dep!r} which is not scheduled in flow")
 
         for phase_id, phase in self.phases.items():
             if phase.agent not in self.agents:

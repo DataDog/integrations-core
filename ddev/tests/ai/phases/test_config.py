@@ -157,6 +157,19 @@ def test_flow_config_unknown_dependency():
         FlowConfig.model_validate(raw)
 
 
+def test_flow_config_dependency_not_scheduled_in_flow():
+    raw = {
+        "agents": {"writer": {"tools": []}},
+        "phases": {
+            "p1": {"agent": "writer", "tasks": [{"name": "t1", "prompt": "Do it."}]},
+            "p2": {"agent": "writer", "tasks": [{"name": "t2", "prompt": "Review it."}]},
+        },
+        "flow": [{"phase": "p2", "dependencies": ["p1"]}],
+    }
+    with pytest.raises(ValidationError, match="not scheduled in flow"):
+        FlowConfig.model_validate(raw)
+
+
 def test_flow_config_unknown_agent_in_phase():
     raw = _minimal_config()
     raw["phases"]["p1"]["agent"] = "nonexistent"

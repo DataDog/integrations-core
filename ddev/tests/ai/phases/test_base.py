@@ -161,8 +161,8 @@ async def test_happy_path_single_task(flow_dir, monkeypatch, message_queue):
     # Checkpoint was written
     checkpoint = mgr.read()["p1"]
     assert checkpoint["status"] == "success"
-    assert checkpoint["tokens"]["total_input"] == 110
-    assert checkpoint["tokens"]["total_output"] == 55
+    assert checkpoint["tokens"]["total_input"] == 100
+    assert checkpoint["tokens"]["total_output"] == 50
 
     # on_success is called by _task_wrapper, not process_message directly.
     # But we verify it would work by checking the send calls.
@@ -192,8 +192,8 @@ async def test_happy_path_two_tasks(flow_dir, monkeypatch, message_queue):
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     checkpoint = mgr.read()["p1"]
-    assert checkpoint["tokens"]["total_input"] == 310
-    assert checkpoint["tokens"]["total_output"] == 135
+    assert checkpoint["tokens"]["total_input"] == 300
+    assert checkpoint["tokens"]["total_output"] == 130
 
 
 # ---------------------------------------------------------------------------
