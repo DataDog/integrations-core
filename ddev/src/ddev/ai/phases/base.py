@@ -42,7 +42,7 @@ def _make_memory_resolver(checkpoint_manager: CheckpointManager) -> Callable[[st
 
     def resolve(key: str) -> str:
         if key.endswith("_memory"):
-            return checkpoint_manager.get_memory(key.removesuffix("_memory"))
+            return checkpoint_manager.memory_content(key.removesuffix("_memory"))
         return f"<VARIABLE UNDEFINED: {key}>"
 
     return resolve
@@ -228,7 +228,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         total_output += response.usage.output_tokens
 
         # 10. Persist the memory file
-        memory_path = self._checkpoint_manager.write_memory(self._phase_id, response.text)
+        self._checkpoint_manager.write_memory(self._phase_id, response.text)
 
         # 11. Write the success checkpoint (with memory_path and final token totals)
         self._checkpoint_manager.write_phase_checkpoint(
@@ -238,7 +238,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
                 "started_at": self._started_at.isoformat(),
                 "finished_at": datetime.now(UTC).isoformat(),
                 "tokens": {"total_input": total_input, "total_output": total_output},
-                "memory_path": str(memory_path),
+                "memory_path": str(self._checkpoint_manager.memory_path(self._phase_id)),
             },
         )
 

@@ -90,32 +90,40 @@ def test_build_memory_prompt_with_additions(manager):
 
 
 # ---------------------------------------------------------------------------
-# write_memory / get_memory
+# write_memory / memory_content / memory_path
 # ---------------------------------------------------------------------------
 
 
 def test_write_memory_and_read_back(manager):
-    result = manager.write_memory("draft", "Created integration.py and tests.")
-    assert manager.get_memory("draft") == "Created integration.py and tests."
-    assert isinstance(result, Path)
-    assert result.is_absolute()
+    manager.write_memory("draft", "Created integration.py and tests.")
+    assert manager.memory_content("draft") == "Created integration.py and tests."
 
 
 def test_write_memory_overwrites(manager):
     manager.write_memory("draft", "first version")
-    result = manager.write_memory("draft", "second version")
-    assert manager.get_memory("draft") == "second version"
-    assert isinstance(result, Path)
-    assert result.is_absolute()
+    manager.write_memory("draft", "second version")
+    assert manager.memory_content("draft") == "second version"
 
 
-def test_get_memory_absent_returns_placeholder(manager):
-    assert manager.get_memory("nonexistent") == "<MEMORY NOT FOUND: nonexistent>"
+def test_memory_content_absent_returns_placeholder(manager):
+    assert manager.memory_content("nonexistent") == "<MEMORY NOT FOUND: nonexistent>"
+
+
+def test_memory_path_returns_absolute_path(manager):
+    path = manager.memory_path("phase1")
+    assert isinstance(path, Path)
+    assert path.is_absolute()
+    assert path.name == "phase1_memory.md"
+
+
+def test_memory_path_before_write(manager):
+    path = manager.memory_path("phase1")
+    assert not path.exists()
 
 
 def test_memory_file_location(manager):
-    returned_path = manager.write_memory("phase1", "content")
+    manager.write_memory("phase1", "content")
     expected_path = manager._path.parent / "phase1_memory.md"
     assert expected_path.exists()
     assert expected_path.read_text() == "content"
-    assert returned_path == expected_path.resolve()
+    assert manager.memory_path("phase1") == expected_path.resolve()

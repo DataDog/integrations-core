@@ -38,7 +38,7 @@ def test_resolver_non_memory_key():
     mgr = MagicMock()
     resolver = _make_memory_resolver(mgr)
     assert resolver("some_variable") == "<VARIABLE UNDEFINED: some_variable>"
-    mgr.get_memory.assert_not_called()
+    mgr.memory_content.assert_not_called()
 
 
 def test_resolver_absent_memory(tmp_path):
@@ -169,7 +169,7 @@ async def test_happy_path_single_task(flow_dir, monkeypatch, message_queue):
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     # Memory was written
-    assert mgr.get_memory("p1") == "summary"
+    assert mgr.memory_content("p1") == "summary"
 
     # Checkpoint was written with memory_path and final token totals (including memory step)
     checkpoint = mgr.read()["p1"]
