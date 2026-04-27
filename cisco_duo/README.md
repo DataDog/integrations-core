@@ -13,6 +13,8 @@ The Cisco Duo integration seamlessly collects multi-factor authentication (MFA) 
 
 ## Setup
 
+**Note**: This integration does not support Duo Federal accounts (`duofederal.com` domains). Only standard Duo accounts (`duosecurity.com` domains) are supported.
+
 ### Configuration
 
 #### Get API Credentials of Cisco Duo
