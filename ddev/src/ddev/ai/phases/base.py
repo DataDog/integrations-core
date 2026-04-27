@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import logging
 from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
@@ -223,9 +224,15 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         memory_prompt = self._checkpoint_manager.build_memory_prompt(user_additions)
 
         # 9. Call the agent for the summary — text-only (allowed_tools=[])
+        for cb_set in self._callback_sets:
+            await cb_set.fire_before_agent_send(1)
+
         response = await agent.send(memory_prompt, allowed_tools=[])
         total_input += response.usage.input_tokens
         total_output += response.usage.output_tokens
+
+        for cb_set in self._callback_sets:
+            await cb_set.fire_agent_response(response, 1)
 
         # 10. Persist the memory file
         self._checkpoint_manager.write_memory(self._phase_id, response.text)
@@ -264,7 +271,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
                 },
             )
         except Exception:
-            pass
+            logging.getLogger(__name__).exception("Failed to write failure checkpoint for phase %s", self._phase_id)
         self.submit_message(
             PhaseFailedMessage(
                 id=f"{self._phase_id}_failed_{message.id}",

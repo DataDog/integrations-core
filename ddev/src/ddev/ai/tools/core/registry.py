@@ -25,7 +25,7 @@ class ToolContext:
     owner_id: str
 
 
-def _plain_factory(tool_cls: type, ctx: ToolContext) -> ToolProtocol:
+def _plain_factory(tool_cls: type[ToolProtocol], ctx: ToolContext) -> ToolProtocol:
     return tool_cls()
 
 

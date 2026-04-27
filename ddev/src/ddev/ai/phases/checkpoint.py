@@ -15,8 +15,7 @@ class CheckpointManager:
         self._path = path
 
     def _ensure_dir(self) -> None:
-        if not self._path.parent.exists():
-            self._path.parent.mkdir(parents=True, exist_ok=True)
+        self._path.parent.mkdir(parents=True, exist_ok=True)
 
     def read(self) -> dict[str, Any]:
         """Return full checkpoint data, keyed by phase_id. Empty dict if file absent."""
