@@ -8,7 +8,6 @@ from collections import namedtuple
 import click
 from semver import VersionInfo
 
-from datadog_checks.dev.subprocess import SubprocessResult
 from datadog_checks.dev.tooling.commands.console import (
     CONTEXT_SETTINGS,
     abort,
@@ -22,14 +21,9 @@ from datadog_checks.dev.tooling.utils import complete_testable_checks, get_valid
 ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, from_contributor')
 
 
-def towncrier(target_dir, cmd, *cmd_args, quiet: bool = False) -> SubprocessResult:
+def towncrier(target_dir, cmd, *cmd_args):
     '''
-    Run a towncrier subcommand with its arguments in ``target_dir`` and return its result.
-
-    By default the captured stdout is echoed to the terminal as soon as towncrier
-    finishes. Pass ``quiet=True`` to suppress that auto-echo so the caller can format,
-    redirect, or persist the captured output via the returned ``SubprocessResult``
-    (which exposes ``stdout``, ``stderr``, and ``code``).
+    Run towncrier command with its arguments in target_dir.
     '''
     tc_res = run_or_abort(
         [
@@ -45,8 +39,7 @@ def towncrier(target_dir, cmd, *cmd_args, quiet: bool = False) -> SubprocessResu
         ],
         capture='both',
     )
-    if not quiet:
-        echo_info(tc_res.stdout.rstrip())
+    echo_info(tc_res.stdout.rstrip())
     return tc_res
 
 

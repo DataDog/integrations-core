@@ -32,7 +32,7 @@ def build(app: Application, targets: tuple[str, ...], output_file: Path | None):
     inspected without touching the integration's CHANGELOG.md or removing the news
     fragments.
     """
-    from datadog_checks.dev.tooling.commands.release.changelog import towncrier
+    from ddev.cli.release.changelog.towncrier import towncrier
 
     integrations: list[Integration] = []
     for target in targets:
@@ -44,7 +44,9 @@ def build(app: Application, targets: tuple[str, ...], output_file: Path | None):
     rendered = [
         (
             integration.name,
-            towncrier(str(integration.path), 'build', '--draft', '--version', 'Unreleased', quiet=True).stdout.strip(),
+            towncrier(
+                app, integration.path, 'build', '--draft', '--version', 'Unreleased', display_output=False
+            ).stdout.strip(),
         )
         for integration in integrations
     ]

@@ -539,11 +539,11 @@ def test_build_command_argument_errors(ddev, repo_with_towncrier, args, expected
 
 
 def test_build_command_surfaces_towncrier_failure(ddev, build_fragments, mocker):
-    from datadog_checks.dev.subprocess import SubprocessResult
+    import subprocess
 
     mocker.patch(
-        'datadog_checks.dev.tooling.commands.console.run_command',
-        return_value=SubprocessResult(stdout='', stderr='boom', code=1),
+        'ddev.utils.platform.Platform.run_command',
+        return_value=subprocess.CompletedProcess(args=[], returncode=1, stdout='', stderr='boom'),
     )
 
     result = ddev('release', 'changelog', 'build', 'ddev')
