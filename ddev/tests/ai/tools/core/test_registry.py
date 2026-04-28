@@ -125,3 +125,61 @@ async def test_empty_registry_always_returns_unknown_error():
     result = await registry.run("anything", {})
     assert result.success is False
     assert result.error is not None
+
+
+# ---------------------------------------------------------------------------
+# ToolRegistry.available_tool_names
+# ---------------------------------------------------------------------------
+
+
+def test_available_tool_names_returns_non_empty_list():
+    names = ToolRegistry.available_tool_names()
+    assert isinstance(names, list)
+    assert len(names) > 0
+
+
+def test_available_tool_names_returns_fresh_copy():
+    a = ToolRegistry.available_tool_names()
+    b = ToolRegistry.available_tool_names()
+    assert a == b
+    assert a is not b
+
+
+# ---------------------------------------------------------------------------
+# ToolRegistry.from_names
+# ---------------------------------------------------------------------------
+
+
+def test_from_names_empty():
+    registry = ToolRegistry.from_names([])
+    assert registry.definitions == []
+
+
+def test_from_names_unknown_raises():
+    with pytest.raises(ValueError, match="Unknown tool name: 'teleport'"):
+        ToolRegistry.from_names(["teleport"])
+
+
+@pytest.mark.parametrize("name", ToolRegistry.available_tool_names())
+def test_from_names_each_known_tool(name):
+    registry = ToolRegistry.from_names([name])
+    assert len(registry.definitions) == 1
+    assert registry.definitions[0]["name"] == name
+
+
+def test_from_names_all_at_once():
+    all_names = ToolRegistry.available_tool_names()
+    registry = ToolRegistry.from_names(all_names)
+    built_names = {d["name"] for d in registry.definitions}
+    assert built_names == set(all_names)
+
+
+def test_from_names_fs_tools_share_file_registry():
+    """All file-system tools in the same registry share a single FileRegistry."""
+    fs_names = [n for n in ToolRegistry.available_tool_names() if n.endswith("_file")]
+    if len(fs_names) < 2:
+        pytest.skip("Need at least 2 fs tools to test shared registry")
+    registry = ToolRegistry.from_names(fs_names)
+    tools = list(registry._tools.values())
+    registries = [t._registry for t in tools]
+    assert all(r is registries[0] for r in registries)
