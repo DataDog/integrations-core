@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """End-to-end policy enforcement: tools must refuse denied paths."""
 
+from unittest.mock import AsyncMock, patch
+
 import pytest
 
 from ddev.ai.tools.fs.append_file import AppendFileTool
@@ -12,6 +14,7 @@ from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.fs.mkdir import MkdirTool
 from ddev.ai.tools.fs.read_file import ReadFileTool
+from ddev.ai.tools.shell.grep import GrepTool
 
 OWNER_ID = "test-agent"
 
@@ -73,7 +76,7 @@ async def test_append_file_refuses_outside_write_root(tmp_path, sandboxed_regist
 
 
 async def test_mkdir_refuses_outside_write_root(tmp_path, sandboxed_registry) -> None:
-    tool = MkdirTool(sandboxed_registry, OWNER_ID)
+    tool = MkdirTool(sandboxed_registry.policy)
     outside = tmp_path.parent / "outside_dir"
     result = await tool.run({"path": str(outside)})
     assert result.success is False
@@ -82,7 +85,7 @@ async def test_mkdir_refuses_outside_write_root(tmp_path, sandboxed_registry) ->
 
 
 async def test_mkdir_allows_inside_write_root(sandbox, sandboxed_registry) -> None:
-    tool = MkdirTool(sandboxed_registry, OWNER_ID)
+    tool = MkdirTool(sandboxed_registry.policy)
     target = sandbox / "a" / "b" / "c"
     result = await tool.run({"path": str(target)})
     assert result.success is True
@@ -167,3 +170,67 @@ async def test_each_agent_can_edit_after_its_own_read(sandbox) -> None:
     )
     assert result.success is True
     assert target.read_text() == "three"
+
+
+# ---------------------------------------------------------------------------
+# GrepTool policy enforcement
+# ---------------------------------------------------------------------------
+
+
+async def test_grep_refuses_denied_root(tmp_path) -> None:
+    policy = FileAccessPolicy(read_deny_names=(), read_deny_roots=(str(tmp_path),))
+    tool = GrepTool(policy)
+    with patch("ddev.ai.tools.shell.grep.run_command", new=AsyncMock()) as mock_run:
+        result = await tool.run({"pattern": "secret", "path": str(tmp_path / "foo")})
+    assert result.success is False
+    assert "Read denied" in result.error
+    mock_run.assert_not_called()
+
+
+async def test_grep_refuses_denied_name(tmp_path) -> None:
+    policy = FileAccessPolicy(read_deny_names=(".env",), read_deny_roots=())
+    tool = GrepTool(policy)
+    with patch("ddev.ai.tools.shell.grep.run_command", new=AsyncMock()) as mock_run:
+        result = await tool.run({"pattern": "SECRET", "path": str(tmp_path / ".env")})
+    assert result.success is False
+    assert "Read denied" in result.error
+    mock_run.assert_not_called()
+
+
+async def test_grep_allows_normal_path(tmp_path) -> None:
+    target = tmp_path / "data.txt"
+    target.write_text("hello world")
+    policy = FileAccessPolicy(read_deny_names=(), read_deny_roots=())
+    tool = GrepTool(policy)
+    result = await tool.run({"pattern": "hello", "path": str(target)})
+    assert result.success is True
+
+
+# ---------------------------------------------------------------------------
+# Tilde-path canonicalization for write tools
+# ---------------------------------------------------------------------------
+
+
+async def test_create_file_with_tilde_path_writes_to_home_when_authorized(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("HOME", str(tmp_path))
+    policy = FileAccessPolicy(write_root=tmp_path, read_deny_names=(), read_deny_roots=())
+    registry = FileRegistry(policy=policy)
+    tool = CreateFileTool(registry, OWNER_ID)
+
+    result = await tool.run({"path": "~/x.txt", "content": "hello"})
+
+    assert result.success is True
+    assert (tmp_path / "x.txt").read_text() == "hello"
+
+
+async def test_create_file_with_tilde_path_refused_when_outside_write_root(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("HOME", str(tmp_path))
+    policy = FileAccessPolicy(write_root=tmp_path / "sub", read_deny_names=(), read_deny_roots=())
+    registry = FileRegistry(policy=policy)
+    tool = CreateFileTool(registry, OWNER_ID)
+
+    result = await tool.run({"path": "~/x.txt", "content": "hello"})
+
+    assert result.success is False
+    assert "outside write root" in result.error
+    assert not (tmp_path / "x.txt").exists()

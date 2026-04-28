@@ -1,34 +1,37 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from pathlib import Path
 from typing import Annotated
 
 from pydantic import Field
 
-from ddev.ai.tools.core.base import BaseToolInput
+from ddev.ai.tools.core.base import BaseTool, BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
 
-from .base import FileRegistryTool
+from .file_access_policy import FileAccessError, FileAccessPolicy
 
 
 class MkdirInput(BaseToolInput):
     path: Annotated[str, Field(description="Path of the directory to create")]
 
 
-class MkdirTool(FileRegistryTool[MkdirInput]):
+class MkdirTool(BaseTool[MkdirInput]):
     """Creates a directory at the given path, including any missing parent directories.
     Use to create directories for config files, logs, source code.
     Writes are restricted to the configured write root."""
+
+    def __init__(self, policy: FileAccessPolicy) -> None:
+        self._policy = policy
 
     @property
     def name(self) -> str:
         return "mkdir"
 
     async def __call__(self, tool_input: MkdirInput) -> ToolResult:
-        if fail := self._assert_writable(tool_input.path):
-            return fail
-        path = Path(tool_input.path).resolve()
+        try:
+            path = self._policy.assert_writable(tool_input.path)
+        except FileAccessError as e:
+            return ToolResult(success=False, error=str(e))
         try:
             path.mkdir(parents=True, exist_ok=True)
         except OSError as e:

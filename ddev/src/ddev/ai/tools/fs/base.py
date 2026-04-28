@@ -6,7 +6,6 @@ from pathlib import Path
 from ddev.ai.tools.core.base import BaseTool, BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
 
-from .file_access_policy import FileAccessError
 from .file_registry import FileRegistry
 
 
@@ -24,19 +23,11 @@ class FileRegistryTool[TInput: BaseToolInput](BaseTool[TInput]):
     def _register(self, path: str, content: str) -> None:
         self._registry.record(self._owner_id, path, content)
 
-    def _assert_writable(self, path: str) -> ToolResult | None:
-        try:
-            self._registry.policy.assert_writable(path)
-        except FileAccessError as e:
-            return ToolResult(success=False, error=str(e))
-        return None
+    def _assert_writable(self, path: str) -> Path:
+        return self._registry.policy.assert_writable(path)
 
-    def _assert_readable(self, path: str) -> ToolResult | None:
-        try:
-            self._registry.policy.assert_readable(path)
-        except FileAccessError as e:
-            return ToolResult(success=False, error=str(e))
-        return None
+    def _assert_readable(self, path: str) -> Path:
+        return self._registry.policy.assert_readable(path)
 
     def _read_verified(self, path: str) -> tuple[str, ToolResult | None]:
         """Read file content and verify it matches this agent's last recorded hash."""

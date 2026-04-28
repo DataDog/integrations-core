@@ -5,6 +5,21 @@ from collections.abc import Iterable
 from fnmatch import fnmatch
 from pathlib import Path
 
+
+def canonicalize_path(path: str | Path) -> Path:
+    """Single source of truth for path canonicalization across the fs layer.
+
+    Every component that compares, indexes, or operates on filesystem paths
+    must run them through this function so the policy, the tools, and the
+    registry agree on what path each input names.
+
+    ``strict=False`` allows resolving paths for files that don't exist yet
+    (e.g. pre-creation checks). Idempotent: calling on an already-canonical
+    path returns the same path.
+    """
+    return Path(path).expanduser().resolve(strict=False)
+
+
 DEFAULT_READ_DENY_NAMES: tuple[str, ...] = (
     ".env",
     ".env.*",
@@ -60,31 +75,37 @@ class FileAccessPolicy:
         read_deny_names: Iterable[str] = DEFAULT_READ_DENY_NAMES,
         read_deny_roots: Iterable[str] = DEFAULT_READ_DENY_ROOTS,
     ) -> None:
-        self._write_root = write_root.expanduser().resolve() if write_root is not None else None
+        self._write_root = canonicalize_path(write_root) if write_root is not None else None
         self._deny_names: tuple[str, ...] = tuple(read_deny_names)
-        self._deny_roots: tuple[Path, ...] = tuple(Path(r).expanduser().resolve() for r in read_deny_roots)
+        self._deny_roots: tuple[Path, ...] = tuple(canonicalize_path(r) for r in read_deny_roots)
 
     @property
     def write_root(self) -> Path | None:
         return self._write_root
 
-    def _resolve(self, path: str) -> Path:
-        # strict=False allows validating paths for files that don't exist yet (e.g. pre-creation checks)
-        return Path(path).expanduser().resolve(strict=False)
+    @property
+    def deny_names(self) -> tuple[str, ...]:
+        return self._deny_names
+
+    @property
+    def deny_roots(self) -> tuple[Path, ...]:
+        return self._deny_roots
 
     def _is_denied(self, resolved: Path) -> bool:
         if any(fnmatch(resolved.name, pat) for pat in self._deny_names):
             return True
         return any(resolved.is_relative_to(root) for root in self._deny_roots)
 
-    def assert_readable(self, path: str) -> None:
-        resolved = self._resolve(path)
+    def assert_readable(self, path: str | Path) -> Path:
+        resolved = canonicalize_path(path)
         if self._is_denied(resolved):
             raise FileAccessError(f"Read denied by policy: {resolved}")
+        return resolved
 
-    def assert_writable(self, path: str) -> None:
-        resolved = self._resolve(path)
+    def assert_writable(self, path: str | Path) -> Path:
+        resolved = canonicalize_path(path)
         if self._is_denied(resolved):
             raise FileAccessError(f"Write denied by policy: {resolved}")
         if self._write_root is not None and not resolved.is_relative_to(self._write_root):
             raise FileAccessError(f"Write denied: {resolved} is outside write root {self._write_root}")
+        return resolved

@@ -3,7 +3,50 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from ddev.ai.tools.fs.file_access_policy import FileAccessError, FileAccessPolicy
+from ddev.ai.tools.fs.file_access_policy import FileAccessError, FileAccessPolicy, canonicalize_path
+
+# ---------------------------------------------------------------------------
+# canonicalize_path
+# ---------------------------------------------------------------------------
+
+
+def test_canonicalize_path_expands_tilde(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("HOME", str(tmp_path))
+    assert canonicalize_path("~/foo") == tmp_path / "foo"
+
+
+def test_canonicalize_path_is_idempotent(tmp_path) -> None:
+    p = tmp_path / "sub" / "file.txt"
+    assert canonicalize_path(str(p)) == canonicalize_path(canonicalize_path(str(p)))
+
+
+def test_canonicalize_path_accepts_path_object(tmp_path) -> None:
+    assert canonicalize_path(tmp_path / "x.txt") == tmp_path / "x.txt"
+
+
+# ---------------------------------------------------------------------------
+# assert_* return canonical path
+# ---------------------------------------------------------------------------
+
+
+def test_assert_readable_returns_canonical_path(tmp_path) -> None:
+    policy = FileAccessPolicy(read_deny_names=(), read_deny_roots=())
+    returned = policy.assert_readable(str(tmp_path / "file.txt"))
+    assert returned == tmp_path / "file.txt"
+
+
+def test_assert_writable_returns_canonical_path(tmp_path) -> None:
+    policy = FileAccessPolicy(write_root=tmp_path, read_deny_names=(), read_deny_roots=())
+    returned = policy.assert_writable(str(tmp_path / "file.txt"))
+    assert returned == tmp_path / "file.txt"
+
+
+def test_assert_readable_expands_tilde(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("HOME", str(tmp_path))
+    policy = FileAccessPolicy(read_deny_names=(), read_deny_roots=())
+    returned = policy.assert_readable("~/file.txt")
+    assert returned == tmp_path / "file.txt"
+
 
 # ---------------------------------------------------------------------------
 # write_root enforcement
@@ -149,9 +192,7 @@ def test_read_denied_by_default_name_additional(tmp_path, filename) -> None:
     ["~/.aws", "~/.kube", "~/.gnupg", "~/.docker", "~/.config/gcloud"],
 )
 def test_read_denied_by_default_root(root) -> None:
-    from pathlib import Path
-
     policy = FileAccessPolicy()
-    resolved_root = Path(root).expanduser().resolve(strict=False)
+    resolved_root = canonicalize_path(root)
     with pytest.raises(FileAccessError, match="Read denied"):
         policy.assert_readable(str(resolved_root / "config"))
