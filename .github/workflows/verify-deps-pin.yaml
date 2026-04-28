@@ -1,6 +1,11 @@
 name: Verify dependency resolution pin
 
 on:
+  # merge_group is what GitHub's merge queue dispatches to required checks;
+  # without it, this workflow can be required-but-never-reported and
+  # leave queued PRs stuck. The push trigger on gh-readonly-queue/** is kept
+  # as a belt-and-braces complement.
+  merge_group:
   push:
     branches:
     # gh-readonly-queue/** is the blocking case: a failing run here keeps the

@@ -553,8 +553,8 @@ def test_generate_lockfiles_writes_resolution_pin(tmp_path):
     with pin_path.open("rb") as f:
         pin = tomllib.load(f)
 
-    assert pin["resolution"]["hash"] == inputs_hash.compute_resolution()
-    assert pin["images"]["linux-x86_64"] == "image-hash-for-linux-x86_64"
+    assert pin[inputs_hash.SECTION_RESOLUTION][inputs_hash.HASH_KEY] == inputs_hash.compute_resolution()
+    assert pin[inputs_hash.SECTION_IMAGES]["linux-x86_64"] == "image-hash-for-linux-x86_64"
 
 
 def test_collect_and_validate_wheels(tmp_path):

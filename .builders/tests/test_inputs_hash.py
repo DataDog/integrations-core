@@ -13,7 +13,12 @@ REPO_ROOT = HERE.parent
 def _write_pin(tmp_path: Path, resolution_hash: str, image_hashes: dict[str, str]) -> Path:
     """Write a builder_inputs.toml fixture with the given hashes."""
     pin = tmp_path / 'builder_inputs.toml'
-    lines = ['[resolution]', f'hash = "{resolution_hash}"', '', '[images]']
+    lines = [
+        f'[{inputs_hash.SECTION_RESOLUTION}]',
+        f'{inputs_hash.HASH_KEY} = "{resolution_hash}"',
+        '',
+        f'[{inputs_hash.SECTION_IMAGES}]',
+    ]
     for target in sorted(image_hashes):
         lines.append(f'{target} = "{image_hashes[target]}"')
     pin.write_text('\n'.join(lines) + '\n', encoding='utf-8')
@@ -56,8 +61,23 @@ def test_hash_paths_different_content_different_hash(tmp_path: Path) -> None:
 
 def test_hash_paths_raises_on_empty_pattern(tmp_path: Path) -> None:
     """An empty glob match raises — the pattern lists are static, so empty means drift."""
-    with pytest.raises(RuntimeError, match='gone stale'):
+    with pytest.raises(RuntimeError, match='matched no files'):
         inputs_hash.hash_paths(tmp_path, ['no_match_*.txt'])
+
+
+def test_hash_paths_raises_when_only_ignored_files_match(tmp_path: Path) -> None:
+    """A pattern matching a directory whose contents are entirely ignored raises.
+
+    Without this guard, the hash would silently narrow to sha256(empty) when a
+    pattern's expanded matches all live under filtered names like __pycache__
+    or dotfile directories.
+    """
+    pkg = tmp_path / 'pkg'
+    pkg.mkdir()
+    (pkg / '__pycache__').mkdir()
+    (pkg / '__pycache__' / 'm.pyc').write_bytes(b'x')
+    with pytest.raises(RuntimeError, match='no hashable files'):
+        inputs_hash.hash_paths(tmp_path, ['pkg'])
 
 
 # ---------------------------------------------------------------------------
@@ -87,7 +107,10 @@ def test_pinned_target_returns_empty_when_file_missing(tmp_path: Path) -> None:
 def test_pinned_target_returns_empty_when_images_section_missing(tmp_path: Path) -> None:
     """A pin file with no [images] section is treated as unpinned for every target."""
     pin = tmp_path / 'pin.toml'
-    pin.write_text('[resolution]\nhash = "x"\n', encoding='utf-8')
+    pin.write_text(
+        f'[{inputs_hash.SECTION_RESOLUTION}]\n{inputs_hash.HASH_KEY} = "x"\n',
+        encoding='utf-8',
+    )
     with mock.patch.object(inputs_hash, 'PINNED_FILE', pin):
         assert inputs_hash.pinned_target('linux-x86_64') == ''
 
@@ -128,7 +151,10 @@ def test_pinned_resolution_returns_empty_when_missing(tmp_path: Path) -> None:
 def test_pinned_resolution_returns_empty_when_section_missing(tmp_path: Path) -> None:
     """A pin file with no [resolution] section is treated as unpinned (bootstrap case)."""
     pin = tmp_path / 'pin.toml'
-    pin.write_text('[images]\nlinux-x86_64 = "abc"\n', encoding='utf-8')
+    pin.write_text(
+        f'[{inputs_hash.SECTION_IMAGES}]\nlinux-x86_64 = "abc"\n',
+        encoding='utf-8',
+    )
     with mock.patch.object(inputs_hash, 'PINNED_FILE', pin):
         assert inputs_hash.pinned_resolution() == ''
 
@@ -166,7 +192,10 @@ def test_verify_resolution_returns_false_with_bootstrap_message(tmp_path: Path, 
     during the initial rollout when master simply has not published a resolution pin yet.
     """
     pin = tmp_path / 'pin.toml'
-    pin.write_text('[images]\nlinux-x86_64 = "abc"\n', encoding='utf-8')
+    pin.write_text(
+        f'[{inputs_hash.SECTION_IMAGES}]\nlinux-x86_64 = "abc"\n',
+        encoding='utf-8',
+    )
     with mock.patch.object(inputs_hash, 'PINNED_FILE', pin):
         assert inputs_hash.verify_resolution() is False
     _, err = capsys.readouterr()
@@ -177,14 +206,14 @@ def test_verify_resolution_returns_false_with_bootstrap_message(tmp_path: Path, 
 # Bot-commit neutrality
 # ---------------------------------------------------------------------------
 
-def test_bot_commit_paths_do_not_affect_resolution_hash(tmp_path: Path) -> None:
-    """Editing files the bot commit writes must not change the resolution hash.
+def test_hashing_a_specific_file_ignores_unrelated_siblings(tmp_path: Path) -> None:
+    """Hashing `agent_requirements.in` is unaffected by sibling files outside the pattern.
 
-    The resolution workflow's bot commit writes `.deps/resolved/*.txt` and
-    `.deps/builder_inputs.toml`. If either path contributed to the resolution
-    hash, the bot's own push would re-trigger the workflow, looping. This test
-    pins that contract by constructing two trees that differ only in those
-    paths and asserting hash_paths() returns the same value for both.
+    Sanity check that hash_paths only sees files matched by the patterns it is
+    given — siblings in the same tree (here, fake `.deps/` content shaped like
+    what the bot commit writes) cannot smuggle their content into the hash. The
+    real "no RESOLUTION_INPUTS pattern reaches .deps/" guarantee is enforced by
+    test_resolution_inputs_do_not_glob_into_deps_directory.
     """
     def _build_tree(root: Path, bot_output_contents: str) -> None:
         deps = root / '.deps'
@@ -206,18 +235,25 @@ def test_bot_commit_paths_do_not_affect_resolution_hash(tmp_path: Path) -> None:
 
 
 def test_resolution_inputs_do_not_glob_into_deps_directory() -> None:
-    """No RESOLUTION_INPUTS or SHARED_INPUTS pattern matches anything under .deps/.
+    """No RESOLUTION_INPUTS or SHARED_INPUTS pattern expands to anything under .deps/.
 
     Belt-and-braces companion to test_bot_commit_paths_do_not_affect_resolution_hash:
-    rather than construct a fixture tree, assert the pattern lists themselves
-    cannot reach .deps/. A future refactor that adds `.deps/**` or similar to
-    either list would silently re-introduce the re-trigger loop.
+    rather than construct a fixture tree, assert that the live glob expansion
+    cannot reach .deps/. Asserting on expanded matches (not pattern strings)
+    catches future entries like `**/*.toml` that wouldn't start with `.deps/`
+    but would still pull `.deps/builder_inputs.toml` into the hash.
     """
-    all_patterns = inputs_hash.RESOLUTION_INPUTS + [f'.builders/{p}' for p in inputs_hash.SHARED_INPUTS]
-    offenders = [p for p in all_patterns if p.startswith('.deps/') or p.startswith('.deps')]
+    deps_dir = REPO_ROOT / '.deps'
+    matched: set[Path] = set()
+    for pattern in inputs_hash.RESOLUTION_INPUTS:
+        matched.update(REPO_ROOT.glob(pattern))
+    for pattern in inputs_hash.SHARED_INPUTS:
+        matched.update(HERE.glob(pattern))
+
+    offenders = [p for p in matched if p == deps_dir or deps_dir in p.parents]
     assert not offenders, (
         f'Patterns that glob into .deps/ will cause the bot commit to re-trigger the '
-        f'resolution workflow: {offenders}'
+        f'resolution workflow: {sorted(str(p) for p in offenders)}'
     )
 
 
@@ -282,7 +318,9 @@ def test_status_emits_hashes_json(tmp_path: Path) -> None:
 # Coverage: every tracked .builders/ file is classified
 # ---------------------------------------------------------------------------
 
-# Files under .builders/ that intentionally don't affect any hash.
+# Relative POSIX paths under .builders/ that intentionally don't affect any
+# hash. Matched by full relative path (not basename) so a future file at e.g.
+# .builders/images/linux-x86_64/promote.py is not silently exempted.
 # Each entry needs a comment explaining why.
 EXPECTED_UNCOVERED = {
     # Runs in the separate dependency-wheel-promotion.yaml workflow, not here.
@@ -301,13 +339,26 @@ def _is_ignored_for_coverage(path: Path, builders_dir: Path) -> bool:
 
 
 def _glob_set(base: Path, patterns: list[str]) -> set[Path]:
+    """Expand patterns the same way production does: skip ignored parts (dotfiles, __pycache__).
+
+    Mirrors `_iter_files`/`hash_paths` semantics in inputs_hash.py: when a glob
+    match expands into a directory, files under it are filtered if any part of
+    the path *relative to the matched directory* is ignored. A direct file
+    match is yielded unconditionally, just like production.
+    """
     result: set[Path] = set()
     for pattern in patterns:
         for p in base.glob(pattern):
             if p.is_file():
                 result.add(p)
             elif p.is_dir():
-                result.update(f for f in p.rglob('*') if f.is_file())
+                for f in p.rglob('*'):
+                    if not f.is_file():
+                        continue
+                    rel_parts = f.relative_to(p).parts
+                    if any(inputs_hash.is_ignored(part) for part in rel_parts):
+                        continue
+                    result.add(f)
     return result
 
 
@@ -346,7 +397,7 @@ def test_no_uncovered_files() -> None:
             continue
         if path in covered:
             continue
-        if path.name in EXPECTED_UNCOVERED:
+        if rel in EXPECTED_UNCOVERED:
             continue
         uncovered.append(rel)
 

@@ -27,6 +27,12 @@ HERE = Path(__file__).parent
 REPO_ROOT = HERE.parent
 PINNED_FILE = REPO_ROOT / '.deps' / 'builder_inputs.toml'
 
+# TOML section/key names used in PINNED_FILE. Defined here so upload.py and
+# tests don't drift from the reader.
+SECTION_RESOLUTION = 'resolution'
+SECTION_IMAGES = 'images'
+HASH_KEY = 'hash'
+
 # Glob patterns relative to .builders/ for inputs shared across all builder
 # target images.
 SHARED_INPUTS = [
@@ -77,9 +83,10 @@ def _iter_files(root: Path) -> Iterator[Path]:
 def hash_paths(base: Path, patterns: list[str]) -> str:
     """Hash all files matched by `patterns` (glob-expanded relative to `base`).
 
-    Raises RuntimeError if any pattern matches no files. The pattern lists are
-    static and author-curated, so an empty match means a list entry has gone
-    stale — failing loud prevents the hash from silently narrowing.
+    Raises RuntimeError if a pattern matches no files, or if all matched files
+    are filtered out as ignored (dotfiles, __pycache__). Either case means the
+    pattern is no longer pulling content into the hash, so failing loud
+    prevents the hash from silently narrowing.
 
     Sorting by relative POSIX path before hashing preserves cross-OS stability:
     WindowsPath sorting is case-insensitive and uses backslashes, which would
@@ -89,12 +96,16 @@ def hash_paths(base: Path, patterns: list[str]) -> str:
     for pattern in patterns:
         matched = list(base.glob(pattern))
         if not matched:
-            raise RuntimeError(
-                f'pattern {pattern!r} matched no files under {base}; '
-                f'a SHARED_INPUTS/RESOLUTION_INPUTS entry has gone stale'
-            )
+            raise RuntimeError(f'pattern {pattern!r} matched no files under {base}')
+        pattern_paths: set[Path] = set()
         for p in matched:
-            paths.update(_iter_files(p))
+            pattern_paths.update(_iter_files(p))
+        if not pattern_paths:
+            raise RuntimeError(
+                f'pattern {pattern!r} matched no hashable files under {base} '
+                f'(all matches were filtered as ignored)'
+            )
+        paths.update(pattern_paths)
 
     sorted_paths = sorted(paths, key=lambda p: p.relative_to(base).as_posix())
     digest = sha256()
@@ -136,7 +147,7 @@ def _load_pinned() -> dict:
 
 def pinned_target(target: str) -> str:
     """Return the hash pinned for `target` in builder_inputs.toml, or empty if absent."""
-    images = _load_pinned().get('images', {})
+    images = _load_pinned().get(SECTION_IMAGES, {})
     if target not in images:
         print(f'{PINNED_FILE}: no entry for {target}; treating as unpinned', file=sys.stderr)
         return ''
@@ -145,19 +156,22 @@ def pinned_target(target: str) -> str:
 
 def pinned_resolution() -> str:
     """Return the resolution hash pinned in builder_inputs.toml, or empty if absent."""
-    resolution = _load_pinned().get('resolution', {})
-    if 'hash' not in resolution:
-        print(f'{PINNED_FILE}: no [resolution] hash; treating as unpinned', file=sys.stderr)
+    resolution = _load_pinned().get(SECTION_RESOLUTION, {})
+    if HASH_KEY not in resolution:
+        print(f'{PINNED_FILE}: no [{SECTION_RESOLUTION}] hash; treating as unpinned', file=sys.stderr)
         return ''
-    return resolution['hash']
+    return resolution[HASH_KEY]
 
 
 def _check(label: str, current: str, pinned: str) -> bool:
     """Print current/pinned/fresh-or-STALE status to stderr and return whether they match."""
     fresh = current == pinned
-    print(f'{label}: current={current}', file=sys.stderr)
-    print(f'{label}: pinned ={pinned}', file=sys.stderr)
-    print(f'{label}: {"fresh" if fresh else "STALE"}', file=sys.stderr)
+    print(
+        f'{label}: current={current}\n'
+        f'{label}: pinned ={pinned}\n'
+        f'{label}: {"fresh" if fresh else "STALE"}',
+        file=sys.stderr,
+    )
     return fresh
 
 
@@ -167,10 +181,10 @@ def verify_resolution() -> bool:
     pinned = pinned_resolution()
     if not pinned:
         print(
-            f'{PINNED_FILE}: no [resolution] hash found; dependency resolution has '
-            'not yet published a pin. Expected during the initial rollout; once '
-            'resolve-build-deps publishes once on master, this check starts working '
-            'normally.',
+            f'{PINNED_FILE}: no [{SECTION_RESOLUTION}] hash found; dependency resolution has '
+            f'not yet published a pin. Expected during the initial rollout; once '
+            f'resolve-build-deps publishes once on master, this check starts working '
+            f'normally.',
             file=sys.stderr,
         )
         return False

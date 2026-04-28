@@ -334,10 +334,10 @@ _BUILDER_INPUTS_HEADER = """\
 
 def _write_builder_inputs(path: Path, resolution_hash: str, image_hashes: dict[str, str]) -> None:
     lines = [_BUILDER_INPUTS_HEADER.rstrip('\n')]
-    lines.append('[resolution]')
-    lines.append(f'hash = "{resolution_hash}"')
+    lines.append(f'[{inputs_hash.SECTION_RESOLUTION}]')
+    lines.append(f'{inputs_hash.HASH_KEY} = "{resolution_hash}"')
     lines.append('')
-    lines.append('[images]')
+    lines.append(f'[{inputs_hash.SECTION_IMAGES}]')
     for target in sorted(image_hashes):
         lines.append(f'{target} = "{image_hashes[target]}"')
     path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
