@@ -110,6 +110,21 @@ jobs:
         # Enable disk performance counters
         diskperf -y
 
+    # On Windows, force uv to copy files into the venv instead of hardlinking
+    # them from its cache. uv's default `hardlink` mode on Windows breaks
+    # `hatch env remove` (run by `ddev test --compat` and `--recreate`):
+    # extension modules such as `backports.zstd._zstd.pyd` (a transitive of
+    # `hatch>=1.13`) get loaded by Python during the test run, and Windows
+    # then refuses to delete the venv's hardlink while the cache copy is
+    # still pinned, so cleanup fails with `PermissionError: [WinError 5]`.
+    # Refs:
+    #   https://github.com/astral-sh/uv/issues/7918
+    #   https://docs.astral.sh/uv/reference/settings/#link-mode
+    - name: Configure uv link mode (Windows)
+      if: runner.os == 'Windows'
+      shell: bash
+      run: echo "UV_LINK_MODE=copy" >> "$GITHUB_ENV"
+
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     # When called as a reusable workflow from other repos, `uses: ./` resolves
