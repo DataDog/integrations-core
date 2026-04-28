@@ -16,6 +16,7 @@ class TestLoadBasic:
 
         assert templates.load('init_config/tags') == {
             'name': 'tags',
+            'display_priority': 0,
             'value': {
                 'example': ['<KEY_1>:<VALUE_1>', '<KEY_2>:<VALUE_2>'],
                 'type': 'array',
@@ -119,6 +120,7 @@ class TestApplyOverrides:
 
         assert template == {
             'name': 'tags',
+            'display_priority': 0,
             'value': {'example': ['foo', 'bar'], 'type': 'array', 'items': {'type': 'string'}},
             'description': (
                 'A list of tags to attach to every metric and service check emitted by this integration.\n'
@@ -155,6 +157,7 @@ class TestApplyOverrides:
 
         assert {
             'name': 'skip_proxy',
+            'display_priority': 0,
             'value': {'example': False, 'type': 'boolean'},
             'description': 'foobar',
             'fleet_configurable': True,
@@ -169,6 +172,7 @@ class TestApplyOverrides:
 
         assert template == {
             'name': 'skip_proxy',
+            'display_priority': 0,
             'value': {'example': False, 'type': 'boolean'},
             'description': 'foobar',
             'fleet_configurable': True,
@@ -226,3 +230,25 @@ class TestApplyOverrides:
 
         assert len(errors) == 1
         assert errors[0] == 'Template override `proxy.description` does not refer to a mapping'
+
+    def test_nested_template_override(self):
+        """Overrides should reach fields in nested template refs."""
+        templates = ConfigTemplates()
+
+        # instances/default → instances/all_integrations → instances/tags (tags field)
+        template = templates.load('instances/default')
+        errors = templates.apply_overrides(template, {'tags.display_priority': 5})
+        assert not errors
+
+        tags_item = next((item for item in template if isinstance(item, dict) and item.get('name') == 'tags'), None)
+        assert tags_item is not None
+        assert tags_item['display_priority'] == 5
+
+    def test_nested_template_override_not_found(self):
+        """An override for a name absent from nested templates still reports an error."""
+        templates = ConfigTemplates()
+
+        template = templates.load('instances/default')
+        errors = templates.apply_overrides(template, {'nonexistent_field.display_priority': 5})
+
+        assert len(errors) == 1
