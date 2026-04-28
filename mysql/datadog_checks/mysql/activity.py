@@ -108,8 +108,8 @@ BLOCKING_JOINS_MYSQL8 = """\
         AND mdl_waiting.LOCK_STATUS = 'PENDING'
     LEFT JOIN performance_schema.metadata_locks AS mdl_blocking
         ON mdl_waiting.OBJECT_TYPE = mdl_blocking.OBJECT_TYPE
-        AND mdl_waiting.OBJECT_SCHEMA = mdl_blocking.OBJECT_SCHEMA
-        AND mdl_waiting.OBJECT_NAME = mdl_blocking.OBJECT_NAME
+        AND mdl_waiting.OBJECT_SCHEMA <=> mdl_blocking.OBJECT_SCHEMA
+        AND mdl_waiting.OBJECT_NAME <=> mdl_blocking.OBJECT_NAME
         AND mdl_blocking.LOCK_STATUS = 'GRANTED'
         AND mdl_waiting.OWNER_THREAD_ID != mdl_blocking.OWNER_THREAD_ID
     LEFT JOIN performance_schema.threads AS mdl_blocking_thread
@@ -130,8 +130,8 @@ IDLE_BLOCKERS_SUBQUERY_MYSQL8 = """\
             FROM performance_schema.metadata_locks AS mdl_pending
             JOIN performance_schema.metadata_locks AS mdl_granted
                 ON mdl_pending.OBJECT_TYPE = mdl_granted.OBJECT_TYPE
-                AND mdl_pending.OBJECT_SCHEMA = mdl_granted.OBJECT_SCHEMA
-                AND mdl_pending.OBJECT_NAME = mdl_granted.OBJECT_NAME
+                AND mdl_pending.OBJECT_SCHEMA <=> mdl_granted.OBJECT_SCHEMA
+                AND mdl_pending.OBJECT_NAME <=> mdl_granted.OBJECT_NAME
                 AND mdl_granted.LOCK_STATUS = 'GRANTED'
                 AND mdl_pending.LOCK_STATUS = 'PENDING'
                 AND mdl_pending.OWNER_THREAD_ID != mdl_granted.OWNER_THREAD_ID
