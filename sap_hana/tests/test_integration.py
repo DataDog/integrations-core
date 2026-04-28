@@ -122,7 +122,7 @@ def _assert_logs(check, datadog_agent):
         check.check_id,
         [
             {
-                'application_name': ANY,
+                'application_name': 'python3',
                 'application_user_name': ANY,
                 'audit_policy_name': 'USER_MANAGEMENT',
                 'event_action': 'CREATE USER',
@@ -139,7 +139,7 @@ def _assert_logs(check, datadog_agent):
                 'user_name': 'SYSTEM',
             },
             {
-                'application_name': ANY,
+                'application_name': 'python3',
                 'application_user_name': ANY,
                 'audit_policy_name': 'USER_MANAGEMENT',
                 'event_action': 'ALTER USER',
@@ -156,7 +156,7 @@ def _assert_logs(check, datadog_agent):
                 'user_name': 'SYSTEM',
             },
             {
-                'application_name': ANY,
+                'application_name': 'python3',
                 'application_user_name': ANY,
                 'audit_policy_name': 'USER_MANAGEMENT',
                 'event_action': 'ALTER USER',
