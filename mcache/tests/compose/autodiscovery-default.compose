@@ -1,0 +1,9 @@
+services:
+  memcached-default:
+    image: "memcached:${MCACHE_VERSION}"
+    networks:
+      - network1
+
+networks:
+  network1:
+    name: autodiscovery-default_default
