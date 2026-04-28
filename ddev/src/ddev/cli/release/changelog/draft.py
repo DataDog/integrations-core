@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     help='Write the generated changelog to this file (overwrites if it exists) instead of stdout',
 )
 @click.pass_obj
-def build(app: Application, targets: tuple[str, ...], output_file: Path | None):
+def draft(app: Application, targets: tuple[str, ...], output_file: Path | None):
     """
     Preview the changelog that would be generated from the entries in `changelog.d/`.
 

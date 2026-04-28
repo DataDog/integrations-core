@@ -1,20 +1,12 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import shutil
-import subprocess
 from functools import partial
 
 import pytest
 
 from ddev.repo.core import Repository
-
-
-def _reset_fragments_dir(path):
-    if path.exists():
-        shutil.rmtree(path)
-    path.mkdir(parents=True)
-    return path
+from tests.cli.release.conftest import reset_fragments_dir
 
 
 class TestFix:
@@ -183,79 +175,6 @@ class TestFix:
         )
 
 
-@pytest.fixture
-def repo_with_towncrier(repository, helpers):
-    (repository.path / 'towncrier.toml').write_text(
-        helpers.dedent(
-            r'''
-            [tool.towncrier]
-            # If you change the values for directory or filename, make sure to look for them in the code as well.
-            directory = "changelog.d"
-            filename = "CHANGELOG.md"
-            start_string = "<!-- towncrier release notes start -->\n"
-            underlines = ["", "", ""]
-            template = "changelog_template.jinja"
-            title_format = "## {version} / {project_date}"
-            # We automatically link to PRs, but towncrier only has an issue template so we abuse that.
-            issue_format = "([#{issue}](https://github.com/DataDog/integrations-core/pull/{issue}))"
-
-            # The order of entries matters! It controls the order in which changelog sections are displayed.
-            # https://towncrier.readthedocs.io/en/stable/configuration.html#use-a-toml-array-defined-order
-            [[tool.towncrier.type]]
-            directory="removed"
-            name = "Removed"
-            showcontent = true
-
-            [[tool.towncrier.type]]
-            directory="changed"
-            name = "Changed"
-            showcontent = true
-
-            [[tool.towncrier.type]]
-            directory="security"
-            name = "Security"
-            showcontent = true
-
-            [[tool.towncrier.type]]
-            directory="deprecated"
-            name = "Deprecated"
-            showcontent = true
-
-            [[tool.towncrier.type]]
-            directory="added"
-            name = "Added"
-            showcontent = true
-
-            [[tool.towncrier.type]]
-            directory="fixed"
-            name = "Fixed"
-            showcontent = true
-            '''
-        )
-    )
-    (repository.path / 'changelog_template.jinja').write_text(
-        helpers.dedent(
-            '''
-            {% if sections[""] %}
-            {% for category, val in definitions.items() if category in sections[""] %}
-            ***{{ definitions[category]['name'] }}***:
-
-            {% for text, values in sections[""][category].items() %}
-            * {{ text }} {{ values|join(', ') }}
-            {% endfor %}
-
-            {% endfor %}
-            {% else %}
-            No significant changes.
-
-
-            {% endif %}
-            '''
-        )
-    )
-    return repository
-
-
 class TestNew:
     @pytest.fixture
     def fragments_dir(self, repo_with_towncrier, network_replay, mocker):
@@ -398,7 +317,7 @@ class TestBuild:
                 '''
             )
         )
-        fragments_dir = _reset_fragments_dir(repo_with_towncrier.path / 'ddev' / 'changelog.d')
+        fragments_dir = reset_fragments_dir(repo_with_towncrier.path / 'ddev' / 'changelog.d')
         return changelog, fragments_dir
 
     def test_build(self, setup_changelog_build, helpers, build_changelog):
@@ -472,96 +391,3 @@ class TestBuild:
             ***Added***:
             '''
         )
-
-
-@pytest.fixture
-def build_fragments(repo_with_towncrier):
-    fragments_dir = _reset_fragments_dir(repo_with_towncrier.path / 'ddev' / 'changelog.d')
-    (fragments_dir / '1.added').write_text('Foo')
-    (fragments_dir / '2.fixed').write_text('Bar')
-    return fragments_dir
-
-
-def test_build_command_prints_changelog_to_stdout(ddev, build_fragments, helpers):
-    result = ddev('release', 'changelog', 'build', 'ddev')
-
-    assert result.exit_code == 0, result.output
-    output = helpers.remove_trailing_spaces(result.output)
-    assert '***Added***:' in output
-    assert '* Foo ([#1](https://github.com/DataDog/integrations-core/pull/1))' in output
-    assert '***Fixed***:' in output
-    assert '* Bar ([#2](https://github.com/DataDog/integrations-core/pull/2))' in output
-    # Fragments are preserved (draft mode doesn't remove them).
-    assert (build_fragments / '1.added').exists()
-    assert (build_fragments / '2.fixed').exists()
-
-
-def test_build_command_writes_to_file(ddev, build_fragments, tmp_path, helpers):
-    output_file = tmp_path / 'preview.md'
-
-    result = ddev('release', 'changelog', 'build', 'ddev', '--file', str(output_file))
-
-    assert result.exit_code == 0, result.output
-    assert f'Wrote changelog preview to {output_file}' in result.output
-    contents = helpers.remove_trailing_spaces(output_file.read_text())
-    assert '* Foo ([#1](https://github.com/DataDog/integrations-core/pull/1))' in contents
-    assert '* Bar ([#2](https://github.com/DataDog/integrations-core/pull/2))' in contents
-
-
-def test_build_command_multiple_targets_prefixed_with_target_name(ddev, repo_with_towncrier, helpers):
-    for target in ('ddev', 'datadog_checks_dev'):
-        fragments_dir = _reset_fragments_dir(repo_with_towncrier.path / target / 'changelog.d')
-        (fragments_dir / '1.added').write_text(f'Entry for {target}')
-
-    result = ddev('release', 'changelog', 'build', 'ddev', 'datadog_checks_dev')
-
-    assert result.exit_code == 0, result.output
-    output = helpers.remove_trailing_spaces(result.output)
-    assert '# ddev' in output
-    assert '# datadog_checks_dev' in output
-    assert 'Entry for ddev' in output
-    assert 'Entry for datadog_checks_dev' in output
-
-
-@pytest.mark.parametrize(
-    'args, expected_message',
-    [
-        pytest.param(
-            ['definitely_not_an_integration'], 'Unknown target: definitely_not_an_integration', id='one_unknown'
-        ),
-        pytest.param(
-            ['definitely_not_an_integration', 'also_missing'],
-            'Unknown targets: definitely_not_an_integration, also_missing',
-            id='multiple_unknown',
-        ),
-        pytest.param([], "Missing argument 'TARGETS...'", id='no_targets'),
-    ],
-)
-def test_build_command_argument_errors(ddev, repo_with_towncrier, args, expected_message):
-    result = ddev('release', 'changelog', 'build', *args)
-
-    assert result.exit_code != 0
-    assert expected_message in result.output
-
-
-def test_build_command_no_fragments_renders_no_significant_changes(ddev, repo_with_towncrier):
-    _reset_fragments_dir(repo_with_towncrier.path / 'ddev' / 'changelog.d')
-
-    result = ddev('release', 'changelog', 'build', 'ddev')
-
-    assert result.exit_code == 0, result.output
-    assert 'No significant changes' in result.output
-
-
-def test_build_command_surfaces_towncrier_failure(ddev, build_fragments, mocker):
-    mocker.patch(
-        'ddev.utils.platform.Platform.run_command',
-        return_value=subprocess.CompletedProcess(args=[], returncode=1, stdout='partial output', stderr='boom'),
-    )
-
-    result = ddev('release', 'changelog', 'build', 'ddev')
-
-    assert result.exit_code != 0
-    assert 'partial output' in result.output
-    assert 'towncrier build exited with code 1' in result.output
-    assert 'boom' in result.output

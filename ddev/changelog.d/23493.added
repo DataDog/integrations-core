@@ -1,1 +1,1 @@
-Add `release changelog build` command to preview the changelog generated from `changelog.d/` entries without writing to `CHANGELOG.md` or removing the news fragments.
+Add `release changelog draft` command to preview the changelog generated from `changelog.d/` entries without writing to `CHANGELOG.md` or removing the news fragments.
