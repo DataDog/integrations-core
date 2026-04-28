@@ -232,9 +232,7 @@ class ValidationOrchestrator(EventBusOrchestrator):
     @property
     def had_failures(self) -> bool:
         """True if any validation failed or did not complete."""
-        failed = sum(1 for r in self._results.values() if not r.success)
-        incomplete = len(self._validations) - len(self._results)
-        return failed > 0 or incomplete > 0
+        return any(not r.success for r in self._results.values()) or len(self._results) < len(self._validations)
 
     def _build_error_and_warning(self, exception: Exception | None) -> tuple[str | None, str | None]:
         error_msg = f"Error running validations: {exception}" if exception else None
