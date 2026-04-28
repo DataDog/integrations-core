@@ -35,24 +35,23 @@ def build(app: Application, targets: tuple[str, ...], output_file: Path | None):
     from ddev.cli.release.changelog.towncrier import towncrier
 
     integrations: list[Integration] = []
+    unknown: list[str] = []
     for target in targets:
         try:
             integrations.append(app.repo.integrations.get(target))
-        except OSError as e:
-            app.abort(str(e))
+        except OSError:
+            unknown.append(target)
+    if unknown:
+        app.abort(f'Unknown target{"s" if len(unknown) > 1 else ""}: {", ".join(unknown)}')
 
-    rendered = [
-        (
-            integration.name,
-            towncrier(
-                app, integration.path, 'build', '--draft', '--version', 'Unreleased', display_output=False
-            ).stdout.strip(),
-        )
-        for integration in integrations
-    ]
+    rendered: list[tuple[str, str]] = []
+    for integration in integrations:
+        result = towncrier(app, integration.path, 'build', '--draft', '--version', 'Unreleased', display_output=False)
+        rendered.append((integration.name, result.stdout.strip()))
     output = _format_output(rendered)
 
     if output_file:
+        output_file.parent.mkdir(parents=True, exist_ok=True)
         output_file.write_text(output, encoding='utf-8')
         app.display_success(f'Wrote changelog preview to {output_file}')
     else:

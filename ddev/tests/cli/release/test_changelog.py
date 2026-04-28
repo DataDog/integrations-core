@@ -2,11 +2,19 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import shutil
+import subprocess
 from functools import partial
 
 import pytest
 
 from ddev.repo.core import Repository
+
+
+def _reset_fragments_dir(path):
+    if path.exists():
+        shutil.rmtree(path)
+    path.mkdir(parents=True)
+    return path
 
 
 class TestFix:
@@ -390,10 +398,7 @@ class TestBuild:
                 '''
             )
         )
-        fragments_dir = repo_with_towncrier.path / 'ddev' / 'changelog.d'
-        if fragments_dir.exists():
-            shutil.rmtree(fragments_dir)
-        fragments_dir.mkdir(parents=True)
+        fragments_dir = _reset_fragments_dir(repo_with_towncrier.path / 'ddev' / 'changelog.d')
         return changelog, fragments_dir
 
     def test_build(self, setup_changelog_build, helpers, build_changelog):
@@ -471,10 +476,7 @@ class TestBuild:
 
 @pytest.fixture
 def build_fragments(repo_with_towncrier):
-    fragments_dir = repo_with_towncrier.path / 'ddev' / 'changelog.d'
-    if fragments_dir.exists():
-        shutil.rmtree(fragments_dir)
-    fragments_dir.mkdir(parents=True)
+    fragments_dir = _reset_fragments_dir(repo_with_towncrier.path / 'ddev' / 'changelog.d')
     (fragments_dir / '1.added').write_text('Foo')
     (fragments_dir / '2.fixed').write_text('Bar')
     return fragments_dir
@@ -508,10 +510,7 @@ def test_build_command_writes_to_file(ddev, build_fragments, tmp_path, helpers):
 
 def test_build_command_multiple_targets_prefixed_with_target_name(ddev, repo_with_towncrier, helpers):
     for target in ('ddev', 'datadog_checks_dev'):
-        fragments_dir = repo_with_towncrier.path / target / 'changelog.d'
-        if fragments_dir.exists():
-            shutil.rmtree(fragments_dir)
-        fragments_dir.mkdir(parents=True)
+        fragments_dir = _reset_fragments_dir(repo_with_towncrier.path / target / 'changelog.d')
         (fragments_dir / '1.added').write_text(f'Entry for {target}')
 
     result = ddev('release', 'changelog', 'build', 'ddev', 'datadog_checks_dev')
@@ -527,7 +526,14 @@ def test_build_command_multiple_targets_prefixed_with_target_name(ddev, repo_wit
 @pytest.mark.parametrize(
     'args, expected_message',
     [
-        pytest.param(['definitely_not_an_integration'], 'Integration does not exist', id='unknown_target'),
+        pytest.param(
+            ['definitely_not_an_integration'], 'Unknown target: definitely_not_an_integration', id='one_unknown'
+        ),
+        pytest.param(
+            ['definitely_not_an_integration', 'also_missing'],
+            'Unknown targets: definitely_not_an_integration, also_missing',
+            id='multiple_unknown',
+        ),
         pytest.param([], "Missing argument 'TARGETS...'", id='no_targets'),
     ],
 )
@@ -538,9 +544,16 @@ def test_build_command_argument_errors(ddev, repo_with_towncrier, args, expected
     assert expected_message in result.output
 
 
-def test_build_command_surfaces_towncrier_failure(ddev, build_fragments, mocker):
-    import subprocess
+def test_build_command_no_fragments_renders_no_significant_changes(ddev, repo_with_towncrier):
+    _reset_fragments_dir(repo_with_towncrier.path / 'ddev' / 'changelog.d')
 
+    result = ddev('release', 'changelog', 'build', 'ddev')
+
+    assert result.exit_code == 0, result.output
+    assert 'No significant changes' in result.output
+
+
+def test_build_command_surfaces_towncrier_failure(ddev, build_fragments, mocker):
     mocker.patch(
         'ddev.utils.platform.Platform.run_command',
         return_value=subprocess.CompletedProcess(args=[], returncode=1, stdout='', stderr='boom'),

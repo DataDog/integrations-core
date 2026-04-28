@@ -42,7 +42,7 @@ def towncrier(
     )
     if result.returncode:
         details = '\n'.join(part for part in (result.stdout.strip(), result.stderr.strip()) if part)
-        app.abort(details, code=result.returncode)
+        app.abort(details or f'towncrier {cmd} exited with code {result.returncode}', code=result.returncode)
     if display_output:
         app.display(result.stdout.rstrip(), markup=False)
     return result
