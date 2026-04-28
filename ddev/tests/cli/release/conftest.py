@@ -1,19 +1,9 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import shutil
-
 import pytest
 
-from ddev.utils.fs import Path
 from tests.helpers.git import ClonedRepo
-
-
-def reset_fragments_dir(path: Path) -> Path:
-    if path.exists():
-        shutil.rmtree(path)
-    path.mkdir(parents=True)
-    return path
 
 
 @pytest.fixture

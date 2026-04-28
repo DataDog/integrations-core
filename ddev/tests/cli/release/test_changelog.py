@@ -6,7 +6,7 @@ from functools import partial
 import pytest
 
 from ddev.repo.core import Repository
-from tests.cli.release.conftest import reset_fragments_dir
+from tests.helpers.changelog import reset_fragments_dir
 
 
 class TestFix:

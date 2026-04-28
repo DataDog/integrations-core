@@ -7,7 +7,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from ddev.utils.fs import Path
-from tests.cli.release.conftest import reset_fragments_dir
+from tests.helpers.changelog import reset_fragments_dir
 from tests.helpers.git import ClonedRepo
 from tests.helpers.runner import CliRunner
 
