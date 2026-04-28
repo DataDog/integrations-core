@@ -1,4 +1,4 @@
-Rework event bus error handling around a single `on_error` router and a new `fail_fast` orchestrator policy.
+Rework event bus error handling around a single `on_error` router and a new `fail_fast` orchestrator policy. The `ddev validate all` command is updated to align with the new lifecycle (the orchestrator no longer aborts the process from inside `on_finalize`; the command checks `had_failures` and exits accordingly).
 
 * Add `fail_fast` constructor option to `EventBusOrchestrator` (default `False`). When an `on_error` handler raises a non-Fatal exception, `fail_fast=True` stops the bus while `fail_fast=False` logs and continues.
 * Add `EventBusOrchestrator.on_error(error)`: handles `on_initialize`, `on_message_received`, and `on_finalize` failures. Default re-raises so unmodified subclasses fall through to `fail_fast`.

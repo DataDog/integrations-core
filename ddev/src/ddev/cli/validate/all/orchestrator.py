@@ -229,6 +229,13 @@ class ValidationOrchestrator(EventBusOrchestrator):
         self._publish_report(exception)
         self._print_console_output()
 
+    @property
+    def had_failures(self) -> bool:
+        """True if any validation failed or did not complete."""
+        failed = sum(1 for r in self._results.values() if not r.success)
+        incomplete = len(self._validations) - len(self._results)
+        return failed > 0 or incomplete > 0
+
     def _build_error_and_warning(self, exception: Exception | None) -> tuple[str | None, str | None]:
         error_msg = f"Error running validations: {exception}" if exception else None
 
@@ -326,6 +333,5 @@ class ValidationOrchestrator(EventBusOrchestrator):
             if self._target:
                 fix_all_cmd = f"ddev validate all {self._target} --fix"
             self._app.display_info(f"\nRun `{fix_all_cmd}` to attempt to auto-fix supported validations.")
-            self._app.abort()
         else:
             self._app.display_success(f"All {passed} validations passed")
