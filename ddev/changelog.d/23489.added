@@ -2,9 +2,7 @@ Rework event bus error handling around a single ``on_error`` router and a new ``
 
 * Add ``fail_fast`` constructor option to ``EventBusOrchestrator`` (default ``False``). When an ``on_error`` handler raises a non-Fatal exception, ``fail_fast=True`` stops the bus while ``fail_fast=False`` logs and continues.
 * Add ``EventBusOrchestrator.on_error(error)``: handles ``on_initialize``, ``on_message_received``, and ``on_finalize`` failures. Default re-raises so unmodified subclasses fall through to ``fail_fast``.
-* Add ``BaseProcessor.on_error`` default that re-raises, with the same fall-through semantics.
-* **Breaking:** ``BaseProcessor.on_error`` signature changes from ``(message, error)`` to ``(error)``. The wrapped error carries ``.message``, ``.processor_name``, ``.original_exception``.
+* Add ``BaseProcessor.on_error(error)`` default that re-raises, with the same fall-through semantics. The wrapped error carries ``.message``, ``.processor_name``, ``.original_exception``.
 * Add ``HookExecutionError`` hierarchy (``OrchestratorHookError``, ``ProcessorHookError``) and ``HookName`` enum for identifying which hook failed.
 * Add ``SkipMessageError``: raise from ``on_message_received`` to skip dispatch for the current message and continue the loop.
-* **Breaking:** ``ProcessorSuccessHookError`` removed. Use ``ProcessorHookError(HookName.ON_SUCCESS, ...)`` instead.
-* **Behavior change:** ``on_initialize`` and ``on_finalize`` failures previously propagated from ``run()``. Under default ``fail_fast=False`` they now log and continue. Subclasses that need the old behavior should pass ``fail_fast=True`` or override ``on_error`` to escalate. The internal ``ValidationOrchestrator`` is updated to use ``fail_fast=True`` so finalize failures still surface in the validation report.
+* ``on_initialize`` and ``on_finalize`` failures now route through ``on_error`` instead of always propagating from ``run()``. Under default ``fail_fast=False`` they log and continue; subclasses that need the old behavior should pass ``fail_fast=True`` or override ``on_error`` to escalate. ``ValidationOrchestrator`` opts into ``fail_fast=True`` so finalize failures still surface in the validation report.
