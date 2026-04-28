@@ -1,0 +1,140 @@
+[
+  {
+    "id": "1b8659fd00000001",
+    "name": null,
+    "sdcIp": "10.0.1.250",
+    "sdcGuid": "33FC0AF2-5180-45D8-9BDC-8E2F78CD60BF",
+    "sdcType": "AppSdc",
+    "peerMdmId": null,
+    "sdcApproved": true,
+    "sdcApprovedIps": null,
+    "sdcAgentActive": true,
+    "mdmConnectionState": "Connected",
+    "hostOsFullType": "Linux 5.15.0-91-generic",
+    "systemId": "1fcf40fc60c6520f",
+    "softwareVersionInfo": "R4_5.2100.0",
+    "installedSoftwareVersionInfo": "R4_5.2100.0",
+    "kernelVersion": "5.15.0-91-generic",
+    "kernelBuildNumber": null,
+    "perfProfile": "Default",
+    "versionInfo": "R4_5.2100.0",
+    "sdcDefaultInitiatorConnectivityState": "Connected",
+    "certificateInfo": {
+      "thumbprint": "AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99",
+      "subject": "CN=SDC1, O=Dell, C=US",
+      "issuer": "CN=PowerFlex Root CA, O=Dell, C=US",
+      "validFrom": "2025-01-01T00:00:00Z",
+      "validTo": "2026-01-01T00:00:00Z"
+    },
+    "links": [
+      {
+        "rel": "self",
+        "href": "/api/instances/Sdc::1b8659fd00000001"
+      },
+      {
+        "rel": "/api/Sdc/relationship/Statistics",
+        "href": "/api/instances/Sdc::1b8659fd00000001/relationships/Statistics"
+      },
+      {
+        "rel": "/api/Sdc/relationship/Volume",
+        "href": "/api/instances/Sdc::1b8659fd00000001/relationships/Volume"
+      },
+      {
+        "rel": "/api/parent/relationship/systemId",
+        "href": "/api/instances/System::1fcf40fc60c6520f"
+      }
+    ]
+  },
+  {
+    "id": "1b8659fc00000000",
+    "name": null,
+    "sdcIp": "10.0.1.223",
+    "sdcGuid": "BE3BC972-269A-4931-96B8-286BFA45C004",
+    "sdcType": "AppSdc",
+    "peerMdmId": null,
+    "sdcApproved": true,
+    "sdcApprovedIps": null,
+    "sdcAgentActive": true,
+    "mdmConnectionState": "Connected",
+    "hostOsFullType": "Linux 5.15.0-91-generic",
+    "systemId": "1fcf40fc60c6520f",
+    "softwareVersionInfo": "R4_5.2100.0",
+    "installedSoftwareVersionInfo": "R4_5.2100.0",
+    "kernelVersion": "5.15.0-91-generic",
+    "kernelBuildNumber": null,
+    "perfProfile": "Default",
+    "versionInfo": "R4_5.2100.0",
+    "sdcDefaultInitiatorConnectivityState": "Connected",
+    "certificateInfo": {
+      "thumbprint": "11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF:00",
+      "subject": "CN=SDC2, O=Dell, C=US",
+      "issuer": "CN=PowerFlex Root CA, O=Dell, C=US",
+      "validFrom": "2025-01-01T00:00:00Z",
+      "validTo": "2026-01-01T00:00:00Z"
+    },
+    "links": [
+      {
+        "rel": "self",
+        "href": "/api/instances/Sdc::1b8659fc00000000"
+      },
+      {
+        "rel": "/api/Sdc/relationship/Statistics",
+        "href": "/api/instances/Sdc::1b8659fc00000000/relationships/Statistics"
+      },
+      {
+        "rel": "/api/Sdc/relationship/Volume",
+        "href": "/api/instances/Sdc::1b8659fc00000000/relationships/Volume"
+      },
+      {
+        "rel": "/api/parent/relationship/systemId",
+        "href": "/api/instances/System::1fcf40fc60c6520f"
+      }
+    ]
+  },
+  {
+    "id": "1b8659fe00000002",
+    "name": null,
+    "sdcIp": "10.0.1.228",
+    "sdcGuid": "46EE0B53-B823-4E68-B0B4-41A2DEC5A425",
+    "sdcType": "AppSdc",
+    "peerMdmId": null,
+    "sdcApproved": true,
+    "sdcApprovedIps": null,
+    "sdcAgentActive": true,
+    "mdmConnectionState": "Connected",
+    "hostOsFullType": "Linux 5.15.0-91-generic",
+    "systemId": "1fcf40fc60c6520f",
+    "softwareVersionInfo": "R4_5.2100.0",
+    "installedSoftwareVersionInfo": "R4_5.2100.0",
+    "kernelVersion": "5.15.0-91-generic",
+    "kernelBuildNumber": null,
+    "perfProfile": "Default",
+    "versionInfo": "R4_5.2100.0",
+    "sdcDefaultInitiatorConnectivityState": "Connected",
+    "certificateInfo": {
+      "thumbprint": "FF:EE:DD:CC:BB:AA:99:88:77:66:55:44:33:22:11:00:FF:EE:DD:CC:BB:AA:99:88:77:66:55:44:33:22:11:00",
+      "subject": "CN=SDC3, O=Dell, C=US",
+      "issuer": "CN=PowerFlex Root CA, O=Dell, C=US",
+      "validFrom": "2025-01-01T00:00:00Z",
+      "validTo": "2026-01-01T00:00:00Z"
+    },
+    "links": [
+      {
+        "rel": "self",
+        "href": "/api/instances/Sdc::1b8659fe00000002"
+      },
+      {
+        "rel": "/api/Sdc/relationship/Statistics",
+        "href": "/api/instances/Sdc::1b8659fe00000002/relationships/Statistics"
+      },
+      {
+        "rel": "/api/Sdc/relationship/Volume",
+        "href": "/api/instances/Sdc::1b8659fe00000002/relationships/Volume"
+      },
+      {
+        "rel": "/api/parent/relationship/systemId",
+        "href": "/api/instances/System::1fcf40fc60c6520f"
+      }
+    ]
+  }
+]
