@@ -53,7 +53,7 @@ class FakeCursor:
         return self.rows[:size]
 
 
-def make_check(host='localhost', port='5432', dbname='datadog_test', pool=None, **metadata):
+def make_check(host='localhost', port=5432, dbname='datadog_test', pool=None, **metadata):
     check = SimpleNamespace(
         _config=SimpleNamespace(host=host, port=port, dbname=dbname, **metadata),
         db_pool=pool or FakePool(),
@@ -84,7 +84,7 @@ def response_code(response):
 
 
 def test_normalize_target_trims_lowercases_host_and_removes_one_trailing_dot():
-    target = normalize_target({'host': ' Example.INTERNAL. ', 'port': '5432', 'dbname': 'postgres'})
+    target = normalize_target({'host': ' Example.INTERNAL. ', 'port': 5432, 'dbname': 'postgres'})
 
     assert target.host == 'example.internal'
     assert target.port == 5432
@@ -97,7 +97,7 @@ def test_normalize_target_defaults_missing_port_to_5432():
     assert target.port == 5432
 
 
-@pytest.mark.parametrize('port', [True, 'abc', '0', 0, -1, 65536, None])
+@pytest.mark.parametrize('port', [True, '5432', 'abc', '0', 0, -1, 65536, None])
 def test_normalize_target_rejects_invalid_port_values(port):
     with pytest.raises(ValueError):
         normalize_target({'host': 'localhost', 'port': port, 'dbname': 'postgres'})
@@ -154,11 +154,23 @@ def test_rejects_unknown_limits_fields_before_resolution():
     assert 'SECRET_DO_NOT_LOG' not in str(response)
 
 
+@pytest.mark.parametrize('field', ['maxRows', 'maxBytes', 'timeoutMs'])
+def test_rejects_string_limit_values_before_resolution(field):
+    request = valid_request()
+    request['limits'][field] = '10'
+
+    response = execute_remote_query(request, ExplodingRegistry())
+
+    assert response['status'] == 'FAILED'
+    assert response_code(response) == 'invalid_request'
+    assert field in response['error']['message']
+
+
 def test_resolve_matches_exact_host_port_dbname_from_check_config():
     pool = FakePool()
-    check = make_check(host='localhost', port='5432', dbname='datadog_test', pool=pool)
+    check = make_check(host='localhost', port=5432, dbname='datadog_test', pool=pool)
 
-    response = execute_remote_query(valid_request(host='LOCALHOST.', port='5432'), StaticPostgresCheckRegistry([check]))
+    response = execute_remote_query(valid_request(host='LOCALHOST.', port=5432), StaticPostgresCheckRegistry([check]))
 
     assert response['status'] == 'SUCCEEDED'
     assert response['rows'] == [{'value': 1}]
@@ -167,7 +179,7 @@ def test_resolve_matches_exact_host_port_dbname_from_check_config():
 
 def test_resolve_requires_dbname_match_even_when_host_and_port_match():
     pool = FakePool()
-    check = make_check(host='localhost', port='5432', dbname='datadog_test', pool=pool)
+    check = make_check(host='localhost', port=5432, dbname='datadog_test', pool=pool)
 
     response = execute_remote_query(valid_request(dbname='postgres'), StaticPostgresCheckRegistry([check]))
 
@@ -180,7 +192,7 @@ def test_resolve_ignores_metadata_identity_matches():
     pool = FakePool()
     check = make_check(
         host='configured.internal',
-        port='5432',
+        port=5432,
         dbname='datadog_test',
         pool=pool,
         reported_hostname='reported.internal',

@@ -21,10 +21,6 @@ _TARGET_FIELDS = frozenset({'host', 'port', 'dbname'})
 _LIMIT_FIELDS = frozenset({'maxRows', 'maxBytes', 'timeoutMs'})
 
 
-class UnknownFieldsError(ValueError):
-    pass
-
-
 @dataclass(frozen=True)
 class RemoteQueryTarget:
     host: str
@@ -42,7 +38,6 @@ class RemoteQueryLimits:
 @dataclass(frozen=True)
 class RemoteQueryRequest:
     target: RemoteQueryTarget
-    query: str
     limits: RemoteQueryLimits
 
 
@@ -78,8 +73,6 @@ def execute_remote_query(request: Mapping[str, Any], registry: PostgresCheckRegi
 
 
 def normalize_target(target: Mapping[str, Any]) -> RemoteQueryTarget:
-    _reject_unknown_fields(target, _TARGET_FIELDS, 'target')
-
     host = target.get('host')
     if not isinstance(host, str) or not host.strip():
         raise ValueError('host must be a non-empty string')
@@ -90,7 +83,9 @@ def normalize_target(target: Mapping[str, Any]) -> RemoteQueryTarget:
     if dbname != dbname.strip():
         raise ValueError('dbname must not contain surrounding whitespace')
 
-    return RemoteQueryTarget(host=_normalize_host(host), port=_normalize_port(target.get('port', 5432)), dbname=dbname)
+    return RemoteQueryTarget(
+        host=_normalize_host(host), port=_int_in_range(target.get('port', 5432), 'port', maximum=65535), dbname=dbname
+    )
 
 
 def _parse_request(value: Any) -> RemoteQueryRequest | dict[str, Any]:
@@ -112,17 +107,19 @@ def _parse_request(value: Any) -> RemoteQueryRequest | dict[str, Any]:
     if isinstance(limits_or_error, dict):
         return limits_or_error
 
-    return RemoteQueryRequest(target=target_or_error, query=_ALLOWED_QUERY, limits=limits_or_error)
+    return RemoteQueryRequest(target=target_or_error, limits=limits_or_error)
 
 
 def _parse_target(value: Any) -> RemoteQueryTarget | dict[str, Any]:
     if not isinstance(value, Mapping):
         return _error('invalid_selector', 'Target selector must be a mapping.')
 
+    unknown_fields_error = _unknown_fields_error(value, _TARGET_FIELDS, 'target')
+    if unknown_fields_error is not None:
+        return unknown_fields_error
+
     try:
         return normalize_target(value)
-    except UnknownFieldsError as e:
-        return _error('invalid_request', str(e))
     except ValueError as e:
         return _error('invalid_selector', str(e))
 
@@ -139,9 +136,9 @@ def _parse_limits(value: Any) -> RemoteQueryLimits | dict[str, Any]:
 
     try:
         return RemoteQueryLimits(
-            max_rows=_positive_int(value.get('maxRows', 10), 'maxRows'),
-            max_bytes=_positive_int(value.get('maxBytes', 1_048_576), 'maxBytes'),
-            timeout_ms=_positive_int(value.get('timeoutMs', 5_000), 'timeoutMs'),
+            max_rows=_int_in_range(value.get('maxRows', 10), 'maxRows'),
+            max_bytes=_int_in_range(value.get('maxBytes', 1_048_576), 'maxBytes'),
+            timeout_ms=_int_in_range(value.get('timeoutMs', 5_000), 'timeoutMs'),
         )
     except ValueError as e:
         return _error('invalid_request', str(e))
@@ -156,7 +153,7 @@ def _resolve_matches(target: RemoteQueryTarget, checks: Iterable['PostgreSql']) 
         try:
             candidate = RemoteQueryTarget(
                 host=_normalize_host(config.host),
-                port=_normalize_port(config.port),
+                port=_int_in_range(config.port, 'port', maximum=65535),
                 dbname=config.dbname,
             )
         except (AttributeError, ValueError):
@@ -201,12 +198,6 @@ def _execute_select_1(check: 'PostgreSql', target: RemoteQueryTarget, limits: Re
     }
 
 
-def _reject_unknown_fields(value: Mapping[str, Any], allowed_fields: frozenset[str], label: str) -> None:
-    unknown_fields = _unknown_field_names(value, allowed_fields)
-    if unknown_fields:
-        raise UnknownFieldsError(_unknown_fields_message(unknown_fields, label))
-
-
 def _unknown_fields_error(
     value: Mapping[str, Any], allowed_fields: frozenset[str], label: str
 ) -> dict[str, Any] | None:
@@ -240,35 +231,14 @@ def _normalize_host(value: str) -> str:
     return host
 
 
-def _normalize_port(value: Any) -> int:
-    if isinstance(value, bool):
-        raise ValueError('port must be an integer')
-    if isinstance(value, int):
-        port = value
-    elif isinstance(value, str):
-        if not value.isdigit():
-            raise ValueError('port must be an integer')
-        port = int(value)
-    else:
-        raise ValueError('port must be an integer')
-
-    if port <= 0 or port > 65535:
-        raise ValueError('port must be between 1 and 65535')
-    return port
-
-
-def _positive_int(value: Any, field: str) -> int:
-    if isinstance(value, bool):
-        raise ValueError(f'{field} must be a positive integer')
-    if isinstance(value, int):
-        number = value
-    elif isinstance(value, str) and value.isdigit():
-        number = int(value)
-    else:
-        raise ValueError(f'{field} must be a positive integer')
-    if number <= 0:
-        raise ValueError(f'{field} must be a positive integer')
-    return number
+def _int_in_range(value: Any, field: str, *, minimum: int = 1, maximum: int | None = None) -> int:
+    if not isinstance(value, int) or isinstance(value, bool):
+        raise ValueError(f'{field} must be an integer')
+    if value < minimum or (maximum is not None and value > maximum):
+        if maximum is None:
+            raise ValueError(f'{field} must be greater than or equal to {minimum}')
+        raise ValueError(f'{field} must be between {minimum} and {maximum}')
+    return value
 
 
 def _column_name(column: Any) -> str:
