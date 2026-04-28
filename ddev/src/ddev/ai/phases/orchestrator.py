@@ -9,11 +9,11 @@ from pathlib import Path
 
 import anthropic
 
+from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.base import Phase, PhaseRegistry
 from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import FlowConfig, FlowConfigError
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
-from ddev.ai.react.callbacks import CallbackSet
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.event_bus.exceptions import FatalProcessingError
@@ -44,7 +44,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         checkpoint_path: Path,
         runtime_variables: dict[str, str],
         anthropic_client: anthropic.AsyncAnthropic,
-        callback_sets: list[CallbackSet] | None = None,
+        callbacks: Callbacks | None = None,
         grace_period: float = 10,
         file_access_policy: FileAccessPolicy | None = None,
     ) -> None:
@@ -60,7 +60,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._checkpoint_path = checkpoint_path
         self._runtime_variables = runtime_variables
         self._anthropic_client = anthropic_client
-        self._callback_sets = callback_sets
+        self._callbacks = callbacks
         self._file_registry = FileRegistry(policy=file_access_policy)
 
     async def on_initialize(self) -> None:
@@ -98,7 +98,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
                 runtime_variables=self._runtime_variables,
                 flow_variables=config.variables,
                 config_dir=config_dir,
-                callback_sets=self._callback_sets,
+                callbacks=self._callbacks,
                 file_registry=self._file_registry,
             )
 

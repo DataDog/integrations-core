@@ -10,7 +10,7 @@ import pytest
 from ddev.ai.agent.base import BaseAgent
 from ddev.ai.agent.exceptions import AgentConnectionError
 from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolCall, ToolResultMessage
-from ddev.ai.react.callbacks import CallbackSet
+from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.core.registry import ToolRegistry
@@ -97,7 +97,7 @@ class PerToolRegistry:
 
 
 class CallbackRecorder:
-    """Test helper that wires a CallbackSet to record all lifecycle events."""
+    """Test helper that records all ReAct lifecycle events via a CallbackSet."""
 
     def __init__(self) -> None:
         self.agent_responses: list[tuple[AgentResponse, int]] = []
@@ -107,31 +107,33 @@ class CallbackRecorder:
         self.before_compacts: int = 0
         self.after_compacts: int = 0
 
-        self.callback_set = CallbackSet()
+        cb = CallbackSet()
 
-        @self.callback_set.on_agent_response
+        @cb.on_agent_response
         async def _record_response(response: AgentResponse, iteration: int) -> None:
             self.agent_responses.append((response, iteration))
 
-        @self.callback_set.on_tool_call
+        @cb.on_tool_call
         async def _record_tool_call(tool_call: ToolCall, result: ToolResult, iteration: int) -> None:
             self.tool_calls_seen.append((tool_call, result, iteration))
 
-        @self.callback_set.on_complete
+        @cb.on_complete
         async def _record_complete(result: ReActResult) -> None:
             self.complete_results.append(result)
 
-        @self.callback_set.on_error
+        @cb.on_error
         async def _record_error(error: BaseException) -> None:
             self.errors.append(error)
 
-        @self.callback_set.on_before_compact
+        @cb.on_before_compact
         async def _record_before_compact() -> None:
             self.before_compacts += 1
 
-        @self.callback_set.on_after_compact
+        @cb.on_after_compact
         async def _record_after_compact() -> None:
             self.after_compacts += 1
+
+        self.callbacks = Callbacks([cb])
 
 
 def make_response(
@@ -164,13 +166,13 @@ def make_tool_call(
 def make_process(
     agent: MockAgent,
     registry: MockToolRegistry | None = None,
-    callback_sets: list[CallbackSet] | None = None,
+    callbacks: Callbacks | None = None,
     compact_threshold_pct: float | None = None,
 ) -> ReActProcess:
     return ReActProcess(
         agent=agent,
         tool_registry=registry or MockToolRegistry(),
-        callback_sets=callback_sets,
+        callbacks=callbacks,
         compact_threshold_pct=compact_threshold_pct,
     )
 
@@ -285,7 +287,7 @@ async def test_tool_exception_on_tool_call_callback_fires_with_error_result() ->
     await ReActProcess(
         agent=agent,
         tool_registry=RaisingToolRegistry(ValueError("oops")),
-        callback_sets=[recorder.callback_set],
+        callbacks=recorder.callbacks,
     ).start("x")
 
     assert len(recorder.tool_calls_seen) == 1
@@ -365,7 +367,7 @@ async def test_callbacks_invoked_correct_counts() -> None:
     recorder = CallbackRecorder()
     agent = MockAgent(responses)
 
-    result = await make_process(agent, registry=registry, callback_sets=[recorder.callback_set]).start("Run tools")
+    result = await make_process(agent, registry=registry, callbacks=recorder.callbacks).start("Run tools")
 
     assert len(recorder.agent_responses) == 2
     assert recorder.agent_responses[0][1] == 1
@@ -379,14 +381,6 @@ async def test_callbacks_invoked_correct_counts() -> None:
     assert len(recorder.complete_results) == 1
     assert recorder.complete_results[0] is result
     assert len(recorder.errors) == 0
-
-
-async def test_two_callback_sets_both_notified() -> None:
-    agent = MockAgent([make_response(StopReason.END_TURN)])
-    rec_a, rec_b = CallbackRecorder(), CallbackRecorder()
-    await make_process(agent, callback_sets=[rec_a.callback_set, rec_b.callback_set]).start("x")
-    assert len(rec_a.complete_results) == 1
-    assert len(rec_b.complete_results) == 1
 
 
 # ---------------------------------------------------------------------------
@@ -409,7 +403,7 @@ async def test_agent_error_notifies_and_reraises() -> None:
     process = ReActProcess(
         agent=ErrorAgent(),
         tool_registry=MockToolRegistry(),
-        callback_sets=[recorder.callback_set],
+        callbacks=recorder.callbacks,
     )
 
     with pytest.raises(AgentConnectionError):
@@ -436,7 +430,7 @@ async def test_keyboard_interrupt_notifies_and_reraises() -> None:
     process = ReActProcess(
         agent=InterruptAgent(),
         tool_registry=MockToolRegistry(),
-        callback_sets=[recorder.callback_set],
+        callbacks=recorder.callbacks,
     )
 
     with pytest.raises(KeyboardInterrupt):
@@ -462,7 +456,7 @@ async def test_cancelled_error_notifies_and_reraises() -> None:
     process = ReActProcess(
         agent=CancelledAgent(),
         tool_registry=MockToolRegistry(),
-        callback_sets=[recorder.callback_set],
+        callbacks=recorder.callbacks,
     )
 
     with pytest.raises(asyncio.CancelledError):
@@ -544,7 +538,7 @@ async def test_compact_returns_tokens_when_compaction_occurs() -> None:
 async def test_compact_fires_before_and_after_callbacks() -> None:
     agent = MockAgent([])
     recorder = CallbackRecorder()
-    await make_process(agent, callback_sets=[recorder.callback_set]).compact()
+    await make_process(agent, callbacks=recorder.callbacks).compact()
     assert recorder.before_compacts == 1
     assert recorder.after_compacts == 1
 
@@ -577,7 +571,7 @@ async def test_auto_compact_fires_callbacks() -> None:
     ]
     agent = MockAgent(responses)
     recorder = CallbackRecorder()
-    await make_process(agent, callback_sets=[recorder.callback_set], compact_threshold_pct=75.0).start("task")
+    await make_process(agent, callbacks=recorder.callbacks, compact_threshold_pct=75.0).start("task")
     assert recorder.before_compacts == 1
     assert recorder.after_compacts == 1
 
@@ -628,3 +622,16 @@ async def test_auto_compact_tokens_included_in_result() -> None:
 
     assert result.total_input_tokens == 100 + 200 + 30
     assert result.total_output_tokens == 50 + 80 + 10
+
+
+# ---------------------------------------------------------------------------
+# Default callbacks
+# ---------------------------------------------------------------------------
+
+
+async def test_default_callbacks_is_empty_instance_not_none() -> None:
+    """ReActProcess(callbacks=None) must use an empty Callbacks() default — no AttributeError."""
+    agent = MockAgent([make_response(StopReason.END_TURN)])
+    process = ReActProcess(agent=agent, tool_registry=MockToolRegistry())
+    result = await process.start("Hi")
+    assert result.iterations == 1
