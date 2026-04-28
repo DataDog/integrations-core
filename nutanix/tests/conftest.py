@@ -122,7 +122,7 @@ def mock_instance():
 
 
 @pytest.fixture
-def mock_http_get(mock_http, mocker):
+def mock_http_get(mock_http):
     def mock_response(url, params=None, *args, **kwargs):
         page = None
 
@@ -320,10 +320,7 @@ def mock_http_get(mock_http, mocker):
             return MockHTTPResponse(json_data=response_data)
 
         print(f"[MOCK ERROR] No matching endpoint for URL: {url}")
-        mock_resp = mocker.Mock()
-        mock_resp.status_code = 404
-        mock_resp.raise_for_status = mocker.Mock(side_effect=Exception("404 Not Found"))
-        return mock_resp
+        return MockHTTPResponse(status_code=404)
 
     mock_http.get.side_effect = mock_response
     return mock_http.get
