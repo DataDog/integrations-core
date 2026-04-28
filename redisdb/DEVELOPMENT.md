@@ -86,3 +86,8 @@ Only the default-port bridge-network case is covered today. Other cases (port-fo
 non-default in-container port, `--network=host`, process autodiscovery) are tracked in the
 DSCVR "Integrations autodiscovery exploration" Confluence page and will be added as the
 associated upstream issues are fixed.
+
+The Agent reads `auto_conf.yaml` via a file-level Docker bind-mount of the source-tree
+copy at `redisdb/datadog_checks/redisdb/data/auto_conf.yaml`. Editing the file between
+test runs requires restarting the environment (`ddev env stop` then `ddev env start`)
+because tools like `git checkout` replace the file's inode and break the live mount.
