@@ -45,8 +45,8 @@ def dd_environment(e2e_instance):
     socket so it can discover the container via the Docker listener. No static
     instance config is yielded so the Agent relies purely on `auto_conf.yaml`.
 
-    Otherwise run the existing SASL + IPv6 + socket multi-container setup used by
-    the existing e2e and integration tests.
+    Otherwise run the multi-container SASL + IPv6 + socket setup used by every
+    test in `test_integration_e2e.py`.
     """
     if AUTODISCOVERY:
         e2e_metadata = {
