@@ -122,7 +122,7 @@ def mock_instance():
 
 
 @pytest.fixture
-def mock_http_get(mock_http):
+def mock_http_get(mock_http, mocker):
     def mock_response(url, params=None, *args, **kwargs):
         page = None
 
@@ -182,6 +182,7 @@ def mock_http_get(mock_http):
         if 'api/vmm/v4.0/ahv/config/vms' in url:
             response_data = load_fixture_page("vms.json", page)
 
+            # Filter by host/extId if present in params
             filter_param = params.get('$filter', '') if params else ''
             if "host/extId eq" in filter_param:
                 import re
@@ -197,6 +198,7 @@ def mock_http_get(mock_http):
 
             return MockHTTPResponse(json_data=response_data)
 
+        # Events endpoint - paginated
         if 'api/monitoring/v4.0/serviceability/events' in url:
             response_data = load_fixture_page("events.json", page)
 
@@ -251,6 +253,7 @@ def mock_http_get(mock_http):
 
             return MockHTTPResponse(json_data=response_data)
 
+        # Individual alert fetch by ID (e.g. /alerts/{uuid})
         import re
 
         alert_id_match = re.search(r'api/monitoring/v4\.\d/serviceability/alerts/([0-9a-f-]{36})', url)
@@ -317,6 +320,7 @@ def mock_http_get(mock_http):
             return MockHTTPResponse(json_data=response_data)
 
         print(f"[MOCK ERROR] No matching endpoint for URL: {url}")
+        mock_resp = mocker.Mock()
         mock_resp.status_code = 404
         mock_resp.raise_for_status = mocker.Mock(side_effect=Exception("404 Not Found"))
         return mock_resp
