@@ -1,0 +1,1 @@
+Legacy migration: remove the legacy `clean`, `config`, `test`, `validate all`, `validate licenses`, and `agent requirements` commands from `python -m datadog_checks.dev`. ddev provides native equivalents for the first five; `agent requirements` is unreachable and unsupported.

@@ -9,7 +9,6 @@
 # Security model:
 #   - Workflow runs on pull_request (internal) and pull_request_target (external) events
 #   - job_workflow_ref constrains to the reusable workflow committed to master
-#   - Dependabot PRs are explicitly excluded by workflow logic
 #
 # Permissions granted:
 #   - pull_requests: write  - Apply labels and add team labels to PRs
