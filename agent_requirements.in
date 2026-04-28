@@ -10,7 +10,7 @@ cachetools==7.0.5
 clickhouse-connect==0.14.1
 cm-client==45.0.4
 confluent-kafka==2.13.2
-cryptography==46.0.6
+cryptography==46.0.7
 ddtrace==3.19.5
 dnspython==2.8.0
 fastavro==1.12.1
