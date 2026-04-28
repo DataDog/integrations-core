@@ -1,1 +1,1 @@
-Refactor Cisco Catalyst serial_number metadata to use a symbols list with CISCO-STACK and ENTITY-MIB fallbacks and updated Circitor links.
+Cisco Catalyst: use ``entPhysicalSerialNum`` when ``chassisSerialNumberString`` is absent for device ``serial_number`` metadata.
