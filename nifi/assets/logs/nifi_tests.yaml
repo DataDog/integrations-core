@@ -1,0 +1,117 @@
+id: "nifi"
+tests:
+ -
+  sample: "2026-03-20 18:08:33,065 INFO [main] o.a.nifi.NiFi NiFi PID is 1"
+  result:
+    custom:
+      level: "INFO"
+      logger:
+        name: "o.a.nifi.NiFi"
+        thread_name: "main"
+      timestamp: 1774030113065
+    message: "NiFi PID is 1"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1774030113065
+ -
+  sample: "2026-03-20 18:08:33,065 ERROR [Timer-Driven Process Thread-1] o.a.n.p.standard.PutFile PutFile[id=abc] Failed to write"
+  result:
+    custom:
+      level: "ERROR"
+      logger:
+        name: "o.a.n.p.standard.PutFile"
+        thread_name: "Timer-Driven Process Thread-1"
+      timestamp: 1774030113065
+    message: "PutFile[id=abc] Failed to write"
+    status: "error"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1774030113065
+ -
+  sample: "2026-03-20 18:08:34,100 WARN [Flow Service Tasks Thread-1] o.a.n.c.s.impl.WriteAheadFlowFileRepository Encountered non-critical error"
+  result:
+    custom:
+      level: "WARN"
+      logger:
+        name: "o.a.n.c.s.impl.WriteAheadFlowFileRepository"
+        thread_name: "Flow Service Tasks Thread-1"
+      timestamp: 1774030114100
+    message: "Encountered non-critical error"
+    status: "warn"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1774030114100
+ -
+  sample: '192.168.1.100 - admin [20/Mar/2026:18:08:33 +0000] "GET /nifi-api/flow/status HTTP/1.1" 200 1234 "-" "python-requests/2.31.0"'
+  tags:
+   - "log_type:request"
+  result:
+    custom:
+      date_access: 1774030113000
+      http:
+        auth: "admin"
+        method: "GET"
+        referer: "-"
+        status_category: "OK"
+        status_code: 200
+        url: "/nifi-api/flow/status"
+        url_details:
+          path: "/nifi-api/flow/status"
+        useragent: "python-requests/2.31.0"
+        useragent_details:
+          browser:
+            family: "Python Requests"
+            major: "2"
+            minor: "31"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+        version: "1.1"
+      network:
+        bytes_written: 1234
+        client:
+          ip: "192.168.1.100"
+    message: '192.168.1.100 - admin [20/Mar/2026:18:08:33 +0000] "GET /nifi-api/flow/status HTTP/1.1" 200 1234 "-" "python-requests/2.31.0"'
+    status: "ok"
+    tags:
+     - "source:LOGS_SOURCE"
+     - "log_type:request"
+    timestamp: 1774030113000
+ -
+  sample: '10.0.0.50 - - [20/Mar/2026:18:10:45 +0000] "POST /nifi-api/process-groups/root/process-groups HTTP/1.1" 404 892 "https://localhost:8443/nifi/" "Mozilla/5.0"'
+  tags:
+   - "log_type:request"
+  result:
+    custom:
+      date_access: 1774030245000
+      http:
+        method: "POST"
+        referer: "https://localhost:8443/nifi/"
+        status_category: "warning"
+        status_code: 404
+        url: "/nifi-api/process-groups/root/process-groups"
+        url_details:
+          path: "/nifi-api/process-groups/root/process-groups"
+        useragent: "Mozilla/5.0"
+        useragent_details:
+          browser:
+            family: "Other"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+        version: "1.1"
+      network:
+        bytes_written: 892
+        client:
+          ip: "10.0.0.50"
+    message: '10.0.0.50 - - [20/Mar/2026:18:10:45 +0000] "POST /nifi-api/process-groups/root/process-groups HTTP/1.1" 404 892 "https://localhost:8443/nifi/" "Mozilla/5.0"'
+    status: "warn"
+    tags:
+     - "source:LOGS_SOURCE"
+     - "log_type:request"
+    timestamp: 1774030245000
