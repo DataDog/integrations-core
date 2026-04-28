@@ -697,6 +697,8 @@ def test_mdl_blocking_activity(aggregator, dbm_instance, dd_run_check, root_conn
     MDL_TABLE = 'testdb.mdl_test_table'
 
     with closing(root_conn.cursor()) as cur:
+        # Ensure the consumer is enabled — other tests in this session may disable it.
+        cur.execute("UPDATE performance_schema.setup_consumers SET enabled='YES' WHERE name = 'events_waits_current'")
         cur.execute('DROP TABLE IF EXISTS {}'.format(MDL_TABLE))
         cur.execute('CREATE TABLE {} (id INT PRIMARY KEY, val VARCHAR(50))'.format(MDL_TABLE))
         cur.execute('INSERT INTO {} VALUES (1, %s)'.format(MDL_TABLE), ('hello',))
