@@ -32,6 +32,20 @@ def _build_device_ip(container_ip, last_digit='1'):
     return snmp_device
 
 
+def _snmp_device_from_profile_metrics(aggregator, profile, loader):
+    """Resolve snmp_device tag from autodiscovery metrics (host octet varies with snmpsim layout)."""
+    for stub in aggregator._metrics.get('datadog.snmp.check_duration', []):
+        tags = list(stub.tags or [])
+        if 'snmp_profile:{}'.format(profile) not in tags:
+            continue
+        if 'loader:{}'.format(loader) not in tags:
+            continue
+        for tag in tags:
+            if tag.startswith('snmp_device:'):
+                return tag.partition(':')[2]
+    return None
+
+
 @common.snmp_listener_only
 def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
     """
@@ -105,8 +119,10 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
                 aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags, count=1)
 
     # ==== apc_ups profile ===
+    apc_snmp_device = _snmp_device_from_profile_metrics(aggregator, 'apc_ups', loader='python')
+    assert apc_snmp_device is not None, 'expected apc_ups datadog.snmp.check_duration with loader python'
     common_tags = [
-        'snmp_device:{}'.format(snmp_device),
+        'snmp_device:{}'.format(apc_snmp_device),
         'autodiscovery_subnet:{}.0/28'.format(subnet_prefix),
         'snmp_profile:apc_ups',
         'model:APC Smart-UPS 600',
