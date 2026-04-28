@@ -1,6 +1,7 @@
 services:
   memcached-default:
     image: "memcached:${MCACHE_VERSION}"
+    command: ["-vv"]
     networks:
       - network1
 
