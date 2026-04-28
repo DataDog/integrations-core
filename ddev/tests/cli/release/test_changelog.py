@@ -556,10 +556,12 @@ def test_build_command_no_fragments_renders_no_significant_changes(ddev, repo_wi
 def test_build_command_surfaces_towncrier_failure(ddev, build_fragments, mocker):
     mocker.patch(
         'ddev.utils.platform.Platform.run_command',
-        return_value=subprocess.CompletedProcess(args=[], returncode=1, stdout='', stderr='boom'),
+        return_value=subprocess.CompletedProcess(args=[], returncode=1, stdout='partial output', stderr='boom'),
     )
 
     result = ddev('release', 'changelog', 'build', 'ddev')
 
     assert result.exit_code != 0
+    assert 'partial output' in result.output
+    assert 'towncrier build exited with code 1' in result.output
     assert 'boom' in result.output

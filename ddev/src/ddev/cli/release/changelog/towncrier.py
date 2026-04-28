@@ -40,9 +40,11 @@ def towncrier(
         capture_output=True,
         text=True,
     )
+    stdout = result.stdout.rstrip()
+    if stdout and (display_output or result.returncode):
+        app.display(stdout, markup=False)
     if result.returncode:
-        details = '\n'.join(part for part in (result.stdout.strip(), result.stderr.strip()) if part)
-        app.abort(details or f'towncrier {cmd} exited with code {result.returncode}', code=result.returncode)
-    if display_output:
-        app.display(result.stdout.rstrip(), markup=False)
+        message = f'towncrier {cmd} exited with code {result.returncode}'
+        stderr = result.stderr.rstrip()
+        app.abort(f'{message}\n{stderr}' if stderr else message, code=result.returncode)
     return result
