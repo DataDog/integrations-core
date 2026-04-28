@@ -3,5 +3,15 @@
 [[envs.default.matrix]]
 python = ["3.13"]
 
+[[envs.default.matrix]]
+python = ["3.13"]
+version = ["ad-1.6"]
+
 [envs.default.env-vars]
 DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "MCACHE_VERSION", value = "1.6", if = ["ad-1.6"] },
+  { key = "MCACHE_AUTODISCOVERY", value = "true", if = ["ad-1.6"] },
+]
