@@ -76,19 +76,19 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
     @cached_property
     def test_package_install_command(self):
         if not self.in_core_repo:
-            return self.pip_install_command('datadog-checks-dev')
+            return self.uv_install_command('datadog-checks-dev')
         elif not (self.is_test_package or self.is_dev_package):
-            return self.pip_install_command('-e', '../datadog_checks_dev')
+            return self.uv_install_command('-e', '../datadog_checks_dev')
 
     def base_package_install_command(self, features):
         from ddev.testing.constants import TestEnvVars
 
         if base_package_version := os.environ.get(TestEnvVars.BASE_PACKAGE_VERSION):
-            return self.pip_install_command(self.format_base_package(features, version=base_package_version))
+            return self.uv_install_command(self.format_base_package(features, version=base_package_version))
         elif not self.in_core_repo:
-            return self.pip_install_command(self.format_base_package(features))
+            return self.uv_install_command(self.format_base_package(features))
         elif not (self.is_base_package or self.is_dev_package):
-            return self.pip_install_command('-e', self.format_base_package(features, local=True))
+            return self.uv_install_command('-e', self.format_base_package(features, local=True))
 
     @staticmethod
     def format_base_package(features, version='', local=False):
@@ -103,11 +103,13 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
         return formatted
 
     @staticmethod
-    def pip_install_command(*args):
-        return f'python -m pip install --disable-pip-version-check {{verbosity:flag:-1}} {" ".join(args)}'
+    def uv_install_command(*args):
+        return f'uv pip install {{verbosity:flag:-1}} {" ".join(args)}'
 
     def finalize_config(self, config):
         for env_name, env_config in config.items():
+            env_config.setdefault('installer', 'uv')
+
             if env_name == 'default':
                 # Always add ddtrace as a dependency for the default environment
                 # This ensures we have it available when running tests to emit CI visibility data
@@ -192,6 +194,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
 
         lint_env = {
             'detached': True,
+            'installer': 'uv',
             'scripts': {
                 'style': [
                     self.formatter_command('--diff --check', settings_dir),

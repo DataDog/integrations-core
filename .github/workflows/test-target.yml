@@ -235,33 +235,38 @@ jobs:
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
-        cache: 'pip'
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+      with:
+        enable-cache: false
 
     - name: Restore cache
       if: inputs.repo == 'core'
       uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       with:
-        path: ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
+        path: |
+          ${{ runner.os == 'Windows' && '~\AppData\Local\uv\cache' || runner.os == 'macOS' && '~/Library/Caches/uv' || '~/.cache/uv' }}
+          ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
         key: >-
           ${{ format(
-            'v01-python-{0}-{1}-{2}-{3}',
+            'v02-uv-{0}-{1}-{2}-{3}',
             env.pythonLocation,
             hashFiles('datadog_checks_base/pyproject.toml'),
             hashFiles('datadog_checks_dev/pyproject.toml'),
             hashFiles('ddev/pyproject.toml')
           )}}
         restore-keys: |-
-          v01-python-${{ env.pythonLocation }}
+          v02-uv-${{ env.pythonLocation }}
 
     - name: Install ddev from local folder
       if: inputs.repo == 'core'
       run: |-
-        pip install -e ./datadog_checks_dev[cli]
-        pip install -e ./ddev
+        uv pip install --system -e ./datadog_checks_dev[cli] -e ./ddev
 
     - name: Install ddev from PyPI
       if: inputs.repo != 'core'
-      run: pip install ddev
+      run: uv pip install --system ddev
 
     - name: Configure ddev
       run: |-
