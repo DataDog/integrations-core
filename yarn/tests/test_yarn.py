@@ -266,7 +266,7 @@ def test_auth(aggregator, mocked_auth_request):
     )
 
 
-def test_ssl_verification():
+def test_tls_verify_config_propagates():
     instance = YARN_SSL_VERIFY_TRUE_CONFIG['instances'][0]
     yarn = YarnCheck('yarn', {}, [instance])
     assert yarn.http.options['verify'] is True
