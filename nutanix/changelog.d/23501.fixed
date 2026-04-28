@@ -1,0 +1,1 @@
+Reconcile open alerts against the unresolved-alerts API on every check cycle instead of relying on a persistent cache. Eliminates orphaned `nutanix.alert.open` metric emissions when a resolution is missed (e.g. agent downtime spanning a resolution, or alert deletion).

@@ -4,7 +4,6 @@
 
 from __future__ import annotations
 
-import json
 from collections.abc import Callable
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
@@ -51,11 +50,11 @@ class ActivityMonitor:
         else:
             self.alerts_v42_supported = None
 
-        # Persistent set of open (unresolved) alert extIds
-        cached_open_ids = self.check.read_persistent_cache("open_alert_ids")
-        self._open_alert_ids: set[str] = set(json.loads(cached_open_ids)) if cached_open_ids else set()
-        self._is_first_alert_run = not cached_open_ids
-        self.last_alert_update_time = self.check.read_persistent_cache("last_alert_update_time")
+        # In-memory map of open (unresolved) alerts: extId -> alert metadata.
+        # Reconciled each cycle against the unresolved-alerts API to detect
+        # transitions; not persisted across agent restarts (the unresolved API
+        # is the source of truth on every cycle, including the first one).
+        self._open_alerts: dict[str, dict] = {}
 
     def reset_state(self) -> None:
         """Reset in-memory caches and counters for a new collection run."""
@@ -197,92 +196,53 @@ class ActivityMonitor:
         )
 
     def collect_alerts(self) -> None:
-        self.alerts_count = self._safe_collect("alert", self._collect_alerts)
+        self.alerts_count = self._safe_collect("alert", self._reconcile_alerts)
 
-    def _collect_alerts(self) -> int:
-        """Collect alerts with resolution tracking."""
-        if self._is_first_alert_run:
-            return self._collect_alerts_initial()
-        return self._collect_alerts_updates()
+    def _reconcile_alerts(self) -> int:
+        """Reconcile in-memory open alerts against the unresolved-alerts API.
 
-    def _collect_alerts_initial(self) -> int:
-        """First run: fetch all unresolved alerts, cache their IDs."""
+        The unresolved-alerts API is the source of truth on every cycle:
+        - alerts present in the API but not in the in-memory cache are new
+          (emit open event, add to cache);
+        - alerts in the cache but absent from the API are resolved or deleted
+          (emit resolution event + nutanix.alert.open=0, drop from cache);
+        - alerts in both have their cached metadata refreshed so subsequent
+          metric tags reflect transitions like open->acknowledged.
+
+        Stateless across check cycles in terms of persistence: nothing is
+        written to the persistent cache, so agent restarts re-derive state
+        from the API.
+        """
         alerts = self._list_alerts_unresolved()
-        if not alerts:
-            self.check.log.debug("[%s] No unresolved alerts found on initial run", self._pc_label)
-            self._persist_open_alert_ids()
-            self._update_alert_cursor()
-            self._is_first_alert_run = False
-            return 0
-
         alerts = [a for a in alerts if self._should_collect_activity_item(a, "alert")]
+        api_alerts = {a.get("extId"): a for a in alerts if a.get("extId")}
 
-        for alert in alerts:
-            if ext_id := alert.get("extId"):
-                self._open_alert_ids.add(ext_id)
-            self._process_alert(alert)
-
-        self._persist_open_alert_ids()
-        self._update_alert_cursor()
-        self._is_first_alert_run = False
-        return len(alerts)
-
-    def _collect_alerts_updates(self) -> int:
-        """Subsequent runs: fetch alerts updated since cursor, detect resolutions."""
-        cursor = self.last_alert_update_time
-        if not cursor:
-            cursor = get_current_datetime().isoformat().replace("+00:00", "Z")
-
-        alerts = self._list_alerts_since(cursor)
-        if not alerts:
-            return 0
-
-        alerts = self._filter_after_time(alerts, self.last_alert_update_time, "lastUpdatedTime")
-        if not alerts:
-            return 0
-
-        most_recent = self._find_max_timestamp(alerts, "lastUpdatedTime")
-
-        alerts = [a for a in alerts if self._should_collect_activity_item(a, "alert")]
+        new_ids = api_alerts.keys() - self._open_alerts.keys()
+        gone_ids = self._open_alerts.keys() - api_alerts.keys()
 
         count = 0
-        for alert in alerts:
-            ext_id = alert.get("extId", "")
-            is_resolved = alert.get("isResolved", False)
+        for ext_id in new_ids:
+            alert = api_alerts[ext_id]
+            self._open_alerts[ext_id] = alert
+            self._process_alert(alert)
+            count += 1
 
-            if not is_resolved and ext_id not in self._open_alert_ids:
-                # New open alert
-                self._open_alert_ids.add(ext_id)
-                self._process_alert(alert)
-                count += 1
-            elif is_resolved and ext_id in self._open_alert_ids:
-                # Previously open, now resolved
-                self._open_alert_ids.discard(ext_id)
-                self._emit_resolution_event(alert)
-                count += 1
-            elif is_resolved and ext_id not in self._open_alert_ids:
-                # Created and resolved between runs
-                self._process_alert(alert)
-                self._emit_resolution_event(alert)
-                count += 1
-            # else: still open and already tracked, skip
+        for ext_id in gone_ids:
+            cached = self._open_alerts.pop(ext_id)
+            # Try to fetch the now-resolved alert for resolution metadata
+            # (resolvedTime, resolvedByUsername, isAutoResolved). If the alert
+            # was deleted rather than resolved, _get_alert returns None and we
+            # fall back to the cached metadata.
+            resolved_alert = self._get_alert(ext_id) or cached
+            self._emit_resolution_event(resolved_alert, cached_tags_alert=cached)
+            count += 1
 
-        self._persist_open_alert_ids()
-        if most_recent:
-            self.last_alert_update_time = most_recent
-            self.check.write_persistent_cache("last_alert_update_time", most_recent)
+        # Refresh cached metadata for still-open alerts so metric tags reflect
+        # any changes (e.g. acknowledgment) without emitting an event.
+        for ext_id in api_alerts.keys() & self._open_alerts.keys():
+            self._open_alerts[ext_id] = api_alerts[ext_id]
 
         return count
-
-    def _persist_open_alert_ids(self) -> None:
-        """Write current open alert IDs to persistent cache."""
-        self.check.write_persistent_cache("open_alert_ids", json.dumps(sorted(self._open_alert_ids)))
-
-    def _update_alert_cursor(self) -> None:
-        """Set the lastUpdatedTime cursor to now."""
-        now = get_current_datetime().isoformat().replace("+00:00", "Z")
-        self.last_alert_update_time = now
-        self.check.write_persistent_cache("last_alert_update_time", now)
 
     def _list_activity(self, endpoint: str, time_field: str, start_time_str: str) -> list[dict]:
         """Fetch activity items from Prism Central."""
@@ -293,20 +253,12 @@ class ActivityMonitor:
         return self.check._get_paginated_request_data(endpoint, params=params)
 
     def _list_alerts_unresolved(self) -> list[dict]:
-        """Fetch all unresolved alerts (first run)."""
+        """Fetch all currently-unresolved alerts (the source of truth each cycle)."""
         params = {
             "$filter": "isResolved eq false",
             "$orderBy": "lastUpdatedTime asc",
         }
         return self._list_alerts_with_fallback(params, fallback_filter=lambda a: not a.get("isResolved"))
-
-    def _list_alerts_since(self, start_time_str: str) -> list[dict]:
-        """Fetch alerts updated since a given time (subsequent runs)."""
-        params = {
-            "$filter": f"lastUpdatedTime gt {start_time_str}",
-            "$orderBy": "lastUpdatedTime asc",
-        }
-        return self._list_alerts_with_fallback(params)
 
     def _list_alerts_with_fallback(
         self,
@@ -516,6 +468,32 @@ class ActivityMonitor:
             self.check.log.debug("Failed to render alert message template: %s", e)
             return message
 
+    def _build_alert_tags(self, alert: dict, status: str) -> list[str]:
+        """Build the tag set for an alert lifecycle signal (event or metric).
+
+        status is one of: 'open', 'acknowledged', 'resolved'.
+        """
+        tags = self.check.base_tags.copy()
+        if ext_id := alert.get("extId"):
+            tags.append(f"ext_id:{ext_id}")
+        if alert_type := alert.get("alertType"):
+            tags.append(f"ntnx_alert_type:{alert_type}")
+        if severity := alert.get("severity"):
+            tags.append(f"ntnx_alert_severity:{severity}")
+
+        self._add_cluster_name_tag(tags, alert.get("clusterUUID"))
+
+        for classification in alert.get("classifications", []) or []:
+            tags.append(f"ntnx_alert_classification:{classification}")
+        for impact in alert.get("impactTypes", []) or []:
+            tags.append(f"ntnx_alert_impact:{impact}")
+
+        self._add_source_entity_tags(tags, alert)
+
+        tags.append("ntnx_type:alert")
+        tags.append(f"ntnx_alert_status:{status}")
+        return tags
+
     def _process_alert(self, alert: dict) -> None:
         """Process and send a single alert to Datadog."""
         ext_id = alert.get("extId", "")
@@ -523,39 +501,22 @@ class ActivityMonitor:
         message = alert.get("message", "")
         created_time = alert.get("creationTime")
         severity = alert.get("severity")
-        alert_type = alert.get("alertType")
+        is_acknowledged = alert.get("isAcknowledged", False)
 
         # Render template variables in title and message from parameters
         if parameters := alert.get("parameters"):
             title = self._render_message(title, parameters)
             message = self._render_message(message, parameters)
 
-        # map severity to alert_type
+        # map severity to alert_type; acknowledged alerts use "warning" regardless of severity
         severity_map = {
             "CRITICAL": "error",
             "WARNING": "warning",
             "INFO": "info",
         }
-        event_alert_type = severity_map.get(severity, "info")
-
-        alert_tags = self.check.base_tags.copy()
-        if alert_type:
-            alert_tags.append(f"ntnx_alert_type:{alert_type}")
-        if severity:
-            alert_tags.append(f"ntnx_alert_severity:{severity}")
-
-        self._add_cluster_name_tag(alert_tags, alert.get("clusterUUID"))
-
-        for classification in alert.get("classifications", []) or []:
-            alert_tags.append(f"ntnx_alert_classification:{classification}")
-
-        for impact in alert.get("impactTypes", []) or []:
-            alert_tags.append(f"ntnx_alert_impact:{impact}")
-
-        self._add_source_entity_tags(alert_tags, alert)
-
-        alert_tags.append("ntnx_type:alert")
-        alert_tags.append("ntnx_alert_status:open")
+        event_alert_type = "warning" if is_acknowledged else severity_map.get(severity, "info")
+        status = "acknowledged" if is_acknowledged else "open"
+        alert_tags = self._build_alert_tags(alert, status)
 
         self.check.event(
             {
@@ -572,12 +533,15 @@ class ActivityMonitor:
             }
         )
 
-    def _emit_resolution_event(self, alert: dict) -> None:
-        """Emit a resolution event for a previously open alert."""
+    def _emit_resolution_event(self, alert: dict, cached_tags_alert: dict | None = None) -> None:
+        """Emit a resolution event and a closing nutanix.alert.open:0 metric.
+
+        cached_tags_alert is the alert object as last observed while open; when
+        provided, it's used to build the metric/event tags so they match the
+        most recent open-state submission. Defaults to the resolved alert.
+        """
         ext_id = alert.get("extId", "")
         title = alert.get("title", "Nutanix Alert")
-        severity = alert.get("severity")
-        alert_type = alert.get("alertType")
         resolved_time = alert.get("resolvedTime")
         resolved_by = alert.get("resolvedByUsername")
         is_auto_resolved = alert.get("isAutoResolved", False)
@@ -587,24 +551,7 @@ class ActivityMonitor:
 
         msg_text = "Auto-resolved" if is_auto_resolved else f"Resolved by {resolved_by}" if resolved_by else "Resolved"
 
-        alert_tags = self.check.base_tags.copy()
-        if alert_type:
-            alert_tags.append(f"ntnx_alert_type:{alert_type}")
-        if severity:
-            alert_tags.append(f"ntnx_alert_severity:{severity}")
-
-        self._add_cluster_name_tag(alert_tags, alert.get("clusterUUID"))
-
-        for classification in alert.get("classifications", []) or []:
-            alert_tags.append(f"ntnx_alert_classification:{classification}")
-
-        for impact in alert.get("impactTypes", []) or []:
-            alert_tags.append(f"ntnx_alert_impact:{impact}")
-
-        self._add_source_entity_tags(alert_tags, alert)
-
-        alert_tags.append("ntnx_type:alert")
-        alert_tags.append("ntnx_alert_status:resolved")
+        alert_tags = self._build_alert_tags(cached_tags_alert or alert, "resolved")
         alert_tags.append(f"ntnx_alert_auto_resolved:{str(is_auto_resolved).lower()}")
 
         self.check.event(
@@ -621,6 +568,20 @@ class ActivityMonitor:
                 "tags": alert_tags,
             }
         )
+
+        # Close the per-alert monitor case with an explicit zero.
+        self.check.gauge("alert.open", 0, tags=alert_tags)
+
+    def emit_open_alert_metrics(self) -> None:
+        """Submit nutanix.alert.open:1 for each tracked unresolved alert.
+
+        Called once per check cycle; keeps the gauge warm so per-alert metric
+        monitors don't go no-data while the underlying Nutanix alert is open.
+        """
+        for alert in self._open_alerts.values():
+            is_acknowledged = alert.get("isAcknowledged", False)
+            status = "acknowledged" if is_acknowledged else "open"
+            self.check.gauge("alert.open", 1, tags=self._build_alert_tags(alert, status))
 
     def _process_task(self, task: dict) -> None:
         """Process and send a single task to Datadog as an event."""

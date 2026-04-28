@@ -67,7 +67,9 @@ def test_entity_counts(dd_run_check, mock_instance, mock_http_get):
     assert activity.events_count == 0
     assert activity.tasks_count == 0
     assert activity.audits_count == 0
-    assert activity.alerts_count == 0
+    # First run fetches all unresolved alerts (no time filter), so the count
+    # reflects every isResolved=false alert in the fixture.
+    assert activity.alerts_count == 5
 
 
 def test_summary_log_message(dd_run_check, mock_instance, mock_http_get, caplog):
@@ -75,7 +77,7 @@ def test_summary_log_message(dd_run_check, mock_instance, mock_http_get, caplog)
     with caplog.at_level(logging.INFO):
         dd_run_check(check)
 
-    expected = "[PC:10.0.0.197] Check completed: 2 clusters, 2 hosts, 4 VMs, 0 events, 0 tasks, 0 audits, 0 alerts"
+    expected = "[PC:10.0.0.197] Check completed: 2 clusters, 2 hosts, 4 VMs, 0 events, 0 tasks, 0 audits, 5 alerts"
     summary_lines = [r.message for r in caplog.records if "Check completed" in r.message]
     assert len(summary_lines) == 1
     assert summary_lines[0] == expected

@@ -188,6 +188,9 @@ class NutanixCheck(AgentCheck):
             self.activity_monitor.collect_events()
         if self.collect_alerts_enabled:
             self.activity_monitor.collect_alerts()
+            # Re-submit nutanix.alert.open=1 for every tracked open alert so
+            # per-alert metric monitors stay warm between check cycles.
+            self.activity_monitor.emit_open_alert_metrics()
         if self.collect_tasks_enabled:
             self.activity_monitor.collect_tasks()
         if self.collect_audits_enabled:

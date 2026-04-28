@@ -1,0 +1,1 @@
+Submit `nutanix.alert.open` gauge per Nutanix alert (1 while open, 0 once on resolution) for individual alert lifecycle monitoring.

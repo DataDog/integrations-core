@@ -8,6 +8,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nutanix import NutanixCheck
 
 from .metrics import (
+    ALERT_METRICS,
     CLUSTER_BASIC_METRICS,
     CLUSTER_CAPACITY_METRICS,
     CLUSTER_STATS_METRICS_OPTIONAL,
@@ -25,6 +26,7 @@ from .metrics import (
 
 REQUIRED_METRICS = (
     HEALTH_METRICS
+    + ALERT_METRICS
     + CLUSTER_BASIC_METRICS
     + CLUSTER_CAPACITY_METRICS
     + CLUSTER_STATS_METRICS_REQUIRED
