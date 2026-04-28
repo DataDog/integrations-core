@@ -11,7 +11,14 @@ from concurrent.futures import Executor, ThreadPoolExecutor
 from dataclasses import dataclass
 from typing import assert_never
 
-from .exceptions import FatalProcessingError, MessageProcessingError, ProcessorQueueError, ProcessorSuccessHookError
+from .exceptions import (
+    FatalProcessingError,
+    HookName,
+    MessageProcessingError,
+    OrchestratorHookError,
+    ProcessorQueueError,
+    ProcessorSuccessHookError,
+)
 
 
 @dataclass
@@ -33,8 +40,24 @@ class BaseProcessor[T: BaseMessage]:
     async def on_success(self, message: T) -> None:
         pass
 
-    async def on_error(self, message: T, error: Exception) -> None:
-        pass
+    async def on_error(self, error: Exception) -> None:
+        """
+        Handle a processor-scoped failure.
+
+        Receives a :class:`MessageProcessingError` when ``process_message`` fails, or a
+        :class:`ProcessorHookError` when a processor hook (e.g. ``on_success``) fails.
+        Both wrappers expose ``.message``, ``.original_exception``, and ``.processor_name``
+        so the developer can decide what to do.
+
+        Behavior of the return:
+          - Return cleanly: the error is considered handled, processing continues.
+          - Raise :class:`FatalProcessingError`: stop the orchestrator.
+          - Raise anything else: the orchestrator's ``fail_fast`` policy decides.
+
+        The default implementation re-raises so unmodified processors fall through to
+        the orchestrator-level ``fail_fast`` policy.
+        """
+        raise error
 
     def submit_message(self, message: BaseMessage) -> None:
         if self.queue is None:
@@ -69,6 +92,7 @@ class EventBusOrchestrator(ABC):
         max_timeout: float = 300,
         grace_period: float = 10,
         executor: Executor | None = None,
+        fail_fast: bool = False,
     ):
         """
         Args:
@@ -78,12 +102,17 @@ class EventBusOrchestrator(ABC):
                 messages have been processed.
             executor: The executor to use for running sync processors.
                       The default will be a ThreadpoolExecutor with 4 workers.
+            fail_fast: If True, any exception that escapes an ``on_error`` handler stops
+                       the orchestrator. If False (default), such exceptions are logged
+                       and processing continues. ``FatalProcessingError`` always stops the
+                       orchestrator regardless of this flag.
         """
         self.__validate_parameters(max_timeout, grace_period)
         self._logger = logger
         self._max_timeout = max_timeout
         self._grace_period = grace_period
         self._executor = executor or ThreadPoolExecutor(max_workers=4)
+        self._fail_fast = fail_fast
         self._subscribers: dict[type[BaseMessage], list[Processor]] = {}
         # These will be initialized in the running loop
         self._queue = asyncio.Queue[BaseMessage]()
@@ -144,7 +173,15 @@ class EventBusOrchestrator(ABC):
         Initializes the orchestrator.
         """
         self._running = True
-        await self.on_initialize()
+        try:
+            await self.on_initialize()
+        except (FatalProcessingError, asyncio.CancelledError):
+            raise
+        except Exception as e:
+            await self._apply_error_policy(
+                OrchestratorHookError(HookName.ON_INITIALIZE, e),
+                self.on_error,
+            )
 
     @abstractmethod
     async def on_initialize(self):  # pragma: no cover
@@ -160,7 +197,15 @@ class EventBusOrchestrator(ABC):
         In the case that the execution failed, the exception will be passed to the method
         """
         self._running = False
-        await self.on_finalize(exception)
+        try:
+            await self.on_finalize(exception)
+        except (FatalProcessingError, asyncio.CancelledError):
+            raise
+        except Exception as e:
+            await self._apply_error_policy(
+                OrchestratorHookError(HookName.ON_FINALIZE, e),
+                self.on_error,
+            )
 
     @abstractmethod
     async def on_finalize(self, exception: Exception | None):  # pragma: no cover
@@ -175,6 +220,40 @@ class EventBusOrchestrator(ABC):
         Hook for subclasses to perform actions when a message is received.
         """
         pass
+
+    async def on_error(self, error: Exception) -> None:
+        """
+        Handle an orchestrator-scoped failure.
+
+        Called when ``on_initialize``, ``on_message_received``, or ``on_finalize``
+        raises a non-Fatal exception. ``error`` is always an
+        :class:`OrchestratorHookError` whose ``.hook_name`` and ``.original_exception``
+        identify what failed.
+
+        Behavior of the return:
+          - Return cleanly: the error is considered handled, processing continues.
+          - Raise :class:`FatalProcessingError`: stop the orchestrator.
+          - Raise anything else: the orchestrator's ``fail_fast`` policy decides.
+
+        The default implementation re-raises so unmodified orchestrators fall through
+        to the ``fail_fast`` policy.
+        """
+        raise error
+
+    async def _apply_error_policy(self, wrapped_error: Exception, handler) -> None:
+        """
+        Routes ``wrapped_error`` through ``handler`` and applies the orchestrator's policy.
+
+        See :meth:`on_error` for the contract.
+        """
+        try:
+            await handler(wrapped_error)
+        except (FatalProcessingError, asyncio.CancelledError):
+            raise
+        except Exception as e:
+            if self._fail_fast:
+                raise
+            self._logger.error("Unhandled error during processing: %s", e)
 
     def _remaining_time(self, start_time: float) -> float:
         """
@@ -293,16 +372,15 @@ class EventBusOrchestrator(ABC):
         # If we successfully got a message, process it
         try:
             await self.on_message_received(msg)
-        except asyncio.CancelledError:
-            # If the await suspension raises a CancelledError, we should respect
-            # the global shutdown.
+        except (asyncio.CancelledError, FatalProcessingError):
+            # CancelledError respects the global shutdown; FatalProcessingError is the
+            # explicit stop signal and must reach finalize() through _entry_point().
             raise
-        except FatalProcessingError as e:
-            # If the hook raises a FatalProcessingError, we should stop the orchestrator.
-            self._logger.error("Fatal error processing on_message_received hook: %s", e)
-            return None
         except Exception as e:
-            self._logger.warning("Error in on_message_received: %s", e)
+            await self._apply_error_policy(
+                OrchestratorHookError(HookName.ON_MESSAGE_RECEIVED, e, message=msg),
+                self.on_error,
+            )
 
         # Launch the processors
         self._handle_message(msg, running_tasks)
@@ -316,12 +394,18 @@ class EventBusOrchestrator(ABC):
         get_task: asyncio.Task,
         running_tasks: set[asyncio.Task],
     ):
+        # Tasks that escape with an exception have already been through their processor's
+        # on_error and the orchestrator's policy. The escape itself means the policy
+        # decided to stop the bus, so propagate the first failure to finalize().
         for task in done:
             if task is get_task:
                 continue
             running_tasks.discard(task)
-            if not task.cancelled() and task.exception():
-                self._logger.error("Task failed: %s", task.exception())
+            if task.cancelled():
+                continue
+            exc = task.exception()
+            if exc is not None:
+                raise exc
 
     def _handle_message(self, msg: BaseMessage, running_tasks: set[asyncio.Task]):
         """
@@ -338,6 +422,10 @@ class EventBusOrchestrator(ABC):
     async def _task_wrapper(self, processor: Processor, message: BaseMessage):
         """
         Processes a message by the given processor.
+
+        Routes any process_message failure (wrapped as :class:`MessageProcessingError`)
+        and any on_success failure (wrapped as :class:`ProcessorSuccessHookError`)
+        through the processor's ``on_error`` and applies the orchestrator's policy.
         """
         try:
             match processor:
@@ -347,17 +435,21 @@ class EventBusOrchestrator(ABC):
                     await asyncio.get_running_loop().run_in_executor(self._executor, processor.process_message, message)
                 case _:
                     assert_never(processor)
-        except Exception as e:
-            try:
-                await processor.on_error(message, e)
-            except Exception as hook_error:
-                self._logger.error("Error in processor %s on_error: %s", processor.__class__.__name__, hook_error)
-
-            raise MessageProcessingError(processor.name, message, e) from e
+        except (FatalProcessingError, asyncio.CancelledError):
+            raise
+        except Exception as processing_error:
+            await self._apply_error_policy(
+                MessageProcessingError(processor.name, message, processing_error),
+                processor.on_error,
+            )
+            return
 
         try:
             await processor.on_success(message)
+        except (FatalProcessingError, asyncio.CancelledError):
+            raise
         except Exception as e:
-            # Raise a ProcessorSuccessHookError to ensure the error to show that the failure happened even if the
-            # process_message call succeeded.
-            raise ProcessorSuccessHookError(processor.name, message, e) from e
+            await self._apply_error_policy(
+                ProcessorSuccessHookError(processor.name, message, e),
+                processor.on_error,
+            )
