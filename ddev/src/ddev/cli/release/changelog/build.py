@@ -44,9 +44,7 @@ def build(app: Application, targets: tuple[str, ...], output_file: Path | None):
     rendered = [
         (
             integration.name,
-            towncrier(
-                str(integration.path), 'build', '--draft', '--version', 'Unreleased', return_output=True
-            ).stdout.strip(),
+            towncrier(str(integration.path), 'build', '--draft', '--version', 'Unreleased', quiet=True).stdout.strip(),
         )
         for integration in integrations
     ]
