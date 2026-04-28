@@ -27,6 +27,7 @@ def dd_environment():
                 ]
             ),
             WaitFor(check_metrics_available, wait=5),
+            WaitFor(check_executors_registered, wait=5, attempts=60),
         ],
         attempts=2,
     ):
@@ -37,6 +38,22 @@ def check_metrics_available():
     endpoint = 'http://{}:4050/metrics/json'.format(HOST)
     r = requests.get(endpoint)
     return r.text.count("driver.spark.streaming") >= 6
+
+
+def check_executors_registered():
+    # Spark standalone executors are separate JVMs spawned by workers; they take time
+    # to register with the driver after the application starts. Until at least one
+    # non-driver executor appears, the /executors endpoint returns only the driver and
+    # `spark.executor.*` metrics are never emitted, causing flaky integration tests.
+    for port in (4040, 4050):
+        apps = requests.get('http://{}:{}/api/v1/applications'.format(HOST, port)).json()
+        if not apps:
+            return False
+        app_id = apps[0]['id']
+        executors = requests.get('http://{}:{}/api/v1/applications/{}/executors'.format(HOST, port, app_id)).json()
+        if not any(executor.get('id') != 'driver' for executor in executors):
+            return False
+    return True
 
 
 def get_custom_hosts():
