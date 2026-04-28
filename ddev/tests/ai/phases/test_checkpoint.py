@@ -28,14 +28,14 @@ def test_read_returns_empty_when_file_is_empty(manager):
 
 def test_read_malformed_yaml_raises_checkpoint_read_error(manager):
     manager._path.write_text(": :\n -[")
-    with pytest.raises(CheckpointReadError, match=str(manager._path)):
+    with pytest.raises(CheckpointReadError, match="checkpoints.yaml"):
         manager.read()
 
 
 def test_read_unreadable_file_raises_checkpoint_read_error(manager, monkeypatch):
     manager._path.write_text("phase1:\n  status: success\n")
     monkeypatch.setattr("pathlib.Path.read_text", lambda *_: (_ for _ in ()).throw(OSError("permission denied")))
-    with pytest.raises(CheckpointReadError, match=str(manager._path)):
+    with pytest.raises(CheckpointReadError, match="checkpoints.yaml"):
         manager.read()
 
 
