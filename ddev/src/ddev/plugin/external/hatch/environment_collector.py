@@ -128,6 +128,11 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             if not (self.is_test_package or self.is_dev_package):
                 env_config.setdefault('features', ['deps'])
 
+            # uv-managed venvs do not seed pip. Some tests and integration
+            # scripts shell out to `python -m pip install`, so include pip as
+            # a dependency to keep that working.
+            env_config.setdefault('dependencies', []).append('pip')
+
             base_package_features = env_config.get('base-package-features', self.config.get('base-package-features'))
             install_commands = []
             if install_command := self.base_package_install_command(base_package_features):
@@ -219,6 +224,9 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
                 'ruff==0.11.10',
                 # Keep in sync with: /datadog_checks_base/pyproject.toml
                 'pydantic==2.11.5',
+                # uv-managed venvs do not seed pip, but mypy's --install-types
+                # shells out to `python -m pip install` for missing type stubs.
+                'pip',
             ],
         }
         config = {'lint': lint_env}
