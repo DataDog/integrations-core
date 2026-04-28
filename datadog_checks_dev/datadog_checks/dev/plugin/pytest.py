@@ -354,6 +354,7 @@ def mock_openmetrics_http(mock_http, mocker):
 @pytest.fixture
 def mock_prometheus_http(mock_http, mocker):
     """mock_http with PrometheusScraperMixin.get_http_handler patched to return it."""
+    mock_http.ignore_tls_warning = False
     mocker.patch(
         'datadog_checks.base.checks.prometheus.mixins.PrometheusScraperMixin.get_http_handler',
         return_value=mock_http,
