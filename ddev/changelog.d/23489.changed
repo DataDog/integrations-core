@@ -1,0 +1,1 @@
+Route event bus hook errors through on_error with a new fail_fast orchestrator policy. Hook failures are wrapped as HookExecutionError and routed to the appropriate on_error (orchestrator or processor scope); BaseProcessor.on_error signature changes to a single argument.
