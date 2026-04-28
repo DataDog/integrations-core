@@ -19,6 +19,7 @@ from .exceptions import (
     OrchestratorHookError,
     ProcessorHookError,
     ProcessorQueueError,
+    SkipMessageError,
 )
 
 ErrorHandler = Callable[[Exception], Awaitable[None]]
@@ -221,6 +222,13 @@ class EventBusOrchestrator(ABC):
     async def on_message_received(self, message: BaseMessage):  # pragma: no cover
         """
         Hook for subclasses to perform actions when a message is received.
+
+        Returning cleanly proceeds with dispatching the message to every processor
+        whose ``should_process_message`` accepts it. To prevent dispatch for this
+        message specifically, raise :class:`SkipMessageError` directly from this
+        hook. To stop the bus entirely, raise :class:`FatalProcessingError`. Any
+        other exception is wrapped as :class:`OrchestratorHookError` and routed
+        through :meth:`on_error`.
         """
         pass
 
@@ -247,7 +255,8 @@ class EventBusOrchestrator(ABC):
         """
         Routes ``wrapped_error`` through ``handler`` and applies the orchestrator's policy.
 
-        See :meth:`on_error` for the contract.
+        See :meth:`on_error` for the contract. ``FatalProcessingError`` and
+        ``asyncio.CancelledError`` always propagate as explicit signal exceptions.
         """
         try:
             await handler(wrapped_error)
@@ -256,7 +265,13 @@ class EventBusOrchestrator(ABC):
         except Exception as e:
             if self._fail_fast:
                 raise
-            self._logger.error("Unhandled error during processing: %s", e)
+            hook_name = getattr(wrapped_error, "hook_name", type(wrapped_error).__name__)
+            self._logger.error(
+                "on_error handler for '%s' raised %s while processing %s",
+                hook_name,
+                e,
+                wrapped_error,
+            )
 
     def _remaining_time(self, start_time: float) -> float:
         """
@@ -372,13 +387,16 @@ class EventBusOrchestrator(ABC):
             # Re-create the get_task to keep the loop alive
             return asyncio.create_task(self._queue.get())
 
-        # If we successfully got a message, process it
+        # If we successfully got a message, process it. SkipMessageError raised
+        # directly from on_message_received skips dispatch for this message and
+        # continues with the next one.
         try:
             await self.on_message_received(msg)
         except (asyncio.CancelledError, FatalProcessingError):
-            # CancelledError respects the global shutdown; FatalProcessingError is the
-            # explicit stop signal and must reach finalize() through _entry_point().
             raise
+        except SkipMessageError as e:
+            self._logger.warning("Skipping message %s: %s", msg.id, e)
+            return asyncio.create_task(self._queue.get())
         except Exception as e:
             await self._apply_error_policy(
                 OrchestratorHookError(HookName.ON_MESSAGE_RECEIVED, e, message=msg),
@@ -400,6 +418,9 @@ class EventBusOrchestrator(ABC):
         # Tasks that escape with an exception have already been through their processor's
         # on_error and the orchestrator's policy. The escape itself means the policy
         # decided to stop the bus, so propagate the first failure to finalize().
+        # FIRST_COMPLETED can deliver several failed tasks in one batch; log the rest
+        # so post-mortems aren't single-task views of multi-task failures.
+        first_exc: BaseException | None = None
         for task in done:
             if task is get_task:
                 continue
@@ -407,8 +428,14 @@ class EventBusOrchestrator(ABC):
             if task.cancelled():
                 continue
             exc = task.exception()
-            if exc is not None:
-                raise exc
+            if exc is None:
+                continue
+            if first_exc is None:
+                first_exc = exc
+            else:
+                self._logger.error("Additional task failure suppressed: %s", exc)
+        if first_exc is not None:
+            raise first_exc
 
     def _handle_message(self, msg: BaseMessage, running_tasks: set[asyncio.Task]):
         """

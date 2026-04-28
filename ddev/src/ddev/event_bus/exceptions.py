@@ -17,7 +17,6 @@ class HookName(StrEnum):
     ON_FINALIZE = auto()
     ON_MESSAGE_RECEIVED = auto()
     ON_SUCCESS = auto()
-    ON_ERROR = auto()
 
 
 class ProcessorQueueError(Exception):
@@ -113,8 +112,26 @@ class FatalProcessingError(Exception):
     Raised by hooks or processors to signal that the orchestrator should stop
     processing immediately and shut down gracefully.
 
-    This is the explicit "stop the bus" signal — any hook (including ``on_error``)
+    This is the explicit "stop the bus" signal. Any hook (including ``on_error``)
     can raise it to halt the orchestrator regardless of the ``fail_fast`` policy.
+    """
+
+    pass
+
+
+class SkipMessageError(Exception):
+    """
+    Raised directly from ``on_message_received`` to skip dispatch for the current
+    message and continue the loop.
+
+    Use this when the orchestrator decides a specific message cannot be processed
+    safely and no processor should receive it. Per-processor filtering (when
+    *some* processors should still see the message) belongs in
+    ``BaseProcessor.should_process_message`` instead.
+
+    Only honored when raised directly from ``on_message_received``. From any other
+    hook (``on_initialize``, ``on_finalize``, ``on_error``, processor scope) it
+    propagates as a regular exception subject to the ``fail_fast`` policy.
     """
 
     pass

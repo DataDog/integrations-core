@@ -193,6 +193,9 @@ class ValidationOrchestrator(EventBusOrchestrator):
             max_timeout=max_timeout,
             grace_period=grace_period,
             executor=ThreadPoolExecutor(max_workers=len(validations)),
+            # Surface lifecycle hook failures so on_finalize can render them in the
+            # validation report instead of silently logging.
+            fail_fast=True,
         )
         self._app = app
         self._validations = validations
