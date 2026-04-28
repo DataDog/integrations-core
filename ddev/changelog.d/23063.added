@@ -1,2 +1,0 @@
-- Support size computation for lockfiles in both new and old formats. New CLI param (and envvar) to switch between storage locations.
-- Command to trigger the promotion of wheels for PRs that bump dependencies.

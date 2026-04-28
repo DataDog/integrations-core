@@ -56,7 +56,7 @@ def test_mongo_db_test(aggregator, check, instance_user, dd_run_check):
     check = check(instance_user)
     dd_run_check(check)
 
-    tags = [f'host:{common.HOST}', f'port:{common.PORT1}', 'db:test']
+    tags = [f'host:{common.HOST}', f'port:{common.PORT1}', 'db:test', f'database_instance:{check._resolved_hostname}']
     aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK, tags=tags)
 
     metric_names = aggregator.metric_names
@@ -289,5 +289,6 @@ def test_propagate_agent_tags(
                 f'host:{common.HOST}',
                 f'port:{common.PORT1}',
                 'db:test',
+                f'database_instance:{check._resolved_hostname}',
             ] + agent_tags
             aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK, tags=expected_tags)

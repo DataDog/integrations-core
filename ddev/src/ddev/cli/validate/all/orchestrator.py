@@ -58,6 +58,9 @@ VALIDATIONS: dict[str, ValidationConfig] = {
         description="Verify dependency pins are consistent and Agent-compatible",
         repo_wide=True,
     ),
+    "eula": ValidationConfig(
+        description="Validate EULA definition files",
+    ),
     "http": ValidationConfig(
         description="Validate integrations use the HTTP wrapper correctly",
     ),

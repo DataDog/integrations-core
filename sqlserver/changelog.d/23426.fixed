@@ -1,0 +1,1 @@
+Escape single quotes in SQL string literal interpolation for robustness against unusual database and object names.
