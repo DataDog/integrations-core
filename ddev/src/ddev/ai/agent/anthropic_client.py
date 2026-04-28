@@ -14,7 +14,6 @@ from ddev.ai.tools.core.registry import ToolRegistry
 
 DEFAULT_MODEL: Final[str] = "claude-sonnet-4-6"
 DEFAULT_MAX_TOKENS: Final[int] = 8192  # max tokens per response
-ALLOWED_TOOL_CALLERS: Final = ["code_execution_20260120"]
 
 
 class AnthropicAgent(BaseAgent[MessageParam]):
@@ -28,7 +27,6 @@ class AnthropicAgent(BaseAgent[MessageParam]):
         name: str,
         model: str = DEFAULT_MODEL,
         max_tokens: int = DEFAULT_MAX_TOKENS,
-        programmatic_tool_calling: bool = False,
     ) -> None:
         """Initialize an AnthropicAgent.
         Args:
@@ -38,14 +36,12 @@ class AnthropicAgent(BaseAgent[MessageParam]):
             name: The name of the agent.
             model: The model to use.
             max_tokens: The max tokens per response.
-            programmatic_tool_calling: Whether to allow programmatic tool calling.
         """
 
         super().__init__(name=name, system_prompt=system_prompt, tools=tools)
         self._client = client
         self._model = model
         self._max_tokens = max_tokens
-        self._programmatic_tool_calling = programmatic_tool_calling
         self._context_window: int | None = None
 
     async def _get_context_window(self) -> int:
@@ -70,8 +66,6 @@ class AnthropicAgent(BaseAgent[MessageParam]):
         if allowed_tools is not None:
             allowed = set(allowed_tools)
             definitions = [d for d in definitions if d["name"] in allowed]
-        if not self._programmatic_tool_calling:
-            definitions = [{**d, "allowed_callers": ALLOWED_TOOL_CALLERS} for d in definitions]
         return definitions
 
     def _map_stop_reason(self, raw: str) -> StopReason:
