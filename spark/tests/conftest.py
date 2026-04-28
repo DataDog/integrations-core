@@ -45,15 +45,18 @@ def check_executors_registered():
     # to register with the driver after the application starts. Until at least one
     # non-driver executor appears, the /executors endpoint returns only the driver and
     # `spark.executor.*` metrics are never emitted, causing flaky integration tests.
+    # The cluster runs a single worker with one core (SPARK_WORKER_CORES=1), so only one
+    # of the two apps can own a non-driver executor at a time; either app having one is
+    # enough for `test_integration_standalone` to observe executor metrics.
     for port in (4040, 4050):
         apps = requests.get('http://{}:{}/api/v1/applications'.format(HOST, port)).json()
         if not apps:
-            return False
+            continue
         app_id = apps[0]['id']
         executors = requests.get('http://{}:{}/api/v1/applications/{}/executors'.format(HOST, port, app_id)).json()
-        if not any(executor.get('id') != 'driver' for executor in executors):
-            return False
-    return True
+        if any(executor.get('id') != 'driver' for executor in executors):
+            return True
+    return False
 
 
 def get_custom_hosts():
