@@ -3,21 +3,21 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum, auto
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .orchestrator import BaseMessage
 
 
-class HookName(str, Enum):
+class HookName(StrEnum):
     """Names of the lifecycle hooks exposed by the event bus."""
 
-    ON_INITIALIZE = "on_initialize"
-    ON_FINALIZE = "on_finalize"
-    ON_MESSAGE_RECEIVED = "on_message_received"
-    ON_SUCCESS = "on_success"
-    ON_ERROR = "on_error"
+    ON_INITIALIZE = auto()
+    ON_FINALIZE = auto()
+    ON_MESSAGE_RECEIVED = auto()
+    ON_SUCCESS = auto()
+    ON_ERROR = auto()
 
 
 class ProcessorQueueError(Exception):
@@ -88,7 +88,7 @@ class OrchestratorHookError(HookExecutionError):
 
 class ProcessorHookError(HookExecutionError):
     """
-    Exception raised when a processor-level hook (``on_success``) fails.
+    Exception raised when a processor-level hook (e.g. ``on_success``) fails.
     """
 
     def __init__(
@@ -106,15 +106,6 @@ class ProcessorHookError(HookExecutionError):
         )
         self.processor_name = processor_name
         self.message = message
-
-
-class ProcessorSuccessHookError(ProcessorHookError):
-    """
-    Exception raised when the ``on_success`` hook of a processor fails.
-    """
-
-    def __init__(self, processor_name: str, message: BaseMessage, original_exception: Exception):
-        super().__init__(HookName.ON_SUCCESS, processor_name, message, original_exception)
 
 
 class FatalProcessingError(Exception):

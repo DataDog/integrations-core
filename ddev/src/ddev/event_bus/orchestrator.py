@@ -7,6 +7,7 @@ import asyncio
 import contextlib
 import logging
 from abc import ABC, abstractmethod
+from collections.abc import Awaitable, Callable
 from concurrent.futures import Executor, ThreadPoolExecutor
 from dataclasses import dataclass
 from typing import assert_never
@@ -16,9 +17,11 @@ from .exceptions import (
     HookName,
     MessageProcessingError,
     OrchestratorHookError,
+    ProcessorHookError,
     ProcessorQueueError,
-    ProcessorSuccessHookError,
 )
+
+ErrorHandler = Callable[[Exception], Awaitable[None]]
 
 
 @dataclass
@@ -240,7 +243,7 @@ class EventBusOrchestrator(ABC):
         """
         raise error
 
-    async def _apply_error_policy(self, wrapped_error: Exception, handler) -> None:
+    async def _apply_error_policy(self, wrapped_error: Exception, handler: ErrorHandler) -> None:
         """
         Routes ``wrapped_error`` through ``handler`` and applies the orchestrator's policy.
 
@@ -424,7 +427,7 @@ class EventBusOrchestrator(ABC):
         Processes a message by the given processor.
 
         Routes any process_message failure (wrapped as :class:`MessageProcessingError`)
-        and any on_success failure (wrapped as :class:`ProcessorSuccessHookError`)
+        and any on_success failure (wrapped as :class:`ProcessorHookError`)
         through the processor's ``on_error`` and applies the orchestrator's policy.
         """
         try:
@@ -450,6 +453,6 @@ class EventBusOrchestrator(ABC):
             raise
         except Exception as e:
             await self._apply_error_policy(
-                ProcessorSuccessHookError(processor.name, message, e),
+                ProcessorHookError(HookName.ON_SUCCESS, processor.name, message, e),
                 processor.on_error,
             )
