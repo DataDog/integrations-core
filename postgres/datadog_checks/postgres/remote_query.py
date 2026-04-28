@@ -176,7 +176,6 @@ def _execute_select_1(check: 'PostgreSql', target: RemoteQueryTarget, limits: Re
                 cursor.execute(_ALLOWED_QUERY)
                 if cursor.description is None:
                     return _error('query_failed', 'Query did not return a result set.')
-                columns = [_column_name(column) for column in cursor.description]
                 raw_rows = cursor.fetchmany(limits.max_rows + 1)
     except RuntimeError:
         return _error('target_unavailable', 'Matched Postgres check connection pool is unavailable.', retryable=False)
@@ -185,8 +184,8 @@ def _execute_select_1(check: 'PostgreSql', target: RemoteQueryTarget, limits: Re
         return _error('query_failed', 'Remote query execution failed.')
 
     truncated = len(raw_rows) > limits.max_rows
-    rows = [_row_to_dict(columns, row) for row in raw_rows[: limits.max_rows]]
-    response_columns = [{'name': name, 'type': _infer_type(rows, name)} for name in columns]
+    rows = [{'value': row[0]} for row in raw_rows[: limits.max_rows]]
+    response_columns = [{'name': 'value', 'type': 'integer'}]
     bytes_returned = len(json.dumps({'columns': response_columns, 'rows': rows}, default=str).encode('utf-8'))
 
     return {
@@ -239,33 +238,6 @@ def _int_in_range(value: Any, field: str, *, minimum: int = 1, maximum: int | No
             raise ValueError(f'{field} must be greater than or equal to {minimum}')
         raise ValueError(f'{field} must be between {minimum} and {maximum}')
     return value
-
-
-def _column_name(column: Any) -> str:
-    name = getattr(column, 'name', None)
-    if name is not None:
-        return str(name)
-    return str(column[0])
-
-
-def _row_to_dict(columns: list[str], row: Any) -> dict[str, Any]:
-    if isinstance(row, Mapping):
-        return {column: row[column] for column in columns}
-    return dict(zip(columns, row))
-
-
-def _infer_type(rows: list[dict[str, Any]], column: str) -> str:
-    for row in rows:
-        value = row.get(column)
-        if isinstance(value, bool):
-            return 'boolean'
-        if isinstance(value, int):
-            return 'integer'
-        if isinstance(value, float):
-            return 'number'
-        if value is not None:
-            return 'string'
-    return 'unknown'
 
 
 def _error(code: str, message: str, retryable: bool = False) -> dict[str, Any]:
