@@ -7,9 +7,12 @@ import bmemcached
 import pytest
 
 from datadog_checks.dev import TempDir, WaitFor, docker_run
+from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.mcache import Memcache
 
 from .common import (
+    AUTODISCOVERY,
+    AUTODISCOVERY_COMPOSE_PATH,
     DOCKER_SOCKET_DIR,
     DOCKER_SOCKET_PATH,
     HERE,
@@ -34,6 +37,28 @@ def connect_to_mcache(*client_args):
 
 @pytest.fixture(scope='session')
 def dd_environment(e2e_instance):
+    """
+    Start the Memcached test environment.
+
+    In autodiscovery mode (`MCACHE_AUTODISCOVERY=true`) run a single default-port
+    Memcached container on the Docker bridge network and hand the Agent the Docker
+    socket so it can discover the container via the Docker listener. No static
+    instance config is yielded so the Agent relies purely on `auto_conf.yaml`.
+
+    Otherwise run the existing SASL + IPv6 + socket multi-container setup used by
+    the existing e2e and integration tests.
+    """
+    if AUTODISCOVERY:
+        e2e_metadata = {
+            'docker_volumes': ['/var/run/docker.sock:/var/run/docker.sock:ro'],
+        }
+        with docker_run(
+            AUTODISCOVERY_COMPOSE_PATH,
+            conditions=[CheckDockerLogs(AUTODISCOVERY_COMPOSE_PATH, 'server listening', wait=5)],
+        ):
+            yield None, e2e_metadata
+        return
+
     with docker_run(
         os.path.join(HERE, 'compose', 'docker-compose.yaml'),
         service_name='memcached',
