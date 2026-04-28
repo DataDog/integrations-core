@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import shutil
-import subprocess
 from functools import partial
 
 import pytest
@@ -539,25 +538,15 @@ def test_build_command_argument_errors(ddev, repo_with_towncrier, args, expected
     assert expected_message in result.output
 
 
-def test_build_command_aborts_when_towncrier_config_missing(ddev, repository):
-    config = repository.path / 'towncrier.toml'
-    if config.exists():
-        config.unlink()
-
-    result = ddev('release', 'changelog', 'build', 'ddev')
-
-    assert result.exit_code != 0
-    assert 'Towncrier config not found' in result.output
-
-
 def test_build_command_surfaces_towncrier_failure(ddev, build_fragments, mocker):
+    from datadog_checks.dev.subprocess import SubprocessResult
+
     mocker.patch(
-        'ddev.cli.release.changelog.build.subprocess.run',
-        return_value=subprocess.CompletedProcess(args=[], returncode=1, stdout='', stderr='boom'),
+        'datadog_checks.dev.tooling.commands.console.run_command',
+        return_value=SubprocessResult(stdout='', stderr='boom', code=1),
     )
 
     result = ddev('release', 'changelog', 'build', 'ddev')
 
     assert result.exit_code != 0
-    assert 'towncrier failed for ddev' in result.output
     assert 'boom' in result.output

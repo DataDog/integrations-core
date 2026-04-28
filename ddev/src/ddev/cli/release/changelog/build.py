@@ -3,12 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import subprocess
-import sys
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import click
+
+from ddev.utils.fs import Path
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
@@ -33,9 +32,7 @@ def build(app: Application, targets: tuple[str, ...], output_file: Path | None):
     inspected without touching the integration's CHANGELOG.md or removing the news
     fragments.
     """
-    config = app.repo.path / 'towncrier.toml'
-    if not config.is_file():
-        app.abort(f'Towncrier config not found at {config}')
+    from datadog_checks.dev.tooling.commands.release.changelog import towncrier
 
     integrations: list[Integration] = []
     for target in targets:
@@ -44,38 +41,22 @@ def build(app: Application, targets: tuple[str, ...], output_file: Path | None):
         except OSError as e:
             app.abort(str(e))
 
-    rendered = [(integration.name, _render(config, integration.path)) for integration in integrations]
+    rendered = [
+        (
+            integration.name,
+            towncrier(
+                str(integration.path), 'build', '--draft', '--version', 'Unreleased', return_output=True
+            ).stdout.strip(),
+        )
+        for integration in integrations
+    ]
     output = _format_output(rendered)
 
     if output_file:
-        output_file.write_text(output)
+        output_file.write_text(output, encoding='utf-8')
         app.display_success(f'Wrote changelog preview to {output_file}')
     else:
-        click.echo(output)
-
-
-def _render(config: Path, target_dir: Path) -> str:
-    result = subprocess.run(
-        [
-            sys.executable,
-            '-m',
-            'towncrier',
-            'build',
-            '--draft',
-            '--config',
-            str(config),
-            '--dir',
-            str(target_dir),
-            '--version',
-            'Unreleased',
-        ],
-        capture_output=True,
-        text=True,
-    )
-    if result.returncode != 0:
-        details = '\n'.join(part for part in (result.stderr.strip(), result.stdout.strip()) if part)
-        raise click.ClickException(f'towncrier failed for {target_dir.name}:\n{details}')
-    return result.stdout.strip()
+        app.display(output, markup=False)
 
 
 def _format_output(rendered: list[tuple[str, str]]) -> str:

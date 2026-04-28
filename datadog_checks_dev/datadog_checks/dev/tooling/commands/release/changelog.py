@@ -21,9 +21,14 @@ from datadog_checks.dev.tooling.utils import complete_testable_checks, get_valid
 ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, from_contributor')
 
 
-def towncrier(target_dir, cmd, *cmd_args):
+def towncrier(target_dir, cmd, *cmd_args, return_output=False):
     '''
-    Run towncrier command with its arguments in target_dir.
+    Run a towncrier subcommand with its arguments in ``target_dir`` and return its result.
+
+    By default the captured stdout is echoed to the terminal as soon as towncrier
+    finishes. Pass ``return_output=True`` to suppress that auto-echo so the caller
+    can format, redirect, or persist the captured output via the returned
+    ``SubprocessResult`` (which exposes ``stdout``, ``stderr``, and ``code``).
     '''
     tc_res = run_or_abort(
         [
@@ -39,7 +44,8 @@ def towncrier(target_dir, cmd, *cmd_args):
         ],
         capture='both',
     )
-    echo_info(tc_res.stdout.rstrip())
+    if not return_output:
+        echo_info(tc_res.stdout.rstrip())
     return tc_res
 
 
