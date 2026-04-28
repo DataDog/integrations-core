@@ -51,8 +51,8 @@ def append_tool(registry: FileRegistry, owner_id: str) -> AppendFileTool:
 
 
 @pytest.fixture
-def mkdir_tool(registry: FileRegistry, owner_id: str) -> MkdirTool:
-    return MkdirTool(registry, owner_id)
+def mkdir_tool(permissive_policy: FileAccessPolicy) -> MkdirTool:
+    return MkdirTool(permissive_policy)
 
 
 @pytest.fixture

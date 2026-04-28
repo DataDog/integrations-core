@@ -112,6 +112,18 @@ def test_normalize_relative_and_absolute_are_same_key(registry: FileRegistry, tm
     assert registry.verify(OWNER_A, rel_path, "hello") is True
 
 
+def test_normalize_tilde_and_absolute_are_same_key(registry: FileRegistry, tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("HOME", str(tmp_path))
+
+    tilde_path = "~/foo.txt"
+    abs_path = str(tmp_path / "foo.txt")
+
+    registry.record(OWNER_A, tilde_path, "hello")
+    assert registry.is_known(OWNER_A, abs_path) is True
+    assert registry.is_known(OWNER_A, tilde_path) is True
+    assert registry.verify(OWNER_A, abs_path, "hello") is True
+
+
 # ---------------------------------------------------------------------------
 # lock_for — shared across agents so concurrent writes serialize on the path
 # ---------------------------------------------------------------------------

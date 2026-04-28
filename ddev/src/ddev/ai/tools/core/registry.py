@@ -9,6 +9,7 @@ from importlib import import_module
 
 from anthropic.types import ToolParam
 
+from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
 
 from .protocol import ToolProtocol
@@ -24,6 +25,10 @@ class ToolContext:
     file_registry: FileRegistry
     owner_id: str
 
+    @property
+    def policy(self) -> FileAccessPolicy:
+        return self.file_registry.policy
+
 
 def _plain_factory(tool_cls: type[ToolProtocol], ctx: ToolContext) -> ToolProtocol:
     return tool_cls()
@@ -31,6 +36,10 @@ def _plain_factory(tool_cls: type[ToolProtocol], ctx: ToolContext) -> ToolProtoc
 
 def _file_registry_factory(tool_cls: type, ctx: ToolContext) -> ToolProtocol:
     return tool_cls(ctx.file_registry, ctx.owner_id)
+
+
+def _file_policy_factory(tool_cls: type, ctx: ToolContext) -> ToolProtocol:
+    return tool_cls(ctx.policy)
 
 
 @dataclass(frozen=True)
@@ -52,9 +61,9 @@ TOOL_MANIFEST: dict[str, ToolSpec] = {
     "create_file": ToolSpec("fs.create_file", "CreateFileTool", factory=_file_registry_factory),
     "edit_file": ToolSpec("fs.edit_file", "EditFileTool", factory=_file_registry_factory),
     "append_file": ToolSpec("fs.append_file", "AppendFileTool", factory=_file_registry_factory),
-    "grep": ToolSpec("shell.grep", "GrepTool"),
+    "grep": ToolSpec("shell.grep", "GrepTool", factory=_file_policy_factory),
     "list_files": ToolSpec("shell.list_files", "ListFilesTool"),
-    "mkdir": ToolSpec("fs.mkdir", "MkdirTool", factory=_file_registry_factory),
+    "mkdir": ToolSpec("fs.mkdir", "MkdirTool", factory=_file_policy_factory),
     "http_get": ToolSpec("http.http_get", "HttpGetTool"),
     "ddev_create": ToolSpec("shell.ddev.create", "DdevCreateTool"),
     "ddev_test": ToolSpec("shell.ddev.ddev_test", "DdevTestTool"),

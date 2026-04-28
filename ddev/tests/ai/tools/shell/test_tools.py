@@ -5,6 +5,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.shell.grep import GrepInput, GrepTool
 from ddev.ai.tools.shell.list_files import ListFilesInput, ListFilesTool
 
@@ -13,16 +14,16 @@ from ddev.ai.tools.shell.list_files import ListFilesInput, ListFilesTool
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize(
-    "tool_cls,expected_name,expected_timeout",
-    [
-        (GrepTool, "grep", 30),
-        (ListFilesTool, "list_files", 30),
-    ],
-)
-def test_tool_meta(tool_cls, expected_name, expected_timeout):
-    assert tool_cls().name == expected_name
-    assert tool_cls.timeout == expected_timeout
+def test_grep_tool_meta() -> None:
+    tool = GrepTool(FileAccessPolicy())
+    assert tool.name == "grep"
+    assert GrepTool.timeout == 30
+
+
+def test_list_files_tool_meta() -> None:
+    tool = ListFilesTool()
+    assert tool.name == "list_files"
+    assert ListFilesTool.timeout == 30
 
 
 # ---------------------------------------------------------------------------
@@ -32,7 +33,7 @@ def test_tool_meta(tool_cls, expected_name, expected_timeout):
 
 @pytest.fixture
 def grep_tool() -> GrepTool:
-    return GrepTool()
+    return GrepTool(FileAccessPolicy(read_deny_names=(), read_deny_roots=()))
 
 
 def test_grep_cmd_full_command(grep_tool: GrepTool):
@@ -61,6 +62,32 @@ def test_grep_cmd_pattern_and_path_placement(grep_tool: GrepTool):
     cmd = grep_tool.cmd(GrepInput(pattern=pattern, path="/my dir/sub dir"))
     assert cmd[-2] == pattern
     assert cmd[-1] == "/my dir/sub dir"
+
+
+def test_grep_cmd_recursive_adds_exclude_flags(tmp_path) -> None:
+    policy = FileAccessPolicy(
+        read_deny_names=(".env", "*.pem"),
+        read_deny_roots=(str(tmp_path / "secrets"),),
+    )
+    tool = GrepTool(policy)
+    cmd = tool.cmd(GrepInput(pattern="SECRET", path="/project", recursive=True))
+    sep = cmd.index("--")
+    flags_before_sep = cmd[:sep]
+    assert "--exclude=.env" in flags_before_sep
+    assert "--exclude=*.pem" in flags_before_sep
+    assert "--exclude-dir=secrets" in flags_before_sep
+    assert cmd[-2] == "SECRET"
+    assert cmd[-1] == "/project"
+
+
+def test_grep_cmd_non_recursive_no_exclude_flags(tmp_path) -> None:
+    policy = FileAccessPolicy(
+        read_deny_names=(".env", "*.pem"),
+        read_deny_roots=(str(tmp_path / "secrets"),),
+    )
+    tool = GrepTool(policy)
+    cmd = tool.cmd(GrepInput(pattern="SECRET", path="/project/file.txt", recursive=False))
+    assert not any(arg.startswith("--exclude") for arg in cmd)
 
 
 async def test_grep_no_matches_returns_success(grep_tool: GrepTool):

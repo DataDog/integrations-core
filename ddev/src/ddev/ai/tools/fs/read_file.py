@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from pathlib import Path
 from typing import Annotated
 
 from pydantic import Field
@@ -11,6 +10,7 @@ from ddev.ai.tools.core.truncation import make_tool_result, truncate
 from ddev.ai.tools.core.types import ToolResult
 
 from .base import FileRegistryTool
+from .file_access_policy import FileAccessError
 
 
 class ReadFileInput(BaseToolInput):
@@ -36,14 +36,16 @@ class ReadFileTool(FileRegistryTool[ReadFileInput]):
         return "read_file"
 
     async def __call__(self, tool_input: ReadFileInput) -> ToolResult:
-        if fail := self._assert_readable(tool_input.path):
-            return fail
         try:
-            content = Path(tool_input.path).resolve().read_text(encoding="utf-8")
+            path = self._assert_readable(tool_input.path)
+        except FileAccessError as e:
+            return ToolResult(success=False, error=str(e))
+        try:
+            content = path.read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError) as e:
             return ToolResult(success=False, error=f"{tool_input.path}: {e}")
 
-        self._register(tool_input.path, content)
+        self._register(str(path), content)
 
         offset = tool_input.offset
         limit = tool_input.limit

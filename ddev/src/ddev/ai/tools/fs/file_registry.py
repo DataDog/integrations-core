@@ -3,9 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import asyncio
 import hashlib
-from pathlib import Path
 
-from .file_access_policy import FileAccessPolicy
+from .file_access_policy import FileAccessPolicy, canonicalize_path
 
 
 class FileRegistry:
@@ -33,7 +32,7 @@ class FileRegistry:
         return self._policy
 
     def _normalize(self, path: str) -> str:
-        return Path(path).resolve().as_posix()
+        return canonicalize_path(path).as_posix()
 
     def _hash(self, content: str) -> str:
         return hashlib.sha256(content.encode()).hexdigest()
