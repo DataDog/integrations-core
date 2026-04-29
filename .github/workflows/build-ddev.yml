@@ -174,10 +174,16 @@ jobs:
       with:
         enable-cache: false
 
-    # virtualenv pinned to <21 because of https://github.com/pypa/hatch/issues/2193
     # Both versions pinned for deterministic builds and stable cache reuse.
+    #
+    # virtualenv 21.0.0 (2026-02-25) split interpreter discovery out into the
+    # `python-discovery` package and removed `propose_interpreters` from
+    # `virtualenv.discovery.builtin`, which older hatch versions monkey-patched
+    # directly — see https://github.com/pypa/hatch/issues/2193. hatch 1.16.5
+    # picks up the fix from https://github.com/pypa/hatch/pull/2196 and now
+    # *requires* virtualenv>=21, so they must be bumped together.
     - name: Install Hatch
-      run: uv pip install --system "hatch==1.16.5" "virtualenv==20.39.1"
+      run: uv pip install --system "hatch==1.16.5" "virtualenv==21.3.0"
 
     - name: Install Hatch environment collector plugin
       run: uv pip install --system -e . --no-deps
