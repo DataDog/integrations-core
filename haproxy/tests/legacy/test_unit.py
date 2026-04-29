@@ -9,6 +9,8 @@ from collections import defaultdict
 import mock
 import pytest
 
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
+
 from . import common
 
 pytestmark = [common.requires_legacy_environment]
@@ -427,15 +429,14 @@ def test_regex_tags(aggregator, check, haproxy_mock):
     aggregator.assert_service_check('haproxy.backend_up', tags=tags)
 
 
-def test_version_failure(aggregator, check, datadog_agent):
+def test_version_failure(aggregator, check, datadog_agent, mock_http):
     config = copy.deepcopy(BASE_CONFIG)
     haproxy_check = check(config)
     filepath = os.path.join(os.path.dirname(common.HERE), 'fixtures', 'mock_data')
     with open(filepath, 'rb') as f:
         data = f.read()
-    with mock.patch('requests.Session.get') as m:
-        m.side_effect = [RuntimeError("Ooops"), mock.Mock(content=data)]
-        haproxy_check.check(config)
+    mock_http.get.side_effect = [RuntimeError("Ooops"), MockHTTPResponse(content=data)]
+    haproxy_check.check(config)
 
     # Version failed, but we should have some metrics
     aggregator.assert_metric(
