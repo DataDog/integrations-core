@@ -75,3 +75,62 @@ def test_include_case_insensitive(aggregator, dd_run_check, mock_performance_obj
     aggregator.assert_metric_has_tag('test.foo.bar', 'instance:Barbat', count=0)
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_include_total(aggregator, dd_run_check, mock_performance_objects):
+    mock_performance_objects({'Foo': (['_Total', 'baz'], {'Bar': [1, 2]})})
+    check = get_check(
+        {'metrics': {'Foo': {'name': 'foo', 'include_total': True, 'counters': [{'Bar': 'bar'}]}}}
+    )
+    dd_run_check(check)
+
+    tags = ['instance:_Total']
+    tags.extend(GLOBAL_TAGS)
+    aggregator.assert_metric('test.foo.bar', 1, tags=tags)
+
+    tags = ['instance:baz']
+    tags.extend(GLOBAL_TAGS)
+    aggregator.assert_metric('test.foo.bar', 2, tags=tags)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_include_total_with_lowercase_instance(aggregator, dd_run_check, mock_performance_objects):
+    mock_performance_objects({'Foo': (['_total', 'baz'], {'Bar': [1, 2]})})
+    check = get_check(
+        {'metrics': {'Foo': {'name': 'foo', 'include_total': True, 'counters': [{'Bar': 'bar'}]}}}
+    )
+    dd_run_check(check)
+
+    tags = ['instance:_total']
+    tags.extend(GLOBAL_TAGS)
+    aggregator.assert_metric('test.foo.bar', 1, tags=tags)
+
+    aggregator.assert_metric_has_tag('test.foo.bar', 'instance:baz', count=1)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_include_total_respects_user_exclude(aggregator, dd_run_check, mock_performance_objects):
+    mock_performance_objects({'Foo': (['_Total', 'baz'], {'Bar': [1, 2]})})
+    check = get_check(
+        {
+            'metrics': {
+                'Foo': {
+                    'name': 'foo',
+                    'include_total': True,
+                    'exclude': ['baz'],
+                    'counters': [{'Bar': 'bar'}],
+                }
+            }
+        }
+    )
+    dd_run_check(check)
+
+    tags = ['instance:_Total']
+    tags.extend(GLOBAL_TAGS)
+    aggregator.assert_metric('test.foo.bar', 1, tags=tags)
+
+    aggregator.assert_metric_has_tag('test.foo.bar', 'instance:baz', count=0)
+
+    aggregator.assert_all_metrics_covered()

@@ -1,0 +1,1 @@
+Add a per-performance-object `include_total` option (default `false`) to the Windows perf-counter framework. When set to `true`, the `_Total` aggregate instance is collected instead of being excluded by default.
