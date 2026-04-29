@@ -1,1 +1,0 @@
-Set `display_priority` in `kubernetes_cluster_autoscaler` spec.yaml based on field usage.
