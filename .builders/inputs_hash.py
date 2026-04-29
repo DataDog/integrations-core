@@ -20,6 +20,7 @@ import json
 import sys
 import tomllib
 from collections.abc import Iterator
+from dataclasses import dataclass, field
 from hashlib import sha256
 from pathlib import Path
 
@@ -57,17 +58,60 @@ RESOLUTION_INPUTS = [
     '.builders/build.py',
     '.builders/upload.py',
     '.builders/inputs_hash.py',
+    '.builders/targets.json',
     '.builders/deps/*.txt',
     '.builders/scripts/**/*',
     '.builders/patches/**/*',
     '.builders/images/**/*',
 ]
 
+# A file under .builders/ is one of:
+#   - covered: matched by a SHARED_INPUTS or RESOLUTION_INPUTS pattern and
+#     not filtered by _is_ignored. Enters the hash. Changes flip the hash.
+#   - ignored: filtered by _is_ignored (dotfiles, __pycache__) OR exempted
+#     by IGNORED_DIRS / IGNORED_FILES below. Doesn't enter the hash.
+#     Changes don't flip the hash and don't error.
+#   - uncovered: anything else. status() raises rather than silently
+#     publishing a hash with a coverage hole.
 
-def is_ignored(name: str) -> bool:
-    if name == '.gitkeep':
-        return False
+# Subtrees under .builders/ that are ignored regardless of contents. Matched
+# by relative POSIX path prefix.
+IGNORED_DIRS = (
+    'tests/',  # test infrastructure; not baked into any image or artifact
+    'venv/',   # local virtualenv if a contributor created one
+)
+
+# Specific files under .builders/ that are ignored. Matched by full relative
+# POSIX path so a future file at e.g. images/linux-x86_64/promote.py is not
+# silently exempted.
+IGNORED_FILES = frozenset({
+    # Runs in the separate dependency-wheel-promotion.yaml workflow, not here.
+    'promote.py',
+    # mypy configuration only; does not affect build or resolution output.
+    'pyproject.toml',
+    # Runs in CI to install pytest/etc; not baked into any image or artifact.
+    'test_dependencies.txt',
+})
+
+
+def _is_ignored(name: str) -> bool:
     return name.startswith('.') or name == '__pycache__'
+
+
+def _literal_prefix(pattern: str) -> Path:
+    """Return the leading part of `pattern` before any glob wildcard.
+
+    Used to scope ignored-name filtering to parts of a matched path that are
+    descendants of what the pattern explicitly named, so a pattern like
+    `.github/workflows/resolve-build-deps.yaml` is not itself filtered as a
+    dotfile while incidental dotfiles/__pycache__ inside `scripts/**/*` are.
+    """
+    parts: list[str] = []
+    for part in Path(pattern).parts:
+        if any(c in part for c in '*?['):
+            break
+        parts.append(part)
+    return Path(*parts) if parts else Path()
 
 
 def _iter_files(root: Path) -> Iterator[Path]:
@@ -75,38 +119,81 @@ def _iter_files(root: Path) -> Iterator[Path]:
         yield root
     elif root.is_dir():
         for path in root.rglob('*'):
-            rel_parts = path.relative_to(root).parts
-            if path.is_file() and not any(is_ignored(part) for part in rel_parts):
+            if path.is_file():
                 yield path
 
 
-def hash_paths(base: Path, patterns: list[str]) -> str:
-    """Hash all files matched by `patterns` (glob-expanded relative to `base`).
+def _collect_paths(base: Path, patterns: list[str]) -> set[Path]:
+    """Expand `patterns` under `base` to the set of files that would be hashed.
 
     Raises RuntimeError if a pattern matches no files, or if all matched files
     are filtered out as ignored (dotfiles, __pycache__). Either case means the
     pattern is no longer pulling content into the hash, so failing loud
     prevents the hash from silently narrowing.
 
-    Sorting by relative POSIX path before hashing preserves cross-OS stability:
-    WindowsPath sorting is case-insensitive and uses backslashes, which would
-    produce a different hash than on POSIX systems for the same input set.
+    Filtering: parts of a matched path that come *after* the pattern's literal
+    prefix are checked against `_is_ignored`. The literal prefix is exempt
+    because the user named it explicitly (e.g. `.github/workflows/...` is a
+    deliberate input even though `.github` looks like a dotfile).
     """
     paths: set[Path] = set()
     for pattern in patterns:
         matched = list(base.glob(pattern))
         if not matched:
             raise RuntimeError(f'pattern {pattern!r} matched no files under {base}')
+        prefix_part_count = len(_literal_prefix(pattern).parts)
+
+        def _filtered(path: Path) -> bool:
+            rel_parts = path.relative_to(base).parts[prefix_part_count:]
+            return any(_is_ignored(part) for part in rel_parts)
+
         pattern_paths: set[Path] = set()
         for p in matched:
-            pattern_paths.update(_iter_files(p))
+            pattern_paths.update(f for f in _iter_files(p) if not _filtered(f))
         if not pattern_paths:
             raise RuntimeError(
                 f'pattern {pattern!r} matched no hashable files under {base} '
                 f'(all matches were filtered as ignored)'
             )
         paths.update(pattern_paths)
+    return paths
 
+
+def _uncovered(covered: set[Path]) -> list[str]:
+    """Files under .builders/ that are neither covered nor ignored.
+
+    A file is ignored if any part of its relative path is filtered by
+    _is_ignored (dotfiles, __pycache__), OR it sits under IGNORED_DIRS, OR
+    it matches IGNORED_FILES. Anything else not in `covered` is uncovered.
+
+    The result is sorted relative POSIX paths so the JSON-encoded form is
+    stable for downstream consumers and human inspection.
+    """
+    uncovered: list[str] = []
+    for path in HERE.rglob('*'):
+        if not path.is_file():
+            continue
+        rel_parts = path.relative_to(HERE).parts
+        if any(_is_ignored(part) for part in rel_parts):
+            continue
+        rel = path.relative_to(HERE).as_posix()
+        if any(rel.startswith(prefix) for prefix in IGNORED_DIRS):
+            continue
+        if rel in IGNORED_FILES:
+            continue
+        if path in covered:
+            continue
+        uncovered.append(rel)
+    return sorted(uncovered)
+
+
+def _digest_paths(base: Path, paths: set[Path]) -> str:
+    """SHA-256 the file set in a cross-OS-stable order.
+
+    Sorting by relative POSIX path before hashing preserves cross-OS stability:
+    WindowsPath sorting is case-insensitive and uses backslashes, which would
+    produce a different hash than on POSIX systems for the same input set.
+    """
     sorted_paths = sorted(paths, key=lambda p: p.relative_to(base).as_posix())
     digest = sha256()
     for path in sorted_paths:
@@ -117,50 +204,102 @@ def hash_paths(base: Path, patterns: list[str]) -> str:
     return digest.hexdigest()
 
 
-def compute_target(target: str) -> str:
-    """Hash the working-tree inputs for `target` and return hex sha256."""
-    target_dir = HERE / 'images' / target
-    if not target_dir.is_dir():
-        raise FileNotFoundError(f'Unknown builder target: {target} (expected {target_dir})')
-    return hash_paths(HERE, SHARED_INPUTS + [f'images/{target}/**/*'])
+def _hash_paths(base: Path, patterns: list[str]) -> str:
+    """Hash all files matched by `patterns` (glob-expanded relative to `base`)."""
+    return _digest_paths(base, _collect_paths(base, patterns))
 
 
-def compute_resolution() -> str:
+def _compute_resolution() -> str:
     """Hash all resolution inputs relative to the repo root and return hex sha256."""
-    return hash_paths(REPO_ROOT, RESOLUTION_INPUTS)
+    return _hash_paths(REPO_ROOT, RESOLUTION_INPUTS)
 
 
-def _load_pinned() -> dict:
-    """Load the pinned TOML file, returning {} when the file is missing."""
+@dataclass
+class PinnedHashes:
+    """In-memory representation of the builder_inputs.toml schema.
+
+    Empty `resolution` (or empty `images` dict) indicates a missing section
+    rather than an empty hash — the writer omits empty sections, and readers
+    treat empty values as "unpinned".
+    """
+    resolution: str = ''
+    images: dict[str, str] = field(default_factory=dict)
+
+
+_BUILDER_INPUTS_HEADER = """\
+# Content hashes of the inputs that determine the resolution pipeline and each
+# builder image.
+#
+# The `Resolve Dependencies and Build Wheels` workflow uses these hashes to
+# gate the full pipeline (resolution.hash) and to decide whether to rebuild a
+# builder image from scratch or pull the existing one by digest (images.*).
+# The `verify-deps-pin` workflow checks resolution.hash on merge-queue refs.
+#
+# This file is rewritten by .builders/upload.py whenever dependency resolution
+# publishes new artifacts and should not be edited by hand.
+# Hash inputs are defined in .builders/inputs_hash.py (SHARED_INPUTS,
+# RESOLUTION_INPUTS).
+"""
+
+
+def write_pinned_hashes(path: Path, hashes: PinnedHashes) -> None:
+    """Write `hashes` to `path` as builder_inputs.toml.
+
+    Empty fields are omitted from the output. Parent directory is created if
+    missing so callers don't need a prior mkdir step.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lines = [_BUILDER_INPUTS_HEADER.rstrip('\n')]
+    if hashes.resolution:
+        lines.append(f'[{SECTION_RESOLUTION}]')
+        lines.append(f'{HASH_KEY} = "{hashes.resolution}"')
+        lines.append('')
+    if hashes.images:
+        lines.append(f'[{SECTION_IMAGES}]')
+        for target in sorted(hashes.images):
+            lines.append(f'{target} = "{hashes.images[target]}"')
+    path.write_text('\n'.join(lines).rstrip('\n') + '\n', encoding='utf-8')
+
+
+def _load_pinned_hashes() -> PinnedHashes:
+    """Read PINNED_FILE and return a PinnedHashes; empty fields on missing/unset.
+
+    Unknown TOML sections or keys are silently ignored — additions to the
+    schema must update PinnedHashes, this reader, and write_pinned_hashes.
+    """
     if not PINNED_FILE.is_file():
         print(f'{PINNED_FILE} not found; treating as unpinned', file=sys.stderr)
-        return {}
+        return PinnedHashes()
     try:
         with PINNED_FILE.open('rb') as f:
-            return tomllib.load(f)
+            raw = tomllib.load(f)
     except tomllib.TOMLDecodeError as e:
         raise RuntimeError(
             f'{PINNED_FILE} is malformed; it is regenerated by .builders/upload.py, '
             f'rerun resolve-build-deps if it is corrupted: {e}'
         ) from e
+    return PinnedHashes(
+        resolution=raw.get(SECTION_RESOLUTION, {}).get(HASH_KEY, ''),
+        images=raw.get(SECTION_IMAGES, {}),
+    )
 
 
-def pinned_target(target: str) -> str:
+def _pinned_target(target: str) -> str:
     """Return the hash pinned for `target` in builder_inputs.toml, or empty if absent."""
-    images = _load_pinned().get(SECTION_IMAGES, {})
+    images = _load_pinned_hashes().images
     if target not in images:
         print(f'{PINNED_FILE}: no entry for {target}; treating as unpinned', file=sys.stderr)
         return ''
     return images[target]
 
 
-def pinned_resolution() -> str:
+def _pinned_resolution() -> str:
     """Return the resolution hash pinned in builder_inputs.toml, or empty if absent."""
-    resolution = _load_pinned().get(SECTION_RESOLUTION, {})
-    if HASH_KEY not in resolution:
+    pinned = _load_pinned_hashes().resolution
+    if not pinned:
         print(f'{PINNED_FILE}: no [{SECTION_RESOLUTION}] hash; treating as unpinned', file=sys.stderr)
         return ''
-    return resolution[HASH_KEY]
+    return pinned
 
 
 def _check(label: str, current: str, pinned: str) -> bool:
@@ -175,10 +314,17 @@ def _check(label: str, current: str, pinned: str) -> bool:
     return fresh
 
 
-def verify_resolution() -> bool:
-    """Return True if the working-tree resolution hash matches the pinned hash."""
-    current = compute_resolution()
-    pinned = pinned_resolution()
+def _verify_resolution(current: str | None = None) -> str:
+    """Return 'fresh', 'stale', or 'unpinned' for the working-tree resolution hash.
+
+    'unpinned' means there is no `[resolution]` section yet — distinct from
+    'stale' so callers can tell bootstrap apart from a real mismatch.
+    `current` may be passed in by callers that have already computed it (e.g.
+    status()) to avoid re-walking the input tree.
+    """
+    if current is None:
+        current = _compute_resolution()
+    pinned = _pinned_resolution()
     if not pinned:
         print(
             f'{PINNED_FILE}: no [{SECTION_RESOLUTION}] hash found; dependency resolution has '
@@ -187,29 +333,72 @@ def verify_resolution() -> bool:
             f'normally.',
             file=sys.stderr,
         )
-        return False
-    return _check('resolution', current, pinned)
+        return 'unpinned'
+    return 'fresh' if _check('resolution', current, pinned) else 'stale'
 
 
-def status(targets: list[str]) -> dict[str, str]:
-    """Compute gate outputs for `targets` and return them as $GITHUB_OUTPUT key=value pairs.
+def status(targets_file: Path) -> dict[str, str]:
+    """Compute gate outputs for the targets in `targets_file` and return them as $GITHUB_OUTPUT key=value pairs.
+
+    `targets_file` is a JSON list of `{"platform", "arch", "runner_os"}` entries.
+    The image directory name is derived as f"{platform}-{arch}" — the canonical
+    target identifier under .builders/images/.
 
     Side effect: prints human-readable current/pinned/fresh-or-STALE lines for
     each hash to stderr.
 
-    Output keys: `needs_resolution` (bool string), `rebuild_<target>` (bool
-    string per target), `hashes` (JSON blob mapping target → current hash,
-    consumed by downstream jobs that need the hash value itself).
+    Any target that needs rebuilding also forces resolution: a new builder
+    image can change which wheels link successfully (system libraries, build
+    tools, manylinux selection), so re-resolving on target drift is the safe
+    conservative default.
+
+    Raises RuntimeError if any file under .builders/ is uncovered (neither
+    matched by an input pattern nor ignored). This fails the gate loudly
+    rather than silently publishing a hash with a coverage hole.
+
+    Output keys: `needs_resolution` (bool string), `matrix_container` and
+    `matrix_macos` (JSON lists of matrix entries, one per target, each with
+    image/platform/arch/runner_os/hash/rebuild), `resolution_hash` (the
+    working-tree resolution hash, passed downstream so upload.py can write
+    it into the pin without recomputing).
     """
-    needs_resolution = not verify_resolution()
-    outputs: dict[str, str] = {'needs_resolution': str(needs_resolution).lower()}
-    hashes: dict[str, str] = {}
-    for target in targets:
-        current = compute_target(target)
-        hashes[target] = current
-        fresh = _check(target, current, pinned_target(target))
-        outputs['rebuild_' + target.replace('-', '_')] = str(not fresh).lower()
-    outputs['hashes'] = json.dumps(hashes, sort_keys=True)
+    target_rows = json.loads(targets_file.read_text(encoding='utf-8'))
+    covered: set[Path] = set()
+
+    resolution_paths = _collect_paths(REPO_ROOT, RESOLUTION_INPUTS)
+    covered |= resolution_paths
+    resolution_hash = _digest_paths(REPO_ROOT, resolution_paths)
+    resolution_stale = _verify_resolution(resolution_hash) != 'fresh'
+    outputs: dict[str, str] = {'resolution_hash': resolution_hash}
+    container_rows: list[dict[str, str]] = []
+    macos_rows: list[dict[str, str]] = []
+    any_target_stale = False
+    for row in target_rows:
+        target = f"{row['platform']}-{row['arch']}"
+        target_dir = HERE / 'images' / target
+        if not target_dir.is_dir():
+            raise FileNotFoundError(f'Unknown builder target: {target} (expected {target_dir})')
+        target_patterns = SHARED_INPUTS + [f'images/{target}/**/*']
+        if row['platform'] == 'macos':
+            target_patterns.append('images/macos/**/*')
+        target_paths = _collect_paths(HERE, target_patterns)
+        covered |= target_paths
+        current = _digest_paths(HERE, target_paths)
+        fresh = _check(target, current, _pinned_target(target))
+        entry = {**row, 'image': target, 'hash': current, 'rebuild': str(not fresh).lower()}
+        (macos_rows if row['platform'] == 'macos' else container_rows).append(entry)
+        any_target_stale = any_target_stale or not fresh
+    outputs['needs_resolution'] = str(resolution_stale or any_target_stale).lower()
+    outputs['matrix_container'] = json.dumps(container_rows, sort_keys=True)
+    outputs['matrix_macos'] = json.dumps(macos_rows, sort_keys=True)
+    uncovered = _uncovered(covered)
+    if uncovered:
+        raise RuntimeError(
+            f'{len(uncovered)} uncovered file(s) under .builders/ '
+            f'(not matched by any input pattern, not ignored): '
+            f'{", ".join(uncovered)}. '
+            'For of these files, please decide if you want it to affect the decision to rerun the resolution.'
+        )
     return outputs
 
 
@@ -226,9 +415,9 @@ def _build_parser() -> argparse.ArgumentParser:
 
     status_parser = subparsers.add_parser(
         'status',
-        help='Emit needs_resolution, rebuild_<target>, and hashes (JSON) to $GITHUB_OUTPUT.',
+        help='Emit needs_resolution, matrix_container, matrix_macos, and resolution_hash to $GITHUB_OUTPUT.',
     )
-    status_parser.add_argument('--targets', nargs='+', required=True, metavar='TARGET')
+    status_parser.add_argument('targets_file', type=Path, metavar='TARGETS_FILE')
 
     subparsers.add_parser(
         'verify-resolution',
@@ -239,21 +428,20 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def main() -> None:
     args = _build_parser().parse_args()
-    try:
-        if args.command == 'status':
-            for key, value in status(args.targets).items():
-                sys.stdout.write(f'{key}={value}\n')
-        elif args.command == 'verify-resolution':
-            if not verify_resolution():
-                print(
-                    'Resolution pin is stale. Rebase your branch onto master to re-trigger '
-                    'dependency resolution and update the pin.',
-                    file=sys.stderr,
-                )
-                sys.exit(1)
-    except RuntimeError as e:
-        print(f'error: {e}', file=sys.stderr)
-        sys.exit(2)
+    if args.command == 'status':
+        for key, value in status(args.targets_file).items():
+            sys.stdout.write(f'{key}={value}\n')
+    elif args.command == 'verify-resolution':
+        result = _verify_resolution()
+        if result == 'stale':
+            print(
+                'Resolution pin is stale. Rebase your branch onto master to re-trigger '
+                'dependency resolution and update the pin.',
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        elif result == 'unpinned':
+            sys.exit(1)
 
 
 if __name__ == '__main__':

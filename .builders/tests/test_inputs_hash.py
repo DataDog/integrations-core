@@ -1,4 +1,5 @@
 """Tests for inputs_hash.py: hashing, pinning, status, verify-resolution, and coverage."""
+import json
 from pathlib import Path
 from unittest import mock
 
@@ -10,229 +11,28 @@ HERE = Path(__file__).parent.parent  # .builders/
 REPO_ROOT = HERE.parent
 
 
-def _write_pin(tmp_path: Path, resolution_hash: str, image_hashes: dict[str, str]) -> Path:
-    """Write a builder_inputs.toml fixture with the given hashes."""
-    pin = tmp_path / 'builder_inputs.toml'
-    lines = [
-        f'[{inputs_hash.SECTION_RESOLUTION}]',
-        f'{inputs_hash.HASH_KEY} = "{resolution_hash}"',
-        '',
-        f'[{inputs_hash.SECTION_IMAGES}]',
-    ]
-    for target in sorted(image_hashes):
-        lines.append(f'{target} = "{image_hashes[target]}"')
-    pin.write_text('\n'.join(lines) + '\n', encoding='utf-8')
-    return pin
+def _matrix_entry(out: dict[str, str], image: str) -> dict[str, str]:
+    """Return the matrix row for `image` from whichever of matrix_container/matrix_macos contains it."""
+    rows = json.loads(out['matrix_container']) + json.loads(out['matrix_macos'])
+    matches = [r for r in rows if r['image'] == image]
+    assert len(matches) == 1, f'expected exactly one row for {image}, got {matches}'
+    return matches[0]
 
 
-# ---------------------------------------------------------------------------
-# hash_paths
-# ---------------------------------------------------------------------------
-
-def test_hash_paths_stable_across_filesystem_order(tmp_path: Path) -> None:
-    """Hash depends only on relative path + content, not filesystem iteration order.
-
-    Two directories with the same set of files (same relative path, same
-    content) must produce the same hash regardless of the order the underlying
-    filesystem returns them. Guards against a refactor that drops the internal
-    sorted() call.
-    """
-    dir_a = tmp_path / 'a'
-    dir_b = tmp_path / 'b'
-    dir_a.mkdir()
-    dir_b.mkdir()
-    (dir_a / 'x.txt').write_bytes(b'xxx')
-    (dir_a / 'y.txt').write_bytes(b'yyy')
-    (dir_b / 'y.txt').write_bytes(b'yyy')
-    (dir_b / 'x.txt').write_bytes(b'xxx')
-
-    assert inputs_hash.hash_paths(dir_a, ['*.txt']) == inputs_hash.hash_paths(dir_b, ['*.txt'])
-
-
-def test_hash_paths_different_content_different_hash(tmp_path: Path) -> None:
-    """Changing a file's bytes produces a different hash."""
-    f = tmp_path / 'f.txt'
-    f.write_bytes(b'v1')
-    h1 = inputs_hash.hash_paths(tmp_path, ['f.txt'])
-    f.write_bytes(b'v2')
-    h2 = inputs_hash.hash_paths(tmp_path, ['f.txt'])
-    assert h1 != h2
-
-
-def test_hash_paths_raises_on_empty_pattern(tmp_path: Path) -> None:
-    """An empty glob match raises — the pattern lists are static, so empty means drift."""
-    with pytest.raises(RuntimeError, match='matched no files'):
-        inputs_hash.hash_paths(tmp_path, ['no_match_*.txt'])
-
-
-def test_hash_paths_raises_when_only_ignored_files_match(tmp_path: Path) -> None:
-    """A pattern matching a directory whose contents are entirely ignored raises.
-
-    Without this guard, the hash would silently narrow to sha256(empty) when a
-    pattern's expanded matches all live under filtered names like __pycache__
-    or dotfile directories.
-    """
-    pkg = tmp_path / 'pkg'
-    pkg.mkdir()
-    (pkg / '__pycache__').mkdir()
-    (pkg / '__pycache__' / 'm.pyc').write_bytes(b'x')
-    with pytest.raises(RuntimeError, match='no hashable files'):
-        inputs_hash.hash_paths(tmp_path, ['pkg'])
-
-
-# ---------------------------------------------------------------------------
-# compute_target / pinned_target
-# ---------------------------------------------------------------------------
-
-def test_compute_target_raises_for_unknown_target() -> None:
+def test_status_raises_for_unknown_target(fake_repo: Path, tmp_path: Path) -> None:
     """An unknown target name is a usage error and must raise."""
+    bogus = tmp_path / 'bogus_targets.json'
+    bogus.write_text(
+        json.dumps([{'platform': 'nonexistent', 'arch': 'target', 'runner_os': 'ubuntu-22.04'}]),
+        encoding='utf-8',
+    )
     with pytest.raises(FileNotFoundError, match='Unknown builder target'):
-        inputs_hash.compute_target('nonexistent-target')
-
-
-def test_compute_target_returns_hex_string() -> None:
-    """compute_target returns a 64-character hex sha256 for a valid target."""
-    h = inputs_hash.compute_target('linux-x86_64')
-    assert len(h) == 64
-    assert all(c in '0123456789abcdef' for c in h)
-
-
-def test_pinned_target_returns_empty_when_file_missing(tmp_path: Path) -> None:
-    """No pin file at all is treated as unpinned."""
-    missing = tmp_path / 'no_such.toml'
-    with mock.patch.object(inputs_hash, 'PINNED_FILE', missing):
-        assert inputs_hash.pinned_target('linux-x86_64') == ''
-
-
-def test_pinned_target_returns_empty_when_images_section_missing(tmp_path: Path) -> None:
-    """A pin file with no [images] section is treated as unpinned for every target."""
-    pin = tmp_path / 'pin.toml'
-    pin.write_text(
-        f'[{inputs_hash.SECTION_RESOLUTION}]\n{inputs_hash.HASH_KEY} = "x"\n',
-        encoding='utf-8',
-    )
-    with mock.patch.object(inputs_hash, 'PINNED_FILE', pin):
-        assert inputs_hash.pinned_target('linux-x86_64') == ''
-
-
-def test_pinned_target_returns_empty_when_target_absent(tmp_path: Path) -> None:
-    """A pin file with [images] but no entry for the target is treated as unpinned."""
-    pin = _write_pin(tmp_path, 'abc', {})
-    with mock.patch.object(inputs_hash, 'PINNED_FILE', pin):
-        assert inputs_hash.pinned_target('linux-x86_64') == ''
-
-
-def test_pinned_target_returns_value(tmp_path: Path) -> None:
-    """A pinned target returns the hash exactly as stored."""
-    pin = _write_pin(tmp_path, 'abc', {'linux-x86_64': 'deadbeef'})
-    with mock.patch.object(inputs_hash, 'PINNED_FILE', pin):
-        assert inputs_hash.pinned_target('linux-x86_64') == 'deadbeef'
-
-
-def test_pinned_target_raises_on_malformed_toml(tmp_path: Path) -> None:
-    """A corrupt pin file raises rather than silently acting unpinned."""
-    bad = tmp_path / 'bad.toml'
-    bad.write_text('not valid [[toml', encoding='utf-8')
-    with mock.patch.object(inputs_hash, 'PINNED_FILE', bad):
-        with pytest.raises(RuntimeError, match='malformed'):
-            inputs_hash.pinned_target('linux-x86_64')
-
-
-# ---------------------------------------------------------------------------
-# pinned_resolution
-# ---------------------------------------------------------------------------
-
-def test_pinned_resolution_returns_empty_when_missing(tmp_path: Path) -> None:
-    """No pin file at all is treated as unpinned."""
-    with mock.patch.object(inputs_hash, 'PINNED_FILE', tmp_path / 'missing.toml'):
-        assert inputs_hash.pinned_resolution() == ''
-
-
-def test_pinned_resolution_returns_empty_when_section_missing(tmp_path: Path) -> None:
-    """A pin file with no [resolution] section is treated as unpinned (bootstrap case)."""
-    pin = tmp_path / 'pin.toml'
-    pin.write_text(
-        f'[{inputs_hash.SECTION_IMAGES}]\nlinux-x86_64 = "abc"\n',
-        encoding='utf-8',
-    )
-    with mock.patch.object(inputs_hash, 'PINNED_FILE', pin):
-        assert inputs_hash.pinned_resolution() == ''
-
-
-def test_pinned_resolution_returns_value(tmp_path: Path) -> None:
-    """A populated [resolution].hash is returned exactly."""
-    pin = _write_pin(tmp_path, 'myhash', {})
-    with mock.patch.object(inputs_hash, 'PINNED_FILE', pin):
-        assert inputs_hash.pinned_resolution() == 'myhash'
-
-
-# ---------------------------------------------------------------------------
-# verify_resolution
-# ---------------------------------------------------------------------------
-
-def test_verify_resolution_returns_true_when_fresh(tmp_path: Path) -> None:
-    """A matching pin returns True (workflow will skip resolution)."""
-    current = inputs_hash.compute_resolution()
-    pin = _write_pin(tmp_path, current, {})
-    with mock.patch.object(inputs_hash, 'PINNED_FILE', pin):
-        assert inputs_hash.verify_resolution() is True
-
-
-def test_verify_resolution_returns_false_when_stale(tmp_path: Path) -> None:
-    """A mismatched pin returns False (workflow will rerun resolution)."""
-    pin = _write_pin(tmp_path, 'stale_hash', {})
-    with mock.patch.object(inputs_hash, 'PINNED_FILE', pin):
-        assert inputs_hash.verify_resolution() is False
-
-
-def test_verify_resolution_returns_false_with_bootstrap_message(tmp_path: Path, capsys) -> None:
-    """A pin with no [resolution] section returns False and prints a bootstrap-specific hint.
-
-    Distinct from the generic stale-pin message so authors don't chase a rebase fix
-    during the initial rollout when master simply has not published a resolution pin yet.
-    """
-    pin = tmp_path / 'pin.toml'
-    pin.write_text(
-        f'[{inputs_hash.SECTION_IMAGES}]\nlinux-x86_64 = "abc"\n',
-        encoding='utf-8',
-    )
-    with mock.patch.object(inputs_hash, 'PINNED_FILE', pin):
-        assert inputs_hash.verify_resolution() is False
-    _, err = capsys.readouterr()
-    assert 'has not yet published a pin' in err
+        inputs_hash.status(bogus)
 
 
 # ---------------------------------------------------------------------------
 # Bot-commit neutrality
 # ---------------------------------------------------------------------------
-
-def test_hashing_a_specific_file_ignores_unrelated_siblings(tmp_path: Path) -> None:
-    """Hashing `agent_requirements.in` is unaffected by sibling files outside the pattern.
-
-    Sanity check that hash_paths only sees files matched by the patterns it is
-    given — siblings in the same tree (here, fake `.deps/` content shaped like
-    what the bot commit writes) cannot smuggle their content into the hash. The
-    real "no RESOLUTION_INPUTS pattern reaches .deps/" guarantee is enforced by
-    test_resolution_inputs_do_not_glob_into_deps_directory.
-    """
-    def _build_tree(root: Path, bot_output_contents: str) -> None:
-        deps = root / '.deps'
-        resolved = deps / 'resolved'
-        resolved.mkdir(parents=True)
-        (resolved / 'linux-x86_64_3.13.txt').write_text(bot_output_contents, encoding='utf-8')
-        (deps / 'builder_inputs.toml').write_text(
-            f'[resolution]\nhash = "{bot_output_contents}"\n', encoding='utf-8',
-        )
-        (root / 'agent_requirements.in').write_text('requests==2.31.0\n', encoding='utf-8')
-
-    tree_a = tmp_path / 'a'
-    tree_b = tmp_path / 'b'
-    _build_tree(tree_a, 'before')
-    _build_tree(tree_b, 'after')
-
-    patterns = ['agent_requirements.in']
-    assert inputs_hash.hash_paths(tree_a, patterns) == inputs_hash.hash_paths(tree_b, patterns)
-
 
 def test_resolution_inputs_do_not_glob_into_deps_directory() -> None:
     """No RESOLUTION_INPUTS or SHARED_INPUTS pattern expands to anything under .deps/.
@@ -261,149 +61,391 @@ def test_resolution_inputs_do_not_glob_into_deps_directory() -> None:
 # status
 # ---------------------------------------------------------------------------
 
-def test_status_fresh(tmp_path: Path) -> None:
-    """All hashes match → needs_resolution=false, rebuild_<target>=false."""
-    current_res = inputs_hash.compute_resolution()
-    current_tgt = inputs_hash.compute_target('linux-x86_64')
-    pin = _write_pin(tmp_path, current_res, {'linux-x86_64': current_tgt})
-    with mock.patch.object(inputs_hash, 'PINNED_FILE', pin):
-        out = inputs_hash.status(['linux-x86_64'])
+def test_status_all_fresh(fake_repo_with_fresh_pin: dict, targets_file: Path) -> None:
+    """A pin matching the working tree leaves every freshness flag false."""
+    out = inputs_hash.status(targets_file)
     assert out['needs_resolution'] == 'false'
-    assert out['rebuild_linux_x86_64'] == 'false'
+    assert _matrix_entry(out, 'linux-x86_64')['rebuild'] == 'false'
 
 
-def test_status_stale_resolution(tmp_path: Path) -> None:
-    """Resolution drift alone sets needs_resolution=true but leaves rebuild_ per target intact."""
-    current_tgt = inputs_hash.compute_target('linux-x86_64')
-    pin = _write_pin(tmp_path, 'stale_hash', {'linux-x86_64': current_tgt})
-    with mock.patch.object(inputs_hash, 'PINNED_FILE', pin):
-        out = inputs_hash.status(['linux-x86_64'])
+def test_status_stale_resolution_only(fake_repo_with_fresh_pin: dict, targets_file: Path) -> None:
+    """Resolution drift alone sets needs_resolution=true but leaves the target's rebuild=false."""
+    inputs_hash.write_pinned_hashes(
+        inputs_hash.PINNED_FILE,
+        inputs_hash.PinnedHashes(
+            resolution='stale_resolution_hash',
+            images=fake_repo_with_fresh_pin['target_hashes'],
+        ),
+    )
+    out = inputs_hash.status(targets_file)
     assert out['needs_resolution'] == 'true'
-    assert out['rebuild_linux_x86_64'] == 'false'
+    assert _matrix_entry(out, 'linux-x86_64')['rebuild'] == 'false'
 
 
-def test_status_stale_target(tmp_path: Path) -> None:
-    """Target drift alone sets rebuild_<target>=true without forcing resolution."""
-    current_res = inputs_hash.compute_resolution()
-    pin = _write_pin(tmp_path, current_res, {'linux-x86_64': 'stale_image_hash'})
+def test_status_stale_target_only(fake_repo_with_fresh_pin: dict, targets_file: Path) -> None:
+    """Target drift alone sets the target's rebuild=true and forces needs_resolution=true.
+
+    A target rebuild can change which wheels link, so re-resolving on target
+    drift is the safe conservative default.
+    """
+    inputs_hash.write_pinned_hashes(
+        inputs_hash.PINNED_FILE,
+        inputs_hash.PinnedHashes(
+            resolution=fake_repo_with_fresh_pin['resolution_hash'],
+            images={'linux-x86_64': 'stale_target_hash'},
+        ),
+    )
+    out = inputs_hash.status(targets_file)
+    assert out['needs_resolution'] == 'true'
+    assert _matrix_entry(out, 'linux-x86_64')['rebuild'] == 'true'
+
+
+@pytest.fixture
+def targets_file(fake_repo: Path) -> Path:
+    """Path to the linux-x86_64-only targets.json that fake_repo writes."""
+    return fake_repo / '.builders' / 'targets.json'
+
+
+@pytest.fixture
+def fake_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """Minimum repo tree satisfying SHARED_INPUTS and RESOLUTION_INPUTS for one target.
+
+    Every pattern in the input lists has at least one matching file. Tests that
+    need additional targets or extra files write them on top of the fixture.
+    HERE/REPO_ROOT/PINNED_FILE are repointed at this tree so production hashing
+    runs against deterministic content rather than the live repo.
+    """
+    files = {
+        '.builders/build.py': b'build',
+        '.builders/upload.py': b'upload',
+        '.builders/inputs_hash.py': b'inputs_hash',
+        '.builders/targets.json': b'[{"platform":"linux","arch":"x86_64","runner_os":"ubuntu-22.04"}]',
+        '.builders/deps/build_dependencies.txt': b'build-deps',
+        '.builders/scripts/build_wheels.py': b'build-wheels',
+        '.builders/patches/some.patch': b'patch',
+        '.builders/images/helpers.ps1': b'helpers',
+        '.builders/images/install-from-source.sh': b'install',
+        '.builders/images/runner_dependencies.txt': b'runner',
+        '.builders/images/linux-x86_64/Dockerfile': b'linux-x86_64',
+        'agent_requirements.in': b'requests==2.31.0',
+        '.github/workflows/resolve-build-deps.yaml': b'workflow',
+    }
+    for rel, content in files.items():
+        path = tmp_path / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(content)
+
+    monkeypatch.setattr(inputs_hash, 'HERE', tmp_path / '.builders')
+    monkeypatch.setattr(inputs_hash, 'REPO_ROOT', tmp_path)
+    monkeypatch.setattr(inputs_hash, 'PINNED_FILE', tmp_path / '.deps' / 'builder_inputs.toml')
+    return tmp_path
+
+
+def _baseline(fake_repo: Path) -> dict[str, str]:
+    """Write a placeholder pin and run status once; return the output."""
+    inputs_hash.write_pinned_hashes(
+        inputs_hash.PINNED_FILE,
+        inputs_hash.PinnedHashes(resolution='placeholder'),
+    )
+    return inputs_hash.status(fake_repo / '.builders' / 'targets.json')
+
+
+@pytest.fixture
+def fake_repo_with_fresh_pin(fake_repo: Path) -> dict[str, str]:
+    """fake_repo plus a pin that matches the working tree (everything fresh).
+
+    Tests mutate one side of the pin to introduce a single dimension of
+    staleness without losing control of the others. Returned dict has the
+    discovered `resolution_hash` and per-target `target_hashes` so the test
+    can rewrite the pin while preserving whichever side it doesn't want to
+    flip.
+    """
+    discovered = _baseline(fake_repo)
+    rows = json.loads(discovered['matrix_container']) + json.loads(discovered['matrix_macos'])
+    target_hashes = {row['image']: row['hash'] for row in rows}
+    inputs_hash.write_pinned_hashes(
+        inputs_hash.PINNED_FILE,
+        inputs_hash.PinnedHashes(
+            resolution=discovered['resolution_hash'],
+            images=target_hashes,
+        ),
+    )
+    return {
+        'resolution_hash': discovered['resolution_hash'],
+        'target_hashes': target_hashes,
+    }
+
+
+@pytest.mark.parametrize('rel_path', [
+    # _is_ignored: dotfiles and __pycache__ inside tracked subtrees.
+    pytest.param('.builders/scripts/__pycache__/x.pyc', id='pycache-in-scripts'),
+    pytest.param('.builders/scripts/.hidden', id='dotfile-in-scripts'),
+    pytest.param('.builders/images/linux-x86_64/.DS_Store', id='dotfile-in-target'),
+    pytest.param('.builders/images/linux-x86_64/__pycache__/y.pyc', id='pycache-in-target'),
+    # IGNORED_DIRS: subtree exemptions.
+    pytest.param('.builders/tests/test_something.py', id='ignored-dir-tests'),
+    pytest.param('.builders/venv/lib/x.py', id='ignored-dir-venv'),
+    # IGNORED_FILES: specific-file exemptions.
+    pytest.param('.builders/promote.py', id='ignored-file-promote'),
+    pytest.param('.builders/pyproject.toml', id='ignored-file-pyproject'),
+    pytest.param('.builders/test_dependencies.txt', id='ignored-file-test-deps'),
+])
+def test_adding_ignored_file_does_not_change_status(fake_repo: Path, targets_file: Path, rel_path: str) -> None:
+    """Ignored files don't enter any hash and don't error.
+
+    Three flavors are exercised: _is_ignored (dotfiles/__pycache__),
+    IGNORED_DIRS (subtree exemptions), and IGNORED_FILES (specific files).
+    """
+    before = _baseline(fake_repo)
+    path = fake_repo / rel_path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(b'irrelevant')
+    after = inputs_hash.status(targets_file)
+    assert after == before
+
+
+@pytest.mark.parametrize('rel_path,expect_resolution_change,expect_target_change', [
+    # SHARED_INPUTS pattern + RESOLUTION_INPUTS .builders/scripts/**/*: both flip.
+    ('.builders/scripts/new_script.py', True, True),
+    # SHARED_INPUTS patches/**/* + RESOLUTION_INPUTS .builders/patches/**/*: both flip.
+    ('.builders/patches/new.patch', True, True),
+    # Per-target glob + RESOLUTION_INPUTS .builders/images/**/*: both flip.
+    ('.builders/images/linux-x86_64/extra.sh', True, True),
+    # RESOLUTION_INPUTS .builders/images/**/* only; not in SHARED_INPUTS or per-target.
+    ('.builders/images/new_top_level.txt', True, False),
+])
+def test_adding_tracked_file_changes_status(
+    fake_repo: Path, targets_file: Path, rel_path: str, expect_resolution_change: bool, expect_target_change: bool
+) -> None:
+    """A new file matched by an input pattern flips the relevant hash(es)."""
+    before = _baseline(fake_repo)
+    path = fake_repo / rel_path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(b'new content')
+    after = inputs_hash.status(targets_file)
+    before_hash = _matrix_entry(before, 'linux-x86_64')['hash']
+    after_hash = _matrix_entry(after, 'linux-x86_64')['hash']
+    assert (after['resolution_hash'] != before['resolution_hash']) is expect_resolution_change
+    assert (after_hash != before_hash) is expect_target_change
+
+
+@pytest.mark.parametrize('rel_path,expect_resolution_change,expect_target_change', [
+    # SHARED_INPUTS build.py + RESOLUTION_INPUTS .builders/build.py: both flip.
+    ('.builders/build.py', True, True),
+    # SHARED_INPUTS scripts/**/* + RESOLUTION_INPUTS .builders/scripts/**/*: both flip.
+    ('.builders/scripts/build_wheels.py', True, True),
+    # SHARED_INPUTS deps/build_dependencies.txt + RESOLUTION_INPUTS deps/*.txt: both flip.
+    ('.builders/deps/build_dependencies.txt', True, True),
+    # RESOLUTION_INPUTS only; not in SHARED_INPUTS or per-target.
+    ('agent_requirements.in', True, False),
+    # Per-target glob + RESOLUTION_INPUTS .builders/images/**/*: both flip.
+    ('.builders/images/linux-x86_64/Dockerfile', True, True),
+])
+def test_modifying_tracked_file_changes_status(
+    fake_repo: Path, targets_file: Path, rel_path: str, expect_resolution_change: bool, expect_target_change: bool
+) -> None:
+    """Modifying a tracked file's bytes flips the relevant hash(es)."""
+    before = _baseline(fake_repo)
+    (fake_repo / rel_path).write_bytes(b'modified content')
+    after = inputs_hash.status(targets_file)
+    before_hash = _matrix_entry(before, 'linux-x86_64')['hash']
+    after_hash = _matrix_entry(after, 'linux-x86_64')['hash']
+    assert (after['resolution_hash'] != before['resolution_hash']) is expect_resolution_change
+    assert (after_hash != before_hash) is expect_target_change
+
+
+def test_status_raises_when_a_pattern_matches_no_files(fake_repo: Path, targets_file: Path) -> None:
+    """If a tracked file disappears so an input pattern matches nothing, status fails loudly.
+
+    This is the drift detector for stale entries in SHARED_INPUTS / RESOLUTION_INPUTS.
+    """
+    (fake_repo / '.builders' / 'build.py').unlink()
+    with pytest.raises(RuntimeError, match='matched no files'):
+        inputs_hash.status(targets_file)
+
+
+def test_status_raises_when_pattern_only_matches_ignored_files(fake_repo: Path, targets_file: Path) -> None:
+    """If a tracked directory exists but every file in it is ignored, status fails loudly.
+
+    Without this guard, the hash would silently narrow to sha256(empty) when
+    every match is a dotfile or under __pycache__/.
+    """
+    scripts = fake_repo / '.builders' / 'scripts'
+    for f in scripts.iterdir():
+        f.unlink()
+    (scripts / '__pycache__').mkdir()
+    (scripts / '__pycache__' / 'x.pyc').write_bytes(b'x')
+    with pytest.raises(RuntimeError, match='no hashable files'):
+        inputs_hash.status(targets_file)
+
+
+@pytest.mark.parametrize('rel_path', [
+    pytest.param('.builders/some_new_top_level.py', id='top-level-py'),
+    pytest.param('.builders/deps/something_else.json', id='wrong-extension-in-deps'),
+    pytest.param('.builders/new_directory/file.txt', id='new-subtree'),
+])
+def test_status_raises_on_uncovered_file(fake_repo: Path, targets_file: Path, rel_path: str) -> None:
+    """A file under .builders/ matched by no pattern and not ignored fails the gate.
+
+    Without this guard, the gate would publish a hash that excludes a real
+    input — the silent-coverage-hole failure mode the test_no_uncovered_files
+    drift detector exists to prevent.
+    """
+    path = fake_repo / rel_path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(b'uncovered')
+    with pytest.raises(RuntimeError, match='uncovered'):
+        inputs_hash.status(targets_file)
+
+
+def test_status_raises_on_malformed_pin(fake_repo: Path, targets_file: Path) -> None:
+    """A corrupt pin file raises rather than silently acting unpinned."""
+    inputs_hash.PINNED_FILE.parent.mkdir(parents=True, exist_ok=True)
+    inputs_hash.PINNED_FILE.write_text('not valid [[toml', encoding='utf-8')
+    with pytest.raises(RuntimeError, match='malformed'):
+        inputs_hash.status(targets_file)
+
+
+def test_status_no_pin_for_target_means_rebuild(fake_repo: Path, targets_file: Path, capsys) -> None:
+    """When the pin has no entry for a target, status sets that target's rebuild=true.
+
+    Covers the three "no target hash" cases collectively (no pin file, no
+    [images] section, target absent from section) — they all resolve to the
+    same observable behavior.
+    """
+    inputs_hash.write_pinned_hashes(
+        inputs_hash.PINNED_FILE,
+        inputs_hash.PinnedHashes(resolution='placeholder'),
+    )
+    out = inputs_hash.status(targets_file)
+    assert _matrix_entry(out, 'linux-x86_64')['rebuild'] == 'true'
+    assert 'no entry for linux-x86_64' in capsys.readouterr().err
+
+
+def test_status_no_resolution_pin_emits_bootstrap_message(fake_repo: Path, targets_file: Path, capsys) -> None:
+    """When the pin has no [resolution] section, status emits the bootstrap hint.
+
+    Distinct from the generic stale-pin message so authors don't chase a
+    rebase fix during the initial rollout when master simply has not
+    published a resolution pin yet.
+    """
+    inputs_hash.write_pinned_hashes(
+        inputs_hash.PINNED_FILE,
+        inputs_hash.PinnedHashes(images={'linux-x86_64': 'abc'}),
+    )
+    out = inputs_hash.status(targets_file)
+    assert out['needs_resolution'] == 'true'
+    assert 'has not yet published a pin' in capsys.readouterr().err
+
+
+def test_status_emits_matrix_split_by_platform(tmp_path: Path) -> None:
+    """status emits matrix_container and matrix_macos JSON lists, each with image/platform/arch/runner_os/hash/rebuild."""
+    pin = tmp_path / 'builder_inputs.toml'
+    inputs_hash.write_pinned_hashes(pin, inputs_hash.PinnedHashes(resolution='x'))
+    targets_file = tmp_path / 'targets.json'
+    targets_file.write_text(json.dumps([
+        {'platform': 'linux',   'arch': 'x86_64',  'runner_os': 'ubuntu-22.04'},
+        {'platform': 'linux',   'arch': 'aarch64', 'runner_os': 'ubuntu-22.04-arm'},
+        {'platform': 'windows', 'arch': 'x86_64',  'runner_os': 'windows-2022'},
+        {'platform': 'macos',   'arch': 'x86_64',  'runner_os': 'macos-14-large'},
+        {'platform': 'macos',   'arch': 'aarch64', 'runner_os': 'macos-14'},
+    ]), encoding='utf-8')
     with mock.patch.object(inputs_hash, 'PINNED_FILE', pin):
-        out = inputs_hash.status(['linux-x86_64'])
-    assert out['needs_resolution'] == 'false'
-    assert out['rebuild_linux_x86_64'] == 'true'
+        out = inputs_hash.status(targets_file)
+    container = json.loads(out['matrix_container'])
+    macos = json.loads(out['matrix_macos'])
+    assert {r['image'] for r in container} == {'linux-x86_64', 'linux-aarch64', 'windows-x86_64'}
+    assert {r['image'] for r in macos} == {'macos-x86_64', 'macos-aarch64'}
+    for row in container + macos:
+        assert set(row) == {'image', 'platform', 'arch', 'runner_os', 'hash', 'rebuild'}
 
 
-def test_status_keys_use_underscores(tmp_path: Path) -> None:
-    """rebuild_<target> output keys replace hyphens with underscores for GitHub Actions."""
-    pin = _write_pin(tmp_path, 'x', {})
-    with mock.patch.object(inputs_hash, 'PINNED_FILE', pin):
-        out = inputs_hash.status(['linux-x86_64', 'linux-aarch64', 'windows-x86_64'])
-    assert 'rebuild_linux_x86_64' in out
-    assert 'rebuild_linux_aarch64' in out
-    assert 'rebuild_windows_x86_64' in out
+# ---------------------------------------------------------------------------
+# main() end-to-end: stdout format and exit codes consumed by GitHub Actions
+# ---------------------------------------------------------------------------
+
+def test_main_status_emits_key_equals_value_lines(
+    fake_repo_with_fresh_pin: dict, targets_file: Path, monkeypatch, capsys
+) -> None:
+    """`status` writes `key=value\\n` lines to stdout — the format $GITHUB_OUTPUT consumes.
+
+    A regression that switched to JSON or a different separator would silently
+    break the workflow's `if: needs.gate.outputs.needs_resolution == 'true'`
+    expression, which has no test coverage outside this assertion.
+    """
+    monkeypatch.setattr('sys.argv', ['inputs_hash.py', 'status', str(targets_file)])
+    inputs_hash.main()
+    stdout = capsys.readouterr().out
+    lines = stdout.splitlines()
+    keys = {line.split('=', 1)[0] for line in lines if '=' in line}
+    assert {'needs_resolution', 'matrix_container', 'matrix_macos', 'resolution_hash'} <= keys
+    for line in lines:
+        assert '=' in line, f'stdout line missing key=value separator: {line!r}'
 
 
-def test_status_emits_hashes_json(tmp_path: Path) -> None:
-    """status emits a `hashes` JSON blob mapping target → current hash for downstream jobs."""
-    import json
+def test_main_verify_resolution_fresh_exits_zero(
+    fake_repo_with_fresh_pin: dict, monkeypatch
+) -> None:
+    """`verify-resolution` against a matching pin exits 0."""
+    monkeypatch.setattr('sys.argv', ['inputs_hash.py', 'verify-resolution'])
+    inputs_hash.main()
 
-    pin = _write_pin(tmp_path, 'x', {})
-    with mock.patch.object(inputs_hash, 'PINNED_FILE', pin):
-        out = inputs_hash.status(['linux-x86_64'])
-    hashes = json.loads(out['hashes'])
-    assert set(hashes) == {'linux-x86_64'}
-    assert hashes['linux-x86_64'] == inputs_hash.compute_target('linux-x86_64')
+
+def test_main_verify_resolution_stale_exits_one_with_rebase_advice(
+    fake_repo: Path, monkeypatch, capsys
+) -> None:
+    """`verify-resolution` against a stale pin exits 1 and prints rebase guidance.
+
+    Exit 1 is what verify-deps-pin.yaml relies on to fail the merge queue; the
+    rebase line is the actionable hint shown to the author whose pin is stale.
+    """
+    inputs_hash.write_pinned_hashes(
+        inputs_hash.PINNED_FILE,
+        inputs_hash.PinnedHashes(resolution='stale_resolution_hash'),
+    )
+    monkeypatch.setattr('sys.argv', ['inputs_hash.py', 'verify-resolution'])
+    with pytest.raises(SystemExit) as excinfo:
+        inputs_hash.main()
+    assert excinfo.value.code == 1
+    assert 'Rebase your branch' in capsys.readouterr().err
+
+
+def test_main_verify_resolution_unpinned_exits_one_without_rebase_advice(
+    fake_repo: Path, monkeypatch, capsys
+) -> None:
+    """`verify-resolution` on a tree with no [resolution] pin exits 1 but suppresses rebase advice.
+
+    Bootstrap state: master has not yet published a pin. Telling the author to
+    rebase would be wrong — there is nothing on master to rebase onto. Per B3,
+    rebase advice is gated to the 'stale' branch only.
+    """
+    inputs_hash.write_pinned_hashes(
+        inputs_hash.PINNED_FILE,
+        inputs_hash.PinnedHashes(images={'linux-x86_64': 'abc'}),
+    )
+    monkeypatch.setattr('sys.argv', ['inputs_hash.py', 'verify-resolution'])
+    with pytest.raises(SystemExit) as excinfo:
+        inputs_hash.main()
+    assert excinfo.value.code == 1
+    assert 'Rebase your branch' not in capsys.readouterr().err
 
 
 # ---------------------------------------------------------------------------
 # Coverage: every tracked .builders/ file is classified
 # ---------------------------------------------------------------------------
 
-# Relative POSIX paths under .builders/ that intentionally don't affect any
-# hash. Matched by full relative path (not basename) so a future file at e.g.
-# .builders/images/linux-x86_64/promote.py is not silently exempted.
-# Each entry needs a comment explaining why.
-EXPECTED_UNCOVERED = {
-    # Runs in the separate dependency-wheel-promotion.yaml workflow, not here.
-    'promote.py',
-    # mypy configuration only; does not affect build or resolution output.
-    'pyproject.toml',
-    # Test infrastructure; not baked into any image or artifact.
-    'test_dependencies.txt',
-}
+def test_no_uncovered_files(tmp_path: Path) -> None:
+    """Every file under .builders/ is classified.
 
+    Adding a new file under .builders/ fails CI until a human adds it to
+    SHARED_INPUTS, a per-target images/<target>/ directory, RESOLUTION_INPUTS,
+    or IGNORED_DIRS / IGNORED_FILES (with a comment explaining why).
 
-def _is_ignored_for_coverage(path: Path, builders_dir: Path) -> bool:
-    """Mirror the skip semantics that compute_target/compute_resolution apply when walking files."""
-    rel = path.relative_to(builders_dir)
-    return any(inputs_hash.is_ignored(part) for part in rel.parts)
-
-
-def _glob_set(base: Path, patterns: list[str]) -> set[Path]:
-    """Expand patterns the same way production does: skip ignored parts (dotfiles, __pycache__).
-
-    Mirrors `_iter_files`/`hash_paths` semantics in inputs_hash.py: when a glob
-    match expands into a directory, files under it are filtered if any part of
-    the path *relative to the matched directory* is ignored. A direct file
-    match is yielded unconditionally, just like production.
+    Runs against the live repo by design — this is the drift detector.
+    status() raises if anything is uncovered; succeeding (no exception) is
+    the assertion.
     """
-    result: set[Path] = set()
-    for pattern in patterns:
-        for p in base.glob(pattern):
-            if p.is_file():
-                result.add(p)
-            elif p.is_dir():
-                for f in p.rglob('*'):
-                    if not f.is_file():
-                        continue
-                    rel_parts = f.relative_to(p).parts
-                    if any(inputs_hash.is_ignored(part) for part in rel_parts):
-                        continue
-                    result.add(f)
-    return result
-
-
-def test_no_uncovered_files() -> None:
-    """Every file under .builders/ is covered by SHARED_INPUTS, a per-target
-    images/<target>/** glob, RESOLUTION_INPUTS, or EXPECTED_UNCOVERED.
-
-    This test is the enforcement mechanism for hash coverage drift: adding a
-    new file under .builders/ fails CI until a human classifies it.
-    """
-    builders_dir = HERE
-    repo_root = REPO_ROOT
-
-    shared_files = _glob_set(builders_dir, inputs_hash.SHARED_INPUTS)
-
-    target_dirs = [d for d in (builders_dir / 'images').iterdir() if d.is_dir()]
-    per_target_files: set[Path] = set()
-    for target_dir in target_dirs:
-        per_target_files.update(_glob_set(builders_dir, [f'images/{target_dir.name}/**/*']))
-
-    resolution_files_abs = _glob_set(repo_root, inputs_hash.RESOLUTION_INPUTS)
-    resolution_files_in_builders = {p for p in resolution_files_abs if p.is_relative_to(builders_dir)}
-
-    covered = shared_files | per_target_files | resolution_files_in_builders
-
-    uncovered = []
-    for path in builders_dir.rglob('*'):
-        if not path.is_file():
-            continue
-        if _is_ignored_for_coverage(path, builders_dir):
-            continue
-        rel = path.relative_to(builders_dir).as_posix()
-        if rel.startswith('tests/'):
-            continue
-        if rel.startswith('venv/'):
-            continue
-        if path in covered:
-            continue
-        if rel in EXPECTED_UNCOVERED:
-            continue
-        uncovered.append(rel)
-
-    assert not uncovered, (
-        f'These files under .builders/ are not covered by any hash input list or '
-        f'EXPECTED_UNCOVERED:\n  ' + '\n  '.join(sorted(uncovered)) +
-        '\nAdd each file to SHARED_INPUTS, RESOLUTION_INPUTS, or EXPECTED_UNCOVERED '
-        'with a comment explaining why.'
-    )
+    pin = tmp_path / 'builder_inputs.toml'
+    inputs_hash.write_pinned_hashes(pin, inputs_hash.PinnedHashes(resolution='placeholder'))
+    with mock.patch.object(inputs_hash, 'PINNED_FILE', pin):
+        inputs_hash.status(HERE / 'targets.json')

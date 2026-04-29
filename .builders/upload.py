@@ -22,7 +22,6 @@ BUILDER_DIR = Path(__file__).parent
 REPO_DIR = BUILDER_DIR.parent
 RESOLUTION_DIR = REPO_DIR / '.deps'
 LOCK_FILE_DIR = RESOLUTION_DIR / 'resolved'
-DIRECT_DEP_FILE = REPO_DIR / 'agent_requirements.in'
 CACHE_CONTROL = 'public, max-age=15'
 VALID_PROJECT_NAME = re.compile(r'^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$', re.IGNORECASE)
 UNNORMALIZED_PROJECT_NAME_CHARS = re.compile(r'[-_.]+')
@@ -276,18 +275,9 @@ class Bucket:
             blob.patch()
 
 
-def generate_lockfiles(targets_dir, lockfiles):
+def generate_lockfiles(targets_dir, lockfiles, resolution_hash):
     targets_dir = Path(targets_dir)
     LOCK_FILE_DIR.mkdir(parents=True, exist_ok=True)
-    with RESOLUTION_DIR.joinpath('metadata.json').open('w', encoding='utf-8') as f:
-        contents = json.dumps(
-            {
-                'sha256': sha256(DIRECT_DEP_FILE.read_bytes()).hexdigest(),
-            },
-            indent=2,
-            sort_keys=True,
-        )
-        f.write(f'{contents}\n')
 
     image_digests = {}
     builder_inputs = {}
@@ -313,34 +303,10 @@ def generate_lockfiles(targets_dir, lockfiles):
         contents = json.dumps(image_digests, indent=2, sort_keys=True)
         f.write(f'{contents}\n')
 
-    _write_builder_inputs(RESOLUTION_DIR / 'builder_inputs.toml', inputs_hash.compute_resolution(), builder_inputs)
-
-
-_BUILDER_INPUTS_HEADER = """\
-# Content hashes of the inputs that determine the resolution pipeline and each
-# builder image.
-#
-# The `Resolve Dependencies and Build Wheels` workflow uses these hashes to
-# gate the full pipeline (resolution.hash) and to decide whether to rebuild a
-# builder image from scratch or pull the existing one by digest (images.*).
-# The `verify-deps-pin` workflow checks resolution.hash on merge-queue refs.
-#
-# This file is rewritten by .builders/upload.py whenever dependency resolution
-# publishes new artifacts and should not be edited by hand.
-# Hash inputs are defined in .builders/inputs_hash.py (SHARED_INPUTS,
-# RESOLUTION_INPUTS).
-"""
-
-
-def _write_builder_inputs(path: Path, resolution_hash: str, image_hashes: dict[str, str]) -> None:
-    lines = [_BUILDER_INPUTS_HEADER.rstrip('\n')]
-    lines.append(f'[{inputs_hash.SECTION_RESOLUTION}]')
-    lines.append(f'{inputs_hash.HASH_KEY} = "{resolution_hash}"')
-    lines.append('')
-    lines.append(f'[{inputs_hash.SECTION_IMAGES}]')
-    for target in sorted(image_hashes):
-        lines.append(f'{target} = "{image_hashes[target]}"')
-    path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
+    inputs_hash.write_pinned_hashes(
+        RESOLUTION_DIR / 'builder_inputs.toml',
+        inputs_hash.PinnedHashes(resolution=resolution_hash, images=builder_inputs),
+    )
 
 
 def upload(targets_dir: Path, bucket: Bucket | None = None) -> dict[str, list[str]]:
@@ -389,6 +355,14 @@ def upload(targets_dir: Path, bucket: Bucket | None = None) -> dict[str, list[st
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='builder', allow_abbrev=False)
     parser.add_argument('targets_dir')
+    parser.add_argument(
+        '--resolution-hash',
+        required=True,
+        help=(
+            'Hex sha256 of the resolution inputs, computed by the gate job '
+            'and passed in to avoid recomputing against the working tree.'
+        ),
+    )
     args = parser.parse_args()
     lockfiles = upload(args.targets_dir)
-    generate_lockfiles(args.targets_dir, lockfiles)
+    generate_lockfiles(args.targets_dir, lockfiles, args.resolution_hash)

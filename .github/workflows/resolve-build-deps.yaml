@@ -7,6 +7,11 @@ on:
     - 7.*.*
     - gh-readonly-queue/**
 
+# cancel-in-progress rules out the gate-vs-publish tree-divergence race: a new
+# push to the same ref cancels the in-flight run, so the gate's hash and the
+# tree the publish job commits the pin into are guaranteed to come from the
+# same SHA. That is why upload.py can trust the resolution_hash passed in from
+# the gate output rather than recomputing against the working tree.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -28,10 +33,9 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       needs_resolution: ${{ steps.hash-check.outputs.needs_resolution }}
-      rebuild_linux_x86_64: ${{ steps.hash-check.outputs.rebuild_linux_x86_64 }}
-      rebuild_linux_aarch64: ${{ steps.hash-check.outputs.rebuild_linux_aarch64 }}
-      rebuild_windows_x86_64: ${{ steps.hash-check.outputs.rebuild_windows_x86_64 }}
-      hashes: ${{ steps.hash-check.outputs.hashes }}
+      matrix_container: ${{ steps.hash-check.outputs.matrix_container }}
+      matrix_macos: ${{ steps.hash-check.outputs.matrix_macos }}
+      resolution_hash: ${{ steps.hash-check.outputs.resolution_hash }}
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -44,8 +48,7 @@ jobs:
       - name: Compute hashes
         id: hash-check
         run: |
-          python .builders/inputs_hash.py status \
-            --targets linux-x86_64 linux-aarch64 windows-x86_64 \
+          python .builders/inputs_hash.py status .builders/targets.json \
             >> "$GITHUB_OUTPUT"
 
   test:
@@ -123,21 +126,15 @@ jobs:
           path: constraints.txt
 
   build:
-    name: Target ${{ matrix.job.image }} on ${{ matrix.job.os }}
+    name: Target ${{ matrix.job.image }} on ${{ matrix.job.runner_os }}
     needs:
       - gate
       - pre-resolve
-    runs-on: ${{ matrix.job.os }}
+    runs-on: ${{ matrix.job.runner_os }}
     strategy:
       fail-fast: false
       matrix:
-        job:
-        - os: ubuntu-22.04-arm
-          image: linux-aarch64
-        - os: ubuntu-22.04
-          image: linux-x86_64
-        - os: windows-2022
-          image: windows-x86_64
+        job: ${{ fromJSON(needs.gate.outputs.matrix_container) }}
 
     permissions:
       packages: write
@@ -156,20 +153,8 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: Detect builder changes
-      id: builder-check
-      env:
-        HASHES: ${{ needs.gate.outputs.hashes }}
-        TARGET: ${{ matrix.job.image }}
-      run: |
-        jq -er --arg t "$TARGET" '.[$t]' <<<"$HASHES" > /tmp/inputs_sha256
-        case "$TARGET" in
-          linux-x86_64)   changed="${{ needs.gate.outputs.rebuild_linux_x86_64 }}" ;;
-          linux-aarch64)  changed="${{ needs.gate.outputs.rebuild_linux_aarch64 }}" ;;
-          windows-x86_64) changed="${{ needs.gate.outputs.rebuild_windows_x86_64 }}" ;;
-          *) echo "unknown target: $TARGET" >&2; exit 1 ;;
-        esac
-        echo "builder_changed=$changed" >> "$GITHUB_OUTPUT"
+    - name: Persist target inputs hash
+      run: echo "${{ matrix.job.hash }}" > /tmp/inputs_sha256
 
     - name: Install management dependencies
       run: pip install -r .builders/deps/host_dependencies.txt
@@ -191,21 +176,21 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build image and wheels
-      if: steps.builder-check.outputs.builder_changed == 'true'
+      if: matrix.job.rebuild == 'true'
       run: python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --constraints .constraints/constraints.txt
 
     - name: Pull image and build wheels
-      if: steps.builder-check.outputs.builder_changed == 'false'
+      if: matrix.job.rebuild == 'false'
       run: |
         digest=$(jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json)
         python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest --constraints .constraints/constraints.txt
 
     - name: Publish image
-      if: steps.builder-check.outputs.builder_changed == 'true'
+      if: matrix.job.rebuild == 'true'
       run: ${DOCKER} push ${{ env.BUILDER_IMAGE }}
 
     - name: Save new image digest and inputs hash
-      if: steps.builder-check.outputs.builder_changed == 'true'
+      if: matrix.job.rebuild == 'true'
       run: |
         ${DOCKER} inspect --format "{{index .RepoDigests 0}}" ${{ env.BUILDER_IMAGE }} \
           | cut -d '@' -f 2 \
@@ -213,7 +198,7 @@ jobs:
         cp /tmp/inputs_sha256 ${{ env.OUT_DIR }}/inputs_sha256
 
     - name: Persist current image digest and inputs hash
-      if: steps.builder-check.outputs.builder_changed == 'false'
+      if: matrix.job.rebuild == 'false'
       run: |
         jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json > ${{ env.OUT_DIR }}/image_digest
         cp /tmp/inputs_sha256 ${{ env.OUT_DIR }}/inputs_sha256
@@ -225,21 +210,18 @@ jobs:
         path: output
 
   build-macos:
-    name: Target macOS/${{ matrix.job.arch }} on ${{ matrix.job.os }}
+    name: Target ${{ matrix.job.image }} on ${{ matrix.job.runner_os }}
     needs:
+      - gate
       - pre-resolve
-    runs-on: ${{ matrix.job.os }}
+    runs-on: ${{ matrix.job.runner_os }}
     strategy:
       fail-fast: false
       matrix:
-        job:
-        - arch: x86_64
-          os: macos-14-large
-        - arch: aarch64
-          os: macos-14 # "macOS 14 Arm64" as per https://github.com/actions/runner-images/blob/main/README.md
+        job: ${{ fromJSON(needs.gate.outputs.matrix_macos) }}
     env:
-      TARGET_NAME: macos-${{ matrix.job.arch }}
-      OUT_DIR: output/macos-${{ matrix.job.arch }}
+      TARGET_NAME: ${{ matrix.job.image }}
+      OUT_DIR: output/${{ matrix.job.image }}
       DD_PYTHON3: "/Library/Frameworks/Python.framework/Versions/3.13/bin/python"
 
     permissions:
@@ -289,7 +271,11 @@ jobs:
       uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       with:
         path: ~/builder_root
-        key: macos-${{ matrix.job.arch }}-deps-builder-root-cache-${{ hashFiles('./.builders/images/macos/*', './.builders/images/*', './.builders/deps/*', './.builders/build.py', './.github/workflows/resolve-build-deps.yml') }}
+        # The gate already content-hashes every file that influences this build
+        # (per-target images, shared images, deps, build.py, the workflow file).
+        # Using its hash as the cache key removes the duplicate hashFiles list
+        # and makes drift between the gate and the cache key unrepresentable.
+        key: ${{ matrix.job.image }}-deps-builder-root-cache-${{ matrix.job.hash }}
 
     - name: Run the build
       env:
@@ -305,16 +291,20 @@ jobs:
           ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3 --constraints .constraints/constraints.txt
         fi
 
+    - name: Save inputs hash into output
+      run: echo "${{ matrix.job.hash }}" > ${{ env.OUT_DIR }}/inputs_sha256
+
     - name: Upload artifacts
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
-        name: target-macos-${{ matrix.job.arch }}
+        name: target-${{ matrix.job.image }}
         path: output
 
 
   publish:
     name: Publish artifacts and commit lockfiles to branch
     needs:
+    - gate
     - build
     - build-macos
     runs-on: ubuntu-latest
@@ -362,7 +352,7 @@ jobs:
         workload_identity_provider: projects/574011472402/locations/global/workloadIdentityPools/github/providers/integrations-core
 
     - name: Upload wheels and create lock files
-      run: python .builders/upload.py targets
+      run: python .builders/upload.py targets --resolution-hash "${{ needs.gate.outputs.resolution_hash }}"
 
     - name: Clean up repository
       run: |

@@ -39,8 +39,8 @@ jobs:
 
       - name: Verify resolution pin
         run: |
-          # Fails with exit 1 if the merged tree's resolution hash does not
-          # match the pinned hash in .deps/builder_inputs.toml.
+          # Fails if the merged tree's resolution hash does not match the
+          # pinned hash in .deps/builder_inputs.toml.
           # If this check fails, rebase your branch onto master to re-trigger
           # dependency resolution and update the pin.
           cd .builders && python inputs_hash.py verify-resolution
