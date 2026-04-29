@@ -123,6 +123,11 @@ def _iter_files(root: Path) -> Iterator[Path]:
                 yield path
 
 
+def _is_filtered(path: Path, base: Path, prefix_part_count: int) -> bool:
+    rel_parts = path.relative_to(base).parts[prefix_part_count:]
+    return any(_is_ignored(part) for part in rel_parts)
+
+
 def _collect_paths(base: Path, patterns: list[str]) -> set[Path]:
     """Expand `patterns` under `base` to the set of files that would be hashed.
 
@@ -142,14 +147,12 @@ def _collect_paths(base: Path, patterns: list[str]) -> set[Path]:
         if not matched:
             raise RuntimeError(f'pattern {pattern!r} matched no files under {base}')
         prefix_part_count = len(_literal_prefix(pattern).parts)
-
-        def _filtered(path: Path) -> bool:
-            rel_parts = path.relative_to(base).parts[prefix_part_count:]
-            return any(_is_ignored(part) for part in rel_parts)
-
         pattern_paths: set[Path] = set()
         for p in matched:
-            pattern_paths.update(f for f in _iter_files(p) if not _filtered(f))
+            pattern_paths.update(
+                f for f in _iter_files(p)
+                if not _is_filtered(f, base, prefix_part_count)
+            )
         if not pattern_paths:
             raise RuntimeError(
                 f'pattern {pattern!r} matched no hashable files under {base} '
@@ -284,22 +287,12 @@ def _load_pinned_hashes() -> PinnedHashes:
     )
 
 
-def _pinned_target(target: str) -> str:
-    """Return the hash pinned for `target` in builder_inputs.toml, or empty if absent."""
-    images = _load_pinned_hashes().images
-    if target not in images:
+def _pinned_target(pinned: PinnedHashes, target: str) -> str:
+    """Return the hash pinned for `target`, or empty if absent."""
+    if target not in pinned.images:
         print(f'{PINNED_FILE}: no entry for {target}; treating as unpinned', file=sys.stderr)
         return ''
-    return images[target]
-
-
-def _pinned_resolution() -> str:
-    """Return the resolution hash pinned in builder_inputs.toml, or empty if absent."""
-    pinned = _load_pinned_hashes().resolution
-    if not pinned:
-        print(f'{PINNED_FILE}: no [{SECTION_RESOLUTION}] hash; treating as unpinned', file=sys.stderr)
-        return ''
-    return pinned
+    return pinned.images[target]
 
 
 def _check(label: str, current: str, pinned: str) -> bool:
@@ -314,7 +307,7 @@ def _check(label: str, current: str, pinned: str) -> bool:
     return fresh
 
 
-def _verify_resolution(current: str | None = None) -> str:
+def _verify_resolution(pinned: PinnedHashes, current: str | None = None) -> str:
     """Return 'fresh', 'stale', or 'unpinned' for the working-tree resolution hash.
 
     'unpinned' means there is no `[resolution]` section yet — distinct from
@@ -324,8 +317,7 @@ def _verify_resolution(current: str | None = None) -> str:
     """
     if current is None:
         current = _compute_resolution()
-    pinned = _pinned_resolution()
-    if not pinned:
+    if not pinned.resolution:
         print(
             f'{PINNED_FILE}: no [{SECTION_RESOLUTION}] hash found; dependency resolution has '
             f'not yet published a pin. Expected during the initial rollout; once '
@@ -334,7 +326,7 @@ def _verify_resolution(current: str | None = None) -> str:
             file=sys.stderr,
         )
         return 'unpinned'
-    return 'fresh' if _check('resolution', current, pinned) else 'stale'
+    return 'fresh' if _check('resolution', current, pinned.resolution) else 'stale'
 
 
 def status(targets_file: Path) -> dict[str, str]:
@@ -365,10 +357,11 @@ def status(targets_file: Path) -> dict[str, str]:
     target_rows = json.loads(targets_file.read_text(encoding='utf-8'))
     covered: set[Path] = set()
 
+    pinned = _load_pinned_hashes()
     resolution_paths = _collect_paths(REPO_ROOT, RESOLUTION_INPUTS)
     covered |= resolution_paths
     resolution_hash = _digest_paths(REPO_ROOT, resolution_paths)
-    resolution_stale = _verify_resolution(resolution_hash) != 'fresh'
+    resolution_stale = _verify_resolution(pinned, resolution_hash) != 'fresh'
     outputs: dict[str, str] = {'resolution_hash': resolution_hash}
     container_rows: list[dict[str, str]] = []
     macos_rows: list[dict[str, str]] = []
@@ -384,7 +377,7 @@ def status(targets_file: Path) -> dict[str, str]:
         target_paths = _collect_paths(HERE, target_patterns)
         covered |= target_paths
         current = _digest_paths(HERE, target_paths)
-        fresh = _check(target, current, _pinned_target(target))
+        fresh = _check(target, current, _pinned_target(pinned, target))
         entry = {**row, 'image': target, 'hash': current, 'rebuild': str(not fresh).lower()}
         (macos_rows if row['platform'] == 'macos' else container_rows).append(entry)
         any_target_stale = any_target_stale or not fresh
@@ -432,7 +425,7 @@ def main() -> None:
         for key, value in status(args.targets_file).items():
             sys.stdout.write(f'{key}={value}\n')
     elif args.command == 'verify-resolution':
-        result = _verify_resolution()
+        result = _verify_resolution(_load_pinned_hashes())
         if result == 'stale':
             print(
                 'Resolution pin is stale. Rebase your branch onto master to re-trigger '

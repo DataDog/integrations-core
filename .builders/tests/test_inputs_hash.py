@@ -338,11 +338,18 @@ def test_status_no_resolution_pin_emits_bootstrap_message(fake_repo: Path, targe
     assert 'has not yet published a pin' in capsys.readouterr().err
 
 
-def test_status_emits_matrix_split_by_platform(tmp_path: Path) -> None:
+def test_status_emits_matrix_split_by_platform(fake_repo: Path) -> None:
     """status emits matrix_container and matrix_macos JSON lists, each with image/platform/arch/runner_os/hash/rebuild."""
-    pin = tmp_path / 'builder_inputs.toml'
-    inputs_hash.write_pinned_hashes(pin, inputs_hash.PinnedHashes(resolution='x'))
-    targets_file = tmp_path / 'targets.json'
+    for target in ('linux-aarch64', 'windows-x86_64', 'macos-x86_64', 'macos-aarch64'):
+        (fake_repo / '.builders' / 'images' / target).mkdir(parents=True, exist_ok=True)
+        (fake_repo / '.builders' / 'images' / target / 'Dockerfile').write_bytes(target.encode())
+    (fake_repo / '.builders' / 'images' / 'macos').mkdir(parents=True, exist_ok=True)
+    (fake_repo / '.builders' / 'images' / 'macos' / 'extra_build.sh').write_bytes(b'extra')
+    inputs_hash.write_pinned_hashes(
+        inputs_hash.PINNED_FILE,
+        inputs_hash.PinnedHashes(resolution='x'),
+    )
+    targets_file = fake_repo / '.builders' / 'targets.json'
     targets_file.write_text(json.dumps([
         {'platform': 'linux',   'arch': 'x86_64',  'runner_os': 'ubuntu-22.04'},
         {'platform': 'linux',   'arch': 'aarch64', 'runner_os': 'ubuntu-22.04-arm'},
@@ -350,8 +357,7 @@ def test_status_emits_matrix_split_by_platform(tmp_path: Path) -> None:
         {'platform': 'macos',   'arch': 'x86_64',  'runner_os': 'macos-14-large'},
         {'platform': 'macos',   'arch': 'aarch64', 'runner_os': 'macos-14'},
     ]), encoding='utf-8')
-    with mock.patch.object(inputs_hash, 'PINNED_FILE', pin):
-        out = inputs_hash.status(targets_file)
+    out = inputs_hash.status(targets_file)
     container = json.loads(out['matrix_container'])
     macos = json.loads(out['matrix_macos'])
     assert {r['image'] for r in container} == {'linux-x86_64', 'linux-aarch64', 'windows-x86_64'}
