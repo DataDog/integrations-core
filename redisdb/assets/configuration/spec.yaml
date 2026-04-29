@@ -158,9 +158,30 @@ files:
 - name: auto_conf.yaml
   options:
     - template: ad_identifiers
+      description: |
+        A list of container identifiers that are used by Autodiscovery to identify
+        which container the check should be run against. For more information, see:
+        https://docs.datadoghq.com/agent/guide/ad_identifiers/
+
+        `cel://process` is required (in addition to `redis`) so the process
+        listener picks up the `cel_selector.processes` CEL rule below. Without an
+        explicit `cel://process` entry the agent only auto-injects it when
+        `ad_identifiers` is empty.
       overrides:
         value.example:
           - redis
+          - cel://process
+    - name: cel_selector
+      required: true
+      description: |
+        CEL rules used by the agent's `process` and (future) container CEL
+        listeners. The `processes` rule below matches any process whose cmdline
+        contains `redis-server`.
+      value:
+        type: object
+        example:
+          processes:
+            - process.cmdline.contains("redis-server")
     - template: init_config
       options: []
     - template: instances
