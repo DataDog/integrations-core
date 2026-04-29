@@ -14,6 +14,8 @@ from datadog_checks.redisdb import Redis
 from .common import (
     AUTODISCOVERY,
     AUTODISCOVERY_COMPOSE_PATH,
+    AUTODISCOVERY_PROCESS,
+    AUTODISCOVERY_PROCESS_COMPOSE_PATH,
     DOCKER_COMPOSE_PATH,
     HERE,
     HOST,
@@ -80,14 +82,37 @@ def dd_environment(master_instance):
     """
     Start the Redis test environment.
 
-    In autodiscovery mode (`REDIS_AUTODISCOVERY=true`) run a single default-port
-    Redis container on the Docker bridge network and hand the Agent the Docker
-    socket so it can discover the container via the Docker listener. No static
-    instance config is yielded so the Agent relies purely on `auto_conf.yaml`.
+    In container-autodiscovery mode (`REDIS_AUTODISCOVERY=true`) run a single
+    default-port Redis container on the Docker bridge network and hand the
+    Agent the Docker socket so it can discover the container via the Docker
+    listener.
+
+    In process-autodiscovery mode (`REDIS_AUTODISCOVERY_PROCESS=true`) run a
+    single Redis container with `network_mode: host` so the `redis-server`
+    process is visible in the host process table, and start the Agent with
+    the process listener enabled and the docker feature disabled.
+
+    In both autodiscovery modes no static instance config is yielded so the
+    Agent relies purely on `auto_conf.yaml`.
 
     Otherwise run the 1-master/2-replica cluster used by the existing e2e
     tests.
     """
+    if AUTODISCOVERY_PROCESS:
+        e2e_metadata = {
+            'env_vars': {
+                'DD_DISCOVERY_ENABLED': 'true',
+                'DD_EXTRA_LISTENERS': 'process',
+                'DD_AUTOCONFIG_EXCLUDE_FEATURES': 'docker',
+            },
+        }
+        with docker_run(
+            AUTODISCOVERY_PROCESS_COMPOSE_PATH,
+            conditions=[CheckDockerLogs(AUTODISCOVERY_PROCESS_COMPOSE_PATH, 'Ready to accept connections', wait=5)],
+        ):
+            yield None, e2e_metadata
+        return
+
     if AUTODISCOVERY:
         e2e_metadata = {
             'docker_volumes': ['/var/run/docker.sock:/var/run/docker.sock:ro'],
