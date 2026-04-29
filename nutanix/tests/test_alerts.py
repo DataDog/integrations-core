@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
-import json
-import os
 from datetime import datetime
 from unittest import mock
 
@@ -12,55 +10,22 @@ import pytest
 
 from datadog_checks.nutanix import NutanixCheck
 
+from .conftest import load_fixture
+
 pytestmark = [pytest.mark.unit]
 
 
-# Mock datetime to cover full alerts fixture window
 MOCK_ALERT_DATETIME = datetime.fromisoformat("2026-01-04T21:09:00.000000Z")
-
-# Datetime after all alerts in the fixture (latest lastUpdatedTime is 2026-04-14T20:42:25Z)
 MOCK_ALERT_DATETIME_AFTER_ALL = datetime.fromisoformat("2026-05-01T00:00:00.000000Z")
 
 
 def _fixture_alert(alert_type, **overrides):
-    """Load the first fixture alert with the given alertType and apply overrides.
-
-    Used to build synthetic unresolved alerts for tests targeting alertTypes
-    that only appear as resolved in the fixture. Reconciliation now sources
-    its truth from `_list_alerts_unresolved`, so tests inject through that.
-    """
-    fixture_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'alerts.json')
-    with open(fixture_path) as f:
-        pages = json.load(f)
-    for page in pages:
+    """Load the first fixture alert with the given alertType and apply overrides."""
+    for page in load_fixture('alerts.json'):
         for alert in page.get('data', []):
             if alert.get('alertType') == alert_type:
-                copy = dict(alert)
-                copy.update(overrides)
-                return copy
+                return {**alert, **overrides}
     raise ValueError(f"No alert with alertType={alert_type} in fixture")
-
-
-@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
-def test_alerts_collection(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
-    """Test that alerts are collected and have basic structure on first run (unresolved only)."""
-    instance = mock_instance.copy()
-    instance["collect_alerts"] = True
-
-    get_current_datetime.return_value = MOCK_ALERT_DATETIME
-
-    check = NutanixCheck('nutanix', {}, [instance])
-    dd_run_check(check)
-
-    alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
-
-    assert len(alerts) > 0, "Expected alerts to be collected"
-    for alert in alerts:
-        assert alert['event_type'] == 'nutanix'
-        assert alert['source_type_name'] == 'nutanix'
-        assert 'ntnx_type:alert' in alert['tags']
-        assert any(t in alert['tags'] for t in ('ntnx_alert_status:open', 'ntnx_alert_status:acknowledged'))
-        assert 'ntnx_alert_type' in str(alert['tags'])
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
@@ -71,7 +36,6 @@ def test_alerts_no_duplicates_on_subsequent_runs(
     instance = mock_instance.copy()
     instance["collect_alerts"] = True
 
-    # Use a datetime after all alerts so the cursor is beyond all fixture data
     get_current_datetime.return_value = MOCK_ALERT_DATETIME_AFTER_ALL
 
     check = NutanixCheck('nutanix', {}, [instance])
@@ -82,7 +46,6 @@ def test_alerts_no_duplicates_on_subsequent_runs(
 
     aggregator.reset()
 
-    # Second run: cursor is now after all alerts, so nothing new
     dd_run_check(check)
 
     alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
@@ -111,7 +74,6 @@ def test_alerts_filtered_by_resource_filters_exclude_cluster(
     dd_run_check(check)
 
     alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
-    # No alerts should have the excluded cluster
     assert all("ntnx_cluster_name:datadog-nutanix-dev" not in e["tags"] for e in alerts)
 
 
@@ -133,7 +95,6 @@ def test_alerts_filtered_by_resource_filters_include_cluster(
 
     alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
     assert len(alerts) > 0, "Expected some alerts to be collected"
-    # All collected alerts should have the included cluster ID
     assert all("ntnx_cluster_name:datadog-nutanix-dev" in e["tags"] for e in alerts)
 
 
@@ -273,22 +234,18 @@ def test_alert_a1031_disk_space_complete_output(
 
     alert = alerts[0]
 
-    # Verify message rendering
     assert "Disk space usage for /var/log on Controller VM 10.0.0.108 has exceeded 75%" in alert["msg_text"]
     assert "{mount_path}" not in alert["msg_text"]
     assert "{entity}" not in alert["msg_text"]
     assert "{ip_address}" not in alert["msg_text"]
     assert "{threshold}" not in alert["msg_text"]
 
-    # Verify title rendering
     assert "Disk space usage high for /var/log on Controller VM 10.0.0.108" in alert["msg_title"]
 
-    # Verify alert structure
     assert alert["event_type"] == "nutanix"
     assert alert["alert_type"] == "warning"
     assert alert["source_type_name"] == "nutanix"
 
-    # Verify tags
     assert "ntnx_type:alert" in alert["tags"]
     assert "ntnx_alert_type:A1031" in alert["tags"]
     assert "ntnx_alert_severity:WARNING" in alert["tags"]
@@ -327,18 +284,15 @@ def test_alert_a111050_default_password_complete_output(
 
     alert = alerts[0]
 
-    # Verify message rendering
     assert "nutanix" in alert["msg_text"]
     assert "{users}" not in alert["msg_text"]
     assert "{pcvm_ip}" not in alert["msg_title"]
     assert "10.0.0.165" in alert["msg_title"]
 
-    # Verify alert structure
     assert alert["event_type"] == "nutanix"
     assert alert["alert_type"] == "warning"  # acknowledged alerts use "warning" regardless of severity
     assert alert["source_type_name"] == "nutanix"
 
-    # Verify tags
     assert "ntnx_type:alert" in alert["tags"]
     assert "ntnx_alert_type:A111050" in alert["tags"]
     assert "ntnx_alert_severity:CRITICAL" in alert["tags"]
@@ -376,18 +330,15 @@ def test_alert_a6227_password_expiry_complete_output(
 
     alert = alerts[0]
 
-    # Verify message rendering
     expected_message = "Admin user password has expired. Please change the admin password."
     assert alert["msg_text"] == expected_message
     assert "{alert_msg}" not in alert["msg_text"]
 
-    # Verify alert structure
     assert alert["event_type"] == "nutanix"
     assert alert["alert_type"] == "warning"  # acknowledged alerts use "warning" regardless of severity
     assert alert["source_type_name"] == "nutanix"
     assert alert["msg_title"] == "Alert: The PC admin user password is going to expire soon or has already expired."
 
-    # Verify tags
     assert "ntnx_type:alert" in alert["tags"]
     assert "ntnx_alert_type:A6227" in alert["tags"]
     assert "ntnx_alert_severity:CRITICAL" in alert["tags"]
@@ -517,15 +468,12 @@ def test_alert_with_ip_address_rendering(get_current_datetime, dd_run_check, agg
 
     alert = alerts[0]
 
-    # Verify ip_address is rendered in message
     assert "10.0.0.108" in alert["msg_text"], "IP address should be rendered in message"
     assert "{ip_address}" not in alert["msg_text"], "Template variable should be replaced"
 
-    # Verify ip_address is rendered in title
     assert "10.0.0.108" in alert["msg_title"], "IP address should be rendered in title"
     assert "{ip_address}" not in alert["msg_title"], "Template variable should be replaced"
 
-    # Verify complete rendered message contains ip_address in proper context
     assert "Disk space usage for /var/log on Controller VM 10.0.0.108" in alert["msg_text"], (
         "Message should contain rendered ip_address in context"
     )
@@ -545,17 +493,15 @@ def test_alerts_first_run_collects_only_unresolved(
     dd_run_check(check)
 
     alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
-
-    # All emitted alerts should be unresolved (open or acknowledged)
     assert len(alerts) > 0
     for alert in alerts:
+        assert alert["event_type"] == "nutanix"
+        assert alert["source_type_name"] == "nutanix"
         assert any(t in alert["tags"] for t in ("ntnx_alert_status:open", "ntnx_alert_status:acknowledged"))
+        assert any(t.startswith("ntnx_alert_type:") for t in alert["tags"])
 
-    # No resolution events on first run
     resolved = [e for e in aggregator.events if "ntnx_alert_status:resolved" in e.get("tags", [])]
     assert len(resolved) == 0
-
-    # In-memory cache populated with one entry per unresolved alert
     assert len(check.activity_monitor._open_alerts) == len(alerts)
 
 
@@ -571,7 +517,6 @@ def test_alerts_resolution_detected_on_subsequent_run(
 
     check = NutanixCheck('nutanix', {}, [instance])
 
-    # First run: populate _open_alerts from real fixture
     dd_run_check(check)
 
     open_events = [e for e in aggregator.events if "ntnx_alert_status:open" in e.get("tags", [])]
@@ -614,7 +559,6 @@ def test_alerts_resolution_detected_on_subsequent_run(
     assert event["aggregation_key"] == f"nutanix-alert-{target_ext_id}"
     assert "Resolved by admin" in event["msg_text"]
 
-    # In-memory cache no longer contains the target
     assert target_ext_id not in check.activity_monitor._open_alerts
 
 
@@ -633,7 +577,6 @@ def test_alerts_still_open_no_duplicate_event(
     dd_run_check(check)
     aggregator.reset()
 
-    # Second run with the same fixture data: reconciliation diff is empty.
     dd_run_check(check)
 
     all_alert_events = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
@@ -668,7 +611,6 @@ def test_alert_open_metric_emitted_per_tracked_alert(
 
     assert len(open_ones) == expected_open
     assert len(ack_ones) == expected_ack
-    # First cycle: no resolutions, no transitions, so no zeroes
     assert len(open_zeros) == 0
     assert len(ack_zeros) == 0
 
@@ -725,13 +667,11 @@ def test_alert_open_metric_zero_on_resolution(
     assert len(zero_metrics) == 1
     assert f"ext_id:{target_ext_id}" in zero_metrics[0].tags
 
-    # nutanix.alert.resolved is emitted as a one-shot signal for this ext_id.
     resolved_metrics = [
         m for m in aggregator.metrics("nutanix.alert.resolved") if m.value == 1 and f"ext_id:{target_ext_id}" in m.tags
     ]
     assert len(resolved_metrics) == 1
 
-    # No further :1 for the target on either open-state metric this cycle
     target_ones = [
         m
         for name in ("nutanix.alert.open", "nutanix.alert.acknowledged")
@@ -784,14 +724,12 @@ def test_alert_state_transition_open_to_acknowledged(
     check = NutanixCheck('nutanix', {}, [instance])
     dd_run_check(check)
 
-    # Pick an alert currently tracked as open (not acknowledged)
     target_ext_id = next(
         ext_id for ext_id, a in check.activity_monitor._open_alerts.items() if not a.get("isAcknowledged")
     )
 
     aggregator.reset()
 
-    # Same unresolved set, but the target is now acknowledged
     refreshed = []
     for ext_id, a in check.activity_monitor._open_alerts.items():
         if ext_id == target_ext_id:
@@ -806,13 +744,11 @@ def test_alert_state_transition_open_to_acknowledged(
 
     dd_run_check(check)
 
-    # :0 emitted to nutanix.alert.open for this ext_id
     open_zeros = [
         m for m in aggregator.metrics("nutanix.alert.open") if m.value == 0 and f"ext_id:{target_ext_id}" in m.tags
     ]
     assert len(open_zeros) == 1
 
-    # :1 emitted to nutanix.alert.acknowledged for this ext_id
     ack_ones = [
         m
         for m in aggregator.metrics("nutanix.alert.acknowledged")
@@ -820,7 +756,6 @@ def test_alert_state_transition_open_to_acknowledged(
     ]
     assert len(ack_ones) >= 1
 
-    # No :1 to nutanix.alert.open for this ext_id this cycle
     open_ones = [
         m for m in aggregator.metrics("nutanix.alert.open") if m.value == 1 and f"ext_id:{target_ext_id}" in m.tags
     ]
@@ -845,8 +780,6 @@ def test_alert_event_carries_originating_cluster_and_user_defined_tags(
     alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
     assert len(alerts) > 0
 
-    # At least one alert exposes both cluster perspectives with distinct values
-    # (clusterUUID = managed cluster, originatingClusterUUID = PC's own cluster).
     distinct_pairs = [
         e
         for e in alerts
@@ -855,7 +788,6 @@ def test_alert_event_carries_originating_cluster_and_user_defined_tags(
     ]
     assert len(distinct_pairs) > 0, "Expected at least one alert with both cluster tags"
 
-    # All alert events carry ntnx_alert_user_defined tag
     for e in alerts:
         assert any(t.startswith("ntnx_alert_user_defined:") for t in e["tags"])
 

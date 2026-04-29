@@ -50,10 +50,7 @@ class ActivityMonitor:
         else:
             self.alerts_v42_supported = None
 
-        # In-memory map of open (unresolved) alerts: extId -> alert metadata.
-        # Reconciled each cycle against the unresolved-alerts API to detect
-        # transitions; not persisted across agent restarts (the unresolved API
-        # is the source of truth on every cycle, including the first one).
+        # extId -> last-seen alert dict; reconciled each cycle against the unresolved-alerts API.
         self._open_alerts: dict[str, dict] = {}
 
     def reset_state(self) -> None:
@@ -200,71 +197,40 @@ class ActivityMonitor:
 
     @staticmethod
     def _alert_state(alert: dict) -> str:
-        """Return 'acknowledged' or 'open' based on the alert's flags."""
         return "acknowledged" if alert.get("isAcknowledged") else "open"
 
-    def _submit_state_metric(self, alert: dict, state: str, value: int, extra_tags: list[str] | None = None) -> None:
-        """Submit nutanix.alert.<state>=<value> with the per-alert tag set.
-
-        The metric name itself encodes the state, so ntnx_alert_status is
-        omitted from the tag set (would be redundant). extra_tags are appended
-        verbatim (e.g. ntnx_alert_auto_resolved on the resolved one-shot).
-        """
-        tags = self._build_alert_tags(alert)
-        if extra_tags:
-            tags.extend(extra_tags)
-        self.check.gauge(f"alert.{state}", value, tags=tags)
+    def _submit_state_metric(self, alert: dict, state: str, value: int) -> None:
+        """Submit nutanix.alert.<state>=<value> (state encoded in metric name, not tag)."""
+        self.check.gauge(f"alert.{state}", value, tags=self._build_alert_tags(alert))
 
     def _reconcile_alerts(self) -> int:
-        """Reconcile in-memory open alerts against the unresolved-alerts API.
-
-        The unresolved-alerts API is the source of truth on every cycle:
-        - alerts present in the API but not in the in-memory cache are new
-          (emit open event, add to cache);
-        - alerts in the cache but absent from the API are resolved or deleted
-          (emit resolution event + nutanix.alert.<prev_state>=0, drop from cache);
-        - alerts in both with a different acknowledgment state get an explicit
-          0 to the previous state's metric (e.g. open->ack zeroes nutanix.alert.open).
-
-        Stateless across check cycles in terms of persistence: nothing is
-        written to the persistent cache, so agent restarts re-derive state
-        from the API.
-        """
+        """Reconcile open alerts against the unresolved-alerts API and emit per-state metrics."""
         alerts = self._list_alerts_unresolved()
         alerts = [a for a in alerts if self._should_collect_activity_item(a, "alert")]
         api_alerts = {a.get("extId"): a for a in alerts if a.get("extId")}
 
-        new_ids = api_alerts.keys() - self._open_alerts.keys()
-        gone_ids = self._open_alerts.keys() - api_alerts.keys()
-
         count = 0
-        for ext_id in new_ids:
+        for ext_id in api_alerts.keys() - self._open_alerts.keys():
             alert = api_alerts[ext_id]
             self._open_alerts[ext_id] = alert
             self._process_alert(alert)
             count += 1
 
-        for ext_id in gone_ids:
+        for ext_id in self._open_alerts.keys() - api_alerts.keys():
             cached = self._open_alerts.pop(ext_id)
-            # Try to fetch the now-resolved alert for resolution metadata
-            # (resolvedTime, resolvedByUsername, isAutoResolved). If the alert
-            # was deleted rather than resolved, _get_alert returns None and we
-            # fall back to the cached metadata.
-            resolved_alert = self._get_alert(ext_id) or cached
-            self._emit_resolution_event(resolved_alert, cached_tags_alert=cached)
+            self._emit_resolution_event(self._get_alert(ext_id) or cached, cached_tags_alert=cached)
             count += 1
 
-        # Detect ack transitions on still-tracked alerts; emit an explicit 0
-        # to the prior state's metric so per-alert monitor cases recover when
-        # the alert leaves that state, then refresh cached metadata.
         for ext_id in api_alerts.keys() & self._open_alerts.keys():
             old_alert = self._open_alerts[ext_id]
             new_alert = api_alerts[ext_id]
             old_state = self._alert_state(old_alert)
-            new_state = self._alert_state(new_alert)
-            if old_state != new_state:
+            if old_state != self._alert_state(new_alert):
                 self._submit_state_metric(old_alert, old_state, 0)
             self._open_alerts[ext_id] = new_alert
+
+        for alert in self._open_alerts.values():
+            self._submit_state_metric(alert, self._alert_state(alert), 1)
 
         return count
 
@@ -566,12 +532,7 @@ class ActivityMonitor:
         )
 
     def _emit_resolution_event(self, alert: dict, cached_tags_alert: dict | None = None) -> None:
-        """Emit a resolution event and a closing nutanix.alert.open:0 metric.
-
-        cached_tags_alert is the alert object as last observed while open; when
-        provided, it's used to build the metric/event tags so they match the
-        most recent open-state submission. Defaults to the resolved alert.
-        """
+        """Emit resolution event, close prev-state gauge, and emit nutanix.alert.resolved=1."""
         ext_id = alert.get("extId", "")
         title = alert.get("title", "Nutanix Alert")
         resolved_time = alert.get("resolvedTime")
@@ -583,8 +544,14 @@ class ActivityMonitor:
 
         msg_text = "Auto-resolved" if is_auto_resolved else f"Resolved by {resolved_by}" if resolved_by else "Resolved"
 
-        alert_tags = self._build_alert_tags(cached_tags_alert or alert, "resolved")
-        alert_tags.append(f"ntnx_alert_auto_resolved:{str(is_auto_resolved).lower()}")
+        prev_alert = cached_tags_alert or alert
+        prev_state = self._alert_state(prev_alert)
+        metric_tags = self._build_alert_tags(prev_alert)
+        event_tags = [
+            *metric_tags,
+            "ntnx_alert_status:resolved",
+            f"ntnx_alert_auto_resolved:{str(is_auto_resolved).lower()}",
+        ]
 
         self.check.event(
             {
@@ -597,32 +564,12 @@ class ActivityMonitor:
                 "alert_type": "success",
                 "source_type_name": self.check.__NAMESPACE__,
                 "aggregation_key": f"nutanix-alert-{ext_id}",
-                "tags": alert_tags,
+                "tags": event_tags,
             }
         )
 
-        # Close whichever per-state metric was last :1 for this alert.
-        prev_alert = cached_tags_alert or alert
-        self._submit_state_metric(prev_alert, self._alert_state(prev_alert), 0)
-
-        # One-shot signal that the alert entered the resolved state.
-        self._submit_state_metric(
-            prev_alert,
-            "resolved",
-            1,
-            extra_tags=[f"ntnx_alert_auto_resolved:{str(is_auto_resolved).lower()}"],
-        )
-
-    def emit_open_alert_metrics(self) -> None:
-        """Submit per-state gauges for each tracked unresolved alert.
-
-        Each tracked alert maps to one of nutanix.alert.open or
-        nutanix.alert.acknowledged based on its current state. Called once
-        per check cycle; keeps gauges warm so per-alert metric monitors
-        don't go no-data while the underlying Nutanix alert is open.
-        """
-        for alert in self._open_alerts.values():
-            self._submit_state_metric(alert, self._alert_state(alert), 1)
+        self.check.gauge(f"alert.{prev_state}", 0, tags=metric_tags)
+        self.check.gauge("alert.resolved", 1, tags=metric_tags)
 
     def _process_task(self, task: dict) -> None:
         """Process and send a single task to Datadog as an event."""
