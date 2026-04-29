@@ -2,9 +2,22 @@
 ## A list of container identifiers that are used by Autodiscovery to identify
 ## which container the check should be run against. For more information, see:
 ## https://docs.datadoghq.com/agent/guide/ad_identifiers/
+##
+## `cel://process` selects the agent's process listener; the
+## `cel_selector.processes` CEL rule below is what actually matches
+## the redis-server process. The container listener is unaffected
+## and continues to use `auto_conf.yaml`.
 #
 ad_identifiers:
-  - redis
+  - cel://process
+
+## @param cel_selector - mapping - required
+## CEL rules used by the agent's process listener. The `processes` rule
+## below matches any process whose cmdline contains `redis-server`.
+#
+cel_selector:
+  processes:
+  - process.cmdline.contains("redis-server")
 
 ## All options defined here are available to all instances.
 #
