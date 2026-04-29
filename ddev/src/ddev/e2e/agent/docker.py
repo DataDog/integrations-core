@@ -287,6 +287,12 @@ class DockerAgent(AgentInterface):
         for host, ip in self.metadata.get('custom_hosts', []):
             command.extend(['--add-host', f'{host}:{ip}'])
 
+        # Linux capabilities required by some Agent components (e.g.
+        # system-probe-lite needs CAP_SYS_PTRACE and CAP_DAC_READ_SEARCH for
+        # service discovery to read /proc entries of other processes).
+        for cap in self.metadata.get('cap_add', []):
+            command.extend(['--cap-add', cap])
+
         if dogstatsd_port := env_vars.get(AgentEnvVars.DOGSTATSD_PORT):
             command.extend(['-p', f'{dogstatsd_port}:{dogstatsd_port}/udp'])
 
