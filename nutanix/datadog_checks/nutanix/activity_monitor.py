@@ -198,6 +198,11 @@ class ActivityMonitor:
     def collect_alerts(self) -> None:
         self.alerts_count = self._safe_collect("alert", self._reconcile_alerts)
 
+    @staticmethod
+    def _alert_state(alert: dict) -> str:
+        """Return 'acknowledged' or 'open' based on the alert's flags."""
+        return "acknowledged" if alert.get("isAcknowledged") else "open"
+
     def _reconcile_alerts(self) -> int:
         """Reconcile in-memory open alerts against the unresolved-alerts API.
 
@@ -205,9 +210,9 @@ class ActivityMonitor:
         - alerts present in the API but not in the in-memory cache are new
           (emit open event, add to cache);
         - alerts in the cache but absent from the API are resolved or deleted
-          (emit resolution event + nutanix.alert.open=0, drop from cache);
-        - alerts in both have their cached metadata refreshed so subsequent
-          metric tags reflect transitions like open->acknowledged.
+          (emit resolution event + nutanix.alert.<prev_state>=0, drop from cache);
+        - alerts in both with a different acknowledgment state get an explicit
+          0 to the previous state's metric (e.g. open->ack zeroes nutanix.alert.open).
 
         Stateless across check cycles in terms of persistence: nothing is
         written to the persistent cache, so agent restarts re-derive state
@@ -237,10 +242,17 @@ class ActivityMonitor:
             self._emit_resolution_event(resolved_alert, cached_tags_alert=cached)
             count += 1
 
-        # Refresh cached metadata for still-open alerts so metric tags reflect
-        # any changes (e.g. acknowledgment) without emitting an event.
+        # Detect ack transitions on still-tracked alerts; emit an explicit 0
+        # to the prior state's metric so per-alert monitor cases recover when
+        # the alert leaves that state, then refresh cached metadata.
         for ext_id in api_alerts.keys() & self._open_alerts.keys():
-            self._open_alerts[ext_id] = api_alerts[ext_id]
+            old_alert = self._open_alerts[ext_id]
+            new_alert = api_alerts[ext_id]
+            old_state = self._alert_state(old_alert)
+            new_state = self._alert_state(new_alert)
+            if old_state != new_state:
+                self.check.gauge(f"alert.{old_state}", 0, tags=self._build_alert_tags(old_alert, old_state))
+            self._open_alerts[ext_id] = new_alert
 
         return count
 
@@ -569,19 +581,29 @@ class ActivityMonitor:
             }
         )
 
-        # Close the per-alert monitor case with an explicit zero.
-        self.check.gauge("alert.open", 0, tags=alert_tags)
+        # Close whichever per-state metric was last :1 for this alert.
+        prev_alert = cached_tags_alert or alert
+        prev_state = self._alert_state(prev_alert)
+        prev_tags = self._build_alert_tags(prev_alert, prev_state)
+        self.check.gauge(f"alert.{prev_state}", 0, tags=prev_tags)
+
+        # One-shot signal that this alert entered the resolved state.
+        # Tagged with ntnx_alert_status:resolved (and ntnx_alert_auto_resolved
+        # in alert_tags above); useful for resolution-rate dashboards and
+        # "recently resolved" panels.
+        self.check.gauge("alert.resolved", 1, tags=alert_tags)
 
     def emit_open_alert_metrics(self) -> None:
-        """Submit nutanix.alert.open:1 for each tracked unresolved alert.
+        """Submit per-state gauges for each tracked unresolved alert.
 
-        Called once per check cycle; keeps the gauge warm so per-alert metric
-        monitors don't go no-data while the underlying Nutanix alert is open.
+        Each tracked alert maps to one of nutanix.alert.open or
+        nutanix.alert.acknowledged based on its current state. Called once
+        per check cycle; keeps gauges warm so per-alert metric monitors
+        don't go no-data while the underlying Nutanix alert is open.
         """
         for alert in self._open_alerts.values():
-            is_acknowledged = alert.get("isAcknowledged", False)
-            status = "acknowledged" if is_acknowledged else "open"
-            self.check.gauge("alert.open", 1, tags=self._build_alert_tags(alert, status))
+            state = self._alert_state(alert)
+            self.check.gauge(f"alert.{state}", 1, tags=self._build_alert_tags(alert, state))
 
     def _process_task(self, task: dict) -> None:
         """Process and send a single task to Datadog as an event."""

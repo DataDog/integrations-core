@@ -1,5 +1,7 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
-nutanix.alert.open,gauge,,,,1 while a Nutanix alert is unresolved (open or acknowledged); 0 emitted once on resolution. Tagged per-alert via ext_id for individual alert lifecycle monitoring.,0,nutanix,alert open,,ext_id
+nutanix.alert.acknowledged,gauge,,,,1 while a Nutanix alert is acknowledged but not yet resolved; 0 emitted once when leaving the acknowledged state. Tagged per-alert via ext_id.,0,nutanix,alert acknowledged,,ext_id
+nutanix.alert.open,gauge,,,,1 while a Nutanix alert is unresolved and unacknowledged; 0 emitted once when leaving the open state (acknowledged or resolved). Tagged per-alert via ext_id.,0,nutanix,alert open,,ext_id
+nutanix.alert.resolved,gauge,,,,1 emitted once when a Nutanix alert is detected as resolved or deleted. One-shot signal useful for resolution-rate dashboards. Tagged per-alert via ext_id.,0,nutanix,alert resolved,,ext_id
 nutanix.api.rate_limited,count,,,,Count of HTTP 429 rate limit responses from the Prism Central API.,0,nutanix,rate_limited,,
 nutanix.cluster.aggregate_hypervisor.memory_usage,gauge,,,,Total memory usage across all hypervisors in the cluster.,0,nutanix,usage,,
 nutanix.cluster.controller.avg_io_latency,gauge,,,,Average I/O latency of the cluster storage controller.,0,nutanix,latency,,

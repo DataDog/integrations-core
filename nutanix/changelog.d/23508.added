@@ -1,0 +1,1 @@
+Split alert lifecycle gauge into per-state metrics: `nutanix.alert.open` (unacknowledged + unresolved), `nutanix.alert.acknowledged` (acknowledged + unresolved), and `nutanix.alert.resolved` (one-shot on resolution detection). State transitions emit an explicit 0 to the previous state's metric.

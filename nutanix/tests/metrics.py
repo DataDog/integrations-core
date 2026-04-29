@@ -5,7 +5,8 @@
 
 HEALTH_METRICS = ["nutanix.health.up"]
 
-ALERT_METRICS = ["nutanix.alert.open"]
+ALERT_METRICS = ["nutanix.alert.open", "nutanix.alert.acknowledged"]
+ALERT_METRICS_OPTIONAL = ["nutanix.alert.resolved"]
 
 CLUSTER_STATS_METRICS_REQUIRED = [
     "nutanix.cluster.aggregate_hypervisor.memory_usage",

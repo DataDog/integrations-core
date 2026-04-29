@@ -647,7 +647,7 @@ def test_alerts_still_open_no_duplicate_event(
 def test_alert_open_metric_emitted_per_tracked_alert(
     get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
 ):
-    """nutanix.alert.open=1 is submitted once per tracked open alert each cycle."""
+    """One :1 emission per tracked alert, partitioned across .open and .acknowledged by state."""
     instance = mock_instance.copy()
     instance["collect_alerts"] = True
 
@@ -656,17 +656,23 @@ def test_alert_open_metric_emitted_per_tracked_alert(
     check = NutanixCheck('nutanix', {}, [instance])
     dd_run_check(check)
 
-    tracked_count = len(check.activity_monitor._open_alerts)
-    assert tracked_count > 0, "Expected the fixture to surface at least one tracked open alert"
+    tracked = list(check.activity_monitor._open_alerts.values())
+    expected_open = sum(1 for a in tracked if not a.get("isAcknowledged"))
+    expected_ack = sum(1 for a in tracked if a.get("isAcknowledged"))
+    assert expected_open + expected_ack > 0
 
-    # One :1 emission per tracked alert; no :0 on first run (no resolutions)
-    open_metrics = [m for m in aggregator.metrics("nutanix.alert.open") if m.value == 1]
-    zero_metrics = [m for m in aggregator.metrics("nutanix.alert.open") if m.value == 0]
-    assert len(open_metrics) == tracked_count
-    assert len(zero_metrics) == 0
+    open_ones = [m for m in aggregator.metrics("nutanix.alert.open") if m.value == 1]
+    ack_ones = [m for m in aggregator.metrics("nutanix.alert.acknowledged") if m.value == 1]
+    open_zeros = [m for m in aggregator.metrics("nutanix.alert.open") if m.value == 0]
+    ack_zeros = [m for m in aggregator.metrics("nutanix.alert.acknowledged") if m.value == 0]
 
-    # Each emission carries the ext_id tag for monitor grouping
-    for m in open_metrics:
+    assert len(open_ones) == expected_open
+    assert len(ack_ones) == expected_ack
+    # First cycle: no resolutions, no transitions, so no zeroes
+    assert len(open_zeros) == 0
+    assert len(ack_zeros) == 0
+
+    for m in open_ones + ack_ones:
         assert any(t.startswith("ext_id:") for t in m.tags)
 
 
@@ -704,51 +710,72 @@ def test_alert_open_metric_zero_on_resolution(
         "impactTypes": ["SYSTEM_INDICATOR"],
     }
 
-    # Target is no longer in the unresolved list; _get_alert returns the resolved metadata.
+    # Pin target's prior state (open) so we know which metric receives the :0.
+    cached = check.activity_monitor._open_alerts[target_ext_id]
+    prior_state = "acknowledged" if cached.get("isAcknowledged") else "open"
+
     remaining = [a for a in check.activity_monitor._open_alerts.values() if a.get("extId") != target_ext_id]
     mocker.patch.object(check.activity_monitor, '_list_alerts_unresolved', return_value=remaining)
     mocker.patch.object(check.activity_monitor, '_get_alert', return_value=resolved_alert)
 
     dd_run_check(check)
 
-    zero_metrics = [m for m in aggregator.metrics("nutanix.alert.open") if m.value == 0]
+    zero_metric_name = f"nutanix.alert.{prior_state}"
+    zero_metrics = [m for m in aggregator.metrics(zero_metric_name) if m.value == 0]
     assert len(zero_metrics) == 1
     assert f"ext_id:{target_ext_id}" in zero_metrics[0].tags
-    assert "ntnx_alert_status:resolved" in zero_metrics[0].tags
 
-    # The resolved alert is no longer tracked, so no :1 emitted for it on this cycle
-    one_metrics_for_target = [
-        m for m in aggregator.metrics("nutanix.alert.open") if m.value == 1 and f"ext_id:{target_ext_id}" in m.tags
+    # nutanix.alert.resolved is emitted as a one-shot signal for this ext_id.
+    resolved_metrics = [
+        m for m in aggregator.metrics("nutanix.alert.resolved") if m.value == 1 and f"ext_id:{target_ext_id}" in m.tags
     ]
-    assert len(one_metrics_for_target) == 0
+    assert len(resolved_metrics) == 1
+
+    # No further :1 for the target on either open-state metric this cycle
+    target_ones = [
+        m
+        for name in ("nutanix.alert.open", "nutanix.alert.acknowledged")
+        for m in aggregator.metrics(name)
+        if m.value == 1 and f"ext_id:{target_ext_id}" in m.tags
+    ]
+    assert len(target_ones) == 0
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
 def test_alert_open_metric_re_emitted_each_cycle(
     get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
 ):
-    """The gauge keeps being submitted on subsequent cycles for still-open alerts."""
+    """Gauges keep being submitted on subsequent cycles for still-tracked alerts."""
     instance = mock_instance.copy()
     instance["collect_alerts"] = True
 
     get_current_datetime.return_value = MOCK_ALERT_DATETIME_AFTER_ALL
 
     check = NutanixCheck('nutanix', {}, [instance])
+
+    def total_ones():
+        return sum(
+            1
+            for name in ("nutanix.alert.open", "nutanix.alert.acknowledged")
+            for m in aggregator.metrics(name)
+            if m.value == 1
+        )
+
     dd_run_check(check)
-    first_cycle_count = len([m for m in aggregator.metrics("nutanix.alert.open") if m.value == 1])
+    first_cycle_count = total_ones()
     assert first_cycle_count > 0
 
     aggregator.reset()
     dd_run_check(check)
-    second_cycle_count = len([m for m in aggregator.metrics("nutanix.alert.open") if m.value == 1])
+    second_cycle_count = total_ones()
     assert second_cycle_count == first_cycle_count
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
-def test_alert_open_metric_tags_refresh_on_ack_transition(
+def test_alert_state_transition_open_to_acknowledged(
     get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
 ):
-    """When a tracked open alert is acknowledged, subsequent metric emissions reflect the new status."""
+    """open->acknowledged: 0 to nutanix.alert.open and 1 to nutanix.alert.acknowledged."""
     instance = mock_instance.copy()
     instance["collect_alerts"] = True
 
@@ -757,14 +784,14 @@ def test_alert_open_metric_tags_refresh_on_ack_transition(
     check = NutanixCheck('nutanix', {}, [instance])
     dd_run_check(check)
 
-    # Pick an alert currently tracked with status 'open' (not acknowledged)
+    # Pick an alert currently tracked as open (not acknowledged)
     target_ext_id = next(
         ext_id for ext_id, a in check.activity_monitor._open_alerts.items() if not a.get("isAcknowledged")
     )
 
     aggregator.reset()
 
-    # Replace the unresolved-list response: same set of alerts, but the target is now acknowledged.
+    # Same unresolved set, but the target is now acknowledged
     refreshed = []
     for ext_id, a in check.activity_monitor._open_alerts.items():
         if ext_id == target_ext_id:
@@ -779,8 +806,22 @@ def test_alert_open_metric_tags_refresh_on_ack_transition(
 
     dd_run_check(check)
 
-    target_metrics = [
+    # :0 emitted to nutanix.alert.open for this ext_id
+    open_zeros = [
+        m for m in aggregator.metrics("nutanix.alert.open") if m.value == 0 and f"ext_id:{target_ext_id}" in m.tags
+    ]
+    assert len(open_zeros) == 1
+
+    # :1 emitted to nutanix.alert.acknowledged for this ext_id
+    ack_ones = [
+        m
+        for m in aggregator.metrics("nutanix.alert.acknowledged")
+        if m.value == 1 and f"ext_id:{target_ext_id}" in m.tags
+    ]
+    assert len(ack_ones) >= 1
+
+    # No :1 to nutanix.alert.open for this ext_id this cycle
+    open_ones = [
         m for m in aggregator.metrics("nutanix.alert.open") if m.value == 1 and f"ext_id:{target_ext_id}" in m.tags
     ]
-    assert len(target_metrics) >= 1
-    assert all("ntnx_alert_status:acknowledged" in m.tags for m in target_metrics)
+    assert len(open_ones) == 0
