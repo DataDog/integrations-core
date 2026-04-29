@@ -31,7 +31,7 @@ dependencies = [
     "coverage",
     "datadog-api-client==2.20.0",
     "datadog-checks-dev[cli]~=37.0",
-    "hatch>=1.8.1",
+    "hatch>=1.13.0",
     "httpx",
     "jsonpointer",
     "pluggy",
