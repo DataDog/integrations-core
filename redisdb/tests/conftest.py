@@ -105,6 +105,7 @@ def dd_environment(master_instance):
                 'DD_EXTRA_LISTENERS': 'process',
                 'DD_AUTOCONFIG_EXCLUDE_FEATURES': 'docker',
             },
+            'cap_add': ['SYS_PTRACE', 'DAC_READ_SEARCH'],
         }
         with docker_run(
             AUTODISCOVERY_PROCESS_COMPOSE_PATH,
