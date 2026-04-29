@@ -17,6 +17,10 @@ from ddev.utils.github_async import (
     IssueComment,
     PaginationData,
     PullRequestReviewComment,
+<<<<<<< HEAD
+=======
+    WorkflowDispatchResult,
+>>>>>>> f987314109 (Create dispatcher task test runner (squashed))
     WorkflowRun,
     async_github_client,
 )
@@ -190,12 +194,21 @@ async def test_create_workflow_dispatch_success() -> None:
         body = json.loads(request.content)
         assert body["ref"] == "main"
         assert "inputs" not in body
+<<<<<<< HEAD
         return httpx.Response(204, headers={"x-ratelimit-remaining": "59"})
+=======
+        return _json_response({"workflow_run_id": 999}, headers={"x-ratelimit-remaining": "59"})
+>>>>>>> f987314109 (Create dispatcher task test runner (squashed))
 
     client = _make_client(httpx.MockTransport(handler))
     result = await client.create_workflow_dispatch("owner", "repo", "my-workflow.yml", "main")
     assert isinstance(result, GitHubResponse)
+<<<<<<< HEAD
     assert result.data is None
+=======
+    assert isinstance(result.data, WorkflowDispatchResult)
+    assert result.data.workflow_run_id == 999
+>>>>>>> f987314109 (Create dispatcher task test runner (squashed))
     assert result.headers.get("x-ratelimit-remaining") == "59"
 
 
@@ -204,10 +217,18 @@ async def test_create_workflow_dispatch_with_inputs() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         body = json.loads(request.content)
         assert body["inputs"] == {"env": "prod"}
+<<<<<<< HEAD
         return httpx.Response(204)
 
     client = _make_client(httpx.MockTransport(handler))
     await client.create_workflow_dispatch("o", "r", 123, "main", inputs={"env": "prod"})
+=======
+        return _json_response({"workflow_run_id": 1})
+
+    client = _make_client(httpx.MockTransport(handler))
+    result = await client.create_workflow_dispatch("o", "r", 123, "main", inputs={"env": "prod"})
+    assert result.data.workflow_run_id == 1
+>>>>>>> f987314109 (Create dispatcher task test runner (squashed))
 
 
 @pytest.mark.asyncio

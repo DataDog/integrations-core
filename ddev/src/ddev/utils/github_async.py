@@ -1,9 +1,19 @@
 """Async GitHub API client for triggering and monitoring GitHub Actions workflows"""
 
+<<<<<<< HEAD
 import re
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
+=======
+import io
+import re
+import zipfile
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+from dataclasses import dataclass
+from pathlib import Path
+>>>>>>> f987314109 (Create dispatcher task test runner (squashed))
 from typing import Any, Literal, Self
 
 import httpx
@@ -73,6 +83,30 @@ class WorkflowRun(BaseModel):
     updated_at: str | None = None
 
 
+<<<<<<< HEAD
+=======
+class WorkflowDispatchResult(BaseModel):
+    """Response payload from a successful workflow dispatch."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    workflow_run_id: int
+
+
+class CheckRun(BaseModel):
+    """A GitHub Checks API check run."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    id: int
+    name: str
+    status: str
+    conclusion: str | None = None
+    html_url: str | None = None
+    head_sha: str | None = None
+
+
+>>>>>>> f987314109 (Create dispatcher task test runner (squashed))
 class Artifact(BaseModel):
     """A GitHub Actions artifact."""
 
@@ -221,7 +255,11 @@ class AsyncGitHubClient:
         ref: str,
         inputs: dict[str, str] | None = None,
         timeout: float | None = None,
+<<<<<<< HEAD
     ) -> GitHubResponse[None]:
+=======
+    ) -> GitHubResponse[WorkflowDispatchResult]:
+>>>>>>> f987314109 (Create dispatcher task test runner (squashed))
         """
         Calls the GitHub API to trigger a workflow dispatch event.
 
@@ -237,7 +275,11 @@ class AsyncGitHubClient:
             timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
 
         Returns:
+<<<<<<< HEAD
             GitHubResponse[None]: Empty response (204 No Content) with headers.
+=======
+            GitHubResponse[WorkflowDispatchResult]: The dispatched run id and headers.
+>>>>>>> f987314109 (Create dispatcher task test runner (squashed))
         """
         body: dict[str, Any] = {"ref": ref}
         if inputs is not None:
@@ -248,7 +290,11 @@ class AsyncGitHubClient:
             timeout=timeout,
             json=body,
         )
+<<<<<<< HEAD
         return GitHubResponse[None].model_validate({"data": None, "headers": dict(response.headers)})
+=======
+        return self._parse_response(response, WorkflowDispatchResult)
+>>>>>>> f987314109 (Create dispatcher task test runner (squashed))
 
     async def get_workflow_run(
         self,
@@ -384,6 +430,146 @@ class AsyncGitHubClient:
         )
         return self._parse_response(response, PullRequestReviewComment)
 
+<<<<<<< HEAD
+=======
+    async def create_check_run(
+        self,
+        owner: str,
+        repo: str,
+        name: str,
+        head_sha: str,
+        status: Literal["queued", "in_progress", "completed"],
+        details_url: str | None = None,
+        output: dict[str, Any] | None = None,
+        timeout: float | None = None,
+    ) -> GitHubResponse[CheckRun]:
+        """
+        Calls the GitHub API to create a check run on a commit.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/checks/runs#create-a-check-run
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            name: Display name of the check.
+            head_sha: SHA of the commit the check is attached to.
+            status: Initial status of the check.
+            details_url: Optional URL the check title links to.
+            output: Optional structured output (title, summary, ...).
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+
+        Returns:
+            GitHubResponse[CheckRun]: The validated check run data and headers.
+        """
+        payload: dict[str, Any] = {"name": name, "head_sha": head_sha, "status": status}
+        if details_url is not None:
+            payload["details_url"] = details_url
+        if output is not None:
+            payload["output"] = output
+        response = await self._request(
+            "POST",
+            f"/repos/{owner}/{repo}/check-runs",
+            timeout=timeout,
+            json=payload,
+        )
+        return self._parse_response(response, CheckRun)
+
+    async def update_check_run(
+        self,
+        owner: str,
+        repo: str,
+        check_run_id: int,
+        status: Literal["queued", "in_progress", "completed"] | None = None,
+        conclusion: str | None = None,
+        details_url: str | None = None,
+        output: dict[str, Any] | None = None,
+        timeout: float | None = None,
+    ) -> GitHubResponse[CheckRun]:
+        """
+        Calls the GitHub API to update an existing check run.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/checks/runs#update-a-check-run
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            check_run_id: Numeric ID of the check run to update.
+            status: New status (``"queued"`` | ``"in_progress"`` | ``"completed"``).
+            conclusion: Final conclusion (only valid when ``status="completed"``).
+            details_url: Optional URL the check title links to.
+            output: Optional structured output (title, summary, ...).
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+
+        Returns:
+            GitHubResponse[CheckRun]: The validated check run data and headers.
+        """
+        payload: dict[str, Any] = {}
+        if status is not None:
+            payload["status"] = status
+        if conclusion is not None:
+            payload["conclusion"] = conclusion
+        if details_url is not None:
+            payload["details_url"] = details_url
+        if output is not None:
+            payload["output"] = output
+        response = await self._request(
+            "PATCH",
+            f"/repos/{owner}/{repo}/check-runs/{check_run_id}",
+            timeout=timeout,
+            json=payload,
+        )
+        return self._parse_response(response, CheckRun)
+
+    async def download_artifact(
+        self,
+        archive_download_url: str,
+        dest_path: Path,
+        timeout: float | None = None,
+    ) -> None:
+        """
+        Downloads and extracts a workflow run artifact zip into ``dest_path``.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/actions/artifacts#download-an-artifact
+
+        The GitHub API responds to the artifact endpoint with a 302 redirect to a
+        short-lived signed URL on a third-party host (typically S3). This method
+        fetches the redirect with the authenticated client, then follows the
+        ``Location`` header with a fresh **unauthenticated** client so the GitHub
+        bearer token is not leaked to the redirect target.
+
+        Args:
+            archive_download_url: The artifact's ``archive_download_url`` (absolute or relative to the API base).
+            dest_path: Directory where the zip contents will be extracted. Created if missing.
+            timeout: Optional timeout for both HTTP requests.
+        """
+        effective_timeout = timeout if timeout is not None else self._default_timeout
+        redirect_response = await self._client.request(
+            "GET",
+            archive_download_url,
+            timeout=effective_timeout,
+            follow_redirects=False,
+        )
+        if redirect_response.status_code != 302:
+            redirect_response.raise_for_status()
+            raise httpx.HTTPError(
+                f"Expected 302 redirect from {archive_download_url}, got {redirect_response.status_code}"
+            )
+        location = redirect_response.headers.get("location")
+        if not location:
+            raise httpx.HTTPError(f"Missing Location header on redirect from {archive_download_url}")
+
+        async with httpx.AsyncClient(timeout=effective_timeout) as anonymous_client:
+            download_response = await anonymous_client.get(location)
+            download_response.raise_for_status()
+
+        dest_path.mkdir(parents=True, exist_ok=True)
+        with zipfile.ZipFile(io.BytesIO(download_response.content)) as zf:
+            zf.extractall(dest_path)
+
+>>>>>>> f987314109 (Create dispatcher task test runner (squashed))
 
 # ---------------------------------------------------------------------------
 # Context manager helper
