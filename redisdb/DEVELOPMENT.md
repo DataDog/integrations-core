@@ -91,3 +91,22 @@ The Agent reads `auto_conf.yaml` via a file-level Docker bind-mount of the sourc
 copy at `redisdb/datadog_checks/redisdb/data/auto_conf.yaml`. Editing the file between
 test runs requires restarting the environment (`ddev env stop` then `ddev env start`)
 because tools like `git checkout` replace the file's inode and break the live mount.
+
+### Agent Process Autodiscovery E2E
+
+The `py3.13-adproc-7.0` environment exercises the Agent's **process** autodiscovery using the
+`cel_selector.processes` rule shipped in `auto_conf.yaml`. It starts a single `redis:7.0`
+container with `network_mode: host` so `redis-server` is visible in the host process table,
+and runs the Agent with `DD_DISCOVERY_ENABLED=true`, `DD_EXTRA_LISTENERS=process`, and
+`DD_AUTOCONFIG_EXCLUDE_FEATURES=docker` (the last one prevents processes-inside-containers
+from getting container-IDs that would otherwise exclude them from the process listener).
+
+```shell
+ddev env start --dev redisdb py3.13-adproc-7.0
+ddev env test  --dev redisdb py3.13-adproc-7.0
+ddev env stop  redisdb py3.13-adproc-7.0
+```
+
+Port 6379 must be free on the host — `network_mode: host` cannot share with another
+listener already bound to that port. The same bind-mount inode caveat as `py3.13-ad-7.0`
+applies to edits of `auto_conf.yaml` between runs.
