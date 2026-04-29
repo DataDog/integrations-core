@@ -108,8 +108,8 @@ class PhaseOrchestrator(EventBusOrchestrator):
                 runtime_variables=self._runtime_variables,
                 flow_variables=config.variables,
                 config_dir=config_dir,
-                callback_sets=self._callback_sets,
                 file_registry=self._file_registry,
+                callback_sets=self._callback_sets,
             )
 
             self.register_processor(phase, [PhaseTrigger])

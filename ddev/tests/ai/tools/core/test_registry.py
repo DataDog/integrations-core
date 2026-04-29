@@ -6,6 +6,7 @@ import pytest
 
 from ddev.ai.tools.core.registry import ToolRegistry
 from ddev.ai.tools.core.types import ToolResult
+from ddev.ai.tools.fs.file_registry import FileRegistry
 
 # ---------------------------------------------------------------------------
 # Fake tools — implement ToolProtocol without depending on BaseTool
@@ -154,25 +155,25 @@ OWNER_ID = "test-agent"
 
 
 def test_from_names_empty():
-    registry = ToolRegistry.from_names([], owner_id=OWNER_ID)
+    registry = ToolRegistry.from_names([], owner_id=OWNER_ID, file_registry=FileRegistry())
     assert registry.definitions == []
 
 
 def test_from_names_unknown_raises():
     with pytest.raises(ValueError, match="Unknown tool name: 'teleport'"):
-        ToolRegistry.from_names(["teleport"], owner_id=OWNER_ID)
+        ToolRegistry.from_names(["teleport"], owner_id=OWNER_ID, file_registry=FileRegistry())
 
 
 @pytest.mark.parametrize("name", ToolRegistry.available_tool_names())
 def test_from_names_each_known_tool(name):
-    registry = ToolRegistry.from_names([name], owner_id=OWNER_ID)
+    registry = ToolRegistry.from_names([name], owner_id=OWNER_ID, file_registry=FileRegistry())
     assert len(registry.definitions) == 1
     assert registry.definitions[0]["name"] == name
 
 
 def test_from_names_all_at_once():
     all_names = ToolRegistry.available_tool_names()
-    registry = ToolRegistry.from_names(all_names, owner_id=OWNER_ID)
+    registry = ToolRegistry.from_names(all_names, owner_id=OWNER_ID, file_registry=FileRegistry())
     built_names = {d["name"] for d in registry.definitions}
     assert built_names == set(all_names)
 
@@ -180,7 +181,7 @@ def test_from_names_all_at_once():
 def test_from_names_fs_tools_share_file_registry():
     """All tools that use the file registry in the same ToolRegistry share a single instance."""
     all_names = ToolRegistry.available_tool_names()
-    registry = ToolRegistry.from_names(all_names, owner_id=OWNER_ID)
+    registry = ToolRegistry.from_names(all_names, owner_id=OWNER_ID, file_registry=FileRegistry())
     fs_tools = [t for t in registry._tools.values() if hasattr(t, "_registry")]
     if len(fs_tools) < 2:
         pytest.skip("Need at least 2 fs tools to test shared registry")
@@ -190,8 +191,6 @@ def test_from_names_fs_tools_share_file_registry():
 
 def test_from_names_reuses_supplied_file_registry():
     """Multiple ToolRegistries can share one FileRegistry; tools carry their own owner_id."""
-    from ddev.ai.tools.fs.file_registry import FileRegistry
-
     shared = FileRegistry()
     reg_a = ToolRegistry.from_names(["read_file", "create_file"], owner_id="a", file_registry=shared)
     reg_b = ToolRegistry.from_names(["read_file", "create_file"], owner_id="b", file_registry=shared)

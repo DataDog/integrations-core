@@ -91,8 +91,8 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         runtime_variables: dict[str, str],
         flow_variables: dict[str, str],
         config_dir: Path,
+        file_registry: FileRegistry,
         callback_sets: list[CallbackSet] | None = None,
-        file_registry: FileRegistry | None = None,
     ) -> None:
         super().__init__(name=phase_id)
         self._phase_id = phase_id

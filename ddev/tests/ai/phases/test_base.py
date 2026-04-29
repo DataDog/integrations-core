@@ -13,11 +13,12 @@ from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.tools.core.registry import ToolRegistry
+from ddev.ai.tools.fs.file_registry import FileRegistry
 
 from .conftest import MockAgent, make_agent_factory, make_response, resolve_key
 
 
-def _empty_registry_from_names(cls, names, *, owner_id, file_registry=None):
+def _empty_registry_from_names(cls, names, *, owner_id, file_registry):
     return ToolRegistry([])
 
 
@@ -147,6 +148,7 @@ def _make_phase(
         runtime_variables=runtime_variables or {},
         flow_variables=flow_variables or {},
         config_dir=flow_dir,
+        file_registry=FileRegistry(),
         callback_sets=None,
     )
     phase.queue = message_queue
@@ -345,6 +347,7 @@ async def test_flow_variables_in_system_prompt(flow_dir, monkeypatch, message_qu
         runtime_variables={},
         flow_variables={"project": "myproj"},
         config_dir=flow_dir,
+        file_registry=FileRegistry(),
     )
     phase.queue = message_queue
 
@@ -384,6 +387,7 @@ async def test_runtime_variables_override_flow_variables(flow_dir, monkeypatch, 
         runtime_variables={"project": "runtime_override"},
         flow_variables={"project": "flow_default"},
         config_dir=flow_dir,
+        file_registry=FileRegistry(),
     )
     phase.queue = message_queue
 
@@ -519,6 +523,7 @@ async def test_task_prompt_resolves_memory_variable(flow_dir, monkeypatch, messa
         runtime_variables={},
         flow_variables={},
         config_dir=flow_dir,
+        file_registry=FileRegistry(),
     )
     phase.queue = message_queue
 

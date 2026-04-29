@@ -92,17 +92,16 @@ class ToolRegistry:
         tool_names: list[str],
         *,
         owner_id: str,
-        file_registry: FileRegistry | None = None,
+        file_registry: FileRegistry,
     ) -> ToolRegistry:
         """Build a ToolRegistry from a list of tool name strings.
 
-        The file_registry is expected to be shared across all owners in a run so
-        that the access policy applies globally; hashes inside it are partitioned
-        by owner_id so each owner must still read-before-write on its own.
-        A new (unshared) FileRegistry is created if one is not supplied.
+        The file_registry is shared across all owners in a run so that the access
+        policy applies globally; hashes inside it are partitioned by owner_id so
+        each owner must still read-before-write on its own.
         """
         ctx = ToolContext(
-            file_registry=file_registry if file_registry is not None else FileRegistry(),
+            file_registry=file_registry,
             owner_id=owner_id,
         )
         tools: list[ToolProtocol] = []
