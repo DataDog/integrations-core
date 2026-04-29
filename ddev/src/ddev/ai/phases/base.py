@@ -17,8 +17,8 @@ from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.template import render_inline, render_prompt
 from ddev.ai.react.callbacks import CallbackSet
 from ddev.ai.react.process import ReActProcess
-from ddev.ai.tools.core.registry import ToolRegistry
 from ddev.ai.tools.fs.file_registry import FileRegistry
+from ddev.ai.tools.registry import ToolRegistry
 from ddev.event_bus.orchestrator import AsyncProcessor, BaseMessage
 
 
@@ -93,6 +93,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         config_dir: Path,
         file_registry: FileRegistry,
         callback_sets: list[CallbackSet] | None = None,
+        logger: logging.Logger | None = None,
     ) -> None:
         super().__init__(name=phase_id)
         self._phase_id = phase_id
@@ -107,6 +108,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         self._config_dir = config_dir
         self._callback_sets: list[CallbackSet] = callback_sets or []
         self._file_registry = file_registry
+        self._logger = logger or logging.getLogger(__name__)
         self._started_at: datetime | None = None
         self._resolver: Callable[[str], str] | None = None
         self._executed = False
@@ -271,11 +273,12 @@ class Phase(AsyncProcessor[PhaseTrigger]):
                 },
             )
         except Exception:
-            logging.getLogger(__name__).exception("Failed to write failure checkpoint for phase %s", self._phase_id)
-        self.submit_message(
-            PhaseFailedMessage(
-                id=f"{self._phase_id}_failed_{message.id}",
-                phase_id=self._phase_id,
-                error=str(error),
+            self._logger.exception("Failed to write failure checkpoint for phase %s", self._phase_id)
+        finally:
+            self.submit_message(
+                PhaseFailedMessage(
+                    id=f"{self._phase_id}_failed_{message.id}",
+                    phase_id=self._phase_id,
+                    error=str(error),
+                )
             )
-        )

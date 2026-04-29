@@ -50,6 +50,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         callback_sets: list[CallbackSet] | None = None,
         grace_period: float = 10,
         file_access_policy: FileAccessPolicy | None = None,
+        logger: logging.Logger | None = None,
     ) -> None:
         """Initialize the orchestrator.
 
@@ -58,7 +59,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         agent writes are confined to that path. Passing ``None`` leaves writes
         unrestricted (appropriate only in tests).
         """
-        super().__init__(logger=logging.getLogger(__name__), grace_period=grace_period)
+        super().__init__(logger=logger or logging.getLogger(__name__), grace_period=grace_period)
         self._flow_yaml_path = flow_yaml_path
         self._checkpoint_path = checkpoint_path
         self._runtime_variables = runtime_variables
@@ -110,6 +111,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
                 config_dir=config_dir,
                 file_registry=self._file_registry,
                 callback_sets=self._callback_sets,
+                logger=self._logger,
             )
 
             self.register_processor(phase, [PhaseTrigger])

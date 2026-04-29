@@ -4,9 +4,9 @@
 
 import pytest
 
-from ddev.ai.tools.core.registry import ToolRegistry
 from ddev.ai.tools.core.types import ToolResult
 from ddev.ai.tools.fs.file_registry import FileRegistry
+from ddev.ai.tools.registry import ToolRegistry
 
 # ---------------------------------------------------------------------------
 # Fake tools — implement ToolProtocol without depending on BaseTool

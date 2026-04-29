@@ -12,8 +12,8 @@ from ddev.ai.phases.base import Phase, _make_memory_resolver, render_memory_prom
 from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
-from ddev.ai.tools.core.registry import ToolRegistry
 from ddev.ai.tools.fs.file_registry import FileRegistry
+from ddev.ai.tools.registry import ToolRegistry
 
 from .conftest import MockAgent, make_agent_factory, make_response, resolve_key
 

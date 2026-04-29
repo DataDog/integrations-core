@@ -10,8 +10,8 @@ from ddev.ai.agent.exceptions import AgentError
 from ddev.ai.agent.types import AgentResponse, StopReason, ToolResultMessage
 from ddev.ai.react.callbacks import CallbackSet
 from ddev.ai.react.types import ReActResult
-from ddev.ai.tools.core.registry import ToolRegistry
 from ddev.ai.tools.core.types import ToolResult
+from ddev.ai.tools.registry import ToolRegistry
 
 
 class ReActProcess:

@@ -6,7 +6,7 @@ import pytest
 
 from ddev.ai.agent.base import _COMPACT_SYSTEM_PROMPT, BaseAgent
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolResultMessage
-from ddev.ai.tools.core.registry import ToolRegistry
+from ddev.ai.tools.registry import ToolRegistry
 
 _AGENT_NAME: str = "test"
 _AGENT_SYSTEM_PROMPT: str = "original"

@@ -12,10 +12,8 @@ from anthropic.types import ToolParam
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
 
-from .protocol import ToolProtocol
-from .types import ToolResult
-
-TOOLS_PACKAGE = "ddev.ai.tools"
+from .core.protocol import ToolProtocol
+from .core.types import ToolResult
 
 
 @dataclass
@@ -46,7 +44,7 @@ def _file_policy_factory(tool_cls: type, ctx: ToolContext) -> ToolProtocol:
 class ToolSpec:
     """Lazy pointer to a tool class and how to construct it.
 
-    ``module`` is relative to ``TOOLS_PACKAGE`` (e.g. ``"fs.read_file"``).
+    ``module`` is relative to the registry's package (e.g. ``"fs.read_file"``).
     ``factory`` receives the already-imported class and the shared ToolContext
     and returns a constructed tool instance.
     """
@@ -109,7 +107,7 @@ class ToolRegistry:
             spec = TOOL_MANIFEST.get(name)
             if spec is None:
                 raise ValueError(f"Unknown tool name: {name!r}")
-            tool_cls = getattr(import_module(f"{TOOLS_PACKAGE}.{spec.module}"), spec.cls)
+            tool_cls = getattr(import_module(f"{__package__}.{spec.module}"), spec.cls)
             tools.append(spec.factory(tool_cls, ctx))
         return cls(tools)
 
