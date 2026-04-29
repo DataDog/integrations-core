@@ -151,7 +151,7 @@ def _baseline(fake_repo: Path) -> dict[str, str]:
 
 
 @pytest.fixture
-def fake_repo_with_fresh_pin(fake_repo: Path) -> dict[str, str]:
+def fake_repo_with_fresh_pin(fake_repo: Path) -> dict:
     """fake_repo plus a pin that matches the working tree (everything fresh).
 
     Tests mutate one side of the pin to introduce a single dimension of
