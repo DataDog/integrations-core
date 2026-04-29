@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 16.1.1 / 2026-04-29
+
+***Fixed***:
+
+* Bumped datadog_checks_dev to version 38.0.0. Fixes dependency issues with new virtualenv. ([#23516](https://github.com/DataDog/integrations-core/pull/23516))
+
 ## 16.1.0 / 2026-04-29
 
 ***Added***:
