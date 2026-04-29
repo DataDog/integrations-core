@@ -12,7 +12,10 @@ from .common import REDIS_VERSION
 
 pytestmark = [
     pytest.mark.e2e,
-    pytest.mark.skipif(common.AUTODISCOVERY, reason='Cluster e2e is not run in the autodiscovery env'),
+    pytest.mark.skipif(
+        common.AUTODISCOVERY or common.AUTODISCOVERY_PROCESS,
+        reason='Cluster e2e is not run in the autodiscovery envs',
+    ),
 ]
 
 
