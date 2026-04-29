@@ -172,9 +172,16 @@ class Query(BaseModel):
     custom_sql_select_fields: Optional[CustomSqlSelectFields] = None
     dbname: str
     entity: Entity
-    interval_seconds: int
+    interval_seconds: Optional[int] = Field(
+        None,
+        description='How often (in seconds) to run this query. When both schedule and\ninterval_seconds are present, schedule takes precedence and interval_seconds\nis ignored. If neither is set, the query is skipped at runtime with a warning.\n',
+    )
     monitor_id: int
     query: str
+    schedule: Optional[str] = Field(
+        None,
+        description='A standard 5-field cron expression (minute hour dom month dow) specifying\nwhen to run this query. When set, takes precedence over interval_seconds.\nIf neither schedule nor interval_seconds is set, the query is skipped at\nruntime with a warning.\n',
+    )
     type: Optional[str] = None
 
 
@@ -185,6 +192,7 @@ class DataObservability(BaseModel):
     )
     collection_interval: Optional[float] = None
     config_id: Optional[str] = None
+    cron_startup_lookback_seconds: Optional[int] = None
     enabled: Optional[bool] = None
     queries: Optional[tuple[Query, ...]] = None
     run_sync: Optional[bool] = None

@@ -5,9 +5,10 @@ from __future__ import annotations
 
 import json
 import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import psycopg
+from croniter import croniter
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 
@@ -20,12 +21,16 @@ EVENT_TRACK_TYPE = 'do-query-results'
 # Cap the number of rows fetched per query to prevent unbounded memory usage.
 MAX_RESULT_ROWS = 10_000
 
+DEFAULT_CRON_STARTUP_LOOKBACK_SECONDS = 300
+
 
 class PostgresDataObservability(DBMAsyncJob):
     def __init__(self, check: PostgreSql, config: InstanceConfig):
         self._check = check
         self._config = config
         self._last_execution: dict[int, float] = {}
+        self._next_run: dict[int, float] = {}
+        self._invalid_warned: set[int] = set()
         collection_interval = config.data_observability.collection_interval or 10
         super(PostgresDataObservability, self).__init__(
             check,
@@ -45,14 +50,64 @@ class PostgresDataObservability(DBMAsyncJob):
     def _do_config(self):
         return self._config.data_observability
 
-    def _get_due_queries(self) -> list[Query]:
+    def _warn_invalid_once(self, monitor_id: int, reason: str) -> None:
+        if monitor_id not in self._invalid_warned:
+            self._invalid_warned.add(monitor_id)
+            self._log.warning("Skipping invalid DO query monitor_id=%d: %s", monitor_id, reason)
+
+    def _query_mode(self, q: Query) -> Literal["cron", "interval"] | None:
+        if q.schedule:
+            if not croniter.is_valid(q.schedule):
+                self._warn_invalid_once(q.monitor_id, f"invalid cron schedule: {q.schedule!r}")
+                return None
+            return "cron"
+        if q.interval_seconds and q.interval_seconds > 0:
+            return "interval"
+        self._warn_invalid_once(q.monitor_id, "neither schedule nor positive interval_seconds set")
+        return None
+
+    def _compute_next_run(self, schedule: str, base: float) -> float:
+        return croniter(schedule, base).get_next(float)
+
+    def _compute_prev_tick(self, schedule: str, base: float) -> float:
+        return croniter(schedule, base).get_prev(float)
+
+    def _cron_startup_lookback_seconds(self) -> int:
+        configured = self._do_config.cron_startup_lookback_seconds
+        if configured is None:
+            return DEFAULT_CRON_STARTUP_LOOKBACK_SECONDS
+        if configured < 0:
+            self._log.warning(
+                "Invalid cron_startup_lookback_seconds=%d: must be >= 0. Cron startup recovery is disabled.",
+                configured,
+            )
+            return 0
+        return configured
+
+    def _get_due_queries(self) -> list[tuple[Query, float]]:
         queries = self._do_config.queries or ()
         now = time.time()
-        due = []
+        lookback_seconds = self._cron_startup_lookback_seconds()
+        due: list[tuple[Query, float]] = []
         for q in queries:
-            last_run = self._last_execution.get(q.monitor_id, 0.0)
-            if now - last_run >= q.interval_seconds:
-                due.append(q)
+            mode = self._query_mode(q)
+            if mode == "cron":
+                next_run = self._next_run.get(q.monitor_id)
+                if next_run is None:
+                    self._next_run[q.monitor_id] = self._compute_next_run(q.schedule, now)
+                    if lookback_seconds > 0:
+                        prev_tick = self._compute_prev_tick(q.schedule, now)
+                        if (now - prev_tick) < lookback_seconds:
+                            due.append((q, prev_tick))
+                    continue
+                if now >= next_run:
+                    due.append((q, next_run))
+            elif mode == "interval":
+                last_run = self._last_execution.get(q.monitor_id, 0.0)
+                if now - last_run >= q.interval_seconds:
+                    # First fire (no prior last_run): treat scheduled time as `now` → lateness = 0.
+                    scheduled = (last_run + q.interval_seconds) if last_run > 0 else now
+                    due.append((q, scheduled))
         return due
 
     def _build_base_tags(self) -> list[str]:
@@ -147,16 +202,20 @@ class PostgresDataObservability(DBMAsyncJob):
 
         base_tags = self._build_base_tags()
 
-        for q in due_queries:
+        for q, scheduled_fire_time in due_queries:
             tags = base_tags + [f'monitor_id:{q.monitor_id}']
 
+            now_at_fire_start = time.time()
             with self._check.db_pool.get_connection(q.dbname) as conn:
                 result = self._execute_single_query(conn, q)
 
-            # Update scheduling timestamp immediately after execution, before
-            # metric/event emission, so a serialization failure in the event
-            # path cannot cause infinite re-execution of the same query.
-            self._last_execution[q.monitor_id] = time.time()
+            # Update scheduling state (last_execution and, for cron, next_run) before
+            # metric/event emission, so a serialization failure in the emit path
+            # cannot cause infinite re-execution of the same query.
+            now_at_fire_end = time.time()
+            self._last_execution[q.monitor_id] = now_at_fire_end
+            if q.schedule:
+                self._next_run[q.monitor_id] = self._compute_next_run(q.schedule, now_at_fire_end)
 
             try:
                 self._check.gauge(
@@ -170,6 +229,16 @@ class PostgresDataObservability(DBMAsyncJob):
                     'dd.postgres.data_observability.query_executions',
                     1,
                     tags=tags + [f'status:{result["status"]}'],
+                    hostname=self._check.reported_hostname,
+                    raw=True,
+                )
+
+                mode_tag = 'mode:cron' if q.schedule else 'mode:interval'
+                lateness = max(0.0, now_at_fire_start - scheduled_fire_time)
+                self._check.gauge(
+                    'dd.postgres.data_observability.query_fire_lateness_seconds',
+                    lateness,
+                    tags=tags + [mode_tag],
                     hostname=self._check.reported_hostname,
                     raw=True,
                 )

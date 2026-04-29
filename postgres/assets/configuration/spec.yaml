@@ -608,6 +608,18 @@ files:
             type: number
             example: 10
             display_default: 10
+        - name: cron_startup_lookback_seconds
+          fleet_configurable: true
+          description: |
+            Lookback window for cron-scheduled queries on check startup. If the
+            most recent scheduled tick was within this many seconds before the
+            check started, the query fires immediately on startup to recover
+            fires that may have been lost across a check restart.
+            Set to 0 to disable startup recovery.
+          value:
+            type: integer
+            example: 300
+            display_default: 300
         - name: run_sync
           hidden: true
           description: Run the job synchronously (for testing).
@@ -643,7 +655,6 @@ files:
                 - monitor_id
                 - dbname
                 - query
-                - interval_seconds
                 - entity
               properties:
               - name: monitor_id
@@ -655,7 +666,18 @@ files:
               - name: query
                 type: string
               - name: interval_seconds
+                description: |
+                  How often (in seconds) to run this query. When both schedule and
+                  interval_seconds are present, schedule takes precedence and interval_seconds
+                  is ignored. If neither is set, the query is skipped at runtime with a warning.
                 type: integer
+              - name: schedule
+                description: |
+                  A standard 5-field cron expression (minute hour dom month dow) specifying
+                  when to run this query. When set, takes precedence over interval_seconds.
+                  If neither schedule nor interval_seconds is set, the query is skipped at
+                  runtime with a warning.
+                type: string
               - name: entity
                 type: object
                 required:

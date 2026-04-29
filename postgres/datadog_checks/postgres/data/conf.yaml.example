@@ -465,6 +465,15 @@ instances:
         #
         # collection_interval: 10
 
+        ## @param cron_startup_lookback_seconds - integer - optional - default: 300
+        ## Lookback window for cron-scheduled queries on check startup. If the
+        ## most recent scheduled tick was within this many seconds before the
+        ## check started, the query fires immediately on startup to recover
+        ## fires that may have been lost across a check restart.
+        ## Set to 0 to disable startup recovery.
+        #
+        # cron_startup_lookback_seconds: 300
+
     ## @param pg_stat_statements_view - string - optional - default: pg_stat_statements
     ## Set this value if you want to define a custom view or function to allow the datadog user to query the
     ## `pg_stat_statements` table, which is useful for restricting the permissions given to the datadog agent.

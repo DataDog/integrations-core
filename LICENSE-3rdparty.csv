@@ -17,6 +17,7 @@ check-postgres,"https://github.com/bucardo/",BSD-2-Clause,Copyright 2007 - 2023 
 clickhouse-connect,PyPI,Apache-2.0,"Copyright 2022-2024 ClickHouse, Inc."
 cm-client,PyPI,Apache-2.0,
 confluent-kafka,PyPI,Apache-2.0,Copyright (C) 1995-1998 Jean-loup Gailly and Mark Adler
+croniter,PyPI,MIT,Copyright (C) 2010-2012 Matsumoto Taichi
 cryptography,PyPI,Apache-2.0,Copyright (c) Individual contributors.
 cryptography,PyPI,BSD-3-Clause,Copyright (c) Individual contributors.
 cryptography,PyPI,PSF,Copyright (c) Individual contributors.
