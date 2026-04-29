@@ -80,7 +80,9 @@ class TestHappyPath:
         trust_anchor = tmp_path / 'root.json'
         trust_anchor.write_text('{}')
 
-        downloader = TUFPointerDownloader(repository_url=_REPO_URL, trust_anchor=trust_anchor)
+        downloader = TUFPointerDownloader(
+            repository_url=_REPO_URL, trust_anchor=trust_anchor
+        )
         wheel_path = downloader.download(_PROJECT, version=_VERSION, dest_dir=tmp_path)
 
         assert wheel_path.exists()
@@ -136,7 +138,9 @@ class TestHappyPath:
         trust_anchor = tmp_path / 'root.json'
         trust_anchor.write_text('{}')
 
-        downloader = TUFPointerDownloader(repository_url=_REPO_URL, trust_anchor=trust_anchor)
+        downloader = TUFPointerDownloader(
+            repository_url=_REPO_URL, trust_anchor=trust_anchor
+        )
         pointer = downloader.get_pointer(_PROJECT, version=_VERSION)
 
         assert pointer['version'] == _VERSION
@@ -145,157 +149,24 @@ class TestHappyPath:
 
     @patch('datadog_checks.downloader.download_v2.Updater')
     @patch('datadog_checks.downloader.download_v2.urllib.request.urlopen')
-    def test_latest_resolves_via_s3_listing(self, mock_urlopen, mock_updater_cls, tmp_path):
-        """version=None lists ``targets/<project>/`` in S3 and picks the max
-        stable version, then fetches that exact pointer through TUF."""
-        target_path = f'{_PROJECT}/14.0.0.json'
-        list_xml = _list_xml(['1.0.0', '2.0.0', '14.0.0'])
+    def test_latest_resolves_to_latest_json(self, mock_urlopen, mock_updater_cls, tmp_path):
+        """version=None uses targets/<project>/latest.json."""
+        target_path = f'{_PROJECT}/latest.json'
         mock_updater = _mock_tuf_updater(_POINTER)
         mock_updater_cls.return_value = mock_updater
 
-        def fake_urlopen(url):
-            mock_resp = MagicMock()
-            mock_resp.__enter__ = lambda s: s
-            mock_resp.__exit__ = MagicMock(return_value=False)
-            if 'list-type=2' in url:
-                mock_resp.read.return_value = list_xml
-            else:
-                mock_resp.read.return_value = _WHEEL_CONTENT
-            return mock_resp
-
-        mock_urlopen.side_effect = fake_urlopen
-
         trust_anchor = tmp_path / 'root.json'
         trust_anchor.write_text('{}')
+        mock_urlopen.return_value.__enter__ = lambda s: s
+        mock_urlopen.return_value.__exit__ = MagicMock(return_value=False)
+        mock_urlopen.return_value.read.return_value = _WHEEL_CONTENT
 
-        downloader = TUFPointerDownloader(repository_url=_REPO_URL, trust_anchor=trust_anchor)
+        downloader = TUFPointerDownloader(
+            repository_url=_REPO_URL, trust_anchor=trust_anchor
+        )
         downloader.download(_PROJECT, dest_dir=tmp_path)
 
         mock_updater.get_targetinfo.assert_called_once_with(target_path)
-
-
-# ---------------------------------------------------------------------------
-# S3 listing helpers
-# ---------------------------------------------------------------------------
-
-
-def _list_xml(versions: list[str], *, prefix: str | None = None) -> bytes:
-    """Build a minimal ListBucketResult XML body for the supplied versions."""
-    prefix = prefix or f'targets/{_PROJECT}/'
-    contents = ''.join(f'<Contents><Key>{prefix}{v}.json</Key><Size>123</Size></Contents>' for v in versions)
-    return (
-        '<?xml version="1.0" encoding="UTF-8"?>'
-        '<ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">'
-        f'<Name>my-bucket</Name><Prefix>{prefix}</Prefix>'
-        f'<KeyCount>{len(versions)}</KeyCount><MaxKeys>1000</MaxKeys>'
-        '<IsTruncated>false</IsTruncated>'
-        f'{contents}'
-        '</ListBucketResult>'
-    ).encode()
-
-
-def _truncated_list_xml(versions: list[str], *, next_token: str) -> bytes:
-    prefix = f'targets/{_PROJECT}/'
-    contents = ''.join(f'<Contents><Key>{prefix}{v}.json</Key><Size>123</Size></Contents>' for v in versions)
-    return (
-        '<?xml version="1.0" encoding="UTF-8"?>'
-        '<ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">'
-        f'<Name>my-bucket</Name><Prefix>{prefix}</Prefix>'
-        f'<KeyCount>{len(versions)}</KeyCount><MaxKeys>1000</MaxKeys>'
-        '<IsTruncated>true</IsTruncated>'
-        f'<NextContinuationToken>{next_token}</NextContinuationToken>'
-        f'{contents}'
-        '</ListBucketResult>'
-    ).encode()
-
-
-@pytest.mark.offline
-class TestLatestResolution:
-    """Behaviour of the bucket-listing latest-version resolver."""
-
-    @patch('datadog_checks.downloader.download_v2.urllib.request.urlopen')
-    def test_picks_max_stable_version(self, mock_urlopen):
-        """Stable versions are compared with PEP 440, picking the maximum."""
-        mock_urlopen.return_value.__enter__ = lambda s: s
-        mock_urlopen.return_value.__exit__ = MagicMock(return_value=False)
-        mock_urlopen.return_value.read.return_value = _list_xml(['1.0.0', '2.0.0', '10.0.0'])
-
-        downloader = TUFPointerDownloader(repository_url=_REPO_URL, disable_verification=True)
-        assert downloader._resolve_latest_version(_PROJECT) == '10.0.0'
-
-    @patch('datadog_checks.downloader.download_v2.urllib.request.urlopen')
-    def test_filters_pre_releases(self, mock_urlopen):
-        """Pre-releases (rcN, devN, +local) must never be picked as latest."""
-        mock_urlopen.return_value.__enter__ = lambda s: s
-        mock_urlopen.return_value.__exit__ = MagicMock(return_value=False)
-        mock_urlopen.return_value.read.return_value = _list_xml(['1.0.0', '2.0.0rc1', '2.0.0.dev1', '2.0.0+local.1'])
-
-        downloader = TUFPointerDownloader(repository_url=_REPO_URL, disable_verification=True)
-        assert downloader._resolve_latest_version(_PROJECT) == '1.0.0'
-
-    @patch('datadog_checks.downloader.download_v2.urllib.request.urlopen')
-    def test_post_releases_count_as_stable(self, mock_urlopen):
-        """``X.Y.Z.postN`` is a stable bug-fix release per PEP 440."""
-        mock_urlopen.return_value.__enter__ = lambda s: s
-        mock_urlopen.return_value.__exit__ = MagicMock(return_value=False)
-        mock_urlopen.return_value.read.return_value = _list_xml(['1.0.0', '1.0.0.post1'])
-
-        downloader = TUFPointerDownloader(repository_url=_REPO_URL, disable_verification=True)
-        assert downloader._resolve_latest_version(_PROJECT) == '1.0.0.post1'
-
-    @patch('datadog_checks.downloader.download_v2.urllib.request.urlopen')
-    def test_no_stable_version_raises(self, mock_urlopen):
-        """A project with only pre-releases must surface a clear error
-        rather than silently picking a non-stable build."""
-        mock_urlopen.return_value.__enter__ = lambda s: s
-        mock_urlopen.return_value.__exit__ = MagicMock(return_value=False)
-        mock_urlopen.return_value.read.return_value = _list_xml(['1.0.0rc1', '1.0.0.dev1'])
-
-        downloader = TUFPointerDownloader(repository_url=_REPO_URL, disable_verification=True)
-        with pytest.raises(TargetNotFoundError, match='No stable version'):
-            downloader._resolve_latest_version(_PROJECT)
-
-    @patch('datadog_checks.downloader.download_v2.urllib.request.urlopen')
-    def test_paginated_listing_aggregates_keys(self, mock_urlopen):
-        """A truncated listing must follow the continuation token so a
-        project with >1000 versions still resolves correctly."""
-        page1 = _truncated_list_xml(['1.0.0'], next_token='tok')
-        page2 = _list_xml(['9.9.9'])
-
-        responses = [page1, page2]
-
-        def fake_urlopen(url):
-            mock_resp = MagicMock()
-            mock_resp.__enter__ = lambda s: s
-            mock_resp.__exit__ = MagicMock(return_value=False)
-            mock_resp.read.return_value = responses.pop(0)
-            return mock_resp
-
-        mock_urlopen.side_effect = fake_urlopen
-
-        downloader = TUFPointerDownloader(repository_url=_REPO_URL, disable_verification=True)
-        assert downloader._resolve_latest_version(_PROJECT) == '9.9.9'
-
-    @patch('datadog_checks.downloader.download_v2.urllib.request.urlopen')
-    def test_ignores_non_pointer_keys(self, mock_urlopen):
-        """Keys under ``targets/<project>/`` that aren't ``<version>.json``
-        (e.g. an accidentally-published file) must be silently skipped."""
-        prefix = f'targets/{_PROJECT}/'
-        body = (
-            '<?xml version="1.0" encoding="UTF-8"?>'
-            '<ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">'
-            f'<Prefix>{prefix}</Prefix><IsTruncated>false</IsTruncated>'
-            f'<Contents><Key>{prefix}1.0.0.json</Key></Contents>'
-            f'<Contents><Key>{prefix}README.txt</Key></Contents>'
-            f'<Contents><Key>{prefix}sub/dir/2.0.0.json</Key></Contents>'
-            '</ListBucketResult>'
-        ).encode()
-        mock_urlopen.return_value.__enter__ = lambda s: s
-        mock_urlopen.return_value.__exit__ = MagicMock(return_value=False)
-        mock_urlopen.return_value.read.return_value = body
-
-        downloader = TUFPointerDownloader(repository_url=_REPO_URL, disable_verification=True)
-        assert downloader._resolve_latest_version(_PROJECT) == '1.0.0'
 
 
 # ---------------------------------------------------------------------------
@@ -316,7 +187,9 @@ class TestTargetNotFound:
         trust_anchor = tmp_path / 'root.json'
         trust_anchor.write_text('{}')
 
-        downloader = TUFPointerDownloader(repository_url=_REPO_URL, trust_anchor=trust_anchor)
+        downloader = TUFPointerDownloader(
+            repository_url=_REPO_URL, trust_anchor=trust_anchor
+        )
         with pytest.raises(TargetNotFoundError, match=_PROJECT):
             downloader.get_pointer(_PROJECT, version='99.99.99')
 
@@ -338,7 +211,9 @@ class TestDigestMismatch:
         trust_anchor = tmp_path / 'root.json'
         trust_anchor.write_text('{}')
 
-        downloader = TUFPointerDownloader(repository_url=_REPO_URL, trust_anchor=trust_anchor)
+        downloader = TUFPointerDownloader(
+            repository_url=_REPO_URL, trust_anchor=trust_anchor
+        )
         with pytest.raises(DigestMismatch, match=_PROJECT):
             downloader.download(_PROJECT, version=_VERSION, dest_dir=tmp_path)
 
@@ -357,7 +232,9 @@ class TestDigestMismatch:
         trust_anchor = tmp_path / 'root.json'
         trust_anchor.write_text('{}')
 
-        downloader = TUFPointerDownloader(repository_url=_REPO_URL, trust_anchor=trust_anchor)
+        downloader = TUFPointerDownloader(
+            repository_url=_REPO_URL, trust_anchor=trust_anchor
+        )
         with pytest.raises(DigestMismatch, match='length'):
             downloader.download(_PROJECT, version=_VERSION, dest_dir=tmp_path)
 
@@ -389,7 +266,9 @@ class TestDisableVerification:
 
         mock_urlopen.side_effect = fake_urlopen
 
-        downloader = TUFPointerDownloader(repository_url=_REPO_URL, disable_verification=True)
+        downloader = TUFPointerDownloader(
+            repository_url=_REPO_URL, disable_verification=True
+        )
         # Use deliberately wrong digest in pointer — should not raise
         bad_pointer = {**_POINTER, 'digest': 'deadbeef' * 8}
         pointer_bytes = json.dumps(bad_pointer).encode()
@@ -409,6 +288,8 @@ class TestDisableVerification:
         )
         mock_urlopen.side_effect = http_404
 
-        downloader = TUFPointerDownloader(repository_url=_REPO_URL, disable_verification=True)
+        downloader = TUFPointerDownloader(
+            repository_url=_REPO_URL, disable_verification=True
+        )
         with pytest.raises(TargetNotFoundError):
             downloader.get_pointer(_PROJECT, version='99.0.0')
