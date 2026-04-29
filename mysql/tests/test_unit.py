@@ -433,6 +433,37 @@ def test_submit_is_called_if_too_many_columns():
         assert mocked_submit.call_count == 2
 
 
+def test_get_tables_data_uses_parameterized_queries():
+    """Table names must be passed as query parameters, not interpolated into SQL strings."""
+    check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
+    databases_data = DatabasesData({}, check, check._config)
+
+    table_list = [{"name": 'normal_table'}, {"name": 'bad"table'}, {"name": "x\") UNION SELECT user()#"}]
+    execute_calls = []
+
+    class MockCursor:
+        def execute(self, query, params=None):
+            execute_calls.append((query, params))
+
+        def fetchall(self):
+            return []
+
+    def fake_index_query(v, m, p):
+        return "SELECT 1 WHERE s = %s AND n IN ({})".format(p)
+
+    with mock.patch('datadog_checks.mysql.databases_data.get_indexes_query', side_effect=fake_index_query):
+        databases_data._get_tables_data(table_list, "mydb", MockCursor())
+
+    table_name_list = [str(t["name"]) for t in table_list]
+
+    assert execute_calls, "Expected at least one query to be executed"
+    for query, params in execute_calls:
+        assert isinstance(params, list)
+        assert params[0] == "mydb"
+        assert params[1:] == table_name_list
+        assert query.count('%s') == len(table_list) + 1
+
+
 def test_exception_handling_by_do_for_dbs():
     check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
     databases_data = DatabasesData({}, check, check._config)
@@ -697,3 +728,17 @@ def test_source_with_zero_replicas_emits_warning_service_check(aggregator, insta
         tags=['foo:bar', 'replication_mode:source'],
         count=1,
     )
+
+
+@pytest.mark.parametrize(
+    'exclude_hostname, expected_hostname',
+    [
+        (False, 'resolved.hostname'),
+        (True, None),
+    ],
+)
+def test_debug_stats_kwargs_respects_exclude_hostname(exclude_hostname, expected_hostname):
+    instance = {'server': 'localhost', 'user': 'datadog', 'exclude_hostname': exclude_hostname}
+    with mock.patch('datadog_checks.mysql.MySql.resolve_db_host', return_value='resolved.hostname'):
+        mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance])
+    assert mysql_check.debug_stats_kwargs()['hostname'] == expected_hostname

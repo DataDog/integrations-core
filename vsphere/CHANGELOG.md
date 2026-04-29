@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 9.4.1 / 2026-04-15
+
+***Fixed***:
+
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+
+## 9.4.0 / 2026-03-18 / Agent 7.78.0
+
+***Added***:
+
+* Add `ssl_ciphers` support for the SOAP connection to allow configuring TLS cipher suites when connecting to vCenter. ([#22723](https://github.com/DataDog/integrations-core/pull/22723))
+
 ## 9.3.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:

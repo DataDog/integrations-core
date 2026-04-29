@@ -255,6 +255,59 @@ def test_sqlserver_ao_metrics(
                 aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
 
 
+def test_sqlserver_availability_groups_query_uses_parameterized_queries(init_config, instance_docker_metrics):
+    ag_with_quotes = "AG1'; DROP TABLE foo; --"
+    instance_docker_metrics['database_metrics'] = {
+        'ao_metrics': {'enabled': True, 'availability_group': ag_with_quotes},
+    }
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    metrics = SqlserverAvailabilityGroupsMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=mock.MagicMock(),
+    )
+    q = metrics.queries[0]
+    assert "resource_group_id = ?" in q['query']
+    assert q['params'] == (ag_with_quotes,)
+
+
+def test_sqlserver_database_replication_stats_query_uses_parameterized_queries(init_config, instance_docker_metrics):
+    ag_with_quotes = "AG1'; DROP TABLE foo; --"
+    instance_docker_metrics['database_metrics'] = {
+        'ao_metrics': {'enabled': True, 'availability_group': ag_with_quotes},
+    }
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    metrics = SqlserverDatabaseReplicationStatsMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=mock.MagicMock(),
+    )
+    q = metrics.queries[0]
+    assert "resource_group_id = ?" in q['query']
+    assert q['params'] == (ag_with_quotes,)
+
+
+def test_sqlserver_availability_replicas_query_uses_parameterized_queries(init_config, instance_docker_metrics):
+    ag_with_quotes = "AG1'; DROP TABLE foo; --"
+    db_with_quotes = "mydb'; DROP TABLE bar; --"
+    instance_docker_metrics['database_metrics'] = {
+        'ao_metrics': {'enabled': True, 'availability_group': ag_with_quotes, 'ao_database': db_with_quotes},
+    }
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    metrics = SqlserverAvailabilityReplicasMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=mock.MagicMock(),
+    )
+    q = metrics.queries[0]
+    assert "resource_group_id = ?" in q['query']
+    assert "database_name = ?" in q['query']
+    assert q['params'] == (ag_with_quotes, db_with_quotes)
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize('include_ao_metrics', [True, False])
@@ -287,7 +340,7 @@ def test_sqlserver_availability_groups_metrics(
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
 
-    def execute_query_handler_mocked(query, db=None):
+    def execute_query_handler_mocked(query, db=None, params=None):
         return mocked_results
 
     availability_groups_metrics = SqlserverAvailabilityGroupsMetrics(
@@ -298,9 +351,9 @@ def test_sqlserver_availability_groups_metrics(
     )
 
     if availability_group:
-        assert availability_groups_metrics.queries[0]['query'].endswith(
-            f" where resource_group_id = '{availability_group}'"
-        )
+        q = availability_groups_metrics.queries[0]
+        assert "resource_group_id = ?" in q['query']
+        assert q.get('params') == (availability_group,)
 
     sqlserver_check._database_metrics = [availability_groups_metrics]
 
@@ -339,25 +392,31 @@ def test_sqlserver_availability_groups_metrics(
         pytest.param(
             None,
             None,
-            [('AG1', 'AG1', 'aoag_secondary', 'SYNCHRONIZED', 2), ('AG1', 'AG1', 'aoag_primary', 'SYNCHRONIZED', 2)],
+            [
+                ('AG1', 'AG1', 'aoag_secondary', 'HEALTHY', 2),
+                ('AG1', 'AG1', 'aoag_primary', 'HEALTHY', 2),
+            ],
             id='no availability_group, no only_emit_local',
         ),
         pytest.param(
             'AG1',
             None,
-            [('AG1', 'AG1', 'aoag_secondary', 'SYNCHRONIZED', 2), ('AG1', 'AG1', 'aoag_primary', 'SYNCHRONIZED', 2)],
+            [
+                ('AG1', 'AG1', 'aoag_secondary', 'HEALTHY', 2),
+                ('AG1', 'AG1', 'aoag_primary', 'HEALTHY', 2),
+            ],
             id='availability_group set, no only_emit_local',
         ),
         pytest.param(
             None,
             True,
-            [('AG1', 'AG1', 'aoag_primary', 'SYNCHRONIZED', 2)],
+            [('AG1', 'AG1', 'aoag_primary', 'HEALTHY', 2)],
             id='no availability_group, only_emit_local is True',
         ),
         pytest.param(
             'AG1',
             True,
-            [('AG1', 'AG1', 'aoag_primary', 'SYNCHRONIZED', 2)],
+            [('AG1', 'AG1', 'aoag_primary', 'HEALTHY', 2)],
             id='availability_group set, only_emit_local is True',
         ),
     ],
@@ -383,7 +442,7 @@ def test_sqlserver_database_replication_stats_metrics(
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
 
-    def execute_query_handler_mocked(query, db=None):
+    def execute_query_handler_mocked(query, db=None, params=None):
         return mocked_results
 
     database_replication_stats_metrics = SqlserverDatabaseReplicationStatsMetrics(
@@ -394,7 +453,8 @@ def test_sqlserver_database_replication_stats_metrics(
     )
 
     if availability_group:
-        assert f"resource_group_id = '{availability_group}'" in database_replication_stats_metrics.queries[0]['query']
+        assert "resource_group_id = ?" in database_replication_stats_metrics.queries[0]['query']
+        assert availability_group in database_replication_stats_metrics.queries[0].get('params', ())
     if only_emit_local:
         assert "is_local = 1" in database_replication_stats_metrics.queries[0]['query']
 
@@ -524,7 +584,7 @@ def test_sqlserver_availability_replicas_metrics(
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
 
-    def execute_query_handler_mocked(query, db=None):
+    def execute_query_handler_mocked(query, db=None, params=None):
         return mocked_results
 
     availability_replicas_metrics = SqlserverAvailabilityReplicasMetrics(
@@ -535,11 +595,13 @@ def test_sqlserver_availability_replicas_metrics(
     )
 
     if availability_group:
-        assert f"resource_group_id = '{availability_group}'" in availability_replicas_metrics.queries[0]['query']
+        assert "resource_group_id = ?" in availability_replicas_metrics.queries[0]['query']
+        assert availability_group in availability_replicas_metrics.queries[0].get('params', ())
     if only_emit_local:
         assert "is_local = 1" in availability_replicas_metrics.queries[0]['query']
     if ao_database:
-        assert f"database_name = '{ao_database}'" in availability_replicas_metrics.queries[0]['query']
+        assert "database_name = ?" in availability_replicas_metrics.queries[0]['query']
+        assert ao_database in availability_replicas_metrics.queries[0].get('params', ())
 
     sqlserver_check._database_metrics = [availability_replicas_metrics]
 
@@ -634,6 +696,72 @@ def test_sqlserver_fci_metrics(
             ] + tags
             for metric_name, metric_value in metrics:
                 aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_sqlserver_fci_metrics_without_cluster_name(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+):
+    """When sys.dm_hadr_cluster has no rows (HADR not configured), the OUTER APPLY returns NULL
+    for cluster_name. FCI metrics should still be collected, and the failover_cluster tag should
+    be omitted thanks to the tag_not_null column type."""
+    instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['database_metrics'] = {
+        'fci_metrics': {'enabled': True},
+    }
+
+    # Columns: (node_name, status_description, cluster_name, status, is_current_owner)
+    mocked_results = [
+        ('node1', 'up', None, 0, 1),
+        ('node2', 'down', None, 1, 0),
+    ]
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    def execute_query_handler_mocked(query, db=None):
+        return mocked_results
+
+    fci_metrics = SqlserverFciMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=execute_query_handler_mocked,
+    )
+
+    sqlserver_check._database_metrics = [fci_metrics]
+
+    dd_run_check(sqlserver_check)
+
+    base_tags = sqlserver_check._config.tags + [
+        "database_hostname:{}".format("stubbed.hostname"),
+        "database_instance:{}".format("stubbed.hostname"),
+        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
+    ]
+
+    metric_names = fci_metrics.metric_names()[0]
+
+    for node_name, status, _cluster_name, *metric_values in mocked_results:
+        # Metrics should still be emitted with node_name and status tags, but without failover_cluster
+        expected_tags = [
+            f'node_name:{node_name}',
+            f'status:{status}',
+        ] + base_tags
+
+        for metric_name, metric_value in zip(metric_names, metric_values):
+            aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
+
+        # Verify that no failover_cluster tag was emitted (tag_not_null skips NULL values)
+        for metric_name in metric_names:
+            for metric_stub in aggregator.metrics(metric_name):
+                if f'node_name:{node_name}' in metric_stub.tags:
+                    assert all(not tag.startswith('failover_cluster:') for tag in metric_stub.tags), (
+                        "failover_cluster tag should not be present when cluster_name is NULL"
+                    )
 
 
 @pytest.mark.integration
@@ -950,6 +1078,69 @@ def test_sqlserver_index_usage_metrics(
     dd_run_check(sqlserver_check)
     for metric_name in index_usage_metrics.metric_names()[0]:
         aggregator.assert_metric(metric_name, count=0)
+
+
+def test_sqlserver_db_fragmentation_query_uses_parameterized_queries(init_config, instance_docker_metrics):
+    instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['database_metrics'] = {
+        'db_fragmentation_metrics': {'enabled': True, 'enabled_tempdb': False},
+    }
+    db_with_quotes = "legit_db'; DROP TABLE foo; --"
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    captured_queries = []
+
+    def capture_new_query_executor(queries, **kwargs):
+        captured_queries.extend(queries)
+        return mock.MagicMock()
+
+    db_fragmentation_metrics = SqlserverDBFragmentationMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=capture_new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=mock.MagicMock(),
+        databases=[db_with_quotes],
+    )
+
+    db_fragmentation_metrics._build_query_executors()
+
+    assert len(captured_queries) == 1
+    q = captured_queries[0]
+    assert "DB_ID(?)" in q['query']
+    assert q['params'] == (db_with_quotes,)
+
+
+def test_sqlserver_db_fragmentation_object_names_uses_parameterized_queries(init_config, instance_docker_metrics):
+    obj_with_quotes = "my_obj'; DROP TABLE foo; --"
+    instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['database_metrics'] = {
+        'db_fragmentation_metrics': {'enabled': True, 'enabled_tempdb': False},
+    }
+    instance_docker_metrics['db_fragmentation_object_names'] = [obj_with_quotes]
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    captured_queries = []
+
+    def capture_new_query_executor(queries, **kwargs):
+        captured_queries.extend(queries)
+        return mock.MagicMock()
+
+    db_fragmentation_metrics = SqlserverDBFragmentationMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=capture_new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=mock.MagicMock(),
+        databases=['master'],
+    )
+
+    db_fragmentation_metrics._build_query_executors()
+
+    assert len(captured_queries) == 1
+    q = captured_queries[0]
+    assert "IN (?)" in q['query']
+    assert q['params'] == ('master', obj_with_quotes)
 
 
 @pytest.mark.integration

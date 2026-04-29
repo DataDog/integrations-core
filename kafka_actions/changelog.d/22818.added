@@ -1,1 +1,0 @@
-Add support for Kerberos (GSSAPI), OAuth (OAUTHBEARER with OIDC and AWS MSK IAM), and TLS/SSL certificate authentication, matching kafka_consumer authentication options.

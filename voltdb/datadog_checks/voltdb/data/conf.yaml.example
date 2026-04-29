@@ -79,6 +79,7 @@ instances:
 
     ## @param statistics_components - list of strings - optional
     ## List VoltDB components to collect metrics. A subset of components are collected by default.
+    ##
     ## See: https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php
     ## The following components are supported:
     ##  - COMMANDLOG

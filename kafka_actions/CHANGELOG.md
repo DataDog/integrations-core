@@ -2,6 +2,51 @@
 
 <!-- towncrier release notes start -->
 
+## 2.6.0 / 2026-04-15
+
+***Added***:
+
+* Update dependencies ([#22996](https://github.com/DataDog/integrations-core/pull/22996))
+* Add raw message format with base64 encoding for key and value deserialization ([#23023](https://github.com/DataDog/integrations-core/pull/23023))
+* Base64-encode binary headers and support header filtering in jq-style filters ([#23106](https://github.com/DataDog/integrations-core/pull/23106))
+
+***Fixed***:
+
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+* Fix filter type coercion for numeric comparisons on protobuf int64 fields ([#23162](https://github.com/DataDog/integrations-core/pull/23162))
+* Fix Avro deserialization for schemas with logical types (decimal, uuid, date, time, timestamp) that caused "Object of type ... is not JSON serializable" errors. ([#23224](https://github.com/DataDog/integrations-core/pull/23224))
+
+## 2.5.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
+***Fixed***:
+
+* Accept list format for `kafka_connect_str` when copied from kafka_consumer config via autodiscovery ([#23115](https://github.com/DataDog/integrations-core/pull/23115))
+
+## 2.4.1 / 2026-03-24
+
+***Fixed***:
+
+* Return early from consume_messages when end of partition is reached instead of waiting for timeout ([#23004](https://github.com/DataDog/integrations-core/pull/23004))
+
+## 2.4.0 / 2026-03-18
+
+***Added***:
+
+* Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707))
+* Add support for Kerberos (GSSAPI), OAuth (OAUTHBEARER with OIDC and AWS MSK IAM), and TLS/SSL certificate authentication, matching kafka_consumer authentication options. ([#22818](https://github.com/DataDog/integrations-core/pull/22818))
+* Bump `confluent-kafka` to 2.13.2 ([#22829](https://github.com/DataDog/integrations-core/pull/22829))
+* Add Schema Registry support for automatic schema fetching when reading Kafka messages with protobuf, avro, or JSON schemas. ([#22867](https://github.com/DataDog/integrations-core/pull/22867))
+* Add start_timestamp support for read_messages action to seek by timestamp instead of offset. ([#22893](https://github.com/DataDog/integrations-core/pull/22893))
+
+***Fixed***:
+
+* Fix consumer timeout when reading latest N messages by seeking back from high watermark instead of positioning at OFFSET_END ([#22797](https://github.com/DataDog/integrations-core/pull/22797))
+* Use the actual Kafka message timestamp instead of current time for message_timestamp in read_messages events. ([#22895](https://github.com/DataDog/integrations-core/pull/22895))
+
 ## 2.3.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:
