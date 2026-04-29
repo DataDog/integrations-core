@@ -12,6 +12,7 @@ from ddev.ai.tools.fs.file_access_policy import FileAccessError, FileAccessPolic
 
 def test_canonicalize_path_expands_tilde(tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))  # Windows uses USERPROFILE, not HOME
     assert canonicalize_path("~/foo") == tmp_path / "foo"
 
 
@@ -43,6 +44,7 @@ def test_assert_writable_returns_canonical_path(tmp_path) -> None:
 
 def test_assert_readable_expands_tilde(tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))  # Windows uses USERPROFILE, not HOME
     policy = FileAccessPolicy(read_deny_names=(), read_deny_roots=())
     returned = policy.assert_readable("~/file.txt")
     assert returned == tmp_path / "file.txt"

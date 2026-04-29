@@ -213,6 +213,7 @@ async def test_grep_allows_normal_path(tmp_path) -> None:
 
 async def test_create_file_with_tilde_path_writes_to_home_when_authorized(tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))  # Windows uses USERPROFILE, not HOME
     policy = FileAccessPolicy(write_root=tmp_path, read_deny_names=(), read_deny_roots=())
     registry = FileRegistry(policy=policy)
     tool = CreateFileTool(registry, OWNER_ID)

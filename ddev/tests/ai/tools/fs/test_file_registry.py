@@ -114,6 +114,7 @@ def test_normalize_relative_and_absolute_are_same_key(registry: FileRegistry, tm
 
 def test_normalize_tilde_and_absolute_are_same_key(registry: FileRegistry, tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))  # Windows uses USERPROFILE, not HOME
 
     tilde_path = "~/foo.txt"
     abs_path = str(tmp_path / "foo.txt")
