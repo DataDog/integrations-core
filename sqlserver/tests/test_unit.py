@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import contextlib
 import copy
 import logging
 import os
@@ -23,6 +24,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_VERSION,
 )
 from datadog_checks.sqlserver.metrics import SqlFractionMetric
+from datadog_checks.sqlserver.schemas import KEY_PREFIX, KEY_PREFIX_PRE_2017, SQLServerSchemaCollector
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import (
     Database,
@@ -63,6 +65,60 @@ def test_construct_use_statement(db_name, expected):
     use_stmt = construct_use_statement(db_name)
 
     assert use_stmt == expected
+
+
+def create_schema_collector() -> SQLServerSchemaCollector:
+    check = mock.Mock()
+    check._config.schema_config = {}
+    check.log = mock.Mock()
+    check.static_info_cache = {}
+    return SQLServerSchemaCollector(check)
+
+
+def test_schema_collector_reuses_pre_2017_connection_for_table_detail_queries() -> None:
+    collector = create_schema_collector()
+    collector._is_2016_or_earlier = True
+    main_cursor = mock.Mock()
+    detail_cursor = mock.Mock()
+    detail_cursor.fetchall_dict.side_effect = [
+        [{"name": "id"}],
+        [{"name": "pk_table_1"}],
+        [{"foreign_key_name": "fk_table_1"}],
+        [{"name": "id"}],
+        [{"name": "pk_table_2"}],
+        [{"foreign_key_name": "fk_table_2"}],
+    ]
+    detail_cursor.fetchone_dict.side_effect = [{"partition_count": 1}, {"partition_count": 2}]
+    collector._check.connection.open_managed_default_connection.side_effect = [
+        contextlib.nullcontext(),
+        contextlib.nullcontext(),
+    ]
+    collector._check.connection.get_managed_cursor.side_effect = [
+        contextlib.nullcontext(main_cursor),
+        contextlib.nullcontext(detail_cursor),
+    ]
+    database = {"name": "datadog_test", "id": "1", "collation": "SQL_Latin1_General_CP1_CI_AS", "owner": "dbo"}
+    rows = [
+        {"schema_name": "test_schema", "schema_id": 1, "owner_name": "dbo", "table_name": "table_1", "table_id": 101},
+        {"schema_name": "test_schema", "schema_id": 1, "owner_name": "dbo", "table_name": "table_2", "table_id": 102},
+    ]
+
+    with collector._get_cursor("datadog_test"):
+        mapped_rows = [collector._map_row(database, row) for row in rows]
+
+    assert collector._check.connection.open_managed_default_connection.call_args_list == [
+        mock.call(KEY_PREFIX),
+        mock.call(KEY_PREFIX_PRE_2017),
+    ]
+    assert collector._check.connection.get_managed_cursor.call_args_list == [
+        mock.call(KEY_PREFIX),
+        mock.call(KEY_PREFIX_PRE_2017),
+    ]
+    assert detail_cursor.execute.call_args_list[0] == mock.call("USE [datadog_test];")
+    assert detail_cursor.execute.call_args_list.count(mock.call("USE [datadog_test];")) == 1
+    assert detail_cursor.execute.call_count == 9
+    assert collector._pre_2017_cursor is None
+    assert [row["schemas"][0]["tables"][0]["partitions"]["partition_count"] for row in mapped_rows] == [1, 2]
 
 
 def test_get_cursor(instance_docker):

@@ -81,6 +81,7 @@ class SQLServerSchemaCollector(SchemaCollector):
         )
         config.max_tables = check._config.schema_config.get('max_tables', 300)
         self._is_2016_or_earlier = None
+        self._pre_2017_cursor = None
         super().__init__(check, config)
 
     def collect_schemas(self):
@@ -108,13 +109,25 @@ class SQLServerSchemaCollector(SchemaCollector):
 
     @contextlib.contextmanager
     def _get_cursor(self, database_name):
-        with self._check.connection.open_managed_default_connection(KEY_PREFIX):
-            with self._check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
+        with contextlib.ExitStack() as stack:
+            try:
+                stack.enter_context(self._check.connection.open_managed_default_connection(KEY_PREFIX))
+                cursor = stack.enter_context(self._check.connection.get_managed_cursor(KEY_PREFIX))
                 switch_db_statement = construct_use_statement(database_name)
                 cursor.execute(switch_db_statement)
+
+                if self._is_2016_or_earlier:
+                    stack.enter_context(self._check.connection.open_managed_default_connection(KEY_PREFIX_PRE_2017))
+                    self._pre_2017_cursor = stack.enter_context(
+                        self._check.connection.get_managed_cursor(KEY_PREFIX_PRE_2017)
+                    )
+                    self._pre_2017_cursor.execute(switch_db_statement)
+
                 query = self._get_tables_query()
                 cursor.execute(query)
                 yield cursor
+            finally:
+                self._pre_2017_cursor = None
 
     def _get_tables_query(self):
         limit = int(self._config.max_tables or 1_000_000)
@@ -169,25 +182,25 @@ class SQLServerSchemaCollector(SchemaCollector):
         object = super()._map_row(database, cursor_row)
         if self._is_2016_or_earlier:
             # We need to fetch the related data for each table
-            # Use a key_prefix to get a separate connection to avoid conflicts with the main connection
-            with self._check.connection.open_managed_default_connection(KEY_PREFIX_PRE_2017):
-                with self._check.connection.get_managed_cursor(KEY_PREFIX_PRE_2017) as cursor:
-                    switch_db_statement = construct_use_statement(database.get("name"))
-                    cursor.execute(switch_db_statement)
-                    table_id = str(cursor_row.get("table_id"))
-                    columns_query = COLUMN_QUERY.replace("schema_tables.table_id", table_id)
-                    cursor.execute(columns_query)
-                    columns = cursor.fetchall_dict()
-                    indexes_query = INDEX_QUERY_PRE_2017.replace("schema_tables.table_id", table_id)
-                    cursor.execute(indexes_query)
-                    indexes = cursor.fetchall_dict()
-                    foreign_keys_query = FOREIGN_KEY_QUERY_PRE_2017.replace("schema_tables.table_id", table_id)
-                    cursor.execute(foreign_keys_query)
-                    foreign_keys = cursor.fetchall_dict()
-                    partitions_query = PARTITIONS_QUERY.replace("schema_tables.table_id", table_id)
-                    cursor.execute(partitions_query)
-                    partition_row = cursor.fetchone_dict()
-                    partition_count = partition_row.get("partition_count") if partition_row else None
+            # Use a separate connection to avoid conflicts with the main cursor while it streams table rows.
+            cursor = self._pre_2017_cursor
+            if cursor is None:
+                raise RuntimeError("pre-2017 schema cursor is not initialized")
+
+            table_id = str(cursor_row.get("table_id"))
+            columns_query = COLUMN_QUERY.replace("schema_tables.table_id", table_id)
+            cursor.execute(columns_query)
+            columns = cursor.fetchall_dict()
+            indexes_query = INDEX_QUERY_PRE_2017.replace("schema_tables.table_id", table_id)
+            cursor.execute(indexes_query)
+            indexes = cursor.fetchall_dict()
+            foreign_keys_query = FOREIGN_KEY_QUERY_PRE_2017.replace("schema_tables.table_id", table_id)
+            cursor.execute(foreign_keys_query)
+            foreign_keys = cursor.fetchall_dict()
+            partitions_query = PARTITIONS_QUERY.replace("schema_tables.table_id", table_id)
+            cursor.execute(partitions_query)
+            partition_row = cursor.fetchone_dict()
+            partition_count = partition_row.get("partition_count") if partition_row else None
         else:
             columns = json.loads(cursor_row.get("columns") or "[]")
             indexes = json.loads(cursor_row.get("indexes") or "[]")
