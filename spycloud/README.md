@@ -1,38 +1,31 @@
-# Agent Check: SpyCloud
-
 ## Overview
+[SpyCloud](https://spycloud.com/) recaptures exposed identity data from the criminal underground, including breaches, malware infections, and phishing activity, and makes this raw stolen data actionable for security teams.
 
-This check monitors [SpyCloud][1].
+This integration collects the following indicator types:
+- IP
+- Domain
+
+Integrate SpyCloud with Datadog to enhance your security logs with threat intelligence, enabling analysis of matched IOCs through pre-built dashboards. Additionally, the integration can be used for Cloud SIEM detection rules for enhanced monitoring and security.
 
 ## Setup
 
-### Installation
+### Obtain an API Key from SpyCloud Platform
 
-The SpyCloud check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+1. Log in to your SpyCloud Customer Portal.
+2. Navigate to the **API** tab in the sidebar.
+3. In the **Keys** section, copy the **API Key**.
 
-### Configuration
+### Connect your SpyCloud account to Datadog
 
-!!! Add list of steps to set up this integration !!!
-
-### Validation
-
-!!! Add steps to validate integration is functioning as expected !!!
-
-## Data Collected
-
-### Metrics
-
-SpyCloud does not include any metrics.
-
-### Events
-
-SpyCloud does not include any events.
+1. Provide following details.
+   | Parameter | Description |
+   | ---------- | ---------------------------------------------- |
+   | API Key | The API Key of your SpyCloud account. |
+   | Collect IP IOCs | Enable to collect IP IOCs. The default value is true. |
+   | Collect Domain IOCs | Enable to collect Domain IOCs. The default value is true. |
+   
+2. Click **Save**.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][3].
-
-[1]: **LINK_TO_INTEGRATION_SITE**
-[2]: https://app.datadoghq.com/account/settings/agent/latest
-[3]: https://docs.datadoghq.com/help/
+Need help? Contact  [Datadog support](https://docs.datadoghq.com/help/).
