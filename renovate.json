@@ -11,7 +11,8 @@
         "^\\.github/workflows/[^/]+\\.ya?ml$"
       ],
       "matchStrings": [
-        "(?<depName>[a-zA-Z][a-zA-Z0-9._-]*)==(?<currentValue>[0-9]+(?:\\.[0-9]+){1,2})"
+        "(?<depName>[a-zA-Z][a-zA-Z0-9._-]*)==(?<currentValue>[0-9]+(?:\\.[0-9]+){1,2})",
+        "# renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>[a-zA-Z][a-zA-Z0-9._-]*)\\s+[A-Z][A-Z0-9_]*: \"(?<currentValue>[0-9]+(?:\\.[0-9]+){1,2})\""
       ],
       "datasourceTemplate": "pypi"
     }

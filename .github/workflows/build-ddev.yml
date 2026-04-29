@@ -29,6 +29,7 @@ defaults:
 env:
   APP_NAME: ddev
   PYTHON_VERSION: "3.13"
+  # renovate: datasource=pypi depName=pyoxidizer
   PYOXIDIZER_VERSION: "0.24.0"
 
 jobs:
