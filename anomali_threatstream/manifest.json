@@ -7,7 +7,7 @@
     "tile": {
         "overview": "README.md#Overview",
         "configuration": "README.md#Setup",
-        "support": "README.md#Support",
+        "support": "README.md#Troubleshooting",
         "changelog": "CHANGELOG.md",
         "description": "Enriches your security logs with threat intelligence data from Anomali ThreatStream.",
         "title": "Anomali ThreatStream",
