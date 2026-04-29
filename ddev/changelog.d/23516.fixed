@@ -1,1 +1,0 @@
-Bumped datadog_checks_dev to version 38.0.0. Fixes dependency issues with new virtualenv.
