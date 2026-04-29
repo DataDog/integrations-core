@@ -221,6 +221,17 @@ exclude = [
 # Dependencies for the downloader that are security-related and should be updated separately from the others
 security_deps = ['in-toto', 'tuf', 'securesystemslib']
 
+# Historical corrections for Agent release documentation generated from
+# requirements-agent-release.txt. Ranges are inclusive.
+[overrides.release.agent.integrations.exclude_by_agent_version]
+"7.74.0..7.78.0" = [
+  "datadog-control-m",
+  "datadog-krakend",
+  "datadog-lustre",
+  "datadog-n8n",
+  "datadog-prefect",
+]
+
 
 # Explicitly mark folders as non-integrations. By default, all folders are assumed to be
 # integrations. Previously, only folders with manifest.json were considered integrations,

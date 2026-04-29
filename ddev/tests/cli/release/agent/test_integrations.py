@@ -53,6 +53,31 @@ def test_integrations_since_to(fake_integrations, ddev):
     assert result.output.rstrip('\n') == expected_output.strip('\n')
 
 
+def test_integrations_given_version_scoped_exclusion_returns_filtered_catalog_only_inside_range(
+    repo_with_agent_release_exclusion_range, ddev
+):
+    result = ddev('release', 'agent', 'integrations', '--since', '7.73.0', '--to', '7.78.1')
+    assert result.exit_code == 0
+
+    expected_output = """## Datadog Agent version 7.78.1
+
+* datadog-existingcheck: 2.0.0
+* datadog-temporary: 1.0.1
+
+## Datadog Agent version 7.78.0
+
+* datadog-existingcheck: 2.0.0
+
+## Datadog Agent version 7.74.0
+
+* datadog-existingcheck: 2.0.0
+
+## Datadog Agent version 7.73.0
+
+* datadog-existingcheck: 2.0.0"""
+    assert result.output.rstrip('\n') == expected_output.strip('\n')
+
+
 @pytest.fixture
 def repo_with_fake_integrations(repo_with_history, config_file):
     config_file.model.repos['core'] = str(repo_with_history.path)
