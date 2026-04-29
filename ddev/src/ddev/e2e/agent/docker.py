@@ -233,11 +233,14 @@ class DockerAgent(AgentInterface):
                 ensure_local_pkg = partial(disable_integration_before_install, self.config_file)
         else:
             # No static config: in autodiscovery setups the Agent would otherwise use the `auto_conf.yaml`
-            # baked into its image. Override that with the integration's own shipped copy so e2e tests
-            # verify what we ship rather than what's currently in the Agent image.
-            auto_conf = self.integration.package_directory / 'data' / 'auto_conf.yaml'
-            if auto_conf.is_file():
-                volumes.append(f'{auto_conf}:{self._config_mount_dir}/auto_conf.yaml:ro')
+            # baked into its image. Override that with the integration's own shipped copies so e2e tests
+            # verify what we ship rather than what's currently in the Agent image. Glob covers both the
+            # legacy single-file form and the multi-file form (e.g. `auto_conf.yaml` plus
+            # `auto_conf_process.yaml` for process autodiscovery).
+            data_dir = self.integration.package_directory / 'data'
+            if data_dir.is_dir():
+                for auto_conf in sorted(data_dir.glob('auto_conf*.yaml')):
+                    volumes.append(f'{auto_conf}:{self._config_mount_dir}/{auto_conf.name}:ro')
 
         # It is safe to assume that the directory name is unique across all repos
         for local_package in local_packages:
