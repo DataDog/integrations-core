@@ -815,3 +815,229 @@ def test_alert_state_metrics_do_not_carry_status_tag(
             assert not any(t.startswith("ntnx_alert_status:") for t in m.tags), (
                 f"{name} should not carry ntnx_alert_status tag (redundant with metric name)"
             )
+
+
+# --- Edge cases: state transitions, filter changes, deletion, empty list ---
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_alert_open_metric_zero_on_resolution_from_acknowledged_state(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
+):
+    """Resolution from the acknowledged state closes nutanix.alert.acknowledged, not .open."""
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    # Specifically pick an alert tracked in the acknowledged state
+    target_ext_id = next(ext_id for ext_id, a in check.activity_monitor._open_alerts.items() if a.get("isAcknowledged"))
+
+    aggregator.reset()
+
+    resolved_alert = {
+        "extId": target_ext_id,
+        "isResolved": True,
+        "resolvedTime": "2026-03-04T01:10:00.000000Z",
+        "resolvedByUsername": "admin",
+        "isAutoResolved": False,
+        "isAcknowledged": True,
+        "title": "Resolved Acknowledged Alert",
+        "alertType": "A1031",
+        "severity": "WARNING",
+    }
+
+    remaining = [a for a in check.activity_monitor._open_alerts.values() if a.get("extId") != target_ext_id]
+    mocker.patch.object(check.activity_monitor, '_list_alerts_unresolved', return_value=remaining)
+    mocker.patch.object(check.activity_monitor, '_get_alert', return_value=resolved_alert)
+
+    dd_run_check(check)
+
+    ack_zeros = [
+        m
+        for m in aggregator.metrics("nutanix.alert.acknowledged")
+        if m.value == 0 and f"ext_id:{target_ext_id}" in m.tags
+    ]
+    assert len(ack_zeros) == 1
+
+    # No :0 on nutanix.alert.open for this ext_id (it never was in that state on this run)
+    open_zeros = [
+        m for m in aggregator.metrics("nutanix.alert.open") if m.value == 0 and f"ext_id:{target_ext_id}" in m.tags
+    ]
+    assert len(open_zeros) == 0
+
+    resolved_metrics = [
+        m for m in aggregator.metrics("nutanix.alert.resolved") if m.value == 1 and f"ext_id:{target_ext_id}" in m.tags
+    ]
+    assert len(resolved_metrics) == 1
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_alert_state_transition_acknowledged_to_open(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
+):
+    """Un-acknowledging in Nutanix moves the alert back from .acknowledged to .open."""
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    target_ext_id = next(ext_id for ext_id, a in check.activity_monitor._open_alerts.items() if a.get("isAcknowledged"))
+
+    aggregator.reset()
+
+    # Same unresolved set, but the target is now un-acknowledged
+    refreshed = []
+    for ext_id, a in check.activity_monitor._open_alerts.items():
+        if ext_id == target_ext_id:
+            updated = dict(a)
+            updated["isAcknowledged"] = False
+            refreshed.append(updated)
+        else:
+            refreshed.append(a)
+
+    mocker.patch.object(check.activity_monitor, '_list_alerts_unresolved', return_value=refreshed)
+
+    dd_run_check(check)
+
+    ack_zeros = [
+        m
+        for m in aggregator.metrics("nutanix.alert.acknowledged")
+        if m.value == 0 and f"ext_id:{target_ext_id}" in m.tags
+    ]
+    assert len(ack_zeros) == 1
+
+    open_ones = [
+        m for m in aggregator.metrics("nutanix.alert.open") if m.value == 1 and f"ext_id:{target_ext_id}" in m.tags
+    ]
+    assert len(open_ones) >= 1
+
+    # Target should not have a :1 on .acknowledged this cycle
+    ack_ones_target = [
+        m
+        for m in aggregator.metrics("nutanix.alert.acknowledged")
+        if m.value == 1 and f"ext_id:{target_ext_id}" in m.tags
+    ]
+    assert len(ack_ones_target) == 0
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_alert_filter_excludes_tracked_alert_emits_spurious_resolution(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
+):
+    """A tracked alert that becomes filter-excluded mid-life is currently treated as resolved.
+
+    Documents existing behavior: when a resource_filter is added that excludes a
+    previously-tracked alert, reconciliation sees it disappear from api_alerts and
+    emits a resolution event + nutanix.alert.resolved=1 — even though Prism Central
+    still has the alert open. Operators changing filter rules should be aware.
+    """
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    target_ext_id = next(iter(check.activity_monitor._open_alerts))
+
+    aggregator.reset()
+
+    # Simulate adding a filter that excludes the target ext_id mid-life
+    original = check.activity_monitor._should_collect_activity_item
+    mocker.patch.object(
+        check.activity_monitor,
+        '_should_collect_activity_item',
+        side_effect=lambda item, kind: item.get("extId") != target_ext_id and original(item, kind),
+    )
+
+    dd_run_check(check)
+
+    resolved_events = [
+        e
+        for e in aggregator.events
+        if "ntnx_alert_status:resolved" in e.get("tags", []) and f"ext_id:{target_ext_id}" in e.get("tags", [])
+    ]
+    assert len(resolved_events) == 1
+    assert target_ext_id not in check.activity_monitor._open_alerts
+
+    resolved_metrics = [
+        m for m in aggregator.metrics("nutanix.alert.resolved") if m.value == 1 and f"ext_id:{target_ext_id}" in m.tags
+    ]
+    assert len(resolved_metrics) == 1
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_alerts_collection_empty_unresolved_list(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
+):
+    """Cold start with no open alerts in Prism Central is a clean no-op."""
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    mocker.patch.object(check.activity_monitor, '_list_alerts_unresolved', return_value=[])
+    dd_run_check(check)
+
+    assert check.activity_monitor.alerts_count == 0
+    assert check.activity_monitor._open_alerts == {}
+    assert [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])] == []
+    for name in ("nutanix.alert.open", "nutanix.alert.acknowledged", "nutanix.alert.resolved"):
+        assert list(aggregator.metrics(name)) == []
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_alert_resolution_with_no_metadata_when_alert_deleted(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
+):
+    """An alert deleted (not resolved) in Nutanix: _get_alert returns None; falls back to cached metadata.
+
+    Exercises the bare 'Resolved' msg_text fallback (no resolvedByUsername, not auto-resolved)
+    and the cached-tags path when the API can no longer return the alert.
+    """
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    target_ext_id = next(iter(check.activity_monitor._open_alerts))
+    cached_state = check.activity_monitor._open_alerts[target_ext_id].copy()
+    prior_state = "acknowledged" if cached_state.get("isAcknowledged") else "open"
+
+    aggregator.reset()
+
+    remaining = [a for a in check.activity_monitor._open_alerts.values() if a.get("extId") != target_ext_id]
+    mocker.patch.object(check.activity_monitor, '_list_alerts_unresolved', return_value=remaining)
+    mocker.patch.object(check.activity_monitor, '_get_alert', return_value=None)
+
+    dd_run_check(check)
+
+    resolution_events = [
+        e
+        for e in aggregator.events
+        if "ntnx_alert_status:resolved" in e.get("tags", []) and f"ext_id:{target_ext_id}" in e.get("tags", [])
+    ]
+    assert len(resolution_events) == 1
+    # No resolvedByUsername and isAutoResolved defaults to False on the cached alert,
+    # so the message falls through to the bare "Resolved" branch.
+    assert resolution_events[0]["msg_text"] == "Resolved"
+    assert "ntnx_alert_auto_resolved:false" in resolution_events[0]["tags"]
+
+    zero_metrics = [
+        m
+        for m in aggregator.metrics(f"nutanix.alert.{prior_state}")
+        if m.value == 0 and f"ext_id:{target_ext_id}" in m.tags
+    ]
+    assert len(zero_metrics) == 1
+
+    resolved_metrics = [
+        m for m in aggregator.metrics("nutanix.alert.resolved") if m.value == 1 and f"ext_id:{target_ext_id}" in m.tags
+    ]
+    assert len(resolved_metrics) == 1
