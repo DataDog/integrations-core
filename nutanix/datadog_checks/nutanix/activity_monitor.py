@@ -203,6 +203,10 @@ class ActivityMonitor:
         """Return 'acknowledged' or 'open' based on the alert's flags."""
         return "acknowledged" if alert.get("isAcknowledged") else "open"
 
+    def _submit_state_metric(self, alert: dict, state: str, value: int) -> None:
+        """Submit nutanix.alert.<state>=<value> with the per-alert tag set."""
+        self.check.gauge(f"alert.{state}", value, tags=self._build_alert_tags(alert, state))
+
     def _reconcile_alerts(self) -> int:
         """Reconcile in-memory open alerts against the unresolved-alerts API.
 
@@ -251,7 +255,7 @@ class ActivityMonitor:
             old_state = self._alert_state(old_alert)
             new_state = self._alert_state(new_alert)
             if old_state != new_state:
-                self.check.gauge(f"alert.{old_state}", 0, tags=self._build_alert_tags(old_alert, old_state))
+                self._submit_state_metric(old_alert, old_state, 0)
             self._open_alerts[ext_id] = new_alert
 
         return count
@@ -583,14 +587,11 @@ class ActivityMonitor:
 
         # Close whichever per-state metric was last :1 for this alert.
         prev_alert = cached_tags_alert or alert
-        prev_state = self._alert_state(prev_alert)
-        prev_tags = self._build_alert_tags(prev_alert, prev_state)
-        self.check.gauge(f"alert.{prev_state}", 0, tags=prev_tags)
+        self._submit_state_metric(prev_alert, self._alert_state(prev_alert), 0)
 
-        # One-shot signal that this alert entered the resolved state.
-        # Tagged with ntnx_alert_status:resolved (and ntnx_alert_auto_resolved
-        # in alert_tags above); useful for resolution-rate dashboards and
-        # "recently resolved" panels.
+        # One-shot signal that the alert entered the resolved state. Uses the
+        # event tag set (which includes ntnx_alert_auto_resolved) for richer
+        # dashboard filtering on resolution rate.
         self.check.gauge("alert.resolved", 1, tags=alert_tags)
 
     def emit_open_alert_metrics(self) -> None:
@@ -602,8 +603,7 @@ class ActivityMonitor:
         don't go no-data while the underlying Nutanix alert is open.
         """
         for alert in self._open_alerts.values():
-            state = self._alert_state(alert)
-            self.check.gauge(f"alert.{state}", 1, tags=self._build_alert_tags(alert, state))
+            self._submit_state_metric(alert, self._alert_state(alert), 1)
 
     def _process_task(self, task: dict) -> None:
         """Process and send a single task to Datadog as an event."""
