@@ -26,8 +26,7 @@ on:
           or triggering downstream wheel builds.
         required: false
         type: boolean
-        # TODO: flip back to false once agent-integration-wheels-release is updated to handle the new payload
-        default: true
+        default: false
       ddev-version:
         description: "ddev version, pinned by default."
         required: false
@@ -40,6 +39,11 @@ on:
 permissions:
   id-token: write
   contents: write # ddev needs to push tags
+
+env:
+  # Default ddev version when callers don't pass `ddev-version`. Tracked by Renovate.
+  # renovate: datasource=pypi depName=ddev
+  DEFAULT_DDEV_VERSION: "14.3.2"
 
 jobs:
   prepare:
@@ -56,7 +60,7 @@ jobs:
           fetch-depth: 0 # ddev needs full tag history
 
       - name: Install ddev
-        run: pip install "ddev${{ inputs.ddev-version && format('=={0}', inputs.ddev-version) || '==14.3.2' }}"
+        run: pip install "ddev==${{ inputs.ddev-version || env.DEFAULT_DDEV_VERSION }}"
 
       - name: Configure ddev
         env:

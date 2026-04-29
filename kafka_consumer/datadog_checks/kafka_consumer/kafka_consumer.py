@@ -149,6 +149,7 @@ class KafkaCheck(AgentCheck):
             'config_type': 'heartbeat',
             'contexts': total_contexts,
             'contexts_limit': self._context_limit,
+            'bootstrap_servers': self.config._kafka_connect_str,
         }
         if self.config._kafka_cluster_id_override:
             payload['original_kafka_cluster_id'] = self.config._auto_detected_cluster_id
