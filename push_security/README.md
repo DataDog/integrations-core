@@ -49,4 +49,3 @@ For further assistance, contact [Datadog support][4].
 [2]: https://pushsecurity.redoc.ly/webhooks-v1#operation/account-event
 [3]: http://login.pushsecurity.com/u/login
 [4]: https://docs.datadoghq.com/help/
-[5]: /integrations/push-security

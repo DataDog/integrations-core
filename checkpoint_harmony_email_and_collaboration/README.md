@@ -56,5 +56,4 @@ Need help? Contact [Datadog support][3].
 [1]: https://www.checkpoint.com/harmony/email-security/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/help/
-[4]: https://app.datadoghq.com/integrations/checkpoint_harmony_email_and_collaboration
 [5]: https://portal.checkpoint.com/

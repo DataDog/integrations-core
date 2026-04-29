@@ -65,7 +65,6 @@ The BeyondTrust Identity Security Insights integration does not include any even
 For any further assistance, contact [Datadog support][4].
 
 [1]: https://www.beyondtrust.com/products/identity-security-insights
-[2]: /integrations/beyondtrust-identity-security-insights
 [3]: https://login.beyondtrust.io/signin/signIn
 [4]: https://docs.datadoghq.com/help/
 [5]: https://docs.datadoghq.com/actions/workflows/

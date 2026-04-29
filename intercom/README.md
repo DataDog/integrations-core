@@ -83,6 +83,5 @@ For further assistance, contact [Datadog Support][5].
 [1]: https://www.intercom.com/
 [2]: https://app.intercom.com/
 [3]: https://developers.intercom.com/docs/webhooks
-[4]: /integrations/intercom
 [5]: https://docs.datadoghq.com/help/
 [6]: https://developers.intercom.com/docs/references/2.10/webhooks/webhook-models

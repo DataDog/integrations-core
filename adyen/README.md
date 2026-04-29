@@ -69,5 +69,4 @@ Additional helpful documentation, links, and articles:
 [1]: https://www.adyen.com/
 [2]: https://docs.adyen.com/development-resources/webhooks/
 [3]: https://docs.datadoghq.com/help/
-[4]: /integrations/adyen
 [5]: https://www.datadoghq.com/blog/monitor-adyen-payments/

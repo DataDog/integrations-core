@@ -50,5 +50,4 @@ For any further assistance, contact [Datadog support][4].
 
 [1]: https://www.jamf.com/products/jamf-pro/
 [2]: https://developer.jamf.com/jamf-pro/docs/webhooks-1
-[3]: /integrations/jamf-pro
 [4]: https://docs.datadoghq.com/help/
