@@ -371,9 +371,25 @@ def test_alert_event_has_aggregation_key_and_status_tag(
         assert any(t in alert["tags"] for t in ("ntnx_alert_status:open", "ntnx_alert_status:acknowledged"))
 
 
+@pytest.mark.parametrize(
+    "is_auto_resolved, expected_msg_text, expected_auto_tag",
+    [
+        (False, "Resolved by noueman", "ntnx_alert_auto_resolved:false"),
+        (True, "Auto-resolved", "ntnx_alert_auto_resolved:true"),
+    ],
+)
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
-def test_emit_resolution_event(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
-    """Test that _emit_resolution_event produces a success event with correct fields."""
+def test_emit_resolution_event(
+    get_current_datetime,
+    dd_run_check,
+    aggregator,
+    mock_instance,
+    mock_http_get,
+    is_auto_resolved,
+    expected_msg_text,
+    expected_auto_tag,
+):
+    """_emit_resolution_event produces a success event with the right msg_text and auto_resolved tag."""
     get_current_datetime.return_value = MOCK_ALERT_DATETIME
 
     check = NutanixCheck('nutanix', {}, [mock_instance])
@@ -383,68 +399,27 @@ def test_emit_resolution_event(get_current_datetime, dd_run_check, aggregator, m
     resolved_alert = {
         "extId": "test-alert-123",
         "title": "Test Alert Title",
-        "message": "Test alert message",
         "severity": "WARNING",
         "alertType": "A1031",
-        "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
-        "creationTime": "2026-03-04T00:46:29.532987Z",
-        "lastUpdatedTime": "2026-03-04T00:49:39.034079Z",
         "isResolved": True,
         "resolvedTime": "2026-03-04T00:49:39.030653Z",
         "resolvedByUsername": "noueman",
-        "isAutoResolved": False,
+        "isAutoResolved": is_auto_resolved,
         "classifications": ["Storage"],
         "impactTypes": ["SYSTEM_INDICATOR"],
     }
 
     check.activity_monitor._emit_resolution_event(resolved_alert)
 
-    events = aggregator.events
-    assert len(events) == 1
-
-    event = events[0]
+    event = aggregator.events[0]
     assert event["alert_type"] == "success"
     assert event["aggregation_key"] == "nutanix-alert-test-alert-123"
     assert event["msg_title"] == "Alert Resolved: Test Alert Title"
-    assert "Resolved by noueman" in event["msg_text"]
+    assert expected_msg_text in event["msg_text"]
+    assert expected_auto_tag in event["tags"]
     assert "ntnx_alert_status:resolved" in event["tags"]
-    assert "ntnx_alert_auto_resolved:false" in event["tags"]
     assert "ntnx_type:alert" in event["tags"]
     assert "ntnx_alert_severity:WARNING" in event["tags"]
-
-
-@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
-def test_emit_resolution_event_auto_resolved(
-    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
-):
-    """Test resolution event for auto-resolved alerts."""
-    get_current_datetime.return_value = MOCK_ALERT_DATETIME
-
-    check = NutanixCheck('nutanix', {}, [mock_instance])
-    dd_run_check(check)
-    aggregator.reset()
-
-    resolved_alert = {
-        "extId": "auto-resolved-456",
-        "title": "CPU Usage High",
-        "message": "CPU usage exceeded threshold",
-        "severity": "CRITICAL",
-        "alertType": "A9999",
-        "creationTime": "2026-03-04T00:46:29.532987Z",
-        "lastUpdatedTime": "2026-03-04T00:49:39.034079Z",
-        "isResolved": True,
-        "resolvedTime": "2026-03-04T01:00:00.000000Z",
-        "isAutoResolved": True,
-        "classifications": [],
-        "impactTypes": [],
-    }
-
-    check.activity_monitor._emit_resolution_event(resolved_alert)
-
-    event = aggregator.events[0]
-    assert event["msg_text"] == "Auto-resolved"
-    assert "ntnx_alert_auto_resolved:true" in event["tags"]
-    assert event["aggregation_key"] == "nutanix-alert-auto-resolved-456"
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")

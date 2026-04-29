@@ -17,6 +17,9 @@ if TYPE_CHECKING:
     from datadog_checks.nutanix.check import NutanixCheck
 
 
+_SEVERITY_TO_ALERT_TYPE = {"CRITICAL": "error", "WARNING": "warning", "INFO": "info"}
+
+
 class _SafeDict(dict):
     """Dict that returns missing keys as template placeholders for safe string formatting."""
 
@@ -459,12 +462,7 @@ class ActivityMonitor:
             return message
 
     def _build_alert_tags(self, alert: dict, status: str | None = None) -> list[str]:
-        """Build the tag set for an alert lifecycle signal (event or metric).
-
-        status is 'open', 'acknowledged', or 'resolved' for events. Pass
-        status=None for per-state metrics, where the metric name itself
-        encodes the state and ntnx_alert_status would be redundant.
-        """
+        """Build the alert tag set; pass status only for events (metrics encode state in the name)."""
         tags = self.check.base_tags.copy()
         if ext_id := alert.get("extId"):
             tags.append(f"ext_id:{ext_id}")
@@ -498,23 +496,15 @@ class ActivityMonitor:
         title = alert.get("title", "Nutanix Alert")
         message = alert.get("message", "")
         created_time = alert.get("creationTime")
-        severity = alert.get("severity")
         is_acknowledged = alert.get("isAcknowledged", False)
 
-        # Render template variables in title and message from parameters
         if parameters := alert.get("parameters"):
             title = self._render_message(title, parameters)
             message = self._render_message(message, parameters)
 
-        # map severity to alert_type; acknowledged alerts use "warning" regardless of severity
-        severity_map = {
-            "CRITICAL": "error",
-            "WARNING": "warning",
-            "INFO": "info",
-        }
-        event_alert_type = "warning" if is_acknowledged else severity_map.get(severity, "info")
-        status = "acknowledged" if is_acknowledged else "open"
-        alert_tags = self._build_alert_tags(alert, status)
+        # Acknowledged alerts soften to "warning" regardless of severity (operator already triaging).
+        event_alert_type = "warning" if is_acknowledged else _SEVERITY_TO_ALERT_TYPE.get(alert.get("severity"), "info")
+        alert_tags = self._build_alert_tags(alert, "acknowledged" if is_acknowledged else "open")
 
         self.check.event(
             {
