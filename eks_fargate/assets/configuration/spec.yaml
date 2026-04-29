@@ -1,4 +1,5 @@
 name: EKS Fargate
+fleet_configurable: true
 files:
   - name: eks_fargate.yaml
     options:

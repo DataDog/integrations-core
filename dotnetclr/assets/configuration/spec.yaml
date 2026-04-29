@@ -1,4 +1,5 @@
 name: .NET CLR
+fleet_configurable: true
 files:
 - name: dotnetclr.yaml
   options:

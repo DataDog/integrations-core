@@ -1,0 +1,82 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "enabledManagers": [
+    "github-actions",
+    "custom.regex"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "^\\.github/workflows/[^/]+\\.ya?ml$"
+      ],
+      "matchStrings": [
+        "(?<depName>[a-zA-Z][a-zA-Z0-9._-]*)==(?<currentValue>[0-9]+(?:\\.[0-9]+){1,2})",
+        "# renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>[a-zA-Z][a-zA-Z0-9._-]*)\\s+[A-Z][A-Z0-9_]*: \"(?<currentValue>[0-9]+(?:\\.[0-9]+){1,2})\""
+      ],
+      "datasourceTemplate": "pypi"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchFileNames": [
+        ".github/workflows/**",
+        ".github/actions/tag-job/**"
+      ],
+      "matchPackageNames": [
+        "!dtolnay/rust-toolchain"
+      ],
+      "groupName": "actions",
+      "schedule": [
+        "before 6am on Monday"
+      ],
+      "labels": [
+        "renovate/actions",
+        "qa/skip-qa"
+      ],
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchDepNames": [
+        "python"
+      ],
+      "enabled": false
+    },
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchPackageNames": [
+        "dtolnay/rust-toolchain"
+      ],
+      "groupName": "actions",
+      "schedule": [
+        "before 6am on Monday"
+      ],
+      "labels": [
+        "renovate/actions",
+        "qa/skip-qa"
+      ]
+    },
+    {
+      "matchManagers": [
+        "custom.regex"
+      ],
+      "groupName": "workflow python deps",
+      "schedule": [
+        "before 6am on Monday"
+      ],
+      "labels": [
+        "renovate/workflow-deps",
+        "qa/skip-qa"
+      ],
+      "minimumReleaseAge": "7 days"
+    }
+  ]
+}

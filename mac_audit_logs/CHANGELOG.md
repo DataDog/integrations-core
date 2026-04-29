@@ -2,6 +2,30 @@
 
 <!-- towncrier release notes start -->
 
+## 1.4.1 / 2026-04-28
+
+***Fixed***:
+
+* Bump lxml to 6.1.0 to address CVE-2026-41066. ([#23418](https://github.com/DataDog/integrations-core/pull/23418))
+
+## 1.4.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
+## 1.3.1 / 2026-03-18
+
+***Fixed***:
+
+* Skip over directories and files that don't match the log file pattern. ([#22479](https://github.com/DataDog/integrations-core/pull/22479))
+
+## 1.3.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
 ## 1.2.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:

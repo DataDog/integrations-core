@@ -2,6 +2,32 @@
 
 <!-- towncrier release notes start -->
 
+## 9.5.1 / 2026-04-15
+
+***Fixed***:
+
+* Polish fleet-configurable spec descriptions. ([#22967](https://github.com/DataDog/integrations-core/pull/22967))
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+
+## 9.5.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
+## 9.4.0 / 2026-03-18
+
+***Added***:
+
+* Add support for Istio ambient mode (v1.24+) with ztunnel and waypoint proxy metrics collection ([#22581](https://github.com/DataDog/integrations-core/pull/22581))
+
+## 9.3.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+* Add DNS and certificate expiry metrics to Istio integration ([#22463](https://github.com/DataDog/integrations-core/pull/22463))
+
 ## 9.2.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:

@@ -58,7 +58,7 @@ EXPECTED_RESPONSE = [
         'message': '{"log": {"dependency": "flask", "version": "1.0.0", '
         '"result": {"issues": 1, "errors": {}, "results": {"release_zero": "0.0.0"}, '
         '"path": "/tmp/tmpmm2wc69i/flask"}}, '
-        '"enrichment_details": {"triggered_rules": ["release_zero"], '
+        '"enrichment_details": {"rules_triggered": ["release_zero"], '
         '"package_ecosystem": "pypi"}}',
     },
     {
@@ -66,7 +66,7 @@ EXPECTED_RESPONSE = [
         'message': '{"log": {"dependency": "requests", "version": "1.0.0", '
         '"result": {"issues": 1, "errors": {}, "results": {"release_zero": "0.0.0"}, '
         '"path": "/tmp/tmpmm2wc69i/requests"}}, '
-        '"enrichment_details": {"triggered_rules": ["release_zero"], '
+        '"enrichment_details": {"rules_triggered": ["release_zero"], '
         '"package_ecosystem": "pypi"}}',
     },
     {
@@ -74,7 +74,7 @@ EXPECTED_RESPONSE = [
         'message': '{"log": {"dependency": "pandas", "version": "1.0.0", '
         '"result": {"issues": 1, "errors": {}, "results": {"release_zero": "0.0.0"}, '
         '"path": "/tmp/tmpmm2wc69i/pandas"}}, '
-        '"enrichment_details": {"triggered_rules": ["release_zero"], '
+        '"enrichment_details": {"rules_triggered": ["release_zero"], '
         '"package_ecosystem": "pypi"}}',
     },
 ]
@@ -166,7 +166,7 @@ def test_get_guarddog_output(config, instance, mocker):
     expected_returncode = 0
     check.package_ecosystem = "pypi"
     check.path = dependency_file_path
-    cmd = "guarddog pypi verify /tmp/dependency_file_path/requirements.txt --output-format=json"
+    cmd = ["guarddog", "pypi", "verify", "/tmp/dependency_file_path/requirements.txt", "--output-format=json"]
 
     mock_completed_process = Mock(stdout=expected_stdout, stderr=expected_stderr, returncode=expected_returncode)
 

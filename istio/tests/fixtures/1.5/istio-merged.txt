@@ -774,3 +774,20 @@ envoy_server_initialization_time_ms_bucket{le="3600000"} 1
 envoy_server_initialization_time_ms_bucket{le="+Inf"} 1
 envoy_server_initialization_time_ms_sum{} 345
 envoy_server_initialization_time_ms_count{} 1
+# HELP istio_agent_cert_expiry_seconds The time remaining, in seconds, before the certificate chain will expire.
+# TYPE istio_agent_cert_expiry_seconds gauge
+istio_agent_cert_expiry_seconds{resource_name="default"} 2751.355808401
+# HELP istio_agent_dns_requests_total Total number of DNS requests.
+# TYPE istio_agent_dns_requests_total counter
+istio_agent_dns_requests_total 60
+# HELP istio_agent_dns_upstream_request_duration_seconds Total time in seconds Istio takes to get DNS response from upstream.
+# TYPE istio_agent_dns_upstream_request_duration_seconds histogram
+istio_agent_dns_upstream_request_duration_seconds_bucket{le="0.001"} 21
+istio_agent_dns_upstream_request_duration_seconds_bucket{le="0.005"} 60
+istio_agent_dns_upstream_request_duration_seconds_bucket{le="0.01"} 60
+istio_agent_dns_upstream_request_duration_seconds_bucket{le="0.1"} 60
+istio_agent_dns_upstream_request_duration_seconds_bucket{le="1"} 60
+istio_agent_dns_upstream_request_duration_seconds_bucket{le="5"} 60
+istio_agent_dns_upstream_request_duration_seconds_bucket{le="+Inf"} 60
+istio_agent_dns_upstream_request_duration_seconds_sum 0.08570030099999999
+istio_agent_dns_upstream_request_duration_seconds_count 60

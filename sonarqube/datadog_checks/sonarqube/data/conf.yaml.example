@@ -125,7 +125,9 @@ instances:
     # default_exclude: []
 
     ## @param components - mapping - optional
-    ## A mapping of components for which metrics should be collected. Each object may override the default
+    ## A mapping of components for which metrics should be collected.
+    ##
+    ## Each object may override the default
     ## options. Each component key may be configured with an optional configuration mapping to filter the metrics 
     ## that should be collected.
     ##
@@ -527,7 +529,7 @@ instances:
 
     ## Web JMX instance example
   -
-    ## @param is_jmx - boolean - optional - default: true
+    ## @param is_jmx - boolean - optional - default: false
     ## Whether or not this instance is a configuration for a JMX integration.
     ## If `is_jmx` is set to true at the init_config level, this flag is ignored.
     ##

@@ -2,6 +2,29 @@
 
 <!-- towncrier release notes start -->
 
+## 8.9.1 / 2026-04-15
+
+***Fixed***:
+
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+* Fix UnicodeDecodeError when IBM MQ queue manager returns channel or queue description fields in non-UTF-8 encoding. ([#23130](https://github.com/DataDog/integrations-core/pull/23130))
+
+## 8.9.0 / 2026-03-18 / Agent 7.78.0
+
+***Added***:
+
+* Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707))
+
+## 8.8.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
+***Fixed***:
+
+* Fix crash when encountering defunct processes. ([#22543](https://github.com/DataDog/integrations-core/pull/22543))
+
 ## 8.7.0 / 2025-12-23 / Agent 7.75.0
 
 ***Added***:

@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 4.4.1 / 2026-04-15
+
+***Fixed***:
+
+* Polish fleet-configurable spec descriptions. ([#22967](https://github.com/DataDog/integrations-core/pull/22967))
+
+## 4.4.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
 ## 4.3.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:

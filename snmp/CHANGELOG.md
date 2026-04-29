@@ -2,6 +2,31 @@
 
 <!-- towncrier release notes start -->
 
+## 12.3.2 / 2026-04-15
+
+***Fixed***:
+
+* Meraki Cloud Controller: use ``device_status`` tag instead of ``status`` for device-level online/offline to avoid confusion with uplink status (connected/not_connected) per Cisco Meraki API semantics. ([#22974](https://github.com/DataDog/integrations-core/pull/22974))
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+
+## 12.3.1 / 2026-04-07 / Agent 7.78.0
+
+***Fixed***:
+
+* Bump pyasn1 from 0.4.8 to 0.6.3 to fix CVE-2026-30922 (DoS via unbounded ASN.1 recursion) and pysnmp from 5.1.0 to 7.1.22. ([#23124](https://github.com/DataDog/integrations-core/pull/23124))
+* Fix pysnmp 7.x API incompatibilities: varBindTable format, MIB sharing, constraint enforcement, and asyncio event-loop race condition in discovery worker threads. ([#23125](https://github.com/DataDog/integrations-core/pull/23125))
+
+## 12.3.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+* Add type metadata field to `_generic-if` profile ([#22496](https://github.com/DataDog/integrations-core/pull/22496))
+
+***Fixed***:
+
+* Fix infoblox-ipam profile collecting duplicate cpu/memory metrics ([#22459](https://github.com/DataDog/integrations-core/pull/22459))
+
 ## 12.2.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:

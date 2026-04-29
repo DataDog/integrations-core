@@ -2,6 +2,30 @@
 
 <!-- towncrier release notes start -->
 
+## 5.4.1 / 2026-04-15
+
+***Fixed***:
+
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+
+## 5.4.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
+## 5.3.1 / 2026-03-18
+
+***Fixed***:
+
+* Collect secondary index data using sindex-list and sindex-stat because the sindex command is deprecated. ([#22510](https://github.com/DataDog/integrations-core/pull/22510))
+
+## 5.3.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
 ## 5.2.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:

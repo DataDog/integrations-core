@@ -1,0 +1,9 @@
+provides:
+  - id: squid-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: squid-logs
+    always_on: false
+    data_type: logs
+    direction: inbound

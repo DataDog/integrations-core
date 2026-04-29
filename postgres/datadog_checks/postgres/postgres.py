@@ -30,6 +30,7 @@ from datadog_checks.postgres.connection_pool import (
     TokenAwareConnection,
     TokenProvider,
 )
+from datadog_checks.postgres.data_observability import PostgresDataObservability
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
 from datadog_checks.postgres.health import PostgresHealth
 from datadog_checks.postgres.metadata import PostgresMetadata
@@ -53,6 +54,7 @@ from .util import (
     BUFFERCACHE_METRICS,
     CLUSTER_VACUUM_PROGRESS_METRICS,
     CONNECTION_METRICS,
+    CONNECTION_METRICS_BY_DB,
     COUNT_METRICS,
     FUNCTION_METRICS,
     IDLE_TX_LOCK_AGE_METRICS,
@@ -165,6 +167,7 @@ class PostgreSql(DatabaseCheck):
         self.statement_metrics = PostgresStatementMetrics(self, self._config)
         self.statement_samples = PostgresStatementSamples(self, self._config)
         self.metadata_samples = PostgresMetadata(self, self._config)
+        self.data_observability = PostgresDataObservability(self, self._config)
         self._relations_manager = RelationsManager(self._config.relations, self._config.max_relations)
         self._clean_state()
         self._query_manager = QueryManager(self, lambda _: None, queries=[])  # query executor is set later
@@ -476,6 +479,14 @@ class PostgreSql(DatabaseCheck):
                 self.statement_samples._job_loop_future.result()
             if self.metadata_samples._job_loop_future:
                 self.metadata_samples._job_loop_future.result()
+        elif self._config.data_observability.enabled:
+            self.metadata_samples.cancel()
+            if self.metadata_samples._job_loop_future:
+                self.metadata_samples._job_loop_future.result()
+        if self._config.data_observability.enabled:
+            self.data_observability.cancel()
+            if self.data_observability._job_loop_future:
+                self.data_observability._job_loop_future.result()
         self._close_db_pool()
 
     def _clean_state(self):
@@ -858,6 +869,18 @@ class PostgreSql(DatabaseCheck):
         archiver_instance_metrics = self.metrics_cache.get_archiver_metrics(self.version)
 
         metric_scope = [CONNECTION_METRICS]
+
+        connection_metrics_by_db = copy.deepcopy(CONNECTION_METRICS_BY_DB)
+        databases_to_ignore = ""
+        if len(self._config.ignore_databases) > 0:
+            escaped_databases = ["'{}'".format(db.replace("'", "''")) for db in self._config.ignore_databases]
+            databases_to_ignore = "AND datname NOT IN ({})".format(", ".join(escaped_databases))
+        connection_metrics_by_db["query"] = connection_metrics_by_db["query"].format(
+            ignore_database_filter=databases_to_ignore
+        )
+        metric_scope.append(connection_metrics_by_db)
+        self.log.debug("Connection Metrics by DB query [%s]", connection_metrics_by_db["query"])
+
         per_database_metric_scope = []
 
         if self._config.collect_function_metrics:
@@ -1089,7 +1112,7 @@ class PostgreSql(DatabaseCheck):
         tags = self.tags + self._get_debug_tags() + (tags or [])
         return {
             'tags': tags,
-            "hostname": self.resolved_hostname,
+            "hostname": self.reported_hostname,
         }
 
     def check(self, _):
@@ -1098,6 +1121,8 @@ class PostgreSql(DatabaseCheck):
 
         tags = copy.copy(self.tags)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
+        # Reset _non_internal_tags to prevent stale dynamic tags (e.g., replication_role) from accumulating
+        self._non_internal_tags = [t for t in copy.copy(self.tags) if not t.startswith("dd.internal")]
         tags_to_add = []
         try:
             # Check version
@@ -1138,6 +1163,10 @@ class PostgreSql(DatabaseCheck):
                     self.statement_metrics.run_job_loop(tags)
                     self.statement_samples.run_job_loop(tags)
                     self.metadata_samples.run_job_loop(tags)
+                elif self._config.data_observability.enabled:
+                    self.metadata_samples.run_job_loop(tags)
+                if self._config.data_observability.enabled:
+                    self.data_observability.run_job_loop(tags)
                 if self._config.collect_wal_metrics is True:
                     # collect wal metrics for pg < 10 only when explicitly enabled
                     # (requires local filesystem access to the WAL directory)

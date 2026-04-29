@@ -1,4 +1,5 @@
 name: RethinkDB
+fleet_configurable: true
 
 files:
   - name: rethinkdb.yaml
@@ -12,6 +13,7 @@ files:
         options:
           - name: host
             description: Host of the RethinkDB server.
+            fleet_configurable: true
             enabled: true
             value:
               example: localhost
@@ -19,6 +21,7 @@ files:
 
           - name: port
             description: Driver port of the RethinkDB server.
+            fleet_configurable: true
             enabled: true
             value:
               example: 28015
@@ -26,11 +29,13 @@ files:
 
           - name: username
             description: The user account to connect as.
+            fleet_configurable: true
             value:
               type: string
 
           - name: password
             description: The password for the user account to connect as.
+            fleet_configurable: true
             secret: true
             value:
               type: string
@@ -39,6 +44,7 @@ files:
             description: |
               Path to a TLS client certificate to use when connecting to the RethinkDB server.
               See also: https://rethinkdb.com/docs/security/#using-tls
+            fleet_configurable: true
             value:
               type: string
 

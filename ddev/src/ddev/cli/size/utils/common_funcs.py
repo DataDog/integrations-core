@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import fnmatch
 import json
 import os
 import re
@@ -72,6 +73,7 @@ class CLIParameters(TypedDict):
     compressed: bool  # Whether to analyze compressed file sizes
     format: Optional[list[str]]  # Output format options (png, csv, markdown, json)
     show_gui: bool  # Whether to display interactive visualization
+    wheels_storage: str  # Storage tier (dev/stable) for new-style lockfile URLs
 
 
 class CLIParametersTimeline(TypedDict):
@@ -81,6 +83,7 @@ class CLIParametersTimeline(TypedDict):
     compressed: bool  # Whether to analyze compressed file sizes
     format: Optional[list[str]]  # Output format options (png, csv, markdown, json)
     show_gui: bool  # Whether to display interactive visualization
+    wheels_storage: str  # Storage tier (dev/stable) for new-style lockfile URLs
 
 
 class InitialParametersTimelineIntegration(CLIParametersTimeline):
@@ -160,7 +163,7 @@ def is_valid_integration_file(
         included_folder = "datadog_checks" + os.sep
 
     if git_ignore is None:
-        git_ignore = get_gitignore_files(repo_path)
+        git_ignore = get_gitignore_files(Path(repo_path))
     # It is not an integration
     if path.startswith("."):
         return False
@@ -171,20 +174,34 @@ def is_valid_integration_file(
     elif any(ignore in path for ignore in ignored_files):
         return False
     # This file is contained in .gitignore
-    elif any(ignore in path for ignore in git_ignore):
+    elif _matches_gitignore(path, git_ignore):
         return False
     else:
         return True
 
 
-def get_gitignore_files(repo_path: str | Path) -> list[str]:
-    gitignore_path = os.path.join(repo_path, ".gitignore")
-    with open(gitignore_path, "r", encoding="utf-8") as file:
-        gitignore_content = file.read()
-        ignored_patterns = [
-            line.strip() for line in gitignore_content.splitlines() if line.strip() and not line.startswith("#")
-        ]
-        return ignored_patterns
+def _matches_gitignore(path: str, patterns: list[str]) -> bool:
+    parts = path.replace(os.sep, "/").split("/")
+    for pattern in patterns:
+        norm = pattern.rstrip("/")
+        if fnmatch.fnmatch(path, norm):
+            return True
+        if fnmatch.fnmatch(os.path.basename(path), norm):
+            return True
+        if any(fnmatch.fnmatch(part, norm) for part in parts):
+            return True
+    return False
+
+
+def get_gitignore_files(repo_path: Path) -> list[str]:
+    gitignore_path = repo_path / ".gitignore"
+    if not gitignore_path.is_file():
+        return []
+
+    with gitignore_path.open(mode="r", encoding="utf-8") as f:
+        lines = [line.strip() for line in f.read().splitlines() if line.strip() and not line.startswith("#")]
+
+    return lines
 
 
 def convert_to_human_readable_size(size_bytes: float) -> str:
@@ -285,7 +302,17 @@ def extract_version_from_about_py(path: str) -> str:
     return ""
 
 
-def get_dependencies(repo_path: str | Path, platform: str, version: str, compressed: bool) -> list[FileDataEntry]:
+WHEELS_STORAGE_PLACEHOLDER = "${INTEGRATIONS_WHEELS_STORAGE}"
+
+
+def resolve_wheel_url(url: str, wheels_storage: str) -> str:
+    """Substitute the wheels storage tier into a lockfile URL."""
+    return url.replace(WHEELS_STORAGE_PLACEHOLDER, wheels_storage)
+
+
+def get_dependencies(
+    repo_path: str | Path, platform: str, version: str, compressed: bool, wheels_storage: str
+) -> list[FileDataEntry]:
     """
     Gets the list of dependencies for a given platform and Python version and returns a FileDataEntry that includes:
     Name, Version, Size_Bytes, Size, and Type.
@@ -296,12 +323,12 @@ def get_dependencies(repo_path: str | Path, platform: str, version: str, compres
         file_path = os.path.join(resolved_path, filename)
 
         if os.path.isfile(file_path) and is_correct_dependency(platform, version, filename):
-            deps, download_urls, versions = get_dependencies_list(file_path)
+            deps, download_urls, versions = get_dependencies_list(file_path, wheels_storage)
             return get_dependencies_sizes(deps, download_urls, versions, compressed)
     return []
 
 
-def get_dependencies_list(file_path: str) -> tuple[list[str], list[str], list[str]]:
+def get_dependencies_list(file_path: str, wheels_storage: str) -> tuple[list[str], list[str], list[str]]:
     """
     Parses a dependency file and extracts the dependency names, download URLs, and versions.
     """
@@ -316,7 +343,7 @@ def get_dependencies_list(file_path: str) -> tuple[list[str], list[str], list[st
             if not match:
                 raise WrongDependencyFormat("The dependency format 'name @ link' is no longer supported.")
             name = match.group(1)
-            url = match.group(2)
+            url = resolve_wheel_url(match.group(2), wheels_storage)
 
             deps.append(name)
             download_urls.append(url)

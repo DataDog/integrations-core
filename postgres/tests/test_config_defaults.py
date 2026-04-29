@@ -180,6 +180,14 @@ EXPECTED_DEFAULTS = {
     'collect_raw_query_statement': {
         'enabled': False,
     },
+    # === Data Observability ===
+    'data_observability': {
+        'enabled': False,
+        'collection_interval': 10,
+        'run_sync': False,
+        'config_id': None,
+        'queries': (),
+    },
     # === Relations configuration ===
     'relations': [],
     # === Query encodings ===
@@ -204,6 +212,7 @@ EXPECTED_DEFAULTS = {
     # === Tagging ===
     'tags': ('server:localhost', 'port:5432', 'db:postgres'),  # Dynamically generated from connection info
     'disable_generic_tags': False,
+    'enable_legacy_tags_normalization': True,
     'propagate_agent_tags': False,
     # === Custom metrics/queries (deprecated/user-provided) ===
     'custom_metrics': (),  # Deprecated field, defaults to empty tuple

@@ -2,6 +2,76 @@
 
 <!-- towncrier release notes start -->
 
+## 23.0.1 / 2026-04-28
+
+***Fixed***:
+
+* Bump lxml to 6.1.0 to address CVE-2026-41066. ([#23418](https://github.com/DataDog/integrations-core/pull/23418))
+
+## 23.0.0 / 2026-04-15
+
+***Changed***:
+
+* Switch `sqlserver.ao.replica_sync_state` from `sys.dm_hadr_database_replica_states` to `sys.dm_hadr_availability_replica_states` to report per-replica synchronization health instead of per-database synchronization state. The `synchronization_state_desc` tag name is preserved for backward compatibility, but its values now reflect the replica-level health rollup (e.g. `HEALTHY`, `PARTIALLY_HEALTHY`, `NOT_HEALTHY`). The previous implementation was broken for availability groups containing multiple databases, as rows would collide on the same tag set and only the last value was reported. To get per-database synchronization state, use `sqlserver.ao.replica_status` which includes a `synchronization_state` tag with full database-level granularity. ([#23310](https://github.com/DataDog/integrations-core/pull/23310))
+
+***Added***:
+
+* Update dependencies ([#22996](https://github.com/DataDog/integrations-core/pull/22996))
+
+***Fixed***:
+
+* Fix ``database_autodiscovery_interval`` config option being silently ignored. The check was reading ``autodiscovery_interval`` instead of the documented ``database_autodiscovery_interval`` key, so customers setting this option were always getting the default 3600s interval. ([#22912](https://github.com/DataDog/integrations-core/pull/22912))
+* Fix stale database metrics cache when autodiscovered databases change. Previously, database-level metric query executors (e.g. ``sys.database_files``) were never rebuilt after autodiscovery detected database changes, causing persistent errors for deleted databases and missing metrics for newly added databases until agent restart. ([#22913](https://github.com/DataDog/integrations-core/pull/22913))
+* Respect exclude_hostname config parameter for debug metrics. If this setting is not respected, we can still submit metrics with a hostname tag, which can have undesirable effects throughout the platform. For example, a host can appear in the Host list where it should not. ([#22938](https://github.com/DataDog/integrations-core/pull/22938))
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+* Bump `datadog-checks-base` to `>=37.34.1`. Notable changes:
+    - Fix schema collection silently dropping all collected metadata when the last discovered database has no tables. ([#22880](https://github.com/DataDog/integrations-core/pull/22880))
+    - Reduce allocations in `StatementMetrics` by deferring dict construction and updating the previous-statements cache in place. ([#23075](https://github.com/DataDog/integrations-core/pull/23075))
+    - Improve compile-time error messages for invalid syntax in DB query extras expressions. ([#23140](https://github.com/DataDog/integrations-core/pull/23140)) ([#23282](https://github.com/DataDog/integrations-core/pull/23282))
+
+## 22.14.0 / 2026-03-18 / Agent 7.78.0
+
+***Added***:
+
+* Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707))
+
+***Fixed***:
+
+* Fix `procedure_name` tag missing from query metrics when the `CONNECT` permission hasn't been granted to the Datadog user. ([#22731](https://github.com/DataDog/integrations-core/pull/22731))
+* Fix `procedure_name` tag missing from activity metrics when the `CONNECT` permission hasn't been granted to the Datadog user. ([#22796](https://github.com/DataDog/integrations-core/pull/22796))
+
+## 22.13.1 / 2026-02-27 / Agent 7.77.0
+
+***Fixed***:
+
+* Cancel SQLServer Agent history job on check cancellation ([#22753](https://github.com/DataDog/integrations-core/pull/22753))
+
+## 22.13.0 / 2026-02-19
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+* Require key_prefix for SQLServer connections to avoid unsafely sharing connections across threads ([#22557](https://github.com/DataDog/integrations-core/pull/22557))
+
+***Fixed***:
+
+* Clarifies the default ADO provider in conf.yaml.example ([#21364](https://github.com/DataDog/integrations-core/pull/21364))
+* Updates collect_raw_query_statements config description ([#22611](https://github.com/DataDog/integrations-core/pull/22611))
+* Fix AgentJobs, Deadlocks and XE collections to run async by default ([#22633](https://github.com/DataDog/integrations-core/pull/22633))
+
+## 22.12.5 / 2026-02-27 / Agent 7.76.2
+
+***Fixed***:
+
+* Fix AgentJobs, Deadlocks and XE collections to run async by default ([#22633](https://github.com/DataDog/integrations-core/pull/22633))
+* Cancel SQLServer agent history job on check cancel ([#22753](https://github.com/DataDog/integrations-core/pull/22753))
+
+## 22.12.4 / 2026-02-05 / Agent 7.76.0
+
+***Fixed***:
+
+* Fixed an issue where schema collection thread connections could get abruptly closed from the main check loop ([#22471](https://github.com/DataDog/integrations-core/pull/22471))
+
 ## 22.12.3 / 2026-01-21
 
 ***Fixed***:

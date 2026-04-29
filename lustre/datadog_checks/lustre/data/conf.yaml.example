@@ -34,17 +34,17 @@ instances:
     #
     # enable_changelogs: false
 
-    ## @param lctl_path - string - optional
+    ## @param lctl_path - string - optional - default: /usr/sbin/lctl
     ## Path to the lctl binary.
     #
     # lctl_path: <LCTL_PATH>
 
-    ## @param lnetctl_path - string - optional
+    ## @param lnetctl_path - string - optional - default: /usr/sbin/lnetctl
     ## Path to the lnetctl binary.
     #
     # lnetctl_path: <LNETCTL_PATH>
 
-    ## @param lfs_path - string - optional
+    ## @param lfs_path - string - optional - default: /usr/bin/lfs
     ## Path to the lfs binary.
     #
     # lfs_path: <LFS_PATH>

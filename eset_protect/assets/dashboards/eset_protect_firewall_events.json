@@ -62,7 +62,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
+                                    "query": "source:eset-protect @event_type:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
                                 },
                                 "indexes": [
                                     "*"
@@ -128,7 +128,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
+                                    "query": "source:eset-protect @event_type:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
                                 },
                                 "indexes": [
                                     "*"
@@ -185,7 +185,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FirewallAggregated_Event @handled:true $hostname $severity $event $source_address $target_address $rule_name $action"
+                                    "query": "source:eset-protect @event_type:FirewallAggregated_Event @handled:true $hostname $severity $event $source_address $target_address $rule_name $action"
                                 },
                                 "indexes": [
                                     "*"
@@ -239,7 +239,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FirewallAggregated_Event @handled:false $hostname $severity $event $source_address $target_address $rule_name $action"
+                                    "query": "source:eset-protect @event_type:FirewallAggregated_Event @handled:false $hostname $severity $event $source_address $target_address $rule_name $action"
                                 },
                                 "indexes": [
                                     "*"
@@ -293,7 +293,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FirewallAggregated_Event @inbound:true $hostname $severity $event $source_address $target_address $rule_name $action"
+                                    "query": "source:eset-protect @event_type:FirewallAggregated_Event @inbound:true $hostname $severity $event $source_address $target_address $rule_name $action"
                                 },
                                 "indexes": [
                                     "*"
@@ -348,7 +348,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FirewallAggregated_Event @inbound:false $hostname $severity $event $source_address $target_address $rule_name $action"
+                                    "query": "source:eset-protect @event_type:FirewallAggregated_Event @inbound:false $hostname $severity $event $source_address $target_address $rule_name $action"
                                 },
                                 "indexes": [
                                     "*"
@@ -402,7 +402,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
+                                    "query": "source:eset-protect @event_type:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
                                 },
                                 "indexes": [
                                     "*"
@@ -471,7 +471,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
+                                    "query": "source:eset-protect @event_type:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
                                 },
                                 "indexes": [
                                     "*"
@@ -540,7 +540,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
+                                    "query": "source:eset-protect @event_type:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
                                 },
                                 "indexes": [
                                     "*"
@@ -610,7 +610,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
+                                    "query": "source:eset-protect @event_type:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
                                 },
                                 "indexes": [
                                     "*"
@@ -679,7 +679,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
+                                    "query": "source:eset-protect @event_type:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
                                 },
                                 "indexes": [
                                     "*"
@@ -749,7 +749,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
+                                    "query": "source:eset-protect @event_type:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
                                 },
                                 "indexes": [
                                     "*"
@@ -819,7 +819,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
+                                    "query": "source:eset-protect @event_type:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
                                 },
                                 "indexes": [
                                     "*"
@@ -888,7 +888,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
+                                    "query": "source:eset-protect @event_type:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
                                 },
                                 "indexes": [
                                     "*"
@@ -957,7 +957,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
+                                    "query": "source:eset-protect @event_type:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
                                 },
                                 "indexes": [
                                     "*"
@@ -1027,7 +1027,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
+                                    "query": "source:eset-protect @event_type:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
                                 },
                                 "indexes": [
                                     "*"
@@ -1096,7 +1096,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
+                                    "query": "source:eset-protect @event_type:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
                                 },
                                 "indexes": [
                                     "*"
@@ -1166,7 +1166,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
+                                    "query": "source:eset-protect @event_type:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
                                 },
                                 "indexes": [
                                     "*"
@@ -1235,7 +1235,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
+                                    "query": "source:eset-protect @event_type:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
                                 },
                                 "indexes": [
                                     "*"
@@ -1306,7 +1306,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
+                                    "query": "source:eset-protect @event_type:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
                                 },
                                 "indexes": [
                                     "*"
@@ -1402,7 +1402,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
+                                    "query": "source:eset-protect @event_type:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action"
                                 },
                                 "indexes": [
                                     "*"
@@ -1495,7 +1495,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:eset-protect service:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action",
+                            "query_string": "source:eset-protect @event_type:FirewallAggregated_Event $hostname $severity $event $source_address $target_address $rule_name $action",
                             "indexes": [],
                             "storage": "hot"
                         },

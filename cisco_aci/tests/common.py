@@ -170,12 +170,12 @@ FIXTURE_LIST = [
     # 0d6ca781810665156211b355129ba2f1 - Api.get_eqpt_capacity
     '_api_mo_topology_json_query_target_subtree_target_subtree_class_fabricPod',
     # 643d217904f09445fbc9f7b43cd131f0 - Api.get_fabric_pods
-    '_api_node_mo_uni_tn_DataDog_json_rsp_subtree_include_event_logs_no_scoped_subtree_order_by_eventRecord_created_desc_page_0_page_size_15',  # noqa: E501
-    # d0260e4832537b43b1acb38bcfa58063 - Api.get_tenant_events
     '_api_mo_uni_tn_DataDog_json_query_target_subtree_target_subtree_class_fvAp',
     # 4efe80304d50330f5ed0f79252ef0a84 - Api.get_apps
-    '_api_mo_uni_tn_DataDog_json_rsp_subtree_include_stats_no_scoped',
-    # c8e9a0dbceac67fb1149684f7fc7772c - Api.get_tenant_stats
+    '_api_mo_uni_tn_DataDog_json_rsp_subtree_include_stats_health_no_scoped',
+    # 07f9ef7474c39eef33e9ddfd269d54fb - Api.get_tenant_stats
+    '_api_mo_uni_tn_DataDogAlt_json_rsp_subtree_include_stats_health_no_scoped',
+    # cd84d80314a78b27c72f287322f30b68 - Api.get_tenant_stats
     '_api_node_class_lldpAdjEp_json',
     # f3713df3a586908a3a11f4c356153519 - Api.get_lldp_adj_eps
     '_api_node_class_cdpAdjEp_json',
@@ -230,6 +230,9 @@ class FakeSessionWrapper(SessionWrapper):
         mock_path = mock_path.replace('[', '_')
         mock_path = mock_path.replace(']', '_')
         mock_path = mock_path.replace('|', '_')
+        if mock_path not in FIXTURE_LIST_FILE_MAP:
+            log.debug("Skipping %s - no fixture file found", path)
+            return {"imdata": []}
         mock_path = FIXTURE_LIST_FILE_MAP[mock_path]
         for p in self.fixture_dirs:
             path = os.path.join(p, mock_path)

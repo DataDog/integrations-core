@@ -1,0 +1,14 @@
+services:
+  nifi:
+    image: apache/nifi:${NIFI_VERSION:-2.8.0}
+    ports:
+      - "8443:8443"
+    environment:
+      SINGLE_USER_CREDENTIALS_USERNAME: admin
+      SINGLE_USER_CREDENTIALS_PASSWORD: ctsBtRBKHRAx69EqUghvvgEvjnaLjFEB
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sk -o /dev/null -w '%{http_code}' https://localhost:8443/nifi-api/flow/about | grep -qv 000"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s

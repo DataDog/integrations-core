@@ -1,4 +1,5 @@
 name: IIS
+fleet_configurable: true
 files:
 - name: iis.yaml
   options:
@@ -9,6 +10,7 @@ files:
   - template: instances
     options:
     - name: sites
+      display_priority: 2
       description: |
         The `sites` parameter allows you to specify a list of sites you want to
         read metrics from. With sites specified, metrics are tagged with the
@@ -18,6 +20,7 @@ files:
         On Agent versions 7.34 or higher, this may also be defined as a mapping
         with `include` and/or `exclude` keys representing arrays of regular
         expressions strings.
+      fleet_configurable: true
       value:
         example:
           include:
@@ -41,6 +44,7 @@ files:
             items:
               type: string
     - name: app_pools
+      display_priority: 0
       description: |
         The `app_pools` parameter allows you to specify a list of application pools you want to
         read metrics from. With application pools specified, metrics are tagged with the
@@ -50,6 +54,7 @@ files:
         On Agent versions 7.34 or higher, this may also be defined as a mapping
         with `include` and/or `exclude` keys representing arrays of regular
         expressions strings.
+      fleet_configurable: true
       value:
         example:
           include:
@@ -79,7 +84,11 @@ files:
             name: httpd_request_method
             counters:
             - CGI Requests/sec: cgi
+        username.display_priority: 4
+        password.display_priority: 3
     - template: instances/pdh_legacy
+      overrides:
+        host.display_priority: 5
       hidden: true
     - template: instances/default
   - template: logs

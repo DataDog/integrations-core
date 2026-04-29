@@ -2,6 +2,38 @@
 
 <!-- towncrier release notes start -->
 
+## 8.8.0 / 2026-04-15
+
+***Added***:
+
+* Allow for ssl_check_hostname to be turned off ([#22972](https://github.com/DataDog/integrations-core/pull/22972))
+* Update dependencies ([#22996](https://github.com/DataDog/integrations-core/pull/22996))
+
+***Fixed***:
+
+* Polish fleet-configurable spec descriptions. ([#22967](https://github.com/DataDog/integrations-core/pull/22967))
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+* Re-order configuration fields based on real-world usage data. ([#23270](https://github.com/DataDog/integrations-core/pull/23270))
+
+## 8.7.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
+## 8.6.0 / 2026-03-18
+
+***Added***:
+
+* Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707))
+* Add CLUSTER INFO metrics: cluster state, slot coverage, node count, cluster size, and current epoch. ([#22917](https://github.com/DataDog/integrations-core/pull/22917))
+
+## 8.5.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
 ## 8.4.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:

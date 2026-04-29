@@ -13,7 +13,11 @@ Integrate Carbon Black Cloud with Datadog to gain insights into Alerts, Audit Lo
 
 ### Configure Datadog Forwarder
 
-- Please refer the [Datadog Forwarder][3]
+Refer to the [Datadog Forwarder][3] documentation for detailed configuration guidance.
+- During the Datadog Forwarder configuration, set the **source** as follows:
+    - For **CloudFormation** deployments, set **DdSource** to **carbon-black-cloud**.
+    - For **Terraform** deployments, set **dd_source** to **carbon-black-cloud**.
+    - For **Manual** deployments, set the **DD_SOURCE** environment variable to **carbon-black-cloud**.
 
 ### Configure Carbon Black Cloud Data Forwarder
 
@@ -24,14 +28,9 @@ Integrate Carbon Black Cloud with Datadog to gain insights into Alerts, Audit Lo
 5. Select a **Type** from the dropdown list.
 6. Select an **AWS S3** option from the provider dropdown list.
 7. Enter the **S3 bucket** name you have created on AWS.
-8. For the **S3 prefix**, please use the base prefix **carbonblackcloud** for all types. The following specific prefixes should be applied according to the type:
-    1. For **Alert** type, use the prefix: `carbonblackcloud-alerts`
-    2. For **Audit log** type, use the prefix: `carbonblackcloud-audit-logs`
-    2. For **Auth event** type, use the prefix: `carbonblackcloud-auth-events`
-    3. For **Endpoint event** types, use the prefix: `carbonblackcloud-endpoint-events`
-    4. For **Watchlist Hit** type, use the prefix: `carbonblackcloud-watchlist-hits`
-8. Set the **forwarder status** to `On`.
-9. To apply the changes, click **Save**.
+8. Enter any **S3 prefix** of your choice.
+9. Set the **forwarder status** to `On`.
+10. To apply the changes, click **Save**.
 
 ## Data Collected
 

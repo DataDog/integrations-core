@@ -18,8 +18,28 @@ metrics:
     symbols:
       - OID: 1.3.6.1.4.1.476.1.42.3.4.1.2.3.1.3
         name: lgpEnvTemperatureMeasurementDegF
+    metric_tags:
+      - symbol:
+          OID: 1.3.6.1.4.1.476.1.42.3.4.1.2.3.1.2 # OID index
+          name: lgpEnvTemperatureDescrDegF
+        tag: lgp_env_temperature_descr_deg_f
+  - MIB: LIEBERT-GP-ENVIRONMENTAL-MIB
+    table:
+      OID: 1.3.6.1.4.1.476.1.42.3.4.1.3.3
+      name: lgpEnvTemperatureTableDegC
+    symbols:
       - OID: 1.3.6.1.4.1.476.1.42.3.4.1.3.3.1.3
         name: lgpEnvTemperatureMeasurementDegC
+    metric_tags:
+      - symbol:
+          OID: 1.3.6.1.4.1.476.1.42.3.4.1.2.3.1.2 # OID index
+          name: lgpEnvTemperatureDescrDegF
+        tag: lgp_env_temperature_descr_deg_f
+  - MIB: LIEBERT-GP-ENVIRONMENTAL-MIB
+    table:
+      OID: 1.3.6.1.4.1.476.1.42.3.4.2.2.3
+      name: lgpEnvHumidityTableRel
+    symbols:
       - OID: 1.3.6.1.4.1.476.1.42.3.4.2.2.3.1.3
         name: lgpEnvHumidityMeasurementRel
     metric_tags:

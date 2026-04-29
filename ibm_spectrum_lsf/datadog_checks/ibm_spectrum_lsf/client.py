@@ -99,3 +99,6 @@ class LSFClient:
             "-u",
             "all",
         )
+
+    def bhist_l(self, job_id: str) -> tuple[str, str, int]:
+        return self._run_command("bhist", "-l", job_id)

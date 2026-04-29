@@ -56,7 +56,7 @@ on:
         type: boolean
       agent-image:
         required: false
-        default: "datadog/agent-dev:master-py3"
+        default: "registry.datadoghq.com/agent-dev:master-py3"
         type: string
       agent-image-py2:
         required: false
@@ -64,7 +64,7 @@ on:
         type: string
       agent-image-windows:
         required: false
-        default: "datadog/agent-dev:master-py3-win-servercore"
+        default: "registry.datadoghq.com/agent:7-rc-servercore"
         type: string
       agent-image-windows-py2:
         required: false
@@ -110,14 +110,62 @@ jobs:
         # Enable disk performance counters
         diskperf -y
 
+    # On Windows minimum-base-package jobs only, force uv to copy files into
+    # the venv instead of hardlinking them from its cache. uv's default
+    # `hardlink` mode on Windows breaks `hatch env remove`, which is invoked
+    # by `ddev test --compat` (used by the minimum-base-package matrix) at the
+    # end of the run: extension modules such as `backports.zstd._zstd.pyd`
+    # (a transitive of `hatch>=1.13`) get loaded by Python during the test
+    # run, and Windows then refuses to delete the venv's hardlink while the
+    # cache copy is still pinned, so cleanup fails with
+    # `PermissionError: [WinError 5]`. We can't influence this from our side:
+    # the share flags that would allow deletion are set by whoever opens the
+    # file (CPython's loader, Defender, etc.), not by us.
+    #
+    # We only set this for `minimum-base-package` runs because regular test
+    # jobs never invoke `hatch env remove` and so keep the hardlink speed-up.
+    # Refs:
+    #   https://github.com/astral-sh/uv/issues/7918
+    #   https://docs.astral.sh/uv/reference/settings/#link-mode
+    - name: Configure uv link mode (Windows minimum-base-package)
+      if: runner.os == 'Windows' && inputs.minimum-base-package
+      shell: bash
+      run: echo "UV_LINK_MODE=copy" >> "$GITHUB_ENV"
+
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-    # We run this for EVERYONE to ensure the scripts are moved
-    # from the action folder to the expected workspace path.
-    # It should cover all repos using this workflow and respect the context if the
-    # workflow is being called with a pinned version.
-    - name: Install workflow scripts
+    # When called as a reusable workflow from other repos, `uses: ./` resolves
+    # from the caller's repo where the actions don't exist. We checkout the
+    # actions from integrations-core so they are available locally.
+    # Note: github.workflow_sha/workflow_ref point to the caller, not to
+    # integrations-core, so we cannot dynamically pin the ref.
+    - name: Resolve integrations-core ref
+      if: inputs.repo != 'core'
+      id: ic-ref
+      shell: bash
+      run: |
+        # GITHUB_WORKFLOW_REF is available in the environment automatically
+        echo "GITHUB_WORKFLOW_REF: $GITHUB_WORKFLOW_REF"
+        echo "ref=${GITHUB_WORKFLOW_REF##*@}" >> "$GITHUB_OUTPUT"
+
+    - name: Checkout integrations-core actions
+      if: inputs.repo != 'core'
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        repository: "DataDog/integrations-core"
+        ref: master
+        fetch-depth: 1
+        sparse-checkout: .github/actions
+        # Use a specific sub-folder
+        path: core-temp
+
+    - name: Install workflow scripts (core)
+      if: inputs.repo == 'core'
       uses: ./.github/actions/setup-test-target-scripts
+
+    - name: Install workflow scripts (non-core)
+      if: inputs.repo != 'core'
+      uses: ./core-temp/.github/actions/setup-test-target-scripts
 
     - name: Set environment variables
       # This step sets the following environment variables for the entire workflow via setup-test-env.sh:
@@ -209,33 +257,38 @@ jobs:
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
-        cache: 'pip'
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+      with:
+        enable-cache: false
 
     - name: Restore cache
       if: inputs.repo == 'core'
-      uses: actions/cache/restore@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       with:
-        path: ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
+        path: |
+          ${{ runner.os == 'Windows' && '~\AppData\Local\uv\cache' || runner.os == 'macOS' && '~/Library/Caches/uv' || '~/.cache/uv' }}
+          ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
         key: >-
           ${{ format(
-            'v01-python-{0}-{1}-{2}-{3}',
+            'v02-uv-{0}-{1}-{2}-{3}',
             env.pythonLocation,
             hashFiles('datadog_checks_base/pyproject.toml'),
             hashFiles('datadog_checks_dev/pyproject.toml'),
             hashFiles('ddev/pyproject.toml')
           )}}
         restore-keys: |-
-          v01-python-${{ env.pythonLocation }}
+          v02-uv-${{ env.pythonLocation }}
 
     - name: Install ddev from local folder
       if: inputs.repo == 'core'
       run: |-
-        pip install -e ./datadog_checks_dev[cli]
-        pip install -e ./ddev
+        uv pip install --system -e ./datadog_checks_dev[cli] -e ./ddev
 
     - name: Install ddev from PyPI
       if: inputs.repo != 'core'
-      run: pip install ddev
+      run: uv pip install --system ddev
 
     - name: Configure ddev
       run: |-
@@ -255,6 +308,9 @@ jobs:
     - name: Prepare for testing
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
       run: ddev ci setup ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }}
+
+    - name: Ensure Docker is running
+      run: bash .github/workflows/scripts/ensure-docker.sh
 
     - name: Run Unit & Integration tests
       if: inputs.latest != true
@@ -304,14 +360,14 @@ jobs:
 
     - name: Upload test results
       if: always()
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: "${{ env.MINIMUM_BASE_PACKAGE_PREFIX }}test-results-${{ inputs.target }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}-${{ inputs.platform }}"
         path: "${{ env.TEST_RESULTS_BASE_DIR }}"
 
     - name: Upload local_clone debug info (ddev only)
       if: always() && inputs.target == 'ddev'
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: "${{ env.MINIMUM_BASE_PACKAGE_PREFIX }}local-clone-debug-${{ inputs.platform }}"
         path: "local_clone_debug.txt"
@@ -323,7 +379,7 @@ jobs:
         always() &&
         inputs.pytest-args != '-m flaky'
       # Flaky tests will have low coverage, don't include in artifacts to avoid pipeline issues
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: "${{ env.MINIMUM_BASE_PACKAGE_PREFIX }}coverage-${{ inputs.target }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}-${{ inputs.platform }}"
         path: "${{ inputs.target }}/coverage.xml"

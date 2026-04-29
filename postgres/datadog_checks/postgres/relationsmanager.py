@@ -92,8 +92,8 @@ FROM (SELECT
       pg_index X ON C.oid = X.indrelid JOIN
       pg_class I ON I.oid = X.indexrelid
       LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
-    AND C.relkind IN ('r', 'm')
-    AND N.nspname NOT IN ('pg_catalog', 'information_schema')
+    WHERE C.relkind IN ('r', 'm')
+      AND N.nspname NOT IN ('pg_catalog', 'information_schema')
 ) s WHERE {relations}
     """.strip(),
     'columns': [

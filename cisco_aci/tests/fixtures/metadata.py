@@ -8,9 +8,6 @@ DEVICE_METADATA = [
     {
         'id': 'default:10.0.200.0',
         'id_tags': [
-            'device_ip:10.0.200.0',
-            'device_namespace:default',
-            'device_hostname:leaf101',
             'device_id:default:10.0.200.0',
         ],
         'integration': 'cisco-aci',
@@ -39,9 +36,6 @@ DEVICE_METADATA = [
     {
         'id': 'default:10.0.200.1',
         'id_tags': [
-            'device_ip:10.0.200.1',
-            'device_namespace:default',
-            'device_hostname:leaf102',
             'device_id:default:10.0.200.1',
         ],
         'integration': 'cisco-aci',
@@ -70,9 +64,6 @@ DEVICE_METADATA = [
     {
         'id': 'default:10.0.200.4',
         'id_tags': [
-            'device_ip:10.0.200.4',
-            'device_namespace:default',
-            'device_hostname:apic1',
             'device_id:default:10.0.200.4',
         ],
         'integration': 'cisco-aci',
@@ -100,9 +91,6 @@ DEVICE_METADATA = [
     {
         'id': 'default:10.0.200.5',
         'id_tags': [
-            'device_ip:10.0.200.5',
-            'device_namespace:default',
-            'device_hostname:spine201',
             'device_id:default:10.0.200.5',
         ],
         'integration': 'cisco-aci',
@@ -145,6 +133,7 @@ INTERFACE_METADATA = [
         'name': 'eth1/1',
         'oper_status': 1,
         'status': 'up',
+        'is_physical': True,
     },
     {
         'admin_status': 1,
@@ -160,6 +149,7 @@ INTERFACE_METADATA = [
         'name': 'eth1/2',
         'oper_status': 1,
         'status': 'up',
+        'is_physical': True,
     },
     {
         'admin_status': 1,
@@ -175,6 +165,7 @@ INTERFACE_METADATA = [
         'name': 'eth1/3',
         'oper_status': 2,
         'status': 'down',
+        'is_physical': True,
     },
     {
         'admin_status': 1,
@@ -190,6 +181,7 @@ INTERFACE_METADATA = [
         'name': 'eth1/1',
         'oper_status': 1,
         'status': 'up',
+        'is_physical': True,
     },
     {
         'admin_status': 1,
@@ -205,6 +197,7 @@ INTERFACE_METADATA = [
         'name': 'eth1/2',
         'oper_status': 1,
         'status': 'up',
+        'is_physical': True,
     },
     {
         'admin_status': 1,
@@ -220,6 +213,7 @@ INTERFACE_METADATA = [
         'name': 'eth1/3',
         'oper_status': 2,
         'status': 'down',
+        'is_physical': True,
     },
     {
         'admin_status': 1,
@@ -235,6 +229,7 @@ INTERFACE_METADATA = [
         'name': 'eth5/1',
         'oper_status': 1,
         'status': 'up',
+        'is_physical': True,
     },
     {
         'admin_status': 1,
@@ -250,6 +245,7 @@ INTERFACE_METADATA = [
         'name': 'eth5/2',
         'oper_status': 1,
         'status': 'up',
+        'is_physical': True,
     },
     {
         'admin_status': 1,
@@ -265,6 +261,7 @@ INTERFACE_METADATA = [
         'name': 'eth7/1',
         'oper_status': 2,
         'status': 'down',
+        'is_physical': True,
     },
 ]
 

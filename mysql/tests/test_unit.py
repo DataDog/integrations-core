@@ -433,6 +433,37 @@ def test_submit_is_called_if_too_many_columns():
         assert mocked_submit.call_count == 2
 
 
+def test_get_tables_data_uses_parameterized_queries():
+    """Table names must be passed as query parameters, not interpolated into SQL strings."""
+    check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
+    databases_data = DatabasesData({}, check, check._config)
+
+    table_list = [{"name": 'normal_table'}, {"name": 'bad"table'}, {"name": "x\") UNION SELECT user()#"}]
+    execute_calls = []
+
+    class MockCursor:
+        def execute(self, query, params=None):
+            execute_calls.append((query, params))
+
+        def fetchall(self):
+            return []
+
+    def fake_index_query(v, m, p):
+        return "SELECT 1 WHERE s = %s AND n IN ({})".format(p)
+
+    with mock.patch('datadog_checks.mysql.databases_data.get_indexes_query', side_effect=fake_index_query):
+        databases_data._get_tables_data(table_list, "mydb", MockCursor())
+
+    table_name_list = [str(t["name"]) for t in table_list]
+
+    assert execute_calls, "Expected at least one query to be executed"
+    for query, params in execute_calls:
+        assert isinstance(params, list)
+        assert params[0] == "mydb"
+        assert params[1:] == table_name_list
+        assert query.count('%s') == len(table_list) + 1
+
+
 def test_exception_handling_by_do_for_dbs():
     check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
     databases_data = DatabasesData({}, check, check._config)
@@ -601,3 +632,113 @@ def test_set_cluster_tags(
         # Check that no replication_role tag is present
         replication_role_tags = [tag for tag in tags if tag.startswith('replication_role:')]
         assert len(replication_role_tags) == 0
+
+
+def test_collect_replication_metrics_returns_empty_for_pure_group_replication():
+    """Test that _collect_replication_metrics returns {} for a pure group replication node."""
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
+
+    mysql_check._group_replication_active = True
+    mysql_check._get_replica_stats = mock.MagicMock(return_value={})
+    mysql_check._get_replicas_connected_count = mock.MagicMock(return_value={'Replicas_connected': 0})
+
+    results = {}
+    replication_metrics = mysql_check._collect_replication_metrics(mock.MagicMock(), results, above_560=True)
+
+    assert replication_metrics == {}
+    assert results == {}
+
+
+def test_collect_replication_metrics_returns_vars_for_traditional_source_with_zero_replicas():
+    """Test that a traditional source with 0 connected replicas still returns REPLICA_VARS
+    so _check_replication_status can emit a WARNING for replica-loss detection."""
+    from datadog_checks.mysql.const import REPLICA_VARS
+
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
+
+    mysql_check._group_replication_active = False
+    mysql_check._get_replica_stats = mock.MagicMock(return_value={})
+    mysql_check._get_replicas_connected_count = mock.MagicMock(return_value={'Replicas_connected': 0})
+
+    results = {}
+    replication_metrics = mysql_check._collect_replication_metrics(mock.MagicMock(), results, above_560=True)
+
+    assert replication_metrics == REPLICA_VARS
+    assert results.get('Replicas_connected') == 0
+
+
+def test_collect_replication_metrics_returns_vars_when_replica():
+    """Test that _collect_replication_metrics returns REPLICA_VARS when this node is a replica."""
+    from datadog_checks.mysql.const import REPLICA_VARS
+
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
+
+    replica_stats = {
+        'Seconds_Behind_Source': {'channel:default': 5},
+        'Slave_IO_Running': {'channel:default': 'Yes'},
+        'Slave_SQL_Running': {'channel:default': 'Yes'},
+    }
+    mysql_check._get_replica_stats = mock.MagicMock(return_value=replica_stats)
+    mysql_check._get_replicas_connected_count = mock.MagicMock(return_value={'Replicas_connected': 0})
+
+    results = {}
+    replication_metrics = mysql_check._collect_replication_metrics(mock.MagicMock(), results, above_560=True)
+
+    assert replication_metrics == REPLICA_VARS
+    assert 'Seconds_Behind_Source' in results
+
+
+def test_collect_replication_metrics_returns_vars_when_has_replicas_connected():
+    """Test that _collect_replication_metrics returns REPLICA_VARS when replicas are connected."""
+    from datadog_checks.mysql.const import REPLICA_VARS
+
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
+
+    mysql_check._get_replica_stats = mock.MagicMock(return_value={})
+    mysql_check._get_replicas_connected_count = mock.MagicMock(return_value={'Replicas_connected': 2})
+
+    results = {}
+    replication_metrics = mysql_check._collect_replication_metrics(mock.MagicMock(), results, above_560=True)
+
+    assert replication_metrics == REPLICA_VARS
+    assert results.get('Replicas_connected') == 2
+
+
+def test_source_with_zero_replicas_emits_warning_service_check(aggregator, instance_basic):
+    """Test that a source with 0 connected replicas emits WARNING for replica-loss detection."""
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_basic])
+    mysql_check.service_check_tags = ['foo:bar']
+    mysql_check.global_variables._variables = {'log_bin': 'ON'}
+
+    mocked_results = {
+        'Replicas_connected': 0,
+    }
+
+    mysql_check._check_replication_status(mocked_results)
+
+    aggregator.assert_service_check(
+        'mysql.replication.slave_running',
+        status=MySql.WARNING,
+        tags=['foo:bar', 'replication_mode:source'],
+        count=1,
+    )
+    aggregator.assert_service_check(
+        'mysql.replication.replica_running',
+        status=MySql.WARNING,
+        tags=['foo:bar', 'replication_mode:source'],
+        count=1,
+    )
+
+
+@pytest.mark.parametrize(
+    'exclude_hostname, expected_hostname',
+    [
+        (False, 'resolved.hostname'),
+        (True, None),
+    ],
+)
+def test_debug_stats_kwargs_respects_exclude_hostname(exclude_hostname, expected_hostname):
+    instance = {'server': 'localhost', 'user': 'datadog', 'exclude_hostname': exclude_hostname}
+    with mock.patch('datadog_checks.mysql.MySql.resolve_db_host', return_value='resolved.hostname'):
+        mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance])
+    assert mysql_check.debug_stats_kwargs()['hostname'] == expected_hostname

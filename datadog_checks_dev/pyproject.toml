@@ -32,14 +32,14 @@ dependencies = [
     "coverage>=5.0.3",
     "flaky>=3.8.0",
     "mock",
-    "pytest==8.1.1",
-    "pytest-asyncio>=0.23.4",
-    "pytest-benchmark[histogram]>=4.0.0",
-    "pytest-cov>=2.6.1",
-    "pytest-memray>=1.4.0; platform_system=='Linux' or platform_system=='Darwin'",
-    "pytest-mock",
+    "pytest==9.0.3",
+    "pytest-asyncio>=1.3.0",
+    "pytest-benchmark[histogram]>=5.2.3",
+    "pytest-cov>=7.1.0",
+    "pytest-memray>=1.8.0; platform_system=='Linux' or platform_system=='Darwin'",
+    "pytest-mock>=3.15.1",
     "pyyaml>=5.4.1",
-    "requests>=2.22.0",
+    "requests>=2.33.0",
     "tenacity",
 ]
 dynamic = [
@@ -68,7 +68,7 @@ cli = [
     "pathspec>=0.10.0",
     "platformdirs>=2.0.0a3",
     "pydantic>=2.0.2",
-    "pysmi==0.3.4",
+    "pysmi==1.6.2",
     "securesystemslib[crypto]==0.28.0",
     "semver>=2.13.0",
     "tabulate>=0.8.9",
@@ -84,7 +84,7 @@ cli = [
     # https://github.com/twisted/towncrier/issues/641
     "towncrier==23.11.0",
     "twine>=1.11.0",
-    "virtualenv<20.22.0",
+    "virtualenv>=20.26.1",
     # TODO: Remove once every check has a pyproject.toml
 ]
 

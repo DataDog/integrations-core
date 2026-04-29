@@ -1,13 +1,16 @@
 name: Postgres
+fleet_configurable: true
 files:
 - name: postgres.yaml
   options:
   - template: init_config
     options:
     - name: propagate_agent_tags
+      display_priority: 0
       description: |
         Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
         When set to `true`, the tags from the agent host are added to the check's tags for all instances.
+      fleet_configurable: true
       value:
         example: false
         type: boolean
@@ -16,206 +19,58 @@ files:
   - template: instances
     options:
     - name: host
+      display_priority: 24
       description: |
         The hostname to connect to. To connect to a Unix socket, specify the full path to the socket directory,
         e.g. `/var/run/postgresql`.
+      fleet_configurable: true
       value:
         type: string
         display_default: "localhost"
     - name: port
+      display_priority: 23
       description: The port to use when connecting to PostgreSQL.
+      fleet_configurable: true
       value:
         type: integer
         display_default: 5432
     - name: username
+      display_priority: 22
       description: The Datadog username created to connect to PostgreSQL.
+      fleet_configurable: true
       value:
         type: string
         display_default: "datadog"
     - name: password
+      display_priority: 21
       description: The password associated with the Datadog user.
+      fleet_configurable: true
       secret: true
       value:
         type: string
     - name: dbname
+      display_priority: 19
       description: |
-        The name of the PostgresSQL database to monitor.
+        The name of the PostgreSQL database to monitor.
         Note: If omitted, the default system Postgres database is queried.
+      fleet_configurable: true
       value:
         type: string
         display_default: postgres
-    - name: reported_hostname
+    - name: dbm
+      display_priority: 18
+      fleet_configurable: true
       description: |
-        Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
-        and can be useful to set a custom hostname when connecting to a remote database through a proxy.
-      value:
-        type: string
-        default: null
-    - name: exclude_hostname
-      description: |
-        Omit the hostname from tags and events. This is useful when the database host is not monitored by an agent.
+        Set to `true` to enable Database Monitoring.
       value:
         type: boolean
         example: false
-    - name: database_identifier
-      description: |
-        Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
-        billable instance.
-        
-        The default value is the resolved hostname for the instance, which respects the `reported_hostname` option.
-
-        This value will be used as-is for the display name of the instance but will be normalized
-        when applied as the `database_instance` tag. Please see https://docs.datadoghq.com/getting_started/tagging/
-        for more details on Datadog tag normalization.
-      options:
-        - name: template
-          value:
-            type: string
-            display_default: "$resolved_hostname"
-            example: "$env-$resolved_hostname:$port"
-          description: |
-            The template to use for the database identifier. The default value is `$resolved_hostname`.
-            You can use the following variables, prefixed by `$` in the template:
-            - resolved_hostname: The resolved hostname of the instance, which respects the `reported_hostname` option.
-            - host: The provided host of the instance.
-            - port: The port number of the instance.
-            In addition, you can use any key from the `tags` section of the configuration.
-    - name: dbstrict
-      description: |
-        Whether to restrict the scope of the check to just the database in question.
-        Set to `true` if you only want to gather metrics from the database provided in the dbname parameter.
-      value:
-        type: boolean
         display_default: false
-        example: false
-    - name: ignore_databases
-      description: |
-        A list of database to ignore. No metrics or statement samples will be collected for these databases.
-        Each value can be a plain string or a Postgres pattern. If you want to ignore the postgres database,
-        set collect_default_database to false in addition to adding it to this array.
-        For more information on how patterns work, see https://www.postgresql.org/docs/12/functions-matching.html
-      value:
-        type: array
-        items:
-          type: string
-        example:
-          - 'template0'
-          - 'template1'
-          - rdsadmin
-          - azure_maintenance
-          - cloudsqladmin
-          - alloydbadmin
-          - alloydbmetadata
-        default:
-          - 'template0'
-          - 'template1'
-          - rdsadmin
-          - azure_maintenance
-          - cloudsqladmin
-          - alloydbadmin
-          - alloydbmetadata
-    - name: ignore_schemas_owned_by
-      description: |
-        A list of database users which own schemas to ignore.
-        No metrics will be collected for these schemas.
-        Each value can be a plain string or a Postgres pattern.
-      value:
-        type: array
-        items:
-          type: string
-        example:
-          - rds_superuser
-          - rdsadmin
-          - user123
-          - 'dev_%_owner'
-        default:
-          - rds_superuser
-          - rdsadmin
-    - name: ssl
-      description: |
-        This option determines whether or not and with what priority a secure SSL TCP/IP connection
-        is negotiated with the server. There are six modes:
-        - `disable`: Only tries a non-SSL connection.
-        - `allow`: First tries a non-SSL connection; if if fails, tries an SSL connection.
-        - `prefer`: First tries an SSL connection; if it fails, tries a non-SSL connection.
-        - `require`: Only tries an SSL connection. If a root CA file is present, verifies the certificate in
-                     the same way as if verify-ca was specified.
-        - `verify-ca`: Only tries an SSL connection, and verifies that the server certificate is issued by a
-                       trusted certificate authority (CA).
-        - `verify-full`: Only tries an SSL connection and verifies that the server certificate is issued by a
-                         trusted CA and that the requested server host name matches the one in the certificate.
-
-        For a detailed description of how these options work see https://www.postgresql.org/docs/current/libpq-ssl.html
-      value:
-        type: string
-        example: 'allow'
-        default: 'allow'
-    - name: ssl_root_cert
-      description: |
-        The path to the ssl root certificate.
-
-        For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
-      value:
-        type: string
-        default: null
-    - name: ssl_cert
-      description: |
-        The path to the ssl certificate.
-
-        For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
-      value:
-        type: string
-        default: null
-    - name: ssl_key
-      description: |
-        The path to the ssl client key.
-
-        For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
-      value:
-        type: string
-        default: null
-    - name: ssl_password
-      description: |
-        The password for the secret key specified in ssl_key, allowing client certificate private keys to be stored
-        in encrypted form on disk.
-
-        For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
-      value:
-        type: string
-        default: null
-    - name: query_timeout
-      description: |
-        Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
-        to all metric collection queries. Aborts any statement that takes more than the specified number of milliseconds,
-        starting from the time the command arrives at the server from the client. A value of zero turns this off.
-        Cancelled queries won't log any metrics.
-      value:
-        type: integer
-        example: 5000
-    - name: idle_connection_timeout
-      description: |
-        Sets the timeout (in ms) a connection used in the connection pool will be idle until it is closed by the pooler.
-        This value should be configured to a lower value if you are observing connection buildup on the Postgres server,
-        or a higher value if connections are getting prematurely closed.
-      hidden: true
-      value:
-        type: integer
-        example: 60000
-    - name: max_connections
-      hidden: true
-      description: |
-        Sets the upper bound limit on the number of concurrent connections the Agent can have on the database server.
-        The Agent needs to open additional connections to collect explain plans across databases.
-        Idle connections are cached, but pruned over time to balance the performance impact of opening connections and the cost of having many open connections.
-        Raising the default value should only be needed on workloads with >50 databases.
-        Lowering the default value can reduce the number of explain plans collected and is not recommended in most cases.
-      value:
-        type: integer
-        example: 30
-        display_default: 30
     - name: relations
+      display_priority: 17
+      fleet_configurable: true
       description: |
-        The list of relations/tables must be specified here to track per-relation (table, index , view, etc.) metrics.
+        The list of relations/tables must be specified here to track per-relation (table, index, view, etc.) metrics.
         If enabled, `dbname` should be specified to collect database-specific relations metrics.
         You can either specify a single relation by its exact name in 'relation_name' or use a regex to track metrics
         from all matching relations (useful in cases where relation names are dynamically generated, e.g. TimescaleDB).
@@ -271,23 +126,267 @@ files:
             relkind:
               - r
               - p
-    - name: max_relations
-      description: Determines the maximum number of relations to fetch.
+    - name: collect_activity_metrics
+      display_priority: 15
+      fleet_configurable: true
+      description: |
+        Collect metrics regarding transactions from pg_stat_activity. Please make sure the user
+        has sufficient privileges to read from pg_stat_activity before enabling this option.
       value:
-        type: integer
-        example: 300
+        type: boolean
+        example: false
     - name: collect_function_metrics
+      display_priority: 14
+      fleet_configurable: true
       description: |
         If set to true, collects metrics regarding PL/pgSQL functions from pg_stat_user_functions.
       value:
         type: boolean
         example: false
+    - name: collect_database_size_metrics
+      display_priority: 13
+      fleet_configurable: true
+      description: Collect database size metrics.
+      value:
+        type: boolean
+        example: true
+    - name: collect_bloat_metrics
+      display_priority: 12
+      fleet_configurable: true
+      description: Collect metrics about table bloat. Only available when `relation` metrics are enabled.
+      enabled: true
+      value:
+        type: boolean
+        example: false
+    - name: tag_replication_role
+      display_priority: 10
+      fleet_configurable: true
+      hidden: true
+      description: Tag metrics and checks with `replication_role:<master|standby>`.
+      value:
+        type: boolean
+        example: true
     - name: collect_count_metrics
+      display_priority: 9
+      fleet_configurable: true
       description: Collect count of user tables from pg_class.
       value:
         type: boolean
         example: true
+    - name: max_relations
+      display_priority: 8
+      fleet_configurable: true
+      description: Determines the maximum number of relations to fetch.
+      value:
+        type: integer
+        example: 300
+    - name: ssl
+      display_priority: 7
+      description: |
+        This option determines whether or not and with what priority a secure SSL TCP/IP connection
+        is negotiated with the server.
+
+        There are six modes:
+        - `disable`: Only tries a non-SSL connection.
+        - `allow`: First tries a non-SSL connection; if it fails, tries an SSL connection.
+        - `prefer`: First tries an SSL connection; if it fails, tries a non-SSL connection.
+        - `require`: Only tries an SSL connection. If a root CA file is present, verifies the certificate in
+                     the same way as if verify-ca was specified.
+        - `verify-ca`: Only tries an SSL connection, and verifies that the server certificate is issued by a
+                       trusted certificate authority (CA).
+        - `verify-full`: Only tries an SSL connection and verifies that the server certificate is issued by a
+                         trusted CA and that the requested server host name matches the one in the certificate.
+
+        For a detailed description of how these options work see https://www.postgresql.org/docs/current/libpq-ssl.html
+      fleet_configurable: true
+      value:
+        type: string
+        example: 'allow'
+        default: 'allow'
+    - name: collect_default_database
+      display_priority: 4
+      fleet_configurable: true
+      description: Include statistics from the default database 'postgres' in the check metrics.
+      value:
+        type: boolean
+        example: true
+    - name: query_timeout
+      display_priority: 3
+      fleet_configurable: true
+      description: |
+        Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
+        to all metric collection queries. Aborts any statement that takes more than the specified number of milliseconds,
+        starting from the time the command arrives at the server from the client. A value of zero turns this off.
+        Cancelled queries won't log any metrics.
+      value:
+        type: integer
+        example: 5000
+    - name: reported_hostname
+      display_priority: 2
+      description: |
+        Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
+        and can be useful to set a custom hostname when connecting to a remote database through a proxy.
+      fleet_configurable: true
+      value:
+        type: string
+        default: null
+    - name: ignore_databases
+      display_priority: 1
+      fleet_configurable: true
+      description: |
+        A list of databases to ignore. No metrics or statement samples will be collected for these databases.
+        Each value can be a plain string or a Postgres pattern. If you want to ignore the postgres database,
+        set collect_default_database to false in addition to adding it to this array.
+        For more information on how patterns work, see https://www.postgresql.org/docs/12/functions-matching.html
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - 'template0'
+          - 'template1'
+          - rdsadmin
+          - azure_maintenance
+          - cloudsqladmin
+          - alloydbadmin
+          - alloydbmetadata
+        default:
+          - 'template0'
+          - 'template1'
+          - rdsadmin
+          - azure_maintenance
+          - cloudsqladmin
+          - alloydbadmin
+          - alloydbmetadata
+    - name: exclude_hostname
+      display_priority: 0
+      description: |
+        Omit the hostname from tags and events. This is useful when the database host is not monitored by an agent.
+      value:
+        type: boolean
+        example: false
+    - name: database_identifier
+      display_priority: 0
+      description: |
+        Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
+        billable instance.
+        
+        The default value is the resolved hostname for the instance, which respects the `reported_hostname` option.
+
+        This value will be used as-is for the display name of the instance but will be normalized
+        when applied as the `database_instance` tag. Please see https://docs.datadoghq.com/getting_started/tagging/
+        for more details on Datadog tag normalization.
+      options:
+        - name: template
+          value:
+            type: string
+            display_default: "$resolved_hostname"
+            example: "$env-$resolved_hostname:$port"
+          description: |
+            The template to use for the database identifier. The default value is `$resolved_hostname`.
+            You can use the following variables, prefixed by `$` in the template:
+            - resolved_hostname: The resolved hostname of the instance, which respects the `reported_hostname` option.
+            - host: The provided host of the instance.
+            - port: The port number of the instance.
+            In addition, you can use any key from the `tags` section of the configuration.
+    - name: dbstrict
+      display_priority: 0
+      fleet_configurable: true
+      description: |
+        Whether to restrict the scope of the check to just the database in question.
+        Set to `true` if you only want to gather metrics from the database provided in the dbname parameter.
+      value:
+        type: boolean
+        display_default: false
+        example: false
+    - name: ignore_schemas_owned_by
+      display_priority: 0
+      fleet_configurable: true
+      description: |
+        A list of database users which own schemas to ignore.
+        No metrics will be collected for these schemas.
+        Each value can be a plain string or a Postgres pattern.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - rds_superuser
+          - rdsadmin
+          - user123
+          - 'dev_%_owner'
+        default:
+          - rds_superuser
+          - rdsadmin
+    - name: ssl_root_cert
+      display_priority: 0
+      description: |
+        The path to the ssl root certificate.
+
+        For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+      fleet_configurable: true
+      value:
+        type: string
+        require_trusted_provider: true
+        default: null
+    - name: ssl_cert
+      display_priority: 0
+      description: |
+        The path to the ssl certificate.
+
+        For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+      fleet_configurable: true
+      value:
+        type: string
+        require_trusted_provider: true
+        default: null
+    - name: ssl_key
+      display_priority: 0
+      description: |
+        The path to the ssl client key.
+
+        For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+      value:
+        type: string
+        require_trusted_provider: true
+        default: null
+    - name: ssl_password
+      display_priority: 0
+      description: |
+        The password for the secret key specified in ssl_key, allowing client certificate private keys to be stored
+        in encrypted form on disk.
+
+        For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+      secret: true
+      value:
+        type: string
+        default: null
+    - name: idle_connection_timeout
+      display_priority: 0
+      fleet_configurable: true
+      description: |
+        Sets the timeout (in ms) a connection used in the connection pool will be idle until it is closed by the pooler.
+        This value should be configured to a lower value if you are observing connection buildup on the Postgres server,
+        or a higher value if connections are getting prematurely closed.
+      hidden: true
+      value:
+        type: integer
+        example: 60000
+    - name: max_connections
+      display_priority: 0
+      hidden: true
+      description: |
+        Sets the upper bound limit on the number of concurrent connections the Agent can have on the database server.
+        The Agent needs to open additional connections to collect explain plans across databases.
+        Idle connections are cached, but pruned over time to balance the performance impact of opening connections and the cost of having many open connections.
+        Raising the default value should only be needed on workloads with >50 databases.
+        Lowering the default value can reduce the number of explain plans collected and is not recommended in most cases.
+      value:
+        type: integer
+        example: 30
+        display_default: 30
     - name: locks_idle_in_transaction
+      display_priority: 0
       description: Configure collection of idle in transaction lock age metrics
       hidden: true
       options:
@@ -313,18 +412,14 @@ files:
             display_default: 100
           hidden: true
     - name: collect_checksum_metrics
+      display_priority: 0
+      fleet_configurable: true
       description: Collect counts of database failed checksums. Only supported on versions >= 12.
       value:
         type: boolean
         example: false
-    - name: collect_activity_metrics
-      description: |
-        Collect metrics regarding transactions from pg_stat_activity. Please make sure the user
-        has sufficient privileges to read from pg_stat_activity before enabling this option.
-      value:
-        type: boolean
-        example: false
     - name: activity_metrics_excluded_aggregations
+      display_priority: 0
       description: |
         A list of columns to remove from the pg_stat_activity aggregation.
         By default, datname, usename and application_name will be used.
@@ -339,29 +434,17 @@ files:
           - application_name
         default: []
     - name: collect_buffercache_metrics
+      display_priority: 0
+      fleet_configurable: true
       description: |
         If set to true, collects metrics regarding buffer cache usage from pg_buffercache.
         pg_buffercache extension must be installed.
       value:
         type: boolean
         example: false
-    - name: collect_database_size_metrics
-      description: Collect database size metrics.
-      value:
-        type: boolean
-        example: true
-    - name: collect_default_database
-      description: Include statistics from the default database 'postgres' in the check metrics.
-      value:
-        type: boolean
-        example: true
-    - name: collect_bloat_metrics
-      description: Collect metrics about table bloat. Only available when `relation` metrics are enabled.
-      enabled: true
-      value:
-        type: boolean
-        example: false
     - name: collect_wal_metrics
+      display_priority: 0
+      fleet_configurable: true
       description: |
         Collect metrics about WAL file age.
 
@@ -375,6 +458,7 @@ files:
         example: true
         display_default: null
     - name: data_directory
+      display_priority: 0
       description: |
         The data directory of your postgres installation.
         Only used when `collect_wal_metrics` is explicitly set to `true` on Postgres 9.6 and below.
@@ -382,30 +466,15 @@ files:
         type: string
         example: /usr/local/pgsql/data
         display_default: /usr/local/pgsql/data
-    - name: tag_replication_role
-      hidden: true
-      description: Tag metrics and checks with `replication_role:<master|standby>`.
-      value:
-        type: boolean
-        example: true
     - name: table_count_limit
+      display_priority: 0
+      fleet_configurable: true
       description: The maximum number of tables to collect metrics from.
       value:
         type: integer
         display_default: 200
-    - template: instances/db
-      overrides:
-        custom_queries.value.example:
-          - query: "SELECT foo, COUNT(*) FROM table.events GROUP BY foo"
-            columns:
-              - name: foo
-                type: tag
-              - name: event.total
-                type: gauge
-            tags:
-              - test:postgresql
-            metric_prefix: postgresql
     - name: custom_metrics
+      display_priority: 0
       description: This option is deprecated. Use `custom_queries` instead.
       hidden: true
       value:
@@ -413,30 +482,36 @@ files:
         items:
           type: object
     - name: database_autodiscovery
+      display_priority: 0
+      fleet_configurable: true
       description: |
         Define the configuration for database autodiscovery.
         Complete this section if you want to auto-discover databases on this host
         instead of specifying each using dbname.
       options:
         - name: enabled
+          fleet_configurable: true
           description: Enable database autodiscovery.
           value:
             type: boolean
             example: false
             display_default: false
         - name: global_view_db
+          fleet_configurable: true
           description: Database the agent connects to perform autodiscovery operations
           value:
             type: string
             example: postgres
             display_default: postgres
         - name: max_databases
+          fleet_configurable: true
           description: The maximum number of databases this host should monitor.
           value:
             type: integer
             example: 100
             display_default: 100
         - name: include
+          fleet_configurable: true
           description: |
             Regular expression for database names to include as part of
             database autodiscovery.
@@ -455,6 +530,7 @@ files:
             display_default:
               - ".*"
         - name: exclude
+          fleet_configurable: true
           description: |
             Regular expression for database names to exclude as part of `database_autodiscovery`.
             Character casing is ignored. The regular expressions start matching from the beginning,
@@ -485,6 +561,8 @@ files:
             example: 600
             display_default: 600
     - name: application_name
+      display_priority: 0
+      fleet_configurable: true
       description: |
         The application_name can be any string of less than NAMEDATALEN characters (64 characters in a standard build).
         It is typically set by an application upon connection to the server.
@@ -492,14 +570,106 @@ files:
       value:
         type: string
         example: "datadog-agent"
-    - name: dbm
+    - name: data_observability
+      display_priority: 0
+      fleet_configurable: true
       description: |
-        Set to `true` to enable Database Monitoring.
-      value:
-        type: boolean
-        example: false
-        display_default: false
+        Configure the Data Observability async job, which executes monitoring
+        queries delivered via Remote Configuration.
+      options:
+        - name: enabled
+          fleet_configurable: true
+          description: Enable the Data Observability job.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: collection_interval
+          fleet_configurable: true
+          description: |
+            How often (in seconds) the job wakes up to check which queries are
+            due. Individual queries have their own interval_seconds. This value
+            must be less than or equal to the smallest interval_seconds across
+            all configured queries (i.e. the least common denominator), otherwise
+            queries with short intervals will be delayed.
+          value:
+            type: number
+            example: 10
+            display_default: 10
+        - name: run_sync
+          hidden: true
+          description: Run the job synchronously (for testing).
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: config_id
+          hidden: true
+          description: |
+            Unique identifier of the Remote Configuration payload that populated
+            this data_observability block. Set automatically by the Datadog Agent
+            Go RC handler when it delivers query configuration; do not set this
+            field manually. It is forwarded as-is on every emitted event so that
+            the intake can correlate results back to the originating RC config.
+          value:
+            type: string
+        - name: queries
+          hidden: true
+          description: |
+            List of monitor queries to execute. Populated automatically by the
+            Datadog Agent Go RC handler when Remote Configuration delivers a
+            DO_QUERY_ACTIONS payload; do not set this field manually. Each entry
+            describes one SQL monitoring query along with its scheduling
+            parameters and entity metadata.
+          value:
+            type: array
+            items:
+              type: object
+              required:
+                - monitor_id
+                - dbname
+                - query
+                - interval_seconds
+                - entity
+              properties:
+              - name: monitor_id
+                type: integer
+              - name: dbname
+                type: string
+              - name: type
+                type: string
+              - name: query
+                type: string
+              - name: interval_seconds
+                type: integer
+              - name: entity
+                type: object
+                required:
+                  - platform
+                  - account
+                  - database
+                  - schema
+                  - table
+                properties:
+                - name: platform
+                  type: string
+                - name: account
+                  type: string
+                - name: database
+                  type: string
+                - name: schema
+                  type: string
+                - name: table
+                  type: string
+              - name: custom_sql_select_fields
+                type: object
+                properties:
+                - name: metric_config_id
+                  type: integer
+                - name: entity_id
+                  type: string
     - name: pg_stat_statements_view
+      display_priority: 0
       description: |
         Set this value if you want to define a custom view or function to allow the datadog user to query the
         `pg_stat_statements` table, which is useful for restricting the permissions given to the datadog agent.
@@ -509,6 +679,7 @@ files:
         example: show_pg_stat_statements()
         display_default: pg_stat_statements
     - name: pg_stat_activity_view
+      display_priority: 0
       hidden: true
       description: |
         Set this value if you want to define a custom view or function to allow the datadog user to query the
@@ -518,6 +689,7 @@ files:
         type: string
         display_default: pg_stat_activity
     - name: query_encodings
+      display_priority: 0
       description: |
         Set this value if your database is encoded in SQL_ASCII and you have clients that use encodings other than UTF-8.
         When attempting to decode stored query text for query metrics, samples and activity, the agent will use these
@@ -535,15 +707,19 @@ files:
         display_default:
           - utf8
     - name: query_metrics
+      display_priority: 0
+      fleet_configurable: true
       description: Configure collection of query metrics
       options:
         - name: enabled
+          fleet_configurable: true
           description: |
             Enable collection of query metrics. Requires `dbm: true`.
           value:
             type: boolean
             example: true
         - name: collection_interval
+          fleet_configurable: true
           description: |
             Set the query metric collection interval (in seconds). Each collection involves a single query to
             `pg_stat_statements`. If a non-default value is chosen then that exact same value must be used for *every*
@@ -608,15 +784,19 @@ files:
             type: integer
             example: 20_000_000
     - name: query_samples
+      display_priority: 0
+      fleet_configurable: true
       description: Configure collection of explain plan samples
       options:
         - name: enabled
+          fleet_configurable: true
           description: |
             Enable collection of explain plans. Requires `dbm: true`.
           value:
             type: boolean
             example: true
         - name: collection_interval
+          fleet_configurable: true
           description: |
             Set the explain plan collection interval (in seconds). Each collection involves a single query to
             `pg_stat_activity` followed by at most one `EXPLAIN` query per unique normalized query seen.
@@ -624,6 +804,7 @@ files:
             type: number
             example: 1
         - name: explain_function
+          fleet_configurable: true
           description: |
             Override the default function used to collect explain plans for queries.
           value:
@@ -658,6 +839,7 @@ files:
             type: integer
             example: 10000
         - name: explain_parameterized_queries
+          fleet_configurable: true
           description: |
             This option will enable the ability to explain parameterized queries.
             This is useful if your SQL clients are using the extended query protocol or prepared statements.
@@ -687,15 +869,19 @@ files:
             type: boolean
             example: false
     - name: query_activity
+      display_priority: 0
+      fleet_configurable: true
       description: Configure collection of in-flight query samples
       options:
         - name: enabled
+          fleet_configurable: true
           description: |
             Enable collection of in-flight query samples. Requires `dbm: true`.
           value:
             type: boolean
             example: true
         - name: collection_interval
+          fleet_configurable: true
           description: |
             Set the in-flight query sample collection interval (in seconds). This number cannot be smaller than
             the `query_samples` configured collection_interval.
@@ -704,6 +890,7 @@ files:
             example: 10
           hidden: true
         - name: payload_row_limit
+          fleet_configurable: true
           description: |
             Set the maximum number of pg_stat_activity rows you want to report. If the table is larger
             than the maximum rows set, then the top N longest running transactions will be reported.
@@ -711,15 +898,19 @@ files:
             type: number
             example: 3500
     - name: collect_settings
+      display_priority: 0
+      fleet_configurable: true
       description: Configure collection of pg_settings.
       options:
         - name: enabled
+          fleet_configurable: true
           description: |
             Enable collection of pg_settings. Requires `dbm: true`.
           value:
             type: boolean
             example: true
         - name: collection_interval
+          fleet_configurable: true
           description: |
             Set the database settings collection interval (in seconds). Each collection involves a single query to
             `pg_settings`.
@@ -727,8 +918,9 @@ files:
             type: number
             example: 600
         - name: ignored_settings_patterns
+          fleet_configurable: true
           description: |
-            A list of setting patterns to ignore. Any setting key matching one of the value in this list will
+            A list of setting patterns to ignore. Any setting key matching one of the values in this list will
             not be collected. This uses the traditional LIKE pattern-matching approach.
           value:
               type: array
@@ -739,6 +931,7 @@ files:
               default:
                 - plpgsql%
         - name: run_sync
+          fleet_configurable: true
           hidden: true
           description: |
             Run the metadata collection synchronously. This is useful for testing purposes, but should not be used
@@ -747,18 +940,22 @@ files:
             type: boolean
             example: false
     - name: collect_schemas
+      display_priority: 0
+      fleet_configurable: true
       description: |
         Enable collection of database schemas. In order to collect schemas from all user databases,
         enable `database_autodiscovery`. To collect from a single database, set `dbname` to collect
         the schema for that database.
       options:
         - name: enabled
+          fleet_configurable: true
           description: |
             Enable collection of database schemas. Requires `dbm: true`.
           value:
             type: boolean
             example: false
         - name: max_tables
+          fleet_configurable: true
           description: |
             Maximum amount of tables the Agent collects from the instance.
           value:
@@ -766,12 +963,14 @@ files:
             example: 300
             display_default: 300
         - name: max_query_duration
+          fleet_configurable: true
           description: |
             Maximum duration of the query to collect schema information in seconds.
           value:
             type: number
             display_default: 60
         - name: max_columns
+          fleet_configurable: true
           description: |
             Maximum amount of columns the Agent collects per table.
           value:
@@ -779,12 +978,14 @@ files:
             example: 50
             display_default: 50
         - name: collection_interval
+          fleet_configurable: true
           description: |
             The database schema collection interval (in seconds).
           value:
             type: number
             example: 600
         - name: include_databases
+          fleet_configurable: true
           description: |
             A list of regex patterns to include databases. 
             Any database whose name matches any one of these patterns will be included. 
@@ -796,6 +997,7 @@ files:
             example:
               - "mydb"
         - name: exclude_databases
+          fleet_configurable: true
           description: |
             A list of regex patterns to exclude databases.
             Any database whose name matches any one of these patterns will be excluded.
@@ -815,6 +1017,7 @@ files:
               - "alloydbadmin"
               - "alloydbmetadata"
         - name: include_schemas
+          fleet_configurable: true
           description: |
             A list of regex patterns to include schemas. 
             Any schema whose name matches any one of these patterns will be included.
@@ -826,6 +1029,7 @@ files:
             example:
               - "myschema"
         - name: exclude_schemas
+          fleet_configurable: true
           description: |
             A list of regex patterns to exclude schemas. 
             Any schema whose name matches any one of these patterns will be excluded.
@@ -837,6 +1041,7 @@ files:
             example:
               - "privateschema.*"
         - name: include_tables
+          fleet_configurable: true
           description: |
             A list of regex patterns to include tables. 
             Any table whose name matches any one of these patterns will be included.
@@ -848,6 +1053,7 @@ files:
             example:
               - "users.*"
         - name: exclude_tables
+          fleet_configurable: true
           description: |
             A list of regex patterns to exclude tables. 
             Any table whose name matches any one of these patterns will be excluded.
@@ -860,6 +1066,7 @@ files:
               - "customer.*"
 
     - name: aws
+      display_priority: 0
       description: |
         This block defines the configuration for AWS RDS and Aurora instances.
 
@@ -917,6 +1124,7 @@ files:
               example: arn:aws:iam::123456789012:role/MyRole
 
     - name: gcp
+      display_priority: 0
       description: |
         This block defines the configuration for Google Cloud SQL instances.
 
@@ -946,6 +1154,7 @@ files:
             example: foo-database
 
     - name: azure
+      display_priority: 0
       description: |
         This block defines the configuration for Azure Database for PostgreSQL.
 
@@ -1006,6 +1215,7 @@ files:
               type: string
               example: https://ossrdbms-aad.database.windows.net/.default
     - name: obfuscator_options
+      display_priority: 0
       description: |
         Configure how the SQL obfuscator behaves.
         Note: This option only applies when `dbm` is enabled.
@@ -1035,6 +1245,7 @@ files:
             type: boolean
             example: true
         - name: collect_tables
+          fleet_configurable: true
           description: |
             Set to `false` to disable the collection of tables in your SQL statements.
             Requires `collect_metadata: true`.
@@ -1042,6 +1253,7 @@ files:
             type: boolean
             example: true
         - name: collect_commands
+          fleet_configurable: true
           description: |
             Set to `false` to disable the collection of commands in your SQL statements.
             Requires `collect_metadata: true`.
@@ -1051,6 +1263,7 @@ files:
             type: boolean
             example: true
         - name: collect_comments
+          fleet_configurable: true
           description: |
             Set to `false` to disable the collection of comments in your SQL statements.
             Requires `collect_metadata: true`.
@@ -1060,8 +1273,9 @@ files:
             type: boolean
             example: true
         - name: keep_sql_alias
+          fleet_configurable: true
           description: |
-            Set to `true` to keep sql aliases in obfuscated SQL statements. Examples of aliases are
+            Set to `true` to keep SQL aliases in obfuscated SQL statements. Examples of aliases are
             `with select 1 as alias`, `select column as other_name`, or `select * from table t`.
             When `true` these aliases will not be removed.
           value:
@@ -1069,6 +1283,7 @@ files:
             example: true
             display_default: true
         - name: keep_dollar_quoted_func
+          fleet_configurable: true
           description: |
             Set to `true` to prevent dollar quoted function strings (e.g. `$func$`) from being removed.
             When not removed, the sql content of dollar quoted func strings will be obfuscated.
@@ -1078,6 +1293,7 @@ files:
             example: true
             display_default: true
         - name: remove_space_between_parentheses
+          fleet_configurable: true
           description: |
             Set to `true` to remove spaces between parentheses in your normalized SQL statements.
           value:
@@ -1085,6 +1301,7 @@ files:
             example: false
             display_default: false
         - name: keep_null
+          fleet_configurable: true
           description: |
             Set to `true` to keep the keyword `NULL` in your obfuscated SQL statements.
           value:
@@ -1092,6 +1309,7 @@ files:
             example: false
             display_default: false
         - name: keep_boolean
+          fleet_configurable: true
           description: |
             Set to `true` to keep the keywords `TRUE` and `FALSE` in your obfuscated SQL statements.
           value:
@@ -1099,6 +1317,7 @@ files:
             example: false
             display_default: false
         - name: keep_positional_parameter
+          fleet_configurable: true
           description: |
             Set to `true` to keep positional parameters (e.g. `$1`) in your obfuscated SQL statements.
           value:
@@ -1106,6 +1325,7 @@ files:
             example: false
             display_default: false
         - name: keep_trailing_semicolon
+          fleet_configurable: true
           description: |
             Set to `true` to keep trailing semicolons in your normalized SQL statements.
           value:
@@ -1113,6 +1333,7 @@ files:
             example: false
             display_default: false
         - name: keep_identifier_quotation
+          fleet_configurable: true
           description: |
             Set to `true` to keep identifier quotations (e.g. `"my_table"`) in your normalized SQL statements.
           value:
@@ -1120,6 +1341,7 @@ files:
             example: false
             display_default: false
         - name: keep_json_path
+          fleet_configurable: true
           description: |
             Set to `true` to keep JSON path expressions (e.g. `data->'key'`) in your normalized SQL statements.
           value:
@@ -1127,6 +1349,8 @@ files:
             example: false
             display_default: false
     - name: collect_raw_query_statement
+      display_priority: 0
+      fleet_configurable: true
       description: |
         Configure the collection of raw query statements in query samples and explain plans.
         Raw query statements and explain plans may contain sensitive information (e.g., passwords)
@@ -1135,10 +1359,10 @@ files:
         explain plans into Datadog, which can then become viewable in query samples or explain plans. 
         This option is disabled by default.
         Note: Collection of raw query statements is currently in preview.
-        If you are interested in participating, please reach out to your Datadog Customer Success Manager.
         This option only applies when dbm is enabled.
       options:
         - name: enabled
+          fleet_configurable: true
           description: |
             Set to `true` to collect the raw query statements.
           value:
@@ -1146,6 +1370,8 @@ files:
             example: false
             display_default: false
     - name: log_unobfuscated_queries
+      display_priority: 0
+      fleet_configurable: true
       hidden: true
       description: |
         Set to `true` to enable logging of original unobfuscated SQL queries when obfuscation errors occur.
@@ -1156,6 +1382,7 @@ files:
         example: false
         display_default: false
     - name: log_unobfuscated_plans
+      display_priority: 0
       hidden: true
       description: |
         Set to `true` to enable logging of original unobfuscated SQL plans when obfuscation errors occur.
@@ -1166,7 +1393,9 @@ files:
         example: false
         display_default: false
     - name: database_instance_collection_interval
+      display_priority: 0
       hidden: true
+      fleet_configurable: true
       description: |
         Set the database instance collection interval (in seconds). The database instance collection sends
         basic information about the database instance along with a signal that it still exists.
@@ -1175,18 +1404,38 @@ files:
         type: number
         default: 300
     - name: propagate_agent_tags
+      display_priority: 0
+      fleet_configurable: true
       description: |
         Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
+
         When set to `true`, the tags from the agent host are added to the check's tags for all instances.
         This option takes precedence over the `propagate_agent_tags` option in `init_config`.
       value:
         example: false
         type: boolean
+    - template: instances/db
+      overrides:
+        custom_queries.value.example:
+          - query: "SELECT foo, COUNT(*) FROM table.events GROUP BY foo"
+            columns:
+              - name: foo
+                type: tag
+              - name: event.total
+                type: gauge
+            tags:
+              - test:postgresql
+            metric_prefix: postgresql
+        custom_queries.display_priority: 16
     - template: instances/default
       overrides:
         disable_generic_tags.hidden: False
         disable_generic_tags.enabled: True
         disable_generic_tags.description: The integration will stop sending server tag as is reduntant with host tag
+        tags.display_priority: 20
+        min_collection_interval.display_priority: 11
+        disable_generic_tags.display_priority: 6
+        empty_default_hostname.display_priority: 5
   - template: logs
     example:
     - type: file

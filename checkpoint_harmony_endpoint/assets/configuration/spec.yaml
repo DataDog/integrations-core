@@ -1,4 +1,5 @@
 name: Checkpoint Harmony Endpoint
+fleet_configurable: true
 files:
 - name: checkpoint_harmony_endpoint.yaml
   options:

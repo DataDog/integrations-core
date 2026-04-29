@@ -29,6 +29,7 @@ defaults:
 env:
   APP_NAME: ddev
   PYTHON_VERSION: "3.13"
+  # renovate: datasource=pypi depName=pyoxidizer
   PYOXIDIZER_VERSION: "0.24.0"
 
 jobs:
@@ -52,23 +53,52 @@ jobs:
         fi
         echo "base_tags=team:agent-integrations,service:ddev,context:$context" >> $GITHUB_OUTPUT
 
+  should-sign-and-upload:
+    name: Determine signing conditions
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        # Override workflow-level working-directory since this job does not checkout code
+        working-directory: .
+    outputs:
+      result: ${{ steps.check.outputs.result }}
+    steps:
+    - id: check
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        REF: ${{ github.ref }}
+      run: |
+        result=false
+        if [[ "$EVENT_NAME" == "schedule" || ( "$EVENT_NAME" == "push" && "$REF" == refs/tags/* ) ]]; then
+          result=true
+        fi
+        echo "result=$result" >> $GITHUB_OUTPUT
+
   python-artifacts:
     name: Build wheel and source distribution
     runs-on: ubuntu-latest
     needs: define-tags
-
+    permissions:
+      # needed for dd-sts
+      id-token: write
     steps:
     - name: Checkout code
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         fetch-depth: 0
 
+    - name: Get Datadog credentials
+      id: dd-sts
+      uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+      with:
+        policy: integrations-core-api-key
+
     - name: Tag Job
       uses: ./.github/actions/tag-job
       if: ${{ github.event.pull_request.head.repo.fork != true }}
       with:
         tags: '${{ needs.define-tags.outputs.base_tags }},step:build-artifacts'
-        dd_api_key: ${{ secrets.DD_API_KEY }}
+        dd_api_key: ${{ steps.dd-sts.outputs.api_key }}
 
     - name: Install build frontend
       run: python -m pip install --upgrade build
@@ -77,7 +107,7 @@ jobs:
       run: python -m build
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: python-artifacts
         path: ddev/dist/*
@@ -89,6 +119,9 @@ jobs:
     - define-tags
     - python-artifacts
     runs-on: ${{ matrix.job.os }}
+    permissions:
+      # needed for dd-sts
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
@@ -124,7 +157,7 @@ jobs:
       CARGO: cargo
       CARGO_BUILD_TARGET: ${{ matrix.job.target }}
       PYAPP_REPO: pyapp
-      PYAPP_VERSION: "0.15.1"
+      PYAPP_VERSION: "0.24.0"
       PYAPP_PIP_EXTERNAL: "1"
 
     steps:
@@ -133,12 +166,18 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Get Datadog credentials
+      id: dd-sts
+      uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+      with:
+        policy: integrations-core-api-key
+
     - name: Tag Job
       uses: ./.github/actions/tag-job
       if: ${{ github.event.pull_request.head.repo.fork != true }}
       with:
         tags: '${{ needs.define-tags.outputs.base_tags }},step:build-binary,os:${{ matrix.job.os }},target:${{ matrix.job.target }}'
-        dd_api_key: ${{ secrets.DD_API_KEY }}
+        dd_api_key: ${{ steps.dd-sts.outputs.api_key }}
 
     - name: Fetch PyApp
       run: >-
@@ -152,20 +191,37 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
+    - name: Install uv
+      uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+      with:
+        enable-cache: false
+
+    # Both versions pinned for deterministic builds and stable cache reuse.
+    #
+    # virtualenv 21.0.0 (2026-02-25) split interpreter discovery out into the
+    # `python-discovery` package and removed `propose_interpreters` from
+    # `virtualenv.discovery.builtin`, which older hatch versions monkey-patched
+    # directly — see https://github.com/pypa/hatch/issues/2193. hatch 1.16.5
+    # picks up the fix from https://github.com/pypa/hatch/pull/2196 and now
+    # *requires* virtualenv>=21, so they must be bumped together.
     - name: Install Hatch
-      run: pip install -U hatch
+      run: uv pip install --system "hatch==1.16.5" "virtualenv==21.3.0"
 
     - name: Install Hatch environment collector plugin
-      run: pip install -e . --no-deps
+      run: uv pip install --system -e . --no-deps
 
     - name: Install Rust toolchain
-      uses: dtolnay/rust-toolchain@772c4490b37ea1c65caf6a53089a38ea1510cf4a # 1.93.0 Latest rust stable version as of 2026-01-27 (https://forge.rust-lang.org/)
+      # This action must be pinned to a commit reachable from the master branch — any other commit
+      # will eventually be garbage-collected and break the workflow. See:
+      # https://github.com/dtolnay/rust-toolchain#choice-of-full-length-commit-sha
+      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # master
       with:
+        toolchain: stable
         targets: ${{ matrix.job.target }}
 
     - name: Set up cross compiling
       if: matrix.job.cross
-      uses: taiki-e/install-action@7e574ed8bb89811282a11aecb3fe1d043bf5bf0e # v2.67.15
+      uses: taiki-e/install-action@d6e286fa45544157a02d45a43742857ebbc25d12 # v2.68.16
       with:
         tool: cross
 
@@ -182,7 +238,7 @@ jobs:
 
     - name: Download Python artifacts
       if: ${{ !startsWith(github.event.ref, 'refs/tags') }}
-      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
       with:
         name: python-artifacts
         path: ddev/dist
@@ -214,7 +270,7 @@ jobs:
       run: |-
         cat <<"OUTER" >> $GITHUB_OUTPUT
         script<<INNER
-        cd dist/app
+        cd dist/binary
         old_binary="$(ls)"
         binary="${old_binary/${{ steps.version.outputs.raw-version }}/${{ steps.version.outputs.version }}}"
         mv "$old_binary" "$binary"
@@ -227,7 +283,7 @@ jobs:
         cat <<"OUTER" >> $GITHUB_OUTPUT
         script<<INNER
         mkdir packaging
-        cd dist/app
+        cd dist/binary
 
         binary="$(ls)"
 
@@ -243,7 +299,7 @@ jobs:
     - name: Build managed binary
       env:
         PYAPP_SELF_COMMAND: "none"
-      run: hatch build --target app
+      run: hatch build --target binary
 
     - name: Correct binary version
       if: steps.version.outputs.version != steps.version.outputs.raw-version
@@ -254,17 +310,17 @@ jobs:
 
     - name: Upload staged managed archive
       if: runner.os != 'Linux'
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: staged-managed-${{ runner.os }}-${{ matrix.job.target }}
         path: ddev/packaging/*
         if-no-files-found: error
 
     - name: Reset artifact directories
-      run: rm -rf dist/app packaging
+      run: rm -rf dist/binary packaging
 
     - name: Build standalone binary
-      run: hatch build --target app
+      run: hatch build --target binary
 
     - name: Correct binary version
       if: steps.version.outputs.version != steps.version.outputs.raw-version
@@ -275,7 +331,7 @@ jobs:
 
     - name: Upload staged standalone archive
       if: runner.os != 'Linux'
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: staged-standalone-${{ runner.os }}-${{ matrix.job.target }}
         path: ddev/packaging/*
@@ -285,7 +341,7 @@ jobs:
     # can upload directly at this point
     - name: Upload standalone archive
       if: runner.os == 'Linux'
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: standalone-${{ matrix.job.target }}
         path: ddev/packaging/*
@@ -293,25 +349,33 @@ jobs:
 
   windows-packaging:
     name: Build Windows installers
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name == 'push' || github.event_name == 'schedule' || github.event.pull_request.head.repo.full_name == github.repository
     needs:
     - define-tags
+    - should-sign-and-upload
     - binaries
     runs-on: windows-2022
-
+    permissions:
+      # needed for dd-sts
+      id-token: write
     env:
       VERSION: ${{ needs.binaries.outputs.version }}
 
     steps:
     - name: Checkout code
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - name: Get Datadog credentials
+      id: dd-sts
+      uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+      with:
+        policy: integrations-core-api-key 
 
     - name: Tag Job
       uses: ./.github/actions/tag-job
       if: ${{ github.event.pull_request.head.repo.fork != true }}
       with:
         tags: '${{ needs.define-tags.outputs.base_tags }},step:package-windows,os:windows'
-        dd_api_key: ${{ secrets.DD_API_KEY }}
+        dd_api_key: ${{ steps.dd-sts.outputs.api_key }}
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
@@ -353,7 +417,7 @@ jobs:
         OUTER
 
     - name: Download staged standalone binaries
-      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
       with:
         pattern: staged-standalone-${{ runner.os }}-*
         path: ddev/archives
@@ -366,7 +430,7 @@ jobs:
       run: ${{ steps.script-prepare.outputs.script }}
 
     - name: Upload standalone binaries
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: standalone-${{ matrix.job.target }}
         path: ddev/archives/*
@@ -376,7 +440,7 @@ jobs:
       run: rm -rf archives bin targets
 
     - name: Download staged managed binaries
-      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
       with:
         pattern: staged-managed-${{ runner.os }}-*
         path: ddev/archives
@@ -400,7 +464,8 @@ jobs:
         mv build/*/release/*/*.{exe,msi} installers
 
     - name: Upload installers
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      if: needs.should-sign-and-upload.outputs.result == 'true'
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: installers-${{ runner.os }}
         path: ddev/installers/*
@@ -408,12 +473,15 @@ jobs:
 
   macos-packaging:
     name: Build macOS installer and sign/notarize artifacts
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name == 'push' || github.event_name == 'schedule' || github.event.pull_request.head.repo.full_name == github.repository
     needs:
     - define-tags
+    - should-sign-and-upload
     - binaries
     runs-on: macos-14-large
-
+    permissions:
+      # needed for dd-sts
+      id-token: write
     env:
       VERSION: ${{ needs.binaries.outputs.version }}
 
@@ -421,12 +489,18 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
+    - name: Get Datadog credentials
+      id: dd-sts
+      uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+      with:
+        policy: integrations-core-api-key
+
     - name: Tag Job
       uses: ./.github/actions/tag-job
       if: ${{ github.event.pull_request.head.repo.fork != true }}
       with:
         tags: '${{ needs.define-tags.outputs.base_tags }},step:package-macos,os:macos'
-        dd_api_key: ${{ secrets.DD_API_KEY }}
+        dd_api_key: ${{ steps.dd-sts.outputs.api_key }}
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
@@ -446,6 +520,7 @@ jobs:
         tar --strip-components=1 -xzf - -C /usr/local/bin "$ARCHIVE_NAME/rcodesign"
 
     - name: Write credentials
+      if: needs.should-sign-and-upload.outputs.result == 'true'
       env:
         APPLE_DEVELOPER_ID_APPLICATION_CERTIFICATE: "${{ secrets.APPLE_DEVELOPER_ID_APPLICATION_CERTIFICATE }}"
         APPLE_DEVELOPER_ID_APPLICATION_PRIVATE_KEY: "${{ secrets.APPLE_DEVELOPER_ID_APPLICATION_PRIVATE_KEY }}"
@@ -514,7 +589,7 @@ jobs:
         OUTER
 
     - name: Download staged standalone binaries
-      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
       with:
         pattern: staged-standalone-${{ runner.os }}-*
         path: ddev/archives
@@ -524,9 +599,11 @@ jobs:
       run: ${{ steps.script-extract.outputs.script }}
 
     - name: Sign standalone binaries
+      if: needs.should-sign-and-upload.outputs.result == 'true'
       run: ${{ steps.script-sign.outputs.script }}
 
     - name: Notarize standalone binaries
+      if: needs.should-sign-and-upload.outputs.result == 'true'
       run: ${{ steps.script-notarize.outputs.script }}
 
     - name: Archive standalone binaries
@@ -539,7 +616,7 @@ jobs:
         done
 
     - name: Upload standalone binaries
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: standalone-${{ runner.os }}
         path: ddev/archives/*
@@ -549,7 +626,7 @@ jobs:
       run: rm -rf archives bin notarize-bin
 
     - name: Download staged managed binaries
-      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
       with:
         pattern: staged-managed-${{ runner.os }}-*
         path: ddev/archives
@@ -559,9 +636,11 @@ jobs:
       run: ${{ steps.script-extract.outputs.script }}
 
     - name: Sign managed binaries
+      if: needs.should-sign-and-upload.outputs.result == 'true'
       run: ${{ steps.script-sign.outputs.script }}
 
     - name: Notarize managed binaries
+      if: needs.should-sign-and-upload.outputs.result == 'true'
       run: ${{ steps.script-notarize.outputs.script }}
 
     # bin/<APP_NAME>-<VERSION>-<TARGET> -> targets/<TARGET>/<APP_NAME>
@@ -604,6 +683,7 @@ jobs:
         echo "path=$pkg_file" >> "$GITHUB_OUTPUT"
 
     - name: Sign PKG
+      if: needs.should-sign-and-upload.outputs.result == 'true'
       run: >-
         rcodesign sign -vv
         --pem-source /tmp/certificate-installer.pem
@@ -612,6 +692,7 @@ jobs:
         "signed/${{ steps.pkg.outputs.path }}"
 
     - name: Notarize PKG
+      if: needs.should-sign-and-upload.outputs.result == 'true'
       run: >-
         rcodesign notary-submit
         --api-key-path /tmp/app-store-connect.json
@@ -619,7 +700,8 @@ jobs:
         "signed/${{ steps.pkg.outputs.path }}"
 
     - name: Upload installer
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      if: needs.should-sign-and-upload.outputs.result == 'true'
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: installers-${{ runner.os }}
         path: ddev/signed/${{ steps.pkg.outputs.path }}
@@ -646,28 +728,34 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
+    - name: Get Datadog credentials
+      id: dd-sts
+      uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+      with:
+        policy: integrations-core-api-key
+
     - name: Tag Job
       uses: ./.github/actions/tag-job
       if: ${{ github.event.pull_request.head.repo.fork != true }}
       with:
         tags: '${{ needs.define-tags.outputs.base_tags }},step:publish'
-        dd_api_key: ${{ secrets.DD_API_KEY }}
+        dd_api_key: ${{ steps.dd-sts.outputs.api_key }}
 
     - name: Download Python artifacts
-      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
       with:
         name: python-artifacts
         path: dist
 
     - name: Download binaries
-      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
       with:
         pattern: standalone*
         path: archives
         merge-multiple: true
 
     - name: Download installers
-      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
       with:
         pattern: installers-*
         path: installers

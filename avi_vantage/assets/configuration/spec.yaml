@@ -1,4 +1,5 @@
 name: Avi Vantage
+fleet_configurable: true
 
 files:
 - name: avi_vantage.yaml
@@ -9,12 +10,14 @@ files:
   - template: instances
     options:
     - name: avi_controller_url
+      fleet_configurable: true
       required: true
       description: The Controller base API URL
       value:
         example: https://<AVI_CONTROLLER_HOSTNAME>/
         type: string
     - name: entities
+      fleet_configurable: true
       required: false
       description: |
         List of entity types to collect metrics from. Valid options are
@@ -32,6 +35,7 @@ files:
           type: string
           enum: *avi_entities
     - name: tenants
+      fleet_configurable: true
       required: false
       description: |
         A list of tenant names to collect metrics for. If empty, it defaults to the admin tenant.

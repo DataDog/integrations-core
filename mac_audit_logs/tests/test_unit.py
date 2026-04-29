@@ -9,7 +9,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest  # noqa: I001
 
-from datadog_checks.base import AgentCheck, ConfigurationError  # noqa: F401
+from datadog_checks.base import AgentCheck  # noqa: F401
+from datadog_checks.base.errors import ConfigurationError  # noqa: F401
 from datadog_checks.mac_audit_logs import MacAuditLogsCheck, constants, utils
 
 audit_logs_dir_path = "/var/audit/"
@@ -138,13 +139,14 @@ def test_convert_local_to_utc_timezone_timestamp_str():
 @pytest.mark.unit
 @patch("os.path.isdir", return_value=True)
 @patch('os.listdir', return_value=file_names)
+@patch("os.path.isfile", return_value=True)  # All entries are files
 @patch("datadog_checks.mac_audit_logs.utils.get_utc_timestamp_minus_hours", return_value="20230401000000")
-def test_collect_relevant_files(mock_listdir, mock_isdir, utc_timestamp_minus_hours, instance):
+def test_collect_relevant_files(mock_get_utc, mock_isfile, mock_listdir, mock_isdir, instance):
     check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
     # Call the method
     result = check.collect_relevant_files("20230401120000")
 
-    # Define expected results
+    # Define expected results - "current" should be skipped
     expected = [
         (utils.time_string_to_datetime_utc("20230401000000"), "20230401000000.20230401120000"),
         (utils.time_string_to_datetime_utc("20230401120000"), "20230401120000.20230401123045"),
@@ -155,6 +157,44 @@ def test_collect_relevant_files(mock_listdir, mock_isdir, utc_timestamp_minus_ho
     ]
     # Check if the result matches the expected output
     assert result == expected
+
+
+@pytest.mark.unit
+@patch("os.path.isdir", return_value=True)
+@patch(
+    'os.listdir',
+    return_value=["20230401000000.20230401120000", "secure", "_hold", "some_dir", "current", "file.txt.bak"],
+)
+@patch("os.path.isfile", side_effect=lambda path: not path.endswith("some_dir"))  # some_dir is a directory
+@patch("datadog_checks.mac_audit_logs.utils.get_utc_timestamp_minus_hours", return_value="20230401000000")
+def test_collect_relevant_files_with_non_standard_entries(
+    mock_get_utc, mock_isfile, mock_listdir, mock_isdir, instance
+):
+    """Test that non-standard files and directories are skipped without errors."""
+    check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
+    check.log = MagicMock()
+
+    # Call the method
+    result = check.collect_relevant_files("20230401120000")
+
+    # Only the valid audit log file should be returned
+    expected = [
+        (utils.time_string_to_datetime_utc("20230401000000"), "20230401000000.20230401120000"),
+    ]
+    assert result == expected
+
+    # Verify debug logging for skipped entries
+    debug_calls = check.log.debug.call_args_list
+    debug_messages = [str(call) for call in debug_calls]
+
+    # Check that debug messages were logged for non-standard files
+    assert any("secure" in msg for msg in debug_messages), "Should log debug for 'secure' file"
+    assert any("_hold" in msg for msg in debug_messages), "Should log debug for '_hold' file"
+    assert any("some_dir" in msg for msg in debug_messages), "Should log debug for directory"
+    assert any("file.txt.bak" in msg for msg in debug_messages), "Should log debug for file with wrong format"
+
+    # Ensure no error logs were generated
+    check.log.error.assert_not_called()
 
 
 @pytest.mark.unit

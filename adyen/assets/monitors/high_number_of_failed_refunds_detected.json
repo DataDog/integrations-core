@@ -8,11 +8,10 @@
 		"id": 154602429,
 		"name": "High number of failed refunds detected",
 		"type": "log alert",
-		"query": "logs(\"source:adyen service:transaction @evt.name:REFUND @notificationItems.NotificationRequestItem.success:false\").index(\"*\").rollup(\"cardinality\", \"@pspReference\").last(\"1d\") > 10",
+		"query": "logs(\"source:adyen @evt.name:REFUND @notificationItems.NotificationRequestItem.success:false\").index(\"*\").rollup(\"cardinality\", \"@pspReference\").last(\"1d\") > 10",
 		"message": "{{#is_alert}}\nFailed Refund refers that a transaction could not be reversed, possibly due to issues with the payment method, insufficient funds, or card network problems.\n\nA refund attempt was unsuccessful, meaning the funds were not returned to the customer. This issue needs immediate attention to ensure proper resolution and avoid customer dissatisfaction.\n{{/is_alert}}",
 		"tags": [
-			"source:adyen",
-			"service:transaction"
+			"source:adyen"
 		],
 		"options": {
 			"thresholds": {

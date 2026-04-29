@@ -80,6 +80,10 @@ def instance_enable_health_service_check():
     return True
 
 
+def instance_enable_legacy_tags_normalization():
+    return True
+
+
 def instance_enable_service_check():
     return False
 

@@ -14,9 +14,22 @@ files:
           If the password contains special characters, be sure to escape them using percent encoding.
 
           See: https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING
+        secret: true
         value:
           example: postgresql://<USERNAME>:<PASSWORD>@<HOSTNAME>:<PORT>/<DATABASE_URL>?sslmode=require
           type: string
+      - name: database_filter_regex
+        description: |
+          Collect metrics only for PgBouncer database names matching this regular expression.
+
+          The regex is applied to the PgBouncer database name exposed by the admin views.
+          Global metrics that are not tied to a specific database, such as configuration metrics,
+          are still collected.
+        value:
+          example: ^(datadog_test|dogs)$
+          type: string
+          display_default: null
+        fleet_configurable: true
       - name: host
         description: If `database_url` is not used, set up the host to connect to with the `host` parameter.
         value:

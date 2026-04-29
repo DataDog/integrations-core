@@ -1,4 +1,5 @@
 name: flink
+fleet_configurable: true
 files:
 - name: flink.yaml
   options:

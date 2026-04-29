@@ -2,6 +2,34 @@
 
 <!-- towncrier release notes start -->
 
+## 2.5.1 / 2026-04-15
+
+***Fixed***:
+
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+
+## 2.5.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
+## 2.4.1 / 2026-03-18
+
+***Fixed***:
+
+* Handle non-200 HTTP response from /cluster/metrics/export when Proxmox Metric Server is not configured to prevent AttributeError. ([#22698](https://github.com/DataDog/integrations-core/pull/22698))
+
+## 2.4.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
+***Fixed***:
+
+* Update conf.yaml to display 'default' field defined in spec.yaml ([#21744](https://github.com/DataDog/integrations-core/pull/21744))
+
 ## 2.3.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:

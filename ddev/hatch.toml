@@ -1,6 +1,6 @@
 [env.collectors.datadog-checks]
 check-types = true
-mypy-args = [
+mypy-files = [
   "src/ddev",
 ]
 
@@ -13,5 +13,5 @@ dependencies = [
 ]
 # TODO: remove this when the old CLI is gone
 pre-install-commands = [
-  "python -m pip install --disable-pip-version-check {verbosity:flag:-1} -e ../datadog_checks_dev[cli]",
+  "uv pip install {verbosity:flag:-1} -e ../datadog_checks_dev[cli]",
 ]

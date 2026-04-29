@@ -1,0 +1,11 @@
+provides:
+  - id: genesys-metrics
+    always_on: true
+    granular: false
+    data_type: metrics
+    direction: inbound
+  - id: genesys-logs
+    always_on: true
+    granular: false
+    data_type: logs
+    direction: inbound

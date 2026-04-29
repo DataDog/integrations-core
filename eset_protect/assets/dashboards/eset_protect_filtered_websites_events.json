@@ -62,7 +62,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
+                                    "query": "source:eset-protect @event_type:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
                                 },
                                 "indexes": [
                                     "*"
@@ -128,7 +128,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
+                                    "query": "source:eset-protect @event_type:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
                                 },
                                 "indexes": [
                                     "*"
@@ -185,7 +185,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FilteredWebsites_Event @handled:true $hostname $event $severity $rule_id $action_taken $target_address"
+                                    "query": "source:eset-protect @event_type:FilteredWebsites_Event @handled:true $hostname $event $severity $rule_id $action_taken $target_address"
                                 },
                                 "indexes": [
                                     "*"
@@ -238,7 +238,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
+                                    "query": "source:eset-protect @event_type:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
                                 },
                                 "indexes": [
                                     "*"
@@ -307,7 +307,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
+                                    "query": "source:eset-protect @event_type:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
                                 },
                                 "indexes": [
                                     "*"
@@ -377,7 +377,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FilteredWebsites_Event @handled:false $hostname $event $severity $rule_id $action_taken $target_address"
+                                    "query": "source:eset-protect @event_type:FilteredWebsites_Event @handled:false $hostname $event $severity $rule_id $action_taken $target_address"
                                 },
                                 "indexes": [
                                     "*"
@@ -430,7 +430,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
+                                    "query": "source:eset-protect @event_type:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
                                 },
                                 "indexes": [
                                     "*"
@@ -499,7 +499,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FilteredWebsites_Event @action_taken:\"Blocked URL\" $hostname $event $severity $rule_id $action_taken $target_address"
+                                    "query": "source:eset-protect @event_type:FilteredWebsites_Event @action_taken:\"Blocked URL\" $hostname $event $severity $rule_id $action_taken $target_address"
                                 },
                                 "indexes": [
                                     "*"
@@ -568,7 +568,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FilteredWebsites_Event @action_taken:\"Blocked URL\" $hostname $event $severity $rule_id $action_taken $target_address"
+                                    "query": "source:eset-protect @event_type:FilteredWebsites_Event @action_taken:\"Blocked URL\" $hostname $event $severity $rule_id $action_taken $target_address"
                                 },
                                 "indexes": [
                                     "*"
@@ -637,7 +637,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
+                                    "query": "source:eset-protect @event_type:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
                                 },
                                 "indexes": [
                                     "*"
@@ -707,7 +707,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
+                                    "query": "source:eset-protect @event_type:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
                                 },
                                 "indexes": [
                                     "*"
@@ -783,7 +783,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
+                                    "query": "source:eset-protect @event_type:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
                                 },
                                 "indexes": [
                                     "*"
@@ -852,7 +852,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FilteredWebsites_Event @action_taken:Allowed $hostname $event $severity $rule_id $action_taken $target_address"
+                                    "query": "source:eset-protect @event_type:FilteredWebsites_Event @action_taken:Allowed $hostname $event $severity $rule_id $action_taken $target_address"
                                 },
                                 "indexes": [
                                     "*"
@@ -921,7 +921,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
+                                    "query": "source:eset-protect @event_type:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
                                 },
                                 "indexes": [
                                     "*"
@@ -989,7 +989,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
+                                    "query": "source:eset-protect @event_type:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
                                 },
                                 "indexes": [
                                     "*"
@@ -1059,7 +1059,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
+                                    "query": "source:eset-protect @event_type:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
                                 },
                                 "indexes": [
                                     "*"
@@ -1128,7 +1128,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
+                                    "query": "source:eset-protect @event_type:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
                                 },
                                 "indexes": [
                                     "*"
@@ -1212,7 +1212,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
+                                    "query": "source:eset-protect @event_type:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
                                 },
                                 "indexes": [
                                     "*"
@@ -1268,7 +1268,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
+                                    "query": "source:eset-protect @event_type:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
                                 },
                                 "indexes": [
                                     "*"
@@ -1337,7 +1337,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FilteredWebsites_Event @action_taken:\"Blocked URL\" $hostname $event $severity $rule_id $action_taken $target_address"
+                                    "query": "source:eset-protect @event_type:FilteredWebsites_Event @action_taken:\"Blocked URL\" $hostname $event $severity $rule_id $action_taken $target_address"
                                 },
                                 "indexes": [
                                     "*"
@@ -1406,7 +1406,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
+                                    "query": "source:eset-protect @event_type:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
                                 },
                                 "indexes": [
                                     "*"
@@ -1475,7 +1475,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:eset-protect service:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
+                                    "query": "source:eset-protect @event_type:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address"
                                 },
                                 "indexes": [
                                     "*"
@@ -1542,7 +1542,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:eset-protect service:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address",
+                            "query_string": "source:eset-protect @event_type:FilteredWebsites_Event $hostname $event $severity $rule_id $action_taken $target_address",
                             "indexes": [],
                             "storage": "hot"
                         },

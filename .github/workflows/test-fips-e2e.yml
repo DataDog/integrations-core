@@ -43,7 +43,7 @@ jobs:
       DD_TRACE_ANALYTICS_ENABLED: "true"
 
     permissions:
-       # needed for codecov in test-target.yml, allows the action to get a JWT signed by Github
+       # needed for dd-sts and codecov in test-target.yml, allows the action to get a JWT signed by Github
        id-token: write
        # needed for compute-matrix in test-target.yml
        contents: read
@@ -63,27 +63,37 @@ jobs:
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
-        cache: 'pip'
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+      with:
+        enable-cache: false
 
     - name: Restore cache
-      uses: actions/cache/restore@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       with:
-        path: '~/.cache/pip'
+        path: |
+          ~/.cache/uv
+          ~/.cache/pip
         key: >-
           ${{ format(
-            'v01-python-{0}-{1}-{2}-{3}',
+            'v02-uv-{0}-{1}-{2}-{3}',
             env.pythonLocation,
             hashFiles('datadog_checks_base/pyproject.toml'),
             hashFiles('datadog_checks_dev/pyproject.toml'),
             hashFiles('ddev/pyproject.toml')
           )}}
         restore-keys: |-
-          v01-python-${{ env.pythonLocation }}
+          v02-uv-${{ env.pythonLocation }}
+    - name: Get Datadog credentials
+      id: dd-sts
+      uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+      with:
+        policy: integrations-core-api-key
 
     - name: Install ddev from local folder
       run: |-
-        pip install -e ./datadog_checks_dev[cli]
-        pip install -e ./ddev
+        uv pip install --system -e ./datadog_checks_dev[cli] -e ./ddev
 
     - name: Configure ddev
       run: |-
@@ -104,15 +114,15 @@ jobs:
 
     - name: Run E2E tests with FIPS disabled
       env:
-        DDEV_E2E_AGENT: "${{ inputs.agent-image || 'datadog/agent-dev:master-py3' }}"
-        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+        DDEV_E2E_AGENT: "${{ inputs.agent-image || 'registry.datadoghq.com/agent-dev:master-py3' }}"
+        DD_API_KEY: "${{ steps.dd-sts.outputs.api_key }}"
       run: |
         ddev env test --base --new-env --junit ${{ inputs.target || 'tls' }} -- all -m "fips_off"
 
     - name: Run E2E tests with FIPS enabled
       env:
-        DDEV_E2E_AGENT: "${{ inputs.agent-image-fips || 'datadog/agent-dev:master-fips' }}"
-        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+        DDEV_E2E_AGENT: "${{ inputs.agent-image-fips || 'registry.datadoghq.com/agent-dev:master-fips' }}" 
+        DD_API_KEY: "${{ steps.dd-sts.outputs.api_key }}"
       run: |
         ddev env test --base --new-env --junit ${{ inputs.target || 'tls' }} -- all -k "fips_on"
 
@@ -126,7 +136,7 @@ jobs:
 
     - name: Upload test results
       if: always()
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: "test-results-${{ inputs.target || 'tls' }}"
         path: "${{ env.TEST_RESULTS_BASE_DIR }}"
@@ -139,4 +149,16 @@ jobs:
       with:
         use_oidc: true
         files: "${{ inputs.target || 'tls' }}/coverage.xml"
+        flags: "${{ inputs.target || 'tls' }}"
+
+    - name: Upload coverage to Datadog
+      if: >
+        !github.event.repository.private &&
+        always()
+      continue-on-error: true
+      uses: DataDog/coverage-upload-github-action@9bbbf86d16f7db1b14c5b885e61cf0d96053686a # v1.0.0
+      with:
+        api_key: ${{ secrets.DD_API_KEY }}
+        files: "${{ inputs.target || 'tls' }}/coverage.xml"
+        format: cobertura
         flags: "${{ inputs.target || 'tls' }}"
