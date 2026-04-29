@@ -203,9 +203,17 @@ class ActivityMonitor:
         """Return 'acknowledged' or 'open' based on the alert's flags."""
         return "acknowledged" if alert.get("isAcknowledged") else "open"
 
-    def _submit_state_metric(self, alert: dict, state: str, value: int) -> None:
-        """Submit nutanix.alert.<state>=<value> with the per-alert tag set."""
-        self.check.gauge(f"alert.{state}", value, tags=self._build_alert_tags(alert, state))
+    def _submit_state_metric(self, alert: dict, state: str, value: int, extra_tags: list[str] | None = None) -> None:
+        """Submit nutanix.alert.<state>=<value> with the per-alert tag set.
+
+        The metric name itself encodes the state, so ntnx_alert_status is
+        omitted from the tag set (would be redundant). extra_tags are appended
+        verbatim (e.g. ntnx_alert_auto_resolved on the resolved one-shot).
+        """
+        tags = self._build_alert_tags(alert)
+        if extra_tags:
+            tags.extend(extra_tags)
+        self.check.gauge(f"alert.{state}", value, tags=tags)
 
     def _reconcile_alerts(self) -> int:
         """Reconcile in-memory open alerts against the unresolved-alerts API.
@@ -484,10 +492,12 @@ class ActivityMonitor:
             self.check.log.debug("Failed to render alert message template: %s", e)
             return message
 
-    def _build_alert_tags(self, alert: dict, status: str) -> list[str]:
+    def _build_alert_tags(self, alert: dict, status: str | None = None) -> list[str]:
         """Build the tag set for an alert lifecycle signal (event or metric).
 
-        status is one of: 'open', 'acknowledged', 'resolved'.
+        status is 'open', 'acknowledged', or 'resolved' for events. Pass
+        status=None for per-state metrics, where the metric name itself
+        encodes the state and ntnx_alert_status would be redundant.
         """
         tags = self.check.base_tags.copy()
         if ext_id := alert.get("extId"):
@@ -496,8 +506,13 @@ class ActivityMonitor:
             tags.append(f"ntnx_alert_type:{alert_type}")
         if severity := alert.get("severity"):
             tags.append(f"ntnx_alert_severity:{severity}")
+        if (user_defined := alert.get("isUserDefined")) is not None:
+            tags.append(f"ntnx_alert_user_defined:{str(user_defined).lower()}")
+        if service_name := alert.get("serviceName"):
+            tags.append(f"ntnx_alert_service:{service_name}")
 
         self._add_cluster_name_tag(tags, alert.get("clusterUUID"))
+        self._add_cluster_name_tag(tags, alert.get("originatingClusterUUID"), tag_name="ntnx_originating_cluster_name")
 
         for classification in alert.get("classifications", []) or []:
             tags.append(f"ntnx_alert_classification:{classification}")
@@ -507,7 +522,8 @@ class ActivityMonitor:
         self._add_source_entity_tags(tags, alert)
 
         tags.append("ntnx_type:alert")
-        tags.append(f"ntnx_alert_status:{status}")
+        if status is not None:
+            tags.append(f"ntnx_alert_status:{status}")
         return tags
 
     def _process_alert(self, alert: dict) -> None:
@@ -589,10 +605,13 @@ class ActivityMonitor:
         prev_alert = cached_tags_alert or alert
         self._submit_state_metric(prev_alert, self._alert_state(prev_alert), 0)
 
-        # One-shot signal that the alert entered the resolved state. Uses the
-        # event tag set (which includes ntnx_alert_auto_resolved) for richer
-        # dashboard filtering on resolution rate.
-        self.check.gauge("alert.resolved", 1, tags=alert_tags)
+        # One-shot signal that the alert entered the resolved state.
+        self._submit_state_metric(
+            prev_alert,
+            "resolved",
+            1,
+            extra_tags=[f"ntnx_alert_auto_resolved:{str(is_auto_resolved).lower()}"],
+        )
 
     def emit_open_alert_metrics(self) -> None:
         """Submit per-state gauges for each tracked unresolved alert.
@@ -691,14 +710,20 @@ class ActivityMonitor:
                 if entity_name := source_entity.get("name"):
                     tags.append(f"ntnx_{entity_type}_name:{entity_name}")
 
-    def _add_cluster_name_tag(self, tags: list[str], cluster_id: str | None, fallback_name: str | None = None) -> None:
-        """Add cluster name tag from ID lookup, with optional fallback."""
+    def _add_cluster_name_tag(
+        self,
+        tags: list[str],
+        cluster_id: str | None,
+        fallback_name: str | None = None,
+        tag_name: str = "ntnx_cluster_name",
+    ) -> None:
+        """Add a cluster name tag from ID lookup, with optional fallback."""
         if not cluster_id:
             return
         if cluster_id in self.check.cluster_names:
-            tags.append(f"ntnx_cluster_name:{self.check.cluster_names[cluster_id]}")
+            tags.append(f"{tag_name}:{self.check.cluster_names[cluster_id]}")
         elif fallback_name:
-            tags.append(f"ntnx_cluster_name:{fallback_name}")
+            tags.append(f"{tag_name}:{fallback_name}")
 
     def _cluster_resource(self, cluster_id: str) -> tuple[str, dict]:
         """Build a cluster resource tuple from a cluster ID."""

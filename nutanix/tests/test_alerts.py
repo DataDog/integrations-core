@@ -825,3 +825,78 @@ def test_alert_state_transition_open_to_acknowledged(
         m for m in aggregator.metrics("nutanix.alert.open") if m.value == 1 and f"ext_id:{target_ext_id}" in m.tags
     ]
     assert len(open_ones) == 0
+
+
+# --- Tier 1 tags + status-tag-free metrics ---
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_alert_event_carries_originating_cluster_and_user_defined_tags(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
+):
+    """Alert events carry ntnx_originating_cluster_name and ntnx_alert_user_defined tags."""
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
+    assert len(alerts) > 0
+
+    # At least one alert exposes both cluster perspectives with distinct values
+    # (clusterUUID = managed cluster, originatingClusterUUID = PC's own cluster).
+    distinct_pairs = [
+        e
+        for e in alerts
+        if any(t.startswith("ntnx_cluster_name:") for t in e["tags"])
+        and any(t.startswith("ntnx_originating_cluster_name:") for t in e["tags"])
+    ]
+    assert len(distinct_pairs) > 0, "Expected at least one alert with both cluster tags"
+
+    # All alert events carry ntnx_alert_user_defined tag
+    for e in alerts:
+        assert any(t.startswith("ntnx_alert_user_defined:") for t in e["tags"])
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_alert_event_carries_service_tag_when_available(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
+):
+    """ntnx_alert_service is emitted only when the alert has a serviceName."""
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    synthetic = _fixture_alert(
+        "NTNX_IAMv2_Authn_Database_Connectivity_Error_Warning",
+        isResolved=False,
+        isAcknowledged=False,
+    )
+    mocker.patch.object(check.activity_monitor, '_list_alerts_unresolved', return_value=[synthetic])
+    dd_run_check(check)
+
+    alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
+    assert len(alerts) == 1
+    assert "ntnx_alert_service:IAMv2" in alerts[0]["tags"]
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_alert_state_metrics_do_not_carry_status_tag(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
+):
+    """The metric name encodes the state, so ntnx_alert_status is omitted from metric tags."""
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    for name in ("nutanix.alert.open", "nutanix.alert.acknowledged"):
+        for m in aggregator.metrics(name):
+            assert not any(t.startswith("ntnx_alert_status:") for t in m.tags), (
+                f"{name} should not carry ntnx_alert_status tag (redundant with metric name)"
+            )
