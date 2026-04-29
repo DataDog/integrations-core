@@ -1,11 +1,5 @@
 """Async GitHub API client for triggering and monitoring GitHub Actions workflows"""
 
-<<<<<<< HEAD
-import re
-from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
-from dataclasses import dataclass
-=======
 import io
 import re
 import zipfile
@@ -13,7 +7,6 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from pathlib import Path
->>>>>>> f987314109 (Create dispatcher task test runner (squashed))
 from typing import Any, Literal, Self
 
 import httpx
@@ -83,8 +76,6 @@ class WorkflowRun(BaseModel):
     updated_at: str | None = None
 
 
-<<<<<<< HEAD
-=======
 class WorkflowDispatchResult(BaseModel):
     """Response payload from a successful workflow dispatch."""
 
@@ -106,7 +97,6 @@ class CheckRun(BaseModel):
     head_sha: str | None = None
 
 
->>>>>>> f987314109 (Create dispatcher task test runner (squashed))
 class Artifact(BaseModel):
     """A GitHub Actions artifact."""
 
@@ -255,11 +245,7 @@ class AsyncGitHubClient:
         ref: str,
         inputs: dict[str, str] | None = None,
         timeout: float | None = None,
-<<<<<<< HEAD
-    ) -> GitHubResponse[None]:
-=======
     ) -> GitHubResponse[WorkflowDispatchResult]:
->>>>>>> f987314109 (Create dispatcher task test runner (squashed))
         """
         Calls the GitHub API to trigger a workflow dispatch event.
 
@@ -275,11 +261,7 @@ class AsyncGitHubClient:
             timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
 
         Returns:
-<<<<<<< HEAD
-            GitHubResponse[None]: Empty response (204 No Content) with headers.
-=======
             GitHubResponse[WorkflowDispatchResult]: The dispatched run id and headers.
->>>>>>> f987314109 (Create dispatcher task test runner (squashed))
         """
         body: dict[str, Any] = {"ref": ref}
         if inputs is not None:
@@ -290,11 +272,7 @@ class AsyncGitHubClient:
             timeout=timeout,
             json=body,
         )
-<<<<<<< HEAD
-        return GitHubResponse[None].model_validate({"data": None, "headers": dict(response.headers)})
-=======
         return self._parse_response(response, WorkflowDispatchResult)
->>>>>>> f987314109 (Create dispatcher task test runner (squashed))
 
     async def get_workflow_run(
         self,
@@ -430,8 +408,6 @@ class AsyncGitHubClient:
         )
         return self._parse_response(response, PullRequestReviewComment)
 
-<<<<<<< HEAD
-=======
     async def create_check_run(
         self,
         owner: str,
@@ -569,7 +545,6 @@ class AsyncGitHubClient:
         with zipfile.ZipFile(io.BytesIO(download_response.content)) as zf:
             zf.extractall(dest_path)
 
->>>>>>> f987314109 (Create dispatcher task test runner (squashed))
 
 # ---------------------------------------------------------------------------
 # Context manager helper
