@@ -63,10 +63,10 @@ For further assistance, contact [Datadog Support][3].
 
 Additional helpful documentation, links, and articles:
 
-- [Monitor and optimize payment processing with Datadog's Adyen integration][5]
+- [Monitor and optimize payment processing with Datadog's Adyen integration][4]
 
 
 [1]: https://www.adyen.com/
 [2]: https://docs.adyen.com/development-resources/webhooks/
 [3]: https://docs.datadoghq.com/help/
-[5]: https://www.datadoghq.com/blog/monitor-adyen-payments/
+[4]: https://www.datadoghq.com/blog/monitor-adyen-payments/

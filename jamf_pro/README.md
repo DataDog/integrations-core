@@ -46,8 +46,8 @@ The Jamf Pro integration does not include any events.
 
 ## Support
 
-For any further assistance, contact [Datadog support][4].
+For any further assistance, contact [Datadog support][3].
 
 [1]: https://www.jamf.com/products/jamf-pro/
 [2]: https://developer.jamf.com/jamf-pro/docs/webhooks-1
-[4]: https://docs.datadoghq.com/help/
+[3]: https://docs.datadoghq.com/help/

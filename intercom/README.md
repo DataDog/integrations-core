@@ -4,7 +4,7 @@
 
 [Intercom][1] is a customer communication platform that enables businesses to engage with their users through in-app messaging, email, and chat. It offers features like live chat, automated messaging, and customer support tools, making it easier for companies to provide personalized customer experiences.
 
-The Intercom integration seamlessly collects admin activities, data events, conversations, news items, and ticket data, and ingests them into Datadog for comprehensive analysis using [webhooks][6].
+The Intercom integration seamlessly collects admin activities, data events, conversations, news items, and ticket data, and ingests them into Datadog for comprehensive analysis using [webhooks][5].
 
 **Minimum Agent version:** 7.57.1
 
@@ -78,10 +78,10 @@ The Intercom integration does not include any service checks.
 
 ## Support
 
-For further assistance, contact [Datadog Support][5].
+For further assistance, contact [Datadog Support][4].
 
 [1]: https://www.intercom.com/
 [2]: https://app.intercom.com/
 [3]: https://developers.intercom.com/docs/webhooks
-[5]: https://docs.datadoghq.com/help/
-[6]: https://developers.intercom.com/docs/references/2.10/webhooks/webhook-models
+[4]: https://docs.datadoghq.com/help/
+[5]: https://developers.intercom.com/docs/references/2.10/webhooks/webhook-models
