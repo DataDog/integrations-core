@@ -1,12 +1,12 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import json
 import os
 
 import pytest
 
 from datadog_checks.dev import WaitFor, run_command
-from datadog_checks.redisdb import Redis
 
 from . import common
 
@@ -21,26 +21,44 @@ def _agent_container_name():
     return f'dd_redisdb_{env}'
 
 
-def _autodiscovery_ready():
-    result = run_command(
-        ['docker', 'exec', _agent_container_name(), 'agent', 'configcheck'],
+def _redisdb_scheduled_and_running():
+    # The short-lived `agent check` subprocess used by `dd_agent_check` cannot
+    # be used here: its workloadmeta never finishes initialising before the
+    # process listener can match the redis-server process, so it gives up
+    # without scheduling any redisdb config. We verify against the long-lived
+    # agent's status JSON instead.
+    container = _agent_container_name()
+    configcheck = run_command(
+        ['docker', 'exec', container, 'agent', 'configcheck'],
         capture=True,
         check=True,
     )
-    assert 'redisdb' in result.stdout, result.stdout
+    assert 'redisdb' in configcheck.stdout, configcheck.stdout
+    assert 'host: 127.0.0.1' in configcheck.stdout, configcheck.stdout
+    assert 'port: 6379' in configcheck.stdout, configcheck.stdout
+
+    status = run_command(
+        ['docker', 'exec', container, 'agent', 'status', '--json'],
+        capture=True,
+        check=True,
+    )
+    checks = json.loads(status.stdout).get('runnerStats', {}).get('Checks', {}).get('redisdb', {})
+    assert checks, f'redisdb not in runnerStats: {status.stdout[:500]}'
+    info = next(iter(checks.values()))
+    assert info['TotalRuns'] >= 1, info
+    assert info['TotalErrors'] == 0, info
+    assert info['TotalServiceChecks'] >= 1, info
 
 
 @pytest.fixture
-def autodiscovery_ready():
-    WaitFor(_autodiscovery_ready, attempts=30, wait=2)()
+def redisdb_scheduled_and_running():
+    WaitFor(_redisdb_scheduled_and_running, attempts=60, wait=2)()
 
 
-def test_e2e_autodiscovery_process(dd_agent_check, autodiscovery_ready):
-    aggregator = dd_agent_check(
-        {'init_config': {}, 'instances': []},
-        rate=True,
-        discovery_min_instances=1,
-        discovery_timeout=30,
-    )
-    service_checks = aggregator.service_checks('redis.can_connect')
-    assert any(sc.status == Redis.OK and 'redis_port:6379' in sc.tags for sc in service_checks), service_checks
+def test_e2e_autodiscovery_process(redisdb_scheduled_and_running):
+    # All assertions are in the fixture: configcheck shows the redisdb
+    # config was scheduled with `host: 127.0.0.1, port: 6379` (the agent
+    # substituted `%%host%%` after matching the redis-server process via
+    # the cel://process listener), and the running agent has executed the
+    # check at least once with no errors.
+    pass
