@@ -1358,6 +1358,10 @@ integration/spark:
 - changed-files:
   - any-glob-to-any-file:
     - spark/**/*
+integration/spycloud:
+- changed-files:
+  - any-glob-to-any-file:
+    - spycloud/**/*
 integration/sqlserver:
 - changed-files:
   - any-glob-to-any-file:
