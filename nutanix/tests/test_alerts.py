@@ -36,6 +36,7 @@ def test_alerts_no_duplicates_on_subsequent_runs(
     instance = mock_instance.copy()
     instance["collect_alerts"] = True
 
+    # Datetime past all fixture alerts, so the cursor doesn't surface anything new on re-run
     get_current_datetime.return_value = MOCK_ALERT_DATETIME_AFTER_ALL
 
     check = NutanixCheck('nutanix', {}, [instance])
@@ -46,6 +47,7 @@ def test_alerts_no_duplicates_on_subsequent_runs(
 
     aggregator.reset()
 
+    # Second run with the same fixture state: reconciliation diff is empty
     dd_run_check(check)
 
     alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
@@ -517,6 +519,7 @@ def test_alerts_resolution_detected_on_subsequent_run(
 
     check = NutanixCheck('nutanix', {}, [instance])
 
+    # First run: populate _open_alerts from the real fixture
     dd_run_check(check)
 
     open_events = [e for e in aggregator.events if "ntnx_alert_status:open" in e.get("tags", [])]
@@ -724,12 +727,14 @@ def test_alert_state_transition_open_to_acknowledged(
     check = NutanixCheck('nutanix', {}, [instance])
     dd_run_check(check)
 
+    # Pick an alert currently tracked as open (not acknowledged) so we can transition it
     target_ext_id = next(
         ext_id for ext_id, a in check.activity_monitor._open_alerts.items() if not a.get("isAcknowledged")
     )
 
     aggregator.reset()
 
+    # Same unresolved set, but the target now has isAcknowledged=True
     refreshed = []
     for ext_id, a in check.activity_monitor._open_alerts.items():
         if ext_id == target_ext_id:
@@ -780,6 +785,9 @@ def test_alert_event_carries_originating_cluster_and_user_defined_tags(
     alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
     assert len(alerts) > 0
 
+    # At least one alert exposes both cluster perspectives with distinct values
+    # (clusterUUID = managed cluster the alert is reported against,
+    #  originatingClusterUUID = PC's own cluster federating the alert)
     distinct_pairs = [
         e
         for e in alerts
