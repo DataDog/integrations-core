@@ -45,7 +45,7 @@
 - name: password
   display_priority: 0
   description: Password to use when connecting to JMX.
-  secret: true
+  formats: ["secret"]
   value:
     type: string
   fleet_configurable: true
@@ -97,7 +97,7 @@
   display_priority: 0
   description: 'A list of Java JVM options, for example: "-Xmx200m -Xms50m".'
   fleet_configurable: true
-  formats: ["java_jvm_options"]
+  formats: ["jvm"]
   value:
     type: string
   
@@ -117,7 +117,7 @@
   description: |
     The password for your TrustStore.jks file.
     `trust_store_password` should be set if SSL is enabled.
-  secret: true
+  formats: ["secret"]
   value:
     type: string
   fleet_configurable: true
@@ -138,7 +138,7 @@
   description: |
     The password to your key store.
     `key_store_password` should be set if client authentication is enabled on the target JVM.
-  secret: true
+  formats: ["secret"]
   value:
     type: string
   fleet_configurable: true
