@@ -1,0 +1,276 @@
+# Skipped integrations (no Agent spec.yaml)
+
+These appear in the org-count CSV but have no `assets/configuration/spec.yaml`
+in `integrations-core` — typically platform features (logs, incidents, audit trail),
+SaaS-only integrations, or marketplace tiles.
+
+- `logs` — no spec.yaml in repo
+- `container` — no spec.yaml in repo
+- `continuous profiler` — no spec.yaml in repo
+- `synthetics data` — no spec.yaml in repo
+- `push notifications` — no spec.yaml in repo
+- `security monitoring` — no spec.yaml in repo
+- `incidents` — no spec.yaml in repo
+- `network performance monitoring` — no spec.yaml in repo
+- `feed` — no spec.yaml in repo
+- `cri` — no spec.yaml in repo
+- `containerd` — no spec.yaml in repo
+- `github` — no spec.yaml in repo
+- `audit trail` — no spec.yaml in repo
+- `jenkins` — no spec.yaml in repo
+- `event viewer` — no spec.yaml in repo
+- `.net clr` — no spec.yaml in repo
+- `knative for anthos` — no spec.yaml in repo
+- `asp.net` — no spec.yaml in repo
+- `github apps` — no spec.yaml in repo
+- `ansible` — no spec.yaml in repo
+- `systemd` — no spec.yaml in repo
+- `kubernetes api server metrics` — no spec.yaml in repo
+- `auth0` — no spec.yaml in repo
+- `pingdom legacy api (v2.1)` — no spec.yaml in repo
+- `bitbucket` — no spec.yaml in repo
+- `logstash` — no spec.yaml in repo
+- `go` — no spec.yaml in repo
+- `oracle database` — no spec.yaml in repo
+- `circleci` — no spec.yaml in repo
+- `chef` — no spec.yaml in repo
+- `pdh` — no spec.yaml in repo
+- `zendesk` — no spec.yaml in repo
+- `cisco` — no spec.yaml in repo
+- `aws pricing` — no spec.yaml in repo
+- `okta` — no spec.yaml in repo
+- `snowflake` — no spec.yaml in repo
+- `apollo engine` — no spec.yaml in repo
+- `helm` — no spec.yaml in repo
+- `meraki` — no spec.yaml in repo
+- `ping` — no spec.yaml in repo
+- `confluent cloud` — no spec.yaml in repo
+- `github telemetry` — no spec.yaml in repo
+- `terraform` — no spec.yaml in repo
+- `microsoft 365` — no spec.yaml in repo
+- `oom kill` — no spec.yaml in repo
+- `rollbar` — no spec.yaml in repo
+- `observability pipelines` — no spec.yaml in repo
+- `puppet` — no spec.yaml in repo
+- `chatwork` — no spec.yaml in repo
+- `cloud cost` — no spec.yaml in repo
+- `pivotal` — no spec.yaml in repo
+- `salesforce` — no spec.yaml in repo
+- `databricks` — no spec.yaml in repo
+- `bugsnag` — no spec.yaml in repo
+- `nomad` — no spec.yaml in repo
+- `jmeter` — no spec.yaml in repo
+- `pusher` — no spec.yaml in repo
+- `dyn` — no spec.yaml in repo
+- `segment` — no spec.yaml in repo
+- `couchdb` — no spec.yaml in repo
+- `desk` — no spec.yaml in repo
+- `cloudhealth` — no spec.yaml in repo
+- `puma` — no spec.yaml in repo
+- `capistrano` — no spec.yaml in repo
+- `papertrail` — no spec.yaml in repo
+- `splunk` — no spec.yaml in repo
+- `dell` — no spec.yaml in repo
+- `launchdarkly` — no spec.yaml in repo
+- `openshift` — no spec.yaml in repo
+- `mesos` — no spec.yaml in repo
+- `airbrake` — no spec.yaml in repo
+- `uptime` — no spec.yaml in repo
+- `oracle cloud infrastructure` — no spec.yaml in repo
+- `sumo logic` — no spec.yaml in repo
+- `palo alto networks firewall` — no spec.yaml in repo
+- `travis ci` — no spec.yaml in repo
+- `netlify` — no spec.yaml in repo
+- `sendgrid` — no spec.yaml in repo
+- `alibaba cloud` — no spec.yaml in repo
+- `crowdstrike` — no spec.yaml in repo
+- `nvml` — no spec.yaml in repo
+- `speedtest` — no spec.yaml in repo
+- `tcp queue length` — no spec.yaml in repo
+- `sqreen` — no spec.yaml in repo
+- `hasura cloud` — no spec.yaml in repo
+- `pingdom` — no spec.yaml in repo
+- `jfrog platform` — no spec.yaml in repo
+- `redis sentinel` — no spec.yaml in repo
+- `windows kernel memory` — no spec.yaml in repo
+- `xmatters` — no spec.yaml in repo
+- `signal sciences` — no spec.yaml in repo
+- `fabric` — no spec.yaml in repo
+- `lacework` — no spec.yaml in repo
+- `gearman` — no spec.yaml in repo
+- `juniper networks` — no spec.yaml in repo
+- `f5 networks` — no spec.yaml in repo
+- `federator.ai` — no spec.yaml in repo
+- `honeybadger` — no spec.yaml in repo
+- `bigpanda` — no spec.yaml in repo
+- `zabbix (community version)` — no spec.yaml in repo
+- `jumpcloud` — no spec.yaml in repo
+- `lighthouse` — no spec.yaml in repo
+- `akamai datastream 2` — no spec.yaml in repo
+- `gremlin` — no spec.yaml in repo
+- `concourse ci` — no spec.yaml in repo
+- `cloud foundry` — no spec.yaml in repo
+- `bonsai` — no spec.yaml in repo
+- `redis enterprise` — no spec.yaml in repo
+- `php apcu` — no spec.yaml in repo
+- `office 365` — no spec.yaml in repo
+- `lightbendrp` — no spec.yaml in repo
+- `pihole` — no spec.yaml in repo
+- `aqua` — no spec.yaml in repo
+- `squadcast` — no spec.yaml in repo
+- `rapdev snmp profiles` — no spec.yaml in repo
+- `rundeck` — no spec.yaml in repo
+- `reboot required` — no spec.yaml in repo
+- `redmine` — no spec.yaml in repo
+- `split` — no spec.yaml in repo
+- `filebeat` — no spec.yaml in repo
+- `cri-o` — no spec.yaml in repo
+- `aws iam access analyzer` — no spec.yaml in repo
+- `buddy` — no spec.yaml in repo
+- `catchpoint` — no spec.yaml in repo
+- `logz.io` — no spec.yaml in repo
+- `bind 9` — no spec.yaml in repo
+- `consul connect` — no spec.yaml in repo
+- `unbound` — no spec.yaml in repo
+- `gatekeeper` — no spec.yaml in repo
+- `dingtalk` — no spec.yaml in repo
+- `io connect mulesoft anypoint` — no spec.yaml in repo
+- `fluent bit` — no spec.yaml in repo
+- `neo4j` — no spec.yaml in repo
+- `flowdock` — no spec.yaml in repo
+- `rapdev zoom` — no spec.yaml in repo
+- `cockroachdb dedicated` — no spec.yaml in repo
+- `planetscale` — no spec.yaml in repo
+- `configcat` — no spec.yaml in repo
+- `retool` — no spec.yaml in repo
+- `nvidia jetson` — no spec.yaml in repo
+- `algorithmia` — no spec.yaml in repo
+- `nextcloud` — no spec.yaml in repo
+- `akamai mpulse` — no spec.yaml in repo
+- `n2ws backup & recovery` — no spec.yaml in repo
+- `tidb cloud` — no spec.yaml in repo
+- `perimeterx` — no spec.yaml in repo
+- `reporter` — no spec.yaml in repo
+- `zscaler (community version)` — no spec.yaml in repo
+- `lambdatest` — no spec.yaml in repo
+- `portworx` — no spec.yaml in repo
+- `gnatsd` — no spec.yaml in repo
+- `purefa` — no spec.yaml in repo
+- `pivotal pks` — no spec.yaml in repo
+- `rapdev solaris agent` — no spec.yaml in repo
+- `redpanda` — no spec.yaml in repo
+- `rapdev nutanix` — no spec.yaml in repo
+- `gnatsd streaming` — no spec.yaml in repo
+- `mparticle` — no spec.yaml in repo
+- `trek10 aws coverage advisor` — no spec.yaml in repo
+- `rigor` — no spec.yaml in repo
+- `rapdev validator` — no spec.yaml in repo
+- `bigpanda saas` — no spec.yaml in repo
+- `rapdev sophos` — no spec.yaml in repo
+- `ns1` — no spec.yaml in repo
+- `pulumi` — no spec.yaml in repo
+- `oracle container engine for kubernetes - oke` — no spec.yaml in repo
+- `hbase master` — no spec.yaml in repo
+- `hbase regionserver` — no spec.yaml in repo
+- `convox` — no spec.yaml in repo
+- `rbltracker` — no spec.yaml in repo
+- `open policy agent` — no spec.yaml in repo
+- `moogsoft` — no spec.yaml in repo
+- `synthetic email` — no spec.yaml in repo
+- `podman` — no spec.yaml in repo
+- `hardware sentry` — no spec.yaml in repo
+- `amixr` — no spec.yaml in repo
+- `flagsmith` — no spec.yaml in repo
+- `octoprint` — no spec.yaml in repo
+- `conviva` — no spec.yaml in repo
+- `apache apisix` — no spec.yaml in repo
+- `statsig` — no spec.yaml in repo
+- `eventstore` — no spec.yaml in repo
+- `alertnow` — no spec.yaml in repo
+- `contrastsecurity` — no spec.yaml in repo
+- `vns3` — no spec.yaml in repo
+- `zebrium` — no spec.yaml in repo
+- `tidb` — no spec.yaml in repo
+- `salesforce commerce cloud` — no spec.yaml in repo
+- `upsc` — no spec.yaml in repo
+- `rapdev backup` — no spec.yaml in repo
+- `onelogin` — no spec.yaml in repo
+- `kyoto tycoon` — no spec.yaml in repo
+- `blue matador` — no spec.yaml in repo
+- `rapdev maxdb` — no spec.yaml in repo
+- `sleuth` — no spec.yaml in repo
+- `altostra` — no spec.yaml in repo
+- `storm` — no spec.yaml in repo
+- `agentil software sap netweaver` — no spec.yaml in repo
+- `rapdev github` — no spec.yaml in repo
+- `sendmail` — no spec.yaml in repo
+- `tyk` — no spec.yaml in repo
+- `oracle timesten` — no spec.yaml in repo
+- `nerdvision` — no spec.yaml in repo
+- `rapdev terraform` — no spec.yaml in repo
+- `datazoom` — no spec.yaml in repo
+- `stormforge` — no spec.yaml in repo
+- `rapdev servicenow` — no spec.yaml in repo
+- `salesforce incidents` — no spec.yaml in repo
+- `rapdev gitlab` — no spec.yaml in repo
+- `campfire` — no spec.yaml in repo
+- `crest data systems dell emc isilon` — no spec.yaml in repo
+- `rapdev msteams` — no spec.yaml in repo
+- `opsmatic` — no spec.yaml in repo
+- `rapdev hp-ux agent` — no spec.yaml in repo
+- `cyral` — no spec.yaml in repo
+- `cloudsmith` — no spec.yaml in repo
+- `rapdev box` — no spec.yaml in repo
+- `federator.ai.license` — no spec.yaml in repo
+- `backstage` — no spec.yaml in repo
+- `appkeeper` — no spec.yaml in repo
+- `kernelcare` — no spec.yaml in repo
+- `moxtra` — no spec.yaml in repo
+- `syncthing` — no spec.yaml in repo
+- `rapdev influxdb` — no spec.yaml in repo
+- `rapdev rapid7` — no spec.yaml in repo
+- `torq` — no spec.yaml in repo
+- `triggermesh` — no spec.yaml in repo
+- `mailgun` — no spec.yaml in repo
+- `purefb` — no spec.yaml in repo
+- `signl4` — no spec.yaml in repo
+- `stardog` — no spec.yaml in repo
+- `adaptive shield` — no spec.yaml in repo
+- `zenduty` — no spec.yaml in repo
+- `sosivio` — no spec.yaml in repo
+- `botprise` — no spec.yaml in repo
+- `cfssl` — no spec.yaml in repo
+- `speedscale` — no spec.yaml in repo
+- `stripe` — no spec.yaml in repo
+- `emnify` — no spec.yaml in repo
+- `exim` — no spec.yaml in repo
+- `insightfinder` — no spec.yaml in repo
+- `avm consulting workday` — no spec.yaml in repo
+- `cortex` — no spec.yaml in repo
+- `ilert` — no spec.yaml in repo
+- `agentil software sap businessobjects` — no spec.yaml in repo
+- `scalr (community version)` — no spec.yaml in repo
+- `resin` — no spec.yaml in repo
+- `fairwinds insights` — no spec.yaml in repo
+- `vespa` — no spec.yaml in repo
+- `rapdev services` — no spec.yaml in repo
+- `gitea` — no spec.yaml in repo
+- `neutrona` — no spec.yaml in repo
+- `statsig license` — no spec.yaml in repo
+- `crest data systems microsoft defender` — no spec.yaml in repo
+- `netnology sd-wan` — no spec.yaml in repo
+- `pliant` — no spec.yaml in repo
+- `superwise` — no spec.yaml in repo
+- `nobl9` — no spec.yaml in repo
+- `sedai` — no spec.yaml in repo
+- `stackpulse` — no spec.yaml in repo
+- `visium technologies cygraph` — no spec.yaml in repo
+- `edgecast` — no spec.yaml in repo
+- `riak mdc replication` — no spec.yaml in repo
+- `neoload` — no spec.yaml in repo
+- `unitq` — no spec.yaml in repo
+- `insightfinder license` — no spec.yaml in repo
+- `drata` — no spec.yaml in repo
+- `mainstorconcept-ziris` — no spec.yaml in repo
+- `blink` — no spec.yaml in repo
+- `zoom` — no spec.yaml in repo
