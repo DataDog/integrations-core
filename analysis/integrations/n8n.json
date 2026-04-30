@@ -1,0 +1,24 @@
+{
+  "name": "n8n",
+  "display_name": "n8n",
+  "spec_path": "n8n/assets/configuration/spec.yaml",
+  "required_fields": ["openmetrics_endpoint"],
+  "all_relevant_fields": [
+    {"name": "openmetrics_endpoint", "required": true, "default": "http://localhost:5678"},
+    {"name": "raw_metric_prefix", "required": false, "default": "n8n"}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "n8n is configured via the `instances/openmetrics` template with a single required `openmetrics_endpoint`. The check (`N8nCheck`) inherits `OpenMetricsBaseCheckV2` and scrapes the standard `/metrics` path; it also probes `/healthz/readiness` derived by `urljoin` from the same base URL. n8n's default web/server port is 5678, and `/metrics` is the documented Prometheus endpoint. This is pattern A: a single canonical OpenMetrics endpoint on a known port — a generic openmetrics port-scan can discover it without per-integration logic. No credentials are required (the endpoint is unauthenticated when enabled).",
+  "references": [
+    {"kind": "spec", "path": "n8n/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "n8n/datadog_checks/n8n/check.py"},
+    {"kind": "readme", "path": "n8n/README.md"},
+    {"kind": "upstream", "url": "https://docs.n8n.io/hosting/logging-monitoring/monitoring/"}
+  ],
+  "confidence": "medium",
+  "needs_human_review": false,
+  "notes": "Caveat: n8n's `/metrics` endpoint is disabled by default and must be enabled via `N8N_METRICS=true` environment variables on the n8n process. If enabled, port 5678 + `/metrics` is canonical. The spec has no auto_conf.yaml on disk, but the OpenMetrics port-scan template applies cleanly. Optional `raw_metric_prefix` may need to be set if the user customises `N8N_METRICS_PREFIX`, but it has a sensible default."
+}

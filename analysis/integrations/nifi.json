@@ -1,0 +1,30 @@
+{
+  "name": "nifi",
+  "display_name": "NiFi",
+  "spec_path": "nifi/assets/configuration/spec.yaml",
+  "required_fields": ["api_url"],
+  "all_relevant_fields": [
+    {"name": "api_url", "required": true, "default": null},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null},
+    {"name": "collect_bulletins", "required": false, "default": true},
+    {"name": "bulletin_min_level", "required": false, "default": "WARNING"},
+    {"name": "collect_connection_metrics", "required": false, "default": false},
+    {"name": "collect_processor_metrics", "required": false, "default": false},
+    {"name": "process_groups", "required": false, "default": ["root"]}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The NiFi integration polls the NiFi REST API (default `https://localhost:8443/nifi-api`) for system diagnostics, flow status, process group, connection, processor, bulletin and cluster summary endpoints. Although the spec marks `username` / `password` as optional, NiFi 2.x defaults to HTTPS with single-user authentication enabled, and the check explicitly disables `RequestsWrapper`'s automatic auth and constructs its own NiFi token-based auth flow (POST `/access/token` in `NiFiApi`) when those credentials are supplied. Production deployments are essentially never unauthenticated. The `api_url` is also non-trivial: it depends on hostname, port (8080 vs 8443), and the `/nifi-api` base path — discovery is plausible on the wire but useless without credentials. Pattern E rule: when no realistic unauthenticated mode exists, classify as impossible.",
+  "references": [
+    {"kind": "spec", "path": "nifi/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "nifi/datadog_checks/nifi/check.py"},
+    {"kind": "check", "path": "nifi/datadog_checks/nifi/api.py"},
+    {"kind": "readme", "path": "nifi/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "The check does not use JMXFetch despite NiFi exposing JMX; it scrapes the REST API exclusively. The hint suggesting JMX is incorrect for this codebase. Classification driven by mandatory authentication in production NiFi deployments, not by the spec marking creds optional."
+}

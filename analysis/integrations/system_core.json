@@ -1,0 +1,20 @@
+{
+  "name": "system_core",
+  "display_name": "System Core",
+  "spec_path": "system_core/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [],
+  "classification": "generic",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The System Core check is a host-local CPU metric check with no required configuration fields and no remote target. The implementation calls `psutil.cpu_count()`, `psutil.cpu_times(percpu=True)`, and `psutil.cpu_freq(percpu=True)` against the Agent host and emits per-core gauges and rates. There is no host/port/URL/credential to discover. Auto-config is trivial: emit the integration with the default empty instance on every Agent host — every host has CPUs. Sits alongside `disk` and `btrfs` in the host-presence-check family (pattern H/L analogue with no binary or network involved).",
+  "references": [
+    {"kind": "spec", "path": "system_core/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "system_core/datadog_checks/system_core/system_core.py"},
+    {"kind": "readme", "path": "system_core/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Generic with method `other` (no on-wire probe). Trigger is universal host presence — every Agent host has CPU info available via psutil."
+}

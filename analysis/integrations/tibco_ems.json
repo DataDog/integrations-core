@@ -1,0 +1,26 @@
+{
+  "name": "tibco_ems",
+  "display_name": "Tibco EMS",
+  "spec_path": "tibco_ems/assets/configuration/spec.yaml",
+  "required_fields": ["username", "password", "script_path"],
+  "all_relevant_fields": [
+    {"name": "tibemsadmin", "required": false, "default": "/usr/bin/tibemsadmin"},
+    {"name": "host", "required": false, "default": "localhost"},
+    {"name": "port", "required": false, "default": 7222},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null},
+    {"name": "script_path", "required": false, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Despite the JMS framing, the check does not use JMXFetch: it shells out to the local `tibemsadmin` CLI (pattern L, local subprocess) and parses its output. To run, it requires a username, password, and a script_path the user must provision on disk. While the spec marks these as not strictly required, the constructed command line passes them unconditionally and the EMS server requires authentication for the `show` commands. This combines pattern L (local CLI) with pattern D (credentials-required), making auto-config infeasible.",
+  "references": [
+    {"kind": "spec", "path": "tibco_ems/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "tibco_ems/datadog_checks/tibco_ems/tibco_ems.py"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Not JMXFetch-based as the hint suggested; uses tibemsadmin subprocess. Still impossible due to mandatory credentials and a user-supplied script file."
+}

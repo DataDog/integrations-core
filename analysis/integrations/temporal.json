@@ -1,0 +1,21 @@
+{
+  "name": "temporal",
+  "display_name": "Temporal",
+  "spec_path": "temporal/assets/configuration/spec.yaml",
+  "required_fields": ["openmetrics_endpoint"],
+  "all_relevant_fields": [
+    {"name": "openmetrics_endpoint", "required": true, "default": null}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Temporal uses the standard OpenMetrics V2 instances template with a single required openmetrics_endpoint. The Temporal server exposes Prometheus metrics on a configurable listenAddress + handlerPath; in typical deployments this is a single host+port pair (commonly 8000 or 9090) and no credentials are required. Pattern A: OpenMetrics on a known port.",
+  "references": [
+    {"kind": "spec", "path": "temporal/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "temporal/datadog_checks/temporal/check.py"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Endpoint port is user-configured server-side; discovery layer can scan likely Prometheus ports."
+}

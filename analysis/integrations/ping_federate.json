@@ -1,0 +1,19 @@
+{
+  "name": "ping_federate",
+  "display_name": "PingFederate",
+  "spec_path": "ping_federate/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [],
+  "classification": "impossible",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Despite the hint about Prometheus, the PingFederate tile in this repo is logs-only: the spec contains only a `logs` template (file tail of `<pf_install>/pingfederate/log/admin.log` and `audit.log`) and ships no Agent metric check beyond `__init__.py`. The README confirms there are no metrics, events, or service checks. The `<pf_install>` placeholder is per-deployment user input and the integration emits CEF logs only. There is no endpoint to probe.",
+  "references": [
+    {"kind": "spec", "path": "ping_federate/assets/configuration/spec.yaml"},
+    {"kind": "readme", "path": "ping_federate/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Logs-only tile (pattern N analogue). README explicitly states no metrics/events/service checks. The hint about a Prometheus endpoint does not match what the integration actually ships."
+}

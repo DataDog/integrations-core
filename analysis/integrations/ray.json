@@ -1,0 +1,23 @@
+{
+  "name": "ray",
+  "display_name": "Ray",
+  "spec_path": "ray/assets/configuration/spec.yaml",
+  "required_fields": ["openmetrics_endpoint"],
+  "all_relevant_fields": [
+    {"name": "openmetrics_endpoint", "required": true, "default": null}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Ray exposes Prometheus metrics from its dashboard/metrics agent on a fixed default port (8080), as documented in the README sample (`http://<RAY_ADDRESS>:8080`) and the Docker autodiscovery snippet (`http://%%host%%:8080`). The check inherits `OpenMetricsBaseCheckV2` with a single `openmetrics_endpoint` field; no authentication is required. This is a canonical pattern A case: a generic OpenMetrics port-scan probing port 8080 for a Prometheus exposition format response is enough to identify a Ray cluster.",
+  "references": [
+    {"kind": "spec", "path": "ray/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "ray/datadog_checks/ray/check.py"},
+    {"kind": "readme", "path": "ray/README.md"},
+    {"kind": "upstream", "url": "https://docs.ray.io/en/latest/cluster/metrics.html"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Default Ray Prometheus port is 8080. Ray operators can override the metrics export port (`--metrics-export-port`), so port discovery should fall back to a small port-scan if 8080 is closed."
+}

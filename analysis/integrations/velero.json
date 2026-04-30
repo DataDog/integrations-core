@@ -1,0 +1,24 @@
+{
+  "name": "velero",
+  "display_name": "Velero",
+  "spec_path": "velero/assets/configuration/spec.yaml",
+  "required_fields": ["openmetrics_endpoint"],
+  "all_relevant_fields": [
+    {"name": "openmetrics_endpoint", "required": true, "default": null}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Velero's check is a thin `OpenMetricsBaseCheckV2` that scrapes a single Prometheus endpoint. The spec uses the standard `instances/openmetrics` template with `openmetrics_endpoint` as the only required field. The Velero server (and `node-agent` daemonset) expose Prometheus metrics on port 8085 at `/metrics` by default, as confirmed by the integration's own validators (`http://localhost:8085/metrics`) and Velero's upstream Helm chart defaults. A generic OpenMetrics port-scan on `:8085/metrics` over `%%host%%` is sufficient to discover and configure both the Velero deployment and the node-agent daemonset.",
+  "references": [
+    {"kind": "spec", "path": "velero/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "velero/datadog_checks/velero/check.py"},
+    {"kind": "readme", "path": "velero/README.md"},
+    {"kind": "other", "path": "velero/datadog_checks/velero/config_models/validators.py"},
+    {"kind": "upstream", "url": "https://velero.io/docs/main/troubleshooting/#velero-is-not-publishing-prometheus-metrics"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Two pod sets (velero deployment and node-agent daemonset) both expose `:8085/metrics`; auto-config should annotate both. Metrics must be enabled in the deployment (default is on)."
+}

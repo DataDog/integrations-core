@@ -1,4 +1,4 @@
-_Generated 2026-04-30. 215 total: 81 generic / 33 custom / 101 impossible / 1 need review (⚠)._
+_Generated 2026-04-30. 260 total: 96 generic / 40 custom / 124 impossible / 2 need review (⚠)._
 
 ### Generic auto-config possible
 
@@ -73,15 +73,30 @@ _Generated 2026-04-30. 215 total: 81 generic / 33 custom / 101 impossible / 1 ne
 | Mesos Master (`mesos_master`) | `url` | http-path-probe | high |
 | Mesos Slave (`mesos_slave`) | `url` | http-path-probe | high |
 | Milvus (`milvus`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
+| n8n (`n8n`) | `openmetrics_endpoint` | openmetrics-port-scan | medium |
+| Network (`network`) | — | other | high |
 | NGINX Ingress Controller (`nginx_ingress_controller`) | `prometheus_url` | openmetrics-port-scan | high |
+| NVIDIA NIM (`nvidia_nim`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
+| NVIDIA Triton (`nvidia_triton`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
 | Pulsar (`pulsar`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
+| Quarkus (`quarkus`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
+| Ray (`ray`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
 | Redis (`redisdb`) | `host`, `port` | tcp-banner-probe | high |
 | Riak (`riak`) | `url` | http-path-probe | high |
 | Scylla (`scylla`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
 | Squid (`squid`) | `name` | http-path-probe | high |
 | StatsD (`statsd`) | — | tcp-banner-probe | high |
+| Strimzi (`strimzi`) | — | openmetrics-port-scan | medium |
+| System Core (`system_core`) | — | other | high |
+| System Swap (`system_swap`) | — | other | high |
+| Teleport (`teleport`) | `teleport_url` | openmetrics-port-scan | high |
+| Temporal (`temporal`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
 | Traffic Server (`traffic_server`) | `traffic_server_url` | http-path-probe | high |
 | Twemproxy (nutcracker) (`twemproxy`) | `host`, `port` | tcp-banner-probe | high |
+| Velero (`velero`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
+| vLLM (`vllm`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
+| Weaviate (`weaviate`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
+| Event Viewer (`win32_event_log`) | `path` | other | medium |
 | Windows Service (`windows_service`) | `services` | other | medium |
 | YARN (`yarn`) | `resourcemanager_uri` | http-path-probe | high |
 | ZooKeeper (`zk`) | `host` | tcp-banner-probe | high |
@@ -113,14 +128,21 @@ _Generated 2026-04-30. 215 total: 81 generic / 33 custom / 101 impossible / 1 ne
 | Marathon (`marathon`) | `url` | http-path-probe | medium |
 | MongoDB (`mongo`) | `hosts` | credentials-required | medium |
 | Nagios (`nagios`) | `nagios_conf` | config-file-parse | high |
+| Nfsstat (`nfsstat`) | — | other | high |
 | NGINX (`nginx`) | `nginx_status_url` | http-path-probe | high |
 | PHP-FPM (`php_fpm`) | `status_url` | http-path-probe | medium |
 | Postfix (`postfix`) | `directory` | other | medium |
+| Prefect (`prefect`) | `prefect_url` | http-path-probe | medium |
 | RabbitMQ (`rabbitmq`) | — | http-path-probe | high |
 | RethinkDB (`rethinkdb`) | `host`, `port` | credentials-required | medium |
+| Slurm (`slurm`) | — | other | high |
 | Spark (`spark`) | `spark_url`, `cluster_name` | http-path-probe | medium |
 | Supervisord (`supervisord`) | `name` | http-path-probe | medium |
+| TCP (`tcp_check`) | `name`, `host`, `port` | other | high |
+| Tekton (`tekton`) | — | http-path-probe | high |
 | TLS (`tls`) | `server` | other | medium |
+| TorchServe (`torchserve`) | — | http-path-probe | high |
+| Traefik Mesh (`traefik_mesh`) | `openmetrics_endpoint` | http-path-probe | medium |
 | Varnish (`varnish`) | `varnishstat` | other | high |
 | Vault (`vault`) | `api_url` | credentials-required | medium |
 
@@ -197,35 +219,58 @@ _Generated 2026-04-30. 215 total: 81 generic / 33 custom / 101 impossible / 1 ne
 | Microsoft DNS (`microsoft_dns`) | — | other | high |
 | Microsoft Sysmon (`microsoft_sysmon`) | — | other | high |
 | MySQL (`mysql`) | `host`, `username`, `password` | credentials-required | high |
+| NiFi (`nifi`) | `api_url` | credentials-required | high |
+| Nutanix (`nutanix`) | `pc_ip`, `pc_username`, `pc_password` | credentials-required | high |
+| Octopus Deploy (`octopus_deploy`) | `octopus_endpoint`, `api_key` | credentials-required | high |
 | OpenLDAP (`openldap`) | `url` | credentials-required | high |
 | OpenMetrics (`openmetrics`) | `openmetrics_endpoint`, `namespace`, `metrics` | other | high |
 | OpenStack (`openstack`) | `keystone_server_url`, `name`, `user` | credentials-required | high |
 | OpenStack Controller (`openstack_controller`) | `keystone_server_url`, `user` | credentials-required | high |
+| OpenVPN (`openvpn`) | — | other | high |
+| Oracle Database ⚠ (`oracle`) | `server`, `service_name`, `username`, `password` | credentials-required | high |
+| OSSEC Security (`ossec_security`) | — | other | high |
+| Palo Alto Panorama (`palo_alto_panorama`) | — | other | high |
+| Palo Alto Networks Firewall (`pan_firewall`) | — | other | high |
+| PDH (`pdh_check`) | `countersetname`, `metrics` | other | high |
 | PgBouncer (`pgbouncer`) | `host`, `username` | credentials-required | high |
+| PingFederate (`ping_federate`) | — | other | high |
 | Postgres (`postgres`) | `host`, `port`, `username`, `password` | credentials-required | high |
 | PowerDNS Recursor (`powerdns_recursor`) | `host`, `port`, `api_key` | credentials-required | high |
 | Presto (`presto`) | `host`, `port` | credentials-required | high |
+| Process (`process`) | `name` | other | high |
 | Prometheus (`prometheus`) | `prometheus_url`, `namespace`, `metrics` | other | high |
+| Proxmox (`proxmox`) | `proxmox_server`, `headers` | credentials-required | high |
 | ProxySQL (`proxysql`) | `host`, `port`, `username`, `password` | credentials-required | high |
 | RiakCS (`riakcs`) | `access_id`, `access_secret` | credentials-required | high |
 | SAP HANA (`sap_hana`) | `server`, `username`, `password` | credentials-required | high |
 | Sidekiq (`sidekiq`) | — | other | high |
 | Silk (`silk`) | `host_address`, `username`, `password` | credentials-required | high |
+| Silverstripe CMS (`silverstripe_cms`) | `SILVERSTRIPE_DATABASE_TYPE`, `SILVERSTRIPE_DATABASE_NAME`, `SILVERSTRIPE_DATABASE_SERVER_IP`, `SILVERSTRIPE_DATABASE_PORT`, `SILVERSTRIPE_DATABASE_USERNAME`, `SILVERSTRIPE_DATABASE_PASSWORD` | credentials-required | high |
 | SingleStore (`singlestore`) | `host`, `username`, `password` | credentials-required | high |
 | SNMP (`snmp`) | `ip_address` | credentials-required | high |
 | Solr (`solr`) | `host`, `port` | credentials-required | high |
 | SonarQube (`sonarqube`) | `web_endpoint` | credentials-required | high |
+| Sonatype Nexus (`sonatype_nexus`) | `username`, `password`, `server_url` | credentials-required | high |
+| SonicWall Firewall (`sonicwall_firewall`) | — | other | high |
 | SQL Server (`sqlserver`) | `host` | credentials-required | high |
 | SSH/SFTP (`ssh_check`) | `host`, `username` | credentials-required | high |
+| Supabase (`supabase`) | — | credentials-required | high |
+| Suricata (`suricata`) | — | other | high |
+| Symantec Endpoint Protection (`symantec_endpoint_protection`) | — | other | high |
 | TeamCity (`teamcity`) | `server` | credentials-required | high |
 | Tenable (Nessus) (`tenable`) | — | other | high |
 | Teradata (`teradata`) | `server`, `database`, `username`, `password` | credentials-required | high |
+| Tibco EMS (`tibco_ems`) | `username`, `password`, `script_path` | credentials-required | high |
 | TokuMX (`tokumx`) | `server` | credentials-required | high |
 | Tomcat (`tomcat`) | `host`, `port`, `user`, `password` | credentials-required | high |
 | Prisma Cloud Compute (Twistlock) (`twistlock`) | `url`, `username`, `password` | credentials-required | high |
 | Vertica (`vertica`) | `server`, `port`, `username`, `password`, `db` | credentials-required | high |
 | VoltDB (`voltdb`) | `url`, `username`, `password` | credentials-required | high |
 | vSphere (`vsphere`) | `host`, `username`, `password` | credentials-required | high |
+| WatchGuard Firebox (`watchguard_firebox`) | — | other | high |
+| Wazuh (`wazuh`) | — | other | high |
 | WebLogic (`weblogic`) | `host`, `port`, `user`, `password` | credentials-required | high |
 | Windows Performance Counters (`windows_performance_counters`) | `metrics` | other | high |
 | WMI (`wmi_check`) | `class`, `metrics` | other | high |
+| Zeek (`zeek`) | — | other | high |
+| Zscaler Private Access (`zscaler_private_access`) | — | other | high |

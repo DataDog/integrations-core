@@ -1,0 +1,23 @@
+{
+  "name": "tekton",
+  "display_name": "Tekton",
+  "spec_path": "tekton/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [
+    {"name": "pipelines_controller_endpoint", "required": false, "default": null},
+    {"name": "triggers_controller_endpoint", "required": false, "default": null},
+    {"name": "openmetrics_endpoint", "required": false, "default": null}
+  ],
+  "classification": "custom",
+  "auto_config_method": "http-path-probe",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Tekton uses OpenMetricsBaseCheckV2 but exposes two distinct Prometheus endpoints (Pipelines Controller on port 9090 and Triggers Controller on port 9000), each with its own metric namespace. The check enforces that at least one endpoint be configured. Because the integration multiplexes between two well-known but separate K8s service URLs (e.g. http://tekton-pipelines-controller:9090/metrics and http://tekton-triggers-controller:9000/metrics), discovery must probe both Tekton services. This is closer to pattern F (dual-mode) than to a single openmetrics-port-scan target.",
+  "references": [
+    {"kind": "spec", "path": "tekton/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "tekton/datadog_checks/tekton/check.py"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Two well-known service names/ports per K8s deployment; default ports 9090 (pipelines) and 9000 (triggers)."
+}

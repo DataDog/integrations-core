@@ -1,0 +1,29 @@
+{
+  "name": "proxmox",
+  "display_name": "Proxmox",
+  "spec_path": "proxmox/assets/configuration/spec.yaml",
+  "required_fields": ["proxmox_server", "headers"],
+  "all_relevant_fields": [
+    {"name": "proxmox_server", "required": true, "default": null},
+    {"name": "headers", "required": false, "default": null},
+    {"name": "auth_token", "required": false, "default": null},
+    {"name": "tls_verify", "required": false, "default": true},
+    {"name": "collect_tasks", "required": false, "default": false},
+    {"name": "resource_filters", "required": false, "default": null},
+    {"name": "collected_task_types", "required": false, "default": ["qmstart", "qmstop", "qmshutdown", "qmreboot", "qmigrate", "qmsuspend", "vzstart", "vzshutdown", "vzsuspend", "startall", "stopall", "suspendall", "aptupdate"]}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The Proxmox check queries the Proxmox VE REST API at `proxmox_server` (default port 8006, path /api2/json). Every endpoint on that API requires authentication: the spec's documented pattern is an Authorization header containing a Proxmox API token of the form `PVEAPIToken=<USER>@<REALM>!<TOKEN_ID>=<YOUR_TOKEN>`, supplied via `headers` or `auth_token`. The API token is composed of cluster-specific identifiers (user, realm, token id, secret) that cannot be derived from the wire. Without the token the API returns 401 and the check yields no data, so generic host+port discovery cannot produce a working configuration.",
+  "references": [
+    {"kind": "spec", "path": "proxmox/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "proxmox/datadog_checks/proxmox/check.py"},
+    {"kind": "readme", "path": "proxmox/README.md"},
+    {"kind": "upstream", "url": "https://pve.proxmox.com/pve-docs/api-viewer/"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern D: spec-required credentials. The Authorization header carrying the PVE API token is mandatory; auto-config cannot mint cluster-specific tokens."
+}

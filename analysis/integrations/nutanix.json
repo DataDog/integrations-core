@@ -1,0 +1,27 @@
+{
+  "name": "nutanix",
+  "display_name": "Nutanix",
+  "spec_path": "nutanix/assets/configuration/spec.yaml",
+  "required_fields": ["pc_ip", "pc_username", "pc_password"],
+  "all_relevant_fields": [
+    {"name": "pc_ip", "required": true, "default": null},
+    {"name": "pc_port", "required": false, "default": 9440},
+    {"name": "pc_username", "required": true, "default": null},
+    {"name": "pc_password", "required": true, "default": null},
+    {"name": "page_limit", "required": false, "default": 50},
+    {"name": "resource_filters", "required": false, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The Nutanix integration talks to a Prism Central HTTPS API (default port 9440) using basic auth. Both `pc_username` and `pc_password` are explicitly `required: true` in the spec, and the check (`NutanixCheck`) wires them via `HTTP_CONFIG_REMAPPER` into the `RequestsWrapper`'s standard `username` / `password` so every API call sends the credentials. Without them no resource (clusters, hosts, VMs, events, tasks, alerts, audits, categories) can be enumerated. Classic pattern D: spec-required credentials with no unauthenticated fallback. `pc_ip` is also user-supplied (Prism Central is a separate management VM, typically not on the Agent host). Auto-config is impossible without credential discovery and the operator's choice of which Prism Central instance to monitor.",
+  "references": [
+    {"kind": "spec", "path": "nutanix/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "nutanix/datadog_checks/nutanix/check.py"},
+    {"kind": "readme", "path": "nutanix/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Spec marks `pc_username` and `pc_password` as required; check uses HTTP_CONFIG_REMAPPER to feed them into the RequestsWrapper Basic auth. No anonymous mode for Prism Central."
+}

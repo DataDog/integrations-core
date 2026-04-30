@@ -1,0 +1,29 @@
+{
+  "name": "network",
+  "display_name": "Network",
+  "spec_path": "network/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [
+    {"name": "collect_connection_state", "required": false, "default": false},
+    {"name": "collect_connection_queues", "required": false, "default": false},
+    {"name": "excluded_interfaces", "required": false, "default": ["lo", "lo0"]},
+    {"name": "excluded_interface_re", "required": false, "default": null},
+    {"name": "conntrack_path", "required": false, "default": null},
+    {"name": "collect_aws_ena_metrics", "required": false, "default": false},
+    {"name": "collect_ethtool_metrics", "required": false, "default": false}
+  ],
+  "classification": "generic",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The Network check has no required configuration fields and no remote endpoint. It is host-local: the `Network` class dispatches to a platform-specific subclass (`LinuxNetwork`, `WindowsNetwork`, `BSDNetwork`, `SolarisNetwork`) and reads `/proc/net/dev` (and other `/proc` entries on Linux), uses psutil for socket/connection state, and optionally shells out to `ss` / `netstat` / `conntrack` / `ethtool` for richer stats. There is no host/port/URL/credential to discover. Auto-config is trivial: emit the integration with default empty instance whenever the Agent is running on a supported OS. Method `other` because there is no network probe — this is the same shape as the btrfs / iis pattern (host-local discovery).",
+  "references": [
+    {"kind": "spec", "path": "network/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "network/datadog_checks/network/network.py"},
+    {"kind": "check", "path": "network/datadog_checks/network/check_linux.py"},
+    {"kind": "readme", "path": "network/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Optional features (conntrack, ethtool, AWS ENA, connection state via ss/netstat) require additional binaries or capabilities, but the base check works with no configuration on every supported OS. Conceptually identical to btrfs (pattern: host-local presence; no per-instance input)."
+}

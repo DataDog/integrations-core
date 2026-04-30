@@ -1,0 +1,29 @@
+{
+  "name": "pdh_check",
+  "display_name": "PDH",
+  "spec_path": "pdh_check/assets/configuration/spec.yaml",
+  "required_fields": ["countersetname", "metrics"],
+  "all_relevant_fields": [
+    {"name": "countersetname", "required": true, "default": null},
+    {"name": "metrics", "required": true, "default": null},
+    {"name": "admin_share", "required": false, "default": "c$"},
+    {"name": "host", "required": false, "default": "."},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null},
+    {"name": "additional_metrics", "required": false, "default": null},
+    {"name": "counter_data_types", "required": false, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "pdh_check is the generic Windows Performance Counter (PDH) framework: the user must declare which `countersetname` to query and supply a list of `[<COUNTER_NAME>, <METRIC_NAME>, <METRIC_TYPE>]` mappings. The check class is a thin shim over `PDHBaseCheck` and contributes no opinion about which counter set to monitor. There is no upstream system to fingerprint — every deployment is bespoke. This is pattern J: user-supplied generic check template. The optional remote-host mode (`host` + `username` + `password` via the `pdh_legacy` template) only deepens the credential gap.",
+  "references": [
+    {"kind": "spec", "path": "pdh_check/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "pdh_check/datadog_checks/pdh_check/pdh_check.py"},
+    {"kind": "other", "path": "datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/instances/pdh_legacy.yaml"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern J (user-supplied generic check template). Sibling of windows_performance_counters and wmi_check — the integration is the configuration template, not a service binding."
+}

@@ -1,0 +1,24 @@
+{
+  "name": "nfsstat",
+  "display_name": "Nfsstat",
+  "spec_path": "nfsstat/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [
+    {"name": "nfsiostat_path", "required": false, "default": null},
+    {"name": "autofs_enabled", "required": false, "default": false},
+    {"name": "disable_missing_mountpoints_warning", "required": false, "default": false}
+  ],
+  "classification": "custom",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The Nfsstat check has no required configuration fields and no remote endpoint. It runs the local `nfsiostat` binary as a subprocess (shipped with the Agent at `/opt/datadog-agent/embedded/sbin/nfsiostat`, falling back to `/usr/local/sbin/nfsiostat`, or a user-provided path via `nfsiostat_path`) and parses its tabular output. Discovery on the Agent host reduces to: `is the nfsiostat binary present and does the host have any NFS mount points?`. This is pattern L (local CLI subprocess). The check raises a warning (not an error) when no NFS mounts are found, so naive auto-enabling could produce noise on hosts without NFS — auto-config should prefer to emit the instance only when at least one filesystem of `fstype` `nfs`/`nfs4` is mounted.",
+  "references": [
+    {"kind": "spec", "path": "nfsstat/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "nfsstat/datadog_checks/nfsstat/nfsstat.py"},
+    {"kind": "readme", "path": "nfsstat/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Despite the hint, the check does not read /proc/net/rpc/nfsd directly; it shells out to the `nfsiostat` Python script. Method `other` (no network probe). Linux-only in practice (the embedded binary is only meaningful there)."
+}

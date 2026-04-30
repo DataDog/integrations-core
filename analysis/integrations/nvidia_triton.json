@@ -1,0 +1,25 @@
+{
+  "name": "nvidia_triton",
+  "display_name": "NVIDIA Triton",
+  "spec_path": "nvidia_triton/assets/configuration/spec.yaml",
+  "required_fields": ["openmetrics_endpoint"],
+  "all_relevant_fields": [
+    {"name": "openmetrics_endpoint", "required": true, "default": "http://localhost:8002/metrics"},
+    {"name": "collect_server_info", "required": false, "default": true},
+    {"name": "server_port", "required": false, "default": 8000}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "NVIDIA Triton Inference Server exposes Prometheus metrics on a fixed `/metrics` path at the documented default port 8002 (configured via `--metrics-port`). The check is an OpenMetricsBaseCheckV2 subclass requiring just `openmetrics_endpoint`. The optional companion HTTP API (port 8000) is used only for version/health metadata and is enabled by default but not required for the core OpenMetrics scrape. Pattern A: single canonical OpenMetrics URL with fixed default port — straightforward openmetrics-port-scan candidate. No existing auto_conf.yaml on disk.",
+  "references": [
+    {"kind": "spec", "path": "nvidia_triton/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "nvidia_triton/datadog_checks/nvidia_triton/check.py"},
+    {"kind": "readme", "path": "nvidia_triton/README.md"},
+    {"kind": "upstream", "url": "https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/metrics.html"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "The companion port 8000 (HTTP API) is used for server-info enrichment; if not reachable the check still works for OpenMetrics scraping."
+}

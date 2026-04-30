@@ -1,0 +1,19 @@
+{
+  "name": "zeek",
+  "display_name": "Zeek",
+  "spec_path": "zeek/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [],
+  "classification": "impossible",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Zeek (formerly Bro) is a network IDS. The Datadog integration is logs-only: the spec defines a single `logs` block where the user picks one of two collection modes. Open-source Zeek emits log files (`type: file`, `path: /opt/zeek/logs/current/*.log`) which are tailed; the Corelight Zeek appliance forwards over TCP (`type: tcp`, `port: <PORT>`) which the Agent must listen on. There is no metric check (`datadog_checks/zeek/` has only `__about__.py`, `__init__.py`, and `data/conf.yaml.example`) and no upstream service for the Agent to probe. The choice between file and TCP modes, the file path, and the listen port are all user policy that cannot be derived from the wire.",
+  "references": [
+    {"kind": "spec", "path": "zeek/assets/configuration/spec.yaml"},
+    {"kind": "readme", "path": "zeek/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Logs-only integration with no instances block and no check.py. Same shape as wazuh and zscaler_private_access."
+}

@@ -1,0 +1,19 @@
+{
+  "name": "suricata",
+  "display_name": "Suricata",
+  "spec_path": "suricata/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [],
+  "classification": "impossible",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Suricata is a logs-only integration. The spec defines no Agent metric check — only a `template: logs` block pointing the Agent at `/var/log/suricata/eve.json`. There is no `<name>.py` check (the `datadog_checks/suricata/` package contains only `__init__.py` and `__about__.py`), no host/port/endpoint, and no service to probe. Auto-config in the network-probe sense does not apply: enabling it requires the user to install and run Suricata, configure EVE JSON output, and ensure the file path is correct on the Agent host. None of that is recoverable from the wire.",
+  "references": [
+    {"kind": "spec", "path": "suricata/assets/configuration/spec.yaml"},
+    {"kind": "readme", "path": "suricata/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Logs-only IDS integration. Same structural shape as other vendor-tile logs-only integrations — no probe surface."
+}

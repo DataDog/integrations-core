@@ -1,0 +1,23 @@
+{
+  "name": "sonatype_nexus",
+  "display_name": "Sonatype Nexus",
+  "spec_path": "sonatype_nexus/assets/configuration/spec.yaml",
+  "required_fields": ["username", "password", "server_url"],
+  "all_relevant_fields": [
+    {"name": "username", "required": true, "default": null},
+    {"name": "password", "required": true, "default": null},
+    {"name": "server_url", "required": true, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The Sonatype Nexus check authenticates against the Nexus Repository Manager REST API (/service/rest/v1/status/check and /service/metrics/data) using basic auth. The spec marks username, password, and server_url as required with no defaults. Without operator-supplied credentials, the metrics endpoints return 401, so credential discovery is mandatory and out of scope for a generic wire-level probe.",
+  "references": [
+    {"kind": "spec", "path": "sonatype_nexus/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "sonatype_nexus/datadog_checks/sonatype_nexus/check.py"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern D: spec-required credentials. Default Nexus port is 8081 (per the example) and the API paths are stable, but the auth requirement dominates."
+}

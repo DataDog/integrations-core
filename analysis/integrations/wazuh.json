@@ -1,0 +1,19 @@
+{
+  "name": "wazuh",
+  "display_name": "Wazuh",
+  "spec_path": "wazuh/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [],
+  "classification": "impossible",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Wazuh is a host intrusion detection system (HIDS). The Datadog integration is logs-only: the spec defines a single `logs` block expecting the user to declare a UDP listener (`type: udp`, `port: <PORT>`) for Wazuh to forward syslog-style events into. There is no Agent metric check at all — `datadog_checks/wazuh/` contains no `wazuh.py`, only `__about__.py`, `__init__.py`, and a `data/conf.yaml.example`. There is no upstream service to probe over the network from the Agent: the Agent passively receives forwarded events on a port the user has chosen and must configure on the Wazuh side as well. Auto-config in the network-probe sense does not apply.",
+  "references": [
+    {"kind": "spec", "path": "wazuh/assets/configuration/spec.yaml"},
+    {"kind": "readme", "path": "wazuh/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Logs-only integration with no instances block in spec. Same shape as zeek and zscaler_private_access (and broadly pattern N — the integration is a log-shipping tile, not a probeable service)."
+}

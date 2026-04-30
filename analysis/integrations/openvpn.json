@@ -1,0 +1,19 @@
+{
+  "name": "openvpn",
+  "display_name": "OpenVPN",
+  "spec_path": "openvpn/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [],
+  "classification": "impossible",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The OpenVPN integration is logs-only: there is no Agent metric check (the `datadog_checks/openvpn/` package contains only a version stub, no `check.py`). The spec defines a single `logs` template that listens on a user-supplied TCP/UDP port for syslog forwarded from the OpenVPN server. The README explicitly requires the user to (a) configure syslog forwarding on the OpenVPN Access Server side and (b) pick a free port on the Agent host. Neither piece of input is discoverable from the wire — the upstream system actively pushes to the Agent on a port the user chose. Similar to pattern N (DogStatsD/instrumentation-only): auto-config in the network-probe sense doesn't apply.",
+  "references": [
+    {"kind": "spec", "path": "openvpn/assets/configuration/spec.yaml"},
+    {"kind": "readme", "path": "openvpn/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Logs-forwarder integration with no Agent check. The configuration is a syslog listener port, not a probe target."
+}

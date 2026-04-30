@@ -1,0 +1,19 @@
+{
+  "name": "ossec_security",
+  "display_name": "OSSEC Security",
+  "spec_path": "ossec_security/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [],
+  "classification": "impossible",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "OSSEC is a host-based intrusion detection system. The integration spec contains only a `logs` template (UDP listener at a user-supplied `<PORT>`) and ships no Agent metric check (no <name>.py beyond `__init__.py`). Setup requires the user to configure OSSEC to forward syslog to the Agent and to pick a port; there is no upstream service running alongside the Agent that auto-config could probe. The `<PORT>` placeholder reflects user policy, not a discoverable property.",
+  "references": [
+    {"kind": "spec", "path": "ossec_security/assets/configuration/spec.yaml"},
+    {"kind": "readme", "path": "ossec_security/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Logs-only tile, similar in shape to pattern N. No metric check, no auto_conf.yaml. Discovery is structurally inapplicable."
+}

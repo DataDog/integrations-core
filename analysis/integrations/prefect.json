@@ -1,0 +1,29 @@
+{
+  "name": "prefect",
+  "display_name": "Prefect",
+  "spec_path": "prefect/assets/configuration/spec.yaml",
+  "required_fields": ["prefect_url"],
+  "all_relevant_fields": [
+    {"name": "prefect_url", "required": true, "default": null},
+    {"name": "custom_headers", "required": false, "default": null},
+    {"name": "collect_events", "required": false, "default": false},
+    {"name": "work_pool_names", "required": false, "default": null},
+    {"name": "work_queue_names", "required": false, "default": null},
+    {"name": "deployment_names", "required": false, "default": null},
+    {"name": "event_names", "required": false, "default": null}
+  ],
+  "classification": "custom",
+  "auto_config_method": "http-path-probe",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Prefect's check polls the Prefect Server REST API rooted at `prefect_url` (e.g. http://<host>:4200/api), hitting endpoints like /version, /health, /ready, /work_pools/filter, /events/filter. The default Prefect API server port (4200) and the `/api` prefix are stable, so a generic HTTP probe of /api/health or /api/ready on a candidate host could detect a Prefect deployment without credentials in default open-source deployments. However, Prefect Cloud and most production self-hosted deployments require an Authorization Bearer token supplied via `custom_headers`; without it the API returns 401. The integration is therefore probable on the wire (single canonical path, single port) but production reachability typically depends on user-supplied tokens, so classify as custom rather than generic.",
+  "references": [
+    {"kind": "spec", "path": "prefect/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "prefect/datadog_checks/prefect/check.py"},
+    {"kind": "readme", "path": "prefect/README.md"},
+    {"kind": "upstream", "url": "https://docs.prefect.io/latest/api-ref/server/"}
+  ],
+  "confidence": "medium",
+  "needs_human_review": false,
+  "notes": "Self-hosted open-source Prefect typically runs unauthenticated on :4200/api and is reachable by a generic /api/health probe. Prefect Cloud and authenticated deployments require a bearer token supplied through custom_headers, which falls outside generic discovery."
+}
