@@ -1,0 +1,22 @@
+{
+  "name": "bentoml",
+  "display_name": "BentoML",
+  "spec_path": "bentoml/assets/configuration/spec.yaml",
+  "required_fields": ["openmetrics_endpoint"],
+  "all_relevant_fields": [
+    {"name": "openmetrics_endpoint", "required": true, "default": null}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "BentoML serves Prometheus metrics on the model server's HTTP port (default 3000) at the canonical /metrics path. The spec uses template: instances/openmetrics with example openmetrics_endpoint http://localhost:3000/metrics, and the check class inherits OpenMetricsBaseCheckV2. No credentials are required. The check additionally probes a few model-server health endpoints under the same base URL, but those derive from the openmetrics_endpoint host:port - they are not separate inputs. Single canonical OpenMetrics port + path makes this a textbook generic openmetrics-port-scan candidate.",
+  "references": [
+    {"kind": "spec", "path": "bentoml/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "bentoml/datadog_checks/bentoml/check.py"},
+    {"kind": "upstream", "url": "https://docs.bentoml.com/en/latest/build-with-bentoml/observability/metrics.html"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern A (OpenMetrics on a known port). Default port 3000 is the BentoML HTTP server's metrics port."
+}

@@ -1,0 +1,23 @@
+{
+  "name": "citrix_hypervisor",
+  "display_name": "Citrix Hypervisor",
+  "spec_path": "citrix_hypervisor/assets/configuration/spec.yaml",
+  "required_fields": ["url"],
+  "all_relevant_fields": [
+    {"name": "url", "required": true, "default": null},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Citrix Hypervisor (formerly XenServer) exposes its RRD metrics over an HTTP endpoint (`/host_rrd`, `/rrd_updates`) protected by HTTP Basic auth against the XAPI user database. The check uses the standard `instances/http` template, which inherits `username`/`password` and forwards them to the inner HTTP client. While `username`/`password` are not strictly `required: true` in the spec, the XAPI endpoints will not return RRD data without a valid hypervisor login, so a real deployment cannot be auto-configured without them. Even the URL itself is per-host (each pool master has its own management address). Pattern D / E.",
+  "references": [
+    {"kind": "spec", "path": "citrix_hypervisor/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "citrix_hypervisor/datadog_checks/citrix_hypervisor/check.py"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Only `url` is `required: true` in the spec, but the upstream XAPI requires HTTP Basic credentials to return host_rrd/rrd_updates. There is no unauthenticated default deployment."
+}

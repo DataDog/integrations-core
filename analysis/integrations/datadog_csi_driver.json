@@ -1,0 +1,22 @@
+{
+  "name": "datadog_csi_driver",
+  "display_name": "Datadog CSI Driver",
+  "spec_path": "datadog_csi_driver/assets/configuration/spec.yaml",
+  "required_fields": ["openmetrics_endpoint"],
+  "all_relevant_fields": [
+    {"name": "openmetrics_endpoint", "required": true, "default": "http://localhost:5000/metrics"}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": true,
+  "auto_conf_path": "datadog_csi_driver/datadog_checks/datadog_csi_driver/data/auto_conf.yaml",
+  "explanation": "Datadog's own CSI driver exposes Prometheus metrics on a fixed endpoint. The check inherits OpenMetricsBaseCheckV2 with a hardcoded default of http://localhost:5000/metrics, and the existing auto_conf.yaml templates this as http://%%host%%:5000/metrics with the `csi-driver` AD identifier. Single canonical port and path, no auth — generic OpenMetrics port-scan applies cleanly.",
+  "references": [
+    {"kind": "spec", "path": "datadog_csi_driver/assets/configuration/spec.yaml"},
+    {"kind": "auto_conf", "path": "datadog_csi_driver/datadog_checks/datadog_csi_driver/data/auto_conf.yaml"},
+    {"kind": "check", "path": "datadog_csi_driver/datadog_checks/datadog_csi_driver/check.py"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern A: OpenMetrics on a known port. Identical shape to datadog_cluster_agent."
+}

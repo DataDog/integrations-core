@@ -1,0 +1,25 @@
+{
+  "name": "hudi",
+  "display_name": "Hudi",
+  "spec_path": "hudi/assets/configuration/spec.yaml",
+  "required_fields": ["host", "port"],
+  "all_relevant_fields": [
+    {"name": "host", "required": false, "default": null},
+    {"name": "port", "required": false, "default": null},
+    {"name": "user", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Hudi is a JMX integration: the spec only references `init_config/jmx` and `instances/jmx`, the integration ships a `metrics.yaml` MBean list, and there is no Python check (only an `__init__.py` re-exporting the version). JMXFetch is dispatched against a Spark / Flink / standalone Hudi JVM that the user must expose with `-Dcom.sun.management.jmxremote.*` flags. JMX RMI ports are not standardised across Hudi deployments and production JMX endpoints almost always require `user` / `password` plus possibly a key/trust store. By the JMXFetch rule (pattern D / shortcut), this is impossible.",
+  "references": [
+    {"kind": "spec", "path": "hudi/assets/configuration/spec.yaml"},
+    {"kind": "other", "path": "hudi/datadog_checks/hudi/data/metrics.yaml"},
+    {"kind": "other", "path": "hudi/datadog_checks/hudi/data/conf.yaml.example"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "JMX integration with no service-side check.py; classified per the standard JMX-impossible rule."
+}

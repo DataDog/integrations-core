@@ -1,0 +1,34 @@
+{
+  "name": "ibm_ace",
+  "display_name": "IBM ACE",
+  "spec_path": "ibm_ace/assets/configuration/spec.yaml",
+  "required_fields": ["mq_server", "mq_port", "channel", "queue_manager"],
+  "all_relevant_fields": [
+    {"name": "mq_server", "required": true, "default": null},
+    {"name": "mq_port", "required": true, "default": 1414},
+    {"name": "channel", "required": true, "default": null},
+    {"name": "queue_manager", "required": true, "default": null},
+    {"name": "mq_user", "required": false, "default": null},
+    {"name": "mq_password", "required": false, "default": null},
+    {"name": "mqcd_version", "required": false, "default": 9},
+    {"name": "tls_auth", "required": false, "default": false},
+    {"name": "tls_cipher_spec", "required": false, "default": null},
+    {"name": "tls_key_repository_location", "required": false, "default": null},
+    {"name": "tls_certificate_label", "required": false, "default": null},
+    {"name": "resource_statistics", "required": false, "default": true},
+    {"name": "message_flows", "required": false, "default": true}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "IBM App Connect Enterprise is collected by subscribing to IBM MQ pub/sub topics over MQI (via `pymqi`). The check requires `mq_server`, `mq_port`, `channel`, and `queue_manager`, none of which are discoverable on the wire: `channel` and `queue_manager` are administrator-defined identifiers configured inside the MQ broker, and standard production deployments authenticate the channel with `mq_user`/`mq_password` (and frequently TLS using a `.kdb` key repository plus a cipher spec). The Agent must also be running on a host with the IBM MQ client libraries installed. No combination of host+port probes yields the channel/QM names or credentials.",
+  "references": [
+    {"kind": "spec", "path": "ibm_ace/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "ibm_ace/datadog_checks/ibm_ace/check.py"},
+    {"kind": "check", "path": "ibm_ace/datadog_checks/ibm_ace/subscription.py"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "MQ-based integration: needs operator-defined channel/queue manager plus credentials and IBM MQ client libs (pattern D)."
+}

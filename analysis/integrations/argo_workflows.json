@@ -1,0 +1,23 @@
+{
+  "name": "argo_workflows",
+  "display_name": "Argo Workflows",
+  "spec_path": "argo_workflows/assets/configuration/spec.yaml",
+  "required_fields": ["openmetrics_endpoint"],
+  "all_relevant_fields": [
+    {"name": "openmetrics_endpoint", "required": true, "default": "http://localhost:9090/metrics"}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Argo Workflows is a Kubernetes-native workflow engine. The check is `OpenMetricsBaseCheckV2` and the spec uses `template: instances/openmetrics` with a single endpoint pointing to the workflow controller's Prometheus metrics on the well-known port `9090/metrics` (documented in the README and upstream docs). No authentication is required by default; an OpenMetrics port-scan on the workflow-controller pod at `http://%%host%%:9090/metrics` is sufficient.",
+  "references": [
+    {"kind": "spec", "path": "argo_workflows/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "argo_workflows/datadog_checks/argo_workflows/check.py"},
+    {"kind": "readme", "path": "argo_workflows/README.md"},
+    {"kind": "upstream", "url": "https://argo-workflows.readthedocs.io/en/latest/metrics/"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern A. No auto_conf.yaml currently shipped, but the integration is fleet_configurable and uses a fixed Prometheus port."
+}

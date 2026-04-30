@@ -1,0 +1,22 @@
+{
+  "name": "dcgm",
+  "display_name": "NVIDIA DCGM",
+  "spec_path": "dcgm/assets/configuration/spec.yaml",
+  "required_fields": ["openmetrics_endpoint"],
+  "all_relevant_fields": [
+    {"name": "openmetrics_endpoint", "required": true, "default": "http://localhost:9400/metrics"}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "NVIDIA's dcgm-exporter exposes GPU telemetry as Prometheus metrics on the universally documented port 9400 at `/metrics`. The check inherits OpenMetricsBaseCheckV2 with no additional auth; the spec template just overrides the example endpoint. Single canonical port and path, no credentials — generic OpenMetrics port-scan applies.",
+  "references": [
+    {"kind": "spec", "path": "dcgm/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "dcgm/datadog_checks/dcgm/check.py"},
+    {"kind": "upstream", "url": "https://github.com/NVIDIA/dcgm-exporter"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern A: OpenMetrics on a known port (9400). No existing auto_conf.yaml on disk, but adding one would be straightforward."
+}

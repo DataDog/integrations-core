@@ -1,4 +1,4 @@
-_Generated 2026-04-30. 115 total: 39 generic / 27 custom / 49 impossible / 0 need review (⚠)._
+_Generated 2026-04-30. 165 total: 55 generic / 29 custom / 81 impossible / 1 need review (⚠)._
 
 ### Generic auto-config possible
 
@@ -7,13 +7,28 @@ _Generated 2026-04-30. 115 total: 39 generic / 27 custom / 49 impossible / 0 nee
 | Active Directory (`active_directory`) | — | other | high |
 | Aerospike (`aerospike`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
 | Apache (`apache`) | `apache_status_url` | http-path-probe | high |
+| Appgate SDP (`appgate_sdp`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
+| Argo Rollouts (`argo_rollouts`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
+| Argo Workflows (`argo_workflows`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
+| ArgoCD (`argocd`) | — | openmetrics-port-scan | high |
+| ASP.NET (`aspdotnet`) | — | other | medium |
+| AWS Neuron (`aws_neuron`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
+| Azure IoT Edge (`azure_iot_edge`) | `edge_hub_prometheus_url`, `edge_agent_prometheus_url` | openmetrics-port-scan | high |
+| BentoML (`bentoml`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
+| Boundary (`boundary`) | `health_endpoint`, `openmetrics_endpoint` | openmetrics-port-scan | high |
 | Btrfs (`btrfs`) | — | other | high |
+| Calico (`calico`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
+| Celery (`celery`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
 | cert-manager (`cert_manager`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
 | Cilium (`cilium`) | `agent_endpoint` | openmetrics-port-scan | high |
 | CockroachDB (`cockroachdb`) | — | openmetrics-port-scan | high |
 | Consul (`consul`) | `url` | http-path-probe | medium |
 | CoreDNS (`coredns`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
+| CRI-O (`crio`) | `prometheus_url` | openmetrics-port-scan | high |
 | Datadog Cluster Agent (`datadog_cluster_agent`) | `prometheus_url` | openmetrics-port-scan | high |
+| Datadog CSI Driver (`datadog_csi_driver`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
+| NVIDIA DCGM (`dcgm`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
+| Disk (`disk`) | — | other | high |
 | etcd (`etcd`) | `prometheus_url` | openmetrics-port-scan | high |
 | Exchange Server (`exchange_server`) | — | other | high |
 | Fluentd (`fluentd`) | `monitor_agent_url` | http-path-probe | high |
@@ -39,6 +54,7 @@ _Generated 2026-04-30. 115 total: 39 generic / 27 custom / 49 impossible / 0 nee
 | Scylla (`scylla`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
 | Squid (`squid`) | `name` | http-path-probe | high |
 | StatsD (`statsd`) | — | tcp-banner-probe | high |
+| Traffic Server (`traffic_server`) | `traffic_server_url` | http-path-probe | high |
 | Twemproxy (nutcracker) (`twemproxy`) | `host`, `port` | tcp-banner-probe | high |
 | Windows Service (`windows_service`) | `services` | other | medium |
 | YARN (`yarn`) | `resourcemanager_uri` | http-path-probe | high |
@@ -52,6 +68,7 @@ _Generated 2026-04-30. 115 total: 39 generic / 27 custom / 49 impossible / 0 nee
 | Airflow (`airflow`) | `url` | http-path-probe | medium |
 | Cassandra Nodetool (`cassandra_nodetool`) | `keyspaces` | other | high |
 | Ceph (`ceph`) | — | other | medium |
+| CouchDB (`couch`) | `server` | http-path-probe | medium |
 | Druid (`druid`) | `url` | http-path-probe | medium |
 | Elasticsearch (`elastic`) | `url` | http-path-probe | medium |
 | Envoy (`envoy`) | — | http-path-probe | medium |
@@ -59,6 +76,7 @@ _Generated 2026-04-30. 115 total: 39 generic / 27 custom / 49 impossible / 0 nee
 | GitLab Runner (`gitlab_runner`) | `gitlab_url`, `prometheus_endpoint`, `allowed_metrics` | openmetrics-port-scan | medium |
 | GlusterFS (`glusterfs`) | — | other | high |
 | HAProxy (`haproxy`) | — | http-path-probe | medium |
+| Impala (`impala`) | `service_type`, `openmetrics_endpoint` | http-path-probe | high |
 | Istio (`istio`) | — | http-path-probe | medium |
 | Kafka Consumer (`kafka_consumer`) | `kafka_connect_str` | other | medium |
 | Kube Scheduler (`kube_scheduler`) | `prometheus_url` | http-path-probe | high |
@@ -81,26 +99,53 @@ _Generated 2026-04-30. 115 total: 39 generic / 27 custom / 49 impossible / 0 nee
 | Integration | Required fields | Method | Conf. |
 |---|---|---|---|
 | ActiveMQ (`activemq`) | `host`, `port` | credentials-required | high |
+| Amazon MSK (`amazon_msk`) | `cluster_arn` | credentials-required | high |
 | Ambari (`ambari`) | `url` | credentials-required | high |
 | ArangoDB (`arangodb`) | `openmetrics_endpoint` | credentials-required | high |
+| Arctic Wolf Aurora Endpoint Security (`arctic_wolf_aurora_endpoint_security`) | — | other | high |
+| Avi Vantage (`avi_vantage`) | `avi_controller_url` | credentials-required | high |
+| Barracuda SecureEdge (`barracuda_secure_edge`) | — | other | high |
+| BeyondTrust Password Safe (`beyondtrust_password_safe`) | — | other | high |
+| BeyondTrust Privileged Remote Access (`beyondtrust_privileged_remote_access`) | — | other | high |
 | Cacti (`cacti`) | `mysql_host`, `mysql_user`, `rrd_path` | credentials-required | high |
 | Cassandra (`cassandra`) | `host`, `port`, `user`, `password` | credentials-required | high |
+| Checkpoint Harmony Endpoint (`checkpoint_harmony_endpoint`) | — | other | high |
+| Check Point Quantum Firewall (`checkpoint_quantum_firewall`) | — | other | high |
 | Cisco ACI (`cisco_aci`) | `aci_url`, `username`, `pwd` | credentials-required | high |
+| Cisco ASA (`cisco_asa`) | — | other | high |
+| Cisco Secure Client (`cisco_secure_client`) | — | other | high |
+| Cisco Secure Firewall (`cisco_secure_firewall`) | — | other | high |
+| Cisco Secure Web Appliance (`cisco_secure_web_appliance`) | — | other | high |
+| Citrix Hypervisor (`citrix_hypervisor`) | `url` | credentials-required | high |
 | ClickHouse (`clickhouse`) | `server` | credentials-required | high |
+| Cloud Foundry API (`cloud_foundry_api`) | `api_url`, `client_id`, `client_secret` | credentials-required | high |
+| Cloudera (`cloudera`) | `api_url`, `workload_username`, `workload_password` | credentials-required | high |
+| Barracuda CloudGen Firewall (`cloudgen_firewall`) | — | other | high |
 | Confluent Platform (`confluent_platform`) | `host`, `port` | credentials-required | high |
+| Control-M (`control_m`) | `control_m_api_endpoint` | credentials-required | high |
 | Couchbase (`couchbase`) | `server` | credentials-required | high |
+| Delinea Privilege Manager (`delinea_privilege_manager`) | — | other | high |
+| Delinea Secret Server (`delinea_secret_server`) | — | other | high |
+| Directory (`directory`) | `directory` | other | high |
+| DNS (`dns_check`) | `hostname` | other | high |
 | Flink (`flink`) | — | other | high |
+| FoundationDB (`foundationdb`) | — | credentials-required | high |
 | Gunicorn (`gunicorn`) | `proc_name` | other | high |
 | Harbor (`harbor`) | `url`, `username`, `password` | credentials-required | high |
 | Hazelcast (`hazelcast`) | `host`, `port` | credentials-required | high |
 | Hive (`hive`) | `host`, `port` | credentials-required | high |
 | HiveMQ (`hivemq`) | `host`, `port` | credentials-required | high |
+| Hudi (`hudi`) | `host`, `port` | credentials-required | high |
+| IBM ACE (`ibm_ace`) | `mq_server`, `mq_port`, `channel`, `queue_manager` | credentials-required | high |
 | IBM Db2 (`ibm_db2`) | `db`, `username`, `password` | credentials-required | high |
+| IBM i ⚠ (`ibm_i`) | `username`, `password`, `driver` | credentials-required | high |
 | IBM MQ (`ibm_mq`) | `channel`, `queue_manager` | credentials-required | high |
 | IBM WAS (`ibm_was`) | `servlet_url` | credentials-required | high |
 | Ignite (`ignite`) | `host`, `port` | credentials-required | high |
 | JBoss/WildFly (`jboss_wildfly`) | `jmx_url` | credentials-required | high |
 | journald (`journald`) | — | other | high |
+| MapR (`mapr`) | — | credentials-required | high |
+| MarkLogic (`marklogic`) | `url`, `username`, `password` | credentials-required | high |
 | MySQL (`mysql`) | `host`, `username`, `password` | credentials-required | high |
 | OpenLDAP (`openldap`) | `url` | credentials-required | high |
 | OpenMetrics (`openmetrics`) | `openmetrics_endpoint`, `namespace`, `metrics` | other | high |
@@ -112,8 +157,10 @@ _Generated 2026-04-30. 115 total: 39 generic / 27 custom / 49 impossible / 0 nee
 | Presto (`presto`) | `host`, `port` | credentials-required | high |
 | Prometheus (`prometheus`) | `prometheus_url`, `namespace`, `metrics` | other | high |
 | ProxySQL (`proxysql`) | `host`, `port`, `username`, `password` | credentials-required | high |
+| RiakCS (`riakcs`) | `access_id`, `access_secret` | credentials-required | high |
 | SAP HANA (`sap_hana`) | `server`, `username`, `password` | credentials-required | high |
 | Sidekiq (`sidekiq`) | — | other | high |
+| Silk (`silk`) | `host_address`, `username`, `password` | credentials-required | high |
 | SingleStore (`singlestore`) | `host`, `username`, `password` | credentials-required | high |
 | SNMP (`snmp`) | `ip_address` | credentials-required | high |
 | Solr (`solr`) | `host`, `port` | credentials-required | high |
@@ -122,9 +169,12 @@ _Generated 2026-04-30. 115 total: 39 generic / 27 custom / 49 impossible / 0 nee
 | SSH/SFTP (`ssh_check`) | `host`, `username` | credentials-required | high |
 | TeamCity (`teamcity`) | `server` | credentials-required | high |
 | Tenable (Nessus) (`tenable`) | — | other | high |
+| Teradata (`teradata`) | `server`, `database`, `username`, `password` | credentials-required | high |
+| TokuMX (`tokumx`) | `server` | credentials-required | high |
 | Tomcat (`tomcat`) | `host`, `port`, `user`, `password` | credentials-required | high |
 | Prisma Cloud Compute (Twistlock) (`twistlock`) | `url`, `username`, `password` | credentials-required | high |
 | Vertica (`vertica`) | `server`, `port`, `username`, `password`, `db` | credentials-required | high |
+| VoltDB (`voltdb`) | `url`, `username`, `password` | credentials-required | high |
 | vSphere (`vsphere`) | `host`, `username`, `password` | credentials-required | high |
 | WebLogic (`weblogic`) | `host`, `port`, `user`, `password` | credentials-required | high |
 | Windows Performance Counters (`windows_performance_counters`) | `metrics` | other | high |

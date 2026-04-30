@@ -1,0 +1,26 @@
+{
+  "name": "riakcs",
+  "display_name": "RiakCS",
+  "spec_path": "riakcs/assets/configuration/spec.yaml",
+  "required_fields": ["access_id", "access_secret"],
+  "all_relevant_fields": [
+    {"name": "access_id", "required": true, "default": null},
+    {"name": "access_secret", "required": true, "default": null},
+    {"name": "is_secure", "required": false, "default": true},
+    {"name": "host", "required": false, "default": "localhost"},
+    {"name": "port", "required": false, "default": 8080},
+    {"name": "s3_root", "required": false, "default": "s3.amazonaws.com"}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "RiakCS is the S3-compatible Riak fork. The check uses boto3 to issue an S3 GetObject against the special `riak-cs` bucket, which requires an `access_id` and `access_secret` pair from the user's RiakCS deployment. These are tenant-specific credentials that cannot be obtained via wire-level probing. Pattern D (spec-required credentials).",
+  "references": [
+    {"kind": "spec", "path": "riakcs/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "riakcs/datadog_checks/riakcs/riakcs.py"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "No auto_conf.yaml ships with the integration. Both `access_id` and `access_secret` are mandatory in the spec (no defaults) and the check raises if either is missing."
+}

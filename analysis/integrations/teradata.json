@@ -1,0 +1,32 @@
+{
+  "name": "teradata",
+  "display_name": "Teradata",
+  "spec_path": "teradata/assets/configuration/spec.yaml",
+  "required_fields": ["server", "database", "username", "password"],
+  "all_relevant_fields": [
+    {"name": "server", "required": true, "default": null},
+    {"name": "port", "required": false, "default": 1025},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null},
+    {"name": "account", "required": false, "default": null},
+    {"name": "database", "required": true, "default": null},
+    {"name": "https_port", "required": false, "default": 443},
+    {"name": "ssl_mode", "required": false, "default": "Prefer"},
+    {"name": "ssl_protocol", "required": false, "default": "TLSv1.2"},
+    {"name": "auth_mechanism", "required": false, "default": null},
+    {"name": "auth_data", "required": false, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The Teradata check connects via the `teradatasql` driver (port 1025 by default) and runs SQL queries (DBC views, ResUsageSpma, AllSpaceV) under a dedicated Datadog database user. While the spec marks only `server` and `database` as required, every supported `auth_mechanism` (TD2, TDNEGO, LDAP, KRB5, JWT) needs at minimum a username plus either a password or a JWT/Kerberos token in `auth_data`. The integration also requires the user to grant SELECT on internal Teradata views before any metric works. None of this can be discovered from a wire probe.",
+  "references": [
+    {"kind": "spec", "path": "teradata/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "teradata/datadog_checks/teradata/check.py"},
+    {"kind": "check", "path": "teradata/datadog_checks/teradata/queries.py"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "DB driver + user-provisioned credentials (pattern D); also needs `database` as a free-form but required identifier."
+}

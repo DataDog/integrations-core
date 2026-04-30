@@ -1,0 +1,23 @@
+{
+  "name": "celery",
+  "display_name": "Celery",
+  "spec_path": "celery/assets/configuration/spec.yaml",
+  "required_fields": ["openmetrics_endpoint"],
+  "all_relevant_fields": [
+    {"name": "openmetrics_endpoint", "required": true, "default": null}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Despite the hint, this integration is not DogStatsD-based: it is a standard OpenMetricsBaseCheckV2 implementation that scrapes the Celery Flower Prometheus metrics endpoint. The spec inherits `template: instances/openmetrics` and overrides `openmetrics_endpoint.required: true`, with the canonical example `http://localhost:5555/metrics`. Flower's Prometheus integration documents port 5555 and path `/metrics` as the standard endpoint. This matches Pattern A (\"OpenMetrics on a known port\") - a generic openmetrics-port-scan can probe `http://%%host%%:5555/metrics` without integration-specific knowledge. No auto_conf.yaml ships today, but the shape is exactly the bootstrap-friendly OpenMetrics case.",
+  "references": [
+    {"kind": "spec", "path": "celery/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "celery/datadog_checks/celery/check.py"},
+    {"kind": "readme", "path": "celery/README.md"},
+    {"kind": "upstream", "url": "https://flower.readthedocs.io/en/latest/prometheus-integration.html"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern A. The hint suggested DogStatsD-only but the actual check is OpenMetricsBaseCheckV2 against Celery Flower (port 5555). Discovery would need to detect a Flower sidecar/companion process, not Celery itself; in production the Flower deployment is a deliberate operator choice."
+}

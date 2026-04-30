@@ -1,0 +1,25 @@
+{
+  "name": "mapr",
+  "display_name": "MapR",
+  "spec_path": "mapr/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [
+    {"name": "ticket_location", "required": false, "default": null},
+    {"name": "hostname", "required": false, "default": null},
+    {"name": "stream_path", "required": false, "default": "/var/mapr/mapr.monitoring/metricstreams"},
+    {"name": "metric_whitelist", "required": false, "default": [".*"]},
+    {"name": "streams_count", "required": false, "default": 1}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "MapR is the Hadoop distribution. The check consumes metrics from a MapR Streams (Kafka-API) topic at `<stream_path>/<stream_id>:<hostname>` using the MapR-flavoured `confluent_kafka` library. On secured clusters (the production default) the consumer must authenticate with a MapR ticket file passed via `ticket_location` or the `MAPR_TICKETFILE_LOCATION` environment variable; the check warns if neither is set. The ticket is a per-user credential issued by `maprlogin` on the cluster, not something discoverable over the wire. The integration also depends on the `mapr-streams-python` package and on `LD_LIBRARY_PATH` pointing at the MapR client libraries, which is host provisioning state. Pattern D / I.",
+  "references": [
+    {"kind": "spec", "path": "mapr/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "mapr/datadog_checks/mapr/mapr.py"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "All spec fields are technically optional (defaults derive from env/FQDN) but the integration cannot run on a secured cluster without the user-provisioned ticket file. The ticket is the credential."
+}

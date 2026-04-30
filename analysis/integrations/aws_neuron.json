@@ -1,0 +1,23 @@
+{
+  "name": "aws_neuron",
+  "display_name": "AWS Neuron",
+  "spec_path": "aws_neuron/assets/configuration/spec.yaml",
+  "required_fields": ["openmetrics_endpoint"],
+  "all_relevant_fields": [
+    {"name": "openmetrics_endpoint", "required": true, "default": "http://localhost:8000/metrics"}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "AWS Neuron monitoring relies on the `neuron-monitor` companion tool, which exposes Prometheus-formatted metrics on the well-known port `8000/metrics` on the EC2/Inferentia/Trainium instance. The check is `OpenMetricsBaseCheckV2` and the spec uses `template: instances/openmetrics` with a single endpoint. No authentication is required; an OpenMetrics port-scan against `http://%%host%%:8000/metrics` is sufficient where `neuron-monitor-prometheus` is running.",
+  "references": [
+    {"kind": "spec", "path": "aws_neuron/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "aws_neuron/datadog_checks/aws_neuron/check.py"},
+    {"kind": "readme", "path": "aws_neuron/README.md"},
+    {"kind": "upstream", "url": "https://awsdocs-neuron.readthedocs-hosted.com/en/latest/tools/neuron-sys-tools/neuron-monitor-user-guide.html"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern A. Discovery presumes the user has installed and started the neuron-monitor Prometheus exporter; the integration itself only consumes its endpoint."
+}

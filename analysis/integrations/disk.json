@@ -1,0 +1,40 @@
+{
+  "name": "disk",
+  "display_name": "Disk",
+  "spec_path": "disk/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [
+    {"name": "use_mount", "required": false, "default": false},
+    {"name": "all_partitions", "required": false, "default": false},
+    {"name": "file_system_include", "required": false, "default": null},
+    {"name": "file_system_exclude", "required": false, "default": null},
+    {"name": "device_include", "required": false, "default": null},
+    {"name": "device_exclude", "required": false, "default": null},
+    {"name": "mount_point_include", "required": false, "default": null},
+    {"name": "mount_point_exclude", "required": false, "default": null},
+    {"name": "include_all_devices", "required": false, "default": true},
+    {"name": "service_check_rw", "required": false, "default": false},
+    {"name": "tag_by_filesystem", "required": false, "default": false},
+    {"name": "tag_by_label", "required": false, "default": true},
+    {"name": "blkid_cache_file", "required": false, "default": null},
+    {"name": "use_lsblk", "required": false, "default": false},
+    {"name": "device_tag_re", "required": false, "default": null},
+    {"name": "min_disk_size", "required": false, "default": 0},
+    {"name": "timeout", "required": false, "default": 5},
+    {"name": "create_mounts", "required": false, "default": null},
+    {"name": "lowercase_device_tag", "required": false, "default": false}
+  ],
+  "classification": "generic",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The Disk check is a host-local system check with no required configuration fields and no remote target. It enumerates partitions/devices via `psutil.disk_partitions()` and `psutil.disk_usage()` on the Agent host, optionally calls `blkid`/`lsblk` for labels (Linux) or creates SMB/NFS mounts (Windows). All instance options are filters/tagging knobs over the locally-discovered set. Auto-config is trivial: emit the integration with the default empty instance on every Agent host (the check is in fact enabled by default in core Agent). Discovery is universal — every host has at least the root filesystem — and there is no network probe. This places it alongside btrfs/iis as a host-presence check.",
+  "references": [
+    {"kind": "spec", "path": "disk/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "disk/datadog_checks/disk/disk.py"},
+    {"kind": "readme", "path": "disk/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Generic with method `other` (no on-wire probe). Trigger is universal host presence — like btrfs but unconditional. The optional `create_mounts` Windows branch carries SMB/NFS user/password, but that is opt-in; default-mode auto-config does not need credentials."
+}

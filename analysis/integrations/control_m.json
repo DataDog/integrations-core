@@ -1,0 +1,23 @@
+{
+  "name": "control_m",
+  "display_name": "Control-M",
+  "spec_path": "control_m/assets/configuration/spec.yaml",
+  "required_fields": ["control_m_api_endpoint"],
+  "all_relevant_fields": [
+    {"name": "control_m_api_endpoint", "required": true, "default": null},
+    {"name": "control_m_username", "required": false, "default": null},
+    {"name": "control_m_password", "required": false, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Control-M is BMC's enterprise job scheduler. The check talks to the Control-M Automation API at a deployment-specific URL (e.g. https://example.com:8443/automation-api) and authenticates via either session login (username + password) or a static bearer token passed through `headers`. The API endpoint host/port and base path are not standardized across deployments, and every meaningful API call requires authentication. There is no unauthenticated discovery surface.",
+  "references": [
+    {"kind": "spec", "path": "control_m/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "control_m/datadog_checks/control_m/check.py"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern D: spec-required credentials (auth is mandatory in practice; spec marks creds optional only because token-via-headers is an alternative). Endpoint URL is also user-supplied with no universal default."
+}

@@ -1,0 +1,27 @@
+{
+  "name": "marklogic",
+  "display_name": "MarkLogic",
+  "spec_path": "marklogic/assets/configuration/spec.yaml",
+  "required_fields": ["url", "username", "password"],
+  "all_relevant_fields": [
+    {"name": "url", "required": true, "default": "http://localhost:8002"},
+    {"name": "enable_health_service_checks", "required": false, "default": false},
+    {"name": "resource_filters", "required": false, "default": null},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null},
+    {"name": "auth_type", "required": false, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "MarkLogic is a NoSQL DB whose Management REST API on port 8002 (and the health view) is gated behind a user with the `manage-user` (or `manage-admin` for health checks) role. The check authenticates via the standard `instances/http` template (username, password, auth_type). The `manage-admin` permission is explicitly required for health service checks per the spec. Production deployments cannot be probed without credentials. Pattern D.",
+  "references": [
+    {"kind": "spec", "path": "marklogic/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "marklogic/datadog_checks/marklogic/check.py"},
+    {"kind": "upstream", "url": "https://docs.marklogic.com/REST/management"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Username/password come from the shared `instances/http` template rather than being declared inline in the spec; they are still required in practice."
+}

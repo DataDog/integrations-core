@@ -1,0 +1,26 @@
+{
+  "name": "couch",
+  "display_name": "CouchDB",
+  "spec_path": "couch/assets/configuration/spec.yaml",
+  "required_fields": ["server"],
+  "all_relevant_fields": [
+    {"name": "server", "required": true, "default": "http://localhost:5984"},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null},
+    {"name": "name", "required": false, "default": null},
+    {"name": "enable_per_db_metrics", "required": false, "default": true}
+  ],
+  "classification": "custom",
+  "auto_config_method": "http-path-probe",
+  "has_existing_auto_conf": true,
+  "auto_conf_path": "couch/datadog_checks/couch/data/auto_conf.yaml",
+  "explanation": "CouchDB exposes a REST API on the well-known port 5984. The existing auto_conf.yaml templates the server URL as http://%%host%%:5984. The check fetches the server root for version detection then walks `/_node/*/_stats`, `/_active_tasks`, and per-database stats. CouchDB 2.x+ admin endpoints typically require basic auth (admin party is dev-only), so realistic deployments need credentials, but the version-probing root endpoint and unauthenticated read paths can confirm a CouchDB server is on the wire. Custom (not generic) because the integration probes multiple HTTP paths and the upstream supports two distinct API shapes (1.x vs 2.x cluster).",
+  "references": [
+    {"kind": "spec", "path": "couch/assets/configuration/spec.yaml"},
+    {"kind": "auto_conf", "path": "couch/datadog_checks/couch/data/auto_conf.yaml"},
+    {"kind": "check", "path": "couch/datadog_checks/couch/couch.py"}
+  ],
+  "confidence": "medium",
+  "needs_human_review": false,
+  "notes": "Pattern E variant: auth-optional in spec but production deployments will require admin credentials for /_stats endpoints. Unauthenticated probe of `/` (welcome JSON with version) suffices to identify CouchDB; full metric collection falls through to credential discovery."
+}

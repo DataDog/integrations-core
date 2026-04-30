@@ -1,0 +1,36 @@
+{
+  "name": "directory",
+  "display_name": "Directory",
+  "spec_path": "directory/assets/configuration/spec.yaml",
+  "required_fields": ["directory"],
+  "all_relevant_fields": [
+    {"name": "directory", "required": true, "default": null},
+    {"name": "name", "required": false, "default": null},
+    {"name": "dirtagname", "required": false, "default": null},
+    {"name": "filetagname", "required": false, "default": null},
+    {"name": "filegauges", "required": false, "default": false},
+    {"name": "max_filegauge_count", "required": false, "default": 20},
+    {"name": "pattern", "required": false, "default": "*"},
+    {"name": "exclude_dirs", "required": false, "default": null},
+    {"name": "dirs_patterns_full", "required": false, "default": false},
+    {"name": "recursive", "required": false, "default": false},
+    {"name": "follow_symlinks", "required": false, "default": true},
+    {"name": "stat_follow_symlinks", "required": false, "default": true},
+    {"name": "countonly", "required": false, "default": false},
+    {"name": "ignore_missing", "required": false, "default": false},
+    {"name": "submit_histograms", "required": false, "default": true}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The Directory check is a generic filesystem-scanning template: the user MUST supply an absolute path in `directory`, and the check walks it with `os.walk`, calling `stat()` on matching files to emit gauges/histograms (sizes, mtimes, file/folder counts). There is no upstream service, no port, no protocol, and no canonical default path — every deployment monitors a different user-chosen directory (logs dir, upload dir, queue dir, etc.). The `directory` field is the entire purpose of the integration; auto-config has no signal from which to synthesize it. This is pattern J (\"user-supplied generic check template\"): the integration is itself the configuration template.",
+  "references": [
+    {"kind": "spec", "path": "directory/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "directory/datadog_checks/directory/directory.py"},
+    {"kind": "readme", "path": "directory/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern J. The check requires user *intent* (which directory matters) — that input is policy, not discoverable state. Method `other` because no probe exists; method is not `credentials-required` since no auth is involved."
+}

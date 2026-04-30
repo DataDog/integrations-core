@@ -1,0 +1,26 @@
+{
+  "name": "foundationdb",
+  "display_name": "FoundationDB",
+  "spec_path": "foundationdb/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [
+    {"name": "cluster_file", "required": false, "default": null},
+    {"name": "tls_certificate_file", "required": false, "default": null},
+    {"name": "tls_key_file", "required": false, "default": null},
+    {"name": "tls_verify_peers", "required": false, "default": null},
+    {"name": "tls_password", "required": false, "default": null},
+    {"name": "tls_ca_file", "required": false, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "FoundationDB clients connect through a binary cluster file (`fdb.cluster`) which contains a description, an ID, and the coordinator IP/port list. The check uses the `fdb` Python binding to call `fdb.open(cluster_file=...)` and then reads the `\\xff\\xff/status/json` special key. There is no host/port to probe directly; without the cluster file there is no way for the discovery layer to address the database. TLS-secured deployments additionally require a key/cert/CA bundle. The cluster file is host-specific state (typically provisioned by the FoundationDB installer or operator) and cannot be derived over the wire.",
+  "references": [
+    {"kind": "spec", "path": "foundationdb/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "foundationdb/datadog_checks/foundationdb/check.py"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Spec marks `cluster_file` as optional because the binding will fall back to standard locations (e.g. `/etc/foundationdb/fdb.cluster`) if the file exists there. That still means the credential-equivalent (the cluster file) must already be present on the Agent host."
+}

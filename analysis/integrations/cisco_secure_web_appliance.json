@@ -1,0 +1,21 @@
+{
+  "name": "cisco_secure_web_appliance",
+  "display_name": "Cisco Secure Web Appliance",
+  "spec_path": "cisco_secure_web_appliance/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [
+    {"name": "logs", "required": true, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Cisco Secure Web Appliance (CSWA) is a logs-only vendor security tile. The spec exposes only a `logs` template offering two collection modes (file tail of access_logs/l4tm_logs, or UDP syslog). There is no Agent check class under `datadog_checks/cisco_secure_web_appliance/` (no <name>.py implementation), no metrics endpoint, and no network probe. Enabling the integration depends on user-specific paths (where CSWA writes its log files) or syslog port choice, neither of which is discoverable from the wire.",
+  "references": [
+    {"kind": "spec", "path": "cisco_secure_web_appliance/assets/configuration/spec.yaml"},
+    {"kind": "readme", "path": "cisco_secure_web_appliance/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern N (logs-only / instrumentation-only). No check.py exists; integration is a logs config + manifest only."
+}
