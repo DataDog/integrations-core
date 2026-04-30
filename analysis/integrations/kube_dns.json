@@ -1,0 +1,24 @@
+{
+  "name": "kube_dns",
+  "display_name": "Kube DNS",
+  "spec_path": "kube_dns/assets/configuration/spec.yaml",
+  "required_fields": ["prometheus_endpoint"],
+  "all_relevant_fields": [
+    {"name": "prometheus_endpoint", "required": true, "default": "http://localhost:10055/metrics"},
+    {"name": "health_url", "required": false, "default": "http://localhost:8081/readiness"}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": true,
+  "auto_conf_path": "kube_dns/datadog_checks/kube_dns/data/auto_conf.yaml",
+  "explanation": "kube-dns exposes Prometheus metrics on the fixed path `/metrics` over its dnsmasq metrics port (10055 by default). The shipped auto_conf templates `http://%%host%%:10055/metrics`, which is the upstream default. No credentials are required — the metrics port is unauthenticated by design. The integration is functionally identical in shape to coredns/etcd: one URL with one canonical port, OpenMetrics on the wire.",
+  "references": [
+    {"kind": "spec", "path": "kube_dns/assets/configuration/spec.yaml"},
+    {"kind": "auto_conf", "path": "kube_dns/datadog_checks/kube_dns/data/auto_conf.yaml"},
+    {"kind": "check", "path": "kube_dns/datadog_checks/kube_dns/kube_dns.py"},
+    {"kind": "upstream", "url": "https://github.com/kubernetes/dns/blob/master/docs/kube-dns.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "kube-dns is the legacy cluster DNS (replaced by CoreDNS in k8s 1.13+). For new deployments coredns is the relevant integration; kube_dns auto-config still applies to clusters that haven't migrated."
+}

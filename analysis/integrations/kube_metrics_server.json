@@ -1,0 +1,22 @@
+{
+  "name": "kube_metrics_server",
+  "display_name": "Kube metrics server",
+  "spec_path": "kube_metrics_server/assets/configuration/spec.yaml",
+  "required_fields": ["prometheus_url"],
+  "all_relevant_fields": [
+    {"name": "prometheus_url", "required": true, "default": null},
+    {"name": "health_url", "required": false, "default": null}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "kube-metrics-server is a Kubernetes API extension server that exposes Prometheus metrics on a fixed path (/metrics) over HTTPS on port 443. The spec uses the openmetrics_legacy template and the example URL is https://%%host%%:443/metrics, indicating a single canonical endpoint. The check inherits OpenMetricsBaseCheck. Discovery reduces to scraping https://<pod_ip>:443/metrics on a discovered metrics-server pod.",
+  "references": [
+    {"kind": "spec", "path": "kube_metrics_server/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "kube_metrics_server/datadog_checks/kube_metrics_server/kube_metrics_server.py"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern A (OpenMetrics on a known port). TLS server certs are typically self-signed in-cluster, so the discovery probe should accept TLS without strict verification, matching the autodiscovery convention for other Kubernetes-internal targets."
+}

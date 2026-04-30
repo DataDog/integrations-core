@@ -1,0 +1,28 @@
+{
+  "name": "prometheus",
+  "display_name": "Prometheus",
+  "spec_path": "prometheus/assets/configuration/spec.yaml",
+  "required_fields": ["prometheus_url", "namespace", "metrics"],
+  "all_relevant_fields": [
+    {"name": "prometheus_url", "required": true, "default": null},
+    {"name": "namespace", "required": true, "default": null},
+    {"name": "metrics", "required": true, "default": null},
+    {"name": "prometheus_metrics_prefix", "required": false, "default": null},
+    {"name": "ssl_cert", "required": false, "default": null},
+    {"name": "ssl_private_key", "required": false, "default": null},
+    {"name": "ssl_ca_cert", "required": false, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "This is the user-supplied Generic Prometheus check (`GenericPrometheusCheck`). It is not tied to any single upstream system: the user must point it at an arbitrary application's Prometheus endpoint, choose a metric `namespace`, and explicitly enumerate the `metrics` to scrape (with optional renaming). None of these can be inferred from the wire — the URL, namespace, and metric allow-list are inherently per-application configuration decisions. There is no canonical port, path, or service to probe.",
+  "references": [
+    {"kind": "spec", "path": "prometheus/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "prometheus/datadog_checks/prometheus/prometheus.py"},
+    {"kind": "readme", "path": "prometheus/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Method is `other` (not `credentials-required`) because the blocker is user-defined semantics (namespace, metric allow-list), not authentication. There is no auto_conf.yaml — Autodiscovery for arbitrary Prometheus endpoints is intentionally not provided here; users are pointed at the OpenMetrics integration instead."
+}

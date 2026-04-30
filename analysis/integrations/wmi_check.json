@@ -1,0 +1,31 @@
+{
+  "name": "wmi_check",
+  "display_name": "WMI",
+  "spec_path": "wmi_check/assets/configuration/spec.yaml",
+  "required_fields": ["class", "metrics"],
+  "all_relevant_fields": [
+    {"name": "class", "required": true, "default": null},
+    {"name": "metrics", "required": true, "default": null},
+    {"name": "host", "required": false, "default": "localhost"},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null},
+    {"name": "namespace", "required": false, "default": "root\\cimv2"},
+    {"name": "filters", "required": false, "default": null},
+    {"name": "tag_by", "required": false, "default": null},
+    {"name": "tag_queries", "required": false, "default": null},
+    {"name": "provider", "required": false, "default": 64}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "wmi_check is a generic, schema-driven WMI bridge: the user must declare which WMI `class` to query and which `[<WMI_PROPERTY>, <METRIC_NAME>, <METRIC_TYPE>]` mappings to emit. There is no upstream system to fingerprint — every deployment is bespoke. Unlike `iis` (which targets a known Windows role with fixed perf counters), `wmi_check` has no defaults to discover: discovery would have to invent a class name and a property→metric mapping, which is application-specific by design. Out of scope for auto-config.",
+  "references": [
+    {"kind": "spec", "path": "wmi_check/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "wmi_check/datadog_checks/wmi_check/wmi_check.py"},
+    {"kind": "upstream", "url": "https://learn.microsoft.com/en-us/windows/win32/wmisdk/wmi-start-page"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern: 'user-provided schema check'. The check is a thin SDK over WinWMICheck and contributes no opinion about which WMI class to query. Compare with the other Windows checks (active_directory, exchange_server) which target a known role and could plausibly be 'service-present' generic."
+}

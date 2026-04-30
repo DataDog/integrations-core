@@ -1,0 +1,23 @@
+{
+  "name": "nginx_ingress_controller",
+  "display_name": "NGINX Ingress Controller",
+  "spec_path": "nginx_ingress_controller/assets/configuration/spec.yaml",
+  "required_fields": ["prometheus_url"],
+  "all_relevant_fields": [
+    {"name": "prometheus_url", "required": true, "default": "http://localhost:10254/metrics"},
+    {"name": "collect_nginx_histograms", "required": false, "default": false}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The check inherits OpenMetricsBaseCheck and scrapes a single fixed Prometheus endpoint at http://%%host%%:10254/metrics. The /metrics endpoint exposed by the kubernetes/ingress-nginx controller on port 10254 is universal, unauthenticated, and well documented. Discovery reduces to probing that port + path.",
+  "references": [
+    {"kind": "spec", "path": "nginx_ingress_controller/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "nginx_ingress_controller/datadog_checks/nginx_ingress_controller/nginx_ingress_controller.py"},
+    {"kind": "upstream", "url": "https://kubernetes.github.io/ingress-nginx/user-guide/monitoring/"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "No auto_conf.yaml ships in the integration repo, but the discovery path is straightforward (single fixed port and path)."
+}

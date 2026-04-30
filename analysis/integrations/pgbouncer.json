@@ -1,0 +1,27 @@
+{
+  "name": "pgbouncer",
+  "display_name": "PgBouncer",
+  "spec_path": "pgbouncer/assets/configuration/spec.yaml",
+  "required_fields": ["host", "username"],
+  "all_relevant_fields": [
+    {"name": "database_url", "required": false, "default": null},
+    {"name": "host", "required": false, "default": null},
+    {"name": "port", "required": false, "default": null},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null},
+    {"name": "database_filter_regex", "required": false, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "PgBouncer speaks the Postgres wire protocol on its admin port (default 6432) and exposes statistics via `SHOW` admin queries against the virtual `pgbouncer` database. The check raises ConfigurationError unless either `database_url` is set, or both `host` and `username` are provided. Even though the password may be empty for `localhost` ident auth, any production deployment requires a stats user defined in `pgbouncer.ini`'s `stats_users` (or the legacy `admin_users`) — that user and its password are out-of-band configuration that cannot be discovered from the wire.",
+  "references": [
+    {"kind": "spec", "path": "pgbouncer/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "pgbouncer/datadog_checks/pgbouncer/pgbouncer.py"},
+    {"kind": "upstream", "url": "https://www.pgbouncer.org/config.html"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Spec marks all fields as optional but the check enforces `host` + `username` (or `database_url`). The credential blocker dominates — same shape as Postgres."
+}

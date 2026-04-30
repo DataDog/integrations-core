@@ -1,0 +1,29 @@
+{
+  "name": "vault",
+  "display_name": "Vault",
+  "spec_path": "vault/assets/configuration/spec.yaml",
+  "required_fields": ["api_url"],
+  "all_relevant_fields": [
+    {"name": "use_openmetrics", "required": false, "default": true},
+    {"name": "api_url", "required": true, "default": null},
+    {"name": "client_token", "required": false, "default": null},
+    {"name": "client_token_path", "required": false, "default": null},
+    {"name": "no_token", "required": false, "default": false},
+    {"name": "openmetrics_endpoint", "required": false, "default": null},
+    {"name": "collect_secondary_dr", "required": false, "default": false},
+    {"name": "detect_leader", "required": false, "default": false}
+  ],
+  "classification": "custom",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Vault exposes its API on a known port (8200) under /v1, and the agent can reach /sys/health unauthenticated for basic status checks. However, the OpenMetrics /v1/sys/metrics endpoint is gated by an ACL-bound client token in any production deployment, and metric collection is the integration's primary purpose. A discovery layer could probe http://%%host%%:8200/v1/sys/health to detect Vault, but useful metric collection still requires a client token (or token file path) that doesn't come over the wire. Closest pattern: auth-optional-but-practically-required (like elastic).",
+  "references": [
+    {"kind": "spec", "path": "vault/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "vault/datadog_checks/vault/vault.py"},
+    {"kind": "check", "path": "vault/datadog_checks/vault/check.py"}
+  ],
+  "confidence": "medium",
+  "needs_human_review": false,
+  "notes": "Default port 8200 and base path /v1 are universal. A 'no_token' mode exists for unauthenticated metric scraping, but it only works if the operator has explicitly disabled the ACL on /v1/sys/metrics, which is uncommon in production."
+}

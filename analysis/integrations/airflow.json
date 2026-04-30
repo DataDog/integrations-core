@@ -1,0 +1,24 @@
+{
+  "name": "airflow",
+  "display_name": "Airflow",
+  "spec_path": "airflow/assets/configuration/spec.yaml",
+  "required_fields": ["url"],
+  "all_relevant_fields": [
+    {"name": "url", "required": true, "default": null},
+    {"name": "collect_ongoing_duration", "required": false, "default": true}
+  ],
+  "classification": "custom",
+  "auto_config_method": "http-path-probe",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The `airflow` Agent check itself is an HTTP probe against the Airflow webserver (default port 8080). It first calls `/api/v1/version` to detect Airflow 2.x; on success it collects from `/api/v1/health` and `/api/v1/dags/~/dagRuns/~/taskInstances?state=running`, otherwise it falls back to the legacy 1.x endpoint `/api/experimental/test`. Discovery must therefore probe port 8080 and try the stable API path first, falling back to the experimental path. Note Airflow 2 commonly enables web auth, in which case the API is reachable but `/api/v1/health` requires no auth while task-instance endpoints do — so generic probing of `/health` works, but the full check coverage may degrade. Separately, the bulk of `airflow.*` metrics actually come from the Airflow StatsD plugin into DogStatsD; that path is configured on the Airflow side and is orthogonal to Agent-side auto-config.",
+  "references": [
+    {"kind": "spec", "path": "airflow/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "airflow/datadog_checks/airflow/airflow.py"},
+    {"kind": "readme", "path": "airflow/README.md"},
+    {"kind": "upstream", "url": "https://airflow.apache.org/docs/apache-airflow/stable/stable-rest-api-ref.html"}
+  ],
+  "confidence": "medium",
+  "needs_human_review": false,
+  "notes": "Two API paths must be tried in order (stable v1 then experimental). Default port 8080 is Airflow's convention but commonly remapped behind ingress. The integration does not collect Prometheus metrics directly; the StatsD plugin path is out of scope for Agent-check auto-config. README example AD template uses `http://%%host%%:8080`."
+}

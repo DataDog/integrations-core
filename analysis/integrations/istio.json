@@ -1,0 +1,31 @@
+{
+  "name": "istio",
+  "display_name": "Istio",
+  "spec_path": "istio/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [
+    {"name": "use_openmetrics",       "required": false, "default": false},
+    {"name": "istio_mode",            "required": false, "default": "sidecar"},
+    {"name": "istio_mesh_endpoint",   "required": false, "default": null},
+    {"name": "istiod_endpoint",       "required": false, "default": null},
+    {"name": "ztunnel_endpoint",      "required": false, "default": null},
+    {"name": "waypoint_endpoint",     "required": false, "default": null},
+    {"name": "openmetrics_endpoint",  "required": false, "default": null},
+    {"name": "send_histograms_buckets","required": false,"default": true},
+    {"name": "tag_by_endpoint",       "required": false, "default": true}
+  ],
+  "classification": "custom",
+  "auto_config_method": "http-path-probe",
+  "has_existing_auto_conf": true,
+  "auto_conf_path": "istio/datadog_checks/istio/data/auto_conf.yaml",
+  "explanation": "Istio exposes Prometheus metrics from multiple distinct components: the proxy (sidecar) at :15020/stats/prometheus, the istiod control plane at :15014/metrics, plus ambient-mode ztunnel and waypoint (also :15020). The check requires at least one endpoint depending on mode (sidecar vs ambient), and the shipped auto_conf.yaml is tied to ad_identifiers=[proxyv2, proxyv2-rhel8] and templates istio_mesh_endpoint=http://%%host%%:15020/stats/prometheus. There is also a v1/v2 OpenMetrics split (use_openmetrics) and a deprecated istio_mesh_endpoint vs istiod_endpoint distinction. Discovery requires probing multiple paths, ports, and modes plus selecting the correct namespace, so it is integration-specific (custom).",
+  "references": [
+    {"kind": "spec",      "path": "istio/assets/configuration/spec.yaml"},
+    {"kind": "check",     "path": "istio/datadog_checks/istio/check.py"},
+    {"kind": "auto_conf", "path": "istio/datadog_checks/istio/data/auto_conf.yaml"},
+    {"kind": "readme",    "path": "istio/README.md"}
+  ],
+  "confidence": "medium",
+  "needs_human_review": false,
+  "notes": "Pattern F/G hybrid: multi-component (proxy/istiod/ztunnel/waypoint), multi-mode (sidecar/ambient), multi-OpenMetrics-version. Auto-discovery already operates at the container level via ad_identifiers, but a generic probe would need component-specific path knowledge."
+}

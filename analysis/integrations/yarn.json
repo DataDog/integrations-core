@@ -1,0 +1,25 @@
+{
+  "name": "yarn",
+  "display_name": "YARN",
+  "spec_path": "yarn/assets/configuration/spec.yaml",
+  "required_fields": ["resourcemanager_uri"],
+  "all_relevant_fields": [
+    {"name": "resourcemanager_uri", "required": false, "default": "http://localhost:8088"},
+    {"name": "cluster_name", "required": false, "default": "default_cluster"},
+    {"name": "collect_app_metrics", "required": false, "default": true},
+    {"name": "collect_node_metrics", "required": false, "default": true}
+  ],
+  "classification": "generic",
+  "auto_config_method": "http-path-probe",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "YARN's check hits the ResourceManager REST API at well-known paths under `/ws/v1/cluster` (metrics, apps, nodes, scheduler). The ResourceManager web UI defaults to port 8088 across Hadoop versions and the `/ws/v1/cluster/metrics` JSON endpoint is universal, unauthenticated by default. A single HTTP probe to `http://%%host%%:8088/ws/v1/cluster/metrics` confirms the integration target. No credentials are required in the default mode.",
+  "references": [
+    {"kind": "spec", "path": "yarn/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "yarn/datadog_checks/yarn/yarn.py"},
+    {"kind": "upstream", "url": "https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-site/ResourceManagerRest.html"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Kerberos-secured clusters (SPNEGO) would force the integration into credentials-required mode, but the upstream default deployment leaves the REST API open. HA setups expose multiple RM hosts; only the active one responds to metric requests."
+}

@@ -1,0 +1,27 @@
+{
+  "name": "cilium",
+  "display_name": "Cilium",
+  "spec_path": "cilium/assets/configuration/spec.yaml",
+  "required_fields": ["agent_endpoint"],
+  "all_relevant_fields": [
+    {"name": "use_openmetrics", "required": false, "default": true},
+    {"name": "agent_endpoint", "required": false, "default": "http://%%host%%:9962/metrics"},
+    {"name": "operator_endpoint", "required": false, "default": null},
+    {"name": "openmetrics_endpoint", "required": false, "default": null},
+    {"name": "prometheus_url", "required": false, "default": null}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": true,
+  "auto_conf_path": "cilium/datadog_checks/cilium/data/auto_conf.yaml",
+  "explanation": "Cilium exposes Prometheus metrics on fixed default ports — `cilium-agent` on 9962/metrics and `cilium-operator` on 6942/metrics. The check is `OpenMetricsBaseCheckV2`; the existing `auto_conf.yaml` already templates `agent_endpoint: http://%%host%%:9962/metrics` keyed off the `cilium-agent`/`cilium` AD identifier. No credentials needed; an OpenMetrics port-scan on the two known ports is sufficient.",
+  "references": [
+    {"kind": "spec", "path": "cilium/assets/configuration/spec.yaml"},
+    {"kind": "auto_conf", "path": "cilium/datadog_checks/cilium/data/auto_conf.yaml"},
+    {"kind": "check", "path": "cilium/datadog_checks/cilium/check.py"},
+    {"kind": "upstream", "url": "https://docs.cilium.io/en/stable/observability/metrics/"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Operator vs. agent are separate scrape targets with distinct ports — discovery should probe both."
+}

@@ -1,0 +1,27 @@
+{
+  "name": "tomcat",
+  "display_name": "Tomcat",
+  "spec_path": "tomcat/assets/configuration/spec.yaml",
+  "required_fields": ["host", "port", "user", "password"],
+  "all_relevant_fields": [
+    {"name": "is_jmx",                  "required": true,  "default": true},
+    {"name": "collect_default_metrics", "required": true,  "default": true},
+    {"name": "host",                    "required": true,  "default": "localhost"},
+    {"name": "port",                    "required": true,  "default": 9012},
+    {"name": "user",                    "required": false, "default": null},
+    {"name": "password",                "required": false, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": true,
+  "auto_conf_path": "tomcat/datadog_checks/tomcat/data/auto_conf.yaml",
+  "explanation": "Tomcat is a JMX-based check that inherits JMXFetch (template: instances/jmx). The shipped auto_conf.yaml supplies host/port via Autodiscovery (%%host%%:9012), but production Tomcat JMX endpoints are almost always secured with JMX user/password authentication (set via -Dcom.sun.management.jmxremote.authenticate=true and a passwords file). Per procedure pattern D and the documented rule that JMXFetch integrations always need host+port+user+password, this falls into impossible/credentials-required. The localhost-no-auth case works only for unsecured dev/test servers.",
+  "references": [
+    {"kind": "spec",      "path": "tomcat/assets/configuration/spec.yaml"},
+    {"kind": "auto_conf", "path": "tomcat/datadog_checks/tomcat/data/auto_conf.yaml"},
+    {"kind": "readme",    "path": "tomcat/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "JMX integration; per procedure shortcut, classify as impossible. Default JMX port is 9012 in the spec, though Tomcat's documented default RMI port is 9010/9012/8050 depending on docs."
+}

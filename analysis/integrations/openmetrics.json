@@ -1,0 +1,25 @@
+{
+  "name": "openmetrics",
+  "display_name": "OpenMetrics",
+  "spec_path": "openmetrics/assets/configuration/spec.yaml",
+  "required_fields": ["openmetrics_endpoint", "namespace", "metrics"],
+  "all_relevant_fields": [
+    {"name": "openmetrics_endpoint", "required": false, "default": null},
+    {"name": "prometheus_url", "required": false, "default": null},
+    {"name": "namespace", "required": true, "default": null},
+    {"name": "metrics", "required": true, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The OpenMetrics integration is a generic, user-supplied scraper for arbitrary Prometheus / OpenMetrics endpoints. It has no upstream system to discover — the user MUST provide `openmetrics_endpoint` (or legacy `prometheus_url`), a `namespace`, and a `metrics` allowlist that names which series to collect. There is no canonical port, path, or default that a probe could derive: any of the dozens of integrations elsewhere in this repo is a more specific instance of OpenMetrics. By definition this integration is the user-config-required fallback, so auto-config cannot apply.",
+  "references": [
+    {"kind": "spec", "path": "openmetrics/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "openmetrics/datadog_checks/openmetrics/openmetrics.py"},
+    {"kind": "readme", "path": "openmetrics/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Special case: this integration exists precisely so the user can point the Agent at an arbitrary endpoint. No upstream exists to autodiscover. Method `other` (not `credentials-required`) because the missing input is the endpoint URL/metric list itself, not authentication. Suggest a new procedure pattern for 'user-supplied generic check'."
+}

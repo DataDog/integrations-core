@@ -1,0 +1,32 @@
+{
+  "name": "jboss_wildfly",
+  "display_name": "JBoss/WildFly",
+  "spec_path": "jboss_wildfly/assets/configuration/spec.yaml",
+  "required_fields": ["jmx_url"],
+  "all_relevant_fields": [
+    {"name": "jmx_url", "required": true, "default": null},
+    {"name": "host", "required": false, "default": null},
+    {"name": "port", "required": false, "default": null},
+    {"name": "user", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null},
+    {"name": "process_name_regex", "required": false, "default": null},
+    {"name": "trust_store_path", "required": false, "default": null},
+    {"name": "trust_store_password", "required": false, "default": null},
+    {"name": "key_store_path", "required": false, "default": null},
+    {"name": "key_store_password", "required": false, "default": null},
+    {"name": "rmi_registry_ssl", "required": false, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "JBoss/WildFly is a JMX integration handled by JMXFetch. The spec marks `jmx_url` as required (e.g. `service:jmx:remote+http://<HOST>:<PORT>` for WildFly 10+, `service:jmx:http-remoting-jmx://...` for 9 and older), and the spec also mandates a custom client JAR (`custom_jar_paths` pointing at `jboss-cli-client.jar`). Production JBoss/WildFly management interfaces require authentication (a ManagementRealm user provisioned via `add-user.sh`), so `user`/`password` are effectively required. None of these (URL scheme variant, client JAR path, management realm credentials) can be inferred from a wire probe.",
+  "references": [
+    {"kind": "spec", "path": "jboss_wildfly/assets/configuration/spec.yaml"},
+    {"kind": "readme", "path": "jboss_wildfly/README.md"},
+    {"kind": "upstream", "url": "https://docs.wildfly.org/30/Admin_Guide.html#JMX"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Standard JMX-impossible pattern (also see weblogic, tomcat, cassandra), with the additional twist that JBoss requires a vendor-specific client JAR on the Agent host."
+}

@@ -1,0 +1,23 @@
+{
+  "name": "cert_manager",
+  "display_name": "cert-manager",
+  "spec_path": "cert_manager/assets/configuration/spec.yaml",
+  "required_fields": ["openmetrics_endpoint"],
+  "all_relevant_fields": [
+    {"name": "openmetrics_endpoint", "required": true, "default": "http://%%host%%:9402/metrics"}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": true,
+  "auto_conf_path": "cert_manager/datadog_checks/cert_manager/data/auto_conf.yaml",
+  "explanation": "cert-manager is an OpenMetricsBaseCheckV2 integration that scrapes the cert-manager controller's Prometheus endpoint. Default port 9402 and path `/metrics` are universal across cert-manager deployments (set by the controller's `--metrics-listen-address`). The shipped `auto_conf.yaml` already templates the endpoint as `http://%%host%%:9402/metrics` keyed on the `cert-manager-controller` AD identifier, so no credentials or per-deployment config are needed.",
+  "references": [
+    {"kind": "spec", "path": "cert_manager/assets/configuration/spec.yaml"},
+    {"kind": "auto_conf", "path": "cert_manager/datadog_checks/cert_manager/data/auto_conf.yaml"},
+    {"kind": "check", "path": "cert_manager/datadog_checks/cert_manager/cert_manager.py"},
+    {"kind": "upstream", "url": "https://cert-manager.io/docs/devops-tips/prometheus-metrics/"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": ""
+}

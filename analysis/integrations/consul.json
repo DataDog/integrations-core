@@ -1,0 +1,29 @@
+{
+  "name": "consul",
+  "display_name": "Consul",
+  "spec_path": "consul/assets/configuration/spec.yaml",
+  "required_fields": ["url"],
+  "all_relevant_fields": [
+    {"name": "url", "required": true, "default": "http://localhost:8500"},
+    {"name": "use_prometheus_endpoint", "required": false, "default": false},
+    {"name": "acl_token", "required": false, "default": null},
+    {"name": "catalog_checks", "required": false, "default": false},
+    {"name": "network_latency_checks", "required": false, "default": false},
+    {"name": "self_leader_check", "required": false, "default": false},
+    {"name": "single_node_install", "required": false, "default": false}
+  ],
+  "classification": "generic",
+  "auto_config_method": "http-path-probe",
+  "has_existing_auto_conf": true,
+  "auto_conf_path": "consul/datadog_checks/consul/data/auto_conf.yaml",
+  "explanation": "Consul's HTTP API listens on a single well-known port (8500 by default for the agent, 8501 for HTTPS) and the check just needs a base URL — it discovers everything else (`/v1/status/leader`, `/v1/agent/self`, `/v1/agent/metrics?format=prometheus`) from there. The shipped auto_conf templates `http://%%host%%:8500`, which is exactly the canonical default. ACL tokens are optional and only required if the operator has enabled ACLs (default deny is becoming common, but there is still a wide deployment base running unauthenticated localhost agents). Probing port 8500 for `/v1/status/leader` returning a JSON-quoted IP:port string is a strong, integration-agnostic HTTP probe.",
+  "references": [
+    {"kind": "spec", "path": "consul/assets/configuration/spec.yaml"},
+    {"kind": "auto_conf", "path": "consul/datadog_checks/consul/data/auto_conf.yaml"},
+    {"kind": "check", "path": "consul/datadog_checks/consul/consul.py"},
+    {"kind": "upstream", "url": "https://developer.hashicorp.com/consul/api-docs/agent"}
+  ],
+  "confidence": "medium",
+  "needs_human_review": false,
+  "notes": "Consul deployments with `acl.default_policy = deny` need an ACL token to read most endpoints — flag that the auth-optional caveat applies (similar to elastic/mongo). The unauthenticated `/v1/status/leader` and Prometheus endpoint still respond, so a probe can still fingerprint Consul; metric collection breadth is what suffers."
+}

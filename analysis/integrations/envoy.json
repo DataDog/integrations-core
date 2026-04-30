@@ -1,0 +1,25 @@
+{
+  "name": "envoy",
+  "display_name": "Envoy",
+  "spec_path": "envoy/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [
+    {"name": "openmetrics_endpoint", "required": false, "default": "http://localhost:80/stats/prometheus"},
+    {"name": "stats_url", "required": false, "default": "http://localhost:80/stats"},
+    {"name": "collect_server_info", "required": false, "default": true}
+  ],
+  "classification": "custom",
+  "auto_config_method": "http-path-probe",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Envoy exposes its admin/stats interface on a listener whose port is operator-configured (commonly 9901, but the shipped example uses 80, and in service-mesh deployments it's typically 15000 for Istio sidecars or 8001/8081 in upstream samples). The integration supports two collection paths in one instance schema: the modern OpenMetrics path `/stats/prometheus` (preferred, OpenMetricsBaseCheckV2) and the legacy `/stats` admin endpoint parsed by the in-tree parser. Discovery must therefore probe candidate admin ports and try the Prometheus path first, falling back to `/stats`. Both paths are unauthenticated by default. This is the dual-mode pattern (procedure pattern F): doable, but not generic — it needs Envoy-specific port candidates and path order.",
+  "references": [
+    {"kind": "spec", "path": "envoy/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "envoy/datadog_checks/envoy/check.py"},
+    {"kind": "readme", "path": "envoy/README.md"},
+    {"kind": "upstream", "url": "https://www.envoyproxy.io/docs/envoy/latest/operations/admin"}
+  ],
+  "confidence": "medium",
+  "needs_human_review": false,
+  "notes": "No `auto_conf.yaml` ships with the integration. Envoy's admin port is not standardized across deployments; in Istio sidecars it is typically 15000, while the shipped example uses 80. A real auto-config layer would need a candidate port list (15000, 9901, 8001, 8081, 80) and would have to confirm Envoy by inspecting the `/server_info` response."
+}

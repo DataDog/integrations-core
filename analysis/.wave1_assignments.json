@@ -1,0 +1,15 @@
+{
+  "wave": 1,
+  "batches": [
+    ["datadog_cluster_agent", "tls", "nginx_ingress_controller", "windows_service", "ssh_check"],
+    ["php_fpm", "kube_scheduler", "tomcat", "mcache", "istio"],
+    ["kube_controller_manager", "zk", "consul", "wmi_check", "kube_dns"],
+    ["vault", "vsphere", "active_directory", "kube_metrics_server", "postfix"],
+    ["gunicorn", "cassandra", "cert_manager", "envoy", "airflow"],
+    ["prometheus", "supervisord", "spark", "kong", "varnish"],
+    ["fluentd", "gitlab_runner", "gitlab", "pgbouncer", "activemq"],
+    ["solr", "sonarqube", "openmetrics", "nagios", "hyperv"],
+    ["sidekiq", "squid", "cilium", "windows_performance_counters", "jboss_wildfly"],
+    ["hdfs_datanode", "couchbase", "yarn", "confluent_platform", "ceph"]
+  ]
+}

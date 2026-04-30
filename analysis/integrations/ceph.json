@@ -1,0 +1,25 @@
+{
+  "name": "ceph",
+  "display_name": "Ceph",
+  "spec_path": "ceph/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [
+    {"name": "ceph_cmd", "required": false, "default": "/usr/bin/ceph"},
+    {"name": "ceph_cluster", "required": false, "default": "ceph"},
+    {"name": "use_sudo", "required": false, "default": false},
+    {"name": "collect_service_check_for", "required": false, "default": null}
+  ],
+  "classification": "custom",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The Ceph check shells out to the local `ceph` CLI (`/usr/bin/ceph --cluster ceph status -fjson`, etc.) via `get_subprocess_output`. There is no network endpoint to probe: discovery means detecting whether the `ceph` binary is installed locally and whether the dd-agent user has permission to read the cluster admin keyring (often via `sudo`). This is a host-local presence check rather than a network probe, similar to Windows perf-counter integrations. Ceph also ships a Prometheus mgr module that the Datadog Agent could scrape generically, but that path uses the openmetrics check, not this one. Classification is custom because feasibility hinges on file-system presence and permission detection rather than any of the standard wire probes.",
+  "references": [
+    {"kind": "spec", "path": "ceph/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "ceph/datadog_checks/ceph/ceph.py"},
+    {"kind": "upstream", "url": "https://docs.ceph.com/en/latest/mgr/prometheus/"}
+  ],
+  "confidence": "medium",
+  "needs_human_review": false,
+  "notes": "If the user wants Prometheus-style metrics from the ceph-mgr Prometheus module (port 9283), that becomes a separate openmetrics-port-scan candidate handled by a different integration. The legacy CLI-based check has no canonical network surface."
+}

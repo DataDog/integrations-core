@@ -1,0 +1,26 @@
+{
+  "name": "nagios",
+  "display_name": "Nagios",
+  "spec_path": "nagios/assets/configuration/spec.yaml",
+  "required_fields": ["nagios_conf"],
+  "all_relevant_fields": [
+    {"name": "nagios_conf", "required": true, "default": null},
+    {"name": "collect_events", "required": false, "default": null},
+    {"name": "passive_checks_events", "required": false, "default": null},
+    {"name": "collect_host_performance_data", "required": false, "default": null},
+    {"name": "collect_service_performance_data", "required": false, "default": null}
+  ],
+  "classification": "custom",
+  "auto_config_method": "config-file-parse",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The Nagios integration runs on the same host as a Nagios/Icinga v1 server and tails its log/perfdata files. The required `nagios_conf` points to the main config file (e.g. `/etc/nagios3/nagios.cfg`); the check parses it to discover `log_file`, `host_perfdata_file`, `service_perfdata_file`, and the corresponding template strings. There is no network endpoint at all. Auto-config could plausibly look for well-known config paths (`/etc/nagios*/nagios.cfg`, `/etc/icinga/icinga.cfg`, `/usr/local/nagios/etc/nagios.cfg`) and parse the first one found — Nagios-specific logic, hence custom.",
+  "references": [
+    {"kind": "spec", "path": "nagios/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "nagios/datadog_checks/nagios/nagios.py"},
+    {"kind": "readme", "path": "nagios/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Local file-tailing integration with no network probe. The README's containerized example also assumes the user has bind-mounted `/etc/nagios3/nagios.cfg` into the Agent container, suggesting users always need to make a deliberate config decision. Pattern is 'sniff filesystem for a known config-file path'."
+}

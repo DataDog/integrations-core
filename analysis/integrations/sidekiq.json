@@ -1,0 +1,19 @@
+{
+  "name": "sidekiq",
+  "display_name": "Sidekiq",
+  "spec_path": "sidekiq/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [],
+  "classification": "impossible",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Sidekiq is not an Agent metric check at all. The integration is wired through DogStatsD: the application emits StatsD metrics via the dogstatsd-ruby client and the Agent ingests them through its DogStatsD listener. The only Agent-side configuration in the spec is a logs file path (`/var/log/sidekiq.log`). There is no host/port/endpoint to discover and no check.py; auto-config in the network-probe sense does not apply. Real setup requires user code changes (gem install, initializer, dogstatsd_mapper_profiles in datadog.yaml), which can't be inferred from the wire.",
+  "references": [
+    {"kind": "spec", "path": "sidekiq/assets/configuration/spec.yaml"},
+    {"kind": "readme", "path": "sidekiq/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Logs-only / DogStatsD-driven integration. Pattern: application-emitted StatsD with required dogstatsd_mapper_profiles is structurally not autodiscoverable."
+}

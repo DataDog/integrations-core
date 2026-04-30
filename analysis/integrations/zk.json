@@ -1,0 +1,27 @@
+{
+  "name": "zk",
+  "display_name": "ZooKeeper",
+  "spec_path": "zk/assets/configuration/spec.yaml",
+  "required_fields": ["host"],
+  "all_relevant_fields": [
+    {"name": "host", "required": true, "default": "localhost"},
+    {"name": "port", "required": false, "default": 2181},
+    {"name": "timeout", "required": false, "default": 3},
+    {"name": "use_tls", "required": false, "default": false},
+    {"name": "expected_mode", "required": false, "default": null},
+    {"name": "report_instance_mode", "required": false, "default": true}
+  ],
+  "classification": "generic",
+  "auto_config_method": "tcp-banner-probe",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The ZooKeeper check opens a TCP socket to host:port (default 2181) and sends the `ruok`, `stat`, and `mntr` four-letter words; `ruok` returns the literal `imok` and `stat` returns a multi-line response starting with `Zookeeper version: ...`. Both make excellent banner probes — a generic discovery layer can connect to 2181, send `ruok\\n`, and key off `imok`. No credentials are involved by default. TLS is optional. The 4LW interface needs to be enabled in `zoo.cfg` (`4lw.commands.whitelist`) on modern ZooKeeper, which is a deployment detail, not a config-discovery problem.",
+  "references": [
+    {"kind": "spec", "path": "zk/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "zk/datadog_checks/zk/zk.py"},
+    {"kind": "upstream", "url": "https://zookeeper.apache.org/doc/r3.8.0/zookeeperAdmin.html#sc_4lw"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "No auto_conf.yaml ships with the integration today, but the discovery story is straightforward."
+}

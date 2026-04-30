@@ -1,0 +1,28 @@
+{
+  "name": "spark",
+  "display_name": "Spark",
+  "spec_path": "spark/assets/configuration/spec.yaml",
+  "required_fields": ["spark_url", "cluster_name"],
+  "all_relevant_fields": [
+    {"name": "spark_url", "required": true, "default": null},
+    {"name": "cluster_name", "required": true, "default": null},
+    {"name": "spark_cluster_mode", "required": false, "default": "spark_yarn_mode"},
+    {"name": "spark_ui_ports", "required": false, "default": null},
+    {"name": "spark_pre_20_mode", "required": false, "default": false},
+    {"name": "spark_proxy_enabled", "required": false, "default": false},
+    {"name": "metricsservlet_path", "required": false, "default": "/metrics/json"}
+  ],
+  "classification": "custom",
+  "auto_config_method": "http-path-probe",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The Spark check supports four mutually-exclusive deployment topologies — Spark Standalone master (port 8080), YARN ResourceManager (port 8088), Mesos master (port 5050), and Spark driver (port 4040) — selected by `spark_cluster_mode`. Each has a different REST UI shape: the YARN mode hits `/ws/v1/cluster/apps`, Mesos hits `/frameworks`, Standalone scrapes the master HTML page, etc. Discovery would have to probe several candidate ports and inspect response shape to identify the topology, then choose the right code path. On top of that, `cluster_name` is an arbitrary user-chosen tag that has no on-the-wire equivalent, and many production deployments add proxy auth, Knox/DC-OS tokens, or YARN security.",
+  "references": [
+    {"kind": "spec", "path": "spark/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "spark/datadog_checks/spark/spark.py"},
+    {"kind": "upstream", "url": "https://spark.apache.org/docs/latest/monitoring.html"}
+  ],
+  "confidence": "medium",
+  "needs_human_review": false,
+  "notes": "Even if topology auto-detection by port + response shape is feasible (closest to pattern G, multiple plausible URL paths), `cluster_name` is a required user-supplied label with no discovery story. Auth-token / DC/OS / Knox modes push real-world deployments toward `credentials-required`."
+}

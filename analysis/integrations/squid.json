@@ -1,0 +1,27 @@
+{
+  "name": "squid",
+  "display_name": "Squid",
+  "spec_path": "squid/assets/configuration/spec.yaml",
+  "required_fields": ["name"],
+  "all_relevant_fields": [
+    {"name": "name", "required": true, "default": null},
+    {"name": "host", "required": false, "default": "localhost"},
+    {"name": "port", "required": false, "default": 3128},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null}
+  ],
+  "classification": "generic",
+  "auto_config_method": "http-path-probe",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Squid exposes its Cache Manager counters over HTTP at the single canonical path `/squid-internal-mgr/counters` on the proxy port (default 3128). The check just GETs that URL and parses the `key = value` body. `name` is the only spec-required field, but it's just an instance label (no discovery semantics). Optional `cachemgr_username`/`cachemgr_password` cover hardened deployments but are not the default; localhost-from-the-proxy access is typically unauthenticated. A generic HTTP-path probe on port 3128 with that one well-known path is sufficient.",
+  "references": [
+    {"kind": "spec", "path": "squid/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "squid/datadog_checks/squid/squid.py"},
+    {"kind": "readme", "path": "squid/README.md"},
+    {"kind": "upstream", "url": "https://wiki.squid-cache.org/Features/CacheManager"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "`name` is required by the spec but is just a free-form instance tag, not a discovery input — auto-config can synthesize it (e.g. from container metadata or host:port)."
+}

@@ -1,0 +1,28 @@
+{
+  "name": "gitlab",
+  "display_name": "GitLab",
+  "spec_path": "gitlab/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [
+    {"name": "gitlab_url", "required": false, "default": null},
+    {"name": "api_token", "required": false, "default": null},
+    {"name": "openmetrics_endpoint", "required": false, "default": "http://<GITLAB_URL>/-/metrics"},
+    {"name": "prometheus_endpoint", "required": false, "default": null},
+    {"name": "prometheus_url", "required": false, "default": null},
+    {"name": "gitaly_server_endpoint", "required": false, "default": null}
+  ],
+  "classification": "custom",
+  "auto_config_method": "http-path-probe",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "GitLab exposes Prometheus metrics on the main app at `/-/metrics`, but the endpoint is IP-allowlisted by default (`monitoring.ip_whitelist` in gitlab.rb) — the Agent host must be allowed before the URL works. Additionally there are component-specific endpoints (Gitaly on 9236, sidekiq exporter, postgres exporter, etc.) which the check supports via separate fields. The legacy `prometheus_url` and the v2 `openmetrics_endpoint` paths trigger different implementations (gitlab.py vs gitlab_v2.py). Auto-config must probe `/-/metrics` and degrade gracefully when the allowlist blocks the Agent; the `api_token` for version metadata is optional but typically required in production.",
+  "references": [
+    {"kind": "spec", "path": "gitlab/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "gitlab/datadog_checks/gitlab/gitlab.py"},
+    {"kind": "check", "path": "gitlab/datadog_checks/gitlab/gitlab_v2.py"},
+    {"kind": "upstream", "url": "https://docs.gitlab.com/ee/administration/monitoring/prometheus/gitlab_metrics.html"}
+  ],
+  "confidence": "medium",
+  "needs_human_review": false,
+  "notes": "All instance fields are technically optional in the spec, but the check requires at least one of openmetrics_endpoint / prometheus_url / prometheus_endpoint. Multiple deployment shapes (omnibus on a single host vs. distributed components on dedicated ports) make a single canonical probe insufficient."
+}

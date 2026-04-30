@@ -1,0 +1,25 @@
+{
+  "name": "active_directory",
+  "display_name": "Active Directory",
+  "spec_path": "active_directory/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [
+    {"name": "extra_metrics", "required": false, "default": null},
+    {"name": "metrics", "required": false, "default": null},
+    {"name": "server", "required": false, "default": null},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null}
+  ],
+  "classification": "generic",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Active Directory inherits the Windows perf_counters template (same shape as iis). In its default mode the agent runs on the domain controller itself and reads NTDS / Netlogon / DHCP Server / DFS Replicated Folders performance counters locally; the check actively detects which Windows services exist on the host (see ActiveDirectoryCheckV2.get_default_config) and enables only the relevant counter sets. There is no remote host/port in the default deployment, so discovery reduces to 'is the NTDS service installed on this Windows host?'. The optional pdh_legacy mode adds remote host + credentials but is hidden in the spec.",
+  "references": [
+    {"kind": "spec", "path": "active_directory/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "active_directory/datadog_checks/active_directory/check.py"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern H (local Windows host detection), as anticipated. The check's _service_exists() probe is itself the discovery primitive."
+}

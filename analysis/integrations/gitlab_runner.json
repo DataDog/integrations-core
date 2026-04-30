@@ -1,0 +1,26 @@
+{
+  "name": "gitlab_runner",
+  "display_name": "GitLab Runner",
+  "spec_path": "gitlab_runner/assets/configuration/spec.yaml",
+  "required_fields": ["gitlab_url", "prometheus_endpoint", "allowed_metrics"],
+  "all_relevant_fields": [
+    {"name": "gitlab_url", "required": true, "default": null},
+    {"name": "prometheus_endpoint", "required": true, "default": null},
+    {"name": "allowed_metrics", "required": true, "default": null},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null}
+  ],
+  "classification": "custom",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "GitLab Runner's prometheus listener (default `:9252/metrics`) is unauthenticated and could be discovered with a generic OpenMetrics port-scan. However the check also requires `gitlab_url` (a separate connectivity probe to the GitLab master, sometimes with `?token=<TOKEN>` for CE deployments) and `allowed_metrics` (an init_config metric-allowlist with no usable default — the spec example is the canonical list but it's marked required). Discovery layer must (a) probe the runner's prometheus port and (b) inject a default allowlist; the gitlab_url field is best-effort and tokens are out-of-band.",
+  "references": [
+    {"kind": "spec", "path": "gitlab_runner/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "gitlab_runner/datadog_checks/gitlab_runner/gitlab_runner.py"},
+    {"kind": "upstream", "url": "https://docs.gitlab.com/runner/monitoring/"}
+  ],
+  "confidence": "medium",
+  "needs_human_review": false,
+  "notes": "Three required fields, two of them deployment-specific (gitlab_url, allowed_metrics). The prometheus endpoint itself is generic, but the check's broader contract requires custom logic to populate the other fields, including the GitLab master URL which lives on a different host."
+}

@@ -1,0 +1,29 @@
+{
+  "name": "kube_controller_manager",
+  "display_name": "Kubernetes Controller Manager",
+  "spec_path": "kube_controller_manager/assets/configuration/spec.yaml",
+  "required_fields": ["prometheus_url"],
+  "all_relevant_fields": [
+    {"name": "prometheus_url", "required": true, "default": "http://localhost:10252/metrics"},
+    {"name": "possible_prometheus_urls", "required": false, "default": null},
+    {"name": "health_url", "required": false, "default": "http://localhost:10252/healthz"},
+    {"name": "bearer_token_auth", "required": false, "default": "tls_only"},
+    {"name": "ssl_verify", "required": false, "default": true},
+    {"name": "leader_election", "required": false, "default": true},
+    {"name": "leader_election_kind", "required": false, "default": "auto"}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": true,
+  "auto_conf_path": "kube_controller_manager/datadog_checks/kube_controller_manager/data/auto_conf.yaml",
+  "explanation": "kube-controller-manager exposes Prometheus metrics on a fixed `/metrics` path. The auto_conf already enumerates the canonical port pair (10257 secure / 10252 insecure) and prefers the first that responds. Bearer-token auth is needed for the secure 10257 endpoint in modern clusters, but the Agent's in-cluster service-account token (mounted at `/var/run/secrets/kubernetes.io/serviceaccount/token`) is supplied via `bearer_token_auth: tls_only` rather than user-supplied credentials, so the only thing discovery has to find is the host/port. This matches the OpenMetrics port-scan pattern.",
+  "references": [
+    {"kind": "spec", "path": "kube_controller_manager/assets/configuration/spec.yaml"},
+    {"kind": "auto_conf", "path": "kube_controller_manager/datadog_checks/kube_controller_manager/data/auto_conf.yaml"},
+    {"kind": "check", "path": "kube_controller_manager/datadog_checks/kube_controller_manager/kube_controller_manager.py"},
+    {"kind": "upstream", "url": "https://kubernetes.io/docs/reference/command-line-tools-reference/kube-controller-manager/"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "The check ships with `possible_prometheus_urls` baked in, which is essentially a hard-coded discovery list (4 URL combinations). Auto-config that probes 10257 then 10252 on the pod IP is enough."
+}

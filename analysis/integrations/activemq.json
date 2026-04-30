@@ -1,0 +1,27 @@
+{
+  "name": "activemq",
+  "display_name": "ActiveMQ",
+  "spec_path": "activemq/assets/configuration/spec.yaml",
+  "required_fields": ["host", "port"],
+  "all_relevant_fields": [
+    {"name": "host", "required": true, "default": "localhost"},
+    {"name": "port", "required": true, "default": 1616},
+    {"name": "user", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null},
+    {"name": "is_jmx", "required": false, "default": true}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The activemq integration is a JMXFetch-backed check (spec inherits `instances/jmx`, `is_jmx: true`). JMX-based checks always need `host` + `port` and, in any production-shaped deployment, `user` + `password` — ActiveMQ's JMX agent enables authentication by default in modern releases via `jmx.access` / `jmx.password` files. Spec marks user/password as optional (so an unauthenticated localhost broker works), but per the procedure rubric, JMXFetch-based integrations are classified as impossible because credentials cannot be discovered from the wire even when the JMX port itself can be probed.",
+  "references": [
+    {"kind": "spec", "path": "activemq/assets/configuration/spec.yaml"},
+    {"kind": "other", "path": "activemq/datadog_checks/activemq/data/conf.yaml.example"},
+    {"kind": "other", "path": "datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/instances/jmx.yaml"},
+    {"kind": "upstream", "url": "https://activemq.apache.org/components/classic/documentation/jmx"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "ActiveMQ also has a sibling integration `activemq_xml` that scrapes the web console — different code path, different feasibility. This entry covers only the JMX-based `activemq` check."
+}

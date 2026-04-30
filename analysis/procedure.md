@@ -218,6 +218,128 @@ Hallmarks:
 Examples: snmp. Classification: **impossible**, **high** confidence —
 auto-config feasibility is about credential discovery, not device discovery.
 
+### J. "User-supplied generic check template" — `impossible` / `other`
+
+Hallmarks:
+- The integration is a *framework*, not a service binding: the user
+  provides the URL, counter list, metric mapping, JMX MBean list, etc.
+- Required spec fields name *what to collect*, not *where to probe*.
+- The check class is a base class (`OpenMetricsBaseCheckV2`,
+  `PerfCountersBaseCheck`, plain `AgentCheck` with subprocess), not a
+  service-specific implementation.
+
+Examples: openmetrics, prometheus (generic), windows_performance_counters,
+wmi_check. Classification: **impossible**, **high** confidence — there
+is no upstream system to autodiscover because the integration itself is
+the configuration template.
+
+### K. "Synthetic / user-intent probe" — `custom` or `impossible`
+
+Hallmarks:
+- The check actively probes a target the user nominates (`tls`,
+  `http_check`, `tcp_check`, `ssh_check`).
+- There is no upstream "service" running alongside the Agent — the user
+  picks an arbitrary remote.
+
+Classification: **custom** when no credentials are required (`tls`,
+`http_check`, `tcp_check`); **impossible** when authentication is needed
+(`ssh_check`). Method: `other` for unauthenticated, `credentials-required`
+when creds are needed.
+
+### L. "Local CLI subprocess" — `custom` / `other`
+
+Hallmarks:
+- The check executes a local binary (`varnishstat`, `ceph`, `postqueue`)
+  and parses its output.
+- May need group/sudo privileges or a keyring file the user must provision.
+- Discovery on the Agent host: "is this binary installed and runnable?"
+
+Examples: varnish, ceph, postfix. Classification: **custom**,
+**medium** confidence; method: `other`. Linux analogue of pattern H.
+
+### M. "Process-name local discovery" — `impossible` / `other`
+
+Hallmarks:
+- The check enumerates host processes (psutil) and matches a user-supplied
+  name (`proc_name`).
+- The choice of which application to monitor is user policy, not a
+  discoverable property.
+
+Examples: gunicorn. Classification: **impossible**, **high** confidence —
+similar to pattern J in that the user's *intent* is the missing input.
+
+### N. "DogStatsD / instrumentation-only" — `impossible` / `other`
+
+Hallmarks:
+- The "integration" is just a logs config + dogstatsd_mapper_profiles; no
+  Agent check is dispatched against a live endpoint.
+- The upstream emits metrics to the Agent via DogStatsD (or by tailing logs).
+
+Examples: sidekiq. Classification: **impossible**, **high** confidence —
+auto-config in the network-probe sense doesn't apply; the integration
+exists as a metric-name mapping, not a probe.
+
+### O. "In-cluster bearer-token auth" — does NOT downgrade to `impossible`
+
+Many Kubernetes control-plane integrations (`kube_controller_manager`,
+`kube_scheduler`, `kube_apiserver`, `kube_proxy`) reach Prometheus
+endpoints behind authentication, but the credential is the pod's own
+ServiceAccount bearer token mounted at
+`/var/run/secrets/kubernetes.io/serviceaccount/token`. The Agent supplies
+this automatically when running in-cluster. Treat these as **generic**
+with `openmetrics-port-scan`, not impossible — the credential is
+auto-injected, not user-supplied.
+
+### P. "JMX-over-HTTP servlet" — `generic` / `http-path-probe`
+
+Hallmarks:
+- Looks JMX-shaped in the spec, but the check actually scrapes the
+  Hadoop-style `/jmx` HTTP servlet on a fixed port.
+- No JMXFetch / RMI involved.
+
+Examples: hdfs_datanode. Classification: **generic**, **high** confidence.
+Distinct from the JMXFetch-impossible rule — read the check code to
+confirm whether it inherits `JMXFetch` or just GETs `/jmx`.
+
+### Q. "Hard-coded URL fallback list" — strong `generic` signal
+
+When the spec ships a built-in `possible_prometheus_urls` ordered list
+(e.g. kube_controller_manager, etcd), the discovery layer effectively
+already lives inside the integration. Classification: **generic**,
+**high** confidence.
+
+### R. "Two-path single-spec dual API" — `custom` / `http-path-probe`
+
+Distinct from F (rabbitmq, haproxy, where the two modes live in *separate*
+instance fields):
+
+Hallmarks:
+- One required URL field, but the check tries multiple paths or APIs in
+  order under that single field (envoy: `/stats/prometheus` vs `/stats`;
+  airflow: REST API v1 vs experimental).
+
+Examples: envoy, airflow. Classification: **custom**, **medium** to
+**high** confidence depending on how many fallback paths and how stable
+the upstream version split is.
+
+### S. "Topology multiplexer (mode enum)" — `custom` / `http-path-probe` or `other`
+
+Hallmarks:
+- Spec has an enum field (`spark_cluster_mode`, `istio_mode`, etc.) that
+  selects between mutually-exclusive backend topologies (Standalone vs
+  YARN vs Mesos for Spark; sidecar vs ambient for Istio).
+- Different ports, different response shapes, different auth.
+
+Examples: spark, istio. Classification: **custom**, **medium** confidence.
+
+## Free-form instance labels are NOT discovery blockers
+
+When a `required: true` field is just a freeform tag (`name` in squid,
+`cluster_name` in spark), don't classify the integration as impossible
+on that basis — the auto-config layer can synthesize it from container
+or host metadata. Only classify as impossible if the field needs
+*specific* user input (URL, credentials, metric list, etc.).
+
 ## Decision rule for "auth-optional in spec"
 
 When the spec marks `username` / `password` (or token / cert) as optional:
