@@ -275,9 +275,7 @@ class ValidationOrchestrator(EventBusOrchestrator):
             return False
         return all(is_successful_validation_comment(comment["body"]) for comment in previous_comments)
 
-    def _build_pr_comment_body(
-        self, error_msg: str | None, extra_warning: str | None, current_succeeded: bool
-    ) -> str:
+    def _build_pr_comment_body(self, error_msg: str | None, extra_warning: str | None, current_succeeded: bool) -> str:
         comment_body = format_pr_comment(
             self._results,
             VALIDATIONS,

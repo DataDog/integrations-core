@@ -320,9 +320,7 @@ def test_pr_has_label_from_event(tmp_path, content, expected):
         pytest.param("pull_request_review", False, id="pull-request-review"),
     ],
 )
-def test_should_suppress_validation_comments_only_for_pull_request_events(
-    tmp_path, monkeypatch, event_name, expected
-):
+def test_should_suppress_validation_comments_only_for_pull_request_events(tmp_path, monkeypatch, event_name, expected):
     event_file = tmp_path / "event.json"
     event_file.write_text(f'{{"pull_request": {{"labels": [{{"name": "{VALIDATION_COMMENT_SUPPRESSION_LABEL}"}}]}}}}')
     monkeypatch.setenv("GITHUB_EVENT_NAME", event_name)
