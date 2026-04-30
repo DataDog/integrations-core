@@ -263,6 +263,13 @@ class ValidationOrchestrator(EventBusOrchestrator):
         for comment in comments:
             self._app.github.delete_comment(comment["id"])
 
+    def _previous_success_already_reported(
+        self, current_succeeded: bool, previous_comments: list[GithubComment]
+    ) -> bool:
+        if not current_succeeded or not previous_comments:
+            return False
+        return all(is_successful_validation_comment(comment["body"]) for comment in previous_comments)
+
     def _publish_report(self, exception: Exception | None) -> None:
         error_msg, extra_warning = self._build_error_and_warning(exception)
 
@@ -309,11 +316,7 @@ class ValidationOrchestrator(EventBusOrchestrator):
                 self._app.logger.debug("Validation PR comments are suppressed for PR #%s.", self._pr_number)
                 self._delete_comments(previous_comments)
                 return
-            if (
-                current_succeeded
-                and previous_comments
-                and all(is_successful_validation_comment(comment.get("body", "")) for comment in previous_comments)
-            ):
+            if self._previous_success_already_reported(current_succeeded, previous_comments):
                 self._app.logger.debug("Previous validation comments already reported success; skipping PR comment.")
                 return
             self._app.logger.debug("Deleting previous validation comments on PR #%s...", self._pr_number)
