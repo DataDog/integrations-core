@@ -10,8 +10,8 @@ from ddev.ai.agent.exceptions import AgentError
 from ddev.ai.agent.types import AgentResponse, StopReason, ToolResultMessage
 from ddev.ai.react.callbacks import CallbackSet
 from ddev.ai.react.types import ReActResult
-from ddev.ai.tools.core.registry import ToolRegistry
 from ddev.ai.tools.core.types import ToolResult
+from ddev.ai.tools.registry import ToolRegistry
 
 
 class ReActProcess:
@@ -93,6 +93,9 @@ class ReActProcess:
             Every exception is forwarded after notifying callbacks.
         """
         try:
+            for cb_set in self._callback_sets:
+                await cb_set.fire_before_agent_send(1)
+
             response = await self._agent.send(prompt, allowed_tools)
             iterations = 1
             total_input = response.usage.input_tokens
@@ -122,6 +125,9 @@ class ReActProcess:
                         await cb_set.fire_tool_call(tc, result, iterations)
 
                 messages = [ToolResultMessage(tool_call_id=tc.id, result=result) for tc, result in tool_call_results]
+
+                for cb_set in self._callback_sets:
+                    await cb_set.fire_before_agent_send(iterations + 1)
 
                 response = await self._agent.send(messages, allowed_tools)
                 iterations += 1

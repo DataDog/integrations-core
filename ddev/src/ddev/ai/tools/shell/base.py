@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import asyncio
 from abc import abstractmethod
+from collections.abc import Callable
 from typing import ClassVar
 
 from ddev.ai.tools.core.base import BaseTool, BaseToolInput
@@ -24,7 +25,11 @@ class CmdTool[TInput: BaseToolInput](BaseTool[TInput]):
         return await run_command(self.cmd(tool_input), timeout=self.timeout)
 
 
-async def run_command(cmd: list[str], timeout: int = 10) -> ToolResult:
+async def run_command(
+    cmd: list[str],
+    timeout: int = 10,
+    stdout_filter: Callable[[str], str] | None = None,
+) -> ToolResult:
     try:
         proc = await asyncio.create_subprocess_exec(
             *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
@@ -42,6 +47,9 @@ async def run_command(cmd: list[str], timeout: int = 10) -> ToolResult:
     # errors="replace" to keep output readable in case of non-UTF-8 characters
     stdout = stdout_bytes.decode("utf-8", errors="replace")
     stderr = stderr_bytes.decode("utf-8", errors="replace")
+
+    if stdout_filter is not None:
+        stdout = stdout_filter(stdout)
 
     output = stdout
     if proc.returncode != 0 and stderr:

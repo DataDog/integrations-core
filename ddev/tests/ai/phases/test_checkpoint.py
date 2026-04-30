@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from pathlib import Path
+
 import pytest
 
 from ddev.ai.phases.checkpoint import CheckpointManager, CheckpointReadError
@@ -34,7 +36,7 @@ def test_read_malformed_yaml_raises_checkpoint_read_error(manager):
 
 def test_read_unreadable_file_raises_checkpoint_read_error(manager, monkeypatch):
     manager._path.write_text("phase1:\n  status: success\n")
-    monkeypatch.setattr("pathlib.Path.read_text", lambda *_: (_ for _ in ()).throw(OSError("permission denied")))
+    monkeypatch.setattr("pathlib.Path.read_text", lambda *_, **__: (_ for _ in ()).throw(OSError("permission denied")))
     with pytest.raises(CheckpointReadError, match="checkpoints.yaml"):
         manager.read()
 
@@ -88,30 +90,40 @@ def test_build_memory_prompt_with_additions(manager):
 
 
 # ---------------------------------------------------------------------------
-# write_memory / get_memory
+# write_memory / memory_content / memory_path
 # ---------------------------------------------------------------------------
 
 
 def test_write_memory_and_read_back(manager):
-    manager.write_phase_checkpoint("p", {})  # ensure parent dir exists
     manager.write_memory("draft", "Created integration.py and tests.")
-    assert manager.get_memory("draft") == "Created integration.py and tests."
+    assert manager.memory_content("draft") == "Created integration.py and tests."
 
 
 def test_write_memory_overwrites(manager):
-    manager.write_phase_checkpoint("p", {})
     manager.write_memory("draft", "first version")
     manager.write_memory("draft", "second version")
-    assert manager.get_memory("draft") == "second version"
+    assert manager.memory_content("draft") == "second version"
 
 
-def test_get_memory_absent_returns_placeholder(manager):
-    assert manager.get_memory("nonexistent") == "<MEMORY NOT FOUND: nonexistent>"
+def test_memory_content_absent_returns_placeholder(manager):
+    assert manager.memory_content("nonexistent") == "<MEMORY NOT FOUND: nonexistent>"
+
+
+def test_memory_path_returns_absolute_path(manager):
+    path = manager.memory_path("phase1")
+    assert isinstance(path, Path)
+    assert path.is_absolute()
+    assert path.name == "phase1_memory.md"
+
+
+def test_memory_path_before_write(manager):
+    path = manager.memory_path("phase1")
+    assert not path.exists()
 
 
 def test_memory_file_location(manager):
-    manager.write_phase_checkpoint("p", {})
     manager.write_memory("phase1", "content")
     expected_path = manager._path.parent / "phase1_memory.md"
     assert expected_path.exists()
     assert expected_path.read_text() == "content"
+    assert manager.memory_path("phase1") == expected_path.resolve()

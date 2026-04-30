@@ -13,8 +13,8 @@ from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUs
 from ddev.ai.react.callbacks import CallbackSet
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.react.types import ReActResult
-from ddev.ai.tools.core.registry import ToolRegistry
 from ddev.ai.tools.core.types import ToolResult
+from ddev.ai.tools.registry import ToolRegistry
 
 _TOOL_RESULT_DATA: str = "ok"
 
