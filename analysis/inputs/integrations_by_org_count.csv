@@ -1,0 +1,405 @@
+INTEGRATION_NAME,COUNT(DISTINCT FACT_ORG_ENABLED_DATADOG_INTEGRATION_DAILY.ORG_ID)
+logs,"77,466"
+redis,"38,443"
+postgres,"37,490"
+container,"36,178"
+datadog cluster agent,"35,232"
+nginx,"35,027"
+continuous profiler,"32,636"
+coredns,"23,645"
+apache,"21,702"
+synthetics data,"19,913"
+mysql,"19,410"
+push notifications,"18,107"
+security monitoring,"18,091"
+incidents,"17,147"
+network performance monitoring,"14,868"
+feed,"13,017"
+haproxy,"11,923"
+elasticsearch,"10,094"
+cri,"9,395"
+containerd,"8,870"
+iis,"7,421"
+mongodb,"7,168"
+rabbitmq,"7,012"
+github,"6,273"
+sql server,"6,266"
+tls,"5,604"
+nginx-ingress-controller,"5,289"
+windows service,"5,191"
+ssh,"5,123"
+php-fpm,"5,037"
+kube scheduler,"4,969"
+tomcat,"4,953"
+memcached,"4,652"
+kafka,"4,644"
+etcd,"4,254"
+audit trail,"4,180"
+jenkins,"3,974"
+istio,"3,821"
+kubernetes controller manager,"3,675"
+zookeeper,"3,654"
+event viewer,"3,499"
+snmp,"3,325"
+mongodb atlas,"3,150"
+consul,"2,809"
+.net clr,"2,526"
+wmi,"2,443"
+knative for anthos,"2,348"
+kube dns,"2,331"
+vault,"2,273"
+asp.net,"2,200"
+github apps,"2,159"
+vsphere,"2,147"
+active directory,"2,103"
+kube metrics server,"2,092"
+ansible,"2,035"
+systemd,"1,932"
+postfix,"1,928"
+kubernetes api server metrics,"1,914"
+gunicorn,"1,889"
+cassandra,"1,879"
+auth0,"1,874"
+cert-manager,"1,851"
+envoy,"1,838"
+airflow,"1,746"
+prometheus,"1,674"
+supervisord,"1,649"
+spark,"1,640"
+kong,"1,580"
+pingdom legacy api (v2.1),"1,507"
+bitbucket,"1,476"
+varnish,"1,406"
+fluentd,"1,362"
+gitlab runner,"1,362"
+gitlab,"1,324"
+logstash,"1,307"
+go,"1,253"
+oracle database,"1,200"
+circleci,"1,144"
+pgbouncer,"1,143"
+chef,"1,053"
+activemq,"1,032"
+pdh,998
+zendesk,996
+solr,994
+cisco,979
+kafka consumer,963
+aws pricing,944
+okta,918
+sonarqube,912
+openmetrics,880
+snowflake,849
+apollo engine,828
+nagios,804
+helm,744
+meraki,735
+hyperv,689
+sidekiq,688
+ping,686
+confluent cloud,680
+github telemetry,674
+squid,658
+terraform,657
+cilium,650
+microsoft 365,645
+oom kill,611
+rollbar,610
+observability pipelines,585
+windows performance counters,576
+jboss/wildfly,568
+puppet,556
+chatwork,533
+cloud cost,493
+pivotal,485
+salesforce,481
+databricks,479
+bugsnag,478
+hdfs datanode,469
+nomad,469
+jmeter,464
+couchbase,461
+yarn,458
+pusher,449
+confluent platform,446
+dyn,444
+ceph,443
+segment,430
+couchdb,422
+desk,407
+cloudhealth,393
+puma,381
+capistrano,381
+papertrail,375
+splunk,367
+exchange server,366
+dell,365
+launchdarkly,362
+proxysql,342
+openshift,334
+mesos,319
+airbrake,319
+flink,305
+openstack,288
+uptime,278
+linkerd,275
+oracle cloud infrastructure,258
+cassandra nodetool,258
+sumo logic,251
+clickhouse,249
+palo alto networks firewall,247
+journald,246
+travis ci,245
+netlify,243
+sendgrid,242
+alibaba cloud,236
+marathon,231
+crowdstrike,230
+statsd,226
+teamcity,221
+aerospike,215
+nvml,214
+speedtest,213
+tcp queue length,210
+sqreen,206
+hasura cloud,204
+pingdom,203
+openldap,197
+jfrog platform,195
+mapreduce,192
+ibm was,192
+cockroachdb,192
+redis sentinel,189
+windows kernel memory,186
+ibm mq,179
+lighttpd,176
+xmatters,175
+cacti,169
+kube proxy,168
+signal sciences,163
+cisco aci,157
+hive,157
+fabric,156
+lacework,149
+gearman,149
+hdfs namenode,147
+presto,147
+hazelcast,144
+juniper networks,143
+f5 networks,143
+federator.ai,141
+btrfs,138
+honeybadger,138
+bigpanda,137
+druid,136
+zabbix (community version),136
+powerdns recursor,135
+jumpcloud,134
+activemq xml,133
+lighthouse,131
+sap hana,130
+akamai datastream 2,129
+scylla,128
+gremlin,126
+concourse ci,125
+ibm db2,124
+cloud foundry,123
+bonsai,119
+riak,117
+redis enterprise,114
+php apcu,109
+office 365,108
+lightbendrp,106
+pihole,103
+harbor,101
+aqua,100
+squadcast,100
+rapdev snmp profiles,96
+rundeck,95
+reboot required,94
+weblogic,94
+redmine,92
+split,91
+twistlock,91
+tenable,86
+openstack controller,85
+filebeat,83
+twemproxy,83
+cri-o,81
+aws iam access analyzer,81
+buddy,80
+mesos master,79
+catchpoint,78
+ignite,78
+logz.io,78
+bind 9,71
+pulsar,71
+glusterfs,69
+consul connect,68
+unbound,67
+gatekeeper,67
+dingtalk,67
+io connect mulesoft anypoint,66
+rethinkdb,65
+fluent bit,63
+neo4j,60
+flowdock,59
+rapdev zoom,59
+cockroachdb dedicated,56
+vertica,55
+planetscale,53
+hivemq,52
+configcat,52
+retool,52
+nvidia jetson,51
+algorithmia,50
+nextcloud,49
+akamai mpulse,49
+arangodb,47
+n2ws backup & recovery,47
+ambari,44
+tidb cloud,42
+fluxcd,42
+perimeterx,41
+reporter,40
+zscaler (community version),40
+lambdatest,40
+portworx,40
+gnatsd,37
+singlestore,37
+purefa,37
+pivotal pks,36
+rapdev solaris agent,35
+redpanda,34
+rapdev nutanix,34
+gnatsd streaming,33
+mparticle,32
+tokumx,32
+trek10 aws coverage advisor,31
+rigor,31
+rapdev validator,31
+bigpanda saas,30
+traffic server,30
+rapdev sophos,30
+ns1,29
+pulumi,29
+oracle container engine for kubernetes - oke,29
+hbase master,28
+hbase regionserver,28
+boundary,28
+convox,26
+rbltracker,26
+open policy agent,26
+marklogic,25
+moogsoft,25
+synthetic email,24
+ibm i,24
+podman,24
+hardware sentry,23
+amixr,23
+flagsmith,23
+riakcs,22
+octoprint,22
+conviva,22
+apache apisix,22
+statsig,21
+eventstore,21
+alertnow,21
+contrastsecurity,21
+foundationdb,20
+vns3,19
+zebrium,19
+tidb,19
+mapr,19
+salesforce commerce cloud,19
+upsc,17
+rapdev backup,17
+citrix hypervisor,17
+onelogin,17
+avi vantage,17
+kyoto tycoon,17
+blue matador,17
+rapdev maxdb,16
+sleuth,16
+altostra,16
+storm,16
+agentil software sap netweaver,16
+rapdev github,15
+sendmail,15
+tyk,15
+oracle timesten,15
+nerdvision,13
+rapdev terraform,13
+datazoom,13
+voltdb,13
+stormforge,13
+rapdev servicenow,12
+salesforce incidents,12
+rapdev gitlab,11
+campfire,11
+crest data systems dell emc isilon,11
+rapdev msteams,11
+opsmatic,11
+rapdev hp-ux agent,11
+cyral,10
+cloudsmith,10
+rapdev box,10
+federator.ai.license,10
+backstage,9
+appkeeper,9
+kernelcare,9
+moxtra,9
+syncthing,9
+rapdev influxdb,9
+rapdev rapid7,9
+torq,8
+triggermesh,8
+mailgun,8
+purefb,8
+hudi,8
+signl4,7
+stardog,7
+adaptive shield,7
+zenduty,7
+silk,7
+sosivio,7
+teradata,6
+ibm ace,6
+botprise,6
+cfssl,6
+speedscale,6
+stripe,6
+emnify,6
+exim,6
+insightfinder,6
+avm consulting workday,5
+cortex,5
+ilert,5
+agentil software sap businessobjects,5
+calico,5
+scalr (community version),5
+resin,4
+fairwinds insights,4
+vespa,4
+rapdev services,4
+gitea,4
+neutrona,3
+statsig license,3
+crest data systems microsoft defender,3
+netnology sd-wan,3
+pliant,3
+superwise,3
+nobl9,3
+sedai,3
+stackpulse,2
+visium technologies cygraph,2
+edgecast,2
+riak mdc replication,2
+neoload,2
+unitq,2
+insightfinder license,2
+impala,2
+drata,2
+mainstorconcept-ziris,2
+blink,1
+zoom,1
