@@ -480,17 +480,3 @@ instances:
 #     path: /opt/nifi/logs/nifi-app.log
 #     source: nifi
 #     service: nifi
-#   - type: file
-#     path: /opt/nifi/logs/nifi-user.log
-#     source: nifi
-#     service: nifi
-#   - type: file
-#     path: /opt/nifi/logs/nifi-bootstrap.log
-#     source: nifi
-#     service: nifi
-#   - type: file
-#     path: /opt/nifi/logs/nifi-request.log
-#     source: nifi
-#     service: nifi
-#     tags:
-#     - log_type:request
