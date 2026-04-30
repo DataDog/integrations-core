@@ -95,7 +95,7 @@
   fleet_configurable: true
 - name: password
   display_priority: 0
-  secret: true
+  formats: ["secret"]
   value:
     type: string
   description: The password to use if services are behind basic or NTLM auth.
@@ -300,6 +300,7 @@
 - name: tls_cert
   display_priority: 0
   fleet_configurable: true
+  formats: ["path"]
   value:
     example: <CERT_PATH>
     type: string
@@ -311,6 +312,7 @@
 - name: tls_private_key
   display_priority: 0
   fleet_configurable: true
+  formats: ["secret"]
   value:
     example: <PRIVATE_KEY_PATH>
     type: string
@@ -321,6 +323,7 @@
 - name: tls_ca_cert
   display_priority: 0
   fleet_configurable: true
+  formats: ["path"]
   value:
     example: <CA_CERT_PATH>
     type: string
