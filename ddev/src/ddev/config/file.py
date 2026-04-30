@@ -9,7 +9,9 @@ from dataclasses import dataclass
 from typing import cast
 
 from ddev.config.model import RootConfig
-from ddev.config.utils import scrub_config
+from ddev.config.override_trust import get_override_trust_state
+from ddev.config.override_trust import strip_fetch_command_fields as _strip_fetch_command_fields
+from ddev.config.scrubber import scrub_config
 from ddev.utils.fs import Path
 from ddev.utils.toml import dumps_toml_data, load_toml_data
 
@@ -94,6 +96,8 @@ class ConfigFileWithOverrides:
         self.combined_model: RootConfig = cast(RootConfig, UNINITIALIZED)
         self.combined_content: str = ""
         self._overrides_path: Path | None = None
+        # Warnings collected during load() for surfacing at CLI startup.
+        self.load_warnings: list[str] = []
 
     @property
     def overrides_path(self) -> Path:
@@ -146,6 +150,8 @@ class ConfigFileWithOverrides:
             return Path(relative_overrides_path)
 
     def load(self):
+        self.load_warnings = []
+
         self.global_content = self.global_path.read_text()
         self.global_model = RootConfig(load_toml_data(self.global_content))
 
@@ -157,7 +163,29 @@ class ConfigFileWithOverrides:
             return
 
         self.overrides_content = overrides_content
-        self.overrides_model = RootConfig(load_toml_data(self.overrides_content))
+        overrides_raw = load_toml_data(self.overrides_content)
+
+        # Determine trust state for the local override file.
+        global_config_dir = self.global_path.parent
+        trust_state, _ = get_override_trust_state(self.overrides_path, global_config_dir)
+
+        if trust_state == 'allowed':
+            # Commands are trusted – leave overrides_raw intact.
+            pass
+        elif trust_state == 'denied':
+            # User explicitly silenced warnings; strip quietly.
+            _strip_fetch_command_fields(overrides_raw)
+        else:
+            # Unknown / hash mismatch – strip and warn.
+            stripped = _strip_fetch_command_fields(overrides_raw)
+            if stripped:
+                self.load_warnings.append(
+                    f'Ignored untrusted `_fetch_command` field(s) from {self.pretty_overrides_path}: '
+                    f'{", ".join(stripped)}. '
+                    f'Run `ddev config allow` to trust this file.'
+                )
+
+        self.overrides_model = RootConfig(overrides_raw)
 
         self.combined_model = RootConfig(
             deep_merge_with_list_handling(
