@@ -14,7 +14,16 @@ from dataclasses import dataclass
 import pytest
 from pytest_mock import MockerFixture
 
-from ddev.event_bus.exceptions import FatalProcessingError, ProcessorQueueError
+from ddev.event_bus.exceptions import (
+    FatalProcessingError,
+    HookExecutionError,
+    HookName,
+    MessageProcessingError,
+    OrchestratorHookError,
+    ProcessorHookError,
+    ProcessorQueueError,
+    SkipMessageError,
+)
 from ddev.event_bus.orchestrator import AsyncProcessor, BaseMessage, EventBusOrchestrator, SyncProcessor
 
 # Test Structure Documentation
@@ -81,6 +90,7 @@ class Secretary(AsyncProcessor[Memo]):
         self.delivered_memos: list[BaseMessage] = []
         self.confirmations: list[BaseMessage] = []
         self.failed_deliveries: list[tuple[BaseMessage, Exception]] = []
+        self.hook_failures: list[ProcessorHookError] = []
 
     async def process_message(self, message: Memo) -> None:
         if message.content.startswith("fail_processing"):
@@ -92,10 +102,13 @@ class Secretary(AsyncProcessor[Memo]):
             raise RuntimeError("Success hook failed intentionally")
         self.confirmations.append(message)
 
-    async def on_error(self, message: Memo, error: Exception) -> None:
-        if message.content == "fail_processing_and_error":
-            raise RuntimeError("Error hook failed intentionally")
-        self.failed_deliveries.append((message, error))
+    async def on_error(self, error: Exception) -> None:
+        if isinstance(error, MessageProcessingError):
+            if error.message.content == "fail_processing_and_error":
+                raise RuntimeError("Error hook failed intentionally")
+            self.failed_deliveries.append((error.message, error.original_exception))
+        elif isinstance(error, ProcessorHookError):
+            self.hook_failures.append(error)
 
 
 class Analyst(AsyncProcessor[TaskAssignment | Announcement]):
@@ -123,8 +136,19 @@ class Manager(AsyncProcessor[Memo]):
 
 
 class MockOrchestrator(EventBusOrchestrator):
-    def __init__(self, logger: logging.Logger, max_timeout: float = 300, grace_period: float = 10):
-        super().__init__(logger=logger, max_timeout=max_timeout, grace_period=grace_period)
+    def __init__(
+        self,
+        logger: logging.Logger,
+        max_timeout: float = 300,
+        grace_period: float = 10,
+        fail_fast: bool = False,
+    ):
+        super().__init__(
+            logger=logger,
+            max_timeout=max_timeout,
+            grace_period=grace_period,
+            fail_fast=fail_fast,
+        )
         self.events: list[str] = []
         self.received_messages: list[BaseMessage] = []
         self.finalized_exception: Exception | None = None
@@ -226,46 +250,46 @@ def test_workflow_success(
 def test_processor_processing_failure(
     orchestrator: MockOrchestrator,
     secretary: Secretary,
-    caplog: pytest.LogCaptureFixture,
     memo_content: str,
     expected_error_type: type[Exception],
 ) -> None:
+    """Secretary's on_error returns cleanly, so the failure is handled and the bus continues."""
     orchestrator.submit_message(Memo("failed_memo", content=memo_content))
 
     orchestrator.run()
 
-    # Secretary should have failed processing
     assert len(secretary.delivered_memos) == 0
     assert len(secretary.confirmations) == 0
     assert len(secretary.failed_deliveries) == 1
+    assert orchestrator.finalized_exception is None
 
     failed_msg, error = secretary.failed_deliveries[0]
     assert failed_msg.id == "failed_memo"
     assert isinstance(error, expected_error_type)
 
-    # Check that MessageProcessingError was logged (as the task failure)
-    # The log format is "Task failed: %s" where %s is the exception repr
-    assert "Error processing message by processor" in caplog.text
-    assert "Processing failed intentionally" in caplog.text
 
-
-def test_processor_success_hook_failure(
-    orchestrator: MockOrchestrator, secretary: Secretary, caplog: pytest.LogCaptureFixture
+def test_processor_success_hook_failure_routed_to_on_error(
+    orchestrator: MockOrchestrator, secretary: Secretary
 ) -> None:
+    """on_success failure is wrapped and routed to the processor's on_error."""
     orchestrator.submit_message(Memo("hook_fail_memo", content="fail_success_hook"))
+
     orchestrator.run()
 
-    # Processing succeeded
+    # process_message succeeded but on_success failed
     assert len(secretary.delivered_memos) == 1
-    # But success hook failed
     assert len(secretary.confirmations) == 0
-
-    # Error hook should NOT be called for success hook failure
+    # Routed as a ProcessorHookError, not a MessageProcessingError
     assert len(secretary.failed_deliveries) == 0
+    assert len(secretary.hook_failures) == 1
 
-    # Check that ProcessorSuccessHookError was logged
-    assert "Error in 'on_success' hook for processor" in caplog.text
-    assert "Success hook failed intentionally" in caplog.text
+    hook_err = secretary.hook_failures[0]
+    assert hook_err.hook_name is HookName.ON_SUCCESS
+    assert isinstance(hook_err.original_exception, RuntimeError)
+    assert isinstance(hook_err, ProcessorHookError)
+    assert isinstance(hook_err, HookExecutionError)
+    # Bus continues — Secretary handled the failure
+    assert orchestrator.finalized_exception is None
 
 
 def test_mixed_messages(orchestrator: MockOrchestrator, secretary: Secretary, analyst: Analyst) -> None:
@@ -328,34 +352,94 @@ def test_validate_parameters(max_timeout: float, grace_period: float, expectatio
         MockOrchestrator(logger, max_timeout=max_timeout, grace_period=grace_period)
 
 
-def test_default_on_error(orchestrator: MockOrchestrator, analyst: Analyst, caplog: pytest.LogCaptureFixture) -> None:
-    # Analyst uses default on_error (pass)
+def test_default_on_error_with_default_policy_logs_and_continues(
+    orchestrator: MockOrchestrator, analyst: Analyst, caplog: pytest.LogCaptureFixture
+) -> None:
+    """Analyst uses the default re-raising on_error; under fail_fast=False the bus logs and continues."""
     orchestrator.submit_message(TaskAssignment("bad_task", priority=-1))
     orchestrator.run()
 
     assert len(analyst.completed_tasks) == 0
     assert "finalize" in orchestrator.events
+    assert orchestrator.finalized_exception is None
     assert "Analyst failed intentionally" in caplog.text
 
 
-def test_processor_on_error_failure(
-    orchestrator: MockOrchestrator,
-    secretary: Secretary,
-    caplog: pytest.LogCaptureFixture,
+def test_default_on_error_with_fail_fast_stops_bus(secretary: Secretary, analyst: Analyst, manager: Manager) -> None:
+    """Default on_error re-raises; under fail_fast=True the bus stops."""
+    logger = logging.getLogger("test")
+    orchestrator = MockOrchestrator(logger, grace_period=0.1, fail_fast=True)
+    orchestrator.register_processor(analyst, [TaskAssignment, Announcement])
+
+    orchestrator.submit_message(TaskAssignment("bad_task", priority=-1))
+
+    with pytest.raises(MessageProcessingError) as exc_info:
+        orchestrator.run()
+
+    assert isinstance(exc_info.value.original_exception, ValueError)
+    assert "finalize" in orchestrator.events
+    assert orchestrator.finalized_exception is exc_info.value
+
+
+def test_processor_on_error_failure_logs_under_default_policy(
+    orchestrator: MockOrchestrator, secretary: Secretary, caplog: pytest.LogCaptureFixture
 ) -> None:
+    """on_error itself raising a non-Fatal error is logged under fail_fast=False; bus continues."""
     orchestrator.submit_message(Memo("double_fail_memo", content="fail_processing_and_error"))
 
     orchestrator.run()
 
     assert len(secretary.delivered_memos) == 0
     assert len(secretary.failed_deliveries) == 0
-
-    # The orchestrator should have caught the double failure and continued
     assert "finalize" in orchestrator.events
-    # We should have logged the error
+    assert orchestrator.finalized_exception is None
     assert "Error hook failed intentionally" in caplog.text
-    # And the task should have failed with the original processing error wrapped
-    assert "Error processing message by processor" in caplog.text
+
+
+def test_processor_on_error_failure_stops_bus_under_fail_fast(secretary: Secretary) -> None:
+    """on_error itself raising a non-Fatal error stops the bus when fail_fast=True."""
+    logger = logging.getLogger("test")
+    orchestrator = MockOrchestrator(logger, grace_period=0.1, fail_fast=True)
+    orchestrator.register_processor(secretary, [Memo])
+
+    orchestrator.submit_message(Memo("double_fail_memo", content="fail_processing_and_error"))
+
+    with pytest.raises(RuntimeError, match="Error hook failed intentionally"):
+        orchestrator.run()
+
+    assert "finalize" in orchestrator.events
+    assert isinstance(orchestrator.finalized_exception, RuntimeError)
+
+
+def test_on_error_returning_cleanly_continues_under_fail_fast(secretary: Secretary) -> None:
+    """A processor whose on_error returns cleanly keeps the bus running even with fail_fast=True."""
+    logger = logging.getLogger("test")
+    orchestrator = MockOrchestrator(logger, grace_period=0.1, fail_fast=True)
+    orchestrator.register_processor(secretary, [Memo])
+
+    orchestrator.submit_message(Memo("recoverable_memo", content="fail_processing"))
+    orchestrator.submit_message(Memo("ok_memo", content="ok"))
+
+    orchestrator.run()
+
+    assert orchestrator.finalized_exception is None
+    assert len(secretary.delivered_memos) == 1
+    assert secretary.delivered_memos[0].id == "ok_memo"
+    assert len(secretary.failed_deliveries) == 1
+
+
+def test_processor_on_error_recovers_processing_failure(orchestrator: MockOrchestrator, secretary: Secretary) -> None:
+    """process_message() failures handled by on_error keep the bus running normally."""
+    orchestrator.submit_message(Memo("recoverable_memo", content="fail_processing"))
+    orchestrator.submit_message(Memo("ok_memo", content="ok"))
+
+    orchestrator.run()
+
+    assert "finalize" in orchestrator.events
+    assert orchestrator.finalized_exception is None
+    assert len(secretary.delivered_memos) == 1
+    assert secretary.delivered_memos[0].id == "ok_memo"
+    assert len(secretary.failed_deliveries) == 1
 
 
 def test_no_subscribers() -> None:
@@ -371,7 +455,47 @@ def test_no_subscribers() -> None:
     assert len(orchestrator.received_messages) == 0
 
 
-def test_initialization_failure() -> None:
+@pytest.mark.parametrize(
+    "hook_name, hook_attr",
+    [
+        (HookName.ON_INITIALIZE, "on_initialize"),
+        (HookName.ON_MESSAGE_RECEIVED, "on_message_received"),
+        (HookName.ON_FINALIZE, "on_finalize"),
+    ],
+    ids=["on_initialize", "on_message_received", "on_finalize"],
+)
+def test_orchestrator_hook_failure_surfaces_under_fail_fast(
+    hook_name: HookName,
+    hook_attr: str,
+) -> None:
+    """Each orchestrator-level hook surfaces its failure through run() when fail_fast=True."""
+    logger = logging.getLogger("test")
+    orchestrator = MockOrchestrator(logger, grace_period=0.1, fail_fast=True)
+
+    async def hook_boom(*_args, **_kwargs):
+        raise RuntimeError(f"{hook_attr} boom")
+
+    setattr(orchestrator, hook_attr, hook_boom)
+
+    if hook_name is HookName.ON_MESSAGE_RECEIVED:
+        secretary = Secretary("secretary")
+        orchestrator.register_processor(secretary, [Memo])
+        orchestrator.submit_message(Memo("trigger"))
+    else:
+        secretary = None
+
+    with pytest.raises(OrchestratorHookError) as exc_info:
+        orchestrator.run()
+
+    assert exc_info.value.hook_name is hook_name
+    assert isinstance(exc_info.value.original_exception, RuntimeError)
+    assert str(exc_info.value.original_exception) == f"{hook_attr} boom"
+    if secretary is not None:
+        assert len(secretary.delivered_memos) == 0
+
+
+def test_initialization_failure_swallowed_under_default_policy(caplog: pytest.LogCaptureFixture) -> None:
+    """Under fail_fast=False the default on_error re-raise is logged and the bus continues."""
     logger = logging.getLogger("test")
     orchestrator = MockOrchestrator(logger, grace_period=0.1)
 
@@ -379,14 +503,36 @@ def test_initialization_failure() -> None:
         raise RuntimeError("Init failed")
 
     orchestrator.on_initialize = on_init_fail
+    orchestrator.run()
 
-    with pytest.raises(RuntimeError, match="Init failed"):
-        orchestrator.run()
-
-    # Finalize should still be called
     assert "finalize" in orchestrator.events
-    assert isinstance(orchestrator.finalized_exception, RuntimeError)
-    assert str(orchestrator.finalized_exception) == "Init failed"
+    assert orchestrator.finalized_exception is None
+    assert "Init failed" in caplog.text
+
+
+def test_orchestrator_on_error_can_handle_initialization_failure() -> None:
+    """A custom orchestrator on_error can swallow init failures cleanly."""
+    logger = logging.getLogger("test")
+    orchestrator = MockOrchestrator(logger, grace_period=0.1, fail_fast=True)
+
+    seen: list[OrchestratorHookError] = []
+
+    async def on_init_fail():
+        raise RuntimeError("Init failed")
+
+    async def on_error_handle(error):
+        seen.append(error)
+        # Return cleanly = handled
+
+    orchestrator.on_initialize = on_init_fail  # type: ignore[method-assign]
+    orchestrator.on_error = on_error_handle  # type: ignore[method-assign]
+
+    orchestrator.run()
+
+    assert len(seen) == 1
+    assert seen[0].hook_name is HookName.ON_INITIALIZE
+    assert "finalize" in orchestrator.events
+    assert orchestrator.finalized_exception is None
 
 
 def test_finalize_receives_exception_on_process_messages_failure(mocker: MockerFixture) -> None:
@@ -501,9 +647,7 @@ def test_processor_submit_without_bus() -> None:
         processor.submit_message(Memo("fail"))
 
 
-def test_fatal_processing_error_stops_orchestrator(
-    orchestrator: MockOrchestrator, caplog: pytest.LogCaptureFixture
-) -> None:
+def test_fatal_processing_error_stops_orchestrator(orchestrator: MockOrchestrator) -> None:
     # Capture the original method to preserve its behavior (tracking received messages)
     original_on_message = orchestrator.on_message_received
 
@@ -518,15 +662,158 @@ def test_fatal_processing_error_stops_orchestrator(
     orchestrator.submit_message(Memo("fatal_msg"))
     orchestrator.submit_message(Memo("ignored_msg"))
 
-    orchestrator.run()
+    with pytest.raises(FatalProcessingError, match="Fatal error triggered"):
+        orchestrator.run()
 
-    # Should stop
+    # Finalize ran with the fatal error attached
     assert "finalize" in orchestrator.events
-    assert "Fatal error processing on_message_received hook" in caplog.text
+    assert isinstance(orchestrator.finalized_exception, FatalProcessingError)
 
-    # Assert that only the first message was processed/received by the hook
+    # Only the first message was processed/received by the hook
     assert len(orchestrator.received_messages) == 1
     assert orchestrator.received_messages[0].id == "fatal_msg"
+
+
+def test_orchestrator_hook_failure_swallowed_under_default_policy(
+    secretary: Secretary, caplog: pytest.LogCaptureFixture
+) -> None:
+    """Under fail_fast=False, an orchestrator hook failure is logged and processing continues."""
+    logger = logging.getLogger("test")
+    orchestrator = MockOrchestrator(logger, grace_period=0.1)
+    orchestrator.register_processor(secretary, [Memo])
+
+    call_count = [0]
+
+    async def on_message_first_fails(message: BaseMessage):
+        call_count[0] += 1
+        if call_count[0] == 1:
+            raise RuntimeError("first message hook failed")
+
+    orchestrator.on_message_received = on_message_first_fails  # type: ignore[method-assign]
+
+    orchestrator.submit_message(Memo("boom_msg"))
+    orchestrator.submit_message(Memo("ok_msg"))
+    orchestrator.run()
+
+    assert orchestrator.finalized_exception is None
+    assert "first message hook failed" in caplog.text
+    # Both messages were dispatched: hook error didn't stop the loop
+    assert len(secretary.delivered_memos) == 2
+
+
+def test_processor_on_error_can_signal_fatal(orchestrator: MockOrchestrator, secretary: Secretary) -> None:
+    """on_error raising FatalProcessingError stops the bus regardless of fail_fast."""
+
+    async def fatal_on_error(error: Exception) -> None:
+        raise FatalProcessingError("on_error decided to stop the bus")
+
+    secretary.on_error = fatal_on_error  # type: ignore[method-assign]
+
+    orchestrator.submit_message(Memo("trigger_fatal", content="fail_processing"))
+
+    with pytest.raises(FatalProcessingError, match="on_error decided to stop the bus"):
+        orchestrator.run()
+
+    assert "finalize" in orchestrator.events
+    assert isinstance(orchestrator.finalized_exception, FatalProcessingError)
+    assert len(secretary.delivered_memos) == 0
+
+
+def test_finalize_failure_swallowed_under_default_policy(caplog: pytest.LogCaptureFixture) -> None:
+    """Under fail_fast=False on_finalize failures route through on_error and are absorbed."""
+    logger = logging.getLogger("test")
+    orchestrator = MockOrchestrator(logger, grace_period=0.1)
+
+    async def on_finalize_boom(exception: Exception | None) -> None:
+        orchestrator.events.append("finalize")
+        raise RuntimeError("finalize boom")
+
+    orchestrator.on_finalize = on_finalize_boom  # type: ignore[method-assign]
+
+    orchestrator.run()
+
+    assert "finalize" in orchestrator.events
+    assert "finalize boom" in caplog.text
+
+
+def test_finalize_failure_takes_precedence_over_earlier_exception_under_fail_fast() -> None:
+    """When init and finalize both fail under fail_fast=True, the finalize failure surfaces."""
+    logger = logging.getLogger("test")
+    orchestrator = MockOrchestrator(logger, grace_period=0.1, fail_fast=True)
+
+    saw_exception: list[Exception | None] = []
+
+    async def on_init_fail() -> None:
+        raise RuntimeError("init failed")
+
+    async def on_finalize_boom(exception: Exception | None) -> None:
+        orchestrator.events.append("finalize")
+        saw_exception.append(exception)
+        raise RuntimeError("finalize boom")
+
+    orchestrator.on_initialize = on_init_fail  # type: ignore[method-assign]
+    orchestrator.on_finalize = on_finalize_boom  # type: ignore[method-assign]
+
+    with pytest.raises(OrchestratorHookError) as exc_info:
+        orchestrator.run()
+
+    assert exc_info.value.hook_name is HookName.ON_FINALIZE
+    assert isinstance(exc_info.value.original_exception, RuntimeError)
+    assert str(exc_info.value.original_exception) == "finalize boom"
+
+    # on_finalize received the wrapped initialization failure
+    assert len(saw_exception) == 1
+    init_err = saw_exception[0]
+    assert isinstance(init_err, OrchestratorHookError)
+    assert init_err.hook_name is HookName.ON_INITIALIZE
+
+
+def test_skip_message_error_from_on_message_received(
+    orchestrator: MockOrchestrator, secretary: Secretary, caplog: pytest.LogCaptureFixture
+) -> None:
+    """SkipMessageError from on_message_received skips dispatch and continues with the next message."""
+
+    async def on_message_skip_first(message: BaseMessage):
+        if message.id == "skip_me":
+            raise SkipMessageError("not safe to process")
+
+    orchestrator.on_message_received = on_message_skip_first  # type: ignore[method-assign]
+
+    orchestrator.submit_message(Memo("skip_me"))
+    orchestrator.submit_message(Memo("ok_msg"))
+    orchestrator.run()
+
+    assert orchestrator.finalized_exception is None
+    assert [m.id for m in secretary.delivered_memos] == ["ok_msg"]
+    assert "Skipping message skip_me" in caplog.text
+    assert "not safe to process" in caplog.text
+
+
+def test_skip_message_error_outside_on_message_received_has_no_special_behavior(
+    bare_orchestrator: MockOrchestrator, caplog: pytest.LogCaptureFixture
+) -> None:
+    """SkipMessageError raised in processor scope has no special skip behavior."""
+
+    class SkipperProcessor(AsyncProcessor[Memo]):
+        def __init__(self, name: str):
+            super().__init__(name)
+            self.attempts: list[Memo] = []
+
+        async def process_message(self, message: Memo) -> None:
+            self.attempts.append(message)
+            raise SkipMessageError("skip from processor scope")
+
+    proc = SkipperProcessor("skipper")
+    bare_orchestrator.register_processor(proc, [Memo])
+
+    bare_orchestrator.submit_message(Memo("m1"))
+    bare_orchestrator.submit_message(Memo("m2"))
+    bare_orchestrator.run()
+
+    # process_message was attempted for both messages — bus did not short-circuit
+    assert len(proc.attempts) == 2
+    # No "Skipping message" log line — that path is reserved for on_message_received context
+    assert "Skipping message" not in caplog.text
 
 
 def test_should_process_message_conditional_filtering(bare_orchestrator: MockOrchestrator) -> None:
