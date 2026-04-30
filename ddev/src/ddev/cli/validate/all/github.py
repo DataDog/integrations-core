@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 COMMENT_HEADING = "## Validation Report"
 COMMENT_STATUS_SUCCESS = "<!-- ddev-validation-report:success -->"
 COMMENT_STATUS_ACTION_REQUIRED = "<!-- ddev-validation-report:action-required -->"
+# Suppresses all validation PR comments, including failures, on the next validation run.
 VALIDATION_COMMENT_SUPPRESSION_LABEL = "ci/skip-validation-comments"
 
 
