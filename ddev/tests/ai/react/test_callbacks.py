@@ -252,3 +252,133 @@ async def test_multiple_compact_handlers_all_fired() -> None:
     await cb.fire_before_compact()
     await cb.fire_after_compact()
     assert fired == ["before-1", "before-2", "after-1", "after-2"]
+
+
+# ---------------------------------------------------------------------------
+# on_phase_start
+# ---------------------------------------------------------------------------
+
+
+async def test_phase_start_registered_and_fired() -> None:
+    cb = CallbackSet()
+    fired: list[str] = []
+
+    @cb.on_phase_start
+    async def h(phase_id: str) -> None:
+        fired.append(phase_id)
+
+    await cb.fire_phase_start("my-phase")
+    assert fired == ["my-phase"]
+
+
+async def test_phase_start_receives_correct_phase_id() -> None:
+    cb = CallbackSet()
+    received: list[str] = []
+
+    @cb.on_phase_start
+    async def h(phase_id: str) -> None:
+        received.append(phase_id)
+
+    await cb.fire_phase_start("draft")
+    assert received == ["draft"]
+
+
+async def test_phase_start_multiple_handlers_all_fire_in_order() -> None:
+    cb = CallbackSet()
+    fired: list[int] = []
+
+    @cb.on_phase_start
+    async def first(phase_id: str) -> None:
+        fired.append(1)
+
+    @cb.on_phase_start
+    async def second(phase_id: str) -> None:
+        fired.append(2)
+
+    @cb.on_phase_start
+    async def third(phase_id: str) -> None:
+        fired.append(3)
+
+    await cb.fire_phase_start("p")
+    assert fired == [1, 2, 3]
+
+
+async def test_phase_start_exception_is_swallowed() -> None:
+    cb = CallbackSet()
+    fired: list[bool] = []
+
+    @cb.on_phase_start
+    async def bad(phase_id: str) -> None:
+        raise RuntimeError("boom")
+
+    @cb.on_phase_start
+    async def good(phase_id: str) -> None:
+        fired.append(True)
+
+    await cb.fire_phase_start("p")
+    assert fired == [True]
+
+
+# ---------------------------------------------------------------------------
+# on_before_agent_send
+# ---------------------------------------------------------------------------
+
+
+async def test_before_agent_send_registered_and_fired() -> None:
+    cb = CallbackSet()
+    fired: list[int] = []
+
+    @cb.on_before_agent_send
+    async def h(iteration: int) -> None:
+        fired.append(iteration)
+
+    await cb.fire_before_agent_send(3)
+    assert fired == [3]
+
+
+async def test_before_agent_send_receives_correct_iteration() -> None:
+    cb = CallbackSet()
+    received: list[int] = []
+
+    @cb.on_before_agent_send
+    async def h(iteration: int) -> None:
+        received.append(iteration)
+
+    await cb.fire_before_agent_send(7)
+    assert received == [7]
+
+
+async def test_before_agent_send_multiple_handlers_all_fire_in_order() -> None:
+    cb = CallbackSet()
+    fired: list[int] = []
+
+    @cb.on_before_agent_send
+    async def first(iteration: int) -> None:
+        fired.append(1)
+
+    @cb.on_before_agent_send
+    async def second(iteration: int) -> None:
+        fired.append(2)
+
+    @cb.on_before_agent_send
+    async def third(iteration: int) -> None:
+        fired.append(3)
+
+    await cb.fire_before_agent_send(1)
+    assert fired == [1, 2, 3]
+
+
+async def test_before_agent_send_exception_is_swallowed() -> None:
+    cb = CallbackSet()
+    fired: list[bool] = []
+
+    @cb.on_before_agent_send
+    async def bad(iteration: int) -> None:
+        raise RuntimeError("boom")
+
+    @cb.on_before_agent_send
+    async def good(iteration: int) -> None:
+        fired.append(True)
+
+    await cb.fire_before_agent_send(1)
+    assert fired == [True]

@@ -10,7 +10,7 @@ from anthropic.types import MessageParam, ToolParam, ToolResultBlockParam
 from ddev.ai.agent.base import BaseAgent
 from ddev.ai.agent.exceptions import AgentAPIError, AgentConnectionError, AgentError, AgentRateLimitError
 from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolCall, ToolResultMessage
-from ddev.ai.tools.core.registry import ToolRegistry
+from ddev.ai.tools.registry import ToolRegistry
 
 DEFAULT_MODEL: Final[str] = "claude-sonnet-4-6"
 DEFAULT_MAX_TOKENS: Final[int] = 8192  # max tokens per response

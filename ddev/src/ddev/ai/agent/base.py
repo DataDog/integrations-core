@@ -7,7 +7,7 @@ from copy import deepcopy
 from typing import Final
 
 from ddev.ai.agent.types import AgentResponse, ToolResultMessage
-from ddev.ai.tools.core.registry import ToolRegistry
+from ddev.ai.tools.registry import ToolRegistry
 
 _COMPACT_SYSTEM_PROMPT: Final[str] = """\
 You are summarizing an agentic conversation to free up context space.
