@@ -87,7 +87,7 @@ jobs:
         run: python .github/workflows/scripts/release_dispatch.py
 
   dispatch:
-    name: Dispatch wheel builds (batch ${{ strategy.job-index + 1 }})
+    name: Dispatch wheel builds (batch ${{ strategy.job-index }})
     needs: prepare
     if: needs.prepare.outputs.has_packages == 'true' && !inputs.dry-run
     runs-on: ubuntu-latest
