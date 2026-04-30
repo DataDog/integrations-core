@@ -2,6 +2,8 @@
 
 ## Overview
 
+**Note:** This integration is no longer maintained by Datadog, and troubleshooting and support are not available for this integration. Datadog recommends using [GPU Monitoring][18] for full GPU metrics and reporting.
+
 This check submits metrics exposed by the [NVIDIA DCGM Exporter][16] in Datadog Agent format. For more information on NVIDIA Data Center GPU Manager (DCGM), see [NVIDIA DCGM][15].
 
 **Minimum Agent version:** 7.47.0
@@ -405,3 +407,4 @@ Additional helpful documentation, links, and articles:
 [15]: https://developer.nvidia.com/dcgm
 [16]: https://github.com/NVIDIA/dcgm-exporter
 [17]: https://docs.datadoghq.com/integrations/nvml/#metrics
+[18]: https://docs.datadoghq.com/gpu_monitoring/
