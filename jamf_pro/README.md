@@ -8,13 +8,11 @@ Integrate Jamf Pro with Datadog to gain insights into [Events][2] using pre-buil
 
 ## Setup
 
-### Configuration
-
-#### Webhook Configuration
+### Webhook Configuration
 
 Configure the Datadog endpoint to forward Jamf Pro detections as logs to Datadog.
 
-1. Copy the generated URL inside the **Configuration** tab on the Datadog [Jamf Pro][3] tile.
+1. {{< integration-api-key-picker >}}
 2. In Jamf Pro, click **Settings** in the sidebar.
 3. In the **Global** section, click **Webhooks**.
 4. Click **New**.
@@ -46,9 +44,8 @@ The Jamf Pro integration does not include any events.
 
 ## Support
 
-For any further assistance, contact [Datadog support][4].
+For any further assistance, contact [Datadog support][3].
 
 [1]: https://www.jamf.com/products/jamf-pro/
 [2]: https://developer.jamf.com/jamf-pro/docs/webhooks-1
-[3]: /integrations/jamf-pro
-[4]: https://docs.datadoghq.com/help/
+[3]: https://docs.datadoghq.com/help/

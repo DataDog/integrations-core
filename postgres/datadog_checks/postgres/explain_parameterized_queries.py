@@ -24,7 +24,7 @@ SELECT CARDINALITY(parameter_types) FROM pg_prepared_statements WHERE name = 'dd
 
 EXECUTE_PREPARED_STATEMENT_QUERY = 'EXECUTE dd_{prepared_statement}{parameters}'
 
-EXPLAIN_QUERY = 'SELECT {explain_function}($stmt${statement}$stmt$)'
+EXPLAIN_QUERY = 'SELECT {explain_function}(%s)'
 
 
 def agent_check_getter(self):
@@ -157,10 +157,8 @@ class ExplainParameterizedQueries:
             prepared_statement_query = self._generate_prepared_statement_query(conn, query_signature)
             return self._execute_query_and_fetch_rows(
                 conn,
-                EXPLAIN_QUERY.format(
-                    explain_function=self._explain_function,
-                    statement=prepared_statement_query,
-                ),
+                EXPLAIN_QUERY.format(explain_function=self._explain_function),
+                (prepared_statement_query,),
             )
         except Exception as e:
             logged_statement = obfuscated_statement
@@ -189,9 +187,9 @@ class ExplainParameterizedQueries:
             logger.debug('Executing query=[%s]', query)
             cursor.execute(query, ignore_query_metric=True)
 
-    def _execute_query_and_fetch_rows(self, conn, query):
+    def _execute_query_and_fetch_rows(self, conn, query, params=None):
         with conn.cursor() as cursor:
-            cursor.execute(query, ignore_query_metric=True)
+            cursor.execute(query, params, ignore_query_metric=True)
             return cursor.fetchall()
 
     def _is_parameterized_query(self, statement: str) -> bool:

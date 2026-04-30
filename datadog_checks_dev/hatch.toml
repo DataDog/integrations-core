@@ -15,5 +15,5 @@ matrix.python.features = [
 ]
 # TODO: remove this when the old CLI is gone
 matrix.python.pre-install-commands = [
-  { value = "python -m pip install --no-deps --disable-pip-version-check {verbosity:flag:-1} -e ../ddev", if = ["3.13"] },
+  { value = "uv pip install --no-deps {verbosity:flag:-1} -e ../ddev", if = ["3.13"] },
 ]

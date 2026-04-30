@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import copy
+
 from datadog_checks.base.utils.containers import hash_mutable
 from datadog_checks.cisco_aci import CiscoACICheck
 from datadog_checks.cisco_aci.api import Api
@@ -40,9 +42,6 @@ class ApiMock:
             {"index": {"attributes": {"attr": "2"}}},
             {"other": {"attributes": {"attr": "3"}}},
         ]
-
-    def get_tenant_events(self, tenant, page=0, page_size=15):
-        return []
 
     def get_epg_meta(self, tenant, app, epg):
         return [{"fvCEp": {"attributes": {"ip": "ip1", "mac": "mac1", "encap": "encap1"}}}]
@@ -214,6 +213,8 @@ def test_tenant_mocked(aggregator):
 
     metric_name = 'cisco_aci.tenant.health'
     aggregator.assert_metric(metric_name, value=99.0, tags=tags, hostname='')
+    # confirm we only submitted once, even though both fvOverallHealth and healthInst were present
+    aggregator.assert_metric(metric_name, count=1, tags=tags, hostname='')
 
     metric_name = 'cisco_aci.tenant.overall_health'
     aggregator.assert_metric(metric_name, value=99.0, tags=tags, hostname='')
@@ -1035,3 +1036,20 @@ def test_tenant_mocked(aggregator):
 
     # Assert coverage for this check on this instance
     aggregator.assert_all_metrics_covered()
+
+
+def test_tenant_mocked_no_fv_health(aggregator):
+    conf = copy.deepcopy(common.CONFIG_WITH_TAGS)
+    conf["tenant"] = ['DataDogAlt']
+
+    check = CiscoACICheck(common.CHECK_NAME, {}, [conf])
+    api = Api(common.ACI_URLS, check.http, common.USERNAME, password=common.PASSWORD, log=check.log)
+    api.wrapper_factory = common.FakeTenantSessionWrapper
+    check._api_cache[hash_mutable(conf)] = api
+
+    check.check({})
+
+    tags = ['project:cisco_aci', 'tenant:DataDogAlt']
+
+    metric_name = 'cisco_aci.tenant.health'
+    aggregator.assert_metric(metric_name, value=94.0, tags=tags, hostname='')

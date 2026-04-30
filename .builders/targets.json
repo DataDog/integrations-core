@@ -1,0 +1,7 @@
+[
+  {"platform": "linux",   "arch": "x86_64",  "runner_os": "ubuntu-22.04"},
+  {"platform": "linux",   "arch": "aarch64", "runner_os": "ubuntu-22.04-arm"},
+  {"platform": "windows", "arch": "x86_64",  "runner_os": "windows-2022"},
+  {"platform": "macos",   "arch": "x86_64",  "runner_os": "macos-14-large"},
+  {"platform": "macos",   "arch": "aarch64", "runner_os": "macos-14"}
+]
