@@ -60,6 +60,17 @@ class CheckCluster(LazyFunction):
             raise RetryError('Redis cluster boot timed out!\nMaster: {}\nReplica: {}'.format(master, replica))
 
 
+def pytest_collection_modifyitems(config, items):
+    if not (AUTODISCOVERY or AUTODISCOVERY_PROCESS):
+        return
+    skip_cluster = pytest.mark.skip(reason='Cluster fixtures are not available in autodiscovery envs')
+    for item in items:
+        if 'test_e2e_autodiscovery' in str(item.fspath):
+            continue
+        if 'integration' in item.keywords:
+            item.add_marker(skip_cluster)
+
+
 @pytest.fixture(scope='session')
 def redis_auth():
     """
