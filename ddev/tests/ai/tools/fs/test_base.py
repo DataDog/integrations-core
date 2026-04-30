@@ -9,6 +9,7 @@ from pydantic import Field
 from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
 from ddev.ai.tools.fs.base import FileRegistryTool
+from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
 
 OWNER_ID = "test-agent"
@@ -39,8 +40,8 @@ class DummyTool(FileRegistryTool[DummyInput]):
 
 
 @pytest.fixture
-def registry() -> FileRegistry:
-    return FileRegistry()
+def registry(tmp_path) -> FileRegistry:
+    return FileRegistry(policy=FileAccessPolicy(write_root=tmp_path))
 
 
 @pytest.fixture

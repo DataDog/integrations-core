@@ -12,6 +12,7 @@ from ddev.ai.phases.base import Phase, _make_memory_resolver, render_memory_prom
 from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
+from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.registry import ToolRegistry
 
@@ -148,7 +149,7 @@ def _make_phase(
         runtime_variables=runtime_variables or {},
         flow_variables=flow_variables or {},
         config_dir=flow_dir,
-        file_registry=FileRegistry(),
+        file_registry=FileRegistry(policy=FileAccessPolicy(write_root=flow_dir)),
         callback_sets=None,
     )
     phase.queue = message_queue
@@ -347,7 +348,7 @@ async def test_flow_variables_in_system_prompt(flow_dir, monkeypatch, message_qu
         runtime_variables={},
         flow_variables={"project": "myproj"},
         config_dir=flow_dir,
-        file_registry=FileRegistry(),
+        file_registry=FileRegistry(policy=FileAccessPolicy(write_root=flow_dir)),
     )
     phase.queue = message_queue
 
@@ -387,7 +388,7 @@ async def test_runtime_variables_override_flow_variables(flow_dir, monkeypatch, 
         runtime_variables={"project": "runtime_override"},
         flow_variables={"project": "flow_default"},
         config_dir=flow_dir,
-        file_registry=FileRegistry(),
+        file_registry=FileRegistry(policy=FileAccessPolicy(write_root=flow_dir)),
     )
     phase.queue = message_queue
 
@@ -523,7 +524,7 @@ async def test_task_prompt_resolves_memory_variable(flow_dir, monkeypatch, messa
         runtime_variables={},
         flow_variables={},
         config_dir=flow_dir,
-        file_registry=FileRegistry(),
+        file_registry=FileRegistry(policy=FileAccessPolicy(write_root=flow_dir)),
     )
     phase.queue = message_queue
 

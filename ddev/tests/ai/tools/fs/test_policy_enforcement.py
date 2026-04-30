@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""End-to-end policy enforcement: tools must refuse denied paths."""
+"""End-to-end policy enforcement: tools must respect the two-zone read/write model."""
 
 from unittest.mock import AsyncMock, patch
 
@@ -21,8 +21,10 @@ OWNER_ID = "test-agent"
 
 @pytest.fixture
 def sandbox(tmp_path):
-    """Write root = tmp_path, with the default read denylist active."""
-    return tmp_path
+    """Write root — a subdirectory of tmp_path so files at the tmp_path level are outside it."""
+    s = tmp_path / "sandbox"
+    s.mkdir()
+    return s
 
 
 @pytest.fixture
@@ -37,7 +39,7 @@ def sandboxed_registry(sandbox) -> FileRegistry:
 
 async def test_create_file_refuses_outside_write_root(tmp_path, sandboxed_registry) -> None:
     tool = CreateFileTool(sandboxed_registry, OWNER_ID)
-    outside = tmp_path.parent / "outside.txt"
+    outside = tmp_path / "outside.txt"
     result = await tool.run({"path": str(outside), "content": "x"})
     assert result.success is False
     assert "outside write root" in result.error
@@ -53,7 +55,7 @@ async def test_create_file_allows_inside_write_root(sandbox, sandboxed_registry)
 
 
 async def test_edit_file_refuses_outside_write_root(tmp_path, sandboxed_registry) -> None:
-    outside = tmp_path.parent / "outside.txt"
+    outside = tmp_path / "outside.txt"
     outside.write_text("old")
     sandboxed_registry.record(OWNER_ID, str(outside), "old")
 
@@ -65,7 +67,7 @@ async def test_edit_file_refuses_outside_write_root(tmp_path, sandboxed_registry
 
 
 async def test_append_file_refuses_outside_write_root(tmp_path, sandboxed_registry) -> None:
-    outside = tmp_path.parent / "outside.txt"
+    outside = tmp_path / "outside.txt"
     outside.write_text("hello")
     sandboxed_registry.record(OWNER_ID, str(outside), "hello")
 
@@ -77,7 +79,7 @@ async def test_append_file_refuses_outside_write_root(tmp_path, sandboxed_regist
 
 async def test_mkdir_refuses_outside_write_root(tmp_path, sandboxed_registry) -> None:
     tool = MkdirTool(sandboxed_registry.policy)
-    outside = tmp_path.parent / "outside_dir"
+    outside = tmp_path / "outside_dir"
     result = await tool.run({"path": str(outside)})
     assert result.success is False
     assert "outside write root" in result.error
@@ -93,12 +95,39 @@ async def test_mkdir_allows_inside_write_root(sandbox, sandboxed_registry) -> No
 
 
 # ---------------------------------------------------------------------------
-# Read denylist
+# Inside write_root: deny patterns are bypassed for reads and writes
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("filename", [".env", ".envrc", "id_rsa", "api.pem"])
-async def test_read_file_refuses_denied_names(tmp_path, sandboxed_registry, filename) -> None:
+async def test_write_denied_name_inside_write_root_is_allowed(sandbox, sandboxed_registry) -> None:
+    """Agents must be able to write .env and similar files inside their sandbox."""
+    tool = CreateFileTool(sandboxed_registry, OWNER_ID)
+    target = sandbox / ".env"
+    result = await tool.run({"path": str(target), "content": "SECRET=1"})
+    assert result.success is True
+    assert target.exists()
+    assert target.read_text() == "SECRET=1"
+
+
+async def test_read_denied_name_inside_write_root_is_allowed(sandbox, sandboxed_registry) -> None:
+    """Agents must be able to read back files they created inside their sandbox."""
+    target = sandbox / ".env"
+    target.write_text("SECRET=1")
+    sandboxed_registry.record(OWNER_ID, str(target), "SECRET=1")
+
+    tool = ReadFileTool(sandboxed_registry, OWNER_ID)
+    result = await tool.run({"path": str(target)})
+    assert result.success is True
+
+
+# ---------------------------------------------------------------------------
+# Outside write_root: read denylist still applies
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("filename", [".env", ".envrc", ".netrc", "api.pem", "private.key"])
+async def test_read_file_refuses_denied_names_outside_write_root(tmp_path, sandboxed_registry, filename) -> None:
+    # Files sit at tmp_path level, which is outside sandbox (the write_root).
     target = tmp_path / filename
     target.write_text("secret")
 
@@ -109,22 +138,13 @@ async def test_read_file_refuses_denied_names(tmp_path, sandboxed_registry, file
 
 
 async def test_read_file_allows_normal_files(tmp_path) -> None:
-    registry = FileRegistry(policy=FileAccessPolicy(read_deny_roots=()))
+    registry = FileRegistry(policy=FileAccessPolicy(write_root=tmp_path, deny_patterns=()))
     target = tmp_path / "data.txt"
     target.write_text("ok")
 
     tool = ReadFileTool(registry, OWNER_ID)
     result = await tool.run({"path": str(target)})
     assert result.success is True
-
-
-async def test_write_to_denied_name_refused(sandbox, sandboxed_registry) -> None:
-    tool = CreateFileTool(sandboxed_registry, OWNER_ID)
-    target = sandbox / ".env"
-    result = await tool.run({"path": str(target), "content": "SECRET=1"})
-    assert result.success is False
-    assert "Write denied" in result.error
-    assert not target.exists()
 
 
 # ---------------------------------------------------------------------------
@@ -134,7 +154,7 @@ async def test_write_to_denied_name_refused(sandbox, sandboxed_registry) -> None
 
 async def test_read_by_one_agent_does_not_authorize_another_to_edit(sandbox) -> None:
     """Agent A reads a file; agent B tries to edit it without reading — must fail."""
-    policy = FileAccessPolicy(write_root=sandbox, read_deny_names=(), read_deny_roots=())
+    policy = FileAccessPolicy(write_root=sandbox, deny_patterns=())
     registry = FileRegistry(policy=policy)
     target = sandbox / "shared.txt"
     target.write_text("hello")
@@ -151,7 +171,7 @@ async def test_read_by_one_agent_does_not_authorize_another_to_edit(sandbox) -> 
 
 
 async def test_each_agent_can_edit_after_its_own_read(sandbox) -> None:
-    policy = FileAccessPolicy(write_root=sandbox, read_deny_names=(), read_deny_roots=())
+    policy = FileAccessPolicy(write_root=sandbox, deny_patterns=())
     registry = FileRegistry(policy=policy)
     target = sandbox / "shared.txt"
     target.write_text("one")
@@ -178,7 +198,9 @@ async def test_each_agent_can_edit_after_its_own_read(sandbox) -> None:
 
 
 async def test_grep_refuses_denied_root(tmp_path) -> None:
-    policy = FileAccessPolicy(read_deny_names=(), read_deny_roots=(str(tmp_path),))
+    # write_root is a subdirectory; the search path at tmp_path level is outside it and denied.
+    write_root = tmp_path / "sandbox"
+    policy = FileAccessPolicy(write_root=write_root, deny_patterns=(f"{tmp_path}/*",))
     tool = GrepTool(policy)
     with patch("ddev.ai.tools.shell.grep.run_command", new=AsyncMock()) as mock_run:
         result = await tool.run({"pattern": "secret", "path": str(tmp_path / "foo")})
@@ -188,7 +210,8 @@ async def test_grep_refuses_denied_root(tmp_path) -> None:
 
 
 async def test_grep_refuses_denied_name(tmp_path) -> None:
-    policy = FileAccessPolicy(read_deny_names=(".env",), read_deny_roots=())
+    write_root = tmp_path / "sandbox"
+    policy = FileAccessPolicy(write_root=write_root, deny_patterns=(".env",))
     tool = GrepTool(policy)
     with patch("ddev.ai.tools.shell.grep.run_command", new=AsyncMock()) as mock_run:
         result = await tool.run({"pattern": "SECRET", "path": str(tmp_path / ".env")})
@@ -200,10 +223,85 @@ async def test_grep_refuses_denied_name(tmp_path) -> None:
 async def test_grep_allows_normal_path(tmp_path) -> None:
     target = tmp_path / "data.txt"
     target.write_text("hello world")
-    policy = FileAccessPolicy(read_deny_names=(), read_deny_roots=())
+    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=())
     tool = GrepTool(policy)
     result = await tool.run({"pattern": "hello", "path": str(target)})
     assert result.success is True
+
+
+async def test_grep_non_recursive_returns_file_matches(tmp_path) -> None:
+    """Non-recursive grep on a single file returns actual matches (no post-filter applied)."""
+    target = tmp_path / "data.txt"
+    target.write_text("hello world\n")
+    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=())
+    tool = GrepTool(policy)
+    result = await tool.run({"pattern": "hello", "path": str(target), "recursive": False})
+    assert result.success is True
+    assert "hello" in (result.data or "")
+
+
+async def test_grep_inside_write_root_returns_denied_name_files(tmp_path) -> None:
+    """Recursive grep inside write_root returns .env and other denied-name files."""
+    sandbox = tmp_path / "sandbox"
+    sandbox.mkdir()
+    (sandbox / ".env").write_text("SECRET=hello\n")
+    policy = FileAccessPolicy(write_root=sandbox, deny_patterns=(".env",))
+    tool = GrepTool(policy)
+    result = await tool.run({"pattern": "hello", "path": str(sandbox), "recursive": True})
+    assert result.success is True
+    assert ".env" in (result.data or "")
+
+
+async def test_grep_post_filter_strips_denied_path_pattern_matches(tmp_path) -> None:
+    """Denied path-pattern files are stripped from grep output even when grep walks them."""
+    write_root = tmp_path / "sandbox"
+    project = tmp_path / "project"
+    secrets = tmp_path / "secrets"
+    project.mkdir()
+    secrets.mkdir()
+    (project / "ok.txt").write_text("hello world\n")
+    (secrets / "leak.txt").write_text("hello world\n")
+
+    policy = FileAccessPolicy(write_root=write_root, deny_patterns=(f"{secrets}/*",))
+    tool = GrepTool(policy)
+    result = await tool.run({"pattern": "hello", "path": str(tmp_path), "recursive": True})
+    assert result.success is True
+    assert "ok.txt" in result.data
+    assert "leak.txt: Read denied by policy" in result.data
+
+
+async def test_grep_post_filter_strips_symlink_to_denied(tmp_path) -> None:
+    """A symlink in the search root resolving into a denied tree is filtered out."""
+    write_root = tmp_path / "sandbox"
+    project = tmp_path / "project"
+    secrets = tmp_path / "secrets"
+    project.mkdir()
+    secrets.mkdir()
+    (secrets / "key.txt").write_text("hello world\n")
+    (project / "link.txt").symlink_to(secrets / "key.txt")
+
+    policy = FileAccessPolicy(write_root=write_root, deny_patterns=(f"{secrets}/*",))
+    tool = GrepTool(policy)
+    result = await tool.run({"pattern": "hello", "path": str(project), "recursive": True})
+    assert result.success is True
+    # link.txt may appear as a denial notice but must not appear as a match line.
+    assert "link.txt" not in result.data
+
+
+async def test_grep_excludes_basename_pattern_matches(tmp_path) -> None:
+    """Basename patterns ride on grep's --exclude flag; verify denied files are absent."""
+    write_root = tmp_path / "sandbox"
+    project = tmp_path / "project"
+    project.mkdir()
+    (project / "config.py").write_text("token=abc\n")
+    (project / ".env").write_text("token=abc\n")
+
+    policy = FileAccessPolicy(write_root=write_root, deny_patterns=(".env",))
+    tool = GrepTool(policy)
+    result = await tool.run({"pattern": "token", "path": str(project), "recursive": True})
+    assert result.success is True
+    assert "config.py" in result.data
+    assert ".env" not in result.data
 
 
 # ---------------------------------------------------------------------------
@@ -214,7 +312,7 @@ async def test_grep_allows_normal_path(tmp_path) -> None:
 async def test_create_file_with_tilde_path_writes_to_home_when_authorized(tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("HOME", str(tmp_path))
     monkeypatch.setenv("USERPROFILE", str(tmp_path))  # Windows uses USERPROFILE, not HOME
-    policy = FileAccessPolicy(write_root=tmp_path, read_deny_names=(), read_deny_roots=())
+    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=())
     registry = FileRegistry(policy=policy)
     tool = CreateFileTool(registry, OWNER_ID)
 
@@ -226,7 +324,7 @@ async def test_create_file_with_tilde_path_writes_to_home_when_authorized(tmp_pa
 
 async def test_create_file_with_tilde_path_refused_when_outside_write_root(tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("HOME", str(tmp_path))
-    policy = FileAccessPolicy(write_root=tmp_path / "sub", read_deny_names=(), read_deny_roots=())
+    policy = FileAccessPolicy(write_root=tmp_path / "sub", deny_patterns=())
     registry = FileRegistry(policy=policy)
     tool = CreateFileTool(registry, OWNER_ID)
 

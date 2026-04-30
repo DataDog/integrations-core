@@ -21,8 +21,8 @@ def owner_id() -> str:
 
 
 @pytest.fixture
-def permissive_policy() -> FileAccessPolicy:
-    return FileAccessPolicy(read_deny_names=(), read_deny_roots=())
+def permissive_policy(tmp_path) -> FileAccessPolicy:
+    return FileAccessPolicy(write_root=tmp_path, deny_patterns=())
 
 
 @pytest.fixture

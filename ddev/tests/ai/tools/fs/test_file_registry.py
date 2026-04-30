@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
 
 OWNER_A = "agent-a"
@@ -10,8 +11,8 @@ OWNER_B = "agent-b"
 
 
 @pytest.fixture
-def registry() -> FileRegistry:
-    return FileRegistry()
+def registry(tmp_path) -> FileRegistry:
+    return FileRegistry(policy=FileAccessPolicy(write_root=tmp_path))
 
 
 # ---------------------------------------------------------------------------

@@ -7,7 +7,7 @@ from pydantic import Field
 
 from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
-from ddev.ai.tools.fs.file_access_policy import FileAccessError, FileAccessPolicy
+from ddev.ai.tools.fs.file_access_policy import FileAccessError, FileAccessPolicy, canonicalize_path
 
 from .base import CmdTool, run_command
 
@@ -22,8 +22,6 @@ class GrepTool(CmdTool[GrepInput]):
     """Searches for a regex pattern in files. Returns matching lines with file path and line
     numbers. Use to find specific config values, ports, hostnames across files. Supports extended
     regex syntax. Output might be truncated for large results.
-
-    The named search root is checked against FileAccessPolicy before any subprocess runs.
     """
 
     timeout = 30
@@ -40,19 +38,61 @@ class GrepTool(CmdTool[GrepInput]):
             self._policy.assert_readable(tool_input.path)
         except FileAccessError as e:
             return ToolResult(success=False, error=str(e))
-        result = await run_command(self.cmd(tool_input), timeout=self.timeout)
+        result = await run_command(
+            self.cmd(tool_input),
+            timeout=self.timeout,
+            stdout_filter=self._filter_stdout if tool_input.recursive else None,
+        )
         # grep exits 1 when no lines match — not a failure
         if not result.success and result.error is None:
             return result.model_copy(update={"success": True})
         return result
 
     def cmd(self, tool_input: GrepInput) -> list[str]:
-        cmd = ["grep", "-n", "-E"]
+        cmd = ["grep", "-n", "-E", "--null", "-I", "--no-messages"]
         if tool_input.recursive:
             cmd.append("-r")
-            for pat in self._policy.deny_names:
-                cmd.append(f"--exclude={pat}")
-            for root in self._policy.deny_roots:
-                cmd.append(f"--exclude-dir={root.name}")
+            search_path = canonicalize_path(tool_input.path)
+            write_root = self._policy.write_root
+            # Skip --exclude= flags when the search overlaps write_root: either the
+            # search is inside write_root (all files are visible) or write_root is
+            # inside the search (mixing zones). In both cases the post-filter handles
+            # per-line decisions correctly. Only apply flags when the entire search
+            # is outside write_root, where deny patterns are fully in effect.
+            overlaps_write_root = search_path.is_relative_to(write_root) or write_root.is_relative_to(search_path)
+            if not overlaps_write_root:
+                for pat in self._policy.basename_patterns:
+                    cmd.append(f"--exclude={pat}")
         cmd += ["--", tool_input.pattern, tool_input.path]
         return cmd
+
+    def _filter_stdout(self, stdout: str) -> str:
+        """Filter stdout to only include lines whose filename is allowed by the policy.
+        If the filename is denied, we return 'Read denied by policy' instead of the line.
+
+        ``grep --null`` output: ``<filename>\\0<lineno>:<content>\\n``. Split on the
+        first NUL and run the filename through ``assert_readable`` (which
+        canonicalizes through symlinks).
+
+        Only use when recursive is True.
+        """
+        decision: dict[str, bool] = {}
+        result: list[str] = []
+        for line in stdout.splitlines():
+            nul = line.find("\0")
+            if nul == -1:
+                continue
+            filename, rest = line[:nul], line[nul + 1 :]
+            allowed = decision.get(filename)
+            if allowed is None:
+                try:
+                    self._policy.assert_readable(filename)
+                    allowed = True
+                except FileAccessError:
+                    allowed = False
+                decision[filename] = allowed
+            if allowed:
+                result.append(f"{filename}:{rest}")
+            else:
+                result.append(f"{filename}: Read denied by policy")
+        return "\n".join(result)

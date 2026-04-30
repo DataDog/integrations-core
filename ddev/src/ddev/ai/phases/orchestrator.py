@@ -47,17 +47,15 @@ class PhaseOrchestrator(EventBusOrchestrator):
         checkpoint_path: Path,
         runtime_variables: dict[str, str],
         anthropic_client: anthropic.AsyncAnthropic,
+        file_access_policy: FileAccessPolicy,
         callback_sets: list[CallbackSet] | None = None,
         grace_period: float = 10,
-        file_access_policy: FileAccessPolicy | None = None,
         logger: logging.Logger | None = None,
     ) -> None:
         """Initialize the orchestrator.
 
-        Production callers (e.g. the CLI) must pass a ``file_access_policy``
-        with ``write_root`` set to the integration output directory so that
-        agent writes are confined to that path. Passing ``None`` leaves writes
-        unrestricted (appropriate only in tests).
+        ``file_access_policy`` must have ``write_root`` set to the integration
+        output directory so that agent writes are confined to that path.
         """
         super().__init__(logger=logger or logging.getLogger(__name__), grace_period=grace_period)
         self._flow_yaml_path = flow_yaml_path

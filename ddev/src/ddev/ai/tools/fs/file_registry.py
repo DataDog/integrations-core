@@ -22,8 +22,8 @@ class FileRegistry:
     _locks and _hashes grow for the registry's lifetime and are never evicted.
     """
 
-    def __init__(self, policy: FileAccessPolicy | None = None) -> None:
-        self._policy = policy if policy is not None else FileAccessPolicy()
+    def __init__(self, policy: FileAccessPolicy) -> None:
+        self._policy = policy
         self._hashes: dict[str, dict[str, str]] = {}
         self._locks: dict[str, asyncio.Lock] = {}
 

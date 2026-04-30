@@ -99,19 +99,21 @@ def test_imported_class_not_registered():
     assert "BaseMessage" not in registry.known_names()
 
 
-def test_two_orchestrators_have_independent_registries(tmp_path):
+def test_two_orchestrators_have_independent_registries(tmp_path, file_access_policy):
     """Each PhaseOrchestrator owns its own registry; registering in one does not affect the other."""
     o1 = PhaseOrchestrator(
         flow_yaml_path=tmp_path / "flow.yaml",
         checkpoint_path=tmp_path / "checkpoints.yaml",
         runtime_variables={},
         anthropic_client=MagicMock(),
+        file_access_policy=file_access_policy,
     )
     o2 = PhaseOrchestrator(
         flow_yaml_path=tmp_path / "flow.yaml",
         checkpoint_path=tmp_path / "checkpoints.yaml",
         runtime_variables={},
         anthropic_client=MagicMock(),
+        file_access_policy=file_access_policy,
     )
 
     class ExclusivePhase(Phase):
@@ -136,12 +138,13 @@ def test_discover_does_not_mutate_global_state():
 # ---------------------------------------------------------------------------
 
 
-async def test_on_message_received_fatal_on_phase_failed():
+async def test_on_message_received_fatal_on_phase_failed(file_access_policy):
     orchestrator = PhaseOrchestrator(
         flow_yaml_path=Path("/fake/flow.yaml"),
         checkpoint_path=Path("/fake/checkpoints.yaml"),
         runtime_variables={},
         anthropic_client=MagicMock(),
+        file_access_policy=file_access_policy,
     )
     msg = PhaseFailedMessage(id="f1", phase_id="p1", error="something broke")
 
@@ -149,12 +152,13 @@ async def test_on_message_received_fatal_on_phase_failed():
         await orchestrator.on_message_received(msg)
 
 
-async def test_on_message_received_ignores_other_messages():
+async def test_on_message_received_ignores_other_messages(file_access_policy):
     orchestrator = PhaseOrchestrator(
         flow_yaml_path=Path("/fake/flow.yaml"),
         checkpoint_path=Path("/fake/checkpoints.yaml"),
         runtime_variables={},
         anthropic_client=MagicMock(),
+        file_access_policy=file_access_policy,
     )
     # These should not raise
     await orchestrator.on_message_received(PhaseTrigger(id="start", phase_id=None))
@@ -198,12 +202,13 @@ def minimal_flow(tmp_path):
     return tmp_path
 
 
-async def test_on_initialize_registers_all_flow_phases(minimal_flow):
+async def test_on_initialize_registers_all_flow_phases(minimal_flow, file_access_policy):
     orchestrator = PhaseOrchestrator(
         flow_yaml_path=minimal_flow / "flow.yaml",
         checkpoint_path=minimal_flow / "checkpoints.yaml",
         runtime_variables={},
         anthropic_client=MagicMock(),
+        file_access_policy=file_access_policy,
     )
     await orchestrator.on_initialize()
 
@@ -212,12 +217,13 @@ async def test_on_initialize_registers_all_flow_phases(minimal_flow):
     assert phase_names == {"a", "b"}
 
 
-async def test_on_initialize_wires_dependencies(minimal_flow):
+async def test_on_initialize_wires_dependencies(minimal_flow, file_access_policy):
     orchestrator = PhaseOrchestrator(
         flow_yaml_path=minimal_flow / "flow.yaml",
         checkpoint_path=minimal_flow / "checkpoints.yaml",
         runtime_variables={},
         anthropic_client=MagicMock(),
+        file_access_policy=file_access_policy,
     )
     await orchestrator.on_initialize()
 
@@ -227,12 +233,13 @@ async def test_on_initialize_wires_dependencies(minimal_flow):
     assert phases_by_name["b"]._dependencies == {"a"}
 
 
-async def test_on_initialize_submits_initial_phase_trigger(minimal_flow):
+async def test_on_initialize_submits_initial_phase_trigger(minimal_flow, file_access_policy):
     orchestrator = PhaseOrchestrator(
         flow_yaml_path=minimal_flow / "flow.yaml",
         checkpoint_path=minimal_flow / "checkpoints.yaml",
         runtime_variables={},
         anthropic_client=MagicMock(),
+        file_access_policy=file_access_policy,
     )
     await orchestrator.on_initialize()
 
@@ -242,7 +249,7 @@ async def test_on_initialize_submits_initial_phase_trigger(minimal_flow):
     assert msg.phase_id is None
 
 
-async def test_on_initialize_unknown_phase_type_raises_flow_config_error(tmp_path):
+async def test_on_initialize_unknown_phase_type_raises_flow_config_error(tmp_path, file_access_policy):
     (tmp_path / "prompts").mkdir()
     (tmp_path / "prompts" / "writer.md").write_text("system prompt")
     (tmp_path / "flow.yaml").write_text(
@@ -266,12 +273,13 @@ async def test_on_initialize_unknown_phase_type_raises_flow_config_error(tmp_pat
         checkpoint_path=tmp_path / "checkpoints.yaml",
         runtime_variables={},
         anthropic_client=MagicMock(),
+        file_access_policy=file_access_policy,
     )
     with pytest.raises(FlowConfigError, match="Unknown phase type"):
         await orchestrator.on_initialize()
 
 
-async def test_on_initialize_missing_agent_raises(tmp_path):
+async def test_on_initialize_missing_agent_raises(tmp_path, file_access_policy):
     (tmp_path / "prompts").mkdir()
     (tmp_path / "flow.yaml").write_text(
         dedent("""\
@@ -294,6 +302,7 @@ async def test_on_initialize_missing_agent_raises(tmp_path):
         checkpoint_path=tmp_path / "checkpoints.yaml",
         runtime_variables={},
         anthropic_client=MagicMock(),
+        file_access_policy=file_access_policy,
     )
     with pytest.raises(FlowConfigError):
         await orchestrator.on_initialize()
@@ -304,7 +313,7 @@ async def test_on_initialize_missing_agent_raises(tmp_path):
 # ---------------------------------------------------------------------------
 
 
-async def test_orphan_phase_with_unknown_type_does_not_block_init(tmp_path):
+async def test_orphan_phase_with_unknown_type_does_not_block_init(tmp_path, file_access_policy):
     """A phase defined in phases: but absent from flow: may have an unknown type — no error."""
     (tmp_path / "prompts").mkdir()
     (tmp_path / "prompts" / "writer.md").write_text("system prompt")
@@ -335,6 +344,7 @@ async def test_orphan_phase_with_unknown_type_does_not_block_init(tmp_path):
         checkpoint_path=tmp_path / "checkpoints.yaml",
         runtime_variables={},
         anthropic_client=MagicMock(),
+        file_access_policy=file_access_policy,
     )
     await orchestrator.on_initialize()
 
@@ -342,7 +352,7 @@ async def test_orphan_phase_with_unknown_type_does_not_block_init(tmp_path):
     assert {p.name for p in processors} == {"real"}
 
 
-async def test_phase_in_flow_with_unknown_type_raises(tmp_path):
+async def test_phase_in_flow_with_unknown_type_raises(tmp_path, file_access_policy):
     """A phase referenced from flow: with an unknown type must still raise FlowConfigError."""
     (tmp_path / "prompts").mkdir()
     (tmp_path / "prompts" / "writer.md").write_text("system prompt")
@@ -367,12 +377,13 @@ async def test_phase_in_flow_with_unknown_type_raises(tmp_path):
         checkpoint_path=tmp_path / "checkpoints.yaml",
         runtime_variables={},
         anthropic_client=MagicMock(),
+        file_access_policy=file_access_policy,
     )
     with pytest.raises(FlowConfigError, match="Unknown phase type"):
         await orchestrator.on_initialize()
 
 
-async def test_orphan_phase_logs_warning(tmp_path, caplog):
+async def test_orphan_phase_logs_warning(tmp_path, file_access_policy, caplog):
     """An orphan phase must emit a warning containing its phase id."""
     import logging
 
@@ -405,6 +416,7 @@ async def test_orphan_phase_logs_warning(tmp_path, caplog):
         checkpoint_path=tmp_path / "checkpoints.yaml",
         runtime_variables={},
         anthropic_client=MagicMock(),
+        file_access_policy=file_access_policy,
     )
     with caplog.at_level(logging.WARNING):
         await orchestrator.on_initialize()
@@ -417,22 +429,24 @@ async def test_orphan_phase_logs_warning(tmp_path, caplog):
 # ---------------------------------------------------------------------------
 
 
-async def test_on_finalize_no_failure_is_noop():
+async def test_on_finalize_no_failure_is_noop(tmp_path, file_access_policy):
     orchestrator = PhaseOrchestrator(
         flow_yaml_path=Path("/fake/flow.yaml"),
         checkpoint_path=Path("/fake/checkpoints.yaml"),
         runtime_variables={},
         anthropic_client=MagicMock(),
+        file_access_policy=file_access_policy,
     )
     await orchestrator.on_finalize(None)  # must not raise
 
 
-async def test_on_finalize_after_phase_failed_raises():
+async def test_on_finalize_after_phase_failed_raises(tmp_path, file_access_policy):
     orchestrator = PhaseOrchestrator(
         flow_yaml_path=Path("/fake/flow.yaml"),
         checkpoint_path=Path("/fake/checkpoints.yaml"),
         runtime_variables={},
         anthropic_client=MagicMock(),
+        file_access_policy=file_access_policy,
     )
     msg = PhaseFailedMessage(id="f1", phase_id="p1", error="boom")
     with pytest.raises(FatalProcessingError):
@@ -442,7 +456,7 @@ async def test_on_finalize_after_phase_failed_raises():
         await orchestrator.on_finalize(None)
 
 
-def test_run_raises_runtime_error_when_phase_fails(tmp_path):
+def test_run_raises_runtime_error_when_phase_fails(tmp_path, file_access_policy):
     """Full pipeline: a failing phase must cause run() to raise RuntimeError."""
     (tmp_path / "prompts").mkdir()
     (tmp_path / "prompts" / "writer.md").write_text("system prompt")
@@ -472,6 +486,7 @@ def test_run_raises_runtime_error_when_phase_fails(tmp_path):
         checkpoint_path=tmp_path / "checkpoints.yaml",
         runtime_variables={},
         anthropic_client=MagicMock(),
+        file_access_policy=file_access_policy,
         grace_period=0.1,
     )
     orchestrator._phase_registry.register("FailingPhase", FailingPhase)
