@@ -275,9 +275,11 @@ class KafkaActionsCheck(AgentCheck):
             'value_format': config.get('value_format', 'json'),
             'value_schema': config.get('value_schema'),
             'value_uses_schema_registry': config.get('value_uses_schema_registry', False),
+            'value_skip_bytes': config.get('value_skip_bytes', 0),
             'key_format': config.get('key_format', 'string'),
             'key_schema': config.get('key_schema'),
             'key_uses_schema_registry': config.get('key_uses_schema_registry', False),
+            'key_skip_bytes': config.get('key_skip_bytes', 0),
         }
 
         self.log.debug(
