@@ -81,8 +81,9 @@ class PostgresDiagnose:
         try:
             if conn is not None:
                 self._diagnose_version(conn)
-                self._diagnose_pg_monitor_role(conn)
-                self._diagnose_pg_stat_activity_access(conn)
+                if self._uses_pg_stat_activity():
+                    self._diagnose_pg_monitor_role(conn)
+                    self._diagnose_pg_stat_activity_access(conn)
                 if self._check._config.dbm:
                     self._run_dbm_probes(conn)
         finally:
@@ -98,33 +99,31 @@ class PostgresDiagnose:
         if query_samples or self._check._config.query_activity.enabled:
             self._diagnose_track_activity_query_size(conn)
         # Cluster-level GUCs -- run once on the main connection. Keep SPL first so the
-        # per-DB extension/readable probes can cascade-skip off the global FAIL.
+        # pg_stat_statements extension/readable probes can cascade-skip off the global FAIL.
         if query_metrics:
             self._diagnose_shared_preload_libraries(conn)
             self._diagnose_track_io_timing(conn)
             self._diagnose_pg_stat_statements_max(conn)
+            failed = set()
+            self._diagnose_pg_stat_statements_extension(conn, self._check._config.dbname, failed)
+            self._diagnose_pg_stat_statements_readable(conn, self._check._config.dbname, failed)
 
-        if not (query_metrics or query_samples):
+        if not query_samples:
             return
 
-        # The DBM setup docs require the operator to install pg_stat_statements, the datadog
-        # schema, USAGE grants, and the explain function in EVERY monitored database. Run all
-        # per-database probes under one short-lived connection per database so a customer with
-        # autodiscovery enabled gets one row per (probe, database) -- not just for the main DB.
+        # Query-sample setup is per-database. Query-metrics setup is intentionally not included
+        # here: the runtime statement collector reads cross-database pg_stat_statements rows from
+        # the main DB connection only.
         for dbname in self._get_dbm_probe_databases(conn):
             probe_conn = conn if dbname == self._check._config.dbname else self._open_probe_connection(dbname)
             if probe_conn is None:
                 continue
             failed = set()
             try:
-                if query_metrics:
-                    self._diagnose_pg_stat_statements_extension(probe_conn, dbname, failed)
-                    self._diagnose_pg_stat_statements_readable(probe_conn, dbname, failed)
-                if query_samples:
-                    self._diagnose_datadog_schema(probe_conn, dbname, failed)
-                    self._diagnose_schema_usage(probe_conn, dbname, "datadog", failed)
-                    self._diagnose_schema_usage(probe_conn, dbname, "public", failed)
-                    self._diagnose_explain_function(probe_conn, dbname, failed)
+                self._diagnose_datadog_schema(probe_conn, dbname, failed)
+                self._diagnose_schema_usage(probe_conn, dbname, "datadog", failed)
+                self._diagnose_schema_usage(probe_conn, dbname, "public", failed)
+                self._diagnose_explain_function(probe_conn, dbname, failed)
             finally:
                 if probe_conn is not conn:
                     _safe_close(probe_conn)
@@ -157,9 +156,13 @@ class PostgresDiagnose:
             kwargs["token_provider"] = token_provider
         host_desc = self._host_desc()
         username = self._check._config.username
+        conn = None
         try:
             conn = TokenAwareConnection.connect(**kwargs)
+            self._check.db_pool._configure_connection(conn)
         except psycopg.Error as e:
+            if conn is not None:
+                _safe_close(conn)
             code = DatabaseConfigurationError.connection_failure
             self._fail(
                 code,
@@ -172,13 +175,6 @@ class PostgresDiagnose:
                 rawerror=str(e),
             )
             return None
-        # Probe queries are read-only; running in autocommit keeps one failing probe from
-        # poisoning the implicit transaction and cascading silent failures through the rest
-        # of the diagnostics.
-        try:
-            conn.autocommit = True
-        except psycopg.Error:
-            pass
         self._check.diagnosis.success(
             name=DatabaseConfigurationError.connection_failure.value,
             diagnosis="Connected to {host} (dbname={db}) as {user}".format(host=host_desc, db=dbname, user=username),
@@ -350,10 +346,7 @@ class PostgresDiagnose:
             return
         self._fail(
             code,
-            diagnosis=(
-                "The datadog user is not a member of pg_monitor; other users' activity and statement "
-                "metrics will be invisible."
-            ),
+            diagnosis=("The datadog user is not a member of pg_monitor; other users' activity rows will be masked."),
             category=CATEGORY_POSTGRES,
             description=DIAGNOSTIC_METADATA[code]["description"],
             remediation=build_remediation(code),
@@ -547,41 +540,47 @@ class PostgresDiagnose:
         dbname = dbname or self._check._config.dbname
         failed = self._failed if failed is None else failed
         explain_function = self._check._config.query_samples.explain_function
-        schema, name = _split_function(explain_function)
+        schema, _ = _split_function(explain_function)
         if schema == "datadog" and DatabaseConfigurationError.missing_datadog_schema.value in failed:
             # Function lives in a schema that doesn't exist; the schema FAIL is the actionable item.
             return
-        if schema is None:
-            # Unqualified -- follow the same search_path resolution the runtime uses when
-            # it calls `SELECT {explain_function}(...)`. `current_schemas(false)` returns
-            # the effective user-visible schemas for this session.
-            row = _fetchone(
-                conn,
-                (
-                    "SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace "
-                    "WHERE p.proname = %s AND n.nspname = ANY(current_schemas(false))"
+        if DatabaseConfigurationError.missing_schema_usage_grant.value in failed:
+            # The validation call would only duplicate the missing GRANT failure.
+            return
+
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT {}(%s)".format(_safe_identifier(explain_function)),
+                    ("SELECT * FROM pg_stat_activity",),
+                )
+                row = cursor.fetchone()
+        except (ValueError, psycopg.Error) as e:
+            self._fail(
+                code,
+                diagnosis="{} cannot be executed in {}; execution plans cannot be collected: {}".format(
+                    explain_function, dbname, e
                 ),
-                (name,),
+                category=CATEGORY_POSTGRES,
+                description=build_description(code, explain_function=explain_function),
+                remediation=build_remediation(code, explain_function=explain_function),
+                rawerror=str(e),
+                failed_codes=failed,
             )
-        else:
-            row = _fetchone(
-                conn,
-                (
-                    "SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace "
-                    "WHERE n.nspname = %s AND p.proname = %s"
-                ),
-                (schema, name),
-            )
-        if row:
+            return
+
+        if _explain_result_has_plan(row):
             self._check.diagnosis.success(
                 name=code.value,
-                diagnosis="{} exists in {}.".format(explain_function, dbname),
+                diagnosis="{} executed successfully in {}.".format(explain_function, dbname),
                 category=CATEGORY_POSTGRES,
             )
             return
         self._fail(
             code,
-            diagnosis="{} is not defined in {}; execution plans cannot be collected.".format(explain_function, dbname),
+            diagnosis="{} did not return an execution plan in {}; execution plans cannot be collected.".format(
+                explain_function, dbname
+            ),
             category=CATEGORY_POSTGRES,
             description=build_description(code, explain_function=explain_function),
             remediation=build_remediation(code, explain_function=explain_function),
@@ -654,6 +653,12 @@ class PostgresDiagnose:
         host = self._check._config.host or "localhost"
         port = self._check._config.port
         return "{}:{}".format(host, port) if port else host
+
+    def _uses_pg_stat_activity(self):
+        config = self._check._config
+        return config.collect_activity_metrics or (
+            config.dbm and (config.query_samples.enabled or config.query_activity.enabled)
+        )
 
     def _get_dbm_probe_databases(self, conn):
         # dbstrict wins: the sample collector filters by `datname = self._config.dbname`
@@ -728,6 +733,10 @@ def _show(conn, setting):
     if not row:
         return None, False
     return row[0], True
+
+
+def _explain_result_has_plan(row):
+    return bool(row and len(row) >= 1 and row[0] and len(row[0]) >= 1)
 
 
 def _safe_close(conn):
