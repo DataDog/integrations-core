@@ -1,1 +1,0 @@
-Bump minimum virtualenv to 20.26.1 in the cli extras for compatibility with modern hatch.

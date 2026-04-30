@@ -40,6 +40,11 @@ permissions:
   id-token: write
   contents: write # ddev needs to push tags
 
+env:
+  # Default ddev version when callers don't pass `ddev-version`. Tracked by Renovate.
+  # renovate: datasource=pypi depName=ddev
+  DEFAULT_DDEV_VERSION: "14.3.2"
+
 jobs:
   prepare:
     name: Tag releases and build dispatch batches
@@ -55,7 +60,7 @@ jobs:
           fetch-depth: 0 # ddev needs full tag history
 
       - name: Install ddev
-        run: pip install "ddev${{ inputs.ddev-version && format('=={0}', inputs.ddev-version) || '==14.3.2' }}"
+        run: pip install "ddev==${{ inputs.ddev-version || env.DEFAULT_DDEV_VERSION }}"
 
       - name: Configure ddev
         env:
@@ -87,7 +92,7 @@ jobs:
         run: python .github/workflows/scripts/release_dispatch.py
 
   dispatch:
-    name: Dispatch wheel builds (batch ${{ strategy.job-index + 1 }})
+    name: Dispatch wheel builds (batch ${{ strategy.job-index }})
     needs: prepare
     if: needs.prepare.outputs.has_packages == 'true' && !inputs.dry-run
     runs-on: ubuntu-latest
