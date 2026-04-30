@@ -498,6 +498,53 @@ class AsyncGitHubClient:
         )
         return self._parse_response(response, CheckRun)
 
+    async def _resolve_artifact_redirect(
+        self,
+        archive_download_url: str,
+        timeout: float | None = None,
+    ) -> str:
+        """Authenticated GET; return the unauthenticated signed URL from the 302 Location header."""
+        effective_timeout = timeout if timeout is not None else self._default_timeout
+        redirect_response = await self._client.request(
+            "GET",
+            archive_download_url,
+            timeout=effective_timeout,
+            follow_redirects=False,
+        )
+        if redirect_response.status_code != 302:
+            redirect_response.raise_for_status()
+            raise httpx.HTTPError(
+                f"Expected 302 redirect from {archive_download_url}, got {redirect_response.status_code}"
+            )
+        location = redirect_response.headers.get("location")
+        if not location:
+            raise httpx.HTTPError(f"Missing Location header on redirect from {archive_download_url}")
+        return location
+
+    async def _download_and_extract_zip(
+        self,
+        signed_url: str,
+        dest_path: Path,
+        timeout: float | None = None,
+    ) -> None:
+        """Anonymous fetch (no bearer token to S3) + zip-slip-validated extractall."""
+        effective_timeout = timeout if timeout is not None else self._default_timeout
+        async with httpx.AsyncClient(timeout=effective_timeout) as anonymous_client:
+            download_response = await anonymous_client.get(signed_url)
+            download_response.raise_for_status()
+
+        dest_path.mkdir(parents=True, exist_ok=True)
+        with zipfile.ZipFile(io.BytesIO(download_response.content)) as zf:
+            dest_root = dest_path.resolve()
+            for info in zf.infolist():
+                name = info.filename
+                if name.startswith("/") or ".." in Path(name).parts:
+                    raise httpx.HTTPError(f"Zip-slip detected: {name}")
+                target = (dest_path / name).resolve()
+                if target != dest_root and dest_root not in target.parents:
+                    raise httpx.HTTPError(f"Zip-slip detected: {name}")
+            zf.extractall(dest_path)
+
     async def download_artifact(
         self,
         archive_download_url: str,
@@ -514,36 +561,16 @@ class AsyncGitHubClient:
         short-lived signed URL on a third-party host (typically S3). This method
         fetches the redirect with the authenticated client, then follows the
         ``Location`` header with a fresh **unauthenticated** client so the GitHub
-        bearer token is not leaked to the redirect target.
+        bearer token is not leaked to the redirect target. Each zip member is
+        validated against ``dest_path`` before extraction (zip-slip protection).
 
         Args:
             archive_download_url: The artifact's ``archive_download_url`` (absolute or relative to the API base).
             dest_path: Directory where the zip contents will be extracted. Created if missing.
             timeout: Optional timeout for both HTTP requests.
         """
-        effective_timeout = timeout if timeout is not None else self._default_timeout
-        redirect_response = await self._client.request(
-            "GET",
-            archive_download_url,
-            timeout=effective_timeout,
-            follow_redirects=False,
-        )
-        if redirect_response.status_code != 302:
-            redirect_response.raise_for_status()
-            raise httpx.HTTPError(
-                f"Expected 302 redirect from {archive_download_url}, got {redirect_response.status_code}"
-            )
-        location = redirect_response.headers.get("location")
-        if not location:
-            raise httpx.HTTPError(f"Missing Location header on redirect from {archive_download_url}")
-
-        async with httpx.AsyncClient(timeout=effective_timeout) as anonymous_client:
-            download_response = await anonymous_client.get(location)
-            download_response.raise_for_status()
-
-        dest_path.mkdir(parents=True, exist_ok=True)
-        with zipfile.ZipFile(io.BytesIO(download_response.content)) as zf:
-            zf.extractall(dest_path)
+        location = await self._resolve_artifact_redirect(archive_download_url, timeout)
+        await self._download_and_extract_zip(location, dest_path, timeout)
 
 
 # ---------------------------------------------------------------------------
