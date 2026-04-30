@@ -11,7 +11,7 @@ import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, TypedDict
 
 from ddev.cli.validate.all.github import (
     COMMENT_HEADING,
@@ -25,6 +25,11 @@ from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator, SyncP
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
+
+
+class GithubComment(TypedDict):
+    id: int
+    body: str
 
 
 @dataclass(frozen=True)
@@ -246,11 +251,15 @@ class ValidationOrchestrator(EventBusOrchestrator):
             and all(result.success for result in self._results.values())
         )
 
-    def _get_previous_validation_comments(self, pr_number: int) -> list[dict]:
-        comments = self._app.github.get_pull_request_comments(pr_number)
-        return [comment for comment in comments if comment.get("body", "").startswith(COMMENT_HEADING)]
+    def _get_previous_validation_comments(self, pr_number: int) -> list[GithubComment]:
+        comments: list[dict[str, Any]] = self._app.github.get_pull_request_comments(pr_number)
+        return [
+            {"id": comment["id"], "body": comment.get("body", "")}
+            for comment in comments
+            if comment.get("body", "").startswith(COMMENT_HEADING)
+        ]
 
-    def _delete_comments(self, comments: list[dict]) -> None:
+    def _delete_comments(self, comments: list[GithubComment]) -> None:
         for comment in comments:
             self._app.github.delete_comment(comment["id"])
 
