@@ -51,7 +51,7 @@ def _redisdb_scheduled_and_running():
 
 
 @pytest.fixture
-def redisdb_scheduled_and_running():
+def redisdb_scheduled_and_running(dd_agent_check):
     WaitFor(_redisdb_scheduled_and_running, attempts=60, wait=2)()
 
 
