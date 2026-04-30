@@ -1,0 +1,9 @@
+services:
+  redis-default:
+    image: "redis:${REDIS_VERSION}"
+    networks:
+      - network1
+
+networks:
+  network1:
+    name: autodiscovery-default_default

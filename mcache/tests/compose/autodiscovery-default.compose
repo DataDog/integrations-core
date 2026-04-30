@@ -1,0 +1,12 @@
+services:
+  memcached-default:
+    image: "memcached:${MCACHE_VERSION}"
+    # -vv is required for the CheckDockerLogs 'server listening' readiness
+    # probe in conftest.py: memcached is silent at default verbosity.
+    command: ["-vv"]
+    networks:
+      - network1
+
+networks:
+  network1:
+    name: autodiscovery-default_default

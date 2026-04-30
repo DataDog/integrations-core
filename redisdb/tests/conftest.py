@@ -11,7 +11,19 @@ from datadog_checks.dev import LazyFunction, RetryError, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.redisdb import Redis
 
-from .common import DOCKER_COMPOSE_PATH, HERE, HOST, MASTER_PORT, PASSWORD, PORT, REPLICA_PORT
+from .common import (
+    AUTODISCOVERY,
+    AUTODISCOVERY_COMPOSE_PATH,
+    AUTODISCOVERY_PROCESS,
+    AUTODISCOVERY_PROCESS_COMPOSE_PATH,
+    DOCKER_COMPOSE_PATH,
+    HERE,
+    HOST,
+    MASTER_PORT,
+    PASSWORD,
+    PORT,
+    REPLICA_PORT,
+)
 
 
 class CheckCluster(LazyFunction):
@@ -48,6 +60,17 @@ class CheckCluster(LazyFunction):
             raise RetryError('Redis cluster boot timed out!\nMaster: {}\nReplica: {}'.format(master, replica))
 
 
+def pytest_collection_modifyitems(config, items):
+    if not (AUTODISCOVERY or AUTODISCOVERY_PROCESS):
+        return
+    skip_cluster = pytest.mark.skip(reason='Cluster fixtures are not available in autodiscovery envs')
+    for item in items:
+        if 'test_e2e_autodiscovery' in str(item.fspath):
+            continue
+        if 'integration' in item.keywords:
+            item.add_marker(skip_cluster)
+
+
 @pytest.fixture(scope='session')
 def redis_auth():
     """
@@ -68,8 +91,51 @@ def redis_auth():
 @pytest.fixture(scope='session')
 def dd_environment(master_instance):
     """
-    Start a cluster with one master, one replica, and one unhealthy replica.
+    Start the Redis test environment.
+
+    In container-autodiscovery mode (`REDIS_AUTODISCOVERY=true`) run a single
+    default-port Redis container on the Docker bridge network and hand the
+    Agent the Docker socket so it can discover the container via the Docker
+    listener.
+
+    In process-autodiscovery mode (`REDIS_AUTODISCOVERY_PROCESS=true`) run a
+    single Redis container with `network_mode: host` so the `redis-server`
+    process is visible in the host process table, and start the Agent with
+    the process listener enabled and the docker feature disabled.
+
+    In both autodiscovery modes no static instance config is yielded so the
+    Agent relies purely on `auto_conf.yaml`.
+
+    Otherwise run the 1-master/2-replica cluster used by the existing e2e
+    tests.
     """
+    if AUTODISCOVERY_PROCESS:
+        e2e_metadata = {
+            'env_vars': {
+                'DD_DISCOVERY_ENABLED': 'true',
+                'DD_EXTRA_LISTENERS': 'process',
+                'DD_AUTOCONFIG_EXCLUDE_FEATURES': 'docker',
+            },
+            'cap_add': ['SYS_PTRACE', 'DAC_READ_SEARCH'],
+        }
+        with docker_run(
+            AUTODISCOVERY_PROCESS_COMPOSE_PATH,
+            conditions=[CheckDockerLogs(AUTODISCOVERY_PROCESS_COMPOSE_PATH, 'Ready to accept connections', wait=5)],
+        ):
+            yield None, e2e_metadata
+        return
+
+    if AUTODISCOVERY:
+        e2e_metadata = {
+            'docker_volumes': ['/var/run/docker.sock:/var/run/docker.sock:ro'],
+        }
+        with docker_run(
+            AUTODISCOVERY_COMPOSE_PATH,
+            conditions=[CheckDockerLogs(AUTODISCOVERY_COMPOSE_PATH, 'Ready to accept connections', wait=5)],
+        ):
+            yield None, e2e_metadata
+        return
+
     with docker_run(
         DOCKER_COMPOSE_PATH,
         conditions=[

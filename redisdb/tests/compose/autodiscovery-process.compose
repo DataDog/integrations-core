@@ -1,0 +1,4 @@
+services:
+  redis-process:
+    image: "redis:${REDIS_VERSION}"
+    network_mode: host

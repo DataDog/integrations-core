@@ -212,3 +212,48 @@ files:
             example: 6379
             type: integer
           fleet_configurable: true
+
+- name: auto_conf_process.yaml
+  example_name: auto_conf_process.yaml
+  options:
+    - template: ad_identifiers
+      description: |
+        A list of container identifiers that are used by Autodiscovery to identify
+        which container the check should be run against. For more information, see:
+        https://docs.datadoghq.com/agent/guide/ad_identifiers/
+
+        `cel://process` selects the agent's process listener; the
+        `cel_selector.processes` CEL rule below is what actually matches
+        the redis-server process. The container listener is unaffected
+        and continues to use `auto_conf.yaml`.
+      overrides:
+        value.example:
+          - cel://process
+    - name: cel_selector
+      required: true
+      description: |
+        CEL rules used by the agent's process listener. The `processes` rule
+        below matches any process whose cmdline contains `redis-server`.
+      value:
+        type: object
+        example:
+          processes:
+            - process.cmdline.contains("redis-server")
+    - template: init_config
+      options: []
+    - template: instances
+      options:
+        - name: host
+          required: true
+          description: Enter the host to connect to.
+          value:
+            example: '%%host%%'
+            type: string
+          fleet_configurable: true
+        - name: port
+          required: true
+          description: Enter the port of the host to connect to.
+          value:
+            example: 6379
+            type: integer
+          fleet_configurable: true

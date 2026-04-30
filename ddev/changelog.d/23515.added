@@ -1,0 +1,1 @@
+Add ``cap_add`` support to the docker e2e agent for tests requiring extra Linux capabilities, and bind-mount all ``auto_conf*.yaml`` files (not just ``auto_conf.yaml``) from the integration's data dir.

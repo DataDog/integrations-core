@@ -5,6 +5,7 @@ import os
 
 import pytest
 
+from datadog_checks.base import is_affirmative
 from datadog_checks.dev import get_docker_hostname
 from datadog_checks.dev.utils import ON_LINUX, ON_WINDOWS
 
@@ -18,6 +19,9 @@ PASSWORD = 'testpass'
 
 DOCKER_SOCKET_DIR = '/tmp'
 DOCKER_SOCKET_PATH = '/tmp/memcached.sock'
+
+AUTODISCOVERY = is_affirmative(os.environ.get('MCACHE_AUTODISCOVERY', 'false'))
+AUTODISCOVERY_COMPOSE_PATH = os.path.join(HERE, 'compose', 'autodiscovery-default.compose')
 
 platform_supports_sockets = ON_LINUX
 requires_socket_support = pytest.mark.skipif(
