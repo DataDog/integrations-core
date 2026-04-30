@@ -17,6 +17,7 @@ from ddev.cli.validate.all.github import (
     parse_pr_number_from_event,
     parse_pr_number_from_ref,
     pr_has_label_from_event,
+    should_suppress_validation_comments,
     write_step_summary,
 )
 from ddev.cli.validate.all.orchestrator import ValidationConfig, ValidationResult
@@ -309,6 +310,25 @@ def test_pr_has_label_from_event(tmp_path, content, expected):
     event_file = tmp_path / "event.json"
     event_file.write_text(content)
     assert pr_has_label_from_event(str(event_file), VALIDATION_COMMENT_SUPPRESSION_LABEL) is expected
+
+
+@pytest.mark.parametrize(
+    "event_name, expected",
+    [
+        pytest.param("pull_request", True, id="pull-request"),
+        pytest.param("pull_request_target", False, id="pull-request-target"),
+        pytest.param("pull_request_review", False, id="pull-request-review"),
+    ],
+)
+def test_should_suppress_validation_comments_only_for_pull_request_events(
+    tmp_path, monkeypatch, event_name, expected
+):
+    event_file = tmp_path / "event.json"
+    event_file.write_text(f'{{"pull_request": {{"labels": [{{"name": "{VALIDATION_COMMENT_SUPPRESSION_LABEL}"}}]}}}}')
+    monkeypatch.setenv("GITHUB_EVENT_NAME", event_name)
+    monkeypatch.setenv("GITHUB_EVENT_PATH", str(event_file))
+
+    assert should_suppress_validation_comments() is expected
 
 
 # --- format_step_summary ---

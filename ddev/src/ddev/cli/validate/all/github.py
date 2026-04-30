@@ -82,6 +82,8 @@ def pr_has_label_from_event(event_path: str, label: str) -> bool:
 
 
 def should_suppress_validation_comments() -> bool:
+    if os.environ.get("GITHUB_EVENT_NAME") != "pull_request":
+        return False
     if event_path := os.environ.get("GITHUB_EVENT_PATH"):
         return pr_has_label_from_event(event_path, VALIDATION_COMMENT_SUPPRESSION_LABEL)
     return False
