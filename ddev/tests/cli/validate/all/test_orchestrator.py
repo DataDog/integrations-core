@@ -311,6 +311,25 @@ def test_on_finalize_deletes_previous_validation_comments(mock_app):
     mock_app.github.post_pull_request_comment.assert_called_once()
 
 
+def test_on_finalize_posts_pr_comment_when_deleting_previous_comment_fails(mock_app):
+    mock_app.config.github.token = "fake-token"
+    mock_app.github.get_pull_request_comments.return_value = [
+        {"id": 100, "body": "## Validation Report\nold report"},
+    ]
+    mock_app.github.delete_comment.side_effect = RuntimeError("not found")
+
+    orch = ValidationOrchestrator(app=mock_app, validations=["config"], target=None, pr_number=42)
+    orch._results = {
+        "config": ValidationResult(name="config", success=True, stdout="ok", stderr="", duration=1.0),
+    }
+    asyncio.run(orch.on_finalize(exception=None))
+
+    mock_app.github.delete_comment.assert_called_once_with(100)
+    mock_app.github.post_pull_request_comment.assert_called_once()
+    warning_args = [str(c) for c in mock_app.display_warning.call_args_list]
+    assert any("Failed to delete previous validation comment 100" in w for w in warning_args)
+
+
 def test_on_finalize_skips_pr_comment_on_repeated_success(mock_app):
     mock_app.config.github.token = "fake-token"
     mock_app.github.get_pull_request_comments.return_value = [

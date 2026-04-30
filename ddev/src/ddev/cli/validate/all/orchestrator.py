@@ -261,7 +261,12 @@ class ValidationOrchestrator(EventBusOrchestrator):
 
     def _delete_comments(self, comments: list[GithubComment]) -> None:
         for comment in comments:
-            self._app.github.delete_comment(comment["id"])
+            try:
+                self._app.github.delete_comment(comment["id"])
+            except Exception as exc:
+                self._app.display_warning(
+                    f"Failed to delete previous validation comment {comment['id']}: {type(exc).__name__}: {exc}"
+                )
 
     def _previous_success_already_reported(
         self, current_succeeded: bool, previous_comments: list[GithubComment]
