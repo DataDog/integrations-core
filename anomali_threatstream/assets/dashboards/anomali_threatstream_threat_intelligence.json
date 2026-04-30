@@ -26,7 +26,7 @@
             "id": 4703436348810301,
             "definition": {
                 "type": "note",
-                "content": "[Anomali ThreatStream](https://www.anomali.com/products/threatstream) is a threat intelligence platform (TIP) that automates the collection, curation, and analysis of threat data from global, open-source, and premium feeds. \n\nThis dashboard provides overview of IOCs detected by Anomali ThreatStream.\n\nFor more information, see the [Anomali ThreatStream Datadog Integration Documentation](https://docs.datadoghq.com/integrations/anomali_threatstream/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "[Anomali ThreatStream](https://www.anomali.com/products/threatstream) is a threat intelligence platform (TIP) that automates the collection, curation, and analysis of threat data from global, open-source, and premium feeds. \n\nThis dashboard provides an overview of IOCs detected by Anomali ThreatStream.\n\nFor more information, see the [Anomali ThreatStream Datadog Integration Documentation](https://docs.datadoghq.com/integrations/anomali_threatstream/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -56,7 +56,7 @@
                         "id": 8781357638428208,
                         "definition": {
                             "type": "note",
-                            "content": "Provides visibility into logs enriched with Anomali ThreatStream threat intelligence, highlighting matched indicators, severity, confidence and source distribution. Use this group to analyze IOC trends, assess risk levels, and prioritize threat investigation.",
+                            "content": "Provides visibility into logs enriched with Anomali ThreatStream threat intelligence, highlighting matched indicators, severity, confidence, and source distribution. Use this group to analyze IOC trends, assess risk levels, and prioritize threat investigation.",
                             "background_color": "blue",
                             "font_size": "14",
                             "text_align": "center",
@@ -1602,7 +1602,7 @@
                         "id": 3155236468110778,
                         "definition": {
                             "type": "note",
-                            "content": "Datadog Cloud SIEM analyzes and correlates logs identified malicious by Anomali ThreatStream Threat Intelligence to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security/siem/home).",
+                            "content": "Datadog Cloud SIEM analyzes and correlates logs identified as malicious by Anomali ThreatStream Threat Intelligence to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security/siem/home).",
                             "background_color": "blue",
                             "font_size": "14",
                             "text_align": "center",

@@ -22,7 +22,7 @@ Integrate Anomali ThreatStream with Datadog to enhance your security logs with t
 
 ### Connect your Anomali ThreatStream account to Datadog
 
-1. Provide following details.
+1. Provide the following details.
    | Parameter | Description |
    | ---------- | ---------------------------------------------- |
    | Domain | Domain of the Anomali ThreatStream. |
