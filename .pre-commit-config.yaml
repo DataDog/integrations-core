@@ -17,6 +17,7 @@ repos:
       entry: ddev test -s
       language: system
       files: '.+\.py'
+      exclude: '^analysis/'
       pass_filenames: false
     - id: labeler_config
       name: Validate labeler config
