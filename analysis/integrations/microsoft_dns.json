@@ -8,12 +8,19 @@
   "auto_config_method": "other",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "Microsoft DNS is a logs-only integration (despite the hint suggesting a perf-counters shape). The spec contains only a `logs` template that wires the Windows Event Log channel `Microsoft-Windows-DNSServer/Audit` to Datadog with `type: windows_event`; there is no `instances` block, no Agent metric check, and no check.py implementation. The README explicitly states 'The Microsoft DNS integration does not include any metrics.' Discovery reduces to 'is the DNS Server role installed and is the audit channel enabled on this Windows host?', but there is no network probe and no metric check to dispatch — the integration is purely a Windows Event Log forwarder.",
+  "explanation": "Microsoft DNS is a logs-only integration (despite the hint suggesting a perf-counters shape). The spec contains only a `logs` template that wires the Windows Event Log channel `Microsoft-Windows-DNSServer/Audit` to Datadog with `type: windows_event`; there is no `instances` block, no Agent metric check, and no check.py implementation. The README explicitly states 'The Microsoft DNS integration does not include any metrics.' Discovery reduces to 'is the DNS Server role installed and is the audit channel enabled on this Windows host?', but there is no network probe and no metric check to dispatch \u2014 the integration is purely a Windows Event Log forwarder.",
   "references": [
-    {"kind": "spec", "path": "microsoft_dns/assets/configuration/spec.yaml"},
-    {"kind": "readme", "path": "microsoft_dns/README.md"}
+    {
+      "kind": "spec",
+      "path": "microsoft_dns/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "readme",
+      "path": "microsoft_dns/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Hint suggested Pattern H (perf_counters) but the actual integration is logs-only via windows_event channel. No metric check exists. Pattern N analogue (instrumentation/log-forwarding only)."
+  "notes": "Hint suggested Pattern H (perf_counters) but the actual integration is logs-only via windows_event channel. No metric check exists. Pattern N analogue (instrumentation/log-forwarding only).",
+  "discovery_bucket": "logs-only"
 }

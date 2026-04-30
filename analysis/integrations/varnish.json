@@ -2,26 +2,62 @@
   "name": "varnish",
   "display_name": "Varnish",
   "spec_path": "varnish/assets/configuration/spec.yaml",
-  "required_fields": ["varnishstat"],
+  "required_fields": [
+    "varnishstat"
+  ],
   "all_relevant_fields": [
-    {"name": "varnishstat", "required": true, "default": null},
-    {"name": "varnishadm", "required": false, "default": null},
-    {"name": "secretfile", "required": false, "default": "/etc/varnish/secret"},
-    {"name": "name", "required": false, "default": null},
-    {"name": "daemon_host", "required": false, "default": "localhost"},
-    {"name": "daemon_port", "required": false, "default": 6082}
+    {
+      "name": "varnishstat",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "varnishadm",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "secretfile",
+      "required": false,
+      "default": "/etc/varnish/secret"
+    },
+    {
+      "name": "name",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "daemon_host",
+      "required": false,
+      "default": "localhost"
+    },
+    {
+      "name": "daemon_port",
+      "required": false,
+      "default": 6082
+    }
   ],
   "classification": "custom",
   "auto_config_method": "other",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "The Varnish check does not talk to Varnish over the network — it shells out to the local `varnishstat` binary (and optionally `varnishadm`) and parses its text/XML/JSON output. Discovery is therefore not a network probe but a local-host concern: \"is the varnishstat binary present, and which path is it at?\". The spec field is even marked `require_trusted_provider: true`, signalling that the value is a path to an executable on the Agent's host, not a URL. The conventional path is `/usr/bin/varnishstat`, but containerized deployments require wrapping the command (e.g. `docker exec`) and passing `%%host%%` template variables, which is inherently per-environment. Backend health additionally needs `varnishadm` plus the secretfile, which is a credential.",
+  "explanation": "The Varnish check does not talk to Varnish over the network \u2014 it shells out to the local `varnishstat` binary (and optionally `varnishadm`) and parses its text/XML/JSON output. Discovery is therefore not a network probe but a local-host concern: \"is the varnishstat binary present, and which path is it at?\". The spec field is even marked `require_trusted_provider: true`, signalling that the value is a path to an executable on the Agent's host, not a URL. The conventional path is `/usr/bin/varnishstat`, but containerized deployments require wrapping the command (e.g. `docker exec`) and passing `%%host%%` template variables, which is inherently per-environment. Backend health additionally needs `varnishadm` plus the secretfile, which is a credential.",
   "references": [
-    {"kind": "spec", "path": "varnish/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "varnish/datadog_checks/varnish/varnish.py"},
-    {"kind": "upstream", "url": "https://varnish-cache.org/docs/trunk/reference/varnishstat.html"}
+    {
+      "kind": "spec",
+      "path": "varnish/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "varnish/datadog_checks/varnish/varnish.py"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://varnish-cache.org/docs/trunk/reference/varnishstat.html"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Method is `other` because there is no on-wire probe at all — it's a local executable check, similar in spirit to pattern H (local Windows host detection) but on Unix. A reasonable auto-config heuristic would be: `which varnishstat` -> if found, emit a default instance pointing at it. Backend health via varnishadm requires the secretfile, so that mode is `credentials-required` in practice."
+  "notes": "Method is `other` because there is no on-wire probe at all \u2014 it's a local executable check, similar in spirit to pattern H (local Windows host detection) but on Unix. A reasonable auto-config heuristic would be: `which varnishstat` -> if found, emit a default instance pointing at it. Backend health via varnishadm requires the secretfile, so that mode is `credentials-required` in practice.",
+  "discovery_bucket": "local-cli-binary"
 }

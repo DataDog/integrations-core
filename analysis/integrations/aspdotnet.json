@@ -4,20 +4,37 @@
   "spec_path": "aspdotnet/assets/configuration/spec.yaml",
   "required_fields": [],
   "all_relevant_fields": [
-    {"name": "use_legacy_check_version", "required": false, "default": false}
+    {
+      "name": "use_legacy_check_version",
+      "required": false,
+      "default": false
+    }
   ],
   "classification": "generic",
   "auto_config_method": "other",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "ASP.NET is collected via Windows Performance Counters (PDH) on the local host where the Agent runs. The spec uses `template: instances/perf_counters` and the check inherits `PerfCountersBaseCheckWithLegacySupport`. There is no remote host/port in the default mode — auto-config reduces to detecting whether ASP.NET (the `ASP.NET` / `ASP.NET Apps v*` perf-counter object set) is present on the Windows host and enabling the check with default counters. The optional `pdh_legacy` template can target a remote machine via username/password but is hidden in the spec.",
+  "explanation": "ASP.NET is collected via Windows Performance Counters (PDH) on the local host where the Agent runs. The spec uses `template: instances/perf_counters` and the check inherits `PerfCountersBaseCheckWithLegacySupport`. There is no remote host/port in the default mode \u2014 auto-config reduces to detecting whether ASP.NET (the `ASP.NET` / `ASP.NET Apps v*` perf-counter object set) is present on the Windows host and enabling the check with default counters. The optional `pdh_legacy` template can target a remote machine via username/password but is hidden in the spec.",
   "references": [
-    {"kind": "spec", "path": "aspdotnet/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "aspdotnet/datadog_checks/aspdotnet/check.py"},
-    {"kind": "check", "path": "aspdotnet/datadog_checks/aspdotnet/aspdotnet.py"},
-    {"kind": "readme", "path": "aspdotnet/README.md"}
+    {
+      "kind": "spec",
+      "path": "aspdotnet/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "aspdotnet/datadog_checks/aspdotnet/check.py"
+    },
+    {
+      "kind": "check",
+      "path": "aspdotnet/datadog_checks/aspdotnet/aspdotnet.py"
+    },
+    {
+      "kind": "readme",
+      "path": "aspdotnet/README.md"
+    }
   ],
   "confidence": "medium",
   "needs_human_review": false,
-  "notes": "Pattern H (local Windows host detection), same shape as iis. Auto-config trigger is 'ASP.NET perf-counter object present on this machine', not a network probe."
+  "notes": "Pattern H (local Windows host detection), same shape as iis. Auto-config trigger is 'ASP.NET perf-counter object present on this machine', not a network probe.",
+  "discovery_bucket": "generic-windows-perf"
 }

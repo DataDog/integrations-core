@@ -2,13 +2,35 @@
   "name": "nginx",
   "display_name": "NGINX",
   "spec_path": "nginx/assets/configuration/spec.yaml",
-  "required_fields": ["nginx_status_url"],
+  "required_fields": [
+    "nginx_status_url"
+  ],
   "all_relevant_fields": [
-    {"name": "nginx_status_url", "required": true, "default": "http://localhost:81/nginx_status/"},
-    {"name": "use_plus_api", "required": false, "default": false},
-    {"name": "use_plus_api_stream", "required": false, "default": true},
-    {"name": "plus_api_version", "required": false, "default": 2},
-    {"name": "use_vts", "required": false, "default": false}
+    {
+      "name": "nginx_status_url",
+      "required": true,
+      "default": "http://localhost:81/nginx_status/"
+    },
+    {
+      "name": "use_plus_api",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "use_plus_api_stream",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "plus_api_version",
+      "required": false,
+      "default": 2
+    },
+    {
+      "name": "use_vts",
+      "required": false,
+      "default": false
+    }
   ],
   "classification": "custom",
   "auto_config_method": "http-path-probe",
@@ -16,11 +38,21 @@
   "auto_conf_path": null,
   "explanation": "NGINX has at least three plausible status paths depending on the build: stub_status (open-source nginx), the NGINX Plus `/api` (R13+), and the vhost_traffic_status (`vts`) module's JSON endpoint. The status path is operator-configurable, so a discovery layer must probe candidate paths and inspect the response shape to pick the right mode. The port itself is whatever the operator configured.",
   "references": [
-    {"kind": "spec", "path": "nginx/assets/configuration/spec.yaml"},
-    {"kind": "upstream", "url": "https://nginx.org/en/docs/http/ngx_http_stub_status_module.html"},
-    {"kind": "upstream", "url": "https://docs.nginx.com/nginx/admin-guide/monitoring/live-activity-monitoring/"}
+    {
+      "kind": "spec",
+      "path": "nginx/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://nginx.org/en/docs/http/ngx_http_stub_status_module.html"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://docs.nginx.com/nginx/admin-guide/monitoring/live-activity-monitoring/"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": ""
+  "notes": "",
+  "discovery_bucket": "http-multi-path"
 }

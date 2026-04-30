@@ -2,9 +2,15 @@
   "name": "datadog_cluster_agent",
   "display_name": "Datadog Cluster Agent",
   "spec_path": "datadog_cluster_agent/assets/configuration/spec.yaml",
-  "required_fields": ["prometheus_url"],
+  "required_fields": [
+    "prometheus_url"
+  ],
   "all_relevant_fields": [
-    {"name": "prometheus_url", "required": true, "default": "http://localhost:5000/metrics"}
+    {
+      "name": "prometheus_url",
+      "required": true,
+      "default": "http://localhost:5000/metrics"
+    }
   ],
   "classification": "generic",
   "auto_config_method": "openmetrics-port-scan",
@@ -12,11 +18,21 @@
   "auto_conf_path": "datadog_cluster_agent/datadog_checks/datadog_cluster_agent/data/auto_conf.yaml",
   "explanation": "The check inherits OpenMetricsBaseCheck and scrapes a single fixed Prometheus endpoint at http://%%host%%:5000/metrics. The existing auto_conf.yaml uses the cluster-agent AD identifier and templates the host. Default port (5000) and path (/metrics) are hardcoded, with no auth required, so a generic OpenMetrics port scan suffices for discovery.",
   "references": [
-    {"kind": "spec", "path": "datadog_cluster_agent/assets/configuration/spec.yaml"},
-    {"kind": "auto_conf", "path": "datadog_cluster_agent/datadog_checks/datadog_cluster_agent/data/auto_conf.yaml"},
-    {"kind": "check", "path": "datadog_cluster_agent/datadog_checks/datadog_cluster_agent/check.py"}
+    {
+      "kind": "spec",
+      "path": "datadog_cluster_agent/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "auto_conf",
+      "path": "datadog_cluster_agent/datadog_checks/datadog_cluster_agent/data/auto_conf.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "datadog_cluster_agent/datadog_checks/datadog_cluster_agent/check.py"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": ""
+  "notes": "",
+  "discovery_bucket": "generic-openmetrics-scan"
 }

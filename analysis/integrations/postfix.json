@@ -2,13 +2,35 @@
   "name": "postfix",
   "display_name": "Postfix",
   "spec_path": "postfix/assets/configuration/spec.yaml",
-  "required_fields": ["directory"],
+  "required_fields": [
+    "directory"
+  ],
   "all_relevant_fields": [
-    {"name": "postfix_user", "required": false, "default": "root"},
-    {"name": "postqueue", "required": false, "default": false},
-    {"name": "directory", "required": false, "default": null},
-    {"name": "queues", "required": false, "default": null},
-    {"name": "config_directory", "required": false, "default": null}
+    {
+      "name": "postfix_user",
+      "required": false,
+      "default": "root"
+    },
+    {
+      "name": "postqueue",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "directory",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "queues",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "config_directory",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "custom",
   "auto_config_method": "other",
@@ -16,10 +38,17 @@
   "auto_conf_path": null,
   "explanation": "Postfix is a host-local check: it counts files in /var/spool/postfix/<queue> directories or shells out to postqueue -p. There is no network endpoint to probe. Discovery has to detect that Postfix is installed on the local host (presence of /var/spool/postfix or a postqueue binary on PATH) and that the agent has the required sudoers / authorized_mailq_users grants. Because the choice between the directory-based mode (needs sudo + a queue_directory path) and the postqueue mode (needs the binary + ACL grant) depends on local OS state and operator-supplied permissions, the discovery logic is integration-specific.",
   "references": [
-    {"kind": "spec", "path": "postfix/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "postfix/datadog_checks/postfix/postfix.py"}
+    {
+      "kind": "spec",
+      "path": "postfix/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "postfix/datadog_checks/postfix/postfix.py"
+    }
   ],
   "confidence": "medium",
   "needs_human_review": false,
-  "notes": "Default queue directory /var/spool/postfix is universal on Linux Postfix installs, and 'queues' has documented sensible defaults (incoming, active, deferred). The blocker is privilege configuration (passwordless sudo for 'find', or authorized_mailq_users), which the agent cannot self-grant. New pattern: 'host-local file/queue inspection with privilege grants' — similar in shape to Windows perf counters (pattern H) but on Linux and requiring out-of-band sudoers configuration."
+  "notes": "Default queue directory /var/spool/postfix is universal on Linux Postfix installs, and 'queues' has documented sensible defaults (incoming, active, deferred). The blocker is privilege configuration (passwordless sudo for 'find', or authorized_mailq_users), which the agent cannot self-grant. New pattern: 'host-local file/queue inspection with privilege grants' \u2014 similar in shape to Windows perf counters (pattern H) but on Linux and requiring out-of-band sudoers configuration.",
+  "discovery_bucket": "local-cli-binary"
 }

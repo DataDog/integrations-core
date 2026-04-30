@@ -2,30 +2,85 @@
   "name": "oracle",
   "display_name": "Oracle Database",
   "spec_path": "oracle/assets/configuration/spec.yaml",
-  "required_fields": ["server", "service_name", "username", "password"],
+  "required_fields": [
+    "server",
+    "service_name",
+    "username",
+    "password"
+  ],
   "all_relevant_fields": [
-    {"name": "server", "required": true, "default": "localhost:1521"},
-    {"name": "service_name", "required": true, "default": null},
-    {"name": "username", "required": true, "default": null},
-    {"name": "password", "required": true, "default": null},
-    {"name": "protocol", "required": false, "default": "TCP"},
-    {"name": "use_instant_client", "required": false, "default": false},
-    {"name": "jdbc_driver_path", "required": false, "default": null},
-    {"name": "jdbc_truststore_path", "required": false, "default": null},
-    {"name": "jdbc_truststore_type", "required": false, "default": null},
-    {"name": "jdbc_truststore_password", "required": false, "default": null}
+    {
+      "name": "server",
+      "required": true,
+      "default": "localhost:1521"
+    },
+    {
+      "name": "service_name",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "username",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "protocol",
+      "required": false,
+      "default": "TCP"
+    },
+    {
+      "name": "use_instant_client",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "jdbc_driver_path",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "jdbc_truststore_path",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "jdbc_truststore_type",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "jdbc_truststore_password",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "The Oracle Database integration requires a dedicated Datadog database user with explicit grants (`username` + `password` are both `required: true`) plus the `service_name` of the target instance. None of these can be derived from the wire — credentials are provisioned out of band. Additionally, Oracle's network protocol requires a proprietary client library: either the bundled native client, the Oracle Instant Client, or a JDBC driver path. This integration ships no Python check inside `integrations-core` (the heavy lifting moved to the Agent core/DBM); only spec, README, and dashboards are present here. Pattern D (credential-required) plus a host-prerequisite, mirroring `ibm_i`'s shape — proprietary client library prerequisite is also a structural blocker.",
+  "explanation": "The Oracle Database integration requires a dedicated Datadog database user with explicit grants (`username` + `password` are both `required: true`) plus the `service_name` of the target instance. None of these can be derived from the wire \u2014 credentials are provisioned out of band. Additionally, Oracle's network protocol requires a proprietary client library: either the bundled native client, the Oracle Instant Client, or a JDBC driver path. This integration ships no Python check inside `integrations-core` (the heavy lifting moved to the Agent core/DBM); only spec, README, and dashboards are present here. Pattern D (credential-required) plus a host-prerequisite, mirroring `ibm_i`'s shape \u2014 proprietary client library prerequisite is also a structural blocker.",
   "references": [
-    {"kind": "spec", "path": "oracle/assets/configuration/spec.yaml"},
-    {"kind": "readme", "path": "oracle/README.md"},
-    {"kind": "upstream", "url": "https://docs.datadoghq.com/database_monitoring/setup_oracle/"}
+    {
+      "kind": "spec",
+      "path": "oracle/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "readme",
+      "path": "oracle/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://docs.datadoghq.com/database_monitoring/setup_oracle/"
+    }
   ],
   "confidence": "high",
   "needs_human_review": true,
-  "notes": "No `datadog_checks/oracle/` Python package in this repo (Agent-core/DBM integration). Pattern T candidate: proprietary client library prerequisite (Oracle Instant Client / Oracle native client / JDBC driver) shared with `ibm_i`."
+  "notes": "No `datadog_checks/oracle/` Python package in this repo (Agent-core/DBM integration). Pattern T candidate: proprietary client library prerequisite (Oracle Instant Client / Oracle native client / JDBC driver) shared with `ibm_i`.",
+  "discovery_bucket": "creds-proprietary-client"
 }

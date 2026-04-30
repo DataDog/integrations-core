@@ -8,13 +8,23 @@
   "auto_config_method": "other",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "The Flink integration ships no Agent check binary — datadog_checks/flink/ contains only __init__.py and a logs-only conf.yaml.example. Metrics are collected by configuring Flink's built-in Datadog HTTP Reporter (which posts directly to the Datadog API) or its StatsD reporter (to dogstatsd). The Agent does not probe Flink at all, so there is no endpoint to autodiscover. The only Agent-side configuration is an optional logs tailer pointed at /var/log/flink.log. Separately, Flink JVMs can be monitored via the generic JMX integration, which has its own credential needs.",
+  "explanation": "The Flink integration ships no Agent check binary \u2014 datadog_checks/flink/ contains only __init__.py and a logs-only conf.yaml.example. Metrics are collected by configuring Flink's built-in Datadog HTTP Reporter (which posts directly to the Datadog API) or its StatsD reporter (to dogstatsd). The Agent does not probe Flink at all, so there is no endpoint to autodiscover. The only Agent-side configuration is an optional logs tailer pointed at /var/log/flink.log. Separately, Flink JVMs can be monitored via the generic JMX integration, which has its own credential needs.",
   "references": [
-    {"kind": "spec", "path": "flink/assets/configuration/spec.yaml"},
-    {"kind": "readme", "path": "flink/README.md"},
-    {"kind": "other", "path": "flink/datadog_checks/flink/data/conf.yaml.example"}
+    {
+      "kind": "spec",
+      "path": "flink/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "readme",
+      "path": "flink/README.md"
+    },
+    {
+      "kind": "other",
+      "path": "flink/datadog_checks/flink/data/conf.yaml.example"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern N (DogStatsD / instrumentation-only). Closest analogue is sidekiq — no probe, only a metric/log mapping. JMX is a separate integration."
+  "notes": "Pattern N (DogStatsD / instrumentation-only). Closest analogue is sidekiq \u2014 no probe, only a metric/log mapping. JMX is a separate integration.",
+  "discovery_bucket": "logs-only"
 }

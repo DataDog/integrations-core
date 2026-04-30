@@ -4,7 +4,11 @@
   "spec_path": "cisco_secure_firewall/assets/configuration/spec.yaml",
   "required_fields": [],
   "all_relevant_fields": [
-    {"name": "logs", "required": true, "default": null}
+    {
+      "name": "logs",
+      "required": true,
+      "default": null
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "other",
@@ -12,10 +16,17 @@
   "auto_conf_path": null,
   "explanation": "Cisco Secure Firewall is a logs-only vendor security tile. The spec defines only a `logs` template (tcp/udp syslog) and there is no Agent check class under `datadog_checks/cisco_secure_firewall/` (no <name>.py implementation). Enabling the integration is purely a question of whether the user routes ASA/FTD syslog to a port the Agent listens on; there is no metric endpoint to probe and no host/port the Agent can autodiscover from the wire. The user must also know which TCP/UDP port their firewall is configured to ship syslog to.",
   "references": [
-    {"kind": "spec", "path": "cisco_secure_firewall/assets/configuration/spec.yaml"},
-    {"kind": "readme", "path": "cisco_secure_firewall/README.md"}
+    {
+      "kind": "spec",
+      "path": "cisco_secure_firewall/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "readme",
+      "path": "cisco_secure_firewall/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern N (logs-only / instrumentation-only). No check.py exists; integration is a logs config + manifest only."
+  "notes": "Pattern N (logs-only / instrumentation-only). No check.py exists; integration is a logs config + manifest only.",
+  "discovery_bucket": "logs-only"
 }

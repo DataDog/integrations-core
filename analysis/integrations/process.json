@@ -2,15 +2,45 @@
   "name": "process",
   "display_name": "Process",
   "spec_path": "process/assets/configuration/spec.yaml",
-  "required_fields": ["name"],
+  "required_fields": [
+    "name"
+  ],
   "all_relevant_fields": [
-    {"name": "name", "required": true, "default": null},
-    {"name": "search_string", "required": false, "default": null},
-    {"name": "pid", "required": false, "default": null},
-    {"name": "pid_file", "required": false, "default": null},
-    {"name": "exact_match", "required": false, "default": true},
-    {"name": "user", "required": false, "default": null},
-    {"name": "collect_children", "required": false, "default": false}
+    {
+      "name": "name",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "search_string",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "pid",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "pid_file",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "exact_match",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "user",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "collect_children",
+      "required": false,
+      "default": false
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "other",
@@ -18,11 +48,21 @@
   "auto_conf_path": null,
   "explanation": "The Process check is the canonical generic process-monitoring template (patterns J + M). It does not probe the network at all: it iterates host processes via `psutil` and matches against user-supplied `search_string`, `pid`, or `pid_file`. The required `name` is just a free-form tag for the metrics, and exactly one of search_string/pid/pid_file must be provided to identify which processes to count. The choice of which processes to monitor is user policy (which application, which command-line pattern, which pid file path), not a discoverable property of the host. There is no upstream service to autodiscover; the integration is itself a configuration template that the user fills in.",
   "references": [
-    {"kind": "spec", "path": "process/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "process/datadog_checks/process/process.py"},
-    {"kind": "readme", "path": "process/README.md"}
+    {
+      "kind": "spec",
+      "path": "process/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "process/datadog_checks/process/process.py"
+    },
+    {
+      "kind": "readme",
+      "path": "process/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern J/M: user-supplied generic check template combined with process-name local discovery. The user's intent (which process matters) is the missing input."
+  "notes": "Pattern J/M: user-supplied generic check template combined with process-name local discovery. The user's intent (which process matters) is the missing input.",
+  "discovery_bucket": "per-process-discovery"
 }

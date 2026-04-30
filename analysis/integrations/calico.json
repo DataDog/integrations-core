@@ -2,9 +2,15 @@
   "name": "calico",
   "display_name": "Calico",
   "spec_path": "calico/assets/configuration/spec.yaml",
-  "required_fields": ["openmetrics_endpoint"],
+  "required_fields": [
+    "openmetrics_endpoint"
+  ],
   "all_relevant_fields": [
-    {"name": "openmetrics_endpoint", "required": true, "default": null}
+    {
+      "name": "openmetrics_endpoint",
+      "required": true,
+      "default": null
+    }
   ],
   "classification": "generic",
   "auto_config_method": "openmetrics-port-scan",
@@ -12,12 +18,25 @@
   "auto_conf_path": null,
   "explanation": "Calico's check is a thin OpenMetricsBaseCheckV2 wrapper around Felix's Prometheus endpoint. The spec uses the standard `instances/openmetrics` template with a single required `openmetrics_endpoint` field; no credentials are involved. Felix exposes /metrics on a fixed default port (9091 per the README's minikube example, with felix-metrics-svc as the upstream-recommended Service). Discovery is a port-scan for an OpenMetrics endpoint on the well-known Felix metrics port. No auto_conf.yaml ships on disk, but the integration follows pattern A (OpenMetrics on a known port) and the user has nothing else to provide.",
   "references": [
-    {"kind": "spec", "path": "calico/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "calico/datadog_checks/calico/check.py"},
-    {"kind": "readme", "path": "calico/README.md"},
-    {"kind": "upstream", "url": "https://docs.tigera.io/calico/3.25/operations/monitor/monitor-component-metrics"}
+    {
+      "kind": "spec",
+      "path": "calico/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "calico/datadog_checks/calico/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "calico/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://docs.tigera.io/calico/3.25/operations/monitor/monitor-component-metrics"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Felix port 9091 and Typha port 9093 are conventional but operator-configurable; users sometimes override via Tigera FelixConfiguration. Discovery should probe both."
+  "notes": "Felix port 9091 and Typha port 9093 are conventional but operator-configurable; users sometimes override via Tigera FelixConfiguration. Discovery should probe both.",
+  "discovery_bucket": "generic-openmetrics-scan"
 }

@@ -2,28 +2,73 @@
   "name": "sap_hana",
   "display_name": "SAP HANA",
   "spec_path": "sap_hana/assets/configuration/spec.yaml",
-  "required_fields": ["server", "username", "password"],
+  "required_fields": [
+    "server",
+    "username",
+    "password"
+  ],
   "all_relevant_fields": [
-    {"name": "server", "required": true, "default": null},
-    {"name": "port", "required": false, "default": 30015},
-    {"name": "username", "required": true, "default": null},
-    {"name": "password", "required": true, "default": null},
-    {"name": "schema", "required": false, "default": "SYS_DATABASES"},
-    {"name": "use_tls", "required": false, "default": false},
-    {"name": "connection_properties", "required": false, "default": null}
+    {
+      "name": "server",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "port",
+      "required": false,
+      "default": 30015
+    },
+    {
+      "name": "username",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "schema",
+      "required": false,
+      "default": "SYS_DATABASES"
+    },
+    {
+      "name": "use_tls",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "connection_properties",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "The SAP HANA check connects to the HANA database over the SQL protocol via the proprietary `hdbcli` driver and runs SQL queries against monitoring views (`M_*`, `SYS_DATABASES.*`). It requires a user with `MONITORING` (or equivalent) role privileges granted ahead of time. The spec marks `server`, `username`, and `password` as `required: true`, with `password` flagged `secret: true`. There is no unauthenticated query path on HANA — this is pattern D (spec-required credentials), the same shape as postgres / mysql / sqlserver.",
+  "explanation": "The SAP HANA check connects to the HANA database over the SQL protocol via the proprietary `hdbcli` driver and runs SQL queries against monitoring views (`M_*`, `SYS_DATABASES.*`). It requires a user with `MONITORING` (or equivalent) role privileges granted ahead of time. The spec marks `server`, `username`, and `password` as `required: true`, with `password` flagged `secret: true`. There is no unauthenticated query path on HANA \u2014 this is pattern D (spec-required credentials), the same shape as postgres / mysql / sqlserver.",
   "references": [
-    {"kind": "spec", "path": "sap_hana/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "sap_hana/datadog_checks/sap_hana/sap_hana.py"},
-    {"kind": "readme", "path": "sap_hana/README.md"},
-    {"kind": "upstream", "url": "https://help.sap.com/docs/SAP_HANA_PLATFORM"}
+    {
+      "kind": "spec",
+      "path": "sap_hana/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "sap_hana/datadog_checks/sap_hana/sap_hana.py"
+    },
+    {
+      "kind": "readme",
+      "path": "sap_hana/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://help.sap.com/docs/SAP_HANA_PLATFORM"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Default port 30015 is the standard SYSTEMDB SQL port (3<instance_number>15), so a network probe could trivially identify the listener — but credentials cannot be discovered. The integration also requires the operator to manually `pip install hdbcli` into the Agent's embedded Python."
+  "notes": "Default port 30015 is the standard SYSTEMDB SQL port (3<instance_number>15), so a network probe could trivially identify the listener \u2014 but credentials cannot be discovered. The integration also requires the operator to manually `pip install hdbcli` into the Agent's embedded Python.",
+  "discovery_bucket": "creds-proprietary-client"
 }

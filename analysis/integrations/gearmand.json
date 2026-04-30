@@ -4,9 +4,21 @@
   "spec_path": "gearmand/assets/configuration/spec.yaml",
   "required_fields": [],
   "all_relevant_fields": [
-    {"name": "server", "required": false, "default": "127.0.0.1"},
-    {"name": "port", "required": false, "default": 4730},
-    {"name": "tasks", "required": false, "default": null}
+    {
+      "name": "server",
+      "required": false,
+      "default": "127.0.0.1"
+    },
+    {
+      "name": "port",
+      "required": false,
+      "default": 4730
+    },
+    {
+      "name": "tasks",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "generic",
   "auto_config_method": "tcp-banner-probe",
@@ -14,11 +26,21 @@
   "auto_conf_path": null,
   "explanation": "Gearman speaks a plain-text admin protocol over TCP on the well-known port 4730. The check uses `python3_gearman.GearmanAdminClient` against `host:port` and explicitly defaults to `127.0.0.1:4730` when either field is omitted (`_get_conf` warns and falls back). No authentication is configurable. The optional `tasks` allowlist only filters per-task metrics; aggregate metrics work without it. A discovery probe can connect to TCP/4730 and issue an admin command (e.g. `version\\r\\n`, `status\\r\\n`) to confirm the server.",
   "references": [
-    {"kind": "spec", "path": "gearmand/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "gearmand/datadog_checks/gearmand/gearmand.py"},
-    {"kind": "readme", "path": "gearmand/README.md"}
+    {
+      "kind": "spec",
+      "path": "gearmand/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "gearmand/datadog_checks/gearmand/gearmand.py"
+    },
+    {
+      "kind": "readme",
+      "path": "gearmand/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern C (TCP banner / known protocol). No existing auto_conf.yaml on disk, but the field set (host + port with universal defaults, no auth) is textbook generic."
+  "notes": "Pattern C (TCP banner / known protocol). No existing auto_conf.yaml on disk, but the field set (host + port with universal defaults, no auth) is textbook generic.",
+  "discovery_bucket": "tcp-protocol-handshake"
 }

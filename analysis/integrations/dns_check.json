@@ -2,15 +2,45 @@
   "name": "dns_check",
   "display_name": "DNS",
   "spec_path": "dns_check/assets/configuration/spec.yaml",
-  "required_fields": ["hostname"],
+  "required_fields": [
+    "hostname"
+  ],
   "all_relevant_fields": [
-    {"name": "name", "required": false, "default": null},
-    {"name": "hostname", "required": true, "default": null},
-    {"name": "nameserver", "required": false, "default": null},
-    {"name": "nameserver_port", "required": false, "default": 53},
-    {"name": "resolves_as", "required": false, "default": null},
-    {"name": "timeout", "required": false, "default": 5},
-    {"name": "record_type", "required": false, "default": "A"}
+    {
+      "name": "name",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "hostname",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "nameserver",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "nameserver_port",
+      "required": false,
+      "default": 53
+    },
+    {
+      "name": "resolves_as",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "timeout",
+      "required": false,
+      "default": 5
+    },
+    {
+      "name": "record_type",
+      "required": false,
+      "default": "A"
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "other",
@@ -18,11 +48,21 @@
   "auto_conf_path": null,
   "explanation": "The DNS check is a synthetic probe: the user nominates a `hostname` (required) to resolve via `dns.resolver.Resolver().query()` and the check measures resolution time and optionally validates the result against an expected `resolves_as` IP list. There is no upstream service co-located with the Agent; the target is whichever name the user wants to monitor (e.g. `www.example.com`, an internal service name, or a CNAME being failover-tested). The required `hostname` is user *intent*, not a discoverable property. This is pattern K (synthetic / user-intent probe), with no credentials involved, but in this case the missing input is the target identity itself, so auto-config cannot synthesize a default instance.",
   "references": [
-    {"kind": "spec", "path": "dns_check/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "dns_check/datadog_checks/dns_check/dns_check.py"},
-    {"kind": "readme", "path": "dns_check/README.md"}
+    {
+      "kind": "spec",
+      "path": "dns_check/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "dns_check/datadog_checks/dns_check/dns_check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "dns_check/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern K (synthetic probe). Unlike http_check/tcp_check/tls (custom because they at least have a discoverable network endpoint to fingerprint), dns_check's target is purely a user-chosen hostname string with no on-host signal. Method `other` (no auth required, but not custom either since there is nothing to discover)."
+  "notes": "Pattern K (synthetic probe). Unlike http_check/tcp_check/tls (custom because they at least have a discoverable network endpoint to fingerprint), dns_check's target is purely a user-chosen hostname string with no on-host signal. Method `other` (no auth required, but not custom either since there is nothing to discover).",
+  "discovery_bucket": "user-intent-synthetic"
 }

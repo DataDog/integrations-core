@@ -4,8 +4,16 @@
   "spec_path": "cockroachdb/assets/configuration/spec.yaml",
   "required_fields": [],
   "all_relevant_fields": [
-    {"name": "openmetrics_endpoint", "required": false, "default": "http://localhost:8080/_status/vars"},
-    {"name": "prometheus_url", "required": false, "default": null}
+    {
+      "name": "openmetrics_endpoint",
+      "required": false,
+      "default": "http://localhost:8080/_status/vars"
+    },
+    {
+      "name": "prometheus_url",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "generic",
   "auto_config_method": "openmetrics-port-scan",
@@ -13,11 +21,21 @@
   "auto_conf_path": null,
   "explanation": "CockroachDB exposes a Prometheus-format metrics endpoint at the fixed path `/_status/vars` on its admin HTTP port (default 8080). The check is an OpenMetricsBaseCheckV2 subclass that hardcodes this default in `get_default_config`, so a generic OpenMetrics port-scan that probes `http://%%host%%:8080/_status/vars` is sufficient. The spec overrides `openmetrics_endpoint.required` to false because the check supplies the default. No credentials are required.",
   "references": [
-    {"kind": "spec", "path": "cockroachdb/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "cockroachdb/datadog_checks/cockroachdb/check.py"},
-    {"kind": "upstream", "url": "https://www.cockroachlabs.com/docs/stable/monitoring-and-alerting.html#prometheus-endpoint"}
+    {
+      "kind": "spec",
+      "path": "cockroachdb/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "cockroachdb/datadog_checks/cockroachdb/check.py"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://www.cockroachlabs.com/docs/stable/monitoring-and-alerting.html#prometheus-endpoint"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "No auto_conf.yaml ships with the integration, but the path/port are universal and the check defaults make discovery trivial."
+  "notes": "No auto_conf.yaml ships with the integration, but the path/port are universal and the check defaults make discovery trivial.",
+  "discovery_bucket": "generic-openmetrics-scan"
 }

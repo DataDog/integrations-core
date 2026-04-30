@@ -2,9 +2,15 @@
   "name": "quarkus",
   "display_name": "Quarkus",
   "spec_path": "quarkus/assets/configuration/spec.yaml",
-  "required_fields": ["openmetrics_endpoint"],
+  "required_fields": [
+    "openmetrics_endpoint"
+  ],
   "all_relevant_fields": [
-    {"name": "openmetrics_endpoint", "required": true, "default": null}
+    {
+      "name": "openmetrics_endpoint",
+      "required": true,
+      "default": null
+    }
   ],
   "classification": "generic",
   "auto_config_method": "openmetrics-port-scan",
@@ -12,12 +18,25 @@
   "auto_conf_path": null,
   "explanation": "Quarkus exposes Prometheus metrics through its Micrometer Prometheus MeterRegistry extension at the well-known path `/q/metrics`, on the same HTTP port the application serves on (default 8080). The check inherits `OpenMetricsBaseCheckV2` and consumes a single `openmetrics_endpoint` URL. The path is fixed and singular, no authentication is required by default, and the spec ships a single canonical example (`http://localhost:8080/q/metrics`). This fits pattern A: a generic OpenMetrics port-scan that probes `/q/metrics` on candidate HTTP ports is sufficient for discovery.",
   "references": [
-    {"kind": "spec", "path": "quarkus/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "quarkus/datadog_checks/quarkus/check.py"},
-    {"kind": "readme", "path": "quarkus/README.md"},
-    {"kind": "upstream", "url": "https://quarkus.io/guides/telemetry-micrometer"}
+    {
+      "kind": "spec",
+      "path": "quarkus/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "quarkus/datadog_checks/quarkus/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "quarkus/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://quarkus.io/guides/telemetry-micrometer"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "The application port is configurable per-deployment, but the path /q/metrics is universal across Quarkus apps using the Micrometer Prometheus extension."
+  "notes": "The application port is configurable per-deployment, but the path /q/metrics is universal across Quarkus apps using the Micrometer Prometheus extension.",
+  "discovery_bucket": "generic-openmetrics-scan"
 }

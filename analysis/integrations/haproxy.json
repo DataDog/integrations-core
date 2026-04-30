@@ -4,11 +4,31 @@
   "spec_path": "haproxy/assets/configuration/spec.yaml",
   "required_fields": [],
   "all_relevant_fields": [
-    {"name": "use_openmetrics", "required": false, "default": false},
-    {"name": "openmetrics_endpoint", "required": false, "default": null},
-    {"name": "url", "required": false, "default": "http://localhost/admin?stats"},
-    {"name": "username", "required": false, "default": null},
-    {"name": "password", "required": false, "default": null}
+    {
+      "name": "use_openmetrics",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "openmetrics_endpoint",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "url",
+      "required": false,
+      "default": "http://localhost/admin?stats"
+    },
+    {
+      "name": "username",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "custom",
   "auto_config_method": "http-path-probe",
@@ -16,10 +36,17 @@
   "auto_conf_path": null,
   "explanation": "HAProxy supports two collection modes: a Prometheus exporter (HAProxy 2+ exposes `/metrics` on a configurable port, often 8404) which is unauthenticated and OpenMetrics-compatible, and the legacy stats page (`/admin?stats` or similar) which typically needs HTTP basic auth. A discovery layer must probe `/metrics` first and fall back to the stats page; classification is custom because of the multi-mode logic, but the OpenMetrics path is the easy case.",
   "references": [
-    {"kind": "spec", "path": "haproxy/assets/configuration/spec.yaml"},
-    {"kind": "upstream", "url": "https://www.haproxy.com/documentation/haproxy-configuration-tutorials/metrics-and-observability/prometheus/"}
+    {
+      "kind": "spec",
+      "path": "haproxy/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://www.haproxy.com/documentation/haproxy-configuration-tutorials/metrics-and-observability/prometheus/"
+    }
   ],
   "confidence": "medium",
   "needs_human_review": false,
-  "notes": "If only OpenMetrics mode were considered, this would be generic; the legacy mode pulls it into custom."
+  "notes": "If only OpenMetrics mode were considered, this would be generic; the legacy mode pulls it into custom.",
+  "discovery_bucket": "http-multi-path"
 }

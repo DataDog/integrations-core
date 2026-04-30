@@ -2,15 +2,47 @@
   "name": "voltdb",
   "display_name": "VoltDB",
   "spec_path": "voltdb/assets/configuration/spec.yaml",
-  "required_fields": ["url", "username", "password"],
+  "required_fields": [
+    "url",
+    "username",
+    "password"
+  ],
   "all_relevant_fields": [
-    {"name": "url", "required": true, "default": null},
-    {"name": "username", "required": true, "default": null},
-    {"name": "password", "required": true, "default": null},
-    {"name": "password_hashed", "required": false, "default": false},
-    {"name": "statistics_components", "required": false, "default": null},
-    {"name": "tls_verify", "required": false, "default": null},
-    {"name": "tls_cert", "required": false, "default": null}
+    {
+      "name": "url",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "username",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "password_hashed",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "statistics_components",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "tls_verify",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "tls_cert",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
@@ -18,11 +50,21 @@
   "auto_conf_path": null,
   "explanation": "The VoltDB check posts to the JSON HTTP client interface (default port 8080) and invokes system procedures such as @Statistics and @SystemInformation. The spec overrides the standard HTTP template to mark both `username` and `password` as required, and the check passes them to its Client to authenticate every request (with optional `password_hashed` to indicate the password is already SHA-1 hashed). Without a user provisioned in VoltDB's deployment file, no stats are reachable, so credentials cannot come from a wire probe.",
   "references": [
-    {"kind": "spec", "path": "voltdb/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "voltdb/datadog_checks/voltdb/check.py"},
-    {"kind": "check", "path": "voltdb/datadog_checks/voltdb/client.py"}
+    {
+      "kind": "spec",
+      "path": "voltdb/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "voltdb/datadog_checks/voltdb/check.py"
+    },
+    {
+      "kind": "check",
+      "path": "voltdb/datadog_checks/voltdb/client.py"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Standard auth-required DB pattern (pattern D)."
+  "notes": "Standard auth-required DB pattern (pattern D).",
+  "discovery_bucket": "creds-spec-mandated"
 }

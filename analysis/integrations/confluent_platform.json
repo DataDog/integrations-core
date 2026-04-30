@@ -2,16 +2,51 @@
   "name": "confluent_platform",
   "display_name": "Confluent Platform",
   "spec_path": "confluent_platform/assets/configuration/spec.yaml",
-  "required_fields": ["host", "port"],
+  "required_fields": [
+    "host",
+    "port"
+  ],
   "all_relevant_fields": [
-    {"name": "host", "required": true, "default": null},
-    {"name": "port", "required": true, "default": null},
-    {"name": "user", "required": false, "default": null},
-    {"name": "password", "required": false, "default": null},
-    {"name": "is_jmx", "required": false, "default": null},
-    {"name": "jmx_url", "required": false, "default": null},
-    {"name": "trust_store_path", "required": false, "default": null},
-    {"name": "trust_store_password", "required": false, "default": null}
+    {
+      "name": "host",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "port",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "user",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "is_jmx",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "jmx_url",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "trust_store_path",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "trust_store_password",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
@@ -19,11 +54,21 @@
   "auto_conf_path": null,
   "explanation": "Confluent Platform is a JMX integration (`is_jmx: true`, `template: instances/jmx`) that connects via the Java RMI registry to brokers, Connect, Schema Registry, REST Proxy, etc. JMX in production Confluent deployments is gated behind RMI credentials and frequently SSL (trust/key stores). Even when unauthenticated locally, JMX requires per-component port configuration, no canonical default port, and one instance per component. The check has no auto_conf.yaml because Autodiscovery cannot template JMX targets reliably without operator input. Per the procedure shortcut, JMX-fetch integrations are always impossible to auto-configure.",
   "references": [
-    {"kind": "spec", "path": "confluent_platform/assets/configuration/spec.yaml"},
-    {"kind": "other", "path": "datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/instances/jmx.yaml"},
-    {"kind": "upstream", "url": "https://docs.confluent.io/platform/current/kafka/monitoring.html"}
+    {
+      "kind": "spec",
+      "path": "confluent_platform/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "other",
+      "path": "datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/instances/jmx.yaml"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://docs.confluent.io/platform/current/kafka/monitoring.html"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "The integration is multi-component: each JMX component runs on a different port (broker 9999, Connect 9875, Schema Registry 9987, etc.) which the user must declare. Discovery would also need to know which Confluent component is on which JVM."
+  "notes": "The integration is multi-component: each JMX component runs on a different port (broker 9999, Connect 9875, Schema Registry 9987, etc.) which the user must declare. Discovery would also need to know which Confluent component is on which JVM.",
+  "discovery_bucket": "creds-jmx-rmi"
 }

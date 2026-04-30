@@ -4,22 +4,48 @@
   "spec_path": "strimzi/assets/configuration/spec.yaml",
   "required_fields": [],
   "all_relevant_fields": [
-    {"name": "cluster_operator_endpoint", "required": false, "default": null},
-    {"name": "topic_operator_endpoint", "required": false, "default": null},
-    {"name": "user_operator_endpoint", "required": false, "default": null},
-    {"name": "openmetrics_endpoint", "required": false, "default": null}
+    {
+      "name": "cluster_operator_endpoint",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "topic_operator_endpoint",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "user_operator_endpoint",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "openmetrics_endpoint",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "generic",
   "auto_config_method": "openmetrics-port-scan",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "Strimzi is a Kubernetes Kafka operator. The check inherits OpenMetricsBaseCheckV2 and scrapes up to three Prometheus endpoints exposed by Strimzi components: cluster_operator (default :8080/metrics), topic_operator (default :8080/metrics), and user_operator (default :8081/metrics). The spec example URLs hard-code these conventional ports/paths and the endpoints are unauthenticated by Strimzi default. At least one endpoint must be set, but each is a standard /metrics path on a well-known port — a fit for a generic OpenMetrics port scan in-cluster.",
+  "explanation": "Strimzi is a Kubernetes Kafka operator. The check inherits OpenMetricsBaseCheckV2 and scrapes up to three Prometheus endpoints exposed by Strimzi components: cluster_operator (default :8080/metrics), topic_operator (default :8080/metrics), and user_operator (default :8081/metrics). The spec example URLs hard-code these conventional ports/paths and the endpoints are unauthenticated by Strimzi default. At least one endpoint must be set, but each is a standard /metrics path on a well-known port \u2014 a fit for a generic OpenMetrics port scan in-cluster.",
   "references": [
-    {"kind": "spec", "path": "strimzi/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "strimzi/datadog_checks/strimzi/check.py"},
-    {"kind": "upstream", "url": "https://strimzi.io/docs/operators/latest/deploying.html#assembly-metrics-str"}
+    {
+      "kind": "spec",
+      "path": "strimzi/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "strimzi/datadog_checks/strimzi/check.py"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://strimzi.io/docs/operators/latest/deploying.html#assembly-metrics-str"
+    }
   ],
   "confidence": "medium",
   "needs_human_review": false,
-  "notes": "Pattern A (OpenMetrics on a known port), but with up to three distinct operator endpoints rather than one. Discovery should probe :8080/metrics (cluster + topic) and :8081/metrics (user) on Strimzi operator pods."
+  "notes": "Pattern A (OpenMetrics on a known port), but with up to three distinct operator endpoints rather than one. Discovery should probe :8080/metrics (cluster + topic) and :8081/metrics (user) on Strimzi operator pods.",
+  "discovery_bucket": "generic-openmetrics-scan"
 }

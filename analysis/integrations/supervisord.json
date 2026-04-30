@@ -2,14 +2,40 @@
   "name": "supervisord",
   "display_name": "Supervisord",
   "spec_path": "supervisord/assets/configuration/spec.yaml",
-  "required_fields": ["name"],
+  "required_fields": [
+    "name"
+  ],
   "all_relevant_fields": [
-    {"name": "name", "required": true, "default": null},
-    {"name": "host", "required": false, "default": "localhost"},
-    {"name": "port", "required": false, "default": 9001},
-    {"name": "socket", "required": false, "default": null},
-    {"name": "username", "required": false, "default": null},
-    {"name": "password", "required": false, "default": null}
+    {
+      "name": "name",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "host",
+      "required": false,
+      "default": "localhost"
+    },
+    {
+      "name": "port",
+      "required": false,
+      "default": 9001
+    },
+    {
+      "name": "socket",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "username",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "custom",
   "auto_config_method": "http-path-probe",
@@ -17,11 +43,21 @@
   "auto_conf_path": null,
   "explanation": "Supervisord is monitored via its XML-RPC interface, reachable either through an inet HTTP server (default `http://localhost:9001/RPC2`) or through a UNIX domain socket whose path is deployment-specific. The only spec-required field is `name`, an arbitrary tag chosen by the user. Two things make this non-generic: (1) the typical production deployment uses a UNIX socket whose path cannot be guessed without parsing supervisor's own config, and (2) when authentication is enabled in `inet_http_server`, calls return 401 unless `username`/`password` are supplied. The HTTP+no-auth case (port 9001) is probable, but real deployments often need socket-path discovery or credentials.",
   "references": [
-    {"kind": "spec", "path": "supervisord/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "supervisord/datadog_checks/supervisord/supervisord.py"},
-    {"kind": "upstream", "url": "http://supervisord.org/configuration.html#inet-http-server-section-settings"}
+    {
+      "kind": "spec",
+      "path": "supervisord/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "supervisord/datadog_checks/supervisord/supervisord.py"
+    },
+    {
+      "kind": "upstream",
+      "url": "http://supervisord.org/configuration.html#inet-http-server-section-settings"
+    }
   ],
   "confidence": "medium",
   "needs_human_review": false,
-  "notes": "The `name` field is just a friendly tag — not a discovery input. Discovery would have to (a) probe TCP 9001 for the XML-RPC endpoint, (b) fall back to enumerating common socket paths (e.g. /var/run/supervisor.sock, /tmp/supervisor.sock), and (c) give up if auth is required. Closest to pattern E (auth-optional but practically required in some deployments) combined with socket-path discovery."
+  "notes": "The `name` field is just a friendly tag \u2014 not a discovery input. Discovery would have to (a) probe TCP 9001 for the XML-RPC endpoint, (b) fall back to enumerating common socket paths (e.g. /var/run/supervisor.sock, /tmp/supervisor.sock), and (c) give up if auth is required. Closest to pattern E (auth-optional but practically required in some deployments) combined with socket-path discovery.",
+  "discovery_bucket": "http-multi-path"
 }

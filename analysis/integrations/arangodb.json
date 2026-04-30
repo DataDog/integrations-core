@@ -2,12 +2,30 @@
   "name": "arangodb",
   "display_name": "ArangoDB",
   "spec_path": "arangodb/assets/configuration/spec.yaml",
-  "required_fields": ["openmetrics_endpoint"],
+  "required_fields": [
+    "openmetrics_endpoint"
+  ],
   "all_relevant_fields": [
-    {"name": "openmetrics_endpoint", "required": true, "default": null},
-    {"name": "username", "required": false, "default": null},
-    {"name": "password", "required": false, "default": null},
-    {"name": "auth_token", "required": false, "default": null}
+    {
+      "name": "openmetrics_endpoint",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "username",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "auth_token",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
@@ -15,12 +33,25 @@
   "auto_conf_path": null,
   "explanation": "ArangoDB exposes Prometheus metrics on a fixed path (`/_admin/metrics/v2`) on its HTTP coordinator port (default 8529). The check (`OpenMetricsBaseCheckV2`) is generic-shaped and the path/port are universal, but ArangoDB enables JWT authentication by default (`authentication = true` is the production posture, mirrored in the integration's own test config). Reaching `/_admin/metrics/v2` therefore requires either basic auth credentials or a JWT bearer token provisioned out-of-band. Without those, autodiscovery cannot scrape a real-world cluster, so this is `impossible` / `credentials-required`.",
   "references": [
-    {"kind": "spec", "path": "arangodb/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "arangodb/datadog_checks/arangodb/check.py"},
-    {"kind": "other", "path": "arangodb/tests/docker/arangodb3/arangod.conf"},
-    {"kind": "readme", "path": "arangodb/README.md"}
+    {
+      "kind": "spec",
+      "path": "arangodb/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "arangodb/datadog_checks/arangodb/check.py"
+    },
+    {
+      "kind": "other",
+      "path": "arangodb/tests/docker/arangodb3/arangod.conf"
+    },
+    {
+      "kind": "readme",
+      "path": "arangodb/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Path and port are stable enough that *if* auth were disabled or the credential could be auto-injected (e.g. a known service account), this would degrade to a generic openmetrics-port-scan. With ArangoDB's default JWT model, auth tokens are not derivable from the wire."
+  "notes": "Path and port are stable enough that *if* auth were disabled or the credential could be auto-injected (e.g. a known service account), this would degrade to a generic openmetrics-port-scan. With ArangoDB's default JWT model, auth tokens are not derivable from the wire.",
+  "discovery_bucket": "creds-api-token"
 }

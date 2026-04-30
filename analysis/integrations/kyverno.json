@@ -2,9 +2,15 @@
   "name": "kyverno",
   "display_name": "Kyverno",
   "spec_path": "kyverno/assets/configuration/spec.yaml",
-  "required_fields": ["openmetrics_endpoint"],
+  "required_fields": [
+    "openmetrics_endpoint"
+  ],
   "all_relevant_fields": [
-    {"name": "openmetrics_endpoint", "required": true, "default": "http://localhost:8000/metrics"}
+    {
+      "name": "openmetrics_endpoint",
+      "required": true,
+      "default": "http://localhost:8000/metrics"
+    }
   ],
   "classification": "generic",
   "auto_config_method": "openmetrics-port-scan",
@@ -12,12 +18,25 @@
   "auto_conf_path": null,
   "explanation": "Kyverno controllers (Admissions, Backup, Cleanup, Reports) each expose Prometheus-formatted metrics at `/metrics` on the well-known port 8000. The check inherits OpenMetricsBaseCheckV2 with no extra config beyond the standard openmetrics template; the README's autodiscovery snippet is `http://%%host%%:8000/metrics`. No authentication is required. Pattern A (OpenMetrics on a known port).",
   "references": [
-    {"kind": "spec", "path": "kyverno/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "kyverno/datadog_checks/kyverno/check.py"},
-    {"kind": "readme", "path": "kyverno/README.md"},
-    {"kind": "upstream", "url": "https://kyverno.io/docs/monitoring/"}
+    {
+      "kind": "spec",
+      "path": "kyverno/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "kyverno/datadog_checks/kyverno/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "kyverno/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://kyverno.io/docs/monitoring/"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Multiple controller pods may need to be discovered separately (each emits its own metrics on :8000), but per-pod the discovery shape is identical."
+  "notes": "Multiple controller pods may need to be discovered separately (each emits its own metrics on :8000), but per-pod the discovery shape is identical.",
+  "discovery_bucket": "generic-openmetrics-scan"
 }

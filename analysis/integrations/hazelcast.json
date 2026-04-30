@@ -2,15 +2,46 @@
   "name": "hazelcast",
   "display_name": "Hazelcast",
   "spec_path": "hazelcast/assets/configuration/spec.yaml",
-  "required_fields": ["host", "port"],
+  "required_fields": [
+    "host",
+    "port"
+  ],
   "all_relevant_fields": [
-    {"name": "is_jmx", "required": false, "default": true},
-    {"name": "host", "required": false, "default": null},
-    {"name": "port", "required": false, "default": 1099},
-    {"name": "user", "required": false, "default": null},
-    {"name": "password", "required": false, "default": null},
-    {"name": "mc_health_check_endpoint", "required": false, "default": null},
-    {"name": "mc_cluster_states", "required": false, "default": null}
+    {
+      "name": "is_jmx",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "host",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "port",
+      "required": false,
+      "default": 1099
+    },
+    {
+      "name": "user",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "mc_health_check_endpoint",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "mc_cluster_states",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
@@ -18,11 +49,21 @@
   "auto_conf_path": null,
   "explanation": "Hazelcast is primarily a JMXFetch integration: the spec inherits both `init_config/jmx` and `instances/jmx` (with default JMX port 1099), and the bundled Python check (`HazelcastCheck`) only adds a small HTTP poller for the optional Management Center health endpoint (`mc_health_check_endpoint`) plus a cluster-state mapping. Real metric collection requires JMX RMI to a running Hazelcast member with `-Dhazelcast.jmx=true`, which in production is gated by JMX authentication (user + password) and often TLS. Per pattern D and the JMXFetch shortcut, this is impossible. The Management Center HTTP probe alone does not produce the integration's metric set.",
   "references": [
-    {"kind": "spec", "path": "hazelcast/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "hazelcast/datadog_checks/hazelcast/check.py"},
-    {"kind": "readme", "path": "hazelcast/README.md"}
+    {
+      "kind": "spec",
+      "path": "hazelcast/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "hazelcast/datadog_checks/hazelcast/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "hazelcast/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Spec marks host/port as `required: false` because the user can choose the JMX (Hazelcast member) path or the HTTP (Management Center) path; both still need user-supplied targets and creds in production. JMXFetch dual-mode pairing of pattern D + a small HTTP service-check helper."
+  "notes": "Spec marks host/port as `required: false` because the user can choose the JMX (Hazelcast member) path or the HTTP (Management Center) path; both still need user-supplied targets and creds in production. JMXFetch dual-mode pairing of pattern D + a small HTTP service-check helper.",
+  "discovery_bucket": "creds-jmx-rmi"
 }

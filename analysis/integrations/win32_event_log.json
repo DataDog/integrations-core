@@ -2,32 +2,92 @@
   "name": "win32_event_log",
   "display_name": "Event Viewer",
   "spec_path": "win32_event_log/assets/configuration/spec.yaml",
-  "required_fields": ["path"],
+  "required_fields": [
+    "path"
+  ],
   "all_relevant_fields": [
-    {"name": "path", "required": true, "default": null},
-    {"name": "dd_security_events", "required": false, "default": null},
-    {"name": "query", "required": false, "default": null},
-    {"name": "filters", "required": false, "default": null},
-    {"name": "start", "required": false, "default": "now"},
-    {"name": "legacy_mode", "required": false, "default": true},
-    {"name": "legacy_mode_v2", "required": false, "default": false},
-    {"name": "server", "required": false, "default": "localhost"},
-    {"name": "auth_type", "required": false, "default": "default"},
-    {"name": "user", "required": false, "default": null},
-    {"name": "password", "required": false, "default": null},
-    {"name": "domain", "required": false, "default": null}
+    {
+      "name": "path",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "dd_security_events",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "query",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "filters",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "start",
+      "required": false,
+      "default": "now"
+    },
+    {
+      "name": "legacy_mode",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "legacy_mode_v2",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "server",
+      "required": false,
+      "default": "localhost"
+    },
+    {
+      "name": "auth_type",
+      "required": false,
+      "default": "default"
+    },
+    {
+      "name": "user",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "domain",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "generic",
   "auto_config_method": "other",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "This is the Windows Event Viewer integration, distinct from the `win_event_log` Datadog Agent (Go) check of the same family. The Python check here is `Win32EventLogCheck(AgentCheck, ConfigMixin)` and reads the local Event Log via the `win32evtlog` pywin32 API (EvtSubscribe, EvtRender, etc.). The default `server: localhost` means no remote credentials are needed; the `user`/`password`/`domain`/`auth_type` fields are only consulted when `server` is set to a remote machine. The required `path` field is the Event Log channel name (e.g. `System`, `Application`, `Security`) — a fixed enumeration of well-known Windows channels — so an auto-config layer running on a Windows host can deterministically populate one instance per standard channel, the same way the existing IIS / windows_service integrations populate from local OS state. Discovery is `is this a Windows host?` rather than a network probe, so method is `other`.",
+  "explanation": "This is the Windows Event Viewer integration, distinct from the `win_event_log` Datadog Agent (Go) check of the same family. The Python check here is `Win32EventLogCheck(AgentCheck, ConfigMixin)` and reads the local Event Log via the `win32evtlog` pywin32 API (EvtSubscribe, EvtRender, etc.). The default `server: localhost` means no remote credentials are needed; the `user`/`password`/`domain`/`auth_type` fields are only consulted when `server` is set to a remote machine. The required `path` field is the Event Log channel name (e.g. `System`, `Application`, `Security`) \u2014 a fixed enumeration of well-known Windows channels \u2014 so an auto-config layer running on a Windows host can deterministically populate one instance per standard channel, the same way the existing IIS / windows_service integrations populate from local OS state. Discovery is `is this a Windows host?` rather than a network probe, so method is `other`.",
   "references": [
-    {"kind": "spec", "path": "win32_event_log/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "win32_event_log/datadog_checks/win32_event_log/check.py"},
-    {"kind": "upstream", "url": "https://learn.microsoft.com/en-us/windows/win32/wes/windows-event-log"}
+    {
+      "kind": "spec",
+      "path": "win32_event_log/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "win32_event_log/datadog_checks/win32_event_log/check.py"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/wes/windows-event-log"
+    }
   ],
   "confidence": "medium",
   "needs_human_review": false,
-  "notes": "Pattern H (local Windows host detection). The required `path` is a Windows channel name from a small well-known set; auto-config can pre-populate `System`/`Application` (and `Security` when legacy_mode is on) without further user input. Remote-server mode is opt-in and would fall through to credentials-required, but it's not the default. Note: this is the legacy/v2-Python check; there is also a separate `win_event_log` core Agent check that ships logs via `type: windows_event` — they are different integration tiles."
+  "notes": "Pattern H (local Windows host detection). The required `path` is a Windows channel name from a small well-known set; auto-config can pre-populate `System`/`Application` (and `Security` when legacy_mode is on) without further user input. Remote-server mode is opt-in and would fall through to credentials-required, but it's not the default. Note: this is the legacy/v2-Python check; there is also a separate `win_event_log` core Agent check that ships logs via `type: windows_event` \u2014 they are different integration tiles.",
+  "discovery_bucket": "user-intent-synthetic"
 }

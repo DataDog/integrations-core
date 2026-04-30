@@ -4,26 +4,68 @@
   "spec_path": "lustre/assets/configuration/spec.yaml",
   "required_fields": [],
   "all_relevant_fields": [
-    {"name": "node_type", "required": false, "default": null},
-    {"name": "filesystems", "required": false, "default": null},
-    {"name": "enable_changelogs", "required": false, "default": false},
-    {"name": "lctl_path", "required": false, "default": "/usr/sbin/lctl"},
-    {"name": "lnetctl_path", "required": false, "default": "/usr/sbin/lnetctl"},
-    {"name": "lfs_path", "required": false, "default": "/usr/bin/lfs"},
-    {"name": "enable_lnetctl_detailed", "required": false, "default": false},
-    {"name": "enable_extra_params", "required": false, "default": false}
+    {
+      "name": "node_type",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "filesystems",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "enable_changelogs",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "lctl_path",
+      "required": false,
+      "default": "/usr/sbin/lctl"
+    },
+    {
+      "name": "lnetctl_path",
+      "required": false,
+      "default": "/usr/sbin/lnetctl"
+    },
+    {
+      "name": "lfs_path",
+      "required": false,
+      "default": "/usr/bin/lfs"
+    },
+    {
+      "name": "enable_lnetctl_detailed",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "enable_extra_params",
+      "required": false,
+      "default": false
+    }
   ],
   "classification": "custom",
   "auto_config_method": "other",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "The Lustre check shells out to local Lustre administrative binaries — `lctl` (default `/usr/sbin/lctl`), `lnetctl` (`/usr/sbin/lnetctl`), and `lfs` (`/usr/bin/lfs`) — to enumerate devices, parse params, collect LNET stats, and (on clients) read changelogs. There is no network endpoint and no credential. All instance fields are optional with sensible defaults: `node_type` is auto-detected from `lctl dl` output (mds if any `mdt`, oss if any `ost`, otherwise client), and `filesystems` defaults to discovery via `lctl`. Discovery is host-local: \"are the Lustre user-space binaries installed and is this host a Lustre client/MDS/OSS?\". This matches pattern L (Local CLI subprocess), with the additional wrinkle that some collection paths (changelogs, MDS/OSS jobstats) require root or a registered changelog user — environmental constraints, not credentials to discover.",
+  "explanation": "The Lustre check shells out to local Lustre administrative binaries \u2014 `lctl` (default `/usr/sbin/lctl`), `lnetctl` (`/usr/sbin/lnetctl`), and `lfs` (`/usr/bin/lfs`) \u2014 to enumerate devices, parse params, collect LNET stats, and (on clients) read changelogs. There is no network endpoint and no credential. All instance fields are optional with sensible defaults: `node_type` is auto-detected from `lctl dl` output (mds if any `mdt`, oss if any `ost`, otherwise client), and `filesystems` defaults to discovery via `lctl`. Discovery is host-local: \"are the Lustre user-space binaries installed and is this host a Lustre client/MDS/OSS?\". This matches pattern L (Local CLI subprocess), with the additional wrinkle that some collection paths (changelogs, MDS/OSS jobstats) require root or a registered changelog user \u2014 environmental constraints, not credentials to discover.",
   "references": [
-    {"kind": "spec", "path": "lustre/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "lustre/datadog_checks/lustre/check.py"},
-    {"kind": "readme", "path": "lustre/README.md"}
+    {
+      "kind": "spec",
+      "path": "lustre/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "lustre/datadog_checks/lustre/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "lustre/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern L. Method `other`: discovery is presence/runnability of `lctl` (and node-type self-detection from its output). Optional changelog collection on clients additionally needs a registered changelog user, which the auto-config layer cannot provision."
+  "notes": "Pattern L. Method `other`: discovery is presence/runnability of `lctl` (and node-type self-detection from its output). Optional changelog collection on clients additionally needs a registered changelog user, which the auto-config layer cannot provision.",
+  "discovery_bucket": "local-cli-binary"
 }

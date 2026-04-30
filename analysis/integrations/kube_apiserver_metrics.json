@@ -2,27 +2,66 @@
   "name": "kube_apiserver_metrics",
   "display_name": "Kubernetes API server metrics",
   "spec_path": "kube_apiserver_metrics/assets/configuration/spec.yaml",
-  "required_fields": ["prometheus_url"],
+  "required_fields": [
+    "prometheus_url"
+  ],
   "all_relevant_fields": [
-    {"name": "prometheus_url", "required": true, "default": "https://localhost:443/metrics"},
-    {"name": "possible_prometheus_urls", "required": false, "default": null},
-    {"name": "scheme", "required": false, "default": "https"},
-    {"name": "bearer_token_auth", "required": false, "default": "tls_only"},
-    {"name": "bearer_token_path", "required": false, "default": "/var/run/secrets/kubernetes.io/serviceaccount/token"},
-    {"name": "ssl_verify", "required": false, "default": false}
+    {
+      "name": "prometheus_url",
+      "required": true,
+      "default": "https://localhost:443/metrics"
+    },
+    {
+      "name": "possible_prometheus_urls",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "scheme",
+      "required": false,
+      "default": "https"
+    },
+    {
+      "name": "bearer_token_auth",
+      "required": false,
+      "default": "tls_only"
+    },
+    {
+      "name": "bearer_token_path",
+      "required": false,
+      "default": "/var/run/secrets/kubernetes.io/serviceaccount/token"
+    },
+    {
+      "name": "ssl_verify",
+      "required": false,
+      "default": false
+    }
   ],
   "classification": "generic",
   "auto_config_method": "openmetrics-port-scan",
   "has_existing_auto_conf": true,
   "auto_conf_path": "kube_apiserver_metrics/datadog_checks/kube_apiserver_metrics/data/auto_conf.yaml",
-  "explanation": "The check inherits OpenMetricsBaseCheck and scrapes a single `/metrics` path on the kube-apiserver. The shipped auto_conf.yaml already enumerates the canonical secure ports (`possible_prometheus_urls: [https://%%host%%:6443/metrics, https://%%host%%:8443/metrics]`) — i.e. discovery is reduced to picking the first responding port. Authentication uses the in-cluster ServiceAccount bearer token mounted at `/var/run/secrets/kubernetes.io/serviceaccount/token`, supplied automatically by the Agent (pattern O), not by user input. This matches the OpenMetrics-port-scan generic shape.",
+  "explanation": "The check inherits OpenMetricsBaseCheck and scrapes a single `/metrics` path on the kube-apiserver. The shipped auto_conf.yaml already enumerates the canonical secure ports (`possible_prometheus_urls: [https://%%host%%:6443/metrics, https://%%host%%:8443/metrics]`) \u2014 i.e. discovery is reduced to picking the first responding port. Authentication uses the in-cluster ServiceAccount bearer token mounted at `/var/run/secrets/kubernetes.io/serviceaccount/token`, supplied automatically by the Agent (pattern O), not by user input. This matches the OpenMetrics-port-scan generic shape.",
   "references": [
-    {"kind": "spec", "path": "kube_apiserver_metrics/assets/configuration/spec.yaml"},
-    {"kind": "auto_conf", "path": "kube_apiserver_metrics/datadog_checks/kube_apiserver_metrics/data/auto_conf.yaml"},
-    {"kind": "check", "path": "kube_apiserver_metrics/datadog_checks/kube_apiserver_metrics/kube_apiserver_metrics.py"},
-    {"kind": "upstream", "url": "https://kubernetes.io/docs/concepts/cluster-administration/system-metrics/"}
+    {
+      "kind": "spec",
+      "path": "kube_apiserver_metrics/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "auto_conf",
+      "path": "kube_apiserver_metrics/datadog_checks/kube_apiserver_metrics/data/auto_conf.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "kube_apiserver_metrics/datadog_checks/kube_apiserver_metrics/kube_apiserver_metrics.py"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://kubernetes.io/docs/concepts/cluster-administration/system-metrics/"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Spec also exposes a deprecated `scheme` field; modern usage just sets the scheme inside `prometheus_url` and relies on the in-cluster bearer token. Pattern O applies."
+  "notes": "Spec also exposes a deprecated `scheme` field; modern usage just sets the scheme inside `prometheus_url` and relies on the in-cluster bearer token. Pattern O applies.",
+  "discovery_bucket": "generic-incluster-bearer-token"
 }

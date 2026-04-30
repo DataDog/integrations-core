@@ -4,24 +4,56 @@
   "spec_path": "hyperv/assets/configuration/spec.yaml",
   "required_fields": [],
   "all_relevant_fields": [
-    {"name": "host", "required": false, "default": null},
-    {"name": "username", "required": false, "default": null},
-    {"name": "password", "required": false, "default": null},
-    {"name": "use_legacy_check_version", "required": false, "default": null}
+    {
+      "name": "host",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "username",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "use_legacy_check_version",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "generic",
   "auto_config_method": "other",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "Hyper-V is collected via Windows Performance Counters (PDH) on the local host where the Agent runs — `template: instances/perf_counters` plus a per-integration metric set defined in code. There is no remote host/port in the default mode; the integration just reads PDH counters for the Hyper-V provider on the same machine. Auto-config reduces to: detect whether the Hyper-V role is installed (e.g. presence of the `vmms` service or the Hyper-V WMI namespace) and enable the check with the built-in METRICS_CONFIG. The hidden `pdh_legacy` template can target a remote machine via host/username/password, but that's an opt-in mode mirroring IIS.",
+  "explanation": "Hyper-V is collected via Windows Performance Counters (PDH) on the local host where the Agent runs \u2014 `template: instances/perf_counters` plus a per-integration metric set defined in code. There is no remote host/port in the default mode; the integration just reads PDH counters for the Hyper-V provider on the same machine. Auto-config reduces to: detect whether the Hyper-V role is installed (e.g. presence of the `vmms` service or the Hyper-V WMI namespace) and enable the check with the built-in METRICS_CONFIG. The hidden `pdh_legacy` template can target a remote machine via host/username/password, but that's an opt-in mode mirroring IIS.",
   "references": [
-    {"kind": "spec", "path": "hyperv/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "hyperv/datadog_checks/hyperv/check.py"},
-    {"kind": "check", "path": "hyperv/datadog_checks/hyperv/hyperv.py"},
-    {"kind": "readme", "path": "hyperv/README.md"},
-    {"kind": "upstream", "url": "https://docs.microsoft.com/en-us/windows-server/virtualization/hyper-v/hyper-v-on-windows-server"}
+    {
+      "kind": "spec",
+      "path": "hyperv/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "hyperv/datadog_checks/hyperv/check.py"
+    },
+    {
+      "kind": "check",
+      "path": "hyperv/datadog_checks/hyperv/hyperv.py"
+    },
+    {
+      "kind": "readme",
+      "path": "hyperv/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://docs.microsoft.com/en-us/windows-server/virtualization/hyper-v/hyper-v-on-windows-server"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Same pattern as IIS (procedure pattern H, 'Local Windows host detection'). Trigger is 'Hyper-V role installed on this machine', not a network probe. Method `other` for the same reason."
+  "notes": "Same pattern as IIS (procedure pattern H, 'Local Windows host detection'). Trigger is 'Hyper-V role installed on this machine', not a network probe. Method `other` for the same reason.",
+  "discovery_bucket": "generic-windows-perf"
 }

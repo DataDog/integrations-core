@@ -4,12 +4,36 @@
   "spec_path": "argocd/assets/configuration/spec.yaml",
   "required_fields": [],
   "all_relevant_fields": [
-    {"name": "app_controller_endpoint", "required": false, "default": null},
-    {"name": "appset_controller_endpoint", "required": false, "default": null},
-    {"name": "api_server_endpoint", "required": false, "default": null},
-    {"name": "repo_server_endpoint", "required": false, "default": null},
-    {"name": "notifications_controller_endpoint", "required": false, "default": null},
-    {"name": "commit_server_endpoint", "required": false, "default": null}
+    {
+      "name": "app_controller_endpoint",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "appset_controller_endpoint",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "api_server_endpoint",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "repo_server_endpoint",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "notifications_controller_endpoint",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "commit_server_endpoint",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "generic",
   "auto_config_method": "openmetrics-port-scan",
@@ -17,12 +41,25 @@
   "auto_conf_path": null,
   "explanation": "ArgoCD ships several components, each exposing Prometheus metrics on a fixed well-known port: Application Controller (8082), ApplicationSet Controller (8080), API Server (8083), Repo Server (8084), Notifications Controller (9001) and Commit Server (8087), all at `/metrics`. The check is `OpenMetricsBaseCheckV2` and dispatches one scraper per declared endpoint; at least one endpoint must be set, but each is unauthenticated. Each component has a distinct AD identifier (e.g. `argocd-application-controller`, `argocd-server`, `argocd-repo-server`), so an openmetrics-port-scan keyed on the container name plus the component-specific port is sufficient.",
   "references": [
-    {"kind": "spec", "path": "argocd/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "argocd/datadog_checks/argocd/check.py"},
-    {"kind": "readme", "path": "argocd/README.md"},
-    {"kind": "upstream", "url": "https://argo-cd.readthedocs.io/en/stable/operator-manual/metrics/"}
+    {
+      "kind": "spec",
+      "path": "argocd/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "argocd/datadog_checks/argocd/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "argocd/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://argo-cd.readthedocs.io/en/stable/operator-manual/metrics/"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern A with multiple component-specific endpoints (similar to cilium agent vs operator). Discovery should probe each component port; the check raises if no endpoint is set, but supplying one is enough to start collecting that component's metrics."
+  "notes": "Pattern A with multiple component-specific endpoints (similar to cilium agent vs operator). Discovery should probe each component port; the check raises if no endpoint is set, but supplying one is enough to start collecting that component's metrics.",
+  "discovery_bucket": "generic-openmetrics-scan"
 }

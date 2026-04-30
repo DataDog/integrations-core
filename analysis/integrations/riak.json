@@ -2,9 +2,15 @@
   "name": "riak",
   "display_name": "Riak",
   "spec_path": "riak/assets/configuration/spec.yaml",
-  "required_fields": ["url"],
+  "required_fields": [
+    "url"
+  ],
   "all_relevant_fields": [
-    {"name": "url", "required": true, "default": "http://127.0.0.1:8098/stats"}
+    {
+      "name": "url",
+      "required": true,
+      "default": "http://127.0.0.1:8098/stats"
+    }
   ],
   "classification": "generic",
   "auto_config_method": "http-path-probe",
@@ -12,13 +18,29 @@
   "auto_conf_path": "riak/datadog_checks/riak/data/auto_conf.yaml",
   "explanation": "Riak's HTTP REST API exposes a singular, well-known stats endpoint at `/stats` on the default HTTP port 8098. The shipped auto_conf.yaml templates `url: http://%%host%%:8098/stats` and the check simply GETs that URL and parses the JSON. No authentication is required by default, and there is only one canonical path. Pattern B (single canonical HTTP path).",
   "references": [
-    {"kind": "spec", "path": "riak/assets/configuration/spec.yaml"},
-    {"kind": "auto_conf", "path": "riak/datadog_checks/riak/data/auto_conf.yaml"},
-    {"kind": "check", "path": "riak/datadog_checks/riak/riak.py"},
-    {"kind": "readme", "path": "riak/README.md"},
-    {"kind": "upstream", "url": "https://docs.riak.com/riak/kv/latest/developing/api/http/status.1.html"}
+    {
+      "kind": "spec",
+      "path": "riak/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "auto_conf",
+      "path": "riak/datadog_checks/riak/data/auto_conf.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "riak/datadog_checks/riak/riak.py"
+    },
+    {
+      "kind": "readme",
+      "path": "riak/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://docs.riak.com/riak/kv/latest/developing/api/http/status.1.html"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Riak also exposes a separate protobuf port (8087); the Datadog check consumes only the HTTP `/stats` JSON endpoint, so a single HTTP path probe suffices."
+  "notes": "Riak also exposes a separate protobuf port (8087); the Datadog check consumes only the HTTP `/stats` JSON endpoint, so a single HTTP path probe suffices.",
+  "discovery_bucket": "http-json-shape"
 }

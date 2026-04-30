@@ -11,23 +11,54 @@
     "SILVERSTRIPE_DATABASE_PASSWORD"
   ],
   "all_relevant_fields": [
-    {"name": "SILVERSTRIPE_DATABASE_TYPE", "required": true, "default": null},
-    {"name": "SILVERSTRIPE_DATABASE_NAME", "required": true, "default": null},
-    {"name": "SILVERSTRIPE_DATABASE_SERVER_IP", "required": true, "default": null},
-    {"name": "SILVERSTRIPE_DATABASE_PORT", "required": true, "default": null},
-    {"name": "SILVERSTRIPE_DATABASE_USERNAME", "required": true, "default": null},
-    {"name": "SILVERSTRIPE_DATABASE_PASSWORD", "required": true, "default": null}
+    {
+      "name": "SILVERSTRIPE_DATABASE_TYPE",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "SILVERSTRIPE_DATABASE_NAME",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "SILVERSTRIPE_DATABASE_SERVER_IP",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "SILVERSTRIPE_DATABASE_PORT",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "SILVERSTRIPE_DATABASE_USERNAME",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "SILVERSTRIPE_DATABASE_PASSWORD",
+      "required": true,
+      "default": null
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "The Silverstripe CMS check connects directly to the backing database (MySQL or PostgreSQL) using DB credentials supplied by the user, then runs SQL queries against the Silverstripe schema to derive metrics. Required fields include the database type, name, server IP, port, username, and password — all of which are user-private state with no defaults and no on-the-wire discovery. Auto-config is not feasible without surfacing the operator's DB credentials.",
+  "explanation": "The Silverstripe CMS check connects directly to the backing database (MySQL or PostgreSQL) using DB credentials supplied by the user, then runs SQL queries against the Silverstripe schema to derive metrics. Required fields include the database type, name, server IP, port, username, and password \u2014 all of which are user-private state with no defaults and no on-the-wire discovery. Auto-config is not feasible without surfacing the operator's DB credentials.",
   "references": [
-    {"kind": "spec", "path": "silverstripe_cms/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "silverstripe_cms/datadog_checks/silverstripe_cms/check.py"}
+    {
+      "kind": "spec",
+      "path": "silverstripe_cms/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "silverstripe_cms/datadog_checks/silverstripe_cms/check.py"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern D: spec-required credentials (DB user/password). Even the database type itself is a required toggle (MySQL vs PostgreSQL), which determines the client driver."
+  "notes": "Pattern D: spec-required credentials (DB user/password). Even the database type itself is a required toggle (MySQL vs PostgreSQL), which determines the client driver.",
+  "discovery_bucket": "creds-spec-mandated"
 }

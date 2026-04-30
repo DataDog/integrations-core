@@ -2,21 +2,37 @@
   "name": "appgate_sdp",
   "display_name": "Appgate SDP",
   "spec_path": "appgate_sdp/assets/configuration/spec.yaml",
-  "required_fields": ["openmetrics_endpoint"],
+  "required_fields": [
+    "openmetrics_endpoint"
+  ],
   "all_relevant_fields": [
-    {"name": "openmetrics_endpoint", "required": true, "default": null}
+    {
+      "name": "openmetrics_endpoint",
+      "required": true,
+      "default": null
+    }
   ],
   "classification": "generic",
   "auto_config_method": "openmetrics-port-scan",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "Appgate SDP's check is a minimal OpenMetricsBaseCheckV2 wrapper. The spec uses `instances/openmetrics` with a single required `openmetrics_endpoint` field defaulted to `http://localhost:5556/metrics`; no credentials, certificates, or tokens are required by the check. This matches pattern A (OpenMetrics on a known port). Discovery is a port-scan for `/metrics` on Appgate SDP appliance/controller/gateway hosts — port 5556 is the documented Prometheus exporter port for the appliance.",
+  "explanation": "Appgate SDP's check is a minimal OpenMetricsBaseCheckV2 wrapper. The spec uses `instances/openmetrics` with a single required `openmetrics_endpoint` field defaulted to `http://localhost:5556/metrics`; no credentials, certificates, or tokens are required by the check. This matches pattern A (OpenMetrics on a known port). Discovery is a port-scan for `/metrics` on Appgate SDP appliance/controller/gateway hosts \u2014 port 5556 is the documented Prometheus exporter port for the appliance.",
   "references": [
-    {"kind": "spec", "path": "appgate_sdp/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "appgate_sdp/datadog_checks/appgate_sdp/check.py"},
-    {"kind": "readme", "path": "appgate_sdp/README.md"}
+    {
+      "kind": "spec",
+      "path": "appgate_sdp/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "appgate_sdp/datadog_checks/appgate_sdp/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "appgate_sdp/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Despite being a zero-trust gateway product, the metrics endpoint itself is unauthenticated Prometheus on a fixed port. Production deployments may protect 5556 via local-only listener, which is a network-reachability concern rather than an auth blocker."
+  "notes": "Despite being a zero-trust gateway product, the metrics endpoint itself is unauthenticated Prometheus on a fixed port. Production deployments may protect 5556 via local-only listener, which is a network-reachability concern rather than an auth blocker.",
+  "discovery_bucket": "generic-openmetrics-scan"
 }

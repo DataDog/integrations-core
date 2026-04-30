@@ -10,10 +10,17 @@
   "auto_conf_path": null,
   "explanation": "Checkpoint Harmony Endpoint is a logs-only vendor security tile. The spec defines only `init_config/default` and `instances/default` (no metric collection options) and the README's Setup section is exclusively about pointing Checkpoint's syslog/log-exporter (typically port 514) at the Agent's syslog listener. There is no Agent metric check (only an `__init__.py` with a stale `from .check import CheckpointHarmonyEndpointCheck` import - no actual check.py exists), no metrics endpoint, no host/port to autodiscover from the wire. Enabling the integration depends on the user knowing which port the Agent should listen on for incoming syslog and on configuring Smart Console log streaming - neither of which is discoverable.",
   "references": [
-    {"kind": "spec", "path": "checkpoint_harmony_endpoint/assets/configuration/spec.yaml"},
-    {"kind": "readme", "path": "checkpoint_harmony_endpoint/README.md"}
+    {
+      "kind": "spec",
+      "path": "checkpoint_harmony_endpoint/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "readme",
+      "path": "checkpoint_harmony_endpoint/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern N (logs-only). The __init__.py imports a non-existent CheckpointHarmonyEndpointCheck class; effectively a logs/syslog tile only."
+  "notes": "Pattern N (logs-only). The __init__.py imports a non-existent CheckpointHarmonyEndpointCheck class; effectively a logs/syslog tile only.",
+  "discovery_bucket": "logs-only"
 }

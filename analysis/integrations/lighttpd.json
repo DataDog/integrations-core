@@ -2,9 +2,15 @@
   "name": "lighttpd",
   "display_name": "Lighttpd",
   "spec_path": "lighttpd/assets/configuration/spec.yaml",
-  "required_fields": ["lighttpd_status_url"],
+  "required_fields": [
+    "lighttpd_status_url"
+  ],
   "all_relevant_fields": [
-    {"name": "lighttpd_status_url", "required": true, "default": "http://localhost/server-status?auto"}
+    {
+      "name": "lighttpd_status_url",
+      "required": true,
+      "default": "http://localhost/server-status?auto"
+    }
   ],
   "classification": "generic",
   "auto_config_method": "http-path-probe",
@@ -12,11 +18,21 @@
   "auto_conf_path": null,
   "explanation": "Lighttpd's `mod_status` exposes a single canonical status page at `/server-status` with the `?auto` (or `?format=plain` on Lighttpd 2) query string for machine-readable output. The check itself even auto-appends the suffix variant when the first attempt returns no metrics. A generic HTTP path probe against `http://%%host%%/server-status?auto` on port 80 (or whatever the admin port is) is sufficient. No credentials are required by default.",
   "references": [
-    {"kind": "spec", "path": "lighttpd/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "lighttpd/datadog_checks/lighttpd/lighttpd.py"},
-    {"kind": "upstream", "url": "https://redmine.lighttpd.net/projects/1/wiki/Docs_ModStatus"}
+    {
+      "kind": "spec",
+      "path": "lighttpd/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "lighttpd/datadog_checks/lighttpd/lighttpd.py"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://redmine.lighttpd.net/projects/1/wiki/Docs_ModStatus"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Mirrors the apache mod_status pattern (B). The check probes `?auto` first then falls back to `?format=plain` for Lighttpd 2."
+  "notes": "Mirrors the apache mod_status pattern (B). The check probes `?auto` first then falls back to `?format=plain` for Lighttpd 2.",
+  "discovery_bucket": "http-text-format"
 }

@@ -8,12 +8,19 @@
   "auto_config_method": "other",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "Ivanti Connect Secure is a logs-only vendor security tile. The spec only defines a `logs` template (TCP/UDP syslog listener on a user-supplied port) and ships no Agent metric check (`datadog_checks/ivanti_connect_secure/` contains only `__about__.py` and `__init__.py`, with no `<name>.py`). There is no upstream HTTP/JMX/OpenMetrics endpoint to discover; the Agent passively receives forwarded syslog from the Ivanti appliance. Auto-config in the network-probe sense does not apply — the appliance must be configured out-of-band to ship logs to the Agent's listener port chosen by the operator.",
+  "explanation": "Ivanti Connect Secure is a logs-only vendor security tile. The spec only defines a `logs` template (TCP/UDP syslog listener on a user-supplied port) and ships no Agent metric check (`datadog_checks/ivanti_connect_secure/` contains only `__about__.py` and `__init__.py`, with no `<name>.py`). There is no upstream HTTP/JMX/OpenMetrics endpoint to discover; the Agent passively receives forwarded syslog from the Ivanti appliance. Auto-config in the network-probe sense does not apply \u2014 the appliance must be configured out-of-band to ship logs to the Agent's listener port chosen by the operator.",
   "references": [
-    {"kind": "spec", "path": "ivanti_connect_secure/assets/configuration/spec.yaml"},
-    {"kind": "readme", "path": "ivanti_connect_secure/README.md"}
+    {
+      "kind": "spec",
+      "path": "ivanti_connect_secure/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "readme",
+      "path": "ivanti_connect_secure/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Logs-only vendor security tile; no metric check. Same shape as other syslog-ingest tiles."
+  "notes": "Logs-only vendor security tile; no metric check. Same shape as other syslog-ingest tiles.",
+  "discovery_bucket": "logs-only"
 }

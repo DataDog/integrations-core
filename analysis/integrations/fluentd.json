@@ -2,12 +2,30 @@
   "name": "fluentd",
   "display_name": "Fluentd",
   "spec_path": "fluentd/assets/configuration/spec.yaml",
-  "required_fields": ["monitor_agent_url"],
+  "required_fields": [
+    "monitor_agent_url"
+  ],
   "all_relevant_fields": [
-    {"name": "monitor_agent_url", "required": true, "default": "http://example.com:24220/api/plugins.json"},
-    {"name": "plugin_ids", "required": false, "default": null},
-    {"name": "tag_by", "required": false, "default": "plugin_id"},
-    {"name": "fluentd", "required": false, "default": "fluentd"}
+    {
+      "name": "monitor_agent_url",
+      "required": true,
+      "default": "http://example.com:24220/api/plugins.json"
+    },
+    {
+      "name": "plugin_ids",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "tag_by",
+      "required": false,
+      "default": "plugin_id"
+    },
+    {
+      "name": "fluentd",
+      "required": false,
+      "default": "fluentd"
+    }
   ],
   "classification": "generic",
   "auto_config_method": "http-path-probe",
@@ -15,11 +33,21 @@
   "auto_conf_path": null,
   "explanation": "Fluentd's monitor_agent plugin exposes a single canonical JSON endpoint at `/api/plugins.json` on the conventional port 24220. The check makes an unauthenticated HTTP GET against this URL; no credentials, tokens, or per-deployment paths are required. Auto-config can probe `http://%%host%%:24220/api/plugins.json` and validate the JSON shape (top-level `plugins` array).",
   "references": [
-    {"kind": "spec", "path": "fluentd/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "fluentd/datadog_checks/fluentd/fluentd.py"},
-    {"kind": "upstream", "url": "https://docs.fluentd.org/input/monitor_agent"}
+    {
+      "kind": "spec",
+      "path": "fluentd/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "fluentd/datadog_checks/fluentd/fluentd.py"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://docs.fluentd.org/input/monitor_agent"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "monitor_agent must be enabled in the Fluentd config; if it isn't, the port simply won't respond and discovery falls through cleanly."
+  "notes": "monitor_agent must be enabled in the Fluentd config; if it isn't, the port simply won't respond and discovery falls through cleanly.",
+  "discovery_bucket": "http-json-shape"
 }

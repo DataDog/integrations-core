@@ -2,9 +2,15 @@
   "name": "druid",
   "display_name": "Druid",
   "spec_path": "druid/assets/configuration/spec.yaml",
-  "required_fields": ["url"],
+  "required_fields": [
+    "url"
+  ],
   "all_relevant_fields": [
-    {"name": "url", "required": true, "default": null}
+    {
+      "name": "url",
+      "required": true,
+      "default": null
+    }
   ],
   "classification": "custom",
   "auto_config_method": "http-path-probe",
@@ -12,12 +18,25 @@
   "auto_conf_path": null,
   "explanation": "The Druid check takes a single required `url` (the base URL of a Druid process) and issues GETs against `/status/properties` and `/status/health`. The path is universal for Druid 0.16+, but the *port* is not: Druid is a multi-process system and the user must point the check at one of several services (coordinator 8081, overlord 8090, broker 8082, historical 8083, middlemanager 8091, router 8888) and ideally instantiate one check per process. There is no canonical \"Druid port\". The auto-config layer would need to probe the well-known Druid HTTP ports on a host, hit `/status/properties` on each, parse `druid.service` from the JSON response to identify which component it is, and emit one instance per discovered process. No credentials are required by default (Druid's HTTP API is unauthenticated unless the operator configures `druid.auth.*` extensions), so an HTTP probe of the Druid status servlet is sufficient.",
   "references": [
-    {"kind": "spec", "path": "druid/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "druid/datadog_checks/druid/druid.py"},
-    {"kind": "readme", "path": "druid/README.md"},
-    {"kind": "upstream", "url": "https://druid.apache.org/docs/latest/operations/api-reference"}
+    {
+      "kind": "spec",
+      "path": "druid/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "druid/datadog_checks/druid/druid.py"
+    },
+    {
+      "kind": "readme",
+      "path": "druid/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://druid.apache.org/docs/latest/operations/api-reference"
+    }
   ],
   "confidence": "medium",
   "needs_human_review": false,
-  "notes": "Custom rather than generic because there are six-plus plausible Druid component ports and the discovery layer must walk them, hit `/status/properties`, and tag instances by `druid.service`. Note also that the bulk of Druid metrics flow via DogStatsD (statsd-emitter extension), not via this check — this integration only contributes service-health probes. Authentication is optional; if the cluster enables `druid-basic-security`, credentials become required and this falls back to impossible."
+  "notes": "Custom rather than generic because there are six-plus plausible Druid component ports and the discovery layer must walk them, hit `/status/properties`, and tag instances by `druid.service`. Note also that the bulk of Druid metrics flow via DogStatsD (statsd-emitter extension), not via this check \u2014 this integration only contributes service-health probes. Authentication is optional; if the cluster enables `druid-basic-security`, credentials become required and this falls back to impossible.",
+  "discovery_bucket": "http-multi-path"
 }

@@ -2,25 +2,56 @@
   "name": "kubernetes_state",
   "display_name": "Kubernetes State",
   "spec_path": "kubernetes_state/assets/configuration/spec.yaml",
-  "required_fields": ["kube_state_url"],
+  "required_fields": [
+    "kube_state_url"
+  ],
   "all_relevant_fields": [
-    {"name": "kube_state_url", "required": true, "default": null},
-    {"name": "join_standard_tags", "required": false, "default": false},
-    {"name": "hostname_override", "required": false, "default": true},
-    {"name": "prometheus_url", "required": false, "default": null}
+    {
+      "name": "kube_state_url",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "join_standard_tags",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "hostname_override",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "prometheus_url",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "generic",
   "auto_config_method": "openmetrics-port-scan",
   "has_existing_auto_conf": true,
   "auto_conf_path": "kubernetes_state/datadog_checks/kubernetes_state/data/auto_conf.yaml",
-  "explanation": "The legacy `kubernetes_state` check scrapes kube-state-metrics over Prometheus on port 8080 at `/metrics`. The auto_conf template (`ad_identifiers: [kube-state-metrics]`) targets the kube-state-metrics container, sets `kube_state_url: http://%%host%%:8080/metrics`, and requires no credentials — a classic OpenMetrics port-scan. The check inherits `OpenMetricsBaseCheck`.",
+  "explanation": "The legacy `kubernetes_state` check scrapes kube-state-metrics over Prometheus on port 8080 at `/metrics`. The auto_conf template (`ad_identifiers: [kube-state-metrics]`) targets the kube-state-metrics container, sets `kube_state_url: http://%%host%%:8080/metrics`, and requires no credentials \u2014 a classic OpenMetrics port-scan. The check inherits `OpenMetricsBaseCheck`.",
   "references": [
-    {"kind": "spec", "path": "kubernetes_state/assets/configuration/spec.yaml"},
-    {"kind": "auto_conf", "path": "kubernetes_state/datadog_checks/kubernetes_state/data/auto_conf.yaml"},
-    {"kind": "check", "path": "kubernetes_state/datadog_checks/kubernetes_state/kubernetes_state.py"},
-    {"kind": "upstream", "url": "https://github.com/kubernetes/kube-state-metrics"}
+    {
+      "kind": "spec",
+      "path": "kubernetes_state/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "auto_conf",
+      "path": "kubernetes_state/datadog_checks/kubernetes_state/data/auto_conf.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "kubernetes_state/datadog_checks/kubernetes_state/kubernetes_state.py"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://github.com/kubernetes/kube-state-metrics"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Superseded in modern deployments by `kubernetes_state_core` (cluster-agent built-in)."
+  "notes": "Superseded in modern deployments by `kubernetes_state_core` (cluster-agent built-in).",
+  "discovery_bucket": "generic-openmetrics-scan"
 }

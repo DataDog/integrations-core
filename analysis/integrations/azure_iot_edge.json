@@ -2,11 +2,26 @@
   "name": "azure_iot_edge",
   "display_name": "Azure IoT Edge",
   "spec_path": "azure_iot_edge/assets/configuration/spec.yaml",
-  "required_fields": ["edge_hub_prometheus_url", "edge_agent_prometheus_url"],
+  "required_fields": [
+    "edge_hub_prometheus_url",
+    "edge_agent_prometheus_url"
+  ],
   "all_relevant_fields": [
-    {"name": "edge_hub_prometheus_url", "required": true, "default": null},
-    {"name": "edge_agent_prometheus_url", "required": true, "default": null},
-    {"name": "prometheus_url", "required": false, "default": null}
+    {
+      "name": "edge_hub_prometheus_url",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "edge_agent_prometheus_url",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "prometheus_url",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "generic",
   "auto_config_method": "openmetrics-port-scan",
@@ -14,12 +29,25 @@
   "auto_conf_path": null,
   "explanation": "Azure IoT Edge runtime exposes Prometheus metrics from two modules (edgeHub and edgeAgent), both on the well-known port 9600 at the canonical /metrics path. The check inherits OpenMetricsBaseCheck and the spec uses the openmetrics_legacy template; no credentials are required. Two endpoints are needed instead of one, but each is a stock OpenMetrics scrape on a fixed port, so a generic openmetrics-port-scan probe over port 9600 (run twice, once per module hostname/IP) is sufficient. Container Autodiscovery is the documented installation path - the README ships com.datadoghq.ad.* labels with both URLs hardcoded - which strongly indicates the deployment shape is autodiscoverable.",
   "references": [
-    {"kind": "spec", "path": "azure_iot_edge/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "azure_iot_edge/datadog_checks/azure_iot_edge/check.py"},
-    {"kind": "readme", "path": "azure_iot_edge/README.md"},
-    {"kind": "upstream", "url": "https://learn.microsoft.com/en-us/azure/iot-edge/how-to-access-built-in-metrics"}
+    {
+      "kind": "spec",
+      "path": "azure_iot_edge/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "azure_iot_edge/datadog_checks/azure_iot_edge/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "azure_iot_edge/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://learn.microsoft.com/en-us/azure/iot-edge/how-to-access-built-in-metrics"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Two-endpoint OpenMetrics scrape on the same fixed port 9600 (edgeHub and edgeAgent containers). Pattern A variant; auto-config layer must enumerate both runtime modules."
+  "notes": "Two-endpoint OpenMetrics scrape on the same fixed port 9600 (edgeHub and edgeAgent containers). Pattern A variant; auto-config layer must enumerate both runtime modules.",
+  "discovery_bucket": "generic-openmetrics-scan"
 }

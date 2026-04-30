@@ -2,11 +2,33 @@
   "name": "ibm_spectrum_lsf",
   "display_name": "IBM Spectrum LSF",
   "spec_path": "ibm_spectrum_lsf/assets/configuration/spec.yaml",
-  "required_fields": ["cluster_name"],
+  "required_fields": [
+    "cluster_name"
+  ],
   "all_relevant_fields": [
-    {"name": "cluster_name", "required": true, "default": null},
-    {"name": "metric_sources", "required": false, "default": ["lsclusters", "lshosts", "bhosts", "lsload", "bqueues", "bslots", "bjobs"]},
-    {"name": "badmin_perfmon_auto", "required": false, "default": true}
+    {
+      "name": "cluster_name",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "metric_sources",
+      "required": false,
+      "default": [
+        "lsclusters",
+        "lshosts",
+        "bhosts",
+        "lsload",
+        "bqueues",
+        "bslots",
+        "bjobs"
+      ]
+    },
+    {
+      "name": "badmin_perfmon_auto",
+      "required": false,
+      "default": true
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "other",
@@ -14,12 +36,25 @@
   "auto_conf_path": null,
   "explanation": "IBM Spectrum LSF is a HPC workload scheduler. The check executes vendor CLI binaries (`lsid`, `lsclusters`, `lshosts`, `bhosts`, `lsload`, `bqueues`, `bjobs`, `bhist`, `bslots`, `badmin perfmon`, etc.) via `subprocess.run` and parses their output - it does not speak any network protocol. To run, the Agent host must (a) have the LSF client binaries installed and on PATH, (b) be configured as an LSF submission/management host with valid LSF environment (LSF_TOP, LSF_ENVDIR, profile.lsf sourced) so the binaries authenticate against the cluster master, and (c) supply the operator-chosen `cluster_name`. Pattern L (local CLI subprocess) plus an unknowable user-policy field (cluster name) makes this not autodiscoverable: the Agent cannot infer which LSF cluster name to attach without either reading LSF config files or being told.",
   "references": [
-    {"kind": "spec", "path": "ibm_spectrum_lsf/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "ibm_spectrum_lsf/datadog_checks/ibm_spectrum_lsf/check.py"},
-    {"kind": "check", "path": "ibm_spectrum_lsf/datadog_checks/ibm_spectrum_lsf/client.py"},
-    {"kind": "readme", "path": "ibm_spectrum_lsf/README.md"}
+    {
+      "kind": "spec",
+      "path": "ibm_spectrum_lsf/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "ibm_spectrum_lsf/datadog_checks/ibm_spectrum_lsf/check.py"
+    },
+    {
+      "kind": "check",
+      "path": "ibm_spectrum_lsf/datadog_checks/ibm_spectrum_lsf/client.py"
+    },
+    {
+      "kind": "readme",
+      "path": "ibm_spectrum_lsf/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Borderline custom/other (presence of LSF binaries is host-local discoverable), but the required `cluster_name` field is operator policy and the LSF environment carries implicit credentials/host trust, so impossible is the more accurate classification."
+  "notes": "Borderline custom/other (presence of LSF binaries is host-local discoverable), but the required `cluster_name` field is operator policy and the LSF environment carries implicit credentials/host trust, so impossible is the more accurate classification.",
+  "discovery_bucket": "creds-proprietary-client"
 }

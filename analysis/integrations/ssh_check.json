@@ -2,17 +2,56 @@
   "name": "ssh_check",
   "display_name": "SSH/SFTP",
   "spec_path": "ssh_check/assets/configuration/spec.yaml",
-  "required_fields": ["host", "username"],
+  "required_fields": [
+    "host",
+    "username"
+  ],
   "all_relevant_fields": [
-    {"name": "host", "required": true, "default": null},
-    {"name": "username", "required": true, "default": null},
-    {"name": "password", "required": false, "default": null},
-    {"name": "port", "required": false, "default": 22},
-    {"name": "private_key_file", "required": false, "default": null},
-    {"name": "private_key_type", "required": false, "default": "rsa"},
-    {"name": "sftp_check", "required": false, "default": true},
-    {"name": "add_missing_keys", "required": false, "default": false},
-    {"name": "force_sha1", "required": false, "default": false}
+    {
+      "name": "host",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "username",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "port",
+      "required": false,
+      "default": 22
+    },
+    {
+      "name": "private_key_file",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "private_key_type",
+      "required": false,
+      "default": "rsa"
+    },
+    {
+      "name": "sftp_check",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "add_missing_keys",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "force_sha1",
+      "required": false,
+      "default": false
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
@@ -20,11 +59,21 @@
   "auto_conf_path": null,
   "explanation": "The SSH check uses paramiko.SSHClient.connect with a required username and either password or private key, then verifies transport.is_authenticated(). Without credentials the check cannot exercise its core service check (ssh.can_connect) nor the SFTP probe, so auto-config cannot meaningfully enable it. Detecting an SSH server on port 22 is trivial, but it is also out-of-scope - the integration is designed to validate authenticated access for a specific user.",
   "references": [
-    {"kind": "spec", "path": "ssh_check/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "ssh_check/datadog_checks/ssh_check/ssh_check.py"},
-    {"kind": "readme", "path": "ssh_check/README.md"}
+    {
+      "kind": "spec",
+      "path": "ssh_check/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "ssh_check/datadog_checks/ssh_check/ssh_check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "ssh_check/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": ""
+  "notes": "",
+  "discovery_bucket": "creds-spec-mandated"
 }

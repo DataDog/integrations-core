@@ -2,23 +2,46 @@
   "name": "weaviate",
   "display_name": "Weaviate",
   "spec_path": "weaviate/assets/configuration/spec.yaml",
-  "required_fields": ["openmetrics_endpoint"],
+  "required_fields": [
+    "openmetrics_endpoint"
+  ],
   "all_relevant_fields": [
-    {"name": "openmetrics_endpoint", "required": true, "default": "http://localhost:2112/metrics"},
-    {"name": "weaviate_api_endpoint", "required": false, "default": "http://localhost:8080"}
+    {
+      "name": "openmetrics_endpoint",
+      "required": true,
+      "default": "http://localhost:2112/metrics"
+    },
+    {
+      "name": "weaviate_api_endpoint",
+      "required": false,
+      "default": "http://localhost:8080"
+    }
   ],
   "classification": "generic",
   "auto_config_method": "openmetrics-port-scan",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "Weaviate exposes Prometheus-formatted metrics on a fixed `/metrics` path; the upstream-documented default port is 2112 (configurable via the `PROMETHEUS_MONITORING_PORT` env var). The check class is `WeaviateCheck(OpenMetricsBaseCheckV2, ConfigMixin)` and the spec uses `template: instances/openmetrics` with `openmetrics_endpoint` overridden as required. The optional `weaviate_api_endpoint` (default `http://localhost:8080`) adds a small set of REST API metrics (`/v1/meta`, `/v1/nodes`, `/v1/.well-known/live`) but the check skips that block when the field is unset, so the OpenMetrics endpoint is the only mandatory probe. This is a textbook 'OpenMetrics on a known port' case — pattern A.",
+  "explanation": "Weaviate exposes Prometheus-formatted metrics on a fixed `/metrics` path; the upstream-documented default port is 2112 (configurable via the `PROMETHEUS_MONITORING_PORT` env var). The check class is `WeaviateCheck(OpenMetricsBaseCheckV2, ConfigMixin)` and the spec uses `template: instances/openmetrics` with `openmetrics_endpoint` overridden as required. The optional `weaviate_api_endpoint` (default `http://localhost:8080`) adds a small set of REST API metrics (`/v1/meta`, `/v1/nodes`, `/v1/.well-known/live`) but the check skips that block when the field is unset, so the OpenMetrics endpoint is the only mandatory probe. This is a textbook 'OpenMetrics on a known port' case \u2014 pattern A.",
   "references": [
-    {"kind": "spec", "path": "weaviate/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "weaviate/datadog_checks/weaviate/check.py"},
-    {"kind": "readme", "path": "weaviate/README.md"},
-    {"kind": "upstream", "url": "https://weaviate.io/developers/weaviate/configuration/monitoring"}
+    {
+      "kind": "spec",
+      "path": "weaviate/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "weaviate/datadog_checks/weaviate/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "weaviate/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://weaviate.io/developers/weaviate/configuration/monitoring"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "No on-disk auto_conf.yaml ships with the integration, but the Prometheus port and path are stable enough for openmetrics-port-scan to handle. The optional REST API endpoint is best-effort and can be skipped during discovery."
+  "notes": "No on-disk auto_conf.yaml ships with the integration, but the Prometheus port and path are stable enough for openmetrics-port-scan to handle. The optional REST API endpoint is best-effort and can be skipped during discovery.",
+  "discovery_bucket": "generic-openmetrics-scan"
 }

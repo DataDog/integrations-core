@@ -8,12 +8,19 @@
   "auto_config_method": "other",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "Symantec Endpoint Protection is a vendor-tile logs-only integration. The spec contains only a `template: logs` block configuring a UDP syslog listener (`type: udp`, `port: <PORT>`) and there is no Agent metric check — the `datadog_checks/symantec_endpoint_protection/` package ships only `__init__.py` and `__about__.py`. Setup requires the user to (1) configure the SEP Manager to forward syslog to the Agent and (2) pick a UDP port, neither of which is discoverable on the wire. Auto-config in the network-probe sense does not apply.",
+  "explanation": "Symantec Endpoint Protection is a vendor-tile logs-only integration. The spec contains only a `template: logs` block configuring a UDP syslog listener (`type: udp`, `port: <PORT>`) and there is no Agent metric check \u2014 the `datadog_checks/symantec_endpoint_protection/` package ships only `__init__.py` and `__about__.py`. Setup requires the user to (1) configure the SEP Manager to forward syslog to the Agent and (2) pick a UDP port, neither of which is discoverable on the wire. Auto-config in the network-probe sense does not apply.",
   "references": [
-    {"kind": "spec", "path": "symantec_endpoint_protection/assets/configuration/spec.yaml"},
-    {"kind": "readme", "path": "symantec_endpoint_protection/README.md"}
+    {
+      "kind": "spec",
+      "path": "symantec_endpoint_protection/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "readme",
+      "path": "symantec_endpoint_protection/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Logs-only vendor security tile (UDP syslog ingestion). No probe surface; the user-supplied UDP port is intent, not a discoverable property."
+  "notes": "Logs-only vendor security tile (UDP syslog ingestion). No probe surface; the user-supplied UDP port is intent, not a discoverable property.",
+  "discovery_bucket": "logs-only"
 }

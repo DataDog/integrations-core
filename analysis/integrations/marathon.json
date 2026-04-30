@@ -2,27 +2,67 @@
   "name": "marathon",
   "display_name": "Marathon",
   "spec_path": "marathon/assets/configuration/spec.yaml",
-  "required_fields": ["url"],
+  "required_fields": [
+    "url"
+  ],
   "all_relevant_fields": [
-    {"name": "url", "required": true, "default": null},
-    {"name": "acs_url", "required": false, "default": null},
-    {"name": "group", "required": false, "default": null},
-    {"name": "label_tags", "required": false, "default": null},
-    {"name": "username", "required": false, "default": null},
-    {"name": "password", "required": false, "default": null},
-    {"name": "auth_token", "required": false, "default": null}
+    {
+      "name": "url",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "acs_url",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "group",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "label_tags",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "username",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "auth_token",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "custom",
   "auto_config_method": "http-path-probe",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "The check GETs Marathon REST API paths (`/v2/apps`, `/v2/deployments`, `/v2/queue`) under a single user-supplied `url`. The Marathon master listens on a well-known port (8080 for HTTP, 8443 for HTTPS), so a port-scan + path probe of `/v2/info` or `/v2/apps` could identify Marathon distinctively (the JSON shape is unambiguous). However, two complications push this into custom territory: (1) DC/OS deployments require ACS authentication via a separate `acs_url` plus username/password (or a richer `auth_token` reader/writer config) — discovery would have to detect ACS and follow the login dance; (2) self-hosted Marathon masters often run behind basic auth or a reverse proxy. The unauthenticated localhost case works for development and matches pattern E (auth-optional in spec, often gated in production). Without ACS/auth credentials the discovery layer can identify the endpoint but cannot complete the connection.",
+  "explanation": "The check GETs Marathon REST API paths (`/v2/apps`, `/v2/deployments`, `/v2/queue`) under a single user-supplied `url`. The Marathon master listens on a well-known port (8080 for HTTP, 8443 for HTTPS), so a port-scan + path probe of `/v2/info` or `/v2/apps` could identify Marathon distinctively (the JSON shape is unambiguous). However, two complications push this into custom territory: (1) DC/OS deployments require ACS authentication via a separate `acs_url` plus username/password (or a richer `auth_token` reader/writer config) \u2014 discovery would have to detect ACS and follow the login dance; (2) self-hosted Marathon masters often run behind basic auth or a reverse proxy. The unauthenticated localhost case works for development and matches pattern E (auth-optional in spec, often gated in production). Without ACS/auth credentials the discovery layer can identify the endpoint but cannot complete the connection.",
   "references": [
-    {"kind": "spec", "path": "marathon/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "marathon/datadog_checks/marathon/marathon.py"},
-    {"kind": "readme", "path": "marathon/README.md"}
+    {
+      "kind": "spec",
+      "path": "marathon/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "marathon/datadog_checks/marathon/marathon.py"
+    },
+    {
+      "kind": "readme",
+      "path": "marathon/README.md"
+    }
   ],
   "confidence": "medium",
   "needs_human_review": false,
-  "notes": "Mesos/Marathon is largely sunsetted (DC/OS EOL); modern deployments are rare. Pattern E with an HTTP-path-probe edge: probe `/v2/info` on 8080 and 8443, fall through to credentials when 401."
+  "notes": "Mesos/Marathon is largely sunsetted (DC/OS EOL); modern deployments are rare. Pattern E with an HTTP-path-probe edge: probe `/v2/info` on 8080 and 8443, fall through to credentials when 401.",
+  "discovery_bucket": "http-multi-path"
 }

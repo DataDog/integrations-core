@@ -2,14 +2,40 @@
   "name": "tls",
   "display_name": "TLS",
   "spec_path": "tls/assets/configuration/spec.yaml",
-  "required_fields": ["server"],
+  "required_fields": [
+    "server"
+  ],
   "all_relevant_fields": [
-    {"name": "server", "required": true, "default": null},
-    {"name": "port", "required": false, "default": 443},
-    {"name": "transport", "required": false, "default": "TCP"},
-    {"name": "local_cert_path", "required": false, "default": null},
-    {"name": "server_hostname", "required": false, "default": null},
-    {"name": "start_tls", "required": false, "default": null}
+    {
+      "name": "server",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "port",
+      "required": false,
+      "default": 443
+    },
+    {
+      "name": "transport",
+      "required": false,
+      "default": "TCP"
+    },
+    {
+      "name": "local_cert_path",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "server_hostname",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "start_tls",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "custom",
   "auto_config_method": "other",
@@ -17,11 +43,21 @@
   "auto_conf_path": null,
   "explanation": "TLS is a synthetic check: the user explicitly nominates a hostname/IP (or local cert file) they want to monitor. There is no upstream system to discover on the host where the Agent runs - the integration's purpose is to validate someone else's certificate. Without a target list provided by the user, auto-config has nothing to enumerate. Once a target is known, the check is a generic TCP+TLS handshake on port 443 (or any port), so the technical probe is trivial; the missing piece is intent.",
   "references": [
-    {"kind": "spec", "path": "tls/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "tls/datadog_checks/tls/tls.py"},
-    {"kind": "readme", "path": "tls/README.md"}
+    {
+      "kind": "spec",
+      "path": "tls/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "tls/datadog_checks/tls/tls.py"
+    },
+    {
+      "kind": "readme",
+      "path": "tls/README.md"
+    }
   ],
   "confidence": "medium",
   "needs_human_review": false,
-  "notes": "Could auto-enable for any TLS-listening port discovered on the local host or in a service catalog, but that would be a custom orchestration layer rather than a per-integration probe. Consider grouping with other 'synthetic' style checks (http_check, tcp_check)."
+  "notes": "Could auto-enable for any TLS-listening port discovered on the local host or in a service catalog, but that would be a custom orchestration layer rather than a per-integration probe. Consider grouping with other 'synthetic' style checks (http_check, tcp_check).",
+  "discovery_bucket": "user-intent-synthetic"
 }

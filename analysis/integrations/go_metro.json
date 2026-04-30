@@ -2,16 +2,52 @@
   "name": "go_metro",
   "display_name": "Go-Metro (TCP RTT)",
   "spec_path": "go-metro/assets/configuration/spec.yaml",
-  "required_fields": ["interface", "ips", "hosts"],
+  "required_fields": [
+    "interface",
+    "ips",
+    "hosts"
+  ],
   "all_relevant_fields": [
-    {"name": "snaplen", "required": true, "default": 512},
-    {"name": "idle_ttl", "required": true, "default": 300},
-    {"name": "exp_ttl", "required": true, "default": 60},
-    {"name": "statsd_ip", "required": true, "default": "127.0.0.1"},
-    {"name": "statsd_port", "required": true, "default": 8125},
-    {"name": "interface", "required": true, "default": null},
-    {"name": "ips", "required": true, "default": null},
-    {"name": "hosts", "required": true, "default": null}
+    {
+      "name": "snaplen",
+      "required": true,
+      "default": 512
+    },
+    {
+      "name": "idle_ttl",
+      "required": true,
+      "default": 300
+    },
+    {
+      "name": "exp_ttl",
+      "required": true,
+      "default": 60
+    },
+    {
+      "name": "statsd_ip",
+      "required": true,
+      "default": "127.0.0.1"
+    },
+    {
+      "name": "statsd_port",
+      "required": true,
+      "default": 8125
+    },
+    {
+      "name": "interface",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "ips",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "hosts",
+      "required": true,
+      "default": null
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "other",
@@ -19,10 +55,17 @@
   "auto_conf_path": null,
   "explanation": "go-metro is a passive TCP RTT sniffer (a Go binary using libpcap) that ships only with the legacy 64-bit Agent v5 DEB/RPM packages and is not available in Agent v6+. There is no upstream service to probe; instead the user nominates a network `interface` plus an `ips`/`hosts` allowlist of remote endpoints whose round-trip times should be measured. Like dns_check / http_check, the target is purely user intent (which peers do you care about RTT for?), not a discoverable on-host signal. Setup additionally requires `setcap cap_net_raw+ep` on the binary, so even runtime feasibility is host-state dependent.",
   "references": [
-    {"kind": "spec", "path": "go-metro/assets/configuration/spec.yaml"},
-    {"kind": "readme", "path": "go-metro/README.md"}
+    {
+      "kind": "spec",
+      "path": "go-metro/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "readme",
+      "path": "go-metro/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern K (synthetic / user-intent probe), and additionally an Agent v5-only check that has no equivalent in current Agents. No check.py under datadog_checks/go-metro/ — the Python side is just a conf example for the embedded Go binary. Directory is hyphenated (`go-metro`); using underscored name `go_metro` to satisfy schema regex."
+  "notes": "Pattern K (synthetic / user-intent probe), and additionally an Agent v5-only check that has no equivalent in current Agents. No check.py under datadog_checks/go-metro/ \u2014 the Python side is just a conf example for the embedded Go binary. Directory is hyphenated (`go-metro`); using underscored name `go_metro` to satisfy schema regex.",
+  "discovery_bucket": "per-process-discovery"
 }

@@ -2,10 +2,21 @@
   "name": "boundary",
   "display_name": "Boundary",
   "spec_path": "boundary/assets/configuration/spec.yaml",
-  "required_fields": ["health_endpoint", "openmetrics_endpoint"],
+  "required_fields": [
+    "health_endpoint",
+    "openmetrics_endpoint"
+  ],
   "all_relevant_fields": [
-    {"name": "health_endpoint", "required": true, "default": "http://localhost:9203/health"},
-    {"name": "openmetrics_endpoint", "required": true, "default": "http://localhost:9203/metrics"}
+    {
+      "name": "health_endpoint",
+      "required": true,
+      "default": "http://localhost:9203/health"
+    },
+    {
+      "name": "openmetrics_endpoint",
+      "required": true,
+      "default": "http://localhost:9203/metrics"
+    }
   ],
   "classification": "generic",
   "auto_config_method": "openmetrics-port-scan",
@@ -13,11 +24,21 @@
   "auto_conf_path": null,
   "explanation": "HashiCorp Boundary's controller exposes Prometheus metrics on `/metrics` and a health endpoint on `/health`, both on the controller listener (default port 9203). The check inherits `OpenMetricsBaseCheckV2` and the only auxiliary call is an unauthenticated GET on `/health`. Both paths are universal and unauthenticated by default, so a generic OpenMetrics port-scan that targets 9203 covers it. Pattern A, with the health-endpoint requirement being a peer of the metrics URL on the same port. The Boundary controller's metrics endpoint is publicly documented as fixed at the controller API listener.",
   "references": [
-    {"kind": "spec", "path": "boundary/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "boundary/datadog_checks/boundary/check.py"},
-    {"kind": "upstream", "url": "https://developer.hashicorp.com/boundary/docs/operations/metrics"}
+    {
+      "kind": "spec",
+      "path": "boundary/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "boundary/datadog_checks/boundary/check.py"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://developer.hashicorp.com/boundary/docs/operations/metrics"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Two required URL fields but they live on the same host:port and have fixed paths, so discovery still reduces to a single port probe."
+  "notes": "Two required URL fields but they live on the same host:port and have fixed paths, so discovery still reduces to a single port probe.",
+  "discovery_bucket": "generic-openmetrics-scan"
 }

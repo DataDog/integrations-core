@@ -10,10 +10,17 @@
   "auto_conf_path": null,
   "explanation": "Palo Alto Panorama is a vendor security tile for centralized Palo Alto firewall management. The spec contains only a `logs` template (UDP/TCP listener at a user-supplied `<PORT>`) and there is no Agent metric check beyond `__init__.py`. Setup requires the operator to configure Panorama to forward syslog to the Agent and to choose the listener port; there is no upstream service running alongside the Agent to fingerprint, and no host/endpoint auto-config could resolve.",
   "references": [
-    {"kind": "spec", "path": "palo_alto_panorama/assets/configuration/spec.yaml"},
-    {"kind": "readme", "path": "palo_alto_panorama/README.md"}
+    {
+      "kind": "spec",
+      "path": "palo_alto_panorama/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "readme",
+      "path": "palo_alto_panorama/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Logs-only vendor tile (pattern N analogue). No metric check, no auto_conf.yaml."
+  "notes": "Logs-only vendor tile (pattern N analogue). No metric check, no auto_conf.yaml.",
+  "discovery_bucket": "logs-only"
 }

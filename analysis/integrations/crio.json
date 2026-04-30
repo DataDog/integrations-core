@@ -2,20 +2,33 @@
   "name": "crio",
   "display_name": "CRI-O",
   "spec_path": "crio/assets/configuration/spec.yaml",
-  "required_fields": ["prometheus_url"],
+  "required_fields": [
+    "prometheus_url"
+  ],
   "all_relevant_fields": [
-    {"name": "prometheus_url", "required": true, "default": "http://localhost:9090/metrics"}
+    {
+      "name": "prometheus_url",
+      "required": true,
+      "default": "http://localhost:9090/metrics"
+    }
   ],
   "classification": "generic",
   "auto_config_method": "openmetrics-port-scan",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "CRI-O is a Kubernetes container runtime. The check inherits OpenMetricsBaseCheck and scrapes a single fixed Prometheus endpoint, defaulting to http://localhost:9090/metrics (the port CRI-O's `metrics_port` config option uses). No authentication is required — the metrics endpoint is plain HTTP on a known port. A generic OpenMetrics port-scan against the CRI-O metrics port satisfies discovery.",
+  "explanation": "CRI-O is a Kubernetes container runtime. The check inherits OpenMetricsBaseCheck and scrapes a single fixed Prometheus endpoint, defaulting to http://localhost:9090/metrics (the port CRI-O's `metrics_port` config option uses). No authentication is required \u2014 the metrics endpoint is plain HTTP on a known port. A generic OpenMetrics port-scan against the CRI-O metrics port satisfies discovery.",
   "references": [
-    {"kind": "spec", "path": "crio/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "crio/datadog_checks/crio/crio.py"}
+    {
+      "kind": "spec",
+      "path": "crio/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "crio/datadog_checks/crio/crio.py"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern A: OpenMetrics on a known port. No existing auto_conf.yaml; CRI-O typically runs on the host (not as a container), so AD-by-image is less natural — but the port/path are universal."
+  "notes": "Pattern A: OpenMetrics on a known port. No existing auto_conf.yaml; CRI-O typically runs on the host (not as a container), so AD-by-image is less natural \u2014 but the port/path are universal.",
+  "discovery_bucket": "generic-openmetrics-scan"
 }

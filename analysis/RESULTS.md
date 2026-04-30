@@ -5,24 +5,59 @@ Final summary of the analysis driven by [DSCVR/6650004331](https://datadoghq.atl
 ## Stats
 
 - **Total analysed:** 260 integrations (every `assets/configuration/spec.yaml` in `integrations-core` as of 2026-04-30, ordered by org count from `analysis/inputs/integrations_by_org_count.csv`).
-- **Generic auto-config possible:** 96 (36.9%). Method breakdown: 58 `openmetrics-port-scan`, 18 `other` (host-local), 14 `http-path-probe`, 6 `tcp-banner-probe`.
-- **Custom auto-config possible:** 40 (15.4%).
-- **Auto-config impossible:** 124 (47.7%).
+- **Discovery-bucket distribution** (the primary classification — see [`procedure.md`](procedure.md) for definitions):
+
+| Section | Bucket | Count |
+|---|---|---|
+| Fully generic | generic-openmetrics-scan | 51 |
+| Fully generic | generic-incluster-bearer-token | 10 |
+| Fully generic | generic-windows-perf | 6 |
+| Fully generic | generic-linux-procfs | 7 |
+| HTTP probe (specific verification) | http-text-format | 4 |
+| HTTP probe (specific verification) | http-json-shape | 10 |
+| HTTP probe (specific verification) | http-multi-path | 21 |
+| TCP probe (specific protocol) | tcp-banner-server-greets | 1 |
+| TCP probe (specific protocol) | tcp-protocol-handshake | 5 |
+| Local detection | local-cli-binary | 10 |
+| Local detection | local-scm-enumeration | 1 |
+| Local detection | cloud-task-metadata | 1 |
+| Local detection | local-config-file | 2 |
+| Credentials required | creds-spec-mandated | 24 |
+| Credentials required | creds-jmx-rmi | 14 |
+| Credentials required | creds-api-token | 24 |
+| Credentials required | creds-proprietary-client | 9 |
+| Credentials required | creds-auth-optional-practical | 4 |
+| No probe surface | logs-only | 38 |
+| No probe surface | dogstatsd-only | 1 |
+| No probe surface | user-schema-template | 6 |
+| No probe surface | user-intent-synthetic | 6 |
+| No probe surface | per-process-discovery | 5 |
+
+- The legacy 3-way classification (`generic` / `custom` / `impossible`) is also kept on every per-integration JSON for backward reference: 96 generic, 40 custom, 124 impossible.
 - **Confidence:** 227 high, 33 medium, 0 low.
 - **Flagged for human review:** 2 (`ibm_i`, `oracle`).
 - **Skipped (no `spec.yaml`):** 270 entries from the CSV (logs/incidents/audit-trail/SaaS-only/marketplace tiles). See `analysis/skipped.md`.
 
 ## Headline conclusion
 
-About **a third of integrations could be picked up by a generic "scan ports until something looks like OpenMetrics"** mechanism with no integration-specific code at all — that is, the source ticket's lightest-weight option would deliver real coverage.
+After the bucket refinement, **74 of 260 integrations (28%) are fully generic** — the discovery layer needs no integration-specific verification code at all, just a per-integration port + path table. These break down as:
 
-The next-largest generic sub-cluster is **host-local kernel/perf-counter integrations** (iis, btrfs, network, disk, system_core, system_swap, infiniband, dotnetclr, aspdotnet, …). For these the auto-config trigger is "is the relevant subsystem present on this host?", not a network probe, and the discovery primitive looks more like Windows SCM enumeration (Windows side) or `/sys|/proc` filesystem checks (Linux side).
+- **51** — `generic-openmetrics-scan` (Prometheus exposition format on a known port)
+- **10** — `generic-incluster-bearer-token` (same as above, with the Agent's pod ServiceAccount token auto-injected)
+- **6** — `generic-windows-perf` (PDH counter set presence on the local Windows host)
+- **7** — `generic-linux-procfs` (`/proc` and `/sys` reads on the local Linux host)
 
-The "impossible" bucket is dominated by:
+The next ~35 integrations have a fixed URL/port but need integration-specific *verification* (text/JSON shape, multi-path probing). These are real custom-logic territory — the user's stricter definition of "not generic":
 
-1. **Spec-required credentials** (DBs, JMX, vendor APIs) — credentials cannot come from the wire.
-2. **Logs-only / DogStatsD-only / vendor security tiles** — there is no probe surface; the "integration" is just a logs config or a metric-name mapping.
-3. **User-supplied generic templates** (openmetrics, prometheus, windows_performance_counters, wmi_check, pdh_check, http_check, tcp_check, dns_check, process, etc.) — the integration *is* the configuration template; nothing for the discovery layer to fingerprint.
+- `http-text-format` (3, e.g. apache mod_status, squid)
+- `http-json-shape` (10, e.g. mesos `id`+`frameworks`, fluentd `plugins`, yarn `clusterMetrics`)
+- `http-multi-path` (21, e.g. nginx 3-paths, rabbitmq Prometheus+Management, envoy stats vs Prometheus)
+
+Plus 6 with TCP-protocol-specific handshakes (redis, memcached, zookeeper 4LW, gearmand, statsd, twemproxy).
+
+The "no probe surface" bucket — logs-only tiles, DogStatsD-only, user-supplied templates, synthetic probes, per-process discovery — accounts for **56 integrations (22%)**.
+
+Credentials-required buckets (124 total, 48%) split into 5 sub-categories: spec-mandated DB creds (24), JMX/RMI (14), API token / OAuth (24), proprietary client library (9), auth-optional-but-practically-required (4), plus `local-cli-binary` (10) and `local-config-file` (2) which need host-local state.
 
 ## Patterns surfaced (named in `procedure.md`)
 

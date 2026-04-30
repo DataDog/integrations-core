@@ -2,26 +2,61 @@
   "name": "activemq_xml",
   "display_name": "ActiveMQ XML",
   "spec_path": "activemq_xml/assets/configuration/spec.yaml",
-  "required_fields": ["url"],
+  "required_fields": [
+    "url"
+  ],
   "all_relevant_fields": [
-    {"name": "url", "required": true, "default": null},
-    {"name": "suppress_errors", "required": false, "default": false},
-    {"name": "detailed_queues", "required": false, "default": null},
-    {"name": "detailed_topics", "required": false, "default": null},
-    {"name": "detailed_subscribers", "required": false, "default": null}
+    {
+      "name": "url",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "suppress_errors",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "detailed_queues",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "detailed_topics",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "detailed_subscribers",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "custom",
   "auto_config_method": "credentials-required",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "Unlike its JMX-based sibling `activemq`, this integration scrapes ActiveMQ's web console: it appends `/admin/xml/queues.jsp`, `/admin/xml/topics.jsp`, `/admin/xml/subscribers.jsp` to the user-supplied base `url` and parses the XML with `ElementTree`. The path triplet is universal for ActiveMQ Classic, the default web console port is 8161, and the check inherits the standard `instances/http` template (so basic auth is optional in the spec). However, ActiveMQ Classic's web console ships with HTTP basic auth enabled out of the box (the realm is configured in `jetty-realm.properties`, default user `admin`/`admin`), and any production deployment changes those credentials. The Prometheus-style fallback that pattern F uses for rabbitmq/haproxy does not exist here — there is only the authenticated /admin path. A network probe could detect the listening port, but extracting metrics requires credentials.",
+  "explanation": "Unlike its JMX-based sibling `activemq`, this integration scrapes ActiveMQ's web console: it appends `/admin/xml/queues.jsp`, `/admin/xml/topics.jsp`, `/admin/xml/subscribers.jsp` to the user-supplied base `url` and parses the XML with `ElementTree`. The path triplet is universal for ActiveMQ Classic, the default web console port is 8161, and the check inherits the standard `instances/http` template (so basic auth is optional in the spec). However, ActiveMQ Classic's web console ships with HTTP basic auth enabled out of the box (the realm is configured in `jetty-realm.properties`, default user `admin`/`admin`), and any production deployment changes those credentials. The Prometheus-style fallback that pattern F uses for rabbitmq/haproxy does not exist here \u2014 there is only the authenticated /admin path. A network probe could detect the listening port, but extracting metrics requires credentials.",
   "references": [
-    {"kind": "spec", "path": "activemq_xml/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "activemq_xml/datadog_checks/activemq_xml/activemq_xml.py"},
-    {"kind": "readme", "path": "activemq_xml/README.md"},
-    {"kind": "upstream", "url": "https://activemq.apache.org/web-console"}
+    {
+      "kind": "spec",
+      "path": "activemq_xml/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "activemq_xml/datadog_checks/activemq_xml/activemq_xml.py"
+    },
+    {
+      "kind": "readme",
+      "path": "activemq_xml/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://activemq.apache.org/web-console"
+    }
   ],
   "confidence": "medium",
   "needs_human_review": false,
-  "notes": "Custom rather than impossible because a localhost dev-mode broker with default `admin/admin` could in principle be auto-configured; in practice (pattern E) every real deployment changes those credentials, so credentials-required is the dominant blocker. If we ever build a generic web-console probe that hits 8161 and follows /admin/xml/*.jsp, the discovery layer is otherwise straightforward."
+  "notes": "Custom rather than impossible because a localhost dev-mode broker with default `admin/admin` could in principle be auto-configured; in practice (pattern E) every real deployment changes those credentials, so credentials-required is the dominant blocker. If we ever build a generic web-console probe that hits 8161 and follows /admin/xml/*.jsp, the discovery layer is otherwise straightforward.",
+  "discovery_bucket": "creds-auth-optional-practical"
 }

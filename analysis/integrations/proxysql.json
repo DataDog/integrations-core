@@ -2,28 +2,75 @@
   "name": "proxysql",
   "display_name": "ProxySQL",
   "spec_path": "proxysql/assets/configuration/spec.yaml",
-  "required_fields": ["host", "port", "username", "password"],
+  "required_fields": [
+    "host",
+    "port",
+    "username",
+    "password"
+  ],
   "all_relevant_fields": [
-    {"name": "host", "required": true, "default": null},
-    {"name": "port", "required": true, "default": null},
-    {"name": "username", "required": true, "default": null},
-    {"name": "password", "required": true, "default": null},
-    {"name": "tls_verify", "required": false, "default": false},
-    {"name": "connect_timeout", "required": false, "default": 10},
-    {"name": "read_timeout", "required": false, "default": null},
-    {"name": "additional_metrics", "required": false, "default": null}
+    {
+      "name": "host",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "port",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "username",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "tls_verify",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "connect_timeout",
+      "required": false,
+      "default": 10
+    },
+    {
+      "name": "read_timeout",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "additional_metrics",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "ProxySQL exposes its admin interface via the MySQL wire protocol on a separate admin port. The check connects with pymysql and queries stats_* tables in the admin schema, so a username and password (the ProxySQL admin user) are required. Both are marked required: true with no defaults in the spec, and there is no unauthenticated mode. Default port is also user-supplied (no default) — typically 6032, but not enforced by the check.",
+  "explanation": "ProxySQL exposes its admin interface via the MySQL wire protocol on a separate admin port. The check connects with pymysql and queries stats_* tables in the admin schema, so a username and password (the ProxySQL admin user) are required. Both are marked required: true with no defaults in the spec, and there is no unauthenticated mode. Default port is also user-supplied (no default) \u2014 typically 6032, but not enforced by the check.",
   "references": [
-    {"kind": "spec", "path": "proxysql/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "proxysql/datadog_checks/proxysql/proxysql.py"},
-    {"kind": "readme", "path": "proxysql/README.md"}
+    {
+      "kind": "spec",
+      "path": "proxysql/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "proxysql/datadog_checks/proxysql/proxysql.py"
+    },
+    {
+      "kind": "readme",
+      "path": "proxysql/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern D (spec-required credentials). MySQL wire protocol means a TCP banner probe could detect a MySQL-shaped server, but auth is still mandatory before any stats can be read."
+  "notes": "Pattern D (spec-required credentials). MySQL wire protocol means a TCP banner probe could detect a MySQL-shaped server, but auth is still mandatory before any stats can be read.",
+  "discovery_bucket": "creds-spec-mandated"
 }

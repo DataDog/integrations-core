@@ -2,21 +2,38 @@
   "name": "duckdb",
   "display_name": "DuckDB",
   "spec_path": "duckdb/assets/configuration/spec.yaml",
-  "required_fields": ["db_name"],
+  "required_fields": [
+    "db_name"
+  ],
   "all_relevant_fields": [
-    {"name": "db_name", "required": true, "default": null},
-    {"name": "connection_attempt", "required": false, "default": 3}
+    {
+      "name": "db_name",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "connection_attempt",
+      "required": false,
+      "default": 3
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "other",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "DuckDB is an embedded analytical database stored as a file on the local filesystem. The required `db_name` field is a filesystem path to a `.db` file (e.g. `/path-to-file/my_database.db`), and the check opens it via `duckdb.connect(self.db_name, read_only=True)`. There is no port, no network endpoint, and no canonical filesystem location — the path is entirely user-defined. Auto-config would have to guess where the user has stored their DuckDB file(s), which is not discoverable from the wire or from any standard location. Closest analogue is pattern M (process-name local discovery) but applied to filesystem state: the user's intent (which file to monitor) is the missing input.",
+  "explanation": "DuckDB is an embedded analytical database stored as a file on the local filesystem. The required `db_name` field is a filesystem path to a `.db` file (e.g. `/path-to-file/my_database.db`), and the check opens it via `duckdb.connect(self.db_name, read_only=True)`. There is no port, no network endpoint, and no canonical filesystem location \u2014 the path is entirely user-defined. Auto-config would have to guess where the user has stored their DuckDB file(s), which is not discoverable from the wire or from any standard location. Closest analogue is pattern M (process-name local discovery) but applied to filesystem state: the user's intent (which file to monitor) is the missing input.",
   "references": [
-    {"kind": "spec", "path": "duckdb/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "duckdb/datadog_checks/duckdb/check.py"}
+    {
+      "kind": "spec",
+      "path": "duckdb/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "duckdb/datadog_checks/duckdb/check.py"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern M-like. There is no upstream service to probe; DuckDB is opened in-process from a user-chosen file path. A filesystem scan for `*.db` files is not a sane discovery primitive (collisions with other tools and unknown intent)."
+  "notes": "Pattern M-like. There is no upstream service to probe; DuckDB is opened in-process from a user-chosen file path. A filesystem scan for `*.db` files is not a sane discovery primitive (collisions with other tools and unknown intent).",
+  "discovery_bucket": "local-config-file"
 }

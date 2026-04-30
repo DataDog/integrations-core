@@ -2,12 +2,30 @@
   "name": "mesos_master",
   "display_name": "Mesos Master",
   "spec_path": "mesos_master/assets/configuration/spec.yaml",
-  "required_fields": ["url"],
+  "required_fields": [
+    "url"
+  ],
   "all_relevant_fields": [
-    {"name": "url", "required": true, "default": "http://localhost:5050"},
-    {"name": "username", "required": false, "default": null},
-    {"name": "password", "required": false, "default": null},
-    {"name": "auth_token", "required": false, "default": null}
+    {
+      "name": "url",
+      "required": true,
+      "default": "http://localhost:5050"
+    },
+    {
+      "name": "username",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "auth_token",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "generic",
   "auto_config_method": "http-path-probe",
@@ -15,12 +33,25 @@
   "auto_conf_path": null,
   "explanation": "Mesos Master exposes an unauthenticated HTTP REST API on the well-known port 5050. The check GETs /state (cluster topology, version) and /metrics/snapshot (counter snapshot) and parses JSON. Both endpoints are universal across Mesos versions and require no credentials in the default deployment. A generic http-path-probe to GET /state on port 5050 (verifying a JSON body with a 'version' key and Mesos-shaped fields like 'leader' / 'activated_slaves') is sufficient. DC/OS and HTTP-auth-enabled clusters need an auth_token, but those are not the typical case.",
   "references": [
-    {"kind": "spec", "path": "mesos_master/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "mesos_master/datadog_checks/mesos_master/mesos_master.py"},
-    {"kind": "readme", "path": "mesos_master/README.md"},
-    {"kind": "upstream", "url": "http://mesos.apache.org/documentation/latest/endpoints/master/state/"}
+    {
+      "kind": "spec",
+      "path": "mesos_master/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "mesos_master/datadog_checks/mesos_master/mesos_master.py"
+    },
+    {
+      "kind": "readme",
+      "path": "mesos_master/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "http://mesos.apache.org/documentation/latest/endpoints/master/state/"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern B (single canonical HTTP path). DC/OS deployments require auth_token (file or dcos_auth) but that is the minority case."
+  "notes": "Pattern B (single canonical HTTP path). DC/OS deployments require auth_token (file or dcos_auth) but that is the minority case.",
+  "discovery_bucket": "http-json-shape"
 }

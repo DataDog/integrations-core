@@ -2,13 +2,35 @@
   "name": "ibm_was",
   "display_name": "IBM WAS",
   "spec_path": "ibm_was/assets/configuration/spec.yaml",
-  "required_fields": ["servlet_url"],
+  "required_fields": [
+    "servlet_url"
+  ],
   "all_relevant_fields": [
-    {"name": "servlet_url", "required": true, "default": null},
-    {"name": "custom_queries", "required": false, "default": null},
-    {"name": "custom_queries_units_gauge", "required": false, "default": null},
-    {"name": "username", "required": false, "default": null},
-    {"name": "password", "required": false, "default": null}
+    {
+      "name": "servlet_url",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "custom_queries",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "custom_queries_units_gauge",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "username",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
@@ -16,11 +38,21 @@
   "auto_conf_path": null,
   "explanation": "Despite the JMX/WebSphere reputation, this check is an HTTP scraper of WebSphere's PerfServlet (`requests.get(servlet_url)` parsing PMI XML), not JMXFetch. However the path it scrapes (`/wasPerfTool/servlet/perfservlet`) requires the operator to first deploy `PerfServletApp.ear` from `<WAS_HOME>/installableApps`, switch the PMI statistic set from `Basic` to `All` via the WebSphere admin console, and (per the README) enable application security, which forces basic auth. The port (typically 9080 or 9443) varies by WAS profile, the servlet context root is operator-chosen, and authentication credentials are required once application security is on. None of this is recoverable from a generic HTTP probe.",
   "references": [
-    {"kind": "spec", "path": "ibm_was/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "ibm_was/datadog_checks/ibm_was/ibm_was.py"},
-    {"kind": "readme", "path": "ibm_was/README.md"}
+    {
+      "kind": "spec",
+      "path": "ibm_was/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "ibm_was/datadog_checks/ibm_was/ibm_was.py"
+    },
+    {
+      "kind": "readme",
+      "path": "ibm_was/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Not a JMXFetch integration (which the hint suggested) — it parses XML from a PerfServlet endpoint. Still impossible because the servlet must be installed and deployed manually, the URL is not standardized, and PMI-secured WAS instances require basic auth credentials."
+  "notes": "Not a JMXFetch integration (which the hint suggested) \u2014 it parses XML from a PerfServlet endpoint. Still impossible because the servlet must be installed and deployed manually, the URL is not standardized, and PMI-secured WAS instances require basic auth credentials.",
+  "discovery_bucket": "creds-api-token"
 }

@@ -10,12 +10,25 @@
   "auto_conf_path": "ecs_fargate/datadog_checks/ecs_fargate/data/conf.yaml.default",
   "explanation": "ECS Fargate metrics are collected by hitting the task-local ECS Container Metadata Endpoint, either v4 (URL provided in the `ECS_CONTAINER_METADATA_URI_V4` env var) or v2 (the link-local `http://169.254.170.2/v2`). Both endpoints are unauthenticated and reachable only from inside the task. The integration ships a `conf.yaml.default` template with `ad_identifiers: [_ecs_fargate]` that the Agent's Autodiscovery layer uses to schedule the check whenever it detects it is running in a Fargate task. There are no per-instance required fields driving endpoint resolution; the check derives the URL itself at runtime from the environment.",
   "references": [
-    {"kind": "spec", "path": "ecs_fargate/assets/configuration/spec.yaml"},
-    {"kind": "auto_conf", "path": "ecs_fargate/datadog_checks/ecs_fargate/data/conf.yaml.default"},
-    {"kind": "check", "path": "ecs_fargate/datadog_checks/ecs_fargate/ecs_fargate.py"},
-    {"kind": "upstream", "url": "https://docs.aws.amazon.com/AmazonECS/latest/userguide/task-metadata-endpoint-v4-fargate.html"}
+    {
+      "kind": "spec",
+      "path": "ecs_fargate/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "auto_conf",
+      "path": "ecs_fargate/datadog_checks/ecs_fargate/data/conf.yaml.default"
+    },
+    {
+      "kind": "check",
+      "path": "ecs_fargate/datadog_checks/ecs_fargate/ecs_fargate.py"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/userguide/task-metadata-endpoint-v4-fargate.html"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Auto-discovery already works via the `_ecs_fargate` AD identifier. Method is `other` because there is no network probe in the conventional sense; the trigger is 'is this Agent running inside an ECS Fargate task' (env var presence + link-local endpoint reachability), and credentials are not required (the metadata endpoint is task-local and unauthenticated)."
+  "notes": "Auto-discovery already works via the `_ecs_fargate` AD identifier. Method is `other` because there is no network probe in the conventional sense; the trigger is 'is this Agent running inside an ECS Fargate task' (env var presence + link-local endpoint reachability), and credentials are not required (the metadata endpoint is task-local and unauthenticated).",
+  "discovery_bucket": "cloud-task-metadata"
 }

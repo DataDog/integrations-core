@@ -2,22 +2,42 @@
   "name": "coredns",
   "display_name": "CoreDNS",
   "spec_path": "coredns/assets/configuration/spec.yaml",
-  "required_fields": ["openmetrics_endpoint"],
+  "required_fields": [
+    "openmetrics_endpoint"
+  ],
   "all_relevant_fields": [
-    {"name": "openmetrics_endpoint", "required": true, "default": "http://%%host%%:9153/metrics"},
-    {"name": "prometheus_url", "required": false, "default": null}
+    {
+      "name": "openmetrics_endpoint",
+      "required": true,
+      "default": "http://%%host%%:9153/metrics"
+    },
+    {
+      "name": "prometheus_url",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "generic",
   "auto_config_method": "openmetrics-port-scan",
   "has_existing_auto_conf": true,
   "auto_conf_path": "coredns/datadog_checks/coredns/data/auto_conf.yaml",
-  "explanation": "CoreDNS exposes Prometheus metrics on `/metrics`, with the prometheus plugin defaulting to port 9153. This is a single canonical OpenMetrics endpoint, well-known and singular — exactly the case a generic OpenMetrics port-scan would handle.",
+  "explanation": "CoreDNS exposes Prometheus metrics on `/metrics`, with the prometheus plugin defaulting to port 9153. This is a single canonical OpenMetrics endpoint, well-known and singular \u2014 exactly the case a generic OpenMetrics port-scan would handle.",
   "references": [
-    {"kind": "spec", "path": "coredns/assets/configuration/spec.yaml"},
-    {"kind": "auto_conf", "path": "coredns/datadog_checks/coredns/data/auto_conf.yaml"},
-    {"kind": "upstream", "url": "https://coredns.io/plugins/metrics/"}
+    {
+      "kind": "spec",
+      "path": "coredns/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "auto_conf",
+      "path": "coredns/datadog_checks/coredns/data/auto_conf.yaml"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://coredns.io/plugins/metrics/"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": ""
+  "notes": "",
+  "discovery_bucket": "generic-openmetrics-scan"
 }

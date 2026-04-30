@@ -2,13 +2,40 @@
   "name": "avi_vantage",
   "display_name": "Avi Vantage",
   "spec_path": "avi_vantage/assets/configuration/spec.yaml",
-  "required_fields": ["avi_controller_url"],
+  "required_fields": [
+    "avi_controller_url"
+  ],
   "all_relevant_fields": [
-    {"name": "avi_controller_url", "required": true, "default": null},
-    {"name": "entities", "required": false, "default": ["controller", "pool", "serviceengine", "virtualservice"]},
-    {"name": "tenants", "required": false, "default": []},
-    {"name": "username", "required": false, "default": null},
-    {"name": "password", "required": false, "default": null}
+    {
+      "name": "avi_controller_url",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "entities",
+      "required": false,
+      "default": [
+        "controller",
+        "pool",
+        "serviceengine",
+        "virtualservice"
+      ]
+    },
+    {
+      "name": "tenants",
+      "required": false,
+      "default": []
+    },
+    {
+      "name": "username",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
@@ -16,10 +43,17 @@
   "auto_conf_path": null,
   "explanation": "Avi Vantage is a load balancer whose Controller exposes Prometheus metrics under `/api/analytics/prometheus-metrics/<entity>`. The check inherits `OpenMetricsBaseCheckV2` but wraps every scrape in a `login()` context manager that POSTs `username`/`password` to `/login` and stores the auth cookie/CSRF token; without successful login the scrape is skipped and a CRITICAL service check is emitted. The Controller URL is also tenant-specific (different controllers per tenancy). Pattern D / E.",
   "references": [
-    {"kind": "spec", "path": "avi_vantage/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "avi_vantage/datadog_checks/avi_vantage/check.py"}
+    {
+      "kind": "spec",
+      "path": "avi_vantage/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "avi_vantage/datadog_checks/avi_vantage/check.py"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Although username/password come from the inherited OpenMetrics/HTTP template (not declared at the top level of the Avi spec), the check code unconditionally calls `self.http.post(login_url, data={'username': ..., 'password': ...})` before scraping, so credentials are effectively mandatory."
+  "notes": "Although username/password come from the inherited OpenMetrics/HTTP template (not declared at the top level of the Avi spec), the check code unconditionally calls `self.http.post(login_url, data={'username': ..., 'password': ...})` before scraping, so credentials are effectively mandatory.",
+  "discovery_bucket": "creds-api-token"
 }

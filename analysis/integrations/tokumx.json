@@ -2,14 +2,40 @@
   "name": "tokumx",
   "display_name": "TokuMX",
   "spec_path": "tokumx/assets/configuration/spec.yaml",
-  "required_fields": ["server"],
+  "required_fields": [
+    "server"
+  ],
   "all_relevant_fields": [
-    {"name": "server", "required": true, "default": null},
-    {"name": "ssl", "required": false, "default": false},
-    {"name": "ssl_keyfile", "required": false, "default": null},
-    {"name": "ssl_certfile", "required": false, "default": null},
-    {"name": "ssl_cert_reqs", "required": false, "default": null},
-    {"name": "ssl_ca_certs", "required": false, "default": null}
+    {
+      "name": "server",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "ssl",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "ssl_keyfile",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "ssl_certfile",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "ssl_cert_reqs",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "ssl_ca_certs",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
@@ -17,10 +43,17 @@
   "auto_conf_path": null,
   "explanation": "TokuMX is a deprecated MongoDB fork. The check uses a vendored pymongo client (`MongoClient`) and requires a full MongoDB URI in the form `mongodb://<USER>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>`. Authenticated access to MongoDB-style admin commands (`serverStatus`, replica-set state) is the norm in production deployments, and the URI must encode credentials. Like the `mongo` integration, real deployments fall through to credential discovery, which is out of scope for wire-only autodiscovery. Pattern D / E.",
   "references": [
-    {"kind": "spec", "path": "tokumx/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "tokumx/datadog_checks/tokumx/tokumx.py"}
+    {
+      "kind": "spec",
+      "path": "tokumx/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "tokumx/datadog_checks/tokumx/tokumx.py"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "TokuMX is end-of-life; auto-config feasibility is moot but classification matches the parent mongo integration."
+  "notes": "TokuMX is end-of-life; auto-config feasibility is moot but classification matches the parent mongo integration.",
+  "discovery_bucket": "creds-spec-mandated"
 }

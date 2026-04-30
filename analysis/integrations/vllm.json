@@ -2,9 +2,15 @@
   "name": "vllm",
   "display_name": "vLLM",
   "spec_path": "vllm/assets/configuration/spec.yaml",
-  "required_fields": ["openmetrics_endpoint"],
+  "required_fields": [
+    "openmetrics_endpoint"
+  ],
   "all_relevant_fields": [
-    {"name": "openmetrics_endpoint", "required": true, "default": "http://localhost:8000/metrics"}
+    {
+      "name": "openmetrics_endpoint",
+      "required": true,
+      "default": "http://localhost:8000/metrics"
+    }
   ],
   "classification": "generic",
   "auto_config_method": "openmetrics-port-scan",
@@ -12,12 +18,25 @@
   "auto_conf_path": null,
   "explanation": "vLLM's OpenAI-compatible API server exposes Prometheus metrics on the same port as the API (default 8000) at `/metrics`. The check is a plain `OpenMetricsBaseCheckV2` with the standard `instances/openmetrics` template; `openmetrics_endpoint` is the only required field, with the example `http://localhost:8000/metrics`. The check additionally calls `/version` on the same host for metadata, but that is derived from the configured endpoint, not a separate user input. A single OpenMetrics port-scan on `:8000/metrics` is sufficient.",
   "references": [
-    {"kind": "spec", "path": "vllm/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "vllm/datadog_checks/vllm/check.py"},
-    {"kind": "readme", "path": "vllm/README.md"},
-    {"kind": "upstream", "url": "https://docs.vllm.ai/en/stable/serving/metrics.html"}
+    {
+      "kind": "spec",
+      "path": "vllm/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "vllm/datadog_checks/vllm/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "vllm/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://docs.vllm.ai/en/stable/serving/metrics.html"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "vLLM's HTTP API and the Prometheus endpoint share port 8000 by default; production deployments may put auth in front of the API but the `/metrics` path is normally left unauthenticated."
+  "notes": "vLLM's HTTP API and the Prometheus endpoint share port 8000 by default; production deployments may put auth in front of the API but the `/metrics` path is normally left unauthenticated.",
+  "discovery_bucket": "generic-openmetrics-scan"
 }

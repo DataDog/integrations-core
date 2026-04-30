@@ -2,22 +2,41 @@
   "name": "pulsar",
   "display_name": "Pulsar",
   "spec_path": "pulsar/assets/configuration/spec.yaml",
-  "required_fields": ["openmetrics_endpoint"],
+  "required_fields": [
+    "openmetrics_endpoint"
+  ],
   "all_relevant_fields": [
-    {"name": "openmetrics_endpoint", "required": true, "default": "http://localhost:8080/metrics"}
+    {
+      "name": "openmetrics_endpoint",
+      "required": true,
+      "default": "http://localhost:8080/metrics"
+    }
   ],
   "classification": "generic",
   "auto_config_method": "openmetrics-port-scan",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "Pulsar's check inherits `OpenMetricsBaseCheckV2` and the spec uses `template: instances/openmetrics` with a single canonical endpoint at `http://%%host%%:8080/metrics` (the broker's web service port). The check's `get_default_config` hard-codes the same URL. No authentication is required for the metrics endpoint by default. This is the standard Pattern A shape — single OpenMetrics endpoint on a well-known port.",
+  "explanation": "Pulsar's check inherits `OpenMetricsBaseCheckV2` and the spec uses `template: instances/openmetrics` with a single canonical endpoint at `http://%%host%%:8080/metrics` (the broker's web service port). The check's `get_default_config` hard-codes the same URL. No authentication is required for the metrics endpoint by default. This is the standard Pattern A shape \u2014 single OpenMetrics endpoint on a well-known port.",
   "references": [
-    {"kind": "spec", "path": "pulsar/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "pulsar/datadog_checks/pulsar/check.py"},
-    {"kind": "readme", "path": "pulsar/README.md"},
-    {"kind": "upstream", "url": "https://pulsar.apache.org/docs/admin-api-overview/"}
+    {
+      "kind": "spec",
+      "path": "pulsar/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "pulsar/datadog_checks/pulsar/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "pulsar/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://pulsar.apache.org/docs/admin-api-overview/"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "No auto_conf.yaml ships, but the URL pattern is fixed and identical to other Pattern A integrations (e.g. coredns)."
+  "notes": "No auto_conf.yaml ships, but the URL pattern is fixed and identical to other Pattern A integrations (e.g. coredns).",
+  "discovery_bucket": "generic-openmetrics-scan"
 }

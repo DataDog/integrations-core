@@ -2,14 +2,43 @@
   "name": "postgres",
   "display_name": "Postgres",
   "spec_path": "postgres/assets/configuration/spec.yaml",
-  "required_fields": ["host", "port", "username", "password"],
+  "required_fields": [
+    "host",
+    "port",
+    "username",
+    "password"
+  ],
   "all_relevant_fields": [
-    {"name": "host", "required": false, "default": "localhost"},
-    {"name": "port", "required": false, "default": 5432},
-    {"name": "username", "required": true, "default": "datadog"},
-    {"name": "password", "required": true, "default": null},
-    {"name": "dbname", "required": false, "default": "postgres"},
-    {"name": "dbm", "required": false, "default": false}
+    {
+      "name": "host",
+      "required": false,
+      "default": "localhost"
+    },
+    {
+      "name": "port",
+      "required": false,
+      "default": 5432
+    },
+    {
+      "name": "username",
+      "required": true,
+      "default": "datadog"
+    },
+    {
+      "name": "password",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "dbname",
+      "required": false,
+      "default": "postgres"
+    },
+    {
+      "name": "dbm",
+      "required": false,
+      "default": false
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
@@ -17,9 +46,13 @@
   "auto_conf_path": null,
   "explanation": "Postgres requires a dedicated `datadog` user with explicit grants and a password to read the statistics views. The credentials cannot be discovered from the wire; they must be provisioned out-of-band. Once provided, host/port have universal defaults but the auth blocker dominates classification.",
   "references": [
-    {"kind": "spec", "path": "postgres/assets/configuration/spec.yaml"}
+    {
+      "kind": "spec",
+      "path": "postgres/assets/configuration/spec.yaml"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": ""
+  "notes": "",
+  "discovery_bucket": "creds-spec-mandated"
 }

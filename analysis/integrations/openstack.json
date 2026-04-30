@@ -2,28 +2,75 @@
   "name": "openstack",
   "display_name": "OpenStack",
   "spec_path": "openstack/assets/configuration/spec.yaml",
-  "required_fields": ["keystone_server_url", "name", "user"],
+  "required_fields": [
+    "keystone_server_url",
+    "name",
+    "user"
+  ],
   "all_relevant_fields": [
-    {"name": "keystone_server_url", "required": true, "default": null},
-    {"name": "os_host", "required": false, "default": null},
-    {"name": "nova_api_version", "required": false, "default": "v2.1"},
-    {"name": "hypervisor_ids", "required": false, "default": null},
-    {"name": "name", "required": true, "default": null},
-    {"name": "user", "required": true, "default": null},
-    {"name": "auth_scope", "required": false, "default": null},
-    {"name": "collect_all_projects", "required": false, "default": null},
-    {"name": "ssl_verify", "required": false, "default": true}
+    {
+      "name": "keystone_server_url",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "os_host",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "nova_api_version",
+      "required": false,
+      "default": "v2.1"
+    },
+    {
+      "name": "hypervisor_ids",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "name",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "user",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "auth_scope",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "collect_all_projects",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "ssl_verify",
+      "required": false,
+      "default": true
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "The legacy OpenStack check authenticates against Keystone Identity API v3 to obtain a scoped/unscoped token, then walks Nova / Neutron service catalogs. The required user field is a structured object {password, name, domain.id} that must match an OpenStack identity, and keystone_server_url points at a tenant-specific Keystone endpoint that varies per deployment. Neither the URL nor the credentials can be discovered from the wire — they are tenant configuration. No unauthenticated mode exists.",
+  "explanation": "The legacy OpenStack check authenticates against Keystone Identity API v3 to obtain a scoped/unscoped token, then walks Nova / Neutron service catalogs. The required user field is a structured object {password, name, domain.id} that must match an OpenStack identity, and keystone_server_url points at a tenant-specific Keystone endpoint that varies per deployment. Neither the URL nor the credentials can be discovered from the wire \u2014 they are tenant configuration. No unauthenticated mode exists.",
   "references": [
-    {"kind": "spec", "path": "openstack/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "openstack/datadog_checks/openstack/openstack.py"}
+    {
+      "kind": "spec",
+      "path": "openstack/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "openstack/datadog_checks/openstack/openstack.py"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern D (spec-required credentials) plus tenant-scoped URL. Note that there is also an openstack_controller integration that handles the modern OpenStack deployment; same credential model."
+  "notes": "Pattern D (spec-required credentials) plus tenant-scoped URL. Note that there is also an openstack_controller integration that handles the modern OpenStack deployment; same credential model.",
+  "discovery_bucket": "creds-api-token"
 }

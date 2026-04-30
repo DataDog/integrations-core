@@ -2,13 +2,35 @@
   "name": "aerospike",
   "display_name": "Aerospike",
   "spec_path": "aerospike/assets/configuration/spec.yaml",
-  "required_fields": ["openmetrics_endpoint"],
+  "required_fields": [
+    "openmetrics_endpoint"
+  ],
   "all_relevant_fields": [
-    {"name": "openmetrics_endpoint", "required": false, "default": "http://127.0.0.1:9145/metrics"},
-    {"name": "host", "required": false, "default": "localhost"},
-    {"name": "port", "required": false, "default": 3000},
-    {"name": "tls_name", "required": false, "default": null},
-    {"name": "tls_config", "required": false, "default": null}
+    {
+      "name": "openmetrics_endpoint",
+      "required": false,
+      "default": "http://127.0.0.1:9145/metrics"
+    },
+    {
+      "name": "host",
+      "required": false,
+      "default": "localhost"
+    },
+    {
+      "name": "port",
+      "required": false,
+      "default": 3000
+    },
+    {
+      "name": "tls_name",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "tls_config",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "generic",
   "auto_config_method": "openmetrics-port-scan",
@@ -16,12 +38,25 @@
   "auto_conf_path": null,
   "explanation": "Modern Aerospike monitoring is OpenMetrics-based: the integration is a thin `OpenMetricsBaseCheckV2` subclass (`AerospikeCheckV2`) that scrapes the Aerospike Prometheus Exporter, which conventionally listens on port 9145 at `/metrics`. The README shows the standard Autodiscovery template `{\"openmetrics_endpoint\": \"http://%%host%%:9145/metrics\"}`. The legacy direct-info-protocol fields (`host`, `port` 3000, `tls_*`) are marked `legacy: true` / `hidden: true` and exist only for backwards compatibility. A generic OpenMetrics port probe at 9145 covers the default deployment.",
   "references": [
-    {"kind": "spec", "path": "aerospike/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "aerospike/datadog_checks/aerospike/check.py"},
-    {"kind": "readme", "path": "aerospike/README.md"},
-    {"kind": "upstream", "url": "https://github.com/aerospike/aerospike-prometheus-exporter"}
+    {
+      "kind": "spec",
+      "path": "aerospike/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "aerospike/datadog_checks/aerospike/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "aerospike/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://github.com/aerospike/aerospike-prometheus-exporter"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Requires the operator to run the Aerospike Prometheus Exporter alongside the database, but that is the upstream-recommended deployment for monitoring Aerospike v4.9+. Legacy direct mode (port 3000 info protocol) is deprecated."
+  "notes": "Requires the operator to run the Aerospike Prometheus Exporter alongside the database, but that is the upstream-recommended deployment for monitoring Aerospike v4.9+. Legacy direct mode (port 3000 info protocol) is deprecated.",
+  "discovery_bucket": "generic-openmetrics-scan"
 }

@@ -2,17 +2,57 @@
   "name": "vsphere",
   "display_name": "vSphere",
   "spec_path": "vsphere/assets/configuration/spec.yaml",
-  "required_fields": ["host", "username", "password"],
+  "required_fields": [
+    "host",
+    "username",
+    "password"
+  ],
   "all_relevant_fields": [
-    {"name": "host", "required": true, "default": null},
-    {"name": "username", "required": true, "default": null},
-    {"name": "password", "required": true, "default": null},
-    {"name": "use_legacy_check_version", "required": true, "default": false},
-    {"name": "ssl_verify", "required": false, "default": true},
-    {"name": "ssl_cafile", "required": false, "default": null},
-    {"name": "ssl_capath", "required": false, "default": null},
-    {"name": "collection_type", "required": false, "default": "realtime"},
-    {"name": "rest_api_options", "required": false, "default": null}
+    {
+      "name": "host",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "username",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "use_legacy_check_version",
+      "required": true,
+      "default": false
+    },
+    {
+      "name": "ssl_verify",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "ssl_cafile",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "ssl_capath",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "collection_type",
+      "required": false,
+      "default": "realtime"
+    },
+    {
+      "name": "rest_api_options",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
@@ -20,10 +60,17 @@
   "auto_conf_path": null,
   "explanation": "vSphere requires read-only vCenter credentials (host + username + password) to authenticate against the vSphere SOAP and REST APIs. There is no unauthenticated mode and no fixed endpoint that returns useful data without a valid session. The credentials cannot be discovered from the wire.",
   "references": [
-    {"kind": "spec", "path": "vsphere/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "vsphere/datadog_checks/vsphere/vsphere.py"}
+    {
+      "kind": "spec",
+      "path": "vsphere/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "vsphere/datadog_checks/vsphere/vsphere.py"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Standard spec-required credentials pattern (D)."
+  "notes": "Standard spec-required credentials pattern (D).",
+  "discovery_bucket": "creds-spec-mandated"
 }

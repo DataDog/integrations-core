@@ -2,9 +2,15 @@
   "name": "argo_rollouts",
   "display_name": "Argo Rollouts",
   "spec_path": "argo_rollouts/assets/configuration/spec.yaml",
-  "required_fields": ["openmetrics_endpoint"],
+  "required_fields": [
+    "openmetrics_endpoint"
+  ],
   "all_relevant_fields": [
-    {"name": "openmetrics_endpoint", "required": true, "default": "http://localhost:8090/metrics"}
+    {
+      "name": "openmetrics_endpoint",
+      "required": true,
+      "default": "http://localhost:8090/metrics"
+    }
   ],
   "classification": "generic",
   "auto_config_method": "openmetrics-port-scan",
@@ -12,12 +18,25 @@
   "auto_conf_path": null,
   "explanation": "Argo Rollouts is a Kubernetes-native progressive delivery controller. The check is `OpenMetricsBaseCheckV2` and the spec uses `template: instances/openmetrics` with a single endpoint pointing to the controller's Prometheus metrics on the well-known port `8090/metrics` (documented in the README and upstream docs). No authentication is required; an OpenMetrics port-scan against `http://%%host%%:8090/metrics` on the `argo-rollouts` pod is sufficient.",
   "references": [
-    {"kind": "spec", "path": "argo_rollouts/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "argo_rollouts/datadog_checks/argo_rollouts/check.py"},
-    {"kind": "readme", "path": "argo_rollouts/README.md"},
-    {"kind": "upstream", "url": "https://argo-rollouts.readthedocs.io/en/stable/features/controller-metrics/"}
+    {
+      "kind": "spec",
+      "path": "argo_rollouts/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "argo_rollouts/datadog_checks/argo_rollouts/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "argo_rollouts/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://argo-rollouts.readthedocs.io/en/stable/features/controller-metrics/"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern A. No auto_conf.yaml currently shipped, but the integration is fleet_configurable and uses a fixed Prometheus port."
+  "notes": "Pattern A. No auto_conf.yaml currently shipped, but the integration is fleet_configurable and uses a fixed Prometheus port.",
+  "discovery_bucket": "generic-openmetrics-scan"
 }

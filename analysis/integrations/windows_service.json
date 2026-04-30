@@ -2,12 +2,30 @@
   "name": "windows_service",
   "display_name": "Windows Service",
   "spec_path": "windows_service/assets/configuration/spec.yaml",
-  "required_fields": ["services"],
+  "required_fields": [
+    "services"
+  ],
   "all_relevant_fields": [
-    {"name": "services", "required": true, "default": null},
-    {"name": "disable_legacy_service_tag", "required": false, "default": false},
-    {"name": "windows_service_startup_type_tag", "required": false, "default": false},
-    {"name": "collect_display_name_as_tag", "required": false, "default": false}
+    {
+      "name": "services",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "disable_legacy_service_tag",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "windows_service_startup_type_tag",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "collect_display_name_as_tag",
+      "required": false,
+      "default": false
+    }
   ],
   "classification": "generic",
   "auto_config_method": "other",
@@ -15,10 +33,17 @@
   "auto_conf_path": null,
   "explanation": "The check runs on the local Windows host and queries the Service Control Manager (win32service.OpenSCManager / EnumServicesStatusEx). There is no remote network probe. The required `services` list specifies which services to monitor; the user can pass `ALL` to enumerate every registered service, in which case discovery is purely 'is this Windows?' and the check trivially populates targets from SCM. Auto-config can default the instance to `services: [ALL]` on any Windows host where the Agent is installed.",
   "references": [
-    {"kind": "spec", "path": "windows_service/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "windows_service/datadog_checks/windows_service/windows_service.py"}
+    {
+      "kind": "spec",
+      "path": "windows_service/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "windows_service/datadog_checks/windows_service/windows_service.py"
+    }
   ],
   "confidence": "medium",
   "needs_human_review": false,
-  "notes": "Same pattern as iis: local Windows host detection rather than network probing. Default-enabling with `services: [ALL]` may be too noisy for production - users typically want a curated list - but technical feasibility is high."
+  "notes": "Same pattern as iis: local Windows host detection rather than network probing. Default-enabling with `services: [ALL]` may be too noisy for production - users typically want a curated list - but technical feasibility is high.",
+  "discovery_bucket": "local-scm-enumeration"
 }

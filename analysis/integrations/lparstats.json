@@ -4,25 +4,63 @@
   "spec_path": "lparstats/assets/configuration/spec.yaml",
   "required_fields": [],
   "all_relevant_fields": [
-    {"name": "name", "required": false, "default": null},
-    {"name": "sudo", "required": false, "default": false},
-    {"name": "memory_stats", "required": false, "default": true},
-    {"name": "page_stats", "required": false, "default": true},
-    {"name": "memory_entitlements", "required": false, "default": true},
-    {"name": "hypervisor", "required": false, "default": true},
-    {"name": "spurr_utilization", "required": false, "default": true}
+    {
+      "name": "name",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "sudo",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "memory_stats",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "page_stats",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "memory_entitlements",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "hypervisor",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "spurr_utilization",
+      "required": false,
+      "default": true
+    }
   ],
   "classification": "custom",
   "auto_config_method": "other",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "The LPARStats check shells out to the AIX `lparstat` CLI (`/usr/bin/lparstat`, optionally via `sudo`) and parses its tabular output for memory, hypervisor, and SPURR processor utilization metrics. There is no network endpoint, no credential, and no required field — discovery is purely host-local: \"is this an AIX LPAR with `lparstat` runnable?\". This is pattern L (\"Local CLI subprocess\"): the Agent host either has the binary installed (AIX-only) or it doesn't. Several optional sub-collectors (`memory_entitlements`, `hypervisor`) require root or a sudoers entry for `dd-agent`, which is an environmental privilege constraint rather than a credential the auto-config layer could discover.",
+  "explanation": "The LPARStats check shells out to the AIX `lparstat` CLI (`/usr/bin/lparstat`, optionally via `sudo`) and parses its tabular output for memory, hypervisor, and SPURR processor utilization metrics. There is no network endpoint, no credential, and no required field \u2014 discovery is purely host-local: \"is this an AIX LPAR with `lparstat` runnable?\". This is pattern L (\"Local CLI subprocess\"): the Agent host either has the binary installed (AIX-only) or it doesn't. Several optional sub-collectors (`memory_entitlements`, `hypervisor`) require root or a sudoers entry for `dd-agent`, which is an environmental privilege constraint rather than a credential the auto-config layer could discover.",
   "references": [
-    {"kind": "spec", "path": "lparstats/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "lparstats/datadog_checks/lparstats/lparstats.py"},
-    {"kind": "readme", "path": "lparstats/README.md"}
+    {
+      "kind": "spec",
+      "path": "lparstats/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "lparstats/datadog_checks/lparstats/lparstats.py"
+    },
+    {
+      "kind": "readme",
+      "path": "lparstats/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern L analogue, AIX-only. Auto-config trigger: detect AIX OS plus presence and runnability of `/usr/bin/lparstat`. No probe target; method `other`. Privilege-gated sub-features (sudo/root) are out of scope for discovery."
+  "notes": "Pattern L analogue, AIX-only. Auto-config trigger: detect AIX OS plus presence and runnability of `/usr/bin/lparstat`. No probe target; method `other`. Privilege-gated sub-features (sudo/root) are out of scope for discovery.",
+  "discovery_bucket": "local-cli-binary"
 }

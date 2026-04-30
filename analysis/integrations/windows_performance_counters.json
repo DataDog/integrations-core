@@ -2,25 +2,57 @@
   "name": "windows_performance_counters",
   "display_name": "Windows Performance Counters",
   "spec_path": "windows_performance_counters/assets/configuration/spec.yaml",
-  "required_fields": ["metrics"],
+  "required_fields": [
+    "metrics"
+  ],
   "all_relevant_fields": [
-    {"name": "metrics", "required": true, "default": null},
-    {"name": "namespace", "required": false, "default": null},
-    {"name": "server", "required": false, "default": null},
-    {"name": "username", "required": false, "default": null},
-    {"name": "password", "required": false, "default": null}
+    {
+      "name": "metrics",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "namespace",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "server",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "username",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "other",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "This is a generic, user-supplied template check — not a check tied to any specific upstream service. The required `metrics` field is a mapping of PDH counter sets (object name + counters + tag_name + instance_counts) that the user defines for whatever Windows component they want to monitor. There is no canonical service, port, or endpoint to discover; without a user-provided counter list there is nothing for the check to do. The check class (`PerfCountersBaseCheck`) is the same machinery used by integrations like `iis` and `active_directory`, but here the integration is by definition a configuration template. Auto-config cannot synthesize the counter list from the wire.",
+  "explanation": "This is a generic, user-supplied template check \u2014 not a check tied to any specific upstream service. The required `metrics` field is a mapping of PDH counter sets (object name + counters + tag_name + instance_counts) that the user defines for whatever Windows component they want to monitor. There is no canonical service, port, or endpoint to discover; without a user-provided counter list there is nothing for the check to do. The check class (`PerfCountersBaseCheck`) is the same machinery used by integrations like `iis` and `active_directory`, but here the integration is by definition a configuration template. Auto-config cannot synthesize the counter list from the wire.",
   "references": [
-    {"kind": "spec", "path": "windows_performance_counters/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "windows_performance_counters/datadog_checks/windows_performance_counters/check.py"},
-    {"kind": "readme", "path": "windows_performance_counters/README.md"}
+    {
+      "kind": "spec",
+      "path": "windows_performance_counters/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "windows_performance_counters/datadog_checks/windows_performance_counters/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "windows_performance_counters/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Generic template-style integration: the 'config' is the integration. Same pattern likely applies to `prometheus`, `openmetrics`, `http_check`, `tcp_check`, `snmp` (generic mode), `wmi_check`, `pdh_check` — auto-config feasibility for these reduces to 'no, the user defines what to monitor'."
+  "notes": "Generic template-style integration: the 'config' is the integration. Same pattern likely applies to `prometheus`, `openmetrics`, `http_check`, `tcp_check`, `snmp` (generic mode), `wmi_check`, `pdh_check` \u2014 auto-config feasibility for these reduces to 'no, the user defines what to monitor'.",
+  "discovery_bucket": "user-schema-template"
 }

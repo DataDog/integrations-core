@@ -2,31 +2,88 @@
   "name": "solr",
   "display_name": "Solr",
   "spec_path": "solr/assets/configuration/spec.yaml",
-  "required_fields": ["host", "port"],
+  "required_fields": [
+    "host",
+    "port"
+  ],
   "all_relevant_fields": [
-    {"name": "host", "required": true, "default": null},
-    {"name": "port", "required": true, "default": null},
-    {"name": "user", "required": false, "default": null},
-    {"name": "password", "required": false, "default": null},
-    {"name": "is_jmx", "required": false, "default": null},
-    {"name": "jmx_url", "required": false, "default": null},
-    {"name": "rmi_registry_ssl", "required": false, "default": null},
-    {"name": "key_store_path", "required": false, "default": null},
-    {"name": "key_store_password", "required": false, "default": null},
-    {"name": "trust_store_path", "required": false, "default": null},
-    {"name": "trust_store_password", "required": false, "default": null}
+    {
+      "name": "host",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "port",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "user",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "is_jmx",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "jmx_url",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "rmi_registry_ssl",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "key_store_path",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "key_store_password",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "trust_store_path",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "trust_store_password",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "Solr is collected via the JMXFetch helper (`template: instances/jmx`). Production Solr deployments enable JMX Remote with authentication and frequently TLS, requiring `user`, `password`, and key/trust-store paths. The example port (9999) is not a true convention — JMX listening ports are deployment-specific. Even a host+port probe cannot validate the JMX endpoint without credentials. Per the procedure's pattern I (JMXFetch always needs host+port+user+password), Solr falls into the impossible bucket.",
+  "explanation": "Solr is collected via the JMXFetch helper (`template: instances/jmx`). Production Solr deployments enable JMX Remote with authentication and frequently TLS, requiring `user`, `password`, and key/trust-store paths. The example port (9999) is not a true convention \u2014 JMX listening ports are deployment-specific. Even a host+port probe cannot validate the JMX endpoint without credentials. Per the procedure's pattern I (JMXFetch always needs host+port+user+password), Solr falls into the impossible bucket.",
   "references": [
-    {"kind": "spec", "path": "solr/assets/configuration/spec.yaml"},
-    {"kind": "readme", "path": "solr/README.md"},
-    {"kind": "other", "path": "datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/instances/jmx.yaml"}
+    {
+      "kind": "spec",
+      "path": "solr/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "readme",
+      "path": "solr/README.md"
+    },
+    {
+      "kind": "other",
+      "path": "datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/instances/jmx.yaml"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "JMX-based integration; the example port 9999 in spec.yaml is a placeholder, not a real Solr default. Auth and TLS-for-RMI are essentially mandatory in production."
+  "notes": "JMX-based integration; the example port 9999 in spec.yaml is a placeholder, not a real Solr default. Auth and TLS-for-RMI are essentially mandatory in production.",
+  "discovery_bucket": "creds-jmx-rmi"
 }

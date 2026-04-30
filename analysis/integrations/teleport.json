@@ -2,11 +2,25 @@
   "name": "teleport",
   "display_name": "Teleport",
   "spec_path": "teleport/assets/configuration/spec.yaml",
-  "required_fields": ["teleport_url"],
+  "required_fields": [
+    "teleport_url"
+  ],
   "all_relevant_fields": [
-    {"name": "teleport_url", "required": true, "default": null},
-    {"name": "diag_port", "required": false, "default": 3000},
-    {"name": "openmetrics_endpoint", "required": false, "default": null}
+    {
+      "name": "teleport_url",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "diag_port",
+      "required": false,
+      "default": 3000
+    },
+    {
+      "name": "openmetrics_endpoint",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "generic",
   "auto_config_method": "openmetrics-port-scan",
@@ -14,10 +28,17 @@
   "auto_conf_path": null,
   "explanation": "Teleport's diagnostic HTTP endpoint serves Prometheus metrics on a known default port (3000) at /metrics, with a fixed health probe at /healthz. The check (OpenMetricsBaseCheckV2) constructs the openmetrics_endpoint from teleport_url + diag_port automatically. No credentials are required for the diagnostic endpoint. host + port (default 3000) is sufficient for a generic probe.",
   "references": [
-    {"kind": "spec", "path": "teleport/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "teleport/datadog_checks/teleport/check.py"}
+    {
+      "kind": "spec",
+      "path": "teleport/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "teleport/datadog_checks/teleport/check.py"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern A (OpenMetrics on a known port). Diagnostic endpoint must be enabled on the Teleport server."
+  "notes": "Pattern A (OpenMetrics on a known port). Diagnostic endpoint must be enabled on the Teleport server.",
+  "discovery_bucket": "generic-openmetrics-scan"
 }

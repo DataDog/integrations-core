@@ -2,15 +2,45 @@
   "name": "php_fpm",
   "display_name": "PHP-FPM",
   "spec_path": "php_fpm/assets/configuration/spec.yaml",
-  "required_fields": ["status_url"],
+  "required_fields": [
+    "status_url"
+  ],
   "all_relevant_fields": [
-    {"name": "status_url",  "required": false, "default": null},
-    {"name": "ping_url",    "required": false, "default": null},
-    {"name": "ping_reply",  "required": false, "default": "pong"},
-    {"name": "use_fastcgi", "required": false, "default": false},
-    {"name": "http_host",   "required": false, "default": null},
-    {"name": "username",    "required": false, "default": null},
-    {"name": "password",    "required": false, "default": null}
+    {
+      "name": "status_url",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "ping_url",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "ping_reply",
+      "required": false,
+      "default": "pong"
+    },
+    {
+      "name": "use_fastcgi",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "http_host",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "username",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "custom",
   "auto_config_method": "http-path-probe",
@@ -18,11 +48,21 @@
   "auto_conf_path": null,
   "explanation": "PHP-FPM exposes status/ping over an HTTP path that the user must configure on a FastCGI passthrough (typically nginx or Apache). The path is conventionally /status and /ping but is fully user-configurable in the FPM pool config (pm.status_path, ping.path) and depends on the front-end web server's routing. The check requires that at least one of status_url or ping_url be supplied; both default to localhost examples but no port/path is universal. Direct FastCGI mode (use_fastcgi=true) targets port 9000 directly but still needs the path. Discovery is feasible only via probing several plausible paths (/status, /ping, /fpm-status, /fpm-ping) and possibly direct FastCGI on 9000.",
   "references": [
-    {"kind": "spec",   "path": "php_fpm/assets/configuration/spec.yaml"},
-    {"kind": "check",  "path": "php_fpm/datadog_checks/php_fpm/php_fpm.py"},
-    {"kind": "readme", "path": "php_fpm/README.md"}
+    {
+      "kind": "spec",
+      "path": "php_fpm/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "php_fpm/datadog_checks/php_fpm/php_fpm.py"
+    },
+    {
+      "kind": "readme",
+      "path": "php_fpm/README.md"
+    }
   ],
   "confidence": "medium",
   "needs_human_review": false,
-  "notes": "No auto_conf.yaml ships with the integration. Pattern G (multiple plausible URL paths). Direct FastCGI mode could be probed at port 9000, but conventional deployments rely on the web server proxying status to a non-default path."
+  "notes": "No auto_conf.yaml ships with the integration. Pattern G (multiple plausible URL paths). Direct FastCGI mode could be probed at port 9000, but conventional deployments rely on the web server proxying status to a non-default path.",
+  "discovery_bucket": "http-multi-path"
 }

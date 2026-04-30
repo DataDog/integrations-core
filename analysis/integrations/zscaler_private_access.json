@@ -8,12 +8,19 @@
   "auto_config_method": "other",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "Zscaler Private Access is a vendor SaaS security tile. The Datadog integration is logs-only: the spec defines a single `logs` block expecting the user to declare a TCP listener (`type: tcp`, `port: <PORT>`) for the Zscaler appliance to forward syslog to. There is no Agent metric check (`datadog_checks/zscaler_private_access/` has no `.py` check module — only `__about__.py`, `__init__.py`, and `data/conf.yaml.example`). The Agent does not initiate any connection toward Zscaler; it passively receives forwarded events on a user-chosen port that must also be configured upstream in Zscaler. There is no probeable endpoint and no shared secret/credential that would even fit the `credentials-required` shape — the missing input is a logging pipeline both sides must be wired up for.",
+  "explanation": "Zscaler Private Access is a vendor SaaS security tile. The Datadog integration is logs-only: the spec defines a single `logs` block expecting the user to declare a TCP listener (`type: tcp`, `port: <PORT>`) for the Zscaler appliance to forward syslog to. There is no Agent metric check (`datadog_checks/zscaler_private_access/` has no `.py` check module \u2014 only `__about__.py`, `__init__.py`, and `data/conf.yaml.example`). The Agent does not initiate any connection toward Zscaler; it passively receives forwarded events on a user-chosen port that must also be configured upstream in Zscaler. There is no probeable endpoint and no shared secret/credential that would even fit the `credentials-required` shape \u2014 the missing input is a logging pipeline both sides must be wired up for.",
   "references": [
-    {"kind": "spec", "path": "zscaler_private_access/assets/configuration/spec.yaml"},
-    {"kind": "readme", "path": "zscaler_private_access/README.md"}
+    {
+      "kind": "spec",
+      "path": "zscaler_private_access/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "readme",
+      "path": "zscaler_private_access/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Logs-only vendor SaaS integration. Same shape as wazuh and zeek; pattern N variant for vendor security tiles."
+  "notes": "Logs-only vendor SaaS integration. Same shape as wazuh and zeek; pattern N variant for vendor security tiles.",
+  "discovery_bucket": "logs-only"
 }

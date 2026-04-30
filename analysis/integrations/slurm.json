@@ -4,20 +4,76 @@
   "spec_path": "slurm/assets/configuration/spec.yaml",
   "required_fields": [],
   "all_relevant_fields": [
-    {"name": "slurm_binaries_dir", "required": false, "default": "/usr/bin/"},
-    {"name": "sinfo_path", "required": false, "default": "/usr/bin/sinfo"},
-    {"name": "sacct_path", "required": false, "default": "/usr/bin/sacct"},
-    {"name": "sdiag_path", "required": false, "default": "/usr/bin/sdiag"},
-    {"name": "sshare_path", "required": false, "default": "/usr/bin/sshare"},
-    {"name": "squeue_path", "required": false, "default": "/usr/bin/squeue"},
-    {"name": "scontrol_path", "required": false, "default": "/usr/bin/scontrol"},
-    {"name": "collect_sinfo_stats", "required": false, "default": true},
-    {"name": "collect_sdiag_stats", "required": false, "default": true},
-    {"name": "collect_squeue_stats", "required": false, "default": true},
-    {"name": "collect_sacct_stats", "required": false, "default": true},
-    {"name": "collect_sshare_stats", "required": false, "default": true},
-    {"name": "collect_scontrol_stats", "required": false, "default": false},
-    {"name": "collect_gpu_stats", "required": false, "default": false}
+    {
+      "name": "slurm_binaries_dir",
+      "required": false,
+      "default": "/usr/bin/"
+    },
+    {
+      "name": "sinfo_path",
+      "required": false,
+      "default": "/usr/bin/sinfo"
+    },
+    {
+      "name": "sacct_path",
+      "required": false,
+      "default": "/usr/bin/sacct"
+    },
+    {
+      "name": "sdiag_path",
+      "required": false,
+      "default": "/usr/bin/sdiag"
+    },
+    {
+      "name": "sshare_path",
+      "required": false,
+      "default": "/usr/bin/sshare"
+    },
+    {
+      "name": "squeue_path",
+      "required": false,
+      "default": "/usr/bin/squeue"
+    },
+    {
+      "name": "scontrol_path",
+      "required": false,
+      "default": "/usr/bin/scontrol"
+    },
+    {
+      "name": "collect_sinfo_stats",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "collect_sdiag_stats",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "collect_squeue_stats",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "collect_sacct_stats",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "collect_sshare_stats",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "collect_scontrol_stats",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "collect_gpu_stats",
+      "required": false,
+      "default": false
+    }
   ],
   "classification": "custom",
   "auto_config_method": "other",
@@ -25,10 +81,17 @@
   "auto_conf_path": null,
   "explanation": "The Slurm check shells out to local Slurm CLI binaries (sinfo, squeue, sacct, sdiag, sshare, scontrol, optionally seff) via subprocess and parses their delimited output. There is no remote endpoint, port, or service to probe. Discovery on the Agent host reduces to \"are the Slurm binaries installed under slurm_binaries_dir (default /usr/bin/)?\" and may also need controller-side privileges to run sacct/scontrol. This is the canonical local-CLI-subprocess pattern.",
   "references": [
-    {"kind": "spec", "path": "slurm/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "slurm/datadog_checks/slurm/check.py"}
+    {
+      "kind": "spec",
+      "path": "slurm/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "slurm/datadog_checks/slurm/check.py"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern L: local CLI subprocess. No required fields in spec (binary paths default to /usr/bin/) but discovery still has to verify the binaries exist and are runnable by dd-agent."
+  "notes": "Pattern L: local CLI subprocess. No required fields in spec (binary paths default to /usr/bin/) but discovery still has to verify the binaries exist and are runnable by dd-agent.",
+  "discovery_bucket": "local-cli-binary"
 }

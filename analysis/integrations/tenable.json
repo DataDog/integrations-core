@@ -4,7 +4,11 @@
   "spec_path": "tenable/assets/configuration/spec.yaml",
   "required_fields": [],
   "all_relevant_fields": [
-    {"name": "logs", "required": true, "default": null}
+    {
+      "name": "logs",
+      "required": true,
+      "default": null
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "other",
@@ -12,10 +16,17 @@
   "auto_conf_path": null,
   "explanation": "Tenable ships only a logs configuration that tails Nessus log files (backend.log, www_server.log) - there is no Agent check class, no metrics endpoint, and no network probe. Auto-config in the network-probe sense does not apply: enabling the integration is purely a question of whether Nessus log files exist at the expected paths on the host, and which API access keys the user wants to use for any external Tenable APIs.",
   "references": [
-    {"kind": "spec", "path": "tenable/assets/configuration/spec.yaml"},
-    {"kind": "readme", "path": "tenable/README.md"}
+    {
+      "kind": "spec",
+      "path": "tenable/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "readme",
+      "path": "tenable/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern N (logs-only / instrumentation-only). The integration has no datadog_checks/tenable/<name>.py implementation - it is purely a logs config + manifest."
+  "notes": "Pattern N (logs-only / instrumentation-only). The integration has no datadog_checks/tenable/<name>.py implementation - it is purely a logs config + manifest.",
+  "discovery_bucket": "logs-only"
 }

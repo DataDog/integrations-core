@@ -2,14 +2,40 @@
   "name": "couchbase",
   "display_name": "Couchbase",
   "spec_path": "couchbase/assets/configuration/spec.yaml",
-  "required_fields": ["server"],
+  "required_fields": [
+    "server"
+  ],
   "all_relevant_fields": [
-    {"name": "server", "required": true, "default": "http://localhost:8091"},
-    {"name": "query_monitoring_url", "required": false, "default": null},
-    {"name": "sync_gateway_url", "required": false, "default": null},
-    {"name": "index_stats_url", "required": false, "default": null},
-    {"name": "username", "required": false, "default": null},
-    {"name": "password", "required": false, "default": null}
+    {
+      "name": "server",
+      "required": true,
+      "default": "http://localhost:8091"
+    },
+    {
+      "name": "query_monitoring_url",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "sync_gateway_url",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "index_stats_url",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "username",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
@@ -17,12 +43,25 @@
   "auto_conf_path": "couchbase/datadog_checks/couchbase/data/auto_conf.yaml",
   "explanation": "Couchbase exposes a REST API on port 8091 and the auto_conf template already covers host/port via `http://%%host%%:8091`. However, every Couchbase deployment beyond a fresh install requires admin credentials (username/password) to access `/pools`, `/pools/default`, bucket stats, query stats, and index stats. The HTTP_CONFIG_REMAPPER in the check explicitly remaps `user` to `username`, confirming auth is the standard mode. Credentials cannot be discovered from the wire, so classification is impossible.",
   "references": [
-    {"kind": "spec", "path": "couchbase/assets/configuration/spec.yaml"},
-    {"kind": "auto_conf", "path": "couchbase/datadog_checks/couchbase/data/auto_conf.yaml"},
-    {"kind": "check", "path": "couchbase/datadog_checks/couchbase/couchbase.py"},
-    {"kind": "upstream", "url": "https://docs.couchbase.com/server/current/rest-api/rest-intro.html"}
+    {
+      "kind": "spec",
+      "path": "couchbase/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "auto_conf",
+      "path": "couchbase/datadog_checks/couchbase/data/auto_conf.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "couchbase/datadog_checks/couchbase/couchbase.py"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://docs.couchbase.com/server/current/rest-api/rest-intro.html"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Spec marks username/password optional because they live in the shared HTTP template, but in practice the Couchbase REST API rejects unauthenticated stats requests."
+  "notes": "Spec marks username/password optional because they live in the shared HTTP template, but in practice the Couchbase REST API rejects unauthenticated stats requests.",
+  "discovery_bucket": "creds-spec-mandated"
 }

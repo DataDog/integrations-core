@@ -2,19 +2,65 @@
   "name": "sonarqube",
   "display_name": "SonarQube",
   "spec_path": "sonarqube/assets/configuration/spec.yaml",
-  "required_fields": ["web_endpoint"],
+  "required_fields": [
+    "web_endpoint"
+  ],
   "all_relevant_fields": [
-    {"name": "web_endpoint", "required": false, "default": null},
-    {"name": "default_tag", "required": false, "default": "component"},
-    {"name": "components", "required": false, "default": null},
-    {"name": "components_discovery", "required": false, "default": null},
-    {"name": "username", "required": false, "default": null},
-    {"name": "password", "required": false, "default": null},
-    {"name": "auth_type", "required": false, "default": null},
-    {"name": "is_jmx", "required": false, "default": false},
-    {"name": "host", "required": false, "default": null},
-    {"name": "port", "required": false, "default": null},
-    {"name": "user", "required": false, "default": null}
+    {
+      "name": "web_endpoint",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "default_tag",
+      "required": false,
+      "default": "component"
+    },
+    {
+      "name": "components",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "components_discovery",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "username",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "auth_type",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "is_jmx",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "host",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "port",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "user",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
@@ -22,11 +68,21 @@
   "auto_conf_path": null,
   "explanation": "SonarQube has two distinct collection modes: (1) a web API instance using `web_endpoint` (typically http://host:9000) plus basic auth, and (2) a JMX instance using JMXFetch with multiple JVMs (web, ce, search) on user-defined ports. The web API requires credentials in any non-trivial deployment, and the README confirms `username`/`password` are needed. The JMX side requires host+port+user+password and the ports are not standardized (10443/10444/10445 are documentation examples). Either path requires credentials, so auto-config cannot complete from the wire.",
   "references": [
-    {"kind": "spec", "path": "sonarqube/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "sonarqube/datadog_checks/sonarqube/check.py"},
-    {"kind": "readme", "path": "sonarqube/README.md"}
+    {
+      "kind": "spec",
+      "path": "sonarqube/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "sonarqube/datadog_checks/sonarqube/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "sonarqube/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Dual-mode (HTTP API + JMX) where both modes need credentials. Even the unauthenticated web case requires the user to supply `components` (or `components_discovery`) to know what to scrape — the integration will not collect anything without it."
+  "notes": "Dual-mode (HTTP API + JMX) where both modes need credentials. Even the unauthenticated web case requires the user to supply `components` (or `components_discovery`) to know what to scrape \u2014 the integration will not collect anything without it.",
+  "discovery_bucket": "creds-spec-mandated"
 }

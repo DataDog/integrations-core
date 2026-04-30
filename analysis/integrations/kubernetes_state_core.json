@@ -4,27 +4,73 @@
   "spec_path": "kubernetes_state_core/assets/configuration/spec.yaml",
   "required_fields": [],
   "all_relevant_fields": [
-    {"name": "collectors", "required": false, "default": null},
-    {"name": "label_joins", "required": false, "default": null},
-    {"name": "labels_as_tags", "required": false, "default": null},
-    {"name": "annotations_as_tags", "required": false, "default": null},
-    {"name": "labels_mapper", "required": false, "default": null},
-    {"name": "namespaces", "required": false, "default": null},
-    {"name": "resync_period", "required": false, "default": 300},
-    {"name": "telemetry", "required": false, "default": false},
-    {"name": "skip_leader_election", "required": false, "default": false}
+    {
+      "name": "collectors",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "label_joins",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "labels_as_tags",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "annotations_as_tags",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "labels_mapper",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "namespaces",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "resync_period",
+      "required": false,
+      "default": 300
+    },
+    {
+      "name": "telemetry",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "skip_leader_election",
+      "required": false,
+      "default": false
+    }
   ],
   "classification": "generic",
   "auto_config_method": "other",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "The Kubernetes State Core check is a Cluster-Agent built-in (Go-implemented, the `datadog_checks/kubernetes_state_core` directory ships only `conf.yaml.example` — no Python check). Per the README, it embeds the kube-state-metrics logic inside the Datadog Cluster Agent, so there is no external Prometheus endpoint to discover and no required URL/credentials in the spec. Discovery is purely 'is the Cluster Agent running?' which the Cluster Agent answers for itself via its own ServiceAccount and Kubernetes API access. Treat as `generic` with method `other` because no network probe is required.",
+  "explanation": "The Kubernetes State Core check is a Cluster-Agent built-in (Go-implemented, the `datadog_checks/kubernetes_state_core` directory ships only `conf.yaml.example` \u2014 no Python check). Per the README, it embeds the kube-state-metrics logic inside the Datadog Cluster Agent, so there is no external Prometheus endpoint to discover and no required URL/credentials in the spec. Discovery is purely 'is the Cluster Agent running?' which the Cluster Agent answers for itself via its own ServiceAccount and Kubernetes API access. Treat as `generic` with method `other` because no network probe is required.",
   "references": [
-    {"kind": "spec", "path": "kubernetes_state_core/assets/configuration/spec.yaml"},
-    {"kind": "readme", "path": "kubernetes_state_core/README.md"},
-    {"kind": "upstream", "url": "https://docs.datadoghq.com/integrations/kubernetes_state_core/"}
+    {
+      "kind": "spec",
+      "path": "kubernetes_state_core/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "readme",
+      "path": "kubernetes_state_core/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://docs.datadoghq.com/integrations/kubernetes_state_core/"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "No Python check; integration ships only assets and example config. The Cluster Agent enables this check directly when KSM Core is turned on, using the Agent's own in-cluster ServiceAccount."
+  "notes": "No Python check; integration ships only assets and example config. The Cluster Agent enables this check directly when KSM Core is turned on, using the Agent's own in-cluster ServiceAccount.",
+  "discovery_bucket": "generic-incluster-bearer-token"
 }

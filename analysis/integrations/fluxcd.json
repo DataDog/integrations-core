@@ -2,9 +2,15 @@
   "name": "fluxcd",
   "display_name": "Flux",
   "spec_path": "fluxcd/assets/configuration/spec.yaml",
-  "required_fields": ["openmetrics_endpoint"],
+  "required_fields": [
+    "openmetrics_endpoint"
+  ],
   "all_relevant_fields": [
-    {"name": "openmetrics_endpoint", "required": true, "default": null}
+    {
+      "name": "openmetrics_endpoint",
+      "required": true,
+      "default": null
+    }
   ],
   "classification": "generic",
   "auto_config_method": "openmetrics-port-scan",
@@ -12,11 +18,21 @@
   "auto_conf_path": null,
   "explanation": "FluxCD is a Kubernetes GitOps controller (helm-controller, kustomize-controller, source-controller, notification-controller). Each controller exposes Prometheus metrics on a fixed, well-known port (8080) and path (`/metrics`), as documented in the README and reflected in the typical autodiscovery template (`http://%%host%%:8080/metrics`). The check is a thin `OpenMetricsBaseCheckV2` subclass with a single required field (`openmetrics_endpoint`) and no auth surface. This matches pattern A (`openmetrics-port-scan`) cleanly.",
   "references": [
-    {"kind": "spec", "path": "fluxcd/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "fluxcd/datadog_checks/fluxcd/check.py"},
-    {"kind": "readme", "path": "fluxcd/README.md"}
+    {
+      "kind": "spec",
+      "path": "fluxcd/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "fluxcd/datadog_checks/fluxcd/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "fluxcd/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "No auto_conf.yaml ships, but the README's pod-annotation example serves as the canonical template. Discovery should target Flux pods by label (`app.kubernetes.io/part-of=flux` or controller-specific labels) and probe :8080/metrics."
+  "notes": "No auto_conf.yaml ships, but the README's pod-annotation example serves as the canonical template. Discovery should target Flux pods by label (`app.kubernetes.io/part-of=flux` or controller-specific labels) and probe :8080/metrics.",
+  "discovery_bucket": "generic-openmetrics-scan"
 }

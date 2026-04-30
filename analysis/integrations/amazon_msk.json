@@ -2,26 +2,63 @@
   "name": "amazon_msk",
   "display_name": "Amazon MSK",
   "spec_path": "amazon_msk/assets/configuration/spec.yaml",
-  "required_fields": ["cluster_arn"],
+  "required_fields": [
+    "cluster_arn"
+  ],
   "all_relevant_fields": [
-    {"name": "cluster_arn", "required": true, "default": null},
-    {"name": "region_name", "required": false, "default": null},
-    {"name": "assume_role", "required": false, "default": null},
-    {"name": "jmx_exporter_port", "required": false, "default": 11001},
-    {"name": "node_exporter_port", "required": false, "default": 11002},
-    {"name": "prometheus_metrics_path", "required": false, "default": "/metrics"},
-    {"name": "use_openmetrics", "required": false, "default": true}
+    {
+      "name": "cluster_arn",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "region_name",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "assume_role",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "jmx_exporter_port",
+      "required": false,
+      "default": 11001
+    },
+    {
+      "name": "node_exporter_port",
+      "required": false,
+      "default": 11002
+    },
+    {
+      "name": "prometheus_metrics_path",
+      "required": false,
+      "default": "/metrics"
+    },
+    {
+      "name": "use_openmetrics",
+      "required": false,
+      "default": true
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "The check requires a cluster ARN and uses boto3 (`kafka.list_nodes`) to enumerate broker endpoints, then scrapes the JMX/Node exporters per broker. Two blockers make this impossible for generic auto-config: (1) `cluster_arn` is a required user-supplied AWS resource identifier — it cannot be inferred from the wire and is not a property of the host the Agent runs on; (2) the AWS API call requires IAM credentials (default boto3 chain or `assume_role`) that the user must provision out-of-band. Even though the broker-side Prometheus endpoints are unauthenticated and on fixed ports, discovery cannot proceed without first authenticating to the AWS control plane to learn which brokers exist.",
+  "explanation": "The check requires a cluster ARN and uses boto3 (`kafka.list_nodes`) to enumerate broker endpoints, then scrapes the JMX/Node exporters per broker. Two blockers make this impossible for generic auto-config: (1) `cluster_arn` is a required user-supplied AWS resource identifier \u2014 it cannot be inferred from the wire and is not a property of the host the Agent runs on; (2) the AWS API call requires IAM credentials (default boto3 chain or `assume_role`) that the user must provision out-of-band. Even though the broker-side Prometheus endpoints are unauthenticated and on fixed ports, discovery cannot proceed without first authenticating to the AWS control plane to learn which brokers exist.",
   "references": [
-    {"kind": "spec", "path": "amazon_msk/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "amazon_msk/datadog_checks/amazon_msk/check.py"}
+    {
+      "kind": "spec",
+      "path": "amazon_msk/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "amazon_msk/datadog_checks/amazon_msk/check.py"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Same shape as other AWS-API-fronted integrations: ARN + IAM creds gate the entire flow. Broker-side Prometheus exporters could be discovered directly if the user already knows the broker hosts, but the check class as written goes through MSK control plane."
+  "notes": "Same shape as other AWS-API-fronted integrations: ARN + IAM creds gate the entire flow. Broker-side Prometheus exporters could be discovered directly if the user already knows the broker hosts, but the check class as written goes through MSK control plane.",
+  "discovery_bucket": "creds-api-token"
 }

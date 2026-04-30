@@ -10,10 +10,17 @@
   "auto_conf_path": null,
   "explanation": "pan_firewall is a vendor logs-only tile for Palo Alto Networks firewall syslog ingestion. The spec contains only a `logs` template (TCP listener on port 10518 by default) and ships no Agent metric check beyond `__init__.py`. Setup requires the operator to configure PAN-OS syslog forwarding via Device > Server Profiles, define custom log formats for each log type, and point the firewall at the Agent host. There is no upstream service the Agent can discover; the listener is purely a passive sink.",
   "references": [
-    {"kind": "spec", "path": "pan_firewall/assets/configuration/spec.yaml"},
-    {"kind": "readme", "path": "pan_firewall/README.md"}
+    {
+      "kind": "spec",
+      "path": "pan_firewall/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "readme",
+      "path": "pan_firewall/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Logs-only vendor tile (pattern N analogue). The fixed port 10518 is the Agent-side listener, not a service to probe."
+  "notes": "Logs-only vendor tile (pattern N analogue). The fixed port 10518 is the Agent-side listener, not a service to probe.",
+  "discovery_bucket": "logs-only"
 }

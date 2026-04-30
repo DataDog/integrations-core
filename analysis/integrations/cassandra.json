@@ -2,14 +2,43 @@
   "name": "cassandra",
   "display_name": "Cassandra",
   "spec_path": "cassandra/assets/configuration/spec.yaml",
-  "required_fields": ["host", "port", "user", "password"],
+  "required_fields": [
+    "host",
+    "port",
+    "user",
+    "password"
+  ],
   "all_relevant_fields": [
-    {"name": "cassandra_aliasing", "required": true, "default": true},
-    {"name": "is_jmx", "required": false, "default": true},
-    {"name": "host", "required": true, "default": "localhost"},
-    {"name": "port", "required": true, "default": 7199},
-    {"name": "user", "required": false, "default": null},
-    {"name": "password", "required": false, "default": null}
+    {
+      "name": "cassandra_aliasing",
+      "required": true,
+      "default": true
+    },
+    {
+      "name": "is_jmx",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "host",
+      "required": true,
+      "default": "localhost"
+    },
+    {
+      "name": "port",
+      "required": true,
+      "default": 7199
+    },
+    {
+      "name": "user",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
@@ -17,10 +46,17 @@
   "auto_conf_path": null,
   "explanation": "Cassandra is a JMXFetch-based integration: the spec inherits `template: instances/jmx` and sets `is_jmx: true`. JMX collection requires a JVM-level connection to the Cassandra JMX port (default 7199) and, in any production deployment, JMX authentication credentials (user + password). The credentials are provisioned out-of-band by the cluster operator and cannot be derived from the wire. Per the procedure's pattern I, JMXFetch integrations are categorically `impossible` for generic auto-config.",
   "references": [
-    {"kind": "spec", "path": "cassandra/assets/configuration/spec.yaml"},
-    {"kind": "upstream", "url": "https://cassandra.apache.org/doc/latest/cassandra/managing/operating/security.html"}
+    {
+      "kind": "spec",
+      "path": "cassandra/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://cassandra.apache.org/doc/latest/cassandra/managing/operating/security.html"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Default JMX port 7199 is universal but irrelevant given the auth requirement. JMX is also typically bound to localhost-only by default, so even unauthenticated discovery is gated on JMX remote being explicitly enabled."
+  "notes": "Default JMX port 7199 is universal but irrelevant given the auth requirement. JMX is also typically bound to localhost-only by default, so even unauthenticated discovery is gated on JMX remote being explicitly enabled.",
+  "discovery_bucket": "creds-jmx-rmi"
 }

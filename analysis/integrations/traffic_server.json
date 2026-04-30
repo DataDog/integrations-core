@@ -2,22 +2,41 @@
   "name": "traffic_server",
   "display_name": "Traffic Server",
   "spec_path": "traffic_server/assets/configuration/spec.yaml",
-  "required_fields": ["traffic_server_url"],
+  "required_fields": [
+    "traffic_server_url"
+  ],
   "all_relevant_fields": [
-    {"name": "traffic_server_url", "required": true, "default": "http://localhost:8080/_stats"}
+    {
+      "name": "traffic_server_url",
+      "required": true,
+      "default": "http://localhost:8080/_stats"
+    }
   ],
   "classification": "generic",
   "auto_config_method": "http-path-probe",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "Apache Traffic Server exposes metrics through the `stats_over_http` plugin at a single canonical path `/_stats`, returning a JSON document with a `global` key. The plugin's default port is 8080 (the same as the proxy by default; operators commonly bind it on the proxy port or remap it). The check just performs a GET and parses JSON — no credentials, no path enumeration. A generic HTTP-path probe that hits `http://%%host%%:8080/_stats` and validates the JSON shape (`global` key) is sufficient. Pattern B.",
+  "explanation": "Apache Traffic Server exposes metrics through the `stats_over_http` plugin at a single canonical path `/_stats`, returning a JSON document with a `global` key. The plugin's default port is 8080 (the same as the proxy by default; operators commonly bind it on the proxy port or remap it). The check just performs a GET and parses JSON \u2014 no credentials, no path enumeration. A generic HTTP-path probe that hits `http://%%host%%:8080/_stats` and validates the JSON shape (`global` key) is sufficient. Pattern B.",
   "references": [
-    {"kind": "spec", "path": "traffic_server/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "traffic_server/datadog_checks/traffic_server/check.py"},
-    {"kind": "readme", "path": "traffic_server/README.md"},
-    {"kind": "upstream", "url": "https://docs.trafficserver.apache.org/en/latest/admin-guide/plugins/stats_over_http.en.html"}
+    {
+      "kind": "spec",
+      "path": "traffic_server/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "traffic_server/datadog_checks/traffic_server/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "traffic_server/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://docs.trafficserver.apache.org/en/latest/admin-guide/plugins/stats_over_http.en.html"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Port 8080 is the default for both proxy and stats endpoint; some operators may remap the stats endpoint to a separate port."
+  "notes": "Port 8080 is the default for both proxy and stats endpoint; some operators may remap the stats endpoint to a separate port.",
+  "discovery_bucket": "http-json-shape"
 }

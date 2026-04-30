@@ -2,21 +2,37 @@
   "name": "falco",
   "display_name": "Falco",
   "spec_path": "falco/assets/configuration/spec.yaml",
-  "required_fields": ["openmetrics_endpoint"],
+  "required_fields": [
+    "openmetrics_endpoint"
+  ],
   "all_relevant_fields": [
-    {"name": "openmetrics_endpoint", "required": true, "default": null}
+    {
+      "name": "openmetrics_endpoint",
+      "required": true,
+      "default": null
+    }
   ],
   "classification": "generic",
   "auto_config_method": "openmetrics-port-scan",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "The Falco check is `OpenMetricsBaseCheckV2` and the spec uses the standard `instances/openmetrics` template — a single required `openmetrics_endpoint` and no auth fields. The README documents the conventional Prometheus listener at port 8765 with the canonical `/metrics` path, configured via `metrics.listen_port` in `falco.yaml`. A generic OpenMetrics port scan (host + 8765 + `/metrics`) matches the canonical deployment cleanly. No `auto_conf.yaml` is shipped today.",
+  "explanation": "The Falco check is `OpenMetricsBaseCheckV2` and the spec uses the standard `instances/openmetrics` template \u2014 a single required `openmetrics_endpoint` and no auth fields. The README documents the conventional Prometheus listener at port 8765 with the canonical `/metrics` path, configured via `metrics.listen_port` in `falco.yaml`. A generic OpenMetrics port scan (host + 8765 + `/metrics`) matches the canonical deployment cleanly. No `auto_conf.yaml` is shipped today.",
   "references": [
-    {"kind": "spec", "path": "falco/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "falco/datadog_checks/falco/check.py"},
-    {"kind": "readme", "path": "falco/README.md"}
+    {
+      "kind": "spec",
+      "path": "falco/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "falco/datadog_checks/falco/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "falco/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern A: OpenMetrics on a known port (8765). Adding an auto_conf.yaml templated to http://%%host%%:8765/metrics would mirror coredns/etcd."
+  "notes": "Pattern A: OpenMetrics on a known port (8765). Adding an auto_conf.yaml templated to http://%%host%%:8765/metrics would mirror coredns/etcd.",
+  "discovery_bucket": "generic-openmetrics-scan"
 }

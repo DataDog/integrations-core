@@ -2,9 +2,15 @@
   "name": "kuma",
   "display_name": "Kuma",
   "spec_path": "kuma/assets/configuration/spec.yaml",
-  "required_fields": ["openmetrics_endpoint"],
+  "required_fields": [
+    "openmetrics_endpoint"
+  ],
   "all_relevant_fields": [
-    {"name": "openmetrics_endpoint", "required": true, "default": "http://%%host%%:5680/metrics"}
+    {
+      "name": "openmetrics_endpoint",
+      "required": true,
+      "default": "http://%%host%%:5680/metrics"
+    }
   ],
   "classification": "generic",
   "auto_config_method": "openmetrics-port-scan",
@@ -12,12 +18,25 @@
   "auto_conf_path": null,
   "explanation": "Kuma's control plane exposes Prometheus-formatted metrics at `/metrics` on the well-known port 5680. The check inherits OpenMetricsBaseCheckV2 and the spec template (`instances/openmetrics`) only needs a single URL. The README's autodiscovery snippet uses `http://%%host%%:5680/metrics`. No authentication is required for the control plane metrics endpoint. Pattern A (OpenMetrics on a known port).",
   "references": [
-    {"kind": "spec", "path": "kuma/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "kuma/datadog_checks/kuma/check.py"},
-    {"kind": "readme", "path": "kuma/README.md"},
-    {"kind": "upstream", "url": "https://kuma.io/docs/latest/production/monitoring/prometheus/"}
+    {
+      "kind": "spec",
+      "path": "kuma/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "kuma/datadog_checks/kuma/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "kuma/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://kuma.io/docs/latest/production/monitoring/prometheus/"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Envoy data-plane metrics are out of scope here — collected via the separate envoy integration. This check targets the Kuma control plane only."
+  "notes": "Envoy data-plane metrics are out of scope here \u2014 collected via the separate envoy integration. This check targets the Kuma control plane only.",
+  "discovery_bucket": "generic-openmetrics-scan"
 }

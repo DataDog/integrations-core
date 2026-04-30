@@ -2,12 +2,30 @@
   "name": "kubevirt_handler",
   "display_name": "KubeVirt Handler",
   "spec_path": "kubevirt_handler/assets/configuration/spec.yaml",
-  "required_fields": ["kubevirt_handler_metrics_endpoint"],
+  "required_fields": [
+    "kubevirt_handler_metrics_endpoint"
+  ],
   "all_relevant_fields": [
-    {"name": "kubevirt_handler_metrics_endpoint", "required": true, "default": null},
-    {"name": "kubevirt_handler_healthz_endpoint", "required": false, "default": null},
-    {"name": "kube_namespace", "required": false, "default": null},
-    {"name": "kube_pod_name", "required": false, "default": null}
+    {
+      "name": "kubevirt_handler_metrics_endpoint",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "kubevirt_handler_healthz_endpoint",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "kube_namespace",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "kube_pod_name",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "generic",
   "auto_config_method": "openmetrics-port-scan",
@@ -15,12 +33,25 @@
   "auto_conf_path": null,
   "explanation": "Mirrors kubevirt_controller: the check inherits OpenMetricsBaseCheckV2 and scrapes the KubeVirt Handler (`virt-handler`) DaemonSet pod's `/metrics` endpoint on a fixed path. Recommended autodiscovery uses `https://%%host%%:%%port%%/metrics`. `kube_namespace`/`kube_pod_name` are template-variable tag inputs, not discovery inputs. No user credentials are needed (TLS verify typically off). Canonical OpenMetrics port-scan.",
   "references": [
-    {"kind": "spec", "path": "kubevirt_handler/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "kubevirt_handler/datadog_checks/kubevirt_handler/check.py"},
-    {"kind": "readme", "path": "kubevirt_handler/README.md"},
-    {"kind": "upstream", "url": "https://kubevirt.io/user-guide/operations/component_monitoring/"}
+    {
+      "kind": "spec",
+      "path": "kubevirt_handler/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "kubevirt_handler/datadog_checks/kubevirt_handler/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "kubevirt_handler/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://kubevirt.io/user-guide/operations/component_monitoring/"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "No on-disk auto_conf.yaml; pod-annotation autodiscovery in the README covers the canonical case."
+  "notes": "No on-disk auto_conf.yaml; pod-annotation autodiscovery in the README covers the canonical case.",
+  "discovery_bucket": "generic-incluster-bearer-token"
 }

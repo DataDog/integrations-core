@@ -10,6 +10,7 @@
     "all_relevant_fields",
     "classification",
     "auto_config_method",
+    "discovery_bucket",
     "has_existing_auto_conf",
     "explanation",
     "references",
@@ -51,6 +52,34 @@
         "config-file-parse",
         "credentials-required",
         "other"
+      ]
+    },
+    "discovery_bucket": {
+      "type": "string",
+      "enum": [
+        "generic-openmetrics-scan",
+        "generic-incluster-bearer-token",
+        "generic-windows-perf",
+        "generic-linux-procfs",
+        "http-text-format",
+        "http-json-shape",
+        "http-multi-path",
+        "tcp-banner-server-greets",
+        "tcp-protocol-handshake",
+        "local-cli-binary",
+        "local-scm-enumeration",
+        "local-config-file",
+        "cloud-task-metadata",
+        "creds-spec-mandated",
+        "creds-jmx-rmi",
+        "creds-api-token",
+        "creds-proprietary-client",
+        "creds-auth-optional-practical",
+        "logs-only",
+        "dogstatsd-only",
+        "user-schema-template",
+        "user-intent-synthetic",
+        "per-process-discovery"
       ]
     },
     "has_existing_auto_conf": {"type": "boolean"},

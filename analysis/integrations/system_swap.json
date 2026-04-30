@@ -10,11 +10,21 @@
   "auto_conf_path": null,
   "explanation": "The System Swap check is a host-local swap-usage metric check with no required configuration fields and no remote target. The implementation calls `psutil.swap_memory()` against the Agent host and emits `system.swap.swapped_in` / `system.swap.swapped_out` rates. There is no host/port/URL/credential to discover. Auto-config is trivial: emit the integration with the default empty instance on every Agent host (psutil reports zeros where swap is absent, so the check is safe to enable unconditionally). Sits alongside `disk`, `btrfs`, and `system_core` in the host-presence-check family.",
   "references": [
-    {"kind": "spec", "path": "system_swap/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "system_swap/datadog_checks/system_swap/system_swap.py"},
-    {"kind": "readme", "path": "system_swap/README.md"}
+    {
+      "kind": "spec",
+      "path": "system_swap/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "system_swap/datadog_checks/system_swap/system_swap.py"
+    },
+    {
+      "kind": "readme",
+      "path": "system_swap/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Generic with method `other` (no on-wire probe). Trigger is universal host presence — psutil reports swap stats on every Agent host."
+  "notes": "Generic with method `other` (no on-wire probe). Trigger is universal host presence \u2014 psutil reports swap stats on every Agent host.",
+  "discovery_bucket": "generic-linux-procfs"
 }

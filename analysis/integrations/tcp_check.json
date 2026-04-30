@@ -2,16 +2,52 @@
   "name": "tcp_check",
   "display_name": "TCP",
   "spec_path": "tcp_check/assets/configuration/spec.yaml",
-  "required_fields": ["name", "host", "port"],
+  "required_fields": [
+    "name",
+    "host",
+    "port"
+  ],
   "all_relevant_fields": [
-    {"name": "name", "required": true, "default": null},
-    {"name": "host", "required": true, "default": null},
-    {"name": "port", "required": true, "default": null},
-    {"name": "timeout", "required": false, "default": 10},
-    {"name": "collect_response_time", "required": false, "default": false},
-    {"name": "ip_cache_duration", "required": false, "default": null},
-    {"name": "multiple_ips", "required": false, "default": false},
-    {"name": "ipv4_only", "required": false, "default": false}
+    {
+      "name": "name",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "host",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "port",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "timeout",
+      "required": false,
+      "default": 10
+    },
+    {
+      "name": "collect_response_time",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "ip_cache_duration",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "multiple_ips",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "ipv4_only",
+      "required": false,
+      "default": false
+    }
   ],
   "classification": "custom",
   "auto_config_method": "other",
@@ -19,10 +55,17 @@
   "auto_conf_path": null,
   "explanation": "tcp_check is a synthetic user-intent probe (pattern K): the user nominates an arbitrary host and port to test TCP reachability. There is no upstream service running alongside the Agent to discover; the integration is the probe itself. The 'name' field is a freeform instance label and not a discovery blocker, but 'host' and 'port' encode user intent that cannot be inferred from the wire. No credentials are needed, so this is custom rather than impossible.",
   "references": [
-    {"kind": "spec", "path": "tcp_check/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "tcp_check/datadog_checks/tcp_check/tcp_check.py"}
+    {
+      "kind": "spec",
+      "path": "tcp_check/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "tcp_check/datadog_checks/tcp_check/tcp_check.py"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern K (synthetic / user-intent probe), parallel to http_check and tls."
+  "notes": "Pattern K (synthetic / user-intent probe), parallel to http_check and tls.",
+  "discovery_bucket": "user-intent-synthetic"
 }

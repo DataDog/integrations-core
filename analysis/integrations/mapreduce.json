@@ -2,14 +2,41 @@
   "name": "mapreduce",
   "display_name": "MapReduce",
   "spec_path": "mapreduce/assets/configuration/spec.yaml",
-  "required_fields": ["resourcemanager_uri", "cluster_name"],
+  "required_fields": [
+    "resourcemanager_uri",
+    "cluster_name"
+  ],
   "all_relevant_fields": [
-    {"name": "resourcemanager_uri", "required": true, "default": "http://localhost:8088"},
-    {"name": "cluster_name", "required": true, "default": null},
-    {"name": "general_counters", "required": false, "default": null},
-    {"name": "job_specific_counters", "required": false, "default": null},
-    {"name": "collect_task_metrics", "required": false, "default": false},
-    {"name": "disable_legacy_cluster_tag", "required": false, "default": false}
+    {
+      "name": "resourcemanager_uri",
+      "required": true,
+      "default": "http://localhost:8088"
+    },
+    {
+      "name": "cluster_name",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "general_counters",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "job_specific_counters",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "collect_task_metrics",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "disable_legacy_cluster_tag",
+      "required": false,
+      "default": false
+    }
   ],
   "classification": "generic",
   "auto_config_method": "http-path-probe",
@@ -17,11 +44,21 @@
   "auto_conf_path": null,
   "explanation": "MapReduce is the YARN ResourceManager check's MapReduce-flavoured sibling: the check hits the same REST API root (`ws/v1/cluster`, `ws/v1/cluster/apps`, `ws/v1/mapreduce/jobs`) on the ResourceManager (default port 8088) and then follows the application master URLs. The default deployment leaves the REST API unauthenticated. `cluster_name` is marked required in the spec but is a freeform tag (per the procedure rule, that doesn't force impossible classification). A single HTTP probe at `http://%%host%%:8088/ws/v1/cluster/metrics` is sufficient to identify the integration target, mirroring the YARN classification.",
   "references": [
-    {"kind": "spec", "path": "mapreduce/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "mapreduce/datadog_checks/mapreduce/mapreduce.py"},
-    {"kind": "upstream", "url": "https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-site/ResourceManagerRest.html"}
+    {
+      "kind": "spec",
+      "path": "mapreduce/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "mapreduce/datadog_checks/mapreduce/mapreduce.py"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-site/ResourceManagerRest.html"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Same caveats as YARN: Kerberos/SPNEGO-secured Hadoop clusters would force the integration into credentials-required mode. `cluster_name` is a label, not a discovery input."
+  "notes": "Same caveats as YARN: Kerberos/SPNEGO-secured Hadoop clusters would force the integration into credentials-required mode. `cluster_name` is a label, not a discovery input.",
+  "discovery_bucket": "http-json-shape"
 }

@@ -2,22 +2,42 @@
   "name": "gunicorn",
   "display_name": "Gunicorn",
   "spec_path": "gunicorn/assets/configuration/spec.yaml",
-  "required_fields": ["proc_name"],
+  "required_fields": [
+    "proc_name"
+  ],
   "all_relevant_fields": [
-    {"name": "proc_name", "required": true, "default": null},
-    {"name": "gunicorn", "required": false, "default": "gunicorn"}
+    {
+      "name": "proc_name",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "gunicorn",
+      "required": false,
+      "default": "gunicorn"
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "other",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "The Gunicorn check does not probe the network at all. It uses `psutil.process_iter` on the host where the Agent runs to find a master process whose cmdline matches `gunicorn: master [<proc_name>]`. The required `proc_name` is application-specific (it's the value the user passed to `gunicorn --name`) and is set by the application owner; it cannot be derived from the wire or from any well-known list. Discovery would require enumerating every gunicorn master process on every host the Agent can see and then deciding which app names matter — this is process-name discovery, not credential or endpoint discovery, and is out of scope for generic auto-config. Note `setproctitle` must also be installed in the app's Python env for the master title pattern to appear at all.",
+  "explanation": "The Gunicorn check does not probe the network at all. It uses `psutil.process_iter` on the host where the Agent runs to find a master process whose cmdline matches `gunicorn: master [<proc_name>]`. The required `proc_name` is application-specific (it's the value the user passed to `gunicorn --name`) and is set by the application owner; it cannot be derived from the wire or from any well-known list. Discovery would require enumerating every gunicorn master process on every host the Agent can see and then deciding which app names matter \u2014 this is process-name discovery, not credential or endpoint discovery, and is out of scope for generic auto-config. Note `setproctitle` must also be installed in the app's Python env for the master title pattern to appear at all.",
   "references": [
-    {"kind": "spec", "path": "gunicorn/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "gunicorn/datadog_checks/gunicorn/gunicorn.py"},
-    {"kind": "readme", "path": "gunicorn/README.md"}
+    {
+      "kind": "spec",
+      "path": "gunicorn/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "gunicorn/datadog_checks/gunicorn/gunicorn.py"
+    },
+    {
+      "kind": "readme",
+      "path": "gunicorn/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Discovery here is local-process based, not network. Even if `proc_name` could be discovered by scanning host processes, picking which gunicorn apps to monitor is a user-policy question the Agent cannot answer."
+  "notes": "Discovery here is local-process based, not network. Even if `proc_name` could be discovered by scanning host processes, picking which gunicorn apps to monitor is a user-policy question the Agent cannot answer.",
+  "discovery_bucket": "per-process-discovery"
 }

@@ -4,24 +4,57 @@
   "spec_path": "supabase/assets/configuration/spec.yaml",
   "required_fields": [],
   "all_relevant_fields": [
-    {"name": "privileged_metrics_endpoint", "required": false, "default": null},
-    {"name": "storage_api_endpoint", "required": false, "default": null},
-    {"name": "openmetrics_endpoint", "required": false, "default": null},
-    {"name": "username", "required": false, "default": null},
-    {"name": "password", "required": false, "default": null}
+    {
+      "name": "privileged_metrics_endpoint",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "storage_api_endpoint",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "openmetrics_endpoint",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "username",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "Supabase exposes two Prometheus-compatible endpoints. The hosted `privileged_metrics_endpoint` lives at `https://<project-ref>.supabase.co/customer/v1/privileged/metrics` — it requires (a) the per-project subdomain `<project-ref>` and (b) HTTP Basic Auth where the password is the service-role JWT pulled from the Supabase dashboard. Neither is discoverable on the wire. The self-hosted `storage_api_endpoint` at `http://%%host%%:5000/metrics` is unauthenticated and lives on a fixed port, but the README scopes it to self-hosted deployments and the check requires at least one of the two endpoints. The dominant production deployment of Supabase is the hosted offering, where the service-role JWT is the irreducible blocker, so classify as impossible. The storage path could be picked up by an OpenMetrics port-scan in self-hosted setups; capture that as a note.",
+  "explanation": "Supabase exposes two Prometheus-compatible endpoints. The hosted `privileged_metrics_endpoint` lives at `https://<project-ref>.supabase.co/customer/v1/privileged/metrics` \u2014 it requires (a) the per-project subdomain `<project-ref>` and (b) HTTP Basic Auth where the password is the service-role JWT pulled from the Supabase dashboard. Neither is discoverable on the wire. The self-hosted `storage_api_endpoint` at `http://%%host%%:5000/metrics` is unauthenticated and lives on a fixed port, but the README scopes it to self-hosted deployments and the check requires at least one of the two endpoints. The dominant production deployment of Supabase is the hosted offering, where the service-role JWT is the irreducible blocker, so classify as impossible. The storage path could be picked up by an OpenMetrics port-scan in self-hosted setups; capture that as a note.",
   "references": [
-    {"kind": "spec", "path": "supabase/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "supabase/datadog_checks/supabase/check.py"},
-    {"kind": "readme", "path": "supabase/README.md"},
-    {"kind": "upstream", "url": "https://supabase.com/docs/guides/monitoring-troubleshooting/metrics#accessing-the-metrics-endpoint"}
+    {
+      "kind": "spec",
+      "path": "supabase/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "supabase/datadog_checks/supabase/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "supabase/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://supabase.com/docs/guides/monitoring-troubleshooting/metrics#accessing-the-metrics-endpoint"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern F-adjacent (dual-mode Prometheus): hosted path needs project-ref + service-role JWT; self-hosted Storage API path on fixed port 5000 is unauthenticated and would be discoverable by openmetrics-port-scan in isolation. Auth on the hosted path dominates the classification."
+  "notes": "Pattern F-adjacent (dual-mode Prometheus): hosted path needs project-ref + service-role JWT; self-hosted Storage API path on fixed port 5000 is unauthenticated and would be discoverable by openmetrics-port-scan in isolation. Auth on the hosted path dominates the classification.",
+  "discovery_bucket": "creds-api-token"
 }

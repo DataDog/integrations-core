@@ -2,17 +2,56 @@
   "name": "octopus_deploy",
   "display_name": "Octopus Deploy",
   "spec_path": "octopus_deploy/assets/configuration/spec.yaml",
-  "required_fields": ["octopus_endpoint", "api_key"],
+  "required_fields": [
+    "octopus_endpoint",
+    "api_key"
+  ],
   "all_relevant_fields": [
-    {"name": "octopus_endpoint", "required": true, "default": "http://localhost:80"},
-    {"name": "spaces", "required": false, "default": null},
-    {"name": "project_groups", "required": false, "default": null},
-    {"name": "projects", "required": false, "default": null},
-    {"name": "environments", "required": false, "default": null},
-    {"name": "paginated_limit", "required": false, "default": 30},
-    {"name": "collect_events", "required": false, "default": false},
-    {"name": "headers", "required": false, "default": null},
-    {"name": "auth_token", "required": false, "default": null}
+    {
+      "name": "octopus_endpoint",
+      "required": true,
+      "default": "http://localhost:80"
+    },
+    {
+      "name": "spaces",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "project_groups",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "projects",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "environments",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "paginated_limit",
+      "required": false,
+      "default": 30
+    },
+    {
+      "name": "collect_events",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "headers",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "auth_token",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
@@ -20,12 +59,25 @@
   "auto_conf_path": null,
   "explanation": "Octopus Deploy's REST API requires an `X-Octopus-ApiKey` header (or equivalent `auth_token`) for every request. The README explicitly directs users to create an API key in the Octopus Server before configuring the check. The spec ships a placeholder `<OCTOPUS_API_KEY>` in the headers example. While `octopus_endpoint` could be probed on a default port, no metrics or metadata can be returned without authentication, so the credential is the binding input. Pattern D: spec-required credentials.",
   "references": [
-    {"kind": "spec", "path": "octopus_deploy/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "octopus_deploy/datadog_checks/octopus_deploy/check.py"},
-    {"kind": "readme", "path": "octopus_deploy/README.md"},
-    {"kind": "upstream", "url": "https://octopus.com/docs/octopus-rest-api/getting-started#authentication"}
+    {
+      "kind": "spec",
+      "path": "octopus_deploy/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "octopus_deploy/datadog_checks/octopus_deploy/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "octopus_deploy/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://octopus.com/docs/octopus-rest-api/getting-started#authentication"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "API key is not a discrete spec field — it lives in the `headers` map or `auth_token` — but it is functionally required."
+  "notes": "API key is not a discrete spec field \u2014 it lives in the `headers` map or `auth_token` \u2014 but it is functionally required.",
+  "discovery_bucket": "creds-api-token"
 }

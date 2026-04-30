@@ -4,13 +4,41 @@
   "spec_path": "infiniband/assets/configuration/spec.yaml",
   "required_fields": [],
   "all_relevant_fields": [
-    {"name": "infiniband_path", "required": false, "default": "/sys/class/infiniband"},
-    {"name": "exclude_devices", "required": false, "default": null},
-    {"name": "additional_counters", "required": false, "default": null},
-    {"name": "additional_hw_counters", "required": false, "default": null},
-    {"name": "exclude_counters", "required": false, "default": null},
-    {"name": "exclude_hw_counters", "required": false, "default": null},
-    {"name": "collection_type", "required": false, "default": "gauge"}
+    {
+      "name": "infiniband_path",
+      "required": false,
+      "default": "/sys/class/infiniband"
+    },
+    {
+      "name": "exclude_devices",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "additional_counters",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "additional_hw_counters",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "exclude_counters",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "exclude_hw_counters",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "collection_type",
+      "required": false,
+      "default": "gauge"
+    }
   ],
   "classification": "generic",
   "auto_config_method": "other",
@@ -18,11 +46,21 @@
   "auto_conf_path": null,
   "explanation": "The Infiniband check has no required configuration fields and no network endpoint. It walks `/sys/class/infiniband` on the Agent host (or `/host/sys/class/infiniband` when running containerised), enumerates IB devices and ports, and reads counter/hw_counter/status sysfs files directly. There is no host/port/URL/credential to discover - presence of the `/sys/class/infiniband` directory with at least one device is the trigger. This is the same shape as btrfs: a host-local kernel-surface check, pattern H/L analogue with no binary or network involved. Auto-config can emit the integration with default-empty instances on any Agent host where the sysfs path exists.",
   "references": [
-    {"kind": "spec", "path": "infiniband/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "infiniband/datadog_checks/infiniband/check.py"},
-    {"kind": "readme", "path": "infiniband/README.md"}
+    {
+      "kind": "spec",
+      "path": "infiniband/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "infiniband/datadog_checks/infiniband/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "infiniband/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Mirrors btrfs pattern: generic / other because the discovery signal is host-local presence of a kernel sysfs hierarchy. The Agent must have read access to /sys/class/infiniband (containerised deployments mount /host/sys, which the check already handles)."
+  "notes": "Mirrors btrfs pattern: generic / other because the discovery signal is host-local presence of a kernel sysfs hierarchy. The Agent must have read access to /sys/class/infiniband (containerised deployments mount /host/sys, which the check already handles).",
+  "discovery_bucket": "generic-linux-procfs"
 }

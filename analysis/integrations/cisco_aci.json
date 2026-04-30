@@ -2,22 +2,82 @@
   "name": "cisco_aci",
   "display_name": "Cisco ACI",
   "spec_path": "cisco_aci/assets/configuration/spec.yaml",
-  "required_fields": ["aci_url", "username", "pwd"],
+  "required_fields": [
+    "aci_url",
+    "username",
+    "pwd"
+  ],
   "all_relevant_fields": [
-    {"name": "aci_url", "required": true, "default": null},
-    {"name": "aci_urls", "required": false, "default": null},
-    {"name": "username", "required": true, "default": null},
-    {"name": "pwd", "required": false, "default": null},
-    {"name": "tenant", "required": false, "default": null},
-    {"name": "cert_name", "required": false, "default": null},
-    {"name": "cert_key", "required": false, "default": null},
-    {"name": "cert_key_path", "required": false, "default": null},
-    {"name": "cert_key_password", "required": false, "default": null},
-    {"name": "appcenter", "required": false, "default": false},
-    {"name": "namespace", "required": false, "default": "default"},
-    {"name": "send_ndm_metadata", "required": false, "default": false},
-    {"name": "send_faultinst_faults", "required": false, "default": false},
-    {"name": "send_faultdelegate_faults", "required": false, "default": false}
+    {
+      "name": "aci_url",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "aci_urls",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "username",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "pwd",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "tenant",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "cert_name",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "cert_key",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "cert_key_path",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "cert_key_password",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "appcenter",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "namespace",
+      "required": false,
+      "default": "default"
+    },
+    {
+      "name": "send_ndm_metadata",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "send_faultinst_faults",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "send_faultdelegate_faults",
+      "required": false,
+      "default": false
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
@@ -25,11 +85,21 @@
   "auto_conf_path": null,
   "explanation": "The Cisco ACI check polls the APIC controller's REST API. The instance must specify the controller URL (`aci_url` or a list of URLs in `aci_urls`) plus authentication: either a `username` + `pwd`, or certificate-based auth (`cert_name`, `cert_key` / `cert_key_path`, optional `cert_key_password`). The check raises ConfigurationError if no URL is given and authenticates against `/api/aaaLogin.json` for every poll. Per pattern D, classify as impossible: no URL or credential is derivable from a wire probe, and APIC is a centralized controller, not a per-host service.",
   "references": [
-    {"kind": "spec", "path": "cisco_aci/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "cisco_aci/datadog_checks/cisco_aci/cisco.py"},
-    {"kind": "readme", "path": "cisco_aci/README.md"}
+    {
+      "kind": "spec",
+      "path": "cisco_aci/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "cisco_aci/datadog_checks/cisco_aci/cisco.py"
+    },
+    {
+      "kind": "readme",
+      "path": "cisco_aci/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "APIC is a fabric controller, often reached via a single VIP/URL outside the Agent host. Credentials and URL are user-managed inputs."
+  "notes": "APIC is a fabric controller, often reached via a single VIP/URL outside the Agent host. Credentials and URL are user-managed inputs.",
+  "discovery_bucket": "creds-api-token"
 }

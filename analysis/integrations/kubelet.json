@@ -4,26 +4,67 @@
   "spec_path": "kubelet/assets/configuration/spec.yaml",
   "required_fields": [],
   "all_relevant_fields": [
-    {"name": "cadvisor_metrics_endpoint", "required": false, "default": null},
-    {"name": "kubelet_metrics_endpoint", "required": false, "default": null},
-    {"name": "probes_metrics_endpoint", "required": false, "default": null},
-    {"name": "cadvisor_port", "required": false, "default": null},
-    {"name": "prometheus_url", "required": false, "default": null},
-    {"name": "bearer_token_auth", "required": false, "default": false},
-    {"name": "bearer_token_path", "required": false, "default": null}
+    {
+      "name": "cadvisor_metrics_endpoint",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "kubelet_metrics_endpoint",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "probes_metrics_endpoint",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "cadvisor_port",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "prometheus_url",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "bearer_token_auth",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "bearer_token_path",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "generic",
   "auto_config_method": "other",
   "has_existing_auto_conf": true,
   "auto_conf_path": "kubelet/datadog_checks/kubelet/data/conf.yaml.default",
-  "explanation": "The kubelet integration runs against the Agent's own host node. The shipped `conf.yaml.default` declares `ad_identifiers: [_kubelet]`, which is a built-in Autodiscovery listener — the Agent itself populates the kubelet URL, port, and bearer token via `kubeutil.get_connection_info()`, then `KubeletCredentials` injects the in-cluster ServiceAccount token. None of the per-instance fields are required: the user does not supply a host, port, or credentials. Per pattern O (in-cluster bearer-token auth) plus the agent-managed `_kubelet` listener, this is `generic`. No external network probe is needed because the Agent's runtime auto-detects the local kubelet, so the auto-config method is `other` (host-local detection rather than port scan).",
+  "explanation": "The kubelet integration runs against the Agent's own host node. The shipped `conf.yaml.default` declares `ad_identifiers: [_kubelet]`, which is a built-in Autodiscovery listener \u2014 the Agent itself populates the kubelet URL, port, and bearer token via `kubeutil.get_connection_info()`, then `KubeletCredentials` injects the in-cluster ServiceAccount token. None of the per-instance fields are required: the user does not supply a host, port, or credentials. Per pattern O (in-cluster bearer-token auth) plus the agent-managed `_kubelet` listener, this is `generic`. No external network probe is needed because the Agent's runtime auto-detects the local kubelet, so the auto-config method is `other` (host-local detection rather than port scan).",
   "references": [
-    {"kind": "spec", "path": "kubelet/assets/configuration/spec.yaml"},
-    {"kind": "auto_conf", "path": "kubelet/datadog_checks/kubelet/data/conf.yaml.default"},
-    {"kind": "check", "path": "kubelet/datadog_checks/kubelet/kubelet.py"},
-    {"kind": "upstream", "url": "https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet/"}
+    {
+      "kind": "spec",
+      "path": "kubelet/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "auto_conf",
+      "path": "kubelet/datadog_checks/kubelet/data/conf.yaml.default"
+    },
+    {
+      "kind": "check",
+      "path": "kubelet/datadog_checks/kubelet/kubelet.py"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet/"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "The `_kubelet` AD identifier is a special agent-builtin listener; discovery happens inside the Agent runtime (kubeutil), not via a network probe template."
+  "notes": "The `_kubelet` AD identifier is a special agent-builtin listener; discovery happens inside the Agent runtime (kubeutil), not via a network probe template.",
+  "discovery_bucket": "generic-incluster-bearer-token"
 }

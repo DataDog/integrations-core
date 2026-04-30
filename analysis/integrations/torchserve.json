@@ -4,9 +4,21 @@
   "spec_path": "torchserve/assets/configuration/spec.yaml",
   "required_fields": [],
   "all_relevant_fields": [
-    {"name": "openmetrics_endpoint", "required": false, "default": "http://localhost:8082/metrics"},
-    {"name": "inference_api_url", "required": false, "default": "http://localhost:8080"},
-    {"name": "management_api_url", "required": false, "default": "http://localhost:8081"}
+    {
+      "name": "openmetrics_endpoint",
+      "required": false,
+      "default": "http://localhost:8082/metrics"
+    },
+    {
+      "name": "inference_api_url",
+      "required": false,
+      "default": "http://localhost:8080"
+    },
+    {
+      "name": "management_api_url",
+      "required": false,
+      "default": "http://localhost:8081"
+    }
   ],
   "classification": "custom",
   "auto_config_method": "http-path-probe",
@@ -14,12 +26,25 @@
   "auto_conf_path": null,
   "explanation": "TorchServe exposes three distinct HTTP endpoints on three different conventional ports: the OpenMetrics scrape endpoint (`/metrics` on 8082), the Inference API (8080) and the Management API (8081). The check dispatches to one of three sub-checks depending on which of `openmetrics_endpoint`, `inference_api_url`, or `management_api_url` is set, and the spec marks each as optional but exactly one must be configured per instance. Auto-config has to probe up to three well-known ports and emit up to three instances; because the discovery is multi-endpoint and instance-multiplexed, this is custom rather than generic, even though each individual endpoint follows a fixed convention.",
   "references": [
-    {"kind": "spec", "path": "torchserve/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "torchserve/datadog_checks/torchserve/check.py"},
-    {"kind": "readme", "path": "torchserve/README.md"},
-    {"kind": "upstream", "url": "https://pytorch.org/serve/metrics_api.html"}
+    {
+      "kind": "spec",
+      "path": "torchserve/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "torchserve/datadog_checks/torchserve/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "torchserve/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://pytorch.org/serve/metrics_api.html"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "OpenMetrics endpoint is only enabled when TorchServe is started with `metrics_mode=prometheus`; otherwise port 8082 will not respond. Inference (8080) and Management (8081) APIs are on by default. Probe should try all three ports and emit instances per endpoint detected."
+  "notes": "OpenMetrics endpoint is only enabled when TorchServe is started with `metrics_mode=prometheus`; otherwise port 8082 will not respond. Inference (8080) and Management (8081) APIs are on by default. Probe should try all three ports and emit instances per endpoint detected.",
+  "discovery_bucket": "http-multi-path"
 }

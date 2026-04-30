@@ -2,9 +2,15 @@
   "name": "hdfs_datanode",
   "display_name": "HDFS Datanode",
   "spec_path": "hdfs_datanode/assets/configuration/spec.yaml",
-  "required_fields": ["hdfs_datanode_jmx_uri"],
+  "required_fields": [
+    "hdfs_datanode_jmx_uri"
+  ],
   "all_relevant_fields": [
-    {"name": "hdfs_datanode_jmx_uri", "required": true, "default": "http://localhost:9864"}
+    {
+      "name": "hdfs_datanode_jmx_uri",
+      "required": true,
+      "default": "http://localhost:9864"
+    }
   ],
   "classification": "generic",
   "auto_config_method": "http-path-probe",
@@ -12,11 +18,21 @@
   "auto_conf_path": null,
   "explanation": "The HDFS DataNode check fetches metrics from the JMX HTTP servlet at `/jmx` (no JMX-RMI). The DataNode HTTP port defaults to 9864 (Hadoop 3) and the path `/jmx` is universal, so a single HTTP probe against `http://%%host%%:9864/jmx` is enough to discover and validate the endpoint. No authentication is required by default. Classification is generic because the URL is canonical and singular.",
   "references": [
-    {"kind": "spec", "path": "hdfs_datanode/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "hdfs_datanode/datadog_checks/hdfs_datanode/hdfs_datanode.py"},
-    {"kind": "upstream", "url": "https://hadoop.apache.org/docs/r3.1.3/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml"}
+    {
+      "kind": "spec",
+      "path": "hdfs_datanode/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "hdfs_datanode/datadog_checks/hdfs_datanode/hdfs_datanode.py"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://hadoop.apache.org/docs/r3.1.3/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Hadoop 2.x uses port 50075 instead of 9864; a discovery layer should probe both. Kerberos-secured clusters would require credentials but the default deployment is open."
+  "notes": "Hadoop 2.x uses port 50075 instead of 9864; a discovery layer should probe both. Kerberos-secured clusters would require credentials but the default deployment is open.",
+  "discovery_bucket": "http-json-shape"
 }

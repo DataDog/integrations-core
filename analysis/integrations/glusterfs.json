@@ -4,20 +4,38 @@
   "spec_path": "glusterfs/assets/configuration/spec.yaml",
   "required_fields": [],
   "all_relevant_fields": [
-    {"name": "gstatus_path", "required": false, "default": "<datadog-agent>/embedded/sbin/gstatus"},
-    {"name": "use_sudo", "required": false, "default": true}
+    {
+      "name": "gstatus_path",
+      "required": false,
+      "default": "<datadog-agent>/embedded/sbin/gstatus"
+    },
+    {
+      "name": "use_sudo",
+      "required": false,
+      "default": true
+    }
   ],
   "classification": "custom",
   "auto_config_method": "other",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "The GlusterFS check shells out to the local `gstatus` binary (shipped with the Agent at `<run_path>/embedded/sbin/gstatus`) via `subprocess.run`, parses the JSON output, and emits cluster/volume/brick metrics. There is no remote host or port — discovery means \"is gstatus installed and runnable on this host, and is glusterd present?\". A passwordless sudoers entry for `dd-agent` is also required. This matches Pattern L (local CLI subprocess), analogous to varnish/ceph/postfix.",
+  "explanation": "The GlusterFS check shells out to the local `gstatus` binary (shipped with the Agent at `<run_path>/embedded/sbin/gstatus`) via `subprocess.run`, parses the JSON output, and emits cluster/volume/brick metrics. There is no remote host or port \u2014 discovery means \"is gstatus installed and runnable on this host, and is glusterd present?\". A passwordless sudoers entry for `dd-agent` is also required. This matches Pattern L (local CLI subprocess), analogous to varnish/ceph/postfix.",
   "references": [
-    {"kind": "spec", "path": "glusterfs/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "glusterfs/datadog_checks/glusterfs/check.py"},
-    {"kind": "readme", "path": "glusterfs/README.md"}
+    {
+      "kind": "spec",
+      "path": "glusterfs/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "glusterfs/datadog_checks/glusterfs/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "glusterfs/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern L. No network probe; auto-config would need to detect the gstatus binary on the host filesystem."
+  "notes": "Pattern L. No network probe; auto-config would need to detect the gstatus binary on the host filesystem.",
+  "discovery_bucket": "local-cli-binary"
 }

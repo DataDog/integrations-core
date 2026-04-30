@@ -10,10 +10,17 @@
   "auto_conf_path": null,
   "explanation": "Delinea Privilege Manager is a vendor security marketplace tile with no Agent metric check. The spec defines only a `logs` template (TCP/UDP syslog ingestion at a user-supplied port) and the `datadog_checks/delinea_privilege_manager/` package contains no `.py` check implementation. Required setup is on the upstream Delinea side (configure syslog forwarding to the Agent's TCP/UDP listener); there is no host/port/endpoint to discover from the Agent's vantage point and no service for a probe to fingerprint. Auto-config in the network-probe sense does not apply.",
   "references": [
-    {"kind": "spec", "path": "delinea_privilege_manager/assets/configuration/spec.yaml"},
-    {"kind": "readme", "path": "delinea_privilege_manager/README.md"}
+    {
+      "kind": "spec",
+      "path": "delinea_privilege_manager/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "readme",
+      "path": "delinea_privilege_manager/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Logs-only marketplace tile (pattern N variant: syslog-receive-only, not DogStatsD). The Agent receives syslog from the upstream product; the user must configure the forwarder on Delinea, which is not discoverable from the Agent."
+  "notes": "Logs-only marketplace tile (pattern N variant: syslog-receive-only, not DogStatsD). The Agent receives syslog from the upstream product; the user must configure the forwarder on Delinea, which is not discoverable from the Agent.",
+  "discovery_bucket": "logs-only"
 }

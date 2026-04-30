@@ -2,17 +2,56 @@
   "name": "http_check",
   "display_name": "HTTP",
   "spec_path": "http_check/assets/configuration/spec.yaml",
-  "required_fields": ["name", "url"],
+  "required_fields": [
+    "name",
+    "url"
+  ],
   "all_relevant_fields": [
-    {"name": "name", "required": true, "default": null},
-    {"name": "url", "required": true, "default": null},
-    {"name": "method", "required": false, "default": "get"},
-    {"name": "content_match", "required": false, "default": null},
-    {"name": "reverse_content_match", "required": false, "default": false},
-    {"name": "http_response_status_code", "required": false, "default": "(1|2|3)\\d\\d"},
-    {"name": "check_certificate_expiration", "required": false, "default": true},
-    {"name": "days_warning", "required": false, "default": 14},
-    {"name": "days_critical", "required": false, "default": 7}
+    {
+      "name": "name",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "url",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "method",
+      "required": false,
+      "default": "get"
+    },
+    {
+      "name": "content_match",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "reverse_content_match",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "http_response_status_code",
+      "required": false,
+      "default": "(1|2|3)\\d\\d"
+    },
+    {
+      "name": "check_certificate_expiration",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "days_warning",
+      "required": false,
+      "default": 14
+    },
+    {
+      "name": "days_critical",
+      "required": false,
+      "default": 7
+    }
   ],
   "classification": "custom",
   "auto_config_method": "other",
@@ -20,11 +59,21 @@
   "auto_conf_path": null,
   "explanation": "http_check is a synthetic / user-intent probe (pattern K). The check accepts an arbitrary user-nominated URL and issues an HTTP request, validating status codes, response body content, and optionally the TLS certificate. There is no upstream service running alongside the Agent to discover - the user picks an arbitrary remote target plus a freeform `name` label. The required `url` field captures intent, not a discoverable property: any URL on the public internet (or internal network) is a valid configuration, and the auto-config layer cannot guess which endpoints the operator wants synthetic monitoring on. Once the URL is known, the probe itself is generic (any HTTP server), but the missing input is the user's choice of target.",
   "references": [
-    {"kind": "spec", "path": "http_check/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "http_check/datadog_checks/http_check/http_check.py"},
-    {"kind": "readme", "path": "http_check/README.md"}
+    {
+      "kind": "spec",
+      "path": "http_check/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "http_check/datadog_checks/http_check/http_check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "http_check/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Sibling of tls and tcp_check (pattern K). No credentials are required, so classified as custom rather than impossible. The `name` field is freeform and not a discovery blocker."
+  "notes": "Sibling of tls and tcp_check (pattern K). No credentials are required, so classified as custom rather than impossible. The `name` field is freeform and not a discovery blocker.",
+  "discovery_bucket": "user-intent-synthetic"
 }

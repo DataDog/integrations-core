@@ -2,25 +2,58 @@
   "name": "powerdns_recursor",
   "display_name": "PowerDNS Recursor",
   "spec_path": "powerdns_recursor/assets/configuration/spec.yaml",
-  "required_fields": ["host", "port", "api_key"],
+  "required_fields": [
+    "host",
+    "port",
+    "api_key"
+  ],
   "all_relevant_fields": [
-    {"name": "host", "required": true, "default": null},
-    {"name": "port", "required": true, "default": null},
-    {"name": "api_key", "required": true, "default": null},
-    {"name": "version", "required": false, "default": null}
+    {
+      "name": "host",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "port",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "api_key",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "version",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "The PowerDNS Recursor check hits the recursor's webserver statistics API (`/api/v1/servers/localhost/statistics` on v4, `/servers/localhost/statistics` on v3). The webserver is disabled by default; when the operator enables it they must also set `api-key=<secret>` in `recursor.conf`, and every request must carry that key in the `X-API-Key` header. The spec marks `api_key` as `required: true` with `secret: true` and the check sets `self.http.options['headers']['X-API-Key'] = self.instance['api_key']` in `__init__`. There is no unauthenticated mode, so auto-config cannot synthesize a working instance from the wire alone — pattern D.",
+  "explanation": "The PowerDNS Recursor check hits the recursor's webserver statistics API (`/api/v1/servers/localhost/statistics` on v4, `/servers/localhost/statistics` on v3). The webserver is disabled by default; when the operator enables it they must also set `api-key=<secret>` in `recursor.conf`, and every request must carry that key in the `X-API-Key` header. The spec marks `api_key` as `required: true` with `secret: true` and the check sets `self.http.options['headers']['X-API-Key'] = self.instance['api_key']` in `__init__`. There is no unauthenticated mode, so auto-config cannot synthesize a working instance from the wire alone \u2014 pattern D.",
   "references": [
-    {"kind": "spec", "path": "powerdns_recursor/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "powerdns_recursor/datadog_checks/powerdns_recursor/powerdns_recursor.py"},
-    {"kind": "readme", "path": "powerdns_recursor/README.md"},
-    {"kind": "upstream", "url": "https://doc.powerdns.com/recursor/http-api/index.html"}
+    {
+      "kind": "spec",
+      "path": "powerdns_recursor/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "powerdns_recursor/datadog_checks/powerdns_recursor/powerdns_recursor.py"
+    },
+    {
+      "kind": "readme",
+      "path": "powerdns_recursor/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://doc.powerdns.com/recursor/http-api/index.html"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Default webserver port is 8082 and the path is universal, so the network surface itself is trivial to probe — but the API key cannot be discovered. Classification is therefore impossible / credentials-required."
+  "notes": "Default webserver port is 8082 and the path is universal, so the network surface itself is trivial to probe \u2014 but the API key cannot be discovered. Classification is therefore impossible / credentials-required.",
+  "discovery_bucket": "creds-api-token"
 }

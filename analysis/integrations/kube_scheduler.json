@@ -2,16 +2,50 @@
   "name": "kube_scheduler",
   "display_name": "Kube Scheduler",
   "spec_path": "kube_scheduler/assets/configuration/spec.yaml",
-  "required_fields": ["prometheus_url"],
+  "required_fields": [
+    "prometheus_url"
+  ],
   "all_relevant_fields": [
-    {"name": "prometheus_url",          "required": true,  "default": "http://localhost:10251/metrics"},
-    {"name": "possible_prometheus_urls","required": false, "default": null},
-    {"name": "health_url",              "required": false, "default": null},
-    {"name": "leader_election",         "required": false, "default": true},
-    {"name": "leader_election_kind",    "required": false, "default": "auto"},
-    {"name": "bearer_token_auth",       "required": false, "default": "tls_only"},
-    {"name": "bearer_token_path",       "required": false, "default": "/var/run/secrets/kubernetes.io/serviceaccount/token"},
-    {"name": "ssl_verify",              "required": false, "default": true}
+    {
+      "name": "prometheus_url",
+      "required": true,
+      "default": "http://localhost:10251/metrics"
+    },
+    {
+      "name": "possible_prometheus_urls",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "health_url",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "leader_election",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "leader_election_kind",
+      "required": false,
+      "default": "auto"
+    },
+    {
+      "name": "bearer_token_auth",
+      "required": false,
+      "default": "tls_only"
+    },
+    {
+      "name": "bearer_token_path",
+      "required": false,
+      "default": "/var/run/secrets/kubernetes.io/serviceaccount/token"
+    },
+    {
+      "name": "ssl_verify",
+      "required": false,
+      "default": true
+    }
   ],
   "classification": "custom",
   "auto_config_method": "http-path-probe",
@@ -19,11 +53,21 @@
   "auto_conf_path": "kube_scheduler/datadog_checks/kube_scheduler/data/auto_conf.yaml",
   "explanation": "kube-scheduler exposes Prometheus metrics on /metrics, but the port and scheme have changed between Kubernetes versions: legacy clusters expose unauthenticated http on :10251, while modern (1.13+) clusters expose authenticated https on :10259 and require a service-account bearer token. The shipped auto_conf.yaml encodes this with possible_prometheus_urls listing four URL/port/scheme combinations the check tries in order. Authentication is automated via the in-cluster service-account token mounted at the standard path with bearer_token_auth=tls_only, so the Agent running in-cluster needs no user-supplied credential. Discovery requires the probe to walk the four candidates and respect TLS/auth quirks.",
   "references": [
-    {"kind": "spec",      "path": "kube_scheduler/assets/configuration/spec.yaml"},
-    {"kind": "check",     "path": "kube_scheduler/datadog_checks/kube_scheduler/kube_scheduler.py"},
-    {"kind": "auto_conf", "path": "kube_scheduler/datadog_checks/kube_scheduler/data/auto_conf.yaml"}
+    {
+      "kind": "spec",
+      "path": "kube_scheduler/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "kube_scheduler/datadog_checks/kube_scheduler/kube_scheduler.py"
+    },
+    {
+      "kind": "auto_conf",
+      "path": "kube_scheduler/datadog_checks/kube_scheduler/data/auto_conf.yaml"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern G (multiple plausible URL paths) with a twist: tokens are read from a known in-cluster path so 'credentials' are not user-provided. The integration already implements the discovery via possible_prometheus_urls and ad_identifiers=[kube-scheduler]."
+  "notes": "Pattern G (multiple plausible URL paths) with a twist: tokens are read from a known in-cluster path so 'credentials' are not user-provided. The integration already implements the discovery via possible_prometheus_urls and ad_identifiers=[kube-scheduler].",
+  "discovery_bucket": "generic-incluster-bearer-token"
 }

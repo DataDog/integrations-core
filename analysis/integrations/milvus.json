@@ -2,22 +2,41 @@
   "name": "milvus",
   "display_name": "Milvus",
   "spec_path": "milvus/assets/configuration/spec.yaml",
-  "required_fields": ["openmetrics_endpoint"],
+  "required_fields": [
+    "openmetrics_endpoint"
+  ],
   "all_relevant_fields": [
-    {"name": "openmetrics_endpoint", "required": true, "default": "http://localhost:9091/metrics"}
+    {
+      "name": "openmetrics_endpoint",
+      "required": true,
+      "default": "http://localhost:9091/metrics"
+    }
   ],
   "classification": "generic",
   "auto_config_method": "openmetrics-port-scan",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "Milvus is a vector database that natively exposes Prometheus metrics on a fixed, well-known endpoint. The check inherits OpenMetricsBaseCheckV2 and ships only the standard `instances/openmetrics` template with `openmetrics_endpoint` defaulting to http://localhost:9091/metrics (Milvus' documented Prometheus port and path). No credentials are required and the path is a single canonical /metrics — Pattern A (OpenMetrics on a known port). A generic OpenMetrics port scan against 9091 with path /metrics, validating Prometheus exposition format with milvus_*-prefixed series, is sufficient to autodiscover.",
+  "explanation": "Milvus is a vector database that natively exposes Prometheus metrics on a fixed, well-known endpoint. The check inherits OpenMetricsBaseCheckV2 and ships only the standard `instances/openmetrics` template with `openmetrics_endpoint` defaulting to http://localhost:9091/metrics (Milvus' documented Prometheus port and path). No credentials are required and the path is a single canonical /metrics \u2014 Pattern A (OpenMetrics on a known port). A generic OpenMetrics port scan against 9091 with path /metrics, validating Prometheus exposition format with milvus_*-prefixed series, is sufficient to autodiscover.",
   "references": [
-    {"kind": "spec", "path": "milvus/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "milvus/datadog_checks/milvus/check.py"},
-    {"kind": "readme", "path": "milvus/README.md"},
-    {"kind": "upstream", "url": "https://milvus.io/docs/monitor.md"}
+    {
+      "kind": "spec",
+      "path": "milvus/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "milvus/datadog_checks/milvus/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "milvus/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://milvus.io/docs/monitor.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern A: OpenMetrics on a known port (9091) with fixed /metrics path; no auth in the default deployment. No auto_conf.yaml ships, but the spec template is unambiguous."
+  "notes": "Pattern A: OpenMetrics on a known port (9091) with fixed /metrics path; no auth in the default deployment. No auto_conf.yaml ships, but the spec template is unambiguous.",
+  "discovery_bucket": "generic-openmetrics-scan"
 }

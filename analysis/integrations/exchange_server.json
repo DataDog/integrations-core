@@ -4,22 +4,49 @@
   "spec_path": "exchange_server/assets/configuration/spec.yaml",
   "required_fields": [],
   "all_relevant_fields": [
-    {"name": "extra_metrics", "required": false, "default": null},
-    {"name": "metrics", "required": false, "default": null},
-    {"name": "server", "required": false, "default": null},
-    {"name": "username", "required": false, "default": null},
-    {"name": "password", "required": false, "default": null}
+    {
+      "name": "extra_metrics",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "metrics",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "server",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "username",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "generic",
   "auto_config_method": "other",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "Exchange Server inherits the Windows perf_counters template (PerfCountersBaseCheckWithLegacySupport). In its default mode the Agent runs on the Exchange host itself and reads MSExchange* PDH performance counters locally; there is no remote host/port to probe. Auto-config reduces to 'is Exchange Server installed on this Windows host?' — a local service detection, not a network probe. The hidden pdh_legacy template adds remote host + credentials, but it's an opt-in mode.",
+  "explanation": "Exchange Server inherits the Windows perf_counters template (PerfCountersBaseCheckWithLegacySupport). In its default mode the Agent runs on the Exchange host itself and reads MSExchange* PDH performance counters locally; there is no remote host/port to probe. Auto-config reduces to 'is Exchange Server installed on this Windows host?' \u2014 a local service detection, not a network probe. The hidden pdh_legacy template adds remote host + credentials, but it's an opt-in mode.",
   "references": [
-    {"kind": "spec", "path": "exchange_server/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "exchange_server/datadog_checks/exchange_server/check.py"}
+    {
+      "kind": "spec",
+      "path": "exchange_server/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "exchange_server/datadog_checks/exchange_server/check.py"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern H (local Windows host detection), same shape as iis and active_directory. No auto_conf.yaml ships."
+  "notes": "Pattern H (local Windows host detection), same shape as iis and active_directory. No auto_conf.yaml ships.",
+  "discovery_bucket": "generic-windows-perf"
 }

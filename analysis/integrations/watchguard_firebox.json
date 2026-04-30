@@ -8,13 +8,23 @@
   "auto_config_method": "other",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "WatchGuard Firebox is a vendor tile with no Agent metric check: there is no `datadog_checks/<name>/<name>.py`, no `OpenMetricsBaseCheck` subclass, and the spec defines only a `logs` template that ingests UDP syslog on a user-chosen port. Configuration requires the user to (1) point the Firebox device at the Agent's syslog listener and (2) choose an arbitrary listen port. There is no upstream service to probe from the Agent's side and no host/port to derive over the wire — the user's intent (which port, which device) is the missing input. Auto-config in the network-probe sense does not apply.",
+  "explanation": "WatchGuard Firebox is a vendor tile with no Agent metric check: there is no `datadog_checks/<name>/<name>.py`, no `OpenMetricsBaseCheck` subclass, and the spec defines only a `logs` template that ingests UDP syslog on a user-chosen port. Configuration requires the user to (1) point the Firebox device at the Agent's syslog listener and (2) choose an arbitrary listen port. There is no upstream service to probe from the Agent's side and no host/port to derive over the wire \u2014 the user's intent (which port, which device) is the missing input. Auto-config in the network-probe sense does not apply.",
   "references": [
-    {"kind": "spec", "path": "watchguard_firebox/assets/configuration/spec.yaml"},
-    {"kind": "readme", "path": "watchguard_firebox/README.md"},
-    {"kind": "other", "path": "watchguard_firebox/manifest.json"}
+    {
+      "kind": "spec",
+      "path": "watchguard_firebox/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "readme",
+      "path": "watchguard_firebox/README.md"
+    },
+    {
+      "kind": "other",
+      "path": "watchguard_firebox/manifest.json"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Logs-only vendor tile (UDP syslog ingest). Same structural pattern as other vendor security tiles: no check.py, only a `logs` block in the spec."
+  "notes": "Logs-only vendor tile (UDP syslog ingest). Same structural pattern as other vendor security tiles: no check.py, only a `logs` block in the spec.",
+  "discovery_bucket": "logs-only"
 }

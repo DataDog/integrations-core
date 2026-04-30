@@ -2,14 +2,42 @@
   "name": "silk",
   "display_name": "Silk",
   "spec_path": "silk/assets/configuration/spec.yaml",
-  "required_fields": ["host_address", "username", "password"],
+  "required_fields": [
+    "host_address",
+    "username",
+    "password"
+  ],
   "all_relevant_fields": [
-    {"name": "host_address", "required": true, "default": null},
-    {"name": "username", "required": false, "default": null},
-    {"name": "password", "required": false, "default": null},
-    {"name": "enable_blocksize_statistics", "required": false, "default": false},
-    {"name": "enable_read_write_statistics", "required": false, "default": false},
-    {"name": "tls_verify", "required": false, "default": null}
+    {
+      "name": "host_address",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "username",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "enable_blocksize_statistics",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "enable_read_write_statistics",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "tls_verify",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
@@ -17,11 +45,21 @@
   "auto_conf_path": null,
   "explanation": "The Silk check builds a base URL `<host_address>/api/v2/` and issues authenticated HTTPS GETs to the Silk Cloud Data Platform REST API (`/system/state`, `/system/servers`, etc.). The spec only marks `host_address` as `required: true`, but the upstream Silk SDP REST API gates every endpoint behind the user's Silk credentials supplied via the standard HTTP `username`/`password` template, and the integration's documented setup requires a dedicated read-only Silk user. No unauthenticated path exists, so a wire probe cannot bring up the integration.",
   "references": [
-    {"kind": "spec", "path": "silk/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "silk/datadog_checks/silk/check.py"},
-    {"kind": "check", "path": "silk/datadog_checks/silk/constants.py"}
+    {
+      "kind": "spec",
+      "path": "silk/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "silk/datadog_checks/silk/check.py"
+    },
+    {
+      "kind": "check",
+      "path": "silk/datadog_checks/silk/constants.py"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Vendor REST API + per-tenant credentials (pattern D)."
+  "notes": "Vendor REST API + per-tenant credentials (pattern D).",
+  "discovery_bucket": "creds-api-token"
 }

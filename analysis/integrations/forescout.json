@@ -8,12 +8,19 @@
   "auto_config_method": "other",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "Forescout is a logs-only vendor tile. The spec defines no `instances` block at all, only a `logs` template that expects the user to configure a syslog `tcp`/`udp` listener `port` on the Agent (the Forescout Syslog plugin must be installed and pointed at this port). There is no Agent metric check, no Python check class, and no upstream service to probe — Forescout pushes syslog into the Agent rather than the Agent pulling. The integration's value is the log pipeline plus dashboards; auto-config in the network-probe sense does not apply.",
+  "explanation": "Forescout is a logs-only vendor tile. The spec defines no `instances` block at all, only a `logs` template that expects the user to configure a syslog `tcp`/`udp` listener `port` on the Agent (the Forescout Syslog plugin must be installed and pointed at this port). There is no Agent metric check, no Python check class, and no upstream service to probe \u2014 Forescout pushes syslog into the Agent rather than the Agent pulling. The integration's value is the log pipeline plus dashboards; auto-config in the network-probe sense does not apply.",
   "references": [
-    {"kind": "spec", "path": "forescout/assets/configuration/spec.yaml"},
-    {"kind": "readme", "path": "forescout/README.md"}
+    {
+      "kind": "spec",
+      "path": "forescout/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "readme",
+      "path": "forescout/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern N (logs-only / vendor syslog tile). No check.py exists under datadog_checks/forescout/."
+  "notes": "Pattern N (logs-only / vendor syslog tile). No check.py exists under datadog_checks/forescout/.",
+  "discovery_bucket": "logs-only"
 }

@@ -13,6 +13,7 @@ DATA = [
     {
         "name": "redisdb", "display_name": "Redis",
         "classification": "generic",
+        "discovery_bucket": "tcp-protocol-handshake",
         "required_fields": ["host", "port"],
         "auto_config_method": "tcp-banner-probe",
         "explanation": "PING banner.",
@@ -22,6 +23,7 @@ DATA = [
     {
         "name": "nginx", "display_name": "NGINX",
         "classification": "custom",
+        "discovery_bucket": "http-multi-path",
         "required_fields": ["nginx_status_url"],
         "auto_config_method": "http-path-probe",
         "explanation": "Multiple stub_status path conventions.",
@@ -31,6 +33,7 @@ DATA = [
     {
         "name": "github", "display_name": "GitHub",
         "classification": "impossible",
+        "discovery_bucket": "creds-api-token",
         "required_fields": ["github_app_id", "private_key"],
         "auto_config_method": "credentials-required",
         "explanation": "Needs app id + private key.",
@@ -40,11 +43,15 @@ DATA = [
 ]
 
 
-def test_all_three_tables_present():
+def test_section_and_bucket_headers():
     out = render.render(DATA, generated_at="2026-04-30")
-    assert "### Generic auto-config possible" in out
-    assert "### Custom auto-config possible" in out
-    assert "### Auto-config impossible" in out
+    assert "## Fully generic" in out
+    assert "## TCP probe with integration-specific protocol" in out
+    assert "## HTTP probe with integration-specific verification" in out
+    assert "## Credentials required" in out
+    assert "### `tcp-protocol-handshake`" in out
+    assert "### `http-multi-path`" in out
+    assert "### `creds-api-token`" in out
     assert "redisdb" in out
     assert "nginx" in out
     assert "github" in out

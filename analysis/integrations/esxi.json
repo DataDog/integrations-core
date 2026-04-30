@@ -2,27 +2,69 @@
   "name": "esxi",
   "display_name": "ESXi",
   "spec_path": "esxi/assets/configuration/spec.yaml",
-  "required_fields": ["host", "username", "password"],
+  "required_fields": [
+    "host",
+    "username",
+    "password"
+  ],
   "all_relevant_fields": [
-    {"name": "host", "required": true, "default": null},
-    {"name": "username", "required": true, "default": null},
-    {"name": "password", "required": true, "default": null},
-    {"name": "ssl_verify", "required": false, "default": true},
-    {"name": "ssl_cafile", "required": false, "default": null},
-    {"name": "ssl_capath", "required": false, "default": null},
-    {"name": "proxy", "required": false, "default": null}
+    {
+      "name": "host",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "username",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "ssl_verify",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "ssl_cafile",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "ssl_capath",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "proxy",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "The ESXi check connects to the host's vSphere Web Services API via pyVmomi (`pyVim.connect.SmartConnect`) using `host`, `username`, and `password`, all marked required in the spec. The check verifies it is talking to an ESXi host (not vCenter) and then walks the inventory and perfManager. There is no anonymous probe path — every API call requires authenticated session credentials provisioned out-of-band by the user.",
+  "explanation": "The ESXi check connects to the host's vSphere Web Services API via pyVmomi (`pyVim.connect.SmartConnect`) using `host`, `username`, and `password`, all marked required in the spec. The check verifies it is talking to an ESXi host (not vCenter) and then walks the inventory and perfManager. There is no anonymous probe path \u2014 every API call requires authenticated session credentials provisioned out-of-band by the user.",
   "references": [
-    {"kind": "spec", "path": "esxi/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "esxi/datadog_checks/esxi/check.py"},
-    {"kind": "readme", "path": "esxi/README.md"}
+    {
+      "kind": "spec",
+      "path": "esxi/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "esxi/datadog_checks/esxi/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "esxi/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern D: spec-required username + password for the vSphere API. Same shape as vsphere/postgres/mysql credential bindings."
+  "notes": "Pattern D: spec-required username + password for the vSphere API. Same shape as vsphere/postgres/mysql credential bindings.",
+  "discovery_bucket": "creds-spec-mandated"
 }

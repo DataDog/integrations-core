@@ -2,14 +2,40 @@
   "name": "mcache",
   "display_name": "Memcached",
   "spec_path": "mcache/assets/configuration/spec.yaml",
-  "required_fields": ["url"],
+  "required_fields": [
+    "url"
+  ],
   "all_relevant_fields": [
-    {"name": "url",      "required": true,  "default": null},
-    {"name": "socket",   "required": false, "default": null},
-    {"name": "port",     "required": false, "default": 11211},
-    {"name": "username", "required": false, "default": null},
-    {"name": "password", "required": false, "default": null},
-    {"name": "options",  "required": false, "default": null}
+    {
+      "name": "url",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "socket",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "port",
+      "required": false,
+      "default": 11211
+    },
+    {
+      "name": "username",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "options",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "generic",
   "auto_config_method": "tcp-banner-probe",
@@ -17,12 +43,25 @@
   "auto_conf_path": "mcache/datadog_checks/mcache/data/auto_conf.yaml",
   "explanation": "Memcached speaks a well-known text/binary protocol on port 11211; the check connects via bmemcached and issues stats commands. Required configuration is just url (host) and an optional port that defaults to 11211. Authentication via username/password is supported but optional and rarely deployed (default Memcached has no auth). The shipped auto_conf.yaml templates url=%%host%% with port 11211, confirming Autodiscovery already works generically. Discovery via TCP banner probe matches procedure pattern C.",
   "references": [
-    {"kind": "spec",      "path": "mcache/assets/configuration/spec.yaml"},
-    {"kind": "check",     "path": "mcache/datadog_checks/mcache/mcache.py"},
-    {"kind": "auto_conf", "path": "mcache/datadog_checks/mcache/data/auto_conf.yaml"},
-    {"kind": "readme",    "path": "mcache/README.md"}
+    {
+      "kind": "spec",
+      "path": "mcache/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "mcache/datadog_checks/mcache/mcache.py"
+    },
+    {
+      "kind": "auto_conf",
+      "path": "mcache/datadog_checks/mcache/data/auto_conf.yaml"
+    },
+    {
+      "kind": "readme",
+      "path": "mcache/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Same shape as redisdb. SASL-authenticated deployments would fall through; rare in practice."
+  "notes": "Same shape as redisdb. SASL-authenticated deployments would fall through; rare in practice.",
+  "discovery_bucket": "tcp-protocol-handshake"
 }

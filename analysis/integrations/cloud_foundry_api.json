@@ -2,13 +2,37 @@
   "name": "cloud_foundry_api",
   "display_name": "Cloud Foundry API",
   "spec_path": "cloud_foundry_api/assets/configuration/spec.yaml",
-  "required_fields": ["api_url", "client_id", "client_secret"],
+  "required_fields": [
+    "api_url",
+    "client_id",
+    "client_secret"
+  ],
   "all_relevant_fields": [
-    {"name": "api_url", "required": true, "default": null},
-    {"name": "client_id", "required": true, "default": null},
-    {"name": "client_secret", "required": true, "default": null},
-    {"name": "event_filter", "required": false, "default": null},
-    {"name": "results_per_page", "required": false, "default": 100}
+    {
+      "name": "api_url",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "client_id",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "client_secret",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "event_filter",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "results_per_page",
+      "required": false,
+      "default": 100
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
@@ -16,10 +40,17 @@
   "auto_conf_path": null,
   "explanation": "The Cloud Foundry API check authenticates to UAA with a `client_id` / `client_secret` (OAuth2 client credentials grant) and uses the resulting bearer token to query the Cloud Controller v2/v3 APIs. The check raises `ConfigurationError` if any of `api_url`, `client_id`, or `client_secret` is missing. The credentials must be provisioned out-of-band against the deployment's UAA; they are not discoverable from the wire. Even though the API URL could in principle be probed, classification is dominated by the auth blocker.",
   "references": [
-    {"kind": "spec", "path": "cloud_foundry_api/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "cloud_foundry_api/datadog_checks/cloud_foundry_api/cloud_foundry_api.py"}
+    {
+      "kind": "spec",
+      "path": "cloud_foundry_api/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "cloud_foundry_api/datadog_checks/cloud_foundry_api/cloud_foundry_api.py"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern D (spec-required credentials)."
+  "notes": "Pattern D (spec-required credentials).",
+  "discovery_bucket": "creds-api-token"
 }

@@ -2,16 +2,50 @@
   "name": "clickhouse",
   "display_name": "ClickHouse",
   "spec_path": "clickhouse/assets/configuration/spec.yaml",
-  "required_fields": ["server"],
+  "required_fields": [
+    "server"
+  ],
   "all_relevant_fields": [
-    {"name": "server", "required": true, "default": null},
-    {"name": "port", "required": false, "default": 8123},
-    {"name": "username", "required": false, "default": "default"},
-    {"name": "password", "required": false, "default": ""},
-    {"name": "db", "required": false, "default": "default"},
-    {"name": "tls_verify", "required": false, "default": false},
-    {"name": "verify", "required": false, "default": true},
-    {"name": "dbm", "required": false, "default": false}
+    {
+      "name": "server",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "port",
+      "required": false,
+      "default": 8123
+    },
+    {
+      "name": "username",
+      "required": false,
+      "default": "default"
+    },
+    {
+      "name": "password",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "db",
+      "required": false,
+      "default": "default"
+    },
+    {
+      "name": "tls_verify",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "verify",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "dbm",
+      "required": false,
+      "default": false
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
@@ -19,11 +53,21 @@
   "auto_conf_path": null,
   "explanation": "The check uses the `clickhouse-connect` Python client to authenticate to ClickHouse's HTTP interface (default port 8123) and runs SQL queries against `system.*` tables. While the spec marks `username`/`password` as optional (defaulting to `default` / empty), that combination only works on completely unsecured ClickHouse installs; any production deployment, ClickHouse Cloud, or DBM-enabled setup requires real credentials with `SHOW`/`SELECT` privileges on system tables. Even if discovery picked the host+port, it cannot generate or supply a valid SQL user. This is pattern D (spec-required credentials) softened to pattern E (auth-optional in spec, practically required in production).",
   "references": [
-    {"kind": "spec", "path": "clickhouse/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "clickhouse/datadog_checks/clickhouse/clickhouse.py"},
-    {"kind": "readme", "path": "clickhouse/README.md"}
+    {
+      "kind": "spec",
+      "path": "clickhouse/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "clickhouse/datadog_checks/clickhouse/clickhouse.py"
+    },
+    {
+      "kind": "readme",
+      "path": "clickhouse/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "HTTP interface on 8123 is well-known. The hint mentioned a 'JMX-like protocol' — actually port 9000 is ClickHouse's native TCP protocol, not JMX, and the integration explicitly does not use it. Auth is what blocks autodiscovery."
+  "notes": "HTTP interface on 8123 is well-known. The hint mentioned a 'JMX-like protocol' \u2014 actually port 9000 is ClickHouse's native TCP protocol, not JMX, and the integration explicitly does not use it. Auth is what blocks autodiscovery.",
+  "discovery_bucket": "creds-spec-mandated"
 }

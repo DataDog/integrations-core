@@ -4,22 +4,46 @@
   "spec_path": "kong/assets/configuration/spec.yaml",
   "required_fields": [],
   "all_relevant_fields": [
-    {"name": "openmetrics_endpoint", "required": false, "default": "http://localhost:8001/metrics"},
-    {"name": "kong_status_url", "required": false, "default": "http://localhost:8001/status/"}
+    {
+      "name": "openmetrics_endpoint",
+      "required": false,
+      "default": "http://localhost:8001/metrics"
+    },
+    {
+      "name": "kong_status_url",
+      "required": false,
+      "default": "http://localhost:8001/status/"
+    }
   ],
   "classification": "generic",
   "auto_config_method": "openmetrics-port-scan",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "Modern Kong exposes Prometheus/OpenMetrics on the Admin API at `http://<host>:8001/metrics` (Prometheus plugin) — the recommended path documented in the README. The legacy `kong_status_url` mode hits `http://<host>:8001/status/` on the same Admin API, also unauthenticated by default. Both endpoints share the same well-known port (8001) and don't require credentials in the default deployment. The check dispatches to `KongCheck` (OpenMetricsBaseCheckV2) when `openmetrics_endpoint` is set, otherwise to the legacy status parser. An OpenMetrics port scan on 8001 with `/metrics` is the canonical generic case.",
+  "explanation": "Modern Kong exposes Prometheus/OpenMetrics on the Admin API at `http://<host>:8001/metrics` (Prometheus plugin) \u2014 the recommended path documented in the README. The legacy `kong_status_url` mode hits `http://<host>:8001/status/` on the same Admin API, also unauthenticated by default. Both endpoints share the same well-known port (8001) and don't require credentials in the default deployment. The check dispatches to `KongCheck` (OpenMetricsBaseCheckV2) when `openmetrics_endpoint` is set, otherwise to the legacy status parser. An OpenMetrics port scan on 8001 with `/metrics` is the canonical generic case.",
   "references": [
-    {"kind": "spec", "path": "kong/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "kong/datadog_checks/kong/check.py"},
-    {"kind": "check", "path": "kong/datadog_checks/kong/kong.py"},
-    {"kind": "readme", "path": "kong/README.md"},
-    {"kind": "upstream", "url": "https://docs.konghq.com/hub/kong-inc/prometheus/"}
+    {
+      "kind": "spec",
+      "path": "kong/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "kong/datadog_checks/kong/check.py"
+    },
+    {
+      "kind": "check",
+      "path": "kong/datadog_checks/kong/kong.py"
+    },
+    {
+      "kind": "readme",
+      "path": "kong/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://docs.konghq.com/hub/kong-inc/prometheus/"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Production deployments that protect the Admin API with RBAC or a key-auth plugin would shift this toward `credentials-required`, but the upstream-recommended setup leaves the metrics endpoint open on the internal admin port. Closest to pattern A (OpenMetrics on a known port). No auto_conf.yaml ships today, but the spec assumes the canonical URL."
+  "notes": "Production deployments that protect the Admin API with RBAC or a key-auth plugin would shift this toward `credentials-required`, but the upstream-recommended setup leaves the metrics endpoint open on the internal admin port. Closest to pattern A (OpenMetrics on a known port). No auto_conf.yaml ships today, but the spec assumes the canonical URL.",
+  "discovery_bucket": "generic-openmetrics-scan"
 }

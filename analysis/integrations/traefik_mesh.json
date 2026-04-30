@@ -2,11 +2,25 @@
   "name": "traefik_mesh",
   "display_name": "Traefik Mesh",
   "spec_path": "traefik_mesh/assets/configuration/spec.yaml",
-  "required_fields": ["openmetrics_endpoint"],
+  "required_fields": [
+    "openmetrics_endpoint"
+  ],
   "all_relevant_fields": [
-    {"name": "openmetrics_endpoint", "required": true, "default": null},
-    {"name": "traefik_proxy_api_endpoint", "required": false, "default": null},
-    {"name": "traefik_controller_api_endpoint", "required": false, "default": null}
+    {
+      "name": "openmetrics_endpoint",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "traefik_proxy_api_endpoint",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "traefik_controller_api_endpoint",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "custom",
   "auto_config_method": "http-path-probe",
@@ -14,12 +28,25 @@
   "auto_conf_path": null,
   "explanation": "Traefik Mesh's primary collection path is OpenMetrics on the proxy's metrics entrypoint (default port 8082, path `/metrics`), which alone would be a generic openmetrics-port-scan case. However the check additionally queries two optional management APIs on different default ports (proxy API on 8080, controller API on 9000) for version metadata, mesh node readiness and controller readiness service checks. Full coverage therefore requires probing three distinct endpoints/ports per cluster, so discovery is integration-specific. The README documents the exact ports and explicitly suggests `%%host%%:8082/metrics` for autodiscovery.",
   "references": [
-    {"kind": "spec", "path": "traefik_mesh/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "traefik_mesh/datadog_checks/traefik_mesh/check.py"},
-    {"kind": "readme", "path": "traefik_mesh/README.md"},
-    {"kind": "upstream", "url": "https://doc.traefik.io/traefik-mesh/observability/"}
+    {
+      "kind": "spec",
+      "path": "traefik_mesh/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "traefik_mesh/datadog_checks/traefik_mesh/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "traefik_mesh/README.md"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://doc.traefik.io/traefik-mesh/observability/"
+    }
   ],
   "confidence": "medium",
   "needs_human_review": false,
-  "notes": "Single required field is the OpenMetrics endpoint; if only that is auto-configured, version, controller readiness and mesh node readiness will not be collected. README ports: 8082 (metrics), 8080 (proxy API), 9000 (controller API)."
+  "notes": "Single required field is the OpenMetrics endpoint; if only that is auto-configured, version, controller readiness and mesh node readiness will not be collected. README ports: 8082 (metrics), 8080 (proxy API), 9000 (controller API).",
+  "discovery_bucket": "http-multi-path"
 }

@@ -2,9 +2,15 @@
   "name": "nvidia_nim",
   "display_name": "NVIDIA NIM",
   "spec_path": "nvidia_nim/assets/configuration/spec.yaml",
-  "required_fields": ["openmetrics_endpoint"],
+  "required_fields": [
+    "openmetrics_endpoint"
+  ],
   "all_relevant_fields": [
-    {"name": "openmetrics_endpoint", "required": true, "default": "http://localhost:8000/metrics"}
+    {
+      "name": "openmetrics_endpoint",
+      "required": true,
+      "default": "http://localhost:8000/metrics"
+    }
   ],
   "classification": "generic",
   "auto_config_method": "openmetrics-port-scan",
@@ -12,11 +18,21 @@
   "auto_conf_path": null,
   "explanation": "NVIDIA NIM (Inference Microservice) exposes Prometheus metrics on a single canonical `/metrics` endpoint, defaulting to port 8000. The check is a thin OpenMetricsBaseCheckV2 subclass with one required field (`openmetrics_endpoint`). Pattern A: a single canonical OpenMetrics URL with a fixed port and path. The version metadata sub-call simply rewrites `/metrics` to `/v1/version` on the same host; no extra user input. No existing auto_conf.yaml on disk, but discovery is straightforward.",
   "references": [
-    {"kind": "spec", "path": "nvidia_nim/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "nvidia_nim/datadog_checks/nvidia_nim/check.py"},
-    {"kind": "upstream", "url": "https://docs.nvidia.com/nim/large-language-models/latest/observability.html"}
+    {
+      "kind": "spec",
+      "path": "nvidia_nim/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "nvidia_nim/datadog_checks/nvidia_nim/check.py"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://docs.nvidia.com/nim/large-language-models/latest/observability.html"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": ""
+  "notes": "",
+  "discovery_bucket": "generic-openmetrics-scan"
 }

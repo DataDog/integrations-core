@@ -2,17 +2,57 @@
   "name": "cloudera",
   "display_name": "Cloudera",
   "spec_path": "cloudera/assets/configuration/spec.yaml",
-  "required_fields": ["api_url", "workload_username", "workload_password"],
+  "required_fields": [
+    "api_url",
+    "workload_username",
+    "workload_password"
+  ],
   "all_relevant_fields": [
-    {"name": "workload_username", "required": true, "default": null},
-    {"name": "workload_password", "required": true, "default": null},
-    {"name": "api_url", "required": true, "default": null},
-    {"name": "verify_ssl", "required": false, "default": true},
-    {"name": "ssl_ca_cert", "required": false, "default": null},
-    {"name": "cert_file", "required": false, "default": null},
-    {"name": "key_file", "required": false, "default": null},
-    {"name": "clusters", "required": false, "default": null},
-    {"name": "cloudera_client", "required": false, "default": "cm_client"}
+    {
+      "name": "workload_username",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "workload_password",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "api_url",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "verify_ssl",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "ssl_ca_cert",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "cert_file",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "key_file",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "clusters",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "cloudera_client",
+      "required": false,
+      "default": "cm_client"
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
@@ -20,10 +60,17 @@
   "auto_conf_path": null,
   "explanation": "The Cloudera integration scrapes the Cloudera Manager REST API (e.g. `https://cluster1.cloudera.site/cluster_1/cdp-proxy-api/cm-api/v48`). The check requires `workload_username` and `workload_password` (CDP Workload credentials) at init_config level plus a per-instance `api_url` that includes the deployment-specific cluster slug and API version. None of this is recoverable from a generic network probe: the URL embeds tenant-specific paths and the API will not respond without the workload credential. Even the optional mTLS path needs a user-provisioned `cert_file`/`key_file`.",
   "references": [
-    {"kind": "spec", "path": "cloudera/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "cloudera/datadog_checks/cloudera/check.py"}
+    {
+      "kind": "spec",
+      "path": "cloudera/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "cloudera/datadog_checks/cloudera/check.py"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Pattern D (spec-required credentials). Cloudera Manager REST API requires CDP workload auth and a tenant-specific URL path."
+  "notes": "Pattern D (spec-required credentials). Cloudera Manager REST API requires CDP workload auth and a tenant-specific URL path.",
+  "discovery_bucket": "creds-api-token"
 }

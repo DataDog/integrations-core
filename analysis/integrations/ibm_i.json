@@ -2,26 +2,64 @@
   "name": "ibm_i",
   "display_name": "IBM i",
   "spec_path": "ibm_i/assets/configuration/spec.yaml",
-  "required_fields": ["username", "password", "driver"],
+  "required_fields": [
+    "username",
+    "password",
+    "driver"
+  ],
   "all_relevant_fields": [
-    {"name": "system", "required": false, "default": null},
-    {"name": "hostname", "required": false, "default": null},
-    {"name": "username", "required": false, "default": null},
-    {"name": "password", "required": false, "default": null},
-    {"name": "driver", "required": false, "default": "iSeries Access ODBC Driver"},
-    {"name": "connection_string", "required": false, "default": null}
+    {
+      "name": "system",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "hostname",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "username",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "password",
+      "required": false,
+      "default": null
+    },
+    {
+      "name": "driver",
+      "required": false,
+      "default": "iSeries Access ODBC Driver"
+    },
+    {
+      "name": "connection_string",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "impossible",
   "auto_config_method": "credentials-required",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "IBM i (formerly AS/400) is queried over ODBC using a proprietary driver (`iSeries Access ODBC Driver` or equivalent). The check spawns a Python subprocess that opens a pyodbc connection and runs SQL against `SYSIBMADM` views. It needs (a) a user-profile name + password (or a raw `connection_string`), and (b) a host-side ODBC driver installed and registered. Neither is discoverable from the wire: the credentials must be provisioned out of band, and the driver must be installed by the operator. Pattern D plus a host-prerequisite check. None of `username`, `password`, `driver`, or `connection_string` are flagged `required: true` in the spec, but in practice authentication is not optional — without one of them the check cannot connect.",
+  "explanation": "IBM i (formerly AS/400) is queried over ODBC using a proprietary driver (`iSeries Access ODBC Driver` or equivalent). The check spawns a Python subprocess that opens a pyodbc connection and runs SQL against `SYSIBMADM` views. It needs (a) a user-profile name + password (or a raw `connection_string`), and (b) a host-side ODBC driver installed and registered. Neither is discoverable from the wire: the credentials must be provisioned out of band, and the driver must be installed by the operator. Pattern D plus a host-prerequisite check. None of `username`, `password`, `driver`, or `connection_string` are flagged `required: true` in the spec, but in practice authentication is not optional \u2014 without one of them the check cannot connect.",
   "references": [
-    {"kind": "spec", "path": "ibm_i/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "ibm_i/datadog_checks/ibm_i/check.py"},
-    {"kind": "upstream", "url": "https://www.ibm.com/docs/en/i/7.4?topic=services-odbc-driver"}
+    {
+      "kind": "spec",
+      "path": "ibm_i/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "ibm_i/datadog_checks/ibm_i/check.py"
+    },
+    {
+      "kind": "upstream",
+      "url": "https://www.ibm.com/docs/en/i/7.4?topic=services-odbc-driver"
+    }
   ],
   "confidence": "high",
   "needs_human_review": true,
-  "notes": "Flagged for human review for the host-prerequisite angle: the proprietary ODBC driver must be installed on the Agent host. This is a different shape from pattern D (DB credentials only) and also from pattern L (local CLI). Could warrant a new pattern: 'Proprietary client library prerequisite' — auto-config has to detect both credentials and a non-trivial driver install."
+  "notes": "Flagged for human review for the host-prerequisite angle: the proprietary ODBC driver must be installed on the Agent host. This is a different shape from pattern D (DB credentials only) and also from pattern L (local CLI). Could warrant a new pattern: 'Proprietary client library prerequisite' \u2014 auto-config has to detect both credentials and a non-trivial driver install.",
+  "discovery_bucket": "creds-proprietary-client"
 }

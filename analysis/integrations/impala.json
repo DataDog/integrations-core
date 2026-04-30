@@ -2,22 +2,43 @@
   "name": "impala",
   "display_name": "Impala",
   "spec_path": "impala/assets/configuration/spec.yaml",
-  "required_fields": ["service_type", "openmetrics_endpoint"],
+  "required_fields": [
+    "service_type",
+    "openmetrics_endpoint"
+  ],
   "all_relevant_fields": [
-    {"name": "service_type", "required": true, "default": "daemon"},
-    {"name": "openmetrics_endpoint", "required": true, "default": null}
+    {
+      "name": "service_type",
+      "required": true,
+      "default": "daemon"
+    },
+    {
+      "name": "openmetrics_endpoint",
+      "required": true,
+      "default": null
+    }
   ],
   "classification": "custom",
   "auto_config_method": "http-path-probe",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "Impala's check is OpenMetricsBaseCheckV2 hitting `/metrics_prometheus` on each daemon's debug HTTP server. No credentials are needed for the Prometheus endpoint. However, the integration is a topology multiplexer (pattern S): `service_type` is required and selects between three distinct backend roles (daemon=25000, statestore=25010, catalog=25020), each on a different port and emitting a different metric set. Discovery must probe all three known ports for `/metrics_prometheus` and tag the resulting instance with the matching service_type. The path is non-standard enough (not `/metrics`) that a generic OpenMetrics port-scan won't suffice — it needs the specific path.",
+  "explanation": "Impala's check is OpenMetricsBaseCheckV2 hitting `/metrics_prometheus` on each daemon's debug HTTP server. No credentials are needed for the Prometheus endpoint. However, the integration is a topology multiplexer (pattern S): `service_type` is required and selects between three distinct backend roles (daemon=25000, statestore=25010, catalog=25020), each on a different port and emitting a different metric set. Discovery must probe all three known ports for `/metrics_prometheus` and tag the resulting instance with the matching service_type. The path is non-standard enough (not `/metrics`) that a generic OpenMetrics port-scan won't suffice \u2014 it needs the specific path.",
   "references": [
-    {"kind": "spec", "path": "impala/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "impala/datadog_checks/impala/check.py"},
-    {"kind": "readme", "path": "impala/README.md"}
+    {
+      "kind": "spec",
+      "path": "impala/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "impala/datadog_checks/impala/check.py"
+    },
+    {
+      "kind": "readme",
+      "path": "impala/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Three role-specific ports + a fixed path are stable across Impala versions. service_type is a freeform label that auto-config can synthesize from the matched port."
+  "notes": "Three role-specific ports + a fixed path are stable across Impala versions. service_type is a freeform label that auto-config can synthesize from the matched port.",
+  "discovery_bucket": "http-multi-path"
 }

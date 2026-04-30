@@ -16,6 +16,7 @@ VALID = {
     ],
     "classification": "generic",
     "auto_config_method": "tcp-banner-probe",
+    "discovery_bucket": "tcp-protocol-handshake",
     "has_existing_auto_conf": True,
     "auto_conf_path": "redisdb/datadog_checks/redisdb/data/auto_conf.yaml",
     "explanation": "Redis answers a banner; default port 6379.",

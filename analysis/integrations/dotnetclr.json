@@ -10,11 +10,21 @@
   "auto_conf_path": null,
   "explanation": ".NET CLR metrics are collected via Windows Performance Counters (PDH) on the local host where the Agent runs. The spec uses `template: instances/perf_counters` and the check inherits `PerfCountersBaseCheckWithLegacySupport`. There is no remote host/port in the default mode; the check reads the local `.NET CLR Memory`, `.NET CLR Exceptions`, etc. perf-counter object set. Auto-config reduces to detecting whether any .NET CLR-instrumented process is registered with PDH on the Windows host and enabling the check with the default counter list. The hidden `pdh_legacy` template can target a remote machine via username/password but is not the default path.",
   "references": [
-    {"kind": "spec", "path": "dotnetclr/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "dotnetclr/datadog_checks/dotnetclr/check.py"},
-    {"kind": "check", "path": "dotnetclr/datadog_checks/dotnetclr/metrics.py"}
+    {
+      "kind": "spec",
+      "path": "dotnetclr/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "dotnetclr/datadog_checks/dotnetclr/check.py"
+    },
+    {
+      "kind": "check",
+      "path": "dotnetclr/datadog_checks/dotnetclr/metrics.py"
+    }
   ],
   "confidence": "medium",
   "needs_human_review": false,
-  "notes": "Pattern H (local Windows host detection), same shape as aspdotnet and iis. Auto-config trigger is '.NET CLR perf-counter objects present on this machine', not a network probe."
+  "notes": "Pattern H (local Windows host detection), same shape as aspdotnet and iis. Auto-config trigger is '.NET CLR perf-counter objects present on this machine', not a network probe.",
+  "discovery_bucket": "generic-windows-perf"
 }

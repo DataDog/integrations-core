@@ -4,19 +4,33 @@
   "spec_path": "btrfs/assets/configuration/spec.yaml",
   "required_fields": [],
   "all_relevant_fields": [
-    {"name": "excluded_devices", "required": false, "default": null}
+    {
+      "name": "excluded_devices",
+      "required": false,
+      "default": null
+    }
   ],
   "classification": "generic",
   "auto_config_method": "other",
   "has_existing_auto_conf": false,
   "auto_conf_path": null,
-  "explanation": "The Btrfs check has no required configuration fields and no network endpoint. It enumerates `psutil.disk_partitions()` on the Agent host, filters those whose `fstype == 'btrfs'`, and issues `BTRFS_IOC_SPACE_INFO` / `BTRFS_IOC_FS_INFO` / `BTRFS_IOC_DEV_INFO` ioctls against each mountpoint via a directory file descriptor. There is no host/port/URL/credential to discover. Auto-config is therefore trivial: emit the integration with its default empty instance whenever the Agent host has at least one mounted btrfs filesystem (or even unconditionally — the check raises only if zero btrfs devices are present). Discovery is a host-local presence check (\"is any filesystem of type btrfs mounted?\"), analogous to pattern H/L but with no binary or network involved.",
+  "explanation": "The Btrfs check has no required configuration fields and no network endpoint. It enumerates `psutil.disk_partitions()` on the Agent host, filters those whose `fstype == 'btrfs'`, and issues `BTRFS_IOC_SPACE_INFO` / `BTRFS_IOC_FS_INFO` / `BTRFS_IOC_DEV_INFO` ioctls against each mountpoint via a directory file descriptor. There is no host/port/URL/credential to discover. Auto-config is therefore trivial: emit the integration with its default empty instance whenever the Agent host has at least one mounted btrfs filesystem (or even unconditionally \u2014 the check raises only if zero btrfs devices are present). Discovery is a host-local presence check (\"is any filesystem of type btrfs mounted?\"), analogous to pattern H/L but with no binary or network involved.",
   "references": [
-    {"kind": "spec", "path": "btrfs/assets/configuration/spec.yaml"},
-    {"kind": "check", "path": "btrfs/datadog_checks/btrfs/btrfs.py"},
-    {"kind": "readme", "path": "btrfs/README.md"}
+    {
+      "kind": "spec",
+      "path": "btrfs/assets/configuration/spec.yaml"
+    },
+    {
+      "kind": "check",
+      "path": "btrfs/datadog_checks/btrfs/btrfs.py"
+    },
+    {
+      "kind": "readme",
+      "path": "btrfs/README.md"
+    }
   ],
   "confidence": "high",
   "needs_human_review": false,
-  "notes": "Classified as generic because the trigger is universal (presence of a btrfs mount on the host) and no per-instance input is needed. Method `other` because there is no network probe — discovery is via the host's mount table. The Agent process must run with permissions to open the mountpoint and issue the ioctls (typically root or CAP_SYS_ADMIN), which is an environmental constraint rather than a credential."
+  "notes": "Classified as generic because the trigger is universal (presence of a btrfs mount on the host) and no per-instance input is needed. Method `other` because there is no network probe \u2014 discovery is via the host's mount table. The Agent process must run with permissions to open the mountpoint and issue the ioctls (typically root or CAP_SYS_ADMIN), which is an environmental constraint rather than a credential.",
+  "discovery_bucket": "generic-linux-procfs"
 }
