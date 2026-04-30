@@ -5,11 +5,11 @@ This integration collects the following indicator types:
 - IP
 - Domain
 
-Integrate SpyCloud with Datadog to enhance your security logs with threat intelligence, enabling analysis of matched IOCs through pre-built dashboards. Additionally, the integration can be used for Cloud SIEM detection rules for enhanced monitoring and security.
+Integrate SpyCloud with Datadog to enrich your security logs with threat intelligence and analyze matched IOCs through pre-built dashboards. The integration also feeds Cloud SIEM detection rules.
 
 ## Setup
 
-### Obtain an API Key from SpyCloud Platform
+### Obtain an API key from the SpyCloud Customer Portal
 
 1. Log in to your SpyCloud Customer Portal.
 2. Navigate to the **API** tab in the sidebar.
@@ -17,15 +17,15 @@ Integrate SpyCloud with Datadog to enhance your security logs with threat intell
 
 ### Connect your SpyCloud account to Datadog
 
-1. Provide following details.
+1. Provide the following details:
    | Parameter | Description |
    | ---------- | ---------------------------------------------- |
    | API Key | The API Key of your SpyCloud account. |
-   | Collect IP IOCs | Enable to collect IP IOCs. The default value is true. |
-   | Collect Domain IOCs | Enable to collect Domain IOCs. The default value is true. |
+   | Collect IP IOCs | Enable to collect IP IOCs. Enabled by default. |
+   | Collect Domain IOCs | Enable to collect Domain IOCs. Enabled by default. |
    
 2. Click **Save**.
 
 ## Troubleshooting
 
-Need help? Contact  [Datadog support](https://docs.datadoghq.com/help/).
+Need help? Contact [Datadog support](https://docs.datadoghq.com/help/).
