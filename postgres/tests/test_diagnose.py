@@ -468,6 +468,26 @@ def test_missing_explain_function_fails(integration_check, pg_instance):
     assert 'explain_statement' in entry['diagnosis']
 
 
+def test_explain_function_with_trailing_parens_succeeds(integration_check, pg_instance):
+    """explain_function configured with trailing () should not produce invalid SQL."""
+    fn = 'datadog.explain_statement()'
+    instance = dict(pg_instance, dbm=True, query_samples={'explain_function': fn})
+    check = integration_check(instance)
+    dbm_responses = [
+        ("nspname = 'datadog'", [(1,)]),
+        ("has_schema_privilege", [(True,)]),
+        ("extname = 'pg_stat_statements'", [(1,)]),
+        ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
+        (_explain_call('datadog.explain_statement'), _successful_explain()),
+    ]
+    conn = FakeConn(_happy_server_responses() + dbm_responses)
+    with _patch_connection(check, conn):
+        diagnoses = _get_diagnoses(check)
+    entries = _by_name(diagnoses, DatabaseConfigurationError.undefined_explain_function.value)
+    assert len(entries) == 1
+    assert entries[0]['result'] == Diagnosis.DIAGNOSIS_SUCCESS
+
+
 def test_query_samples_probes_each_monitored_database(integration_check, pg_instance):
     instance = dict(pg_instance, dbm=True, query_metrics={'enabled': False})
     check = integration_check(instance)

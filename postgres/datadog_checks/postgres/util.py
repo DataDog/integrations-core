@@ -176,6 +176,11 @@ DIAGNOSTIC_METADATA = {
         ),
         "docs_anchor": DatabaseConfigurationError.pg_stat_statements_not_readable.value,
     },
+    DatabaseConfigurationError.config_validation: {
+        "description": "The Postgres integration configuration failed validation.",
+        "remediation": "Resolve the errors and warnings by editing conf.d/postgres.d/conf.yaml, then restart the agent.",
+        "docs_anchor": DatabaseConfigurationError.config_validation.value,
+    },
 }
 
 
@@ -219,10 +224,13 @@ def _diagnostic_context(code, **kwargs):
     return context
 
 
+_diagnostic_fmt = PartialFormatter()
+
+
 def _format_diagnostic_text(template, **kwargs):
     if not template:
         return template
-    return PartialFormatter().format(template, **kwargs)
+    return _diagnostic_fmt.format(template, **kwargs)
 
 
 class DBExplainError(Enum):

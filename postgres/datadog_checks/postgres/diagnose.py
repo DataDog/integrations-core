@@ -550,8 +550,11 @@ class PostgresDiagnose:
 
         try:
             with conn.cursor() as cursor:
+                # Strip a trailing "()" from config — _safe_identifier re-appends it,
+                # but we supply our own argument list, so "foo()(%s)" would be a syntax error.
+                fn_name = explain_function[:-2] if explain_function.endswith("()") else explain_function
                 cursor.execute(
-                    "SELECT {}(%s)".format(_safe_identifier(explain_function)),
+                    "SELECT {}(%s)".format(_safe_identifier(fn_name)),
                     ("SELECT * FROM pg_stat_activity",),
                 )
                 row = cursor.fetchone()
