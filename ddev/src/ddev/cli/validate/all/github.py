@@ -15,6 +15,10 @@ if TYPE_CHECKING:
     from ddev.cli.validate.all.orchestrator import ValidationConfig, ValidationResult
 
 COMMENT_HEADING = "## Validation Report"
+COMMENT_STATUS_SUCCESS = "<!-- ddev-validation-report:success -->"
+COMMENT_STATUS_ACTION_REQUIRED = "<!-- ddev-validation-report:action-required -->"
+# Suppresses all validation PR comments, including failures, on the next validation run.
+VALIDATION_COMMENT_SUPPRESSION_LABEL = "ci/skip-validation-comments"
 
 
 def parse_pr_number_from_event(event_path: str) -> int | None:
@@ -59,6 +63,32 @@ def get_pr_number(app: Application) -> int | None:
     return None
 
 
+def pr_has_label_from_event(event_path: str, label: str) -> bool:
+    """Return whether the GitHub Actions PR event payload contains a label."""
+    try:
+        event = json.loads(Path(event_path).read_text())
+    except (json.JSONDecodeError, OSError):
+        return False
+
+    pr = event.get("pull_request")
+    if not isinstance(pr, dict):
+        return False
+
+    labels = pr.get("labels", [])
+    if not isinstance(labels, list):
+        return False
+
+    return any(isinstance(item, dict) and item.get("name") == label for item in labels)
+
+
+def should_suppress_validation_comments() -> bool:
+    if os.environ.get("GITHUB_EVENT_NAME") != "pull_request":
+        return False
+    if event_path := os.environ.get("GITHUB_EVENT_PATH"):
+        return pr_has_label_from_event(event_path, VALIDATION_COMMENT_SUPPRESSION_LABEL)
+    return False
+
+
 def get_workflow_run_url() -> str | None:
     server = os.environ.get("GITHUB_SERVER_URL")
     repo = os.environ.get("GITHUB_REPOSITORY")
@@ -75,8 +105,14 @@ def write_step_summary(content: str) -> None:
                 f.write(content + "\n")
 
 
-def _build_preamble(error: str | None, warning: str | None) -> list[str]:
+def is_successful_validation_comment(body: str) -> bool:
+    return COMMENT_STATUS_SUCCESS in body
+
+
+def _build_preamble(error: str | None, warning: str | None, status_marker: str | None = None) -> list[str]:
     parts: list[str] = [f"{COMMENT_HEADING}\n"]
+    if status_marker:
+        parts.append(f"{status_marker}\n")
     if error:
         parts.append(f"> **Error:** {error}\n")
     if warning:
@@ -136,6 +172,7 @@ def format_pr_comment(
     *,
     error: str | None = None,
     warning: str | None = None,
+    successful: bool = False,
 ) -> str:
     """Format a PR comment with collapsible sections to reduce clutter."""
     failures: dict[str, ValidationResult] = {}
@@ -144,7 +181,8 @@ def format_pr_comment(
         (passed if result.success else failures)[name] = result
 
     incomplete = _build_incomplete_warning(expected_validations, results)
-    parts = _build_preamble(error, warning)
+    status_marker = COMMENT_STATUS_SUCCESS if successful else COMMENT_STATUS_ACTION_REQUIRED
+    parts = _build_preamble(error, warning, status_marker)
     parts.extend(incomplete)
 
     if failures:
