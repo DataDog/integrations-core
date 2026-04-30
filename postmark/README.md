@@ -11,9 +11,7 @@ To gain insights into Postmark's broadcast and transactional message streams, in
 Follow the instructions below to configure this integration for your Postmark account.
 
 
-### Configuration
-
-#### Enable open and link tracking in server settings for the message streams
+### Enable open and link tracking in server settings for the message streams
 Follow these steps to enable both features:
 
 1. Log into your [Postmark account][3]. This redirects you to the [servers][4] page.
@@ -21,7 +19,7 @@ Follow these steps to enable both features:
 3. In the navigation panel, click the **Settings** tab.
 4. In the **Tracking** section, enable both **Open tracking** and **Link tracking**.
 
-#### Webhook configuration steps
+### Webhook configuration steps
 Configure the Datadog endpoint to forward the following activity logs to Datadog:
 - **Broadcast** message streams
 - **Transactional** message streams

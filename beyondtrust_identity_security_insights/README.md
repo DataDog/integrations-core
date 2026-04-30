@@ -10,9 +10,7 @@ This integration also includes ready-to-use Cloud SIEM detection rules for enhan
 
 ## Setup
 
-### Configuration
-
-#### Webhook Configuration
+### Webhook Configuration
 
 Configure the Datadog endpoint to forward BeyondTrust Identity Security Insights detections as logs to Datadog.
 

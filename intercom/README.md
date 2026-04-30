@@ -12,9 +12,7 @@ The Intercom integration seamlessly collects admin activities, data events, conv
 
 Follow the instructions below to configure this integration for your Intercom account.
 
-### Configuration
-
-#### Webhook Configuration
+### Webhook Configuration
 
 Configure the Datadog endpoint to forward Intercom events as logs to Datadog. See [Intercom webhook overview][3] for more details.
 

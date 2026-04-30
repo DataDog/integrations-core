@@ -10,9 +10,7 @@ The Adyen integration collects transaction, dispute, and payout data using Adyen
 
 Follow the instructions below to configure this integration for your Adyen account.
 
-### Configuration
-
-#### Webhook Configuration
+### Webhook Configuration
 
 Configure the Datadog endpoint to forward Adyen events as logs to Datadog. For more details, see [Adyen webhook overview][2].
 

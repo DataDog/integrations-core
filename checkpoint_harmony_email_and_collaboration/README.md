@@ -12,9 +12,7 @@ Get detailed visibility into these events with out-of-the-box dashboards, and st
 
 Follow the instructions below to configure this integration for your Check Point Harmony Email & Collaboration account.
 
-### Configuration
-
-#### Webhook Configuration
+### Webhook Configuration
 
 Configure the Datadog endpoint to forward Check Point Harmony Email & Collaboration events as logs to Datadog.
 
