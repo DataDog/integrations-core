@@ -96,6 +96,28 @@ def fake_repo(
 
 
 @pytest.fixture
+def fake_integrations_core_repo(
+    tmp_path_factory,
+    config_file,
+    mocker,
+):
+    """Like ``fake_repo``, but path includes ``integrations-core`` so ``validate dep`` sets ``repo_core`` true."""
+    mocker.patch('ddev.utils.git.GitRepository.worktrees', return_value=[])
+
+    set_root('')
+    repo_path = tmp_path_factory.mktemp('integrations-core')
+    repo = Repository('core', str(repo_path))
+
+    config_file.model.repos['core'] = str(repo.path)
+    config_file.model.repo = 'core'
+    config_file.save()
+    for file_path, file_name, content in FILES_IN_FAKE_REPO:
+        write_file(repo_path / file_path, file_name, content)
+
+    yield repo
+
+
+@pytest.fixture
 def fake_extras_repo(
     request,
     tmp_path_factory,

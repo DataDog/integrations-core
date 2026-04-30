@@ -105,3 +105,45 @@ def test_one_valid_one_invalid_integration(fake_repo, ddev):
     assert match_regex.match(result.output), f"Unexpected output: {result.output}"
     assert result_2.exit_code == 1
     assert error_regex.search(result_2.output), f"Unexpected output: {result_2.output}"
+
+
+def _write_git_dep_check(repo_path, check_name: str) -> None:
+    git_dep = 'sample_git_pkg @ git+https://github.com/pypa/pip.git@24.0'
+    write_file(
+        repo_path,
+        'agent_requirements.in',
+        f"""datadog-checks-base==37.21.0
+{git_dep}
+""",
+    )
+    write_file(
+        repo_path / check_name,
+        'pyproject.toml',
+        f"""
+        [project]
+        dependencies = [
+            "datadog-checks-base>=37.21.0",
+        ]
+
+        [project.optional-dependencies]
+        libs = [
+            "{git_dep}",
+        ]
+        """,
+    )
+
+
+def test_validate_dep_core_path(fake_integrations_core_repo, ddev):
+    assert 'integrations-core' in str(fake_integrations_core_repo.path)
+    _write_git_dep_check(fake_integrations_core_repo.path, 'git_dep_check')
+    result = ddev('validate', 'dep', 'git_dep_check')
+    assert result.exit_code == 0
+    assert match_regex.match(result.output), f"Unexpected output: {result.output}"
+
+
+def test_validate_dep_non_core_path(fake_repo, ddev):
+    assert 'integrations-core' not in str(fake_repo.path)
+    _write_git_dep_check(fake_repo.path, 'git_dep_check')
+    result = ddev('validate', 'dep', 'git_dep_check')
+    assert result.exit_code == 0
+    assert match_regex.match(result.output), f"Unexpected output: {result.output}"
