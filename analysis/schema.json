@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Integration auto-config analysis",
+  "type": "object",
+  "required": [
+    "name",
+    "display_name",
+    "spec_path",
+    "required_fields",
+    "all_relevant_fields",
+    "classification",
+    "auto_config_method",
+    "has_existing_auto_conf",
+    "explanation",
+    "references",
+    "confidence",
+    "needs_human_review"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "name":         {"type": "string", "pattern": "^[a-z0-9_]+$"},
+    "display_name": {"type": "string"},
+    "spec_path":    {"type": "string"},
+    "required_fields": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "all_relevant_fields": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "required"],
+        "additionalProperties": false,
+        "properties": {
+          "name":     {"type": "string"},
+          "required": {"type": "boolean"},
+          "default":  {}
+        }
+      }
+    },
+    "classification": {
+      "type": "string",
+      "enum": ["generic", "custom", "impossible"]
+    },
+    "auto_config_method": {
+      "type": "string",
+      "enum": [
+        "openmetrics-port-scan",
+        "tcp-banner-probe",
+        "http-path-probe",
+        "config-file-parse",
+        "credentials-required",
+        "other"
+      ]
+    },
+    "has_existing_auto_conf": {"type": "boolean"},
+    "auto_conf_path":         {"type": ["string", "null"]},
+    "explanation":            {"type": "string"},
+    "references": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind"],
+        "additionalProperties": false,
+        "properties": {
+          "kind": {"type": "string", "enum": ["spec", "check", "auto_conf", "readme", "upstream", "other"]},
+          "path": {"type": "string"},
+          "url":  {"type": "string"}
+        }
+      }
+    },
+    "confidence":         {"type": "string", "enum": ["high", "medium", "low"]},
+    "needs_human_review": {"type": "boolean"},
+    "notes":              {"type": "string"}
+  }
+}
