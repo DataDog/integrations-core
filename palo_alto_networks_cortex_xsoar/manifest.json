@@ -1,0 +1,42 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "e4f68beb-6472-490c-ba02-72ded5b9c203",
+  "app_id": "palo-alto-networks-cortex-xsoar",
+  "owner": "saas-integrations",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "<FILL IN - A brief description of what this offering provides>",
+    "title": "Palo Alto Networks Cortex XSOAR",
+    "media": [],
+    "classifier_tags": [
+      "Category::Security",
+      "Category::Metrics",
+      "Category::Log Collection",
+      "Category::Automation",
+      "Category::Cloud",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 74861768,
+      "source_type_name": "Palo Alto Networks Cortex XSOAR",
+      "events": {
+        "creates_events": false
+      }
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
