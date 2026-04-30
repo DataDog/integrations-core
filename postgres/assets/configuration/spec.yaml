@@ -629,7 +629,6 @@ files:
                 - monitor_id
                 - dbname
                 - query
-                - interval_seconds
                 - entity
               properties:
               - name: monitor_id
@@ -641,7 +640,17 @@ files:
               - name: query
                 type: string
               - name: interval_seconds
+                description: |
+                  How often (in seconds) to run this query. At least one of interval_seconds or
+                  schedule must be set. When both are present, schedule takes precedence and
+                  interval_seconds is ignored.
                 type: integer
+              - name: schedule
+                description: |
+                  A standard 5-field cron expression (minute hour dom month dow) specifying
+                  when to run this query. When set, takes precedence over interval_seconds.
+                  At least one of schedule or interval_seconds must be set.
+                type: string
               - name: entity
                 type: object
                 required:
