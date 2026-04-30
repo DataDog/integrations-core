@@ -311,7 +311,11 @@ class ValidationOrchestrator(EventBusOrchestrator):
         httpx_logger.setLevel(logging.WARNING)
         try:
             self._app.logger.debug("Fetching previous validation comments on PR #%s...", self._pr_number)
-            previous_comments = self._get_previous_validation_comments(self._pr_number)
+            try:
+                previous_comments = self._get_previous_validation_comments(self._pr_number)
+            except Exception as exc:
+                self._app.display_warning(f"Failed to read previous validation comments: {type(exc).__name__}: {exc}")
+                previous_comments = []
             if self._suppress_pr_comments:
                 self._app.logger.debug("Validation PR comments are suppressed for PR #%s.", self._pr_number)
                 self._delete_comments(previous_comments)

@@ -278,6 +278,22 @@ def test_on_finalize_posts_pr_comment_on_success(mock_app):
     assert COMMENT_STATUS_SUCCESS in body
 
 
+def test_on_finalize_posts_pr_comment_when_fetching_previous_comments_fails(mock_app):
+    mock_app.config.github.token = "fake-token"
+    mock_app.github.get_pull_request_comments.side_effect = RuntimeError("network error")
+
+    orch = ValidationOrchestrator(app=mock_app, validations=["config"], target=None, pr_number=42)
+    orch._results = {
+        "config": ValidationResult(name="config", success=True, stdout="ok", stderr="", duration=1.0),
+    }
+    asyncio.run(orch.on_finalize(exception=None))
+
+    mock_app.display_warning.assert_called()
+    warning_args = [str(c) for c in mock_app.display_warning.call_args_list]
+    assert any("Failed to read previous validation comments" in w for w in warning_args)
+    mock_app.github.post_pull_request_comment.assert_called_once()
+
+
 def test_on_finalize_deletes_previous_validation_comments(mock_app):
     mock_app.config.github.token = "fake-token"
     mock_app.github.get_pull_request_comments.return_value = [
