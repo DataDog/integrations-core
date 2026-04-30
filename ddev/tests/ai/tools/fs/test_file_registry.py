@@ -3,12 +3,16 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
+
+OWNER_A = "agent-a"
+OWNER_B = "agent-b"
 
 
 @pytest.fixture
-def registry() -> FileRegistry:
-    return FileRegistry()
+def registry(tmp_path) -> FileRegistry:
+    return FileRegistry(policy=FileAccessPolicy(write_root=tmp_path))
 
 
 # ---------------------------------------------------------------------------
@@ -26,13 +30,20 @@ def registry() -> FileRegistry:
 def test_is_known(registry: FileRegistry, tmp_path, record, expected) -> None:
     path = str(tmp_path / "file.txt")
     if record:
-        registry.record(path, "hello")
-    assert registry.is_known(path) is expected
+        registry.record(OWNER_A, path, "hello")
+    assert registry.is_known(OWNER_A, path) is expected
 
 
 def test_is_known_different_path(registry: FileRegistry, tmp_path) -> None:
-    registry.record(str(tmp_path / "other.txt"), "hello")
-    assert registry.is_known(str(tmp_path / "file.txt")) is False
+    registry.record(OWNER_A, str(tmp_path / "other.txt"), "hello")
+    assert registry.is_known(OWNER_A, str(tmp_path / "file.txt")) is False
+
+
+def test_is_known_is_scoped_to_owner(registry: FileRegistry, tmp_path) -> None:
+    path = str(tmp_path / "file.txt")
+    registry.record(OWNER_A, path, "hello")
+    assert registry.is_known(OWNER_A, path) is True
+    assert registry.is_known(OWNER_B, path) is False
 
 
 # ---------------------------------------------------------------------------
@@ -51,8 +62,14 @@ def test_is_known_different_path(registry: FileRegistry, tmp_path) -> None:
 def test_verify(registry: FileRegistry, tmp_path, recorded_content, verify_content, expected) -> None:
     path = str(tmp_path / "file.txt")
     if recorded_content is not None:
-        registry.record(path, recorded_content)
-    assert registry.verify(path, verify_content) is expected
+        registry.record(OWNER_A, path, recorded_content)
+    assert registry.verify(OWNER_A, path, verify_content) is expected
+
+
+def test_verify_fails_for_different_agent(registry: FileRegistry, tmp_path) -> None:
+    path = str(tmp_path / "file.txt")
+    registry.record(OWNER_A, path, "hello")
+    assert registry.verify(OWNER_B, path, "hello") is False
 
 
 # ---------------------------------------------------------------------------
@@ -60,13 +77,24 @@ def test_verify(registry: FileRegistry, tmp_path, recorded_content, verify_conte
 # ---------------------------------------------------------------------------
 
 
-def test_record_overwrites_previous_hash(registry: FileRegistry, tmp_path) -> None:
+def test_record_overwrites_previous_hash_within_agent(registry: FileRegistry, tmp_path) -> None:
     path = str(tmp_path / "file.txt")
-    registry.record(path, "old")
-    registry.record(path, "new")
+    registry.record(OWNER_A, path, "old")
+    registry.record(OWNER_A, path, "new")
 
-    assert registry.verify(path, "new") is True
-    assert registry.verify(path, "old") is False
+    assert registry.verify(OWNER_A, path, "new") is True
+    assert registry.verify(OWNER_A, path, "old") is False
+
+
+def test_record_does_not_cross_agents(registry: FileRegistry, tmp_path) -> None:
+    path = str(tmp_path / "file.txt")
+    registry.record(OWNER_A, path, "from-a")
+    registry.record(OWNER_B, path, "from-b")
+
+    assert registry.verify(OWNER_A, path, "from-a") is True
+    assert registry.verify(OWNER_A, path, "from-b") is False
+    assert registry.verify(OWNER_B, path, "from-b") is True
+    assert registry.verify(OWNER_B, path, "from-a") is False
 
 
 # ---------------------------------------------------------------------------
@@ -75,19 +103,31 @@ def test_record_overwrites_previous_hash(registry: FileRegistry, tmp_path) -> No
 
 
 def test_normalize_relative_and_absolute_are_same_key(registry: FileRegistry, tmp_path, monkeypatch) -> None:
-    # Make tmp_path the cwd so that a relative path resolves to the same absolute path
     monkeypatch.chdir(tmp_path)
 
     abs_path = str(tmp_path / "file.txt")
     rel_path = "file.txt"
 
-    registry.record(abs_path, "hello")
-    assert registry.is_known(rel_path) is True
-    assert registry.verify(rel_path, "hello") is True
+    registry.record(OWNER_A, abs_path, "hello")
+    assert registry.is_known(OWNER_A, rel_path) is True
+    assert registry.verify(OWNER_A, rel_path, "hello") is True
+
+
+def test_normalize_tilde_and_absolute_are_same_key(registry: FileRegistry, tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))  # Windows uses USERPROFILE, not HOME
+
+    tilde_path = "~/foo.txt"
+    abs_path = str(tmp_path / "foo.txt")
+
+    registry.record(OWNER_A, tilde_path, "hello")
+    assert registry.is_known(OWNER_A, abs_path) is True
+    assert registry.is_known(OWNER_A, tilde_path) is True
+    assert registry.verify(OWNER_A, abs_path, "hello") is True
 
 
 # ---------------------------------------------------------------------------
-# lock_for
+# lock_for — shared across agents so concurrent writes serialize on the path
 # ---------------------------------------------------------------------------
 
 

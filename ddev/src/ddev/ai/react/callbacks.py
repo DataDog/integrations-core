@@ -45,6 +45,18 @@ class AfterCompactCallback(Protocol):
     async def __call__(self) -> None: ...
 
 
+class OnPhaseStartCallback(Protocol):
+    """Called once when a phase begins executing, before any agent interaction."""
+
+    async def __call__(self, phase_id: str) -> None: ...
+
+
+class OnBeforeAgentSendCallback(Protocol):
+    """Called immediately before each agent.send() request is issued."""
+
+    async def __call__(self, iteration: int) -> None: ...
+
+
 class CallbackSet:
     """Decorator-based registry for ReAct lifecycle event handlers.
 
@@ -64,6 +76,8 @@ class CallbackSet:
         self._on_error: list[OnErrorCallback] = []
         self._before_compact: list[BeforeCompactCallback] = []
         self._after_compact: list[AfterCompactCallback] = []
+        self._on_phase_start: list[OnPhaseStartCallback] = []
+        self._on_before_agent_send: list[OnBeforeAgentSendCallback] = []
 
     def on_agent_response(self, func: OnAgentResponseCallback) -> OnAgentResponseCallback:
         """Register a handler fired after every agent response."""
@@ -93,6 +107,16 @@ class CallbackSet:
     def on_after_compact(self, func: AfterCompactCallback) -> AfterCompactCallback:
         """Register a handler fired just after compaction completes."""
         self._after_compact.append(func)
+        return func
+
+    def on_phase_start(self, func: OnPhaseStartCallback) -> OnPhaseStartCallback:
+        """Register a handler fired at the start of a phase."""
+        self._on_phase_start.append(func)
+        return func
+
+    def on_before_agent_send(self, func: OnBeforeAgentSendCallback) -> OnBeforeAgentSendCallback:
+        """Register a handler fired right before each agent.send() request."""
+        self._on_before_agent_send.append(func)
         return func
 
     async def fire_agent_response(self, response: AgentResponse, iteration: int) -> None:
@@ -134,5 +158,19 @@ class CallbackSet:
         for handler in self._after_compact:
             try:
                 await handler()
+            except Exception:
+                pass
+
+    async def fire_phase_start(self, phase_id: str) -> None:
+        for handler in self._on_phase_start:
+            try:
+                await handler(phase_id)
+            except Exception:
+                pass
+
+    async def fire_before_agent_send(self, iteration: int) -> None:
+        for handler in self._on_before_agent_send:
+            try:
+                await handler(iteration)
             except Exception:
                 pass
