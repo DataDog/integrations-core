@@ -922,6 +922,29 @@ def test_collect_and_emit_runs_with_partial_failures(check):
     assert payload['clickhouse']['active_merges'] == _collected_merges()
 
 
+def test_collect_and_emit_skips_when_all_collectors_empty(check):
+    job = check.parts_and_merges
+    job.tags = ['test:clickhouse']
+    job._tags_no_db = ['test:clickhouse']
+
+    with (
+        mock.patch.object(job, '_collect_parts', return_value=[]),
+        mock.patch.object(job, '_collect_merges', return_value=[]),
+        mock.patch.object(job, '_collect_mutations', return_value=[]),
+        mock.patch.object(job, '_collect_mutations_aggregated', return_value=[]),
+        mock.patch.object(job, '_collect_replication_queue', return_value=[]),
+        mock.patch.object(job, '_collect_replication_queue_aggregated', return_value=[]),
+        mock.patch.object(job, '_collect_detached_parts', return_value=[]),
+        mock.patch.object(job, '_collect_thresholds', return_value=[]),
+        mock.patch.object(check, 'database_monitoring_query_activity') as activity_mock,
+        mock.patch('datadog_checks.clickhouse.parts_and_merges.datadog_agent') as agent_mock,
+    ):
+        agent_mock.get_version.return_value = '7.64.0'
+        job._collect_and_emit()
+
+    activity_mock.assert_not_called()
+
+
 # -----------------------------------------------------------------------------
 # Cluster routing
 # -----------------------------------------------------------------------------
