@@ -12,7 +12,7 @@ from .common import ACME_METRICS, CERT_METRICS, CONTROLLER_METRICS, MOCK_INSTANC
 
 
 @pytest.fixture()
-def error_metrics(mock_http):
+def mock_http_error_response(mock_http):
     mock_http.get.return_value = MockHTTPResponse(status_code=502, headers={'Content-Type': "text/plain"})
     yield
 
@@ -51,7 +51,7 @@ def test_check(aggregator, dd_run_check, mock_http):
 
 
 @pytest.mark.unit
-def test_openmetrics_error(aggregator, instance, error_metrics):
+def test_openmetrics_error(aggregator, instance, mock_http_error_response):
     check = CertManagerCheck('cert_manager', {}, [MOCK_INSTANCE])
     with pytest.raises(Exception):
         check.check(MOCK_INSTANCE)
