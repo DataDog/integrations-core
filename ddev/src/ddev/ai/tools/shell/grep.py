@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from pathlib import Path
 from typing import Annotated
 
 from pydantic import Field
@@ -52,19 +53,20 @@ class GrepTool(CmdTool[GrepInput]):
         cmd = ["grep", "-n", "-E", "--null", "-I", "--no-messages"]
         if tool_input.recursive:
             cmd.append("-r")
-            search_path = canonicalize_path(tool_input.path)
-            write_root = self._policy.write_root
-            # Skip --exclude= flags when the search overlaps write_root: either the
-            # search is inside write_root (all files are visible) or write_root is
-            # inside the search (mixing zones). In both cases the post-filter handles
-            # per-line decisions correctly. Only apply flags when the entire search
-            # is outside write_root, where deny patterns are fully in effect.
-            overlaps_write_root = search_path.is_relative_to(write_root) or write_root.is_relative_to(search_path)
-            if not overlaps_write_root:
-                for pat in self._policy.basename_patterns:
-                    cmd.append(f"--exclude={pat}")
+            cmd.extend(self._exclude_flags(canonicalize_path(tool_input.path)))
         cmd += ["--", tool_input.pattern, tool_input.path]
         return cmd
+
+    def _exclude_flags(self, search_path: Path) -> list[str]:
+        # Skip --exclude= flags when the search overlaps write_root: either the
+        # search is inside write_root (all files are visible) or write_root is
+        # inside the search (mixing zones). In both cases the post-filter handles
+        # per-line decisions correctly. Only apply flags when the entire search
+        # is outside write_root, where deny patterns are fully in effect.
+        write_root = self._policy.write_root
+        if search_path.is_relative_to(write_root) or write_root.is_relative_to(search_path):
+            return []
+        return [f"--exclude={pat}" for pat in self._policy.basename_patterns]
 
     def _filter_stdout(self, stdout: str) -> str:
         """Filter stdout to only include lines whose filename is allowed by the policy.
@@ -78,6 +80,7 @@ class GrepTool(CmdTool[GrepInput]):
         """
         decision: dict[str, bool] = {}
         result: list[str] = []
+        emitted_denials: set[str] = set()
         for line in stdout.splitlines():
             nul = line.find("\0")
             if nul == -1:
@@ -93,6 +96,7 @@ class GrepTool(CmdTool[GrepInput]):
                 decision[filename] = allowed
             if allowed:
                 result.append(f"{filename}:{rest}")
-            else:
+            elif filename not in emitted_denials:
                 result.append(f"{filename}: Read denied by policy")
+                emitted_denials.add(filename)
         return "\n".join(result)

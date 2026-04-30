@@ -286,6 +286,7 @@ async def test_grep_post_filter_strips_symlink_to_denied(tmp_path) -> None:
     assert result.success is True
     # link.txt may appear as a denial notice but must not appear as a match line.
     assert "link.txt" not in result.data
+    assert result.data
 
 
 async def test_grep_excludes_basename_pattern_matches(tmp_path) -> None:

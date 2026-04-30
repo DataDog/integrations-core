@@ -21,7 +21,7 @@ def canonicalize_path(path: str | Path) -> Path:
     return Path(path).expanduser().resolve(strict=False)
 
 
-_WILDCARD_CHARS = "*?["
+WILDCARD_CHARS = "*?["
 
 
 def _canonicalize_pattern(pat: str) -> str:
@@ -33,7 +33,7 @@ def _canonicalize_pattern(pat: str) -> str:
     symlinked deny roots (e.g. ``~/.ssh -> /secrets/ssh``) are matched
     against the same target the path side canonicalizes to.
     """
-    indices = [pat.find(c) for c in _WILDCARD_CHARS if c in pat]
+    indices = [pat.find(c) for c in WILDCARD_CHARS if c in pat]
     idx = min(indices) if indices else -1
     if idx == -1:
         return str(canonicalize_path(pat))

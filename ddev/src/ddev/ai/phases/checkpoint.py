@@ -26,7 +26,7 @@ class CheckpointManager:
         if not self._path.exists():
             return {}
         try:
-            return yaml.safe_load(self._path.read_text()) or {}
+            return yaml.safe_load(self._path.read_text(encoding="utf-8")) or {}
         except (OSError, yaml.YAMLError) as e:
             raise CheckpointReadError(f"Failed to load checkpoints from {self._path}: {e}") from e
 
@@ -35,7 +35,7 @@ class CheckpointManager:
         checkpoints = self.read()
         checkpoints[phase_id] = data
         self._ensure_dir()
-        self._path.write_text(yaml.dump(checkpoints, default_flow_style=False))
+        self._path.write_text(yaml.dump(checkpoints, default_flow_style=False), encoding="utf-8")
 
     def build_memory_prompt(self, user_additions: str | None) -> str:
         """Build the memory prompt to send to the agent at the end of a phase."""

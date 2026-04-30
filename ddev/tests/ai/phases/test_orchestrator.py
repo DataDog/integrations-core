@@ -308,6 +308,20 @@ async def test_on_initialize_missing_agent_raises(tmp_path, file_access_policy):
         await orchestrator.on_initialize()
 
 
+async def test_on_initialize_phases_share_file_registry(minimal_flow, file_access_policy):
+    orchestrator = PhaseOrchestrator(
+        flow_yaml_path=minimal_flow / "flow.yaml",
+        checkpoint_path=minimal_flow / "checkpoints.yaml",
+        runtime_variables={},
+        anthropic_client=MagicMock(),
+        file_access_policy=file_access_policy,
+    )
+    await orchestrator.on_initialize()
+    phases = orchestrator._subscribers.get(PhaseTrigger, [])
+    assert len(phases) >= 2
+    assert all(p._file_registry is phases[0]._file_registry for p in phases[1:])
+
+
 # ---------------------------------------------------------------------------
 # PhaseOrchestrator.on_initialize — orphan-phase validation
 # ---------------------------------------------------------------------------
