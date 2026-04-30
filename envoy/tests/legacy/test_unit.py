@@ -167,9 +167,7 @@ def test_config(extra_config, expected_http_kwargs, check):
         ),
     ],
 )
-def test_metadata_with_exception(
-    datadog_agent, fixture_path, mock_http_response, check, exception, log_call_parameters, mock_http
-):
+def test_metadata_with_exception(datadog_agent, check, exception, log_call_parameters, mock_http):
     instance = INSTANCES['main']
     check = check(instance)
     check.check_id = 'test:123'
