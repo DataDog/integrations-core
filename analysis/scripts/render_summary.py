@@ -73,10 +73,52 @@ def render(records, generated_at=None):
     return "\n".join(out)
 
 
+def render_brief(records, generated_at=None, header_note=""):
+    """Compact rendering: integration | required fields | method | confidence."""
+    generated_at = generated_at or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    counts = {"generic": 0, "custom": 0, "impossible": 0}
+    review = 0
+    for r in records:
+        counts[r["classification"]] += 1
+        if r.get("needs_human_review"):
+            review += 1
+    total = len(records)
+    out = []
+    out.append(
+        f"_Generated {generated_at}. {total} total: "
+        f"{counts['generic']} generic / {counts['custom']} custom / "
+        f"{counts['impossible']} impossible / {review} need review (⚠).{header_note}_\n"
+    )
+    by_cls = {"generic": [], "custom": [], "impossible": []}
+    for r in records:
+        by_cls[r["classification"]].append(r)
+    for header, key in [
+        ("Generic auto-config possible", "generic"),
+        ("Custom auto-config possible", "custom"),
+        ("Auto-config impossible", "impossible"),
+    ]:
+        out.append(f"### {header}\n")
+        out.append("| Integration | Required fields | Method | Conf. |")
+        out.append("|---|---|---|---|")
+        for rec in sorted(by_cls[key], key=lambda r: r["name"]):
+            flag = " ⚠" if rec.get("needs_human_review") else ""
+            fields = ", ".join(f"`{f}`" for f in rec.get("required_fields", [])) or "—"
+            out.append(
+                f"| {rec['display_name']}{flag} (`{rec['name']}`) | "
+                f"{fields} | {rec.get('auto_config_method', '')} | "
+                f"{rec.get('confidence', '')} |"
+            )
+        out.append("")
+    return "\n".join(out)
+
+
 def main():
     records = load_all()
     OUT.write_text(render(records))
     print(f"wrote {OUT} ({len(records)} integrations)")
+    brief_path = OUT.with_name("summary_brief.md")
+    brief_path.write_text(render_brief(records))
+    print(f"wrote {brief_path}")
 
 
 if __name__ == "__main__":
