@@ -105,7 +105,7 @@ def verify_base_dependency(source, check_name, dependency, force_pinned=True, mi
     return not failed
 
 
-def verify_dependency(source, name, python_versions, file):
+def verify_dependency(source, name, python_versions, file, repo_core):
     for dependency_definitions in python_versions.values():
         # Identify dependencies that are defined multiple times for the same set of environment markers
         requirements = [Requirement(dep) for dep in dependency_definitions]
@@ -142,30 +142,31 @@ def verify_dependency(source, name, python_versions, file):
                     return False
 
                 return True
+            
+            if repo_core:
+                if not specifier_set:
+                    message = f'Unpinned version found for dependency `{name}`: {format_check_usage(checks, source)}'
+                    echo_failure(message)
+                    annotate_error(file, message)
+                    return False
+                elif len(specifier_set) > 1:
+                    message = (
+                        f'Multiple unstable version pins `{specifier_set}` found for dependency `{name}` '
+                        f'(use a single == explicitly): {format_check_usage(checks, source)}'
+                    )
+                    echo_failure(message)
+                    annotate_error(file, message)
+                    return False
 
-            if not specifier_set:
-                message = f'Unpinned version found for dependency `{name}`: {format_check_usage(checks, source)}'
-                echo_failure(message)
-                annotate_error(file, message)
-                return False
-            elif len(specifier_set) > 1:
-                message = (
-                    f'Multiple unstable version pins `{specifier_set}` found for dependency `{name}` '
-                    f'(use a single == explicitly): {format_check_usage(checks, source)}'
-                )
-                echo_failure(message)
-                annotate_error(file, message)
-                return False
-
-            specifier = get_next(specifier_set)
-            if specifier.operator != '==':
-                message = (
-                    f'Unstable version pin `{specifier}` found for dependency `{name}` '
-                    f'(use == explicitly): {format_check_usage(checks, source)}'
-                )
-                echo_failure(message)
-                annotate_error(file, message)
-                return False
+                specifier = get_next(specifier_set)
+                if specifier.operator != '==':
+                    message = (
+                        f'Unstable version pin `{specifier}` found for dependency `{name}` '
+                        f'(use == explicitly): {format_check_usage(checks, source)}'
+                    )
+                    echo_failure(message)
+                    annotate_error(file, message)
+                    return False
 
     return True
 
@@ -184,7 +185,7 @@ def dep(check, require_base_check_version, min_base_check_version):
 
     \b
     * Verify the uniqueness of dependency versions across all checks, or optionally a single check
-    * Verify all the dependencies are pinned.
+    * Verify all the dependencies are pinned when validating from integrations-core.
     * Verify the embedded Python environment defined in the base check and requirements
       listed in every integration are compatible.
     * Verify each check specifies a `CHECKS_BASE_REQ` variable for `datadog-checks-base` requirement
@@ -197,6 +198,7 @@ def dep(check, require_base_check_version, min_base_check_version):
     agent_dependencies, agent_errors = read_agent_dependencies()
     agent_dependencies_file = get_agent_requirements()
     annotate_errors(agent_dependencies_file, agent_errors)
+    repo_core = "integrations-core" in root
     if agent_errors:
         for agent_error in agent_errors:
             echo_failure(agent_error)
@@ -225,18 +227,17 @@ def dep(check, require_base_check_version, min_base_check_version):
                 echo_failure(check_error)
 
         for name, versions in sorted(check_dependencies.items()):
-            if not verify_dependency('Checks', name, versions, req_source):
+            if not verify_dependency('Checks', name, versions, req_source, repo_core):
                 failed = True
-
-            if name not in agent_dependencies:
-                failed = True
-                message = (
-                    f'Dependency {name} found in the {check_name} integration requirements '
-                    'but not in the agent requirements, run `ddev dep freeze` to sync them.'
-                )
-                echo_failure(message)
-                annotate_error(req_source, message)
-
+            if repo_core:
+                if name not in agent_dependencies:
+                    failed = True
+                    message = (
+                        f'Dependency {name} found in the {check_name} integration requirements '
+                        'but not in the agent requirements, run `ddev dep freeze` to sync them.'
+                    )
+                    echo_failure(message)
+                    annotate_error(req_source, message)
     check_base_dependencies, check_base_errors = read_check_base_dependencies(checks)
     check_dependencies, check_errors = read_check_dependencies(checks)
 
@@ -247,17 +248,18 @@ def dep(check, require_base_check_version, min_base_check_version):
             failed = True
 
     for name, python_versions in sorted(agent_dependencies.items()):
-        if not verify_dependency('Agent', name, python_versions, agent_dependencies_file):
+        if not verify_dependency('Agent', name, python_versions, agent_dependencies_file, repo_core):
             failed = True
 
         # Check that this dependency defined on the agent requirements is actually used
         # This only makes sense when we take all check dependencies into account
-        if check is None and name not in check_dependencies:
-            failed = True
-            message = f'Stale dependency needs to be removed by syncing: {name}'
-            echo_failure(message)
-            annotate_error(agent_dependencies_file, message)
-            continue
+        if repo_core:
+            if check is None and name not in check_dependencies:
+                failed = True
+                message = f'Stale dependency needs to be removed by syncing: {name}'
+                echo_failure(message)
+                annotate_error(agent_dependencies_file, message)
+                continue
 
         # Look for version mismatches for this dependency against individual checks
         agent_dependency_definitions = get_dependency_set(python_versions)
