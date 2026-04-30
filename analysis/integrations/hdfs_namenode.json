@@ -1,0 +1,23 @@
+{
+  "name": "hdfs_namenode",
+  "display_name": "HDFS Namenode",
+  "spec_path": "hdfs_namenode/assets/configuration/spec.yaml",
+  "required_fields": ["hdfs_namenode_jmx_uri"],
+  "all_relevant_fields": [
+    {"name": "hdfs_namenode_jmx_uri", "required": true, "default": "http://localhost:9870"}
+  ],
+  "classification": "generic",
+  "auto_config_method": "http-path-probe",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Despite the name, the HDFS NameNode check does not use JMX/RMI: it issues an HTTP GET against the Hadoop JMX servlet at `/jmx` on the NameNode HTTP port (default 9870 in Hadoop 3, 50070 in Hadoop 2). The Python check is a thin AgentCheck that joins the configured URI with `jmx` and parses the JSON beans (FSNamesystem, FSNamesystemState, NameNodeInfo). The path is canonical and singular, no auth is required by default, so a single HTTP probe against `http://%%host%%:9870/jmx` resolves discovery. Same pattern P as hdfs_datanode.",
+  "references": [
+    {"kind": "spec", "path": "hdfs_namenode/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "hdfs_namenode/datadog_checks/hdfs_namenode/hdfs_namenode.py"},
+    {"kind": "readme", "path": "hdfs_namenode/README.md"},
+    {"kind": "upstream", "url": "https://hadoop.apache.org/docs/r3.1.3/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Hadoop 2.x exposes the same servlet at port 50070; a discovery layer should probe both. Kerberos-secured clusters require SPNEGO credentials but the open default deployment is the assumed shape."
+}

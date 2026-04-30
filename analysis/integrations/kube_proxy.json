@@ -1,0 +1,23 @@
+{
+  "name": "kube_proxy",
+  "display_name": "Kube Proxy",
+  "spec_path": "kube_proxy/assets/configuration/spec.yaml",
+  "required_fields": ["prometheus_url"],
+  "all_relevant_fields": [
+    {"name": "prometheus_url", "required": true, "default": "http://127.0.0.1:10249/metrics"},
+    {"name": "health_url", "required": false, "default": "http://localhost:10256/healthz"}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "kube-proxy exposes Prometheus-format metrics on the fixed path `/metrics` at TCP port 10249 (the `metricsBindAddress` default), and a health endpoint at `/healthz` on port 10256. The check is an OpenMetricsBaseCheck subclass that hardcodes `http://localhost:10249/metrics` as its default and even derives the health URL from the prometheus URL automatically. Discovery just needs to find a kube-proxy pod and probe port 10249. This is the standard in-cluster control-plane pattern (O) — when authentication is required, the Agent's pod ServiceAccount token is auto-injected; in the default insecure setup, no credentials are needed at all.",
+  "references": [
+    {"kind": "spec", "path": "kube_proxy/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "kube_proxy/datadog_checks/kube_proxy/kube_proxy.py"},
+    {"kind": "upstream", "url": "https://kubernetes.io/docs/reference/command-line-tools-reference/kube-proxy/"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "No auto_conf.yaml ships, but the port (10249) and path (`/metrics`) are universal Kubernetes defaults. Pattern O applies."
+}

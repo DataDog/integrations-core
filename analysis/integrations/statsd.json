@@ -1,0 +1,24 @@
+{
+  "name": "statsd",
+  "display_name": "StatsD",
+  "spec_path": "statsd/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [
+    {"name": "host", "required": false, "default": "localhost"},
+    {"name": "port", "required": false, "default": 8126},
+    {"name": "timeout", "required": false, "default": 10}
+  ],
+  "classification": "generic",
+  "auto_config_method": "tcp-banner-probe",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Despite the name, this is NOT a DogStatsD-only integration. The check opens a TCP socket to a non-Datadog Etsy/StatsD server's management interface (default port 8126), sends text commands (`health`, `stats`, `counters`, `gauges`, `timers`) and parses the responses — a simple line-protocol over TCP. No authentication, no credentials, no API keys. The README explicitly documents `host: localhost, port: 8126` as the canonical configuration and the Containerized template uses `{\"host\": \"%%host%%\", \"port\":\"8126\"}`. A generic TCP banner-style probe that sends `health\\n` and looks for `health: up` or `health: down` would identify the service unambiguously. Pattern C (TCP banner / known protocol) — same shape as redisdb / memcached.",
+  "references": [
+    {"kind": "spec", "path": "statsd/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "statsd/datadog_checks/statsd/statsd.py"},
+    {"kind": "readme", "path": "statsd/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Hint claimed this was DogStatsD-only (pattern N) — incorrect. It probes Etsy StatsD's admin TCP interface on 8126. Distinct from sidekiq/journald: there IS a network endpoint and a service-specific protocol response."
+}

@@ -1,0 +1,30 @@
+{
+  "name": "singlestore",
+  "display_name": "SingleStore",
+  "spec_path": "singlestore/assets/configuration/spec.yaml",
+  "required_fields": ["host", "username", "password"],
+  "all_relevant_fields": [
+    {"name": "host", "required": true, "default": null},
+    {"name": "port", "required": false, "default": 3306},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null},
+    {"name": "connect_timeout", "required": false, "default": 10},
+    {"name": "read_timeout", "required": false, "default": null},
+    {"name": "use_tls", "required": false, "default": false},
+    {"name": "collect_system_metrics", "required": false, "default": false}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "SingleStore (formerly MemSQL) speaks the MySQL wire protocol (default port 3306). The check opens a `pymysql` connection and runs SQL against `MV_GLOBAL_STATUS`, the `AGGREGATORS`/`LEAVES` cluster views, and optionally the `MV_SYSINFO_*` tables. Although `username`/`password` are technically marked optional in the spec, no production SingleStore cluster permits anonymous SQL, and the queries the check runs require a user with metadata-read privileges. Per pattern D and the decision rule for auth-optional specs (no realistic unauthenticated mode), this is `impossible` / `credentials-required`.",
+  "references": [
+    {"kind": "spec", "path": "singlestore/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "singlestore/datadog_checks/singlestore/check.py"},
+    {"kind": "other", "path": "singlestore/datadog_checks/singlestore/queries.py"},
+    {"kind": "readme", "path": "singlestore/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Same shape as the mysql / postgres / sqlserver impossibility — DB credentials are operator-provisioned and cannot be inferred from the wire, even though the default port (3306) is universal."
+}

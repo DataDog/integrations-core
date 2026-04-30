@@ -1,0 +1,31 @@
+{
+  "name": "vertica",
+  "display_name": "Vertica",
+  "spec_path": "vertica/assets/configuration/spec.yaml",
+  "required_fields": ["server", "port", "username", "password", "db"],
+  "all_relevant_fields": [
+    {"name": "db", "required": false, "default": null},
+    {"name": "server", "required": false, "default": "localhost"},
+    {"name": "port", "required": false, "default": 5433},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null},
+    {"name": "backup_servers", "required": false, "default": null},
+    {"name": "connection_load_balance", "required": false, "default": false},
+    {"name": "timeout", "required": false, "default": 10},
+    {"name": "use_tls", "required": false, "default": false},
+    {"name": "metric_groups", "required": false, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Vertica is a relational database. The check uses `vertica_python` to open a SQL connection on port 5433 and queries the `v_monitor` / `v_catalog` schemas. A username and password are required to authenticate — the spec's example placeholders (`<USERNAME>`, `<PASSWORD>`) signal that these are user-supplied even though the YAML doesn't mark them with `required: true`. There is no anonymous mode. Pattern D — standard spec-required database credentials.",
+  "references": [
+    {"kind": "spec", "path": "vertica/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "vertica/datadog_checks/vertica/vertica.py"},
+    {"kind": "readme", "path": "vertica/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern D. Same shape as postgres/mysql/sqlserver — credentials cannot be discovered from the wire."
+}

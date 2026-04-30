@@ -1,0 +1,29 @@
+{
+  "name": "cacti",
+  "display_name": "Cacti",
+  "spec_path": "cacti/assets/configuration/spec.yaml",
+  "required_fields": ["mysql_host", "mysql_user", "rrd_path"],
+  "all_relevant_fields": [
+    {"name": "mysql_host", "required": true, "default": "localhost"},
+    {"name": "mysql_port", "required": false, "default": 3306},
+    {"name": "mysql_user", "required": true, "default": null},
+    {"name": "mysql_password", "required": false, "default": null},
+    {"name": "mysql_db", "required": false, "default": "cacti"},
+    {"name": "rrd_path", "required": true, "default": null},
+    {"name": "field_names", "required": false, "default": ["ifName", "dskDevice"]},
+    {"name": "rrd_whitelist", "required": false, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The Cacti check connects to Cacti's MySQL backend (via pymysql) to enumerate hosts and RRD file metadata, then reads the on-disk RRD files (via rrdtool) for actual metric values. This requires a MySQL username (and password in any non-trivial deployment) plus a filesystem path to the RRD directory (`/var/lib/cacti/rra`, `/var/www/html/cacti/rra`, or wherever the operator put it). The MySQL credentials are not discoverable from the wire, and the RRD path is site-specific filesystem state. There is no network endpoint for autodiscovery to probe.",
+  "references": [
+    {"kind": "spec", "path": "cacti/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "cacti/datadog_checks/cacti/cacti.py"},
+    {"kind": "upstream", "url": "https://www.cacti.net/"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Combines pattern D (MySQL credentials) with a required filesystem path the user must supply. The `require_trusted_provider: true` annotation on `rrd_path` reinforces that this is operator policy input, not a discoverable value."
+}

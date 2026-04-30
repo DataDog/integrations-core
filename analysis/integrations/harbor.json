@@ -1,0 +1,26 @@
+{
+  "name": "harbor",
+  "display_name": "Harbor",
+  "spec_path": "harbor/assets/configuration/spec.yaml",
+  "required_fields": ["url", "username", "password"],
+  "all_relevant_fields": [
+    {"name": "url", "required": true, "default": null},
+    {"name": "username", "required": true, "default": null},
+    {"name": "password", "required": true, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": true,
+  "auto_conf_path": "harbor/datadog_checks/harbor/data/auto_conf.yaml",
+  "explanation": "Harbor is a container registry with a REST API on port 80/443. The spec overrides the standard HTTP template to mark `username` and `password` as required, and the shipped auto_conf.yaml ships `username: <USERNAME>` / `password: <PASSWORD>` placeholders. The check calls registry, project, volume, and read-only endpoints that require an admin (or at least authenticated) account. Some endpoints (registries, volume) silently return 401/403 for non-admin users. Credentials cannot be discovered from the wire. Pattern D (spec-required credentials).",
+  "references": [
+    {"kind": "spec", "path": "harbor/assets/configuration/spec.yaml"},
+    {"kind": "auto_conf", "path": "harbor/datadog_checks/harbor/data/auto_conf.yaml"},
+    {"kind": "check", "path": "harbor/datadog_checks/harbor/harbor.py"},
+    {"kind": "readme", "path": "harbor/README.md"},
+    {"kind": "upstream", "url": "https://goharbor.io/docs/latest/install-config/"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Existing auto_conf.yaml uses the `nginx-photon` AD identifier (the Harbor proxy container) but still requires user-supplied credentials."
+}

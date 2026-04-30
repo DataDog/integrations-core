@@ -1,0 +1,23 @@
+{
+  "name": "linkerd",
+  "display_name": "Linkerd",
+  "spec_path": "linkerd/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [
+    {"name": "openmetrics_endpoint", "required": false, "default": null},
+    {"name": "prometheus_url", "required": false, "default": null}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Linkerd's data-plane proxy exposes Prometheus-format metrics on its admin port (default 9990) at the fixed path /admin/metrics/prometheus. The check inherits OpenMetricsBaseCheckV2 with a hard-coded metric map; once the endpoint URL is supplied, no auth or further configuration is needed. The spec ships an example openmetrics_endpoint of http://localhost:9990/admin/metrics/prometheus, which is the universal Linkerd admin path. Discovery is a generic 'GET /admin/metrics/prometheus on port 9990 and verify Prometheus-format response' probe.",
+  "references": [
+    {"kind": "spec", "path": "linkerd/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "linkerd/datadog_checks/linkerd/check.py"},
+    {"kind": "upstream", "url": "https://linkerd.io/2/reference/proxy-metrics/"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern A (OpenMetrics on a known port). No auto_conf.yaml ships, but k8s deployments typically use the istio-style label-based autodiscovery on the linkerd-proxy container."
+}

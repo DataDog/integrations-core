@@ -1,0 +1,28 @@
+{
+  "name": "rethinkdb",
+  "display_name": "RethinkDB",
+  "spec_path": "rethinkdb/assets/configuration/spec.yaml",
+  "required_fields": ["host", "port"],
+  "all_relevant_fields": [
+    {"name": "host", "required": true, "default": "localhost"},
+    {"name": "port", "required": true, "default": 28015},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null},
+    {"name": "tls_ca_cert", "required": false, "default": null}
+  ],
+  "classification": "custom",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The check connects to RethinkDB's driver port (default 28015) using the official `rethinkdb` Python driver and runs ReQL queries against the `rethinkdb` system database for cluster/server/table/job metrics. The spec marks `username` / `password` as optional, but the README explicitly instructs operators to create a `datadog-agent` user with a password and read-only grants (RethinkDB 2.4+ requires authenticated access for system tables in any production deployment; only an unsecured 2.3.x or pre-bootstrapped admin instance accepts unauthenticated connections). Pattern E: auth-optional in spec but practically required.",
+  "references": [
+    {"kind": "spec", "path": "rethinkdb/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "rethinkdb/datadog_checks/rethinkdb/check.py"},
+    {"kind": "check", "path": "rethinkdb/datadog_checks/rethinkdb/config.py"},
+    {"kind": "readme", "path": "rethinkdb/README.md"},
+    {"kind": "upstream", "url": "https://rethinkdb.com/docs/permissions-and-accounts/"}
+  ],
+  "confidence": "medium",
+  "needs_human_review": false,
+  "notes": "Pattern E. The 28015 driver port is reachable and TCP-probable, but actual metric collection requires credentials in production. There is also a separate HTTP admin UI on 8080, but the check does not use it."
+}

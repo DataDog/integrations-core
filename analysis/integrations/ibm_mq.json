@@ -1,0 +1,32 @@
+{
+  "name": "ibm_mq",
+  "display_name": "IBM MQ",
+  "spec_path": "ibm_mq/assets/configuration/spec.yaml",
+  "required_fields": ["channel", "queue_manager"],
+  "all_relevant_fields": [
+    {"name": "channel", "required": true, "default": null},
+    {"name": "queue_manager", "required": true, "default": null},
+    {"name": "host", "required": false, "default": "localhost"},
+    {"name": "port", "required": false, "default": 1414},
+    {"name": "connection_name", "required": false, "default": null},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null},
+    {"name": "ssl_auth", "required": false, "default": false},
+    {"name": "ssl_cipher_spec", "required": false, "default": null},
+    {"name": "ssl_key_repository_location", "required": false, "default": null},
+    {"name": "ssl_certificate_label", "required": false, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "IBM MQ requires the proprietary `pymqi` client library and connects to a queue manager over a named SVRCONN channel. The two required fields (`channel`, `queue_manager`) are MQ-administrative identifiers that are not discoverable from the wire — every site picks its own naming. Production deployments add username/password and/or SSL with a key repository and cipher spec. None of this can be discovered by probing the listener port (1414); even discovering the existence of an MQ listener does not yield a working configuration.",
+  "references": [
+    {"kind": "spec", "path": "ibm_mq/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "ibm_mq/datadog_checks/ibm_mq/ibm_mq.py"},
+    {"kind": "upstream", "url": "https://www.ibm.com/docs/en/ibm-mq"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Even ignoring auth, the channel name and queue manager name are mandatory site-specific identifiers — pattern D plus pattern J-style user-intent inputs."
+}

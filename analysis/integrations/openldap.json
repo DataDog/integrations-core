@@ -1,0 +1,30 @@
+{
+  "name": "openldap",
+  "display_name": "OpenLDAP",
+  "spec_path": "openldap/assets/configuration/spec.yaml",
+  "required_fields": ["url"],
+  "all_relevant_fields": [
+    {"name": "url", "required": true, "default": null},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null},
+    {"name": "ssl_verify", "required": false, "default": true},
+    {"name": "ssl_key", "required": false, "default": null},
+    {"name": "ssl_cert", "required": false, "default": null},
+    {"name": "ssl_ca_certs", "required": false, "default": null},
+    {"name": "custom_queries", "required": false, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The check binds to slapd (`ldap3.Connection(...).bind()`) and reads the `cn=Monitor` backend. While the spec marks `username`/`password` as optional (anonymous bind syntactically works), the README and OpenLDAP defaults require an explicit Distinguished Name with read access provisioned via ACL on the monitor database. The setup section walks the operator through `slappasswd`, `ldapadd`, and an `olcAccess` rule for a dedicated monitoring user. Without those credentials the bind will succeed but the search of `cn=Monitor` returns no entries. Like other auth-gated databases (postgres, mysql), there is no production-shaped deployment where unauthenticated discovery yields metrics.",
+  "references": [
+    {"kind": "spec", "path": "openldap/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "openldap/datadog_checks/openldap/openldap.py"},
+    {"kind": "readme", "path": "openldap/README.md"},
+    {"kind": "upstream", "url": "https://www.openldap.org/doc/admin24/monitoringslapd.html"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Default port is 389 (ldap) or 636 (ldaps), and the URL scheme determines TLS use, so a generic TCP-banner sweep could find slapd, but discovery cannot supply the bind DN/password. Pattern D (spec-required credentials) with the spec-optional/practically-required twist (E)."
+}

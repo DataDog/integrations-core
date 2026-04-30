@@ -1,0 +1,28 @@
+{
+  "name": "cassandra_nodetool",
+  "display_name": "Cassandra Nodetool",
+  "spec_path": "cassandra_nodetool/assets/configuration/spec.yaml",
+  "required_fields": ["keyspaces"],
+  "all_relevant_fields": [
+    {"name": "keyspaces", "required": true, "default": null},
+    {"name": "host", "required": false, "default": "localhost"},
+    {"name": "port", "required": false, "default": 7199},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null},
+    {"name": "ssl", "required": false, "default": false},
+    {"name": "nodetool", "required": false, "default": "/usr/bin/nodetool"}
+  ],
+  "classification": "custom",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The check shells out to a local `nodetool` binary (default /usr/bin/nodetool) and parses the output of `nodetool status -- <keyspace>`. There is no Agent-driven network probe; nodetool itself opens the JMX connection on port 7199. Discovery on the Agent host reduces to 'is the nodetool binary installed and runnable, and which Cassandra cluster does it point at?'. The required `keyspaces` list is operator policy (which keyspaces to monitor) and cannot be inferred from the wire without already running `nodetool` plus credentials when the JMX server is authenticated. This is the same shape as varnish/ceph/postfix (pattern L: local CLI subprocess), with the additional caveat that production JMX deployments add `username`/`password` requirements.",
+  "references": [
+    {"kind": "spec", "path": "cassandra_nodetool/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "cassandra_nodetool/datadog_checks/cassandra_nodetool/cassandra_nodetool.py"},
+    {"kind": "readme", "path": "cassandra_nodetool/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern L (local CLI subprocess). The `keyspaces` requirement is user policy, not a discoverable property; even with nodetool present the operator must enumerate keyspaces to cover."
+}

@@ -1,0 +1,24 @@
+{
+  "name": "twemproxy",
+  "display_name": "Twemproxy (nutcracker)",
+  "spec_path": "twemproxy/assets/configuration/spec.yaml",
+  "required_fields": ["host", "port"],
+  "all_relevant_fields": [
+    {"name": "host", "required": true, "default": null},
+    {"name": "port", "required": true, "default": 2222}
+  ],
+  "classification": "generic",
+  "auto_config_method": "tcp-banner-probe",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Twemproxy (nutcracker) exposes a stats monitoring port that emits a single JSON document immediately upon TCP connect (no request needed). The check just opens a socket to host:port, drains the response, and parses it. No authentication, no path negotiation. A generic TCP-banner probe that opens a connection and verifies the response decodes as JSON containing the well-known top-level keys (service:nutcracker, source, version, total_connections) is sufficient. The conventional stats port is 22222 per upstream documentation, although the spec example/code default is 2222.",
+  "references": [
+    {"kind": "spec", "path": "twemproxy/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "twemproxy/datadog_checks/twemproxy/twemproxy.py"},
+    {"kind": "readme", "path": "twemproxy/README.md"},
+    {"kind": "upstream", "url": "https://github.com/twitter/twemproxy#observability"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern C (TCP banner / known protocol). The probe must try both 22222 (upstream-documented default) and 2222 (Datadog spec example default) since both are in active use."
+}

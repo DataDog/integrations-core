@@ -1,0 +1,31 @@
+{
+  "name": "hivemq",
+  "display_name": "HiveMQ",
+  "spec_path": "hivemq/assets/configuration/spec.yaml",
+  "required_fields": ["host", "port"],
+  "all_relevant_fields": [
+    {"name": "is_jmx", "required": false, "default": true},
+    {"name": "host", "required": true, "default": null},
+    {"name": "port", "required": true, "default": 9010},
+    {"name": "user", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null},
+    {"name": "trust_store_path", "required": false, "default": null},
+    {"name": "trust_store_password", "required": false, "default": null},
+    {"name": "key_store_path", "required": false, "default": null},
+    {"name": "key_store_password", "required": false, "default": null},
+    {"name": "rmi_registry_ssl", "required": false, "default": false}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "HiveMQ is monitored via JMXFetch: the spec inherits `template: instances/jmx` and `init_config/jmx`, so collection happens over JMX/RMI on the broker's monitoring port (default 9010). Although user/password are marked optional in the spec, any production HiveMQ deployment with JMX exposed off-localhost will require JMX authentication credentials, and TLS-protected RMI additionally requires trust/key stores. Per pattern I (JMXFetch) and pattern D (spec credentials), this falls into the categorical `impossible` bucket for auto-config because the credentials and keystores are operator-provisioned out-of-band.",
+  "references": [
+    {"kind": "spec", "path": "hivemq/assets/configuration/spec.yaml"},
+    {"kind": "other", "path": "hivemq/datadog_checks/hivemq/data/conf.yaml.example"},
+    {"kind": "readme", "path": "hivemq/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Despite HiveMQ also offering a Prometheus extension, this Datadog integration is JMX-only; no openmetrics_endpoint path exists in the spec."
+}

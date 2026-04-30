@@ -1,0 +1,26 @@
+{
+  "name": "scylla",
+  "display_name": "Scylla",
+  "spec_path": "scylla/assets/configuration/spec.yaml",
+  "required_fields": ["openmetrics_endpoint"],
+  "all_relevant_fields": [
+    {"name": "openmetrics_endpoint", "required": false, "default": null},
+    {"name": "prometheus_url", "required": false, "default": null},
+    {"name": "metric_groups", "required": false, "default": null}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Scylla exposes Prometheus metrics on the Scylla Prometheus exporter at the well-known port 9180 with path `/metrics`. The check inherits `OpenMetricsBaseCheckV2` (via `ScyllaCheckV2`) and the spec uses `template: instances/openmetrics` with the example `http://localhost:9180/metrics`. There is no required username/password and no Scylla-specific endpoint logic in the path. A generic openmetrics port-scan against `:9180/metrics` (matching `scylla_*` series) is sufficient for discovery. The legacy `prometheus_url` field is a deprecated alias and not required.",
+  "references": [
+    {"kind": "spec", "path": "scylla/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "scylla/datadog_checks/scylla/scylla.py"},
+    {"kind": "check", "path": "scylla/datadog_checks/scylla/scylla_v2.py"},
+    {"kind": "readme", "path": "scylla/README.md"},
+    {"kind": "upstream", "url": "https://opensource.docs.scylladb.com/stable/operating-scylla/monitoring/monitoring-stack.html"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern A (OpenMetrics on a known port). Although Scylla is also a Cassandra-compatible DB exposing a CQL/JMX surface, the Datadog check only consumes the Prometheus exporter, which makes it generic."
+}

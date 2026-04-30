@@ -1,0 +1,32 @@
+{
+  "name": "openstack_controller",
+  "display_name": "OpenStack Controller",
+  "spec_path": "openstack_controller/assets/configuration/spec.yaml",
+  "required_fields": ["keystone_server_url", "user"],
+  "all_relevant_fields": [
+    {"name": "name", "required": false, "default": null},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null},
+    {"name": "domain_id", "required": false, "default": "default"},
+    {"name": "user", "required": false, "default": null},
+    {"name": "keystone_server_url", "required": false, "default": null},
+    {"name": "openstack_config_file_path", "required": false, "default": null},
+    {"name": "openstack_cloud_name", "required": false, "default": null},
+    {"name": "endpoint_interface", "required": false, "default": "public"},
+    {"name": "endpoint_region_id", "required": false, "default": null},
+    {"name": "use_legacy_check_version", "required": false, "default": false}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The OpenStack Controller check authenticates against Keystone (Identity API v3) using a username/password/domain triple (or an openstack-sdk clouds.yaml file referenced via openstack_config_file_path / openstack_cloud_name). The check then walks every component endpoint (Nova, Neutron, Cinder, Ironic, Octavia, Glance, Heat, Swift) using a scoped/unscoped token. Without credentials and a Keystone URL, no API call succeeds. The Keystone URL itself is also site-specific (custom hostname/port), so it cannot be probed generically.",
+  "references": [
+    {"kind": "spec", "path": "openstack_controller/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "openstack_controller/datadog_checks/openstack_controller/openstack_controller.py"},
+    {"kind": "readme", "path": "openstack_controller/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern D. The spec marks individual auth fields as optional only because they can be supplied via clouds.yaml instead - one of the two paths is mandatory in practice."
+}

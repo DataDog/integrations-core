@@ -1,0 +1,27 @@
+{
+  "name": "presto",
+  "display_name": "Presto",
+  "spec_path": "presto/assets/configuration/spec.yaml",
+  "required_fields": ["host", "port"],
+  "all_relevant_fields": [
+    {"name": "is_jmx", "required": false, "default": true},
+    {"name": "host", "required": true, "default": "localhost"},
+    {"name": "port", "required": true, "default": 9999},
+    {"name": "user", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": true,
+  "auto_conf_path": "presto/datadog_checks/presto/data/auto_conf.yaml",
+  "explanation": "Presto is a JMXFetch-only integration: the spec inherits `template: instances/jmx`, the Python package has no check class (only `__version__`), and the shipped auto_conf.yaml sets `is_jmx: true` with `%%host%%` / `%%port%%` templating. JMXFetch connects to the Presto coordinator's JMX RMI port (example 9999); production Presto / Trino clusters that enable the JMX agent require JMX authentication (user + password). Per the procedure's JMXFetch shortcut and pattern D, classify as impossible: JMX credentials and TLS material cannot be derived from a wire probe.",
+  "references": [
+    {"kind": "spec", "path": "presto/assets/configuration/spec.yaml"},
+    {"kind": "auto_conf", "path": "presto/datadog_checks/presto/data/auto_conf.yaml"},
+    {"kind": "check", "path": "presto/datadog_checks/presto/__init__.py"},
+    {"kind": "readme", "path": "presto/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "auto_conf.yaml exists and only fills host/port via Autodiscovery. That's enough for unauthenticated localhost-style dev clusters but not for the standard pattern-D JMX-with-credentials production case. Same shape as cassandra/tomcat/hive."
+}

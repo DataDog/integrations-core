@@ -1,0 +1,26 @@
+{
+  "name": "journald",
+  "display_name": "journald",
+  "spec_path": "journald/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [
+    {"name": "type", "required": true, "default": "journald"},
+    {"name": "container_mode", "required": false, "default": false},
+    {"name": "include_units", "required": false, "default": null},
+    {"name": "exclude_units", "required": false, "default": null},
+    {"name": "include_user_units", "required": false, "default": null},
+    {"name": "exclude_user_units", "required": false, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "journald is a logs-only integration: there is no Agent metric check (no `journald.py`), only a logs configuration template. The Agent's logs subsystem reads the systemd journal locally via `/var/log/journal` or `/run/log/journal`. There is no network endpoint, no host/port, no authentication. The integration's required input is the operator's intent — which units to include/exclude and what `source`/`service` tags to apply — which is policy, not a discoverable attribute. Discovery would also have to verify that the Agent runs on a host with systemd-journald and that `dd-agent` is in the `systemd-journal` group, both of which are out-of-band setup steps. Closest existing patterns: pattern N (DogStatsD/instrumentation-only — non-probe integration) and pattern J (user supplies the configuration template).",
+  "references": [
+    {"kind": "spec", "path": "journald/assets/configuration/spec.yaml"},
+    {"kind": "readme", "path": "journald/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Logs-only host-local integration; no AgentCheck class. Same structural class as sidekiq (no probe target), but driven by the Agent's logs collector reading the journal rather than DogStatsD."
+}

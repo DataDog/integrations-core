@@ -1,0 +1,26 @@
+{
+  "name": "twistlock",
+  "display_name": "Prisma Cloud Compute (Twistlock)",
+  "spec_path": "twistlock/assets/configuration/spec.yaml",
+  "required_fields": ["url", "username", "password"],
+  "all_relevant_fields": [
+    {"name": "url", "required": true, "default": null},
+    {"name": "project", "required": false, "default": null},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The Twistlock check targets the Prisma Cloud Compute Console API and authenticates with basic auth using a Prisma Cloud API access key ID (username) and secret key (password). The spec marks username/password as optional in the http template, but every realistic deployment of the Console enforces auth, and the SaaS variant explicitly requires the access key pair. There is no unauthenticated metrics endpoint to probe, and the URL itself (custom Console hostname / project name) is not discoverable from the wire.",
+  "references": [
+    {"kind": "spec", "path": "twistlock/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "twistlock/datadog_checks/twistlock/config.py"},
+    {"kind": "check", "path": "twistlock/datadog_checks/twistlock/twistlock.py"},
+    {"kind": "readme", "path": "twistlock/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern D (spec-required credentials in practice). Even a localhost Console requires an API key pair."
+}

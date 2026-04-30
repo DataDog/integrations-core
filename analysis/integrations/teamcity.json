@@ -1,0 +1,28 @@
+{
+  "name": "teamcity",
+  "display_name": "TeamCity",
+  "spec_path": "teamcity/assets/configuration/spec.yaml",
+  "required_fields": ["server"],
+  "all_relevant_fields": [
+    {"name": "use_openmetrics", "required": false, "default": false},
+    {"name": "server", "required": true, "default": null},
+    {"name": "openmetrics_endpoint", "required": false, "default": null},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null},
+    {"name": "projects", "required": false, "default": null},
+    {"name": "build_configuration", "required": false, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "TeamCity is a JetBrains CI server reached over HTTP at a per-deployment hostname (e.g. `http://teamcity.<ACCOUNT_NAME>.com`). The spec marks `server` as required with no canonical port or path, and the README requires the operator to either enable Guest authentication on the TeamCity server (server-side configuration that can't be probed) or supply `username`/`password` for HTTP basic auth. The REST API instance further needs an explicit `projects`/`build_configuration` mapping that defines what to monitor, which is a user policy choice. No combination of host/port probes can stand in for a TeamCity URL plus credentials plus project filters.",
+  "references": [
+    {"kind": "spec", "path": "teamcity/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "teamcity/datadog_checks/teamcity/check.py"},
+    {"kind": "readme", "path": "teamcity/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "OpenMetrics mode (`use_openmetrics: true`) hits TeamCity's `/metrics` Prometheus endpoint, but the same `server` URL is required and basic auth is the typical production setup. Even guest auth requires a server-side toggle and explicit role/permission grant."
+}

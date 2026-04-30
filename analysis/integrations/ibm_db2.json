@@ -1,0 +1,29 @@
+{
+  "name": "ibm_db2",
+  "display_name": "IBM Db2",
+  "spec_path": "ibm_db2/assets/configuration/spec.yaml",
+  "required_fields": ["db", "username", "password"],
+  "all_relevant_fields": [
+    {"name": "db", "required": true, "default": null},
+    {"name": "username", "required": true, "default": null},
+    {"name": "password", "required": true, "default": null},
+    {"name": "host", "required": false, "default": null},
+    {"name": "port", "required": false, "default": 50000},
+    {"name": "security", "required": false, "default": "none"},
+    {"name": "tls_cert", "required": false, "default": null},
+    {"name": "connection_timeout", "required": false, "default": 10}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "IBM Db2 connects via the `ibm_db` driver and the spec marks `db` (database name), `username`, and `password` as required. The check builds a connection string from these and calls `ibm_db.connect`, so monitoring is not possible without credentials and a specific catalogued/uncataloged database name. Pattern D (spec-required credentials).",
+  "references": [
+    {"kind": "spec", "path": "ibm_db2/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "ibm_db2/datadog_checks/ibm_db2/ibm_db2.py"},
+    {"kind": "readme", "path": "ibm_db2/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Default Db2 port 50000 is universal but useless without auth + database name. No auto_conf.yaml ships with the integration."
+}

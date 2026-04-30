@@ -1,0 +1,26 @@
+{
+  "name": "ignite",
+  "display_name": "Ignite",
+  "spec_path": "ignite/assets/configuration/spec.yaml",
+  "required_fields": ["host", "port"],
+  "all_relevant_fields": [
+    {"name": "host", "required": true, "default": "localhost"},
+    {"name": "port", "required": true, "default": 49112},
+    {"name": "user", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null},
+    {"name": "is_jmx", "required": false, "default": true}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Ignite is a JMXFetch-based integration: the spec inherits `init_config/jmx` and `instances/jmx`, with no Python check class — collection happens through JMXFetch using a shipped `metrics.yaml` MBean list. Per the procedure rubric, JMXFetch checks always need host + port and, in any production-shaped deployment, JMX authentication credentials (user/password) and likely SSL trust material. Credentials cannot be discovered from the wire.",
+  "references": [
+    {"kind": "spec", "path": "ignite/assets/configuration/spec.yaml"},
+    {"kind": "other", "path": "ignite/datadog_checks/ignite/data/metrics.yaml"},
+    {"kind": "readme", "path": "ignite/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pure JMXFetch integration — no .py check class beyond __init__/__about__. Same shape as activemq."
+}

@@ -1,0 +1,26 @@
+{
+  "name": "hive",
+  "display_name": "Hive",
+  "spec_path": "hive/assets/configuration/spec.yaml",
+  "required_fields": ["host", "port"],
+  "all_relevant_fields": [
+    {"name": "is_jmx", "required": false, "default": true},
+    {"name": "host", "required": true, "default": null},
+    {"name": "port", "required": true, "default": 8809},
+    {"name": "user", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Hive is a JMXFetch-only integration: the spec inherits `template: instances/jmx` and there is no Python check class (the package only re-exports `__version__`). Collection runs through JMXFetch against HiveServer2 / Hive Metastore JMX (default example port 8809). Per the procedure's JMXFetch shortcut and pattern D, host+port+user+password are needed in any production deployment, and JMX credentials cannot be derived from the wire. Classify as impossible.",
+  "references": [
+    {"kind": "spec", "path": "hive/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "hive/datadog_checks/hive/__init__.py"},
+    {"kind": "readme", "path": "hive/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pure JMXFetch integration like cassandra/tomcat/jboss_wildfly. Hive itself runs JMX over RMI, so even an unauthenticated localhost probe would not look like a generic /jmx HTTP servlet."
+}

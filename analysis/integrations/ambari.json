@@ -1,0 +1,28 @@
+{
+  "name": "ambari",
+  "display_name": "Ambari",
+  "spec_path": "ambari/assets/configuration/spec.yaml",
+  "required_fields": ["url"],
+  "all_relevant_fields": [
+    {"name": "url", "required": true, "default": null},
+    {"name": "services", "required": false, "default": null},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null},
+    {"name": "auth_type", "required": false, "default": "basic"},
+    {"name": "collect_service_metrics", "required": false, "default": true},
+    {"name": "collect_service_status", "required": false, "default": false}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Ambari is the Hadoop cluster management REST API (typically on port 8080). The check walks the `/api/v1/clusters/...` tree to enumerate hosts, services, and components. Although `username`/`password` are marked optional in the spec, every production Ambari server has authentication enabled (default credentials are notoriously `admin:admin`, which a generic auto-config layer must not assume), and even discovering which `services` and `components` to scrape requires user policy: the `services` mapping is a per-deployment whitelist of metric headers per component. Per pattern D (credential-required REST API) and the user-intent caveat, this is `impossible`.",
+  "references": [
+    {"kind": "spec", "path": "ambari/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "ambari/datadog_checks/ambari/ambari.py"},
+    {"kind": "readme", "path": "ambari/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "URL field is just `localhost` in the README example, but real deployments need scheme+host+port plus basic-auth credentials. The `services` whitelist is also a user-policy input that auto-config cannot synthesize."
+}
