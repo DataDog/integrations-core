@@ -1,0 +1,25 @@
+{
+  "name": "iis",
+  "display_name": "IIS",
+  "spec_path": "iis/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [
+    {"name": "sites", "required": false, "default": null},
+    {"name": "app_pools", "required": false, "default": null},
+    {"name": "host", "required": false, "default": null},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null}
+  ],
+  "classification": "generic",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "IIS is collected via Windows Performance Counters (PDH) on the local host where the Agent runs — there's no remote host/port in the default mode. Auto-config reduces to: detect whether IIS is installed (the W3SVC service) on this machine and enable the check with default sites/app_pools (all). The legacy `pdh_legacy` template can target a remote machine via username/password, but that's an opt-in mode.",
+  "references": [
+    {"kind": "spec", "path": "iis/assets/configuration/spec.yaml"},
+    {"kind": "upstream", "url": "https://learn.microsoft.com/en-us/iis/web-hosting/web-server-for-shared-hosting/installing-internet-information-services-iis-7"}
+  ],
+  "confidence": "medium",
+  "needs_human_review": false,
+  "notes": "Auto-config trigger here is 'IIS service present', not a network probe. Several Windows-host integrations (active_directory, dns_check, exchange) likely follow the same pattern — flag for shared treatment."
+}

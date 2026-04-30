@@ -1,0 +1,25 @@
+{
+  "name": "elastic",
+  "display_name": "Elasticsearch",
+  "spec_path": "elastic/assets/configuration/spec.yaml",
+  "required_fields": ["url"],
+  "all_relevant_fields": [
+    {"name": "url", "required": true, "default": "http://localhost:9200"},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null},
+    {"name": "cluster_stats", "required": false, "default": false}
+  ],
+  "classification": "custom",
+  "auto_config_method": "http-path-probe",
+  "has_existing_auto_conf": true,
+  "auto_conf_path": "elastic/datadog_checks/elastic/data/auto_conf.yaml",
+  "explanation": "The check only requires a URL (default `http://localhost:9200`) — Elasticsearch's REST API is on a well-known port. However, virtually all production deployments enable xpack security and require basic auth and TLS, so a discovery layer must (a) probe the port for the ES root document, (b) detect whether security is enabled, and (c) defer to the existing auto_conf template for the credentialed path. Classification is custom because of the deployment-mode branching even though the unauthenticated case is trivial.",
+  "references": [
+    {"kind": "spec", "path": "elastic/assets/configuration/spec.yaml"},
+    {"kind": "auto_conf", "path": "elastic/datadog_checks/elastic/data/auto_conf.yaml"},
+    {"kind": "upstream", "url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster.html"}
+  ],
+  "confidence": "medium",
+  "needs_human_review": false,
+  "notes": "Cloud-managed clusters (Elastic Cloud, AWS OpenSearch) always need credentials → fall through to credentials-required in practice."
+}

@@ -1,0 +1,24 @@
+{
+  "name": "mysql",
+  "display_name": "MySQL",
+  "spec_path": "mysql/assets/configuration/spec.yaml",
+  "required_fields": ["host", "username", "password"],
+  "all_relevant_fields": [
+    {"name": "host", "required": true, "default": "localhost"},
+    {"name": "port", "required": false, "default": 3306},
+    {"name": "username", "required": true, "default": "datadog"},
+    {"name": "password", "required": true, "default": null},
+    {"name": "dbm", "required": false, "default": false}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "MySQL needs a dedicated `datadog` user with explicit grants and a password to read performance schema and replication state. The credentials cannot be discovered from the wire — they must be provisioned in the database first.",
+  "references": [
+    {"kind": "spec", "path": "mysql/assets/configuration/spec.yaml"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": ""
+}

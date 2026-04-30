@@ -1,0 +1,24 @@
+{
+  "name": "etcd",
+  "display_name": "etcd",
+  "spec_path": "etcd/assets/configuration/spec.yaml",
+  "required_fields": ["prometheus_url"],
+  "all_relevant_fields": [
+    {"name": "prometheus_url", "required": true, "default": "http://localhost:2379/metrics"},
+    {"name": "possible_prometheus_urls", "required": false, "default": null},
+    {"name": "ssl_verify", "required": false, "default": false}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": true,
+  "auto_conf_path": "etcd/datadog_checks/etcd/data/auto_conf.yaml",
+  "explanation": "etcd exposes Prometheus metrics on `/metrics` over its client port (default 2379). The auto_conf already lists both `https://` and `http://` variants of the same path. A generic OpenMetrics scan that tries TLS-then-cleartext on the client port is sufficient.",
+  "references": [
+    {"kind": "spec", "path": "etcd/assets/configuration/spec.yaml"},
+    {"kind": "auto_conf", "path": "etcd/datadog_checks/etcd/data/auto_conf.yaml"},
+    {"kind": "upstream", "url": "https://etcd.io/docs/v3.5/op-guide/monitoring/"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": ""
+}
