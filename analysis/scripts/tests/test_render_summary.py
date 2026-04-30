@@ -59,9 +59,10 @@ def test_section_and_bucket_headers():
 
 def test_counts_in_header():
     out = render.render(DATA, generated_at="2026-04-30")
-    assert "1 generic" in out
-    assert "1 custom" in out
-    assert "1 impossible" in out
+    assert "3 integrations classified" in out
+    assert "## TCP probe with integration-specific protocol (1)" in out
+    assert "## HTTP probe with integration-specific verification (1)" in out
+    assert "## Credentials required (1)" in out
 
 
 def test_needs_review_marker():

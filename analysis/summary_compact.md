@@ -1,8 +1,8 @@
-_Generated 2026-04-30. 260 total: 96 generic / 40 custom / 124 impossible / 2 need review (⚠)._
+_Generated 2026-04-30. 260 integrations classified across 23 discovery buckets in 6 sections; 2 need review (⚠)._
 
-**Sections:** [Fully generic](#fully-generic) · [HTTP probe with integration-specific verification](#http-probe-with-integration-specific-verification) · [TCP probe with integration-specific protocol](#tcp-probe-with-integration-specific-protocol) · [Local detection (no network, no credentials)](#local-detection-no-network-no-credentials) · [Credentials required](#credentials-required) · [No probe surface](#no-probe-surface)
+**Sections:** [Fully generic (74)](#fully-generic) · [HTTP probe with integration-specific verification (35)](#http-probe-with-integration-specific-verification) · [TCP probe with integration-specific protocol (6)](#tcp-probe-with-integration-specific-protocol) · [Local detection (no network, no credentials) (14)](#local-detection-no-network-no-credentials) · [Credentials required (75)](#credentials-required) · [No probe surface (56)](#no-probe-surface)
 
-## Fully generic
+## Fully generic (74)
 
 _No integration-specific verification code; the discovery layer carries at most a per-integration port + path table._
 
@@ -108,7 +108,7 @@ Read host-local files under `/proc` or `/sys`. Per-integration data is just the 
 | System Core (`system_core`) | — | other — The System Core check is a host-local CPU metric check with no required configuration fields and no remote target. | [spec](../system_core/assets/configuration/spec.yaml), [check](../system_core/datadog_checks/system_core/system_core.py), [readme](../system_core/README.md) |
 | System Swap (`system_swap`) | — | other — The System Swap check is a host-local swap-usage metric check with no required configuration fields and no remote target. | [spec](../system_swap/assets/configuration/spec.yaml), [check](../system_swap/datadog_checks/system_swap/system_swap.py), [readme](../system_swap/README.md) |
 
-## HTTP probe with integration-specific verification
+## HTTP probe with integration-specific verification (35)
 
 _Fixed URL on a known port, but the discovery layer needs integration-specific verification code (more than just "is this Prometheus exposition format?") to confirm the target._
 
@@ -168,7 +168,7 @@ Try several plausible paths or modes per integration (e.g. nginx stub_status / P
 | TorchServe (`torchserve`) | — | http-path-probe — TorchServe exposes three distinct HTTP endpoints on three different conventional ports: the OpenMetrics scrape endpoint (`/metrics` on 8082), the Inference API (8080) and the Management API (8081). | [spec](../torchserve/assets/configuration/spec.yaml), [check](../torchserve/datadog_checks/torchserve/check.py), [readme](../torchserve/README.md), [upstream](https://pytorch.org/serve/metrics_api.html) |
 | Traefik Mesh (`traefik_mesh`) | `openmetrics_endpoint` | http-path-probe — Traefik Mesh's primary collection path is OpenMetrics on the proxy's metrics entrypoint (default port 8082, path `/metrics`), which alone would be a generic openmetrics-port-scan case. | [spec](../traefik_mesh/assets/configuration/spec.yaml), [check](../traefik_mesh/datadog_checks/traefik_mesh/check.py), [readme](../traefik_mesh/README.md), [upstream](https://doc.traefik.io/traefik-mesh/observability/) |
 
-## TCP probe with integration-specific protocol
+## TCP probe with integration-specific protocol (6)
 
 _Open a TCP socket, exchange integration-specific bytes to confirm the target._
 
@@ -192,7 +192,7 @@ Client sends fixed bytes, integration-specific reply (memcached `version`, redis
 | StatsD (`statsd`) | — | tcp-banner-probe — Despite the name, this is NOT a DogStatsD-only integration. | [spec](../statsd/assets/configuration/spec.yaml), [check](../statsd/datadog_checks/statsd/statsd.py), [readme](../statsd/README.md) |
 | ZooKeeper (`zk`) | `host` | tcp-banner-probe — The ZooKeeper check opens a TCP socket to host:port (default 2181) and sends the `ruok`, `stat`, and `mntr` four-letter words; `ruok` returns the literal `imok` and `stat` returns a multi-line response starting with `Zookeeper version: ...`. | [spec](../zk/assets/configuration/spec.yaml), [check](../zk/datadog_checks/zk/zk.py), [upstream](https://zookeeper.apache.org/doc/r3.8.0/zookeeperAdmin.html#sc_4lw) |
 
-## Local detection (no network, no credentials)
+## Local detection (no network, no credentials) (14)
 
 _The integration runs against host-local state; discovery is "is this thing present on the Agent host?"._
 
@@ -238,7 +238,7 @@ Read a user-supplied local config or DB file (`duckdb` `.db` file, nagios `nagio
 | DuckDB (`duckdb`) | `db_name` | other — DuckDB is an embedded analytical database stored as a file on the local filesystem. The required `db_name` field is a filesystem path to a `.db` file (e.g. | [spec](../duckdb/assets/configuration/spec.yaml), [check](../duckdb/datadog_checks/duckdb/check.py) |
 | Nagios (`nagios`) | `nagios_conf` | config-file-parse — The Nagios integration runs on the same host as a Nagios/Icinga v1 server and tails its log/perfdata files. The required `nagios_conf` points to the main config file (e.g. | [spec](../nagios/assets/configuration/spec.yaml), [check](../nagios/datadog_checks/nagios/nagios.py), [readme](../nagios/README.md) |
 
-## Credentials required
+## Credentials required (75)
 
 _The check needs credentials that cannot be discovered from the wire. Sub-bucketed by what kind of credential._
 
@@ -352,7 +352,7 @@ Spec marks auth as optional but production deployments invariably need it (xpack
 | MongoDB (`mongo`) | `hosts` | credentials-required — MongoDB's default port (27017) is universal and the wire protocol is detectable. Strictly per spec, only `hosts` is required, so an unauthenticated localhost dev instance could be discovered generically. | [spec](../mongo/assets/configuration/spec.yaml), [upstream](https://www.mongodb.com/docs/manual/tutorial/configure-x509-client-authentication/) |
 | Vault (`vault`) | `api_url` | credentials-required — Vault exposes its API on a known port (8200) under /v1, and the agent can reach /sys/health unauthenticated for basic status checks. | [spec](../vault/assets/configuration/spec.yaml), [check](../vault/datadog_checks/vault/vault.py), [check](../vault/datadog_checks/vault/check.py) |
 
-## No probe surface
+## No probe surface (56)
 
 _No reachable upstream service to probe at all. The integration is a logs sink, a DogStatsD listener, a generic configuration template, or a synthetic check._
 

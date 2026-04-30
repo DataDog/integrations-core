@@ -1,8 +1,8 @@
-_Generated 2026-04-30. 260 total: 96 generic / 40 custom / 124 impossible / 2 need review (⚠)._
+_Generated 2026-04-30. 260 integrations classified across 23 discovery buckets in 6 sections; 2 need review (⚠)._
 
-**Sections:** [Fully generic](#fully-generic) · [HTTP probe with integration-specific verification](#http-probe-with-integration-specific-verification) · [TCP probe with integration-specific protocol](#tcp-probe-with-integration-specific-protocol) · [Local detection (no network, no credentials)](#local-detection-no-network-no-credentials) · [Credentials required](#credentials-required) · [No probe surface](#no-probe-surface)
+**Sections:** [Fully generic (74)](#fully-generic) · [HTTP probe with integration-specific verification (35)](#http-probe-with-integration-specific-verification) · [TCP probe with integration-specific protocol (6)](#tcp-probe-with-integration-specific-protocol) · [Local detection (no network, no credentials) (14)](#local-detection-no-network-no-credentials) · [Credentials required (75)](#credentials-required) · [No probe surface (56)](#no-probe-surface)
 
-## Fully generic
+## Fully generic (74)
 
 _No integration-specific verification code; the discovery layer carries at most a per-integration port + path table._
 
@@ -108,7 +108,7 @@ Read host-local files under `/proc` or `/sys`. Per-integration data is just the 
 | System Core (`system_core`) | — | other — The System Core check is a host-local CPU metric check with no required configuration fields and no remote target. The implementation calls `psutil.cpu_count()`, `psutil.cpu_times(percpu=True)`, and `psutil.cpu_freq(percpu=True)` against the Agent host and emits per-core gauges and rates. There is no host/port/URL/credential to discover. Auto-config is trivial: emit the integration with the default empty instance on every Agent host — every host has CPUs. Sits alongside `disk` and `btrfs` in the host-presence-check family (pattern H/L analogue with no binary or network involved). | [spec](../system_core/assets/configuration/spec.yaml), [check](../system_core/datadog_checks/system_core/system_core.py), [readme](../system_core/README.md) |
 | System Swap (`system_swap`) | — | other — The System Swap check is a host-local swap-usage metric check with no required configuration fields and no remote target. The implementation calls `psutil.swap_memory()` against the Agent host and emits `system.swap.swapped_in` / `system.swap.swapped_out` rates. There is no host/port/URL/credential to discover. Auto-config is trivial: emit the integration with the default empty instance on every Agent host (psutil reports zeros where swap is absent, so the check is safe to enable unconditionally). Sits alongside `disk`, `btrfs`, and `system_core` in the host-presence-check family. | [spec](../system_swap/assets/configuration/spec.yaml), [check](../system_swap/datadog_checks/system_swap/system_swap.py), [readme](../system_swap/README.md) |
 
-## HTTP probe with integration-specific verification
+## HTTP probe with integration-specific verification (35)
 
 _Fixed URL on a known port, but the discovery layer needs integration-specific verification code (more than just "is this Prometheus exposition format?") to confirm the target._
 
@@ -168,7 +168,7 @@ Try several plausible paths or modes per integration (e.g. nginx stub_status / P
 | TorchServe (`torchserve`) | — | http-path-probe — TorchServe exposes three distinct HTTP endpoints on three different conventional ports: the OpenMetrics scrape endpoint (`/metrics` on 8082), the Inference API (8080) and the Management API (8081). The check dispatches to one of three sub-checks depending on which of `openmetrics_endpoint`, `inference_api_url`, or `management_api_url` is set, and the spec marks each as optional but exactly one must be configured per instance. Auto-config has to probe up to three well-known ports and emit up to three instances; because the discovery is multi-endpoint and instance-multiplexed, this is custom rather than generic, even though each individual endpoint follows a fixed convention. | [spec](../torchserve/assets/configuration/spec.yaml), [check](../torchserve/datadog_checks/torchserve/check.py), [readme](../torchserve/README.md), [upstream](https://pytorch.org/serve/metrics_api.html) |
 | Traefik Mesh (`traefik_mesh`) | `openmetrics_endpoint` | http-path-probe — Traefik Mesh's primary collection path is OpenMetrics on the proxy's metrics entrypoint (default port 8082, path `/metrics`), which alone would be a generic openmetrics-port-scan case. However the check additionally queries two optional management APIs on different default ports (proxy API on 8080, controller API on 9000) for version metadata, mesh node readiness and controller readiness service checks. Full coverage therefore requires probing three distinct endpoints/ports per cluster, so discovery is integration-specific. The README documents the exact ports and explicitly suggests `%%host%%:8082/metrics` for autodiscovery. | [spec](../traefik_mesh/assets/configuration/spec.yaml), [check](../traefik_mesh/datadog_checks/traefik_mesh/check.py), [readme](../traefik_mesh/README.md), [upstream](https://doc.traefik.io/traefik-mesh/observability/) |
 
-## TCP probe with integration-specific protocol
+## TCP probe with integration-specific protocol (6)
 
 _Open a TCP socket, exchange integration-specific bytes to confirm the target._
 
@@ -192,7 +192,7 @@ Client sends fixed bytes, integration-specific reply (memcached `version`, redis
 | StatsD (`statsd`) | — | tcp-banner-probe — Despite the name, this is NOT a DogStatsD-only integration. The check opens a TCP socket to a non-Datadog Etsy/StatsD server's management interface (default port 8126), sends text commands (`health`, `stats`, `counters`, `gauges`, `timers`) and parses the responses — a simple line-protocol over TCP. No authentication, no credentials, no API keys. The README explicitly documents `host: localhost, port: 8126` as the canonical configuration and the Containerized template uses `{"host": "%%host%%", "port":"8126"}`. A generic TCP banner-style probe that sends `health\n` and looks for `health: up` or `health: down` would identify the service unambiguously. Pattern C (TCP banner / known protocol) — same shape as redisdb / memcached. | [spec](../statsd/assets/configuration/spec.yaml), [check](../statsd/datadog_checks/statsd/statsd.py), [readme](../statsd/README.md) |
 | ZooKeeper (`zk`) | `host` | tcp-banner-probe — The ZooKeeper check opens a TCP socket to host:port (default 2181) and sends the `ruok`, `stat`, and `mntr` four-letter words; `ruok` returns the literal `imok` and `stat` returns a multi-line response starting with `Zookeeper version: ...`. Both make excellent banner probes — a generic discovery layer can connect to 2181, send `ruok\n`, and key off `imok`. No credentials are involved by default. TLS is optional. The 4LW interface needs to be enabled in `zoo.cfg` (`4lw.commands.whitelist`) on modern ZooKeeper, which is a deployment detail, not a config-discovery problem. | [spec](../zk/assets/configuration/spec.yaml), [check](../zk/datadog_checks/zk/zk.py), [upstream](https://zookeeper.apache.org/doc/r3.8.0/zookeeperAdmin.html#sc_4lw) |
 
-## Local detection (no network, no credentials)
+## Local detection (no network, no credentials) (14)
 
 _The integration runs against host-local state; discovery is "is this thing present on the Agent host?"._
 
@@ -238,7 +238,7 @@ Read a user-supplied local config or DB file (`duckdb` `.db` file, nagios `nagio
 | DuckDB (`duckdb`) | `db_name` | other — DuckDB is an embedded analytical database stored as a file on the local filesystem. The required `db_name` field is a filesystem path to a `.db` file (e.g. `/path-to-file/my_database.db`), and the check opens it via `duckdb.connect(self.db_name, read_only=True)`. There is no port, no network endpoint, and no canonical filesystem location — the path is entirely user-defined. Auto-config would have to guess where the user has stored their DuckDB file(s), which is not discoverable from the wire or from any standard location. Closest analogue is pattern M (process-name local discovery) but applied to filesystem state: the user's intent (which file to monitor) is the missing input. | [spec](../duckdb/assets/configuration/spec.yaml), [check](../duckdb/datadog_checks/duckdb/check.py) |
 | Nagios (`nagios`) | `nagios_conf` | config-file-parse — The Nagios integration runs on the same host as a Nagios/Icinga v1 server and tails its log/perfdata files. The required `nagios_conf` points to the main config file (e.g. `/etc/nagios3/nagios.cfg`); the check parses it to discover `log_file`, `host_perfdata_file`, `service_perfdata_file`, and the corresponding template strings. There is no network endpoint at all. Auto-config could plausibly look for well-known config paths (`/etc/nagios*/nagios.cfg`, `/etc/icinga/icinga.cfg`, `/usr/local/nagios/etc/nagios.cfg`) and parse the first one found — Nagios-specific logic, hence custom. | [spec](../nagios/assets/configuration/spec.yaml), [check](../nagios/datadog_checks/nagios/nagios.py), [readme](../nagios/README.md) |
 
-## Credentials required
+## Credentials required (75)
 
 _The check needs credentials that cannot be discovered from the wire. Sub-bucketed by what kind of credential._
 
@@ -352,7 +352,7 @@ Spec marks auth as optional but production deployments invariably need it (xpack
 | MongoDB (`mongo`) | `hosts` | credentials-required — MongoDB's default port (27017) is universal and the wire protocol is detectable. Strictly per spec, only `hosts` is required, so an unauthenticated localhost dev instance could be discovered generically. In practice, every production MongoDB enables authentication and most also require a dedicated `datadog` user with `clusterMonitor` role, plus a `connection_scheme` decision (`mongodb` vs. `mongodb+srv`) for replica sets. Classification is custom because of the auth-mode branching, but in real deployments it falls through to credentials-required. | [spec](../mongo/assets/configuration/spec.yaml), [upstream](https://www.mongodb.com/docs/manual/tutorial/configure-x509-client-authentication/) |
 | Vault (`vault`) | `api_url` | credentials-required — Vault exposes its API on a known port (8200) under /v1, and the agent can reach /sys/health unauthenticated for basic status checks. However, the OpenMetrics /v1/sys/metrics endpoint is gated by an ACL-bound client token in any production deployment, and metric collection is the integration's primary purpose. A discovery layer could probe http://%%host%%:8200/v1/sys/health to detect Vault, but useful metric collection still requires a client token (or token file path) that doesn't come over the wire. Closest pattern: auth-optional-but-practically-required (like elastic). | [spec](../vault/assets/configuration/spec.yaml), [check](../vault/datadog_checks/vault/vault.py), [check](../vault/datadog_checks/vault/check.py) |
 
-## No probe surface
+## No probe surface (56)
 
 _No reachable upstream service to probe at all. The integration is a logs sink, a DogStatsD listener, a generic configuration template, or a synthetic check._
 

@@ -1,8 +1,8 @@
-_Generated 2026-04-30. 260 total: 96 generic / 40 custom / 124 impossible / 2 need review (⚠)._
+_Generated 2026-04-30. 260 integrations classified across 23 discovery buckets in 6 sections; 2 need review (⚠)._
 
-**Sections:** [Fully generic](#fully-generic) · [HTTP probe with integration-specific verification](#http-probe-with-integration-specific-verification) · [TCP probe with integration-specific protocol](#tcp-probe-with-integration-specific-protocol) · [Local detection (no network, no credentials)](#local-detection-no-network-no-credentials) · [Credentials required](#credentials-required) · [No probe surface](#no-probe-surface)
+**Sections:** [Fully generic (74)](#fully-generic) · [HTTP probe with integration-specific verification (35)](#http-probe-with-integration-specific-verification) · [TCP probe with integration-specific protocol (6)](#tcp-probe-with-integration-specific-protocol) · [Local detection (no network, no credentials) (14)](#local-detection-no-network-no-credentials) · [Credentials required (75)](#credentials-required) · [No probe surface (56)](#no-probe-surface)
 
-## Fully generic
+## Fully generic (74)
 
 _No integration-specific verification code; the discovery layer carries at most a per-integration port + path table._
 
@@ -108,7 +108,7 @@ Read host-local files under `/proc` or `/sys`. Per-integration data is just the 
 | System Core (`system_core`) | — | other | high |
 | System Swap (`system_swap`) | — | other | high |
 
-## HTTP probe with integration-specific verification
+## HTTP probe with integration-specific verification (35)
 
 _Fixed URL on a known port, but the discovery layer needs integration-specific verification code (more than just "is this Prometheus exposition format?") to confirm the target._
 
@@ -168,7 +168,7 @@ Try several plausible paths or modes per integration (e.g. nginx stub_status / P
 | TorchServe (`torchserve`) | — | http-path-probe | high |
 | Traefik Mesh (`traefik_mesh`) | `openmetrics_endpoint` | http-path-probe | medium |
 
-## TCP probe with integration-specific protocol
+## TCP probe with integration-specific protocol (6)
 
 _Open a TCP socket, exchange integration-specific bytes to confirm the target._
 
@@ -192,7 +192,7 @@ Client sends fixed bytes, integration-specific reply (memcached `version`, redis
 | StatsD (`statsd`) | — | tcp-banner-probe | high |
 | ZooKeeper (`zk`) | `host` | tcp-banner-probe | high |
 
-## Local detection (no network, no credentials)
+## Local detection (no network, no credentials) (14)
 
 _The integration runs against host-local state; discovery is "is this thing present on the Agent host?"._
 
@@ -238,7 +238,7 @@ Read a user-supplied local config or DB file (`duckdb` `.db` file, nagios `nagio
 | DuckDB (`duckdb`) | `db_name` | other | high |
 | Nagios (`nagios`) | `nagios_conf` | config-file-parse | high |
 
-## Credentials required
+## Credentials required (75)
 
 _The check needs credentials that cannot be discovered from the wire. Sub-bucketed by what kind of credential._
 
@@ -352,7 +352,7 @@ Spec marks auth as optional but production deployments invariably need it (xpack
 | MongoDB (`mongo`) | `hosts` | credentials-required | medium |
 | Vault (`vault`) | `api_url` | credentials-required | medium |
 
-## No probe surface
+## No probe surface (56)
 
 _No reachable upstream service to probe at all. The integration is a logs sink, a DogStatsD listener, a generic configuration template, or a synthetic check._
 

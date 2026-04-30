@@ -153,27 +153,31 @@ def _render(records, row_fn, table_header, generated_at=None):
     for r in records:
         by_bucket[r["discovery_bucket"]].append(r)
 
-    counts = defaultdict(int)
-    review = 0
-    for r in records:
-        counts[r["classification"]] += 1
-        if r.get("needs_human_review"):
-            review += 1
-    total = len(records)
+    section_counts = []
+    for section_title, _, buckets in SECTIONS:
+        n = sum(len(by_bucket.get(b, [])) for b, _ in buckets)
+        section_counts.append((section_title, n))
 
+    review = sum(1 for r in records if r.get("needs_human_review"))
+    total = len(records)
     generated_at = generated_at or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
     out = []
     out.append(
-        f"_Generated {generated_at}. {total} total: "
-        f"{counts['generic']} generic / {counts['custom']} custom / "
-        f"{counts['impossible']} impossible / {review} need review (⚠)._\n"
+        f"_Generated {generated_at}. {total} integrations classified across "
+        f"23 discovery buckets in 6 sections; {review} need review (⚠)._\n"
     )
-    out.append("**Sections:** "
-               + " · ".join(f"[{title}](#{_anchor(title)})" for title, _, _ in SECTIONS)
-               + "\n")
+    out.append(
+        "**Sections:** "
+        + " · ".join(
+            f"[{title} ({n})](#{_anchor(title)})"
+            for title, n in section_counts
+        )
+        + "\n"
+    )
 
-    for section_title, section_desc, buckets in SECTIONS:
-        out.append(f"## {section_title}\n")
+    for (section_title, section_desc, buckets), (_, section_count) in zip(SECTIONS, section_counts):
+        out.append(f"## {section_title} ({section_count})\n")
         out.append(f"_{section_desc}_\n")
         for bucket_name, bucket_desc in buckets:
             recs = sorted(by_bucket.get(bucket_name, []), key=lambda r: r["name"])
