@@ -117,6 +117,113 @@ Output goes to `analysis/integrations/<name>.json` and must validate against
 write what you know, and move on. The summary will surface the entry with a
 warning marker.
 
-## Patterns observed
+## Patterns observed (after Phase 1 bootstrap, 15 integrations)
 
-(Section appended after Phase 1 bootstrap — see Task 11 of the plan.)
+The bootstrap surfaced a few recurring shapes worth naming. Use these as
+shortcuts but verify them against the actual `spec.yaml` and check code.
+
+### A. "OpenMetrics on a known port" — `generic` / `openmetrics-port-scan`
+
+Hallmarks:
+- Spec uses `template: instances/openmetrics` or
+  `template: instances/openmetrics_legacy`.
+- `auto_conf.yaml` (in spec or on disk) sets `openmetrics_endpoint` /
+  `prometheus_url` to `http://%%host%%:PORT/metrics` (port and path are fixed).
+- No `username` / `password` in the required path.
+
+Examples: coredns, etcd. Classification: **generic**, **high** confidence.
+
+### B. "Single canonical HTTP path" — `generic` / `http-path-probe`
+
+Hallmarks:
+- Required field is a single URL with one universal path (e.g.
+  `/server-status?auto`).
+- Upstream documents that exact path as the monitoring endpoint.
+
+Examples: apache. Classification: **generic**, **high** confidence.
+
+### C. "TCP banner / known protocol" — `generic` / `tcp-banner-probe`
+
+Hallmarks:
+- Required fields are `host` + `port` only.
+- The server speaks first (Redis: server greeting; SSH: banner) or responds
+  to a fixed protocol-specific request (Memcached: `version`).
+
+Examples: redisdb. Classification: **generic**, **high** confidence.
+
+### D. "Spec-required credentials" — `impossible` / `credentials-required`
+
+Hallmarks:
+- `username` and/or `password` (or API key, certificate, OAuth) is
+  `required: true` in the spec.
+- The DB / management API can't be queried without them.
+
+Examples: postgres, mysql, sqlserver. Classification: **impossible**,
+**high** confidence.
+
+### E. "Auth-optional in spec but practically required" — `custom` / `credentials-required`
+
+Hallmarks:
+- Spec marks `username` / `password` as optional, but every production
+  deployment of the upstream system enables authentication (e.g. xpack
+  security, Mongo auth, SASL/SSL on Kafka).
+- The localhost-no-auth case works for development.
+
+Examples: elastic, mongo, kafka_consumer. Classification: **custom**,
+**medium** confidence. Add a note that real deployments will fall through
+to credential discovery.
+
+### F. "Dual-mode: Prometheus plus legacy" — `custom` / `http-path-probe`
+
+Hallmarks:
+- Spec defines two distinct collection paths (typically a Prometheus /
+  OpenMetrics plugin and a management API or stats page).
+- The Prometheus path is unauthenticated and easy; the legacy path needs
+  basic auth.
+- A discovery layer must probe the Prometheus port first and fall back.
+
+Examples: rabbitmq, haproxy. Classification: **custom**, **high** to
+**medium** confidence depending on default-port stability.
+
+### G. "Multiple plausible URL paths" — `custom` / `http-path-probe`
+
+Hallmarks:
+- One URL field, but the path varies by upstream module/version (e.g.
+  nginx stub_status, Plus `/api`, vts JSON).
+- The discovery layer must try paths in order and inspect response shape.
+
+Examples: nginx. Classification: **custom**, **high** confidence.
+
+### H. "Local Windows host detection" — `generic` / `other`
+
+Hallmarks:
+- Spec inherits `template: instances/perf_counters`.
+- No remote host/port in the default mode (the Agent runs on the same
+  Windows host that exposes the counters).
+- Optional `pdh_legacy` mode adds remote host + credentials.
+
+Examples: iis. Classification: **generic**, **medium** confidence. Method
+is `other` because there's no network probe — discovery is "is this
+service installed on this machine?". Likely also applies to
+`active_directory`, `dns_check`, `exchange_server`, `windows_service`.
+
+### I. "Credential-gated network discovery" — `impossible` / `credentials-required`
+
+Hallmarks:
+- The integration includes its own network-sweep autodiscovery (e.g. SNMP
+  `network_address` + profiles).
+- Sweep still requires a credential to authenticate against discovered
+  devices.
+
+Examples: snmp. Classification: **impossible**, **high** confidence —
+auto-config feasibility is about credential discovery, not device discovery.
+
+## Decision rule for "auth-optional in spec"
+
+When the spec marks `username` / `password` (or token / cert) as optional:
+- If the integration has *no* mode that works without authentication
+  in production-shaped deployments → **impossible**.
+- If there is *one* unauthenticated path that is realistic
+  (e.g. RabbitMQ's Prometheus plugin) → **custom** (cover both modes).
+- If localhost-no-auth is the typical case → **generic**, but flag the
+  production caveat in `notes`.
