@@ -112,6 +112,26 @@ def render_brief(records, generated_at=None, header_note=""):
     return "\n".join(out)
 
 
+def _trim_explanation(text, limit=240):
+    """Cap an explanation at the nearest sentence boundary <= limit chars."""
+    import re
+    if len(text) <= limit:
+        return text
+    sentences = re.split(r"(?<=[.!?])\s+", text)
+    out = ""
+    for s in sentences:
+        if len(out) + len(s) + 1 > limit and out:
+            break
+        out = (out + " " + s).strip() if out else s
+    return out
+
+
+def render_compact(records, generated_at=None):
+    """Same shape as render() but with explanations trimmed to ~240 chars."""
+    trimmed = [dict(r, explanation=_trim_explanation(r.get("explanation", ""))) for r in records]
+    return render(trimmed, generated_at=generated_at)
+
+
 def main():
     records = load_all()
     OUT.write_text(render(records))
@@ -119,6 +139,9 @@ def main():
     brief_path = OUT.with_name("summary_brief.md")
     brief_path.write_text(render_brief(records))
     print(f"wrote {brief_path}")
+    compact_path = OUT.with_name("summary_compact.md")
+    compact_path.write_text(render_compact(records))
+    print(f"wrote {compact_path}")
 
 
 if __name__ == "__main__":

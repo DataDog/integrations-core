@@ -14,6 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 SUMMARY_VERBOSE = ROOT / "analysis" / "summary.md"
 SUMMARY_BRIEF = ROOT / "analysis" / "summary_brief.md"
+SUMMARY_COMPACT = ROOT / "analysis" / "summary_compact.md"
 
 GITHUB_BASE = "https://github.com/DataDog/integrations-core/blob/master/"
 
@@ -41,7 +42,11 @@ def rewrite_links(md):
 
 
 def build(mode="verbose"):
-    src = SUMMARY_BRIEF if mode == "brief" else SUMMARY_VERBOSE
+    src = {
+        "brief": SUMMARY_BRIEF,
+        "compact": SUMMARY_COMPACT,
+        "verbose": SUMMARY_VERBOSE,
+    }.get(mode, SUMMARY_VERBOSE)
     return INTRODUCTION_MD + rewrite_links(src.read_text())
 
 
