@@ -7,7 +7,7 @@ from pathlib import Path
 import yaml
 from pydantic import BaseModel, ConfigDict, ValidationError, field_validator, model_validator
 
-from ddev.ai.tools.core.registry import ToolRegistry
+from ddev.ai.tools.registry import ToolRegistry
 
 
 class FlowConfigError(Exception):

@@ -8,6 +8,7 @@ from typing import Any
 import pytest
 
 from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolResultMessage
+from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -112,3 +113,8 @@ def flow_dir(tmp_path):
 def message_queue():
     """An asyncio.Queue that can be attached to a Phase for submit_message."""
     return asyncio.Queue()
+
+
+@pytest.fixture
+def file_access_policy(tmp_path) -> FileAccessPolicy:
+    return FileAccessPolicy(write_root=tmp_path)
