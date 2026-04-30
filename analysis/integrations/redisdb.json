@@ -1,0 +1,26 @@
+{
+  "name": "redisdb",
+  "display_name": "Redis",
+  "spec_path": "redisdb/assets/configuration/spec.yaml",
+  "required_fields": ["host", "port"],
+  "all_relevant_fields": [
+    {"name": "host", "required": true, "default": "localhost"},
+    {"name": "port", "required": true, "default": 6379},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null},
+    {"name": "unix_socket_path", "required": false, "default": null},
+    {"name": "ssl", "required": false, "default": false}
+  ],
+  "classification": "generic",
+  "auto_config_method": "tcp-banner-probe",
+  "has_existing_auto_conf": true,
+  "auto_conf_path": "redisdb/datadog_checks/redisdb/data/auto_conf.yaml",
+  "explanation": "Redis answers a banner over TCP and the default port 6379 is universal. A generic TCP/banner probe (PING / CLIENT INFO) is sufficient for the unauthenticated case. Authenticated deployments need a password, which is out of scope for generic discovery, but the existing autodiscovery template covers them once the password is provided.",
+  "references": [
+    {"kind": "spec", "path": "redisdb/assets/configuration/spec.yaml"},
+    {"kind": "auto_conf", "path": "redisdb/datadog_checks/redisdb/data/auto_conf.yaml"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": ""
+}

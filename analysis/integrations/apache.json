@@ -1,0 +1,22 @@
+{
+  "name": "apache",
+  "display_name": "Apache",
+  "spec_path": "apache/assets/configuration/spec.yaml",
+  "required_fields": ["apache_status_url"],
+  "all_relevant_fields": [
+    {"name": "apache_status_url", "required": true, "default": "http://localhost/server-status?auto"}
+  ],
+  "classification": "generic",
+  "auto_config_method": "http-path-probe",
+  "has_existing_auto_conf": true,
+  "auto_conf_path": "apache/datadog_checks/apache/data/auto_conf.yaml",
+  "explanation": "Apache's mod_status exposes a single canonical machine-readable URL: `/server-status?auto`. The endpoint and its `?auto` query parameter are universal across deployments — a single HTTP probe is enough.",
+  "references": [
+    {"kind": "spec", "path": "apache/assets/configuration/spec.yaml"},
+    {"kind": "auto_conf", "path": "apache/datadog_checks/apache/data/auto_conf.yaml"},
+    {"kind": "upstream", "url": "https://httpd.apache.org/docs/2.4/mod/mod_status.html"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": ""
+}
