@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
+from ddev.cli.validate.all.github import VALIDATION_COMMENT_SUPPRESSION_LABEL
 from ddev.cli.validate.all.orchestrator import VALIDATIONS
 
 from .conftest import completed_process
@@ -117,3 +118,27 @@ def test_all_command_aborts_when_no_validations_configured(ddev):
 
     assert result.exit_code != 0
     assert NO_VALIDATIONS_ERROR in result.output
+
+
+def test_all_command_passes_comment_suppression_label_state(ddev, tmp_path, monkeypatch):
+    event_file = tmp_path / "event.json"
+    event_file.write_text(f'{{"pull_request": {{"labels": [{{"name": "{VALIDATION_COMMENT_SUPPRESSION_LABEL}"}}]}}}}')
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
+    monkeypatch.setenv("GITHUB_EVENT_PATH", str(event_file))
+    captured: dict[str, object] = {}
+
+    class FakeOrchestrator:
+        def __init__(self, **kwargs):
+            captured.update(kwargs)
+
+        def run(self):
+            pass
+
+    with (
+        patch("ddev.cli.validate.all._load_validations", return_value={"config": VALIDATIONS["config"]}),
+        patch("ddev.cli.validate.all.orchestrator.ValidationOrchestrator", FakeOrchestrator),
+    ):
+        result = ddev("validate", "all", *FAST_ORCHESTRATOR_OPTS)
+
+    assert result.exit_code == 0, result.output
+    assert captured["suppress_pr_comments"] is True

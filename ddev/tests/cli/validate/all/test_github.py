@@ -6,12 +6,17 @@ from __future__ import annotations
 import pytest
 
 from ddev.cli.validate.all.github import (
+    COMMENT_STATUS_ACTION_REQUIRED,
+    COMMENT_STATUS_SUCCESS,
+    VALIDATION_COMMENT_SUPPRESSION_LABEL,
     format_pr_comment,
     format_step_summary,
     get_pr_number,
     get_workflow_run_url,
+    is_successful_validation_comment,
     parse_pr_number_from_event,
     parse_pr_number_from_ref,
+    pr_has_label_from_event,
     write_step_summary,
 )
 from ddev.cli.validate.all.orchestrator import ValidationConfig, ValidationResult
@@ -127,6 +132,8 @@ def test_format_pr_comment_all_passed(helpers):
     expected = helpers.dedent("""
         ## Validation Report
 
+        <!-- ddev-validation-report:success -->
+
         All 2 validations passed.
 
         <details>
@@ -138,7 +145,7 @@ def test_format_pr_comment_all_passed(helpers):
         | `config` | Validate default configuration files against spec.yaml | ✅ |
 
         </details>""")
-    assert format_pr_comment(results, CONFIGS, "changed", list(results)) == expected
+    assert format_pr_comment(results, CONFIGS, "changed", list(results), successful=True) == expected
 
 
 def test_format_pr_comment_one_failure_with_target(helpers):
@@ -148,6 +155,8 @@ def test_format_pr_comment_one_failure_with_target(helpers):
     }
     expected = helpers.dedent("""
         ## Validation Report
+
+        <!-- ddev-validation-report:action-required -->
 
         | Validation | Description | Status |
         |---|---|---|
@@ -173,6 +182,8 @@ def test_format_pr_comment_all_failures_no_details_section(helpers):
     expected = helpers.dedent("""
         ## Validation Report
 
+        <!-- ddev-validation-report:action-required -->
+
         | Validation | Description | Status |
         |---|---|---|
         | `config` | Validate default configuration files against spec.yaml | ❌ |
@@ -185,7 +196,7 @@ def test_format_pr_comment_no_fix_command_when_all_pass():
     results = {
         "config": ValidationResult(name="config", success=True, stdout="ok", stderr="", duration=1.0),
     }
-    comment = format_pr_comment(results, CONFIGS, None, list(results))
+    comment = format_pr_comment(results, CONFIGS, None, list(results), successful=True)
     assert "All 1 validations passed." in comment
     assert "ddev validate all" not in comment
 
@@ -196,6 +207,8 @@ def test_format_pr_comment_with_error_and_warning(helpers):
     }
     expected = helpers.dedent("""
         ## Validation Report
+
+        <!-- ddev-validation-report:action-required -->
 
         > **Error:** Error running validations: boom
 
@@ -231,7 +244,7 @@ def test_format_pr_comment_missing_config_uses_empty_description():
     results = {
         "unknown": ValidationResult(name="unknown", success=True, stdout="ok", stderr="", duration=1.0),
     }
-    comment = format_pr_comment(results, CONFIGS, None, list(results))
+    comment = format_pr_comment(results, CONFIGS, None, list(results), successful=True)
     assert "| `unknown` |  | ✅ |" in comment
 
 
@@ -251,6 +264,51 @@ def test_format_step_summary_incomplete_validations_warns():
     }
     summary = format_step_summary(results, CONFIGS, None, ["ci", "config", "metadata"])
     assert "2 validation(s) did not complete: `config`, `metadata`" in summary
+
+
+def test_format_step_summary_does_not_include_comment_status():
+    results = {
+        "config": ValidationResult(name="config", success=True, stdout="ok", stderr="", duration=1.0),
+    }
+    summary = format_step_summary(results, CONFIGS, None, ["config"])
+    assert COMMENT_STATUS_SUCCESS not in summary
+    assert COMMENT_STATUS_ACTION_REQUIRED not in summary
+
+
+@pytest.mark.parametrize(
+    "body, expected",
+    [
+        pytest.param(f"## Validation Report\n\n{COMMENT_STATUS_SUCCESS}\n\nAll good", True, id="success-marker"),
+        pytest.param(
+            f"## Validation Report\n\n{COMMENT_STATUS_ACTION_REQUIRED}\n\nBad", False, id="action-required-marker"
+        ),
+        pytest.param("## Validation Report\n\nAll 2 validations passed.", False, id="legacy-success"),
+        pytest.param("unrelated comment", False, id="unrelated-comment"),
+    ],
+)
+def test_is_successful_validation_comment(body, expected):
+    assert is_successful_validation_comment(body) is expected
+
+
+@pytest.mark.parametrize(
+    "content, expected",
+    [
+        pytest.param(
+            f'{{"pull_request": {{"labels": [{{"name": "{VALIDATION_COMMENT_SUPPRESSION_LABEL}"}}]}}}}',
+            True,
+            id="label-present",
+        ),
+        pytest.param('{"pull_request": {"labels": [{"name": "other"}]}}', False, id="other-label"),
+        pytest.param('{"pull_request": {"labels": []}}', False, id="no-labels"),
+        pytest.param('{"pull_request": {}}', False, id="missing-labels"),
+        pytest.param('{"pull_request": "bad"}', False, id="pr-not-dict"),
+        pytest.param("{bad json}", False, id="malformed-json"),
+    ],
+)
+def test_pr_has_label_from_event(tmp_path, content, expected):
+    event_file = tmp_path / "event.json"
+    event_file.write_text(content)
+    assert pr_has_label_from_event(str(event_file), VALIDATION_COMMENT_SUPPRESSION_LABEL) is expected
 
 
 # --- format_step_summary ---

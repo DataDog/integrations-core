@@ -10,6 +10,7 @@ from unittest.mock import patch
 import pytest
 
 from ddev.cli.validate.all import _load_validations
+from ddev.cli.validate.all.github import COMMENT_STATUS_ACTION_REQUIRED, COMMENT_STATUS_SUCCESS
 from ddev.cli.validate.all.orchestrator import (
     VALIDATIONS,
     ValidationMessage,
@@ -204,6 +205,7 @@ def test_on_finalize_writes_step_summary(mock_app, tmp_path, monkeypatch):
 
 def test_on_finalize_posts_pr_comment_on_failure(mock_app):
     mock_app.config.github.token = "fake-token"
+    mock_app.github.get_pull_request_comments.return_value = []
 
     orch = ValidationOrchestrator(app=mock_app, validations=["config"], target=None, pr_number=42)
     orch._results = {
@@ -219,12 +221,14 @@ def test_on_finalize_posts_pr_comment_on_failure(mock_app):
     assert "Validate default configuration files against spec.yaml" in body
     assert "| `config` |" in body
     assert "❌" in body
+    assert COMMENT_STATUS_ACTION_REQUIRED in body
     assert "[View full run](https://github.com/DataDog/integrations-core/actions/runs/12345)" in body
 
 
 def test_on_finalize_pr_comment_omits_run_link_when_env_missing(mock_app, monkeypatch):
     monkeypatch.delenv("GITHUB_RUN_ID")
     mock_app.config.github.token = "fake-token"
+    mock_app.github.get_pull_request_comments.return_value = []
 
     orch = ValidationOrchestrator(app=mock_app, validations=["config"], target=None, pr_number=42)
     orch._results = {
@@ -242,6 +246,7 @@ def test_on_finalize_step_summary_does_not_include_run_link(mock_app, tmp_path, 
     monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary_file))
 
     mock_app.config.github.token = "fake-token"
+    mock_app.github.get_pull_request_comments.return_value = []
     orch = ValidationOrchestrator(app=mock_app, validations=["config"], target=None, pr_number=42)
     orch._results = {
         "config": ValidationResult(name="config", success=False, stdout="err", stderr="", duration=1.0),
@@ -255,6 +260,7 @@ def test_on_finalize_step_summary_does_not_include_run_link(mock_app, tmp_path, 
 
 def test_on_finalize_posts_pr_comment_on_success(mock_app):
     mock_app.config.github.token = "fake-token"
+    mock_app.github.get_pull_request_comments.return_value = []
 
     orch = ValidationOrchestrator(app=mock_app, validations=["config", "ci"], target=None, pr_number=42)
     orch._results = {
@@ -269,6 +275,7 @@ def test_on_finalize_posts_pr_comment_on_success(mock_app):
     assert "<details>" in body
     assert "| `ci` |" in body
     assert "| `config` |" in body
+    assert COMMENT_STATUS_SUCCESS in body
 
 
 def test_on_finalize_deletes_previous_validation_comments(mock_app):
@@ -286,6 +293,113 @@ def test_on_finalize_deletes_previous_validation_comments(mock_app):
 
     mock_app.github.delete_comment.assert_called_once_with(100)
     mock_app.github.post_pull_request_comment.assert_called_once()
+
+
+def test_on_finalize_skips_pr_comment_on_repeated_success(mock_app):
+    mock_app.config.github.token = "fake-token"
+    mock_app.github.get_pull_request_comments.return_value = [
+        {"id": 100, "body": f"## Validation Report\n\n{COMMENT_STATUS_SUCCESS}\n\nAll 1 validations passed."},
+    ]
+
+    orch = ValidationOrchestrator(app=mock_app, validations=["config"], target=None, pr_number=42)
+    orch._results = {
+        "config": ValidationResult(name="config", success=True, stdout="ok", stderr="", duration=1.0),
+    }
+    asyncio.run(orch.on_finalize(exception=None))
+
+    mock_app.github.get_pull_request_comments.assert_called_once_with(42)
+    mock_app.github.delete_comment.assert_not_called()
+    mock_app.github.post_pull_request_comment.assert_not_called()
+
+
+def test_on_finalize_posts_recovery_comment_after_failure(mock_app):
+    mock_app.config.github.token = "fake-token"
+    mock_app.github.get_pull_request_comments.return_value = [
+        {"id": 100, "body": f"## Validation Report\n\n{COMMENT_STATUS_ACTION_REQUIRED}\n\nold failure"},
+    ]
+
+    orch = ValidationOrchestrator(app=mock_app, validations=["config"], target=None, pr_number=42)
+    orch._results = {
+        "config": ValidationResult(name="config", success=True, stdout="ok", stderr="", duration=1.0),
+    }
+    asyncio.run(orch.on_finalize(exception=None))
+
+    mock_app.github.delete_comment.assert_called_once_with(100)
+    mock_app.github.post_pull_request_comment.assert_called_once()
+    body = mock_app.github.post_pull_request_comment.call_args[0][1]
+    assert COMMENT_STATUS_SUCCESS in body
+
+
+def test_on_finalize_posts_failure_comment_after_success(mock_app):
+    mock_app.config.github.token = "fake-token"
+    mock_app.github.get_pull_request_comments.return_value = [
+        {"id": 100, "body": f"## Validation Report\n\n{COMMENT_STATUS_SUCCESS}\n\nold success"},
+    ]
+
+    orch = ValidationOrchestrator(app=mock_app, validations=["config"], target=None, pr_number=42)
+    orch._results = {
+        "config": ValidationResult(name="config", success=False, stdout="err", stderr="", duration=1.0),
+    }
+    with pytest.raises(SystemExit):
+        asyncio.run(orch.on_finalize(exception=None))
+
+    mock_app.github.delete_comment.assert_called_once_with(100)
+    mock_app.github.post_pull_request_comment.assert_called_once()
+    body = mock_app.github.post_pull_request_comment.call_args[0][1]
+    assert COMMENT_STATUS_ACTION_REQUIRED in body
+
+
+def test_on_finalize_posts_success_when_previous_comment_has_no_status(mock_app):
+    mock_app.config.github.token = "fake-token"
+    mock_app.github.get_pull_request_comments.return_value = [
+        {"id": 100, "body": "## Validation Report\n\nAll 1 validations passed."},
+    ]
+
+    orch = ValidationOrchestrator(app=mock_app, validations=["config"], target=None, pr_number=42)
+    orch._results = {
+        "config": ValidationResult(name="config", success=True, stdout="ok", stderr="", duration=1.0),
+    }
+    asyncio.run(orch.on_finalize(exception=None))
+
+    mock_app.github.delete_comment.assert_called_once_with(100)
+    mock_app.github.post_pull_request_comment.assert_called_once()
+    body = mock_app.github.post_pull_request_comment.call_args[0][1]
+    assert COMMENT_STATUS_SUCCESS in body
+
+
+def test_on_finalize_suppresses_pr_comments_and_deletes_previous_comments(mock_app):
+    mock_app.config.github.token = "fake-token"
+    mock_app.github.get_pull_request_comments.return_value = [
+        {"id": 100, "body": f"## Validation Report\n\n{COMMENT_STATUS_ACTION_REQUIRED}\n\nold failure"},
+        {"id": 200, "body": "unrelated comment"},
+    ]
+
+    orch = ValidationOrchestrator(
+        app=mock_app, validations=["config"], target=None, pr_number=42, suppress_pr_comments=True
+    )
+    orch._results = {
+        "config": ValidationResult(name="config", success=True, stdout="ok", stderr="", duration=1.0),
+    }
+    asyncio.run(orch.on_finalize(exception=None))
+
+    mock_app.github.delete_comment.assert_called_once_with(100)
+    mock_app.github.post_pull_request_comment.assert_not_called()
+
+
+def test_on_finalize_suppresses_pr_comments_with_no_previous_comments(mock_app):
+    mock_app.config.github.token = "fake-token"
+    mock_app.github.get_pull_request_comments.return_value = []
+
+    orch = ValidationOrchestrator(
+        app=mock_app, validations=["config"], target=None, pr_number=42, suppress_pr_comments=True
+    )
+    orch._results = {
+        "config": ValidationResult(name="config", success=True, stdout="ok", stderr="", duration=1.0),
+    }
+    asyncio.run(orch.on_finalize(exception=None))
+
+    mock_app.github.delete_comment.assert_not_called()
+    mock_app.github.post_pull_request_comment.assert_not_called()
 
 
 def test_on_finalize_includes_pr_warning_in_summary(mock_app, tmp_path, monkeypatch):
@@ -306,6 +420,7 @@ def test_on_finalize_includes_pr_warning_in_summary(mock_app, tmp_path, monkeypa
 
 def test_on_finalize_handles_post_failure(mock_app):
     mock_app.config.github.token = "fake-token"
+    mock_app.github.get_pull_request_comments.return_value = []
     mock_app.github.post_pull_request_comment.side_effect = RuntimeError("network error")
 
     orch = ValidationOrchestrator(app=mock_app, validations=["config"], target=None, pr_number=42)

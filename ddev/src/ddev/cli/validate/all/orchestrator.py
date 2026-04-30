@@ -18,6 +18,7 @@ from ddev.cli.validate.all.github import (
     format_pr_comment,
     format_step_summary,
     get_workflow_run_url,
+    is_successful_validation_comment,
     write_step_summary,
 )
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator, SyncProcessor
@@ -183,6 +184,7 @@ class ValidationOrchestrator(EventBusOrchestrator):
         validations: list[str] | None = None,
         fix: bool = False,
         pr_number: int | None = None,
+        suppress_pr_comments: bool = False,
         grace_period: float = 5,
         max_timeout: float = 600,
         subprocess_timeout: float = SUBPROCESS_TIMEOUT,
@@ -199,6 +201,7 @@ class ValidationOrchestrator(EventBusOrchestrator):
         self._target = target
         self._fix = fix
         self._pr_number = pr_number
+        self._suppress_pr_comments = suppress_pr_comments
         self._results: dict[str, ValidationResult] = {}
 
         self.register_processor(
@@ -236,14 +239,20 @@ class ValidationOrchestrator(EventBusOrchestrator):
 
         return error_msg, extra_warning
 
-    def _delete_previous_comments(self, pr_number: int) -> None:
-        try:
-            comments = self._app.github.get_pull_request_comments(pr_number)
-            for comment in comments:
-                if comment.get("body", "").startswith(COMMENT_HEADING):
-                    self._app.github.delete_comment(comment["id"])
-        except Exception as exc:
-            self._app.display_warning(f"Failed to clean up previous validation comments: {exc}")
+    def _current_run_succeeded(self, exception: Exception | None) -> bool:
+        return (
+            exception is None
+            and len(self._results) == len(self._validations)
+            and all(result.success for result in self._results.values())
+        )
+
+    def _get_previous_validation_comments(self, pr_number: int) -> list[dict]:
+        comments = self._app.github.get_pull_request_comments(pr_number)
+        return [comment for comment in comments if comment.get("body", "").startswith(COMMENT_HEADING)]
+
+    def _delete_comments(self, comments: list[dict]) -> None:
+        for comment in comments:
+            self._app.github.delete_comment(comment["id"])
 
     def _publish_report(self, exception: Exception | None) -> None:
         error_msg, extra_warning = self._build_error_and_warning(exception)
@@ -258,6 +267,7 @@ class ValidationOrchestrator(EventBusOrchestrator):
         )
         write_step_summary(summary_body)
 
+        current_succeeded = self._current_run_succeeded(exception)
         comment_body = format_pr_comment(
             self._results,
             VALIDATIONS,
@@ -265,6 +275,7 @@ class ValidationOrchestrator(EventBusOrchestrator):
             self._validations,
             error=error_msg,
             warning=extra_warning,
+            successful=current_succeeded,
         )
         if run_url := get_workflow_run_url():
             comment_body += f"\n\n[View full run]({run_url})"
@@ -283,8 +294,21 @@ class ValidationOrchestrator(EventBusOrchestrator):
         previous_level = httpx_logger.level
         httpx_logger.setLevel(logging.WARNING)
         try:
+            self._app.logger.debug("Fetching previous validation comments on PR #%s...", self._pr_number)
+            previous_comments = self._get_previous_validation_comments(self._pr_number)
+            if self._suppress_pr_comments:
+                self._app.logger.debug("Validation PR comments are suppressed for PR #%s.", self._pr_number)
+                self._delete_comments(previous_comments)
+                return
+            if (
+                current_succeeded
+                and previous_comments
+                and all(is_successful_validation_comment(comment.get("body", "")) for comment in previous_comments)
+            ):
+                self._app.logger.debug("Previous validation comments already reported success; skipping PR comment.")
+                return
             self._app.logger.debug("Deleting previous validation comments on PR #%s...", self._pr_number)
-            self._delete_previous_comments(self._pr_number)
+            self._delete_comments(previous_comments)
             self._app.logger.debug("Posting validation comment on PR #%s...", self._pr_number)
             self._app.github.post_pull_request_comment(self._pr_number, comment_body)
             self._app.logger.debug("Comment posted successfully.")
