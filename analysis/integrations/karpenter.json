@@ -1,0 +1,23 @@
+{
+  "name": "karpenter",
+  "display_name": "Karpenter",
+  "spec_path": "karpenter/assets/configuration/spec.yaml",
+  "required_fields": ["openmetrics_endpoint"],
+  "all_relevant_fields": [
+    {"name": "openmetrics_endpoint", "required": true, "default": "http://localhost:8080/metrics"}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Karpenter is a Kubernetes cluster autoscaler controller that exposes Prometheus metrics on a fixed `/metrics` path. The spec inherits `template: instances/openmetrics` and the check is a thin `OpenMetricsBaseCheckV2` subclass with a static `METRIC_MAP`. The example endpoint is `http://localhost:8080/metrics`; upstream Karpenter documentation also describes a single canonical Prometheus metrics port (8080 for older releases, 8000 for v1+; both follow `/metrics`). No authentication is required for the in-cluster Prometheus endpoint. Pattern A applies — single canonical OpenMetrics endpoint, no credentials, port is well-known per the upstream docs.",
+  "references": [
+    {"kind": "spec", "path": "karpenter/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "karpenter/datadog_checks/karpenter/check.py"},
+    {"kind": "readme", "path": "karpenter/README.md"},
+    {"kind": "upstream", "url": "https://karpenter.sh/docs/reference/metrics/"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "No `auto_conf.yaml` shipped in the data directory, but the integration is still a textbook OpenMetrics generic. Default port shifted between Karpenter major versions (8080 → 8000); a port-scan probe handles both."
+}

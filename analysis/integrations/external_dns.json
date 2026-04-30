@@ -1,0 +1,22 @@
+{
+  "name": "external_dns",
+  "display_name": "External DNS",
+  "spec_path": "external_dns/assets/configuration/spec.yaml",
+  "required_fields": ["prometheus_url"],
+  "all_relevant_fields": [
+    {"name": "prometheus_url", "required": true, "default": "http://%%host%%:7979/metrics"}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": true,
+  "auto_conf_path": "external_dns/datadog_checks/external_dns/data/auto_conf.yaml",
+  "explanation": "External DNS is a Kubernetes controller that exposes Prometheus metrics on a fixed path `/metrics` at the conventional default port 7979. The check uses `OpenMetricsBaseCheck` with a single `prometheus_url` field, and the shipped `auto_conf.yaml` already templates `http://%%host%%:7979/metrics` against the `external-dns` AD identifier. No credentials are required.",
+  "references": [
+    {"kind": "spec", "path": "external_dns/assets/configuration/spec.yaml"},
+    {"kind": "auto_conf", "path": "external_dns/datadog_checks/external_dns/data/auto_conf.yaml"},
+    {"kind": "check", "path": "external_dns/datadog_checks/external_dns/external_dns.py"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern A: OpenMetrics on a known port. The legacy openmetrics template is used; an openmetrics-port-scan probe matches cleanly."
+}

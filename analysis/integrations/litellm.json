@@ -1,0 +1,24 @@
+{
+  "name": "litellm",
+  "display_name": "LiteLLM",
+  "spec_path": "litellm/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [
+    {"name": "openmetrics_endpoint", "required": false, "default": "http://localhost:4000/metrics"},
+    {"name": "litellm_health_endpoint", "required": false, "default": "http://localhost:4000/health"}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "LiteLLM Proxy exposes Prometheus metrics on a single canonical path `/metrics` (per upstream docs at https://docs.litellm.ai/docs/proxy/prometheus) at the proxy's HTTP port — `4000` by default in the spec example and the project's documented default. The check inherits `OpenMetricsBaseCheckV2`. The only override is `openmetrics_endpoint.required: false`, so the spec marks it optional, but the example reflects the universal upstream default. The optional `litellm_health_endpoint` augments OpenMetrics with a JSON `/health` poll at the same host:port. This is a textbook pattern A (\"OpenMetrics on a known port\") with one extra optional auxiliary URL on the same origin — port-scan for Prometheus on 4000/metrics is sufficient.",
+  "references": [
+    {"kind": "spec", "path": "litellm/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "litellm/datadog_checks/litellm/check.py"},
+    {"kind": "readme", "path": "litellm/README.md"},
+    {"kind": "upstream", "url": "https://docs.litellm.ai/docs/proxy/prometheus"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "No auto_conf.yaml ships, but the spec example pins `http://localhost:4000/metrics`, the LiteLLM proxy default. The auxiliary `/health` endpoint sits on the same origin and can be derived if `/metrics` is found."
+}

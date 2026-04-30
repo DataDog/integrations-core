@@ -1,0 +1,22 @@
+{
+  "name": "hugging_face_tgi",
+  "display_name": "Hugging Face TGI",
+  "spec_path": "hugging_face_tgi/assets/configuration/spec.yaml",
+  "required_fields": ["openmetrics_endpoint"],
+  "all_relevant_fields": [
+    {"name": "openmetrics_endpoint", "required": true, "default": "http://localhost:80/metrics"}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Hugging Face Text Generation Inference exposes Prometheus metrics on a single canonical `/metrics` path. The check is a thin subclass of `OpenMetricsBaseCheckV2` that maps a fixed metric/label dictionary; the only required field is the OpenMetrics endpoint URL. The spec example points at port 80, which matches the TGI default HTTP server port (configurable via `--port`). This is pattern A (OpenMetrics on a known port) - one URL, one path, no auth - so a generic openmetrics-port-scan against the typical TGI port set (80, 8080, 3000) covers the deployment shapes documented upstream.",
+  "references": [
+    {"kind": "spec", "path": "hugging_face_tgi/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "hugging_face_tgi/datadog_checks/hugging_face_tgi/check.py"},
+    {"kind": "upstream", "url": "https://huggingface.co/docs/text-generation-inference/en/basic_tutorials/monitoring"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "No auto_conf.yaml ships today, but the standard openmetrics_endpoint=http://%%host%%:80/metrics template would be sufficient. The TGI default port can be overridden by the operator, which is a minor caveat shared with most Prometheus-based integrations."
+}

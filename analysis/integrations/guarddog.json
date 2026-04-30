@@ -1,0 +1,24 @@
+{
+  "name": "guarddog",
+  "display_name": "GuardDog",
+  "spec_path": "guarddog/assets/configuration/spec.yaml",
+  "required_fields": ["guarddog_path", "package_ecosystem", "dependency_file_path"],
+  "all_relevant_fields": [
+    {"name": "guarddog_path", "required": true, "default": null},
+    {"name": "package_ecosystem", "required": true, "default": null},
+    {"name": "dependency_file_path", "required": true, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "GuardDog is a Datadog-authored CLI scanner that audits dependency manifests for malicious packages. The Agent check (`check.py`) shells out via `subprocess.run` to a user-installed `guarddog` binary (`init_config.guarddog_path`) and runs `<guarddog_path> <package_ecosystem> verify <dependency_file_path> --output-format=json`. The two per-instance required fields are user-policy: which ecosystem (`pypi`/`npm`/`go`/`github_action`) and the absolute path to a `requirements.txt` / `package.json` / `go.mod` / workflow file the user wants scanned. There is no network endpoint, no port, no service to probe — discovery would have to enumerate dependency files on the host, which is an arbitrary user choice rather than a fingerprintable upstream system.",
+  "references": [
+    {"kind": "spec", "path": "guarddog/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "guarddog/datadog_checks/guarddog/check.py"},
+    {"kind": "readme", "path": "guarddog/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern L (local CLI subprocess) crossed with pattern K (user-intent target). Even on hosts where the `guarddog` binary is installed, the missing input is which dependency file to scan, which is project-specific."
+}

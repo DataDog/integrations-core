@@ -1,0 +1,24 @@
+{
+  "name": "kyototycoon",
+  "display_name": "Kyoto Tycoon",
+  "spec_path": "kyototycoon/assets/configuration/spec.yaml",
+  "required_fields": ["report_url"],
+  "all_relevant_fields": [
+    {"name": "report_url", "required": true, "default": "http://localhost:1978/rpc/report"},
+    {"name": "name", "required": false, "default": null}
+  ],
+  "classification": "generic",
+  "auto_config_method": "http-path-probe",
+  "has_existing_auto_conf": true,
+  "auto_conf_path": "kyototycoon/datadog_checks/kyototycoon/data/auto_conf.yaml",
+  "explanation": "Kyoto Tycoon serves an HTTP RPC interface; the check issues a single GET against the canonical `/rpc/report` endpoint on the well-known port 1978 and parses its tab-separated response. No authentication is required. The shipped auto_conf.yaml already templates `http://%%host%%:1978/rpc/report`, confirming a single canonical URL. Pattern B (single canonical HTTP path).",
+  "references": [
+    {"kind": "spec", "path": "kyototycoon/assets/configuration/spec.yaml"},
+    {"kind": "auto_conf", "path": "kyototycoon/datadog_checks/kyototycoon/data/auto_conf.yaml"},
+    {"kind": "check", "path": "kyototycoon/datadog_checks/kyototycoon/kyototycoon.py"},
+    {"kind": "readme", "path": "kyototycoon/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "The optional `name` field is a freeform instance label, not a discovery input."
+}

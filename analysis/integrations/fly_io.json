@@ -1,0 +1,27 @@
+{
+  "name": "fly_io",
+  "display_name": "Fly.io",
+  "spec_path": "fly_io/assets/configuration/spec.yaml",
+  "required_fields": ["org_slug"],
+  "all_relevant_fields": [
+    {"name": "openmetrics_endpoint", "required": false, "default": null},
+    {"name": "org_slug", "required": true, "default": null},
+    {"name": "machines_api_endpoint", "required": false, "default": null},
+    {"name": "match_string", "required": false, "default": "{__name__=~\".+\"}"},
+    {"name": "headers", "required": false, "default": null},
+    {"name": "auth_token", "required": false, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Fly.io is a hosted platform, not a co-located service. The check (`OpenMetricsBaseCheckV2`) builds its endpoint from a tenant-specific `org_slug` (`https://api.fly.io/prometheus/<org_slug>/federate?...`) and requires an `Authorization` header with a `FlyV1` access token (created via `fly tokens create readonly`) for both the Prometheus federate API and the Machines REST API. The `org_slug` and the access token are user-supplied state that does not come over the wire and cannot be probed.",
+  "references": [
+    {"kind": "spec", "path": "fly_io/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "fly_io/datadog_checks/fly_io/check.py"},
+    {"kind": "readme", "path": "fly_io/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern D variant: SaaS API token + tenant identifier (org_slug). Even though the integration uses OpenMetrics under the hood, the endpoint is a multi-tenant SaaS URL gated by a bearer token."
+}

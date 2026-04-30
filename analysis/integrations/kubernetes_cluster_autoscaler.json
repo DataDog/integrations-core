@@ -1,0 +1,23 @@
+{
+  "name": "kubernetes_cluster_autoscaler",
+  "display_name": "Kubernetes Cluster Autoscaler",
+  "spec_path": "kubernetes_cluster_autoscaler/assets/configuration/spec.yaml",
+  "required_fields": ["openmetrics_endpoint"],
+  "all_relevant_fields": [
+    {"name": "openmetrics_endpoint", "required": true, "default": null}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The check inherits `OpenMetricsBaseCheckV2` and exposes a single required `openmetrics_endpoint`. Cluster Autoscaler serves Prometheus metrics on `/metrics` at the well-known port 8085 (per upstream and the spec's example). No authentication is required for the metrics endpoint, so a generic OpenMetrics port scan against the autoscaler pod can synthesize the URL.",
+  "references": [
+    {"kind": "spec", "path": "kubernetes_cluster_autoscaler/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "kubernetes_cluster_autoscaler/datadog_checks/kubernetes_cluster_autoscaler/check.py"},
+    {"kind": "readme", "path": "kubernetes_cluster_autoscaler/README.md"},
+    {"kind": "upstream", "url": "https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/proposals/metrics.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "No auto_conf.yaml shipped; users typically annotate the autoscaler pod with AD templates per the README."
+}

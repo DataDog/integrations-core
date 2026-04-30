@@ -1,0 +1,22 @@
+{
+  "name": "linux_proc_extras",
+  "display_name": "Linux Proc Extras",
+  "spec_path": "linux_proc_extras/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [
+    {"name": "include_interrupt_metrics", "required": false, "default": false}
+  ],
+  "classification": "generic",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The check reads files under the Agent host's `procfs_path` (defaults to `/proc`): `sys/fs/inode-nr`, `stat`, `sys/kernel/random/entropy_avail`, `<pid>/status`, and optionally `interrupts`. There is no required configuration field, no host/port/URL/credential, and no upstream service to probe. Discovery is a host-local presence check — \"is /proc available?\" — which is true on every Linux host. The only optional knob (`include_interrupt_metrics`) is a cardinality toggle, not an endpoint selector. Auto-config can therefore deploy the integration unconditionally on Linux hosts with its default empty instance. Direct analogue of btrfs (pattern: host-local generic, no network probe, no binary subprocess).",
+  "references": [
+    {"kind": "spec", "path": "linux_proc_extras/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "linux_proc_extras/datadog_checks/linux_proc_extras/linux_proc_extras.py"},
+    {"kind": "readme", "path": "linux_proc_extras/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Method `other` because there is no network probe — discovery is OS presence (Linux + readable /proc). No required fields and no per-host variation in endpoint."
+}

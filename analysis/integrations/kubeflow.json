@@ -1,0 +1,22 @@
+{
+  "name": "kubeflow",
+  "display_name": "Kubeflow",
+  "spec_path": "kubeflow/assets/configuration/spec.yaml",
+  "required_fields": ["openmetrics_endpoint"],
+  "all_relevant_fields": [
+    {"name": "openmetrics_endpoint", "required": true, "default": null}
+  ],
+  "classification": "custom",
+  "auto_config_method": "http-path-probe",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "KubeflowCheck inherits OpenMetricsBaseCheckV2 with a single `openmetrics_endpoint` field, but Kubeflow is a multi-component umbrella (pipelines / `ml-pipeline`, kserve, katib, plus profile/notebook/training controllers). Each component runs in its own pod and exposes Prometheus on its own port — the README documents 9090 generically and points users at kube-prometheus-stack ServiceMonitors per component, with no single canonical port. Discovery would need to enumerate the Kubeflow components in the cluster and probe each pod's metrics port, so it is not handled by a single integration-agnostic port scan. Multiple plausible endpoints under one user-facing field is the pattern G / kubeflow-multi-component shape.",
+  "references": [
+    {"kind": "spec", "path": "kubeflow/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "kubeflow/datadog_checks/kubeflow/check.py"},
+    {"kind": "readme", "path": "kubeflow/README.md"}
+  ],
+  "confidence": "medium",
+  "needs_human_review": false,
+  "notes": "The spec.example uses `http://<prometheus-service>:9090/metrics`, suggesting users are expected to scrape an aggregated Prometheus rather than each Kubeflow component directly. If auto-config targets the cluster's Prometheus aggregator instead of individual pods, this could collapse to generic; otherwise per-component discovery is needed."
+}

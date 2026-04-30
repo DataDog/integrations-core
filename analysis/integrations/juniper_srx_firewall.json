@@ -1,0 +1,19 @@
+{
+  "name": "juniper_srx_firewall",
+  "display_name": "Juniper SRX Firewall",
+  "spec_path": "juniper_srx_firewall/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [],
+  "classification": "impossible",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Juniper SRX Firewall is a logs-only vendor security tile. The spec only defines a `logs` template (UDP syslog listener on a user-supplied port, tagged `ndm_syslog:true`) and ships no Agent metric check (`datadog_checks/juniper_srx_firewall/` contains only `__about__.py` and `__init__.py`). There is no upstream service endpoint for the Agent to probe; logs are forwarded from the SRX device to the Agent's syslog listener. Auto-config in the network-probe sense does not apply — the operator must point the firewall at the Agent's listener port out-of-band.",
+  "references": [
+    {"kind": "spec", "path": "juniper_srx_firewall/assets/configuration/spec.yaml"},
+    {"kind": "readme", "path": "juniper_srx_firewall/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Logs-only vendor security tile; no metric check. Same shape as ivanti_connect_secure."
+}

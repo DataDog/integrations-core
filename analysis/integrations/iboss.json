@@ -1,0 +1,20 @@
+{
+  "name": "iboss",
+  "display_name": "iboss",
+  "spec_path": "iboss/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [],
+  "classification": "impossible",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "iboss is a logs-only vendor security tile (Secure Web Gateway / Zero Trust). The integration ships no Python check class - the `datadog_checks/iboss/` directory contains only `__about__.py`, `__init__.py`, and a sample conf - and the spec.yaml defines no `instances` block at all, only a `logs` template that listens for syslog (`type: tcp/udp`) on a user-chosen port. There is no upstream service to probe, no metric endpoint, and no host/port the Agent would dial out to. Setup is operator-driven: configure the iboss appliance to forward syslog to the Agent and wire dashboards/SIEM rules. This is pattern N (logs-only / instrumentation), so auto-config in the network-probe sense does not apply.",
+  "references": [
+    {"kind": "spec", "path": "iboss/assets/configuration/spec.yaml"},
+    {"kind": "readme", "path": "iboss/README.md"},
+    {"kind": "other", "path": "iboss/manifest.json"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Spec has no instances block (logs template only). No check.py exists. Pattern N (logs-only) - same shape as sidekiq, but with syslog ingestion instead of DogStatsD."
+}

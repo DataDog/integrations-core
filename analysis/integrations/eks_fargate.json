@@ -1,0 +1,21 @@
+{
+  "name": "eks_fargate",
+  "display_name": "EKS Fargate",
+  "spec_path": "eks_fargate/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [],
+  "classification": "generic",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": true,
+  "auto_conf_path": "eks_fargate/datadog_checks/eks_fargate/data/conf.yaml.default",
+  "explanation": "EKS Fargate generates heartbeat and capacity metrics for pods running on Fargate virtual nodes. The check inherits `KubeletBase` and obtains the kubelet URL via `kubeutil.get_connection_info()`, which the Agent populates from in-cluster ServiceAccount credentials (mounted bearer token + CA cert). Detection of Fargate mode is done by inspecting the `DD_KUBERNETES_KUBELET_NODENAME` env var for the substring `fargate`. The integration ships a `conf.yaml.default` template with `ad_identifiers: [_eks_fargate]`, so Autodiscovery already schedules the check when the Agent runs in an EKS Fargate pod. No user-supplied required fields drive endpoint resolution; credentials are auto-injected like other in-cluster integrations (pattern O).",
+  "references": [
+    {"kind": "spec", "path": "eks_fargate/assets/configuration/spec.yaml"},
+    {"kind": "auto_conf", "path": "eks_fargate/datadog_checks/eks_fargate/data/conf.yaml.default"},
+    {"kind": "check", "path": "eks_fargate/datadog_checks/eks_fargate/eks_fargate.py"},
+    {"kind": "upstream", "url": "https://docs.aws.amazon.com/eks/latest/userguide/fargate.html"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern O (in-cluster bearer-token auth) plus an `_eks_fargate` AD identifier. Auto-config trigger is 'Agent pod is on a Fargate virtual node' (env var + kubelet reachability); credentials are auto-injected, not user-supplied."
+}

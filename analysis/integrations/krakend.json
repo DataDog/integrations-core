@@ -1,0 +1,25 @@
+{
+  "name": "krakend",
+  "display_name": "KrakenD",
+  "spec_path": "krakend/assets/configuration/spec.yaml",
+  "required_fields": ["openmetrics_endpoint"],
+  "all_relevant_fields": [
+    {"name": "openmetrics_endpoint", "required": true, "default": null},
+    {"name": "go_metrics", "required": false, "default": true},
+    {"name": "process_metrics", "required": false, "default": true}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "KrakendCheck inherits OpenMetricsBaseCheckV2 and only needs `openmetrics_endpoint`. KrakenD's documented OpenTelemetry-Prometheus exporter listens on port 9090 at `/metrics` (per upstream docs and the integration README and tests), with no auth. The remaining options (`go_metrics`, `process_metrics`) are content filters, not endpoint-resolution inputs. Discovery only needs to find a TCP/9090 service responding to a `/metrics` GET.",
+  "references": [
+    {"kind": "spec", "path": "krakend/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "krakend/datadog_checks/krakend/check.py"},
+    {"kind": "readme", "path": "krakend/README.md"},
+    {"kind": "upstream", "url": "https://www.krakend.io/docs/telemetry/opentelemetry/"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Port 9090 is the value documented in the KrakenD README and used in tests; the user is free to pick any port in their KrakenD config, but 9090 is the canonical default for the OpenTelemetry Prometheus exporter."
+}

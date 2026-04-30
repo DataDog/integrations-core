@@ -1,0 +1,19 @@
+{
+  "name": "keycloak",
+  "display_name": "Keycloak",
+  "spec_path": "keycloak/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [],
+  "classification": "impossible",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The Keycloak integration is logs-only: spec.yaml defines a single `logs` block (TCP/UDP syslog listener) and no `instances` block, and the package ships no Agent check class — there is no live endpoint for an auto-config probe to hit. The user must configure Keycloak to forward syslog to a port the Agent listens on, which is user policy, not a discoverable property. This matches the pattern N (instrumentation/log-only) shape.",
+  "references": [
+    {"kind": "spec", "path": "keycloak/assets/configuration/spec.yaml"},
+    {"kind": "readme", "path": "keycloak/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Keycloak does expose a Prometheus `/metrics` endpoint upstream, but this Datadog integration does not scrape it — it only ingests forwarded syslog. Auto-config in the network-probe sense doesn't apply."
+}

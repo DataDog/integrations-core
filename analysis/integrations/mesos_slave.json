@@ -1,0 +1,29 @@
+{
+  "name": "mesos_slave",
+  "display_name": "Mesos Slave",
+  "spec_path": "mesos_slave/assets/configuration/spec.yaml",
+  "required_fields": ["url"],
+  "all_relevant_fields": [
+    {"name": "url", "required": true, "default": "http://localhost:5051"},
+    {"name": "master_port", "required": false, "default": 5050},
+    {"name": "cluster_name", "required": false, "default": null},
+    {"name": "tasks", "required": false, "default": null},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null},
+    {"name": "auth_token", "required": false, "default": null}
+  ],
+  "classification": "generic",
+  "auto_config_method": "http-path-probe",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Mesos Slave (agent) exposes the same unauthenticated HTTP REST API shape as Mesos Master, on the well-known port 5051. The check GETs /state (slave-side topology, version, frameworks/executors/tasks) and /metrics/snapshot (counter snapshot) and parses JSON. Both paths are universal across Mesos versions and require no credentials in the default deployment. A generic http-path-probe to GET /state on port 5051 (verifying a JSON body with a 'version' key plus slave-shaped fields like 'id' and 'frameworks') is sufficient. DC/OS deployments need an auth_token, but those are the minority case (mirroring mesos_master).",
+  "references": [
+    {"kind": "spec", "path": "mesos_slave/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "mesos_slave/datadog_checks/mesos_slave/mesos_slave.py"},
+    {"kind": "readme", "path": "mesos_slave/README.md"},
+    {"kind": "upstream", "url": "http://mesos.apache.org/documentation/latest/endpoints/"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Symmetric to mesos_master (Pattern B — single canonical HTTP path). Default port 5051 is the agent port; master_port (5050) is only used to back-fill cluster_name from the master."
+}

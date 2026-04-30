@@ -1,0 +1,24 @@
+{
+  "name": "go_expvar",
+  "display_name": "Go Expvar",
+  "spec_path": "go_expvar/assets/configuration/spec.yaml",
+  "required_fields": ["expvar_url"],
+  "all_relevant_fields": [
+    {"name": "expvar_url", "required": true, "default": null},
+    {"name": "namespace", "required": false, "default": "go_expvar"},
+    {"name": "metrics", "required": false, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "go_expvar scrapes Go's built-in `/debug/vars` endpoint exposed by `net/http/pprof` or `expvar.Handler()` in any Go program that opted in. The path component is fixed (`GO_EXPVAR_URL_PATH = \"/debug/vars\"` in the check), but the host, port, and even whether expvar is mounted at the root or behind a custom mux are entirely application-specific: there is no canonical port for arbitrary Go binaries, and the user must also pick a `namespace` and (optionally) a custom `metrics` allowlist with paths like `memstats/PauseTotalNs`. The missing input is user *intent* — which Go application to monitor — so this falls under pattern J (user-supplied generic check template) rather than a discoverable upstream service.",
+  "references": [
+    {"kind": "spec", "path": "go_expvar/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "go_expvar/datadog_checks/go_expvar/go_expvar.py"},
+    {"kind": "readme", "path": "go_expvar/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern J (framework / user-supplied target). The `/debug/vars` path is universal but only meaningful once the user names a specific Go process; the integration is effectively a Prometheus-style generic scraper for Go's expvar format."
+}

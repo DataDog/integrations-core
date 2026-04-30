@@ -1,0 +1,23 @@
+{
+  "name": "keda",
+  "display_name": "KEDA",
+  "spec_path": "keda/assets/configuration/spec.yaml",
+  "required_fields": ["openmetrics_endpoint"],
+  "all_relevant_fields": [
+    {"name": "openmetrics_endpoint", "required": true, "default": "http://localhost:8080/metrics"}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "KedaCheck inherits OpenMetricsBaseCheckV2 and only requires an openmetrics_endpoint. KEDA's components (admissions controller, metrics API server, operator) each expose Prometheus metrics on a fixed `/metrics` path on port 8080, so the discovery layer just needs to scan that port on each KEDA pod. No credentials are needed and the path is canonical, matching the OpenMetrics-on-a-known-port pattern.",
+  "references": [
+    {"kind": "spec", "path": "keda/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "keda/datadog_checks/keda/check.py"},
+    {"kind": "readme", "path": "keda/README.md"},
+    {"kind": "upstream", "url": "https://keda.sh/docs/2.16/integrations/prometheus/"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "No auto_conf.yaml ships with the integration today, but the contract (host + 8080 + /metrics) is uniform across all KEDA components and a port scan would discover each."
+}

@@ -1,0 +1,20 @@
+{
+  "name": "linux_audit_logs",
+  "display_name": "Linux Audit Logs",
+  "spec_path": "linux_audit_logs/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [],
+  "classification": "impossible",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Linux Audit Logs is a logs-only integration. The spec contains a single `logs` template tailing `/var/log/audit/audit.log` (source/service `linux-audit-logs`); there is no Agent metric check (no check.py — `datadog_checks/linux_audit_logs/` only has `__about__.py` and `__init__.py`). There is no host/port/URL/credential to discover and no per-instance options that drive endpoint resolution. Auto-config in the network-probe sense does not apply: the only \"discovery\" needed is whether the Agent host has auditd running and writing to the standard audit log path, which is a host-local presence check tied to a fixed file path rather than a probe. Treat as impossible like other logs-only / instrumentation-only integrations (pattern N).",
+  "references": [
+    {"kind": "spec", "path": "linux_audit_logs/assets/configuration/spec.yaml"},
+    {"kind": "readme", "path": "linux_audit_logs/README.md"},
+    {"kind": "other", "path": "linux_audit_logs/datadog_checks/linux_audit_logs/__init__.py"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Logs-only integration (pattern N analogue). No Agent check class is dispatched, only a logs tailer. Hint from prompt confirms: classified as impossible."
+}

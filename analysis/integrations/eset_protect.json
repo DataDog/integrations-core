@@ -1,0 +1,19 @@
+{
+  "name": "eset_protect",
+  "display_name": "ESET Protect",
+  "spec_path": "eset_protect/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [],
+  "classification": "impossible",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "ESET Protect is a logs-only integration. The spec defines no Agent metric check; the only options are a `logs` template (TCP/UDP listener with a user-chosen port, source eset-protect). There is no datadog_checks/eset_protect/<name>.py — the package contains only metadata (__init__.py, __about__.py). Logs are forwarded from the ESET Protect Web Console, so there is no upstream service for the Agent to discover and probe. Auto-config in the network-probe sense does not apply.",
+  "references": [
+    {"kind": "spec", "path": "eset_protect/assets/configuration/spec.yaml"},
+    {"kind": "readme", "path": "eset_protect/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Logs-only vendor security tile. Pattern N (instrumentation-only): no Agent check is dispatched against a live endpoint."
+}

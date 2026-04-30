@@ -3,13 +3,17 @@
 The Introduction text mirrors the source ticket and is preserved verbatim.
 Local relative paths in summary.md are rewritten to absolute github.com URLs
 so the links work when rendered on Confluence.
+
+Usage:
+    python3 build_confluence_body.py [verbose|brief]
 """
 import re
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-SUMMARY = ROOT / "analysis" / "summary.md"
+SUMMARY_VERBOSE = ROOT / "analysis" / "summary.md"
+SUMMARY_BRIEF = ROOT / "analysis" / "summary_brief.md"
 
 GITHUB_BASE = "https://github.com/DataDog/integrations-core/blob/master/"
 
@@ -36,13 +40,14 @@ def rewrite_links(md):
     return re.sub(r"\]\(\.\./([^)]+)\)", lambda m: f"]({GITHUB_BASE}{m.group(1)})", md)
 
 
-def build():
-    summary = SUMMARY.read_text()
-    return INTRODUCTION_MD + rewrite_links(summary)
+def build(mode="verbose"):
+    src = SUMMARY_BRIEF if mode == "brief" else SUMMARY_VERBOSE
+    return INTRODUCTION_MD + rewrite_links(src.read_text())
 
 
 def main():
-    sys.stdout.write(build())
+    mode = sys.argv[1] if len(sys.argv) > 1 else "verbose"
+    sys.stdout.write(build(mode))
 
 
 if __name__ == "__main__":

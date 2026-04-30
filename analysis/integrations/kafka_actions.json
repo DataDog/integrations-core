@@ -1,0 +1,36 @@
+{
+  "name": "kafka_actions",
+  "display_name": "Kafka Actions",
+  "spec_path": "kafka_actions/assets/configuration/spec.yaml",
+  "required_fields": ["remote_config_id", "kafka_connect_str"],
+  "all_relevant_fields": [
+    {"name": "remote_config_id", "required": true, "default": null},
+    {"name": "kafka_connect_str", "required": true, "default": null},
+    {"name": "kafka_cluster_id", "required": false, "default": null},
+    {"name": "security_protocol", "required": false, "default": "PLAINTEXT"},
+    {"name": "sasl_mechanism", "required": false, "default": null},
+    {"name": "sasl_plain_username", "required": false, "default": null},
+    {"name": "sasl_plain_password", "required": false, "default": null},
+    {"name": "sasl_kerberos_keytab", "required": false, "default": null},
+    {"name": "sasl_kerberos_principal", "required": false, "default": null},
+    {"name": "sasl_oauth_token_provider", "required": false, "default": null},
+    {"name": "schema_registry_url", "required": false, "default": null},
+    {"name": "read_messages", "required": false, "default": null},
+    {"name": "create_topic", "required": false, "default": null},
+    {"name": "delete_topic", "required": false, "default": null},
+    {"name": "produce_message", "required": false, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Kafka Actions is not a discovery-style metric check. The README states explicitly that the integration is exclusively triggered by Remote Configuration and should never be scheduled manually. The spec marks `remote_config_id` as required and notes 'This ID is automatically set by the Datadog backend via remote configuration. This parameter is REQUIRED — the integration will not start without it.' The check (`KafkaActionsCheck` extending `AgentCheck`) executes one of seven imperative admin actions (read_messages, create_topic, delete_topic, produce_message, etc.) against a user-supplied `kafka_connect_str` bootstrap server, with action-specific payload (cluster ID, topic name, base64-encoded message bytes) supplied by the operator. There is no upstream `kafka_actions` service to probe — the user's intent (which action, which topic, which payload) is the missing input, and the credential/transport fields (SASL, mTLS, OAuth) are user-provided. Pattern N / pattern J apply.",
+  "references": [
+    {"kind": "spec", "path": "kafka_actions/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "kafka_actions/datadog_checks/kafka_actions/check.py"},
+    {"kind": "readme", "path": "kafka_actions/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Remote-Configuration-driven action runner, not an autodiscoverable service. Distinct from `kafka` (JMX broker) and `kafka_consumer` (consumer-group offsets)."
+}

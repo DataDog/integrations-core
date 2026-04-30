@@ -1,4 +1,4 @@
-_Generated 2026-04-30. 165 total: 55 generic / 29 custom / 81 impossible / 1 need review (⚠)._
+_Generated 2026-04-30. 215 total: 81 generic / 33 custom / 101 impossible / 1 need review (⚠)._
 
 ### Generic auto-config possible
 
@@ -29,24 +29,50 @@ _Generated 2026-04-30. 165 total: 55 generic / 29 custom / 81 impossible / 1 nee
 | Datadog CSI Driver (`datadog_csi_driver`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
 | NVIDIA DCGM (`dcgm`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
 | Disk (`disk`) | — | other | high |
+| .NET CLR (`dotnetclr`) | — | other | medium |
+| Amazon Fargate (`ecs_fargate`) | — | other | high |
+| EKS Fargate (`eks_fargate`) | — | other | high |
 | etcd (`etcd`) | `prometheus_url` | openmetrics-port-scan | high |
 | Exchange Server (`exchange_server`) | — | other | high |
+| External DNS (`external_dns`) | `prometheus_url` | openmetrics-port-scan | high |
+| Falco (`falco`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
 | Fluentd (`fluentd`) | `monitor_agent_url` | http-path-probe | high |
 | Flux (`fluxcd`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
+| Gearman (`gearmand`) | — | tcp-banner-probe | high |
 | HDFS Datanode (`hdfs_datanode`) | `hdfs_datanode_jmx_uri` | http-path-probe | high |
 | HDFS Namenode (`hdfs_namenode`) | `hdfs_namenode_jmx_uri` | http-path-probe | high |
+| Hugging Face TGI (`hugging_face_tgi`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
 | Hyper-V (`hyperv`) | — | other | high |
 | IIS (`iis`) | — | other | medium |
+| Infiniband (`infiniband`) | — | other | high |
+| Karpenter (`karpenter`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
+| KEDA (`keda`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
 | Kong (`kong`) | — | openmetrics-port-scan | high |
+| KrakenD (`krakend`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
+| Kubernetes API server metrics (`kube_apiserver_metrics`) | `prometheus_url` | openmetrics-port-scan | high |
 | Kubernetes Controller Manager (`kube_controller_manager`) | `prometheus_url` | openmetrics-port-scan | high |
 | Kube DNS (`kube_dns`) | `prometheus_endpoint` | openmetrics-port-scan | high |
 | Kube metrics server (`kube_metrics_server`) | `prometheus_url` | openmetrics-port-scan | high |
 | Kube Proxy (`kube_proxy`) | `prometheus_url` | openmetrics-port-scan | high |
+| Kubelet (`kubelet`) | — | other | high |
+| Kubernetes Cluster Autoscaler (`kubernetes_cluster_autoscaler`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
+| Kubernetes State (`kubernetes_state`) | `kube_state_url` | openmetrics-port-scan | high |
+| Kubernetes State Core (`kubernetes_state_core`) | — | other | high |
+| KubeVirt API (`kubevirt_api`) | `kubevirt_api_metrics_endpoint` | openmetrics-port-scan | medium |
+| KubeVirt Controller (`kubevirt_controller`) | `kubevirt_controller_metrics_endpoint` | openmetrics-port-scan | high |
+| KubeVirt Handler (`kubevirt_handler`) | `kubevirt_handler_metrics_endpoint` | openmetrics-port-scan | high |
+| Kuma (`kuma`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
+| Kyoto Tycoon (`kyototycoon`) | `report_url` | http-path-probe | high |
+| Kyverno (`kyverno`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
 | Lighttpd (`lighttpd`) | `lighttpd_status_url` | http-path-probe | high |
 | Linkerd (`linkerd`) | — | openmetrics-port-scan | high |
+| Linux Proc Extras (`linux_proc_extras`) | — | other | high |
+| LiteLLM (`litellm`) | — | openmetrics-port-scan | high |
 | MapReduce (`mapreduce`) | `resourcemanager_uri`, `cluster_name` | http-path-probe | high |
 | Memcached (`mcache`) | `url` | tcp-banner-probe | high |
 | Mesos Master (`mesos_master`) | `url` | http-path-probe | high |
+| Mesos Slave (`mesos_slave`) | `url` | http-path-probe | high |
+| Milvus (`milvus`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
 | NGINX Ingress Controller (`nginx_ingress_controller`) | `prometheus_url` | openmetrics-port-scan | high |
 | Pulsar (`pulsar`) | `openmetrics_endpoint` | openmetrics-port-scan | high |
 | Redis (`redisdb`) | `host`, `port` | tcp-banner-probe | high |
@@ -76,10 +102,14 @@ _Generated 2026-04-30. 165 total: 55 generic / 29 custom / 81 impossible / 1 nee
 | GitLab Runner (`gitlab_runner`) | `gitlab_url`, `prometheus_endpoint`, `allowed_metrics` | openmetrics-port-scan | medium |
 | GlusterFS (`glusterfs`) | — | other | high |
 | HAProxy (`haproxy`) | — | http-path-probe | medium |
+| HTTP (`http_check`) | `name`, `url` | other | high |
 | Impala (`impala`) | `service_type`, `openmetrics_endpoint` | http-path-probe | high |
 | Istio (`istio`) | — | http-path-probe | medium |
 | Kafka Consumer (`kafka_consumer`) | `kafka_connect_str` | other | medium |
 | Kube Scheduler (`kube_scheduler`) | `prometheus_url` | http-path-probe | high |
+| Kubeflow (`kubeflow`) | `openmetrics_endpoint` | http-path-probe | medium |
+| LPARStats (`lparstats`) | — | other | high |
+| Lustre (`lustre`) | — | other | high |
 | Marathon (`marathon`) | `url` | http-path-probe | medium |
 | MongoDB (`mongo`) | `hosts` | credentials-required | medium |
 | Nagios (`nagios`) | `nagios_conf` | config-file-parse | high |
@@ -128,8 +158,17 @@ _Generated 2026-04-30. 165 total: 55 generic / 29 custom / 81 impossible / 1 nee
 | Delinea Secret Server (`delinea_secret_server`) | — | other | high |
 | Directory (`directory`) | `directory` | other | high |
 | DNS (`dns_check`) | `hostname` | other | high |
+| DO Query Actions (`do_query_actions`) | `db_identifier`, `username`, `password`, `db_type`, `queries` | credentials-required | high |
+| DuckDB (`duckdb`) | `db_name` | other | high |
+| ESET Protect (`eset_protect`) | — | other | high |
+| ESXi (`esxi`) | `host`, `username`, `password` | credentials-required | high |
 | Flink (`flink`) | — | other | high |
+| Fly.io (`fly_io`) | `org_slug` | credentials-required | high |
+| Forescout (`forescout`) | — | other | high |
 | FoundationDB (`foundationdb`) | — | credentials-required | high |
+| Go Expvar (`go_expvar`) | `expvar_url` | other | high |
+| Go-Metro (TCP RTT) (`go_metro`) | `interface`, `ips`, `hosts` | other | high |
+| GuardDog (`guarddog`) | `guarddog_path`, `package_ecosystem`, `dependency_file_path` | other | high |
 | Gunicorn (`gunicorn`) | `proc_name` | other | high |
 | Harbor (`harbor`) | `url`, `username`, `password` | credentials-required | high |
 | Hazelcast (`hazelcast`) | `host`, `port` | credentials-required | high |
@@ -140,12 +179,23 @@ _Generated 2026-04-30. 165 total: 55 generic / 29 custom / 81 impossible / 1 nee
 | IBM Db2 (`ibm_db2`) | `db`, `username`, `password` | credentials-required | high |
 | IBM i ⚠ (`ibm_i`) | `username`, `password`, `driver` | credentials-required | high |
 | IBM MQ (`ibm_mq`) | `channel`, `queue_manager` | credentials-required | high |
+| IBM Spectrum LSF (`ibm_spectrum_lsf`) | `cluster_name` | other | high |
 | IBM WAS (`ibm_was`) | `servlet_url` | credentials-required | high |
+| iboss (`iboss`) | — | other | high |
 | Ignite (`ignite`) | `host`, `port` | credentials-required | high |
+| Ivanti Connect Secure (`ivanti_connect_secure`) | — | other | high |
 | JBoss/WildFly (`jboss_wildfly`) | `jmx_url` | credentials-required | high |
 | journald (`journald`) | — | other | high |
+| Juniper SRX Firewall (`juniper_srx_firewall`) | — | other | high |
+| Kafka (`kafka`) | `host`, `port` | credentials-required | high |
+| Kafka Actions (`kafka_actions`) | `remote_config_id`, `kafka_connect_str` | other | high |
+| Keycloak (`keycloak`) | — | other | high |
+| Linux Audit Logs (`linux_audit_logs`) | — | other | high |
+| Mac Audit Logs (`mac_audit_logs`) | `MONITOR`, `AUDIT_LOGS_DIR_PATH` | other | high |
 | MapR (`mapr`) | — | credentials-required | high |
 | MarkLogic (`marklogic`) | `url`, `username`, `password` | credentials-required | high |
+| Microsoft DNS (`microsoft_dns`) | — | other | high |
+| Microsoft Sysmon (`microsoft_sysmon`) | — | other | high |
 | MySQL (`mysql`) | `host`, `username`, `password` | credentials-required | high |
 | OpenLDAP (`openldap`) | `url` | credentials-required | high |
 | OpenMetrics (`openmetrics`) | `openmetrics_endpoint`, `namespace`, `metrics` | other | high |

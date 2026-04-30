@@ -1,0 +1,23 @@
+{
+  "name": "mac_audit_logs",
+  "display_name": "Mac Audit Logs",
+  "spec_path": "mac_audit_logs/assets/configuration/spec.yaml",
+  "required_fields": ["MONITOR", "AUDIT_LOGS_DIR_PATH"],
+  "all_relevant_fields": [
+    {"name": "MONITOR", "required": true, "default": null},
+    {"name": "AUDIT_LOGS_DIR_PATH", "required": true, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Mac Audit Logs is a logs-only integration. The check runs locally on a macOS host with BSM auditing enabled and shells out to `auditreduce` / `praudit` (via sudo) to parse files in /var/audit. There is no remote network endpoint to probe — discovery would reduce to 'is BSM auditing enabled and is the agent running on a Mac with sudo access to auditreduce?'. The required `AUDIT_LOGS_DIR_PATH` is conventionally /var/audit but the operating model is host-local log file ingestion, not a service probe; auto-config in the network-probe sense does not apply.",
+  "references": [
+    {"kind": "spec", "path": "mac_audit_logs/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "mac_audit_logs/datadog_checks/mac_audit_logs/check.py"},
+    {"kind": "readme", "path": "mac_audit_logs/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Logs-only integration that subprocesses local BSM tooling (auditreduce/praudit) with sudo. Not a network-probe target. Similar shape to other host-local log forwarders (Pattern N analogue for macOS audit pipeline)."
+}

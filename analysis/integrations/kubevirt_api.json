@@ -1,0 +1,29 @@
+{
+  "name": "kubevirt_api",
+  "display_name": "KubeVirt API",
+  "spec_path": "kubevirt_api/assets/configuration/spec.yaml",
+  "required_fields": ["kubevirt_api_metrics_endpoint"],
+  "all_relevant_fields": [
+    {"name": "kubevirt_api_metrics_endpoint", "required": true, "default": null},
+    {"name": "kubevirt_api_healthz_endpoint", "required": false, "default": null},
+    {"name": "kube_namespace", "required": false, "default": null},
+    {"name": "kube_pod_name", "required": false, "default": null},
+    {"name": "kube_config_dict", "required": false, "default": null},
+    {"name": "tls_verify", "required": false, "default": null}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The KubeVirt API `virt-api` pod exposes Prometheus metrics over HTTPS on port 443 at `/metrics` (per README and tests). The check inherits `OpenMetricsBaseCheckV2` and additionally calls the Kubernetes API to enumerate VirtualMachine / VirtualMachineInstance custom resources. Both authentications are auto-injected: the metrics endpoint is reachable in-cluster and TLS verification is typically disabled (self-signed virt-api cert), and the Kubernetes API client uses `load_incluster_config()` with the Agent's ServiceAccount token (per pattern O). Spec marks no field as strictly required, but the check assumes `kubevirt_api_metrics_endpoint` is set. The endpoint URL is canonical (`https://<virt-api-pod>:443/metrics`), so an OpenMetrics port scan against the autodiscovered virt-api pod resolves it.",
+  "references": [
+    {"kind": "spec", "path": "kubevirt_api/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "kubevirt_api/datadog_checks/kubevirt_api/check.py"},
+    {"kind": "check", "path": "kubevirt_api/datadog_checks/kubevirt_api/kube_client.py"},
+    {"kind": "readme", "path": "kubevirt_api/README.md"},
+    {"kind": "upstream", "url": "https://kubevirt.io/user-guide/operations/component_monitoring/"}
+  ],
+  "confidence": "medium",
+  "needs_human_review": false,
+  "notes": "Beyond OpenMetrics scraping, the check needs RBAC (`kubevirt.io:view`) bound to the Agent's ServiceAccount to list VMs/VMIs. The credential itself (in-cluster token) is auto-injected, but the cluster admin must apply the ClusterRoleBinding documented in the README — that's an out-of-band manual step that auto-config cannot perform."
+}

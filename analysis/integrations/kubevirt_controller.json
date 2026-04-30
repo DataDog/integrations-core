@@ -1,0 +1,26 @@
+{
+  "name": "kubevirt_controller",
+  "display_name": "KubeVirt Controller",
+  "spec_path": "kubevirt_controller/assets/configuration/spec.yaml",
+  "required_fields": ["kubevirt_controller_metrics_endpoint"],
+  "all_relevant_fields": [
+    {"name": "kubevirt_controller_metrics_endpoint", "required": true, "default": null},
+    {"name": "kubevirt_controller_healthz_endpoint", "required": false, "default": null},
+    {"name": "kube_namespace", "required": false, "default": null},
+    {"name": "kube_pod_name", "required": false, "default": null}
+  ],
+  "classification": "generic",
+  "auto_config_method": "openmetrics-port-scan",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The check inherits OpenMetricsBaseCheckV2 and points at the KubeVirt Controller's `/metrics` Prometheus endpoint, which it exposes on the pod at a fixed path (port 8443/443). The recommended autodiscovery pattern in the README uses `https://%%host%%:%%port%%/metrics`, so once the pod is identified, host+port+/metrics is sufficient. `kube_namespace` and `kube_pod_name` are tag inputs supplied automatically by Autodiscovery template variables — they don't drive endpoint resolution. No user-supplied credentials are needed; TLS verify is typically disabled or relies on cluster CA. This is the canonical OpenMetrics port-scan case.",
+  "references": [
+    {"kind": "spec", "path": "kubevirt_controller/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "kubevirt_controller/datadog_checks/kubevirt_controller/check.py"},
+    {"kind": "readme", "path": "kubevirt_controller/README.md"},
+    {"kind": "upstream", "url": "https://kubevirt.io/user-guide/operations/component_monitoring/"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "No on-disk auto_conf.yaml ships with the integration; autodiscovery pod annotations in the README cover the canonical case. The metrics endpoint is HTTPS on the pod IP."
+}

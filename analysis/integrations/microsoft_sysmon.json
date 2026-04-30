@@ -1,0 +1,19 @@
+{
+  "name": "microsoft_sysmon",
+  "display_name": "Microsoft Sysmon",
+  "spec_path": "microsoft_sysmon/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [],
+  "classification": "impossible",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "Microsoft Sysmon is a logs-only integration. The spec contains only a `logs` template that forwards the Windows Event Log channel `Microsoft-Windows-Sysmon/Operational` via `type: windows_event`; there is no `instances` block, no Agent metric check, and no check.py implementation. There is no network endpoint to probe and no metric check to dispatch — auto-config in the network-probe sense does not apply. Discovery reduces to 'is Sysmon installed and is its operational event channel emitting on this Windows host?'.",
+  "references": [
+    {"kind": "spec", "path": "microsoft_sysmon/assets/configuration/spec.yaml"},
+    {"kind": "readme", "path": "microsoft_sysmon/README.md"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Logs-only integration, identical shape to microsoft_dns (Windows Event Log forwarder). Pattern N analogue."
+}

@@ -1,0 +1,35 @@
+{
+  "name": "do_query_actions",
+  "display_name": "DO Query Actions",
+  "spec_path": "do_query_actions/assets/configuration/spec.yaml",
+  "required_fields": ["db_identifier", "username", "password", "db_type", "queries"],
+  "all_relevant_fields": [
+    {"name": "db_identifier", "required": true, "default": null},
+    {"name": "username", "required": true, "default": null},
+    {"name": "password", "required": false, "default": null},
+    {"name": "port", "required": false, "default": 5432},
+    {"name": "ssl", "required": false, "default": null},
+    {"name": "ssl_cert", "required": false, "default": null},
+    {"name": "ssl_root_cert", "required": false, "default": null},
+    {"name": "ssl_key", "required": false, "default": null},
+    {"name": "ssl_password", "required": false, "default": null},
+    {"name": "aws", "required": false, "default": null},
+    {"name": "managed_authentication", "required": false, "default": null},
+    {"name": "config_id", "required": false, "default": null},
+    {"name": "db_type", "required": true, "default": null},
+    {"name": "queries", "required": true, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "DO Query Actions is a generic SQL-execution framework (currently Postgres only) that runs user-defined queries on a user-nominated database on a user-defined schedule. Required spec fields include `db_identifier` (host + dbname), `username`, `db_type`, and `queries` (a list of SQL with monitor IDs, intervals, entity metadata, etc.). The check connects with psycopg using either a password, AWS RDS IAM tokens, or Azure Managed Identity. Auto-config cannot generate any of these inputs: the user's intent (which database, which queries, which monitor IDs, which entity tags) is the integration's content, not something discoverable on the wire. Combines pattern J (user-supplied template) with pattern D (credentials required).",
+  "references": [
+    {"kind": "spec", "path": "do_query_actions/assets/configuration/spec.yaml"},
+    {"kind": "check", "path": "do_query_actions/datadog_checks/do_query_actions/check.py"},
+    {"kind": "check", "path": "do_query_actions/datadog_checks/do_query_actions/postgres_connection.py"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "Pattern J + D. Even if the agent could discover a Postgres instance on the wire (which postgres itself classifies as impossible), the user must still supply queries, monitor IDs, entity metadata, and credentials."
+}
