@@ -1,9 +1,12 @@
 """Async GitHub API client for triggering and monitoring GitHub Actions workflows"""
 
+import io
 import re
+import zipfile
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Literal, Self
 
 import httpx
@@ -71,6 +74,27 @@ class WorkflowRun(BaseModel):
     html_url: str | None = None
     created_at: str | None = None
     updated_at: str | None = None
+
+
+class WorkflowDispatchResult(BaseModel):
+    """Response payload from a successful workflow dispatch."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    workflow_run_id: int
+
+
+class CheckRun(BaseModel):
+    """A GitHub Checks API check run."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    id: int
+    name: str
+    status: str
+    conclusion: str | None = None
+    html_url: str | None = None
+    head_sha: str | None = None
 
 
 class Artifact(BaseModel):
@@ -221,7 +245,7 @@ class AsyncGitHubClient:
         ref: str,
         inputs: dict[str, str] | None = None,
         timeout: float | None = None,
-    ) -> GitHubResponse[None]:
+    ) -> GitHubResponse[WorkflowDispatchResult]:
         """
         Calls the GitHub API to trigger a workflow dispatch event.
 
@@ -237,7 +261,7 @@ class AsyncGitHubClient:
             timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
 
         Returns:
-            GitHubResponse[None]: Empty response (204 No Content) with headers.
+            GitHubResponse[WorkflowDispatchResult]: The dispatched run id and headers.
         """
         body: dict[str, Any] = {"ref": ref}
         if inputs is not None:
@@ -248,7 +272,7 @@ class AsyncGitHubClient:
             timeout=timeout,
             json=body,
         )
-        return GitHubResponse[None].model_validate({"data": None, "headers": dict(response.headers)})
+        return self._parse_response(response, WorkflowDispatchResult)
 
     async def get_workflow_run(
         self,
@@ -383,6 +407,170 @@ class AsyncGitHubClient:
             json=payload,
         )
         return self._parse_response(response, PullRequestReviewComment)
+
+    async def create_check_run(
+        self,
+        owner: str,
+        repo: str,
+        name: str,
+        head_sha: str,
+        status: Literal["queued", "in_progress", "completed"],
+        details_url: str | None = None,
+        output: dict[str, Any] | None = None,
+        timeout: float | None = None,
+    ) -> GitHubResponse[CheckRun]:
+        """
+        Calls the GitHub API to create a check run on a commit.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/checks/runs#create-a-check-run
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            name: Display name of the check.
+            head_sha: SHA of the commit the check is attached to.
+            status: Initial status of the check.
+            details_url: Optional URL the check title links to.
+            output: Optional structured output (title, summary, ...).
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+
+        Returns:
+            GitHubResponse[CheckRun]: The validated check run data and headers.
+        """
+        payload: dict[str, Any] = {"name": name, "head_sha": head_sha, "status": status}
+        if details_url is not None:
+            payload["details_url"] = details_url
+        if output is not None:
+            payload["output"] = output
+        response = await self._request(
+            "POST",
+            f"/repos/{owner}/{repo}/check-runs",
+            timeout=timeout,
+            json=payload,
+        )
+        return self._parse_response(response, CheckRun)
+
+    async def update_check_run(
+        self,
+        owner: str,
+        repo: str,
+        check_run_id: int,
+        status: Literal["queued", "in_progress", "completed"] | None = None,
+        conclusion: str | None = None,
+        details_url: str | None = None,
+        output: dict[str, Any] | None = None,
+        timeout: float | None = None,
+    ) -> GitHubResponse[CheckRun]:
+        """
+        Calls the GitHub API to update an existing check run.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/checks/runs#update-a-check-run
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            check_run_id: Numeric ID of the check run to update.
+            status: New status (``"queued"`` | ``"in_progress"`` | ``"completed"``).
+            conclusion: Final conclusion (only valid when ``status="completed"``).
+            details_url: Optional URL the check title links to.
+            output: Optional structured output (title, summary, ...).
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+
+        Returns:
+            GitHubResponse[CheckRun]: The validated check run data and headers.
+        """
+        payload: dict[str, Any] = {}
+        if status is not None:
+            payload["status"] = status
+        if conclusion is not None:
+            payload["conclusion"] = conclusion
+        if details_url is not None:
+            payload["details_url"] = details_url
+        if output is not None:
+            payload["output"] = output
+        response = await self._request(
+            "PATCH",
+            f"/repos/{owner}/{repo}/check-runs/{check_run_id}",
+            timeout=timeout,
+            json=payload,
+        )
+        return self._parse_response(response, CheckRun)
+
+    async def _resolve_artifact_redirect(
+        self,
+        archive_download_url: str,
+        timeout: float | None = None,
+    ) -> str:
+        """Authenticated GET; return the unauthenticated signed URL from the 302 Location header."""
+        effective_timeout = timeout if timeout is not None else self._default_timeout
+        redirect_response = await self._client.request(
+            "GET",
+            archive_download_url,
+            timeout=effective_timeout,
+            follow_redirects=False,
+        )
+        if redirect_response.status_code != 302:
+            redirect_response.raise_for_status()
+            raise httpx.HTTPError(
+                f"Expected 302 redirect from {archive_download_url}, got {redirect_response.status_code}"
+            )
+        location = redirect_response.headers.get("location")
+        if not location:
+            raise httpx.HTTPError(f"Missing Location header on redirect from {archive_download_url}")
+        return location
+
+    async def _download_and_extract_zip(
+        self,
+        signed_url: str,
+        dest_path: Path,
+        timeout: float | None = None,
+    ) -> None:
+        """Anonymous fetch (no bearer token to S3) + zip-slip-validated extractall."""
+        effective_timeout = timeout if timeout is not None else self._default_timeout
+        async with httpx.AsyncClient(timeout=effective_timeout) as anonymous_client:
+            download_response = await anonymous_client.get(signed_url)
+            download_response.raise_for_status()
+
+        dest_path.mkdir(parents=True, exist_ok=True)
+        with zipfile.ZipFile(io.BytesIO(download_response.content)) as zf:
+            dest_root = dest_path.resolve()
+            for info in zf.infolist():
+                name = info.filename
+                if name.startswith("/") or ".." in Path(name).parts:
+                    raise httpx.HTTPError(f"Zip-slip detected: {name}")
+                target = (dest_path / name).resolve()
+                if target != dest_root and dest_root not in target.parents:
+                    raise httpx.HTTPError(f"Zip-slip detected: {name}")
+            zf.extractall(dest_path)
+
+    async def download_artifact(
+        self,
+        archive_download_url: str,
+        dest_path: Path,
+        timeout: float | None = None,
+    ) -> None:
+        """
+        Downloads and extracts a workflow run artifact zip into ``dest_path``.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/actions/artifacts#download-an-artifact
+
+        The GitHub API responds to the artifact endpoint with a 302 redirect to a
+        short-lived signed URL on a third-party host (typically S3). This method
+        fetches the redirect with the authenticated client, then follows the
+        ``Location`` header with a fresh **unauthenticated** client so the GitHub
+        bearer token is not leaked to the redirect target. Each zip member is
+        validated against ``dest_path`` before extraction (zip-slip protection).
+
+        Args:
+            archive_download_url: The artifact's ``archive_download_url`` (absolute or relative to the API base).
+            dest_path: Directory where the zip contents will be extracted. Created if missing.
+            timeout: Optional timeout for both HTTP requests.
+        """
+        location = await self._resolve_artifact_redirect(archive_download_url, timeout)
+        await self._download_and_extract_zip(location, dest_path, timeout)
 
 
 # ---------------------------------------------------------------------------
