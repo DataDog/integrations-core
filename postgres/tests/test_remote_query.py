@@ -244,12 +244,14 @@ def test_execute_closed_pool_returns_target_unavailable_without_recreating_crede
     assert pool.requested_dbnames == []
 
 
-def test_execute_rejects_non_canonical_query_before_pool_access():
+@pytest.mark.parametrize('query', ['SELECT current_database()', 'SELECT 1 AS value;', ' SELECT 1 AS value'])
+def test_execute_rejects_non_canonical_query_before_pool_access(query):
     pool = FakePool()
-    request = valid_request(query='SELECT current_database()')
+    request = valid_request(query=query)
 
     response = execute_remote_query(request, StaticPostgresCheckRegistry([make_check(pool=pool)]))
 
     assert response['status'] == 'FAILED'
-    assert response_code(response) == 'query_rejected'
+    assert response_code(response) == 'invalid_request'
+    assert 'query' in response['error']['message']
     assert pool.requested_dbnames == []

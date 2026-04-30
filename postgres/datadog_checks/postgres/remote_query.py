@@ -8,7 +8,9 @@ import json
 import logging
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Any, Literal, Protocol
+
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr, ValidationError, field_validator
 
 if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql
@@ -16,29 +18,49 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 _ALLOWED_QUERY = 'SELECT 1 AS value'
-_REQUEST_FIELDS = frozenset({'target', 'query', 'limits'})
-_TARGET_FIELDS = frozenset({'host', 'port', 'dbname'})
-_LIMIT_FIELDS = frozenset({'maxRows', 'maxBytes', 'timeoutMs'})
 
 
-@dataclass(frozen=True)
-class RemoteQueryTarget:
-    host: str
-    port: int
-    dbname: str
+class RemoteQueryTarget(BaseModel):
+    model_config = ConfigDict(extra='forbid', frozen=True)
+
+    host: StrictStr = Field(min_length=1)
+    port: StrictInt = Field(default=5432, ge=1, le=65535)
+    dbname: StrictStr = Field(min_length=1)
+
+    @field_validator('host')
+    @classmethod
+    def normalize_host(cls, value: str) -> str:
+        host = value.strip().lower()
+        if host.endswith('.'):
+            host = host[:-1]
+        if not host:
+            raise ValueError('host must be a non-empty string')
+        return host
+
+    @field_validator('dbname')
+    @classmethod
+    def validate_dbname(cls, value: str) -> str:
+        if not value:
+            raise ValueError('dbname must be a non-empty string')
+        if value != value.strip():
+            raise ValueError('dbname must not contain surrounding whitespace')
+        return value
 
 
-@dataclass(frozen=True)
-class RemoteQueryLimits:
-    max_rows: int = 10
-    max_bytes: int = 1_048_576
-    timeout_ms: int = 5_000
+class RemoteQueryLimits(BaseModel):
+    model_config = ConfigDict(extra='forbid', frozen=True)
+
+    max_rows: StrictInt = Field(default=10, alias='maxRows', ge=1)
+    max_bytes: StrictInt = Field(default=1_048_576, alias='maxBytes', ge=1)
+    timeout_ms: StrictInt = Field(default=5_000, alias='timeoutMs', ge=1)
 
 
-@dataclass(frozen=True)
-class RemoteQueryRequest:
+class RemoteQueryRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid', frozen=True)
+
     target: RemoteQueryTarget
-    limits: RemoteQueryLimits
+    query: Literal['SELECT 1 AS value']
+    limits: RemoteQueryLimits = Field(default_factory=RemoteQueryLimits)
 
 
 @dataclass(frozen=True)
@@ -53,12 +75,12 @@ class PostgresCheckRegistry(Protocol):
     def iter_postgres_checks(self) -> Iterable['PostgreSql']: ...
 
 
-def execute_remote_query(request: Mapping[str, Any], registry: PostgresCheckRegistry) -> dict[str, Any]:
-    request_or_error = _parse_request(request)
-    if isinstance(request_or_error, dict):
-        return request_or_error
+def execute_remote_query(request: Any, registry: PostgresCheckRegistry) -> dict[str, Any]:
+    try:
+        parsed_request = RemoteQueryRequest.model_validate(request)
+    except ValidationError as e:
+        return _validation_error(e)
 
-    parsed_request = request_or_error
     target = parsed_request.target
     limits = parsed_request.limits
 
@@ -73,75 +95,10 @@ def execute_remote_query(request: Mapping[str, Any], registry: PostgresCheckRegi
 
 
 def normalize_target(target: Mapping[str, Any]) -> RemoteQueryTarget:
-    host = target.get('host')
-    if not isinstance(host, str) or not host.strip():
-        raise ValueError('host must be a non-empty string')
-
-    dbname = target.get('dbname')
-    if not isinstance(dbname, str) or not dbname:
-        raise ValueError('dbname must be a non-empty string')
-    if dbname != dbname.strip():
-        raise ValueError('dbname must not contain surrounding whitespace')
-
-    return RemoteQueryTarget(
-        host=_normalize_host(host), port=_int_in_range(target.get('port', 5432), 'port', maximum=65535), dbname=dbname
-    )
-
-
-def _parse_request(value: Any) -> RemoteQueryRequest | dict[str, Any]:
-    if not isinstance(value, Mapping):
-        return _error('invalid_request', 'Remote query request must be a mapping.')
-
-    unknown_fields_error = _unknown_fields_error(value, _REQUEST_FIELDS, 'request')
-    if unknown_fields_error is not None:
-        return unknown_fields_error
-
-    target_or_error = _parse_target(value.get('target'))
-    if isinstance(target_or_error, dict):
-        return target_or_error
-
-    if not _is_allowed_query(value.get('query')):
-        return _error('query_rejected', 'Only the canonical SELECT 1 proof query is allowed.')
-
-    limits_or_error = _parse_limits(value.get('limits', {}))
-    if isinstance(limits_or_error, dict):
-        return limits_or_error
-
-    return RemoteQueryRequest(target=target_or_error, limits=limits_or_error)
-
-
-def _parse_target(value: Any) -> RemoteQueryTarget | dict[str, Any]:
-    if not isinstance(value, Mapping):
-        return _error('invalid_selector', 'Target selector must be a mapping.')
-
-    unknown_fields_error = _unknown_fields_error(value, _TARGET_FIELDS, 'target')
-    if unknown_fields_error is not None:
-        return unknown_fields_error
-
     try:
-        return normalize_target(value)
-    except ValueError as e:
-        return _error('invalid_selector', str(e))
-
-
-def _parse_limits(value: Any) -> RemoteQueryLimits | dict[str, Any]:
-    if value is None:
-        value = {}
-    if not isinstance(value, Mapping):
-        return _error('invalid_request', 'Limits must be a mapping.')
-
-    unknown_fields_error = _unknown_fields_error(value, _LIMIT_FIELDS, 'limits')
-    if unknown_fields_error is not None:
-        return unknown_fields_error
-
-    try:
-        return RemoteQueryLimits(
-            max_rows=_int_in_range(value.get('maxRows', 10), 'maxRows'),
-            max_bytes=_int_in_range(value.get('maxBytes', 1_048_576), 'maxBytes'),
-            timeout_ms=_int_in_range(value.get('timeoutMs', 5_000), 'timeoutMs'),
-        )
-    except ValueError as e:
-        return _error('invalid_request', str(e))
+        return RemoteQueryTarget.model_validate(target)
+    except ValidationError as e:
+        raise ValueError(_validation_message(e)) from e
 
 
 def _resolve_matches(target: RemoteQueryTarget, checks: Iterable['PostgreSql']) -> list['PostgreSql']:
@@ -197,28 +154,24 @@ def _execute_select_1(check: 'PostgreSql', target: RemoteQueryTarget, limits: Re
     }
 
 
-def _unknown_fields_error(
-    value: Mapping[str, Any], allowed_fields: frozenset[str], label: str
-) -> dict[str, Any] | None:
-    unknown_fields = _unknown_field_names(value, allowed_fields)
-    if unknown_fields:
-        return _error('invalid_request', _unknown_fields_message(unknown_fields, label))
-    return None
+def _validation_error(error: ValidationError) -> dict[str, Any]:
+    return _error('invalid_request', _validation_message(error))
 
 
-def _unknown_field_names(value: Mapping[str, Any], allowed_fields: frozenset[str]) -> list[str]:
-    return sorted(str(field) for field in value if field not in allowed_fields)
+def _validation_message(error: ValidationError) -> str:
+    details = []
+    for item in error.errors(include_input=False):
+        location = _validation_location(item.get('loc', ()))
+        message = item.get('msg', 'Invalid value')
+        if location:
+            details.append(f'{location}: {message}')
+        else:
+            details.append(message)
+    return 'Invalid remote query request: {}'.format('; '.join(details))
 
 
-def _unknown_fields_message(unknown_fields: list[str], label: str) -> str:
-    field_label = 'field' if len(unknown_fields) == 1 else 'fields'
-    return f"{label} contains unknown {field_label}: {', '.join(unknown_fields)}"
-
-
-def _is_allowed_query(value: Any) -> bool:
-    if not isinstance(value, str):
-        return False
-    return value.strip().rstrip(';').strip() == _ALLOWED_QUERY
+def _validation_location(location: tuple[Any, ...]) -> str:
+    return '.'.join(str(part) for part in location)
 
 
 def _normalize_host(value: str) -> str:
