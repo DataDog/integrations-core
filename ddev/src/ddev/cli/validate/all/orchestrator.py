@@ -270,20 +270,9 @@ class ValidationOrchestrator(EventBusOrchestrator):
             return False
         return all(is_successful_validation_comment(comment["body"]) for comment in previous_comments)
 
-    def _publish_report(self, exception: Exception | None) -> None:
-        error_msg, extra_warning = self._build_error_and_warning(exception)
-
-        summary_body = format_step_summary(
-            self._results,
-            VALIDATIONS,
-            self._target,
-            self._validations,
-            error=error_msg,
-            warning=extra_warning,
-        )
-        write_step_summary(summary_body)
-
-        current_succeeded = self._current_run_succeeded(exception)
+    def _build_pr_comment_body(
+        self, error_msg: str | None, extra_warning: str | None, current_succeeded: bool
+    ) -> str:
         comment_body = format_pr_comment(
             self._results,
             VALIDATIONS,
@@ -295,6 +284,50 @@ class ValidationOrchestrator(EventBusOrchestrator):
         )
         if run_url := get_workflow_run_url():
             comment_body += f"\n\n[View full run]({run_url})"
+        return comment_body
+
+    def _fetch_previous_validation_comments_or_empty(self, pr_number: int) -> list[GithubComment]:
+        self._app.logger.debug("Fetching previous validation comments on PR #%s...", pr_number)
+        try:
+            return self._get_previous_validation_comments(pr_number)
+        except Exception as exc:
+            self._app.display_warning(f"Failed to read previous validation comments: {type(exc).__name__}: {exc}")
+            return []
+
+    def _sync_pr_comment(self, comment_body: str, current_succeeded: bool) -> None:
+        if self._pr_number is None:
+            return
+
+        previous_comments = self._fetch_previous_validation_comments_or_empty(self._pr_number)
+        if self._suppress_pr_comments:
+            self._app.logger.debug("Validation PR comments are suppressed for PR #%s.", self._pr_number)
+            self._delete_comments(previous_comments)
+            return
+        if self._previous_success_already_reported(current_succeeded, previous_comments):
+            self._app.logger.debug("Previous validation comments already reported success; skipping PR comment.")
+            return
+
+        self._app.logger.debug("Deleting previous validation comments on PR #%s...", self._pr_number)
+        self._delete_comments(previous_comments)
+        self._app.logger.debug("Posting validation comment on PR #%s...", self._pr_number)
+        self._app.github.post_pull_request_comment(self._pr_number, comment_body)
+        self._app.logger.debug("Comment posted successfully.")
+
+    def _publish_report(self, exception: Exception | None) -> None:
+        error_msg, extra_warning = self._build_error_and_warning(exception)
+        write_step_summary(
+            format_step_summary(
+                self._results,
+                VALIDATIONS,
+                self._target,
+                self._validations,
+                error=error_msg,
+                warning=extra_warning,
+            )
+        )
+
+        current_succeeded = self._current_run_succeeded(exception)
+        comment_body = self._build_pr_comment_body(error_msg, extra_warning, current_succeeded)
 
         self._app.logger.debug("PR number: %s", self._pr_number)
         self._app.logger.debug("GitHub token configured: %s", bool(self._app.config.github.token))
@@ -310,24 +343,7 @@ class ValidationOrchestrator(EventBusOrchestrator):
         previous_level = httpx_logger.level
         httpx_logger.setLevel(logging.WARNING)
         try:
-            self._app.logger.debug("Fetching previous validation comments on PR #%s...", self._pr_number)
-            try:
-                previous_comments = self._get_previous_validation_comments(self._pr_number)
-            except Exception as exc:
-                self._app.display_warning(f"Failed to read previous validation comments: {type(exc).__name__}: {exc}")
-                previous_comments = []
-            if self._suppress_pr_comments:
-                self._app.logger.debug("Validation PR comments are suppressed for PR #%s.", self._pr_number)
-                self._delete_comments(previous_comments)
-                return
-            if self._previous_success_already_reported(current_succeeded, previous_comments):
-                self._app.logger.debug("Previous validation comments already reported success; skipping PR comment.")
-                return
-            self._app.logger.debug("Deleting previous validation comments on PR #%s...", self._pr_number)
-            self._delete_comments(previous_comments)
-            self._app.logger.debug("Posting validation comment on PR #%s...", self._pr_number)
-            self._app.github.post_pull_request_comment(self._pr_number, comment_body)
-            self._app.logger.debug("Comment posted successfully.")
+            self._sync_pr_comment(comment_body, current_succeeded)
         except Exception as exc:
             self._app.display_warning(f"Failed to post PR comment: {type(exc).__name__}: {exc}")
             write_step_summary(f"\n> Failed to post PR comment: {type(exc).__name__}: {exc}")
