@@ -1,0 +1,26 @@
+{
+  "name": "kafka_consumer",
+  "display_name": "Kafka Consumer",
+  "spec_path": "kafka_consumer/assets/configuration/spec.yaml",
+  "required_fields": ["kafka_connect_str"],
+  "all_relevant_fields": [
+    {"name": "kafka_connect_str", "required": true, "default": null},
+    {"name": "kafka_client_api_version", "required": false, "default": null},
+    {"name": "consumer_groups", "required": false, "default": null},
+    {"name": "monitor_unlisted_consumer_groups", "required": false, "default": false},
+    {"name": "security_protocol", "required": false, "default": "PLAINTEXT"},
+    {"name": "sasl_mechanism", "required": false, "default": null}
+  ],
+  "classification": "custom",
+  "auto_config_method": "other",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "The check connects to a Kafka broker bootstrap list (default port 9092 for plaintext, 9093 for SSL/SASL). Strictly per spec only `kafka_connect_str` is required, so unauthenticated localhost setups would discover via a Metadata API request. In practice, production Kafka uses SASL/PLAIN, SASL/SCRAM, or mTLS, all of which need credentials or certs that aren't on the wire. A discovery layer must probe the bootstrap port and either (a) succeed with PLAINTEXT or (b) note the protocol mismatch and require credentials.",
+  "references": [
+    {"kind": "spec", "path": "kafka_consumer/assets/configuration/spec.yaml"},
+    {"kind": "upstream", "url": "https://kafka.apache.org/protocol"}
+  ],
+  "confidence": "medium",
+  "needs_human_review": false,
+  "notes": "Despite the name, this check uses the Kafka Admin client; not JMX. Other Kafka-related integrations (kafka, kafka_streams) may use JMX and should be classified separately."
+}

@@ -1,0 +1,25 @@
+{
+  "name": "mongo",
+  "display_name": "MongoDB",
+  "spec_path": "mongo/assets/configuration/spec.yaml",
+  "required_fields": ["hosts"],
+  "all_relevant_fields": [
+    {"name": "hosts", "required": true, "default": null},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null},
+    {"name": "connection_scheme", "required": false, "default": "mongodb"},
+    {"name": "database", "required": false, "default": null}
+  ],
+  "classification": "custom",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "MongoDB's default port (27017) is universal and the wire protocol is detectable. Strictly per spec, only `hosts` is required, so an unauthenticated localhost dev instance could be discovered generically. In practice, every production MongoDB enables authentication and most also require a dedicated `datadog` user with `clusterMonitor` role, plus a `connection_scheme` decision (`mongodb` vs. `mongodb+srv`) for replica sets. Classification is custom because of the auth-mode branching, but in real deployments it falls through to credentials-required.",
+  "references": [
+    {"kind": "spec", "path": "mongo/assets/configuration/spec.yaml"},
+    {"kind": "upstream", "url": "https://www.mongodb.com/docs/manual/tutorial/configure-x509-client-authentication/"}
+  ],
+  "confidence": "medium",
+  "needs_human_review": false,
+  "notes": ""
+}

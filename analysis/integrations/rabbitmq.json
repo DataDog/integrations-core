@@ -1,0 +1,25 @@
+{
+  "name": "rabbitmq",
+  "display_name": "RabbitMQ",
+  "spec_path": "rabbitmq/assets/configuration/spec.yaml",
+  "required_fields": [],
+  "all_relevant_fields": [
+    {"name": "prometheus_plugin.url", "required": true, "default": "http://localhost:15692"},
+    {"name": "rabbitmq_api_url", "required": false, "default": "http://localhost:15672/api/"},
+    {"name": "rabbitmq_user", "required": false, "default": "guest"},
+    {"name": "rabbitmq_pass", "required": false, "default": "guest"}
+  ],
+  "classification": "custom",
+  "auto_config_method": "http-path-probe",
+  "has_existing_auto_conf": true,
+  "auto_conf_path": "rabbitmq/datadog_checks/rabbitmq/data/auto_conf.yaml",
+  "explanation": "RabbitMQ supports two collection modes: the Prometheus plugin (port 15692, `/metrics`, no auth — easy generic case) and the Management plugin (port 15672, `/api/`, basic auth — typically `guest:guest` only on localhost; remote access needs a dedicated monitoring user). A discovery layer must probe the Prometheus port first and fall back to the Management API. Classification is custom because of the multi-mode logic; the Prometheus path alone would be generic.",
+  "references": [
+    {"kind": "spec", "path": "rabbitmq/assets/configuration/spec.yaml"},
+    {"kind": "auto_conf", "path": "rabbitmq/datadog_checks/rabbitmq/data/auto_conf.yaml"},
+    {"kind": "upstream", "url": "https://www.rabbitmq.com/docs/prometheus"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": ""
+}

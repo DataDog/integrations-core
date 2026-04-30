@@ -1,0 +1,29 @@
+{
+  "name": "snmp",
+  "display_name": "SNMP",
+  "spec_path": "snmp/assets/configuration/spec.yaml",
+  "required_fields": ["ip_address"],
+  "all_relevant_fields": [
+    {"name": "ip_address", "required": true, "default": null},
+    {"name": "network_address", "required": false, "default": null},
+    {"name": "port", "required": false, "default": 161},
+    {"name": "community_string", "required": false, "default": null},
+    {"name": "snmp_version", "required": false, "default": 2},
+    {"name": "user", "required": false, "default": null},
+    {"name": "authKey", "required": false, "default": null},
+    {"name": "privKey", "required": false, "default": null},
+    {"name": "profiles", "required": false, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "SNMP needs at minimum the device IP and a credential: a community string (v1/v2c) or a v3 user with auth/priv keys. Community strings could occasionally be guessed (`public`/`private`) but production devices have unique strings, and v3 is the modern default. The integration has its own network-discovery feature (`network_address` + profile auto-detection) but it still needs a credential to authenticate. Classification is impossible for credential discovery; SNMP-internal device discovery is orthogonal.",
+  "references": [
+    {"kind": "spec", "path": "snmp/assets/configuration/spec.yaml"},
+    {"kind": "upstream", "url": "https://datatracker.ietf.org/doc/html/rfc3411"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": "SNMP has its own per-device autodiscovery (network_address + profiles) — that's not the same as auto-config feasibility for the check. Network sweeps still require a credential."
+}

@@ -1,0 +1,25 @@
+{
+  "name": "sqlserver",
+  "display_name": "SQL Server",
+  "spec_path": "sqlserver/assets/configuration/spec.yaml",
+  "required_fields": ["host"],
+  "all_relevant_fields": [
+    {"name": "host", "required": true, "default": null},
+    {"name": "username", "required": false, "default": null},
+    {"name": "password", "required": false, "default": null},
+    {"name": "database", "required": false, "default": "master"},
+    {"name": "server_version", "required": false, "default": null}
+  ],
+  "classification": "impossible",
+  "auto_config_method": "credentials-required",
+  "has_existing_auto_conf": false,
+  "auto_conf_path": null,
+  "explanation": "SQL Server requires either SQL authentication (username + password for a dedicated `datadog` user with `VIEW SERVER STATE` and other grants) or Windows authentication (the Agent's process identity must have those grants on the SQL Server instance). Either form is provisioned out-of-band; the credentials cannot be derived from the wire. Default port 1433 is universal but irrelevant given the auth blocker.",
+  "references": [
+    {"kind": "spec", "path": "sqlserver/assets/configuration/spec.yaml"},
+    {"kind": "upstream", "url": "https://learn.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/system-dynamic-management-views"}
+  ],
+  "confidence": "high",
+  "needs_human_review": false,
+  "notes": ""
+}
