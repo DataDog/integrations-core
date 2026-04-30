@@ -11,8 +11,8 @@ import pytest
 from ddev.ai.agent.anthropic_client import AnthropicAgent
 from ddev.ai.agent.exceptions import AgentAPIError, AgentConnectionError, AgentError, AgentRateLimitError
 from ddev.ai.agent.types import StopReason, ToolResultMessage
-from ddev.ai.tools.core.registry import ToolRegistry
 from ddev.ai.tools.core.types import ToolResult
+from ddev.ai.tools.registry import ToolRegistry
 
 # ---------------------------------------------------------------------------
 # Helpers
