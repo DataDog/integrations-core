@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from unittest.mock import MagicMock, patch
 
+import google.auth.exceptions
 import pytest
 
 from datadog_checks.base import ConfigurationError
@@ -123,6 +124,24 @@ class TestGCPIAMTokenProviderTokenLifecycle:
             mock_google_auth.refresh.assert_called_once_with(mock_request)
             assert token == "test-iam-token-123"
             assert expires_at == pytest.approx(1000.0 + TOKEN_TTL_SECONDS)
+
+    def test_fetch_token_wraps_refresh_error(self, mock_google_auth):
+        from datadog_checks.redisdb.gcp import GCPIAMTokenProvider
+
+        mock_google_auth.refresh.side_effect = google.auth.exceptions.RefreshError("revoked")
+        with patch("datadog_checks.redisdb.gcp.google.auth.transport.requests.Request"):
+            provider = GCPIAMTokenProvider()
+            with pytest.raises(ConfigurationError, match="failed to refresh credentials"):
+                provider._fetch_token()
+
+    def test_fetch_token_wraps_transport_error(self, mock_google_auth):
+        from datadog_checks.redisdb.gcp import GCPIAMTokenProvider
+
+        mock_google_auth.refresh.side_effect = google.auth.exceptions.TransportError("timeout")
+        with patch("datadog_checks.redisdb.gcp.google.auth.transport.requests.Request"):
+            provider = GCPIAMTokenProvider()
+            with pytest.raises(ConfigurationError, match="token refresh network error"):
+                provider._fetch_token()
 
     def test_is_token_expired_true_before_first_fetch(self, mock_google_auth):
         from datadog_checks.redisdb.gcp import GCPIAMTokenProvider

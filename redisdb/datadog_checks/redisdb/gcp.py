@@ -58,7 +58,14 @@ class GCPIAMTokenProvider:
 
     def _fetch_token(self) -> tuple[str, float]:
         request = google.auth.transport.requests.Request()
-        self._credentials.refresh(request)
+        try:
+            self._credentials.refresh(request)
+        except google.auth.exceptions.RefreshError as e:
+            raise ConfigurationError(f"GCP IAM auth: failed to refresh credentials: {e}") from e
+        except google.auth.exceptions.TransportError as e:
+            raise ConfigurationError(
+                f"GCP IAM auth: token refresh network error (is the metadata server reachable?): {e}"
+            ) from e
         return self._credentials.token, time.time() + TOKEN_TTL_SECONDS
 
     @property
