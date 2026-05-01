@@ -1,0 +1,1 @@
+`ddev dep promote` now prints a link to the dependency-wheel-promotion workflow's recent runs page after dispatching, so users can jump straight to their queued run.
