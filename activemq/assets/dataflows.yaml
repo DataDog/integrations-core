@@ -1,5 +1,9 @@
 provides:
-  - id: activemq-broker-metrics
+  - id: activemq-metrics
     always_on: true
+    data_type: metrics
+    direction: inbound
   - id: activemq-logs
-    always_on: true
+    always_on: false
+    data_type: logs
+    direction: inbound
