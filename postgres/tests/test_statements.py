@@ -426,6 +426,7 @@ def dbm_instance(pg_instance):
     pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2}
     pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 0.2}
     pg_instance['collect_settings'] = {'enabled': False}
+    pg_instance['collect_column_stats'] = {'enabled': False}
     # Set collection_interval close to 0. This is needed if the test runs the check multiple times.
     # This prevents DBMAsync from skipping job executions, as it is designed
     # to not execute jobs more frequently than their collection period.

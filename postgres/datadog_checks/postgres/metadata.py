@@ -10,6 +10,7 @@ import time
 import psycopg
 from psycopg.rows import dict_row
 
+from .column_stats import PostgresColumnStatsCollector
 from .schemas import PostgresSchemaCollector
 
 try:
@@ -80,6 +81,8 @@ class PostgresMetadata(DBMAsyncJob):
     Collects database metadata. Supports:
         1. cloud metadata collection for resource creations
         2. collection of pg_settings
+        3. schema collection
+        4. column statistics collection
     """
 
     def __init__(self, check: PostgreSql, config: InstanceConfig):
@@ -88,19 +91,23 @@ class PostgresMetadata(DBMAsyncJob):
         # Extensions currently doesn't have a separate collection interval option
         self.pg_extensions_collection_interval = self.pg_settings_collection_interval
         self.schemas_collection_interval = config.collect_schemas.collection_interval
+        self.column_stats_collection_interval = config.collect_column_stats.collection_interval
 
         # by default, send resources every 10 minutes
         self.collection_interval = min(
             self.pg_extensions_collection_interval,
             self.pg_settings_collection_interval,
             self.schemas_collection_interval,
+            self.column_stats_collection_interval,
         )
 
         super(PostgresMetadata, self).__init__(
             check,
             rate_limit=1 / float(self.collection_interval),
             run_sync=config.collect_settings.run_sync,
-            enabled=config.collect_settings.enabled or config.collect_schemas.enabled,
+            enabled=config.collect_settings.enabled
+            or config.collect_schemas.enabled
+            or config.collect_column_stats.enabled,
             dbms="postgres",
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg.errors.DatabaseError,),
@@ -113,10 +120,15 @@ class PostgresMetadata(DBMAsyncJob):
         self._collect_extensions_enabled = self._collect_pg_settings_enabled
         self._collect_schemas_enabled = config.collect_schemas.enabled
         self._schema_collector = PostgresSchemaCollector(check) if config.collect_schemas.enabled else None
+        self._collect_column_stats_enabled = config.collect_column_stats.enabled and config.dbm
+        self._column_stats_collector = (
+            PostgresColumnStatsCollector(check, self._cancel_event) if config.collect_column_stats.enabled else None
+        )
         self._compiled_patterns_cache = {}
         self._time_since_last_extension_query = 0
         self._time_since_last_settings_query = 0
         self._last_schemas_query_time = 0
+        self._last_column_stats_query_time = 0
         self.column_buffer_size = 100_000
         self._conn_ttl_ms = self._config.idle_connection_timeout
         self._tags_no_db = None
@@ -212,6 +224,12 @@ class PostgresMetadata(DBMAsyncJob):
         ):
             self._collect_postgres_schemas()
 
+        if (
+            self._collect_column_stats_enabled
+            and time.time() - self._last_column_stats_query_time > self.column_stats_collection_interval
+        ):
+            self._collect_column_stats()
+
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_schemas(self):
         started = self._schema_collector.collect_schemas()
@@ -264,3 +282,8 @@ class PostgresMetadata(DBMAsyncJob):
                 self._log.debug("Loaded %s rows from pg_settings", rows)
                 self._log.debug("Loaded %s rows from pg_settings", len(rows))
                 return [dict(row) for row in rows]
+
+    @tracked_method(agent_check_getter=agent_check_getter)
+    def _collect_column_stats(self):
+        self._column_stats_collector.collect_column_stats(self._tags_no_db)
+        self._last_column_stats_query_time = time.time()
