@@ -52,8 +52,7 @@ def promote(app: Application, pr_url: str):
         )
 
     runs_url = (
-        f'https://github.com/{app.github.repo_id}/actions/workflows/{PROMOTE_WORKFLOW}'
-        f'?query=event%3Aworkflow_dispatch'
+        f'https://github.com/{app.github.repo_id}/actions/workflows/{PROMOTE_WORKFLOW}?query=event%3Aworkflow_dispatch'
     )
     app.display_success(f'Promote workflow dispatched for PR #{pr_number}.')
     app.display_info(f'Recent runs: {runs_url}')
