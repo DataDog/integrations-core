@@ -4,6 +4,8 @@ from unittest import mock
 from zipfile import ZipFile
 
 import pytest
+
+import inputs_hash
 import upload
 
 
@@ -466,7 +468,7 @@ def test_lockfile_generation(tmp_path, setup_targets_dir, frozen_timestamp):
     with mock.patch.object(upload, "RESOLUTION_DIR", fake_deps_dir), \
          mock.patch.object(upload, "LOCK_FILE_DIR", fake_resolved_dir):
 
-        upload.generate_lockfiles(targets_dir, lockfile)
+        upload.generate_lockfiles(targets_dir, lockfile, 'dummy_hash')
         lock_files = list(fake_resolved_dir.glob("*.txt"))
         assert lock_files, "No lock files generated"
         lockfile_map = {lock_file.name: lock_file.read_text().strip() for lock_file in lock_files}
@@ -496,7 +498,7 @@ def test_generate_lockfiles_skips_targets_with_no_wheels(tmp_path):
 
     with mock.patch.object(upload, "RESOLUTION_DIR", fake_deps_dir), \
          mock.patch.object(upload, "LOCK_FILE_DIR", fake_resolved_dir):
-        upload.generate_lockfiles(str(tmp_path / "targets"), lockfile)
+        upload.generate_lockfiles(str(tmp_path / "targets"), lockfile, 'dummy_hash')
 
     lock_files = {f.name for f in fake_resolved_dir.glob("*.txt")}
     assert lock_files == {f"linux-x86_64_{upload.CURRENT_PYTHON_VERSION}.txt"}
@@ -516,7 +518,48 @@ def test_generate_lockfiles_accepts_string_path(tmp_path):
     with mock.patch.object(upload, "RESOLUTION_DIR", fake_deps_dir), \
          mock.patch.object(upload, "LOCK_FILE_DIR", fake_resolved_dir):
         # Should not raise TypeError: unsupported operand type(s) for /: 'str' and 'str'
-        upload.generate_lockfiles(str(tmp_path / "targets"), lockfile)
+        upload.generate_lockfiles(str(tmp_path / "targets"), lockfile, 'dummy_hash')
+
+
+def test_generate_lockfiles_writes_resolution_pin_and_target_inputs(tmp_path):
+    """generate_lockfiles writes the gate-passed resolution_hash plus per-target inputs_sha256 into builder_inputs.toml.
+
+    Pins the four-hop contract (gate output → workflow env → CLI flag →
+    write call) so a refactor that drops resolution_hash anywhere along the
+    way fails here rather than producing a stale or empty [resolution]
+    section in the bot commit.
+    """
+    import tomllib
+
+    lockfile = {
+        'linux-x86_64': ['dep @ https://example.com/dep.whl#sha256=abc', ''],
+        'macos-x86_64': ['dep @ https://example.com/dep-macos.whl#sha256=def', ''],
+    }
+
+    fake_deps_dir = tmp_path / '.deps'
+    fake_resolved_dir = fake_deps_dir / 'resolved'
+    fake_deps_dir.mkdir()
+    fake_resolved_dir.mkdir()
+    targets_dir = tmp_path / 'targets'
+    (targets_dir / 'linux-x86_64').mkdir(parents=True)
+    (targets_dir / 'linux-x86_64' / 'inputs_sha256').write_text('linux-hash', encoding='utf-8')
+    (targets_dir / 'linux-x86_64' / 'image_digest').write_text('sha256:linux-digest', encoding='utf-8')
+    (targets_dir / 'macos-x86_64').mkdir(parents=True)
+    (targets_dir / 'macos-x86_64' / 'inputs_sha256').write_text('macos-hash', encoding='utf-8')
+
+    with mock.patch.object(upload, 'RESOLUTION_DIR', fake_deps_dir), \
+         mock.patch.object(upload, 'LOCK_FILE_DIR', fake_resolved_dir):
+        upload.generate_lockfiles(targets_dir, lockfile, 'gate-passed-hash')
+
+    pin_path = fake_deps_dir / 'builder_inputs.toml'
+    with pin_path.open('rb') as f:
+        pin = tomllib.load(f)
+
+    assert pin[inputs_hash.SECTION_RESOLUTION][inputs_hash.HASH_KEY] == 'gate-passed-hash'
+    assert pin[inputs_hash.SECTION_IMAGES] == {
+        'linux-x86_64': 'linux-hash',
+        'macos-x86_64': 'macos-hash',
+    }
 
 
 def test_collect_and_validate_wheels(tmp_path):

@@ -1,16 +1,21 @@
-# Content hashes of the inputs that determine each builder image.
+# Content hashes of the inputs that determine the resolution pipeline and each
+# builder image.
 #
-# The `Resolve Dependencies and Build Wheels` workflow compares these
-# hashes against hashes computed from the working tree (via
-# .builders/inputs_hash.py) to decide whether to rebuild a builder image
-# from scratch or pull the existing one by digest from image_digests.json.
+# The `Resolve Dependencies and Build Wheels` workflow uses these hashes to
+# gate the full pipeline (resolution.hash) and to decide whether to rebuild a
+# builder image from scratch or pull the existing one by digest (images.*).
+# The `verify-deps-pin` workflow checks resolution.hash on merge-queue refs.
 #
-# This file is rewritten by .builders/upload.py whenever dependency
-# resolution publishes new artifacts and should not be edited by hand.
-# The set of files covered by each hash is defined by COMMON_INPUTS in
-# .builders/inputs_hash.py plus everything under .builders/images/<target>/.
+# This file is rewritten by .builders/upload.py whenever dependency resolution
+# publishes new artifacts and should not be edited by hand.
+# Hash inputs are defined in .builders/inputs_hash.py (SHARED_INPUTS,
+# RESOLUTION_INPUTS).
+[resolution]
+hash = "3a0350917a9a4534e7b427439cc6cc9eee31fe8c4b114c7938cb3d0fb5d38c67"
 
-[inputs]
-linux-aarch64 = "e3b9a63fa95c9d58a54926fd42d1a20ae738a6c05ff8338d995b8cd9c5497ef2"
-linux-x86_64 = "58a8e70bf5f870e210d586662843cdc9948b5d90638e3487f1e07a2b10f27f19"
-windows-x86_64 = "130572854fdcd9ca5d021af13087afa7384b1e659959087db21c77ac144ad313"
+[images]
+linux-aarch64 = "5239191575da3521adfbb9992114201c71c65ff3056de4ae2e475390d218d194"
+linux-x86_64 = "83d13d3171972f56b1336d325eecae73bf5e2329a24142f25e68ae50c542ce6a"
+macos-aarch64 = "c0d0865f31792ef8115f81b8722414ecd5b2c717882074d3c27b67093b6f67a4"
+macos-x86_64 = "f079703480309dd348f20d07bcabc9278bd78619cde7a4146cebbac5292bfc60"
+windows-x86_64 = "d7cc3720c0ac20a28c20d0fd606d6d0a84023e97682c39994ac99c1cdef9e817"
