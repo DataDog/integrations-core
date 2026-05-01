@@ -67,6 +67,7 @@ from .queries import (
     QUERY_DEADLOCKS,
     QUERY_ERRORS_RAISED,
     QUERY_USER_CONNECTIONS,
+    QUERY_WAIT_EVENT_SUMMARY,
     SQL_95TH_PERCENTILE,
     SQL_AVG_QUERY_RUN_TIME,
     SQL_GROUP_REPLICATION_MEMBER,
@@ -468,8 +469,10 @@ class MySql(DatabaseCheck):
 
         if self.global_variables.performance_schema_enabled:
             queries.extend([QUERY_USER_CONNECTIONS])
-            if not self.is_mariadb and self.version.version_compatible((8, 0, 0)) and self._config.dbm_enabled:
-                queries.extend([QUERY_ERRORS_RAISED])
+            if self._config.dbm_enabled:
+                queries.extend([QUERY_WAIT_EVENT_SUMMARY])
+                if not self.is_mariadb and self.version.version_compatible((8, 0, 0)):
+                    queries.extend([QUERY_ERRORS_RAISED])
         if self._index_metrics.include_index_metrics:
             queries.extend(self._index_metrics.queries)
         self._runtime_queries_cached = self._new_query_executor(queries)

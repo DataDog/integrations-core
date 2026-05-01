@@ -262,6 +262,29 @@ QUERY_ERRORS_RAISED = {
     ],
 }
 
+QUERY_WAIT_EVENT_SUMMARY = {
+    'name': 'performance_schema.events_waits_summary_global_by_event_name',
+    'query': """
+        SELECT
+            event_name,
+            count_star,
+            sum_timer_wait / 1000,
+            avg_timer_wait / 1000,
+            max_timer_wait / 1000
+        FROM performance_schema.events_waits_summary_global_by_event_name
+        WHERE count_star > 0
+        ORDER BY sum_timer_wait DESC
+        LIMIT 200
+    """.strip(),
+    'columns': [
+        {'name': 'wait_event', 'type': 'tag'},
+        {'name': 'mysql.performance.wait_event.count', 'type': 'monotonic_count'},
+        {'name': 'mysql.performance.wait_event.time', 'type': 'monotonic_count'},
+        {'name': 'mysql.performance.wait_event.avg_time', 'type': 'gauge'},
+        {'name': 'mysql.performance.wait_event.max_time', 'type': 'gauge'},
+    ],
+}
+
 
 def show_replica_status_query(version, is_mariadb, channel=''):
     if version.version_compatible((10, 5, 1)) or not is_mariadb and version.version_compatible((8, 0, 22)):

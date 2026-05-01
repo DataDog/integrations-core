@@ -215,6 +215,10 @@ mysql.performance.threads_created,count,,thread,,"The number of threads created 
 mysql.performance.threads_running,gauge,,thread,,The number of threads that are not sleeping.,0,mysql,threads running,
 mysql.performance.user_connections,gauge,,connection,,"The number of user connections. Tags: `processlist_db`, `processlist_host`, `processlist_state`, `processlist_user`",0,mysql,user conns,
 mysql.performance.user_time,gauge,,percent,,Percentage of CPU time spent in user space by MySQL.,-1,mysql,cpu user,
+mysql.performance.wait_event.avg_time,gauge,,nanosecond,,Average wait time per occurrence of a wait event (DBM only). Tagged by `wait_event`.,0,mysql,wait event avg time,
+mysql.performance.wait_event.count,count,,event,,Total number of occurrences of a wait event (DBM only). Tagged by `wait_event`.,0,mysql,wait event count,
+mysql.performance.wait_event.max_time,gauge,,nanosecond,,Maximum single-occurrence wait time for a wait event (DBM only). Tagged by `wait_event`.,0,mysql,wait event max time,
+mysql.performance.wait_event.time,count,,nanosecond,,Total accumulated wait time for a wait event (DBM only). Tagged by `wait_event`.,0,mysql,wait event time,
 mysql.queries.count,count,,query,,The total count of executed queries per normalized query and schema. (DBM only),0,mysql,mysql queries count,cpu
 mysql.queries.created_tmp_disk_tables,count,,table,,The total count of temporary tables that exceeded tmp_table_size and were written to disk per normalized query and schema. (DBM only),0,mysql,mysql queries created tmp disk tables,
 mysql.queries.created_tmp_tables,count,,table,,The total count of in-memory temporary tables created during execution per normalized query and schema. (DBM only),0,mysql,mysql queries created tmp tables,

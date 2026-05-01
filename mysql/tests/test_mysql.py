@@ -1065,3 +1065,44 @@ def test_errors_raised_metric_with_dbm(aggregator, dd_run_check, instance_basic,
     else:
         # In all other cases the metric should not be present
         aggregator.assert_metric('mysql.performance.errors_raised', count=0)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    'dbm_enabled',
+    [
+        pytest.param(True, id="dbm_enabled"),
+        pytest.param(False, id="dbm_disabled"),
+    ],
+)
+def test_wait_event_summary_metrics_with_dbm(aggregator, dd_run_check, instance_basic, dbm_enabled):
+    instance_basic['dbm'] = dbm_enabled
+    if dbm_enabled:
+        instance_basic['collect_settings'] = {'enabled': False}
+        instance_basic['query_activity'] = {'enabled': False}
+        instance_basic['query_samples'] = {'enabled': False}
+        instance_basic['query_metrics'] = {'enabled': False}
+
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_basic])
+    dd_run_check(mysql_check)
+
+    aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, count=1)
+
+    wait_event_metrics = [
+        'mysql.performance.wait_event.count',
+        'mysql.performance.wait_event.time',
+        'mysql.performance.wait_event.avg_time',
+        'mysql.performance.wait_event.max_time',
+    ]
+    if dbm_enabled:
+        for metric in wait_event_metrics:
+            aggregator.assert_metric(metric, at_least=1)
+        # Verify wait_event tag is present on submitted metrics
+        for metric in wait_event_metrics:
+            for m in aggregator.metrics(metric):
+                wait_event_tags = [t for t in m.tags if t.startswith('wait_event:')]
+                assert len(wait_event_tags) == 1, "Expected exactly one wait_event tag on {}".format(metric)
+    else:
+        for metric in wait_event_metrics:
+            aggregator.assert_metric(metric, count=0)
