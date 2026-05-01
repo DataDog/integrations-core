@@ -37,6 +37,18 @@ class TargetNotFoundError(ChecksDownloaderException):
     """An exception raised when a target is not found."""
 
 
+class DigestMismatch(ChecksDownloaderException):
+    """Raised when the downloaded wheel's sha256 or length does not match the pointer."""
+
+    def __init__(self, project, expected, actual):
+        self.project = project
+        self.expected = expected
+        self.actual = actual
+
+    def __str__(self):
+        return f'{self.project}: expected {self.expected}, got {self.actual}'
+
+
 class IncorrectRootLayoutType(ChecksDownloaderException):
     def __init__(self, found, expected):
         self.found = found
