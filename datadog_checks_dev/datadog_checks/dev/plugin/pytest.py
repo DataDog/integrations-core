@@ -342,6 +342,32 @@ def mock_http(mocker):
 
 
 @pytest.fixture
+def mock_openmetrics_http(mock_http, mocker):
+    """OpenMetrics HTTP mock with dual interception:
+
+    - v1 checks (OpenMetricsBaseCheck): patches OpenMetricsScraperMixin.get_http_handler to return mock_http.
+    - v2 checks (OpenMetricsBaseCheckV2): inherited via mock_http's AgentCheck.http PropertyMock; the
+      get_http_handler patch is unused on this path because v2 calls self.http.get(...) directly.
+    """
+    mocker.patch(
+        'datadog_checks.base.checks.openmetrics.mixins.OpenMetricsScraperMixin.get_http_handler',
+        return_value=mock_http,
+    )
+    return mock_http
+
+
+@pytest.fixture
+def mock_prometheus_http(mock_http, mocker):
+    """mock_http with PrometheusScraperMixin.get_http_handler patched to return it."""
+    mock_http.ignore_tls_warning = False
+    mocker.patch(
+        'datadog_checks.base.checks.prometheus.mixins.PrometheusScraperMixin.get_http_handler',
+        return_value=mock_http,
+    )
+    return mock_http
+
+
+@pytest.fixture
 def mock_http_response_per_endpoint(mocker, mock_response):
     @overload
     def _mock(

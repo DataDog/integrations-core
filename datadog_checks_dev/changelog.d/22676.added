@@ -1,1 +1,1 @@
-Add mock_http fixture for library-agnostic HTTP client mocking in integration tests.
+Add mock_http, mock_openmetrics_http, and mock_prometheus_http fixtures for library-agnostic HTTP client mocking in integration tests.
