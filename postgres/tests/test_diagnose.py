@@ -521,35 +521,48 @@ def test_query_samples_probes_each_monitored_database(integration_check, pg_inst
     ), missing_explain
 
 
-# -- Autodiscovery-aware query-samples enumeration ---------------------------
+# -- Query-samples database enumeration --------------------------------------
 
 
-def test_query_samples_uses_autodiscovery_when_enabled(integration_check, pg_instance):
-    """When database_autodiscovery is enabled, the per-DB query-samples probes run against
-    the autodiscovery set, not every non-template DB in pg_database."""
+def test_query_samples_with_autodiscovery_probes_query_sampled_databases(integration_check, pg_instance):
+    """Query-samples probes follow pg_stat_activity filtering, not autodiscovery include/exclude."""
     instance = dict(
         pg_instance,
         dbm=True,
-        database_autodiscovery={'enabled': True, 'include': ['app_.*'], 'max_databases': 2},
+        database_autodiscovery={'enabled': True, 'include': ['app_a$'], 'max_databases': 1},
     )
     check = integration_check(instance)
+    healthy_dbm = _happy_dbm_responses()
+    broken_dbm = [
+        ("nspname = 'datadog'", [(1,)]),
+        ("has_schema_privilege", [(False,)]),
+    ]
     connections = {
-        pg_instance['dbname']: FakeConn(_happy_server_responses() + _happy_dbm_responses()),
-        'app_a': FakeConn(_happy_dbm_responses()),
-        'app_b': FakeConn(_happy_dbm_responses()),
+        pg_instance['dbname']: FakeConn(
+            _happy_server_responses() + [("pg_catalog.pg_database", [('app_a',), ('app_b',)])] + healthy_dbm
+        ),
+        'app_a': FakeConn(healthy_dbm),
+        'app_b': FakeConn(broken_dbm),
     }
-    with mock.patch.object(check.autodiscovery, 'get_items', return_value=['app_a', 'app_b']):
+    with mock.patch.object(check.autodiscovery, 'get_items', return_value=['app_a']) as get_items:
         with mock.patch(
             'datadog_checks.postgres.diagnose.TokenAwareConnection.connect',
             side_effect=lambda **kwargs: connections[kwargs['dbname']],
         ) as connect:
-            _get_diagnoses(check)
+            diagnoses = _get_diagnoses(check)
+
+    assert not get_items.called
     opened_dbnames = {call.kwargs['dbname'] for call in connect.call_args_list}
     assert opened_dbnames == {pg_instance['dbname'], 'app_a', 'app_b'}
 
+    rows = _by_name(diagnoses, DatabaseConfigurationError.missing_schema_usage_grant.value)
+    fail_rows = [d for d in rows if d['result'] == Diagnosis.DIAGNOSIS_FAIL]
+    assert len(fail_rows) == 2
+    assert all('app_b' in d['diagnosis'] for d in fail_rows), fail_rows
 
-def test_query_samples_autodiscovery_empty_falls_back_to_pg_database(integration_check, pg_instance):
-    """autodiscovery enabled but returns empty -> fall through to pg_database enumeration."""
+
+def test_query_samples_with_autodiscovery_uses_pg_database_without_lookup(integration_check, pg_instance):
+    """DBM query-sample setup does not call autodiscovery to choose probe databases."""
     instance = dict(
         pg_instance,
         dbm=True,
@@ -559,24 +572,22 @@ def test_query_samples_autodiscovery_empty_falls_back_to_pg_database(integration
     responses = (
         _happy_server_responses() + [("pg_catalog.pg_database", [(pg_instance['dbname'],)])] + _happy_dbm_responses()
     )
-    with mock.patch.object(check.autodiscovery, 'get_items', return_value=[]):
+    with mock.patch.object(check.autodiscovery, 'get_items') as get_items:
         with _patch_connection(check, FakeConn(responses)) as connect:
             _get_diagnoses(check)
+    assert not get_items.called
     opened_dbnames = {call.kwargs['dbname'] for call in connect.call_args_list}
     assert opened_dbnames == {pg_instance['dbname']}
 
 
-def test_query_samples_autodiscovery_raises_falls_back_gracefully(integration_check, pg_instance):
+def test_autodiscovery_probe_databases_raises_falls_back_gracefully(integration_check, pg_instance):
     """autodiscovery enabled, get_items() raises -> fall through to pg_database without crashing."""
     instance = dict(
         pg_instance,
-        dbm=True,
         database_autodiscovery={'enabled': True, 'include': ['.*']},
     )
     check = integration_check(instance)
-    responses = (
-        _happy_server_responses() + [("pg_catalog.pg_database", [(pg_instance['dbname'],)])] + _happy_dbm_responses()
-    )
+    responses = _happy_server_responses() + [("pg_catalog.pg_database", [(pg_instance['dbname'],)])]
     with mock.patch.object(check.autodiscovery, 'get_items', side_effect=psycopg.OperationalError('boom')):
         with _patch_connection(check, FakeConn(responses)):
             diagnoses = _get_diagnoses(check)
@@ -724,17 +735,20 @@ def test_schema_usage_grant_per_autodiscovered_database(integration_check, pg_in
         (_explain_call(), _successful_explain()),
     ]
     connections = {
-        pg_instance['dbname']: FakeConn(_happy_server_responses() + healthy_dbm),
+        pg_instance['dbname']: FakeConn(
+            _happy_server_responses() + [("pg_catalog.pg_database", [('app_a',), ('app_b',)])] + healthy_dbm
+        ),
         'app_a': FakeConn(healthy_dbm),
         'app_b': FakeConn(broken_dbm),
     }
-    with mock.patch.object(check.autodiscovery, 'get_items', return_value=['app_a', 'app_b']):
+    with mock.patch.object(check.autodiscovery, 'get_items') as get_items:
         with mock.patch(
             'datadog_checks.postgres.diagnose.TokenAwareConnection.connect',
             side_effect=lambda **kwargs: connections[kwargs['dbname']],
         ):
             diagnoses = _get_diagnoses(check)
 
+    assert not get_items.called
     rows = _by_name(diagnoses, DatabaseConfigurationError.missing_schema_usage_grant.value)
     fail_rows = [d for d in rows if d['result'] == Diagnosis.DIAGNOSIS_FAIL]
     success_rows = [d for d in rows if d['result'] == Diagnosis.DIAGNOSIS_SUCCESS]

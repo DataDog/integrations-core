@@ -700,9 +700,15 @@ class PostgresDiagnose:
         if self._check._config.dbstrict:
             return [self._check._config.dbname]
 
-        # When autodiscovery is enabled, reuse the same enumeration the running check uses
-        # so the probe set respects include/exclude/max_databases. Fall through to the
-        # pg_database path on exception or empty result to keep diagnose useful.
+        # Query samples read pg_stat_activity from the main DB and later explain each sampled
+        # row by its datname. That runtime path only applies dbstrict/ignore_databases, not
+        # autodiscovery include/exclude, so enumerate pg_database for DBM setup probes.
+        if not (self._check._config.dbm and self._check._config.query_samples.enabled):
+            return self._get_autodiscovered_probe_databases() or self._get_pg_database_probe_databases(conn)
+
+        return self._get_pg_database_probe_databases(conn)
+
+    def _get_autodiscovered_probe_databases(self):
         if self._check._config.database_autodiscovery.enabled and self._check.autodiscovery is not None:
             try:
                 dbs = self._check.autodiscovery.get_items()
@@ -710,10 +716,11 @@ class PostgresDiagnose:
                 self._check.log.debug(
                     "diagnose: autodiscovery.get_items() failed; falling back to pg_database enumeration: %s", e
                 )
-                dbs = None
-            if dbs:
-                return dbs
+                return None
+            return dbs or None
+        return None
 
+    def _get_pg_database_probe_databases(self, conn):
         sql = "SELECT datname FROM pg_catalog.pg_database WHERE datistemplate = false AND datallowconn"
         params = ()
         if self._check._config.ignore_databases:
