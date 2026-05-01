@@ -11,6 +11,8 @@ import pytest
 
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.const import (
+    ENGINE_EDITION_AZURE_MANAGED_INSTANCE,
+    ENGINE_EDITION_SQL_DATABASE,
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_MAJOR_VERSION,
     STATIC_INFO_SERVERNAME,
@@ -306,6 +308,36 @@ def test_sqlserver_availability_replicas_query_uses_parameterized_queries(init_c
     assert "resource_group_id = ?" in q['query']
     assert "database_name = ?" in q['query']
     assert q['params'] == (ag_with_quotes, db_with_quotes)
+
+
+@pytest.mark.parametrize(
+    'engine_edition, major_version, expected',
+    [
+        (ENGINE_EDITION_AZURE_MANAGED_INSTANCE, 12, True),
+        (ENGINE_EDITION_SQL_DATABASE, 12, False),
+        (SQLSERVER_ENGINE_EDITION, 12, False),
+        (SQLSERVER_ENGINE_EDITION, 13, True),
+    ],
+)
+def test_sqlserver_ao_metrics_secondary_lag_support(
+    init_config, instance_docker_metrics, engine_edition, major_version, expected
+):
+    instance_docker_metrics['database_metrics'] = {
+        'ao_metrics': {'enabled': True},
+    }
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    ao_metrics = SqlserverAoMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info={
+            STATIC_INFO_ENGINE_EDITION: engine_edition,
+            STATIC_INFO_MAJOR_VERSION: major_version,
+        },
+        execute_query_handler=mock.MagicMock(),
+    )
+
+    assert ("DRS.secondary_lag_seconds" in ao_metrics.queries[0]['query']) is expected
+    assert ("sqlserver.ao.secondary_lag_seconds" in ao_metrics.metric_names()[0]) is expected
 
 
 @pytest.mark.integration

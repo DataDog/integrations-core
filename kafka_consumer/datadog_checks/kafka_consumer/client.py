@@ -153,12 +153,20 @@ class KafkaClient:
             TopicPartition(topic=topic, partition=partition, offset=offset)
             for topic, partition in partitions
         ]
-        return [
-            (tp.topic, tp.partition, tp.offset)
-            for tp in self._consumer.offsets_for_times(
-                partitions=topicpartitions_for_querying, timeout=self.config._request_timeout
-            )
-        ]
+        results = []
+        for tp in self._consumer.offsets_for_times(
+            partitions=topicpartitions_for_querying, timeout=self.config._request_timeout
+        ):
+            if tp.error:
+                self.log.debug(
+                    "Failed to get offset for topic %s partition %s: %s",
+                    tp.topic,
+                    tp.partition,
+                    tp.error,
+                )
+                continue
+            results.append((tp.topic, tp.partition, tp.offset))
+        return results
 
     def _list_topics(self):
         if self._cluster_metadata:

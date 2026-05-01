@@ -818,6 +818,8 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
         thresholds: list[dict] | None = None,
     ) -> None:
         """Emit a per-cycle row-level payload consumed by dbm-events-processor."""
+        if not (parts or merges or mutations or replication_queue or detached_parts or thresholds):
+            return
         now_ms = int(time.time() * 1000)
         payload = {
             "host": self._check.reported_hostname,
