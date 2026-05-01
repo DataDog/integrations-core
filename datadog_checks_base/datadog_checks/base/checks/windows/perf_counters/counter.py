@@ -55,6 +55,16 @@ class PerfObject:
             # See: https://learn.microsoft.com/en-us/windows/win32/perfctrs/about-performance-counters
             self.include_pattern = re.compile('|'.join(include_patterns), re.IGNORECASE)
 
+        # Opt in to collect the `_Total` aggregate instance, which is excluded by default because
+        # it is usually derivable from the per-instance values. Some perf objects (e.g.
+        # `MSExchangeTransport Queues`) report data on `_Total` that is not the sum of the
+        # visible instances, in which case excluding it loses information.
+        include_total = config.get('include_total', False)
+        if not isinstance(include_total, bool):
+            raise ConfigTypeError(
+                f'Option `include_total` for performance object `{self.name}` must be a boolean'
+            )
+
         # List of regex patterns to filter multi-instance counters AFTER ALL data
         # is collected and retrieved from PDH layer
         exclude_patterns = config.get('exclude', [])
@@ -67,11 +77,13 @@ class PerfObject:
                         f'Pattern #{i} of option `exclude` for performance object `{self.name}` must be a string'
                     )
 
-            final_exclude_patterns = [r'\b_Total\b']
+            final_exclude_patterns = [] if include_total else [r'\b_Total\b']
             final_exclude_patterns.extend(exclude_patterns)
+            # `(?!)` is a never-matching pattern, used when there is nothing to exclude so that
+            # `self.exclude_pattern.search(...)` always returns None without special-casing.
             # Instance names are not case-sensitive, so instances should not have names that differ only in case.
             # See: https://learn.microsoft.com/en-us/windows/win32/perfctrs/about-performance-counters
-            self.exclude_pattern = re.compile('|'.join(final_exclude_patterns), re.IGNORECASE)
+            self.exclude_pattern = re.compile('|'.join(final_exclude_patterns) or r'(?!)', re.IGNORECASE)
 
         # List of wildcards or instance name directly to filter multi-instance counters by PDH layer itself.
         # Thus it is faster and and less resource intensive than regex-based include filtering.
