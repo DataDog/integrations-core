@@ -4,6 +4,7 @@
 
 import json
 from typing import Callable, Optional
+from unittest import mock
 
 import pytest
 
@@ -147,3 +148,38 @@ def test_collect_schemas_pre_2017(dbm_instance, integration_check):
     collector = SQLServerSchemaCollector(check)
 
     collector.collect_schemas()
+
+
+def test_collect_schemas_pre_2017_collects_table_details(dbm_instance, integration_check) -> None:
+    check = integration_check(dbm_instance)
+    check.static_info_cache[STATIC_INFO_MAJOR_VERSION] = 13
+    collector = SQLServerSchemaCollector(check)
+
+    with mock.patch.object(check, "database_monitoring_metadata") as database_monitoring_metadata:
+        collector.collect_schemas()
+
+    assert collector._is_2016_or_earlier is True
+
+    tables = {}
+    for call in database_monitoring_metadata.call_args_list:
+        event = json.loads(call.args[0])
+        for database in event["metadata"]:
+            if database["name"] != SCHEMA_DATABASE:
+                continue
+            for schema in database["schemas"]:
+                for table in schema["tables"]:
+                    tables[table["name"]] = table
+
+    assert set(tables) == {'cities', 'Restaurants', 'RestaurantReviews', 'landmarks'}
+
+    cities = tables["cities"]
+    assert {column["name"] for column in cities["columns"]} == {"id", "name", "population"}
+    assert {index["name"] for index in cities["indexes"]} == {
+        "PK_Cities",
+        "single_column_index",
+        "two_columns_index",
+    }
+    assert cities["partitions"]["partition_count"] > 0
+
+    landmarks = tables["landmarks"]
+    assert any(foreign_key["foreign_key_name"] == "FK_CityId" for foreign_key in landmarks["foreign_keys"])
