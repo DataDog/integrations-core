@@ -5,8 +5,8 @@ from copy import deepcopy
 
 import mock
 import pytest
-import requests
 
+from datadog_checks.base.utils.http_exceptions import HTTPRequestError, HTTPTimeoutError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
@@ -147,7 +147,7 @@ def test_config(extra_config, expected_http_kwargs, check):
     'exception, log_call_parameters',
     [
         pytest.param(
-            requests.exceptions.Timeout(),
+            HTTPTimeoutError('timed out'),
             ('Envoy endpoint `%s` timed out after %s seconds', 'http://localhost:8001/server_info', (10.0, 10.0)),
             id="timeout",
         ),
@@ -157,7 +157,7 @@ def test_config(extra_config, expected_http_kwargs, check):
             id="index error",
         ),
         pytest.param(
-            requests.exceptions.RequestException('Req Exception'),
+            HTTPRequestError('Req Exception'),
             (
                 'Error collecting Envoy version with url=`%s`. Error: %s',
                 'http://localhost:8001/server_info',
@@ -167,18 +167,16 @@ def test_config(extra_config, expected_http_kwargs, check):
         ),
     ],
 )
-def test_metadata_with_exception(
-    datadog_agent, fixture_path, mock_http_response, check, exception, log_call_parameters
-):
+def test_metadata_with_exception(datadog_agent, check, exception, log_call_parameters, mock_http):
     instance = INSTANCES['main']
     check = check(instance)
     check.check_id = 'test:123'
     check.log = mock.MagicMock()
 
-    with mock.patch('requests.Session.get', side_effect=exception):
-        check._collect_metadata()
-        datadog_agent.assert_metadata_count(0)
-        check.log.warning.assert_called_with(*log_call_parameters)
+    mock_http.get.side_effect = exception
+    check._collect_metadata()
+    datadog_agent.assert_metadata_count(0)
+    check.log.warning.assert_called_with(*log_call_parameters)
 
 
 @pytest.mark.parametrize(

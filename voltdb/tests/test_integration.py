@@ -6,10 +6,11 @@ from typing import Callable  # noqa: F401
 
 import mock
 import pytest
-import requests
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub  # noqa: F401
+from datadog_checks.base.utils.http_exceptions import HTTPRequestError
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.voltdb import VoltDBCheck
 from datadog_checks.voltdb.client import Client
 from datadog_checks.voltdb.types import Instance  # noqa: F401
@@ -70,26 +71,24 @@ class TestCheck:
 
         assertions.assert_service_checks(aggregator, instance, connect_status=VoltDBCheck.CRITICAL)
 
-    def test_http_error(self, aggregator, instance):
-        # type: (AggregatorStub, Instance) -> None
+    def test_http_error(self, aggregator, instance, mock_http):
+        # type: (AggregatorStub, Instance, object) -> None
         check = VoltDBCheck('voltdb', {}, [instance])
 
-        with mock.patch('requests.Session.get', side_effect=requests.RequestException('Something failed')):
-            error = check.run()
+        mock_http.get.side_effect = HTTPRequestError('Something failed')
+        error = check.run()
 
         assert 'Something failed' in error
 
         assertions.assert_service_checks(aggregator, instance, connect_status=VoltDBCheck.CRITICAL)
         aggregator.assert_all_metrics_covered()  # No metrics collected.
 
-    def test_http_response_error(self, aggregator, instance):
-        # type: (AggregatorStub, Instance) -> None
+    def test_http_response_error(self, aggregator, instance, mock_http):
+        # type: (AggregatorStub, Instance, object) -> None
         check = VoltDBCheck('voltdb', {}, [instance])
 
-        resp = requests.Response()
-        resp.status_code = 503
-        with mock.patch('requests.Session.get', return_value=resp):
-            error = check.run()
+        mock_http.get.return_value = MockHTTPResponse(status_code=503)
+        error = check.run()
 
         assert '503 Server Error' in error
 
