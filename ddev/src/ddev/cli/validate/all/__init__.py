@@ -80,3 +80,6 @@ def all(
         subprocess_timeout=subprocess_timeout,
     )
     orchestrator.run()
+
+    if orchestrator.had_failures:
+        app.abort()

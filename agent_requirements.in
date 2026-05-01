@@ -10,7 +10,7 @@ cachetools==7.0.5
 clickhouse-connect==0.14.1
 cm-client==45.0.4
 confluent-kafka==2.13.2
-cryptography==46.0.6
+cryptography==46.0.7
 ddtrace==3.19.5
 dnspython==2.8.0
 fastavro==1.12.1
@@ -22,7 +22,7 @@ jellyfish==1.2.1
 kubernetes==35.0.0
 lazy-loader==0.5
 ldap3==2.9.1
-lxml==6.0.1
+lxml==6.1.0
 lz4==4.4.5
 mmh3==5.2.1
 oauthlib==3.3.1

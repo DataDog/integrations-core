@@ -19,7 +19,16 @@ init_config:
 #
 instances:
 
-  -
+    ## @param username - string - optional
+    ## The username used to connect to the `server`.
+    #
+    # username: <USERNAME>
+
+    ## @param password - string - optional
+    ## The password of `username`.
+    #
+    # password: <PASSWORD>
+
     ## @param sites - list of strings or mapping - optional
     ## The `sites` parameter allows you to specify a list of sites you want to
     ## read metrics from. With sites specified, metrics are tagged with the
@@ -60,16 +69,6 @@ instances:
     ## The server with which to connect, defaulting to the local machine.
     #
     # server: <SERVER>
-
-    ## @param username - string - optional
-    ## The username used to connect to the `server`.
-    #
-    # username: <USERNAME>
-
-    ## @param password - string - optional
-    ## The password of `username`.
-    #
-    # password: <PASSWORD>
 
     ## @param enable_health_service_check - boolean - optional - default: true
     ## Whether or not to send a service check named `<NAMESPACE>.windows.perf.health`, which reports

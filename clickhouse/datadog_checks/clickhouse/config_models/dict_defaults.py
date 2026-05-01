@@ -55,3 +55,19 @@ def instance_query_errors():
         max_samples_per_collection=1000,
         run_sync=False,
     )
+
+
+def instance_parts_and_merges():
+    return instance.PartsAndMerges(
+        enabled=True,
+        collection_interval=60,
+        max_parts_rows=500,
+        max_mutations_rows=200,
+        max_detached_parts_rows=1000,
+        max_replication_queue_rows=1000,
+        run_sync=False,
+        table_metrics_include_partition_tag=False,
+        table_metrics_max_tables=200,
+        stalled_merge_elapsed_threshold_seconds=3600,
+        stuck_replication_num_tries=3,
+    )

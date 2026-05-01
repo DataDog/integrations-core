@@ -1,0 +1,1 @@
+Add KRaft (Kafka Raft) metrics for Kafka clusters running without ZooKeeper.

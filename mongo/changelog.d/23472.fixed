@@ -1,0 +1,1 @@
+Fixed a datetime overflow when collecting slow operations from MongoDB 8.0 replica set logs containing out-of-range `$date` sentinel values in RSM topology change entries.
