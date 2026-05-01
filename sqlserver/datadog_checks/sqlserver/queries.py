@@ -7,7 +7,8 @@ from datadog_checks.sqlserver.database_metrics.xe_session_metrics import XE_RING
 # `{}` is replaced with comma-separated ODBC `?` placeholders (values bound via parameters).
 DB_QUERY = """
 SELECT
-    db.database_id AS id, db.name AS name, db.collation_name AS collation, dp.name AS owner
+    db.database_id AS id, db.name AS name, db.collation_name AS collation, dp.name AS owner,
+    db.compatibility_level AS compatibility_level
 FROM
     sys.databases db LEFT JOIN sys.database_principals dp ON db.owner_sid = dp.sid
 WHERE db.name IN ({});
