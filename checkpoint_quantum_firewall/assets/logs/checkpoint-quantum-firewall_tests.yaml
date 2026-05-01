@@ -229,7 +229,6 @@ tests:
         "time" : "1702027299",
         "sig_id" : "4"
       }
-    service: "URL Filtering"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1702027299
@@ -372,7 +371,6 @@ tests:
         "proto" : 17,
         "time" : 1702271803
       }
-    service: "IPS"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
@@ -474,7 +472,6 @@ tests:
         "endpoint_ip" : "185.64.148.0",
         "src_machine_group" : "All Machines"
       }
-    service: "Identity Awareness"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1702458184
@@ -720,7 +717,6 @@ tests:
         "sig_id" : 4,
         "__nsons" : 0
       }
-    service: "Firewall"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1
@@ -1130,7 +1126,6 @@ tests:
         "app_desc" : "The Internet Control Message Protocol (ICMP) is a protocol used by network devices, including routers, to send error messages and operational information.",
         "time" : 1702027684
       }
-    service: "Application Control"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1702027684
