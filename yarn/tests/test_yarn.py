@@ -271,20 +271,22 @@ def test_ssl_verification(aggregator, mock_http):
 
     from .conftest import requests_get_mock
 
-    # verify=True + bad cert → SSLError → CRITICAL service check
     mock_http.get.side_effect = SSLError("certificate verification failed")
     instance = YARN_SSL_VERIFY_TRUE_CONFIG['instances'][0]
     yarn = YarnCheck('yarn', {}, [instance])
-    with pytest.raises(SSLError):
+    try:
         yarn.check(instance)
-    aggregator.assert_service_check(
-        SERVICE_CHECK_NAME,
-        status=YarnCheck.CRITICAL,
-        tags=EXPECTED_TAGS + ['url:{}'.format(RM_ADDRESS)],
-        count=1,
-    )
+    except SSLError:
+        aggregator.assert_service_check(
+            SERVICE_CHECK_NAME,
+            status=YarnCheck.CRITICAL,
+            tags=EXPECTED_TAGS + ['url:{}'.format(RM_ADDRESS)],
+            count=1,
+        )
+        pass
+    else:
+        raise AssertionError('Should have thrown an SSLError due to a badly configured certificate')
 
-    # verify=False → no error → 4 OK service checks
     mock_http.get.side_effect = requests_get_mock
     instance = YARN_SSL_VERIFY_FALSE_CONFIG['instances'][0]
     yarn = YarnCheck('yarn', {}, [instance])
