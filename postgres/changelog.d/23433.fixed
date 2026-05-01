@@ -1,1 +1,0 @@
-Probe connectivity to each autodiscovered database in agent diagnose, even when DBM is disabled.
