@@ -213,9 +213,7 @@ class MessageDeserializer:
                 self.log.warning("skip_bytes must be non-negative, got %d", skip_bytes)
                 return f"<deserialization error: skip_bytes must be non-negative, got {skip_bytes}>", None
             if skip_bytes > len(raw_bytes):
-                self.log.warning(
-                    "skip_bytes=%d exceeds message length %d", skip_bytes, len(raw_bytes)
-                )
+                self.log.warning("skip_bytes=%d exceeds message length %d", skip_bytes, len(raw_bytes))
                 return (
                     f"<deserialization error: skip_bytes={skip_bytes} exceeds message length {len(raw_bytes)}>",
                     None,

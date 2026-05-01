@@ -668,9 +668,7 @@ class TestMessageDeserializer:
         sr_framed = b'\x00' + (42).to_bytes(4, 'big') + b'{"v": 1}'
         prefixed = b'\xfe' + sr_framed
 
-        result, schema_id = deserializer.deserialize_message(
-            prefixed, 'json', uses_schema_registry=True, skip_bytes=1
-        )
+        result, schema_id = deserializer.deserialize_message(prefixed, 'json', uses_schema_registry=True, skip_bytes=1)
         assert json.loads(result) == {'v': 1}
         assert schema_id == 42
 
