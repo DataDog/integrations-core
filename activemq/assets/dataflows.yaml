@@ -1,0 +1,5 @@
+provides:
+  - id: activemq-broker-metrics
+    always_on: true
+  - id: activemq-logs
+    always_on: true
