@@ -11,7 +11,18 @@
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into PingOne Advanced Identity Cloud logs",
     "title": "PingOne Advanced Identity Cloud",
-    "media": [],
+    "media": [
+      {
+        "caption": "PingOne Advanced Identity Cloud Overview",
+        "image_url": "images/ping_one_aic_overview_part1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "PingOne Advanced Identity Cloud Overview (Continued)",
+        "image_url": "images/ping_one_aic_overview_part2.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Security",
@@ -31,8 +42,13 @@
         "metadata_path": "assets/service_checks.json"
       }
     },
-    "dashboards": {},
+    "dashboards": {
+      "PingOne Advanced Identity Cloud Overview": "assets/dashboards/ping_one_aic_overview.json"
+    },
     "monitors": {},
+    "logs": {
+      "source": "ping-one-aic"
+    },
     "saved_views": {}
   },
   "author": {

@@ -1,0 +1,637 @@
+id: ping-one-aic
+tests:
+ -
+  sample: |-
+    {
+      "payload" : {
+        "runAs" : "id=dsameuser,ou=user,ou=am-config",
+        "level" : "INFO",
+        "source" : "audit",
+        "userId" : "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config",
+        "transactionId" : "7ac54f4f-7948-45b6-81e0-ba839d15b4e5/0",
+        "eventName" : "AM-CONFIG-CHANGE",
+        "topic" : "config",
+        "realm" : "/alpha",
+        "_id" : "7b6d5a19-7d91-48da-b600-5a3590d6442f-29082",
+        "trackingIds" : [ "7b6d5a19-7d91-48da-b600-5a3590d6442f-27300" ],
+        "operation" : "UPDATE",
+        "objectId" : "ou=WorkAs,ou=default,ou=OrganizationConfig,ou=1.0,ou=AgentService,ou=services,o=alpha,ou=services,ou=am-config",
+        "timestamp" : "2026-04-02T20:42:46.225Z"
+      },
+      "source" : "am-config",
+      "type" : "application/json",
+      "timestamp" : "2026-04-02T20:42:46.22957863Z"
+    }
+  result:
+    custom:
+      evt:
+        category: "am-config"
+        name: "AM-CONFIG-CHANGE"
+      ocsf:
+        activity_id: 3
+        activity_name: "Update"
+        actor:
+          user:
+            uid: "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Entity Management"
+        class_uid: 3004
+        entity:
+          uid: "ou=WorkAs,ou=default,ou=OrganizationConfig,ou=1.0,ou=AgentService,ou=services,o=alpha,ou=services,ou=am-config"
+        metadata:
+          correlation_uid: "7ac54f4f-7948-45b6-81e0-ba839d15b4e5/0"
+          event_code: "AM-CONFIG-CHANGE"
+          product:
+            name: "PingOne Advanced Identity Cloud"
+            vendor_name: "Ping Identity"
+          uid: "7b6d5a19-7d91-48da-b600-5a3590d6442f-29082"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        time: 1775162566229
+        type_uid: 300403
+      payload:
+        _id: "7b6d5a19-7d91-48da-b600-5a3590d6442f-29082"
+        eventName: "AM-CONFIG-CHANGE"
+        level: "INFO"
+        objectId: "ou=WorkAs,ou=default,ou=OrganizationConfig,ou=1.0,ou=AgentService,ou=services,o=alpha,ou=services,ou=am-config"
+        operation: "UPDATE"
+        realm: "/alpha"
+        runAs: "id=dsameuser,ou=user,ou=am-config"
+        source: "audit"
+        timestamp: "2026-04-02T20:42:46.225Z"
+        topic: "config"
+        trackingIds:
+         - "7b6d5a19-7d91-48da-b600-5a3590d6442f-27300"
+        transactionId: "7ac54f4f-7948-45b6-81e0-ba839d15b4e5/0"
+        userId: "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config"
+      source: "am-config"
+      timestamp: "2026-04-02T20:42:46.22957863Z"
+      type: "application/json"
+      usr:
+        id: "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config"
+    message: |-
+      {
+        "payload" : {
+          "runAs" : "id=dsameuser,ou=user,ou=am-config",
+          "level" : "INFO",
+          "source" : "audit",
+          "userId" : "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config",
+          "transactionId" : "7ac54f4f-7948-45b6-81e0-ba839d15b4e5/0",
+          "eventName" : "AM-CONFIG-CHANGE",
+          "topic" : "config",
+          "realm" : "/alpha",
+          "_id" : "7b6d5a19-7d91-48da-b600-5a3590d6442f-29082",
+          "trackingIds" : [ "7b6d5a19-7d91-48da-b600-5a3590d6442f-27300" ],
+          "operation" : "UPDATE",
+          "objectId" : "ou=WorkAs,ou=default,ou=OrganizationConfig,ou=1.0,ou=AgentService,ou=services,o=alpha,ou=services,ou=am-config",
+          "timestamp" : "2026-04-02T20:42:46.225Z"
+        },
+        "source" : "am-config",
+        "type" : "application/json",
+        "timestamp" : "2026-04-02T20:42:46.22957863Z"
+      }
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1775162566229
+ -
+  sample: |-
+    {
+      "payload" : {
+        "level" : "INFO",
+        "source" : "audit",
+        "userId" : "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config",
+        "transactionId" : "1aaf1366-79ad-4753-90a7-e6ee62027e85-request-3/0/0",
+        "principal" : [ "test.user@example.com" ],
+        "result" : "SUCCESSFUL",
+        "component" : "Authentication",
+        "entries" : [ {
+          "info" : {
+            "treeName" : "FRLogin",
+            "ipAddress" : "73.163.123.67",
+            "authLevel" : "0"
+          }
+        } ],
+        "eventName" : "AM-TREE-LOGIN-COMPLETED",
+        "topic" : "authentication",
+        "realm" : "/",
+        "_id" : "8e59aae1-3238-408f-9f3a-669ce8f9ebbb-13752",
+        "trackingIds" : [ "8e59aae1-3238-408f-9f3a-669ce8f9ebbb-13577" ],
+        "timestamp" : "2026-04-09T17:37:22.329Z"
+      },
+      "source" : "am-authentication",
+      "type" : "application/json",
+      "timestamp" : "2026-04-09T17:37:22.330397891Z"
+    }
+  result:
+    custom:
+      evt:
+        category: "am-authentication"
+        name: "AM-TREE-LOGIN-COMPLETED"
+        outcome: "SUCCESSFUL"
+      info:
+        ipAddress: "73.163.123.67"
+        principal: "test.user@example.com"
+        treeName: "FRLogin"
+      network:
+        client:
+          geoip: { }
+          ip: "73.163.123.67"
+      ocsf:
+        activity_id: 1
+        activity_name: "Logon"
+        actor:
+          user:
+            name: "test.user@example.com"
+            uid: "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Authentication"
+        class_uid: 3002
+        metadata:
+          correlation_uid: "1aaf1366-79ad-4753-90a7-e6ee62027e85-request-3/0/0"
+          event_code: "FRLogin"
+          product:
+            name: "PingOne Advanced Identity Cloud"
+            vendor_name: "Ping Identity"
+          uid: "8e59aae1-3238-408f-9f3a-669ce8f9ebbb-13752"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "73.163.123.67"
+        status: "Success"
+        status_id: 1
+        time: 1775756242330
+        type_uid: 300201
+        user:
+          name: "test.user@example.com"
+          uid: "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config"
+      payload:
+        _id: "8e59aae1-3238-408f-9f3a-669ce8f9ebbb-13752"
+        component: "Authentication"
+        entries:
+         -
+          info:
+            treeName: "FRLogin"
+            ipAddress: "73.163.123.67"
+            authLevel: "0"
+        eventName: "AM-TREE-LOGIN-COMPLETED"
+        level: "INFO"
+        principal:
+         - "test.user@example.com"
+        realm: "/"
+        result: "SUCCESSFUL"
+        source: "audit"
+        timestamp: "2026-04-09T17:37:22.329Z"
+        topic: "authentication"
+        trackingIds:
+         - "8e59aae1-3238-408f-9f3a-669ce8f9ebbb-13577"
+        transactionId: "1aaf1366-79ad-4753-90a7-e6ee62027e85-request-3/0/0"
+        userId: "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config"
+      source: "am-authentication"
+      timestamp: "2026-04-09T17:37:22.330397891Z"
+      type: "application/json"
+      usr:
+        id: "test.user@example.com"
+    message: |-
+      {
+        "payload" : {
+          "level" : "INFO",
+          "source" : "audit",
+          "userId" : "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config",
+          "transactionId" : "1aaf1366-79ad-4753-90a7-e6ee62027e85-request-3/0/0",
+          "principal" : [ "test.user@example.com" ],
+          "result" : "SUCCESSFUL",
+          "component" : "Authentication",
+          "entries" : [ {
+            "info" : {
+              "treeName" : "FRLogin",
+              "ipAddress" : "73.163.123.67",
+              "authLevel" : "0"
+            }
+          } ],
+          "eventName" : "AM-TREE-LOGIN-COMPLETED",
+          "topic" : "authentication",
+          "realm" : "/",
+          "_id" : "8e59aae1-3238-408f-9f3a-669ce8f9ebbb-13752",
+          "trackingIds" : [ "8e59aae1-3238-408f-9f3a-669ce8f9ebbb-13577" ],
+          "timestamp" : "2026-04-09T17:37:22.329Z"
+        },
+        "source" : "am-authentication",
+        "type" : "application/json",
+        "timestamp" : "2026-04-09T17:37:22.330397891Z"
+      }
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1775756242330
+ -
+  sample: |-
+    {
+      "payload" : {
+        "principal" : [ "carlamj" ],
+        "component" : "Authentication",
+        "entries" : [ {
+          "info" : {
+            "nodeOutcome" : "FALSE",
+            "treeName" : "Login",
+            "displayName" : "Identity Store Decision",
+            "nodeType" : "IdentityStoreDecisionNode",
+            "authLevel" : "0",
+            "nodeId" : "7f0c2aee-8c74-4d02-82a6-9d4ed9d11708"
+          }
+        } ],
+        "level" : "INFO",
+        "eventName" : "AM-NODE-LOGIN-COMPLETED",
+        "topic" : "authentication",
+        "realm" : "/alpha",
+        "_id" : "46dd2bb7-e31f-4b3b-afa4-6d70c0a5cc2a-1818",
+        "source" : "audit",
+        "trackingIds" : [ "46dd2bb7-e31f-4b3b-afa4-6d70c0a5cc2a-1510" ],
+        "transactionId" : "0b35609f-7d0e-4105-bc12-c8ac55546e8f-request-2/0",
+        "timestamp" : "2026-03-31T18:46:57.455Z"
+      },
+      "source" : "am-authentication",
+      "type" : "application/json",
+      "timestamp" : "2026-03-31T18:46:57.456415324Z"
+    }
+  result:
+    custom:
+      evt:
+        category: "am-authentication"
+        name: "AM-NODE-LOGIN-COMPLETED"
+        outcome: "FALSE"
+      info:
+        nodeOutcome: "FALSE"
+        nodeType: "IdentityStoreDecisionNode"
+        principal: "carlamj"
+        treeName: "Login"
+      ocsf:
+        activity_id: 1
+        activity_name: "Logon"
+        actor:
+          user:
+            name: "carlamj"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Authentication"
+        class_uid: 3002
+        metadata:
+          correlation_uid: "0b35609f-7d0e-4105-bc12-c8ac55546e8f-request-2/0"
+          event_code: "Login"
+          product:
+            name: "PingOne Advanced Identity Cloud"
+            vendor_name: "Ping Identity"
+          uid: "46dd2bb7-e31f-4b3b-afa4-6d70c0a5cc2a-1818"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        status: "Failure"
+        status_id: 2
+        time: 1774982817456
+        type_uid: 300201
+        user:
+          name: "carlamj"
+      payload:
+        _id: "46dd2bb7-e31f-4b3b-afa4-6d70c0a5cc2a-1818"
+        component: "Authentication"
+        entries:
+         -
+          info:
+            nodeOutcome: "FALSE"
+            treeName: "Login"
+            displayName: "Identity Store Decision"
+            nodeType: "IdentityStoreDecisionNode"
+            authLevel: "0"
+            nodeId: "7f0c2aee-8c74-4d02-82a6-9d4ed9d11708"
+        eventName: "AM-NODE-LOGIN-COMPLETED"
+        level: "INFO"
+        principal:
+         - "carlamj"
+        realm: "/alpha"
+        source: "audit"
+        timestamp: "2026-03-31T18:46:57.455Z"
+        topic: "authentication"
+        trackingIds:
+         - "46dd2bb7-e31f-4b3b-afa4-6d70c0a5cc2a-1510"
+        transactionId: "0b35609f-7d0e-4105-bc12-c8ac55546e8f-request-2/0"
+      source: "am-authentication"
+      timestamp: "2026-03-31T18:46:57.456415324Z"
+      type: "application/json"
+      usr:
+        id: "carlamj"
+    message: |-
+      {
+        "payload" : {
+          "principal" : [ "carlamj" ],
+          "component" : "Authentication",
+          "entries" : [ {
+            "info" : {
+              "nodeOutcome" : "FALSE",
+              "treeName" : "Login",
+              "displayName" : "Identity Store Decision",
+              "nodeType" : "IdentityStoreDecisionNode",
+              "authLevel" : "0",
+              "nodeId" : "7f0c2aee-8c74-4d02-82a6-9d4ed9d11708"
+            }
+          } ],
+          "level" : "INFO",
+          "eventName" : "AM-NODE-LOGIN-COMPLETED",
+          "topic" : "authentication",
+          "realm" : "/alpha",
+          "_id" : "46dd2bb7-e31f-4b3b-afa4-6d70c0a5cc2a-1818",
+          "source" : "audit",
+          "trackingIds" : [ "46dd2bb7-e31f-4b3b-afa4-6d70c0a5cc2a-1510" ],
+          "transactionId" : "0b35609f-7d0e-4105-bc12-c8ac55546e8f-request-2/0",
+          "timestamp" : "2026-03-31T18:46:57.455Z"
+        },
+        "source" : "am-authentication",
+        "type" : "application/json",
+        "timestamp" : "2026-03-31T18:46:57.456415324Z"
+      }
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1774982817456
+ -
+  sample: |-
+    {
+      "payload" : {
+        "principal" : [ "appraisal" ],
+        "component" : "Authentication",
+        "entries" : [ {
+          "info" : {
+            "nodeOutcome" : "false",
+            "treeName" : "Login Public - MFA",
+            "displayName" : "Verify OTP",
+            "nodeType" : "OneTimePasswordCollectorDecisionNode",
+            "authLevel" : "0",
+            "nodeId" : "ca180f07-8321-4409-b747-a8112d2ea463"
+          }
+        } ],
+        "level" : "INFO",
+        "eventName" : "AM-NODE-LOGIN-COMPLETED",
+        "topic" : "authentication",
+        "realm" : "/alpha",
+        "_id" : "273a7e98-b45d-432c-abb7-09b1a1accc7b-137311",
+        "source" : "audit",
+        "trackingIds" : [ "273a7e98-b45d-432c-abb7-09b1a1accc7b-136927" ],
+        "transactionId" : "e8d64ac5-d286-4035-8408-eac18aca00a4-request-6/0",
+        "timestamp" : "2026-04-06T11:56:32.748Z"
+      },
+      "source" : "am-authentication",
+      "type" : "application/json",
+      "timestamp" : "2026-04-06T11:56:32.748733931Z"
+    }
+  result:
+    custom:
+      evt:
+        category: "am-authentication"
+        name: "AM-NODE-LOGIN-COMPLETED"
+        outcome: "false"
+      info:
+        nodeOutcome: "false"
+        nodeType: "OneTimePasswordCollectorDecisionNode"
+        principal: "appraisal"
+        treeName: "Login Public - MFA"
+      ocsf:
+        activity_id: 1
+        activity_name: "Logon"
+        actor:
+          user:
+            name: "appraisal"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Authentication"
+        class_uid: 3002
+        metadata:
+          correlation_uid: "e8d64ac5-d286-4035-8408-eac18aca00a4-request-6/0"
+          event_code: "Login Public - MFA"
+          product:
+            name: "PingOne Advanced Identity Cloud"
+            vendor_name: "Ping Identity"
+          uid: "273a7e98-b45d-432c-abb7-09b1a1accc7b-137311"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        status: "Failure"
+        status_id: 2
+        time: 1775476592748
+        type_uid: 300201
+        user:
+          name: "appraisal"
+      payload:
+        _id: "273a7e98-b45d-432c-abb7-09b1a1accc7b-137311"
+        component: "Authentication"
+        entries:
+         -
+          info:
+            nodeOutcome: "false"
+            treeName: "Login Public - MFA"
+            displayName: "Verify OTP"
+            nodeType: "OneTimePasswordCollectorDecisionNode"
+            authLevel: "0"
+            nodeId: "ca180f07-8321-4409-b747-a8112d2ea463"
+        eventName: "AM-NODE-LOGIN-COMPLETED"
+        level: "INFO"
+        principal:
+         - "appraisal"
+        realm: "/alpha"
+        source: "audit"
+        timestamp: "2026-04-06T11:56:32.748Z"
+        topic: "authentication"
+        trackingIds:
+         - "273a7e98-b45d-432c-abb7-09b1a1accc7b-136927"
+        transactionId: "e8d64ac5-d286-4035-8408-eac18aca00a4-request-6/0"
+      source: "am-authentication"
+      timestamp: "2026-04-06T11:56:32.748733931Z"
+      type: "application/json"
+      usr:
+        id: "appraisal"
+    message: |-
+      {
+        "payload" : {
+          "principal" : [ "appraisal" ],
+          "component" : "Authentication",
+          "entries" : [ {
+            "info" : {
+              "nodeOutcome" : "false",
+              "treeName" : "Login Public - MFA",
+              "displayName" : "Verify OTP",
+              "nodeType" : "OneTimePasswordCollectorDecisionNode",
+              "authLevel" : "0",
+              "nodeId" : "ca180f07-8321-4409-b747-a8112d2ea463"
+            }
+          } ],
+          "level" : "INFO",
+          "eventName" : "AM-NODE-LOGIN-COMPLETED",
+          "topic" : "authentication",
+          "realm" : "/alpha",
+          "_id" : "273a7e98-b45d-432c-abb7-09b1a1accc7b-137311",
+          "source" : "audit",
+          "trackingIds" : [ "273a7e98-b45d-432c-abb7-09b1a1accc7b-136927" ],
+          "transactionId" : "e8d64ac5-d286-4035-8408-eac18aca00a4-request-6/0",
+          "timestamp" : "2026-04-06T11:56:32.748Z"
+        },
+        "source" : "am-authentication",
+        "type" : "application/json",
+        "timestamp" : "2026-04-06T11:56:32.748733931Z"
+      }
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1775476592748
+ -
+  sample: |-
+    {
+      "payload" : {
+        "component" : "OAuth",
+        "level" : "INFO",
+        "response" : {
+          "elapsedTimeUnits" : "MILLISECONDS",
+          "detail" : {
+            "reason" : "Bad Request"
+          },
+          "elapsedTime" : 1451,
+          "status" : "FAILED",
+          "statusCode" : "400"
+        },
+        "client" : {
+          "ip" : "73.163.123.67"
+        },
+        "eventName" : "AM-ACCESS-OUTCOME",
+        "http" : {
+          "request" : {
+            "headers" : {
+              "x-real-ip" : [ "73.163.123.67" ],
+              "x-forwarded-proto" : [ "https" ],
+              "host" : [ "openam-tap-datadog.forgeblocks.com" ],
+              "x-forwarded-for" : [ "73.163.123.67, 136.110.135.38, 35.191.92.80" ],
+              "accept" : [ "*/*" ],
+              "user-agent" : [ "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36" ]
+            },
+            "path" : "https://openam-tap-datadog.forgeblocks.com/am/oauth2/connect/endSession",
+            "method" : "GET",
+            "secure" : true
+          }
+        },
+        "topic" : "access",
+        "realm" : "/",
+        "_id" : "a62fa996-47c1-4327-a86c-1c8fd6f475fe-5698",
+        "source" : "audit",
+        "transactionId" : "a38ce90f-54d1-47db-9f2a-db1a6e5a1455/0",
+        "timestamp" : "2026-03-04T14:06:24.741Z"
+      },
+      "source" : "am-access",
+      "type" : "application/json",
+      "timestamp" : "2026-03-04T14:06:24.742687335Z"
+    }
+  result:
+    custom:
+      evt:
+        category: "am-access"
+        name: "AM-ACCESS-OUTCOME"
+      network:
+        client:
+          geoip: { }
+          ip: "73.163.123.67"
+      ocsf:
+        metadata:
+          correlation_uid: "a38ce90f-54d1-47db-9f2a-db1a6e5a1455/0"
+          event_code: "AM-ACCESS-OUTCOME"
+          product:
+            name: "PingOne Advanced Identity Cloud"
+            vendor_name: "Ping Identity"
+          uid: "a62fa996-47c1-4327-a86c-1c8fd6f475fe-5698"
+        time: 1772633184742
+      payload:
+        _id: "a62fa996-47c1-4327-a86c-1c8fd6f475fe-5698"
+        client:
+          ip: "73.163.123.67"
+        component: "OAuth"
+        eventName: "AM-ACCESS-OUTCOME"
+        http:
+          request:
+            headers:
+              accept:
+               - "*/*"
+              host:
+               - "openam-tap-datadog.forgeblocks.com"
+              user-agent:
+               - "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+              x-forwarded-for:
+               - "73.163.123.67, 136.110.135.38, 35.191.92.80"
+              x-forwarded-proto:
+               - "https"
+              x-real-ip:
+               - "73.163.123.67"
+            method: "GET"
+            path: "https://openam-tap-datadog.forgeblocks.com/am/oauth2/connect/endSession"
+            secure: true
+        level: "INFO"
+        realm: "/"
+        response:
+          detail:
+            reason: "Bad Request"
+          elapsedTime: 1451
+          elapsedTimeUnits: "MILLISECONDS"
+          status: "FAILED"
+          statusCode: "400"
+        source: "audit"
+        timestamp: "2026-03-04T14:06:24.741Z"
+        topic: "access"
+        transactionId: "a38ce90f-54d1-47db-9f2a-db1a6e5a1455/0"
+      source: "am-access"
+      timestamp: "2026-03-04T14:06:24.742687335Z"
+      type: "application/json"
+    message: |-
+      {
+        "payload" : {
+          "component" : "OAuth",
+          "level" : "INFO",
+          "response" : {
+            "elapsedTimeUnits" : "MILLISECONDS",
+            "detail" : {
+              "reason" : "Bad Request"
+            },
+            "elapsedTime" : 1451,
+            "status" : "FAILED",
+            "statusCode" : "400"
+          },
+          "client" : {
+            "ip" : "73.163.123.67"
+          },
+          "eventName" : "AM-ACCESS-OUTCOME",
+          "http" : {
+            "request" : {
+              "headers" : {
+                "x-real-ip" : [ "73.163.123.67" ],
+                "x-forwarded-proto" : [ "https" ],
+                "host" : [ "openam-tap-datadog.forgeblocks.com" ],
+                "x-forwarded-for" : [ "73.163.123.67, 136.110.135.38, 35.191.92.80" ],
+                "accept" : [ "*/*" ],
+                "user-agent" : [ "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36" ]
+              },
+              "path" : "https://openam-tap-datadog.forgeblocks.com/am/oauth2/connect/endSession",
+              "method" : "GET",
+              "secure" : true
+            }
+          },
+          "topic" : "access",
+          "realm" : "/",
+          "_id" : "a62fa996-47c1-4327-a86c-1c8fd6f475fe-5698",
+          "source" : "audit",
+          "transactionId" : "a38ce90f-54d1-47db-9f2a-db1a6e5a1455/0",
+          "timestamp" : "2026-03-04T14:06:24.741Z"
+        },
+        "source" : "am-access",
+        "type" : "application/json",
+        "timestamp" : "2026-03-04T14:06:24.742687335Z"
+      }
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1772633184742
