@@ -5,7 +5,7 @@ This is a legacy integration that is no longer being developed or fully supporte
 {{< /callout >}}
 
 ## Overview
-_We recommend using [GPU Monitoring][18] which not only provides metric parity with this integration but even more metrics and guided remediation actions across your AI stack. Set up Datadog GPU Monitoring [here][19] 
+We recommend using [GPU Monitoring][18], which not only provides metric parity with this integration, but even more metrics and guided remediation actions across your AI stack. [See the Datadog GPU Monitoring documentation][19] for setup instructions. 
 
 This legacy check submits metrics exposed by the [NVIDIA DCGM Exporter][16] in Datadog Agent format. For more information on NVIDIA Data Center GPU Manager (DCGM), see [NVIDIA DCGM][15].
 
