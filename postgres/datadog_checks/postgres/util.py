@@ -36,6 +36,203 @@ class DatabaseConfigurationError(Enum):
     high_pg_stat_statements_max = 'high-pg-stat-statements-max-configuration'
     autodiscovered_databases_exceeds_limit = 'autodiscovered-databases-exceeds-limit'
     autodiscovered_metrics_exceeds_collection_interval = "autodiscovered-metrics-exceeds-collection-interval"
+    # New codes used by the `agent diagnose` pre-flight checks.
+    connection_failure = 'connection-failure'
+    postgres_version_unsupported = 'postgres-version-unsupported'
+    shared_preload_libraries_missing_pg_stat_statements = 'shared-preload-libraries-missing-pg-stat-statements'
+    track_activity_query_size_too_small = 'track-activity-query-size-too-small'
+    track_io_timing_disabled = 'track-io-timing-disabled'
+    missing_pg_monitor_role = 'missing-pg-monitor-role'
+    insufficient_privilege_on_pg_stat_activity = 'insufficient-privilege-on-pg-stat-activity'
+    missing_datadog_schema = 'missing-datadog-schema'
+    missing_schema_usage_grant = 'missing-schema-usage-grant'
+    pg_stat_statements_not_readable = 'pg-stat-statements-not-readable'
+    config_validation = 'config-validation'
+
+
+# Docs anchor is appended to the troubleshooting URL to land the user on the right section.
+TROUBLESHOOTING_DOC_URL = "https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting/"
+
+
+# Central map of diagnostic metadata for every DatabaseConfigurationError code. Used by both the
+# runtime `record_warning` path (so `agent diagnose` sees the same remediation text as `agent status`)
+# and the explicit pre-flight diagnostics in `diagnose.py`.
+DIAGNOSTIC_METADATA = {
+    DatabaseConfigurationError.pg_stat_statements_not_created: {
+        "description": "pg_stat_statements must be installed as an extension in every monitored database.",
+        "remediation": "Run `CREATE EXTENSION pg_stat_statements;` in the monitored database.",
+        "docs_anchor": DatabaseConfigurationError.pg_stat_statements_not_created.value,
+    },
+    DatabaseConfigurationError.pg_stat_statements_not_loaded: {
+        "description": "pg_stat_statements must be pre-loaded via shared_preload_libraries.",
+        "remediation": (
+            "Add `pg_stat_statements` to `shared_preload_libraries` in postgresql.conf and restart the server."
+        ),
+        "docs_anchor": DatabaseConfigurationError.pg_stat_statements_not_loaded.value,
+    },
+    DatabaseConfigurationError.undefined_explain_function: {
+        "description": "The `{explain_function}` function is required to collect execution plans.",
+        "remediation": (
+            "Create the `{explain_function}` function in every monitored database as documented in the "
+            "Postgres DBM setup guide."
+        ),
+        "docs_anchor": DatabaseConfigurationError.undefined_explain_function.value,
+    },
+    DatabaseConfigurationError.undefined_activity_view: {
+        "description": "The pg_stat_activity view (or datadog.pg_stat_activity function on PG 9.6) must be readable.",
+        "remediation": (
+            "Grant `pg_monitor` to the datadog user (PG >= 10), or create the `datadog.pg_stat_activity` "
+            "security-definer function for PG 9.6."
+        ),
+        "docs_anchor": DatabaseConfigurationError.undefined_activity_view.value,
+    },
+    DatabaseConfigurationError.high_pg_stat_statements_max: {
+        "description": "pg_stat_statements.max is set high enough to impact collection performance.",
+        "remediation": (
+            "Lower pg_stat_statements.max in postgresql.conf, or raise "
+            "`query_metrics.pg_stat_statements_max_warning_threshold` in the agent config to silence this."
+        ),
+        "docs_anchor": DatabaseConfigurationError.high_pg_stat_statements_max.value,
+    },
+    DatabaseConfigurationError.autodiscovered_databases_exceeds_limit: {
+        "description": "Database autodiscovery matched more databases than max_databases.",
+        "remediation": (
+            "Increase `max_databases` under `database_autodiscovery` in the agent config, or tighten the "
+            "include/exclude patterns."
+        ),
+        "docs_anchor": DatabaseConfigurationError.autodiscovered_databases_exceeds_limit.value,
+    },
+    DatabaseConfigurationError.autodiscovered_metrics_exceeds_collection_interval: {
+        "description": "A single metric collection pass exceeded the configured min_collection_interval.",
+        "remediation": "Raise `min_collection_interval` or narrow the set of autodiscovered databases.",
+        "docs_anchor": DatabaseConfigurationError.autodiscovered_metrics_exceeds_collection_interval.value,
+    },
+    DatabaseConfigurationError.connection_failure: {
+        "description": "The agent could not open a Postgres connection with the configured credentials.",
+        "remediation": (
+            "Verify host/port are reachable and that the datadog user exists with the right password. "
+            "If using SSL, check that ssl_mode and the ssl_* files are correct."
+        ),
+        "docs_anchor": DatabaseConfigurationError.connection_failure.value,
+    },
+    DatabaseConfigurationError.postgres_version_unsupported: {
+        "description": "The Postgres server version is outside the range the integration supports.",
+        "remediation": "Upgrade Postgres to a supported major version (>= 9.6).",
+        "docs_anchor": DatabaseConfigurationError.postgres_version_unsupported.value,
+    },
+    DatabaseConfigurationError.shared_preload_libraries_missing_pg_stat_statements: {
+        "description": "pg_stat_statements is not present in shared_preload_libraries.",
+        "remediation": (
+            "Set `shared_preload_libraries = 'pg_stat_statements'` in postgresql.conf and restart the server."
+        ),
+        "docs_anchor": DatabaseConfigurationError.shared_preload_libraries_missing_pg_stat_statements.value,
+    },
+    DatabaseConfigurationError.track_activity_query_size_too_small: {
+        "description": "track_activity_query_size is below the recommended value of 4096 bytes.",
+        "remediation": (
+            "Set `track_activity_query_size = 4096` (or higher) in postgresql.conf and restart the server."
+        ),
+        "docs_anchor": DatabaseConfigurationError.track_activity_query_size_too_small.value,
+    },
+    DatabaseConfigurationError.track_io_timing_disabled: {
+        "description": "track_io_timing is off, so I/O timing columns will not be collected.",
+        "remediation": "Set `track_io_timing = on` in postgresql.conf (or at runtime via ALTER SYSTEM).",
+        "docs_anchor": DatabaseConfigurationError.track_io_timing_disabled.value,
+    },
+    DatabaseConfigurationError.missing_pg_monitor_role: {
+        "description": "The datadog user is not a member of pg_monitor and will miss other users' activity.",
+        "remediation": "Run `GRANT pg_monitor TO <datadog_user>;` as a superuser.",
+        "docs_anchor": DatabaseConfigurationError.missing_pg_monitor_role.value,
+    },
+    DatabaseConfigurationError.insufficient_privilege_on_pg_stat_activity: {
+        "description": "pg_stat_activity rows are being masked as `<insufficient privilege>`.",
+        "remediation": "Grant pg_monitor to the datadog user so activity rows are visible across users.",
+        "docs_anchor": DatabaseConfigurationError.insufficient_privilege_on_pg_stat_activity.value,
+    },
+    DatabaseConfigurationError.missing_datadog_schema: {
+        "description": "The `datadog` schema does not exist in the monitored database.",
+        "remediation": (
+            "Create the schema and grant usage: `CREATE SCHEMA datadog;"
+            " GRANT USAGE ON SCHEMA datadog TO <datadog_user>;`"
+        ),
+        "docs_anchor": DatabaseConfigurationError.missing_datadog_schema.value,
+    },
+    DatabaseConfigurationError.missing_schema_usage_grant: {
+        "description": (
+            "The datadog user does not have USAGE on schema `{schema}`; query samples cannot resolve "
+            "objects in this schema."
+        ),
+        "remediation": "Run `GRANT USAGE ON SCHEMA {schema} TO <datadog_user>;` in every monitored database.",
+        "docs_anchor": DatabaseConfigurationError.missing_schema_usage_grant.value,
+    },
+    DatabaseConfigurationError.pg_stat_statements_not_readable: {
+        "description": (
+            "pg_stat_statements is installed but the datadog user cannot SELECT from it — typically a search_path "
+            "or privilege issue."
+        ),
+        "remediation": (
+            "Add the schema that contains pg_stat_statements to the datadog user's search_path, e.g. "
+            "`ALTER ROLE <datadog_user> SET search_path = \"$user\",public,<schema>;`."
+        ),
+        "docs_anchor": DatabaseConfigurationError.pg_stat_statements_not_readable.value,
+    },
+    DatabaseConfigurationError.config_validation: {
+        "description": "The Postgres integration configuration failed validation.",
+        "remediation": (
+            "Resolve the errors and warnings by editing conf.d/postgres.d/conf.yaml, then restart the agent."
+        ),
+        "docs_anchor": DatabaseConfigurationError.config_validation.value,
+    },
+}
+
+
+def parse_shared_preload_libraries(value):
+    """Split a `shared_preload_libraries` GUC value into a set of loaded library names.
+
+    Postgres stores this GUC as a comma-separated list; callers need to check membership
+    (`'pg_stat_statements' in ...`) to decide whether the extension is loaded. An empty or
+    missing value yields an empty set.
+    """
+    if not value:
+        return set()
+    return {part.strip() for part in value.split(",") if part.strip()}
+
+
+def build_description(code, **kwargs):
+    """Return the formatted description string for a DatabaseConfigurationError."""
+    meta = DIAGNOSTIC_METADATA.get(code, {})
+    return _format_diagnostic_text(meta.get("description"), **_diagnostic_context(code, **kwargs))
+
+
+def build_remediation(code, **kwargs):
+    """Return the full remediation string (prose + docs URL) for a DatabaseConfigurationError."""
+    meta = DIAGNOSTIC_METADATA.get(code, {})
+    parts = []
+    remediation = _format_diagnostic_text(meta.get("remediation"), **_diagnostic_context(code, **kwargs))
+    if remediation:
+        parts.append(remediation)
+    anchor = meta.get("docs_anchor")
+    if anchor:
+        parts.append("See {url}#{anchor} for details.".format(url=TROUBLESHOOTING_DOC_URL, anchor=anchor))
+    else:
+        parts.append("See {url} for details.".format(url=TROUBLESHOOTING_DOC_URL))
+    return " ".join(parts)
+
+
+def _diagnostic_context(code, **kwargs):
+    context = dict(kwargs)
+    if code == DatabaseConfigurationError.undefined_explain_function:
+        context.setdefault("explain_function", "datadog.explain_statement")
+    return context
+
+
+_diagnostic_fmt = PartialFormatter()
+
+
+def _format_diagnostic_text(template, **kwargs):
+    if not template:
+        return template
+    return _diagnostic_fmt.format(template, **kwargs)
 
 
 class DBExplainError(Enum):
