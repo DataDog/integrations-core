@@ -5,6 +5,9 @@ import mock
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError as _HTTPConnectionError
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
+from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError as _HTTPTimeoutError
 from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics
 from datadog_checks.traefik_mesh import TraefikMeshCheck
 
@@ -156,3 +159,21 @@ def test_submit_version(datadog_agent, dd_run_check, mock_http_response):
     }
 
     datadog_agent.assert_metadata('test:123', version_metadata)
+
+
+def test_get_json_handles_http_status_error():
+    check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE])
+    with mock.patch('requests.Session.get', side_effect=HTTPStatusError('404 Client Error')):
+        assert check._get_json('http://example.com/api') is None
+
+
+def test_get_json_handles_http_connection_error():
+    check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE])
+    with mock.patch('requests.Session.get', side_effect=_HTTPConnectionError('Connection refused')):
+        assert check._get_json('http://example.com/api') is None
+
+
+def test_get_json_handles_http_timeout_error():
+    check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE])
+    with mock.patch('requests.Session.get', side_effect=_HTTPTimeoutError('Read timed out')):
+        assert check._get_json('http://example.com/api') is None

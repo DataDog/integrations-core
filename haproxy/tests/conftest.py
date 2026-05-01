@@ -14,6 +14,7 @@ import pytest
 import requests
 from packaging import version
 
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.haproxy import HAProxyCheck
 from datadog_checks.haproxy.metrics import METRIC_MAP
@@ -204,14 +205,13 @@ def instancev2():
     return instance
 
 
-@pytest.fixture(scope="module")
-def haproxy_mock():
+@pytest.fixture
+def haproxy_mock(mock_http):
     filepath = os.path.join(HERE, 'fixtures', 'mock_data')
     with open(filepath, 'rb') as f:
         data = f.read()
-    p = mock.patch('requests.Session.get', return_value=mock.Mock(content=data))
-    yield p.start()
-    p.stop()
+    mock_http.get.return_value = MockHTTPResponse(content=data)
+    yield
 
 
 @pytest.fixture(scope="module")
@@ -222,23 +222,22 @@ def mock_data():
     return data.split('\n')
 
 
-@pytest.fixture(scope="module")
-def haproxy_mock_evil():
+@pytest.fixture
+def haproxy_mock_evil(mock_http):
     filepath = os.path.join(HERE, 'fixtures', 'mock_data_evil')
     with open(filepath, 'rb') as f:
         data = f.read()
-    p = mock.patch('requests.Session.get', return_value=mock.Mock(content=data))
-    yield p.start()
-    p.stop()
+    mock_http.get.return_value = MockHTTPResponse(content=data)
+    yield
 
 
-@pytest.fixture(scope="module")
-def haproxy_mock_enterprise_version_info():
+@pytest.fixture
+def haproxy_mock_enterprise_version_info(mock_http):
     filepath = os.path.join(HERE, 'fixtures', 'enterprise_version_info.html')
     with open(filepath, 'rb') as f:
         data = f.read()
-    with mock.patch('requests.Session.get', return_value=mock.Mock(content=data)) as p:
-        yield p
+    mock_http.get.return_value = MockHTTPResponse(content=data)
+    yield
 
 
 @pytest.fixture(scope="session")

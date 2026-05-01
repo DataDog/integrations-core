@@ -6,6 +6,7 @@ import time
 import requests
 
 from datadog_checks.base import OpenMetricsBaseCheck, is_affirmative
+from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
 
 from .check import VaultCheckV2
 from .common import API_METHODS, DEFAULT_API_VERSION, SYS_HEALTH_DEFAULT_CODES, SYS_LEADER_DEFAULT_CODES, Api, Leader
@@ -257,7 +258,7 @@ class Vault(OpenMetricsBaseCheck):
             msg = 'The Vault endpoint `{}` returned invalid json data: {}.'.format(url, e)
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=msg, tags=self._tags)
             raise ApiUnreachable(msg)
-        except requests.exceptions.Timeout:
+        except (requests.exceptions.Timeout, HTTPTimeoutError):
             msg = 'Vault endpoint `{}` timed out after {} seconds'.format(url, self.http.options['timeout'][0])
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=msg, tags=self._tags)
             raise ApiUnreachable(msg)
@@ -318,7 +319,7 @@ class Vault(OpenMetricsBaseCheck):
             self.set_client_token(f.read().decode('utf-8'))
 
     def _set_header(self, http_wrapper, header, value):
-        http_wrapper.options['headers'][header] = value
+        http_wrapper.set_header(header, value)
 
     def get_scraper_config(self, instance):
         # This validation is called during `__init__` but we don't need it

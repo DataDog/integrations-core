@@ -17,7 +17,7 @@ def test_critical_service_check(dd_run_check, aggregator, mock_http_response, ch
     When we can't connect to dcgm-exporter for whatever reason we should only submit a CRITICAL service check.
     """
     mock_http_response(status_code=404)
-    with pytest.raises(Exception, match="requests.exceptions.HTTPError"):
+    with pytest.raises(Exception, match="HTTPStatusError"):
         dd_run_check(check)
     aggregator.assert_service_check('dcgm.openmetrics.health', status=check.CRITICAL)
 

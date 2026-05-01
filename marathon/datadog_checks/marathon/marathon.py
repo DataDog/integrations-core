@@ -7,6 +7,7 @@ from urllib.parse import urljoin
 import requests
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
 
 
 class Marathon(AgentCheck):
@@ -114,7 +115,7 @@ class Marathon(AgentCheck):
                 self.refresh_acs_token(acs_url, tags)
                 r = self.http.get(url)
             r.raise_for_status()
-        except requests.exceptions.Timeout:
+        except (requests.exceptions.Timeout, HTTPTimeoutError):
             # If there's a timeout
             self.service_check(
                 self.SERVICE_CHECK_NAME,

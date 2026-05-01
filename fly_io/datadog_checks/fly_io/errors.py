@@ -5,6 +5,8 @@ from functools import wraps
 
 import requests
 
+from datadog_checks.base.utils.http_exceptions import HTTPRequestError, HTTPStatusError
+
 
 def handle_error(f):
     @wraps(f)
@@ -12,7 +14,7 @@ def handle_error(f):
         try:
             result = f(check, *args, **kwargs)
             return result
-        except requests.exceptions.RequestException as e:
+        except (requests.exceptions.RequestException, HTTPRequestError, HTTPStatusError) as e:
             check.log.debug(
                 "Encountered a RequestException in '%s' [%s]: %s",
                 f.__name__,

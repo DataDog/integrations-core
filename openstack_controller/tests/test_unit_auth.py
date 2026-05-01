@@ -8,7 +8,7 @@ import os
 import pytest
 
 import tests.configs as configs
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 
 pytestmark = [
     pytest.mark.unit,
@@ -20,14 +20,14 @@ pytestmark = [
     ('mock_http_post', 'connection_authorize', 'instance'),
     [
         pytest.param(
-            {'http_error': {'/identity/v3/auth/tokens': MockResponse(status_code=500)}},
+            {'http_error': {'/identity/v3/auth/tokens': MockHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             id='api rest',
         ),
         pytest.param(
             None,
-            {'http_error': MockResponse(status_code=500)},
+            {'http_error': MockHTTPResponse(status_code=500)},
             configs.SDK,
             id='api sdk',
         ),

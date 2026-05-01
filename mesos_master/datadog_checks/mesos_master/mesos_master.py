@@ -13,6 +13,7 @@ import requests
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
 
 
 class MesosMaster(AgentCheck):
@@ -183,7 +184,7 @@ class MesosMaster(AgentCheck):
             else:
                 status = AgentCheck.OK
                 msg = "Mesos master instance detected at {} ".format(url)
-        except requests.exceptions.Timeout:
+        except (requests.exceptions.Timeout, HTTPTimeoutError):
             # If there's a timeout
             msg = "{} seconds timeout when hitting {}".format(self.http.options['timeout'], url)
             status = AgentCheck.CRITICAL
