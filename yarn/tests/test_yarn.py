@@ -266,14 +266,35 @@ def test_auth(aggregator, mocked_auth_request):
     )
 
 
-def test_tls_verify_config_propagates():
+def test_ssl_verification(aggregator, mock_http):
+    from requests.exceptions import SSLError
+
+    from .conftest import requests_get_mock
+
+    # verify=True + bad cert → SSLError → CRITICAL service check
+    mock_http.get.side_effect = SSLError("certificate verification failed")
     instance = YARN_SSL_VERIFY_TRUE_CONFIG['instances'][0]
     yarn = YarnCheck('yarn', {}, [instance])
-    assert yarn.http.options['verify'] is True
+    with pytest.raises(SSLError):
+        yarn.check(instance)
+    aggregator.assert_service_check(
+        SERVICE_CHECK_NAME,
+        status=YarnCheck.CRITICAL,
+        tags=EXPECTED_TAGS + ['url:{}'.format(RM_ADDRESS)],
+        count=1,
+    )
 
+    # verify=False → no error → 4 OK service checks
+    mock_http.get.side_effect = requests_get_mock
     instance = YARN_SSL_VERIFY_FALSE_CONFIG['instances'][0]
     yarn = YarnCheck('yarn', {}, [instance])
-    assert yarn.http.options['verify'] is False
+    yarn.check(instance)
+    aggregator.assert_service_check(
+        SERVICE_CHECK_NAME,
+        status=YarnCheck.OK,
+        tags=EXPECTED_TAGS + ['url:{}'.format(RM_ADDRESS)],
+        count=4,
+    )
 
 
 def test_collect_apps_all_states(dd_run_check, aggregator, mocked_request):
