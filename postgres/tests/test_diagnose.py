@@ -117,15 +117,6 @@ def _successful_explain():
     return [('plan',)]
 
 
-def _main_database_only_connection(dbname, conn):
-    def connect(**kwargs):
-        if kwargs['dbname'] != dbname:
-            raise psycopg.OperationalError('unexpected database probe')
-        return conn
-
-    return connect
-
-
 # -- record_warning regression ------------------------------------------------
 
 
@@ -631,16 +622,20 @@ def test_query_metrics_pg_stat_statements_checked_on_main_database_only(integrat
         ("extname = 'pg_stat_statements'", [(1,)]),
         ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
     ]
+    # Autodiscovered DBs are probed for connectivity but no DBM probes run on them
+    # (query_samples is disabled), so a bare FakeConn is sufficient.
+    connections = {
+        pg_instance['dbname']: FakeConn(_happy_server_responses() + main_dbm),
+        'app_a': FakeConn([]),
+        'app_b': FakeConn([]),
+    }
     with mock.patch.object(check.autodiscovery, 'get_items', return_value=['app_a', 'app_b']):
         with mock.patch(
             'datadog_checks.postgres.diagnose.TokenAwareConnection.connect',
-            side_effect=_main_database_only_connection(
-                pg_instance['dbname'], FakeConn(_happy_server_responses() + main_dbm)
-            ),
-        ) as connect:
+            side_effect=lambda **kwargs: connections[kwargs['dbname']],
+        ):
             diagnoses = _get_diagnoses(check)
 
-    assert {call.kwargs['dbname'] for call in connect.call_args_list} == {pg_instance['dbname']}
     rows = _by_name(diagnoses, DatabaseConfigurationError.pg_stat_statements_not_created.value)
     assert len(rows) == 1
     assert rows[0]['result'] == Diagnosis.DIAGNOSIS_SUCCESS
@@ -662,16 +657,18 @@ def test_query_metrics_pg_stat_statements_readable_checked_on_main_database_only
         ("extname = 'pg_stat_statements'", [(1,)]),
         ('"public"."wrong_view"', [(1,)]),
     ]
+    connections = {
+        pg_instance['dbname']: FakeConn(_happy_server_responses() + main_dbm),
+        'app_a': FakeConn([]),
+        'app_b': FakeConn([]),
+    }
     with mock.patch.object(check.autodiscovery, 'get_items', return_value=['app_a', 'app_b']):
         with mock.patch(
             'datadog_checks.postgres.diagnose.TokenAwareConnection.connect',
-            side_effect=_main_database_only_connection(
-                pg_instance['dbname'], FakeConn(_happy_server_responses() + main_dbm)
-            ),
-        ) as connect:
+            side_effect=lambda **kwargs: connections[kwargs['dbname']],
+        ):
             diagnoses = _get_diagnoses(check)
 
-    assert {call.kwargs['dbname'] for call in connect.call_args_list} == {pg_instance['dbname']}
     rows = _by_name(diagnoses, DatabaseConfigurationError.pg_stat_statements_not_readable.value)
     assert len(rows) == 1
     assert rows[0]['result'] == Diagnosis.DIAGNOSIS_SUCCESS
@@ -778,7 +775,9 @@ def test_schema_usage_skipped_when_datadog_schema_missing(integration_check, pg_
 
 
 def test_dbm_probe_databases_not_used_for_metrics_only(integration_check, pg_instance):
-    """With query_samples disabled, query_metrics probes pg_stat_statements on the main DB only."""
+    """With query_samples disabled, query_metrics probes pg_stat_statements on the main DB only --
+    no datadog-schema or explain-function checks fire on autodiscovered DBs (those are
+    query_samples prerequisites). Per-DB connectivity is still validated."""
     instance = dict(
         pg_instance,
         dbm=True,
@@ -790,22 +789,117 @@ def test_dbm_probe_databases_not_used_for_metrics_only(integration_check, pg_ins
         ("extname = 'pg_stat_statements'", [(1,)]),
         ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
     ]
+    connections = {
+        pg_instance['dbname']: FakeConn(_happy_server_responses() + metrics_only_dbm),
+        'app_a': FakeConn([]),
+        'app_b': FakeConn([]),
+    }
     with mock.patch.object(check.autodiscovery, 'get_items', return_value=['app_a', 'app_b']):
         with mock.patch(
             'datadog_checks.postgres.diagnose.TokenAwareConnection.connect',
-            side_effect=_main_database_only_connection(
-                pg_instance['dbname'], FakeConn(_happy_server_responses() + metrics_only_dbm)
-            ),
-        ) as connect:
+            side_effect=lambda **kwargs: connections[kwargs['dbname']],
+        ):
             diagnoses = _get_diagnoses(check)
 
-    opened_dbnames = {call.kwargs['dbname'] for call in connect.call_args_list}
-    assert opened_dbnames == {pg_instance['dbname']}
     extension_rows = _by_name(diagnoses, DatabaseConfigurationError.pg_stat_statements_not_created.value)
     assert len(extension_rows) == 1
     assert extension_rows[0]['result'] == Diagnosis.DIAGNOSIS_SUCCESS
     assert pg_instance['dbname'] in extension_rows[0]['diagnosis']
     assert not _by_name(diagnoses, DatabaseConfigurationError.missing_schema_usage_grant.value)
+    assert not _by_name(diagnoses, DatabaseConfigurationError.undefined_explain_function.value)
+
+
+# -- Autodiscovery connectivity probing (regardless of DBM) ------------------
+
+
+def test_autodiscovery_without_dbm_probes_each_database_connectivity(integration_check, pg_instance):
+    """Autodiscovery without DBM still fans out connections to discovered DBs in the
+    running check (relation/function/count metrics), so diagnose must validate that
+    the datadog user can CONNECT to each one. A failure on a discovered DB should
+    surface as a connection_failure diagnostic with that dbname embedded.
+    """
+    instance = dict(
+        pg_instance,
+        database_autodiscovery={'enabled': True, 'include': ['app_.*']},
+    )
+    check = integration_check(instance)
+    main_conn = FakeConn(_happy_server_responses())
+    err = psycopg.OperationalError('permission denied for database "app_b"')
+
+    def connect(**kwargs):
+        if kwargs['dbname'] == pg_instance['dbname']:
+            return main_conn
+        if kwargs['dbname'] == 'app_a':
+            return FakeConn([])
+        if kwargs['dbname'] == 'app_b':
+            raise err
+        raise psycopg.OperationalError('unexpected dbname={}'.format(kwargs['dbname']))
+
+    with mock.patch.object(check.autodiscovery, 'get_items', return_value=['app_a', 'app_b']):
+        with mock.patch(
+            'datadog_checks.postgres.diagnose.TokenAwareConnection.connect', side_effect=connect
+        ) as connect_mock:
+            diagnoses = _get_diagnoses(check)
+
+    opened_dbnames = [call.kwargs['dbname'] for call in connect_mock.call_args_list]
+    assert pg_instance['dbname'] in opened_dbnames
+    assert 'app_a' in opened_dbnames
+    assert 'app_b' in opened_dbnames
+
+    conn_diags = _by_name(diagnoses, DatabaseConfigurationError.connection_failure.value)
+    failed = [d for d in conn_diags if d['result'] == Diagnosis.DIAGNOSIS_FAIL]
+    assert len(failed) == 1, failed
+    assert 'app_b' in failed[0]['diagnosis']
+    assert 'permission denied' in failed[0]['diagnosis']
+
+    # No DBM-specific per-database probes should fire when dbm is off.
+    assert not _by_name(diagnoses, DatabaseConfigurationError.missing_datadog_schema.value)
+    assert not _by_name(diagnoses, DatabaseConfigurationError.undefined_explain_function.value)
+
+
+def test_dbm_without_query_samples_still_probes_autodiscovered_connectivity(integration_check, pg_instance):
+    """A query-metrics/query-activity-only DBM setup with autodiscovery still connects
+    per-DB at runtime for relation metrics; diagnose must surface CONNECT failures even
+    though the DBM-specific schema/explain probes are correctly skipped.
+    """
+    instance = dict(
+        pg_instance,
+        dbm=True,
+        query_samples={'enabled': False},
+        database_autodiscovery={'enabled': True, 'include': ['app_.*']},
+    )
+    check = integration_check(instance)
+    err = psycopg.OperationalError('permission denied for database "app_b"')
+    main_responses = _happy_server_responses() + [
+        ("extname = 'pg_stat_statements'", [(1,)]),
+        ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
+    ]
+
+    def connect(**kwargs):
+        if kwargs['dbname'] == pg_instance['dbname']:
+            return FakeConn(main_responses)
+        if kwargs['dbname'] == 'app_a':
+            return FakeConn([])
+        if kwargs['dbname'] == 'app_b':
+            raise err
+        raise psycopg.OperationalError('unexpected dbname={}'.format(kwargs['dbname']))
+
+    with mock.patch.object(check.autodiscovery, 'get_items', return_value=['app_a', 'app_b']):
+        with mock.patch(
+            'datadog_checks.postgres.diagnose.TokenAwareConnection.connect', side_effect=connect
+        ) as connect_mock:
+            diagnoses = _get_diagnoses(check)
+
+    opened_dbnames = [call.kwargs['dbname'] for call in connect_mock.call_args_list]
+    assert set(opened_dbnames) == {pg_instance['dbname'], 'app_a', 'app_b'}
+
+    conn_diags = _by_name(diagnoses, DatabaseConfigurationError.connection_failure.value)
+    failed = [d for d in conn_diags if d['result'] == Diagnosis.DIAGNOSIS_FAIL]
+    assert len(failed) == 1
+    assert 'app_b' in failed[0]['diagnosis']
+
+    # query_samples is disabled -> no datadog schema or explain function probes anywhere.
+    assert not _by_name(diagnoses, DatabaseConfigurationError.missing_datadog_schema.value)
     assert not _by_name(diagnoses, DatabaseConfigurationError.undefined_explain_function.value)
 
 

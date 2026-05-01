@@ -67,31 +67,44 @@ class PostgresDiagnose:
         """Single entry point: open one probe connection and run every diagnostic.
 
         A single orchestrator means a single `connection-failure` row per run
-        (vs. one per orchestrator when the dbname matches). DBM-specific probes
-        are gated on the subfeatures that actually consume each dependency:
-        a query-activity-only setup (``dbm: true`` with query_metrics/query_samples
-        disabled) should not be flagged unhealthy for a missing pg_stat_statements
-        or explain function it will never call.
+        for the main DB (vs. one per orchestrator when the dbname matches).
+        Feature-specific probes are gated on the subfeatures that actually
+        consume each dependency: a query-activity-only setup (``dbm: true``
+        with query_metrics/query_samples disabled) should not be flagged
+        unhealthy for a missing pg_stat_statements or explain function it
+        will never call.
 
-        ``_diagnose_config_validation`` always runs, even when the probe connection
-        cannot be opened -- it only reads in-memory state from ``build_config``.
+        Per-database probing runs whenever the running check connects to
+        databases beyond the main one -- either because autodiscovery is on
+        (relation/function/count metrics fan out across discovered DBs) or
+        because DBM+query_samples needs the datadog schema and explain
+        function on each sampled DB. For autodiscovery without DBM the loop
+        body is empty: validating connectivity is the work, and
+        ``_open_probe_connection`` records that diagnostic on its own.
+
+        ``_diagnose_config_validation`` always runs, even when the probe
+        connection cannot be opened -- it only reads in-memory state from
+        ``build_config``.
         """
         self._failed = set()
-        conn = self._open_probe_connection(self._check._config.dbname)
+        main_conn = self._open_probe_connection(self._check._config.dbname)
         try:
-            if conn is not None:
-                self._diagnose_version(conn)
+            if main_conn is not None:
+                self._diagnose_version(main_conn)
                 if self._uses_pg_stat_activity():
-                    self._diagnose_pg_monitor_role(conn)
-                    self._diagnose_pg_stat_activity_access(conn)
+                    self._diagnose_pg_monitor_role(main_conn)
+                    self._diagnose_pg_stat_activity_access(main_conn)
                 if self._check._config.dbm:
-                    self._run_dbm_probes(conn)
+                    self._run_main_dbm_probes(main_conn)
+                if self._needs_per_database_probing():
+                    self._run_per_database_probes(main_conn)
         finally:
-            if conn is not None:
-                _safe_close(conn)
+            if main_conn is not None:
+                _safe_close(main_conn)
             self._diagnose_config_validation()
 
-    def _run_dbm_probes(self, conn):
+    def _run_main_dbm_probes(self, conn):
+        """Cluster-level DBM probes that only need the main connection."""
         query_metrics = self._check._config.query_metrics.enabled
         query_samples = self._check._config.query_samples.enabled
         # track_activity_query_size backs pg_stat_activity's query column, used by
@@ -108,24 +121,41 @@ class PostgresDiagnose:
             self._diagnose_pg_stat_statements_extension(conn, self._check._config.dbname, failed)
             self._diagnose_pg_stat_statements_readable(conn, self._check._config.dbname, failed)
 
-        if not query_samples:
-            return
+    def _needs_per_database_probing(self):
+        """True when the running check fans out connections across multiple DBs.
 
-        # Query-sample setup is per-database. Query-metrics setup is intentionally not included
-        # here: the runtime statement collector reads cross-database pg_stat_statements rows from
-        # the main DB connection only.
-        for dbname in self._get_dbm_probe_databases(conn):
-            probe_conn = conn if dbname == self._check._config.dbname else self._open_probe_connection(dbname)
+        Autodiscovery causes per-DB connections for relation/function/count
+        metrics regardless of DBM. DBM+query_samples needs per-DB schema and
+        explain function probes. Either condition warrants walking the DB list.
+        """
+        config = self._check._config
+        return (config.database_autodiscovery.enabled and self._check.autodiscovery is not None) or (
+            config.dbm and config.query_samples.enabled
+        )
+
+    def _run_per_database_probes(self, main_conn):
+        """Walk the enumerated DB list, validating connectivity for each.
+
+        DBM-specific per-DB probes (datadog schema, schema usage, explain
+        function) layer in only when DBM+query_samples is configured.
+        Connectivity validation is the side effect of opening the probe
+        connection -- ``_open_probe_connection`` emits the
+        ``connection_failure`` diagnostic with the failing dbname embedded.
+        """
+        run_dbm_setup_probes = self._check._config.dbm and self._check._config.query_samples.enabled
+        for dbname in self._get_probe_databases(main_conn):
+            probe_conn = main_conn if dbname == self._check._config.dbname else self._open_probe_connection(dbname)
             if probe_conn is None:
                 continue
-            failed = set()
             try:
-                self._diagnose_datadog_schema(probe_conn, dbname, failed)
-                self._diagnose_schema_usage(probe_conn, dbname, "datadog", failed)
-                self._diagnose_schema_usage(probe_conn, dbname, "public", failed)
-                self._diagnose_explain_function(probe_conn, dbname, failed)
+                if run_dbm_setup_probes:
+                    failed = set()
+                    self._diagnose_datadog_schema(probe_conn, dbname, failed)
+                    self._diagnose_schema_usage(probe_conn, dbname, "datadog", failed)
+                    self._diagnose_schema_usage(probe_conn, dbname, "public", failed)
+                    self._diagnose_explain_function(probe_conn, dbname, failed)
             finally:
-                if probe_conn is not conn:
+                if probe_conn is not main_conn:
                     _safe_close(probe_conn)
 
     # -- diagnostics ----------------------------------------------------------
@@ -663,7 +693,7 @@ class PostgresDiagnose:
             config.dbm and (config.query_samples.enabled or config.query_activity.enabled)
         )
 
-    def _get_dbm_probe_databases(self, conn):
+    def _get_probe_databases(self, conn):
         # dbstrict wins: the sample collector filters by `datname = self._config.dbname`
         # at runtime (statement_samples.py). Probing any other DB here would misrepresent
         # what the running check actually samples.

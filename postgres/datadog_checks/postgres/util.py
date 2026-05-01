@@ -178,7 +178,9 @@ DIAGNOSTIC_METADATA = {
     },
     DatabaseConfigurationError.config_validation: {
         "description": "The Postgres integration configuration failed validation.",
-        "remediation": "Resolve the errors and warnings by editing conf.d/postgres.d/conf.yaml, then restart the agent.",
+        "remediation": (
+            "Resolve the errors and warnings by editing conf.d/postgres.d/conf.yaml, then restart the agent."
+        ),
         "docs_anchor": DatabaseConfigurationError.config_validation.value,
     },
 }
