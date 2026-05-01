@@ -1,0 +1,1 @@
+Cisco Catalyst: use ``entPhysicalSerialNum`` when ``chassisSerialNumberString`` is absent for device ``serial_number`` metadata.
