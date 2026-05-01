@@ -273,7 +273,11 @@ def test_ssl_verification(aggregator, mock_http):
 
     mock_http.get.side_effect = SSLError("certificate verification failed")
     instance = YARN_SSL_VERIFY_TRUE_CONFIG['instances'][0]
+
+    # Instantiate YarnCheck
     yarn = YarnCheck('yarn', {}, [instance])
+
+    # Run the check on a config with a badly configured SSL certificate
     try:
         yarn.check(instance)
     except SSLError:
@@ -287,6 +291,7 @@ def test_ssl_verification(aggregator, mock_http):
     else:
         raise AssertionError('Should have thrown an SSLError due to a badly configured certificate')
 
+    # Run the check on the same configuration, but with verify=False. We shouldn't get an exception.
     mock_http.get.side_effect = requests_get_mock
     instance = YARN_SSL_VERIFY_FALSE_CONFIG['instances'][0]
     yarn = YarnCheck('yarn', {}, [instance])
