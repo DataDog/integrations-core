@@ -1609,6 +1609,10 @@ tests:
       ocsf:
         activity_id: 1
         activity_name: "Open"
+        actor:
+          process:
+            path: "/usr/bin/bash"
+            name: "bash"
         category_name: "Network Activity"
         category_uid: 4
         class_name: "Network Activity"
