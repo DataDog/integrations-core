@@ -10,12 +10,14 @@ files:
       options:
       - template: instances/openmetrics
         overrides:
+          openmetrics_endpoint.display_priority: 3
           openmetrics_endpoint.required: true
           openmetrics_endpoint.value.example: http://<PROXY_ENDPOINT>:<METRICS_PORT>
           openmetrics_endpoint.description: |
             Endpoint exposing the Traefic Proxy Prometheus metrics. For more information refer to:
             https://doc.traefik.io/traefik/observability/metrics/prometheus/
       - name: traefik_proxy_api_endpoint
+        display_priority: 2
         fleet_configurable: true
         formats: ["url"]
         required: false
@@ -25,6 +27,7 @@ files:
           pattern: \w+
           type: string
       - name: traefik_controller_api_endpoint
+        display_priority: 1
         fleet_configurable: true
         formats: ["url"]
         required: false
