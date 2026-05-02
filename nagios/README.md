@@ -105,6 +105,152 @@ The check watches the Nagios events log for log lines containing these strings, 
 
 The Nagios check does not include any service checks.
 
+## Trigger on-call pages
+
+Configure Nagios notification commands to forward notifications to the Datadog events intake, which routes them to [Datadog On-Call][11] using an `oncall_team` query parameter. Datadog deduplicates and auto-resolves events that share an `aggregation_key`, so a Nagios `RECOVERY` resolves the page created by its corresponding `PROBLEM` automatically.
+
+### Map Nagios events to on-call pages
+
+| Nagios state       | Event `category` | Alert `status` | On-Call effect                                    |
+| ------------------ | ---------------- | -------------- | ------------------------------------------------- |
+| `CRITICAL`, `DOWN` | `alert`          | `error`        | Pages the configured On-Call team                 |
+| `WARNING`          | `alert`          | `warn`         | Pages the configured On-Call team                 |
+| `OK`, `UP`         | `alert`          | `ok`           | Resolves the page with the same `aggregation_key` |
+| `UNKNOWN`          | `change`         | _n/a_          | Sends a non-paging informational event            |
+
+To page on `UNKNOWN` instead, change its mapping in the script.
+
+### Setup
+
+The script depends on `curl` and `python3`. Both are commonly available on Nagios hosts.
+
+Keep the Datadog API key out of `commands.cfg`. Set `DD_API_KEY` as an environment variable exported by the Nagios service, or load it from a Nagios resource file with restricted permissions.
+
+#### Create the notification script
+
+Create `/usr/local/nagios/libexec/notify_datadog_oncall.sh`:
+
+```bash
+#!/bin/bash
+set -u
+
+DD_API_KEY="${DD_API_KEY:-<YOUR_DATADOG_API_KEY>}"
+DD_SITE="${DD_SITE:-datadoghq.com}"  # for example, datadoghq.eu, us3.datadoghq.com
+
+NAGIOS_HOST="${1}"
+SERVICEDESC="${2}"
+STATE="${3}"        # CRITICAL, WARNING, OK, UNKNOWN, UP, DOWN
+ONCALL_TEAM="${4}"  # Datadog On-Call team handle, for example, "ops"
+OUTPUT="${5}"
+
+case "$STATE" in
+  CRITICAL|DOWN) CATEGORY="alert"; STATUS="error" ;;
+  WARNING)       CATEGORY="alert"; STATUS="warn"  ;;
+  OK|UP)         CATEGORY="alert"; STATUS="ok"    ;;
+  *)             CATEGORY="change"; STATUS=""     ;;
+esac
+
+TITLE_JSON=$(printf 'Nagios: %s / %s is %s' "$NAGIOS_HOST" "$SERVICEDESC" "$STATE" \
+  | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')
+MESSAGE_JSON=$(printf '%s' "$OUTPUT" \
+  | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')
+
+if [ "$CATEGORY" = "alert" ]; then
+  ATTRS_JSON="{\"status\": \"$STATUS\"}"
+else
+  ATTRS_JSON="{}"
+fi
+
+PAYLOAD=$(cat <<EOF
+{
+  "category": "$CATEGORY",
+  "title": $TITLE_JSON,
+  "message": $MESSAGE_JSON,
+  "aggregation_key": "nagios:${NAGIOS_HOST}:${SERVICEDESC}",
+  "tags": ["integration:nagios", "host:${NAGIOS_HOST}", "service:${SERVICEDESC}"],
+  "attributes": $ATTRS_JSON
+}
+EOF
+)
+
+URL="https://event-management-intake.${DD_SITE}/api/v2/events/webhook?dd-api-key=${DD_API_KEY}&integration_id=nagios&oncall_team=${ONCALL_TEAM}"
+
+RESPONSE_FILE=$(mktemp)
+trap 'rm -f "$RESPONSE_FILE"' EXIT
+
+HTTP_CODE=$(curl -s -m 15 -o "$RESPONSE_FILE" -w '%{http_code}' \
+  -X POST "$URL" \
+  -H "Content-Type: application/json" \
+  -d "$PAYLOAD")
+
+if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+  echo "Datadog On-Call notification failed: HTTP $HTTP_CODE" >&2
+  cat "$RESPONSE_FILE" >&2
+  exit 1
+fi
+```
+
+Make the script executable:
+
+```shell
+sudo chmod 755 /usr/local/nagios/libexec/notify_datadog_oncall.sh
+```
+
+#### Define the Nagios commands
+
+Add to `commands.cfg`. Use separate commands for service and host notifications so the correct Nagios macros are passed:
+
+```nagios
+define command {
+    command_name    notify-datadog-oncall-service
+    command_line    /usr/local/nagios/libexec/notify_datadog_oncall.sh "$HOSTALIAS$" "$SERVICEDESC$" "$SERVICESTATE$" "$_CONTACTONCALL_TEAM$" "$SERVICEOUTPUT$"
+}
+
+define command {
+    command_name    notify-datadog-oncall-host
+    command_line    /usr/local/nagios/libexec/notify_datadog_oncall.sh "$HOSTALIAS$" "Host" "$HOSTSTATE$" "$_CONTACTONCALL_TEAM$" "$HOSTOUTPUT$"
+}
+```
+
+#### Create contacts with the On-Call team handle
+
+The custom variable `_oncall_team` maps to the Datadog On-Call team handle `@oncall-<handle>`. Set it to exactly the team handle configured in [Datadog On-Call][11], without the `@oncall-` prefix. Add contacts to `contacts.cfg`:
+
+```nagios
+define contact {
+    contact_name                    datadog-ops
+    alias                           Ops Team On-Call
+    service_notification_period     24x7
+    host_notification_period        24x7
+    service_notification_options    w,u,c,r
+    host_notification_options       d,u,r
+    service_notification_commands   notify-datadog-oncall-service
+    host_notification_commands      notify-datadog-oncall-host
+    _oncall_team                    ops
+}
+```
+
+#### Assign the contact to services or hosts
+
+```nagios
+define service {
+    use                     generic-service
+    host_name               webserver-01
+    service_description     HTTP_Service
+    check_command           check_http
+    contacts                datadog-ops
+    notification_options    w,u,c,r
+}
+```
+
+#### Reload Nagios
+
+```shell
+sudo systemctl reload nagios
+```
+
+Verify pages appear under **On-Call > Pages** in Datadog.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][9].
@@ -123,3 +269,4 @@ Need help? Contact [Datadog support][9].
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://docs.datadoghq.com/help/
 [10]: https://www.datadoghq.com/blog/nagios-monitoring
+[11]: https://docs.datadoghq.com/service_management/on-call/
