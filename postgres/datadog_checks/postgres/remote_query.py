@@ -12,7 +12,16 @@ from typing import TYPE_CHECKING, Any, Literal, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr, ValidationError, field_validator
 
-RemoteQuerySql = Literal['SELECT 1 AS value', 'SELECT city, country FROM cities ORDER BY city']
+RemoteQuerySql = Literal[
+    'SELECT 1 AS value',
+    'SELECT city, country FROM cities ORDER BY city',
+    "SELECT repeat('x', 1048576) AS payload",
+    "SELECT repeat('x', 2097152) AS payload",
+    "SELECT repeat('x', 4194304) AS payload",
+    "SELECT repeat('x', 8388608) AS payload",
+    "SELECT repeat('x', 16777216) AS payload",
+    "SELECT repeat('x', 33554432) AS payload",
+]
 
 if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql

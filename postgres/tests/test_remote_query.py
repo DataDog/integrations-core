@@ -276,6 +276,24 @@ def test_execute_accepts_fixture_table_query_and_serializes_result_rows():
     assert pool.requested_dbnames == ['datadog_test']
 
 
+@pytest.mark.parametrize('size', [1048576, 2097152, 4194304, 8388608, 16777216, 33554432])
+def test_execute_accepts_large_payload_proof_queries_and_serializes_result_rows(size):
+    pool = FakePool(rows=[('x' * size,)], description=[SimpleNamespace(name='payload')])
+    check = make_check(pool=pool)
+
+    response = execute_remote_query(
+        valid_request(query=f"SELECT repeat('x', {size}) AS payload"), StaticPostgresCheckRegistry([check])
+    )
+
+    assert response['status'] == 'SUCCEEDED'
+    assert response['columns'] == [{'name': 'payload', 'type': 'string'}]
+    assert len(response['rows']) == 1
+    assert len(response['rows'][0]['payload']) == size
+    assert response['truncated'] is False
+    assert response['stats']['rowCount'] == 1
+    assert pool.requested_dbnames == ['datadog_test']
+
+
 @pytest.mark.parametrize(
     'query',
     [
