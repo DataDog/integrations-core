@@ -17,6 +17,7 @@ from . import queries
 from .__about__ import __version__
 from .config import build_config, sanitize
 from .health import ClickhouseHealth, HealthEvent, HealthStatus
+from .metadata import ClickhouseMetadata
 from .parts_and_merges import ClickhousePartsAndMerges
 from .query_completions import ClickhouseQueryCompletions
 from .query_errors import ClickhouseQueryErrors
@@ -134,7 +135,11 @@ class ClickhouseCheck(DatabaseCheck):
         else:
             self.query_errors = None
 
-        # Initialize parts and merges monitoring (from system.parts, merges, mutations, replication_queue)
+        if self._config.dbm and self._config.collect_schemas and self._config.collect_schemas.enabled:
+            self.metadata = ClickhouseMetadata(self, self._config.collect_schemas)
+        else:
+            self.metadata = None
+
         if self._config.dbm and self._config.parts_and_merges.enabled:
             self.parts_and_merges = ClickhousePartsAndMerges(self, self._config.parts_and_merges)
         else:
@@ -267,6 +272,9 @@ class ClickhouseCheck(DatabaseCheck):
         # Run query errors if DBM is enabled (from system.query_log - failed queries)
         if self.query_errors:
             self.query_errors.run_job_loop(self.tags)
+
+        if self.metadata:
+            self.metadata.run_job_loop(self.tags)
 
         # Run parts and merges monitoring if enabled
         if self.parts_and_merges:
@@ -491,6 +499,8 @@ class ClickhouseCheck(DatabaseCheck):
             self.query_completions.cancel()
         if self.query_errors:
             self.query_errors.cancel()
+        if self.metadata:
+            self.metadata.cancel()
         if self.parts_and_merges:
             self.parts_and_merges.cancel()
 
@@ -503,6 +513,8 @@ class ClickhouseCheck(DatabaseCheck):
             self.query_completions._job_loop_future.result()
         if self.query_errors and self.query_errors._job_loop_future:
             self.query_errors._job_loop_future.result()
+        if self.metadata and self.metadata._job_loop_future:
+            self.metadata._job_loop_future.result()
         if self.parts_and_merges and self.parts_and_merges._job_loop_future:
             self.parts_and_merges._job_loop_future.result()
 

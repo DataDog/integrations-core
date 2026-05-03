@@ -197,6 +197,37 @@ instances:
         #
         # samples_per_hour_per_query: 60
 
+    ## Configure collection of ClickHouse catalog metadata (databases,
+    ## tables, views, columns) for Database Monitoring's Schema Explorer.
+    ## Requires `dbm: true`.
+    #
+    # collect_schemas:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of catalog metadata. When enabled, the agent
+        ## polls `system.tables`, `system.columns`, and
+        ## `system.view_refreshes` (ClickHouse 24.3+) and emits one
+        ## `kind=clickhouse_databases` payload per cycle.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 600
+        ## Set the schema collection interval (in seconds). Catalog data
+        ## changes slowly; 600s (10 min) is a reasonable default.
+        #
+        # collection_interval: 600
+
+        ## @param max_tables - integer - optional - default: 300
+        ## Maximum number of tables plus views to collect per cycle
+        ## across all databases.
+        #
+        # max_tables: 300
+
+        ## @param max_columns - integer - optional - default: 1000
+        ## Maximum number of columns to collect per table/view.
+        #
+        # max_columns: 1000
+
     ## Configure parts and merges monitoring
     #
     # parts_and_merges:
