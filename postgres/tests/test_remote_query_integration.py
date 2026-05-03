@@ -6,23 +6,7 @@ import json
 
 import pytest
 
-from datadog_checks.postgres.remote_query import (
-    StaticPostgresCheckRegistry,
-    execute_remote_query,
-    iter_agent_rpc_stream_copy_events,
-)
-
-
-def remote_query_request(pg_instance: dict[str, object], query: str) -> dict[str, object]:
-    return {
-        'target': {
-            'host': pg_instance['host'],
-            'port': int(pg_instance['port']),
-            'dbname': pg_instance['dbname'],
-        },
-        'query': query,
-        'limits': {'maxRows': 10, 'maxBytes': 1048576, 'timeoutMs': 5000},
-    }
+from datadog_checks.postgres.remote_query import StaticPostgresCheckRegistry, iter_agent_rpc_stream_copy_events
 
 
 def remote_query_copy_request(
@@ -51,37 +35,22 @@ def event_payload(event):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_agent_local_executor_select_1_reuses_integration_check_credentials(integration_check, pg_instance):
+def test_agent_local_copy_stream_select_1_reuses_integration_check_credentials(integration_check, pg_instance):
     check = integration_check(pg_instance)
-    request = remote_query_request(pg_instance, 'SELECT 1 AS value')
+    request = remote_query_copy_request(
+        pg_instance,
+        'SELECT 1 AS value',
+        {'chunkBytes': 16, 'maxBytes': 1024, 'maxRowBytes': 128, 'timeoutMs': 5000},
+    )
 
-    response = execute_remote_query(request, StaticPostgresCheckRegistry([check]))
+    events = list(iter_agent_rpc_stream_copy_events(request, StaticPostgresCheckRegistry([check])))
 
-    assert response['status'] == 'SUCCEEDED'
-    assert response['columns'][0]['name'] == 'value'
-    assert response['rows'] == [{'value': 1}]
-    assert response['truncated'] is False
-    assert response['stats']['rowCount'] == 1
-    assert 'password' not in json.dumps(request).lower()
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-def test_agent_local_executor_fixture_table_query_returns_city_rows(integration_check, pg_instance):
-    bob_instance = dict(pg_instance, username='bob', password='bob')
-    check = integration_check(bob_instance)
-    request = remote_query_request(bob_instance, 'SELECT city, country FROM cities ORDER BY city')
-
-    response = execute_remote_query(request, StaticPostgresCheckRegistry([check]))
-
-    assert response['status'] == 'SUCCEEDED'
-    assert response['columns'] == [{'name': 'city', 'type': 'string'}, {'name': 'country', 'type': 'string'}]
-    assert response['rows'] == [
-        {'city': 'Beautiful city of lights', 'country': 'France'},
-        {'city': 'New York', 'country': 'USA'},
-    ]
-    assert response['truncated'] is False
-    assert response['stats']['rowCount'] == 2
+    data = b''.join(event_payload(event) for event in events if event.event_type == 'data')
+    assert events[0].event_type == 'metadata'
+    assert event_metadata(events[0])['operation'] == 'copy_stream'
+    assert event_metadata(events[-1])['status'] == 'SUCCEEDED'
+    assert data == b'1\n'
+    assert event_metadata(events[-1])['stats']['bytesEmitted'] == len(data)
     assert 'password' not in json.dumps(request).lower()
 
 
@@ -133,22 +102,26 @@ def test_agent_local_copy_stream_binary_format_preserves_non_text_bytes(integrat
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_agent_local_copy_stream_enforces_max_row_bytes_and_reuses_connection(integration_check, pg_instance):
+def test_agent_local_copy_stream_enforces_max_row_bytes_and_connection_remains_reusable(integration_check, pg_instance):
     check = integration_check(pg_instance)
-    request = remote_query_copy_request(
+    oversized_request = remote_query_copy_request(
         pg_instance,
         "SELECT repeat('x', 1048576) AS payload",
         {'chunkBytes': 1024, 'maxBytes': 2 * 1048576, 'maxRowBytes': 1024, 'timeoutMs': 5000},
     )
 
-    events = list(iter_agent_rpc_stream_copy_events(request, StaticPostgresCheckRegistry([check])))
+    events = list(iter_agent_rpc_stream_copy_events(oversized_request, StaticPostgresCheckRegistry([check])))
 
     assert [event for event in events if event.event_type == 'data'] == []
     assert event_metadata(events[-1])['status'] == 'FAILED'
     assert event_metadata(events[-1])['error']['code'] == 'max_row_bytes_exceeded'
 
-    response = execute_remote_query(
-        remote_query_request(pg_instance, 'SELECT 1 AS value'), StaticPostgresCheckRegistry([check])
+    reusable_request = remote_query_copy_request(
+        pg_instance,
+        'SELECT 1 AS value',
+        {'chunkBytes': 16, 'maxBytes': 1024, 'maxRowBytes': 128, 'timeoutMs': 5000},
     )
-    assert response['status'] == 'SUCCEEDED'
-    assert response['rows'] == [{'value': 1}]
+    reusable_events = list(iter_agent_rpc_stream_copy_events(reusable_request, StaticPostgresCheckRegistry([check])))
+    reusable_data = b''.join(event_payload(event) for event in reusable_events if event.event_type == 'data')
+    assert event_metadata(reusable_events[-1])['status'] == 'SUCCEEDED'
+    assert reusable_data == b'1\n'
