@@ -181,20 +181,24 @@ class ClickhouseMetadata(DBMAsyncJob):
     def _emit_metrics(self, tables_rows: list, refresh_rows: list) -> None:
         """Emit per-table size and per-view refresh gauges."""
         base_tags = list(self._check.tags)
-        seen: set[tuple[str, str]] = set()
+        seen_tables: set[tuple[str, str]] = set()
+        seen_views: set[tuple[str, str]] = set()
 
         for row in tables_rows:
             database, name = row[0], row[1]
             total_rows, total_bytes = row[4], row[5]
-            if (database, name) in seen:
+            if (database, name) in seen_tables:
                 continue
-            seen.add((database, name))
+            seen_tables.add((database, name))
             entity_tags = base_tags + [f'db:{database}', f'table:{name}']
             self._check.gauge('table.rows', int(total_rows or 0), tags=entity_tags)
             self._check.gauge('table.bytes', int(total_bytes or 0), tags=entity_tags)
 
         for row in refresh_rows:
             database, view_name = row[0], row[1]
+            if (database, view_name) in seen_views:
+                continue
+            seen_views.add((database, view_name))
             status, last_time, next_time = row[2], row[3], row[4]
             written_rows, written_bytes = row[6], row[7]
             view_tags = base_tags + [f'db:{database}', f'view:{view_name}']

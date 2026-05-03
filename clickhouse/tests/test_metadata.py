@@ -321,6 +321,19 @@ def test_build_payload_routes_views_and_tables(check):
     assert [v['name'] for v in db['views']] == ['events_mv']
 
 
+@pytest.mark.parametrize('engine', ['View', 'LiveView', 'WindowView'])
+def test_build_payload_routes_other_view_engines(check, engine):
+    payload = check.metadata._build_payload(
+        tables_rows=[_view_row(name='some_view', engine=engine)],
+        columns_rows=[],
+        refresh_rows=[],
+    )
+    db = payload['metadata']['databases'][0]
+    assert db['tables'] == []
+    assert [v['name'] for v in db['views']] == ['some_view']
+    assert db['views'][0]['engine'] == engine
+
+
 def test_build_payload_dedupes_replica_rows(check):
     row = _table_row(name='events')
     payload = check.metadata._build_payload(tables_rows=[row, row, row], columns_rows=[], refresh_rows=[])
@@ -409,6 +422,13 @@ def test_build_payload_top_level_fields(check):
     assert payload['collection_started_at'] == 1700000000000
     assert payload['collection_payloads_count'] == 1
     assert payload['collector_id'] == 'test-collector-id'
+    assert payload['tags'] == check.tags
+    assert isinstance(payload['host'], str)
+    assert isinstance(payload['database_hostname'], str)
+    assert 'dbms_version' in payload
+    assert 'agent_version' in payload
+    assert 'ddagenthostname' in payload
+    assert payload['timestamp'] > 0
 
 
 def test_build_payload_truncates_when_aggregate_exceeds_payload_cap(check):
@@ -457,6 +477,34 @@ def test_collect_view_refreshes_unexpected_error_logs_exception(check):
     with mock.patch.object(job, '_execute_query', side_effect=Exception('boom')):
         assert job._collect_view_refreshes() == []
     job._log.exception.assert_called_once()
+
+
+def test_execute_query_closes_client_on_operational_error(check):
+    from clickhouse_connect.driver.exceptions import OperationalError
+
+    job = check.metadata
+    job._log = mock.MagicMock()
+    fake_client = mock.MagicMock()
+    fake_client.query.side_effect = OperationalError('connection lost')
+    job._db_client = fake_client
+
+    with pytest.raises(OperationalError):
+        job._execute_query('SELECT 1')
+
+    assert job._db_client is None
+    fake_client.close.assert_called_once()
+    job._log.warning.assert_called_once()
+
+
+def test_cancel_closes_db_client(check):
+    job = check.metadata
+    fake_client = mock.MagicMock()
+    job._db_client = fake_client
+
+    job.cancel()
+
+    assert job._db_client is None
+    fake_client.close.assert_called_once()
 
 
 def test_emit_metrics_table_gauges(check):
@@ -515,6 +563,20 @@ def test_emit_metrics_dedupes_duplicate_table_rows(check):
 
     rows_emissions = [m for m in emitted if m[0] == 'table.rows']
     assert len(rows_emissions) == 1
+
+
+def test_emit_metrics_dedupes_duplicate_view_refresh_rows(check):
+    job = check.metadata
+    emitted = []
+    check.gauge = lambda name, value, tags=None: emitted.append((name, value, tags))
+
+    row = _refresh_row(view='events_mv')
+    job._emit_metrics([], [row, row, row])
+
+    status_emissions = [m for m in emitted if m[0] == 'view.refresh.status']
+    last_time_emissions = [m for m in emitted if m[0] == 'view.refresh.last_time']
+    assert len(status_emissions) == 1
+    assert len(last_time_emissions) == 1
 
 
 def test_collect_and_emit_publishes_payload(check):

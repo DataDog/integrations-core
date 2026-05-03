@@ -13,12 +13,19 @@ from datadog_checks.clickhouse import ClickhouseCheck
 from .common import CLICKHOUSE_VERSION
 
 UNSUPPORTED_VERSIONS = {'18', '19', '20', '21.8', '22.7'}
+NO_VIEW_REFRESHES_VERSIONS = UNSUPPORTED_VERSIONS | {'23.2', '23.8'}
 
 
 def _is_supported():
     if CLICKHOUSE_VERSION == 'latest':
         return True
     return CLICKHOUSE_VERSION not in UNSUPPORTED_VERSIONS
+
+
+def _supports_view_refreshes():
+    if CLICKHOUSE_VERSION == 'latest':
+        return True
+    return CLICKHOUSE_VERSION not in NO_VIEW_REFRESHES_VERSIONS
 
 
 pytestmark = [
@@ -233,3 +240,50 @@ def test_metadata_disabled_emits_no_payload(aggregator, instance, dd_run_check):
     assert _catalog_events(aggregator) == [], (
         'Expected no clickhouse_databases payload when collect_schemas is disabled'
     )
+
+
+@pytest.mark.skipif(
+    not _supports_view_refreshes(),
+    reason='system.view_refreshes requires ClickHouse 24.3+',
+)
+def test_metadata_refreshable_view_status_populated(aggregator, metadata_instance, dd_run_check):
+    client = _client(metadata_instance)
+    src = 'dd_md_refresh_src'
+    target = 'dd_md_refresh_target'
+    mv = 'dd_md_refreshable_mv'
+    try:
+        for obj in (mv, target, src):
+            client.command(f'DROP TABLE IF EXISTS default.{obj}')
+
+        client.command(f'CREATE TABLE default.{src} (id UInt64, val UInt64) ENGINE = MergeTree ORDER BY id')
+        client.command(f'CREATE TABLE default.{target} (id UInt64, total UInt64) ENGINE = MergeTree ORDER BY id')
+        client.command(
+            f'CREATE MATERIALIZED VIEW default.{mv} REFRESH EVERY 1 HOUR '
+            f'TO default.{target} AS SELECT id, val AS total FROM default.{src}',
+            settings={'allow_experimental_refreshable_materialized_view': 1},
+        )
+
+        check = ClickhouseCheck('clickhouse', {}, [metadata_instance])
+        check.check_id = 'test-collector-id'
+        dd_run_check(check)
+
+        events = _catalog_events(aggregator)
+        db = _find_database(events, 'default')
+        assert db is not None
+
+        view = next((v for v in db['views'] if v['name'] == mv), None)
+        assert view is not None, f'Expected refreshable view {mv} in payload'
+        assert view['is_refreshable'] is True
+
+        required_tags = {'db:default', f'view:{mv}'}
+        status_metrics = [
+            m for m in aggregator.metrics('clickhouse.view.refresh.status') if required_tags.issubset(set(m.tags))
+        ]
+        assert status_metrics, f'Expected clickhouse.view.refresh.status for {mv}'
+        next_time_metrics = [
+            m for m in aggregator.metrics('clickhouse.view.refresh.next_time') if required_tags.issubset(set(m.tags))
+        ]
+        assert next_time_metrics, f'Expected clickhouse.view.refresh.next_time for {mv}'
+    finally:
+        for obj in (mv, target, src):
+            client.command(f'DROP TABLE IF EXISTS default.{obj} SYNC')
