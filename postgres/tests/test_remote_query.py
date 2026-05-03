@@ -11,17 +11,21 @@ import pytest
 from datadog_checks.postgres.remote_query import (
     StaticPostgresCheckRegistry,
     execute_agent_rpc_json,
+    execute_agent_rpc_stream_copy,
     execute_remote_query,
+    iter_agent_rpc_stream_copy_events,
     normalize_target,
 )
 
 
 class FakePool:
-    def __init__(self, rows=None, description=None, closed=False):
+    def __init__(self, rows=None, description=None, closed=False, copy_blocks=None):
         self.rows = rows or [(1,)]
         self.description = description or [SimpleNamespace(name='value')]
         self.closed = closed
+        self.copy_blocks = copy_blocks or []
         self.requested_dbnames = []
+        self.closed_copies = 0
 
     def is_closed(self):
         return self.closed
@@ -29,30 +33,56 @@ class FakePool:
     @contextmanager
     def get_connection(self, dbname):
         self.requested_dbnames.append(dbname)
-        yield FakeConnection(self.rows, self.description)
+        yield FakeConnection(self.rows, self.description, self.copy_blocks, self)
 
 
 class FakeConnection:
-    def __init__(self, rows, description):
+    def __init__(self, rows, description, copy_blocks, pool):
         self.rows = rows
         self.description = description
+        self.copy_blocks = copy_blocks
+        self.pool = pool
 
     @contextmanager
     def cursor(self):
-        yield FakeCursor(self.rows, self.description)
+        yield FakeCursor(self.rows, self.description, self.copy_blocks, self.pool)
 
 
 class FakeCursor:
-    def __init__(self, rows, description):
+    def __init__(self, rows, description, copy_blocks, pool):
         self.rows = rows
         self.description = description
-        self.executed = None
+        self.copy_blocks = copy_blocks
+        self.pool = pool
+        self.executed = []
 
-    def execute(self, query):
-        self.executed = query
+    def execute(self, query, params=None):
+        self.executed.append((query, params))
+
+    def fetchone(self):
+        return ('0',)
 
     def fetchmany(self, size):
         return self.rows[:size]
+
+    def copy(self, query):
+        self.executed.append((query, None))
+        return FakeCopy(self.copy_blocks, self.pool)
+
+
+class FakeCopy:
+    def __init__(self, blocks, pool):
+        self.blocks = blocks
+        self.pool = pool
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.pool.closed_copies += 1
+
+    def __iter__(self):
+        return iter(self.blocks)
 
 
 def make_check(host='localhost', port=5432, dbname='datadog_test', pool=None, **metadata):
@@ -385,3 +415,146 @@ def test_execute_closed_pool_returns_target_unavailable_without_recreating_crede
 
     assert_failed(response, 'target_unavailable')
     assert pool.requested_dbnames == []
+
+
+def valid_copy_request(host='LOCALHOST.', port=5432, dbname='datadog_test', **extra):
+    request = {
+        'operation': 'copy_stream',
+        'target': {'host': host, 'port': port, 'dbname': dbname},
+        'query': 'SELECT 1 AS value',
+        'format': 'csv',
+        'limits': {'chunkBytes': 8, 'maxBytes': 64, 'maxRowBytes': 32, 'timeoutMs': 5000},
+    }
+    request.update(extra)
+    return request
+
+
+def collect_copy_events(request, check):
+    return list(iter_agent_rpc_stream_copy_events(request, StaticPostgresCheckRegistry([check])))
+
+
+def test_copy_stream_requires_explicit_operation_before_pool_access():
+    pool = FakePool(copy_blocks=[b'1\n'])
+    request = valid_copy_request()
+    request.pop('operation')
+
+    events = collect_copy_events(request, make_check(pool=pool))
+
+    assert events[-1]['status'] == 'FAILED'
+    assert events[-1]['error']['code'] == 'invalid_request'
+    assert 'operation' in events[-1]['error']['message']
+    assert pool.requested_dbnames == []
+
+
+def test_copy_stream_rejects_unknown_fields_without_echoing_secrets(caplog):
+    pool = FakePool(copy_blocks=[b'1\n'])
+    request = valid_copy_request(password='SECRET_DO_NOT_LOG')
+
+    events = collect_copy_events(request, make_check(pool=pool))
+
+    assert events[-1]['status'] == 'FAILED'
+    assert events[-1]['error']['code'] == 'invalid_request'
+    assert 'password' in events[-1]['error']['message']
+    assert 'SECRET_DO_NOT_LOG' not in str(events)
+    assert 'SECRET_DO_NOT_LOG' not in caplog.text
+    assert pool.requested_dbnames == []
+
+
+def test_copy_stream_rejects_non_copy_allowlisted_queries_before_pool_access():
+    pool = FakePool(copy_blocks=[b'1\n'])
+    request = valid_copy_request(query='SELECT current_database()')
+
+    events = collect_copy_events(request, make_check(pool=pool))
+
+    assert events[-1]['status'] == 'FAILED'
+    assert events[-1]['error']['code'] == 'invalid_request'
+    assert 'query' in events[-1]['error']['message']
+    assert pool.requested_dbnames == []
+
+
+def test_copy_stream_uses_connection_pool_and_emits_chunked_copy_bytes():
+    pool = FakePool(copy_blocks=[b'abc', b'defgh', b'ijklmnop', b'qr'])
+    check = block_existing_query_helpers(make_check(pool=pool))
+
+    events = collect_copy_events(valid_copy_request(), check)
+
+    assert events[0]['type'] == 'metadata'
+    assert events[0]['operation'] == 'copy_stream'
+    assert events[0]['format'] == 'csv'
+    data_events = [event for event in events if event['type'] == 'data']
+    assert [event['sequence'] for event in data_events] == [0, 1, 2]
+    assert [event['data'] for event in data_events] == [b'abcdefgh', b'ijklmnop', b'qr']
+    assert [event['bytes'] for event in data_events] == [8, 8, 2]
+    assert events[-1]['type'] == 'final'
+    assert events[-1]['status'] == 'SUCCEEDED'
+    assert events[-1]['stats']['bytesEmitted'] == 18
+    assert events[-1]['stats']['chunksEmitted'] == 3
+    assert pool.requested_dbnames == ['datadog_test']
+    assert pool.closed_copies == 1
+
+
+def test_copy_stream_enforces_max_bytes_without_exceeding_limit():
+    pool = FakePool(copy_blocks=[b'abcdefgh', b'ijklmnop'])
+    request = valid_copy_request(limits={'chunkBytes': 8, 'maxBytes': 10, 'maxRowBytes': 32, 'timeoutMs': 5000})
+
+    events = collect_copy_events(request, make_check(pool=pool))
+
+    data_events = [event for event in events if event['type'] == 'data']
+    assert [event['data'] for event in data_events] == [b'abcdefgh', b'ij']
+    assert sum(event['bytes'] for event in data_events) == 10
+    assert events[-1]['status'] == 'FAILED'
+    assert events[-1]['error']['code'] == 'max_bytes_exceeded'
+    assert events[-1]['stats']['bytesEmitted'] == 10
+    assert pool.closed_copies == 1
+
+
+def test_copy_stream_enforces_max_row_bytes_after_copy_block_arrives():
+    pool = FakePool(copy_blocks=[b'abc', b'x' * 33])
+
+    events = collect_copy_events(valid_copy_request(), make_check(pool=pool))
+
+    assert [event['data'] for event in events if event['type'] == 'data'] == []
+    assert events[-1]['status'] == 'FAILED'
+    assert events[-1]['error']['code'] == 'max_row_bytes_exceeded'
+    assert 'row granularity' in events[-1]['error']['message']
+    assert pool.closed_copies == 1
+
+
+def test_agent_rpc_stream_copy_adapts_iterator_to_callback():
+    pool = FakePool(copy_blocks=[b'1\n'])
+    events = []
+
+    execute_agent_rpc_stream_copy(json.dumps(valid_copy_request()), make_check(pool=pool), events.append)
+
+    assert [event['type'] for event in events] == ['metadata', 'data', 'final']
+    assert events[1]['data'] == b'1\n'
+    assert events[-1]['status'] == 'SUCCEEDED'
+
+
+def test_agent_rpc_stream_copy_rejects_malformed_json_without_echoing_input(caplog):
+    pool = FakePool(copy_blocks=[b'1\n'])
+    events = []
+
+    execute_agent_rpc_stream_copy('{"password": "SECRET_DO_NOT_LOG"', make_check(pool=pool), events.append)
+
+    assert events[-1]['status'] == 'FAILED'
+    assert events[-1]['error']['code'] == 'invalid_request'
+    assert 'SECRET_DO_NOT_LOG' not in str(events)
+    assert 'SECRET_DO_NOT_LOG' not in caplog.text
+    assert pool.requested_dbnames == []
+
+
+def test_agent_rpc_stream_copy_closes_copy_when_callback_raises():
+    pool = FakePool(copy_blocks=[b'12345678', b'abcdef'])
+    events = []
+
+    def emit(event):
+        events.append(event)
+        if event['type'] == 'data':
+            raise RuntimeError('stop streaming')
+
+    with pytest.raises(RuntimeError, match='stop streaming'):
+        execute_agent_rpc_stream_copy(json.dumps(valid_copy_request()), make_check(pool=pool), emit)
+
+    assert [event['type'] for event in events] == ['metadata', 'data']
+    assert pool.closed_copies == 1
