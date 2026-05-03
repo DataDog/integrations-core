@@ -25,7 +25,9 @@ def remote_query_request(pg_instance: dict[str, object], query: str) -> dict[str
     }
 
 
-def remote_query_copy_request(pg_instance: dict[str, object], query: str, limits: dict[str, int]) -> dict[str, object]:
+def remote_query_copy_request(
+    pg_instance: dict[str, object], query: str, limits: dict[str, int], stream_format: str = 'csv'
+) -> dict[str, object]:
     return {
         'operation': 'copy_stream',
         'target': {
@@ -34,9 +36,17 @@ def remote_query_copy_request(pg_instance: dict[str, object], query: str, limits
             'dbname': pg_instance['dbname'],
         },
         'query': query,
-        'format': 'csv',
+        'format': stream_format,
         'limits': limits,
     }
+
+
+def event_metadata(event):
+    return event.metadata
+
+
+def event_payload(event):
+    return event.payload
 
 
 @pytest.mark.integration
@@ -88,15 +98,37 @@ def test_agent_local_copy_stream_fixture_table_query_emits_csv_chunks(integratio
 
     events = list(iter_agent_rpc_stream_copy_events(request, StaticPostgresCheckRegistry([check])))
 
-    data = b''.join(event['data'] for event in events if event['type'] == 'data')
-    assert events[0]['type'] == 'metadata'
-    assert events[0]['format'] == 'csv'
-    assert events[-1]['status'] == 'SUCCEEDED'
+    data_events = [event for event in events if event.event_type == 'data']
+    data = b''.join(event_payload(event) for event in data_events)
+    assert events[0].event_type == 'metadata'
+    assert event_metadata(events[0])['format'] == 'csv'
+    assert event_metadata(events[-1])['status'] == 'SUCCEEDED'
     assert b'Beautiful city of lights,France\n' in data
     assert b'New York,USA\n' in data
-    assert events[-1]['stats']['bytesEmitted'] == len(data)
-    assert all(event['bytes'] <= 16 for event in events if event['type'] == 'data')
+    assert event_metadata(events[-1])['stats']['bytesEmitted'] == len(data)
+    assert all(event_metadata(event)['bytes'] <= 16 for event in data_events)
     assert 'password' not in json.dumps(request).lower()
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_agent_local_copy_stream_binary_format_preserves_non_text_bytes(integration_check, pg_instance):
+    check = integration_check(pg_instance)
+    request = remote_query_copy_request(
+        pg_instance,
+        "SELECT decode('00ff80', 'hex') AS payload",
+        {'chunkBytes': 1024, 'maxBytes': 4096, 'maxRowBytes': 4096, 'timeoutMs': 5000},
+        stream_format='binary',
+    )
+
+    events = list(iter_agent_rpc_stream_copy_events(request, StaticPostgresCheckRegistry([check])))
+
+    data = b''.join(event_payload(event) for event in events if event.event_type == 'data')
+    assert events[0].event_type == 'metadata'
+    assert event_metadata(events[0])['format'] == 'binary'
+    assert event_metadata(events[-1])['status'] == 'SUCCEEDED'
+    assert b'PGCOPY\n\xff\r\n\x00' in data
+    assert b'\x00\xff\x80' in data
 
 
 @pytest.mark.integration
@@ -111,9 +143,9 @@ def test_agent_local_copy_stream_enforces_max_row_bytes_and_reuses_connection(in
 
     events = list(iter_agent_rpc_stream_copy_events(request, StaticPostgresCheckRegistry([check])))
 
-    assert [event for event in events if event['type'] == 'data'] == []
-    assert events[-1]['status'] == 'FAILED'
-    assert events[-1]['error']['code'] == 'max_row_bytes_exceeded'
+    assert [event for event in events if event.event_type == 'data'] == []
+    assert event_metadata(events[-1])['status'] == 'FAILED'
+    assert event_metadata(events[-1])['error']['code'] == 'max_row_bytes_exceeded'
 
     response = execute_remote_query(
         remote_query_request(pg_instance, 'SELECT 1 AS value'), StaticPostgresCheckRegistry([check])

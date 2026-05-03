@@ -433,6 +433,14 @@ def collect_copy_events(request, check):
     return list(iter_agent_rpc_stream_copy_events(request, StaticPostgresCheckRegistry([check])))
 
 
+def event_metadata(event):
+    return event.metadata
+
+
+def event_payload(event):
+    return event.payload
+
+
 def test_copy_stream_requires_explicit_operation_before_pool_access():
     pool = FakePool(copy_blocks=[b'1\n'])
     request = valid_copy_request()
@@ -440,9 +448,9 @@ def test_copy_stream_requires_explicit_operation_before_pool_access():
 
     events = collect_copy_events(request, make_check(pool=pool))
 
-    assert events[-1]['status'] == 'FAILED'
-    assert events[-1]['error']['code'] == 'invalid_request'
-    assert 'operation' in events[-1]['error']['message']
+    assert event_metadata(events[-1])['status'] == 'FAILED'
+    assert event_metadata(events[-1])['error']['code'] == 'invalid_request'
+    assert 'operation' in event_metadata(events[-1])['error']['message']
     assert pool.requested_dbnames == []
 
 
@@ -452,9 +460,9 @@ def test_copy_stream_rejects_unknown_fields_without_echoing_secrets(caplog):
 
     events = collect_copy_events(request, make_check(pool=pool))
 
-    assert events[-1]['status'] == 'FAILED'
-    assert events[-1]['error']['code'] == 'invalid_request'
-    assert 'password' in events[-1]['error']['message']
+    assert event_metadata(events[-1])['status'] == 'FAILED'
+    assert event_metadata(events[-1])['error']['code'] == 'invalid_request'
+    assert 'password' in event_metadata(events[-1])['error']['message']
     assert 'SECRET_DO_NOT_LOG' not in str(events)
     assert 'SECRET_DO_NOT_LOG' not in caplog.text
     assert pool.requested_dbnames == []
@@ -466,9 +474,9 @@ def test_copy_stream_rejects_non_copy_allowlisted_queries_before_pool_access():
 
     events = collect_copy_events(request, make_check(pool=pool))
 
-    assert events[-1]['status'] == 'FAILED'
-    assert events[-1]['error']['code'] == 'invalid_request'
-    assert 'query' in events[-1]['error']['message']
+    assert event_metadata(events[-1])['status'] == 'FAILED'
+    assert event_metadata(events[-1])['error']['code'] == 'invalid_request'
+    assert 'query' in event_metadata(events[-1])['error']['message']
     assert pool.requested_dbnames == []
 
 
@@ -478,19 +486,32 @@ def test_copy_stream_uses_connection_pool_and_emits_chunked_copy_bytes():
 
     events = collect_copy_events(valid_copy_request(), check)
 
-    assert events[0]['type'] == 'metadata'
-    assert events[0]['operation'] == 'copy_stream'
-    assert events[0]['format'] == 'csv'
-    data_events = [event for event in events if event['type'] == 'data']
-    assert [event['sequence'] for event in data_events] == [0, 1, 2]
-    assert [event['data'] for event in data_events] == [b'abcdefgh', b'ijklmnop', b'qr']
-    assert [event['bytes'] for event in data_events] == [8, 8, 2]
-    assert events[-1]['type'] == 'final'
-    assert events[-1]['status'] == 'SUCCEEDED'
-    assert events[-1]['stats']['bytesEmitted'] == 18
-    assert events[-1]['stats']['chunksEmitted'] == 3
+    assert events[0].event_type == 'metadata'
+    assert event_metadata(events[0])['operation'] == 'copy_stream'
+    assert event_metadata(events[0])['format'] == 'csv'
+    data_events = [event for event in events if event.event_type == 'data']
+    assert [event_metadata(event)['sequence'] for event in data_events] == [0, 1, 2]
+    assert [event_metadata(event)['offset'] for event in data_events] == [0, 8, 16]
+    assert [event_payload(event) for event in data_events] == [b'abcdefgh', b'ijklmnop', b'qr']
+    assert [event_metadata(event)['bytes'] for event in data_events] == [8, 8, 2]
+    assert events[-1].event_type == 'final'
+    assert event_metadata(events[-1])['status'] == 'SUCCEEDED'
+    assert event_metadata(events[-1])['stats']['bytesEmitted'] == 18
+    assert event_metadata(events[-1])['stats']['chunksEmitted'] == 3
     assert pool.requested_dbnames == ['datadog_test']
     assert pool.closed_copies == 1
+
+
+def test_copy_stream_data_event_payload_preserves_arbitrary_bytes():
+    arbitrary_bytes = b'\x00\xff\x80abc\n'
+    pool = FakePool(copy_blocks=[arbitrary_bytes])
+
+    events = collect_copy_events(valid_copy_request(), make_check(pool=pool))
+
+    data_events = [event for event in events if event.event_type == 'data']
+    assert len(data_events) == 1
+    assert event_payload(data_events[0]) == arbitrary_bytes
+    assert isinstance(event_payload(data_events[0]), bytes)
 
 
 def test_copy_stream_enforces_max_bytes_without_exceeding_limit():
@@ -499,12 +520,12 @@ def test_copy_stream_enforces_max_bytes_without_exceeding_limit():
 
     events = collect_copy_events(request, make_check(pool=pool))
 
-    data_events = [event for event in events if event['type'] == 'data']
-    assert [event['data'] for event in data_events] == [b'abcdefgh', b'ij']
-    assert sum(event['bytes'] for event in data_events) == 10
-    assert events[-1]['status'] == 'FAILED'
-    assert events[-1]['error']['code'] == 'max_bytes_exceeded'
-    assert events[-1]['stats']['bytesEmitted'] == 10
+    data_events = [event for event in events if event.event_type == 'data']
+    assert [event_payload(event) for event in data_events] == [b'abcdefgh', b'ij']
+    assert sum(event_metadata(event)['bytes'] for event in data_events) == 10
+    assert event_metadata(events[-1])['status'] == 'FAILED'
+    assert event_metadata(events[-1])['error']['code'] == 'max_bytes_exceeded'
+    assert event_metadata(events[-1])['stats']['bytesEmitted'] == 10
     assert pool.closed_copies == 1
 
 
@@ -513,32 +534,41 @@ def test_copy_stream_enforces_max_row_bytes_after_copy_block_arrives():
 
     events = collect_copy_events(valid_copy_request(), make_check(pool=pool))
 
-    assert [event['data'] for event in events if event['type'] == 'data'] == []
-    assert events[-1]['status'] == 'FAILED'
-    assert events[-1]['error']['code'] == 'max_row_bytes_exceeded'
-    assert 'row granularity' in events[-1]['error']['message']
+    assert [event_payload(event) for event in events if event.event_type == 'data'] == []
+    assert event_metadata(events[-1])['status'] == 'FAILED'
+    assert event_metadata(events[-1])['error']['code'] == 'max_row_bytes_exceeded'
+    assert 'row granularity' in event_metadata(events[-1])['error']['message']
     assert pool.closed_copies == 1
 
 
-def test_agent_rpc_stream_copy_adapts_iterator_to_callback():
-    pool = FakePool(copy_blocks=[b'1\n'])
+def test_agent_rpc_stream_copy_adapts_iterator_to_binary_safe_callback():
+    arbitrary_bytes = b'\x00\xff\x80abc\n'
+    pool = FakePool(copy_blocks=[arbitrary_bytes])
     events = []
 
-    execute_agent_rpc_stream_copy(json.dumps(valid_copy_request()), make_check(pool=pool), events.append)
+    execute_agent_rpc_stream_copy(
+        json.dumps(valid_copy_request()), make_check(pool=pool), lambda *event: events.append(event)
+    )
 
-    assert [event['type'] for event in events] == ['metadata', 'data', 'final']
-    assert events[1]['data'] == b'1\n'
-    assert events[-1]['status'] == 'SUCCEEDED'
+    assert [event[0] for event in events] == ['metadata', 'data', 'final']
+    assert json.loads(events[1][1])['bytes'] == len(arbitrary_bytes)
+    assert events[1][2] == arbitrary_bytes
+    assert isinstance(events[1][2], bytes)
+    assert json.loads(events[-1][1])['status'] == 'SUCCEEDED'
 
 
 def test_agent_rpc_stream_copy_rejects_malformed_json_without_echoing_input(caplog):
     pool = FakePool(copy_blocks=[b'1\n'])
     events = []
 
-    execute_agent_rpc_stream_copy('{"password": "SECRET_DO_NOT_LOG"', make_check(pool=pool), events.append)
+    execute_agent_rpc_stream_copy(
+        '{"password": "SECRET_DO_NOT_LOG"', make_check(pool=pool), lambda *event: events.append(event)
+    )
 
-    assert events[-1]['status'] == 'FAILED'
-    assert events[-1]['error']['code'] == 'invalid_request'
+    metadata = json.loads(events[-1][1])
+    assert events[-1][0] == 'error'
+    assert metadata['status'] == 'FAILED'
+    assert metadata['error']['code'] == 'invalid_request'
     assert 'SECRET_DO_NOT_LOG' not in str(events)
     assert 'SECRET_DO_NOT_LOG' not in caplog.text
     assert pool.requested_dbnames == []
@@ -548,13 +578,13 @@ def test_agent_rpc_stream_copy_closes_copy_when_callback_raises():
     pool = FakePool(copy_blocks=[b'12345678', b'abcdef'])
     events = []
 
-    def emit(event):
-        events.append(event)
-        if event['type'] == 'data':
+    def emit(event_type, metadata_json, payload):
+        events.append((event_type, metadata_json, payload))
+        if event_type == 'data':
             raise RuntimeError('stop streaming')
 
     with pytest.raises(RuntimeError, match='stop streaming'):
         execute_agent_rpc_stream_copy(json.dumps(valid_copy_request()), make_check(pool=pool), emit)
 
-    assert [event['type'] for event in events] == ['metadata', 'data']
+    assert [event[0] for event in events] == ['metadata', 'data']
     assert pool.closed_copies == 1

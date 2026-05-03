@@ -27,6 +27,7 @@ RemoteQuerySql = Literal[
 RemoteQueryCopySql = Literal[
     'SELECT 1 AS value',
     'SELECT city, country FROM cities ORDER BY city',
+    "SELECT decode('00ff80', 'hex') AS payload",
     "SELECT repeat('x', 1048576) AS payload",
     "SELECT repeat('x', 2097152) AS payload",
     "SELECT repeat('x', 4194304) AS payload",
@@ -36,9 +37,8 @@ RemoteQueryCopySql = Literal[
     "SELECT i, repeat('x', 1000) AS payload FROM generate_series(1, 3000) AS i",
 ]
 
-CopyStreamFormat = Literal['csv']
-CopyStreamEvent = Mapping[str, Any]
-CopyStreamEmit = Callable[[CopyStreamEvent], None]
+CopyStreamFormat = Literal['csv', 'binary']
+CopyStreamEmit = Callable[[str, str, bytes], None]
 
 if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql
@@ -131,6 +131,13 @@ class _CopyStreamState:
     bytes_emitted: int = 0
 
 
+@dataclass(frozen=True)
+class CopyStreamEvent:
+    event_type: str
+    metadata: Mapping[str, Any]
+    payload: bytes = b''
+
+
 class _CopyStreamFailure(Exception):
     def __init__(self, code: str, message: str, retryable: bool = False):
         self.code = code
@@ -164,29 +171,33 @@ def execute_agent_rpc_stream_copy(
     try:
         request = json.loads(request_json)
     except (TypeError, ValueError):
-        emit(
+        _emit_copy_event(
+            emit,
             _stream_failed_event(
                 'invalid_request', 'Invalid remote query request: request_json must be a valid JSON object.'
-            )
+            ),
         )
         return
 
     if not isinstance(request, Mapping):
-        emit(
-            _stream_failed_event('invalid_request', 'Invalid remote query request: request_json must be a JSON object.')
+        _emit_copy_event(
+            emit,
+            _stream_failed_event(
+                'invalid_request', 'Invalid remote query request: request_json must be a JSON object.'
+            ),
         )
         return
 
     events = iter_agent_rpc_stream_copy_events(request, StaticPostgresCheckRegistry([check]))
     try:
         for event in events:
-            emit(event)
+            _emit_copy_event(emit, event)
     except BaseException:
         events.close()
         raise
 
 
-def iter_agent_rpc_stream_copy_events(request: Any, registry: PostgresCheckRegistry) -> Iterator[dict[str, Any]]:
+def iter_agent_rpc_stream_copy_events(request: Any, registry: PostgresCheckRegistry) -> Iterator[CopyStreamEvent]:
     """Yield COPY byte-stream events for unit tests and callback adaptation."""
     started_at = time.monotonic()
     try:
@@ -298,7 +309,7 @@ def _execute_safe_query(
 
 def _iter_copy_stream_events(
     check: 'PostgreSql', request: RemoteQueryCopyRequest, started_at: float
-) -> Iterator[dict[str, Any]]:
+) -> Iterator[CopyStreamEvent]:
     db_pool = getattr(check, 'db_pool', None)
     if db_pool is None:
         yield _stream_failed_event(
@@ -316,15 +327,17 @@ def _iter_copy_stream_events(
         )
         return
 
-    yield {
-        'type': 'metadata',
-        'status': 'STARTED',
-        'format': request.format,
-        'operation': request.operation,
-        'chunkBytes': request.limits.chunk_bytes,
-        'maxBytes': request.limits.max_bytes,
-        'maxRowBytes': request.limits.max_row_bytes,
-    }
+    yield CopyStreamEvent(
+        'metadata',
+        {
+            'status': 'STARTED',
+            'format': request.format,
+            'operation': request.operation,
+            'chunkBytes': request.limits.chunk_bytes,
+            'maxBytes': request.limits.max_bytes,
+            'maxRowBytes': request.limits.max_row_bytes,
+        },
+    )
 
     state = _CopyStreamState()
     error: _CopyStreamFailure | None = None
@@ -351,16 +364,15 @@ def _iter_copy_stream_events(
         )
         return
 
-    yield {
-        'type': 'final',
-        'status': 'SUCCEEDED',
-        'stats': _copy_stream_stats(state, started_at, request.format),
-    }
+    yield CopyStreamEvent(
+        'final',
+        {'status': 'SUCCEEDED', 'stats': _copy_stream_stats(state, started_at, request.format)},
+    )
 
 
 def _copy_stream_data_events(
     check: 'PostgreSql', request: RemoteQueryCopyRequest, state: _CopyStreamState, started_at: float
-) -> Iterator[tuple[dict[str, Any], _CopyStreamState]]:
+) -> Iterator[tuple[CopyStreamEvent, _CopyStreamState]]:
     limits = request.limits
     deadline = started_at + (limits.timeout_ms / 1000)
     copy_sql = _copy_stdout_sql(request.query, request.format)
@@ -413,10 +425,11 @@ def _copy_stream_data_events(
 
 
 def _copy_stdout_sql(query: str, stream_format: CopyStreamFormat) -> str:
-    # CSV is the only initial COPY byte-stream format. It is compact, standard, and preserves raw COPY bytes.
-    if stream_format != 'csv':
-        raise _CopyStreamFailure('invalid_request', 'Unsupported COPY stream format.')
-    return f'COPY ({query}) TO STDOUT WITH (FORMAT CSV)'
+    if stream_format == 'csv':
+        return f'COPY ({query}) TO STDOUT WITH (FORMAT CSV)'
+    if stream_format == 'binary':
+        return f'COPY ({query}) TO STDOUT WITH (FORMAT BINARY)'
+    raise _CopyStreamFailure('invalid_request', 'Unsupported COPY stream format.')
 
 
 def _set_statement_timeout(cursor: Any, timeout_ms: int) -> str | None:
@@ -445,9 +458,17 @@ def _raise_if_timed_out(deadline: float) -> None:
         raise _CopyStreamFailure('timeout', 'COPY stream exceeded timeoutMs.', retryable=True)
 
 
-def _copy_data_event(data: bytearray, state: _CopyStreamState) -> tuple[dict[str, Any], _CopyStreamState]:
+def _copy_data_event(data: bytearray, state: _CopyStreamState) -> tuple[CopyStreamEvent, _CopyStreamState]:
     payload = bytes(data)
-    event = {'type': 'data', 'sequence': state.sequence, 'data': payload, 'bytes': len(payload)}
+    event = CopyStreamEvent(
+        'data',
+        {
+            'sequence': state.sequence,
+            'offset': state.bytes_emitted,
+            'bytes': len(payload),
+        },
+        payload,
+    )
     next_state = _CopyStreamState(
         sequence=state.sequence + 1,
         chunks_emitted=state.chunks_emitted + 1,
@@ -475,17 +496,20 @@ def _stream_failed_event(
     retryable: bool = False,
     stats: Mapping[str, Any] | None = None,
     elapsed_ms: int | None = None,
-) -> dict[str, Any]:
-    event = {
-        'type': 'final',
+) -> CopyStreamEvent:
+    metadata = {
         'status': 'FAILED',
         'error': {'code': code, 'message': message, 'retryable': retryable},
     }
     if stats is not None:
-        event['stats'] = dict(stats)
+        metadata['stats'] = dict(stats)
     elif elapsed_ms is not None:
-        event['stats'] = {'elapsedMs': elapsed_ms}
-    return event
+        metadata['stats'] = {'elapsedMs': elapsed_ms}
+    return CopyStreamEvent('error', metadata)
+
+
+def _emit_copy_event(emit: CopyStreamEmit, event: CopyStreamEvent) -> None:
+    emit(event.event_type, json.dumps(event.metadata, default=str), event.payload)
 
 
 def _response_columns(description: Sequence[Any], rows: Sequence[Sequence[Any]]) -> list[dict[str, str]]:
