@@ -57,6 +57,16 @@ def instance_query_errors():
     )
 
 
+def instance_collect_schemas():
+    return instance.CollectSchemas(
+        enabled=False,
+        collection_interval=600,
+        max_tables=5000,
+        max_columns=1000,
+        run_sync=False,
+    )
+
+
 def instance_parts_and_merges():
     return instance.PartsAndMerges(
         enabled=True,

@@ -69,6 +69,7 @@ EXPECTED_DEFAULTS = {
         'max_samples_per_collection': 1000,
         'run_sync': False,
     },
+    'collect_schemas': None,
     # === DBM: Parts and merges ===
     'parts_and_merges': {
         'enabled': True,
