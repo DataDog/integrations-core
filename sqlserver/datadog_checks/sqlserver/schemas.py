@@ -8,7 +8,7 @@ import contextlib
 from typing import TYPE_CHECKING, TypedDict
 
 from datadog_checks.base.utils.serialization import json
-from datadog_checks.sqlserver.utils import construct_use_statement, execute_query
+from datadog_checks.sqlserver.utils import construct_use_statement, execute_query, is_azure_database
 
 if TYPE_CHECKING:
     from datadog_checks.sqlserver import SQLServer
@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollectorConfig
 from datadog_checks.sqlserver.const import (
     DEFAULT_SCHEMAS_COLLECTION_INTERVAL,
+    STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_MAJOR_VERSION,
 )
 from datadog_checks.sqlserver.queries import (
@@ -32,6 +33,8 @@ from datadog_checks.sqlserver.queries import (
 
 KEY_PREFIX = "dbm-schemas-"
 KEY_PREFIX_PRE_2017 = "dbm-schemas-pre-2017"
+# The modern schema query uses database-scoped JSON output, which requires SQL Server 2016 compatibility.
+MINIMUM_JSON_COMPATIBILITY_LEVEL = 130
 
 
 class DatabaseInfo(TypedDict):
@@ -39,6 +42,7 @@ class DatabaseInfo(TypedDict):
     id: str
     collation: str
     owner: str
+    compatibility_level: str
 
 
 # The schema collector sends lists of DatabaseObjects to the agent
@@ -81,22 +85,14 @@ class SQLServerSchemaCollector(SchemaCollector):
         )
         config.max_tables = check._config.schema_config.get('max_tables', 300)
         self._is_2016_or_earlier = None
+        self._database_compatibility_levels: dict[str, int] = {}
         super().__init__(check, config)
-
-    def collect_schemas(self):
-        # We wait until collect is called to check for static information
-        major_version = int(self._check.static_info_cache.get(STATIC_INFO_MAJOR_VERSION) or 0)
-        if major_version == 0:
-            self._check.log.debug("major_version is not available yet, defaulting to 2016 or earlier")
-        self._is_2016_or_earlier = major_version <= 13
-
-        super().collect_schemas()
 
     @property
     def kind(self):
         return "sqlserver_databases"
 
-    def _get_databases(self):
+    def _get_databases(self) -> list[DatabaseInfo]:
         database_names = self._check.get_databases()
         with self._check.connection.open_managed_default_connection(KEY_PREFIX):
             with self._check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
@@ -104,7 +100,9 @@ class SQLServerSchemaCollector(SchemaCollector):
                     return []
                 placeholders = ",".join(["?"] * len(database_names))
                 query = DB_QUERY.format(placeholders)
-                return execute_query(query, cursor, convert_results_to_str=True, parameters=tuple(database_names))
+                databases = execute_query(query, cursor, convert_results_to_str=True, parameters=tuple(database_names))
+                self._record_database_compatibility_levels(databases)
+                return databases
 
     @contextlib.contextmanager
     def _get_cursor(self, database_name):
@@ -112,9 +110,47 @@ class SQLServerSchemaCollector(SchemaCollector):
             with self._check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
                 switch_db_statement = construct_use_statement(database_name)
                 cursor.execute(switch_db_statement)
+                self._is_2016_or_earlier = self._should_use_legacy_schema_query(database_name)
                 query = self._get_tables_query()
                 cursor.execute(query)
                 yield cursor
+
+    def _record_database_compatibility_levels(self, databases: list[DatabaseInfo]) -> None:
+        self._database_compatibility_levels = {}
+        for database in databases:
+            self._database_compatibility_levels[database["name"]] = int(database["compatibility_level"])
+
+    def _should_use_legacy_schema_query(self, database_name: str) -> bool:
+        """
+        Return whether the current database needs the legacy schema query.
+
+        The modern schema query depends on two SQL Server features:
+        - STRING_AGG, used to build index column lists. On self-managed SQL Server, this requires SQL Server 2017
+          or later. Azure SQL Database and Azure SQL Managed Instance report ProductMajorVersion 12 while still
+          supporting STRING_AGG, so only self-managed SQL Server uses this version gate.
+        - JSON output, used for column, index, and foreign key metadata. This is controlled by each database's
+          compatibility_level and requires level 130 or higher.
+
+        If ProductMajorVersion is missing, use the legacy query because we cannot confirm that STRING_AGG is
+        available.
+        """
+        engine_edition = self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
+        if not is_azure_database(engine_edition):
+            major_version = int(self._check.static_info_cache.get(STATIC_INFO_MAJOR_VERSION) or 0)
+            if major_version == 0:
+                self._check.log.debug("major_version is not available yet, using legacy schema query")
+                return True
+            if major_version <= 13:
+                return True
+
+        compatibility_level = self._database_compatibility_levels.get(database_name)
+        if compatibility_level is None:
+            self._check.log.debug(
+                "compatibility_level is not available for SQL Server database %s, using pre-2017 schema query",
+                database_name,
+            )
+            return True
+        return compatibility_level < MINIMUM_JSON_COMPATIBILITY_LEVEL
 
     def _get_tables_query(self):
         limit = int(self._config.max_tables or 1_000_000)
