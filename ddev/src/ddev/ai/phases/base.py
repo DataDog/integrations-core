@@ -255,13 +255,14 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         """Emit PhaseTrigger to unblock dependent phases."""
         self.submit_message(
             PhaseTrigger(
-                id=f"{self._phase_id}_finished_{message.id}",
+                id=f"{self._phase_id}_finished",
                 phase_id=self._phase_id,
             )
         )
 
-    async def on_error(self, message: PhaseTrigger, error: Exception) -> None:
+    async def on_error(self, error: Exception) -> None:
         """Write failed checkpoint and emit PhaseFailedMessage."""
+        original_error = getattr(error, 'original_exception', error)
         try:
             self._checkpoint_manager.write_phase_checkpoint(
                 self._phase_id,
@@ -269,7 +270,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
                     "status": "failed",
                     "started_at": self._started_at.isoformat() if self._started_at else None,
                     "finished_at": datetime.now(UTC).isoformat(),
-                    "error": str(error),
+                    "error": str(original_error),
                 },
             )
         except Exception:
@@ -277,8 +278,8 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         finally:
             self.submit_message(
                 PhaseFailedMessage(
-                    id=f"{self._phase_id}_failed_{message.id}",
+                    id=f"{self._phase_id}_failed",
                     phase_id=self._phase_id,
-                    error=str(error),
+                    error=str(original_error),
                 )
             )

@@ -466,7 +466,7 @@ async def test_on_finalize_after_phase_failed_raises(tmp_path, file_access_polic
     with pytest.raises(FatalProcessingError):
         await orchestrator.on_message_received(msg)
 
-    with pytest.raises(RuntimeError, match="Pipeline aborted.*p1.*boom"):
+    with pytest.raises(FatalProcessingError, match="Pipeline aborted.*p1.*boom"):
         await orchestrator.on_finalize(None)
 
 
@@ -505,5 +505,5 @@ def test_run_raises_runtime_error_when_phase_fails(tmp_path, file_access_policy)
     )
     orchestrator._phase_registry.register("FailingPhase", FailingPhase)
 
-    with pytest.raises(RuntimeError, match="Pipeline aborted"):
+    with pytest.raises(FatalProcessingError, match="Pipeline aborted"):
         orchestrator.run()
