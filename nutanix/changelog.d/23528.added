@@ -1,0 +1,1 @@
+Add ntnx_maintenance_state and ntnx_connection_state tags to host metrics, ntnx_power_state to VM metrics, ntnx_operation_mode to cluster metrics, and ntnx_disk_status to host storage metrics.

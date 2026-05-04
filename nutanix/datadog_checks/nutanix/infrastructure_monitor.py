@@ -69,6 +69,8 @@ class InfrastructureMonitor:
         # (batch mode) or lazily per-host by _get_vms_for_host (non-batch mode).
         # In batch mode the "" key holds hostless VMs (no host assignment).
         self._vms_by_host: dict[str, list[dict]] = {}
+        # Disk cache keyed by host ID, populated once per run via the cluster-wide /config/disks endpoint.
+        self._disks_by_host: dict[str, list[dict]] = {}
 
     def reset_state(self) -> None:
         """Reset all caches and counters for a new collection run."""
@@ -82,6 +84,7 @@ class InfrastructureMonitor:
         self.vm_count = 0
         self._cluster_capacity.reset()
         self._vms_by_host = {}
+        self._disks_by_host = {}
 
     def collect_cluster_metrics(self) -> None:
         """Collect metrics from all Nutanix clusters."""
@@ -124,6 +127,12 @@ class InfrastructureMonitor:
                 self.check.log.info("[%s] Cached VMs for %d hosts", self._pc_label, len(self._vms_by_host))
             except Exception:
                 self.check.log.exception("[%s] Failed to build VM cache", self._pc_label)
+
+        try:
+            self._build_disks_by_host_cache()
+            self.check.log.info("[%s] Cached disks for %d hosts", self._pc_label, len(self._disks_by_host))
+        except Exception:
+            self.check.log.exception("[%s] Failed to build disk cache", self._pc_label)
 
         # Process each cluster
         processed, skipped = 0, 0
@@ -216,9 +225,7 @@ class InfrastructureMonitor:
 
         power_state = vm.get("powerState", "$UNKNOWN")
         status_value = 0 if power_state == "ON" else 1 if power_state == "PAUSED" else 2
-        self.check.gauge(
-            "vm.status", status_value, hostname=hostname, tags=vm_tags + [f"ntnx_power_state:{power_state}"]
-        )
+        self.check.gauge("vm.status", status_value, hostname=hostname, tags=vm_tags)
 
         self._report_vm_capacity_metrics(vm, hostname, vm_tags)
 
@@ -296,21 +303,28 @@ class InfrastructureMonitor:
         metrics_map: dict[str, str],
         tags: list[str],
         hostname: str | None = None,
+        extra_tags_by_key: dict[str, list[str]] | None = None,
     ) -> None:
-        """Submit stats metrics for any entity type."""
+        """Submit stats metrics for any entity type.
+
+        ``extra_tags_by_key`` adds key-specific tags to a subset of metrics
+        (e.g., disk_status only on storage_* metrics).
+        """
         if not stats:
             self.check.log.warning("No stats returned for %s", entity_name)
             return
 
         is_list = isinstance(stats, list)
+        extra_tags_by_key = extra_tags_by_key or {}
 
         for key, metric_name in metrics_map.items():
             entries = stats if is_list else stats.get(key, [])
             value_field = key if is_list else "value"
+            metric_tags = tags + extra_tags_by_key.get(key, [])
             for entry in entries:
                 value = get_nested(entry, value_field)
                 if value is not None:
-                    self.check.gauge(metric_name, value, hostname=hostname, tags=tags)
+                    self.check.gauge(metric_name, value, hostname=hostname, tags=metric_tags)
 
     def _report_cluster_stats(self, cluster_name: str, cluster_id: str, cluster_tags: list[str]) -> None:
         """Report time-series stats for a cluster."""
@@ -389,6 +403,8 @@ class InfrastructureMonitor:
         self._set_external_tags_for_host(host_name, host_tags)
         self._report_host_capacity_metrics(host, host_name, host_tags)
 
+        disk_status_extra_tags = self._get_disk_status_storage_tags(host_id)
+
         try:
             stats = self._get_stats(f"api/clustermgmt/v4.0/stats/clusters/{cluster_id}/hosts/{host_id}")
             if stats:
@@ -398,6 +414,7 @@ class InfrastructureMonitor:
                     HOST_STATS_METRICS,
                     host_tags,
                     hostname=host_name,
+                    extra_tags_by_key=disk_status_extra_tags,
                 )
         except Exception:
             self.check.log.exception(
@@ -462,11 +479,16 @@ class InfrastructureMonitor:
         if host_type := host.get("hostType"):
             tags.append(f"ntnx_host_type:{host_type}")
 
+        if maintenance_state := host.get("maintenanceState"):
+            tags.append(f"ntnx_maintenance_state:{maintenance_state}")
+
         # hypervisor tags
         if hypervisor_name := get_nested(host, "hypervisor/fullName"):
             tags.append(f"ntnx_hypervisor_name:{hypervisor_name}")
         if hypervisor_type := get_nested(host, "hypervisor/type"):
             tags.append(f"ntnx_hypervisor_type:{hypervisor_type}")
+        if connection_state := get_nested(host, "hypervisor/acropolisConnectionState"):
+            tags.append(f"ntnx_connection_state:{connection_state}")
 
         # Add category tags
         tags.extend(self.check.extract_category_tags(host))
@@ -480,6 +502,9 @@ class InfrastructureMonitor:
         cluster_name = cluster.get("name")
         if cluster_name:
             tags.append(f"ntnx_cluster_name:{cluster_name}")
+
+        if operation_mode := get_nested(cluster, "config/operationMode"):
+            tags.append(f"ntnx_operation_mode:{operation_mode}")
 
         # Add category tags
         tags.extend(self.check.extract_category_tags(cluster))
@@ -509,6 +534,9 @@ class InfrastructureMonitor:
 
         is_agent_vm = is_affirmative(vm.get("isAgentVm"))
         tags.append(f"ntnx_is_agent_vm:{is_agent_vm}")
+
+        if power_state := vm.get("powerState"):
+            tags.append(f"ntnx_power_state:{power_state}")
 
         return tags
 
@@ -560,6 +588,47 @@ class InfrastructureMonitor:
     def _list_hosts_by_cluster(self, cluster_id: str) -> list[dict]:
         """Fetch all hosts for a specific cluster."""
         return self.check._get_paginated_request_data(f"api/clustermgmt/v4.0/config/clusters/{cluster_id}/hosts")
+
+    def _list_all_disks(self) -> list[dict]:
+        """Fetch all disks across all clusters from Prism Central."""
+        return self.check._get_paginated_request_data("api/clustermgmt/v4.0/config/disks")
+
+    def _build_disks_by_host_cache(self) -> None:
+        """Fetch all disks once per run and group them by node extId."""
+        for disk in self._list_all_disks():
+            if node_id := disk.get("nodeExtId"):
+                self._disks_by_host.setdefault(node_id, []).append(disk)
+
+    def _aggregate_disk_status(self, disks: list[dict]) -> str | None:
+        """Return the worst-status across disks: degraded > normal."""
+        degraded_states = {
+            "MARKED_FOR_REMOVAL_BUT_NOT_DETACHABLE",
+            "DATA_MIGRATION_INITIATED",
+            "DETACHABLE",
+        }
+
+        statuses = {disk.get("status") for disk in disks if disk.get("status")}
+        if not statuses:
+            return None
+        if statuses & degraded_states:
+            return "degraded"
+        if "NORMAL" in statuses:
+            return "normal"
+        return None
+
+    def _get_disk_status_storage_tags(self, host_id: str) -> dict[str, list[str]]:
+        """Return per-key extra tags adding ``ntnx_disk_status`` on host storage_* metrics."""
+        status = self._aggregate_disk_status(self._disks_by_host.get(host_id, []))
+        if not status:
+            return {}
+
+        storage_keys = (
+            "freePhysicalStorageBytes",
+            "logicalStorageUsageBytes",
+            "storageCapacityBytes",
+            "storageUsageBytes",
+        )
+        return {key: [f"ntnx_disk_status:{status}"] for key in storage_keys}
 
     def _build_stats_params(self) -> dict[str, str | int]:
         """Build the common query parameters for stats API calls."""
