@@ -1,1 +1,6 @@
-Add ntnx_maintenance_state and ntnx_connection_state tags to host metrics, ntnx_power_state to VM metrics, ntnx_operation_mode to cluster metrics, and ntnx_disk_status to host storage metrics.
+Add resource state tags on host, VM, cluster, and host storage metrics so capacity-planning queries can scope to only healthy, available resources:
+
+  * `ntnx_maintenance_state` and `ntnx_connection_state` on host metrics
+  * `ntnx_power_state` on VM metrics
+  * `ntnx_operation_mode` on cluster metrics
+  * `ntnx_disk_status` on host storage metrics

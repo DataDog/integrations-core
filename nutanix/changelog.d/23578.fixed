@@ -1,1 +1,1 @@
-Fix `nutanix.vm.disk_capacity_bytes` to source allocation from VM config (`disks[].backingInfo.diskSizeBytes`); the v4 stats endpoint never returns `diskCapacityBytes` so the metric was effectively never emitted.
+Fix `nutanix.vm.disk_capacity_bytes` to report allocated disk capacity per VM. The metric was previously declared but no value was ever submitted.
