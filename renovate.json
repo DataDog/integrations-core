@@ -45,13 +45,30 @@
       "minimumReleaseAge": "7 days"
     },
     {
-      "description": "Only manage GitHub Actions versions via Renovate. Runner versions (runs-on), action input versions (uses-with, e.g. node-version / python-version), and container/service images are bumped manually when needed.",
+      "description": "Allow updates to action input versions (uses-with, e.g. node-version / python-version) without the strict full-semver matcher applied to action tags.",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchDepTypes": [
+        "uses-with"
+      ],
+      "groupName": "actions",
+      "schedule": [
+        "before 6am on Monday"
+      ],
+      "labels": [
+        "renovate/actions",
+        "qa/skip-qa"
+      ],
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "description": "Runner versions (runs-on) and container/service/docker images are bumped manually when needed.",
       "matchManagers": [
         "github-actions"
       ],
       "matchDepTypes": [
         "github-runner",
-        "uses-with",
         "docker",
         "container",
         "service"
