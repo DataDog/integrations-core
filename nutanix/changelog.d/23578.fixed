@@ -1,1 +1,0 @@
-Fix `nutanix.vm.disk_capacity_bytes` to report allocated disk capacity per VM. The metric was previously declared but no value was ever submitted.

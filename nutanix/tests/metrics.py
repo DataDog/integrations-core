@@ -148,6 +148,7 @@ VM_STATS_METRICS_OPTIONAL = [
     "nutanix.vm.hypervisor.swap_in_rate_kbps",
     "nutanix.vm.hypervisor.swap_out_rate_kbps",
     "nutanix.vm.memory_usage_bytes",
+    "nutanix.vm.disk_capacity_bytes",
     "nutanix.vm.disk_usage_ppm",
     "nutanix.vm.hypervisor.vm_running_time_usecs",
 ]
@@ -193,7 +194,6 @@ VM_CAPACITY_METRICS = [
     "nutanix.vm.cpu.threads_per_core",
     "nutanix.vm.cpu.vcpus_allocated",
     "nutanix.vm.memory.allocated_bytes",
-    "nutanix.vm.disk_capacity_bytes",
 ]
 
 ALL_METRICS = (

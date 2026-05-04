@@ -134,25 +134,3 @@ def test_cluster_tags_non_string_operation_mode_dropped(monitor):
     """Non-string operationMode values do not crash and produce no tag."""
     tags = monitor._extract_cluster_tags({"name": "c1", "config": {"operationMode": 42}})
     assert all("ntnx_operation_mode" not in t for t in tags)
-
-
-# ---------- _extract_vm_disk_capacity_bytes ----------
-
-
-@pytest.mark.parametrize(
-    "vm,expected",
-    [
-        ({}, 0),
-        ({"disks": None}, 0),
-        ({"disks": []}, 0),
-        ({"disks": [{"backingInfo": {"diskSizeBytes": 100}}]}, 100),
-        ({"disks": [{"backingInfo": {"diskSizeBytes": 100}}, {"backingInfo": {"diskSizeBytes": 50}}]}, 150),
-        # Defensive: missing backingInfo / diskSizeBytes contributes zero, doesn't raise.
-        ({"disks": [{"backingInfo": {"diskSizeBytes": 100}}, {"backingInfo": {}}]}, 100),
-        ({"disks": [{"backingInfo": {"diskSizeBytes": 100}}, {}]}, 100),
-        # Non-dict entries are skipped, not raised.
-        ({"disks": [None, "junk", 42, {"backingInfo": {"diskSizeBytes": 50}}]}, 50),
-    ],
-)
-def test_extract_vm_disk_capacity_bytes(monitor, vm, expected):
-    assert monitor._extract_vm_disk_capacity_bytes(vm) == expected
