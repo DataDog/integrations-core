@@ -580,7 +580,7 @@ Additional helpful documentation, links, and articles:
 [6]: https://docs.datadoghq.com/integrations/faq/mysql-localhost-error-localhost-vs-127-0-0-1/
 [7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [8]: https://github.com/DataDog/integrations-core/blob/master/mysql/datadog_checks/mysql/data/conf.yaml.example
-[9]: https://dev.mysql.com/doc/refman/5.7/en/performance-schema-quick-start.html
+[9]: https://dev.mysql.com/doc/refman/8.4/en/performance-schema-quick-start.html
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [11]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
 [12]: https://docs.datadoghq.com/agent/faq/template_variables/
