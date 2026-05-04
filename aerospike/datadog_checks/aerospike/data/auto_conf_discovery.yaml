@@ -1,0 +1,5 @@
+ad_identifiers:
+  - aerospike-prometheus-exporter
+discovery: {}
+init_config:
+instances: []

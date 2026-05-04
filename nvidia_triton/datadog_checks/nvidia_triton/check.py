@@ -15,6 +15,7 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
     # This will be the prefix of every metric and service check the integration sends
     DEFAULT_METRIC_LIMIT = 0
     __NAMESPACE__ = 'nvidia_triton'
+    DISCOVERY_PORT_HINTS = [8002]
 
     def __init__(self, name, init_config, instances=None):
         super(NvidiaTritonCheck, self).__init__(name, init_config, instances)

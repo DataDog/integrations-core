@@ -1,0 +1,5 @@
+ad_identifiers:
+  - bentoml
+discovery: {}
+init_config:
+instances: []

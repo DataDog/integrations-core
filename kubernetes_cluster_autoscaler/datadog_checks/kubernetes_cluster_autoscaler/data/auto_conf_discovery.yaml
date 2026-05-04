@@ -1,0 +1,5 @@
+ad_identifiers:
+  - registry.k8s.io/autoscaling/cluster-autoscaler
+discovery: {}
+init_config:
+instances: []

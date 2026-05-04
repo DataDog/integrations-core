@@ -1,0 +1,5 @@
+ad_identifiers:
+  - temporalio/server
+discovery: {}
+init_config:
+instances: []

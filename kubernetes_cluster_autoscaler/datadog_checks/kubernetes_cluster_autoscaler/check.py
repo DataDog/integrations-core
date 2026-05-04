@@ -10,6 +10,7 @@ from .metrics import METRIC_MAP, RENAME_LABELS_MAP
 class KubernetesClusterAutoscalerCheck(OpenMetricsBaseCheckV2):
     DEFAULT_METRIC_LIMIT = 0
     __NAMESPACE__ = 'kubernetes_cluster_autoscaler'
+    DISCOVERY_PORT_HINTS = [8085]
 
     def __init__(self, name, init_config, instances=None):
         super(KubernetesClusterAutoscalerCheck, self).__init__(name, init_config, instances)

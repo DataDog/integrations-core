@@ -1,0 +1,5 @@
+ad_identifiers:
+  - nvcr.io/nvidia/k8s/dcgm-exporter
+discovery: {}
+init_config:
+instances: []

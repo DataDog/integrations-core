@@ -1,0 +1,5 @@
+ad_identifiers:
+  - argoproj/argowf
+discovery: {}
+init_config:
+instances: []

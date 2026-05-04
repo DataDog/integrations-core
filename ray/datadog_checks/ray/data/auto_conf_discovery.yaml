@@ -1,0 +1,5 @@
+ad_identifiers:
+  - rayproject/ray
+discovery: {}
+init_config:
+instances: []

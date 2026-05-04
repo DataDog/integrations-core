@@ -11,6 +11,7 @@ from .metrics import METRIC_MAP
 class RayCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = 'ray'
     DEFAULT_METRIC_LIMIT = 0
+    DISCOVERY_PORT_HINTS = [8080]
 
     def get_default_config(self):
         return {
