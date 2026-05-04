@@ -148,15 +148,13 @@ def mocked_requests_get(*args, **kwargs):
                 iter_lines=lambda **kwargs: text_data.split("\n"),
                 headers={'Content-Type': "text/plain"},
             )
-    elif url == "http://{}:{}/api/v4/version".format(HOST, GITLAB_LOCAL_PORT) or url == "http://{}:{}/-/health".format(
-        HOST, GITLAB_LOCAL_PORT
-    ):
+    elif url == "http://{}:{}/api/v4/version".format(HOST, GITLAB_LOCAL_PORT):
         f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'version.json')
         with open(f_name, 'r') as f:
             text_data = f.read()
             response = mock.MagicMock()
             response.status_code = 200
-            response.json.return_value = text_data
+            response.json.return_value = json.loads(text_data)
             return response
 
     pytest.fail("url `{}` not registered".format(args[0]))

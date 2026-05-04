@@ -1,5 +1,5 @@
 {
-    "title": "Checkpoint Quantum Firewall - IPS",
+    "title": "Check Point Quantum Firewall - IPS",
     "description": "- This dashboard gives insights about Intrusion Prevention System (IPS) related logs.",
     "widgets": [
         {

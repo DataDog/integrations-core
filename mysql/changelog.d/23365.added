@@ -1,0 +1,1 @@
+Collect additional statement metrics for sort operations, temporary table usage, and join strategies from events_statements_summary_by_digest.

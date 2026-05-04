@@ -230,7 +230,7 @@
           {
             "definition": {
               "background_color": "vivid_blue",
-              "content": "\nDatadog Cloud SIEM analyzes and correlates Ping Federate Audit logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security?query=source%3Aping-federate%20service%3Aaudit%20). ",
+              "content": "\nDatadog Cloud SIEM analyzes and correlates PingFederate Audit logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security?query=source%3Aping-federate%20service%3Aaudit%20). ",
               "font_size": "14",
               "has_padding": true,
               "show_tick": false,

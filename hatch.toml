@@ -21,8 +21,8 @@ dependencies = [
 ]
 # API & CLI documentation
 post-install-commands = [
-  "pip install -e ./datadog_checks_base[deps,http] -e ./datadog_checks_dev[cli]",
-  "pip install -e ./ddev",
+  "uv pip install -e ./datadog_checks_base[deps,http] -e ./datadog_checks_dev[cli]",
+  "uv pip install -e ./ddev",
 ]
 [envs.docs.env-vars]
 # Use a set timestamp for reproducible builds, see:

@@ -58,6 +58,9 @@ VALIDATIONS: dict[str, ValidationConfig] = {
         description="Verify dependency pins are consistent and Agent-compatible",
         repo_wide=True,
     ),
+    "eula": ValidationConfig(
+        description="Validate EULA definition files",
+    ),
     "http": ValidationConfig(
         description="Validate integrations use the HTTP wrapper correctly",
     ),
@@ -190,6 +193,9 @@ class ValidationOrchestrator(EventBusOrchestrator):
             max_timeout=max_timeout,
             grace_period=grace_period,
             executor=ThreadPoolExecutor(max_workers=len(validations)),
+            # Surface lifecycle hook failures so on_finalize can render them in the
+            # validation report instead of silently logging.
+            fail_fast=True,
         )
         self._app = app
         self._validations = validations
@@ -222,6 +228,11 @@ class ValidationOrchestrator(EventBusOrchestrator):
 
         self._publish_report(exception)
         self._print_console_output()
+
+    @property
+    def had_failures(self) -> bool:
+        """True if any validation failed or did not complete."""
+        return any(not r.success for r in self._results.values()) or len(self._results) < len(self._validations)
 
     def _build_error_and_warning(self, exception: Exception | None) -> tuple[str | None, str | None]:
         error_msg = f"Error running validations: {exception}" if exception else None
@@ -320,6 +331,5 @@ class ValidationOrchestrator(EventBusOrchestrator):
             if self._target:
                 fix_all_cmd = f"ddev validate all {self._target} --fix"
             self._app.display_info(f"\nRun `{fix_all_cmd}` to attempt to auto-fix supported validations.")
-            self._app.abort()
         else:
             self._app.display_success(f"All {passed} validations passed")

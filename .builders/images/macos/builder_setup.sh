@@ -2,7 +2,6 @@
 
 set -euxo pipefail
 
-"${DD_PYTHON3}" -m pip install --no-warn-script-location --upgrade pip
 "${DD_PYTHON3}" -m pip install --no-warn-script-location virtualenv
 "${DD_PYTHON3}" -m virtualenv py3
 
@@ -23,8 +22,8 @@ cp -R /opt/mqm "${DD_PREFIX_PATH}"
 
 # openssl
 DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
-VERSION="3.6.1" \
-SHA256="b1bfedcd5b289ff22aee87c9d600f515767ebf45f77168cb6d64f231f518a82e" \
+VERSION="3.6.2" \
+SHA256="aaf51a1fe064384f811daeaeb4ec4dce7340ec8bd893027eee676af31e83a04f" \
 RELATIVE_PATH="openssl-{{version}}" \
 CONFIGURE_SCRIPT="./config" \
   install-from-source \
