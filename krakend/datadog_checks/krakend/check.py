@@ -51,20 +51,6 @@ class KrakendCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = "krakend.api"
     DEFAULT_METRIC_LIMIT = 0
 
-    @classmethod
-    def discover(cls, service):
-        from datadog_checks.base.utils.discovery import (
-            candidate_ports,
-            http_probe,
-            is_prometheus_exposition,
-        )
-
-        for port in candidate_ports(service, []):
-            if http_probe(service.host, port.number, "/metrics",
-                          verifier=is_prometheus_exposition()):
-                return [{"openmetrics_endpoint": f"http://{service.host}:{port.number}/metrics"}]
-        return None
-
     def create_scraper(self, config: InstanceType):
         return HttpCodeClassScraper(self, self.get_config_with_defaults(config))
 

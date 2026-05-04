@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 import pytest
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.utils.discovery import Port, Service
 from datadog_checks.krakend import KrakendCheck
@@ -136,27 +136,58 @@ def _service(*ports: int) -> Service:
 
 def test_discover_returns_url_for_first_matching_port():
     with patch("datadog_checks.base.utils.discovery.http_probe", side_effect=[True]) as probe:
-        result = KrakendCheck.discover(_service(9090))
+        result = OpenMetricsBaseCheckV2.discover(_service(9090))
     assert result == [{"openmetrics_endpoint": "http://h:9090/metrics"}]
     probe.assert_called_once()
 
 
 def test_discover_skips_non_matching_ports():
     with patch("datadog_checks.base.utils.discovery.http_probe", side_effect=[False, True]) as probe:
-        result = KrakendCheck.discover(_service(8080, 9090))
+        result = OpenMetricsBaseCheckV2.discover(_service(8080, 9090))
     assert result == [{"openmetrics_endpoint": "http://h:9090/metrics"}]
     assert probe.call_count == 2
 
 
 def test_discover_returns_none_when_no_port_matches():
     with patch("datadog_checks.base.utils.discovery.http_probe", side_effect=[False, False, False]) as probe:
-        result = KrakendCheck.discover(_service(80, 8080, 9090))
+        result = OpenMetricsBaseCheckV2.discover(_service(80, 8080, 9090))
     assert result is None
     assert probe.call_count == 3
 
 
 def test_discover_returns_none_when_service_has_no_ports():
     with patch("datadog_checks.base.utils.discovery.http_probe") as probe:
-        result = KrakendCheck.discover(_service())
+        result = OpenMetricsBaseCheckV2.discover(_service())
     assert result is None
     probe.assert_not_called()
+
+
+def test_discover_port_hint_probed_first():
+    # Port hints are probed before other ports; only ports the service exposes are probed
+    class CheckWithHint(OpenMetricsBaseCheckV2):
+        __NAMESPACE__ = "test"
+        DISCOVERY_PORT_HINTS = [9145]
+
+    with patch("datadog_checks.base.utils.discovery.http_probe", side_effect=[False, True]) as probe:
+        result = CheckWithHint.discover(_service(8080, 9145))
+    # hint 9145 is tried first, then 8080
+    assert result == [{"openmetrics_endpoint": "http://h:8080/metrics"}]
+    assert probe.call_count == 2
+
+
+def test_discover_custom_path():
+    class CheckWithPath(OpenMetricsBaseCheckV2):
+        __NAMESPACE__ = "test"
+        DISCOVERY_METRICS_PATH = "/_status/vars"
+
+    with patch("datadog_checks.base.utils.discovery.http_probe", side_effect=[True]) as probe:
+        result = CheckWithPath.discover(_service(8080))
+    assert result == [{"openmetrics_endpoint": "http://h:8080/_status/vars"}]
+    probe.assert_called_once()
+
+
+def test_krakend_inherits_base_discover():
+    # KrakendCheck uses no port hints and /metrics path (base class defaults)
+    assert KrakendCheck.DISCOVERY_PORT_HINTS == []
+    assert KrakendCheck.DISCOVERY_METRICS_PATH == "/metrics"
+    assert KrakendCheck.__dict__.get("discover") is None  # not overridden

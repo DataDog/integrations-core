@@ -4,7 +4,7 @@
 import json
 
 from datadog_checks.base.utils.discovery._bridge import _run_discover
-from datadog_checks.base.utils.discovery.service import Port, Service
+from datadog_checks.base.utils.discovery.service import Service
 
 
 class _Found:
@@ -31,11 +31,13 @@ class _Raises:
         raise RuntimeError("boom")
 
 
-SVC_JSON = json.dumps({
-    "id": "docker://abc",
-    "host": "10.0.0.1",
-    "ports": [{"number": 9090, "name": "metrics"}],
-})
+SVC_JSON = json.dumps(
+    {
+        "id": "docker://abc",
+        "host": "10.0.0.1",
+        "ports": [{"number": 9090, "name": "metrics"}],
+    }
+)
 
 
 def test_bridge_returns_json_list_on_match():
@@ -78,4 +80,5 @@ def test_bridge_constructs_service_correctly():
 def test_bridge_handles_missing_discover_method():
     class NoDiscover:
         pass
+
     assert _run_discover(NoDiscover, SVC_JSON) == "null"

@@ -11,6 +11,7 @@ function with the check class, and receives a JSON string in return:
 - ``"[]"`` — discover explicitly returned an empty list.
 - ``"[{...}, {...}]"`` — one entry per resolved instance config.
 """
+
 import json
 import logging
 from typing import Any
@@ -27,10 +28,7 @@ def _run_discover(check_class: Any, service_json: str) -> str:
     """
     try:
         payload = json.loads(service_json)
-        ports = tuple(
-            Port(number=int(p["number"]), name=p.get("name", ""))
-            for p in payload.get("ports", [])
-        )
+        ports = tuple(Port(number=int(p["number"]), name=p.get("name", "")) for p in payload.get("ports", []))
         service = Service(id=payload["id"], host=payload["host"], ports=ports)
     except Exception:
         _log.exception("discover bridge: failed to parse service payload")

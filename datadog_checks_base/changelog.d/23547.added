@@ -1,0 +1,1 @@
+Add discover() classmethod to OpenMetricsBaseCheckV2 for generic OpenMetrics port scanning.
