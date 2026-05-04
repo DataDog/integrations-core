@@ -262,7 +262,6 @@ class Phase(AsyncProcessor[PhaseTrigger]):
 
     async def on_error(self, error: MessageProcessingError | ProcessorHookError) -> None:
         """Write failed checkpoint and emit PhaseFailedMessage."""
-        original_error = getattr(error, 'original_exception', error)
         try:
             self._checkpoint_manager.write_phase_checkpoint(
                 self._phase_id,
