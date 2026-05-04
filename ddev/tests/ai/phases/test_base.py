@@ -15,6 +15,7 @@ from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.registry import ToolRegistry
+from ddev.event_bus.exceptions import HookName, MessageProcessingError, ProcessorHookError
 
 from .conftest import MockAgent, make_agent_factory, make_response, resolve_key
 
@@ -445,7 +446,7 @@ async def test_on_success_emits_finished_message(flow_dir, monkeypatch, message_
     msg = message_queue.get_nowait()
     assert isinstance(msg, PhaseTrigger)
     assert msg.phase_id == "p1"
-    assert msg.id == "p1_finished_start"
+    assert msg.id == "p1_finished"
 
 
 # ---------------------------------------------------------------------------
@@ -457,7 +458,8 @@ async def test_on_error_writes_failed_checkpoint(flow_dir, monkeypatch, message_
     mock_agent = MockAgent([])
     phase, mgr = _make_phase(flow_dir, mock_agent, monkeypatch, message_queue)
 
-    await phase.on_error(PhaseTrigger(id="start", phase_id=None), RuntimeError("boom"))
+    wrapped = MessageProcessingError("p1", PhaseTrigger(id="start", phase_id=None), RuntimeError("boom"))
+    await phase.on_error(wrapped)
 
     checkpoint = mgr.read()["p1"]
     assert checkpoint["status"] == "failed"
@@ -469,7 +471,10 @@ async def test_on_error_emits_failed_message(flow_dir, monkeypatch, message_queu
     mock_agent = MockAgent([])
     phase, _ = _make_phase(flow_dir, mock_agent, monkeypatch, message_queue)
 
-    await phase.on_error(PhaseTrigger(id="start", phase_id=None), RuntimeError("boom"))
+    wrapped = ProcessorHookError(
+        HookName.ON_SUCCESS, "p1", PhaseTrigger(id="start", phase_id=None), RuntimeError("boom")
+    )
+    await phase.on_error(wrapped)
 
     msg = message_queue.get_nowait()
     assert isinstance(msg, PhaseFailedMessage)
@@ -482,7 +487,8 @@ async def test_on_error_writes_failed_checkpoint_after_start(flow_dir, monkeypat
     phase, mgr = _make_phase(flow_dir, mock_agent, monkeypatch, message_queue)
     phase._started_at = datetime.now(UTC)
 
-    await phase.on_error(PhaseTrigger(id="start", phase_id=None), RuntimeError("boom"))
+    wrapped = MessageProcessingError("p1", PhaseTrigger(id="start", phase_id=None), RuntimeError("boom"))
+    await phase.on_error(wrapped)
 
     checkpoint = mgr.read()["p1"]
     assert checkpoint["status"] == "failed"
@@ -663,7 +669,8 @@ async def test_failed_phase_omits_memory_path(flow_dir, monkeypatch, message_que
     mock_agent = MockAgent([])
     phase, mgr = _make_phase(flow_dir, mock_agent, monkeypatch, message_queue)
 
-    await phase.on_error(PhaseTrigger(id="start", phase_id=None), RuntimeError("boom"))
+    wrapped = MessageProcessingError("p1", PhaseTrigger(id="start", phase_id=None), RuntimeError("boom"))
+    await phase.on_error(wrapped)
 
     checkpoint = mgr.read()["p1"]
     assert "memory_path" not in checkpoint

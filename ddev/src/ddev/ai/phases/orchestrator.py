@@ -124,7 +124,9 @@ class PhaseOrchestrator(EventBusOrchestrator):
             raise FatalProcessingError(f"Phase '{message.phase_id}' failed: {message.error}")
 
     async def on_finalize(self, exception: Exception | None) -> None:
-        if self._failed_phase is not None:
-            raise RuntimeError(
-                f"Pipeline aborted: phase '{self._failed_phase}' failed: {self._failed_error or '<unknown>'}"
+        if exception is not None and self._failed_phase is not None:
+            self._logger.error(
+                "Pipeline aborted: phase '%s' failed: %s",
+                self._failed_phase,
+                self._failed_error or "<unknown>",
             )
