@@ -91,8 +91,9 @@ class PostgresDiagnose:
         try:
             if main_conn is not None:
                 self._diagnose_version(main_conn)
+                self._diagnose_pg_monitor_role(main_conn)
+                self._diagnose_pg_stat_database_access(main_conn)
                 if self._uses_pg_stat_activity():
-                    self._diagnose_pg_monitor_role(main_conn)
                     self._diagnose_pg_stat_activity_access(main_conn)
                 if self._check._config.dbm:
                     self._run_main_dbm_probes(main_conn)
@@ -420,6 +421,35 @@ class PostgresDiagnose:
         self._check.diagnosis.success(
             name=code.value,
             diagnosis="{} is readable with full query visibility.".format(view),
+            category=CATEGORY_POSTGRES,
+        )
+
+    def _diagnose_pg_stat_database_access(self, conn):
+        """Verify the datadog user can SELECT from pg_stat_database.
+
+        ``pg_stat_database`` backs the deadlock, conflict, and connection metrics queried on
+        every check run, regardless of feature flags. ``pg_monitor`` grants this transitively,
+        but a direct ``GRANT SELECT`` is also a valid (narrower) setup -- so probe the actual
+        SELECT instead of inferring from role membership.
+        """
+        code = DatabaseConfigurationError.pg_stat_database_not_readable
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT 1 FROM pg_stat_database LIMIT 1")
+                cursor.fetchall()
+        except psycopg.Error as e:
+            self._fail(
+                code,
+                diagnosis="Unable to SELECT from pg_stat_database: {}".format(e),
+                category=CATEGORY_POSTGRES,
+                description=DIAGNOSTIC_METADATA[code]["description"],
+                remediation=build_remediation(code),
+                rawerror=str(e),
+            )
+            return
+        self._check.diagnosis.success(
+            name=code.value,
+            diagnosis="pg_stat_database is readable.",
             category=CATEGORY_POSTGRES,
         )
 

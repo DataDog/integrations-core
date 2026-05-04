@@ -181,6 +181,7 @@ def _happy_server_responses(
         (_setting('pg_stat_statements.max'), [(str(pgss_max),)]),
         ("rolname = 'pg_monitor'", [(1,)]),
         ("pg_has_role", [(True,)]),
+        ("FROM pg_stat_database", [(1,)]),
         ("query = %s", [(0,)]),
     ]
 
@@ -265,16 +266,20 @@ def test_probe_connection_uses_pool_configuration(integration_check, pg_instance
 
 
 def test_server_config_happy_path(integration_check, pg_instance):
-    """Non-DBM without activity metrics does not require pg_monitor or pg_stat_activity."""
+    """Non-DBM without activity metrics still validates pg_monitor and pg_stat_database
+    (both are baseline grants for the integration); pg_stat_activity is only checked when
+    activity metrics are enabled."""
     check = integration_check(pg_instance)
     diagnoses = _run(check, _happy_server_responses())
 
-    names_and_results = {(d['name'], d['result']) for d in diagnoses}
-    assert (
-        DatabaseConfigurationError.postgres_version_unsupported.value,
-        Diagnosis.DIAGNOSIS_SUCCESS,
-    ) in names_and_results
-    assert not _by_name(diagnoses, DatabaseConfigurationError.missing_pg_monitor_role.value)
+    _assert_all_succeed(
+        diagnoses,
+        (
+            DatabaseConfigurationError.postgres_version_unsupported,
+            DatabaseConfigurationError.missing_pg_monitor_role,
+            DatabaseConfigurationError.pg_stat_database_not_readable,
+        ),
+    )
     assert not _by_name(diagnoses, DatabaseConfigurationError.insufficient_privilege_on_pg_stat_activity.value)
 
 
@@ -345,11 +350,26 @@ def test_unsupported_postgres_version_fails(integration_check, pg_instance):
 
 
 def test_missing_pg_monitor_role_fails(integration_check, pg_instance):
-    check = integration_check(dict(pg_instance, collect_activity_metrics=True))
+    check = integration_check(pg_instance)
     responses = _override(_happy_server_responses(), 'pg_has_role', [(False,)])
     diagnoses = _run(check, responses)
     entry = _by_name(diagnoses, DatabaseConfigurationError.missing_pg_monitor_role.value)[0]
     assert entry['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert 'pg_monitor' in entry['remediation']
+
+
+def test_pg_stat_database_access_fails_on_permission_error(integration_check, pg_instance):
+    check = integration_check(pg_instance)
+    responses = _override(
+        _happy_server_responses(),
+        'FROM pg_stat_database',
+        psycopg.errors.InsufficientPrivilege('permission denied for relation pg_stat_database'),
+    )
+    diagnoses = _run(check, responses)
+    entry = _by_name(diagnoses, DatabaseConfigurationError.pg_stat_database_not_readable.value)[0]
+    assert entry['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert 'pg_stat_database' in entry['diagnosis']
+    assert entry['remediation'] == build_remediation(DatabaseConfigurationError.pg_stat_database_not_readable)
     assert 'pg_monitor' in entry['remediation']
 
 

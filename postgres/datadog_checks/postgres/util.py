@@ -47,6 +47,7 @@ class DatabaseConfigurationError(Enum):
     missing_datadog_schema = 'missing-datadog-schema'
     missing_schema_usage_grant = 'missing-schema-usage-grant'
     pg_stat_statements_not_readable = 'pg-stat-statements-not-readable'
+    pg_stat_database_not_readable = 'pg-stat-database-not-readable'
     config_validation = 'config-validation'
 
 
@@ -175,6 +176,17 @@ DIAGNOSTIC_METADATA = {
             "`ALTER ROLE <datadog_user> SET search_path = \"$user\",public,<schema>;`."
         ),
         "docs_anchor": DatabaseConfigurationError.pg_stat_statements_not_readable.value,
+    },
+    DatabaseConfigurationError.pg_stat_database_not_readable: {
+        "description": (
+            "The datadog user cannot SELECT from pg_stat_database; deadlock, conflict, and connection metrics "
+            "will not be collected."
+        ),
+        "remediation": (
+            "Run `GRANT pg_monitor TO <datadog_user>;` (preferred), or "
+            "`GRANT SELECT ON pg_stat_database TO <datadog_user>;` for a narrower grant."
+        ),
+        "docs_anchor": DatabaseConfigurationError.pg_stat_database_not_readable.value,
     },
     DatabaseConfigurationError.config_validation: {
         "description": "The Postgres integration configuration failed validation.",
