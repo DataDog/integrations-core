@@ -22,7 +22,7 @@ from .exceptions import (
     SkipMessageError,
 )
 
-ErrorHandler = Callable[[OrchestratorHookError], Awaitable[None]]
+type ErrorHandler[E: Exception] = Callable[[E], Awaitable[None]]
 
 
 @dataclass
@@ -44,7 +44,7 @@ class BaseProcessor[T: BaseMessage]:
     async def on_success(self, message: T) -> None:
         pass
 
-    async def on_error(self, error: Exception) -> None:
+    async def on_error(self, error: MessageProcessingError | ProcessorHookError) -> None:
         """
         Handle a processor-scoped failure.
 
@@ -251,7 +251,7 @@ class EventBusOrchestrator(ABC):
         """
         raise error
 
-    async def _apply_error_policy(self, wrapped_error: OrchestratorHookError, handler: ErrorHandler) -> None:
+    async def _apply_error_policy[E: Exception](self, wrapped_error: E, handler: ErrorHandler[E]) -> None:
         """
         Routes ``wrapped_error`` through ``handler`` and applies the orchestrator's policy.
 

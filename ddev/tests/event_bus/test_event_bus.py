@@ -102,12 +102,12 @@ class Secretary(AsyncProcessor[Memo]):
             raise RuntimeError("Success hook failed intentionally")
         self.confirmations.append(message)
 
-    async def on_error(self, error: Exception):
+    async def on_error(self, error: MessageProcessingError | ProcessorHookError):
         if isinstance(error, MessageProcessingError):
             if error.message.content == "fail_processing_and_error":
                 raise RuntimeError("Error hook failed intentionally")
             self.failed_deliveries.append((error.message, error.original_exception))
-        elif isinstance(error, ProcessorHookError):
+        else:
             self.hook_failures.append(error)
 
 
@@ -268,9 +268,7 @@ def test_processor_processing_failure(
     assert isinstance(error, expected_error_type)
 
 
-def test_processor_success_hook_failure_routed_to_on_error(
-    orchestrator: MockOrchestrator, secretary: Secretary
-):
+def test_processor_success_hook_failure_routed_to_on_error(orchestrator: MockOrchestrator, secretary: Secretary):
     """on_success failure is wrapped and routed to the processor's on_error."""
     orchestrator.submit_message(Memo("hook_fail_memo", content="fail_success_hook"))
 
@@ -842,9 +840,7 @@ def test_should_process_message_conditional_filtering(bare_orchestrator: MockOrc
     assert analyst.processed[0].id == "high_task"
 
 
-def test_should_process_message_is_independent_per_processor(
-    bare_orchestrator: MockOrchestrator, secretary: Secretary
-):
+def test_should_process_message_is_independent_per_processor(bare_orchestrator: MockOrchestrator, secretary: Secretary):
     """Each processor filters independently — one skipping a message does not affect the others."""
 
     class UrgentMemosOnlyProcessor(AsyncProcessor[Memo]):
