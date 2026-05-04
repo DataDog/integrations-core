@@ -132,8 +132,8 @@ instances:
     ## StartTLS is implemented on these protocols: smtp, pop3, imap, ftp, xmpp, xmpp-server,
     ## irc, postgres, mysql, lmtp, nntp, sieve, and ldap.
     ##
-    ## Currently this checks supports only the below protocols:
-    ##   postgres, mysql
+    ## Currently this check supports only the below protocols:
+    ##   postgres, mysql, smtp
     #
     # start_tls: <START_TLS>
 
