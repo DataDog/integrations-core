@@ -1,0 +1,1 @@
+Filter out errored partitions from offsets_for_times results to prevent invalid offset reporting

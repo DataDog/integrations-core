@@ -1,0 +1,1 @@
+Support skipping a fixed number of bytes before deserialization via `value_skip_bytes` and `key_skip_bytes` for stripping producer-side prefixes.
