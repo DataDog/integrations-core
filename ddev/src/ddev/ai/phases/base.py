@@ -255,7 +255,6 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         self.submit_message(
             PhaseTrigger(
                 id=f"{self._phase_id}_finished",
-                id=f"{self._phase_id}_finished",
                 phase_id=self._phase_id,
             )
         )
