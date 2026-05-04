@@ -23,6 +23,9 @@
       "matchManagers": [
         "github-actions"
       ],
+      "matchDepTypes": [
+        "action"
+      ],
       "matchFileNames": [
         ".github/workflows/**",
         ".github/actions/tag-job/**"
@@ -42,11 +45,16 @@
       "minimumReleaseAge": "7 days"
     },
     {
+      "description": "Only manage GitHub Actions versions via Renovate. Runner versions (runs-on), action input versions (uses-with, e.g. node-version / python-version), and container/service images are bumped manually when needed.",
       "matchManagers": [
         "github-actions"
       ],
-      "matchDepNames": [
-        "python"
+      "matchDepTypes": [
+        "github-runner",
+        "uses-with",
+        "docker",
+        "container",
+        "service"
       ],
       "enabled": false
     },
