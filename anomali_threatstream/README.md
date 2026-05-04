@@ -16,16 +16,16 @@ Integrate Anomali ThreatStream with Datadog to enhance your security logs with t
 
 1. Log in to the Anomali ThreatStream instance.
 2. Navigate to **Settings** > **My profile**.
-3. Under Account Information, Click **Reveal** next to the **API Key** and copy it. Also, copy your **Email**.
+3. Under Account Information, click **Reveal** next to the **API Key** and copy it. Also, copy your **Email**.
 4. Identify your Anomali ThreatStream Domain using the URL of your Anomali ThreatStream instance.
-   - For example, if your Anomali ThreatStream instance URL is `https://ui.threatstream.com/` then Anomali ThreatStream Domain is `ui.threatstream.com`.
+   - For example, if your Anomali ThreatStream instance URL is `https://ui.threatstream.com/` then your Anomali ThreatStream Domain is `ui.threatstream.com`.
 
 ### Connect your Anomali ThreatStream account to Datadog
 
-1. Provide the following details.
+1. Provide the following details:
    | Parameter | Description |
    | ---------- | ---------------------------------------------- |
-   | Domain | Domain of the Anomali ThreatStream. |
+   | Domain | Your Anomali ThreatStream Domain. |
    | Email | Email address associated with your ThreatStream account. |
    | API Key | API key of your Anomali ThreatStream account. |
    | Collect IPv4 IOCs | Enable to collect IPv4 IOCs. The default value is true. |
