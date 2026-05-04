@@ -15,7 +15,7 @@ from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.registry import ToolRegistry
-from ddev.event_bus.exceptions import MessageProcessingError
+from ddev.event_bus.exceptions import HookName, MessageProcessingError, ProcessorHookError
 
 from .conftest import MockAgent, make_agent_factory, make_response, resolve_key
 
@@ -471,7 +471,9 @@ async def test_on_error_emits_failed_message(flow_dir, monkeypatch, message_queu
     mock_agent = MockAgent([])
     phase, _ = _make_phase(flow_dir, mock_agent, monkeypatch, message_queue)
 
-    wrapped = MessageProcessingError("p1", PhaseTrigger(id="start", phase_id=None), RuntimeError("boom"))
+    wrapped = ProcessorHookError(
+        HookName.ON_SUCCESS, "p1", PhaseTrigger(id="start", phase_id=None), RuntimeError("boom")
+    )
     await phase.on_error(wrapped)
 
     msg = message_queue.get_nowait()
