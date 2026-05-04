@@ -454,7 +454,30 @@ async def test_on_finalize_no_failure_is_noop(tmp_path, file_access_policy):
     await orchestrator.on_finalize(None)  # must not raise
 
 
-async def test_on_finalize_after_phase_failed_raises(tmp_path, file_access_policy):
+async def test_on_finalize_after_phase_failed_logs(tmp_path, file_access_policy, caplog):
+    import logging
+
+    orchestrator = PhaseOrchestrator(
+        flow_yaml_path=Path("/fake/flow.yaml"),
+        checkpoint_path=Path("/fake/checkpoints.yaml"),
+        runtime_variables={},
+        anthropic_client=MagicMock(),
+        file_access_policy=file_access_policy,
+    )
+    msg = PhaseFailedMessage(id="f1", phase_id="p1", error="boom")
+    exc = FatalProcessingError("Phase 'p1' failed: boom")
+    with pytest.raises(FatalProcessingError):
+        await orchestrator.on_message_received(msg)
+
+    with caplog.at_level(logging.ERROR):
+        await orchestrator.on_finalize(exc)  # must not raise
+
+    assert any("Pipeline aborted" in r.message and "p1" in r.message and "boom" in r.message for r in caplog.records)
+
+
+async def test_on_finalize_no_exception_no_log(tmp_path, file_access_policy, caplog):
+    import logging
+
     orchestrator = PhaseOrchestrator(
         flow_yaml_path=Path("/fake/flow.yaml"),
         checkpoint_path=Path("/fake/checkpoints.yaml"),
@@ -466,8 +489,10 @@ async def test_on_finalize_after_phase_failed_raises(tmp_path, file_access_polic
     with pytest.raises(FatalProcessingError):
         await orchestrator.on_message_received(msg)
 
-    with pytest.raises(FatalProcessingError, match="Pipeline aborted.*p1.*boom"):
-        await orchestrator.on_finalize(None)
+    with caplog.at_level(logging.ERROR):
+        await orchestrator.on_finalize(None)  # exception=None means clean exit — no log
+
+    assert not any("Pipeline aborted" in r.message for r in caplog.records)
 
 
 def test_run_raises_runtime_error_when_phase_fails(tmp_path, file_access_policy):
@@ -505,5 +530,5 @@ def test_run_raises_runtime_error_when_phase_fails(tmp_path, file_access_policy)
     )
     orchestrator._phase_registry.register("FailingPhase", FailingPhase)
 
-    with pytest.raises(FatalProcessingError, match="Pipeline aborted"):
+    with pytest.raises(FatalProcessingError, match="Phase 'failing' failed"):
         orchestrator.run()
