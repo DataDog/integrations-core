@@ -63,6 +63,19 @@
       "minimumReleaseAge": "7 days"
     },
     {
+      "description": "Don't auto-bump Python via setup-python's python-version input. Patches are bumped by the Upgrade Python version workflow (ddev meta scripts upgrade-python-version); minor bumps are coordinated manually.",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchDepTypes": [
+        "uses-with"
+      ],
+      "matchDepNames": [
+        "python"
+      ],
+      "enabled": false
+    },
+    {
       "description": "Runner versions (runs-on) and container/service/docker images are bumped manually when needed.",
       "matchManagers": [
         "github-actions"
