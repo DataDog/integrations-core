@@ -8,7 +8,13 @@ The MySQL integration tracks the performance of your MySQL instances. It collect
 
 Enable [Database Monitoring][32] (DBM) for enhanced insights into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live and historical query snapshots, wait event analysis, database load, and query explain plans.
 
-MySQL version 5.6, 5.7, 8.0, and MariaDB versions 10.5, 10.6, 10.11 and 11.1 are supported.
+Supported versions:
+
+| Distribution | Versions          |
+|--------------|-------------------|
+| MySQL        | 5.6, 5.7, 8.0, 8.4 |
+| MariaDB      | 10.5, 10.6, 10.11, 11.4 |
+| Percona      | 8.0, 8.4          |
 
 **Minimum Agent version:** 6.0.0
 
