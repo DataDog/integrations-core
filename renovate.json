@@ -19,8 +19,12 @@
   ],
   "packageRules": [
     {
+      "description": "Only consider full vX.Y.Z tags upstream so we never pin to a moving major-only tag (e.g. v3, v9). pinact's --check rewrites the trailing comment to the canonical full-semver tag of the SHA, so a v3 comment from Renovate would always fail validation.",
       "matchManagers": [
         "github-actions"
+      ],
+      "matchDepTypes": [
+        "action"
       ],
       "matchFileNames": [
         ".github/workflows/**",
@@ -28,6 +32,25 @@
       ],
       "matchPackageNames": [
         "!dtolnay/rust-toolchain"
+      ],
+      "extractVersion": "^(?<version>v\\d+\\.\\d+\\.\\d+)$",
+      "groupName": "actions",
+      "schedule": [
+        "before 6am on Monday"
+      ],
+      "labels": [
+        "renovate/actions",
+        "qa/skip-qa"
+      ],
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "description": "Allow updates to action input versions (uses-with, e.g. node-version / python-version) without the strict full-semver matcher applied to action tags.",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchDepTypes": [
+        "uses-with"
       ],
       "groupName": "actions",
       "schedule": [
@@ -40,11 +63,28 @@
       "minimumReleaseAge": "7 days"
     },
     {
+      "description": "Don't auto-bump Python via setup-python's python-version input. Patches are bumped by the Upgrade Python version workflow (ddev meta scripts upgrade-python-version); minor bumps are coordinated manually.",
       "matchManagers": [
         "github-actions"
       ],
+      "matchDepTypes": [
+        "uses-with"
+      ],
       "matchDepNames": [
         "python"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Runner versions (runs-on) and container/service/docker images are bumped manually when needed.",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchDepTypes": [
+        "github-runner",
+        "docker",
+        "container",
+        "service"
       ],
       "enabled": false
     },
