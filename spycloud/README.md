@@ -13,18 +13,22 @@ Integrate SpyCloud with Datadog to enrich your security logs with threat intelli
 
 1. Log in to your SpyCloud Customer Portal.
 2. Navigate to the **API** tab in the sidebar.
-3. In the **Keys** section, copy the **API Key**.
+3. In the **Keys** section, copy the **API key**.
 
 ### Connect your SpyCloud account to Datadog
 
-1. Provide the following details:
+1. In Datadog, on the SpyCloud integration tile, provide the following details:
    | Parameter | Description |
    | ---------- | ---------------------------------------------- |
-   | API Key | The API Key of your SpyCloud account. |
-   | Collect IP IOCs | Enable to collect IP IOCs. Enabled by default. |
-   | Collect Domain IOCs | Enable to collect Domain IOCs. Enabled by default. |
+   | API key | The API key for your SpyCloud account. |
+   | Collect IP IOCs | Whether to collect IP IOCs from SpyCloud. Enabled by default. |
+   | Collect Domain IOCs | Whether to collect domain IOCs from SpyCloud. Enabled by default. |
    
 2. Click **Save**.
+
+## Data Collected
+
+The SpyCloud integration does not include any metrics, service checks, or events.
 
 ## Troubleshooting
 

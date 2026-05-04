@@ -26,7 +26,7 @@
             "id": 3711764900192796,
             "definition": {
                 "type": "note",
-                "content": "[SpyCloud](https://spycloud.com) recaptures exposed identity data from the criminal underground, including breaches, malware infections, and phishing activity, and makes this raw stolen data actionable for security teams.\n\nThis dashboard provides an overview of logs that matched IOCs identified through SpyCloud Threat Intelligence.\n\nFor more information, see the [SpyCloud Datadog Integration Documentation](https://docs.datadoghq.com/integrations/spycloud/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "[SpyCloud](https://spycloud.com) recaptures exposed identity data from the criminal underground, including breaches, malware infections, and phishing activity, and makes this raw stolen data actionable for security teams.\n\nThis dashboard provides an overview of logs that matched IOCs identified through SpyCloud Threat Intelligence.\n\nFor more information, see the [SpyCloud Datadog Integration Documentation](https://docs.datadoghq.com/integrations/spycloud/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "blue",
                 "font_size": "14",
                 "text_align": "left",
@@ -470,7 +470,7 @@
                             "title": "Distribution of matched IOCs by severity",
                             "title_size": "16",
                             "title_align": "left",
-                            "description": "This Pie Chart shows the distribution of matched IOCs by SpyCloud severity. See the [SpyCloud documentation](https://docs.spycloud.com/public-sc/docs/severity-score-source-types-metadata#:~:text=%F0%9F%93%8A-,Severity%20Table,-Severity) for guidance on interpreting severity values.",
+                            "description": "Distribution of matched IOCs by SpyCloud severity. See the [SpyCloud documentation](https://docs.spycloud.com/public-sc/docs/severity-score-source-types-metadata#:~:text=%F0%9F%93%8A-,Severity%20Table,-Severity) for guidance on interpreting severity values.",
                             "requests": [
                                 {
                                     "queries": [
@@ -1021,7 +1021,7 @@
                     {
                         "id": 2142811045551554,
                         "definition": {
-                            "title": "Machines from matched IOCs by installed av software",
+                            "title": "Machines from matched IOCs by installed AV software",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "bar_chart",
@@ -1361,7 +1361,7 @@
                         "id": 2025332082143309,
                         "definition": {
                             "type": "note",
-                            "content": "Datadog Cloud SIEM analyzes and correlates logs identified malicious by SpyCloud Threat Intelligence to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security/siem/home).",
+                            "content": "Datadog Cloud SIEM analyzes and correlates logs identified as malicious by SpyCloud Threat Intelligence to detect threats to your environment in real time. If you don't see signals, make sure you've enabled [Datadog Cloud SIEM](/security/siem/home).",
                             "background_color": "blue",
                             "font_size": "14",
                             "text_align": "center",
@@ -1381,7 +1381,7 @@
                     {
                         "id": 5986136339683419,
                         "definition": {
-                            "title": "CRITICALs",
+                            "title": "Critical signals",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -1434,7 +1434,7 @@
                     {
                         "id": 6559980888525287,
                         "definition": {
-                            "title": "HIGHs",
+                            "title": "High signals",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -1558,7 +1558,7 @@
                     {
                         "id": 2114682197371367,
                         "definition": {
-                            "title": "MEDIUMs",
+                            "title": "Medium signals",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -1611,7 +1611,7 @@
                     {
                         "id": 1150500876952374,
                         "definition": {
-                            "title": "LOWs",
+                            "title": "Low signals",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -1664,7 +1664,7 @@
                     {
                         "id": 3077932004771300,
                         "definition": {
-                            "title": "INFOs",
+                            "title": "Info signals",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",

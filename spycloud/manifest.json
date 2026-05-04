@@ -13,12 +13,12 @@
     "title": "SpyCloud",
     "media": [
             {
-                "caption": "SpyCloud Threat Intelligence",
+                "caption": "SpyCloud Threat Intelligence dashboard (light theme)",
                 "image_url": "images/spycloud_threat_intelligence_light.png",
                 "media_type": "image"
             },
             {
-                "caption": "SpyCloud Threat Intelligence",
+                "caption": "SpyCloud Threat Intelligence dashboard (dark theme)",
                 "image_url": "images/spycloud_threat_intelligence_dark.png",
                 "media_type": "image"
             }
