@@ -10,6 +10,7 @@ from pytest import fail
 from semver import VersionInfo
 
 from datadog_checks.postgres import util
+from datadog_checks.postgres.schemas import PostgresSchemaCollector
 
 pytestmark = pytest.mark.unit
 
@@ -254,3 +255,73 @@ def test_debug_stats_kwargs_respects_exclude_hostname(
     with mock.patch('datadog_checks.postgres.PostgreSql.resolve_db_host', return_value='resolved.hostname'):
         check = integration_check(pg_instance)
     assert check.debug_stats_kwargs()['hostname'] == expected_hostname
+
+
+@pytest.mark.unit
+def test_get_databases_autodiscovery_uses_parameterized_queries(pg_instance, integration_check):
+    """Database names from autodiscovery must be bound as query parameters, not formatted into SQL."""
+    pg_instance['collect_schemas'] = {'enabled': True}
+    check = integration_check(pg_instance)
+    collector = PostgresSchemaCollector(check)
+
+    db_names = ['postgres', "x') OR 1=1--", 'dogs']
+
+    execute_calls = []
+    mock_cursor = mock.MagicMock()
+    mock_cursor.execute.side_effect = lambda q, p=None: execute_calls.append((q, p))
+    mock_cursor.fetchall.return_value = []
+
+    mock_conn = mock.MagicMock()
+    mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
+
+    mock_main_db = mock.MagicMock()
+    mock_main_db.__enter__.return_value = mock_conn
+
+    check.autodiscovery = mock.MagicMock()
+    check.autodiscovery.get_items.return_value = db_names
+
+    with mock.patch.object(check, '_get_main_db', return_value=mock_main_db):
+        collector._get_databases()
+
+    assert len(execute_calls) == 1
+    query, params = execute_calls[0]
+
+    for name in db_names:
+        assert name not in query, f"Database name {name!r} must not appear in the SQL string"
+
+    assert all(name in params for name in db_names), "All database names must be present in query parameters"
+    assert query.count('%s') == len(params), "Number of placeholders must equal number of parameters"
+
+
+@pytest.mark.unit
+def test_run_explain_uses_parameterized_statement(pg_instance, integration_check):
+    """Statements passed to the explain function must be bound as parameters, not interpolated into SQL."""
+    pg_instance['dbm'] = True
+    pg_instance['query_samples'] = {'enabled': True}
+    check = integration_check(pg_instance)
+    check._resolved_hostname = 'test.host'
+
+    statement = "SELECT 1$stmt$) UNION ALL SELECT current_user--"
+
+    execute_calls = []
+    mock_cursor = mock.MagicMock()
+    mock_cursor.execute.side_effect = lambda q, p=None, **kw: execute_calls.append((q, p))
+    mock_cursor.fetchone.return_value = ([{"Plan": {}}],)
+
+    mock_conn = mock.MagicMock()
+    mock_conn.info.encoding.lower.return_value = 'utf-8'
+    mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
+
+    conn_cm = mock.MagicMock()
+    conn_cm.__enter__.return_value = mock_conn
+
+    with mock.patch.object(check.statement_samples.db_pool, 'get_connection', return_value=conn_cm):
+        with mock.patch.object(check, 'histogram'):
+            check.statement_samples._run_explain('testdb', statement, statement)
+
+    assert execute_calls, "Expected cursor.execute to be called"
+    query, params = execute_calls[0]
+
+    assert '$stmt$' not in query, "Dollar-quote tag must not appear in the SQL template"
+    assert statement not in query, "Statement must not be interpolated into the SQL template"
+    assert params == (statement,), "Statement must be passed as a bound parameter"

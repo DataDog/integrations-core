@@ -29,6 +29,7 @@ defaults:
 env:
   APP_NAME: ddev
   PYTHON_VERSION: "3.13"
+  # renovate: datasource=pypi depName=pyoxidizer
   PYOXIDIZER_VERSION: "0.24.0"
 
 jobs:
@@ -51,6 +52,27 @@ jobs:
           context="pr"
         fi
         echo "base_tags=team:agent-integrations,service:ddev,context:$context" >> $GITHUB_OUTPUT
+
+  should-sign-and-upload:
+    name: Determine signing conditions
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        # Override workflow-level working-directory since this job does not checkout code
+        working-directory: .
+    outputs:
+      result: ${{ steps.check.outputs.result }}
+    steps:
+    - id: check
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        REF: ${{ github.ref }}
+      run: |
+        result=false
+        if [[ "$EVENT_NAME" == "schedule" || ( "$EVENT_NAME" == "push" && "$REF" == refs/tags/* ) ]]; then
+          result=true
+        fi
+        echo "result=$result" >> $GITHUB_OUTPUT
 
   python-artifacts:
     name: Build wheel and source distribution
@@ -169,12 +191,24 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
-    # Pinning virtualenv because of https://github.com/pypa/hatch/issues/2193
+    - name: Install uv
+      uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+      with:
+        enable-cache: false
+
+    # Both versions pinned for deterministic builds and stable cache reuse.
+    #
+    # virtualenv 21.0.0 (2026-02-25) split interpreter discovery out into the
+    # `python-discovery` package and removed `propose_interpreters` from
+    # `virtualenv.discovery.builtin`, which older hatch versions monkey-patched
+    # directly — see https://github.com/pypa/hatch/issues/2193. hatch 1.16.5
+    # picks up the fix from https://github.com/pypa/hatch/pull/2196 and now
+    # *requires* virtualenv>=21, so they must be bumped together.
     - name: Install Hatch
-      run: pip install -U hatch "virtualenv<21"
+      run: uv pip install --system "hatch==1.16.5" "virtualenv==21.3.0"
 
     - name: Install Hatch environment collector plugin
-      run: pip install -e . --no-deps
+      run: uv pip install --system -e . --no-deps
 
     - name: Install Rust toolchain
       # This action must be pinned to a commit reachable from the master branch — any other commit
@@ -315,9 +349,10 @@ jobs:
 
   windows-packaging:
     name: Build Windows installers
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name == 'push' || github.event_name == 'schedule' || github.event.pull_request.head.repo.full_name == github.repository
     needs:
     - define-tags
+    - should-sign-and-upload
     - binaries
     runs-on: windows-2022
     permissions:
@@ -429,6 +464,7 @@ jobs:
         mv build/*/release/*/*.{exe,msi} installers
 
     - name: Upload installers
+      if: needs.should-sign-and-upload.outputs.result == 'true'
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: installers-${{ runner.os }}
@@ -437,9 +473,10 @@ jobs:
 
   macos-packaging:
     name: Build macOS installer and sign/notarize artifacts
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' || github.event_name == 'schedule' || github.event.pull_request.head.repo.full_name == github.repository
     needs:
     - define-tags
+    - should-sign-and-upload
     - binaries
     runs-on: macos-14-large
     permissions:
@@ -483,6 +520,7 @@ jobs:
         tar --strip-components=1 -xzf - -C /usr/local/bin "$ARCHIVE_NAME/rcodesign"
 
     - name: Write credentials
+      if: needs.should-sign-and-upload.outputs.result == 'true'
       env:
         APPLE_DEVELOPER_ID_APPLICATION_CERTIFICATE: "${{ secrets.APPLE_DEVELOPER_ID_APPLICATION_CERTIFICATE }}"
         APPLE_DEVELOPER_ID_APPLICATION_PRIVATE_KEY: "${{ secrets.APPLE_DEVELOPER_ID_APPLICATION_PRIVATE_KEY }}"
@@ -560,13 +598,12 @@ jobs:
     - name: Extract staged standalone binaries
       run: ${{ steps.script-extract.outputs.script }}
 
-    # Signing and notarization steps are skipped for Dependabot PRs (no access to Apple secrets)
     - name: Sign standalone binaries
-      if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'dependabot[bot]'
+      if: needs.should-sign-and-upload.outputs.result == 'true'
       run: ${{ steps.script-sign.outputs.script }}
 
     - name: Notarize standalone binaries
-      if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'dependabot[bot]'
+      if: needs.should-sign-and-upload.outputs.result == 'true'
       run: ${{ steps.script-notarize.outputs.script }}
 
     - name: Archive standalone binaries
@@ -599,11 +636,11 @@ jobs:
       run: ${{ steps.script-extract.outputs.script }}
 
     - name: Sign managed binaries
-      if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'dependabot[bot]'
+      if: needs.should-sign-and-upload.outputs.result == 'true'
       run: ${{ steps.script-sign.outputs.script }}
 
     - name: Notarize managed binaries
-      if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'dependabot[bot]'
+      if: needs.should-sign-and-upload.outputs.result == 'true'
       run: ${{ steps.script-notarize.outputs.script }}
 
     # bin/<APP_NAME>-<VERSION>-<TARGET> -> targets/<TARGET>/<APP_NAME>
@@ -646,7 +683,7 @@ jobs:
         echo "path=$pkg_file" >> "$GITHUB_OUTPUT"
 
     - name: Sign PKG
-      if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'dependabot[bot]'
+      if: needs.should-sign-and-upload.outputs.result == 'true'
       run: >-
         rcodesign sign -vv
         --pem-source /tmp/certificate-installer.pem
@@ -655,7 +692,7 @@ jobs:
         "signed/${{ steps.pkg.outputs.path }}"
 
     - name: Notarize PKG
-      if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'dependabot[bot]'
+      if: needs.should-sign-and-upload.outputs.result == 'true'
       run: >-
         rcodesign notary-submit
         --api-key-path /tmp/app-store-connect.json
@@ -663,7 +700,7 @@ jobs:
         "signed/${{ steps.pkg.outputs.path }}"
 
     - name: Upload installer
-      if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'dependabot[bot]'
+      if: needs.should-sign-and-upload.outputs.result == 'true'
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: installers-${{ runner.os }}

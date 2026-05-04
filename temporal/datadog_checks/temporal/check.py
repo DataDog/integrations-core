@@ -19,7 +19,9 @@ class TemporalCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     def configure_scrapers(self):
         super().configure_scrapers()
 
-        self.scrapers[self.instance['openmetrics_endpoint']].metric_transformer.add_custom_transformer(
+        scraper = self.scrapers[self.instance['openmetrics_endpoint']]
+
+        scraper.metric_transformer.add_custom_transformer(
             "build_information",
             self._transform_build_information,
         )

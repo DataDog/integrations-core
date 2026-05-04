@@ -1,0 +1,1 @@
+Fix SSL certificate verification being ignored when `verify: false` is set. The shared connection pool was created without TLS settings, causing `verify=False` to be silently ignored when clickhouse-connect skips its own TLS pool creation for a pre-supplied pool manager.
