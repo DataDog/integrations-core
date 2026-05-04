@@ -103,6 +103,39 @@ def test_vm_tags_empty_power_state_falls_back_to_unknown(monitor):
     assert "ntnx_power_state:unknown" in tags
 
 
+@pytest.mark.parametrize(
+    "vm,expected_tag",
+    [
+        ({"name": "vm1", "powerState": 42}, "ntnx_power_state:unknown"),
+        ({"name": "vm1", "powerState": True}, "ntnx_power_state:unknown"),
+        ({"name": "vm1", "powerState": ["ON"]}, "ntnx_power_state:unknown"),
+    ],
+)
+def test_vm_tags_non_string_power_state_falls_back_safely(monitor, vm, expected_tag):
+    """A non-string powerState (defensive against API misbehavior) does not crash; falls back to unknown."""
+    tags = monitor._extract_vm_tags(vm)
+    assert expected_tag in tags
+
+
+@pytest.mark.parametrize(
+    "host_field,host_value,expected_tag_key",
+    [
+        ("maintenanceState", 42, "ntnx_maintenance_state"),
+        ("maintenanceState", True, "ntnx_maintenance_state"),
+    ],
+)
+def test_host_tags_non_string_state_does_not_crash(monitor, host_field, host_value, expected_tag_key):
+    """Non-string host state values are dropped, not raised."""
+    tags = monitor._extract_host_tags({host_field: host_value})
+    assert all(expected_tag_key not in t for t in tags)
+
+
+def test_cluster_tags_non_string_operation_mode_dropped(monitor):
+    """Non-string operationMode values do not crash and produce no tag."""
+    tags = monitor._extract_cluster_tags({"name": "c1", "config": {"operationMode": 42}})
+    assert all("ntnx_operation_mode" not in t for t in tags)
+
+
 # ---------- _extract_vm_disk_capacity_bytes ----------
 
 

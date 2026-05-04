@@ -23,6 +23,15 @@ if TYPE_CHECKING:
     from datadog_checks.nutanix.check import NutanixCheck
 
 
+def _norm_state(value: object) -> str | None:
+    """Lowercase a state-tag value if it's a non-empty string; return ``None`` otherwise.
+
+    Defends the ``.lower()`` calls in the ``_extract_*_tags`` methods against any
+    non-string value the Nutanix API might return.
+    """
+    return value.lower() if isinstance(value, str) and value else None
+
+
 @dataclass
 class ClusterCapacity:
     """Accumulator for cluster-level capacity metrics aggregated from hosts and VMs."""
@@ -493,16 +502,16 @@ class InfrastructureMonitor:
         if host_type := host.get("hostType"):
             tags.append(f"ntnx_host_type:{host_type}")
 
-        if maintenance_state := host.get("maintenanceState"):
-            tags.append(f"ntnx_maintenance_state:{maintenance_state.lower()}")
+        if maintenance_state := _norm_state(host.get("maintenanceState")):
+            tags.append(f"ntnx_maintenance_state:{maintenance_state}")
 
         # hypervisor tags
         if hypervisor_name := get_nested(host, "hypervisor/fullName"):
             tags.append(f"ntnx_hypervisor_name:{hypervisor_name}")
         if hypervisor_type := get_nested(host, "hypervisor/type"):
             tags.append(f"ntnx_hypervisor_type:{hypervisor_type}")
-        if connection_state := get_nested(host, "hypervisor/acropolisConnectionState"):
-            tags.append(f"ntnx_connection_state:{connection_state.lower()}")
+        if connection_state := _norm_state(get_nested(host, "hypervisor/acropolisConnectionState")):
+            tags.append(f"ntnx_connection_state:{connection_state}")
 
         # Add category tags
         tags.extend(self.check.extract_category_tags(host))
@@ -517,8 +526,8 @@ class InfrastructureMonitor:
         if cluster_name:
             tags.append(f"ntnx_cluster_name:{cluster_name}")
 
-        if operation_mode := get_nested(cluster, "config/operationMode"):
-            tags.append(f"ntnx_operation_mode:{operation_mode.lower()}")
+        if operation_mode := _norm_state(get_nested(cluster, "config/operationMode")):
+            tags.append(f"ntnx_operation_mode:{operation_mode}")
 
         # Add category tags
         tags.extend(self.check.extract_category_tags(cluster))
@@ -551,8 +560,7 @@ class InfrastructureMonitor:
 
         # Always emit ntnx_power_state — fall back to "unknown" so dashboards/monitors that
         # group by this tag do not silently drop VMs whose powerState is missing.
-        power_state = (vm.get("powerState") or "unknown").lower()
-        tags.append(f"ntnx_power_state:{power_state}")
+        tags.append(f"ntnx_power_state:{_norm_state(vm.get('powerState')) or 'unknown'}")
 
         return tags
 
