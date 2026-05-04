@@ -60,8 +60,8 @@ TROUBLESHOOTING_DOC_URL = "https://docs.datadoghq.com/database_monitoring/setup_
 # and the explicit pre-flight diagnostics in `diagnose.py`.
 DIAGNOSTIC_METADATA = {
     DatabaseConfigurationError.pg_stat_statements_not_created: {
-        "description": "pg_stat_statements must be installed as an extension in every monitored database.",
-        "remediation": "Run `CREATE EXTENSION pg_stat_statements;` in the monitored database.",
+        "description": "pg_stat_statements must be installed as an extension in {dbname}.",
+        "remediation": "Run `CREATE EXTENSION pg_stat_statements;` while connected to {dbname}.",
         "docs_anchor": DatabaseConfigurationError.pg_stat_statements_not_created.value,
     },
     DatabaseConfigurationError.pg_stat_statements_not_loaded: {
@@ -191,7 +191,8 @@ DIAGNOSTIC_METADATA = {
     DatabaseConfigurationError.config_validation: {
         "description": "The Postgres integration configuration failed validation.",
         "remediation": (
-            "Resolve the errors and warnings by editing conf.d/postgres.d/conf.yaml, then restart the agent."
+            "Resolve the errors and warnings by editing the Postgres integration configuration for this instance, "
+            "then restart the agent."
         ),
         "docs_anchor": DatabaseConfigurationError.config_validation.value,
     },
@@ -233,6 +234,7 @@ def build_remediation(code, **kwargs):
 
 def _diagnostic_context(code, **kwargs):
     context = dict(kwargs)
+    context.setdefault("dbname", "the monitored database")
     if code == DatabaseConfigurationError.undefined_explain_function:
         context.setdefault("explain_function", "datadog.explain_statement")
     return context

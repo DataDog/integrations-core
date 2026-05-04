@@ -18,8 +18,6 @@ Caveats:
 
 import psycopg
 
-from datadog_checks.postgres.connection_pool import TokenAwareConnection
-
 from .util import (
     DIAGNOSTIC_METADATA,
     DatabaseConfigurationError,
@@ -123,41 +121,59 @@ class PostgresDiagnose:
             self._diagnose_pg_stat_statements_readable(conn, self._check._config.dbname, failed)
 
     def _needs_per_database_probing(self):
-        """True when the running check fans out connections across multiple DBs.
+        """True when the running check fans out connections across multiple DBs."""
+        return self._needs_autodiscovery_connectivity_probing() or self._needs_query_sample_setup_probing()
 
-        Autodiscovery causes per-DB connections for relation/function/count
-        metrics regardless of DBM. DBM+query_samples needs per-DB schema and
-        explain function probes. Either condition warrants walking the DB list.
-        """
+    def _needs_autodiscovery_connectivity_probing(self):
+        """True when runtime autodiscovery opens per-database connections."""
         config = self._check._config
-        return (config.database_autodiscovery.enabled and self._check.autodiscovery is not None) or (
-            config.dbm and config.query_samples.enabled
-        )
+        return config.database_autodiscovery.enabled and self._check.autodiscovery is not None
+
+    def _needs_query_sample_setup_probing(self):
+        """True when DBM query samples can explain statements from multiple databases."""
+        config = self._check._config
+        return config.dbm and config.query_samples.enabled
 
     def _run_per_database_probes(self, main_conn):
-        """Walk the enumerated DB list, validating connectivity for each.
+        """Run per-database probes along the same fan-out paths as runtime collection."""
+        if self._needs_autodiscovery_connectivity_probing():
+            self._run_autodiscovery_connectivity_probes(main_conn)
+        if self._needs_query_sample_setup_probing():
+            self._run_query_sample_setup_probes(main_conn)
 
-        DBM-specific per-DB probes (datadog schema, schema usage, explain
-        function) layer in only when DBM+query_samples is configured.
-        Connectivity validation is the side effect of opening the probe
-        connection -- ``_open_probe_connection`` emits the
-        ``connection_failure`` diagnostic with the failing dbname embedded.
-        """
-        run_dbm_setup_probes = self._check._config.dbm and self._check._config.query_samples.enabled
-        for dbname in self._get_probe_databases(main_conn):
-            probe_conn = main_conn if dbname == self._check._config.dbname else self._open_probe_connection(dbname)
+    def _run_autodiscovery_connectivity_probes(self, main_conn):
+        """Validate connectivity to databases selected by runtime autodiscovery."""
+        dbnames = self._get_autodiscovered_probe_databases()
+        if dbnames is None:
+            dbnames = self._get_pg_database_probe_databases(main_conn)
+        for dbname in dbnames:
+            probe_conn = self._probe_connection_for_db(main_conn, dbname)
+            if probe_conn is not None and probe_conn is not main_conn:
+                _safe_close(probe_conn)
+
+    def _run_query_sample_setup_probes(self, main_conn):
+        """Validate DBM query-sample prerequisites in every database samples can reference."""
+        for dbname in self._get_query_sample_probe_databases(main_conn):
+            probe_conn = self._probe_connection_for_db(main_conn, dbname)
             if probe_conn is None:
                 continue
             try:
-                if run_dbm_setup_probes:
-                    failed = set()
-                    self._diagnose_datadog_schema(probe_conn, dbname, failed)
-                    self._diagnose_schema_usage(probe_conn, dbname, "datadog", failed)
-                    self._diagnose_schema_usage(probe_conn, dbname, "public", failed)
-                    self._diagnose_explain_function(probe_conn, dbname, failed)
+                failed = set()
+                explain_schema, _ = _split_function(self._check._config.query_samples.explain_function)
+                schemas = ["datadog", "public"]
+                if explain_schema and explain_schema not in schemas:
+                    schemas.append(explain_schema)
+                self._diagnose_datadog_schema(probe_conn, dbname, failed)
+                for schema in schemas:
+                    self._diagnose_schema_usage(probe_conn, dbname, schema, failed)
+                self._diagnose_explain_function(probe_conn, dbname, failed)
             finally:
                 if probe_conn is not main_conn:
                     _safe_close(probe_conn)
+
+    def _probe_connection_for_db(self, main_conn, dbname):
+        """Return the main probe connection or open one for another database."""
+        return main_conn if dbname == self._check._config.dbname else self._open_probe_connection(dbname)
 
     # -- diagnostics ----------------------------------------------------------
 
@@ -180,17 +196,11 @@ class PostgresDiagnose:
 
         Returns the open connection on success, or None on failure.
         """
-        conn_args = self._check.build_connection_args()
-        kwargs = conn_args.as_kwargs(dbname=dbname)
-        token_provider = self._check.db_pool.token_provider
-        if token_provider:
-            kwargs["token_provider"] = token_provider
         host_desc = self._host_desc()
         username = self._check._config.username
         conn = None
         try:
-            conn = TokenAwareConnection.connect(**kwargs)
-            self._check.db_pool._configure_connection(conn)
+            conn = self._check._new_connection(dbname)
         except psycopg.Error as e:
             if conn is not None:
                 _safe_close(conn)
@@ -243,7 +253,7 @@ class PostgresDiagnose:
 
     def _diagnose_shared_preload_libraries(self, conn):
         code = DatabaseConfigurationError.shared_preload_libraries_missing_pg_stat_statements
-        libs, read_ok = _show(conn, "shared_preload_libraries")
+        libs, read_ok = _get_pg_setting(conn, "shared_preload_libraries")
         if not read_ok:
             # shared_preload_libraries is GUC_SUPERUSER_ONLY: its pg_settings row is hidden from
             # users who are not members of pg_monitor. Don't silently drop the diagnostic --
@@ -280,7 +290,7 @@ class PostgresDiagnose:
 
     def _diagnose_track_activity_query_size(self, conn):
         code = DatabaseConfigurationError.track_activity_query_size_too_small
-        raw, read_ok = _show(conn, "track_activity_query_size")
+        raw, read_ok = _get_pg_setting(conn, "track_activity_query_size")
         if not read_ok:
             return
         try:
@@ -307,7 +317,7 @@ class PostgresDiagnose:
 
     def _diagnose_track_io_timing(self, conn):
         code = DatabaseConfigurationError.track_io_timing_disabled
-        raw, read_ok = _show(conn, "track_io_timing")
+        raw, read_ok = _get_pg_setting(conn, "track_io_timing")
         if not read_ok:
             return
         if raw == "on":
@@ -327,7 +337,7 @@ class PostgresDiagnose:
 
     def _diagnose_pg_stat_statements_max(self, conn):
         code = DatabaseConfigurationError.high_pg_stat_statements_max
-        raw, read_ok = _show(conn, "pg_stat_statements.max")
+        raw, read_ok = _get_pg_setting(conn, "pg_stat_statements.max")
         if not read_ok:
             # Not configured, extension not loaded, or restricted from the datadog user
             # -- the shared_preload_libraries / pg_monitor diagnostics report the root cause.
@@ -464,11 +474,7 @@ class PostgresDiagnose:
         # proves its schema exists.
         if schema != "datadog":
             return
-        row = _fetchone(
-            conn,
-            "SELECT 1 FROM pg_namespace WHERE nspname = 'datadog'",
-        )
-        if row:
+        if _schema_exists(conn, "datadog"):
             self._check.diagnosis.success(
                 name=code.value,
                 diagnosis="`datadog` schema exists in {}.".format(dbname),
@@ -494,14 +500,15 @@ class PostgresDiagnose:
         """
         code = DatabaseConfigurationError.missing_schema_usage_grant
         if schema == "datadog":
-            # USAGE on `datadog` only matters when the configured explain_function lives there,
-            # mirroring the gating in `_diagnose_datadog_schema`. A custom function in another
-            # schema doesn't need this grant.
             explain_schema, _ = _split_function(self._check._config.query_samples.explain_function)
-            if explain_schema != "datadog":
+            if not _schema_exists(conn, schema):
+                if (
+                    explain_schema == "datadog"
+                    and DatabaseConfigurationError.missing_datadog_schema.value not in failed
+                ):
+                    self._diagnose_datadog_schema(conn, dbname, failed)
                 return
-            # If the schema itself is missing, the existence FAIL is the actionable item -- don't double up.
-            if DatabaseConfigurationError.missing_datadog_schema.value in failed:
+            if explain_schema == "datadog" and DatabaseConfigurationError.missing_datadog_schema.value in failed:
                 return
         row = _fetchone(
             conn,
@@ -525,6 +532,7 @@ class PostgresDiagnose:
             remediation=build_remediation(code, schema=schema),
             failed_codes=failed,
         )
+        failed.add(_schema_usage_failed_key(schema))
 
     def _diagnose_pg_stat_statements_extension(self, conn, dbname=None, failed=None):
         created = DatabaseConfigurationError.pg_stat_statements_not_created
@@ -536,14 +544,11 @@ class PostgresDiagnose:
             # `CREATE EXTENSION` requires SPL -- emitting this FAIL would just point the user at
             # a command that will fail until they fix SPL and restart.
             return
-        row = _fetchone(
-            conn,
-            "SELECT 1 FROM pg_extension WHERE extname = 'pg_stat_statements'",
-        )
+        row = _get_extension_schema(conn, "pg_stat_statements")
         if row:
             self._check.diagnosis.success(
                 name=created.value,
-                diagnosis="pg_stat_statements extension is installed in {}.".format(dbname),
+                diagnosis="pg_stat_statements extension is installed in schema `{}` in {}.".format(row, dbname),
                 category=CATEGORY_POSTGRES,
             )
             return
@@ -551,8 +556,8 @@ class PostgresDiagnose:
             created,
             diagnosis="pg_stat_statements extension is not installed in {}.".format(dbname),
             category=CATEGORY_POSTGRES,
-            description=DIAGNOSTIC_METADATA[created]["description"],
-            remediation=build_remediation(created),
+            description=build_description(created, dbname=dbname),
+            remediation=build_remediation(created, dbname=dbname),
             failed_codes=failed,
         )
 
@@ -576,15 +581,24 @@ class PostgresDiagnose:
             self._check.log.debug("pg_stat_statements not readable (not loaded): %s", e)
             return
         except psycopg.Error as e:
-            # If the extension probe succeeded but this SELECT still can't find the view,
-            # the user's `pg_stat_statements_view` is misconfigured -- surface it. Otherwise
-            # the top-of-function guard already swallowed the duplicate before we got here.
+            extension_schema = _get_extension_schema(conn, "pg_stat_statements")
+            diagnosis = "Unable to SELECT from {} in {}: {}".format(view, dbname, e)
+            remediation = build_remediation(code)
+            if "." not in view and extension_schema:
+                diagnosis = (
+                    "pg_stat_statements extension is installed in schema `{schema}` in {db}, but `{view}` "
+                    "is not resolvable from the current search_path: {err}"
+                ).format(schema=extension_schema, db=dbname, view=view, err=e)
+                remediation = (
+                    "Set `pg_stat_statements_view: {schema}.{view}` in the Postgres integration configuration "
+                    "or add `{schema}` to the datadog user's search_path. {base}"
+                ).format(schema=extension_schema, view=view, base=remediation)
             self._fail(
                 code,
-                diagnosis="Unable to SELECT from {} in {}: {}".format(view, dbname, e),
+                diagnosis=diagnosis,
                 category=CATEGORY_POSTGRES,
                 description=DIAGNOSTIC_METADATA[code]["description"],
-                remediation=build_remediation(code),
+                remediation=remediation,
                 rawerror=str(e),
                 failed_codes=failed,
             )
@@ -601,11 +615,12 @@ class PostgresDiagnose:
         failed = self._failed if failed is None else failed
         explain_function = self._check._config.query_samples.explain_function
         schema, _ = _split_function(explain_function)
-        if schema == "datadog" and DatabaseConfigurationError.missing_datadog_schema.value in failed:
-            # Function lives in a schema that doesn't exist; the schema FAIL is the actionable item.
+        if schema == "datadog" and not _schema_exists(conn, schema):
+            if DatabaseConfigurationError.missing_datadog_schema.value not in failed:
+                self._diagnose_datadog_schema(conn, dbname, failed)
             return
-        if DatabaseConfigurationError.missing_schema_usage_grant.value in failed:
-            # The validation call would only duplicate the missing GRANT failure.
+        if schema and _schema_usage_failed_key(schema) in failed:
+            # The validation call would only duplicate the missing GRANT failure for this function's schema.
             return
 
         try:
@@ -697,8 +712,8 @@ class PostgresDiagnose:
         description = "\n".join(body_lines)
 
         remediation = (
-            "Resolve the errors and warnings listed above by editing "
-            "conf.d/postgres.d/conf.yaml, then restart the agent."
+            "Resolve the errors and warnings listed above by editing the Postgres integration configuration "
+            "for this instance, then restart the agent."
         )
 
         method = self._check.diagnosis.fail if errors else self._check.diagnosis.warning
@@ -723,19 +738,15 @@ class PostgresDiagnose:
             config.dbm and (config.query_samples.enabled or config.query_activity.enabled)
         )
 
-    def _get_probe_databases(self, conn):
-        # dbstrict wins: the sample collector filters by `datname = self._config.dbname`
-        # at runtime (statement_samples.py). Probing any other DB here would misrepresent
-        # what the running check actually samples.
+    def _get_query_sample_probe_databases(self, conn):
+        # dbstrict only applies to query-sample pg_stat_activity filters. Runtime autodiscovery
+        # still opens the databases it selected, and that connectivity is probed separately.
         if self._check._config.dbstrict:
             return [self._check._config.dbname]
 
-        # Query samples read pg_stat_activity from the main DB and later explain each sampled
-        # row by its datname. That runtime path only applies dbstrict/ignore_databases, not
-        # autodiscovery include/exclude, so enumerate pg_database for DBM setup probes.
-        if not (self._check._config.dbm and self._check._config.query_samples.enabled):
-            return self._get_autodiscovered_probe_databases() or self._get_pg_database_probe_databases(conn)
-
+        # Query samples read pg_stat_activity from the main DB and later explain each sampled row
+        # by its datname. That runtime path applies dbstrict/ignore_databases, not autodiscovery
+        # include/exclude, so enumerate pg_database for DBM setup probes.
         return self._get_pg_database_probe_databases(conn)
 
     def _get_autodiscovered_probe_databases(self):
@@ -747,7 +758,7 @@ class PostgresDiagnose:
                     "diagnose: autodiscovery.get_items() failed; falling back to pg_database enumeration: %s", e
                 )
                 return None
-            return dbs or None
+            return dbs
         return None
 
     def _get_pg_database_probe_databases(self, conn):
@@ -791,7 +802,7 @@ def _fetchall(conn, sql, params=None):
         return None
 
 
-def _show(conn, setting):
+def _get_pg_setting(conn, setting):
     """Look up a GUC in pg_settings.
 
     Returns (value, read_ok):
@@ -803,6 +814,33 @@ def _show(conn, setting):
     if not row:
         return None, False
     return row[0], True
+
+
+def _schema_exists(conn, schema):
+    """Return whether a schema exists in the current database."""
+    row = _fetchone(conn, "SELECT 1 FROM pg_namespace WHERE nspname = %s", (schema,))
+    return bool(row)
+
+
+def _get_extension_schema(conn, extension_name):
+    """Return the schema an extension is installed into, or None when absent."""
+    row = _fetchone(
+        conn,
+        """
+        SELECT n.nspname
+        FROM pg_extension e
+        JOIN pg_namespace n ON n.oid = e.extnamespace
+        WHERE e.extname = %s
+        """,
+        (extension_name,),
+    )
+    if not row:
+        return None
+    return row[0]
+
+
+def _schema_usage_failed_key(schema):
+    return "{}:{}".format(DatabaseConfigurationError.missing_schema_usage_grant.value, schema)
 
 
 def _explain_result_has_plan(row):
