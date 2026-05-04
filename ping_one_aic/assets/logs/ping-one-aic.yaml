@@ -396,18 +396,18 @@ pipeline:
                   @payload.before.accountStatus:Inactive"
               name: "2"
             - filter:
-                query: "@ocsf.metadata.event_code:*"
-              name: "99"
+                query: "@payload.passwordChanged:true @payload.operation:PATCH"
+              name: "3"
             - filter:
                 query: "@payload.after.accountStatus:Inactive
                   @payload.before.accountStatus:active"
               name: "5"
             - filter:
-                query: "@payload.passwordChanged:true @payload.operation:PATCH"
-              name: "3"
-            - filter:
                 query: "@payload.operation:DELETE @payload.objectId:managed/alpha_user/*"
               name: "6"
+            - filter:
+                query: "@ocsf.metadata.event_code:*"
+              name: "99"
           target: ocsf.activity_id
         - type: attribute-remapper
           name: Map `ocsf.activity_id` to `ocsf.activity_id`
