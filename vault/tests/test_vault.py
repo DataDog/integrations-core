@@ -807,7 +807,7 @@ class TestVault:
 
 
 @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
-def test_x_vault_request_header_is_set(dd_run_check, instance, use_openmetrics, mock_openmetrics_http):
+def test_x_vault_request_header_is_set(instance, dd_run_check, use_openmetrics, mock_openmetrics_http):
     instance = instance()
     instance['use_openmetrics'] = use_openmetrics
     c = Vault(Vault.CHECK_NAME, {}, [instance])
