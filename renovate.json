@@ -19,6 +19,7 @@
   ],
   "packageRules": [
     {
+      "description": "Only consider full vX.Y.Z tags upstream so we never pin to a moving major-only tag (e.g. v3, v9). pinact's --check rewrites the trailing comment to the canonical full-semver tag of the SHA, so a v3 comment from Renovate would always fail validation.",
       "matchManagers": [
         "github-actions"
       ],
@@ -29,6 +30,7 @@
       "matchPackageNames": [
         "!dtolnay/rust-toolchain"
       ],
+      "extractVersion": "^(?<version>v\\d+\\.\\d+\\.\\d+)$",
       "groupName": "actions",
       "schedule": [
         "before 6am on Monday"
