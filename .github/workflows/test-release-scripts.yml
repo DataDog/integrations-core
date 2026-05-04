@@ -8,11 +8,13 @@ on:
       - ".github/workflows/scripts/**"
       - ".github/workflows/release-dispatch.yml"
       - ".github/workflows/release-trigger.yml"
+      - ".github/workflows/test-release-scripts.yml"
   pull_request:
     paths:
       - ".github/workflows/scripts/**"
       - ".github/workflows/release-dispatch.yml"
       - ".github/workflows/release-trigger.yml"
+      - ".github/workflows/test-release-scripts.yml"
 
 jobs:
   test:
