@@ -16,7 +16,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import requests
 
-_PROM_LINE = re.compile(r"^[a-zA-Z_:][a-zA-Z0-9_:]*(\{[^}]*\})?\s+[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?(\s|$)")
+_PROM_VALUE = r"([-+]?((\d+\.?\d*|\.\d+)([eE][-+]?\d+)?|Inf|NaN))"
+_PROM_LINE = re.compile(r"^[a-zA-Z_:][a-zA-Z0-9_:]*(\{[^}]*\})?\s+" + _PROM_VALUE + r"(\s|$)")
 
 
 HTTPPredicate = Callable[["requests.Response"], bool]

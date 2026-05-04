@@ -92,6 +92,16 @@ def test_is_prometheus_exposition_rejects_garbage_body():
     assert not is_prometheus_exposition()(_resp(content_type="text/plain", body=body))
 
 
+def test_is_prometheus_exposition_passes_nan_value():
+    body = '# TYPE foo summary\nfoo{quantile="0.5"} NaN\n'
+    assert is_prometheus_exposition()(_resp(content_type="text/plain", body=body))
+
+
+def test_is_prometheus_exposition_passes_inf_values():
+    body = "# HELP foo bar\nfoo +Inf\nbar -Inf\n"
+    assert is_prometheus_exposition()(_resp(content_type="text/plain", body=body))
+
+
 def test_response_equals_tcp_pass():
     assert response_equals(b"imok")(b"imok")
 
