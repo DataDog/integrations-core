@@ -750,12 +750,8 @@ class TestShowReplicaStatusQuery:
     @pytest.mark.parametrize(
         'raw_version,version_comment,is_mariadb,channel,expected_query,expected_params',
         [
-            pytest.param(
-                '5.7.30', 'MySQL', False, '', 'SHOW SLAVE STATUS', (), id='mysql_legacy_no_channel'
-            ),
-            pytest.param(
-                '8.0.22', 'MySQL', False, '', 'SHOW REPLICA STATUS', (), id='mysql_modern_no_channel'
-            ),
+            pytest.param('5.7.30', 'MySQL', False, '', 'SHOW SLAVE STATUS', (), id='mysql_legacy_no_channel'),
+            pytest.param('8.0.22', 'MySQL', False, '', 'SHOW REPLICA STATUS', (), id='mysql_modern_no_channel'),
             pytest.param(
                 '5.7.30',
                 'MySQL',
