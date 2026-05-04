@@ -60,7 +60,7 @@ HOST_STATS_METRICS_REQUIRED = [
 HOST_STATS_METRICS_OPTIONAL = [
     "nutanix.host.cpu_usage",
     "nutanix.host.overall_memory_usage",
-    "nutanix.host.power.consumption.instant_watt",
+    "nutanix.host.power_consumption_instant_watt",
 ]
 
 VM_STATS_METRICS_REQUIRED = [
