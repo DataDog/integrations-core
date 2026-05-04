@@ -142,7 +142,7 @@ def verify_dependency(source, name, python_versions, file, repo_core):
                     return False
 
                 return True
-            
+
             if repo_core:
                 if not specifier_set:
                     message = f'Unpinned version found for dependency `{name}`: {format_check_usage(checks, source)}'
