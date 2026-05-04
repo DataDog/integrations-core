@@ -8,7 +8,7 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING, Any
 
-from confluent_kafka import Consumer, KafkaException, Producer, TopicPartition
+from confluent_kafka import Consumer, KafkaError, KafkaException, Producer, TopicPartition
 from confluent_kafka.admin import AdminClient, ConfigResource, NewTopic, OffsetSpec, ResourceType
 
 try:
@@ -272,10 +272,11 @@ class KafkaActionsClient:
                 msg = consumer.poll(timeout=poll_timeout)
 
                 if msg is None:
-                    continue
+                    self.log.debug("Poll returned None (no more messages available), stopping consumption")
+                    break
 
                 if msg.error():
-                    if msg.error().code() == KafkaException._PARTITION_EOF:
+                    if msg.error().code() == KafkaError._PARTITION_EOF:
                         self.log.debug("Reached end of partition")
                         continue
                     else:

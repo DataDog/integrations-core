@@ -4,11 +4,11 @@
 
 Monitor, troubleshoot, and evaluate your LLM-powered applications, such as chatbots or data extraction tools, using [OpenAI][1]. With LLM Observability, you can investigate the root cause of issues, monitor operational performance, and evaluate the quality, privacy, and safety of your LLM applications.
 
-[LLM Obs tracing view video][16]
-
 Get cost estimation, prompt and completion sampling, error tracking, performance metrics, and more out of [OpenAI][1] account-level, Python, Node.js, and PHP library requests using Datadog metrics and APM.
 
 ## Setup
+
+**Note**: The **Supported OS** requirements for this integration apply to APM library installations (Python, Node.js, PHP) only. The API key-based setup has no OS requirements.
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "API Key" xxx -->
@@ -19,22 +19,20 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 
 ### Installation
 
-# Configuring OpenAI Integration for Datadog
-
-## Overview
+#### Overview
 
 Datadog's OpenAI integration allows you to collect usage metrics, cost data, and enables [LLM Observability][19] to monitor your OpenAI models. Follow the steps below to generate an OpenAI API key and configure the integration.
 
-## Prerequisites
+#### Prerequisites
 
 - An **OpenAI account** with admin write permissions
 - A **valid OpenAI API key**:
   - **For Cloud Cost Management (CCM) and usage metrics**: An **admin-scoped API key is mandatory**. Project-scoped keys cannot collect this data.
   - **For LLM Observability only**: A standard API key with write permissions for model capabilities is sufficient.
 
-## Setup
+#### Setup
 
-### 1. Generate an OpenAI API key
+##### 1. Generate an OpenAI API key
 
 **For Cloud Cost Management and usage metrics**, you must create an **admin-scoped API key**:
 
@@ -51,23 +49,23 @@ Datadog's OpenAI integration allows you to collect usage metrics, cost data, and
    - Ensure that the API key has **write** permission for **model capabilities** to invoke models in your LLM account.
 4. Copy the created API Key to your clipboard.
 
-### 2. Configure Datadog's OpenAI integration
+##### 2. Configure Datadog's OpenAI integration
 
-1. Navigate Datadog's [OpenAI integration tile][11] and open the **Configuration** tab.
+1. Navigate to Datadog's [OpenAI integration tile][11] and open the **Configuration** tab.
 2. Click **Add Account**.
 3. Under **Account Name**, enter a name for your account. Under **API Key**, enter your OpenAI API key (**must be admin-scoped for CCM and usage metrics**). Optionally, add a comma-separated list of tags for metrics associated with this account.
-3. Under **Resources**, enable toggles depending on your use case:
-   - **Collect Cost Data**: If enabled, cost data is visible in [Cloud Cost Management][14] within 24 hours. **Requires an admin-scoped API key.** See ([collected data][15]).
+4. Under **Resources**, enable toggles depending on your use case:
+   - **Collect Cost Data**: If enabled, cost data is visible in [Cloud Cost Management][14] within 24 hours. **Requires an admin-scoped API key.** See [collected data][15].
    - **Use this API key to evaluate your LLM applications**: If enabled, evaluations are run through this API key in LLM Observability.
 
-### Additional Notes
+##### Additional Notes
 
 - **Admin-scoped API key requirement**: An admin-scoped API key is **mandatory** for collecting usage metrics and Cloud Cost Management data. This integration only collects `audio_speeches`, `audio_transcriptions`, `code_interpreter_sessions`, `completions`, `embeddings`, `images`, `moderations`, and `vector_stores` metrics when an admin-scoped API key is provided.
 - If you enable Cloud Cost Management for OpenAI without an admin-scoped API key, cost metrics are not available.
 
-## Additional Resources
+#### Additional Resources
 
-- [OpenAI API Documentation][17]
+- [OpenAI API Documentation][21]
 - [Generating an API Token][18]
 
 
@@ -297,7 +295,7 @@ You can enable LLM Observability in different environments. Follow the appropria
      gcr.io/datadoghq/agent:latest
    ```
 
-2. Install the Datadog APM Python library.
+2. Install the Datadog APM Node.js library.
 
    ```shell
    npm install dd-trace
@@ -349,7 +347,7 @@ No additional setup is required to capture latency, input/output messages, and t
 
 ##### Debugging
 
-If you encounter issues during setup, enable debug logging by setting `DD_TRACE_DEBUG=1`
+If you encounter issues during setup, enable debug logging by setting `DD_TRACE_DEBUG=1`.
 
 This will display detailed information about any errors or issues with tracing.
 
@@ -429,7 +427,7 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 
 ### Installation
 
-#### APM: Get Usage Metrics for Php Applications
+#### APM: Get Usage Metrics for PHP Applications
 
 1. Enable APM and StatsD in your Datadog Agent. For example, in Docker:
 
@@ -530,8 +528,7 @@ Additional helpful documentation, links, and articles:
 [13]: https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site
 [14]: /cost
 [15]: https://docs.datadoghq.com/cloud_cost_management/saas_costs/?tab=openai#data-collected
-[16]: https://imgix.datadoghq.com/video/products/llm-observability/expedite-troubleshooting.mp4?fm=webm&fit=max
-[17]: https://platform.openai.com/docs/
 [18]: https://platform.openai.com/
+[21]: https://platform.openai.com/docs/
 [19]: https://www.datadoghq.com/product/llm-observability/
 [20]: https://platform.openai.com/settings/organization/admin-keys

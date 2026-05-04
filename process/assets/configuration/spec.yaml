@@ -45,6 +45,7 @@ files:
           DEPRECATED: please specify `procfs_path` globally in `datadog.conf` instead
         value:
           type: string
+          require_trusted_provider: true
           example: /proc
           display_default: null
       - template: init_config/default
@@ -81,6 +82,7 @@ files:
       - name: pid_file
         description: |
           A Pid file to match.
+
           Notes:
             * agent v6.11+ on windows runs as an unprivileged `ddagentuser`, so make sure to grant it read access to
               the PID files you specify in this option.
@@ -88,6 +90,7 @@ files:
         fleet_configurable: true
         value:
           type: string
+          require_trusted_provider: true
       - name: exact_match
         description: |
           If you want to match your `search_string` on a substring within the list of process names, 

@@ -20,6 +20,18 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+SECURE_FIELD_NAMES = frozenset(
+    [
+        'schema_registry_tls_ca_cert',
+        'schema_registry_tls_cert',
+        'schema_registry_tls_key',
+        'tls_ca_cert',
+        'tls_cert',
+        'tls_private_key',
+    ]
+)
+
+
 class CreateTopic(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -108,10 +120,15 @@ class ReadMessages(BaseModel):
     )
     key_format: Optional[str] = Field(
         'json',
-        description='Message key format:\n- string: Plain UTF-8 text (most common for keys)\n- json: JSON data (strict validation, fails if not valid JSON)\n- bson: BSON (Binary JSON) data\n- protobuf: Protocol Buffers\n- avro: Apache Avro\n',
+        description='Message key format.\n\nSupported formats:\n- string: Plain UTF-8 text (most common for keys)\n- json: JSON data (strict validation, fails if not valid JSON)\n- bson: BSON (Binary JSON) data\n- protobuf: Protocol Buffers\n- avro: Apache Avro\n',
         examples=['json'],
     )
     key_schema: Optional[str] = Field(None, description='Schema definition for protobuf/avro key')
+    key_skip_bytes: Optional[int] = Field(
+        0,
+        description='Number of bytes to drop from the start of the message key before\ndeserialization. See value_skip_bytes for details. Default 0.\n',
+        examples=[1],
+    )
     key_uses_schema_registry: Optional[bool] = Field(False, description='Whether key uses Schema Registry format')
     max_scanned_messages: Optional[int] = Field(
         1000,
@@ -139,10 +156,15 @@ class ReadMessages(BaseModel):
     topic: str = Field(..., description='Topic to read messages from', examples=['orders'])
     value_format: Optional[str] = Field(
         'json',
-        description='Message value format:\n- json: JSON data (strict validation, fails if not valid JSON)\n- bson: BSON (Binary JSON) data\n- string: Plain UTF-8 text (use for non-JSON text messages)\n- protobuf: Protocol Buffers\n- avro: Apache Avro\nNote: If any message fails deserialization, the read_messages action will stop immediately.\nEnsure the format matches the actual messages in your topic.\n',
+        description='Message value format.\n\nSupported formats:\n- json: JSON data (strict validation, fails if not valid JSON)\n- bson: BSON (Binary JSON) data\n- string: Plain UTF-8 text (use for non-JSON text messages)\n- protobuf: Protocol Buffers\n- avro: Apache Avro\nNote: If any message fails deserialization, the read_messages action will stop immediately.\nEnsure the format matches the actual messages in your topic.\n',
         examples=['json'],
     )
     value_schema: Optional[str] = Field(None, description='Schema definition for protobuf/avro value')
+    value_skip_bytes: Optional[int] = Field(
+        0,
+        description="Number of bytes to drop from the start of the message value before\ndeserialization. Use this to strip a producer-side prefix that\nkafka_actions doesn't recognize natively — for example a 1-byte\nversion flag, a non-Confluent schema-registry envelope, or a\ntenant id prepended to every record. Applied before raw / json /\nbson / protobuf / avro decoding, and before Schema Registry\nmagic-byte detection. Default 0 (no bytes skipped).\n",
+        examples=[1],
+    )
     value_uses_schema_registry: Optional[bool] = Field(False, description='Whether value uses Schema Registry format')
 
 
@@ -279,6 +301,11 @@ class InstanceConfig(BaseModel):
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
             value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+
+            if info.field_name in SECURE_FIELD_NAMES:
+                validation.security.check_field_trusted_provider(
+                    info.field_name, value, info.context.get('security_config')
+                )
         else:
             value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 

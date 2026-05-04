@@ -284,7 +284,7 @@
             "id": 22172841039590,
             "definition": {
               "type": "note",
-              "content": "**The Datadog Nutanix dashboard gives you broad visibility into the health, performance, and resource usage of your hyperconverged infrastructure including clusters, hosts, and virtual machines.**\n\n  Further reading for Nutanix monitoring:\n  - [Datadog's Nutanix integration docs](https://docs.datadoghq.com/integrations/nutanix)\n",
+              "content": "**The Datadog Nutanix dashboard gives you broad visibility into the health, performance, and resource usage of your hyperconverged infrastructure including clusters, hosts, and virtual machines.**\n\nThe **Capacity Planning** section helps you plan cluster resources by tracking physical CPU/memory totals, vCPU and memory allocation across VMs, overcommit ratios, and allocation trends over time.\n\n  Further reading for Nutanix monitoring:\n  - [Datadog's Nutanix integration docs](https://docs.datadoghq.com/integrations/nutanix)\n",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",

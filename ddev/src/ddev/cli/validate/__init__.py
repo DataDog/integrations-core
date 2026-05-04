@@ -4,7 +4,6 @@
 import click
 from datadog_checks.dev.tooling.commands.validate.agent_reqs import agent_reqs
 from datadog_checks.dev.tooling.commands.validate.agent_signature import legacy_signature
-from datadog_checks.dev.tooling.commands.validate.all_validations import all
 from datadog_checks.dev.tooling.commands.validate.codeowners import codeowners
 from datadog_checks.dev.tooling.commands.validate.config import config
 from datadog_checks.dev.tooling.commands.validate.dashboards import dashboards
@@ -21,6 +20,7 @@ from datadog_checks.dev.tooling.commands.validate.saved_views import saved_views
 from datadog_checks.dev.tooling.commands.validate.service_checks import service_checks
 from datadog_checks.dev.tooling.commands.validate.typos import typos
 
+from ddev.cli.validate.all import all
 from ddev.cli.validate.ci import ci
 from ddev.cli.validate.http import http
 from ddev.cli.validate.labeler import labeler

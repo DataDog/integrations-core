@@ -63,17 +63,35 @@ class Subscription(ABC):
         message_cache = {}
         # Use as an ordered set
         unknown_errors = {}
+        truncated = False
 
         while True:
             try:
-                payload = self.sub.get(None, pymqi.md(), self._get_options())
+                payload = self.sub.get(self.check.config.max_message_length, pymqi.md(), self._get_options())
             except pymqi.MQMIError as e:
-                if not (e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE):
+                if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_TRUNCATED_MSG_FAILED:
+                    self.check.log.warning(
+                        'Message on subscription %s exceeded %d-byte buffer and was skipped. '
+                        'Increase max_message_length in the integration configuration.',
+                        self.TYPE,
+                        self.check.config.max_message_length,
+                    )
+                    truncated = True
+                    # The message stays on the queue after a failed MQGET; continue would re-read it in a hot loop.
+                    break
+                elif not (e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE):
                     unknown_errors[str(e)] = traceback.format_exc()
                     time.sleep(1)
             else:
-                message = self.parse_message(payload)
-                message_cache[self.get_message_id(message)] = message
+                try:
+                    message = self.parse_message(payload)
+                    message_cache[self.get_message_id(message)] = message
+                except ValueError as e:
+                    self.check.log.warning(
+                        'Failed to parse message on subscription %s: %s',
+                        self.TYPE,
+                        e,
+                    )
 
             if self._get_elapsed_time() >= SNAPSHOT_UPDATE_INTERVAL:
                 break
@@ -84,6 +102,12 @@ class Subscription(ABC):
             self._submit_health_status(ServiceCheck.CRITICAL, tags, status_message)
             for error in unknown_errors.values():
                 self.check.log.error('%s\n%s', status_message, error)
+        elif truncated:
+            status_message = (
+                'Subscription for {} received a message exceeding the buffer size. '
+                'Increase max_message_length in the integration configuration.'.format(self.TOPIC_STRING)
+            )
+            self._submit_health_status(ServiceCheck.WARNING, tags, status_message)
         elif not message_cache:
             status_message = 'Subscription found nothing for topic string: {}'.format(self.TOPIC_STRING)
             self._submit_health_status(ServiceCheck.WARNING, tags, status_message)

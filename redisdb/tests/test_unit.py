@@ -126,6 +126,7 @@ def test_check_all_available_config_options(check, aggregator, redis_instance, d
         'ssl_keyfile': '/path',
         'ssl_ca_certs': '/path',
         'ssl_cert_reqs': 0,
+        'ssl_check_hostname': True,
     }
     redis_instance.update(connection_args)
 

@@ -71,6 +71,7 @@ instances:
 
     ## @param pid_file - string - optional
     ## A Pid file to match.
+    ##
     ## Notes:
     ##   * agent v6.11+ on windows runs as an unprivileged `ddagentuser`, so make sure to grant it read access to
     ##     the PID files you specify in this option.

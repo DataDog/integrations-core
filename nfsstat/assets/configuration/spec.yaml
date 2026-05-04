@@ -13,6 +13,7 @@ files:
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
         example: /usr/local/sbin/nfsiostat
         display_default: null
     - name: autofs_enabled

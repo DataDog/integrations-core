@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: tenable-io
 metric_id: tenable-io
 backend_only: false

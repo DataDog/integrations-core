@@ -1,3 +1,29 @@
+# Validations to run with `ddev validate all`.
+# Each entry must match a known validation name.
+# Remove an entry to skip that validation for this repo.
+validations = [
+    "agent-reqs",
+    "ci",
+    "codeowners",
+    "config",
+    "dep",
+    "http",
+    "imports",
+    "integration-style",
+    "jmx-metrics",
+    "labeler",
+    "legacy-signature",
+    "license-headers",
+    "licenses",
+    "metadata",
+    "models",
+    "openmetrics",
+    "package",
+    "readmes",
+    "saved-views",
+    "version",
+]
+
 [overrides.display-name]
 datadog_checks_base = "Datadog Checks Base"
 datadog_checks_dev = "Datadog Checks Dev"
@@ -17,6 +43,7 @@ lustre = "Lustre"
 prefect = "Prefect"
 n8n = "n8n"
 control_m = "Control-M"
+nifi = "Apache NiFi"
 
 [overrides.metrics-prefix]
 krakend = "krakend.api."
@@ -24,6 +51,7 @@ lustre = "lustre."
 prefect = "prefect.server."
 n8n = "n8n."
 control_m = "control_m."
+nifi = "nifi."
 
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]
@@ -97,6 +125,9 @@ requests-ntlm = ['ISC']
 requests-unixsocket2 = ['ISC']
 # https://github.com/rethinkdb/rethinkdb-python/blob/master/LICENSE
 rethinkdb = ['Apache-2.0']
+# https://github.com/ijl/orjson/blob/master/LICENSE-APACHE
+# https://github.com/ijl/orjson/blob/master/LICENSE-MIT
+orjson = ['Apache-2.0', 'MIT', 'MPL-2.0']
 # https://github.com/python-semver/python-semver/blob/master/LICENSE.txt
 semver = ['BSD-3-Clause']
 # https://github.com/simplejson/simplejson/blob/master/LICENSE.txt
@@ -121,7 +152,6 @@ redis = 'https://github.com/redis/redis-py'
 requests = 'https://github.com/psf/requests'
 requests-toolbelt = 'https://github.com/requests/toolbelt'
 service-identity = 'https://github.com/pyca/service-identity'
-snowflake-connector-python = 'https://github.com/snowflakedb/snowflake-connector-python'
 supervisor = 'https://github.com/Supervisor/supervisor'
 tuf = 'https://github.com/theupdateframework/python-tuf'
 
@@ -168,6 +198,7 @@ unsorted = [
 [overrides.validate.metadata.integration]
 ecs_fargate = "amazon_fargate"
 kube_scheduler = "kube_scheduler"
+nifi = "nifi"
 nginx_ingress_controller = "nginx-ingress-controller"
 
 
@@ -183,9 +214,7 @@ exclude = [
     'pyvmomi',      # 9+ has breaking changes
     'pymongo',      # Upgrade from 4.8.0 to 4.10.1 causes "AttributeError: module 'pymongo' has no attribute 'mongo_client'"
     'foundationdb', # 7+ has a breaking changes
-    'snowflake-connector-python', # 4.3.0 causes a size bump of 35Mb
     'ddtrace', # 4.5.1 does not support MacOS 11, which is used by the Agent
-    'pyopenssl' # snowflake-connector-python requires pyopenssl<26.0.0, this override should be removed once snowflake-connector-python is removed
 
 ]
 
@@ -214,6 +243,7 @@ __pycache__ = false
 # removed.
 # This is a temporary fix while we implement a metadata.json file that we can add to each integration
 # that replaces the manifest.
+# Used here: https://github.com/DataDog/datadog-agent/blob/main/tasks/agent.py
 # Use manifest-like platforms
 [overrides.manifest.platforms]
 krakend = ["linux", "windows", "mac_os"]
@@ -221,3 +251,4 @@ lustre = ["linux", "windows", "mac_os"]
 prefect = ["linux", "windows", "mac_os"]
 n8n = ["linux", "windows", "mac_os"]
 control_m = ["linux", "windows", "mac_os"]
+nifi = ["linux", "windows", "mac_os"]

@@ -20,6 +20,9 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, deprecations, validators
 
 
+SECURE_FIELD_NAMES = frozenset(['tls_ca_file', 'tls_certificate_key_file'])
+
+
 class Aws(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -175,6 +178,7 @@ class InstanceConfig(BaseModel):
     operation_samples: Optional[OperationSamples] = None
     options: Optional[MappingProxyType[str, Any]] = None
     password: Optional[str] = None
+    propagate_agent_tags: Optional[bool] = None
     query_metrics: Optional[QueryMetrics] = None
     replica_check: Optional[bool] = None
     reported_database_hostname: Optional[str] = None
@@ -208,6 +212,11 @@ class InstanceConfig(BaseModel):
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
             value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+
+            if info.field_name in SECURE_FIELD_NAMES:
+                validation.security.check_field_trusted_provider(
+                    info.field_name, value, info.context.get('security_config')
+                )
         else:
             value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 

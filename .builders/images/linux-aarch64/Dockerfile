@@ -19,8 +19,8 @@ ENV LDFLAGS="-Wl,-rpath,'\$\$ORIGIN' -Wl,--strip-debug"
 RUN yum install -y perl-IPC-Cmd perl-CPANPLUS perl-core && \
  cpanp -i List::Util 1.66 && \
  DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
- VERSION="3.6.1" \
- SHA256="b1bfedcd5b289ff22aee87c9d600f515767ebf45f77168cb6d64f231f518a82e" \
+ VERSION="3.6.2" \
+ SHA256="aaf51a1fe064384f811daeaeb4ec4dce7340ec8bd893027eee676af31e83a04f" \
  RELATIVE_PATH="openssl-{{version}}" \
  # https://docs.python.org/3/using/unix.html#custom-openssl
  INSTALL_COMMAND="make install_sw" \
@@ -36,11 +36,11 @@ RUN yum install -y perl-IPC-Cmd perl-CPANPLUS perl-core && \
  ldconfig
 
 # Compile and install Python 3
-ENV PYTHON3_VERSION=3.13.12
+ENV PYTHON3_VERSION=3.13.13
 RUN yum install -y libffi-devel && \
  DOWNLOAD_URL="https://python.org/ftp/python/{{version}}/Python-{{version}}.tgz" \
  VERSION="${PYTHON3_VERSION}" \
- SHA256="12e7cb170ad2d1a69aee96a1cc7fc8de5b1e97a2bdac51683a3db016ec9a2996" \
+ SHA256="f9cde7b0e2ec8165d7326e2a0f59ea2686ce9d0c617dbbb3d66a7e54d31b74b9" \
  RELATIVE_PATH="Python-{{version}}" \
  bash install-from-source.sh \
  --prefix=/opt/python/${PYTHON3_VERSION} \
@@ -110,7 +110,7 @@ RUN yum install -y flex && \
  VERSION="16.9" \
  SHA256="07c00fb824df0a0c295f249f44691b86e3266753b380c96f633c3311e10bd005" \
  RELATIVE_PATH="postgresql-{{version}}" \
- bash install-from-source.sh --without-readline --with-openssl --without-icu
+ bash install-from-source.sh --without-readline --with-openssl --without-icu --with-gssapi
 # Add paths to pg_config and to the library
 ENV PATH="/usr/local/pgsql/bin:${PATH}"
 ENV LD_LIBRARY_PATH="/usr/local/pgsql/lib/:${LD_LIBRARY_PATH}"
@@ -124,6 +124,9 @@ RUN \
  bash install-from-source.sh --disable-readline --with-included-ltdl --enable-ltdl-install \
  # This is the folder where unixODBC searches for driver config and where we ask customers to copy their config to
  --sysconfdir=/opt/datadog-agent/embedded/etc
+
+# zstd for librdkafka compression support
+RUN yum install -y epel-release && yum install -y libzstd-devel
 
 # Dependencies needed to build librdkafka (and thus, confluent-kafka) with kerberos support
 RUN \

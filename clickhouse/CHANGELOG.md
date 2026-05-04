@@ -2,6 +2,31 @@
 
 <!-- towncrier release notes start -->
 
+## 6.6.0 / 2026-04-15
+
+***Added***:
+
+* Update dependencies ([#22996](https://github.com/DataDog/integrations-core/pull/22996))
+* Add query error collection from system.query_log for DBM ([#23041](https://github.com/DataDog/integrations-core/pull/23041))
+* Add support for ClickHouse explain plans. ([#23286](https://github.com/DataDog/integrations-core/pull/23286))
+
+***Fixed***:
+
+* Bump `datadog-checks-base` to `>=37.34.1`. Notable changes:
+    - Reduce allocations in `StatementMetrics` by deferring dict construction and updating the previous-statements cache in place. ([#23075](https://github.com/DataDog/integrations-core/pull/23075)) ([#23282](https://github.com/DataDog/integrations-core/pull/23282))
+
+## 6.5.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
+## 6.4.1 / 2026-03-24
+
+***Fixed***:
+
+* Fix authentication regression where a missing `password` config option defaults to `None` instead of an empty string, causing ClickHouse to reject connections with error code 194. ([#23015](https://github.com/DataDog/integrations-core/pull/23015))
+
 ## 6.4.0 / 2026-03-18
 
 ***Added***:
