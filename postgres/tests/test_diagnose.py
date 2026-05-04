@@ -109,12 +109,92 @@ def _patch_connection(check, conn):
     return mock.patch('datadog_checks.postgres.diagnose.TokenAwareConnection.connect', return_value=conn)
 
 
+def _patch_per_db(connections):
+    """Patch the probe connection factory to dispatch by ``dbname`` kwarg."""
+    return mock.patch(
+        'datadog_checks.postgres.diagnose.TokenAwareConnection.connect',
+        side_effect=lambda **kwargs: connections[kwargs['dbname']],
+    )
+
+
 def _explain_call(name='datadog.explain_statement'):
     return "SELECT {}(%s)".format(_safe_identifier(name))
 
 
 def _successful_explain():
     return [('plan',)]
+
+
+def _run(check, responses):
+    """Run diagnose against a single FakeConn built from ``responses``."""
+    with _patch_connection(check, FakeConn(responses)):
+        return _get_diagnoses(check)
+
+
+def _dbm_check(integration_check, pg_instance, **overrides):
+    return integration_check(dict(pg_instance, dbm=True, **overrides))
+
+
+def _override(responses, key, new_result):
+    """Replace the result for the matcher matching ``key``.
+
+    String key: exact equality on string matchers. Callable key: qualname equality.
+    """
+    if callable(key):
+        target_qn = getattr(key, '__qualname__', None)
+
+        def hit(m):
+            return callable(m) and getattr(m, '__qualname__', None) == target_qn
+    else:
+
+        def hit(m):
+            return m == key
+
+    out = []
+    found = False
+    for m, r in responses:
+        if hit(m):
+            out.append((m, new_result))
+            found = True
+        else:
+            out.append((m, r))
+    assert found, "no matcher matching {!r}".format(key)
+    return out
+
+
+def _assert_all_succeed(diagnoses, codes):
+    names_and_results = {(d['name'], d['result']) for d in diagnoses}
+    for code in codes:
+        assert (code.value, Diagnosis.DIAGNOSIS_SUCCESS) in names_and_results, (
+            f"expected {code.value} to pass, got {[d for d in diagnoses if d['name'] == code.value]}"
+        )
+
+
+def _happy_server_responses(
+    *, server_version='14.5', spl='pg_stat_statements, pgaudit', track_query_size=4096, track_io='on', pgss_max=10000
+):
+    return [
+        ('SHOW SERVER_VERSION', [(server_version,)]),
+        (_setting('shared_preload_libraries'), [(spl,)]),
+        (_setting('track_activity_query_size'), [(str(track_query_size),)]),
+        (_setting('track_io_timing'), [(track_io,)]),
+        (_setting('pg_stat_statements.max'), [(str(pgss_max),)]),
+        ("rolname = 'pg_monitor'", [(1,)]),
+        ("pg_has_role", [(True,)]),
+        ("query = %s", [(0,)]),
+    ]
+
+
+def _happy_dbm_responses():
+    return [
+        ("nspname = 'datadog'", [(1,)]),
+        # USAGE on `datadog` and `public` is granted -- shared substring across both probes.
+        ("has_schema_privilege", [(True,)]),
+        ("extname = 'pg_stat_statements'", [(1,)]),
+        # pg_stat_statements readable probe — the SQL contains the quoted view name.
+        ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
+        (_explain_call(), _successful_explain()),
+    ]
 
 
 # -- record_warning regression ------------------------------------------------
@@ -154,29 +234,19 @@ def test_get_diagnoses_returns_json(integration_check, pg_instance):
 # -- Connection diagnostic ----------------------------------------------------
 
 
-def test_connection_fails_surfaces_fail(integration_check, pg_instance):
-    check = integration_check(pg_instance)
+@pytest.mark.parametrize('dbm', [False, True])
+def test_connection_failure_surfaces_single_fail(integration_check, pg_instance, dbm):
+    """Exactly one FAIL row regardless of dbm, and exactly one probe connection opened."""
+    check = integration_check(dict(pg_instance, dbm=dbm))
     err = psycopg.OperationalError('could not connect')
-    with mock.patch('datadog_checks.postgres.diagnose.TokenAwareConnection.connect', side_effect=err):
-        diagnoses = _get_diagnoses(check)
-
-    conn_fail = _by_name(diagnoses, DatabaseConfigurationError.connection_failure.value)
-    assert len(conn_fail) == 1  # connection & dbm orchestrators both call open; DBM skipped when dbm=false
-    assert conn_fail[0]['result'] == Diagnosis.DIAGNOSIS_FAIL
-    assert 'could not connect' in conn_fail[0]['diagnosis']
-    assert 'troubleshooting' in conn_fail[0]['remediation']
-
-
-def test_connection_fails_dbm_enabled_reports_once(integration_check, pg_instance):
-    """With dbm=true, the single orchestrator opens one probe connection -- one FAIL row."""
-    check = integration_check(dict(pg_instance, dbm=True))
-    err = psycopg.OperationalError('boom')
     with mock.patch('datadog_checks.postgres.diagnose.TokenAwareConnection.connect', side_effect=err) as connect:
         diagnoses = _get_diagnoses(check)
     assert connect.call_count == 1
-    conn_diags = _by_name(diagnoses, DatabaseConfigurationError.connection_failure.value)
-    assert len(conn_diags) == 1
-    assert conn_diags[0]['result'] == Diagnosis.DIAGNOSIS_FAIL
+    rows = _by_name(diagnoses, DatabaseConfigurationError.connection_failure.value)
+    assert len(rows) == 1
+    assert rows[0]['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert 'could not connect' in rows[0]['diagnosis']
+    assert 'troubleshooting' in rows[0]['remediation']
 
 
 def test_probe_connection_uses_pool_configuration(integration_check, pg_instance):
@@ -194,27 +264,10 @@ def test_probe_connection_uses_pool_configuration(integration_check, pg_instance
 # -- Server config diagnostics ------------------------------------------------
 
 
-def _happy_server_responses(
-    *, server_version='14.5', spl='pg_stat_statements, pgaudit', track_query_size=4096, track_io='on', pgss_max=10000
-):
-    return [
-        ('SHOW SERVER_VERSION', [(server_version,)]),
-        (_setting('shared_preload_libraries'), [(spl,)]),
-        (_setting('track_activity_query_size'), [(str(track_query_size),)]),
-        (_setting('track_io_timing'), [(track_io,)]),
-        (_setting('pg_stat_statements.max'), [(str(pgss_max),)]),
-        ("rolname = 'pg_monitor'", [(1,)]),
-        ("pg_has_role", [(True,)]),
-        ("query = %s", [(0,)]),
-    ]
-
-
 def test_server_config_happy_path(integration_check, pg_instance):
     """Non-DBM without activity metrics does not require pg_monitor or pg_stat_activity."""
     check = integration_check(pg_instance)
-    conn = FakeConn(_happy_server_responses())
-    with _patch_connection(check, conn):
-        diagnoses = _get_diagnoses(check)
+    diagnoses = _run(check, _happy_server_responses())
 
     names_and_results = {(d['name'], d['result']) for d in diagnoses}
     assert (
@@ -228,51 +281,25 @@ def test_server_config_happy_path(integration_check, pg_instance):
 def test_dbm_server_config_happy_path(integration_check, pg_instance):
     """With dbm=true the DBM-gated GUC diagnostics also run and should all succeed on a healthy
     Postgres."""
-    check = integration_check(dict(pg_instance, dbm=True))
-    conn = FakeConn(_happy_server_responses() + _happy_dbm_responses())
-    with _patch_connection(check, conn):
-        diagnoses = _get_diagnoses(check)
-
-    names_and_results = {(d['name'], d['result']) for d in diagnoses}
-    for code in (
-        DatabaseConfigurationError.shared_preload_libraries_missing_pg_stat_statements,
-        DatabaseConfigurationError.track_activity_query_size_too_small,
-        DatabaseConfigurationError.track_io_timing_disabled,
-        DatabaseConfigurationError.high_pg_stat_statements_max,
-    ):
-        assert (code.value, Diagnosis.DIAGNOSIS_SUCCESS) in names_and_results, (
-            f"expected {code.value} to pass, got {[d for d in diagnoses if d['name'] == code.value]}"
-        )
-
-
-def test_shared_preload_libraries_missing_fails(integration_check, pg_instance):
-    check = integration_check(dict(pg_instance, dbm=True))
-    responses = _happy_server_responses(spl='pgaudit') + _happy_dbm_responses()
-    with _patch_connection(check, FakeConn(responses)):
-        diagnoses = _get_diagnoses(check)
-    spl = _by_name(
+    check = _dbm_check(integration_check, pg_instance)
+    diagnoses = _run(check, _happy_server_responses() + _happy_dbm_responses())
+    _assert_all_succeed(
         diagnoses,
-        DatabaseConfigurationError.shared_preload_libraries_missing_pg_stat_statements.value,
+        (
+            DatabaseConfigurationError.shared_preload_libraries_missing_pg_stat_statements,
+            DatabaseConfigurationError.track_activity_query_size_too_small,
+            DatabaseConfigurationError.track_io_timing_disabled,
+            DatabaseConfigurationError.high_pg_stat_statements_max,
+        ),
     )
-    assert spl and spl[0]['result'] == Diagnosis.DIAGNOSIS_FAIL
-    assert 'pg_stat_statements' in spl[0]['diagnosis']
 
 
 def test_shared_preload_libraries_unreadable_warns(integration_check, pg_instance):
     """Row is hidden from non-pg_monitor users for GUC_SUPERUSER_ONLY settings -- we should
     surface a WARNING instead of silently dropping the diagnostic."""
-    check = integration_check(dict(pg_instance, dbm=True))
-    # Replace only the shared_preload_libraries response with an empty result (simulates the
-    # pg_settings row being filtered out for non-pg_monitor members).
-    responses = [
-        (m, r)
-        for (m, r) in _happy_server_responses()
-        if getattr(m, "__qualname__", "") != _setting('shared_preload_libraries').__qualname__
-    ]
-    responses.append((_setting('shared_preload_libraries'), []))
-    responses += _happy_dbm_responses()
-    with _patch_connection(check, FakeConn(responses)):
-        diagnoses = _get_diagnoses(check)
+    check = _dbm_check(integration_check, pg_instance)
+    responses = _override(_happy_server_responses(), _setting('shared_preload_libraries'), [])
+    diagnoses = _run(check, responses + _happy_dbm_responses())
     spl = _by_name(
         diagnoses,
         DatabaseConfigurationError.shared_preload_libraries_missing_pg_stat_statements.value,
@@ -280,45 +307,35 @@ def test_shared_preload_libraries_unreadable_warns(integration_check, pg_instanc
     assert len(spl) == 1, spl
     assert spl[0]['result'] == Diagnosis.DIAGNOSIS_WARNING
     assert 'pg_monitor' in spl[0]['diagnosis']
-    # Remediation should point at the pg_monitor fix.
     assert 'pg_monitor' in spl[0]['remediation']
 
 
-def test_track_activity_query_size_too_small_warns(integration_check, pg_instance):
-    check = integration_check(dict(pg_instance, dbm=True))
-    responses = _happy_server_responses(track_query_size=1024) + _happy_dbm_responses()
-    with _patch_connection(check, FakeConn(responses)):
-        diagnoses = _get_diagnoses(check)
-    entry = _by_name(diagnoses, DatabaseConfigurationError.track_activity_query_size_too_small.value)[0]
+@pytest.mark.parametrize(
+    'kwarg,value,code,assert_in_diagnosis',
+    [
+        (
+            'track_query_size',
+            1024,
+            DatabaseConfigurationError.track_activity_query_size_too_small,
+            str(RECOMMENDED_TRACK_ACTIVITY_QUERY_SIZE),
+        ),
+        ('track_io', 'off', DatabaseConfigurationError.track_io_timing_disabled, None),
+        ('pgss_max', 50000, DatabaseConfigurationError.high_pg_stat_statements_max, '50000'),
+    ],
+)
+def test_dbm_guc_warning(integration_check, pg_instance, kwarg, value, code, assert_in_diagnosis):
+    check = _dbm_check(integration_check, pg_instance)
+    responses = _happy_server_responses(**{kwarg: value}) + _happy_dbm_responses()
+    diagnoses = _run(check, responses)
+    entry = _by_name(diagnoses, code.value)[0]
     assert entry['result'] == Diagnosis.DIAGNOSIS_WARNING
-    assert str(RECOMMENDED_TRACK_ACTIVITY_QUERY_SIZE) in entry['diagnosis']
-
-
-def test_track_io_timing_off_warns(integration_check, pg_instance):
-    check = integration_check(dict(pg_instance, dbm=True))
-    responses = _happy_server_responses(track_io='off') + _happy_dbm_responses()
-    with _patch_connection(check, FakeConn(responses)):
-        diagnoses = _get_diagnoses(check)
-    entry = _by_name(diagnoses, DatabaseConfigurationError.track_io_timing_disabled.value)[0]
-    assert entry['result'] == Diagnosis.DIAGNOSIS_WARNING
-
-
-def test_pg_stat_statements_max_above_threshold_warns(integration_check, pg_instance):
-    check = integration_check(dict(pg_instance, dbm=True))
-    # Default threshold is 10000; exceed it.
-    responses = _happy_server_responses(pgss_max=50000) + _happy_dbm_responses()
-    with _patch_connection(check, FakeConn(responses)):
-        diagnoses = _get_diagnoses(check)
-    entry = _by_name(diagnoses, DatabaseConfigurationError.high_pg_stat_statements_max.value)[0]
-    assert entry['result'] == Diagnosis.DIAGNOSIS_WARNING
-    assert '50000' in entry['diagnosis']
+    if assert_in_diagnosis:
+        assert assert_in_diagnosis in entry['diagnosis']
 
 
 def test_unsupported_postgres_version_fails(integration_check, pg_instance):
     check = integration_check(pg_instance)
-    responses = _happy_server_responses(server_version='9.5.1')
-    with _patch_connection(check, FakeConn(responses)):
-        diagnoses = _get_diagnoses(check)
+    diagnoses = _run(check, _happy_server_responses(server_version='9.5.1'))
     entry = _by_name(diagnoses, DatabaseConfigurationError.postgres_version_unsupported.value)[0]
     assert entry['result'] == Diagnosis.DIAGNOSIS_FAIL
     assert '9.5' in entry['diagnosis']
@@ -329,11 +346,8 @@ def test_unsupported_postgres_version_fails(integration_check, pg_instance):
 
 def test_missing_pg_monitor_role_fails(integration_check, pg_instance):
     check = integration_check(dict(pg_instance, collect_activity_metrics=True))
-    responses = _happy_server_responses()
-    # Replace the pg_has_role response.
-    responses = [(m, [(False,)]) if isinstance(m, str) and m == 'pg_has_role' else (m, r) for m, r in responses]
-    with _patch_connection(check, FakeConn(responses)):
-        diagnoses = _get_diagnoses(check)
+    responses = _override(_happy_server_responses(), 'pg_has_role', [(False,)])
+    diagnoses = _run(check, responses)
     entry = _by_name(diagnoses, DatabaseConfigurationError.missing_pg_monitor_role.value)[0]
     assert entry['result'] == Diagnosis.DIAGNOSIS_FAIL
     assert 'pg_monitor' in entry['remediation']
@@ -341,10 +355,8 @@ def test_missing_pg_monitor_role_fails(integration_check, pg_instance):
 
 def test_insufficient_privilege_on_pg_stat_activity_warns(integration_check, pg_instance):
     check = integration_check(dict(pg_instance, collect_activity_metrics=True))
-    responses = _happy_server_responses()
-    responses = [(m, [(3,)]) if m == "query = %s" else (m, r) for m, r in responses]
-    with _patch_connection(check, FakeConn(responses)):
-        diagnoses = _get_diagnoses(check)
+    responses = _override(_happy_server_responses(), 'query = %s', [(3,)])
+    diagnoses = _run(check, responses)
     entry = _by_name(diagnoses, DatabaseConfigurationError.insufficient_privilege_on_pg_stat_activity.value)[0]
     assert entry['result'] == Diagnosis.DIAGNOSIS_WARNING
     assert '3' in entry['diagnosis']
@@ -353,23 +365,9 @@ def test_insufficient_privilege_on_pg_stat_activity_warns(integration_check, pg_
 # -- DBM diagnostics ----------------------------------------------------------
 
 
-def _happy_dbm_responses():
-    return [
-        ("nspname = 'datadog'", [(1,)]),
-        # USAGE on `datadog` and `public` is granted -- shared substring across both probes.
-        ("has_schema_privilege", [(True,)]),
-        ("extname = 'pg_stat_statements'", [(1,)]),
-        # pg_stat_statements readable probe — the SQL contains the quoted view name.
-        ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
-        (_explain_call(), _successful_explain()),
-    ]
-
-
 def test_dbm_disabled_skips_dbm_diagnostics(integration_check, pg_instance):
     check = integration_check(pg_instance)  # dbm defaults to False
-    conn = FakeConn(_happy_server_responses() + _happy_dbm_responses())
-    with _patch_connection(check, conn):
-        diagnoses = _get_diagnoses(check)
+    diagnoses = _run(check, _happy_server_responses() + _happy_dbm_responses())
     # Neither the DBM database-scoped checks nor the DBM-only server GUC checks should run
     # without dbm=true -- running them against a plain Postgres would fail a healthy instance.
     dbm_names = {
@@ -387,55 +385,30 @@ def test_dbm_disabled_skips_dbm_diagnostics(integration_check, pg_instance):
 
 
 def test_dbm_happy_path(integration_check, pg_instance):
-    check = integration_check(dict(pg_instance, dbm=True))
-    conn = FakeConn(_happy_server_responses() + _happy_dbm_responses())
-    with _patch_connection(check, conn):
-        diagnoses = _get_diagnoses(check)
-    names_and_results = {(d['name'], d['result']) for d in diagnoses}
-    for code in (
-        DatabaseConfigurationError.missing_datadog_schema,
-        DatabaseConfigurationError.missing_schema_usage_grant,
-        DatabaseConfigurationError.pg_stat_statements_not_created,
-        DatabaseConfigurationError.pg_stat_statements_not_readable,
-        DatabaseConfigurationError.undefined_explain_function,
-    ):
-        assert (code.value, Diagnosis.DIAGNOSIS_SUCCESS) in names_and_results, (
-            f"expected {code.value} to pass, got {[d for d in diagnoses if d['name'] == code.value]}"
-        )
-
-
-def test_missing_datadog_schema_fails(integration_check, pg_instance):
-    check = integration_check(dict(pg_instance, dbm=True))
-    dbm_responses = [
-        ("nspname = 'datadog'", []),
-        ("has_schema_privilege", [(True,)]),
-        ("extname = 'pg_stat_statements'", [(1,)]),
-        ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
-        (_explain_call(), _successful_explain()),
-    ]
-    conn = FakeConn(_happy_server_responses() + dbm_responses)
-    with _patch_connection(check, conn):
-        diagnoses = _get_diagnoses(check)
-    entry = _by_name(diagnoses, DatabaseConfigurationError.missing_datadog_schema.value)[0]
-    assert entry['result'] == Diagnosis.DIAGNOSIS_FAIL
+    check = _dbm_check(integration_check, pg_instance)
+    diagnoses = _run(check, _happy_server_responses() + _happy_dbm_responses())
+    _assert_all_succeed(
+        diagnoses,
+        (
+            DatabaseConfigurationError.missing_datadog_schema,
+            DatabaseConfigurationError.missing_schema_usage_grant,
+            DatabaseConfigurationError.pg_stat_statements_not_created,
+            DatabaseConfigurationError.pg_stat_statements_not_readable,
+            DatabaseConfigurationError.undefined_explain_function,
+        ),
+    )
 
 
 def test_missing_pg_stat_statements_extension_fails(integration_check, pg_instance):
-    check = integration_check(dict(pg_instance, dbm=True))
-    dbm_responses = [
-        ("nspname = 'datadog'", [(1,)]),
-        ("has_schema_privilege", [(True,)]),
-        ("extname = 'pg_stat_statements'", []),
-        # Simulate extension missing: the readable probe would raise UndefinedTable, swallowed silently.
-        (
-            'SELECT 1 FROM "pg_stat_statements" LIMIT 1',
-            psycopg.errors.UndefinedTable('relation "pg_stat_statements" does not exist'),
-        ),
-        (_explain_call(), _successful_explain()),
-    ]
-    conn = FakeConn(_happy_server_responses() + dbm_responses)
-    with _patch_connection(check, conn):
-        diagnoses = _get_diagnoses(check)
+    check = _dbm_check(integration_check, pg_instance)
+    dbm_responses = _override(_happy_dbm_responses(), "extname = 'pg_stat_statements'", [])
+    # Simulate extension missing: the readable probe would raise UndefinedTable, swallowed silently.
+    dbm_responses = _override(
+        dbm_responses,
+        'SELECT 1 FROM "pg_stat_statements" LIMIT 1',
+        psycopg.errors.UndefinedTable('relation "pg_stat_statements" does not exist'),
+    )
+    diagnoses = _run(check, _happy_server_responses() + dbm_responses)
     created = _by_name(diagnoses, DatabaseConfigurationError.pg_stat_statements_not_created.value)[0]
     assert created['result'] == Diagnosis.DIAGNOSIS_FAIL
     # readable probe is suppressed when UndefinedTable raised (to avoid double-report)
@@ -443,17 +416,13 @@ def test_missing_pg_stat_statements_extension_fails(integration_check, pg_instan
 
 
 def test_missing_explain_function_fails(integration_check, pg_instance):
-    check = integration_check(dict(pg_instance, dbm=True))
-    dbm_responses = [
-        ("nspname = 'datadog'", [(1,)]),
-        ("has_schema_privilege", [(True,)]),
-        ("extname = 'pg_stat_statements'", [(1,)]),
-        ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
-        (_explain_call(), psycopg.errors.UndefinedFunction('function datadog.explain_statement does not exist')),
-    ]
-    conn = FakeConn(_happy_server_responses() + dbm_responses)
-    with _patch_connection(check, conn):
-        diagnoses = _get_diagnoses(check)
+    check = _dbm_check(integration_check, pg_instance)
+    dbm_responses = _override(
+        _happy_dbm_responses(),
+        _explain_call(),
+        psycopg.errors.UndefinedFunction('function datadog.explain_statement does not exist'),
+    )
+    diagnoses = _run(check, _happy_server_responses() + dbm_responses)
     entry = _by_name(diagnoses, DatabaseConfigurationError.undefined_explain_function.value)[0]
     assert entry['result'] == Diagnosis.DIAGNOSIS_FAIL
     assert 'explain_statement' in entry['diagnosis']
@@ -461,27 +430,17 @@ def test_missing_explain_function_fails(integration_check, pg_instance):
 
 def test_explain_function_with_trailing_parens_succeeds(integration_check, pg_instance):
     """explain_function configured with trailing () should not produce invalid SQL."""
-    fn = 'datadog.explain_statement()'
-    instance = dict(pg_instance, dbm=True, query_samples={'explain_function': fn})
-    check = integration_check(instance)
-    dbm_responses = [
-        ("nspname = 'datadog'", [(1,)]),
-        ("has_schema_privilege", [(True,)]),
-        ("extname = 'pg_stat_statements'", [(1,)]),
-        ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
-        (_explain_call('datadog.explain_statement'), _successful_explain()),
-    ]
-    conn = FakeConn(_happy_server_responses() + dbm_responses)
-    with _patch_connection(check, conn):
-        diagnoses = _get_diagnoses(check)
+    check = _dbm_check(
+        integration_check, pg_instance, query_samples={'explain_function': 'datadog.explain_statement()'}
+    )
+    diagnoses = _run(check, _happy_server_responses() + _happy_dbm_responses())
     entries = _by_name(diagnoses, DatabaseConfigurationError.undefined_explain_function.value)
     assert len(entries) == 1
     assert entries[0]['result'] == Diagnosis.DIAGNOSIS_SUCCESS
 
 
 def test_query_samples_probes_each_monitored_database(integration_check, pg_instance):
-    instance = dict(pg_instance, dbm=True, query_metrics={'enabled': False})
-    check = integration_check(instance)
+    check = _dbm_check(integration_check, pg_instance, query_metrics={'enabled': False})
     connections = {
         pg_instance['dbname']: FakeConn(
             _happy_server_responses()
@@ -504,10 +463,7 @@ def test_query_samples_probes_each_monitored_database(integration_check, pg_inst
             ]
         ),
     }
-    with mock.patch(
-        'datadog_checks.postgres.diagnose.TokenAwareConnection.connect',
-        side_effect=lambda **kwargs: connections[kwargs['dbname']],
-    ):
+    with _patch_per_db(connections):
         diagnoses = _get_diagnoses(check)
 
     missing_schema = _by_name(diagnoses, DatabaseConfigurationError.missing_datadog_schema.value)
@@ -526,12 +482,11 @@ def test_query_samples_probes_each_monitored_database(integration_check, pg_inst
 
 def test_query_samples_with_autodiscovery_probes_query_sampled_databases(integration_check, pg_instance):
     """Query-samples probes follow pg_stat_activity filtering, not autodiscovery include/exclude."""
-    instance = dict(
+    check = _dbm_check(
+        integration_check,
         pg_instance,
-        dbm=True,
         database_autodiscovery={'enabled': True, 'include': ['app_a$'], 'max_databases': 1},
     )
-    check = integration_check(instance)
     healthy_dbm = _happy_dbm_responses()
     broken_dbm = [
         ("nspname = 'datadog'", [(1,)]),
@@ -545,10 +500,7 @@ def test_query_samples_with_autodiscovery_probes_query_sampled_databases(integra
         'app_b': FakeConn(broken_dbm),
     }
     with mock.patch.object(check.autodiscovery, 'get_items', return_value=['app_a']) as get_items:
-        with mock.patch(
-            'datadog_checks.postgres.diagnose.TokenAwareConnection.connect',
-            side_effect=lambda **kwargs: connections[kwargs['dbname']],
-        ) as connect:
+        with _patch_per_db(connections) as connect:
             diagnoses = _get_diagnoses(check)
 
     assert not get_items.called
@@ -563,12 +515,11 @@ def test_query_samples_with_autodiscovery_probes_query_sampled_databases(integra
 
 def test_query_samples_with_autodiscovery_uses_pg_database_without_lookup(integration_check, pg_instance):
     """DBM query-sample setup does not call autodiscovery to choose probe databases."""
-    instance = dict(
+    check = _dbm_check(
+        integration_check,
         pg_instance,
-        dbm=True,
         database_autodiscovery={'enabled': True, 'include': ['matches_nothing_.*']},
     )
-    check = integration_check(instance)
     responses = (
         _happy_server_responses() + [("pg_catalog.pg_database", [(pg_instance['dbname'],)])] + _happy_dbm_responses()
     )
@@ -582,15 +533,10 @@ def test_query_samples_with_autodiscovery_uses_pg_database_without_lookup(integr
 
 def test_autodiscovery_probe_databases_raises_falls_back_gracefully(integration_check, pg_instance):
     """autodiscovery enabled, get_items() raises -> fall through to pg_database without crashing."""
-    instance = dict(
-        pg_instance,
-        database_autodiscovery={'enabled': True, 'include': ['.*']},
-    )
-    check = integration_check(instance)
+    check = integration_check(dict(pg_instance, database_autodiscovery={'enabled': True, 'include': ['.*']}))
     responses = _happy_server_responses() + [("pg_catalog.pg_database", [(pg_instance['dbname'],)])]
     with mock.patch.object(check.autodiscovery, 'get_items', side_effect=psycopg.OperationalError('boom')):
-        with _patch_connection(check, FakeConn(responses)):
-            diagnoses = _get_diagnoses(check)
+        diagnoses = _run(check, responses)
     # Diagnose completed without crashing; config-validation still emits at the bottom.
     assert _by_name(diagnoses, DatabaseConfigurationError.config_validation.value)
 
@@ -600,8 +546,7 @@ def test_query_samples_dbstrict_short_circuits_regardless_of_autodiscovery(integ
     matching the sample collector's runtime filter in statement_samples.py."""
     for ad_enabled in (True, False):
         ad_config = {'enabled': True, 'include': ['.*']} if ad_enabled else {'enabled': False}
-        instance = dict(pg_instance, dbm=True, dbstrict=True, database_autodiscovery=ad_config)
-        check = integration_check(instance)
+        check = _dbm_check(integration_check, pg_instance, dbstrict=True, database_autodiscovery=ad_config)
         responses = _happy_server_responses() + _happy_dbm_responses()
 
         if ad_enabled and check.autodiscovery is not None:
@@ -619,77 +564,47 @@ def test_query_samples_dbstrict_short_circuits_regardless_of_autodiscovery(integ
 # -- Per-database DBM probes (autodiscovery + cluster-level checks) ----------
 
 
-def test_query_metrics_pg_stat_statements_checked_on_main_database_only(integration_check, pg_instance):
-    """Statement metrics read pg_stat_statements from the main DB only, even with autodiscovery."""
-    instance = dict(
+def test_query_samples_disabled_probes_pg_stat_statements_on_main_db_only(integration_check, pg_instance):
+    """With query_samples disabled, query_metrics reads pg_stat_statements from the main DB only,
+    even with autodiscovery. Datadog-schema and explain-function probes are query_samples
+    prerequisites and don't fire anywhere. Per-DB connectivity is still validated."""
+    check = _dbm_check(
+        integration_check,
         pg_instance,
-        dbm=True,
         query_samples={'enabled': False},
         query_activity={'enabled': False},
         database_autodiscovery={'enabled': True, 'include': ['app_.*']},
     )
-    check = integration_check(instance)
     main_dbm = [
         ("extname = 'pg_stat_statements'", [(1,)]),
         ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
     ]
-    # Autodiscovered DBs are probed for connectivity but no DBM probes run on them
-    # (query_samples is disabled), so a bare FakeConn is sufficient.
     connections = {
         pg_instance['dbname']: FakeConn(_happy_server_responses() + main_dbm),
         'app_a': FakeConn([]),
         'app_b': FakeConn([]),
     }
     with mock.patch.object(check.autodiscovery, 'get_items', return_value=['app_a', 'app_b']):
-        with mock.patch(
-            'datadog_checks.postgres.diagnose.TokenAwareConnection.connect',
-            side_effect=lambda **kwargs: connections[kwargs['dbname']],
-        ):
+        with _patch_per_db(connections):
             diagnoses = _get_diagnoses(check)
 
-    rows = _by_name(diagnoses, DatabaseConfigurationError.pg_stat_statements_not_created.value)
-    assert len(rows) == 1
-    assert rows[0]['result'] == Diagnosis.DIAGNOSIS_SUCCESS
-    assert pg_instance['dbname'] in rows[0]['diagnosis']
-
-
-def test_query_metrics_pg_stat_statements_readable_checked_on_main_database_only(integration_check, pg_instance):
-    """A broken pg_stat_statements view in another database should not fail query-metrics diagnose."""
-    instance = dict(
-        pg_instance,
-        dbm=True,
-        query_samples={'enabled': False},
-        query_activity={'enabled': False},
-        database_autodiscovery={'enabled': True, 'include': ['app_.*']},
-        pg_stat_statements_view='public.wrong_view',
-    )
-    check = integration_check(instance)
-    main_dbm = [
-        ("extname = 'pg_stat_statements'", [(1,)]),
-        ('"public"."wrong_view"', [(1,)]),
-    ]
-    connections = {
-        pg_instance['dbname']: FakeConn(_happy_server_responses() + main_dbm),
-        'app_a': FakeConn([]),
-        'app_b': FakeConn([]),
-    }
-    with mock.patch.object(check.autodiscovery, 'get_items', return_value=['app_a', 'app_b']):
-        with mock.patch(
-            'datadog_checks.postgres.diagnose.TokenAwareConnection.connect',
-            side_effect=lambda **kwargs: connections[kwargs['dbname']],
-        ):
-            diagnoses = _get_diagnoses(check)
-
-    rows = _by_name(diagnoses, DatabaseConfigurationError.pg_stat_statements_not_readable.value)
-    assert len(rows) == 1
-    assert rows[0]['result'] == Diagnosis.DIAGNOSIS_SUCCESS
-    assert pg_instance['dbname'] in rows[0]['diagnosis']
+    for code in (
+        DatabaseConfigurationError.pg_stat_statements_not_created,
+        DatabaseConfigurationError.pg_stat_statements_not_readable,
+    ):
+        rows = _by_name(diagnoses, code.value)
+        assert len(rows) == 1, (code.value, rows)
+        assert rows[0]['result'] == Diagnosis.DIAGNOSIS_SUCCESS
+        assert pg_instance['dbname'] in rows[0]['diagnosis']
+    assert not _by_name(diagnoses, DatabaseConfigurationError.missing_schema_usage_grant.value)
+    assert not _by_name(diagnoses, DatabaseConfigurationError.undefined_explain_function.value)
+    assert not _by_name(diagnoses, DatabaseConfigurationError.missing_datadog_schema.value)
 
 
 def test_schema_usage_grant_fails_when_missing(integration_check, pg_instance):
     """Documented setup step `GRANT USAGE ON SCHEMA public TO datadog` must be verified --
     a catalog-only check would mask this since pg_proc joins succeed without USAGE."""
-    check = integration_check(dict(pg_instance, dbm=True))
+    check = _dbm_check(integration_check, pg_instance)
 
     def usage_predicate(sql, params):
         return 'has_schema_privilege' in sql and params == ('public',)
@@ -705,9 +620,7 @@ def test_schema_usage_grant_fails_when_missing(integration_check, pg_instance):
         ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
         (_explain_call(), _successful_explain()),
     ]
-    conn = FakeConn(_happy_server_responses() + dbm_responses)
-    with _patch_connection(check, conn):
-        diagnoses = _get_diagnoses(check)
+    diagnoses = _run(check, _happy_server_responses() + dbm_responses)
 
     rows = _by_name(diagnoses, DatabaseConfigurationError.missing_schema_usage_grant.value)
     fail_rows = [d for d in rows if d['result'] == Diagnosis.DIAGNOSIS_FAIL]
@@ -719,21 +632,14 @@ def test_schema_usage_grant_fails_when_missing(integration_check, pg_instance):
 def test_schema_usage_grant_per_autodiscovered_database(integration_check, pg_instance):
     """USAGE grants are per-database; missing USAGE on `datadog` in one DB only must
     produce a FAIL row scoped to that DB."""
-    instance = dict(
+    check = _dbm_check(
+        integration_check,
         pg_instance,
-        dbm=True,
         database_autodiscovery={'enabled': True, 'include': ['app_.*']},
     )
-    check = integration_check(instance)
     healthy_dbm = _happy_dbm_responses()
     # In app_b, the datadog schema exists but USAGE is denied.
-    broken_dbm = [
-        ("nspname = 'datadog'", [(1,)]),
-        ("has_schema_privilege", [(False,)]),
-        ("extname = 'pg_stat_statements'", [(1,)]),
-        ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
-        (_explain_call(), _successful_explain()),
-    ]
+    broken_dbm = _override(_happy_dbm_responses(), 'has_schema_privilege', [(False,)])
     connections = {
         pg_instance['dbname']: FakeConn(
             _happy_server_responses() + [("pg_catalog.pg_database", [('app_a',), ('app_b',)])] + healthy_dbm
@@ -742,10 +648,7 @@ def test_schema_usage_grant_per_autodiscovered_database(integration_check, pg_in
         'app_b': FakeConn(broken_dbm),
     }
     with mock.patch.object(check.autodiscovery, 'get_items') as get_items:
-        with mock.patch(
-            'datadog_checks.postgres.diagnose.TokenAwareConnection.connect',
-            side_effect=lambda **kwargs: connections[kwargs['dbname']],
-        ):
+        with _patch_per_db(connections):
             diagnoses = _get_diagnoses(check)
 
     assert not get_items.called
@@ -764,20 +667,16 @@ def test_schema_usage_grant_per_autodiscovered_database(integration_check, pg_in
 def test_schema_usage_skipped_when_datadog_schema_missing(integration_check, pg_instance):
     """If the `datadog` schema doesn't exist, the USAGE-on-datadog FAIL is noise on top of
     the schema-existence FAIL. Skip it. USAGE on `public` is independent and still runs."""
-    check = integration_check(dict(pg_instance, dbm=True))
-    dbm_responses = [
-        # datadog schema missing -> _diagnose_datadog_schema FAILs and adds to per-DB `failed`.
-        ("nspname = 'datadog'", []),
-        # has_schema_privilege would return False for datadog (NULL row from a missing schema),
-        # but the cascade-skip means the probe never queries it for `datadog`. Public still does.
-        ("has_schema_privilege", [(True,)]),
-        ("extname = 'pg_stat_statements'", [(1,)]),
-        ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
-        (_explain_call(), psycopg.errors.UndefinedFunction('function datadog.explain_statement does not exist')),
-    ]
-    conn = FakeConn(_happy_server_responses() + dbm_responses)
-    with _patch_connection(check, conn):
-        diagnoses = _get_diagnoses(check)
+    check = _dbm_check(integration_check, pg_instance)
+    dbm_responses = _override(_happy_dbm_responses(), "nspname = 'datadog'", [])
+    # has_schema_privilege would return False for datadog (NULL row from a missing schema),
+    # but the cascade-skip means the probe never queries it for `datadog`. Public still does.
+    dbm_responses = _override(
+        dbm_responses,
+        _explain_call(),
+        psycopg.errors.UndefinedFunction('function datadog.explain_statement does not exist'),
+    )
+    diagnoses = _run(check, _happy_server_responses() + dbm_responses)
 
     schema_rows = _by_name(diagnoses, DatabaseConfigurationError.missing_datadog_schema.value)
     assert schema_rows and schema_rows[0]['result'] == Diagnosis.DIAGNOSIS_FAIL
@@ -788,106 +687,28 @@ def test_schema_usage_skipped_when_datadog_schema_missing(integration_check, pg_
     assert usage_rows[0]['result'] == Diagnosis.DIAGNOSIS_SUCCESS
 
 
-def test_dbm_probe_databases_not_used_for_metrics_only(integration_check, pg_instance):
-    """With query_samples disabled, query_metrics probes pg_stat_statements on the main DB only --
-    no datadog-schema or explain-function checks fire on autodiscovered DBs (those are
-    query_samples prerequisites). Per-DB connectivity is still validated."""
-    instance = dict(
-        pg_instance,
-        dbm=True,
-        query_samples={'enabled': False},
-        database_autodiscovery={'enabled': True, 'include': ['app_.*']},
-    )
-    check = integration_check(instance)
-    metrics_only_dbm = [
-        ("extname = 'pg_stat_statements'", [(1,)]),
-        ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
-    ]
-    connections = {
-        pg_instance['dbname']: FakeConn(_happy_server_responses() + metrics_only_dbm),
-        'app_a': FakeConn([]),
-        'app_b': FakeConn([]),
-    }
-    with mock.patch.object(check.autodiscovery, 'get_items', return_value=['app_a', 'app_b']):
-        with mock.patch(
-            'datadog_checks.postgres.diagnose.TokenAwareConnection.connect',
-            side_effect=lambda **kwargs: connections[kwargs['dbname']],
-        ):
-            diagnoses = _get_diagnoses(check)
-
-    extension_rows = _by_name(diagnoses, DatabaseConfigurationError.pg_stat_statements_not_created.value)
-    assert len(extension_rows) == 1
-    assert extension_rows[0]['result'] == Diagnosis.DIAGNOSIS_SUCCESS
-    assert pg_instance['dbname'] in extension_rows[0]['diagnosis']
-    assert not _by_name(diagnoses, DatabaseConfigurationError.missing_schema_usage_grant.value)
-    assert not _by_name(diagnoses, DatabaseConfigurationError.undefined_explain_function.value)
-
-
 # -- Autodiscovery connectivity probing (regardless of DBM) ------------------
 
 
-def test_autodiscovery_without_dbm_probes_each_database_connectivity(integration_check, pg_instance):
-    """Autodiscovery without DBM still fans out connections to discovered DBs in the
-    running check (relation/function/count metrics), so diagnose must validate that
-    the datadog user can CONNECT to each one. A failure on a discovered DB should
-    surface as a connection_failure diagnostic with that dbname embedded.
-    """
-    instance = dict(
-        pg_instance,
-        database_autodiscovery={'enabled': True, 'include': ['app_.*']},
-    )
-    check = integration_check(instance)
-    main_conn = FakeConn(_happy_server_responses())
+@pytest.mark.parametrize('dbm', [False, True])
+def test_autodiscovery_probes_each_database_connectivity(integration_check, pg_instance, dbm):
+    """Autodiscovery fans out per-DB connections at runtime (relation/function/count metrics
+    without DBM, plus query-metrics/activity with DBM); diagnose must validate that the datadog
+    user can CONNECT to each one. A failure on a discovered DB should surface as a
+    connection_failure diagnostic with that dbname embedded. DBM-specific schema/explain probes
+    must not fire when query_samples is disabled."""
+    overrides = {'database_autodiscovery': {'enabled': True, 'include': ['app_.*']}}
+    if dbm:
+        overrides['dbm'] = True
+        overrides['query_samples'] = {'enabled': False}
+        main_responses = _happy_server_responses() + [
+            ("extname = 'pg_stat_statements'", [(1,)]),
+            ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
+        ]
+    else:
+        main_responses = _happy_server_responses()
+    check = integration_check(dict(pg_instance, **overrides))
     err = psycopg.OperationalError('permission denied for database "app_b"')
-
-    def connect(**kwargs):
-        if kwargs['dbname'] == pg_instance['dbname']:
-            return main_conn
-        if kwargs['dbname'] == 'app_a':
-            return FakeConn([])
-        if kwargs['dbname'] == 'app_b':
-            raise err
-        raise psycopg.OperationalError('unexpected dbname={}'.format(kwargs['dbname']))
-
-    with mock.patch.object(check.autodiscovery, 'get_items', return_value=['app_a', 'app_b']):
-        with mock.patch(
-            'datadog_checks.postgres.diagnose.TokenAwareConnection.connect', side_effect=connect
-        ) as connect_mock:
-            diagnoses = _get_diagnoses(check)
-
-    opened_dbnames = [call.kwargs['dbname'] for call in connect_mock.call_args_list]
-    assert pg_instance['dbname'] in opened_dbnames
-    assert 'app_a' in opened_dbnames
-    assert 'app_b' in opened_dbnames
-
-    conn_diags = _by_name(diagnoses, DatabaseConfigurationError.connection_failure.value)
-    failed = [d for d in conn_diags if d['result'] == Diagnosis.DIAGNOSIS_FAIL]
-    assert len(failed) == 1, failed
-    assert 'app_b' in failed[0]['diagnosis']
-    assert 'permission denied' in failed[0]['diagnosis']
-
-    # No DBM-specific per-database probes should fire when dbm is off.
-    assert not _by_name(diagnoses, DatabaseConfigurationError.missing_datadog_schema.value)
-    assert not _by_name(diagnoses, DatabaseConfigurationError.undefined_explain_function.value)
-
-
-def test_dbm_without_query_samples_still_probes_autodiscovered_connectivity(integration_check, pg_instance):
-    """A query-metrics/query-activity-only DBM setup with autodiscovery still connects
-    per-DB at runtime for relation metrics; diagnose must surface CONNECT failures even
-    though the DBM-specific schema/explain probes are correctly skipped.
-    """
-    instance = dict(
-        pg_instance,
-        dbm=True,
-        query_samples={'enabled': False},
-        database_autodiscovery={'enabled': True, 'include': ['app_.*']},
-    )
-    check = integration_check(instance)
-    err = psycopg.OperationalError('permission denied for database "app_b"')
-    main_responses = _happy_server_responses() + [
-        ("extname = 'pg_stat_statements'", [(1,)]),
-        ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
-    ]
 
     def connect(**kwargs):
         if kwargs['dbname'] == pg_instance['dbname']:
@@ -904,15 +725,19 @@ def test_dbm_without_query_samples_still_probes_autodiscovered_connectivity(inte
         ) as connect_mock:
             diagnoses = _get_diagnoses(check)
 
-    opened_dbnames = [call.kwargs['dbname'] for call in connect_mock.call_args_list]
-    assert set(opened_dbnames) == {pg_instance['dbname'], 'app_a', 'app_b'}
+    opened_dbnames = {call.kwargs['dbname'] for call in connect_mock.call_args_list}
+    assert opened_dbnames == {pg_instance['dbname'], 'app_a', 'app_b'}
 
-    conn_diags = _by_name(diagnoses, DatabaseConfigurationError.connection_failure.value)
-    failed = [d for d in conn_diags if d['result'] == Diagnosis.DIAGNOSIS_FAIL]
-    assert len(failed) == 1
+    failed = [
+        d
+        for d in _by_name(diagnoses, DatabaseConfigurationError.connection_failure.value)
+        if d['result'] == Diagnosis.DIAGNOSIS_FAIL
+    ]
+    assert len(failed) == 1, failed
     assert 'app_b' in failed[0]['diagnosis']
+    assert 'permission denied' in failed[0]['diagnosis']
 
-    # query_samples is disabled -> no datadog schema or explain function probes anywhere.
+    # No DBM-specific per-database probes fire (dbm=false or query_samples disabled).
     assert not _by_name(diagnoses, DatabaseConfigurationError.missing_datadog_schema.value)
     assert not _by_name(diagnoses, DatabaseConfigurationError.undefined_explain_function.value)
 
@@ -920,76 +745,67 @@ def test_dbm_without_query_samples_still_probes_autodiscovered_connectivity(inte
 # -- Subfeature gating --------------------------------------------------------
 
 
-def test_dbm_with_query_metrics_disabled_skips_pg_stat_statements_probes(integration_check, pg_instance):
-    """query_metrics disabled -> pg_stat_statements is not a prerequisite. Don't fail a
-    query-samples-only or query-activity-only DBM setup for a missing extension."""
-    instance = dict(
-        pg_instance,
-        dbm=True,
-        query_metrics={'enabled': False},
-    )
-    check = integration_check(instance)
-    # Set up responses that would FAIL the pg_stat_statements probes if they ran.
-    responses = _happy_server_responses(spl='pgaudit') + [
-        ("nspname = 'datadog'", [(1,)]),
+@pytest.mark.parametrize(
+    'disabled,gated,still_running',
+    [
+        (
+            'query_metrics',
+            {
+                DatabaseConfigurationError.shared_preload_libraries_missing_pg_stat_statements.value,
+                DatabaseConfigurationError.track_io_timing_disabled.value,
+                DatabaseConfigurationError.high_pg_stat_statements_max.value,
+                DatabaseConfigurationError.pg_stat_statements_not_created.value,
+                DatabaseConfigurationError.pg_stat_statements_not_readable.value,
+            },
+            DatabaseConfigurationError.undefined_explain_function.value,
+        ),
+        (
+            'query_samples',
+            {
+                DatabaseConfigurationError.missing_datadog_schema.value,
+                DatabaseConfigurationError.undefined_explain_function.value,
+            },
+            DatabaseConfigurationError.pg_stat_statements_not_created.value,
+        ),
+    ],
+)
+def test_dbm_subfeature_disabled_skips_prerequisite_probes(
+    integration_check, pg_instance, disabled, gated, still_running
+):
+    """Disabling a subfeature drops its prerequisites without affecting the other subfeature."""
+    check = _dbm_check(integration_check, pg_instance, **{disabled: {'enabled': False}})
+    # Use responses that would FAIL the gated probes if they ran.
+    server = _happy_server_responses(spl='pgaudit') if disabled == 'query_metrics' else _happy_server_responses()
+    dbm = [
+        ("nspname = 'datadog'", [] if disabled == 'query_samples' else [(1,)]),
         ("has_schema_privilege", [(True,)]),
-        ("extname = 'pg_stat_statements'", []),  # extension missing
-        ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', psycopg.errors.UndefinedTable('boom')),
-        (_explain_call(), _successful_explain()),
+        ("extname = 'pg_stat_statements'", [] if disabled == 'query_metrics' else [(1,)]),
+        (
+            'SELECT 1 FROM "pg_stat_statements" LIMIT 1',
+            psycopg.errors.UndefinedTable('boom') if disabled == 'query_metrics' else [(1,)],
+        ),
+        (
+            _explain_call(),
+            psycopg.errors.UndefinedFunction('does not exist')
+            if disabled == 'query_samples'
+            else _successful_explain(),
+        ),
     ]
-    with _patch_connection(check, FakeConn(responses)):
-        diagnoses = _get_diagnoses(check)
-    gated = {
-        DatabaseConfigurationError.shared_preload_libraries_missing_pg_stat_statements.value,
-        DatabaseConfigurationError.track_io_timing_disabled.value,
-        DatabaseConfigurationError.high_pg_stat_statements_max.value,
-        DatabaseConfigurationError.pg_stat_statements_not_created.value,
-        DatabaseConfigurationError.pg_stat_statements_not_readable.value,
-    }
+    diagnoses = _run(check, server + dbm)
     assert not any(d['name'] in gated for d in diagnoses), [d['name'] for d in diagnoses if d['name'] in gated]
-    # Samples-side probes still run.
-    assert _by_name(diagnoses, DatabaseConfigurationError.undefined_explain_function.value)
-
-
-def test_dbm_with_query_samples_disabled_skips_explain_probes(integration_check, pg_instance):
-    """query_samples disabled -> the explain function and datadog schema are not prerequisites."""
-    instance = dict(
-        pg_instance,
-        dbm=True,
-        query_samples={'enabled': False},
-    )
-    check = integration_check(instance)
-    responses = _happy_server_responses() + [
-        # If the schema/explain probes ran they'd FAIL on these responses -- they shouldn't run.
-        ("nspname = 'datadog'", []),
-        ("extname = 'pg_stat_statements'", [(1,)]),
-        ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
-        (_explain_call(), psycopg.errors.UndefinedFunction('function datadog.explain_statement does not exist')),
-    ]
-    with _patch_connection(check, FakeConn(responses)):
-        diagnoses = _get_diagnoses(check)
-    gated = {
-        DatabaseConfigurationError.missing_datadog_schema.value,
-        DatabaseConfigurationError.undefined_explain_function.value,
-    }
-    assert not any(d['name'] in gated for d in diagnoses)
-    # Metrics-side probes still run.
-    assert _by_name(diagnoses, DatabaseConfigurationError.pg_stat_statements_not_created.value)
+    assert _by_name(diagnoses, still_running)
 
 
 def test_dbm_with_both_subfeatures_disabled_still_runs_track_activity_query_size(integration_check, pg_instance):
     """query_activity defaults to enabled and reads pg_stat_activity.query, so the
     track_activity_query_size warning still applies even when metrics+samples are off."""
-    instance = dict(
+    check = _dbm_check(
+        integration_check,
         pg_instance,
-        dbm=True,
         query_metrics={'enabled': False},
         query_samples={'enabled': False},
     )
-    check = integration_check(instance)
-    responses = _happy_server_responses(track_query_size=1024)
-    with _patch_connection(check, FakeConn(responses)):
-        diagnoses = _get_diagnoses(check)
+    diagnoses = _run(check, _happy_server_responses(track_query_size=1024))
     entry = _by_name(diagnoses, DatabaseConfigurationError.track_activity_query_size_too_small.value)[0]
     assert entry['result'] == Diagnosis.DIAGNOSIS_WARNING
 
@@ -1000,18 +816,15 @@ def test_dbm_with_both_subfeatures_disabled_still_runs_track_activity_query_size
 def test_pg_stat_statements_readable_fails_when_view_misconfigured(integration_check, pg_instance):
     """Extension is installed but `pg_stat_statements_view` points at a nonexistent name.
     This can no longer be swallowed by the UndefinedTable fast-path; the user needs a FAIL."""
-    check = integration_check(dict(pg_instance, dbm=True, pg_stat_statements_view='public.wrong_view'))
+    check = _dbm_check(integration_check, pg_instance, pg_stat_statements_view='public.wrong_view')
     dbm_responses = [
         ("nspname = 'datadog'", [(1,)]),
-        # Extension probe succeeds.
         ("extname = 'pg_stat_statements'", [(1,)]),
         # But the configured view doesn't exist.
         ('"public"."wrong_view"', psycopg.errors.UndefinedTable('relation "public.wrong_view" does not exist')),
         (_explain_call(), _successful_explain()),
     ]
-    conn = FakeConn(_happy_server_responses() + dbm_responses)
-    with _patch_connection(check, conn):
-        diagnoses = _get_diagnoses(check)
+    diagnoses = _run(check, _happy_server_responses() + dbm_responses)
     entry = _by_name(diagnoses, DatabaseConfigurationError.pg_stat_statements_not_readable.value)[0]
     assert entry['result'] == Diagnosis.DIAGNOSIS_FAIL
     assert 'public.wrong_view' in entry['diagnosis']
@@ -1020,47 +833,38 @@ def test_pg_stat_statements_readable_fails_when_view_misconfigured(integration_c
 # -- Unqualified explain_function resolution ---------------------------------
 
 
-def test_unqualified_explain_function_resolves_via_search_path(integration_check, pg_instance):
+@pytest.mark.parametrize(
+    'explain_result,expected_result,assert_in_diagnosis',
+    [
+        (_successful_explain(), Diagnosis.DIAGNOSIS_SUCCESS, None),
+        (
+            psycopg.errors.UndefinedFunction('function explain_statement does not exist'),
+            Diagnosis.DIAGNOSIS_FAIL,
+            'explain_statement',
+        ),
+    ],
+)
+def test_unqualified_explain_function(
+    integration_check, pg_instance, explain_result, expected_result, assert_in_diagnosis
+):
     """Runtime calls `SELECT explain_statement(...)` and lets Postgres' search_path find it.
-    The diagnose lookup must follow the same resolution rules rather than hardcoding `public`."""
-    instance = dict(pg_instance, dbm=True, query_samples={'explain_function': 'explain_statement'})
-    check = integration_check(instance)
+    The diagnose lookup must follow the same resolution rules rather than hardcoding `public`,
+    and the datadog-schema probe must not run when the function is unqualified."""
+    check = _dbm_check(integration_check, pg_instance, query_samples={'explain_function': 'explain_statement'})
     dbm_responses = [
         # Unqualified function -> datadog schema probe must not run (no explicit `datadog.`).
         ("nspname = 'datadog'", []),
         ("has_schema_privilege", [(True,)]),
         ("extname = 'pg_stat_statements'", [(1,)]),
         ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
-        (_explain_call('explain_statement'), _successful_explain()),
+        (_explain_call('explain_statement'), explain_result),
     ]
-    conn = FakeConn(_happy_server_responses() + dbm_responses)
-    with _patch_connection(check, conn):
-        diagnoses = _get_diagnoses(check)
-    # datadog schema probe skipped entirely (unqualified function).
+    diagnoses = _run(check, _happy_server_responses() + dbm_responses)
     assert not _by_name(diagnoses, DatabaseConfigurationError.missing_datadog_schema.value)
     explain = _by_name(diagnoses, DatabaseConfigurationError.undefined_explain_function.value)[0]
-    assert explain['result'] == Diagnosis.DIAGNOSIS_SUCCESS
-
-
-def test_unqualified_explain_function_not_in_search_path_fails(integration_check, pg_instance):
-    instance = dict(pg_instance, dbm=True, query_samples={'explain_function': 'explain_statement'})
-    check = integration_check(instance)
-    dbm_responses = [
-        ("nspname = 'datadog'", []),
-        ("has_schema_privilege", [(True,)]),
-        ("extname = 'pg_stat_statements'", [(1,)]),
-        ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
-        (
-            _explain_call('explain_statement'),
-            psycopg.errors.UndefinedFunction('function explain_statement does not exist'),
-        ),
-    ]
-    conn = FakeConn(_happy_server_responses() + dbm_responses)
-    with _patch_connection(check, conn):
-        diagnoses = _get_diagnoses(check)
-    explain = _by_name(diagnoses, DatabaseConfigurationError.undefined_explain_function.value)[0]
-    assert explain['result'] == Diagnosis.DIAGNOSIS_FAIL
-    assert 'explain_statement' in explain['diagnosis']
+    assert explain['result'] == expected_result
+    if assert_in_diagnosis:
+        assert assert_in_diagnosis in explain['diagnosis']
 
 
 # -- Cascade skipping ---------------------------------------------------------
@@ -1068,26 +872,24 @@ def test_unqualified_explain_function_not_in_search_path_fails(integration_check
 
 def test_cascade_skip_spl_missing_suppresses_pgss_extension_and_readable(integration_check, pg_instance):
     """When SPL lacks pg_stat_statements, the extension+readable FAILs add no information --
-    `CREATE EXTENSION` can't succeed until SPL is fixed and the server restarted."""
-    check = integration_check(dict(pg_instance, dbm=True))
-    responses = _happy_server_responses(spl='pgaudit') + [
-        ("nspname = 'datadog'", [(1,)]),
-        # If the extension/readable diagnostics did run, these would fail — but they shouldn't run.
-        ("extname = 'pg_stat_statements'", []),
-        (
-            'SELECT 1 FROM "pg_stat_statements" LIMIT 1',
-            psycopg.errors.UndefinedTable('does not exist'),
-        ),
-        (_explain_call(), _successful_explain()),
-    ]
-    with _patch_connection(check, FakeConn(responses)):
-        diagnoses = _get_diagnoses(check)
-    # Root cause still reported.
+    `CREATE EXTENSION` can't succeed until SPL is fixed and the server restarted. Subsumes the
+    basic SPL-FAIL case: the root-cause diagnosis is asserted here."""
+    check = _dbm_check(integration_check, pg_instance)
+    # If the extension/readable diagnostics did run, these would fail — but they shouldn't run.
+    dbm_responses = _override(_happy_dbm_responses(), "extname = 'pg_stat_statements'", [])
+    dbm_responses = _override(
+        dbm_responses,
+        'SELECT 1 FROM "pg_stat_statements" LIMIT 1',
+        psycopg.errors.UndefinedTable('does not exist'),
+    )
+    diagnoses = _run(check, _happy_server_responses(spl='pgaudit') + dbm_responses)
+    # Root cause still reported, with the extension name in the diagnosis text.
     spl_entry = _by_name(
         diagnoses,
         DatabaseConfigurationError.shared_preload_libraries_missing_pg_stat_statements.value,
     )[0]
     assert spl_entry['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert 'pg_stat_statements' in spl_entry['diagnosis']
     # Downstream diagnostics skipped entirely (no entry, not even SUCCESS).
     assert not _by_name(diagnoses, DatabaseConfigurationError.pg_stat_statements_not_created.value)
     assert not _by_name(diagnoses, DatabaseConfigurationError.pg_stat_statements_not_readable.value)
@@ -1096,12 +898,10 @@ def test_cascade_skip_spl_missing_suppresses_pgss_extension_and_readable(integra
 def test_cascade_skip_pg_monitor_missing_suppresses_pg_stat_activity_warning(integration_check, pg_instance):
     """Without pg_monitor, pg_stat_activity masking is a symptom -- the root cause is the role FAIL."""
     check = integration_check(dict(pg_instance, collect_activity_metrics=True))
-    responses = _happy_server_responses()
-    responses = [(m, [(False,)]) if isinstance(m, str) and m == 'pg_has_role' else (m, r) for m, r in responses]
+    responses = _override(_happy_server_responses(), 'pg_has_role', [(False,)])
     # Flip the pg_stat_activity masked-row count to non-zero, so the WARNING *would* fire absent cascade.
-    responses = [(m, [(16,)]) if m == "query = %s" else (m, r) for m, r in responses]
-    with _patch_connection(check, FakeConn(responses)):
-        diagnoses = _get_diagnoses(check)
+    responses = _override(responses, 'query = %s', [(16,)])
+    diagnoses = _run(check, responses)
     role_entry = _by_name(diagnoses, DatabaseConfigurationError.missing_pg_monitor_role.value)[0]
     assert role_entry['result'] == Diagnosis.DIAGNOSIS_FAIL
     assert not _by_name(diagnoses, DatabaseConfigurationError.insufficient_privilege_on_pg_stat_activity.value)
@@ -1109,19 +909,17 @@ def test_cascade_skip_pg_monitor_missing_suppresses_pg_stat_activity_warning(int
 
 def test_cascade_skip_missing_schema_suppresses_explain_function_in_datadog_schema(integration_check, pg_instance):
     """When `datadog` schema is missing, `datadog.explain_statement` can't exist -- the schema
-    FAIL is the actionable item; don't emit an explain-function FAIL with a nonsensical fix."""
-    check = integration_check(dict(pg_instance, dbm=True))
-    dbm_responses = [
-        ("nspname = 'datadog'", []),
-        ("has_schema_privilege", [(True,)]),
-        ("extname = 'pg_stat_statements'", [(1,)]),
-        ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
-        # If the explain-function diagnostic did run, this would produce a FAIL — but it shouldn't run.
-        (_explain_call(), psycopg.errors.UndefinedFunction('function datadog.explain_statement does not exist')),
-    ]
-    conn = FakeConn(_happy_server_responses() + dbm_responses)
-    with _patch_connection(check, conn):
-        diagnoses = _get_diagnoses(check)
+    FAIL is the actionable item; don't emit an explain-function FAIL with a nonsensical fix.
+    Subsumes the basic missing-schema FAIL case."""
+    check = _dbm_check(integration_check, pg_instance)
+    dbm_responses = _override(_happy_dbm_responses(), "nspname = 'datadog'", [])
+    # If the explain-function diagnostic did run, this would produce a FAIL — but it shouldn't run.
+    dbm_responses = _override(
+        dbm_responses,
+        _explain_call(),
+        psycopg.errors.UndefinedFunction('function datadog.explain_statement does not exist'),
+    )
+    diagnoses = _run(check, _happy_server_responses() + dbm_responses)
     schema = _by_name(diagnoses, DatabaseConfigurationError.missing_datadog_schema.value)[0]
     assert schema['result'] == Diagnosis.DIAGNOSIS_FAIL
     assert not _by_name(diagnoses, DatabaseConfigurationError.undefined_explain_function.value)
@@ -1131,8 +929,7 @@ def test_custom_explain_function_schema_skips_datadog_schema_check(integration_c
     """If the user configured an explain_function outside the `datadog` schema, the
     `datadog` schema is not a DBM prerequisite -- the schema check short-circuits entirely
     (no success, warning, or fail row) and the function check carries the DBM verdict."""
-    instance = dict(pg_instance, dbm=True, query_samples={'explain_function': 'public.my_explain'})
-    check = integration_check(instance)
+    check = _dbm_check(integration_check, pg_instance, query_samples={'explain_function': 'public.my_explain'})
     dbm_responses = [
         # `datadog` schema is absent -- but since the configured function lives in `public`,
         # _diagnose_datadog_schema must early-return without hitting pg_namespace at all.
@@ -1142,9 +939,7 @@ def test_custom_explain_function_schema_skips_datadog_schema_check(integration_c
         ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
         (_explain_call('public.my_explain'), _successful_explain()),
     ]
-    conn = FakeConn(_happy_server_responses() + dbm_responses)
-    with _patch_connection(check, conn):
-        diagnoses = _get_diagnoses(check)
+    diagnoses = _run(check, _happy_server_responses() + dbm_responses)
     # No `missing-datadog-schema` diagnosis emitted at all -- success or fail would both be wrong.
     assert not _by_name(diagnoses, DatabaseConfigurationError.missing_datadog_schema.value)
     # The explain-function diagnostic ran and passed (function exists in public).
@@ -1153,8 +948,7 @@ def test_custom_explain_function_schema_skips_datadog_schema_check(integration_c
 
 
 def test_custom_explain_function_guidance_uses_override(integration_check, pg_instance):
-    instance = dict(pg_instance, dbm=True, query_samples={'explain_function': 'public.my_explain'})
-    check = integration_check(instance)
+    check = _dbm_check(integration_check, pg_instance, query_samples={'explain_function': 'public.my_explain'})
     dbm_responses = [
         ("has_schema_privilege", [(True,)]),
         ("extname = 'pg_stat_statements'", [(1,)]),
@@ -1164,9 +958,7 @@ def test_custom_explain_function_guidance_uses_override(integration_check, pg_in
             psycopg.errors.UndefinedFunction('function public.my_explain does not exist'),
         ),
     ]
-    conn = FakeConn(_happy_server_responses() + dbm_responses)
-    with _patch_connection(check, conn):
-        diagnoses = _get_diagnoses(check)
+    diagnoses = _run(check, _happy_server_responses() + dbm_responses)
 
     explain = _by_name(diagnoses, DatabaseConfigurationError.undefined_explain_function.value)[0]
     assert explain['result'] == Diagnosis.DIAGNOSIS_FAIL
@@ -1248,8 +1040,7 @@ def _config_validation_entries(diagnoses):
 def test_config_validation_ok(integration_check, pg_instance):
     check = integration_check(pg_instance)
     check._validation_result = _make_validation_result()
-    with _patch_connection(check, FakeConn(_happy_server_responses())):
-        diagnoses = _get_diagnoses(check)
+    diagnoses = _run(check, _happy_server_responses())
 
     entries = _config_validation_entries(diagnoses)
     assert len(entries) == 1
@@ -1263,8 +1054,7 @@ def test_config_validation_warning(integration_check, pg_instance):
     check._validation_result = _make_validation_result(
         warnings=["The `statement_samples` option is deprecated. Use `query_samples` instead."],
     )
-    with _patch_connection(check, FakeConn(_happy_server_responses())):
-        diagnoses = _get_diagnoses(check)
+    diagnoses = _run(check, _happy_server_responses())
 
     entry = _config_validation_entries(diagnoses)[0]
     assert entry['result'] == Diagnosis.DIAGNOSIS_WARNING
@@ -1280,8 +1070,7 @@ def test_config_validation_error(integration_check, pg_instance):
     check._validation_result = _make_validation_result(
         errors=[ConfigurationError("Application name can include only ASCII characters: foo")],
     )
-    with _patch_connection(check, FakeConn(_happy_server_responses())):
-        diagnoses = _get_diagnoses(check)
+    diagnoses = _run(check, _happy_server_responses())
 
     entry = _config_validation_entries(diagnoses)[0]
     assert entry['result'] == Diagnosis.DIAGNOSIS_FAIL
@@ -1310,8 +1099,7 @@ def test_config_validation_emits_when_connection_fails(integration_check, pg_ins
 def test_config_validation_handles_missing_validation_result(integration_check, pg_instance):
     check = integration_check(pg_instance)
     check._validation_result = None
-    with _patch_connection(check, FakeConn(_happy_server_responses())):
-        diagnoses = _get_diagnoses(check)
+    diagnoses = _run(check, _happy_server_responses())
     entry = _config_validation_entries(diagnoses)[0]
     assert entry['result'] == Diagnosis.DIAGNOSIS_WARNING
     assert entry['diagnosis'] == "Postgres config validation did not complete (check initialization failed)."
@@ -1328,8 +1116,7 @@ def test_config_validation_renders_features(integration_check, pg_instance):
             _feature("collect_schemas", enabled=False),
         ],
     )
-    with _patch_connection(check, FakeConn(_happy_server_responses())):
-        diagnoses = _get_diagnoses(check)
+    diagnoses = _run(check, _happy_server_responses())
     entry = _config_validation_entries(diagnoses)[0]
     assert "Features enabled: query_metrics, query_samples" in entry['description']
     assert "Features disabled: relation_metrics, collect_schemas" in entry['description']
@@ -1345,8 +1132,7 @@ def test_config_validation_strings_are_neutral(integration_check, pg_instance):
         warnings=["deprecated option"],
         features=[_feature("query_metrics", enabled=True)],
     )
-    with _patch_connection(check, FakeConn(_happy_server_responses())):
-        diagnoses = _get_diagnoses(check)
+    diagnoses = _run(check, _happy_server_responses())
 
     entry = _config_validation_entries(diagnoses)[0]
     forbidden = ("agent health", "health event", "dbm-health", "dbm_health")
