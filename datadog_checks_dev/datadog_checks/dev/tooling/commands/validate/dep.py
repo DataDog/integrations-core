@@ -198,7 +198,8 @@ def dep(check, require_base_check_version, min_base_check_version):
     agent_dependencies, agent_errors = read_agent_dependencies()
     agent_dependencies_file = get_agent_requirements()
     annotate_errors(agent_dependencies_file, agent_errors)
-    repo_core = "integrations-core" in root
+    ctx = click.get_current_context()
+    repo_core = ctx.obj['repo_choice'] == 'core'
     if agent_errors:
         for agent_error in agent_errors:
             echo_failure(agent_error)

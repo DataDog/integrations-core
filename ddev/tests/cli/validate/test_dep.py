@@ -107,6 +107,22 @@ def test_one_valid_one_invalid_integration(fake_repo, ddev):
     assert error_regex.search(result_2.output), f"Unexpected output: {result_2.output}"
 
 
+UNPINNED_OPT_CHECK = 'unpinned_opt_check'
+
+_UNPINNED_OPTIONAL_DEP = 'acme-unpinned-lib'
+_PYPROJECT_UNPINNED_OPTIONAL = f"""
+        [project]
+        dependencies = [
+            "datadog-checks-base>=37.21.0",
+        ]
+
+        [project.optional-dependencies]
+        libs = [
+            "{_UNPINNED_OPTIONAL_DEP}",
+        ]
+        """
+
+
 def _write_git_dep_check(repo_path, check_name: str) -> None:
     git_dep = 'sample_git_pkg @ git+https://github.com/pypa/pip.git@24.0'
     write_file(
@@ -133,17 +149,55 @@ def _write_git_dep_check(repo_path, check_name: str) -> None:
     )
 
 
-def test_validate_dep_core_path(fake_integrations_core_repo, ddev):
-    assert 'integrations-core' in str(fake_integrations_core_repo.path)
-    _write_git_dep_check(fake_integrations_core_repo.path, 'git_dep_check')
-    result = ddev('validate', 'dep', 'git_dep_check')
-    assert result.exit_code == 0
+def test_core_rejects_unpinned_optional_dependency(fake_repo, ddev):
+    """With `-c`, unpinned PyPI deps under optional-dependencies fail validation."""
+    write_file(
+        fake_repo.path,
+        'agent_requirements.in',
+        f"""datadog-checks-base==37.21.0
+{_UNPINNED_OPTIONAL_DEP}==1.0.0
+""",
+    )
+    write_file(fake_repo.path, f'{UNPINNED_OPT_CHECK}/pyproject.toml', _PYPROJECT_UNPINNED_OPTIONAL)
+    result = ddev('-c', 'validate', 'dep', UNPINNED_OPT_CHECK)
+    assert result.exit_code == 1
+    assert 'Unpinned version' in result.output
+
+
+def test_extras_allows_unpinned_optional_dependency(fake_extras_repo, ddev):
+    """With `-e`, unpinned optional PyPI deps are allowed (no integrations-core pin rules)."""
+    write_file(
+        fake_extras_repo.path,
+        'agent_requirements.in',
+        """datadog-checks-base>=37.21.0
+""",
+    )
+    write_file(fake_extras_repo.path, f'{UNPINNED_OPT_CHECK}/pyproject.toml', _PYPROJECT_UNPINNED_OPTIONAL)
+    result = ddev('-e', 'validate', 'dep', UNPINNED_OPT_CHECK)
+    assert result.exit_code == 0, result.output
+    assert 'Unpinned version' not in result.output
     assert match_regex.match(result.output), f"Unexpected output: {result.output}"
 
 
-def test_validate_dep_non_core_path(fake_repo, ddev):
-    assert 'integrations-core' not in str(fake_repo.path)
+def test_marketplace_allows_unpinned_optional_dependency(fake_marketplace_repo, ddev):
+    """With `-m`, unpinned optional PyPI deps are allowed (no integrations-core pin rules)."""
+    write_file(
+        fake_marketplace_repo.path,
+        'agent_requirements.in',
+        """datadog-checks-base>=37.21.0
+""",
+    )
+    write_file(fake_marketplace_repo.path, f'{UNPINNED_OPT_CHECK}/pyproject.toml', _PYPROJECT_UNPINNED_OPTIONAL)
+    result = ddev('-m', 'validate', 'dep', UNPINNED_OPT_CHECK)
+    assert result.exit_code == 0, result.output
+    assert 'Unpinned version' not in result.output
+    assert match_regex.match(result.output), f"Unexpected output: {result.output}"
+
+
+def test_validate_dep_git_url_succeeds_on_core(fake_repo, ddev):
+    """Git URL deps return early from verify_dependency and are not treated as unpinned PyPI."""
     _write_git_dep_check(fake_repo.path, 'git_dep_check')
-    result = ddev('validate', 'dep', 'git_dep_check')
+    result = ddev('-c', 'validate', 'dep', 'git_dep_check')
     assert result.exit_code == 0
+    assert 'Unpinned version' not in result.output
     assert match_regex.match(result.output), f"Unexpected output: {result.output}"
