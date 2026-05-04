@@ -305,11 +305,7 @@ class InfrastructureMonitor:
         hostname: str | None = None,
         extra_tags_by_key: dict[str, list[str]] | None = None,
     ) -> None:
-        """Submit stats metrics for any entity type.
-
-        ``extra_tags_by_key`` adds key-specific tags to a subset of metrics
-        (e.g., disk_status only on storage_* metrics).
-        """
+        """Submit stats metrics; ``extra_tags_by_key`` scopes extra tags to specific keys."""
         if not stats:
             self.check.log.warning("No stats returned for %s", entity_name)
             return
@@ -403,8 +399,6 @@ class InfrastructureMonitor:
         self._set_external_tags_for_host(host_name, host_tags)
         self._report_host_capacity_metrics(host, host_name, host_tags)
 
-        disk_status_extra_tags = self._get_disk_status_storage_tags(host_id)
-
         try:
             stats = self._get_stats(f"api/clustermgmt/v4.0/stats/clusters/{cluster_id}/hosts/{host_id}")
             if stats:
@@ -414,7 +408,7 @@ class InfrastructureMonitor:
                     HOST_STATS_METRICS,
                     host_tags,
                     hostname=host_name,
-                    extra_tags_by_key=disk_status_extra_tags,
+                    extra_tags_by_key=self._get_disk_status_storage_tags(host_id),
                 )
         except Exception:
             self.check.log.exception(
@@ -600,35 +594,19 @@ class InfrastructureMonitor:
                 self._disks_by_host.setdefault(node_id, []).append(disk)
 
     def _aggregate_disk_status(self, disks: list[dict]) -> str | None:
-        """Return the worst-status across disks: degraded > normal."""
-        degraded_states = {
-            "MARKED_FOR_REMOVAL_BUT_NOT_DETACHABLE",
-            "DATA_MIGRATION_INITIATED",
-            "DETACHABLE",
-        }
-
-        statuses = {disk.get("status") for disk in disks if disk.get("status")}
-        if not statuses:
-            return None
-        if statuses & degraded_states:
+        """Return the worst disk status across ``disks``: degraded > normal."""
+        statuses = {d.get("status") for d in disks if d.get("status")}
+        if statuses & {"MARKED_FOR_REMOVAL_BUT_NOT_DETACHABLE", "DATA_MIGRATION_INITIATED", "DETACHABLE"}:
             return "degraded"
-        if "NORMAL" in statuses:
-            return "normal"
-        return None
+        return "normal" if "NORMAL" in statuses else None
 
     def _get_disk_status_storage_tags(self, host_id: str) -> dict[str, list[str]]:
         """Return per-key extra tags adding ``ntnx_disk_status`` on host storage_* metrics."""
         status = self._aggregate_disk_status(self._disks_by_host.get(host_id, []))
         if not status:
             return {}
-
-        storage_keys = (
-            "freePhysicalStorageBytes",
-            "logicalStorageUsageBytes",
-            "storageCapacityBytes",
-            "storageUsageBytes",
-        )
-        return {key: [f"ntnx_disk_status:{status}"] for key in storage_keys}
+        keys = ("freePhysicalStorageBytes", "logicalStorageUsageBytes", "storageCapacityBytes", "storageUsageBytes")
+        return {key: [f"ntnx_disk_status:{status}"] for key in keys}
 
     def _build_stats_params(self) -> dict[str, str | int]:
         """Build the common query parameters for stats API calls."""
