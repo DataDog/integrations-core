@@ -177,13 +177,7 @@ class CallbackSet:
 
 
 class Callbacks:
-    """Container of CallbackSet instances. Dispatches each fire_* to all contained sets.
-
-    Usage::
-
-        callbacks = Callbacks([Logger(), MetricsEmitter()])
-        process = ReActProcess(agent, registry, callbacks=callbacks)
-    """
+    """Container of CallbackSet instances. Dispatches each fire_* to all contained sets."""
 
     def __init__(self, sets: list[CallbackSet] | None = None) -> None:
         self._sets: list[CallbackSet] = sets or []
