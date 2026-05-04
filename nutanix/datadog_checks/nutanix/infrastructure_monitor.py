@@ -230,8 +230,14 @@ class InfrastructureMonitor:
         memory_bytes = int(vm.get("memorySizeBytes") or 0)
         return num_sockets, num_cores_per_socket, num_threads_per_core, num_sockets * num_cores_per_socket, memory_bytes
 
+    def _extract_vm_disk_capacity_bytes(self, vm: dict) -> int:
+        """Sum allocated disk capacity across the VM's attached disks (config-sourced)."""
+        return sum(
+            int(get_nested(d, "backingInfo/diskSizeBytes") or 0) for d in vm.get("disks") or [] if isinstance(d, dict)
+        )
+
     def _report_vm_capacity_metrics(self, vm: dict, hostname: str, vm_tags: list[str]) -> None:
-        """Report VM capacity metrics (CPU and memory allocation)."""
+        """Report VM capacity metrics (CPU, memory, and disk allocation)."""
         num_sockets, num_cores_per_socket, num_threads_per_core, vcpus_allocated, memory_bytes = (
             self._extract_vm_capacity(vm)
         )
@@ -241,6 +247,9 @@ class InfrastructureMonitor:
         self.check.gauge("vm.cpu.threads_per_core", num_threads_per_core, hostname=hostname, tags=vm_tags)
         self.check.gauge("vm.cpu.vcpus_allocated", vcpus_allocated, hostname=hostname, tags=vm_tags)
         self.check.gauge("vm.memory.allocated_bytes", memory_bytes, hostname=hostname, tags=vm_tags)
+        self.check.gauge(
+            "vm.disk_capacity_bytes", self._extract_vm_disk_capacity_bytes(vm), hostname=hostname, tags=vm_tags
+        )
 
     def _report_cluster_basic_metrics(self, cluster: dict, cluster_tags: list[str]) -> None:
         """Report basic cluster metrics (counts)."""
