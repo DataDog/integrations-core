@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Awaitable, Callable
 from concurrent.futures import Executor, ThreadPoolExecutor
 from dataclasses import dataclass
-from typing import assert_never
+from typing import assert_never, cast
 
 from .exceptions import (
     FatalProcessingError,
@@ -22,7 +22,7 @@ from .exceptions import (
     SkipMessageError,
 )
 
-ErrorHandler = Callable[[Exception], Awaitable[None]]
+ErrorHandler = Callable[[OrchestratorHookError], Awaitable[None]]
 
 
 @dataclass
@@ -232,7 +232,7 @@ class EventBusOrchestrator(ABC):
         """
         pass
 
-    async def on_error(self, error: Exception) -> None:
+    async def on_error(self, error: OrchestratorHookError) -> None:
         """
         Handle an orchestrator-scoped failure.
 
@@ -251,7 +251,7 @@ class EventBusOrchestrator(ABC):
         """
         raise error
 
-    async def _apply_error_policy(self, wrapped_error: Exception, handler: ErrorHandler) -> None:
+    async def _apply_error_policy(self, wrapped_error: OrchestratorHookError, handler: ErrorHandler) -> None:
         """
         Routes ``wrapped_error`` through ``handler`` and applies the orchestrator's policy.
 
@@ -460,7 +460,7 @@ class EventBusOrchestrator(ABC):
         try:
             match processor:
                 case AsyncProcessor():
-                    await processor.process_message(message)
+                    await cast(AsyncProcessor, processor).process_message(message)
                 case SyncProcessor():
                     await asyncio.get_running_loop().run_in_executor(self._executor, processor.process_message, message)
                 case _:
