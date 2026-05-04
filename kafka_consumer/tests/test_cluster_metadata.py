@@ -1400,3 +1400,10 @@ def test_partition_out_of_sync_broker_id_tag(
         *(f'out_of_sync_broker_id:{b}' for b in expected_oos),
     ]
     aggregator.assert_metric('kafka.partition.under_replicated', value=expected_under, tags=expected_tags)
+    for metric in (
+        'kafka.partition.replicas',
+        'kafka.partition.isr',
+        'kafka.partition.size',
+        'kafka.partition.offline',
+    ):
+        aggregator.assert_metric(metric, tags=expected_tags)
