@@ -61,9 +61,7 @@ class PerfObject:
         # visible instances, in which case excluding it loses information.
         include_total = config.get('include_total', False)
         if not isinstance(include_total, bool):
-            raise ConfigTypeError(
-                f'Option `include_total` for performance object `{self.name}` must be a boolean'
-            )
+            raise ConfigTypeError(f'Option `include_total` for performance object `{self.name}` must be a boolean')
 
         # List of regex patterns to filter multi-instance counters AFTER ALL data
         # is collected and retrieved from PDH layer

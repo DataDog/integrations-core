@@ -79,9 +79,7 @@ def test_include_case_insensitive(aggregator, dd_run_check, mock_performance_obj
 
 def test_include_total(aggregator, dd_run_check, mock_performance_objects):
     mock_performance_objects({'Foo': (['_Total', 'baz'], {'Bar': [1, 2]})})
-    check = get_check(
-        {'metrics': {'Foo': {'name': 'foo', 'include_total': True, 'counters': [{'Bar': 'bar'}]}}}
-    )
+    check = get_check({'metrics': {'Foo': {'name': 'foo', 'include_total': True, 'counters': [{'Bar': 'bar'}]}}})
     dd_run_check(check)
 
     tags = ['instance:_Total']
@@ -97,9 +95,7 @@ def test_include_total(aggregator, dd_run_check, mock_performance_objects):
 
 def test_include_total_with_lowercase_instance(aggregator, dd_run_check, mock_performance_objects):
     mock_performance_objects({'Foo': (['_total', 'baz'], {'Bar': [1, 2]})})
-    check = get_check(
-        {'metrics': {'Foo': {'name': 'foo', 'include_total': True, 'counters': [{'Bar': 'bar'}]}}}
-    )
+    check = get_check({'metrics': {'Foo': {'name': 'foo', 'include_total': True, 'counters': [{'Bar': 'bar'}]}}})
     dd_run_check(check)
 
     tags = ['instance:_total']
