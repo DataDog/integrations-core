@@ -8,6 +8,7 @@ This check monitors [TLS][1] protocol versions, certificate expiration and valid
 
 1. Only TCP is supported.
 2. Only leaf / end user certificates are verified (not intermediate and root certificates).
+3. The `start_tls` option currently supports `postgres`, `mysql`, and `smtp`.
 
 **Minimum Agent version:** 6.12.0
 

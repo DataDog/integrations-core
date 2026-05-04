@@ -339,6 +339,70 @@ def test_mysql_ok(aggregator, instance_remote_mysql_valid):
     aggregator.assert_all_metrics_covered()
 
 
+class FakeSmtpSocket:
+    def __init__(self, response_bytes):
+        self._response_bytes = bytearray(response_bytes)
+        self.sent_commands = []
+
+    def recv(self, n):
+        data = self._response_bytes[:n]
+        self._response_bytes = self._response_bytes[n:]
+        return bytes(data)
+
+    def sendall(self, data):
+        self.sent_commands.append(data)
+
+
+def test_starttls_smtp_ok(instance_remote_ok):
+    c = TLSCheck('tls', {}, [instance_remote_ok])
+    check = TLSRemoteCheck(agent_check=c)
+    check.agent_check._start_tls = 'smtp'
+
+    sock = FakeSmtpSocket(
+        b'220 smtp.valid.mock ESMTP ready\r\n'
+        b'250-smtp.valid.mock\r\n'
+        b'250-STARTTLS\r\n'
+        b'250 SIZE 35882577\r\n'
+        b'220 2.0.0 Ready to start TLS\r\n'
+    )
+
+    check._switch_starttls(sock)
+
+    assert sock.sent_commands == [b'EHLO datadog-agent\r\n', b'STARTTLS\r\n']
+
+
+def test_starttls_smtp_missing_capability(instance_remote_ok):
+    c = TLSCheck('tls', {}, [instance_remote_ok])
+    check = TLSRemoteCheck(agent_check=c)
+    check.agent_check._start_tls = 'smtp'
+
+    sock = FakeSmtpSocket(
+        b'220 smtp.valid.mock ESMTP ready\r\n'
+        b'250-smtp.valid.mock\r\n'
+        b'250 PIPELINING\r\n'
+    )
+
+    with pytest.raises(Exception, match='SMTP endpoint does not support STARTTLS'):
+        check._switch_starttls(sock)
+
+
+def test_starttls_smtp_rejected(instance_remote_ok):
+    c = TLSCheck('tls', {}, [instance_remote_ok])
+    check = TLSRemoteCheck(agent_check=c)
+    check.agent_check._start_tls = 'smtp'
+
+    sock = FakeSmtpSocket(
+        b'220 smtp.valid.mock ESMTP ready\r\n'
+        b'250-smtp.valid.mock\r\n'
+        b'250-STARTTLS\r\n'
+        b'250 SIZE 35882577\r\n'
+        b'454 4.7.0 TLS not available\r\n'
+    )
+
+    with pytest.raises(Exception, match='SMTP endpoint rejected STARTTLS command'):
+        check._switch_starttls(sock)
+
+
 def test_valid_version_with_critical_certificate_validation_and_critial_certificate_expiration(
     aggregator, instance_remote_ok
 ):

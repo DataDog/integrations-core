@@ -155,8 +155,62 @@ class TLSRemoteCheck(object):
             # Read Mysql welcome message
             data = self._read_n_bytes_from_socket(sock, bytes_to_read)
             sock.sendall(packet)
+        elif protocol == "smtp":
+            self.log.debug('Switching connection to encrypted for %s protocol', protocol)
+
+            greeting = self._read_smtp_response(sock)
+            if self._get_smtp_response_code(greeting[0]) != 220:
+                raise Exception('SMTP endpoint returned an unexpected greeting: {}'.format(greeting[0]))
+
+            sock.sendall(b'EHLO datadog-agent\r\n')
+            capabilities = self._read_smtp_response(sock)
+            if self._get_smtp_response_code(capabilities[0]) != 250:
+                raise Exception('SMTP endpoint rejected EHLO command: {}'.format(capabilities[0]))
+
+            if not any(line[4:].strip().upper().startswith('STARTTLS') for line in capabilities if len(line) >= 4):
+                raise Exception('SMTP endpoint does not support STARTTLS')
+
+            sock.sendall(b'STARTTLS\r\n')
+            starttls_response = self._read_smtp_response(sock)
+            if self._get_smtp_response_code(starttls_response[0]) != 220:
+                raise Exception('SMTP endpoint rejected STARTTLS command: {}'.format(starttls_response[0]))
         else:
             raise Exception('Unsupported starttls protocol: ' + protocol)
+
+    def _read_line_from_socket(self, sock):
+        line = bytearray()
+        while True:
+            chunk = sock.recv(1)
+            if not chunk:
+                if line:
+                    break
+                raise Exception('Socket closed while reading SMTP response')
+
+            line.extend(chunk)
+            if chunk == b'\n':
+                break
+
+        return line.decode('ascii', errors='replace').rstrip('\r\n')
+
+    def _read_smtp_response(self, sock):
+        lines = []
+        while True:
+            line = self._read_line_from_socket(sock)
+            lines.append(line)
+            if len(line) < 4:
+                break
+
+            separator = line[3]
+            if separator != '-':
+                break
+
+        return lines
+
+    def _get_smtp_response_code(self, line):
+        if len(line) < 3 or not line[:3].isdigit():
+            raise Exception('SMTP endpoint returned malformed response: {}'.format(line))
+
+        return int(line[:3])
 
     def _read_n_bytes_from_socket(self, sock, n):
         buf = bytearray(n)
