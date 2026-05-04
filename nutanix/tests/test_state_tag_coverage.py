@@ -22,6 +22,7 @@ from tests.metrics import (
     HOST_BASIC_METRICS,
     HOST_CAPACITY_METRICS,
     HOST_STATS_METRICS_REQUIRED,
+    HOST_STORAGE_METRICS,
     VM_BASIC_METRICS,
     VM_CAPACITY_METRICS,
     VM_STATS_METRICS_REQUIRED,
@@ -33,13 +34,6 @@ pytestmark = [pytest.mark.unit]
 # the second host has only acropolisConnectionState. The new state tags are emitted only when
 # the source field is present in the API response (defensive on missing fields), so per-tag
 # coverage assertions scope to the entity instances whose source data is known to populate.
-
-HOST_STORAGE_METRICS = {
-    "nutanix.host.free_physical_storage",
-    "nutanix.host.logical_storage_usage",
-    "nutanix.host.storage_capacity",
-    "nutanix.host.storage_usage",
-}
 
 
 def _tag_keys(metric_obj):

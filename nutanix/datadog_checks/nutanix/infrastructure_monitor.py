@@ -9,7 +9,13 @@ from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING
 
 from datadog_checks.base import is_affirmative
-from datadog_checks.nutanix.metrics import CLUSTER_STATS_METRICS, HOST_STATS_METRICS, VM_STATS_METRICS
+from datadog_checks.nutanix.metrics import (
+    CLUSTER_STATS_METRICS,
+    DEGRADED_DISK_STATUSES,
+    HOST_STATS_METRICS,
+    HOST_STORAGE_STAT_KEYS,
+    VM_STATS_METRICS,
+)
 from datadog_checks.nutanix.resource_filters import should_collect_resource
 from datadog_checks.nutanix.utils import get_nested
 
@@ -130,7 +136,12 @@ class InfrastructureMonitor:
 
         try:
             self._build_disks_by_host_cache()
-            self.check.log.info("[%s] Cached disks for %d hosts", self._pc_label, len(self._disks_by_host))
+            self.check.log.info(
+                "[%s] Cached %d disks across %d hosts",
+                self._pc_label,
+                sum(len(disks) for disks in self._disks_by_host.values()),
+                len(self._disks_by_host),
+            )
         except Exception:
             self.check.log.exception("[%s] Failed to build disk cache", self._pc_label)
 
@@ -483,7 +494,7 @@ class InfrastructureMonitor:
             tags.append(f"ntnx_host_type:{host_type}")
 
         if maintenance_state := host.get("maintenanceState"):
-            tags.append(f"ntnx_maintenance_state:{maintenance_state}")
+            tags.append(f"ntnx_maintenance_state:{maintenance_state.lower()}")
 
         # hypervisor tags
         if hypervisor_name := get_nested(host, "hypervisor/fullName"):
@@ -491,7 +502,7 @@ class InfrastructureMonitor:
         if hypervisor_type := get_nested(host, "hypervisor/type"):
             tags.append(f"ntnx_hypervisor_type:{hypervisor_type}")
         if connection_state := get_nested(host, "hypervisor/acropolisConnectionState"):
-            tags.append(f"ntnx_connection_state:{connection_state}")
+            tags.append(f"ntnx_connection_state:{connection_state.lower()}")
 
         # Add category tags
         tags.extend(self.check.extract_category_tags(host))
@@ -507,7 +518,7 @@ class InfrastructureMonitor:
             tags.append(f"ntnx_cluster_name:{cluster_name}")
 
         if operation_mode := get_nested(cluster, "config/operationMode"):
-            tags.append(f"ntnx_operation_mode:{operation_mode}")
+            tags.append(f"ntnx_operation_mode:{operation_mode.lower()}")
 
         # Add category tags
         tags.extend(self.check.extract_category_tags(cluster))
@@ -538,8 +549,10 @@ class InfrastructureMonitor:
         is_agent_vm = is_affirmative(vm.get("isAgentVm"))
         tags.append(f"ntnx_is_agent_vm:{is_agent_vm}")
 
-        if power_state := vm.get("powerState"):
-            tags.append(f"ntnx_power_state:{power_state}")
+        # Always emit ntnx_power_state — fall back to "unknown" so dashboards/monitors that
+        # group by this tag do not silently drop VMs whose powerState is missing.
+        power_state = (vm.get("powerState") or "unknown").lower()
+        tags.append(f"ntnx_power_state:{power_state}")
 
         return tags
 
@@ -607,7 +620,7 @@ class InfrastructureMonitor:
     def _aggregate_disk_status(self, disks: list[dict]) -> str | None:
         """Return the worst disk status across ``disks``: degraded > normal."""
         statuses = {d.get("status") for d in disks if isinstance(d, dict) and d.get("status")}
-        if statuses & {"MARKED_FOR_REMOVAL_BUT_NOT_DETACHABLE", "DATA_MIGRATION_INITIATED", "DETACHABLE"}:
+        if statuses & DEGRADED_DISK_STATUSES:
             return "degraded"
         return "normal" if "NORMAL" in statuses else None
 
@@ -616,8 +629,7 @@ class InfrastructureMonitor:
         status = self._aggregate_disk_status(self._disks_by_host.get(host_id, []))
         if not status:
             return {}
-        keys = ("freePhysicalStorageBytes", "logicalStorageUsageBytes", "storageCapacityBytes", "storageUsageBytes")
-        return {key: [f"ntnx_disk_status:{status}"] for key in keys}
+        return {key: [f"ntnx_disk_status:{status}"] for key in HOST_STORAGE_STAT_KEYS}
 
     def _build_stats_params(self) -> dict[str, str | int]:
         """Build the common query parameters for stats API calls."""

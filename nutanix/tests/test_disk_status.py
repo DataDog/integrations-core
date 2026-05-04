@@ -3,22 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
-from types import SimpleNamespace
-
 import pytest
 
 from datadog_checks.nutanix import NutanixCheck
-from datadog_checks.nutanix.infrastructure_monitor import InfrastructureMonitor
 from tests.constants import HOST_NAME, HOST_TAGS
 
 pytestmark = [pytest.mark.unit]
-
-
-@pytest.fixture
-def monitor():
-    """Return an InfrastructureMonitor with a minimal check stub (sufficient for pure-logic tests)."""
-    check_stub = SimpleNamespace(pc_ip="10.0.0.197")
-    return InfrastructureMonitor(check_stub)
 
 
 @pytest.mark.parametrize(

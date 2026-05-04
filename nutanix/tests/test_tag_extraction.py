@@ -3,23 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
-from types import SimpleNamespace
-
 import pytest
 
-from datadog_checks.nutanix.infrastructure_monitor import InfrastructureMonitor
-
 pytestmark = [pytest.mark.unit]
-
-
-@pytest.fixture
-def monitor():
-    """Stub check is enough — extract_*_tags methods only call check.extract_category_tags."""
-    check_stub = SimpleNamespace(
-        pc_ip="10.0.0.197",
-        extract_category_tags=lambda _entity: [],
-    )
-    return InfrastructureMonitor(check_stub)
 
 
 # ---------- _extract_host_tags ----------
@@ -40,11 +26,11 @@ def test_host_tags_no_hypervisor_block(monitor):
 
 
 def test_host_tags_full(monitor):
-    """All recognized fields present produce all tags."""
+    """All recognized fields present produce all tags; state-tag VALUES are lowercased on emission."""
     host = {
         "hostName": "h1",
         "hostType": "HYPER_CONVERGED",
-        "maintenanceState": "entering_maintenance_mode",
+        "maintenanceState": "Entering_Maintenance_Mode",
         "hypervisor": {
             "fullName": "AHV 10.3",
             "type": "AHV",
@@ -59,7 +45,7 @@ def test_host_tags_full(monitor):
         "ntnx_maintenance_state:entering_maintenance_mode",
         "ntnx_hypervisor_name:AHV 10.3",
         "ntnx_hypervisor_type:AHV",
-        "ntnx_connection_state:DISCONNECTED",
+        "ntnx_connection_state:disconnected",
     }
 
 
@@ -91,26 +77,49 @@ def test_cluster_tags_omits_operation_mode_when_config_present_but_empty(monitor
 
 
 def test_cluster_tags_with_operation_mode(monitor):
+    """operationMode is lowercased on emission."""
     tags = monitor._extract_cluster_tags({"name": "c1", "config": {"operationMode": "STAND_ALONE"}})
-    assert "ntnx_operation_mode:STAND_ALONE" in tags
+    assert "ntnx_operation_mode:stand_alone" in tags
 
 
 # ---------- _extract_vm_tags ----------
 
 
-def test_vm_tags_paused_power_state(monitor):
-    """PAUSED is preserved verbatim as the tag value."""
+def test_vm_tags_power_state_lowercased(monitor):
+    """PAUSED is lowercased on emission."""
     tags = monitor._extract_vm_tags({"name": "vm1", "powerState": "PAUSED"})
-    assert "ntnx_power_state:PAUSED" in tags
+    assert "ntnx_power_state:paused" in tags
 
 
-def test_vm_tags_no_power_state(monitor):
-    """A VM without powerState produces no ntnx_power_state tag (does not raise)."""
+def test_vm_tags_no_power_state_falls_back_to_unknown(monitor):
+    """A VM without powerState gets ntnx_power_state:unknown so dashboards/monitors do not lose rows."""
     tags = monitor._extract_vm_tags({"name": "vm1"})
-    assert all("ntnx_power_state" not in t for t in tags)
+    assert "ntnx_power_state:unknown" in tags
 
 
-def test_vm_tags_empty_power_state(monitor):
-    """Empty-string powerState should not produce a tag."""
+def test_vm_tags_empty_power_state_falls_back_to_unknown(monitor):
+    """Empty-string powerState falls back to unknown for the same reason."""
     tags = monitor._extract_vm_tags({"name": "vm1", "powerState": ""})
-    assert all("ntnx_power_state" not in t for t in tags)
+    assert "ntnx_power_state:unknown" in tags
+
+
+# ---------- _extract_vm_disk_capacity_bytes ----------
+
+
+@pytest.mark.parametrize(
+    "vm,expected",
+    [
+        ({}, 0),
+        ({"disks": None}, 0),
+        ({"disks": []}, 0),
+        ({"disks": [{"backingInfo": {"diskSizeBytes": 100}}]}, 100),
+        ({"disks": [{"backingInfo": {"diskSizeBytes": 100}}, {"backingInfo": {"diskSizeBytes": 50}}]}, 150),
+        # Defensive: missing backingInfo / diskSizeBytes contributes zero, doesn't raise.
+        ({"disks": [{"backingInfo": {"diskSizeBytes": 100}}, {"backingInfo": {}}]}, 100),
+        ({"disks": [{"backingInfo": {"diskSizeBytes": 100}}, {}]}, 100),
+        # Non-dict entries are skipped, not raised.
+        ({"disks": [None, "junk", 42, {"backingInfo": {"diskSizeBytes": 50}}]}, 50),
+    ],
+)
+def test_extract_vm_disk_capacity_bytes(monitor, vm, expected):
+    assert monitor._extract_vm_disk_capacity_bytes(vm) == expected

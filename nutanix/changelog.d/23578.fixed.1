@@ -1,0 +1,1 @@
+Lowercase state tag values (`ntnx_connection_state`, `ntnx_operation_mode`, `ntnx_power_state`) at emission to match Datadog's ingestion-time normalization, and emit `ntnx_power_state:unknown` when the source field is missing so dashboards/monitors that group by this tag do not silently drop those VMs.

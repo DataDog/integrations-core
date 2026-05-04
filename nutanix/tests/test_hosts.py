@@ -7,7 +7,7 @@ import pytest
 
 from datadog_checks.nutanix import NutanixCheck
 from tests.constants import HOST_NAME, HOST_TAGS
-from tests.metrics import HOST_STATS_METRICS_REQUIRED
+from tests.metrics import HOST_STATS_METRICS_REQUIRED, HOST_STORAGE_METRICS
 
 pytestmark = [pytest.mark.unit]
 
@@ -23,15 +23,8 @@ def test_host_stats_metrics(dd_run_check, aggregator, mock_instance, mock_http_g
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 
-    storage_metrics = {
-        "nutanix.host.free_physical_storage",
-        "nutanix.host.logical_storage_usage",
-        "nutanix.host.storage_capacity",
-        "nutanix.host.storage_usage",
-    }
-
     for metric in HOST_STATS_METRICS_REQUIRED:
-        expected_tags = HOST_TAGS + ['ntnx_disk_status:normal'] if metric in storage_metrics else HOST_TAGS
+        expected_tags = HOST_TAGS + ['ntnx_disk_status:normal'] if metric in HOST_STORAGE_METRICS else HOST_TAGS
         aggregator.assert_metric(metric, at_least=1, tags=expected_tags, hostname=HOST_NAME)
 
 
