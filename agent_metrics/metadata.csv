@@ -1,4 +1,4 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
-datadog.agent.python.version,gauge,,,,The Python version used by the Agent. The metric is tagged with the python_version.,0,agent_metrics,py version,
-datadog.agent.running,gauge,,,,Shows a value of 1 if the Agent is reporting to Datadog.,0,agent_metrics,running,
-datadog.agent.started,count,,,,A count sent with a value of 1 when the Agent starts (available in v6.12+).,0,agent_metrics,started,
+datadog.agent.python.version,gauge,,,,"A value of 1, tagged with python_version.",0,agent_metrics,py version,
+datadog.agent.running,gauge,,,,"A value of 1 if the Agent is running and reporting to Datadog, tagged with version (the Agent version).",0,agent_metrics,running,
+datadog.agent.started,count,,,,A count of 1 each time the Agent starts.,0,agent_metrics,started,
