@@ -807,12 +807,32 @@ class TestVault:
 
 
 @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
-def test_x_vault_request_header_is_set(instance, use_openmetrics, mock_openmetrics_http):
+def test_x_vault_request_header_is_set(dd_run_check, instance, use_openmetrics, mock_openmetrics_http):
     instance = instance()
     instance['use_openmetrics'] = use_openmetrics
     c = Vault(Vault.CHECK_NAME, {}, [instance])
-    # OM-v2 sets the header in __init__; OM-v1 sets it in parse_config (a check_initializations callback).
-    if not use_openmetrics:
-        c.parse_config()
 
-    assert mock_openmetrics_http.options['headers'].get('X-Vault-Request') == 'true'
+    def mock_requests_get(url, *args, **kwargs):
+        assert mock_openmetrics_http.options['headers'].get('X-Vault-Request') == 'true'
+        if url == instance['api_url'] + '/sys/leader':
+            return MockHTTPResponse(
+                json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
+            )
+        if url == instance['api_url'] + '/sys/health':
+            return MockHTTPResponse(
+                json_data={
+                    'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
+                    'cluster_name': 'vault-cluster-f5f44063',
+                    'initialized': True,
+                    'replication_dr_mode': 'disabled',
+                    'replication_performance_mode': 'disabled',
+                    'sealed': False,
+                    'server_time_utc': 1529357080,
+                    'standby': False,
+                    'version': '0.10.2',
+                }
+            )
+        return MockHTTPResponse(content='', status_code=200)
+
+    mock_openmetrics_http.get.side_effect = mock_requests_get
+    dd_run_check(c)
