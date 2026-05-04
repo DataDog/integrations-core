@@ -39,6 +39,12 @@ def monitor():
         # and must not be classified as either degraded or normal.
         ([{"status": "SOME_FUTURE_STATUS"}], None),
         ([{"status": "NORMAL"}, {"status": "SOME_FUTURE_STATUS"}], "normal"),
+        # Malformed inputs: non-dict entries from a misbehaving API are skipped, not raised.
+        ([None], None),
+        ([None, None], None),
+        ("not-a-list-but-iterable", None),
+        ([{"status": "NORMAL"}, None, "weird-string", 42], "normal"),
+        ([{"status": "DETACHABLE"}, None], "degraded"),
     ],
 )
 def test_aggregate_disk_status(monitor, disks, expected):
@@ -84,6 +90,24 @@ def test_build_disks_by_host_cache_skips_disks_without_node_ext_id(monitor, mock
 
     assert set(monitor._disks_by_host) == {"host-a", "host-b"}
     assert "" not in monitor._disks_by_host
+
+
+def test_build_disks_by_host_cache_skips_non_dict_entries(monitor, mocker):
+    """Malformed API responses (None, strings, ints) must not crash the cache build."""
+    mocker.patch.object(
+        monitor,
+        "_list_all_disks",
+        return_value=[
+            None,
+            "not-a-disk",
+            42,
+            {"status": "NORMAL", "nodeExtId": "host-a"},
+            None,
+        ],
+    )
+    monitor._build_disks_by_host_cache()
+
+    assert monitor._disks_by_host == {"host-a": [{"status": "NORMAL", "nodeExtId": "host-a"}]}
 
 
 def test_disks_endpoint_failure_still_emits_storage_metrics_without_tag(

@@ -590,12 +590,14 @@ class InfrastructureMonitor:
     def _build_disks_by_host_cache(self) -> None:
         """Fetch all disks once per run and group them by node extId."""
         for disk in self._list_all_disks():
+            if not isinstance(disk, dict):
+                continue
             if node_id := disk.get("nodeExtId"):
                 self._disks_by_host.setdefault(node_id, []).append(disk)
 
     def _aggregate_disk_status(self, disks: list[dict]) -> str | None:
         """Return the worst disk status across ``disks``: degraded > normal."""
-        statuses = {d.get("status") for d in disks if d.get("status")}
+        statuses = {d.get("status") for d in disks if isinstance(d, dict) and d.get("status")}
         if statuses & {"MARKED_FOR_REMOVAL_BUT_NOT_DETACHABLE", "DATA_MIGRATION_INITIATED", "DETACHABLE"}:
             return "degraded"
         return "normal" if "NORMAL" in statuses else None
