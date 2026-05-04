@@ -1,0 +1,5 @@
+ad_identifiers:
+  - kumahq/kuma-cp
+discovery: {}
+init_config:
+instances: []

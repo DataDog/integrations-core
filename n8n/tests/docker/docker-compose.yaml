@@ -3,6 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: n8nio/n8n
     container_name: n8n-test
     ports:
       - "5678:5678"

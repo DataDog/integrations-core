@@ -11,6 +11,7 @@ class PulsarCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = 'pulsar'
 
     DEFAULT_METRIC_LIMIT = 0
+    DISCOVERY_PORT_HINTS = [8080]
 
     def get_default_config(self):
         return {

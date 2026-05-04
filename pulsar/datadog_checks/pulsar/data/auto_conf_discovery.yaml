@@ -1,0 +1,6 @@
+ad_identifiers:
+  - apachepulsar/pulsar
+  - pulsar
+discovery: {}
+init_config:
+instances: []

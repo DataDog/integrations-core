@@ -31,6 +31,7 @@ class KumaCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = "kuma"
 
     DEFAULT_METRIC_LIMIT = 0
+    DISCOVERY_PORT_HINTS = [5680]
 
     def __init__(self, name, init_config, instances=None):
         super(KumaCheck, self).__init__(name, init_config, instances)

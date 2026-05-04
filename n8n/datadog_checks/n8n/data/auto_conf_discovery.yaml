@@ -1,0 +1,5 @@
+ad_identifiers:
+  - n8nio/n8n
+discovery: {}
+init_config:
+instances: []

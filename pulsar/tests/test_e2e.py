@@ -23,3 +23,13 @@ def test_check(dd_agent_check, instance):
         aggregator.assert_metric(metric, at_least=0)
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_e2e_discovery(dd_agent_check):
+    aggregator = dd_agent_check(
+        {"init_config": {}, "instances": []},
+        rate=True,
+        discovery_min_instances=1,
+        discovery_timeout=30,
+    )
+    aggregator.assert_service_check('pulsar.openmetrics.health', ServiceCheck.OK)
