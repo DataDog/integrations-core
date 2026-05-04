@@ -19,6 +19,7 @@ from ddev.ai.react.callbacks import CallbackSet
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.registry import ToolRegistry
+from ddev.event_bus.exceptions import MessageProcessingError, ProcessorHookError
 from ddev.event_bus.orchestrator import AsyncProcessor, BaseMessage
 
 
@@ -255,12 +256,12 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         """Emit PhaseTrigger to unblock dependent phases."""
         self.submit_message(
             PhaseTrigger(
-                id=f"{self._phase_id}_finished_{message.id}",
+                id=f"{self._phase_id}_finished",
                 phase_id=self._phase_id,
             )
         )
 
-    async def on_error(self, message: PhaseTrigger, error: Exception) -> None:
+    async def on_error(self, error: MessageProcessingError | ProcessorHookError) -> None:
         """Write failed checkpoint and emit PhaseFailedMessage."""
         try:
             self._checkpoint_manager.write_phase_checkpoint(
@@ -269,7 +270,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
                     "status": "failed",
                     "started_at": self._started_at.isoformat() if self._started_at else None,
                     "finished_at": datetime.now(UTC).isoformat(),
-                    "error": str(error),
+                    "error": str(error.original_exception),
                 },
             )
         except Exception:
@@ -277,8 +278,8 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         finally:
             self.submit_message(
                 PhaseFailedMessage(
-                    id=f"{self._phase_id}_failed_{message.id}",
+                    id=f"{self._phase_id}_failed",
                     phase_id=self._phase_id,
-                    error=str(error),
+                    error=str(error.original_exception),
                 )
             )
