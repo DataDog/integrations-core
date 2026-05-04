@@ -43,7 +43,7 @@ permissions:
 env:
   # Default ddev version when callers don't pass `ddev-version`. Tracked by Renovate.
   # renovate: datasource=pypi depName=ddev
-  DEFAULT_DDEV_VERSION: "14.3.2"
+  DEFAULT_DDEV_VERSION: "16.0.0"
 
 jobs:
   prepare:
