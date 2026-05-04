@@ -263,15 +263,15 @@ QUERY_ERRORS_RAISED = {
 }
 
 
-def show_replica_status_query(version, is_mariadb, channel=''):
+def show_replica_status_query(version, is_mariadb: bool, channel: str = '') -> tuple[str, tuple[str, ...]]:
     if version.version_compatible((10, 5, 1)) or not is_mariadb and version.version_compatible((8, 0, 22)):
         base_query = "SHOW REPLICA STATUS"
     else:
         base_query = "SHOW SLAVE STATUS"
     if channel and not is_mariadb:
-        return "{0} FOR CHANNEL '{1}';".format(base_query, channel)
+        return ("{0} FOR CHANNEL %s".format(base_query), (channel,))
     else:
-        return "{0};".format(base_query)
+        return ("{0}".format(base_query), ())
 
 
 def get_indexes_query(version, is_mariadb, placeholders):

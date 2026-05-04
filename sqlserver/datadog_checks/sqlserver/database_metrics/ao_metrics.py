@@ -4,6 +4,7 @@
 
 from typing import List
 
+from datadog_checks.sqlserver.const import ENGINE_EDITION_AZURE_MANAGED_INSTANCE
 from datadog_checks.sqlserver.utils import is_azure_database
 
 from .base import SqlserverDatabaseMetricsBase
@@ -89,6 +90,10 @@ class SqlserverAoMetrics(SqlserverDatabaseMetricsBase):
             f"include_ao_metrics={self.include_ao_metrics})"
         )
 
+    def _supports_secondary_lag_seconds(self) -> bool:
+        # Managed Instance supports this DMV column while reporting a non-boxed ProductMajorVersion.
+        return self.major_version >= 13 or self.engine_edition == ENGINE_EDITION_AZURE_MANAGED_INSTANCE
+
     def __get_query_ao_availability_groups(self) -> dict:
         """
         Construct the sys.availability_groups QueryExecutor configuration based on the SQL Server major version
@@ -168,7 +173,7 @@ class SqlserverAoMetrics(SqlserverDatabaseMetricsBase):
         }
 
         # Include metrics based on version
-        if self.major_version >= 13:
+        if self._supports_secondary_lag_seconds():
             column_definitions_metrics["DRS.secondary_lag_seconds"] = {
                 "name": "ao.secondary_lag_seconds",
                 "type": "gauge",
