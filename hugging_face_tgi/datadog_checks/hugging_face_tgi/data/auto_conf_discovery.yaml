@@ -1,5 +1,0 @@
-ad_identifiers:
-  - ghcr.io/huggingface/text-generation-inference
-discovery: {}
-init_config:
-instances: []

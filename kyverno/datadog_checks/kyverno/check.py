@@ -10,7 +10,6 @@ from .metrics import METRIC_MAP, RENAME_LABELS_MAP
 class KyvernoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     DEFAULT_METRIC_LIMIT = 0
     __NAMESPACE__ = 'kyverno'
-    DISCOVERY_PORT_HINTS = [8000]
 
     def get_default_config(self):
         return {

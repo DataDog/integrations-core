@@ -10,7 +10,6 @@ class NvidiaNIMCheck(OpenMetricsBaseCheckV2):
     DEFAULT_METRIC_LIMIT = 0
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = 'nvidia_nim'
-    DISCOVERY_PORT_HINTS = [8000]
 
     def get_default_config(self):
         return {

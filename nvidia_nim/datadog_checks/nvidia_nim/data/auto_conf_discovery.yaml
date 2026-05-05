@@ -1,5 +1,0 @@
-ad_identifiers:
-  - nvcr.io/nim
-discovery: {}
-init_config:
-instances: []

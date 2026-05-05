@@ -10,7 +10,6 @@ class AerospikeCheckV2(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'aerospike'
 
     DEFAULT_METRIC_LIMIT = 0
-    DISCOVERY_PORT_HINTS = [9145]
 
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)

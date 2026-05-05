@@ -1,5 +1,0 @@
-ad_identifiers:
-  - public.ecr.aws/karpenter/controller
-discovery: {}
-init_config:
-instances: []

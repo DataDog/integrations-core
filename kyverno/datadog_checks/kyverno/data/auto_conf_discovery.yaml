@@ -1,5 +1,0 @@
-ad_identifiers:
-  - ghcr.io/kyverno/kyverno
-discovery: {}
-init_config:
-instances: []

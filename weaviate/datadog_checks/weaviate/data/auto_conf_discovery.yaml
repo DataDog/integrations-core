@@ -1,5 +1,0 @@
-ad_identifiers:
-  - semitechnologies/weaviate
-discovery: {}
-init_config:
-instances: []

@@ -1,5 +1,0 @@
-ad_identifiers:
-  - calico/node
-discovery: {}
-init_config:
-instances: []

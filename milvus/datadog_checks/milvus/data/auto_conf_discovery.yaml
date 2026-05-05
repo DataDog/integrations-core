@@ -1,5 +1,0 @@
-ad_identifiers:
-  - milvusdb/milvus
-discovery: {}
-init_config:
-instances: []

@@ -1,5 +1,0 @@
-ad_identifiers:
-  - argoproj/argo-rollouts
-discovery: {}
-init_config:
-instances: []
