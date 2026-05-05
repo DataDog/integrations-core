@@ -1,7 +1,7 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
 external_dns.controller.last_sync,gauge,,second,,Timestamp of last successful sync with the DNS provider,0,external_dns,controller last sync timestamp,,
-external_dns.controller.verified_a_records,gauge,,record,,Number of DNS A-records that exist both in source and registry (before v1.18),0,external_dns,verified a records,,
-external_dns.controller.verified_aaaa_records,gauge,,record,,Number of DNS AAAA-records that exist both in source and registry (before v1.18),0,external_dns,verified aaaa records,,
+external_dns.controller.verified_a_records,gauge,,record,,Number of DNS A records that exist both in source and registry (before v1.18),0,external_dns,verified a records,,
+external_dns.controller.verified_aaaa_records,gauge,,record,,Number of DNS AAAA records that exist both in source and registry (before v1.18),0,external_dns,verified aaaa records,,
 external_dns.controller.verified_records,gauge,,record,,Number of DNS records that exist both in source and registry (v1.18+),0,external_dns,verified records,,
 external_dns.http.request.duration_seconds.count,count,,request,,Total count of HTTP requests (v1.18+),0,external_dns,http request count,,
 external_dns.http.request.duration_seconds.quantile,gauge,,second,,HTTP request latency quantiles (v1.18+),0,external_dns,http request duration,,

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Get real-time metrics from External DNS to visualize and monitor DNS synchronization. Track source and registry records, controller status, and HTTP request latencies.
+Get real-time metrics from External DNS to visualize and monitor DNS synchronization, including source and registry records, controller status, and HTTP request latencies.
 
 For more information about External DNS, see the [GitHub repo][1].
 
@@ -109,8 +109,8 @@ To enable the legacy mode of this OpenMetrics-based check, replace `openmetrics_
 **Notes**:
 
 - The shipped `external_dns.d/auto_conf.yaml` file enables the `prometheus_url` option by default for legacy mode.
-- The `externaldns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the Datadog Agent that is polling the information using the service discovery.
-- For Deployments, add the annotations to the metadata of the template's specifications. Do not add them at the outer specification level.
+- The `externaldns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the Datadog Agent that is polling the information using the Autodiscovery.
+- For Deployments, add the annotations to the metadata of the template's specification. Do not add them at the outer specification level.
 
 ### Validation
 
@@ -136,7 +136,7 @@ The integration supports two modes that handle Prometheus metric types different
 | summary.sum | gauge | monotonic_count |
 | summary.count | gauge | monotonic_count |
 
-**Notes:**:
+**Notes**:
 
 - Counter metrics with zero values are not emitted by the latest mode on the first scrape (requires a delta > 0).
 - The `metadata.csv` reflects the latest mode behavior as the reference.
