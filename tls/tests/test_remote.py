@@ -359,7 +359,11 @@ def test_starttls_smtp_ok(instance_remote_ok):
     check.agent_check._start_tls = 'smtp'
 
     sock = FakeSmtpSocket(
-        b'220 smtp.valid.mock ESMTP ready\r\n250-smtp.valid.mock\r\n250-STARTTLS\r\n250 SIZE 35882577\r\n220 2.0.0 Ready to start TLS\r\n'
+        b'220 smtp.valid.mock ESMTP ready\r\n'
+        b'250-smtp.valid.mock\r\n'
+        b'250-STARTTLS\r\n'
+        b'250 SIZE 35882577\r\n'
+        b'220 2.0.0 Ready to start TLS\r\n'
     )
 
     check._switch_starttls(sock)
@@ -374,7 +378,11 @@ def test_starttls_smtp_custom_ehlo_hostname(instance_remote_ok):
     check.agent_check._start_tls = 'smtp'
 
     sock = FakeSmtpSocket(
-        b'220 smtp.valid.mock ESMTP ready\r\n250-smtp.valid.mock\r\n250-STARTTLS\r\n250 SIZE 35882577\r\n220 2.0.0 Ready to start TLS\r\n'
+        b'220 smtp.valid.mock ESMTP ready\r\n'
+        b'250-smtp.valid.mock\r\n'
+        b'250-STARTTLS\r\n'
+        b'250 SIZE 35882577\r\n'
+        b'220 2.0.0 Ready to start TLS\r\n'
     )
 
     check._switch_starttls(sock)
