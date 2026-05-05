@@ -1,1 +1,1 @@
-[mysql] Fix SQL_TABLES query to use single quotes for ANSI_QUOTES compatibility
+Fix schema collection query failure when MySQL ANSI_QUOTES sql_mode is enabled
