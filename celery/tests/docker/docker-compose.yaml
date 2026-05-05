@@ -32,8 +32,7 @@ services:
     command: celery -A tasks worker --loglevel=DEBUG; celery -A tasks events --dump
 
   flower:
-    build:
-      context: ./proj
+    image: mher/flower
     depends_on:
       - redis-standalone
     ports:
@@ -41,7 +40,7 @@ services:
     networks:
       - network1
     restart: always
-    command: celery -A tasks flower --port=5555
+    command: celery --broker=redis://:devops-best-friend@redis-standalone:6379/0 flower --port=5555
 
 networks:
   network1:

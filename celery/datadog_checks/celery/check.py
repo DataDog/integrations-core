@@ -12,6 +12,7 @@ class CeleryCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'celery.flower'
 
     DEFAULT_METRIC_LIMIT = 0  # No limit on the number of metrics collected
+    DISCOVERY_PORT_HINTS = [5555]
 
     def __init__(self, name, init_config, instances):
         super(CeleryCheck, self).__init__(name, init_config, instances)
