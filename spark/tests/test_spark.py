@@ -732,9 +732,20 @@ def test_yarn(aggregator, dd_run_check, mock_http):
 
 
 @pytest.mark.unit
-def test_auth_yarn():
+def test_auth_yarn_config():
     c = SparkCheck('spark', {}, [YARN_AUTH_CONFIG])
     assert c.http.options['auth'] == (TEST_USERNAME, TEST_PASSWORD)
+
+
+@pytest.mark.unit
+def test_auth_yarn(aggregator, dd_run_check, mock_http):
+    mock_http.get.side_effect = yarn_requests_get_mock
+    c = SparkCheck('spark', {}, [YARN_AUTH_CONFIG])
+    dd_run_check(c)
+    for sc in aggregator.service_checks(YARN_SERVICE_CHECK):
+        assert sc.status == SparkCheck.OK
+    for sc in aggregator.service_checks(SPARK_SERVICE_CHECK):
+        assert sc.status == SparkCheck.OK
 
 
 @pytest.mark.unit
