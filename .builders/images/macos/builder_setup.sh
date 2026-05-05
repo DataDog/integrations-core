@@ -2,7 +2,6 @@
 
 set -euxo pipefail
 
-"${DD_PYTHON3}" -m pip install --no-warn-script-location --upgrade pip
 "${DD_PYTHON3}" -m pip install --no-warn-script-location virtualenv
 "${DD_PYTHON3}" -m virtualenv py3
 
