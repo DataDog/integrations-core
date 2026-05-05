@@ -10,6 +10,7 @@ from datadog_checks.temporal.metrics import METRIC_MAP
 class TemporalCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = 'temporal.server'
     DEFAULT_METRIC_LIMIT = 0
+    DISCOVERY_PORT_HINTS = [8000]
 
     def get_default_config(self):
         return {

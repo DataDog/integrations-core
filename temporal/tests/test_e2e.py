@@ -28,3 +28,13 @@ def test_e2e_service_checks(dd_agent_check, instance):
         status=TemporalCheck.OK,
         tags=TAGS,
     )
+
+
+def test_e2e_discovery(dd_agent_check):
+    aggregator = dd_agent_check(
+        {"init_config": {}, "instances": []},
+        rate=True,
+        discovery_min_instances=1,
+        discovery_timeout=30,
+    )
+    aggregator.assert_service_check("temporal.server.openmetrics.health", status=TemporalCheck.OK)

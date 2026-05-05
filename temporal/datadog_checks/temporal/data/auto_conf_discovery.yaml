@@ -1,5 +1,6 @@
 ad_identifiers:
-  - temporalio/server
+  - temporalio/auto-setup
+  - auto-setup
 discovery: {}
 init_config:
 instances: []
