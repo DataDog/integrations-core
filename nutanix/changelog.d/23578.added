@@ -1,6 +1,1 @@
-Add tags so you can exclude unavailable or degraded resources from dashboards and monitors:
-
-  * `ntnx_maintenance_state` and `ntnx_connection_state` on host metrics
-  * `ntnx_power_state` on VM metrics
-  * `ntnx_operation_mode` on cluster metrics
-  * `ntnx_disk_status` on host storage metrics
+Add tags to exclude unavailable or degraded resources from dashboards and monitors: `ntnx_maintenance_state` and `ntnx_connection_state` on hosts, `ntnx_power_state` on VMs, `ntnx_operation_mode` on clusters, and `ntnx_disk_status` on host storage metrics.
