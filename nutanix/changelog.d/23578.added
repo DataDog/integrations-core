@@ -1,4 +1,4 @@
-Add resource state tags on host, VM, cluster, and host storage metrics so capacity-planning queries can scope to only healthy, available resources:
+Add tags so you can exclude unavailable or degraded resources from dashboards and monitors:
 
   * `ntnx_maintenance_state` and `ntnx_connection_state` on host metrics
   * `ntnx_power_state` on VM metrics
