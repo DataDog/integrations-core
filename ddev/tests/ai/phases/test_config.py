@@ -171,6 +171,13 @@ def test_flow_config_dependency_not_scheduled_in_flow():
         FlowConfig.model_validate(raw)
 
 
+def test_flow_config_duplicate_phase_raises():
+    raw = _minimal_config()
+    raw["flow"] = [{"phase": "p1"}, {"phase": "p1"}]
+    with pytest.raises(ValidationError, match="Duplicate phase"):
+        FlowConfig.model_validate(raw)
+
+
 def test_flow_config_unknown_agent_in_phase():
     raw = _minimal_config()
     raw["phases"]["p1"]["agent"] = "nonexistent"
@@ -383,3 +390,10 @@ def test_flow_config_acyclic_chain_ok():
     ]
     config = FlowConfig.model_validate(raw)
     assert len(config.flow) == 3
+
+
+def test_flow_config_self_dependency_raises():
+    raw = _minimal_config()
+    raw["flow"] = [{"phase": "p1", "dependencies": ["p1"]}]
+    with pytest.raises(ValidationError, match="Cycle detected"):
+        FlowConfig.model_validate(raw)
