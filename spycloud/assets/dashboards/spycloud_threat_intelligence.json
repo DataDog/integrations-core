@@ -1487,7 +1487,7 @@
                     {
                         "id": 6044605789288649,
                         "definition": {
-                            "title": "Critical Security Signals",
+                            "title": "Critical security signals",
                             "type": "toplist",
                             "requests": [
                                 {
@@ -1717,7 +1717,7 @@
                     {
                         "id": 1784805821887938,
                         "definition": {
-                            "title": "High Security Signals",
+                            "title": "High security signals",
                             "type": "toplist",
                             "requests": [
                                 {
@@ -1788,7 +1788,7 @@
                     {
                         "id": 6427496511993500,
                         "definition": {
-                            "title": "Medium Security Signals",
+                            "title": "Medium security signals",
                             "type": "toplist",
                             "requests": [
                                 {

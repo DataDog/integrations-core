@@ -5,7 +5,7 @@ This integration collects the following indicator types:
 - IP
 - Domain
 
-Integrate SpyCloud with Datadog to enrich your security logs with threat intelligence and analyze matched IOCs through pre-built dashboards. The integration also feeds Cloud SIEM detection rules.
+Integrate SpyCloud with Datadog to enrich your security logs with threat intelligence and analyze matched indicators of compromise (IOCs) through pre-built dashboards. The integration also feeds Cloud SIEM detection rules.
 
 ## Setup
 
