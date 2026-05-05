@@ -12,6 +12,7 @@ from ddev.ai.phases.config import (
     FlowConfigError,
     PhaseConfig,
     TaskConfig,
+    _detect_cycle,
 )
 
 # ---------------------------------------------------------------------------
@@ -295,3 +296,90 @@ def test_from_yaml_invalid_yaml(tmp_path):
 def test_from_yaml_missing_file(tmp_path):
     with pytest.raises(FlowConfigError, match="Failed to load"):
         FlowConfig.from_yaml(tmp_path / "nonexistent.yaml", tmp_path)
+
+
+# ---------------------------------------------------------------------------
+# _detect_cycle
+# ---------------------------------------------------------------------------
+
+
+def test_detect_cycle_no_nodes():
+    assert _detect_cycle({}) is None
+
+
+def test_detect_cycle_no_edges():
+    assert _detect_cycle({"a": [], "b": [], "c": []}) is None
+
+
+def test_detect_cycle_direct_self_loop():
+    cycle = _detect_cycle({"a": ["a"]})
+    assert cycle == ["a", "a"]
+
+
+def test_detect_cycle_two_node_cycle():
+    cycle = _detect_cycle({"a": ["b"], "b": ["a"]})
+    assert cycle is not None
+    assert cycle[0] == cycle[-1]
+    assert set(cycle) == {"a", "b"}
+
+
+def test_detect_cycle_partial_cycle():
+    # d → a → b → c → a  (d is not part of the cycle)
+    cycle = _detect_cycle({"d": ["a"], "a": ["b"], "b": ["c"], "c": ["a"]})
+    assert cycle is not None
+    assert cycle[0] == cycle[-1]
+    assert set(cycle[:-1]) == {"a", "b", "c"}
+
+
+def test_detect_cycle_acyclic():
+    assert _detect_cycle({"d": ["a", "b"], "a": ["c"], "b": ["c"], "c": []}) is None
+
+
+# ---------------------------------------------------------------------------
+# FlowConfig cycle detection via model_validate
+# ---------------------------------------------------------------------------
+
+
+def _three_phase_config() -> dict:
+    agent = {"tools": []}
+    task = {"name": "t", "prompt": "Do it."}
+    return {
+        "agents": {"writer": agent},
+        "phases": {
+            "p1": {"agent": "writer", "tasks": [task]},
+            "p2": {"agent": "writer", "tasks": [task]},
+            "p3": {"agent": "writer", "tasks": [task]},
+        },
+    }
+
+
+def test_flow_config_direct_cycle_raises():
+    raw = _three_phase_config()
+    raw["flow"] = [
+        {"phase": "p1", "dependencies": ["p2"]},
+        {"phase": "p2", "dependencies": ["p1"]},
+    ]
+    with pytest.raises(ValidationError, match="Cycle detected"):
+        FlowConfig.model_validate(raw)
+
+
+def test_flow_config_three_node_cycle_raises():
+    raw = _three_phase_config()
+    raw["flow"] = [
+        {"phase": "p1", "dependencies": ["p3"]},
+        {"phase": "p2", "dependencies": ["p1"]},
+        {"phase": "p3", "dependencies": ["p2"]},
+    ]
+    with pytest.raises(ValidationError, match="Cycle detected"):
+        FlowConfig.model_validate(raw)
+
+
+def test_flow_config_acyclic_chain_ok():
+    raw = _three_phase_config()
+    raw["flow"] = [
+        {"phase": "p1"},
+        {"phase": "p2", "dependencies": ["p1"]},
+        {"phase": "p3", "dependencies": ["p1"]},
+    ]
+    config = FlowConfig.model_validate(raw)
+    assert len(config.flow) == 3

@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from __future__ import annotations
+
 from pathlib import Path
 
 import yaml
@@ -14,6 +16,34 @@ class FlowConfigError(Exception):
     """Wraps Pydantic ValidationError or YAML errors with a user-friendly message."""
 
 
+def _detect_cycle(dependency_map: dict[str, list[str]]) -> list[str] | None:
+    """Return the first cycle found as an ordered list of phase IDs, or None if acyclic."""
+    visiting: set[str] = set()
+    visited: set[str] = set()
+    path: list[str] = []
+
+    def dfs(node: str) -> list[str] | None:
+        visiting.add(node)
+        path.append(node)
+        for dep in dependency_map.get(node, []):
+            if dep in visiting:
+                return path[path.index(dep) :] + [dep]
+            if dep not in visited:
+                result = dfs(dep)
+                if result is not None:
+                    return result
+        path.pop()
+        visiting.discard(node)
+        visited.add(node)
+        return None
+
+    for node in dependency_map:
+        if node not in visited:
+            if (cycle := dfs(node)) is not None:
+                return cycle
+    return None
+
+
 class TaskConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str
@@ -21,7 +51,7 @@ class TaskConfig(BaseModel):
     prompt: str | None = None
 
     @model_validator(mode="after")
-    def exactly_one_source(self) -> "TaskConfig":
+    def exactly_one_source(self) -> TaskConfig:
         if (self.prompt_path is None) == (self.prompt is None):
             raise ValueError("Exactly one of 'prompt_path' or 'prompt' must be set")
         return self
@@ -35,7 +65,7 @@ class CheckpointConfig(BaseModel):
     memory_prompt_path: Path | None = None
 
     @model_validator(mode="after")
-    def exactly_one_source(self) -> "CheckpointConfig":
+    def exactly_one_source(self) -> CheckpointConfig:
         if (self.memory_prompt is None) == (self.memory_prompt_path is None):
             raise ValueError("Exactly one of 'memory_prompt' or 'memory_prompt_path' must be set")
         return self
@@ -86,7 +116,7 @@ class FlowConfig(BaseModel):
     flow: list[FlowEntry]
 
     @model_validator(mode="after")
-    def cross_references(self) -> "FlowConfig":
+    def cross_references(self) -> FlowConfig:
         """Validate all cross-references between agents, phases, and dependencies."""
         scheduled = {entry.phase for entry in self.flow}
         seen: set[str] = set()
@@ -105,10 +135,15 @@ class FlowConfig(BaseModel):
         for phase_id, phase in self.phases.items():
             if phase.agent not in self.agents:
                 raise ValueError(f"Phase {phase_id!r} references unknown agent: {phase.agent!r}")
+
+        dependency_map = {entry.phase: entry.dependencies for entry in self.flow}
+        if cycle := _detect_cycle(dependency_map):
+            raise ValueError(f"Cycle detected in flow: {' → '.join(cycle)}")
+
         return self
 
     @classmethod
-    def from_yaml(cls, path: Path, config_dir: Path) -> "FlowConfig":
+    def from_yaml(cls, path: Path, config_dir: Path) -> FlowConfig:
         """Load, parse, and validate flow.yaml. Raises FlowConfigError on any problem."""
         try:
             raw = yaml.safe_load(path.read_text())
