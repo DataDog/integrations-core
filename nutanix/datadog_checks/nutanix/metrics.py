@@ -103,7 +103,6 @@ VM_STATS_METRICS = {
     "controllerWss3600SecondReadMb": "vm.controller.wss3600second_read_mb",
     "controllerWss3600SecondUnionMb": "vm.controller.wss3600second_union_mb",
     "controllerWss3600SecondWriteMb": "vm.controller.wss3600second_write_mb",
-    "diskCapacityBytes": "vm.disk_capacity_bytes",
     "diskUsagePpm": "vm.disk_usage_ppm",
     "frameBufferUsagePpm": "vm.frame_buffer_usage_ppm",
     "gpuUsagePpm": "vm.gpu_usage_ppm",
