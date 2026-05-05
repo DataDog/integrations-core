@@ -152,25 +152,25 @@ files:
       value:
         type: string
     - name: start_tls
-       description: |
-         Send protocol-specific message(s) to switch to TLS for communication.
-         StartTLS is implemented on these protocols: smtp, pop3, imap, ftp, xmpp, xmpp-server,
-         irc, postgres, mysql, lmtp, nntp, sieve, and ldap.
+      description: |
+        Send protocol-specific message(s) to switch to TLS for communication.
+        StartTLS is implemented on these protocols: smtp, pop3, imap, ftp, xmpp, xmpp-server,
+        irc, postgres, mysql, lmtp, nntp, sieve, and ldap.
 
-         Currently this check supports only the below protocols:
-           postgres, mysql, smtp
-       value:
-         type: string
-         enum:
-         - postgres
-         - mysql
-         - smtp
-     - name: smtp_ehlo_hostname
-       description: |
-         The hostname to use in the SMTP EHLO greeting when start_tls is set to smtp.
-         Only used when start_tls is set to smtp.
-       value:
-         type: string
-         example: 'datadog-agent'
-     - template: instances/default
-     - template: instances/tls
+        Currently this check supports only the below protocols:
+          postgres, mysql, smtp
+      value:
+        type: string
+        enum:
+        - postgres
+        - mysql
+        - smtp
+    - name: smtp_ehlo_hostname
+      description: |
+        The hostname to use in the SMTP EHLO greeting when start_tls is set to smtp.
+        Only used when start_tls is set to smtp.
+      value:
+        type: string
+        example: 'datadog-agent'
+    - template: instances/default
+    - template: instances/tls
