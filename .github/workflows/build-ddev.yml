@@ -771,9 +771,46 @@ jobs:
       with:
         skip-existing: true
 
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      with:
+        python-version: "${{ env.PYTHON_VERSION }}"
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+      with:
+        enable-cache: false
+
+    - name: Install ddev from local folder
+      working-directory: .
+      run: uv pip install --system -e ./datadog_checks_dev[cli] -e ./ddev
+
+    - name: Configure ddev
+      working-directory: .
+      run: |-
+        ddev config override
+        ddev config set upgrade_check false
+
+    # Extraction is best-effort: PyPI publish has already happened by this point, so any failure
+    # here must not abort the workflow before the GitHub release is created. On failure we log a
+    # warning, leave the body file empty, and let the release proceed with an empty body.
+    - name: Extract release notes from CHANGELOG
+      id: release-notes
+      working-directory: .
+      run: |
+        version="${GITHUB_REF_NAME#ddev-v}"
+        notes_file="${RUNNER_TEMP}/release-notes.md"
+        : > "$notes_file"
+        if ! ddev release changelog show ddev "$version" --file "$notes_file"; then
+          echo "::warning::Failed to extract changelog section for ddev $version; release body will be empty."
+          : > "$notes_file"
+        fi
+        echo "path=$notes_file" >> "$GITHUB_OUTPUT"
+
     - name: Add assets to current release
       uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
       with:
+        body_path: ${{ steps.release-notes.outputs.path }}
         files: |-
           archives/*
           installers/*
