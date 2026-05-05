@@ -8,6 +8,7 @@ when generated content crosses 120 characters or normalization is needed.
 These tests pin the behavior the validate flow relies on so a future
 refactor or library bump can't silently break it.
 """
+
 from pathlib import Path
 
 import pytest
@@ -18,7 +19,6 @@ from datadog_checks.dev.tooling.configuration.consumers.model.code_formatter imp
     _resolve_ruff_config,
     format_with_ruff,
 )
-
 
 # --- format_with_ruff -------------------------------------------------------
 

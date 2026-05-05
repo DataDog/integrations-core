@@ -48,7 +48,9 @@ def format_with_ruff(source: str) -> str:
         details = [f'{shlex.join(args)} failed', f'stderr: {stderr.strip()}']
         if e.stdout:
             details.append(f'stdout: {e.stdout.strip()}')
-        raise RuntimeError('`ruff format` failed while formatting auto-generated config models. ' + '; '.join(details)) from e
+        raise RuntimeError(
+            '`ruff format` failed while formatting auto-generated config models. ' + '; '.join(details)
+        ) from e
     return result.stdout
 
 

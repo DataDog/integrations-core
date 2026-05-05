@@ -11,6 +11,7 @@ on a single line or has been wrapped across many lines by the upstream
 formatter; the latter case is what made dropping the `[tool.black]` config
 block from `pyproject.toml` viable.
 """
+
 import pytest
 
 from datadog_checks.dev.tooling.configuration.consumers.model.model_file import _fix_types
@@ -78,11 +79,7 @@ def test_unicode_inside_descriptions_does_not_break_walker():
     """The walker iterates UTF-8 bytes so multi-byte sequences in field
     descriptions, examples, etc. don't trip the `byte must be in range(0, 256)`
     error the original char-iterating implementation would raise."""
-    source = (
-        "label: Optional[list[str]] = Field(\n"
-        "    None, description='unicode: ✓ — résumé · 日本語'\n"
-        ")"
-    )
+    source = "label: Optional[list[str]] = Field(\n    None, description='unicode: ✓ — résumé · 日本語'\n)"
     out = _run(source)
     assert 'tuple[str, ...]' in out
     assert '✓' in out
