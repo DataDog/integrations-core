@@ -1018,7 +1018,11 @@ class PostgreSql(DatabaseCheck):
             kwargs["token_provider"] = self.db_pool.token_provider
 
         conn = TokenAwareConnection.connect(**kwargs)
-        self.db_pool._configure_connection(conn)
+        try:
+            self.db_pool._configure_connection(conn)
+        except Exception:
+            conn.close()
+            raise
         return conn
 
     def _connect(self):

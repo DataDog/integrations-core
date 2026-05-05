@@ -283,6 +283,20 @@ def test_probe_connection_uses_pool_configuration(integration_check, pg_instance
     configure.assert_called_once_with(conn)
 
 
+def test_configure_connection_failure_emits_connection_fail_diagnostic(integration_check, pg_instance):
+    """When _configure_connection raises on the probe connection, diagnose must close the
+    leaked connection and emit a connection-failure FAIL row rather than crashing."""
+    check = integration_check(pg_instance)
+    conn = mock.MagicMock()
+    with mock.patch('datadog_checks.postgres.postgres.TokenAwareConnection.connect', return_value=conn):
+        with mock.patch.object(check.db_pool, '_configure_connection', side_effect=psycopg.Error('SET failed')):
+            diagnoses = _get_diagnoses(check)
+    conn.close.assert_called()
+    rows = _by_name(diagnoses, DatabaseConfigurationError.connection_failure.value)
+    assert len(rows) == 1
+    assert rows[0]['result'] == Diagnosis.DIAGNOSIS_FAIL
+
+
 # -- Server config diagnostics ------------------------------------------------
 
 
