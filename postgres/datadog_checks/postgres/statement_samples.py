@@ -725,9 +725,8 @@ class PostgresStatementSamples(DBMAsyncJob):
                     "Running query on dbname=%s: %s(%s)", dbname, self._explain_function, obfuscated_statement
                 )
                 cursor.execute(
-                    """SELECT {explain_function}($stmt${statement}$stmt$)""".format(
-                        explain_function=self._explain_function, statement=statement
-                    ),
+                    "SELECT {}(%s)".format(self._explain_function),
+                    (statement,),
                     ignore_query_metric=True,
                 )
                 result = cursor.fetchone()

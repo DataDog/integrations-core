@@ -8,6 +8,7 @@ import time
 from datetime import datetime, timezone
 
 from bson import json_util
+from bson.codec_options import DatetimeConversion
 from cachetools import TTLCache
 from pymongo.errors import OperationFailure
 
@@ -68,7 +69,10 @@ class MongoSlowOperations(DBMAsyncJob):
 
         self._last_collection_timestamp = None
 
-        self._log_json_opts = json_util.JSONOptions(tz_aware=True)
+        self._log_json_opts = json_util.JSONOptions(
+            tz_aware=True,
+            datetime_conversion=DatetimeConversion.DATETIME_AUTO,
+        )
 
     def run_job(self):
         self.collect_slow_operations()

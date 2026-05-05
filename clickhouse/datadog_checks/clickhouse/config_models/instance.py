@@ -52,6 +52,24 @@ class MetricPatterns(BaseModel):
     include: Optional[tuple[str, ...]] = None
 
 
+class PartsAndMerges(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_detached_parts_rows: Optional[int] = None
+    max_mutations_rows: Optional[int] = None
+    max_parts_rows: Optional[int] = None
+    max_replication_queue_rows: Optional[int] = None
+    run_sync: Optional[bool] = None
+    stalled_merge_elapsed_threshold_seconds: Optional[int] = None
+    stuck_replication_num_tries: Optional[int] = None
+    table_metrics_include_partition_tag: Optional[bool] = None
+    table_metrics_max_tables: Optional[int] = None
+
+
 class QueryCompletions(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -121,6 +139,7 @@ class InstanceConfig(BaseModel):
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     only_custom_queries: Optional[bool] = None
+    parts_and_merges: Optional[PartsAndMerges] = None
     password: Optional[str] = None
     port: Optional[int] = None
     query_completions: Optional[QueryCompletions] = None

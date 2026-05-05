@@ -27,7 +27,7 @@ def common_params(func: Callable) -> Callable:
     @click.option(
         "--wheels-storage",
         type=click.Choice(["dev", "stable"]),
-        required=True,
+        default='dev',  # 'dev' is a strict superset of 'stable', so we're more likely to find wheels there.
         envvar="INTEGRATIONS_WHEELS_STORAGE",
         help=(
             "Which wheel storage tier to resolve dependency URLs against. "

@@ -512,6 +512,37 @@ def test_client_init(kafka_instance, check, dd_run_check):
     assert check.client.open_consumer.mock_calls == [mock.call("datadog-agent")]
 
 
+def test_add_broker_timestamps_purges_stale_offsets_on_reset(kafka_instance, check):
+    # When the highwater offset goes backwards (topic recreated / retention
+    # wipe / offset reset), cached (offset, timestamp) pairs with offsets
+    # above the new highwater are stale and must be purged — otherwise they
+    # poison interpolation and pin estimated_consumer_lag to a wall-clock
+    # offset equal to how long ago the reset happened.
+    check = check(kafka_instance)
+    broker_timestamps = {"topic1_0": {1_000_000: 100.0, 999_000: 99.0}}
+    check._add_broker_timestamps(broker_timestamps, {("topic1", 0): 170})
+
+    timestamps = broker_timestamps["topic1_0"]
+    assert 1_000_000 not in timestamps
+    assert 999_000 not in timestamps
+    assert 170 in timestamps
+
+
+def test_add_broker_timestamps_evicts_by_oldest_timestamp(kafka_instance, check):
+    # Eviction must drop the entry with the oldest timestamp, not the smallest
+    # offset. Evicting by min(offset) would discard fresh post-reset entries
+    # and keep poisonous ones.
+    kafka_instance['timestamp_history_size'] = 2
+    check = check(kafka_instance)
+    broker_timestamps = {"topic1_0": {500: 50.0, 400: 999.0}}
+    check._add_broker_timestamps(broker_timestamps, {("topic1", 0): 600})
+
+    timestamps = broker_timestamps["topic1_0"]
+    assert 500 not in timestamps  # oldest by timestamp
+    assert 400 in timestamps
+    assert 600 in timestamps
+
+
 def test_resolve_start_offsets():
     highwater_offsets = {
         ("topic1", 0): 100,

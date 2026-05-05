@@ -21,7 +21,7 @@ DB_FRAGMENTATION_QUERY = {
         DDIPS.avg_fragment_size_in_pages as avg_fragment_size_in_pages,
         DDIPS.page_count as page_count,
         DDIPS.avg_fragmentation_in_percent as avg_fragmentation_in_percent
-        FROM sys.dm_db_index_physical_stats (DB_ID('{db}'),null,null,null,null) as DDIPS
+        FROM sys.dm_db_index_physical_stats (DB_ID(?),null,null,null,null) as DDIPS
         INNER JOIN sys.indexes as I WITH (NOLOCK) ON I.object_id = DDIPS.object_id
         AND DDIPS.index_id = I.index_id
         WHERE DDIPS.fragment_count is not null
@@ -112,14 +112,19 @@ class SqlserverDBFragmentationMetrics(SqlserverDatabaseMetricsBase):
 
     def _build_query_executors(self):
         executors = []
+        if self.db_fragmentation_object_names:
+            placeholders = ','.join(['?'] * len(self.db_fragmentation_object_names))
+            object_name_filter = f" AND OBJECT_NAME(DDIPS.object_id, DDIPS.database_id) IN ({placeholders})"
+        else:
+            object_name_filter = None
         for database in self.databases:
             queries = copy.deepcopy(self.queries)
             for query in queries:
-                query['query'] = query['query'].format(db=database)
-                if self.db_fragmentation_object_names:
-                    query['query'] += " AND OBJECT_NAME(DDIPS.object_id, DDIPS.database_id) IN ({})".format(
-                        ','.join(["'{}'".format(name) for name in self.db_fragmentation_object_names])
-                    )
+                params = [database]
+                if object_name_filter:
+                    query['query'] += object_name_filter
+                    params.extend(self.db_fragmentation_object_names)
+                query['params'] = tuple(params)
             executor = self.new_query_executor(
                 queries,
                 executor=functools.partial(self.execute_query_handler, db=database),

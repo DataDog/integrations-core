@@ -292,6 +292,18 @@ files:
           type: boolean
           description: Whether value uses Schema Registry format
           default: false
+        - name: value_skip_bytes
+          type: integer
+          description: |
+            Number of bytes to drop from the start of the message value before
+            deserialization. Use this to strip a producer-side prefix that
+            kafka_actions doesn't recognize natively — for example a 1-byte
+            version flag, a non-Confluent schema-registry envelope, or a
+            tenant id prepended to every record. Applied before raw / json /
+            bson / protobuf / avro decoding, and before Schema Registry
+            magic-byte detection. Default 0 (no bytes skipped).
+          default: 0
+          example: 1
         - name: key_format
           type: string
           description: |
@@ -312,6 +324,13 @@ files:
           type: boolean
           description: Whether key uses Schema Registry format
           default: false
+        - name: key_skip_bytes
+          type: integer
+          description: |
+            Number of bytes to drop from the start of the message key before
+            deserialization. See value_skip_bytes for details. Default 0.
+          default: 0
+          example: 1
         - name: consumer_group_id
           type: string
           description: |

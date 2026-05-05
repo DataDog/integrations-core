@@ -1,0 +1,1 @@
+[Cisco ACI] Remove tenant faults as events, faults are now only to send as logs
