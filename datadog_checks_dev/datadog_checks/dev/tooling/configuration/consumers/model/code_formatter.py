@@ -33,12 +33,15 @@ def format_with_ruff(source: str) -> str:
             text=True,
             check=True,
         )
-    except FileNotFoundError as e:
-        raise RuntimeError(
-            "Cannot format auto-generated config models: `ruff` is not installed. "
-            "Reinstall `datadog_checks_dev[cli]` (or run `pip install ruff`) and retry."
-        ) from e
     except subprocess.CalledProcessError as e:
+        # `python -m ruff` exits non-zero when the ruff package is missing,
+        # surfacing as ModuleNotFoundError on stderr. Promote that to a
+        # clearer install hint; otherwise propagate the underlying error.
+        if e.stderr and "No module named 'ruff'" in e.stderr:
+            raise RuntimeError(
+                "Cannot format auto-generated config models: the `ruff` package is not installed in the active "
+                "interpreter. Reinstall `datadog_checks_dev[cli]` (or run `pip install ruff`) and retry."
+            ) from e
         raise RuntimeError(f'`ruff format` failed while formatting auto-generated config models: {e.stderr}') from e
     return result.stdout
 
