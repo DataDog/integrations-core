@@ -1,0 +1,67 @@
+{
+  "supported_auth_methods": [],
+  "additional_config_fields": [
+    {
+      "type": "password",
+      "key": "api_token",
+      "label": "API client token",
+      "help": "Workato API client token for authentication.",
+      "editable": true,
+      "required": true
+    },
+    {
+      "type": "dropdown",
+      "key": "region",
+      "label": "Region",
+      "help": "Workato region.",
+      "editable": true,
+      "required": true,
+      "options": [
+        {
+          "value": "US",
+          "label": "US"
+        },
+        {
+          "value": "EU",
+          "label": "EU"
+        },
+        {
+          "value": "JP",
+          "label": "JP"
+        },
+        {
+          "value": "SG",
+          "label": "SG"
+        },
+        {
+          "value": "AU",
+          "label": "AU"
+        },
+        {
+          "value": "IL",
+          "label": "IL"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "key": "extra_test_field",
+      "label": "Extra Test Field",
+      "help": "This field does NOT exist in the crawler - should cause validation to fail",
+      "editable": true,
+      "required": false
+    }
+  ],
+  "dataflow_config": [
+    {
+      "dataflow_id": "workato-extra-test-dataflow",
+      "toggle": {
+        "default": false,
+        "label": "Extra Test Dataflow",
+        "help": "This dataflow does NOT exist in any crawler - should cause validation to fail",
+        "editable": true
+      },
+      "additional_config_fields": []
+    }
+  ]
+}
