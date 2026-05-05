@@ -1,0 +1,34 @@
+services:
+  api:
+    build:
+      context: /home/bits/go/src/github.com/DataDog/integrations-core/krakend/tests/docker
+      dockerfile: Dockerfile
+    ports:
+      - "19000:8000"
+    environment:
+      - PYTHONPATH=/app
+    volumes:
+      - /home/bits/go/src/github.com/DataDog/integrations-core/krakend/tests/docker/api.py:/app/api.py
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/valid/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  krakend:
+    image: krakend:${KRAKEND_VERSION}
+    ports:
+      - "19080:8080"  # KrakenD gateway port
+      - "9090:9090"  # OpenTelemetry metrics port
+    volumes:
+      - /home/bits/go/src/github.com/DataDog/integrations-core/krakend/tests/docker/krakend.json:/etc/krakend/krakend.json:ro
+    command: ["run", "-d", "-c", "/etc/krakend/krakend.json"]
+    depends_on:
+      - api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/__health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

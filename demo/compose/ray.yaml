@@ -1,0 +1,16 @@
+services:
+  ray-head:
+    container_name: ray-head
+    hostname: ray-head
+    image: rayproject/ray:${RAY_VERSION}-cpu
+    command:
+      - /bin/bash
+      - -c
+      - |
+        ray start --head --port=6379 --dashboard-host=0.0.0.0 --metrics-export-port=8080
+        sleep infinity
+    ports:
+      - "${HEAD_METRICS_PORT}:8080"
+      - "${HEAD_DASHBOARD_PORT}:8265"
+    healthcheck:
+      disable: true
