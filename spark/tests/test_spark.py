@@ -1153,7 +1153,7 @@ def test_enable_query_name_tag_for_structured_streaming(
 
 def test_do_not_crash_on_version_collection_failure():
     running_apps = {'foo': ('bar', 'http://foo.bar/'), 'foo2': ('bar', 'http://foo.bar/')}
-    rest_requests_to_json = mock.MagicMock(side_effect=[HTTPRequestError, []])
+    rest_requests_to_json = mock.MagicMock(side_effect=[HTTPRequestError("test failure"), []])
 
     c = SparkCheck('spark', {}, [INSTANCE_STANDALONE])
 
