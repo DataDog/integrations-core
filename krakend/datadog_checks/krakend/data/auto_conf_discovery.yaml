@@ -2,7 +2,7 @@ ad_identifiers:
   - krakend
 discovery:
   type: openmetrics
-  ports: [8090]
+  ports: [9090]
   path: /metrics
 init_config:
 instances:
