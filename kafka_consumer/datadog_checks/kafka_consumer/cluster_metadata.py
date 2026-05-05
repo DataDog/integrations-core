@@ -571,12 +571,17 @@ class ClusterMetadataCollector:
                     for replica in replicas:
                         partition_broker_tags.append(f'replica_broker_id:{replica}')
 
+                    isr_set = set(isrs)
+                    out_of_sync_broker_ids = [broker_id for broker_id in replicas if broker_id not in isr_set]
+                    for broker_id in out_of_sync_broker_ids:
+                        partition_broker_tags.append(f'out_of_sync_broker_id:{broker_id}')
+
                     self.check.gauge('partition.replicas', len(replicas), tags=partition_broker_tags)
                     self.check.gauge('partition.isr', len(isrs), tags=partition_broker_tags)
 
                     self.check.gauge('partition.size', partition_size, tags=partition_broker_tags)
 
-                    is_under_replicated = len(isrs) < len(replicas)
+                    is_under_replicated = bool(out_of_sync_broker_ids)
                     self.check.gauge(
                         'partition.under_replicated',
                         1 if is_under_replicated else 0,
