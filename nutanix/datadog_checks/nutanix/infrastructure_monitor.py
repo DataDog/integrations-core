@@ -24,11 +24,7 @@ if TYPE_CHECKING:
 
 
 def _norm_state(value: object) -> str | None:
-    """Lowercase a state-tag value if it's a non-empty string; return ``None`` otherwise.
-
-    Defends the ``.lower()`` calls in the ``_extract_*_tags`` methods against any
-    non-string value the Nutanix API might return.
-    """
+    """Lowercase ``value`` if it's a non-empty string."""
     return value.lower() if isinstance(value, str) and value else None
 
 
@@ -84,7 +80,6 @@ class InfrastructureMonitor:
         # (batch mode) or lazily per-host by _get_vms_for_host (non-batch mode).
         # In batch mode the "" key holds hostless VMs (no host assignment).
         self._vms_by_host: dict[str, list[dict]] = {}
-        # Disk cache keyed by host ID, populated once per run via the cluster-wide /config/disks endpoint.
         self._disks_by_host: dict[str, list[dict]] = {}
 
     def reset_state(self) -> None:
@@ -549,8 +544,7 @@ class InfrastructureMonitor:
         is_agent_vm = is_affirmative(vm.get("isAgentVm"))
         tags.append(f"ntnx_is_agent_vm:{is_agent_vm}")
 
-        # Always emit ntnx_power_state — fall back to "unknown" so dashboards/monitors that
-        # group by this tag do not silently drop VMs whose powerState is missing.
+        # Fall back to "unknown" so dashboards grouped by this tag don't drop VMs.
         tags.append(f"ntnx_power_state:{_norm_state(vm.get('powerState')) or 'unknown'}")
 
         return tags
@@ -618,7 +612,7 @@ class InfrastructureMonitor:
 
     def _aggregate_disk_status(self, disks: list[dict]) -> str | None:
         """Return the worst disk status across ``disks``: degraded > normal."""
-        statuses = {d.get("status") for d in disks if isinstance(d, dict) and d.get("status")}
+        statuses = {d.get("status") for d in disks if d.get("status")}
         if statuses & DEGRADED_DISK_STATUSES:
             return "degraded"
         return "normal" if "NORMAL" in statuses else None

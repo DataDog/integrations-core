@@ -5,13 +5,11 @@
 
 import json
 import os
-from types import SimpleNamespace
 
 import pytest
 
 from datadog_checks.dev import docker_run, get_docker_hostname, get_here
 from datadog_checks.dev.conditions import CheckEndpoints
-from datadog_checks.nutanix.infrastructure_monitor import InfrastructureMonitor
 
 HERE = get_here()
 HOST = get_docker_hostname()
@@ -361,17 +359,3 @@ def mock_http_get(mocker):
         return mock_resp
 
     return mocker.patch('requests.Session.get', side_effect=mock_response)
-
-
-@pytest.fixture
-def monitor():
-    """An InfrastructureMonitor wired to a minimal check stub for pure-logic unit tests.
-
-    Bundles every attribute any test in this suite is known to reach for, so a future test added
-    to any file does not hit AttributeError because of a half-built stub.
-    """
-    check_stub = SimpleNamespace(
-        pc_ip="10.0.0.197",
-        extract_category_tags=lambda _entity: [],
-    )
-    return InfrastructureMonitor(check_stub)
