@@ -14,7 +14,7 @@ def test_update_py_config(fake_repo, ddev):
     result = ddev('meta', 'scripts', 'update-python-config', NEW_PYTHON_VERSION)
 
     assert result.exit_code == 0, result.output
-    assert result.output.endswith('Python upgrades\n\nPassed: 10\n')
+    assert result.output.endswith('Python upgrades\n\nPassed: 9\n')
 
     contents = constant_file.read_text()
     assert f'PYTHON_VERSION = {OLD_PYTHON_VERSION!r}' not in contents

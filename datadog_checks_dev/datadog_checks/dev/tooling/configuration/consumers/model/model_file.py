@@ -1,8 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datamodel_code_generator.format import CodeFormatter
-
+from datadog_checks.dev.tooling.configuration.consumers.model.code_formatter import format_with_ruff
 from datadog_checks.dev.tooling.configuration.consumers.model.model_info import ModelInfo
 
 
@@ -11,14 +10,12 @@ def build_model_file(
     model_id: str,
     section_name: str,
     model_info: ModelInfo,
-    code_formatter: CodeFormatter,
 ):
     """
     :param parsed_document: OpenApi parsed document
     :param model_id: instance or shared
     :param section_name: init or instances
     :param model_info: Information to build the model file
-    :param code_formatter:
     """
     # Whether or not there are options with default values
     options_with_defaults = len(model_info.defaults_file_lines) > 0
@@ -54,7 +51,7 @@ def build_model_file(
     model_file_lines.append('')
     model_file_contents = '\n'.join(model_file_lines)
     if any(len(line) > 120 for line in model_file_lines):
-        model_file_contents = code_formatter.apply_black(model_file_contents)
+        model_file_contents = format_with_ruff(model_file_contents)
     return model_file_contents
 
 

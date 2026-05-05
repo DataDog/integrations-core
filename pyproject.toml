@@ -1,10 +1,13 @@
 # NOTE: You have to use single-quoted strings in TOML for regular expressions.
 # It's the equivalent of r-strings in Python. Multiline strings are treated as
-# verbose regular expressions by Black. Use [ ] to denote a significant space
-# character.
+# verbose regular expressions. Use [ ] to denote a significant space character.
 
-# Keep Black configuration to generate models through validate
-# Switch to Ruff after it provides a Python API
+# This block is consumed transitively by datamodel-code-generator's internal
+# formatter when generating config_models from spec.yaml. Without it, the
+# generator falls back to defaults (line-length=88) and produces multi-line
+# output that breaks our list[...] -> tuple[..., ...] line-by-line transform
+# in datadog_checks_dev. Drop this block when datamodel-code-generator stops
+# using black for formatting (https://github.com/koxudaxi/datamodel-code-generator/issues/1821).
 [tool.black]
 include = '\.pyi?$'
 line-length = 120
