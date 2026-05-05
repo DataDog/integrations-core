@@ -387,9 +387,7 @@ def test_starttls_smtp_missing_capability(instance_remote_ok):
     check = TLSRemoteCheck(agent_check=c)
     check.agent_check._start_tls = 'smtp'
 
-    sock = FakeSmtpSocket(
-        b'220 smtp.valid.mock ESMTP ready\r\n250-smtp.valid.mock\r\n250 PIPELINING\r\n'
-    )
+    sock = FakeSmtpSocket(b'220 smtp.valid.mock ESMTP ready\r\n250-smtp.valid.mock\r\n250 PIPELINING\r\n')
 
     with pytest.raises(Exception, match='SMTP endpoint does not support STARTTLS'):
         check._switch_starttls(sock)
