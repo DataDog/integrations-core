@@ -8,7 +8,7 @@
 
 * Adds validation for event pagination URLs. ([#23354](https://github.com/DataDog/integrations-core/pull/23354))
 
-## 1.0.0 / 2026-03-18 / Agent 7.78.0
+## 1.0.0 / 2026-03-18 / Agent 7.78.1
 
 ***Added***:
 

@@ -11,7 +11,7 @@ files:
     options:
     - name: proxmox_server
       fleet_configurable: true
-      display_priority: 5
+      display_priority: 7
       formats:
         - url
       description: |
@@ -30,34 +30,8 @@ files:
         example: true
         display_default: false
       required: false
-    - name: collected_task_types
-      fleet_configurable: true
-      display_priority: 5
-      description: |
-        Which Proxmox task types to collect.
-
-        When `collect_tasks` is enabled, the integration will collect
-        the following task types by default:
-          - qmstart
-          - qhstop
-          - qmshutdown
-          - qmreboot
-          - qmigrate
-          - qmsuspend
-          - vzstart
-          - vzshutdown
-          - vzsuspend
-          - startall
-          - stopall
-          - suspendall
-          - aptupdate
-      value:
-        type: array
-        items:
-          type: string
-        default: ['qmstart', 'qmstop', 'qmshutdown', 'qmreboot', 'qmigrate', 'qmsuspend', 'vzstart', 'vzshutdown', 'vzsuspend', 'startall', 'stopall', 'suspendall', 'aptupdate']
-      required: false
     - name: resource_filters
+      display_priority: 1
       description: |
           Each filter in the list is composed of three parameters.
           'resource' is one of vm/node/container/storage/pool/sdn on which to apply the filter
@@ -96,6 +70,33 @@ files:
                 type: string
               - name: property
                 type: string
+    - name: collected_task_types
+      fleet_configurable: true
+      display_priority: 0
+      description: |
+        Which Proxmox task types to collect.
+
+        When `collect_tasks` is enabled, the integration will collect
+        the following task types by default:
+          - qmstart
+          - qhstop
+          - qmshutdown
+          - qmreboot
+          - qmigrate
+          - qmsuspend
+          - vzstart
+          - vzshutdown
+          - vzsuspend
+          - startall
+          - stopall
+          - suspendall
+          - aptupdate
+      value:
+        type: array
+        items:
+          type: string
+        default: ['qmstart', 'qmstop', 'qmshutdown', 'qmreboot', 'qmigrate', 'qmsuspend', 'vzstart', 'vzshutdown', 'vzsuspend', 'startall', 'stopall', 'suspendall', 'aptupdate']
+      required: false
     - template: instances/default
       overrides:
         empty_default_hostname.display_priority: 1
@@ -118,6 +119,9 @@ files:
         headers.value.example:
           Authorization: "PVEAPIToken=<USER>@<REALM>!<TOKEN_ID>=<YOUR_TOKEN>"
         auth_token.display_priority: 3
+        tls_verify.display_priority: 6
+        log_requests.display_priority: 3
+        tls_ignore_warning.display_priority: 2
   - template: logs
     example:
     - type: journald

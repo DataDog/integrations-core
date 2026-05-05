@@ -430,6 +430,10 @@ coverage:
         target: 75
         flags:
         - kyototycoon
+      LPARStats:
+        target: 75
+        flags:
+        - lparstats
       Lighttpd:
         target: 75
         flags:
@@ -1408,6 +1412,11 @@ flags:
     paths:
     - kyverno/datadog_checks/kyverno
     - kyverno/tests
+  lparstats:
+    carryforward: true
+    paths:
+    - lparstats/datadog_checks/lparstats
+    - lparstats/tests
   lighttpd:
     carryforward: true
     paths:
