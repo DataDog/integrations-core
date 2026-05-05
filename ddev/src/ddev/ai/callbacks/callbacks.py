@@ -83,15 +83,14 @@ class CallbackSet:
     Group related handlers in a single instance for semantic cohesion, then
     compose multiple instances via Callbacks():
 
-        class Logger(CallbackSet):
-            def __init__(self):
-                super().__init__()
+    Usage::
+        logger = CallbackSet()
 
-                @self.on_complete
-                async def log_done(result: ReActResult) -> None:
-                    print(f"Done in {result.iterations} iterations")
+        @logger.on_complete
+        async def log_done(result: ReActResult) -> None:
+            print(f"Done in {result.iterations} iterations")
 
-        callbacks = Callbacks([Logger(), MetricsEmitter()])
+        callbacks = Callbacks([logger])
     """
 
     def __init__(self) -> None:
