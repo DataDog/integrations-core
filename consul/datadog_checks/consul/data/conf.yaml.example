@@ -147,6 +147,19 @@ instances:
     #
     # collect_health_checks: true
 
+    ## @param health_checks_cache_size - integer - optional - default: 5000
+    ## Maximum number of health check entries kept in the in-memory cache used to detect
+    ## status transitions. Increase if your Consul cluster reports more than 5000 distinct
+    ## health checks across nodes, otherwise transitions may be missed and failure events
+    ## may be re-emitted spuriously.
+    #
+    # health_checks_cache_size: 5000
+
+    ## @param health_checks_cache_ttl - integer - optional - default: 3600
+    ## Time-to-live (in seconds) for entries in the health check status cache.
+    #
+    # health_checks_cache_ttl: 3600
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
