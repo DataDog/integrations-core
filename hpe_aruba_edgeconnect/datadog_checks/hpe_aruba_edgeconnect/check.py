@@ -1,70 +1,234 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any  # noqa: F401
+from __future__ import annotations
 
-from datadog_checks.base import AgentCheck  # noqa: F401
+import json
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Any
 
-# from datadog_checks.base.utils.db import QueryManager
-# from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
-# from json import JSONDecodeError
+from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.http import RequestsWrapper
+
+from .client import ApplianceClient, OrchestratorClient
+from .config_models import ConfigMixin
+from .constants import MINUTE_STATS_INTERVAL, NDM_INTERFACE_RESOURCE_TAG
+from .metrics_store import MetricsStore
+from .models import Appliance, Appliances
+from .ndm_models import batch_payloads, create_device_metadata, create_interface_metadata, create_tunnel_metadata
+from .parsers.minute_stats import MinuteStats
+from .parsers.tunnel import TunnelV2Stats
 
 
-class HpeArubaEdgeconnectCheck(AgentCheck):
-
-    # This will be the prefix of every metric the integration sends
+class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
     __NAMESPACE__ = 'hpe_aruba_edgeconnect'
 
-    def __init__(self, name, init_config, instances):
-        super(HpeArubaEdgeconnectCheck, self).__init__(name, init_config, instances)
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.http.persist_connections = True
+        self._peer_lookup: dict[str, tuple[str, str]] = {}
+        self._overlay_map: dict[str, str] = {}
 
-        # Use self.instance to read the check configuration
-        # self.url = self.instance.get("url")
+    def check(self, _: Any) -> None:
+        orch_client = OrchestratorClient(self.http, self.config.orch_ip)
+        orch_client.login(self.config.username, self.config.password)
+        appliances = self._collect_appliances_from_orch(orch_client)
+        with ThreadPoolExecutor(max_workers=self.config.max_concurrency) as pool:
+            futs = {pool.submit(self._collect_appliance, ap): ap for ap in appliances}
+            for f in as_completed(futs):
+                ap = futs[f]
+                try:
+                    f.result()
+                except Exception:
+                    self.log.warning("Failed to collect from appliance %s", ap.ip, exc_info=True)
 
-        # If the check is going to perform SQL queries you should define a query manager here.
-        # More info at
-        # https://datadoghq.dev/integrations-core/base/databases/#datadog_checks.base.utils.db.core.QueryManager
-        # sample_query = {
-        #     "name": "sample",
-        #     "query": "SELECT * FROM sample_table",
-        #     "columns": [
-        #         {"name": "metric", "type": "gauge"}
-        #     ],
-        # }
-        # self._query_manager = QueryManager(self, self.execute_query, queries=[sample_query])
-        # self.check_initializations.append(self._query_manager.compile_queries)
+    def _submit_metadata(self, items: list, collect_timestamp: int | None = None) -> None:
+        if not items:
+            return
+        for batch in batch_payloads(self.config.namespace, items, collect_timestamp):
+            self.event_platform_event(
+                json.dumps(batch.model_dump(exclude_none=True)),
+                "network-devices-metadata",
+            )
 
-    def check(self, _):
-        # type: (Any) -> None
-        # The following are useful bits of code to help new users get started.
+    def _collect_appliances_from_orch(self, client: OrchestratorClient) -> Appliances:
+        raw_appliances = client.get_appliances()
+        if not raw_appliances:
+            self.log.warning("No appliances returned from orchestrator %s", self.config.orch_ip)
+            return Appliances([])
+        self.log.debug("Found %d appliances from orchestrator before filtering", len(raw_appliances))
+        all_appliances = [Appliance(a) for a in raw_appliances]
+        self._peer_lookup = {ap.host_name: (ap.ip, ap.site or 'unknown') for ap in all_appliances if ap.host_name}
+        appliances = Appliances(all_appliances)
+        appliance_ips = self.config.appliance_ips.model_dump() if self.config.appliance_ips else None
+        appliances.filter(appliance_ips)
+        self.log.debug("Monitoring %d appliances after filtering", len(appliances))
+        appliance_credentials = (
+            [c.model_dump() for c in self.config.appliance_credentials] if self.config.appliance_credentials else None
+        )
+        appliances.resolve_credentials(
+            self.config.username,
+            self.config.password,
+            appliance_credentials,
+        )
+        namespace = self.config.namespace
+        devices = []
+        for ap in appliances:
+            tags = ap.tags(namespace)
+            self.gauge('device.reachability', 1 if ap.is_reachable else 0, tags=tags)
+            if ap.startup_time is not None:
+                # TODO is this actual time or seconds since last reboot? - change for /systemInfo
+                self.gauge('device.uptime', ap.startup_time, tags=tags)
+            devices.append(create_device_metadata(ap, namespace))
+        self._submit_metadata(devices)
+        try:
+            self._overlay_map = client.get_overlay_config()
+        except Exception:
+            self.log.warning("Failed to fetch overlay config, overlay names will use raw IDs", exc_info=True)
+            self._overlay_map = {}
+        return appliances
 
-        # Perform HTTP Requests with our HTTP wrapper.
-        # More info at https://datadoghq.dev/integrations-core/base/http/
-        # try:
-        #     response = self.http.get(self.url)
-        #     response.raise_for_status()
-        #     response_json = response.json()
+    def _create_appliance_client(self, app_ip: str, username: str, password: str) -> ApplianceClient:
+        http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
+        http.persist_connections = True
+        client = ApplianceClient(http, app_ip, self.log)
+        client.login(username, password)
+        return client
 
-        # except (HTTPError, InvalidURL, ConnectionError, Timeout) as e:
-        #     self.log.debug("Could not connect", exc_info=True)
+    def _timestamps_to_fetch(self, app_ip: str, newest: int) -> list[int]:
+        raw = self.read_persistent_cache(f'last_timestamp:{app_ip}')
+        last_ts = int(raw) if raw else None
 
-        # except JSONDecodeError as e:
-        #    self.log.debug("Could not parse JSON", exc_info=True)
+        if last_ts is not None and newest == last_ts:
+            return []
 
-        # except ValueError as e:
-        #    self.log.debug("Unexpected value", exc_info=True)
+        max_backfill = self.config.max_backfill_minutes
+        if last_ts is None:
+            self.log.debug("First run for %s, collecting only the newest timestamp %d", app_ip, newest)
+            return [newest]
 
-        # This is how you submit metrics
-        # There are different types of metrics that you can submit (gauge, event).
-        # More info at https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck
-        # self.gauge("test", 1.23, tags=['foo:bar'])
+        timestamps = []
+        ts = newest
+        while ts > last_ts and len(timestamps) < max_backfill:
+            timestamps.append(ts)
+            ts -= MINUTE_STATS_INTERVAL
 
-        # Perform database queries using the Query Manager
-        # self._query_manager.execute()
+        if ts > last_ts:
+            self.log.warning(
+                "Appliance %s is %d minutes behind; capping backfill at %d minute(s). Older data will be skipped.",
+                app_ip,
+                (newest - last_ts) // MINUTE_STATS_INTERVAL,
+                max_backfill,
+            )
+        else:
+            self.log.debug(
+                "Catching up %d missed minute-stats archives for %s (last cached: %d, newest: %d)",
+                len(timestamps),
+                app_ip,
+                last_ts,
+                newest,
+            )
+        return timestamps
 
-        # This is how you use the persistent cache. This cache file based and persists across agent restarts.
-        # If you need an in-memory cache that is persisted across runs
-        # You can define a dictionary in the __init__ method.
-        # self.write_persistent_cache("key", "value")
-        # value = self.read_persistent_cache("key")
-        pass
+    def _collect_appliance(self, appliance: Appliance) -> None:
+        app_ip = appliance.ip
+        self.log.debug("Starting collection for appliance %s", app_ip)
+        client = self._create_appliance_client(app_ip, appliance.username, appliance.password)
+
+        namespace = self.config.namespace
+        base_tags = appliance.tags(namespace)
+        device_id = appliance.device_id(namespace)
+        newest = client.get_newest_timestamp()
+
+        timestamps = self._timestamps_to_fetch(app_ip, newest)
+        latest_tunnel_stats: list[TunnelV2Stats] = []
+        if timestamps:
+            store = MetricsStore()
+            for ts in reversed(timestamps):
+                content = client.get_minute_stats(f'st2-{ts}.tgz')
+                minute_stats = MinuteStats(content, app_ip, ts, self.log)
+                minute_stats.record(store, base_tags, device_id)
+                if minute_stats.tunnels:
+                    latest_tunnel_stats = minute_stats.tunnels
+            store.flush(self)
+            self.write_persistent_cache(f'last_timestamp:{app_ip}', str(newest))
+        else:
+            self.log.debug("Appliance %s stats are up to date (last timestamp: %d)", app_ip, newest)
+            return
+
+        collectors = [
+            lambda: self._collect_network_interfaces(client, base_tags, device_id, newest),
+            lambda: self._submit_metadata(
+                [
+                    create_tunnel_metadata(
+                        t,
+                        app_ip,
+                        appliance.site,
+                        namespace,
+                        self._peer_lookup,
+                        self._overlay_map,
+                        self.log,
+                    )
+                    for t in latest_tunnel_stats
+                ],
+                newest,
+            ),
+            lambda: self._collect_cpu_stats(client, base_tags, newest),
+            lambda: self._collect_memory_stats(client, base_tags),
+            lambda: self._collect_disk_stats(client, base_tags),
+            lambda: self._collect_alarm_stats(client, base_tags),
+        ]
+        for collect in collectors:
+            try:
+                collect()
+            except Exception:
+                self.log.warning("Collection step failed for appliance %s", app_ip, exc_info=True)
+
+    def _collect_network_interfaces(
+        self,
+        client: ApplianceClient,
+        base_tags: list[str],
+        device_id: str,
+        collect_timestamp: int,
+    ) -> None:
+        data = client.get_network_interfaces()
+        namespace = self.config.namespace
+        interfaces = []
+        for iface in data.get('ifInfo', []):
+            ifname = iface.get('ifName', 'unknown')
+            iface_tags = base_tags + [
+                f'interface_name:{ifname}',
+                f'{NDM_INTERFACE_RESOURCE_TAG}:{device_id}',
+            ]
+            if iface.get('admin') is not None:
+                self.gauge('interface.admin.status', 1 if iface['admin'] else 0, tags=iface_tags)
+            if iface.get('oper') is not None:
+                self.gauge('interface.oper.status', 1 if iface['oper'] else 0, tags=iface_tags)
+            if iface.get('speed') is not None:
+                self.gauge('interface.speed', iface['speed'], tags=iface_tags)
+            interfaces.append(create_interface_metadata(client.app_ip, iface, namespace))
+        self._submit_metadata(interfaces, collect_timestamp)
+
+    def _collect_cpu_stats(self, client: ApplianceClient, base_tags: list[str], newest: int) -> None:
+        cpu_data = client.get_cpu_stats(newest)
+        if cpu_data is not None and cpu_data.get('cpuPct') is not None:
+            self.gauge('device.cpu.usage', cpu_data['cpuPct'], tags=base_tags)
+
+    def _collect_memory_stats(self, client: ApplianceClient, base_tags: list[str]) -> None:
+        mem_data = client.get_memory_stats()
+        if mem_data.get('memPct') is not None:
+            self.gauge('device.memory.usage', mem_data['memPct'], tags=base_tags)
+
+    def _collect_disk_stats(self, client: ApplianceClient, base_tags: list[str]) -> None:
+        disk_data = client.get_disk_usage()
+        if disk_data.get('diskPct') is not None:
+            self.gauge('device.disk.usage', disk_data['diskPct'], tags=base_tags)
+
+    def _collect_alarm_stats(self, client: ApplianceClient, base_tags: list[str]) -> None:
+        alarms = client.get_alarms()
+        hw_alarm = False
+        if isinstance(alarms, dict) and isinstance(alarms.get('outstanding'), list):
+            hw_alarm = any(a.get('type') == 'HW' for a in alarms['outstanding'])
+        if hw_alarm:
+            self.log.debug("Hardware alarm detected on appliance %s", client.app_ip)
+        self.gauge('device.hardware.ok', 0 if hw_alarm else 1, tags=base_tags)

@@ -1,0 +1,25 @@
+services:
+  orch:
+    build:
+      context: ../..
+      dockerfile: tests/docker/fake_orch/Dockerfile
+    container_name: dd-orch
+    ports:
+      - "${HOST_PORT}:8443"
+    environment:
+      ORCH_USERNAME: "${ORCH_USERNAME}"
+      ORCH_PASSWORD: "${ORCH_PASSWORD}"
+      APPLIANCE_IP: "${APPLIANCE_IP}"
+    restart: "no"
+
+  appliance:
+    build:
+      context: ../..
+      dockerfile: tests/docker/fake_appliance/Dockerfile
+    container_name: dd-appliance
+    ports:
+      - "${APPLIANCE_PORT}:8444"
+    environment:
+      APPLIANCE_USERNAME: "${APPLIANCE_USERNAME}"
+      APPLIANCE_PASSWORD: "${APPLIANCE_PASSWORD}"
+    restart: "no"

@@ -7,17 +7,70 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-
 from __future__ import annotations
 
-from typing import Optional
+from types import MappingProxyType
+from typing import Any, Optional
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from typing_extensions import Literal
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
 
 from . import defaults, validators
+
+
+SECURE_FIELD_NAMES = frozenset(
+    ['auth_token', 'kerberos_cache', 'kerberos_keytab', 'tls_ca_cert', 'tls_cert', 'tls_private_key']
+)
+
+
+class ApplianceCredential(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    cidr: Optional[str] = None
+    password: Optional[str] = None
+    username: Optional[str] = None
+
+
+class ApplianceIps(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
+
+
+class AuthToken(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    reader: Optional[MappingProxyType[str, Any]] = None
+    writer: Optional[MappingProxyType[str, Any]] = None
+
+
+class MetricPatterns(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
+
+
+class Proxy(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    http: Optional[str] = None
+    https: Optional[str] = None
+    no_proxy: Optional[tuple[str, ...]] = None
 
 
 class InstanceConfig(BaseModel):
@@ -26,10 +79,54 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    allow_redirects: Optional[bool] = None
+    appliance_credentials: Optional[tuple[ApplianceCredential, ...]] = None
+    appliance_ips: Optional[ApplianceIps] = None
+    auth_token: Optional[AuthToken] = None
+    auth_type: Optional[str] = None
+    aws_host: Optional[str] = None
+    aws_region: Optional[str] = None
+    aws_service: Optional[str] = None
+    connect_timeout: Optional[float] = None
+    disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
+    extra_headers: Optional[MappingProxyType[str, Any]] = None
+    headers: Optional[MappingProxyType[str, Any]] = None
+    kerberos_auth: Optional[Literal['required', 'optional', 'disabled']] = None
+    kerberos_cache: Optional[str] = None
+    kerberos_delegate: Optional[bool] = None
+    kerberos_force_initiate: Optional[bool] = None
+    kerberos_hostname: Optional[str] = None
+    kerberos_keytab: Optional[str] = None
+    kerberos_principal: Optional[str] = None
+    log_requests: Optional[bool] = None
+    max_backfill_minutes: Optional[int] = Field(None, ge=1)
+    max_concurrency: Optional[int] = Field(None, ge=1)
+    metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
+    namespace: Optional[str] = None
+    ntlm_domain: Optional[str] = None
+    orch_ip: str
+    password: str
+    persist_connections: Optional[bool] = None
+    proxy: Optional[Proxy] = None
+    read_timeout: Optional[float] = None
+    request_size: Optional[float] = None
     service: Optional[str] = None
+    skip_proxy: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
+    timeout: Optional[float] = None
+    tls_ca_cert: Optional[str] = None
+    tls_cert: Optional[str] = None
+    tls_ciphers: Optional[tuple[str, ...]] = None
+    tls_ignore_warning: Optional[bool] = None
+    tls_private_key: Optional[str] = None
+    tls_protocols_allowed: Optional[tuple[str, ...]] = None
+    tls_use_host_header: Optional[bool] = None
+    tls_verify: Optional[bool] = None
+    use_legacy_auth_encoding: Optional[bool] = None
+    username: str
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):
@@ -41,6 +138,11 @@ class InstanceConfig(BaseModel):
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
             value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+
+            if info.field_name in SECURE_FIELD_NAMES:
+                validation.security.check_field_trusted_provider(
+                    info.field_name, value, info.context.get('security_config')
+                )
         else:
             value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
