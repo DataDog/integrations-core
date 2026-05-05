@@ -9,8 +9,6 @@ from datadog_checks.quarkus.metrics import METRIC_MAP
 class QuarkusCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'quarkus'
     DEFAULT_METRIC_LIMIT = 0
-    DISCOVERY_PORT_HINTS = [8080]
-    DISCOVERY_METRICS_PATH = "/q/metrics"
 
     def get_default_config(self):
         return {
