@@ -12,9 +12,8 @@
     "name": "[OpenAI] Abnormally high token usage ",
     "options": {
       "include_tags": false,
-      "no_data_timeframe": 10,
+      "on_missing_data": "default",
       "notify_audit": false,
-      "notify_no_data": false,
       "renotify_interval": 0,
       "require_full_window": false,
       "threshold_windows": {
