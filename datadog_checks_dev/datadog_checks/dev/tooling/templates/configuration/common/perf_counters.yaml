@@ -26,7 +26,15 @@
       include: This is the list of regular expressions used to select which instances to monitor.
                If not set, all instances are monitored.
       exclude: This is the list of regular expressions used to select which instances to ignore.
-               If not set, no instances are ignored. Note: `_Total` instances are always ignored.
+               If not set, no instances are ignored. Note: `_Total` instances are ignored by default;
+               set `include_total` to `true` to collect them.
+      include_total: Whether to collect the `_Total` aggregate instance for this performance object.
+                     Defaults to `false`. Most performance objects report `_Total` as the sum of the
+                     individual instances, in which case it is preferable to compute the total in
+                     Datadog. However, some perf objects (e.g. `MSExchangeTransport Queues`) report
+                     data on `_Total` that is not derivable from the visible instances, and in that
+                     case opting in restores the missing data without forcing the collection of every
+                     individual instance.
       include_fast: This is the list of wildcards or exact instance names used to select which
                     instances to monitor. It is faster than the regular expression `include` filter
                     because it relies on the Windows PDH built-in wildcard filtering.
@@ -95,6 +103,8 @@
         type: array
         items:
           type: string
+      - name: include_total
+        type: boolean
       - name: instance_counts
         type: object
         properties:
