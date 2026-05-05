@@ -223,12 +223,31 @@ class PostgresDiagnose:
     def _diagnose_version(self, conn):
         code = DatabaseConfigurationError.postgres_version_unsupported
         try:
-            raw_version = _fetchone(conn, "SHOW SERVER_VERSION")[0]
+            with conn.cursor() as cursor:
+                cursor.execute("SHOW SERVER_VERSION")
+                row = cursor.fetchone()
+        except psycopg.Error as e:
+            self._fail(
+                code,
+                diagnosis="Unable to determine Postgres version: {}".format(e),
+                category=CATEGORY_POSTGRES,
+                rawerror=str(e),
+            )
+            return
+        if not row or row[0] is None:
+            self._fail(
+                code,
+                diagnosis="Unable to determine Postgres version: SHOW SERVER_VERSION returned no rows.",
+                category=CATEGORY_POSTGRES,
+            )
+            return
+        raw_version = row[0]
+        try:
             version = VersionUtils.parse_version(raw_version)
         except Exception as e:
             self._fail(
                 code,
-                diagnosis="Unable to determine Postgres version: {}".format(e),
+                diagnosis="Unable to parse Postgres version {!r}: {}".format(raw_version, e),
                 category=CATEGORY_POSTGRES,
                 rawerror=str(e),
             )
@@ -364,17 +383,37 @@ class PostgresDiagnose:
     def _diagnose_pg_monitor_role(self, conn):
         # pg_monitor only exists on PG >= 10.
         code = DatabaseConfigurationError.missing_pg_monitor_role
-        row = _fetchone(
-            conn,
-            "SELECT 1 FROM pg_roles WHERE rolname = 'pg_monitor'",
-        )
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT 1 FROM pg_roles WHERE rolname = 'pg_monitor'")
+                row = cursor.fetchone()
+        except psycopg.Error as e:
+            self._fail(
+                code,
+                diagnosis="Unable to check pg_monitor role membership: {}".format(e),
+                category=CATEGORY_POSTGRES,
+                description=DIAGNOSTIC_METADATA[code]["description"],
+                remediation=build_remediation(code),
+                rawerror=str(e),
+            )
+            return
         if row is None:
             # PG < 10 has no pg_monitor role — the version diagnostic handles unsupported versions.
             return
-        has_role = _fetchone(
-            conn,
-            "SELECT pg_has_role(current_user, 'pg_monitor', 'MEMBER')",
-        )
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT pg_has_role(current_user, 'pg_monitor', 'MEMBER')")
+                has_role = cursor.fetchone()
+        except psycopg.Error as e:
+            self._fail(
+                code,
+                diagnosis="Unable to check pg_monitor role membership: {}".format(e),
+                category=CATEGORY_POSTGRES,
+                description=DIAGNOSTIC_METADATA[code]["description"],
+                remediation=build_remediation(code),
+                rawerror=str(e),
+            )
+            return
         if has_role and has_role[0]:
             self._check.diagnosis.success(
                 name=code.value,

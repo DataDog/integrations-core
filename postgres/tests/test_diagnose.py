@@ -407,6 +407,34 @@ def test_unsupported_postgres_version_fails(integration_check, pg_instance):
     assert '9.5' in entry['diagnosis']
 
 
+def test_version_probe_psycopg_error_surfaces_underlying_message(integration_check, pg_instance):
+    """A transient connection error during the version probe should surface the underlying
+    psycopg error, not 'NoneType' object is not subscriptable from indexing a swallowed None."""
+    check = integration_check(pg_instance)
+    responses = _override(
+        _happy_server_responses(),
+        'SHOW SERVER_VERSION',
+        psycopg.OperationalError('server closed the connection unexpectedly'),
+    )
+    diagnoses = _run(check, responses)
+    entry = _by_name(diagnoses, DatabaseConfigurationError.postgres_version_unsupported.value)[0]
+    assert entry['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert 'server closed the connection unexpectedly' in entry['diagnosis']
+    assert 'NoneType' not in entry['diagnosis']
+
+
+def test_version_probe_no_rows_fails_clearly(integration_check, pg_instance):
+    """An empty result from SHOW SERVER_VERSION should fail with a clear message rather than
+    crash on None subscripting."""
+    check = integration_check(pg_instance)
+    responses = _override(_happy_server_responses(), 'SHOW SERVER_VERSION', [])
+    diagnoses = _run(check, responses)
+    entry = _by_name(diagnoses, DatabaseConfigurationError.postgres_version_unsupported.value)[0]
+    assert entry['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert 'NoneType' not in entry['diagnosis']
+    assert 'SHOW SERVER_VERSION' in entry['diagnosis']
+
+
 # -- Privilege diagnostics ----------------------------------------------------
 
 
@@ -417,6 +445,35 @@ def test_missing_pg_monitor_role_fails(integration_check, pg_instance):
     entry = _by_name(diagnoses, DatabaseConfigurationError.missing_pg_monitor_role.value)[0]
     assert entry['result'] == Diagnosis.DIAGNOSIS_FAIL
     assert 'pg_monitor' in entry['remediation']
+
+
+def test_pg_monitor_role_existence_probe_psycopg_error_surfaces_underlying_message(integration_check, pg_instance):
+    """A transient error on the pg_roles probe must not be mistaken for PG < 10 (silent skip)."""
+    check = integration_check(pg_instance)
+    responses = _override(
+        _happy_server_responses(),
+        "rolname = 'pg_monitor'",
+        psycopg.OperationalError('server closed the connection unexpectedly'),
+    )
+    diagnoses = _run(check, responses)
+    entry = _by_name(diagnoses, DatabaseConfigurationError.missing_pg_monitor_role.value)[0]
+    assert entry['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert 'server closed the connection unexpectedly' in entry['diagnosis']
+
+
+def test_pg_monitor_has_role_probe_psycopg_error_surfaces_underlying_message(integration_check, pg_instance):
+    """A transient error on the pg_has_role probe must not be misclassified as 'not a member'."""
+    check = integration_check(pg_instance)
+    responses = _override(
+        _happy_server_responses(),
+        'pg_has_role',
+        psycopg.OperationalError('server closed the connection unexpectedly'),
+    )
+    diagnoses = _run(check, responses)
+    entry = _by_name(diagnoses, DatabaseConfigurationError.missing_pg_monitor_role.value)[0]
+    assert entry['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert 'server closed the connection unexpectedly' in entry['diagnosis']
+    assert 'not a member' not in entry['diagnosis']
 
 
 def test_pg_stat_database_access_fails_on_permission_error(integration_check, pg_instance):
