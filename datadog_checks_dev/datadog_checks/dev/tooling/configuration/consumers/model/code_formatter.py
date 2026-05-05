@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -36,13 +37,18 @@ def format_with_ruff(source: str) -> str:
     except subprocess.CalledProcessError as e:
         # `python -m ruff` exits non-zero when the ruff package is missing,
         # surfacing as ModuleNotFoundError on stderr. Promote that to a
-        # clearer install hint; otherwise propagate the underlying error.
-        if e.stderr and "No module named 'ruff'" in e.stderr:
+        # clearer install hint; otherwise propagate the underlying error
+        # with enough context to reproduce the failure manually.
+        stderr = e.stderr or ''
+        if "No module named 'ruff'" in stderr:
             raise RuntimeError(
                 "Cannot format auto-generated config models: the `ruff` package is not installed in the active "
                 "interpreter. Reinstall `datadog_checks_dev[cli]` (or run `pip install ruff`) and retry."
             ) from e
-        raise RuntimeError(f'`ruff format` failed while formatting auto-generated config models: {e.stderr}') from e
+        details = [f'{shlex.join(args)} failed', f'stderr: {stderr.strip()}']
+        if e.stdout:
+            details.append(f'stdout: {e.stdout.strip()}')
+        raise RuntimeError('`ruff format` failed while formatting auto-generated config models. ' + '; '.join(details)) from e
     return result.stdout
 
 
@@ -53,11 +59,13 @@ def _resolve_ruff_config() -> Path | None:
     to walking up from this module so unit tests, which never call ``set_root``,
     still pick up the same configuration as model regeneration.
     """
-    root = Path(get_root())
-    if root.is_dir():
-        candidate = root / 'pyproject.toml'
-        if _has_ruff_section(candidate):
-            return candidate
+    root_str = get_root()
+    if root_str:
+        root = Path(root_str)
+        if root.is_dir():
+            candidate = root / 'pyproject.toml'
+            if _has_ruff_section(candidate):
+                return candidate
 
     for parent in Path(__file__).resolve().parents:
         candidate = parent / 'pyproject.toml'
@@ -70,6 +78,10 @@ def _has_ruff_section(pyproject: Path) -> bool:
     if not pyproject.is_file():
         return False
     try:
-        return '[tool.ruff' in pyproject.read_text()
+        text = pyproject.read_text()
     except OSError:
         return False
+    return any(
+        stripped == '[tool.ruff]' or stripped.startswith('[tool.ruff.')
+        for stripped in (line.strip() for line in text.splitlines())
+    )
