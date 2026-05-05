@@ -167,6 +167,7 @@ files:
       value:
         type: integer
         example: 5000
+        minimum: 1
 
     - name: health_checks_cache_ttl
       fleet_configurable: true
@@ -175,6 +176,7 @@ files:
       value:
         type: integer
         example: 3600
+        minimum: 1
 
     - template: instances/http
     - template: instances/default
