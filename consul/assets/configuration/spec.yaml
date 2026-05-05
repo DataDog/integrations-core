@@ -158,6 +158,7 @@ files:
         example: true
 
     - name: health_checks_cache_size
+      fleet_configurable: true
       description: |
         Maximum number of health check entries kept in the cache used to detect status
         transitions. Increase this if your Consul cluster reports more than 5000 distinct
@@ -168,6 +169,7 @@ files:
         example: 5000
 
     - name: health_checks_cache_ttl
+      fleet_configurable: true
       description: |
         Time-to-live in seconds for entries in the health check status cache.
       value:

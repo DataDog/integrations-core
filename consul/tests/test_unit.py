@@ -688,6 +688,13 @@ def test_health_checks_cache_configurable():
     assert consul_check.health_checks.ttl == 60
 
 
+def test_health_checks_cache_configurable_via_init_config():
+    init_config = {'health_checks_cache_size': 42, 'health_checks_cache_ttl': 7}
+    consul_check = ConsulCheck(common.CHECK_NAME, init_config, [consul_mocks.MOCK_CONFIG])
+    assert consul_check.health_checks.maxsize == 42
+    assert consul_check.health_checks.ttl == 7
+
+
 def test_health_checks_cache_eviction_re_emits_failure_event(aggregator):
     config = dict(consul_mocks.MOCK_CONFIG_DISABLE_SERVICE_TAG)
     config['collect_health_checks'] = True
