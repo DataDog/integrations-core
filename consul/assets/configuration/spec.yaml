@@ -159,17 +159,17 @@ files:
 
     - name: health_checks_cache_size
       description: |
-        Maximum number of health check entries kept in the in-memory cache used to detect
-        status transitions. Increase if your Consul cluster reports more than 5000 distinct
-        health checks across nodes, otherwise transitions may be missed and failure events
-        may be re-emitted spuriously.
+        Maximum number of health check entries kept in the cache used to detect status
+        transitions. Increase this if your Consul cluster reports more than 5000 distinct
+        health checks across nodes. Evicted entries cause status transitions to be missed
+        and failure events to be re-emitted on subsequent check runs.
       value:
         type: integer
         example: 5000
 
     - name: health_checks_cache_ttl
       description: |
-        Time-to-live (in seconds) for entries in the health check status cache.
+        Time-to-live in seconds for entries in the health check status cache.
       value:
         type: integer
         example: 3600
