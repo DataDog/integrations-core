@@ -28,6 +28,7 @@ class N8nCheck(OpenMetricsBaseCheckV2):
         return {
             'metrics': [METRIC_MAP],
             'rename_labels': RENAME_LABELS_MAP,
+            'raw_metric_prefix': 'n8n_',
         }
 
     def _check_n8n_readiness(self):

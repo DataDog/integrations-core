@@ -1,0 +1,1 @@
+Fix missing metrics: set ``raw_metric_prefix`` to ``n8n_`` in ``get_default_config`` and correct the ``defaults.py`` value from ``n8n`` to ``n8n_`` so the prefix is stripped before matching against the metrics map.
