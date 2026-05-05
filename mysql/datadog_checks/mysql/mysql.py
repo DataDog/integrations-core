@@ -1169,10 +1169,11 @@ class MySql(DatabaseCheck):
         try:
             with closing(db.cursor(CommenterDictCursor)) as cursor:
                 if self.is_mariadb and self._config.replication_channel:
-                    cursor.execute("SET @@default_master_connection = '{0}';".format(self._config.replication_channel))
-                cursor.execute(
-                    show_replica_status_query(self.version, self.is_mariadb, self._config.replication_channel)
+                    cursor.execute("SET @@default_master_connection = %s", (self._config.replication_channel,))
+                query, params = show_replica_status_query(
+                    self.version, self.is_mariadb, self._config.replication_channel
                 )
+                cursor.execute(query, params)
 
                 results = cursor.fetchall()
                 self.log.debug("Getting replication status: %s", results)
