@@ -198,12 +198,9 @@ class PostgresDiagnose:
         """
         host_desc = self._host_desc()
         username = self._check._config.username
-        conn = None
         try:
             conn = self._check._new_connection(dbname)
-        except psycopg.Error as e:
-            if conn is not None:
-                _safe_close(conn)
+        except Exception as e:
             code = DatabaseConfigurationError.connection_failure
             self._fail(
                 code,

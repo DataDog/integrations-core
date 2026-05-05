@@ -283,6 +283,32 @@ def test_probe_connection_uses_pool_configuration(integration_check, pg_instance
     configure.assert_called_once_with(conn)
 
 
+@pytest.mark.parametrize(
+    'err',
+    [
+        pytest.param(
+            __import__('botocore.exceptions', fromlist=['NoCredentialsError']).NoCredentialsError(),
+            id='aws-no-credentials',
+        ),
+        pytest.param(
+            __import__('azure.core.exceptions', fromlist=['ClientAuthenticationError']).ClientAuthenticationError(
+                message='managed identity unavailable'
+            ),
+            id='azure-auth-error',
+        ),
+    ],
+)
+def test_non_psycopg_connection_error_surfaces_fail_diagnostic(integration_check, pg_instance, err):
+    """Non-psycopg exceptions from AWS/Azure token providers must produce a
+    connection-failure FAIL row, not an unhandled traceback."""
+    check = integration_check(pg_instance)
+    with mock.patch('datadog_checks.postgres.postgres.TokenAwareConnection.connect', side_effect=err):
+        diagnoses = _get_diagnoses(check)
+    rows = _by_name(diagnoses, DatabaseConfigurationError.connection_failure.value)
+    assert len(rows) == 1
+    assert rows[0]['result'] == Diagnosis.DIAGNOSIS_FAIL
+
+
 def test_configure_connection_failure_emits_connection_fail_diagnostic(integration_check, pg_instance):
     """When _configure_connection raises on the probe connection, diagnose must close the
     leaked connection and emit a connection-failure FAIL row rather than crashing."""
