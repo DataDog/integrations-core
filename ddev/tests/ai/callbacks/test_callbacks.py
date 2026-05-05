@@ -5,7 +5,7 @@
 import pytest
 
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall
-from ddev.ai.react.callbacks import CallbackSet
+from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.core.types import ToolResult
 
@@ -320,6 +320,71 @@ async def test_phase_start_exception_is_swallowed() -> None:
 
 
 # ---------------------------------------------------------------------------
+# on_phase_finish
+# ---------------------------------------------------------------------------
+
+
+async def test_phase_finish_registered_and_fired() -> None:
+    cb = CallbackSet()
+    fired: list[str] = []
+
+    @cb.on_phase_finish
+    async def h(phase_id: str) -> None:
+        fired.append(phase_id)
+
+    await cb.fire_phase_finish("my-phase")
+    assert fired == ["my-phase"]
+
+
+async def test_phase_finish_receives_correct_phase_id() -> None:
+    cb = CallbackSet()
+    received: list[str] = []
+
+    @cb.on_phase_finish
+    async def h(phase_id: str) -> None:
+        received.append(phase_id)
+
+    await cb.fire_phase_finish("write-code")
+    assert received == ["write-code"]
+
+
+async def test_phase_finish_multiple_handlers_all_fire_in_order() -> None:
+    cb = CallbackSet()
+    fired: list[int] = []
+
+    @cb.on_phase_finish
+    async def first(phase_id: str) -> None:
+        fired.append(1)
+
+    @cb.on_phase_finish
+    async def second(phase_id: str) -> None:
+        fired.append(2)
+
+    @cb.on_phase_finish
+    async def third(phase_id: str) -> None:
+        fired.append(3)
+
+    await cb.fire_phase_finish("p")
+    assert fired == [1, 2, 3]
+
+
+async def test_phase_finish_exception_is_swallowed() -> None:
+    cb = CallbackSet()
+    fired: list[bool] = []
+
+    @cb.on_phase_finish
+    async def bad(phase_id: str) -> None:
+        raise RuntimeError("boom")
+
+    @cb.on_phase_finish
+    async def good(phase_id: str) -> None:
+        fired.append(True)
+
+    await cb.fire_phase_finish("p")
+    assert fired == [True]
+
+
+# ---------------------------------------------------------------------------
 # on_before_agent_send
 # ---------------------------------------------------------------------------
 
@@ -382,3 +447,48 @@ async def test_before_agent_send_exception_is_swallowed() -> None:
 
     await cb.fire_before_agent_send(1)
     assert fired == [True]
+
+
+# ---------------------------------------------------------------------------
+# Callbacks container
+# ---------------------------------------------------------------------------
+
+
+async def test_callbacks_empty_is_noop(response: AgentResponse, tool_call: ToolCall, react_result: ReActResult) -> None:
+    callbacks = Callbacks()
+    await callbacks.fire_agent_response(response, 1)
+    await callbacks.fire_tool_call(tool_call, ToolResult(success=True, data="ok"), 1)
+    await callbacks.fire_complete(react_result)
+    await callbacks.fire_error(RuntimeError("boom"))
+    await callbacks.fire_before_compact()
+    await callbacks.fire_after_compact()
+    await callbacks.fire_before_agent_send(1)
+    await callbacks.fire_phase_start("p")
+    await callbacks.fire_phase_finish("p")
+
+
+async def test_callbacks_dispatches_to_all_sets(response: AgentResponse) -> None:
+    fired_a: list[int] = []
+    fired_b: list[int] = []
+
+    set_a = CallbackSet()
+    set_b = CallbackSet()
+
+    @set_a.on_agent_response
+    async def a(response: AgentResponse, iteration: int) -> None:
+        fired_a.append(iteration)
+
+    @set_b.on_agent_response
+    async def b(response: AgentResponse, iteration: int) -> None:
+        fired_b.append(iteration)
+
+    callbacks = Callbacks([set_a, set_b])
+    await callbacks.fire_agent_response(response, 3)
+
+    assert fired_a == [3]
+    assert fired_b == [3]
+
+
+async def test_callbacks_set_with_no_registered_handlers_is_noop(response: AgentResponse) -> None:
+    callbacks = Callbacks([CallbackSet()])
+    await callbacks.fire_agent_response(response, 1)

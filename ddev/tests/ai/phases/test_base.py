@@ -151,7 +151,7 @@ def _make_phase(
         flow_variables=flow_variables or {},
         config_dir=flow_dir,
         file_registry=FileRegistry(policy=FileAccessPolicy(write_root=flow_dir)),
-        callback_sets=None,
+        callbacks=None,
     )
     phase.queue = message_queue
     return phase, checkpoint_manager
