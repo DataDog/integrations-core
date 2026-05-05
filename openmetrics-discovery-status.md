@@ -10,7 +10,6 @@ Tracks all `generic-openmetrics-scan` integrations from the autoconfig analysis
 | Integration | Image | Port | Notes |
 |---|---|---|---|
 | boundary | `hashicorp/boundary` | 9203 | Custom `discover()` override to also derive `health_endpoint` |
-| celery | `mher/flower` | 5555 | Switched flower service to vanilla image; auth in broker URL |
 | cockroachdb | `cockroachdb/cockroach` | 8080 | Path `/_status/vars`; `discover()` forwarded from V1 wrapper class |
 | kong | `kong` | 8001 | `discover()` forwarded from V1 wrapper class |
 | krakend | `devopsfaith/krakend` | 8080 | |
@@ -52,6 +51,7 @@ meaningless for zero-config discovery.
 
 | Integration | Notes |
 |---|---|
+| celery | The check actually monitors Flower (`mher/flower`), not Celery workers. Flower has a canonical image, but the e2e setup builds a custom image from `./proj` (Celery + Flower installed together, no pinned versions). Switching the flower service to `mher/flower` introduces a version mismatch: the workers build from `./proj` with an unpinned Celery version, while `mher/flower` bundles its own. Additionally, the metrics come from Flower rather than Celery directly — users who don't run Flower (or build it into their own image) get no discovery. |
 | quarkus | Users build their own Quarkus app images with arbitrary names |
 
 ### No Docker e2e environment — no compose setup in tests/

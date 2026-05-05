@@ -16,14 +16,3 @@ def test_check_celery_e2e(dd_agent_check):
         aggregator.assert_metric(name=metric, at_least=1)
 
     aggregator.assert_service_check('celery.flower.openmetrics.health', ServiceCheck.OK)
-
-
-@pytest.mark.e2e
-def test_e2e_discovery(dd_agent_check):
-    aggregator = dd_agent_check(
-        {"init_config": {}, "instances": []},
-        rate=True,
-        discovery_min_instances=1,
-        discovery_timeout=30,
-    )
-    aggregator.assert_service_check('celery.flower.openmetrics.health', ServiceCheck.OK)

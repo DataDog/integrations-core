@@ -32,7 +32,8 @@ services:
     command: celery -A tasks worker --loglevel=DEBUG; celery -A tasks events --dump
 
   flower:
-    image: mher/flower
+    build:
+      context: ./proj
     depends_on:
       - redis-standalone
     ports:
