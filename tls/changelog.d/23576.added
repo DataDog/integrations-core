@@ -1,2 +1,2 @@
 Add SMTP STARTTLS support to TLS check negotiation.
-
+Make SMTP EHLO hostname configurable.
