@@ -12,9 +12,8 @@ from urllib.parse import parse_qsl, unquote_plus, urlencode, urljoin, urlparse, 
 import mock
 import pytest
 import urllib3
-from requests import RequestException
 
-from datadog_checks.base.utils.http_exceptions import HTTPConnectionError
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPRequestError
 from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.spark import SparkCheck
@@ -1154,7 +1153,7 @@ def test_enable_query_name_tag_for_structured_streaming(
 
 def test_do_not_crash_on_version_collection_failure():
     running_apps = {'foo': ('bar', 'http://foo.bar/'), 'foo2': ('bar', 'http://foo.bar/')}
-    rest_requests_to_json = mock.MagicMock(side_effect=[RequestException, []])
+    rest_requests_to_json = mock.MagicMock(side_effect=[HTTPRequestError, []])
 
     c = SparkCheck('spark', {}, [INSTANCE_STANDALONE])
 
