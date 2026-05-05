@@ -30,7 +30,13 @@ dependencies = [
     "click~=8.1.6",
     "coverage",
     "datadog-api-client==2.20.0",
-    "datadog-checks-dev[cli]~=38.0",
+    # TEMPORARY: relaxed from the usual `~=38.0` pin to span the gap between
+    # this PR landing (which bumps datadog-checks-dev to 39 because black is
+    # dropped from its [cli] extras) and the next ddev release. Without this,
+    # GitHub Actions that install ddev from the local repo can't resolve dcd
+    # 39 against ddev's tighter pin. The PR that releases ddev MUST tighten
+    # this back to `~=39.0` (see https://github.com/DataDog/integrations-core/pull/23588).
+    "datadog-checks-dev[cli]>=38.0,<40",
     "hatch>=1.13.0",
     "httpx",
     "jsonpointer",
