@@ -5,7 +5,13 @@
 from typing import Final
 
 import anthropic
-from anthropic.types import MessageParam, ToolParam, ToolResultBlockParam
+from anthropic.types import (
+    CacheControlEphemeralParam,
+    MessageParam,
+    TextBlockParam,
+    ToolParam,
+    ToolResultBlockParam,
+)
 
 from ddev.ai.agent.base import BaseAgent
 from ddev.ai.agent.exceptions import AgentAPIError, AgentConnectionError, AgentError, AgentRateLimitError
@@ -14,6 +20,12 @@ from ddev.ai.tools.registry import ToolRegistry
 
 DEFAULT_MODEL: Final[str] = "claude-sonnet-4-6"
 DEFAULT_MAX_TOKENS: Final[int] = 8192  # max tokens per response
+
+# 1h TTL for the static prefix (system + tools): paid once, read for the whole session.
+STATIC_CACHE_CONTROL: Final[CacheControlEphemeralParam] = {"type": "ephemeral", "ttl": "1h"}
+# Default TTL (currently 5 min, but Anthropic may change it) for the sliding breakpoint
+# on the last user message: re-written each turn, so a longer TTL would be wasted.
+SLIDING_CACHE_CONTROL: Final[CacheControlEphemeralParam] = {"type": "ephemeral"}
 
 
 class AnthropicAgent(BaseAgent[MessageParam]):
@@ -102,6 +114,22 @@ class AnthropicAgent(BaseAgent[MessageParam]):
             for msg in messages
         ]
 
+    @staticmethod
+    def _with_user_cache_breakpoint(
+        content: str | list[ToolResultBlockParam],
+    ) -> list[TextBlockParam | ToolResultBlockParam]:
+        """Return a block list with a sliding cache breakpoint on the last block."""
+        if isinstance(content, str):
+            return [{"type": "text", "text": content, "cache_control": SLIDING_CACHE_CONTROL}]
+        return [*content[:-1], {**content[-1], "cache_control": SLIDING_CACHE_CONTROL}]
+
+    @staticmethod
+    def _with_tools_cache_breakpoint(tool_defs: list[ToolParam]) -> list[ToolParam]:
+        """Return a tool list with a static cache breakpoint on the last tool."""
+        if not tool_defs:
+            return tool_defs
+        return [*tool_defs[:-1], {**tool_defs[-1], "cache_control": STATIC_CACHE_CONTROL}]
+
     async def send(
         self,
         content: str | list[ToolResultMessage],
@@ -114,19 +142,27 @@ class AnthropicAgent(BaseAgent[MessageParam]):
         Returns:
             An AgentResponse object containing the response from the agent.
         """
-        tool_defs = self._get_tool_definitions(allowed_tools)
+        tool_defs = self._with_tools_cache_breakpoint(self._get_tool_definitions(allowed_tools))
 
         api_content: str | list[ToolResultBlockParam] = (
             self._to_tool_result_params(content) if isinstance(content, list) else content
         )
-        user_msg: MessageParam = {"role": "user", "content": api_content}
-        messages = [*self._history, user_msg]
+        user_msg_for_history: MessageParam = {"role": "user", "content": api_content}
+        user_msg_for_request: MessageParam = {
+            "role": "user",
+            "content": self._with_user_cache_breakpoint(api_content),
+        }
+        messages = [*self._history, user_msg_for_request]
+
+        system_param: list[TextBlockParam] = [
+            {"type": "text", "text": self._system_prompt, "cache_control": STATIC_CACHE_CONTROL}
+        ]
 
         try:
             response = await self._client.messages.create(
                 model=self._model,
                 max_tokens=self._max_tokens,
-                system=self._system_prompt,
+                system=system_param,
                 messages=messages,
                 tools=tool_defs if tool_defs else anthropic.NOT_GIVEN,
             )
@@ -174,7 +210,9 @@ class AnthropicAgent(BaseAgent[MessageParam]):
             usage=usage,
         )
 
-        # Save to history only after a successful response.
-        self._history.extend([user_msg, {"role": "assistant", "content": response.content}])
+        # Save to history only after a successful response. Use the unmarked form so the
+        # cache_control breakpoint is only ever on the latest user message — this keeps the
+        # request below the 4-marker limit regardless of conversation length.
+        self._history.extend([user_msg_for_history, {"role": "assistant", "content": response.content}])
 
         return agent_response

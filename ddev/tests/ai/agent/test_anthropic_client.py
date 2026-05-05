@@ -485,3 +485,136 @@ async def test_error_mid_conversation_leaves_history_unchanged() -> None:
         await agent.send("Second message")
 
     assert agent.history == history_after_first
+
+
+# ---------------------------------------------------------------------------
+# Prompt caching: static breakpoints (system + last tool, 1h TTL)
+# ---------------------------------------------------------------------------
+
+
+async def test_system_prompt_sent_as_block_with_static_cache_control() -> None:
+    resp = make_response("end_turn", [make_text_block("ok")])
+    agent, create_mock = make_agent(mock_response=resp)
+
+    await agent.send("Hi")
+
+    assert create_mock.call_args.kwargs["system"] == [
+        {
+            "type": "text",
+            "text": "You are helpful.",
+            "cache_control": {"type": "ephemeral", "ttl": "1h"},
+        }
+    ]
+
+
+@pytest.mark.parametrize(
+    "tool_names",
+    [["only"], ["a", "b"], ["a", "b", "c", "d"]],
+    ids=["single_tool", "two_tools", "four_tools"],
+)
+async def test_only_last_tool_carries_static_cache_control(tool_names: list[str]) -> None:
+    registry = ToolRegistry([FakeTool(n) for n in tool_names])
+    resp = make_response("end_turn", [make_text_block("ok")])
+    agent, create_mock = make_agent(tools=registry, mock_response=resp)
+
+    await agent.send("Hi")
+
+    sent_tools = create_mock.call_args.kwargs["tools"]
+    assert all("cache_control" not in t for t in sent_tools[:-1])
+    assert sent_tools[-1]["cache_control"] == {"type": "ephemeral", "ttl": "1h"}
+
+
+async def test_allowed_tools_subset_places_cache_control_on_last_of_subset() -> None:
+    registry = ToolRegistry([FakeTool(n) for n in ["a", "b", "c"]])
+    resp = make_response("end_turn", [make_text_block("ok")])
+    agent, create_mock = make_agent(tools=registry, mock_response=resp)
+
+    await agent.send("Hi", allowed_tools=["a", "b"])
+
+    sent_tools = create_mock.call_args.kwargs["tools"]
+    assert [t["name"] for t in sent_tools] == ["a", "b"]
+    assert "cache_control" not in sent_tools[0]
+    assert sent_tools[-1]["cache_control"] == {"type": "ephemeral", "ttl": "1h"}
+
+
+# ---------------------------------------------------------------------------
+# Prompt caching: sliding breakpoint on the last user message block (default TTL)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "content",
+    [
+        pytest.param("Hi there", id="str"),
+        pytest.param(
+            [ToolResultMessage(tool_call_id="t1", result=ToolResult(success=True, data="r1"))],
+            id="single_tool_result",
+        ),
+        pytest.param(
+            [ToolResultMessage(tool_call_id=f"t{i}", result=ToolResult(success=True, data=f"r{i}")) for i in range(3)],
+            id="multiple_tool_results",
+        ),
+    ],
+)
+async def test_sliding_cache_control_on_last_user_block_only(
+    content: str | list[ToolResultMessage],
+) -> None:
+    resp = make_response("end_turn", [make_text_block("ok")])
+    agent, create_mock = make_agent(mock_response=resp)
+
+    await agent.send(content)
+
+    blocks = create_mock.call_args.kwargs["messages"][-1]["content"]
+    assert isinstance(blocks, list) and blocks
+    assert all("cache_control" not in b for b in blocks[:-1])
+    assert blocks[-1]["cache_control"] == {"type": "ephemeral"}
+    assert "ttl" not in blocks[-1]["cache_control"]
+
+
+# ---------------------------------------------------------------------------
+# Prompt caching: history must not retain cache_control markers
+# (otherwise multi-turn requests would exceed the 4-marker limit)
+# ---------------------------------------------------------------------------
+
+
+async def test_history_str_message_keeps_raw_str_form() -> None:
+    resp = make_response("end_turn", [make_text_block("ok")])
+    agent, _ = make_agent(mock_response=resp)
+
+    await agent.send("Hi")
+
+    assert agent.history[0] == {"role": "user", "content": "Hi"}
+
+
+async def test_history_tool_result_blocks_have_no_cache_control() -> None:
+    resp = make_response("end_turn", [make_text_block("ok")])
+    agent, _ = make_agent(mock_response=resp)
+
+    tool_results = [
+        ToolResultMessage(tool_call_id=f"t{i}", result=ToolResult(success=True, data=f"r{i}")) for i in range(2)
+    ]
+    await agent.send(tool_results)
+
+    blocks = agent.history[0]["content"]
+    assert all("cache_control" not in b for b in blocks)
+
+
+async def test_multi_turn_only_latest_user_message_in_request_has_cache_control() -> None:
+    first_resp = make_response("tool_use", [make_tool_use_block(id="t1")])
+    second_resp = make_response("end_turn", [make_text_block("done")])
+
+    client = MagicMock(spec=anthropic.AsyncAnthropic)
+    client.messages = MagicMock()
+    client.messages.create = AsyncMock(side_effect=[first_resp, second_resp])
+    client.models = MagicMock()
+    client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
+    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="sp", name="t")
+
+    await agent.send("First")
+    await agent.send([ToolResultMessage(tool_call_id="t1", result=ToolResult(success=True, data="r"))])
+
+    sent_messages = client.messages.create.call_args.kwargs["messages"]
+    assert sent_messages[0] == {"role": "user", "content": "First"}
+    latest_blocks = sent_messages[-1]["content"]
+    assert all("cache_control" not in b for b in latest_blocks[:-1])
+    assert latest_blocks[-1]["cache_control"] == {"type": "ephemeral"}
