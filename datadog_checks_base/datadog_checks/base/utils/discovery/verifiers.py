@@ -19,20 +19,20 @@ TCPPredicate = Callable[[bytes], bool]
 
 
 def status_2xx() -> HTTPPredicate:
-    def predicate(response) -> bool:
+    def predicate(response: "requests.Response") -> bool:
         return 200 <= response.status_code < 300
     return predicate
 
 
 def body_contains(needle: str) -> HTTPPredicate:
-    def predicate(response) -> bool:
+    def predicate(response: "requests.Response") -> bool:
         return 200 <= response.status_code < 300 and needle in response.text
     return predicate
 
 
 def body_matches(pattern: str) -> HTTPPredicate:
     compiled = re.compile(pattern, re.MULTILINE)
-    def predicate(response) -> bool:
+    def predicate(response: "requests.Response") -> bool:
         if not (200 <= response.status_code < 300):
             return False
         return bool(compiled.search(response.text))
@@ -41,12 +41,12 @@ def body_matches(pattern: str) -> HTTPPredicate:
 
 def json_has(required_keys: Iterable[str]) -> HTTPPredicate:
     keys = tuple(required_keys)
-    def predicate(response) -> bool:
+    def predicate(response: "requests.Response") -> bool:
         if not (200 <= response.status_code < 300):
             return False
         try:
             doc = response.json()
-        except (ValueError, Exception):
+        except ValueError:
             return False
         if not isinstance(doc, dict):
             return False
@@ -61,7 +61,7 @@ def is_prometheus_exposition() -> HTTPPredicate:
     application/openmetrics-text, and at least one non-comment line must look
     like a Prometheus metric line.
     """
-    def predicate(response) -> bool:
+    def predicate(response: "requests.Response") -> bool:
         if not (200 <= response.status_code < 300):
             return False
         ctype = response.headers.get("Content-Type", "").lower()

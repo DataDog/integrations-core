@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from unittest.mock import Mock
 
-import pytest
-
 from datadog_checks.base.utils.discovery.verifiers import (
     body_contains,
     body_matches,
