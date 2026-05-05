@@ -106,27 +106,44 @@ def _add_imports(model_file_lines, need_defaults, need_deprecations):
 
 
 def _fix_types(model_file_lines):
-    for i, line in enumerate(model_file_lines):
-        line = model_file_lines[i] = line.replace('dict[', 'MappingProxyType[')
-        if 'list[' not in line:
-            continue
+    # Operate on the joined document (as UTF-8 bytes) so the bracket-tracking
+    # pass below works even when the upstream parser pre-wraps `list[...]`
+    # across multiple lines. Iterating bytes keeps the algorithm safe for
+    # non-ASCII content (descriptions, examples) since `[`, `]`, and `list`
+    # are all single-byte ASCII while UTF-8 continuation bytes never collide
+    # with them.
+    content = '\n'.join(model_file_lines).replace('dict[', 'MappingProxyType[')
+    if 'list[' not in content:
+        model_file_lines[:] = content.split('\n')
+        return
 
-        buffer = bytearray()
-        containers = []
+    encoded = content.encode('utf-8')
+    buffer = bytearray()
+    containers = []
+    open_bracket = ord(b'[')
+    close_bracket = ord(b']')
+    whitespace = (ord(b' '), ord(b'\t'), ord(b'\n'))
 
-        for char in line:
-            if char == '[':
-                if buffer[-4:] == b'list':
-                    containers.append(True)
-                    buffer[-4:] = b'tuple'
-                else:
-                    containers.append(False)
-            elif char == ']' and containers.pop():
-                buffer.extend(b', ...')
+    for byte in encoded:
+        if byte == open_bracket:
+            if buffer[-4:] == b'list':
+                containers.append(True)
+                buffer[-4:] = b'tuple'
+            else:
+                containers.append(False)
+        elif byte == close_bracket and containers and containers.pop():
+            # Insert `, ...` after the last non-whitespace byte already in the
+            # buffer so the sentinel sits on the same line as the previous
+            # content (`tuple[X], ...` style) even when the parser wrapped the
+            # closing `]` onto its own line.
+            insert_at = len(buffer)
+            while insert_at > 0 and buffer[insert_at - 1] in whitespace:
+                insert_at -= 1
+            buffer[insert_at:insert_at] = b', ...'
 
-            buffer.append(ord(char))
+        buffer.append(byte)
 
-        model_file_lines[i] = buffer.decode('utf-8')
+    model_file_lines[:] = buffer.decode('utf-8').split('\n')
 
 
 def _add_secure_fields_constant(model_file_lines, require_trusted_providers):
