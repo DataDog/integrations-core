@@ -137,6 +137,12 @@ instances:
     #
     # start_tls: <START_TLS>
 
+    ## @param smtp_ehlo_hostname - string - optional - default: datadog-agent
+    ## The hostname to use in the SMTP EHLO greeting when start_tls is set to smtp.
+    ## Only used when start_tls is set to smtp.
+    #
+    # smtp_ehlo_hostname: datadog-agent
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

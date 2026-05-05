@@ -9,6 +9,7 @@ This check monitors [TLS][1] protocol versions, certificate expiration and valid
 1. Only TCP is supported.
 2. Only leaf / end user certificates are verified (not intermediate and root certificates).
 3. The `start_tls` option currently supports `postgres`, `mysql`, and `smtp`.
+4. When using `start_tls` with `smtp`, you can optionally configure the EHLO hostname via the `smtp_ehlo_hostname` option (defaults to `datadog-agent`).
 
 **Minimum Agent version:** 6.12.0
 

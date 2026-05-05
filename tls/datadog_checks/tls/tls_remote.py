@@ -35,6 +35,7 @@ class TLSRemoteCheck(object):
             # Convert minutes to seconds
             float(self.agent_check.instance.get('intermediate_cert_refresh_interval', 60)) * 60
         )
+        self._smtp_ehlo_hostname = self.agent_check.instance.get('smtp_ehlo_hostname', 'datadog-agent')
 
     def check(self):
         if not self.agent_check._server:
@@ -162,7 +163,8 @@ class TLSRemoteCheck(object):
             if self._get_smtp_response_code(greeting[0]) != 220:
                 raise Exception('SMTP endpoint returned an unexpected greeting: {}'.format(greeting[0]))
 
-            sock.sendall(b'EHLO datadog-agent\r\n')
+            ehlo_command = 'EHLO {}\r\n'.format(self._smtp_ehlo_hostname).encode('ascii')
+            sock.sendall(ehlo_command)
             capabilities = self._read_smtp_response(sock)
             if self._get_smtp_response_code(capabilities[0]) != 250:
                 raise Exception('SMTP endpoint rejected EHLO command: {}'.format(capabilities[0]))

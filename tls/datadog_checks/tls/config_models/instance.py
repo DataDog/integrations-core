@@ -57,6 +57,7 @@ class InstanceConfig(BaseModel):
     server: str
     server_hostname: Optional[str] = None
     service: Optional[str] = None
+    smtp_ehlo_hostname: Optional[str] = None
     start_tls: Optional[Literal['postgres', 'mysql', 'smtp']] = None
     tags: Optional[tuple[str, ...]] = None
     timeout: Optional[int] = None

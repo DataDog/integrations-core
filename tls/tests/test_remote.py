@@ -367,6 +367,21 @@ def test_starttls_smtp_ok(instance_remote_ok):
     assert sock.sent_commands == [b'EHLO datadog-agent\r\n', b'STARTTLS\r\n']
 
 
+def test_starttls_smtp_custom_ehlo_hostname(instance_remote_ok):
+    c = TLSCheck('tls', {}, [instance_remote_ok])
+    c.instance = {'smtp_ehlo_hostname': 'my-custom-host'}
+    check = TLSRemoteCheck(agent_check=c)
+    check.agent_check._start_tls = 'smtp'
+
+    sock = FakeSmtpSocket(
+        b'220 smtp.valid.mock ESMTP ready\r\n250-smtp.valid.mock\r\n250-STARTTLS\r\n250 SIZE 35882577\r\n220 2.0.0 Ready to start TLS\r\n'
+    )
+
+    check._switch_starttls(sock)
+
+    assert sock.sent_commands == [b'EHLO my-custom-host\r\n', b'STARTTLS\r\n']
+
+
 def test_starttls_smtp_missing_capability(instance_remote_ok):
     c = TLSCheck('tls', {}, [instance_remote_ok])
     check = TLSRemoteCheck(agent_check=c)
