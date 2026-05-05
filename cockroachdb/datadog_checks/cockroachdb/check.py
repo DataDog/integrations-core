@@ -23,6 +23,8 @@ class CockroachdbCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = 'cockroachdb'
 
     DEFAULT_METRIC_LIMIT = 0
+    DISCOVERY_PORT_HINTS = [8080]
+    DISCOVERY_METRICS_PATH = '/_status/vars'
 
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)

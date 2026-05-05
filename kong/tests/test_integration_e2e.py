@@ -87,6 +87,19 @@ def test_connection_failure(aggregator, check, dd_run_check):
     aggregator.all_metrics_asserted()
 
 
+@pytest.mark.e2e
+def test_e2e_discovery(dd_agent_check):
+    from datadog_checks.base.constants import ServiceCheck
+
+    aggregator = dd_agent_check(
+        {"init_config": {}, "instances": []},
+        rate=True,
+        discovery_min_instances=1,
+        discovery_timeout=30,
+    )
+    aggregator.assert_service_check('kong.openmetrics.health', ServiceCheck.OK)
+
+
 @pytest.mark.skipif(platform.python_version() < "3", reason='OpenMetrics V2 is only available with Python 3')
 @pytest.mark.e2e
 def test_e2e_openmetrics_v2(dd_agent_check, instance_openmetrics_v2):

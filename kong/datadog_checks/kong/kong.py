@@ -21,6 +21,10 @@ class Kong(AgentCheck):
 
     """ collects metrics for Kong """
 
+    @classmethod
+    def discover(cls, service):
+        return KongCheck.discover(service)
+
     def __new__(cls, name, init_config, instances):
         instance = instances[0]
 

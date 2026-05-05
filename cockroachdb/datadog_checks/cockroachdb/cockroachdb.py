@@ -10,6 +10,10 @@ from .metrics import METRIC_MAP
 class CockroachdbCheck(OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
 
+    @classmethod
+    def discover(cls, service):
+        return CockroachdbCheckV2.discover(service)
+
     def __new__(cls, name, init_config, instances):
         instance = instances[0]
 

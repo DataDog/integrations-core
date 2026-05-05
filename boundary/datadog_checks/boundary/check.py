@@ -12,6 +12,16 @@ from .metrics import METRIC_MAP
 class BoundaryCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = 'boundary'
     DEFAULT_METRIC_LIMIT = 0
+    DISCOVERY_PORT_HINTS = [9203]
+
+    @classmethod
+    def discover(cls, service):
+        instances = super().discover(service)
+        if instances:
+            for instance in instances:
+                base = instance['openmetrics_endpoint'].rsplit('/', 1)[0]
+                instance['health_endpoint'] = f"{base}/health"
+        return instances
 
     SERVICE_CHECK_CONTROLLER_HEALTH = 'controller.health'
 

@@ -11,6 +11,16 @@ from .common import HEALTH_ENDPOINT, METRIC_ENDPOINT
 pytestmark = [pytest.mark.e2e]
 
 
+def test_e2e_discovery(dd_agent_check):
+    aggregator = dd_agent_check(
+        {"init_config": {}, "instances": []},
+        rate=True,
+        discovery_min_instances=1,
+        discovery_timeout=30,
+    )
+    aggregator.assert_service_check('boundary.openmetrics.health', ServiceCheck.OK)
+
+
 def test(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
     custom_tags = instance['tags']

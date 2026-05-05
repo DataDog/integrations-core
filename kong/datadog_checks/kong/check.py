@@ -10,6 +10,7 @@ class KongCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'kong'
 
     DEFAULT_METRIC_LIMIT = 0
+    DISCOVERY_PORT_HINTS = [8001]
 
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)

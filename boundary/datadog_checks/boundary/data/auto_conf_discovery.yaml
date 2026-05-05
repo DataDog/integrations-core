@@ -1,0 +1,5 @@
+ad_identifiers:
+  - hashicorp/boundary
+discovery: {}
+init_config:
+instances: []

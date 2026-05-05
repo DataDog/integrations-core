@@ -1,0 +1,5 @@
+ad_identifiers:
+  - kong
+discovery: {}
+init_config:
+instances: []
