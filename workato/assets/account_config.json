@@ -1,0 +1,14 @@
+{
+  "supported_auth_methods": [],
+  "additional_config_fields": [
+    {
+      "type": "password",
+      "key": "api_token",
+      "label": "API client token",
+      "help": "Workato API client token for authentication.",
+      "editable": true,
+      "required": true
+    }
+  ],
+  "dataflow_config": []
+}
