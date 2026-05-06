@@ -23,16 +23,9 @@ if TYPE_CHECKING:
     from datadog_checks.nutanix.check import NutanixCheck
 
 
-# Sentinel values from the Nutanix v4.0 specs that should be treated as unknown.
-_SENTINEL_STATE_VALUES = frozenset({"$unknown", "$redacted", "undetermined"})
-
-
 def _norm_state(value: object) -> str:
-    """Lowercase ``value``, mapping spec sentinels and missing values to ``unknown``."""
-    if not isinstance(value, str) or not value:
-        return "unknown"
-    normalized = value.lower()
-    return "unknown" if normalized in _SENTINEL_STATE_VALUES else normalized
+    """Lowercase ``value``; missing values fall back to ``$unknown`` (the API's spec sentinel)."""
+    return value.lower() if isinstance(value, str) and value else "$unknown"
 
 
 @dataclass
@@ -480,7 +473,7 @@ class InfrastructureMonitor:
         node_status_ok = {"NORMAL", "NEW_NODE", "PREPROTECTED"}
         node_status_warning = {"TO_BE_PREPROTECTED", "TO_BE_REMOVED", "OK_TO_BE_REMOVED"}
 
-        node_status = host.get("nodeStatus", "$UNKNOWN")
+        node_status = host.get("nodeStatus")
 
         if node_status in node_status_ok:
             status_value = 0
@@ -489,7 +482,7 @@ class InfrastructureMonitor:
         else:
             status_value = 2
 
-        status_tags = host_tags + [f"ntnx_node_status:{node_status}"]
+        status_tags = host_tags + [f"ntnx_node_status:{_norm_state(node_status)}"]
         self.check.gauge("host.status", status_value, hostname=hostname, tags=status_tags)
 
     def _extract_host_tags(self, host: dict) -> list[str]:
@@ -501,16 +494,13 @@ class InfrastructureMonitor:
         if host_name := host.get("hostName"):
             tags.append(f"ntnx_host_name:{host_name}")
 
-        if host_type := host.get("hostType"):
-            tags.append(f"ntnx_host_type:{host_type}")
-
+        tags.append(f"ntnx_host_type:{_norm_state(host.get('hostType'))}")
         tags.append(f"ntnx_maintenance_state:{_norm_state(host.get('maintenanceState'))}")
 
         # hypervisor tags
         if hypervisor_name := get_nested(host, "hypervisor/fullName"):
             tags.append(f"ntnx_hypervisor_name:{hypervisor_name}")
-        if hypervisor_type := get_nested(host, "hypervisor/type"):
-            tags.append(f"ntnx_hypervisor_type:{hypervisor_type}")
+        tags.append(f"ntnx_hypervisor_type:{_norm_state(get_nested(host, 'hypervisor/type'))}")
         tags.append(f"ntnx_connection_state:{_norm_state(get_nested(host, 'hypervisor/acropolisConnectionState'))}")
 
         # Add category tags
@@ -623,13 +613,13 @@ class InfrastructureMonitor:
                 self._disks_by_host.setdefault(node_id, []).append(disk)
 
     def _aggregate_disk_status(self, disks: list[dict]) -> str:
-        """Return the worst disk status across ``disks``: degraded > normal > unknown."""
+        """Return the worst disk status across ``disks``: degraded > normal > $unknown."""
         statuses = {d.get("status") for d in disks if d.get("status")}
         if statuses & DEGRADED_DISK_STATUSES:
             return "degraded"
         if "NORMAL" in statuses:
             return "normal"
-        return "unknown"
+        return "$unknown"
 
     def _get_disk_status_storage_tags(self, host_id: str) -> dict[str, list[str]]:
         """Return per-key extra tags adding ``ntnx_disk_status`` on host storage_* metrics."""

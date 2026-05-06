@@ -46,7 +46,7 @@ def test_host_status_metrics(dd_run_check, aggregator, mock_instance, mock_http_
     dd_run_check(check)
 
     aggregator.assert_metric(
-        "nutanix.host.status", value=0, tags=HOST_TAGS + ['ntnx_node_status:NORMAL'], hostname=HOST_NAME
+        "nutanix.host.status", value=0, tags=HOST_TAGS + ['ntnx_node_status:normal'], hostname=HOST_NAME
     )
 
 
