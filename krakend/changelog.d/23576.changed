@@ -1,0 +1,1 @@
+Migrate to Python discover() classmethod for advanced auto-config; auto_conf_discovery.yaml no longer carries an instance template.
