@@ -1,0 +1,1 @@
+Add Service/Port types and probe helpers (http_probe, tcp_probe, candidate_ports, verifier predicates) under datadog_checks.base.utils.discovery for advanced auto-config.
