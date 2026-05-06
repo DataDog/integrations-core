@@ -9,16 +9,14 @@ from .service import Port, Service
 def candidate_ports(service: Service, hints: Iterable[int]) -> Iterator[Port]:
     """Yield ports to probe for a service, hint-first then remaining.
 
-    Hints are always yielded (with the port name from the service when known,
-    or an empty name when only declared via a docker-compose mapping that
-    doesn't reach the EXPOSE list). Duplicates are collapsed.
+    Hints not exposed by the service are skipped; duplicates are collapsed.
     """
     by_number = {p.number: p for p in service.ports}
     seen: set[int] = set()
     for h in hints:
-        if h not in seen:
+        if h in by_number and h not in seen:
             seen.add(h)
-            yield by_number.get(h) or Port(number=h)
+            yield by_number[h]
     for p in service.ports:
         if p.number not in seen:
             seen.add(p.number)
