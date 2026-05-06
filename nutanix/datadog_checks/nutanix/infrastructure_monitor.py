@@ -154,11 +154,10 @@ class InfrastructureMonitor:
         for cluster in clusters:
             cluster_id = cluster.get("extId")
             cluster_name = cluster.get("name")
+            cluster_label = cluster_name or "unknown"
 
             if self._is_prism_central_cluster(cluster):
-                self.check.log.info(
-                    "[%s] Skipping Prism Central cluster: %s", self._pc_label, cluster_name or "unknown"
-                )
+                self.check.log.info("[%s] Skipping Prism Central cluster: %s", self._pc_label, cluster_label)
                 self._collect_pc_version_metadata(cluster)
                 skipped += 1
                 continue
@@ -168,9 +167,7 @@ class InfrastructureMonitor:
                 continue
 
             if not cluster_id:
-                self.check.log.warning(
-                    "[%s] Cluster %s has no extId, skipping", self._pc_label, cluster_name or "unknown"
-                )
+                self.check.log.warning("[%s] Cluster %s has no extId, skipping", self._pc_label, cluster_label)
                 skipped += 1
                 continue
 
