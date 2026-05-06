@@ -68,6 +68,25 @@ instances:
 ```
 The `policy_validation_flags` [suppress specific validation errors][12] that may not be relevant for your use case. See the [`sample windows_certificate.d/conf.yaml`][4] for a list of all the flags available for use.
 
+Beginning with Agent v7.80.0, the integration supports `certificate_store_regex`, a list of [Go `regexp`][13] patterns matched against store names enumerated from `HKEY_LOCAL_MACHINE\Software\Microsoft\SystemCertificates`. Either `certificate_store`, `certificate_store_regex`, or both must be configured.
+
+This example configuration monitors all certificates in the `ROOT` store as well as any stores whose names start with `Trusted`:
+
+```yaml
+instances:
+  - certificate_store: ROOT
+    certificate_store_regex:
+      - ^Trusted
+```
+
+This example configuration monitors all certificates across all stores:
+
+```yaml
+instances:
+  - certificate_store_regex:
+      - .*
+```
+
 ### Tags
 
 The integration automatically tags all metrics and service checks with the name of the store in the `certificate_store:<STORE>` tag. Certificate metrics and service checks are tagged with the certificate's subjects, thumbprints and serial numbers. CRL metrics and service checks are tagged with the CRL's issuer and thumbprint.
@@ -115,3 +134,4 @@ Need additional help? Contact [Datadog support][9].
 [10]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [11]: https://learn.microsoft.com/en-us/windows-server/networking/technologies/nps/network-policy-server-certificate-revocation-list-overview
 [12]: https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/ns-wincrypt-cert_chain_policy_para
+[13]: https://pkg.go.dev/regexp/syntax
