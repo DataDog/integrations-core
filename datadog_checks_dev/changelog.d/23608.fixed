@@ -1,1 +1,1 @@
-Fix `get_agent_requirement_line` to handle `Supported OS::AIX` classifier tag.
+Fix `get_agent_requirement_line` to ignore unknown OS platforms (e.g. `Supported OS::AIX`) when computing agent requirement lines.
