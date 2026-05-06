@@ -52,4 +52,4 @@ def _aggregate(agg_type: AggType, values: list[float]) -> float:
         return min(values)
     if agg_type is AggType.LAST:
         return values[-1]
-    raise ValueError("Invalid aggregation type: %s", agg_type)
+    raise ValueError(f"Invalid aggregation type: {agg_type}")

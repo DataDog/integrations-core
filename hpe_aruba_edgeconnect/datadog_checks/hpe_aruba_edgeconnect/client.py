@@ -34,7 +34,7 @@ class OrchestratorClient:
         return resp.json()
 
     def get_overlay_config(self) -> dict[str, str]:
-        resp = self._http.get(f'{self._base_url}/gms/rest/gms/overlays3/config')
+        resp = self._http.get(f'{self._base_url}/gms/rest/gms/overlays/config')
         resp.raise_for_status()
         data = resp.json()
         overlay_map: dict[str, str] = {}

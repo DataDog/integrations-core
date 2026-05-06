@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import os
 import tarfile
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from io import BytesIO
 from typing import TYPE_CHECKING, ClassVar
@@ -102,19 +103,41 @@ class MinuteStats:
                     timestamp,
                 )
 
-        self.interfaces = list(InterfaceStats.parse(self.get('interface.csv'), self._log))
-        self.interface_peaks = list(InterfacePeakStats.parse(self.get('interface_peak.csv'), self._log))
-        self.tunnels = list(TunnelV2Stats.parse(self.get('tunnel_v2.txt')))
-        self.tunnel_peaks = list(TunnelPeakStats.parse(self.get('tunnel_peak.csv')))
-        self.jitter = list(JitterStats.parse(self.get('jitter.csv')))
-        self.mos = list(MosStats.parse(self.get('mos.csv')))
-        self.dscp = list(DscpStats.parse(self.get('dscp.csv')))
-        self.dscp_peaks = list(DscpPeakStats.parse(self.get('dscp_peak.csv')))
-        self.tunnel_availability = list(TunnelAvailability.parse(self.get('tunnel_availability_v2.txt')))
-        self.interface_overlays = list(InterfaceOverlayStats.parse(self.get('interface_overlay.csv')))
-        self.probes = list(ProbeStats.parse(self.get('probe_v2.txt')))
-        self.shaper = list(ShaperStats.parse(self.get('shaper.csv')))
-        self.appperf = list(AppperfStats.parse(self.get('appperf_v2.txt')))
+        self.interfaces = self._safe_parse(
+            'interface.csv', lambda: InterfaceStats.parse(self.get('interface.csv'), self._log)
+        )
+        self.interface_peaks = self._safe_parse(
+            'interface_peak.csv', lambda: InterfacePeakStats.parse(self.get('interface_peak.csv'), self._log)
+        )
+        self.tunnels = self._safe_parse('tunnel_v2.txt', lambda: TunnelV2Stats.parse(self.get('tunnel_v2.txt')))
+        self.tunnel_peaks = self._safe_parse(
+            'tunnel_peak.csv', lambda: TunnelPeakStats.parse(self.get('tunnel_peak.csv'))
+        )
+        self.jitter = self._safe_parse('jitter.csv', lambda: JitterStats.parse(self.get('jitter.csv')))
+        self.mos = self._safe_parse('mos.csv', lambda: MosStats.parse(self.get('mos.csv')))
+        self.dscp = self._safe_parse('dscp.csv', lambda: DscpStats.parse(self.get('dscp.csv')))
+        self.dscp_peaks = self._safe_parse('dscp_peak.csv', lambda: DscpPeakStats.parse(self.get('dscp_peak.csv')))
+        self.tunnel_availability = self._safe_parse(
+            'tunnel_availability_v2.txt', lambda: TunnelAvailability.parse(self.get('tunnel_availability_v2.txt'))
+        )
+        self.interface_overlays = self._safe_parse(
+            'interface_overlay.csv', lambda: InterfaceOverlayStats.parse(self.get('interface_overlay.csv'))
+        )
+        self.probes = self._safe_parse('probe_v2.txt', lambda: ProbeStats.parse(self.get('probe_v2.txt')))
+        self.shaper = self._safe_parse('shaper.csv', lambda: ShaperStats.parse(self.get('shaper.csv')))
+        self.appperf = self._safe_parse('appperf_v2.txt', lambda: AppperfStats.parse(self.get('appperf_v2.txt')))
+
+    def _safe_parse[T](self, filename: str, parser: Callable[[], Iterator[T]]) -> list[T]:
+        try:
+            return list(parser())
+        except Exception:
+            self._log.exception(
+                "Failed to parse %s for appliance %s at timestamp %d; skipping this file",
+                filename,
+                self.appliance_ip,
+                self.timestamp,
+            )
+            return []
 
     def get(self, filename: str) -> str:
         return self.files.get(filename, '')

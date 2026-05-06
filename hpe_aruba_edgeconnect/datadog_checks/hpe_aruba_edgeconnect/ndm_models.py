@@ -10,6 +10,8 @@ from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from .parsers.tunnel import parse_tunnel_alias
+
 if TYPE_CHECKING:
     from datadog_checks.base.log import CheckLoggingAdapter
 
@@ -30,7 +32,6 @@ OPER_STATUS_UP = 1
 OPER_STATUS_DOWN = 2
 
 _VLAN_RE = re.compile(r':v(\d+)$')
-_ALIAS_RE = re.compile(r'^to_(.+)_(\w+-\w+)$')
 
 # https://github.com/DataDog/datadog-agent/blob/main/pkg/collector/corechecks/snmp/internal/report/report_device_metadata.go#L46C1-L61C2
 SUPPORTED_DEVICE_TYPES = frozenset(
@@ -172,7 +173,7 @@ def create_tunnel_metadata(
     overlay_map: dict[str, str],
     log: CheckLoggingAdapter,
 ) -> TunnelMetadata:
-    peer_hostname, wan_labels = _parse_tunnel_alias(tunnel.tunnel_alias)
+    peer_hostname, wan_labels = parse_tunnel_alias(tunnel.tunnel_alias)
     if not peer_hostname:
         log.debug("Peer hostname is not present on the tunnel alias %r", peer_hostname, tunnel.tunnel_alias)
     peer_ip, peer_site = peer_lookup.get(peer_hostname, ('', ''))
@@ -224,10 +225,3 @@ def _bool_to_status(value: bool | None, up: int, down: int) -> int:
 def _parse_vlan(ifname: str) -> int | None:
     m = _VLAN_RE.search(ifname)
     return int(m.group(1)) if m else None
-
-
-def _parse_tunnel_alias(alias: str) -> tuple[str, str]:
-    m = _ALIAS_RE.match(alias)
-    if m:
-        return m.group(1), m.group(2)
-    return '', ''

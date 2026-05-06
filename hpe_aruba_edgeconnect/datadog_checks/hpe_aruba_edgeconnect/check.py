@@ -15,7 +15,15 @@ from .config_models import ConfigMixin
 from .constants import MINUTE_STATS_INTERVAL, NDM_INTERFACE_RESOURCE_TAG
 from .metrics_store import MetricsStore
 from .models import Appliance, Appliances
-from .ndm_models import batch_payloads, create_device_metadata, create_interface_metadata, create_tunnel_metadata
+from .ndm_models import (
+    DeviceMetadata,
+    InterfaceMetadata,
+    TunnelMetadata,
+    batch_payloads,
+    create_device_metadata,
+    create_interface_metadata,
+    create_tunnel_metadata,
+)
 from .parsers.minute_stats import MinuteStats
 from .parsers.tunnel import TunnelV2Stats
 
@@ -42,7 +50,11 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
                 except Exception:
                     self.log.warning("Failed to collect from appliance %s", ap.ip, exc_info=True)
 
-    def _submit_metadata(self, items: list, collect_timestamp: int | None = None) -> None:
+    def _submit_metadata(
+        self,
+        items: list[DeviceMetadata | InterfaceMetadata | TunnelMetadata],
+        collect_timestamp: int | None = None,
+    ) -> None:
         if not items:
             return
         for batch in batch_payloads(self.config.namespace, items, collect_timestamp):
@@ -144,40 +156,54 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         latest_tunnel_stats: list[TunnelV2Stats] = []
         if timestamps:
             store = MetricsStore()
+            last_successful_ts: int | None = None
             for ts in reversed(timestamps):
-                content = client.get_minute_stats(f'st2-{ts}.tgz')
-                minute_stats = MinuteStats(content, app_ip, ts, self.log)
-                minute_stats.record(store, base_tags, device_id)
+                try:
+                    content = client.get_minute_stats(f'st2-{ts}.tgz')
+                    minute_stats = MinuteStats(content, app_ip, ts, self.log)
+                    minute_stats.record(store, base_tags, device_id)
+                except Exception:
+                    self.log.warning(
+                        "Failed to process minute-stats archive st2-%d.tgz for appliance %s, skipping",
+                        ts,
+                        app_ip,
+                        exc_info=True,
+                    )
+                    continue
+                last_successful_ts = ts
                 if minute_stats.tunnels:
                     latest_tunnel_stats = minute_stats.tunnels
             store.flush(self)
-            self.write_persistent_cache(f'last_timestamp:{app_ip}', str(newest))
+            if last_successful_ts is not None:
+                self.write_persistent_cache(f'last_timestamp:{app_ip}', str(last_successful_ts))
         else:
             self.log.debug("Appliance %s stats are up to date (last timestamp: %d)", app_ip, newest)
-            return
 
         collectors = [
             lambda: self._collect_network_interfaces(client, base_tags, device_id, newest),
-            lambda: self._submit_metadata(
-                [
-                    create_tunnel_metadata(
-                        t,
-                        app_ip,
-                        appliance.site,
-                        namespace,
-                        self._peer_lookup,
-                        self._overlay_map,
-                        self.log,
-                    )
-                    for t in latest_tunnel_stats
-                ],
-                newest,
-            ),
             lambda: self._collect_cpu_stats(client, base_tags, newest),
             lambda: self._collect_memory_stats(client, base_tags),
             lambda: self._collect_disk_stats(client, base_tags),
             lambda: self._collect_alarm_stats(client, base_tags),
         ]
+        if latest_tunnel_stats:
+            collectors.append(
+                lambda: self._submit_metadata(
+                    [
+                        create_tunnel_metadata(
+                            t,
+                            app_ip,
+                            appliance.site,
+                            namespace,
+                            self._peer_lookup,
+                            self._overlay_map,
+                            self.log,
+                        )
+                        for t in latest_tunnel_stats
+                    ],
+                    newest,
+                )
+            )
         for collect in collectors:
             try:
                 collect()
@@ -200,10 +226,11 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
                 f'interface_name:{ifname}',
                 f'{NDM_INTERFACE_RESOURCE_TAG}:{device_id}',
             ]
-            if iface.get('admin') is not None:
-                self.gauge('interface.admin.status', 1 if iface['admin'] else 0, tags=iface_tags)
-            if iface.get('oper') is not None:
-                self.gauge('interface.oper.status', 1 if iface['oper'] else 0, tags=iface_tags)
+            status_tags = iface_tags + [
+                f'admin_status:{_interface_status_label(iface.get("admin"))}',
+                f'oper_status:{_interface_status_label(iface.get("oper"))}',
+            ]
+            self.gauge('interface.status', 1, tags=status_tags)
             if iface.get('speed') is not None:
                 self.gauge('interface.speed', iface['speed'], tags=iface_tags)
             interfaces.append(create_interface_metadata(client.app_ip, iface, namespace))
@@ -232,3 +259,9 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         if hw_alarm:
             self.log.debug("Hardware alarm detected on appliance %s", client.app_ip)
         self.gauge('device.hardware.ok', 0 if hw_alarm else 1, tags=base_tags)
+
+
+def _interface_status_label(value: Any) -> str:
+    if value is None:
+        return 'unknown'
+    return 'up' if value else 'down'

@@ -33,7 +33,18 @@ from datadog_checks.hpe_aruba_edgeconnect.constants import (
 )
 from datadog_checks.hpe_aruba_edgeconnect.metrics_store import AggType, MetricsStore
 
-_TUNNEL_ALIAS_RE = re.compile(r'^to_\w+_')
+_TUNNEL_ALIAS_RE = re.compile(r'^to_(.+)_(\w+-\w+)$')
+
+
+def parse_tunnel_alias(alias: str) -> tuple[str, str]:
+    """Extract ``(peer_hostname, wan_labels)`` from a tunnel alias of the form ``to_<peer>_<color>``.
+
+    Returns ``('', '')`` when the alias does not match the expected pattern.
+    """
+    m = _TUNNEL_ALIAS_RE.match(alias)
+    if m:
+        return m.group(1), m.group(2)
+    return '', ''
 
 
 @dataclass(init=False, slots=True)
@@ -224,7 +235,8 @@ class TunnelAvailability:
         self.alias = cols[TUNNEL_AVAIL_COL_ALIAS]
         self.seconds_down = float(cols[TUNNEL_AVAIL_COL_SECONDS_DOWN])
         self.color = cols[TUNNEL_AVAIL_COL_COLOR]
-        self.peer = self.alias.split('_')[1] if _TUNNEL_ALIAS_RE.match(self.alias) else None
+        peer, _ = parse_tunnel_alias(self.alias)
+        self.peer = peer or None
 
     def record(self, store: MetricsStore, base_tags: list[str]) -> None:
         tags = base_tags + [

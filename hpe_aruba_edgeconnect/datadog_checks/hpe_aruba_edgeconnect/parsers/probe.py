@@ -12,14 +12,14 @@ from datadog_checks.hpe_aruba_edgeconnect.constants import (
     PROBE_COL_AVG_LATENCY,
     PROBE_COL_AVG_LOSS,
     PROBE_COL_OPER_UP,
-    PROBE_COL_TUNNEL_ALIAS,
+    PROBE_COL_PROBE_NAME,
 )
 from datadog_checks.hpe_aruba_edgeconnect.metrics_store import AggType, MetricsStore
 
 
 @dataclass(init=False, slots=True)
 class ProbeStats:
-    tunnel_alias: str
+    probe_name: str
     avg_latency: float
     avg_loss: float
     avg_jitter: float
@@ -27,7 +27,7 @@ class ProbeStats:
     oper_up: float
 
     def __init__(self, cols: list[str]) -> None:
-        self.tunnel_alias = cols[PROBE_COL_TUNNEL_ALIAS]
+        self.probe_name = cols[PROBE_COL_PROBE_NAME]
         self.avg_latency = float(cols[PROBE_COL_AVG_LATENCY])
         self.avg_loss = float(cols[PROBE_COL_AVG_LOSS])
         self.avg_jitter = float(cols[PROBE_COL_AVG_JITTER])
@@ -35,7 +35,7 @@ class ProbeStats:
         self.oper_up = float(cols[PROBE_COL_OPER_UP])
 
     def record(self, store: MetricsStore, base_tags: list[str]) -> None:
-        tags = base_tags + [f'probe_target:{self.tunnel_alias}']
+        tags = base_tags + [f'probe_name:{self.probe_name}']
         store.record('circuit.sla.latency', self.avg_latency, tags, AggType.AVG)
         store.record('circuit.sla.loss', self.avg_loss, tags, AggType.AVG)
         store.record('circuit.sla.jitter', self.avg_jitter, tags, AggType.AVG)

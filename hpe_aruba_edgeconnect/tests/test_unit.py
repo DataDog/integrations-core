@@ -86,9 +86,8 @@ EXPECTED_METRIC_COUNTS = {
     'device.memory.usage': 1,
     'device.disk.usage': 1,
     'device.hardware.ok': 1,
-    # Interface admin/oper/speed (from mock — 1 interface)
-    'interface.admin.status': 1,
-    'interface.oper.status': 1,
+    # Interface status/speed (from mock — 1 interface)
+    'interface.status': 1,
     'interface.speed': 1,
     # Interface bandwidth (5 ifname × traffic-type combos across both fixtures)
     'interface.bandwidth.tx.count': 5,
@@ -167,6 +166,19 @@ EXPECTED_METRIC_COUNTS = {
     'qos.class.bandwidth.rx.max': 6,
 }
 
+BASE_DEVICE_TAGS = [
+    'device_namespace:default',
+    'device_ip:10.0.0.1',
+    'device_model:EC-V',
+    'device_hostname:SydneySP01',
+    'softwareVersion:9.3.1',
+    'device_vendor:aruba',
+    'site_id:SYD',
+    'site_name:SYD',
+    'dd.internal.resource:ndm_device:default:10.0.0.1',
+    'dd.internal.resource:ndm_device_user_tags:default:10.0.0.1',
+]
+
 EXPECTED_VALUES = [
     # --- device health ---
     ('device.reachability', 1, []),
@@ -174,10 +186,9 @@ EXPECTED_VALUES = [
     ('device.cpu.usage', 50, []),
     ('device.memory.usage', 60, []),
     ('device.disk.usage', 40, []),
-    ('device.hardware.ok', 1, []),
-    # --- interface admin / oper / speed (from mock) ---
-    ('interface.admin.status', 1, ['interface_name:wan0']),
-    ('interface.oper.status', 1, ['interface_name:wan0']),
+    ('device.hardware.ok', 0, []),
+    # --- interface status / speed (from mock) ---
+    ('interface.status', 1, ['interface_name:wan0', 'admin_status:up', 'oper_status:up']),
     ('interface.speed', 1000000, ['interface_name:wan0']),
     # --- interface bandwidth: wan0 pass-through-unshaped (aggregated across two minutes) ---
     ('interface.bandwidth.tx.count', 158508, ['interface_name:wan0', 'traffic_type:pass-through-unshaped']),
@@ -217,12 +228,12 @@ EXPECTED_VALUES = [
     ('qos.class.drops', 0, ['traffic_class:2', 'drop_type:qos']),
     ('qos.class.drop.percentage', 0, ['traffic_class:2']),
     # --- probe: om_passThrough_9 (averaged across two minutes) ---
-    ('circuit.sla.latency', 0, ['probe_target:om_passThrough_9']),
-    ('circuit.sla.loss', 0, ['probe_target:om_passThrough_9']),
-    ('circuit.sla.jitter', 59.5, ['probe_target:om_passThrough_9']),
+    ('circuit.sla.latency', 0, ['probe_name:om_passThrough_9']),
+    ('circuit.sla.loss', 0, ['probe_name:om_passThrough_9']),
+    ('circuit.sla.jitter', 59.5, ['probe_name:om_passThrough_9']),
     # --- nexthop: om_passThrough_6 admin=60, oper=0 ---
-    ('nexthop.status', 60, ['probe_target:om_passThrough_6', 'status_type:admin']),
-    ('nexthop.status', 0, ['probe_target:om_passThrough_6', 'status_type:oper']),
+    ('nexthop.status', 60, ['probe_name:om_passThrough_6', 'status_type:admin']),
+    ('nexthop.status', 0, ['probe_name:om_passThrough_6', 'status_type:oper']),
 ]
 
 PARSER_CASES = [
@@ -293,7 +304,9 @@ def _mock_appliance_client(tgz_data, newest_timestamp=NEWEST_TS, cpu=50, mem=60,
     client.get_cpu_stats.return_value = {'cpuPct': cpu}
     client.get_memory_stats.return_value = {'memPct': mem}
     client.get_disk_usage.return_value = {'diskPct': disk}
-    client.get_alarms.return_value = alarms if alarms is not None else []
+    client.get_alarms.return_value = (
+        alarms if alarms is not None else {'outstanding': [{'type': 'HW'}, {'type': 'TUNNEL'}]}
+    )
     client.app_ip = '10.0.0.1'
     return client
 
@@ -657,6 +670,15 @@ def test_metric_values(all_metrics_aggregator):
         all_metrics_aggregator.assert_metric(full_name, value=expected_value)
         if tag_subset:
             all_metrics_aggregator.assert_metric_has_tags(full_name, tag_subset)
+
+
+def test_metrics_carry_base_device_tags(all_metrics_aggregator):
+    for metric_name in all_metrics_aggregator.metric_names:
+        if not metric_name.startswith(f'{NS}.'):
+            continue
+        for stub in all_metrics_aggregator.metrics(metric_name):
+            missing = [t for t in BASE_DEVICE_TAGS if t not in stub.tags]
+            assert not missing, f'{metric_name} is missing base device tags {missing}; got {stub.tags}'
 
 
 def test_collection_step_failure_does_not_block_others(dd_run_check, aggregator, mocker, check):

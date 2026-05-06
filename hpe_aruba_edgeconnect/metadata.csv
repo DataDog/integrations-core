@@ -1,15 +1,14 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
-hpe_aruba_edgeconnect.application.latency,gauge,,millisecond,,Application latency,0,hpe_aruba_edgeconnect,application latency,,application:myapp latency_type:total
-hpe_aruba_edgeconnect.circuit.sla.jitter,gauge,,millisecond,,Average SLA probe jitter,0,hpe_aruba_edgeconnect,circuit sla jitter,,probe_target:om_passThrough_6
-hpe_aruba_edgeconnect.circuit.sla.latency,gauge,,millisecond,,Average SLA probe latency,0,hpe_aruba_edgeconnect,circuit sla latency,,probe_target:om_passThrough_6
-hpe_aruba_edgeconnect.circuit.sla.loss,gauge,,percent,,Average SLA probe packet loss,0,hpe_aruba_edgeconnect,circuit sla loss,,probe_target:om_passThrough_6
+hpe_aruba_edgeconnect.application.latency,gauge,,millisecond,,Application latency,0,hpe_aruba_edgeconnect,application latency,,application:myapp latency_type:snd
+hpe_aruba_edgeconnect.circuit.sla.jitter,gauge,,millisecond,,Average SLA probe jitter,0,hpe_aruba_edgeconnect,circuit sla jitter,,probe_name:om_passThrough_6
+hpe_aruba_edgeconnect.circuit.sla.latency,gauge,,millisecond,,Average SLA probe latency,0,hpe_aruba_edgeconnect,circuit sla latency,,probe_name:om_passThrough_6
+hpe_aruba_edgeconnect.circuit.sla.loss,gauge,,percent,,Average SLA probe packet loss,0,hpe_aruba_edgeconnect,circuit sla loss,,probe_name:om_passThrough_6
 hpe_aruba_edgeconnect.device.cpu.usage,gauge,,percent,,CPU usage percentage of the appliance,0,hpe_aruba_edgeconnect,device cpu usage,,appliance_ip:10.0.0.1
 hpe_aruba_edgeconnect.device.disk.usage,gauge,,percent,,Disk usage percentage of the appliance,0,hpe_aruba_edgeconnect,device disk usage,,appliance_ip:10.0.0.1
 hpe_aruba_edgeconnect.device.hardware.ok,gauge,,,,Hardware alarm status of the appliance (1=ok 0=alarm active),0,hpe_aruba_edgeconnect,device hardware ok,,appliance_ip:10.0.0.1
 hpe_aruba_edgeconnect.device.memory.usage,gauge,,percent,,Memory usage percentage of the appliance,0,hpe_aruba_edgeconnect,device memory usage,,appliance_ip:10.0.0.1
 hpe_aruba_edgeconnect.device.reachability,gauge,,,,Whether the appliance is reachable from the orchestrator (1=reachable 0=not),0,hpe_aruba_edgeconnect,device reachability,,appliance_name:SydneySP01
 hpe_aruba_edgeconnect.device.uptime,gauge,,second,,Uptime of the appliance in seconds,0,hpe_aruba_edgeconnect,device uptime,,appliance_name:SydneySP01
-hpe_aruba_edgeconnect.interface.admin.status,gauge,,,,Administrative status of the interface (1=up 2=down),0,hpe_aruba_edgeconnect,interface admin status,,interface_name:wan0
 hpe_aruba_edgeconnect.interface.bandwidth.rx.count,gauge,,byte,,Bytes received on the interface,0,hpe_aruba_edgeconnect,interface bandwidth rx count,,interface_name:wan0
 hpe_aruba_edgeconnect.interface.bandwidth.rx.max,gauge,,byte,,Peak bytes received on the interface,0,hpe_aruba_edgeconnect,interface bandwidth rx max,,interface_name:wan0
 hpe_aruba_edgeconnect.interface.bandwidth.rx.rate,gauge,,byte,second,Receive rate on the interface in bytes per second,0,hpe_aruba_edgeconnect,interface bandwidth rx rate,,interface_name:wan0
@@ -28,13 +27,13 @@ hpe_aruba_edgeconnect.interface.drops.packets.rx.rate,gauge,,packet,second,Forwa
 hpe_aruba_edgeconnect.interface.drops.packets.tx.count,gauge,,packet,,Forward drop packets transmitted on the interface,0,hpe_aruba_edgeconnect,interface drops packets tx count,,interface_name:wan0
 hpe_aruba_edgeconnect.interface.drops.packets.tx.max,gauge,,packet,,Peak forward drop packets transmitted on the interface,0,hpe_aruba_edgeconnect,interface drops packets tx max,,interface_name:wan0
 hpe_aruba_edgeconnect.interface.drops.packets.tx.rate,gauge,,packet,second,Forward drop packets transmitted per second on the interface,0,hpe_aruba_edgeconnect,interface drops packets tx rate,,interface_name:wan0
-hpe_aruba_edgeconnect.interface.oper.status,gauge,,,,Operational status of the interface (1=up 2=down),0,hpe_aruba_edgeconnect,interface oper status,,interface_name:wan0
 hpe_aruba_edgeconnect.interface.speed,gauge,,bit,second,Configured speed of the interface in bits per second,0,hpe_aruba_edgeconnect,interface speed,,interface_name:wan0
+hpe_aruba_edgeconnect.interface.status,gauge,,,,"For each interface of each monitored EdgeConnect appliance, this metric reports always 1 with the admin_status and oper_status as tags, as a 'combined' status that can be used for monitors.",0,hpe_aruba_edgeconnect,interface status,,interface_name:wan0
 hpe_aruba_edgeconnect.interface.utilization.rx.avg,gauge,,percent,,Average receive utilization percentage of the interface,0,hpe_aruba_edgeconnect,interface utilization rx avg,,interface_name:wan0
 hpe_aruba_edgeconnect.interface.utilization.rx.max,gauge,,percent,,Peak receive utilization percentage of the interface,0,hpe_aruba_edgeconnect,interface utilization rx max,,interface_name:wan0
 hpe_aruba_edgeconnect.interface.utilization.tx.avg,gauge,,percent,,Average transmit utilization percentage of the interface,0,hpe_aruba_edgeconnect,interface utilization tx avg,,interface_name:wan0
 hpe_aruba_edgeconnect.interface.utilization.tx.max,gauge,,percent,,Peak transmit utilization percentage of the interface,0,hpe_aruba_edgeconnect,interface utilization tx max,,interface_name:wan0
-hpe_aruba_edgeconnect.nexthop.status,gauge,,,,Nexthop administrative or operational status,0,hpe_aruba_edgeconnect,nexthop status,,probe_target:om_passThrough_6 status_type:admin
+hpe_aruba_edgeconnect.nexthop.status,gauge,,,,Nexthop administrative or operational status,0,hpe_aruba_edgeconnect,nexthop status,,probe_name:om_passThrough_6 status_type:admin
 hpe_aruba_edgeconnect.qos.class.bandwidth.rx.count,gauge,,byte,,Bytes received for the DSCP class,0,hpe_aruba_edgeconnect,qos class bandwidth rx count,,dscp:be side:wan
 hpe_aruba_edgeconnect.qos.class.bandwidth.rx.max,gauge,,byte,,Peak receive bandwidth for the DSCP class in bytes,0,hpe_aruba_edgeconnect,qos class bandwidth rx max,,dscp:be side:wan
 hpe_aruba_edgeconnect.qos.class.bandwidth.rx.rate,gauge,,byte,second,Receive rate for the DSCP class in bytes per second,0,hpe_aruba_edgeconnect,qos class bandwidth rx rate,,dscp:be side:wan
