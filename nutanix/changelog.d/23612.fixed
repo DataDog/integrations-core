@@ -1,0 +1,1 @@
+Skip hosts, VMs, and clusters whose API response is missing the unique identifier (`extId`) or display name, and log a warning. Without these checks the integration could emit metrics with no `hostname` and no entity-name tag, making them impossible to correlate.
