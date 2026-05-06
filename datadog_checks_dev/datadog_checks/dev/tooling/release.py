@@ -118,15 +118,15 @@ def get_agent_requirement_line(check, version, app):
                 continue
             elif value == 'macOS':
                 value = 'mac_os'
-            platform = value.lower()
-            if platform not in PLATFORMS_IGNORE:
-                platforms.append(platform)
+            platforms.append(value.lower())
         platforms.sort()
     else:
         if not m:
             platforms = get_platforms_from_overrides(check, app)
         else:
             platforms = sorted(m.get('supported_os', []))
+
+    platforms = [p for p in platforms if p not in PLATFORMS_IGNORE]
 
     # all platforms
     # using sets to ignore possible sorting in the overrides, if any
