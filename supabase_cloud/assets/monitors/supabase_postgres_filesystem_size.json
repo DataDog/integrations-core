@@ -11,7 +11,7 @@
 	"query": "avg(last_5m):100 - ((avg:supabase.cloud.node.filesystem.avail.bytes{*} by {mountpoint,supabase_project_ref} * 100) / avg:supabase.cloud.node.filesystem.size.bytes{*} by {mountpoint,supabase_project_ref}) > 85",
 	"message": "The Postgres server filesystem {{mountpoint.name}} for project {{supabase_project_ref.name}} {{#is_alert}}is over 85% utilized{{/is_alert}}{{#is_alert_recovery}} is back under 85% utilization{{/is_alert_recovery}}. @example@example.com",
 	"tags": [
-		"integration:supabase-cloud"
+		"source:supabase-cloud"
 	],
 	"options": {
 		"thresholds": {
