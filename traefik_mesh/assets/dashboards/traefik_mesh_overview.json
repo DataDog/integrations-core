@@ -584,17 +584,17 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:traefik_mesh.router.requests.count{$host,$service,$router,code:2*} by {code,router,service}.as_count()"
+                                            "query": "sum:traefik_mesh.router.requests.count{$host,$traefik_service,$router,code:2*} by {code,router,traefik_service}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:traefik_mesh.router.requests.count{$host AND $service AND $router AND code:4* OR code:5*} by {code,router,service}.as_count()"
+                                            "query": "sum:traefik_mesh.router.requests.count{$host AND $traefik_service AND $router AND code:4* OR code:5*} by {code,router,traefik_service}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "sum:traefik_mesh.router.requests.count{$host,$service,$routercode:3*} by {code,router,service}.as_count()"
+                                            "query": "sum:traefik_mesh.router.requests.count{$host,$traefik_service,$router,code:3*} by {code,router,traefik_service}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -633,7 +633,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "sum:traefik_mesh.router.requests.count{$router, $endpoint} by {protocol,service}",
+                                            "query": "sum:traefik_mesh.router.requests.count{$router, $endpoint} by {protocol,traefik_service}",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -694,7 +694,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:traefik_mesh.router.responses.bytes.count{$service, $router, $host} by {service,router,host,protocol}"
+                                            "query": "sum:traefik_mesh.router.responses.bytes.count{$traefik_service, $router, $host} by {traefik_service,router,host,protocol}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -900,17 +900,17 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:traefik_mesh.service.requests.count{$host,$service,$endpoint,code:2*} by {protocol,code,method}.as_count()"
+                                            "query": "sum:traefik_mesh.service.requests.count{$host,$traefik_service,$endpoint,code:2*} by {protocol,code,method}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:traefik_mesh.service.requests.count{$host AND $service AND $endpoint AND code:4* OR code:5*} by {protocol,code,method}.as_count()"
+                                            "query": "sum:traefik_mesh.service.requests.count{$host AND $traefik_service AND $endpoint AND code:4* OR code:5*} by {protocol,code,method}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "sum:traefik_mesh.service.requests.count{$host,$service ,$endpoint,code:3*} by {protocol,code,method}.as_count()"
+                                            "query": "sum:traefik_mesh.service.requests.count{$host,$traefik_service ,$endpoint,code:3*} by {protocol,code,method}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -948,7 +948,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:traefik_mesh.service.requests.count{$host} by {protocol,service,router}",
+                                            "query": "avg:traefik_mesh.service.requests.count{$host} by {protocol,traefik_service,router}",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -1009,7 +1009,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:traefik_mesh.service.responses.bytes.count{$host, $service, $endpoint} by {host,service,endpoint}"
+                                            "query": "sum:traefik_mesh.service.responses.bytes.count{$host, $traefik_service, $endpoint} by {host,traefik_service,endpoint}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1058,7 +1058,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:traefik_mesh.service.server.up{$host, $service, $endpoint} by {service}"
+                                            "query": "sum:traefik_mesh.service.server.up{$host, $traefik_service, $endpoint} by {traefik_service}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1098,7 +1098,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:traefik_mesh.service.request.duration.seconds.sum{$host, $service, $endpoint} by {service,endpoint}"
+                                            "query": "sum:traefik_mesh.service.request.duration.seconds.sum{$host, $traefik_service, $endpoint} by {traefik_service,endpoint}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1452,8 +1452,8 @@
             "default": "*"
         },
         {
-            "name": "service",
-            "prefix": "service",
+            "name": "traefik_service",
+            "prefix": "traefik_service",
             "available_values": [],
             "default": "*"
         },
