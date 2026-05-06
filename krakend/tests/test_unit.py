@@ -4,6 +4,7 @@
 
 from collections.abc import Callable
 from pathlib import Path
+from unittest import mock
 from unittest.mock import patch
 
 import pytest
@@ -187,7 +188,63 @@ def test_discover_custom_path():
 
 
 def test_krakend_inherits_base_discover():
-    # KrakendCheck uses no port hints and /metrics path (base class defaults)
-    assert KrakendCheck.DISCOVERY_PORT_HINTS == []
+    # KrakendCheck hints port 9090 and uses /metrics path
+    assert KrakendCheck.DISCOVERY_PORT_HINTS == [9090]
     assert KrakendCheck.DISCOVERY_METRICS_PATH == "/metrics"
     assert KrakendCheck.__dict__.get("discover") is None  # not overridden
+
+
+def test_trial_mode_probes_and_caches_endpoint(monkeypatch):
+    """KrakendCheck in trial mode probes ports and configures itself on
+    first check() call."""
+    import datadog_checks.base.utils.discovery.http as http_mod
+
+    # Mock http_probe to succeed only on port 9090.
+    def fake_probe(host, port, path, *, verifier, timeout=0.5):
+        return port == 9090
+
+    monkeypatch.setattr(http_mod, "http_probe", fake_probe)
+
+    instance = {
+        "__discovery_service__": {
+            "id": "docker://abc",
+            "host": "10.0.0.5",
+            "ports": [
+                {"number": 8080, "name": "admin"},
+                {"number": 9090, "name": "metrics"},
+            ],
+        },
+    }
+
+    check = KrakendCheck("krakend", {}, [instance])
+
+    # Mock the scraper so we don't actually try to scrape during the test.
+    fake_scraper = mock.MagicMock()
+    monkeypatch.setattr(check, "create_scraper", lambda _config: fake_scraper)
+
+    check.check(instance)
+
+    assert check._discovery_endpoint == "http://10.0.0.5:9090/metrics"
+    assert "http://10.0.0.5:9090/metrics" in check.scrapers
+
+
+def test_trial_mode_no_endpoint_raises(monkeypatch):
+    """When no port responds, the check raises so AD records a failure."""
+    import datadog_checks.base.utils.discovery.http as http_mod
+
+    def fake_probe(host, port, path, *, verifier, timeout=0.5):
+        return False
+
+    monkeypatch.setattr(http_mod, "http_probe", fake_probe)
+
+    instance = {
+        "__discovery_service__": {
+            "id": "docker://abc",
+            "host": "10.0.0.5",
+            "ports": [{"number": 1234, "name": ""}],
+        },
+    }
+
+    check = KrakendCheck("krakend", {}, [instance])
+    with pytest.raises(Exception):
+        check.check(instance)
