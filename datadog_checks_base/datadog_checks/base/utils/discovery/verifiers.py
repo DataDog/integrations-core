@@ -8,39 +8,49 @@ Each public function returns a callable predicate. HTTP predicates take a
 return ``bool``. The factory shape lets check classes declare verifiers as
 class-level attributes, e.g. ``DISCOVERY_VERIFY = body_contains("Total Accesses:")``.
 """
+
 import re
 from collections.abc import Callable, Iterable
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import requests
 
 _PROM_LINE = re.compile(r"^[a-zA-Z_:][a-zA-Z0-9_:]*(\{[^}]*\})?\s+[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?(\s|$)")
 
 
-HTTPPredicate = Callable[["requests.Response"], bool]  # noqa: F821 (forward ref for typing)
+HTTPPredicate = Callable[["requests.Response"], bool]
 TCPPredicate = Callable[[bytes], bool]
 
 
 def status_2xx() -> HTTPPredicate:
     def predicate(response: "requests.Response") -> bool:
         return 200 <= response.status_code < 300
+
     return predicate
 
 
 def body_contains(needle: str) -> HTTPPredicate:
     def predicate(response: "requests.Response") -> bool:
         return 200 <= response.status_code < 300 and needle in response.text
+
     return predicate
 
 
 def body_matches(pattern: str) -> HTTPPredicate:
     compiled = re.compile(pattern, re.MULTILINE)
+
     def predicate(response: "requests.Response") -> bool:
         if not (200 <= response.status_code < 300):
             return False
         return bool(compiled.search(response.text))
+
     return predicate
 
 
 def json_has(required_keys: Iterable[str]) -> HTTPPredicate:
     keys = tuple(required_keys)
+
     def predicate(response: "requests.Response") -> bool:
         if not (200 <= response.status_code < 300):
             return False
@@ -51,6 +61,7 @@ def json_has(required_keys: Iterable[str]) -> HTTPPredicate:
         if not isinstance(doc, dict):
             return False
         return all(k in doc for k in keys)
+
     return predicate
 
 
@@ -61,6 +72,7 @@ def is_prometheus_exposition() -> HTTPPredicate:
     application/openmetrics-text, and at least one non-comment line must look
     like a Prometheus metric line.
     """
+
     def predicate(response: "requests.Response") -> bool:
         if not (200 <= response.status_code < 300):
             return False
@@ -73,16 +85,19 @@ def is_prometheus_exposition() -> HTTPPredicate:
                 continue
             return bool(_PROM_LINE.match(stripped))
         return False
+
     return predicate
 
 
 def response_equals(expected: bytes) -> TCPPredicate:
     def predicate(buf: bytes) -> bool:
         return buf == expected
+
     return predicate
 
 
 def response_starts_with(prefix: bytes) -> TCPPredicate:
     def predicate(buf: bytes) -> bool:
         return buf.startswith(prefix)
+
     return predicate
