@@ -1,0 +1,1 @@
+Normalize all `ntnx_*` tag values to lowercase, with `$unknown` (the API's own sentinel) as the consistent fallback for missing values. Previously `ntnx_host_type`, `ntnx_hypervisor_type`, and `ntnx_node_status` emitted raw uppercase values from the API, and `ntnx_disk_status`'s missing-value fallback was `unknown` instead of `$unknown`.
