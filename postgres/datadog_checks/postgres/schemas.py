@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql
 
 from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollectorConfig
+from datadog_checks.postgres.filters import regex_exclude_clauses, regex_include_clause
 from datadog_checks.postgres.version_utils import V10, V11, VersionUtils
 
 
@@ -236,12 +237,8 @@ class PostgresSchemaCollector(SchemaCollector):
 
     def _get_schemas_query(self):
         query = SCHEMA_QUERY
-        for exclude_regex in self._config.exclude_schemas:
-            query += " AND nspname !~ '{}'".format(exclude_regex)
-        if self._config.include_schemas:
-            query += f" AND ({
-                ' OR '.join(f"nspname ~ '{include_regex}'" for include_regex in self._config.include_schemas)
-            })"
+        query += regex_exclude_clauses("nspname", self._config.exclude_schemas)
+        query += regex_include_clause("nspname", self._config.include_schemas)
         if self._check._config.ignore_schemas_owned_by:
             query += " AND nspowner :: regrole :: text not IN ({})".format(
                 ", ".join(f"'{owner}'" for owner in self._check._config.ignore_schemas_owned_by)
@@ -253,12 +250,8 @@ class PostgresSchemaCollector(SchemaCollector):
             query = PG_TABLES_QUERY_V9
         else:
             query = PG_TABLES_QUERY_V10_PLUS
-        for exclude_regex in self._config.exclude_tables:
-            query += " AND c.relname !~ '{}'".format(exclude_regex)
-        if self._config.include_tables:
-            query += f" AND ({
-                ' OR '.join(f"c.relname ~ '{include_regex}'" for include_regex in self._config.include_tables)
-            })"
+        query += regex_exclude_clauses("c.relname", self._config.exclude_tables)
+        query += regex_include_clause("c.relname", self._config.include_tables)
         return query
 
     def get_rows_query(self):

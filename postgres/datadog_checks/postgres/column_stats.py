@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import re
 import time
 
 import psycopg
@@ -23,6 +24,7 @@ from datadog_checks.base.utils.db.utils import default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
+from .filters import regex_exclude_clauses, regex_include_clause
 from .health import PostgresHealthEvent
 from .util import payload_pg_version
 
@@ -38,7 +40,7 @@ WITH tables AS (
     JOIN pg_namespace n ON n.oid = c.relnamespace
     WHERE n.nspname NOT IN ('pg_catalog', 'information_schema')
       AND c.relkind = 'r'
-      {table_filter}
+      {filters}
     ORDER BY n.nspname, c.relname
     LIMIT {max_tables}
 ),
@@ -84,6 +86,10 @@ class PostgresColumnStatsCollectorConfig:
         self.collection_interval = 14400
         self.max_tables = 500
         self.max_query_duration = 60
+        self.include_databases: list[str] = []
+        self.exclude_databases: list[str] = []
+        self.include_schemas: list[str] = []
+        self.exclude_schemas: list[str] = []
         self.include_tables: list[str] = []
         self.exclude_tables: list[str] = []
 
@@ -99,6 +105,10 @@ class PostgresColumnStatsCollector:
         self._config.collection_interval = check._config.collect_column_stats.collection_interval
         self._config.max_tables = check._config.collect_column_stats.max_tables
         self._config.max_query_duration = int(check._config.collect_column_stats.max_query_duration)
+        self._config.include_databases = list(check._config.collect_column_stats.include_databases or [])
+        self._config.exclude_databases = list(check._config.collect_column_stats.exclude_databases or [])
+        self._config.include_schemas = list(check._config.collect_column_stats.include_schemas or [])
+        self._config.exclude_schemas = list(check._config.collect_column_stats.exclude_schemas or [])
         self._config.include_tables = list(check._config.collect_column_stats.include_tables or [])
         self._config.exclude_tables = list(check._config.collect_column_stats.exclude_tables or [])
         self._function_not_found_dbs: set[str] = set()
@@ -126,22 +136,24 @@ class PostgresColumnStatsCollector:
             "collection_interval": self._config.collection_interval,
         }
 
-    def _build_table_filter(self) -> str:
-        clauses = []
-        if self._config.exclude_tables:
-            for pattern in self._config.exclude_tables:
-                clauses.append(f"c.relname !~ '{pattern}'")
-        if self._config.include_tables:
-            include_clauses = [f"c.relname ~ '{pattern}'" for pattern in self._config.include_tables]
-            clauses.append(f"({' OR '.join(include_clauses)})")
-        if clauses:
-            return 'AND ' + ' AND '.join(clauses)
-        return ''
+    def _build_filters(self) -> str:
+        return (
+            regex_exclude_clauses("n.nspname", self._config.exclude_schemas)
+            + regex_include_clause("n.nspname", self._config.include_schemas)
+            + regex_exclude_clauses("c.relname", self._config.exclude_tables)
+            + regex_include_clause("c.relname", self._config.include_tables)
+        )
 
     def _get_databases(self):
         if self._check.autodiscovery:
-            return list(self._check.autodiscovery.get_items() or [])
-        return [self._check._config.dbname]
+            databases = list(self._check.autodiscovery.get_items() or [])
+        else:
+            databases = [self._check._config.dbname]
+        if self._config.exclude_databases:
+            databases = [db for db in databases if not any(re.search(p, db) for p in self._config.exclude_databases)]
+        if self._config.include_databases:
+            databases = [db for db in databases if any(re.search(p, db) for p in self._config.include_databases)]
+        return databases
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def collect_column_stats(self, tags_no_db: list[str]) -> bool:
@@ -214,7 +226,7 @@ class PostgresColumnStatsCollector:
             with self._check.db_pool.get_connection(db_name) as conn:
                 with conn.cursor(row_factory=dict_row) as cursor:
                     query = COLUMN_STATS_QUERY.format(
-                        table_filter=self._build_table_filter(),
+                        filters=self._build_filters(),
                         max_tables=self._config.max_tables,
                     )
                     cursor.execute(f"SET statement_timeout = '{self._config.max_query_duration}s'")

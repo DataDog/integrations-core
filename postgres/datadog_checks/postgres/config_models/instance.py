@@ -85,7 +85,11 @@ class CollectColumnStats(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    exclude_databases: Optional[tuple[str, ...]] = None
+    exclude_schemas: Optional[tuple[str, ...]] = None
     exclude_tables: Optional[tuple[str, ...]] = None
+    include_databases: Optional[tuple[str, ...]] = None
+    include_schemas: Optional[tuple[str, ...]] = None
     include_tables: Optional[tuple[str, ...]] = None
     max_query_duration: Optional[float] = None
     max_tables: Optional[float] = None

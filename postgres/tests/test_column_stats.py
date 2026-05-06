@@ -308,6 +308,10 @@ def test_collect_column_stats_default_config(integration_check, pg_instance, agg
     # Verify defaults
     assert collector._config.collection_interval == 14400
     assert collector._config.max_tables == 500
+    assert collector._config.include_databases == []
+    assert collector._config.exclude_databases == []
+    assert collector._config.include_schemas == []
+    assert collector._config.exclude_schemas == []
     assert collector._config.include_tables == []
     assert collector._config.exclude_tables == []
 
@@ -739,3 +743,90 @@ def test_collect_column_stats_non_database_error_is_absorbed(check_runner, dbm_i
 
     events = aggregator.get_event_platform_events("dbm-column-stats")
     assert events == [], "Expected no events when the cursor raises a non-DatabaseError"
+
+
+def _analyze_public2_cities(pg_instance):
+    """Insert a row into public2.cities and ANALYZE so it appears in pg_stats for cross-schema tests."""
+    conn = _get_superconn(pg_instance)
+    with conn.cursor() as cur:
+        cur.execute("INSERT INTO public2.cities VALUES ('Tokyo', 'Japan') ON CONFLICT DO NOTHING")
+        cur.execute("ANALYZE public2.cities")
+    conn.close()
+
+
+def test_collect_column_stats_include_schemas(integration_check, dbm_instance, pg_instance, aggregator):
+    """include_schemas restricts the result set to tables in matching schemas."""
+    _analyze_tables(pg_instance)
+    _analyze_public2_cities(pg_instance)
+    dbm_instance['collect_column_stats']['include_schemas'] = ['^public2$']
+    check = integration_check(dbm_instance)
+    run_one_check(check)
+    events = aggregator.get_event_platform_events("dbm-column-stats")
+    assert len(events) > 0
+    schemas_seen = {entry['schema'] for evt in events for entry in evt['column_stats']}
+    assert schemas_seen == {'public2'}
+
+
+def test_collect_column_stats_exclude_schemas(integration_check, dbm_instance, pg_instance, aggregator):
+    """exclude_schemas removes matching schemas from the result set."""
+    _analyze_tables(pg_instance)
+    _analyze_public2_cities(pg_instance)
+    dbm_instance['collect_column_stats']['exclude_schemas'] = ['^public$']
+    check = integration_check(dbm_instance)
+    run_one_check(check)
+    events = aggregator.get_event_platform_events("dbm-column-stats")
+    assert len(events) > 0
+    schemas_seen = {entry['schema'] for evt in events for entry in evt['column_stats']}
+    assert 'public' not in schemas_seen
+    assert 'public2' in schemas_seen
+
+
+def test_collect_column_stats_include_and_exclude_schemas(integration_check, dbm_instance, pg_instance, aggregator):
+    """When both include_schemas and exclude_schemas match a schema, exclude wins."""
+    _analyze_tables(pg_instance)
+    _analyze_public2_cities(pg_instance)
+    dbm_instance['collect_column_stats']['include_schemas'] = ['^public']
+    dbm_instance['collect_column_stats']['exclude_schemas'] = ['^public2$']
+    check = integration_check(dbm_instance)
+    run_one_check(check)
+    events = aggregator.get_event_platform_events("dbm-column-stats")
+    assert len(events) > 0
+    schemas_seen = {entry['schema'] for evt in events for entry in evt['column_stats']}
+    assert schemas_seen == {'public'}
+
+
+def test_collect_column_stats_include_databases(check_runner, dbm_instance, aggregator):
+    """include_databases restricts the database list to names matching the regex."""
+    dbm_instance['collect_column_stats']['include_databases'] = ['^dogs$']
+    check = check_runner(dbm_instance)
+    collector = check.metadata_samples._column_stats_collector
+    autodiscovery = MagicMock()
+    autodiscovery.get_items.return_value = ['datadog_test', 'dogs', 'dogs_3']
+    collector._check.autodiscovery = autodiscovery
+
+    assert collector._get_databases() == ['dogs']
+
+
+def test_collect_column_stats_exclude_databases(check_runner, dbm_instance, aggregator):
+    """exclude_databases removes matching databases from the list."""
+    dbm_instance['collect_column_stats']['exclude_databases'] = ['^dogs']
+    check = check_runner(dbm_instance)
+    collector = check.metadata_samples._column_stats_collector
+    autodiscovery = MagicMock()
+    autodiscovery.get_items.return_value = ['datadog_test', 'dogs', 'dogs_3']
+    collector._check.autodiscovery = autodiscovery
+
+    assert collector._get_databases() == ['datadog_test']
+
+
+def test_collect_column_stats_include_and_exclude_databases(check_runner, dbm_instance, aggregator):
+    """When both filters apply, exclude takes precedence."""
+    dbm_instance['collect_column_stats']['include_databases'] = ['^dogs']
+    dbm_instance['collect_column_stats']['exclude_databases'] = ['^dogs_[345]$']
+    check = check_runner(dbm_instance)
+    collector = check.metadata_samples._column_stats_collector
+    autodiscovery = MagicMock()
+    autodiscovery.get_items.return_value = ['datadog_test', 'dogs', 'dogs_2', 'dogs_3', 'dogs_5', 'dogs_9']
+    collector._check.autodiscovery = autodiscovery
+
+    assert collector._get_databases() == ['dogs', 'dogs_2', 'dogs_9']
