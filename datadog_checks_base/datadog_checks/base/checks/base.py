@@ -186,15 +186,25 @@ class AgentCheck(object):
     def __new__(cls, *args, **kwargs):
         # Trial-mode dispatch: when AD schedules a check with a synthetic
         # __discovery_service__ instance, route construction through a
-        # dynamically-generated proxy subclass that defers real check work
-        # until a candidate config is found. _TrialModeMixin handles the
-        # proxy semantics; the proxy class itself early-returns through
-        # this branch to avoid recursion.
-        if not issubclass(cls, _TrialModeMixin):
+        # _TrialModeProxy that defers real check work until a candidate
+        # config is found. We do NOT subclass cls (target_cls) — rtloader's
+        # subclass detector at three.cpp:727 skips any AgentCheck subclass
+        # that itself has subclasses, so adding a subclass of target_cls
+        # would break the loader for subsequent instantiations of the same
+        # check. Instead, target_cls is stashed on the proxy as an
+        # attribute and looked up at runtime.
+        if cls is not _TrialModeProxy:
             instances = _extract_instances(args, kwargs)
             if instances and instances[0].get("__discovery_service__") is not None:
-                proxy_cls = _TrialModeMixin._proxy_for(cls)
-                return proxy_cls(*args, **kwargs)
+                proxy = super().__new__(_TrialModeProxy)
+                proxy._target_cls = cls
+                # Python does not call __init__ when __new__ returns an
+                # instance whose class is not a subclass of cls. _TrialModeProxy
+                # is not a subclass of cls (we can't subclass cls without
+                # tripping rtloader's "no subclasses" rule), so call __init__
+                # explicitly here.
+                proxy.__init__(*args, **kwargs)
+                return proxy
         return super().__new__(cls)
 
     @classmethod
@@ -1645,38 +1655,26 @@ def _extract_instances(args, kwargs):
     return None
 
 
-class _TrialModeMixin:
-    """Mixin that, combined with a target check class via a dynamically-generated
-    subclass, defers real check work until trial-mode (config-discovery) resolves.
+class _TrialModeProxy(AgentCheck):
+    """Proxy check that defers real work until trial-mode (config-discovery)
+    resolves. ``AgentCheck.__new__`` builds an instance of this class when it
+    sees a ``__discovery_service__`` payload, stashing the original target
+    class on ``self._target_cls``.
 
-    On the first ``run()``, the proxy iterates ``target_cls.generate_configs(service)``,
-    constructs a fresh target_cls instance per candidate (which goes through the
-    full normal __init__ + check_initializations flow), runs it, and commits the
-    first one whose ``run()`` completes without an error report. Subsequent runs
-    delegate to that winning instance.
+    On the first ``run()``, the proxy iterates
+    ``self._target_cls.generate_configs(service)``, constructs a fresh
+    target_cls instance per candidate (going through the full normal
+    ``__init__`` + ``run_check_initializations`` + ``check`` lifecycle),
+    runs it, and commits the first whose ``run()`` returns no error
+    report. Subsequent runs delegate to that winning instance.
 
-    The proxy is invisible to the agent runtime: it has the same ``check_id``
-    and ``provider`` attributes the agent set on it, and ``isinstance(proxy,
-    target_cls)`` is True.
+    The proxy is *not* a subclass of ``target_cls`` — see the rationale in
+    ``AgentCheck.__new__`` (rtloader's subclass detector skips classes that
+    have subclasses, so introducing one would break check loading).
     """
 
-    _proxy_cache: dict[type, type] = {}
-
-    @classmethod
-    def _proxy_for(cls, target_cls):
-        if target_cls not in cls._proxy_cache:
-            cls._proxy_cache[target_cls] = type(
-                f"{target_cls.__name__}TrialProxy",
-                (cls, target_cls),
-                {},
-            )
-        return cls._proxy_cache[target_cls]
-
     def __init__(self, *args, **kwargs):
-        # The trial instance has __discovery_service__ but no real config;
-        # target_cls.__init__ would try to validate or pre-configure against
-        # it and fail. Initialize only AgentCheck-level state here. The
-        # winning candidate gets the full target_cls.__init__ in _run_trial.
+        # _target_cls was set by AgentCheck.__new__ before __init__.
         AgentCheck.__init__(self, *args, **kwargs)
         self._service_dict = self.instance["__discovery_service__"]
         self._winner = None
@@ -1698,13 +1696,12 @@ class _TrialModeMixin:
         return ''
 
     def _run_trial(self):
-        target_cls = self._target_cls()
         last_error = None
         tried = 0
-        for candidate in target_cls.generate_configs(self._service_dict):
+        for candidate in self._target_cls.generate_configs(self._service_dict):
             tried += 1
-            inst = target_cls(self.name, self.init_config, [candidate])
-            # rtloader sets these two attributes on the agent-visible check
+            inst = self._target_cls(self.name, self.init_config, [candidate])
+            # rtloader sets check_id and provider on the agent-visible check
             # after construction; mirror them onto the candidate so its
             # metric submissions key off the same check_id as the proxy.
             inst.check_id = self.check_id
@@ -1717,7 +1714,3 @@ class _TrialModeMixin:
         if tried == 0:
             raise ConfigurationError("config-discovery: generate_configs() yielded no candidates")
         raise ConfigurationError(f"config-discovery: no candidate accepted by check() ({last_error})")
-
-    def _target_cls(self):
-        # Proxy MRO is [proxy_cls, _TrialModeMixin, target_cls, ...]
-        return type(self).__mro__[2]

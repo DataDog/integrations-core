@@ -34,10 +34,20 @@ def test_check(dd_agent_check, instance, metrics):
 
 
 def test_e2e_discovery(dd_agent_check):
+    # The auto_conf_discovery's `rayproject/ray` ad_identifier matches all six
+    # containers in the test environment: head + 3 workers (which serve
+    # /metrics on 8080) and 2 task-runner containers (ray-call-apis,
+    # ray-echo-task) that don't serve metrics. With `discovery_min_instances`
+    # set lower than the expected match count, the agent's check command can
+    # exit after only the first-scheduled config runs — and if AD happens
+    # to schedule a task container first the test sees only the failed run.
+    # Wait for all six to be scheduled, then assert that at least the
+    # head/workers emitted the OK service check (per-instance failures from
+    # the task containers are tolerated by the discovery-aware test fixture).
     aggregator = dd_agent_check(
         {"init_config": {}, "instances": []},
         rate=True,
-        discovery_min_instances=1,
-        discovery_timeout=30,
+        discovery_min_instances=6,
+        discovery_timeout=60,
     )
     aggregator.assert_service_check("ray.openmetrics.health", status=AgentCheck.OK)
