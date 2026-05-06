@@ -1,0 +1,1 @@
+Fix Traefik Mesh dashboard queries to use the renamed `traefik_service` tag.
