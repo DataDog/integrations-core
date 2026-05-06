@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from ._bridge import _run_discover
 from .discovery import Discovery
 from .http import http_probe
 from .ports import candidate_ports
@@ -20,6 +21,7 @@ __all__ = [
     'Discovery',
     'Port',
     'Service',
+    '_run_discover',
     'body_contains',
     'body_matches',
     'candidate_ports',
