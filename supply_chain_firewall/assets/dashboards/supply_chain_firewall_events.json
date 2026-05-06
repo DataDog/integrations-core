@@ -7,7 +7,7 @@
             "definition": {
                 "type": "image",
                 "url": "https://static.datadoghq.com/static/images/logos/supply-chain-firewall_large.svg",
-                "url_dark_theme": "https://static.datadoghq.com/static/images/logos/supply-chain-firewall_large.svg",
+                "url_dark_theme": "https://static.datadoghq.com/static/images/logos/supply-chain-firewall_reversed_large.svg",
                 "sizing": "contain",
                 "has_background": false,
                 "has_border": false,
