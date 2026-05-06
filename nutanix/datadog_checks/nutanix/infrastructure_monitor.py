@@ -229,11 +229,11 @@ class InfrastructureMonitor:
     def _process_vm(self, vm: dict, vm_stats_dict: dict[str, list[dict]], cluster_name: str) -> bool:
         """Report metrics for a single VM if it passes filters."""
         vm_id = vm.get("extId")
-        hostname = vm.get("name")
+        vm_name = vm.get("name")
         if not vm_id:
-            self.check.log.warning("[%s][%s] VM %s has no extId, skipping", self._pc_label, cluster_name, hostname)
+            self.check.log.warning("[%s][%s] VM %s has no extId, skipping", self._pc_label, cluster_name, vm_name)
             return False
-        if not hostname:
+        if not vm_name:
             self.check.log.warning("[%s][%s] VM %s has no name, skipping", self._pc_label, cluster_name, vm_id)
             return False
 
@@ -241,20 +241,20 @@ class InfrastructureMonitor:
             return False
 
         vm_tags = self.check.base_tags + self._extract_vm_tags(vm)
-        self._set_external_tags_for_host(hostname, vm_tags)
-        self._report_vm_basic_metrics(vm, hostname, vm_tags)
-        self._report_vm_stats(vm_id, hostname, vm_tags, vm_stats_dict, cluster_name)
+        self._set_external_tags_for_host(vm_name, vm_tags)
+        self._report_vm_basic_metrics(vm, vm_name, vm_tags)
+        self._report_vm_stats(vm_id, vm_name, vm_tags, vm_stats_dict, cluster_name)
         return True
 
-    def _report_vm_basic_metrics(self, vm: dict, hostname: str, vm_tags: list[str]) -> None:
+    def _report_vm_basic_metrics(self, vm: dict, vm_name: str, vm_tags: list[str]) -> None:
         """Report basic VM metrics (counts and status)."""
-        self.check.gauge("vm.count", 1, hostname=hostname, tags=vm_tags)
+        self.check.gauge("vm.count", 1, hostname=vm_name, tags=vm_tags)
 
         power_state = _normalize_tag_value(vm.get("powerState"))
         status_value = 0 if power_state == "on" else 1 if power_state == "paused" else 2
-        self.check.gauge("vm.status", status_value, hostname=hostname, tags=vm_tags)
+        self.check.gauge("vm.status", status_value, hostname=vm_name, tags=vm_tags)
 
-        self._report_vm_capacity_metrics(vm, hostname, vm_tags)
+        self._report_vm_capacity_metrics(vm, vm_name, vm_tags)
 
     def _extract_vm_capacity(self, vm: dict) -> tuple[int, int, int, int, int]:
         """Return (sockets, cores_per_socket, threads_per_core, vcpus_allocated, memory_bytes) for a VM."""
@@ -270,19 +270,19 @@ class InfrastructureMonitor:
             int(get_nested(d, "backingInfo/diskSizeBytes") or 0) for d in vm.get("disks") or [] if isinstance(d, dict)
         )
 
-    def _report_vm_capacity_metrics(self, vm: dict, hostname: str, vm_tags: list[str]) -> None:
+    def _report_vm_capacity_metrics(self, vm: dict, vm_name: str, vm_tags: list[str]) -> None:
         """Report VM capacity metrics (CPU, memory, and disk allocation)."""
         num_sockets, num_cores_per_socket, num_threads_per_core, vcpus_allocated, memory_bytes = (
             self._extract_vm_capacity(vm)
         )
 
-        self.check.gauge("vm.cpu.sockets", num_sockets, hostname=hostname, tags=vm_tags)
-        self.check.gauge("vm.cpu.cores_per_socket", num_cores_per_socket, hostname=hostname, tags=vm_tags)
-        self.check.gauge("vm.cpu.threads_per_core", num_threads_per_core, hostname=hostname, tags=vm_tags)
-        self.check.gauge("vm.cpu.vcpus_allocated", vcpus_allocated, hostname=hostname, tags=vm_tags)
-        self.check.gauge("vm.memory.allocated_bytes", memory_bytes, hostname=hostname, tags=vm_tags)
+        self.check.gauge("vm.cpu.sockets", num_sockets, hostname=vm_name, tags=vm_tags)
+        self.check.gauge("vm.cpu.cores_per_socket", num_cores_per_socket, hostname=vm_name, tags=vm_tags)
+        self.check.gauge("vm.cpu.threads_per_core", num_threads_per_core, hostname=vm_name, tags=vm_tags)
+        self.check.gauge("vm.cpu.vcpus_allocated", vcpus_allocated, hostname=vm_name, tags=vm_tags)
+        self.check.gauge("vm.memory.allocated_bytes", memory_bytes, hostname=vm_name, tags=vm_tags)
         self.check.gauge(
-            "vm.disk_capacity_bytes", self._extract_vm_disk_capacity_bytes(vm), hostname=hostname, tags=vm_tags
+            "vm.disk_capacity_bytes", self._extract_vm_disk_capacity_bytes(vm), hostname=vm_name, tags=vm_tags
         )
 
     def _report_cluster_basic_metrics(self, cluster: dict, cluster_tags: list[str]) -> None:
@@ -369,17 +369,17 @@ class InfrastructureMonitor:
         )
 
     def _report_vm_stats(
-        self, vm_id: str, hostname: str, vm_tags: list[str], vm_stats_dict: dict, cluster_name: str
+        self, vm_id: str, vm_name: str, vm_tags: list[str], vm_stats_dict: dict, cluster_name: str
     ) -> None:
         """Report time-series stats for a VM."""
         stats = vm_stats_dict.get(vm_id)
         if stats:
             self._report_stats(
-                f"[{self._pc_label}][{cluster_name}] VM {hostname}",
+                f"[{self._pc_label}][{cluster_name}] VM {vm_name}",
                 stats,
                 VM_STATS_METRICS,
                 vm_tags,
-                hostname=hostname,
+                hostname=vm_name,
             )
 
     def _process_hosts(
