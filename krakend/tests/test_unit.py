@@ -124,16 +124,10 @@ def test_http_code_class_tag(ready_check: KrakendCheck, aggregator: AggregatorSt
     aggregator.assert_metric_has_tag("krakend.api.http_client.duration.bucket", "code_class:5XX")
 
 
-def test_krakend_discovery_class_attrs():
-    # KrakendCheck hints port 9090 and inherits the base /metrics path.
-    assert KrakendCheck.DISCOVERY_PORT_HINTS == [9090]
-    assert KrakendCheck.DISCOVERY_METRICS_PATH == "/metrics"
-
-
 def test_trial_mode_probes_and_configures_scraper(monkeypatch):
     """KrakendCheck inherits trial-mode behavior from OpenMetricsBaseCheckV2:
-    on first check() call it probes the port hint and configures the scraper
-    for the responding /metrics endpoint."""
+    on first check() call it probes the available ports and configures the
+    scraper for the responding /metrics endpoint."""
     import datadog_checks.base.utils.discovery.http as http_mod
 
     def fake_probe(host, port, path, *, verifier, timeout=0.5):
