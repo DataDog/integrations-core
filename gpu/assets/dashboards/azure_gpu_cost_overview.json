@@ -3,510 +3,56 @@
   "description": "Use this dashboard to investigate Azure GPU compute spend, understand where spend is concentrated across N-series VM families and pricing terms, and correlate costs with GPU hardware utilization.",
   "widgets": [
     {
-      "id": 5720001287453536,
+      "id": 3011001287453001,
       "definition": {
-        "title": "Azure GPU Spend",
-        "background_color": "vivid_green",
-        "show_title": true,
-        "type": "group",
-        "layout_type": "ordered",
-        "widgets": [
+        "title": "GPU Spend by Instance Type (past 1 month)",
+        "time": {
+          "type": "live",
+          "unit": "month",
+          "value": 1,
+          "hide_incomplete_cost_data": true
+        },
+        "comparison_time": {
+          "hide_incomplete_cost_data": true
+        },
+        "type": "cloud_cost_summary",
+        "requests": [
           {
-            "id": 3011001287453001,
-            "definition": {
-              "title": "Azure GPU Spend by Instance Type (past 1 month)",
-              "time": {
-                "type": "live",
-                "unit": "month",
-                "value": 1,
-                "hide_incomplete_cost_data": true
-              },
-              "comparison_time": {
-                "hide_incomplete_cost_data": true
-              },
-              "type": "cloud_cost_summary",
-              "requests": [
-                {
-                  "response_format": "timeseries",
-                  "queries": [
-                    {
-                      "data_source": "cloud_cost",
-                      "name": "query1",
-                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $region AND $team} by {azure_instance_type}.rollup(sum, daily)"
-                    }
-                  ],
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ]
-                }
-              ],
-              "graph_options": [
-                {
-                  "type": "query_value",
-                  "view": "total"
-                },
-                {
-                  "type": "query_value",
-                  "view": "change"
-                },
-                {
-                  "type": "timeseries",
-                  "display_type": "bars"
-                },
-                {
-                  "type": "cloud_cost_table",
-                  "view": "summary",
-                  "sort": {
-                    "type": "formula",
-                    "index": 0,
-                    "order": "desc"
-                  }
-                }
-              ]
-            },
-            "layout": {
-              "x": 0,
-              "y": 0,
-              "width": 12,
-              "height": 6
-            }
-          },
-          {
-            "id": 7908004665252821,
-            "definition": {
-              "title": "Azure GPU Spend",
-              "title_size": "16",
-              "title_align": "left",
-              "time": {
-                "hide_incomplete_cost_data": true
-              },
-              "type": "query_value",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "dollar"
-                        }
-                      }
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "aggregator": "sum",
-                      "data_source": "cloud_cost",
-                      "name": "query1",
-                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $region AND $team}"
-                    }
-                  ],
-                  "response_format": "scalar"
-                }
-              ],
-              "autoscale": true,
-              "precision": 2,
-              "timeseries_background": {
-                "type": "area"
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "cloud_cost",
+                "name": "query1",
+                "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $region AND $team} by {azure_instance_type}.rollup(sum, daily)"
               }
-            },
-            "layout": {
-              "x": 0,
-              "y": 6,
-              "width": 3,
-              "height": 2
-            }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ]
+          }
+        ],
+        "graph_options": [
+          {
+            "type": "query_value",
+            "view": "total"
           },
           {
-            "id": 3669468623318367,
-            "definition": {
-              "type": "note",
-              "content": "Azure GPU VMs are identified by **N-series** meter subcategories (NC, ND, NV families). Coverage is broken down by pricing term: On-Demand, Savings Plan, and Spot. On-demand % tracks the proportion of GPU spend at on-demand pricing.",
-              "background_color": "green",
-              "font_size": "14",
-              "text_align": "left",
-              "vertical_align": "center",
-              "show_tick": false,
-              "has_padding": true
-            },
-            "layout": {
-              "x": 3,
-              "y": 6,
-              "width": 9,
-              "height": 2
-            }
+            "type": "query_value",
+            "view": "change"
           },
           {
-            "id": 7055660677339134,
-            "definition": {
-              "title": "Azure GPU Spend by Coverage Type (Daily)",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "time": {
-                "hide_incomplete_cost_data": true
-              },
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "data_source": "cloud_cost",
-                      "name": "query1",
-                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $region AND $team} by {azure_pricing_term}.rollup(sum, daily)"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "color_order": "shuffled",
-                    "order_by": "values",
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "bars"
-                }
-              ]
-            },
-            "layout": {
-              "x": 0,
-              "y": 8,
-              "width": 6,
-              "height": 3
-            }
+            "type": "timeseries",
+            "display_type": "bars"
           },
           {
-            "id": 7163297225224222,
-            "definition": {
-              "title": "Azure On-Demand % of GPU Spend",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "time": {
-                "hide_incomplete_cost_data": true
-              },
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "alias": "On-Demand %",
-                      "formula": "100 * (query2 / query1)",
-                      "style": {
-                        "palette": "blue",
-                        "palette_index": 4
-                      }
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "data_source": "cloud_cost",
-                      "name": "query2",
-                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND azure_pricing_term:OnDemand AND $region AND $team}.rollup(sum, daily)"
-                    },
-                    {
-                      "data_source": "cloud_cost",
-                      "name": "query1",
-                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $region AND $team}.rollup(sum, daily)"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "order_by": "values",
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ]
-            },
-            "layout": {
-              "x": 6,
-              "y": 8,
-              "width": 6,
-              "height": 3
-            }
-          },
-          {
-            "id": 1817636670988685,
-            "definition": {
-              "title": "Azure GPU Spend by Instance Type",
-              "title_size": "16",
-              "title_align": "left",
-              "time": {
-                "hide_incomplete_cost_data": true
-              },
-              "type": "query_table",
-              "requests": [
-                {
-                  "queries": [
-                    {
-                      "aggregator": "sum",
-                      "data_source": "cloud_cost",
-                      "name": "query1",
-                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND azure_pricing_term:OnDemand AND $region AND $team} by {azure_instance_type}.rollup(sum, daily)"
-                    },
-                    {
-                      "aggregator": "sum",
-                      "data_source": "cloud_cost",
-                      "name": "query2",
-                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND azure_pricing_term:SavingsPlan AND $region AND $team} by {azure_instance_type}.rollup(sum, daily)"
-                    },
-                    {
-                      "aggregator": "sum",
-                      "data_source": "cloud_cost",
-                      "name": "query3",
-                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND azure_pricing_term:Spot AND $region AND $team} by {azure_instance_type}.rollup(sum, daily)"
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "sort": {
-                    "count": 500,
-                    "order_by": [
-                      {
-                        "index": 3,
-                        "order": "desc",
-                        "type": "formula"
-                      }
-                    ]
-                  },
-                  "formulas": [
-                    {
-                      "alias": "On-Demand %",
-                      "cell_display_mode": "bar",
-                      "formula": "query1 / (query1 + query2 + query3) * 100",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "percent"
-                        }
-                      }
-                    },
-                    {
-                      "alias": "Savings Plan %",
-                      "cell_display_mode": "bar",
-                      "formula": "query2 / (query1 + query2 + query3) * 100",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "percent"
-                        }
-                      }
-                    },
-                    {
-                      "alias": "Spot %",
-                      "cell_display_mode": "bar",
-                      "formula": "query3 / (query1 + query2 + query3) * 100",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "percent"
-                        }
-                      }
-                    },
-                    {
-                      "alias": "Total",
-                      "formula": "query1 + query2 + query3",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "dollar"
-                        }
-                      }
-                    }
-                  ]
-                }
-              ],
-              "has_search_bar": "auto"
-            },
-            "layout": {
-              "x": 0,
-              "y": 11,
-              "width": 6,
-              "height": 4
-            }
-          },
-          {
-            "id": 4376959826596106,
-            "definition": {
-              "title": "Azure GPU Spend by Machine Type (Daily)",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "time": {
-                "hide_incomplete_cost_data": true
-              },
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "data_source": "cloud_cost",
-                      "name": "query1",
-                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $region AND $team} by {metersubcategory}.rollup(sum, daily)"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "color_order": "shuffled",
-                    "order_by": "values",
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "bars"
-                }
-              ]
-            },
-            "layout": {
-              "x": 6,
-              "y": 11,
-              "width": 6,
-              "height": 4
-            }
-          },
-          {
-            "id": 4930542959919560,
-            "definition": {
-              "title": "Azure GPU Spend by Team (Monthly)",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "time": {
-                "type": "live",
-                "unit": "year",
-                "value": 1,
-                "hide_incomplete_cost_data": true
-              },
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "data_source": "cloud_cost",
-                      "name": "query1",
-                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $region AND $team} by {team}.rollup(sum, monthly)"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "color_order": "shuffled",
-                    "order_by": "values",
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "bars"
-                }
-              ]
-            },
-            "layout": {
-              "x": 0,
-              "y": 15,
-              "width": 12,
-              "height": 3
-            }
-          },
-          {
-            "id": 3011001287453050,
-            "definition": {
-              "title": "Azure GPU Spend by Region (Daily)",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "time": {
-                "hide_incomplete_cost_data": true
-              },
-              "type": "timeseries",
-              "requests": [
-                {
-                  "queries": [
-                    {
-                      "data_source": "cloud_cost",
-                      "name": "query1",
-                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $region AND $team} by {region}.rollup(sum, daily)"
-                    }
-                  ],
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic",
-                    "order_by": "values",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "bars"
-                }
-              ]
-            },
-            "layout": {
-              "x": 0,
-              "y": 18,
-              "width": 12,
-              "height": 4
+            "type": "cloud_cost_table",
+            "view": "summary",
+            "sort": {
+              "type": "formula",
+              "index": 0,
+              "order": "desc"
             }
           }
         ]
@@ -515,7 +61,499 @@
         "x": 0,
         "y": 0,
         "width": 12,
-        "height": 23
+        "height": 6
+      }
+    },
+    {
+      "id": 7908004665252821,
+      "definition": {
+        "title": "GPU Spend",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "hide_incomplete_cost_data": true
+        },
+        "type": "query_value",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1",
+                "number_format": {
+                  "unit": {
+                    "type": "canonical_unit",
+                    "unit_name": "dollar"
+                  }
+                }
+              }
+            ],
+            "queries": [
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query1",
+                "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $region AND $team}"
+              }
+            ],
+            "response_format": "scalar"
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 6,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 7908004665252822,
+      "definition": {
+        "title": "Spend on Idle GPUs (past 30 days)",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "type": "live",
+          "unit": "month",
+          "value": 1,
+          "hide_incomplete_cost_data": true
+        },
+        "type": "query_value",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1 * (100 - query2) / 100",
+                "number_format": {
+                  "unit": {
+                    "type": "canonical_unit",
+                    "unit_name": "dollar"
+                  }
+                }
+              }
+            ],
+            "queries": [
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query1",
+                "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $region AND $team}"
+              },
+              {
+                "aggregator": "avg",
+                "data_source": "metrics",
+                "name": "query2",
+                "query": "avg:gpu.gr_engine_active{cloud_provider:azure AND $region AND $team}"
+              }
+            ],
+            "response_format": "scalar"
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 3,
+        "y": 6,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 3669468623318367,
+      "definition": {
+        "type": "note",
+        "content": "Azure GPU VMs are identified by **N-series** meter subcategories (NC, ND, NV families). Coverage is broken down by pricing term: On-Demand, Savings Plan, and Spot. On-demand % tracks the proportion of GPU spend at on-demand pricing.",
+        "background_color": "green",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "center",
+        "show_tick": false,
+        "has_padding": true
+      },
+      "layout": {
+        "x": 6,
+        "y": 6,
+        "width": 6,
+        "height": 2
+      }
+    },
+    {
+      "id": 7055660677339134,
+      "definition": {
+        "title": "GPU Spend by Coverage Type (Daily)",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "horizontal",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "time": {
+          "hide_incomplete_cost_data": true
+        },
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "cloud_cost",
+                "name": "query1",
+                "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $region AND $team} by {azure_pricing_term}.rollup(sum, daily)"
+              }
+            ],
+            "response_format": "timeseries",
+            "style": {
+              "color_order": "shuffled",
+              "order_by": "values",
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 8,
+        "width": 6,
+        "height": 3
+      }
+    },
+    {
+      "id": 7163297225224222,
+      "definition": {
+        "title": "On-Demand % of GPU Spend",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "horizontal",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "time": {
+          "hide_incomplete_cost_data": true
+        },
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "alias": "On-Demand %",
+                "formula": "100 * (query2 / query1)",
+                "style": {
+                  "palette": "blue",
+                  "palette_index": 4
+                }
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "cloud_cost",
+                "name": "query2",
+                "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND azure_pricing_term:OnDemand AND $region AND $team}.rollup(sum, daily)"
+              },
+              {
+                "data_source": "cloud_cost",
+                "name": "query1",
+                "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $region AND $team}.rollup(sum, daily)"
+              }
+            ],
+            "response_format": "timeseries",
+            "style": {
+              "order_by": "values",
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 8,
+        "width": 6,
+        "height": 3
+      }
+    },
+    {
+      "id": 1817636670988685,
+      "definition": {
+        "title": "GPU Spend by Instance Type",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "hide_incomplete_cost_data": true
+        },
+        "type": "query_table",
+        "requests": [
+          {
+            "queries": [
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query1",
+                "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND azure_pricing_term:OnDemand AND $region AND $team} by {azure_instance_type}.rollup(sum, daily)"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query2",
+                "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND azure_pricing_term:SavingsPlan AND $region AND $team} by {azure_instance_type}.rollup(sum, daily)"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query3",
+                "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND azure_pricing_term:Spot AND $region AND $team} by {azure_instance_type}.rollup(sum, daily)"
+              }
+            ],
+            "response_format": "scalar",
+            "sort": {
+              "count": 500,
+              "order_by": [
+                {
+                  "index": 3,
+                  "order": "desc",
+                  "type": "formula"
+                }
+              ]
+            },
+            "formulas": [
+              {
+                "alias": "On-Demand %",
+                "cell_display_mode": "bar",
+                "formula": "query1 / (query1 + query2 + query3) * 100",
+                "number_format": {
+                  "unit": {
+                    "type": "canonical_unit",
+                    "unit_name": "percent"
+                  }
+                }
+              },
+              {
+                "alias": "Savings Plan %",
+                "cell_display_mode": "bar",
+                "formula": "query2 / (query1 + query2 + query3) * 100",
+                "number_format": {
+                  "unit": {
+                    "type": "canonical_unit",
+                    "unit_name": "percent"
+                  }
+                }
+              },
+              {
+                "alias": "Spot %",
+                "cell_display_mode": "bar",
+                "formula": "query3 / (query1 + query2 + query3) * 100",
+                "number_format": {
+                  "unit": {
+                    "type": "canonical_unit",
+                    "unit_name": "percent"
+                  }
+                }
+              },
+              {
+                "alias": "Total",
+                "formula": "query1 + query2 + query3",
+                "number_format": {
+                  "unit": {
+                    "type": "canonical_unit",
+                    "unit_name": "dollar"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "has_search_bar": "auto"
+      },
+      "layout": {
+        "x": 0,
+        "y": 11,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "id": 4376959826596106,
+      "definition": {
+        "title": "GPU Spend by Machine Type (Daily)",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "time": {
+          "hide_incomplete_cost_data": true
+        },
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "cloud_cost",
+                "name": "query1",
+                "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $region AND $team} by {metersubcategory}.rollup(sum, daily)"
+              }
+            ],
+            "response_format": "timeseries",
+            "style": {
+              "color_order": "shuffled",
+              "order_by": "values",
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 11,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "id": 4930542959919560,
+      "definition": {
+        "title": "GPU Spend by Team (Monthly)",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "time": {
+          "type": "live",
+          "unit": "year",
+          "value": 1,
+          "hide_incomplete_cost_data": true
+        },
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "cloud_cost",
+                "name": "query1",
+                "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $region AND $team} by {team}.rollup(sum, monthly)"
+              }
+            ],
+            "response_format": "timeseries",
+            "style": {
+              "color_order": "shuffled",
+              "order_by": "values",
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 15,
+        "width": 12,
+        "height": 3
+      }
+    },
+    {
+      "id": 3011001287453050,
+      "definition": {
+        "title": "GPU Spend by Region (Daily)",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "time": {
+          "hide_incomplete_cost_data": true
+        },
+        "type": "timeseries",
+        "requests": [
+          {
+            "queries": [
+              {
+                "data_source": "cloud_cost",
+                "name": "query1",
+                "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $region AND $team} by {region}.rollup(sum, daily)"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "timeseries",
+            "style": {
+              "palette": "dog_classic",
+              "order_by": "values",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 18,
+        "width": 12,
+        "height": 4
       }
     },
     {
@@ -530,7 +568,7 @@
           {
             "id": 3011001287453101,
             "definition": {
-              "title": "Avg GPU Compute Utilization",
+              "title": "Average GPU Utilization %",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -629,7 +667,7 @@
           {
             "id": 3011001287453103,
             "definition": {
-              "title": "Unhealthy GPU Devices",
+              "title": "Average GPU Idle %",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -639,32 +677,43 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:gpu.device.unhealthy{cloud_provider:azure AND $region AND $team}",
-                      "aggregator": "last"
+                      "query": "avg:gpu.gr_engine_active{cloud_provider:azure AND $region AND $team}",
+                      "aggregator": "avg"
                     }
                   ],
                   "formulas": [
                     {
-                      "formula": "query1",
-                      "conditional_formats": [
-                        {
-                          "comparator": ">",
-                          "value": 0,
-                          "palette": "white_on_red"
-                        },
-                        {
-                          "comparator": "<=",
-                          "value": 0,
-                          "palette": "white_on_green"
+                      "formula": "100 - query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
                         }
-                      ]
+                      }
                     }
                   ],
-                  "response_format": "scalar"
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 60,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": ">=",
+                      "value": 30,
+                      "palette": "white_on_yellow"
+                    },
+                    {
+                      "comparator": "<",
+                      "value": 30,
+                      "palette": "white_on_green"
+                    }
+                  ]
                 }
               ],
               "autoscale": true,
-              "precision": 0,
+              "precision": 1,
               "timeseries_background": {
                 "type": "area"
               }
@@ -679,7 +728,7 @@
           {
             "id": 3011001287453104,
             "definition": {
-              "title": "GPU Daily Cost vs Compute Utilization",
+              "title": "GPU Daily Cost vs Utilization",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -723,12 +772,21 @@
                       "data_source": "metrics",
                       "name": "query2",
                       "query": "avg:gpu.sm_active{cloud_provider:azure AND $region AND $team}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "avg:gpu.gr_engine_active{cloud_provider:azure AND $region AND $team}"
                     }
                   ],
                   "formulas": [
                     {
                       "formula": "query2",
-                      "alias": "Avg Compute Utilization %"
+                      "alias": "GPU Utilization %"
+                    },
+                    {
+                      "formula": "100 - query3",
+                      "alias": "GPU Idle %"
                     }
                   ],
                   "response_format": "timeseries",
@@ -756,7 +814,7 @@
           {
             "id": 3011001287453105,
             "definition": {
-              "title": "GPU Compute Utilization by Instance Type",
+              "title": "GPU Utilization by Instance Type",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
