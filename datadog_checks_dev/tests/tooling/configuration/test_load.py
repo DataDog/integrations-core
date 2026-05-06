@@ -2893,7 +2893,11 @@ def test_template_mapping():
     assert options[0]['name'] == 'foo'
     assert options[1] == {
         'name': 'tags',
-        'value': {'example': ['<KEY_1>:<VALUE_1>', '<KEY_2>:<VALUE_2>'], 'type': 'array', 'items': {'type': 'string', 'formats': ['tag']}},
+        'value': {
+            'example': ['<KEY_1>:<VALUE_1>', '<KEY_2>:<VALUE_2>'],
+            'type': 'array',
+            'items': {'type': 'string', 'formats': ['tag']},
+        },
         'description': (
             'A list of tags to attach to every metric and service check emitted by this instance.\n'
             '\n'
