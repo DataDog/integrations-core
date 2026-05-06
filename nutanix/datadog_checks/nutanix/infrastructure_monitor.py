@@ -152,10 +152,13 @@ class InfrastructureMonitor:
         # Process each cluster
         processed, skipped = 0, 0
         for cluster in clusters:
-            cluster_name = cluster.get("name", "unknown")
+            cluster_id = cluster.get("extId")
+            cluster_name = cluster.get("name")
 
             if self._is_prism_central_cluster(cluster):
-                self.check.log.info("[%s] Skipping Prism Central cluster: %s", self._pc_label, cluster_name)
+                self.check.log.info(
+                    "[%s] Skipping Prism Central cluster: %s", self._pc_label, cluster_name or "unknown"
+                )
                 self._collect_pc_version_metadata(cluster)
                 skipped += 1
                 continue
@@ -164,9 +167,15 @@ class InfrastructureMonitor:
                 skipped += 1
                 continue
 
-            cluster_id = cluster.get("extId")
             if not cluster_id:
-                self.check.log.warning("[%s][%s] Cluster has no extId, skipping", self._pc_label, cluster_name)
+                self.check.log.warning(
+                    "[%s] Cluster %s has no extId, skipping", self._pc_label, cluster_name or "unknown"
+                )
+                skipped += 1
+                continue
+
+            if not cluster_name:
+                self.check.log.warning("[%s] Cluster %s has no name, skipping", self._pc_label, cluster_id)
                 skipped += 1
                 continue
 
@@ -221,8 +230,11 @@ class InfrastructureMonitor:
         """Report metrics for a single VM if it passes filters."""
         vm_id = vm.get("extId")
         hostname = vm.get("name")
-        if not vm_id or not hostname:
-            self.check.log.debug("[%s][%s] Skipping VM missing extId or name: %r", self._pc_label, cluster_name, vm)
+        if not vm_id:
+            self.check.log.warning("[%s][%s] VM %s has no extId, skipping", self._pc_label, cluster_name, hostname)
+            return False
+        if not hostname:
+            self.check.log.warning("[%s][%s] VM %s has no name, skipping", self._pc_label, cluster_name, vm_id)
             return False
 
         if not self._should_collect_vm(vm):
@@ -409,13 +421,15 @@ class InfrastructureMonitor:
             self.check.log.warning("[%s][%s] Host %s has no extId, skipping", self._pc_label, cluster_name, host_name)
             return
 
+        if not host_name:
+            self.check.log.warning("[%s][%s] Host %s has no hostName, skipping", self._pc_label, cluster_name, host_id)
+            return
+
         if not should_collect_resource("host", host, self.check.resource_filters, self.check.log):
             return
 
         self.host_count += 1
-
-        if host_name:
-            self.host_names[host_id] = host_name
+        self.host_names[host_id] = host_name
 
         host_tags = cluster_tags + self._extract_host_tags(host)
         self.check.gauge("host.count", 1, hostname=host_name, tags=host_tags)
