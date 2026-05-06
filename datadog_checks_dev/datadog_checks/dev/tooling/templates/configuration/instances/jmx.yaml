@@ -97,7 +97,7 @@
   display_priority: 0
   description: 'A list of Java JVM options, for example: "-Xmx200m -Xms50m".'
   fleet_configurable: true
-  formats: ["jvm"]
+  formats: ["java_jvm_options"]
   value:
     type: string
   
