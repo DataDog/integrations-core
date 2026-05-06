@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from datadog_checks.nutanix.check import NutanixCheck
 
 
-def _norm_state(value: object) -> str:
+def _normalize_tag_value(value: object) -> str:
     """Lowercase ``value``; missing values fall back to ``$unknown`` (the API's spec sentinel)."""
     return value.lower() if isinstance(value, str) and value else "$unknown"
 
@@ -474,7 +474,7 @@ class InfrastructureMonitor:
         node_status_warning = {"TO_BE_PREPROTECTED", "TO_BE_REMOVED", "OK_TO_BE_REMOVED"}
 
         node_status = host.get("nodeStatus")
-        node_status_tag = _norm_state(node_status)
+        node_status_tag = _normalize_tag_value(node_status)
 
         if node_status in node_status_ok:
             status_value = 0
@@ -489,11 +489,11 @@ class InfrastructureMonitor:
     def _extract_host_tags(self, host: dict) -> list[str]:
         """Extract tags from a host object."""
         host_name = host.get("hostName")
-        host_type = _norm_state(host.get("hostType"))
-        maintenance_state = _norm_state(host.get("maintenanceState"))
+        host_type = _normalize_tag_value(host.get("hostType"))
+        maintenance_state = _normalize_tag_value(host.get("maintenanceState"))
         hypervisor_name = get_nested(host, "hypervisor/fullName")
-        hypervisor_type = _norm_state(get_nested(host, "hypervisor/type"))
-        connection_state = _norm_state(get_nested(host, "hypervisor/acropolisConnectionState"))
+        hypervisor_type = _normalize_tag_value(get_nested(host, "hypervisor/type"))
+        connection_state = _normalize_tag_value(get_nested(host, "hypervisor/acropolisConnectionState"))
 
         tags = ["ntnx_type:host"]
         if host_name:
@@ -511,7 +511,7 @@ class InfrastructureMonitor:
     def _extract_cluster_tags(self, cluster: dict) -> list[str]:
         """Extract tags from a cluster object."""
         cluster_name = cluster.get("name")
-        operation_mode = _norm_state(get_nested(cluster, "config/operationMode"))
+        operation_mode = _normalize_tag_value(get_nested(cluster, "config/operationMode"))
 
         tags = []
         if cluster_name:
@@ -527,7 +527,7 @@ class InfrastructureMonitor:
         host_id = get_nested(vm, "host/extId")
         cluster_id = get_nested(vm, "cluster/extId")
         is_agent_vm = is_affirmative(vm.get("isAgentVm"))
-        power_state = _norm_state(vm.get("powerState"))
+        power_state = _normalize_tag_value(vm.get("powerState"))
 
         tags = ["ntnx_type:vm"]
         if vm_name:
