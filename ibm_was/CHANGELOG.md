@@ -2,7 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 5.4.0 / 2026-02-19
+## 5.5.1 / 2026-04-28
+
+***Fixed***:
+
+* Bump lxml to 6.1.0 to address CVE-2026-41066. ([#23418](https://github.com/DataDog/integrations-core/pull/23418))
+
+## 5.5.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
+## 5.4.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:
 

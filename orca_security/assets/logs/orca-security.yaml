@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: orca-security
 metric_id: orca-security
 backend_only: false

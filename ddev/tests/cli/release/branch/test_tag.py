@@ -7,6 +7,60 @@ import pytest
 
 from ddev.utils.git import GitRepository
 
+
+def test_tag_check_open_prs_warns_and_allows_continue(ddev, git, mocker, config_file):
+    config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
+    config_file.save()
+
+    mock_pr = mocker.MagicMock()
+    mock_pr.number = 1234
+    mock_pr.title = 'Fix thing'
+    mock_pr.html_url = 'https://example.invalid/pr/1234'
+    list_prs = mocker.patch(
+        'ddev.utils.github.GitHubManager.list_open_pull_requests_targeting_base',
+        return_value=[mock_pr],
+    )
+
+    result = ddev('release', 'branch', 'tag', '--final', input='y\n')
+
+    assert result.exit_code == 0, result.output
+    assert git.method_calls[-2:] == [
+        c.tag('7.56.0', message='7.56.0'),
+        c.push('7.56.0'),
+    ]
+    assert 'Found 1 open PR(s) targeting base branch 7.56.x' in result.output
+    assert '#1234 Fix thing' in result.output
+    assert 'Open PRs found targeting 7.56.x' in result.output
+    list_prs.assert_called_once_with('7.56.x')
+
+
+def test_tag_skip_open_pr_check(ddev, git, mocker, config_file):
+    config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
+    config_file.save()
+
+    list_prs = mocker.patch('ddev.utils.github.GitHubManager.list_open_pull_requests_targeting_base')
+
+    result = ddev('release', 'branch', 'tag', '--final', '--skip-open-pr-check', input='y\n')
+
+    _assert_tag_pushed(git, result, '7.56.0')
+    list_prs.assert_not_called()
+
+
+def test_tag_github_api_error_degrades_gracefully(ddev, git, mocker, config_file):
+    config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
+    config_file.save()
+
+    mocker.patch(
+        'ddev.utils.github.GitHubManager.list_open_pull_requests_targeting_base',
+        side_effect=Exception('API error'),
+    )
+
+    result = ddev('release', 'branch', 'tag', '--final', input='y\n')
+
+    _assert_tag_pushed(git, result, '7.56.0')
+    assert 'unable to check for open PRs' in result.output
+
+
 NO_CONFIRMATION_SO_ABORT = 'Did not get confirmation, aborting. Did not create or push the tag.'
 RC_NUMBER_PROMPT = 'What RC number are we tagging? (hit ENTER to accept suggestion) [{}]'
 
@@ -36,7 +90,8 @@ def basic_git(mocker):
 
 
 @pytest.fixture
-def git(basic_git):
+def git(basic_git, mocker):
+    mocker.patch('ddev.cli.release.branch.tag._build_agent_yaml_points_to_main', return_value=False)
     basic_git.current_branch.return_value = '7.56.x'
     basic_git.tags.return_value = EXAMPLE_TAGS[:]
     yield basic_git
@@ -176,7 +231,7 @@ def test_abort_valid_rc(ddev, git, no_confirm):
     """
     git.tags.return_value = []
 
-    result = ddev('release', 'branch', 'tag', input='\n{no_confirm}\n')
+    result = ddev('release', 'branch', 'tag', input=f'\n{no_confirm}\n')
 
     assert RC_NUMBER_PROMPT.format('1') in result.output
     assert result.exit_code == 1, result.output
@@ -221,6 +276,24 @@ def test_final(ddev, git, latest_final_tag, expected_new_final_tag):
     result = ddev('release', 'branch', 'tag', '--final', input='y\n')
 
     _assert_tag_pushed(git, result, expected_new_final_tag)
+
+
+def test_build_agent_yaml_points_to_main_aborts(ddev, basic_git, mocker):
+    """
+    When build_agent.yaml still points to main, the command aborts with an actionable
+    message directing the user to the update-build-agent-yaml workflow.
+    """
+    basic_git.current_branch.return_value = '7.56.x'
+    mocker.patch('ddev.cli.release.branch.tag._build_agent_yaml_points_to_main', return_value=True)
+
+    result = ddev('release', 'branch', 'tag')
+
+    assert result.exit_code == 1, result.output
+    assert '`.gitlab/build_agent.yaml` still points to `main`' in result.output
+    assert 'gh workflow run update-build-agent-yaml.yml -f branch=7.56.x' in result.output
+    basic_git.run.assert_not_called()
+    basic_git.tag.assert_not_called()
+    basic_git.push.assert_not_called()
 
 
 # TODO: test for adding RCs for a bugfix release

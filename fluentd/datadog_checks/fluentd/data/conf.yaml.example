@@ -4,7 +4,7 @@ init_config:
 
     ## @param fluentd - string - optional - default: fluentd
     ## Command or path to Fluentd (e.g. `/usr/local/bin/fluentd` or `docker exec container fluentd`).
-    ## Can be overwritten on an instance.
+    ## Can be overridden per instance.
     #
     # fluentd: fluentd
 

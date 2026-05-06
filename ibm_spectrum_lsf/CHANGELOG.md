@@ -2,7 +2,7 @@
 
 <!-- towncrier release notes start -->
 
-## 1.3.0 / 2026-02-19
+## 1.3.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:
 
@@ -14,7 +14,7 @@
 
 * Update conf.yaml to display 'default' field defined in spec.yaml ([#21744](https://github.com/DataDog/integrations-core/pull/21744))
 
-## 1.2.0 / 2026-01-21
+## 1.2.0 / 2026-01-21 / Agent 7.76.0
 
 ***Added***:
 

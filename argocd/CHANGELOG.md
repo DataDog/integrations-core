@@ -2,7 +2,23 @@
 
 <!-- towncrier release notes start -->
 
-## 4.3.0 / 2026-02-19
+## 4.5.0 / 2026-04-15
+
+***Added***:
+
+* Add support for new ArgoCD metrics including kubectl, OCI, GitHub API, login, and proxy extension metrics. ([#22960](https://github.com/DataDog/integrations-core/pull/22960))
+
+***Fixed***:
+
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+
+## 4.4.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
+## 4.3.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:
 

@@ -11,6 +11,7 @@ import os
 import re
 from collections import deque
 from os.path import basename
+from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -27,6 +28,11 @@ from datadog_checks.base.utils.agent.utils import should_profile_memory
 from datadog_checks.base.utils.common import ensure_bytes, to_native_string
 from datadog_checks.base.utils.fips import enable_fips
 from datadog_checks.base.utils.format import json
+from datadog_checks.base.utils.models.validation.security import (
+    DEFAULT_TRUSTED_PROVIDERS,
+    SecurityConfig,
+    check_field_trusted_provider,
+)
 from datadog_checks.base.utils.tagging import GENERIC_TAGS
 from datadog_checks.base.utils.tracing import traced_class
 
@@ -73,6 +79,27 @@ unicodedata: _module_unicodedata = lazy_loader.load('unicodedata')
 # Metric types for which it's only useful to submit once per set of tags
 ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
 TYPO_SIMILARITY_THRESHOLD = 0.95
+
+
+# Global list of secure fields that require trusted provider validation.
+# This provides a fallback security check for integrations that haven't
+# regenerated their models with require_trusted_provider in the spec.
+GLOBAL_SECURE_FIELDS = frozenset(
+    [
+        'tls_cert',
+        'tls_private_key',
+        'tls_ca_cert',
+        'kerberos_keytab',
+        'kerberos_cache',
+        'bearer_token_path',
+        'auth_token',
+        'private_key_path',
+        'java_bin_path',
+        'trust_store_path',
+        'key_store_path',
+        'tools_jar_path',
+    ]
+)
 
 
 @traced_class
@@ -195,6 +222,7 @@ class AgentCheck(object):
         instance = instances[0] if instances else None
 
         self.check_id = ''
+        self.provider = ''
         self.name = name  # type: str
         self.init_config = init_config  # type: InitConfigType
         self.agentConfig = agentConfig  # type: AgentConfigType
@@ -299,6 +327,7 @@ class AgentCheck(object):
 
         self.__formatted_tags = None
         self.__logs_enabled = None
+        self.__security_config = None
         self.__persistent_cache_key_prefix: str = ""
 
         if os.environ.get("GOFIPS", "0") == "1":
@@ -402,6 +431,28 @@ class AgentCheck(object):
         return self.__logs_enabled
 
     @property
+    def security_config(self) -> SecurityConfig:
+        """
+        Returns the integration security configuration, loaded once and cached.
+
+        The security config controls file path validation for untrusted providers.
+        """
+        if self.__security_config is None:
+            trusted_providers = datadog_agent.get_config('integration_trusted_providers')
+            self.__security_config = SecurityConfig(
+                check_name=self.name,
+                provider=self.provider,
+                ignore_untrusted_file_params=bool(datadog_agent.get_config('integration_ignore_untrusted_file_params')),
+                file_paths_allowlist=datadog_agent.get_config('integration_file_paths_allowlist') or [],
+                trusted_providers=trusted_providers
+                if trusted_providers is not None
+                else list(DEFAULT_TRUSTED_PROVIDERS),
+                excluded_checks=datadog_agent.get_config('integration_security_excluded_checks') or [],
+            )
+
+        return self.__security_config
+
+    @property
     def formatted_tags(self):
         # type: () -> str
         if self.__formatted_tags is None:
@@ -486,6 +537,31 @@ class AgentCheck(object):
             self._check_version = getattr(package, '__version__', '0.0.0')
 
         return self._check_version
+
+    def _get_package_dir(self) -> Path:
+        """Return the package directory of the concrete check subclass.
+
+        Resolves the filesystem path of the top-level package for the check
+        (e.g., ``datadog_checks/krakend/``). This is useful for locating
+        data files shipped alongside the check code.
+
+        The method follows the same ``__module__`` + ``importlib`` pattern
+        used by :attr:`check_version`.
+        """
+        if not hasattr(self, '_package_dir'):
+            module_parts = self.__module__.split('.')
+            package_path = '.'.join(module_parts[:2])
+            package = importlib.import_module(package_path)
+            if package.__file__ is not None:
+                self._package_dir = Path(package.__file__).parent
+            elif hasattr(package, '__path__') and package.__path__:
+                self._package_dir = Path(package.__path__[0])
+            else:
+                raise RuntimeError(
+                    f"Cannot determine package directory for {package_path}: "
+                    f"package has no __file__ or __path__ attribute"
+                )
+        return self._package_dir
 
     @property
     def in_developer_mode(self):
@@ -604,10 +680,27 @@ class AgentCheck(object):
 
                 raise ConfigurationError('\n'.join(message_lines)) from None
             else:
+                # Fallback security validation for fields in GLOBAL_SECURE_FIELDS.
+                # This catches secure fields in integrations that haven't regenerated
+                # their models with require_trusted_provider in the spec.
+                try:
+                    security_config = context.get('security_config')
+                    configured_fields = context.get('configured_fields', frozenset())
+                    for field_name in GLOBAL_SECURE_FIELDS & configured_fields:
+                        value = config.get(field_name)
+                        if value is not None:
+                            check_field_trusted_provider(field_name, value, security_config)
+                except ValueError as e:
+                    raise ConfigurationError(str(e)) from None
                 return config_model
 
     def _get_config_model_context(self, config):
-        return {'logger': self.log, 'warning': self.warning, 'configured_fields': frozenset(config)}
+        return {
+            'logger': self.log,
+            'warning': self.warning,
+            'configured_fields': frozenset(config),
+            'security_config': self.security_config,
+        }
 
     def register_secret(self, secret: str) -> None:
         """

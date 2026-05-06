@@ -2,5 +2,11 @@ provides:
   - id: databricks-cloud-cost-metrics
     always_on: false
     granular: true
+    data_type: cloud_cost
+    direction: inbound
   - id: databricks-reference-tables
     always_on: false
+    granular: false
+  - id: databricks-metrics
+    always_on: false
+    granular: false

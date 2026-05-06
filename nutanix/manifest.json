@@ -3,7 +3,7 @@
   "app_uuid": "d9a4c6cb-fd64-463a-860d-03e9c7fd463b",
   "app_id": "nutanix",
   "owner": "agent-integrations",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -11,7 +11,18 @@
     "changelog": "CHANGELOG.md",
     "description": "Monitor the health and performance of your Nutanix Cluster",
     "title": "Nutanix",
-    "media": [],
+    "media": [
+      {
+        "caption": "Nutanix - Overview (light)",
+        "image_url": "images/dashboard_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Nutanix - Overview (dark)",
+        "image_url": "images/dashboard_dark.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",
@@ -19,9 +30,11 @@
       "Category::OS & System",
       "Category::Cloud",
       "Category::Network",
+      "Category::Event Management",
       "Category::Metrics",
       "Offering::Integration",
-      "Submitted Data Type::Metrics"
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Events"
     ]
   },
   "assets": {
@@ -46,7 +59,8 @@
       ]
     },
     "dashboards": {
-        "Nutanix - Overview": "assets/dashboards/nutanix_overview.json"
+        "Nutanix - Overview": "assets/dashboards/nutanix_overview.json",
+        "Nutanix - Activity Monitoring": "assets/dashboards/nutanix_activity_monitoring.json"
     },
     "monitors": {},
     "saved_views": {}

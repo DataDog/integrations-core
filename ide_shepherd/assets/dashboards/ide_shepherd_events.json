@@ -6,8 +6,9 @@
       "id": 2220119315921113,
       "definition": {
         "type": "image",
-        "url": "https://raw.githubusercontent.com/DataDog/IDE-SHEPHERD-extension/refs/heads/main/resources/icons/icon.png",
-        "sizing": "cover",
+        "url": "https://raw.githubusercontent.com/DataDog/IDE-SHEPHERD-extension/refs/heads/main/resources/icons/icon.svg",
+        "sizing": "contain",
+        "margin": "md",
         "has_background": true,
         "has_border": true,
         "vertical_align": "center",

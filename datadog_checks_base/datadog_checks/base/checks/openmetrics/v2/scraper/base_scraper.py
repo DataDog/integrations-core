@@ -192,8 +192,10 @@ class OpenMetricsScraper:
         # some tags can still generate unwanted metric contexts (e.g pod annotations as tags).
         ignore_tags = config.get('ignore_tags', [])
         if ignore_tags:
-            ignored_tags_re = re.compile('|'.join(set(ignore_tags)))
-            custom_tags = [tag for tag in custom_tags if not ignored_tags_re.search(tag)]
+            self.ignored_tags_re = re.compile('|'.join(set(ignore_tags)))
+            custom_tags = [tag for tag in custom_tags if not self.ignored_tags_re.search(tag)]
+        else:
+            self.ignored_tags_re = None
 
         self.static_tags = copy(custom_tags)
         if is_affirmative(self.config.get('tag_by_endpoint', True)):
@@ -469,6 +471,8 @@ class OpenMetricsScraper:
         """
         Set dynamic tags.
         """
+        if self.ignored_tags_re is not None:
+            tags = [tag for tag in tags if not self.ignored_tags_re.search(tag)]
 
         self.tags = tuple(chain(self.static_tags, tags))
 

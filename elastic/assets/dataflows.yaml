@@ -1,0 +1,17 @@
+provides:
+  - id: elastic-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: elastic-logs
+    always_on: false
+    data_type: logs
+    direction: inbound
+  - id: elastic-events
+    always_on: false
+    data_type: events
+    direction: inbound
+  - id: elastic-traces
+    always_on: false
+    data_type: traces
+    direction: inbound

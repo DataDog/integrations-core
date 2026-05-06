@@ -13,12 +13,11 @@
     "title": "Databricks",
     "media": [],
     "classifier_tags": [
+      "Category::AI/ML",
       "Category::Cloud",
       "Category::Cost Management",
       "Category::Log Collection",
-      "Supported OS::Linux",
-      "Supported OS::Windows",
-      "Supported OS::macOS",
+      "Category::Metrics",
       "Offering::Integration"
     ],
     "resources": [
@@ -51,7 +50,7 @@
       "source_type_name": "Databricks",
       "configuration": {},
       "events": {
-        "creates_events": false
+        "creates_events": true
       },
       "metrics": {
         "prefix": "databricks.model_serving.",

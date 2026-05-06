@@ -1,11 +1,7 @@
-# Use a separate image to build ddev from source so the final image doesn't need git
-FROM python:3.13 AS ddev-python
-COPY . /home
-RUN python -m pip install build
-RUN python -m build -s ./home/ddev
-RUN mv ./home/ddev/dist/*.tar.gz ddev.tar.gz 
+FROM registry.ddbuild.io/images/mirror/ubuntu:25.04
 
-FROM registry.ddbuild.io/images/mirror/ubuntu:22.04
+# Get uv — manages Python installations on demand, no system Python pinning needed
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
 # Update sources and install required packages
 RUN apt-get update \
@@ -29,20 +25,26 @@ RUN apt-get update \
  && rm -rf /var/tmp/*
 
 # Add GitHub public host key to the list of known hosts
-# https://help.github.com/en/articles/githubs-ssh-key-fingerprints
+# https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints
 RUN mkdir -p ~/.ssh \
- && echo "|1|L3rBLxsTRXA5C48+4DcV8hHvK4Y=|fFirAqNJJWk+xY7wkc703OcVH+w= ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=" > ~/.ssh/known_hosts
+ && ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+
+# dd-octo-sts CLI for GitHub token exchange (replaces SSH deploy key)
+# To update: crane ls registry.ddbuild.io/dd-octo-sts | sort -V | tail -1
+#            crane digest registry.ddbuild.io/dd-octo-sts:<version>
+COPY --from=registry.ddbuild.io/dd-octo-sts:v1.10.4@sha256:20edc79b3fc3f9cd58eb0aeba7391a8e63ccb79c0b969a4a62a745cf5b2e39c2 /usr/local/bin/dd-octo-sts /usr/local/bin/dd-octo-sts
 
 # Locales are required to be set to use click
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
+ENV UV_TOOL_BIN_DIR=/usr/local/bin
 
-# Copy in ddev.tar.gz from the other image
-COPY --from=ddev-python ddev.tar.gz /
-
-# Install pip
-RUN curl -sSL https://bootstrap.pypa.io/get-pip.py | python3 \
- # Install ddev for release tagging
- && pip3 install --no-cache-dir ddev.tar.gz \
- # Install awscli for access to GitHub deploy key stored in SSM
- && pip3 install --no-cache-dir awscli==1.29.7
+# Mount the build context without adding it to the image.
+# Copy to a writable location because hatch-vcs writes src/ddev/_version.py during build,
+# which fails on the read-only bind mount. Both the copy and removal are in one RUN
+# so the source never lands in the final image.
+RUN --mount=type=bind,source=.,target=/src \
+    cp -r /src /tmp/repo \
+ && uv tool install /tmp/repo/ddev \
+ && uv tool install 'awscli==1.29.7' \
+ && rm -rf /tmp/repo

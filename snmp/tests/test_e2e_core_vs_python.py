@@ -625,7 +625,7 @@ def test_e2e_profile_isilon(dd_agent_check):
 
 def test_e2e_profile_meraki_cloud_controller(dd_agent_check):
     config = common.generate_container_profile_config('meraki-cloud-controller')
-    assert_python_vs_core(dd_agent_check, config, tags_to_skip=['mac_address', 'status'])
+    assert_python_vs_core(dd_agent_check, config, tags_to_skip=['mac_address', 'device_status'])
 
 
 def test_e2e_profile_netapp(dd_agent_check):

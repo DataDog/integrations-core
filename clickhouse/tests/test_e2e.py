@@ -15,6 +15,8 @@ def test_check(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
     server_tag = 'server:{}'.format(instance['server'])
     port_tag = 'port:{}'.format(instance['port'])
+    db_hostname_tag = 'database_hostname:{}'.format(instance['server'])
+    db_instance_tag = 'database_instance:{}:{}:default'.format(instance['server'], instance['port'])
     metrics = get_metrics(CLICKHOUSE_VERSION)
 
     for metric in metrics:
@@ -28,7 +30,7 @@ def test_check(dd_agent_check, instance):
 
     aggregator.assert_metric(
         'clickhouse.dictionary.item.current',
-        tags=[server_tag, port_tag, 'db:default', 'foo:bar', 'dictionary:test'],
+        tags=[server_tag, port_tag, 'db:default', 'foo:bar', 'dictionary:test', db_hostname_tag, db_instance_tag],
         at_least=1,
     )
 

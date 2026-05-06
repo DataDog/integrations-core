@@ -2,7 +2,25 @@
 
 <!-- towncrier release notes start -->
 
-## 9.3.0 / 2026-02-19
+## 9.5.1 / 2026-04-15
+
+***Fixed***:
+
+* Re-order configuration fields based on real-world usage data. ([#23278](https://github.com/DataDog/integrations-core/pull/23278))
+
+## 9.5.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
+## 9.4.0 / 2026-03-18
+
+***Added***:
+
+* elastic: add `prirep` and `index` tags to the `elasticsearch.shards` metric through an additional `detailed_shard_metrics` option ([#22426](https://github.com/DataDog/integrations-core/pull/22426))
+
+## 9.3.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:
 

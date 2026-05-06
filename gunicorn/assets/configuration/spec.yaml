@@ -5,16 +5,19 @@ files:
   - template: init_config
     options:
       - name: gunicorn
+        display_priority: 0
         description: |
           Command or path to gunicorn (e.g. `/usr/local/bin/gunicorn` or `docker exec container gunicorn`)
           can be overwritten on an instance
         value:
           type: string
+          require_trusted_provider: true
           example: gunicorn
       - template: init_config/default
   - template: instances
     options:
     - name: proc_name
+      display_priority: 1
       required: true
       description: |
         The name of the gunicorn process. For the following gunicorn server:
@@ -26,9 +29,11 @@ files:
         type: string
       fleet_configurable: true
     - name: gunicorn
+      display_priority: 0
       description: Command or path to gunicorn (e.g. `/usr/local/bin/gunicorn` or `docker exec container gunicorn`)
       value:
         type: string
+        require_trusted_provider: true
         example: gunicorn
     - template: instances/default
   - template: logs

@@ -17,6 +17,8 @@ def test_check(aggregator, instance, dd_run_check):
     dd_run_check(check)
     server_tag = 'server:{}'.format(instance['server'])
     port_tag = 'port:{}'.format(instance['port'])
+    db_hostname_tag = 'database_hostname:{}'.format(instance['server'])
+    db_instance_tag = 'database_instance:{}:{}:default'.format(instance['server'], instance['port'])
     metrics = get_metrics(CLICKHOUSE_VERSION)
 
     for metric in metrics:
@@ -27,7 +29,7 @@ def test_check(aggregator, instance, dd_run_check):
 
     aggregator.assert_metric(
         'clickhouse.dictionary.item.current',
-        tags=[server_tag, port_tag, 'db:default', 'foo:bar', 'dictionary:test'],
+        tags=[server_tag, port_tag, 'db:default', 'foo:bar', 'dictionary:test', db_hostname_tag, db_instance_tag],
         at_least=1,
     )
 
@@ -60,6 +62,8 @@ def test_custom_queries(aggregator, instance, dd_run_check):
             'db:default',
             'foo:bar',
             'test:clickhouse',
+            'database_hostname:{}'.format(instance['server']),
+            'database_instance:{}:{}:default'.format(instance['server'], instance['port']),
         ],
     )
 
@@ -73,3 +77,26 @@ def test_version_metadata(instance, datadog_agent, dd_run_check):
     datadog_agent.assert_metadata(
         'test:123', {'version.scheme': 'calver', 'version.year': CLICKHOUSE_VERSION.split(".")[0]}
     )
+
+
+def test_database_instance_metadata(aggregator, instance, datadog_agent, dd_run_check):
+    """Test that database_instance metadata is sent correctly."""
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check.check_id = 'test:456'
+    dd_run_check(check)
+
+    # Get database monitoring metadata events
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+
+    # Find the database_instance event
+    event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
+
+    assert event is not None, "database_instance metadata event should be sent"
+    assert event['dbms'] == 'clickhouse'
+    assert event['kind'] == 'database_instance'
+    assert event['database_instance'] == check.database_identifier
+    assert event['collection_interval'] == 300
+    assert 'metadata' in event
+    assert 'dbm' in event['metadata']
+    assert 'connection_host' in event['metadata']
+    assert event['metadata']['connection_host'] == instance['server']

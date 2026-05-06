@@ -1,0 +1,13 @@
+provides:
+  - id: couchbase-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: couchbase-logs
+    always_on: false
+    data_type: logs
+    direction: inbound
+  - id: couchbase-events
+    always_on: true
+    data_type: events
+    direction: inbound

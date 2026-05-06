@@ -35,7 +35,7 @@ on:
         type: boolean
       agent-image:
         required: false
-        default: "datadog/agent-dev:master-py3"
+        default: "registry.datadoghq.com/agent-dev:master-py3"
         type: string
       agent-image-py2:
         required: false
@@ -43,7 +43,7 @@ on:
         type: string
       agent-image-windows:
         required: false
-        default: "datadog/agent-dev:master-py3-win-servercore"
+        default: "registry.datadoghq.com/agent:7-rc-servercore"
         type: string
       agent-image-windows-py2:
         required: false
@@ -362,9 +362,23 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
+      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
+    strategy:
+      matrix:
+        target-env:
+        - py3.13-windows-SQLOLEDB-2019-single
+        - py3.13-windows-SQLOLEDB-2022-single
+        - py3.13-windows-SQLOLEDB-2025-single
+        - py3.13-windows-MSOLEDBSQL-2019-single
+        - py3.13-windows-MSOLEDBSQL-2022-single
+        - py3.13-windows-MSOLEDBSQL-2025-single
+        - py3.13-windows-odbc-2019-single
+        - py3.13-windows-odbc-2022-single
+        - py3.13-windows-odbc-2025-single
+      fail-fast: false
   j87dbe3f:
     uses: ./.github/workflows/test-target.yml
     with:

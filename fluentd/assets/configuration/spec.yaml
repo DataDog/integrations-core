@@ -8,7 +8,7 @@ files:
     - name: fluentd
       description: |
         Command or path to Fluentd (e.g. `/usr/local/bin/fluentd` or `docker exec container fluentd`).
-        Can be overwritten on an instance.
+        Can be overridden per instance.
       fleet_configurable: true
       value:
         type: string

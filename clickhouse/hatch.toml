@@ -1,11 +1,12 @@
 [env.collectors.datadog-checks]
+base-package-features = ["deps", "db"]
 
 [envs.default.env-vars]
 CLICKHOUSE_REPOSITORY = "clickhouse/clickhouse-server"
 
 [[envs.default.matrix]]
 python = ["3.13"]
-version = ["18", "19", "20", "21.8", "22.7"]
+version = ["18", "19", "20", "21.8", "22.7", "23.2", "23.8", "24.8", "25.3"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [

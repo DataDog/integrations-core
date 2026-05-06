@@ -57,6 +57,7 @@ UNEXPLAINABLE_COMMANDS = frozenset(
         "profile",  # command to get profile level
         "listCollections",
         "listDatabases",
+        "listIndexes",
         'dbStats',
         'createIndexes',
         'shardCollection',
@@ -174,6 +175,10 @@ def get_explain_plan(
     try:
         for key in EXPLAIN_COMMAND_EXCLUDE_KEYS:
             command.pop(key, None)
+        # The aggregate command requires 'cursor' when wrapped in the explain command form.
+        # Other commands (find, count, distinct, etc.) reject 'cursor' as an unknown field.
+        if "aggregate" in command and "cursor" not in command:
+            command["cursor"] = {}
         try:
             explain_plan = api_client.explain_command(dbname, command, verbosity)
             return format_explain_plan(explain_plan)

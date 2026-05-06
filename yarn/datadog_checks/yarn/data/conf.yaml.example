@@ -71,7 +71,7 @@ instances:
 
   -
     ## @param resourcemanager_uri - string - optional - default: http://localhost:8088
-    ## The YARN check retrieves metrics from YARNS's ResourceManager. This
+    ## The YARN check retrieves metrics from YARN's ResourceManager. This
     ## check must be run from the Master Node and the ResourceManager URI must
     ## be specified below. The ResourceManager URI is composed of the
     ## ResourceManager's hostname and port.

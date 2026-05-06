@@ -1,0 +1,11 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["3.13"]
+
+version = ["1.118.1"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "N8N_VERSION", value = "1.118.1", if = ["1.118.1"] },
+]

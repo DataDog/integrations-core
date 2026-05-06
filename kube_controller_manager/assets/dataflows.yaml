@@ -1,0 +1,5 @@
+provides:
+  - id: kube-controller-manager-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound

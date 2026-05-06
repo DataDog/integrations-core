@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: ping-federate
 metric_id: ping-federate
 backend_only: false

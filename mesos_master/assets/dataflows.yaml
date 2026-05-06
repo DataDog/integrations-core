@@ -1,0 +1,9 @@
+provides:
+  - id: mesos-master-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: mesos-master-logs
+    always_on: false
+    data_type: logs
+    direction: inbound
