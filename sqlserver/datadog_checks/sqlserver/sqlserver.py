@@ -103,6 +103,7 @@ from datadog_checks.sqlserver.const import (
     VALID_METRIC_TYPES,
     expected_sys_databases_columns,
 )
+from datadog_checks.sqlserver.diagnose import SqlserverDiagnose
 from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
 from datadog_checks.sqlserver.utils import (
     is_azure_sql_database,
@@ -195,6 +196,9 @@ class SQLServer(DatabaseCheck):
         self._query_manager = None
         self._database_metrics = None
         self.sqlserver_incr_fraction_metric_previous_values = {}
+
+        # Register explicit pre-flight diagnostics for `datadog-agent diagnose`.
+        SqlserverDiagnose(self).register()
 
         self._submit_initialization_health_event()
 
