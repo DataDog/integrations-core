@@ -1,0 +1,1 @@
+Drop unjustified 9090 port hint from discover(); probe all exposed service ports.
