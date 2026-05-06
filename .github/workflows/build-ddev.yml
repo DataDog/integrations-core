@@ -714,8 +714,6 @@ jobs:
   extract-release-notes:
     name: Extract release notes
     if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
-    needs:
-    - define-tags
     runs-on: ubuntu-latest
 
     permissions:
