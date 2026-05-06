@@ -12,7 +12,6 @@ from ddev.ai.phases.config import (
     FlowConfigError,
     PhaseConfig,
     TaskConfig,
-    _detect_cycle,
 )
 
 # ---------------------------------------------------------------------------
@@ -306,43 +305,6 @@ def test_from_yaml_missing_file(tmp_path):
 
 
 # ---------------------------------------------------------------------------
-# _detect_cycle
-# ---------------------------------------------------------------------------
-
-
-def test_detect_cycle_no_nodes():
-    assert _detect_cycle({}) is None
-
-
-def test_detect_cycle_no_edges():
-    assert _detect_cycle({"a": [], "b": [], "c": []}) is None
-
-
-def test_detect_cycle_direct_self_loop():
-    cycle = _detect_cycle({"a": ["a"]})
-    assert cycle == ["a", "a"]
-
-
-def test_detect_cycle_two_node_cycle():
-    cycle = _detect_cycle({"a": ["b"], "b": ["a"]})
-    assert cycle is not None
-    assert cycle[0] == cycle[-1]
-    assert set(cycle) == {"a", "b"}
-
-
-def test_detect_cycle_partial_cycle():
-    # d → a → b → c → a  (d is not part of the cycle)
-    cycle = _detect_cycle({"d": ["a"], "a": ["b"], "b": ["c"], "c": ["a"]})
-    assert cycle is not None
-    assert cycle[0] == cycle[-1]
-    assert set(cycle[:-1]) == {"a", "b", "c"}
-
-
-def test_detect_cycle_acyclic():
-    assert _detect_cycle({"d": ["a", "b"], "a": ["c"], "b": ["c"], "c": []}) is None
-
-
-# ---------------------------------------------------------------------------
 # FlowConfig cycle detection via model_validate
 # ---------------------------------------------------------------------------
 
@@ -390,6 +352,28 @@ def test_flow_config_acyclic_chain_ok():
     ]
     config = FlowConfig.model_validate(raw)
     assert len(config.flow) == 3
+
+
+def test_flow_disjoined_graphs_ok():
+    agent = {"tools": []}
+    task = {"name": "t", "prompt": "Do it."}
+    raw = {
+        "agents": {"writer": agent},
+        "phases": {
+            "p1": {"agent": "writer", "tasks": [task]},
+            "p2": {"agent": "writer", "tasks": [task]},
+            "p3": {"agent": "writer", "tasks": [task]},
+            "p4": {"agent": "writer", "tasks": [task]},
+        },
+        "flow": [
+            {"phase": "p1"},
+            {"phase": "p2", "dependencies": ["p1"]},
+            {"phase": "p3"},
+            {"phase": "p4", "dependencies": ["p3"]},
+        ],
+    }
+    config = FlowConfig.model_validate(raw)
+    assert len(config.flow) == 4
 
 
 def test_flow_config_self_dependency_raises():
