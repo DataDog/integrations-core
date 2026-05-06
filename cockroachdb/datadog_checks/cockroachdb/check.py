@@ -26,6 +26,11 @@ class CockroachdbCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
     DISCOVERY_PORT_HINTS = [8080]
     DISCOVERY_METRICS_PATH = '/_status/vars'
 
+    def __init__(self, name, init_config, instances):
+        super().__init__(name, init_config, instances)
+
+        self.check_initializations.append(self.configure_additional_transformers)
+
     def get_default_config(self):
         return {
             'openmetrics_endpoint': 'http://localhost:8080/_status/vars',
@@ -35,22 +40,6 @@ class CockroachdbCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
     def create_scraper(self, config):
         return OpenMetricsCompatibilityScraper(self, self.get_config_with_defaults(config))
 
-    def configure_scrapers(self):
-        super().configure_scrapers()
-
-        # Attach custom transformers to every scraper. For trial-mode instances
-        # the first super() call finds the placeholder and skips creating a
-        # scraper; _resolve_discovery later re-invokes this method once the
-        # real scraper exists.
-        for scraper in self.scrapers.values():
-            scraper.metric_transformer.add_custom_transformer(
-                'build_timestamp', self.configure_transformer_build_timestamp('build.timestamp')
-            )
-            for metric, data in METRIC_WITH_LABEL_NAME.items():
-                scraper.metric_transformer.add_custom_transformer(
-                    metric, self.configure_transformer_label_in_name(metric, **data), pattern=True
-                )
-
     def configure_transformer_build_timestamp(self, metric_name):
         def build_timestamp_transformer(metric, sample_data, runtime_data):
             for sample, tags, hostname in sample_data:
@@ -58,6 +47,16 @@ class CockroachdbCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
                 self.set_metadata('version', sample.labels['tag'])
 
         return build_timestamp_transformer
+
+    def configure_additional_transformers(self):
+        self.scrapers[self.instance['openmetrics_endpoint']].metric_transformer.add_custom_transformer(
+            'build_timestamp', self.configure_transformer_build_timestamp('build.timestamp')
+        )
+
+        for metric, data in METRIC_WITH_LABEL_NAME.items():
+            self.scrapers[self.instance['openmetrics_endpoint']].metric_transformer.add_custom_transformer(
+                metric, self.configure_transformer_label_in_name(metric, **data), pattern=True
+            )
 
     def configure_transformer_label_in_name(self, metric_pattern, new_name, label_name, metric_type):
         method = getattr(self, metric_type)

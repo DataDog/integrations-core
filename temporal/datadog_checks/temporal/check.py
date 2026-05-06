@@ -20,15 +20,12 @@ class TemporalCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     def configure_scrapers(self):
         super().configure_scrapers()
 
-        # Iterate over whatever scrapers were built. For trial-mode instances
-        # the first call here finds an empty dict (the placeholder is skipped);
-        # _resolve_discovery later re-invokes this method once the real scraper
-        # exists, so the transformer is attached to it then.
-        for scraper in self.scrapers.values():
-            scraper.metric_transformer.add_custom_transformer(
-                "build_information",
-                self._transform_build_information,
-            )
+        scraper = self.scrapers[self.instance['openmetrics_endpoint']]
+
+        scraper.metric_transformer.add_custom_transformer(
+            "build_information",
+            self._transform_build_information,
+        )
 
     def _transform_build_information(self, metric, sample_data, runtime_data):
         for sample, *_ in sample_data:

@@ -183,6 +183,27 @@ class AgentCheck(object):
         except Exception:
             return cls
 
+    def __new__(cls, *args, **kwargs):
+        # Trial-mode dispatch: when AD schedules a check with a synthetic
+        # __discovery_service__ instance, route construction through a
+        # dynamically-generated proxy subclass that defers real check work
+        # until a candidate config is found. _TrialModeMixin handles the
+        # proxy semantics; the proxy class itself early-returns through
+        # this branch to avoid recursion.
+        if not issubclass(cls, _TrialModeMixin):
+            instances = _extract_instances(args, kwargs)
+            if instances and instances[0].get("__discovery_service__") is not None:
+                proxy_cls = _TrialModeMixin._proxy_for(cls)
+                return proxy_cls(*args, **kwargs)
+        return super().__new__(cls)
+
+    @classmethod
+    def generate_configs(cls, service_dict):
+        """Yield candidate complete instance dicts to try when this class is
+        scheduled in trial-mode (AD config discovery). Subclasses opting
+        into config discovery override this. Default: not supported."""
+        raise NotImplementedError(f"{cls.__name__} does not support config discovery; override generate_configs")
+
     def __init__(self, *args, **kwargs):
         # type: (*Any, **Any) -> None
         """
@@ -1611,3 +1632,92 @@ class AgentCheck(object):
             raise ValueError(f'Failed to load config: {stderr.decode("utf-8", errors="replace")}')
 
         return _parse_ast_config(stdout.strip().decode('utf-8'))
+
+
+def _extract_instances(args, kwargs):
+    """Pull the `instances` list out of the AgentCheck-style positional/kwarg args."""
+    if 'instances' in kwargs:
+        return kwargs['instances']
+    if len(args) > 3:
+        return args[3]  # old-style: (name, init_config, agentConfig, instances)
+    if len(args) > 2 and isinstance(args[2], (list, tuple)):
+        return args[2]  # new-style: (name, init_config, instances)
+    return None
+
+
+class _TrialModeMixin:
+    """Mixin that, combined with a target check class via a dynamically-generated
+    subclass, defers real check work until trial-mode (config-discovery) resolves.
+
+    On the first ``run()``, the proxy iterates ``target_cls.generate_configs(service)``,
+    constructs a fresh target_cls instance per candidate (which goes through the
+    full normal __init__ + check_initializations flow), runs it, and commits the
+    first one whose ``run()`` completes without an error report. Subsequent runs
+    delegate to that winning instance.
+
+    The proxy is invisible to the agent runtime: it has the same ``check_id``
+    and ``provider`` attributes the agent set on it, and ``isinstance(proxy,
+    target_cls)`` is True.
+    """
+
+    _proxy_cache: dict[type, type] = {}
+
+    @classmethod
+    def _proxy_for(cls, target_cls):
+        if target_cls not in cls._proxy_cache:
+            cls._proxy_cache[target_cls] = type(
+                f"{target_cls.__name__}TrialProxy",
+                (cls, target_cls),
+                {},
+            )
+        return cls._proxy_cache[target_cls]
+
+    def __init__(self, *args, **kwargs):
+        # The trial instance has __discovery_service__ but no real config;
+        # target_cls.__init__ would try to validate or pre-configure against
+        # it and fail. Initialize only AgentCheck-level state here. The
+        # winning candidate gets the full target_cls.__init__ in _run_trial.
+        AgentCheck.__init__(self, *args, **kwargs)
+        self._service_dict = self.instance["__discovery_service__"]
+        self._winner = None
+
+    def run(self):
+        if self._winner is not None:
+            return self._winner.run()
+        try:
+            self._run_trial()
+        except Exception as e:
+            return json.encode(
+                [
+                    {
+                        'message': self.sanitize(str(e)),
+                        'traceback': self.sanitize(traceback.format_exc()),
+                    }
+                ]
+            )
+        return ''
+
+    def _run_trial(self):
+        target_cls = self._target_cls()
+        last_error = None
+        tried = 0
+        for candidate in target_cls.generate_configs(self._service_dict):
+            tried += 1
+            inst = target_cls(self.name, self.init_config, [candidate])
+            # rtloader sets these two attributes on the agent-visible check
+            # after construction; mirror them onto the candidate so its
+            # metric submissions key off the same check_id as the proxy.
+            inst.check_id = self.check_id
+            inst.provider = self.provider
+            error_report = inst.run()
+            if not error_report:
+                self._winner = inst
+                return
+            last_error = error_report
+        if tried == 0:
+            raise ConfigurationError("config-discovery: generate_configs() yielded no candidates")
+        raise ConfigurationError(f"config-discovery: no candidate accepted by check() ({last_error})")
+
+    def _target_cls(self):
+        # Proxy MRO is [proxy_cls, _TrialModeMixin, target_cls, ...]
+        return type(self).__mro__[2]

@@ -27,6 +27,7 @@ OPENMETRICS_V2_BASE_PY = (
     / "v2"
     / "base.py"
 )
+AGENTCHECK_BASE_PY = INTEGRATIONS_CORE_ROOT / "datadog_checks_base" / "datadog_checks" / "base" / "checks" / "base.py"
 SITE_PACKAGES = "/opt/datadog-agent/embedded/lib/python3.13/site-packages"
 
 
@@ -46,6 +47,7 @@ def dd_environment():
                     f"{N8N_AUTOCONF}:/etc/datadog-agent/conf.d/n8n.d/auto_conf_discovery.yaml:ro",
                     f"{DISCOVERY_HELPERS_DIR}:{SITE_PACKAGES}/datadog_checks/base/utils/discovery:ro",
                     f"{OPENMETRICS_V2_BASE_PY}:{SITE_PACKAGES}/datadog_checks/base/checks/openmetrics/v2/base.py:ro",
+                    f"{AGENTCHECK_BASE_PY}:{SITE_PACKAGES}/datadog_checks/base/checks/base.py:ro",
                     "/var/run/docker.sock:/var/run/docker.sock:ro",
                 ],
             },

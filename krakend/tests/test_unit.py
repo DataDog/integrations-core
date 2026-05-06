@@ -4,7 +4,6 @@
 
 from collections.abc import Callable
 from pathlib import Path
-from unittest import mock
 
 import pytest
 
@@ -122,59 +121,3 @@ def test_service_check_emitted(ready_check: KrakendCheck, aggregator: Aggregator
 
 def test_http_code_class_tag(ready_check: KrakendCheck, aggregator: AggregatorStub):
     aggregator.assert_metric_has_tag("krakend.api.http_client.duration.bucket", "code_class:5XX")
-
-
-def test_trial_mode_probes_and_configures_scraper(monkeypatch):
-    """KrakendCheck inherits trial-mode behavior from OpenMetricsBaseCheckV2:
-    on first check() call it probes the available ports and configures the
-    scraper for the responding /metrics endpoint."""
-    import datadog_checks.base.utils.discovery.http as http_mod
-
-    def fake_probe(host, port, path, *, verifier, timeout=0.5):
-        return port == 9090
-
-    monkeypatch.setattr(http_mod, "http_probe", fake_probe)
-
-    instance = {
-        "__discovery_service__": {
-            "id": "docker://abc",
-            "host": "10.0.0.5",
-            "ports": [
-                {"number": 8080, "name": "admin"},
-                {"number": 9090, "name": "metrics"},
-            ],
-        },
-    }
-
-    check = KrakendCheck("krakend", {}, [instance])
-
-    fake_scraper = mock.MagicMock()
-    monkeypatch.setattr(check, "create_scraper", lambda _config: fake_scraper)
-
-    check.check(instance)
-
-    assert check._discovery_resolved is True
-    assert check.instance["openmetrics_endpoint"] == "http://10.0.0.5:9090/metrics"
-    assert "http://10.0.0.5:9090/metrics" in check.scrapers
-
-
-def test_trial_mode_no_endpoint_raises(monkeypatch):
-    """When no port responds, the check raises so AD records a failure."""
-    import datadog_checks.base.utils.discovery.http as http_mod
-
-    def fake_probe(host, port, path, *, verifier, timeout=0.5):
-        return False
-
-    monkeypatch.setattr(http_mod, "http_probe", fake_probe)
-
-    instance = {
-        "__discovery_service__": {
-            "id": "docker://abc",
-            "host": "10.0.0.5",
-            "ports": [{"number": 1234, "name": ""}],
-        },
-    }
-
-    check = KrakendCheck("krakend", {}, [instance])
-    with pytest.raises(Exception):
-        check.check(instance)

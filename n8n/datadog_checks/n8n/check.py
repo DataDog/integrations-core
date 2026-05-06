@@ -24,16 +24,10 @@ class N8nCheck(OpenMetricsBaseCheckV2):
         self.tags = self.instance.get('tags', [])
         self._ready_endpoint = DEFAULT_READY_ENDPOINT
 
-    def _post_discovery_hook(self):
-        # The real openmetrics_endpoint is now in self.instance; refresh the
-        # cached attribute that __init__ captured from the placeholder.
-        self.openmetrics_endpoint = self.instance["openmetrics_endpoint"]
-
     def get_default_config(self):
         return {
             'metrics': [METRIC_MAP],
             'rename_labels': RENAME_LABELS_MAP,
-            'raw_metric_prefix': 'n8n_',
         }
 
     def _check_n8n_readiness(self):

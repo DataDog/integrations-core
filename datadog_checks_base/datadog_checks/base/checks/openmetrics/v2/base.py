@@ -32,7 +32,8 @@ class OpenMetricsBaseCheckV2(AgentCheck):
 
     DEFAULT_METRIC_LIMIT = 2000
 
-    # Subclasses can override to specify well-known port(s) for discovery.
+    # Subclasses can override to specify well-known port(s) for trial-mode
+    # config discovery.
     DISCOVERY_PORT_HINTS: list[int] = []
 
     # Subclasses can override if metrics are not at /metrics.
@@ -43,11 +44,6 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         super().__init_subclass__(**kwargs)
         return traced_class(cls)
 
-    # Placeholder endpoint injected into trial-mode instances so the parent's
-    # configuration-model validation and configure_scrapers don't fail before
-    # _resolve_discovery has picked the real endpoint.
-    _DISCOVERY_PLACEHOLDER_ENDPOINT = "http://discovery-pending.invalid/metrics"
-
     def __init__(self, name, init_config, instances):
         """
         The base class for any OpenMetrics-based integration.
@@ -55,11 +51,6 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         Subclasses are expected to override this to add their custom scrapers or transformers.
         When overriding, make sure to call this (the parent's) __init__ first!
         """
-        if instances:
-            for inst in instances:
-                if inst.get("__discovery_service__") is not None and not inst.get("openmetrics_endpoint"):
-                    inst["openmetrics_endpoint"] = self._DISCOVERY_PLACEHOLDER_ENDPOINT
-
         super(OpenMetricsBaseCheckV2, self).__init__(name, init_config, instances)
 
         # All desired scraper configurations, which subclasses can override as needed
@@ -67,10 +58,6 @@ class OpenMetricsBaseCheckV2(AgentCheck):
 
         # All configured scrapers keyed by the endpoint
         self.scrapers = {}
-
-        # True once a trial-mode (config-discovery) instance has resolved its
-        # endpoint and the scrapers have been (re)configured.
-        self._discovery_resolved = False
 
         self.check_initializations.append(self.configure_scrapers)
 
@@ -83,8 +70,6 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         Another thing to note is that this check ignores its instance argument completely.
         We take care of instance-level customization at initialization time.
         """
-        self.ensure_discovery_resolved()
-
         self.refresh_scrapers()
 
         for endpoint, scraper in self.scrapers.items():
@@ -105,11 +90,6 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         scrapers = {}
 
         for config in self.scraper_configs:
-            # Trial-mode instance: the placeholder endpoint is set so config-model
-            # validation passes, but we don't want a real scraper for it. Skip
-            # until _resolve_discovery sets the real endpoint and re-invokes us.
-            if config.get("__discovery_service__") is not None and not self._discovery_resolved:
-                continue
             endpoint = config.get('openmetrics_endpoint', '')
             if not isinstance(endpoint, str):
                 raise ConfigurationError('The setting `openmetrics_endpoint` must be a string')
@@ -121,77 +101,23 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         self.scrapers.clear()
         self.scrapers.update(scrapers)
 
-    def ensure_discovery_resolved(self):
-        """Run trial-mode discovery if this instance was scheduled by AD with
-        a __discovery_service__ payload and discovery hasn't completed yet.
-        Idempotent. Subclasses can call this before reading self.config
-        fields whose values are derived during discovery (e.g. health_endpoint
-        in boundary), so that the read returns the real value rather than
-        the placeholder injected for instance-config validation."""
-        if self.instance.get("__discovery_service__") is not None and not self._discovery_resolved:
-            self._resolve_discovery(self.instance["__discovery_service__"])
-
-    def _resolve_discovery(self, service_dict):
-        """Probe candidate ports and configure scrapers for the responding endpoint.
-
-        Called from ensure_discovery_resolved() on the first run for trial-mode
-        instances. Subclasses can override _post_discovery_hook to customize
-        behavior after the endpoint is resolved (e.g. to derive related fields
-        from openmetrics_endpoint).
-        """
-        # Module-attribute access for http_probe so tests can monkeypatch it.
-        import datadog_checks.base.utils.discovery.http as http_mod
-        from datadog_checks.base.utils.discovery import (
-            Port,
-            Service,
-            candidate_ports,
-            is_prometheus_exposition,
-        )
+    @classmethod
+    def generate_configs(cls, service_dict):
+        """Yield candidate complete instance dicts to try when this class is
+        scheduled in trial-mode (config-discovery). Subclasses can override
+        to add fields derived from the resolved openmetrics_endpoint
+        (e.g. boundary's health_endpoint)."""
+        from datadog_checks.base.utils.discovery import Port, Service, candidate_ports
 
         service = Service(
             id=service_dict["id"],
             host=service_dict["host"],
             ports=tuple(Port(number=p["number"], name=p.get("name", "")) for p in service_dict["ports"]),
         )
-
-        endpoint = None
-        for port in candidate_ports(service, self.DISCOVERY_PORT_HINTS):
-            if http_mod.http_probe(
-                service.host,
-                port.number,
-                self.DISCOVERY_METRICS_PATH,
-                verifier=is_prometheus_exposition(),
-            ):
-                endpoint = f"http://{service.host}:{port.number}{self.DISCOVERY_METRICS_PATH}"
-                break
-
-        if endpoint is None:
-            tried = [p.number for p in candidate_ports(service, self.DISCOVERY_PORT_HINTS)]
-            raise ConfigurationError(
-                f"openmetrics discovery: no responding {self.DISCOVERY_METRICS_PATH} "
-                f"endpoint on {service.host} (ports tried: {tried})"
-            )
-
-        self.instance["openmetrics_endpoint"] = endpoint
-        self.scraper_configs = [self.instance]
-        self._discovery_resolved = True
-        # Subclass hook: update other self.instance fields whose values are
-        # derived from the discovered openmetrics_endpoint (e.g. boundary's
-        # health_endpoint). Runs before the config-model rebuild so the
-        # InstanceConfig picks up the new values in one pass.
-        self._post_discovery_hook()
-        # Rebuild the config model so self.config (used by ConfigMixin
-        # subclasses) reflects post-discovery values rather than the
-        # placeholder injected for trial-mode validation.
-        self._config_model_instance = None
-        self.load_configuration_models()
-        self.configure_scrapers()
-
-    def _post_discovery_hook(self):
-        """Subclasses can override to update self.instance fields whose
-        values are derived from the discovered openmetrics_endpoint. Called
-        from _resolve_discovery before the config-model rebuild."""
-        pass
+        for port in candidate_ports(service, cls.DISCOVERY_PORT_HINTS):
+            yield {
+                "openmetrics_endpoint": (f"http://{service.host}:{port.number}{cls.DISCOVERY_METRICS_PATH}"),
+            }
 
     def create_scraper(self, config):
         """
