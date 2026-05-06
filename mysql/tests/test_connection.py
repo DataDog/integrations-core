@@ -2,7 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+from unittest.mock import MagicMock, patch
 
+import pymysql
 import pytest
 
 from datadog_checks.mysql import MySql
@@ -105,3 +107,54 @@ def test_connection_with_charset(instance_basic):
         'read_timeout': None,
         'charset': 'utf8mb4',
     }
+
+
+def _capture_warnings(check):
+    """Return a list that accumulates warning messages logged by the check."""
+    import logging
+
+    captured = []
+
+    class _WarnCapture(logging.Handler):
+        def emit(self, record):
+            if record.levelno == logging.WARNING:
+                captured.append(record.getMessage())
+
+    handler = _WarnCapture()
+    check.log.logger.addHandler(handler)
+    check.log.logger.setLevel(logging.WARNING)
+    return captured, handler
+
+
+def test_1045_warns_ssl_hint_when_no_ssl_configured(instance_basic):
+    check = MySql(common.CHECK_NAME, {}, [instance_basic])
+    captured, handler = _capture_warnings(check)
+    try:
+        with patch('datadog_checks.mysql.mysql.connect_with_session_variables') as mock_connect, \
+             patch.object(check, 'service_check'):
+            mock_connect.side_effect = pymysql.err.OperationalError(1045, "Access denied")
+            with pytest.raises(pymysql.err.OperationalError):
+                with check._connect():
+                    pass
+        assert any('ssl' in w.lower() for w in captured), f"Expected ssl warning, got: {captured}"
+        assert any('1045' in w for w in captured), f"Expected 1045 in warning, got: {captured}"
+    finally:
+        check.log.logger.removeHandler(handler)
+
+
+def test_1045_no_ssl_hint_when_ssl_already_configured(instance_basic):
+    instance = copy.deepcopy(instance_basic)
+    instance['ssl'] = {'check_hostname': False}
+    check = MySql(common.CHECK_NAME, {}, [instance])
+    captured, handler = _capture_warnings(check)
+    try:
+        with patch('datadog_checks.mysql.mysql.connect_with_session_variables') as mock_connect, \
+             patch.object(check, 'service_check'):
+            mock_connect.side_effect = pymysql.err.OperationalError(1045, "Access denied")
+            with pytest.raises(pymysql.err.OperationalError):
+                with check._connect():
+                    pass
+        ssl_warns = [w for w in captured if 'ssl' in w.lower() and '1045' in w]
+        assert ssl_warns == [], f"Unexpected ssl/1045 warning when ssl configured: {ssl_warns}"
+    finally:
+        check.log.logger.removeHandler(handler)
