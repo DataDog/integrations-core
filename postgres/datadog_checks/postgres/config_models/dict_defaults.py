@@ -86,7 +86,7 @@ def instance_collect_settings():
 
 def instance_collect_column_stats():
     return instance.CollectColumnStats(
-        enabled=True,
+        enabled=False,
         max_tables=500,
         collection_interval=14400,
         include_databases=[],

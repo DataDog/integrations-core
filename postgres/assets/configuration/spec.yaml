@@ -1075,7 +1075,7 @@ files:
             Enable collection of column statistics. Requires `dbm: true`.
           value:
             type: boolean
-            example: true
+            example: false
         - name: collection_interval
           description: |
             Set the column statistics collection interval (in seconds).
