@@ -12,7 +12,7 @@ def tcp_probe(
     port: int,
     *,
     send: bytes = b"",
-    verify: Callable[[bytes], bool],
+    verifier: Callable[[bytes], bool],
     timeout: float = 0.5,
     read_max: int = _DEFAULT_READ_MAX,
 ) -> bool:
@@ -41,4 +41,4 @@ def tcp_probe(
             buf = b"".join(chunks)
     except OSError:
         return False
-    return bool(verify(buf))
+    return bool(verifier(buf))

@@ -11,7 +11,7 @@ def http_probe(
     port: int,
     path: str,
     *,
-    verify: Callable[[requests.Response], bool],
+    verifier: Callable[[requests.Response], bool],
     timeout: float = 0.5,
 ) -> bool:
     """Perform a single GET probe and apply the verifier.
@@ -28,6 +28,6 @@ def http_probe(
     except requests.RequestException:
         return False
     try:
-        return bool(verify(response))
+        return bool(verifier(response))
     finally:
         response.close()

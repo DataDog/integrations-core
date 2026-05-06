@@ -49,7 +49,7 @@ def test_tcp_probe_zookeeper_4lw_pattern():
             conn.sendall(b"imok")
 
     with _tcp_server(handler) as port:
-        assert tcp_probe("127.0.0.1", port, send=b"ruok", verify=response_equals(b"imok"), timeout=1.0)
+        assert tcp_probe("127.0.0.1", port, send=b"ruok", verifier=response_equals(b"imok"), timeout=1.0)
 
 
 def test_tcp_probe_redis_ping_pattern():
@@ -58,7 +58,7 @@ def test_tcp_probe_redis_ping_pattern():
         conn.sendall(b"+PONG\r\n")
 
     with _tcp_server(handler) as port:
-        assert tcp_probe("127.0.0.1", port, send=b"PING\r\n", verify=response_starts_with(b"+PONG"), timeout=1.0)
+        assert tcp_probe("127.0.0.1", port, send=b"PING\r\n", verifier=response_starts_with(b"+PONG"), timeout=1.0)
 
 
 def test_tcp_probe_server_speaks_first():
@@ -66,7 +66,7 @@ def test_tcp_probe_server_speaks_first():
         conn.sendall(b'{"service":"nutcracker","source":"x","version":"0.5"}')
 
     with _tcp_server(handler) as port:
-        assert tcp_probe("127.0.0.1", port, verify=response_starts_with(b'{"service":"nutcracker"'), timeout=1.0)
+        assert tcp_probe("127.0.0.1", port, verifier=response_starts_with(b'{"service":"nutcracker"'), timeout=1.0)
 
 
 def test_tcp_probe_returns_false_when_verifier_rejects():
@@ -74,7 +74,7 @@ def test_tcp_probe_returns_false_when_verifier_rejects():
         conn.sendall(b"WRONG")
 
     with _tcp_server(handler) as port:
-        assert not tcp_probe("127.0.0.1", port, verify=response_starts_with(b"+PONG"), timeout=1.0)
+        assert not tcp_probe("127.0.0.1", port, verifier=response_starts_with(b"+PONG"), timeout=1.0)
 
 
 def test_tcp_probe_returns_false_on_refused_connection():
@@ -82,7 +82,7 @@ def test_tcp_probe_returns_false_on_refused_connection():
     sock.bind(("127.0.0.1", 0))
     port = sock.getsockname()[1]
     sock.close()  # port is now free; nothing listening
-    assert not tcp_probe("127.0.0.1", port, verify=response_starts_with(b"x"), timeout=1.0)
+    assert not tcp_probe("127.0.0.1", port, verifier=response_starts_with(b"x"), timeout=1.0)
 
 
 def test_tcp_probe_returns_false_on_timeout():
@@ -93,4 +93,4 @@ def test_tcp_probe_returns_false_on_timeout():
         time.sleep(2.0)
 
     with _tcp_server(handler) as port:
-        assert not tcp_probe("127.0.0.1", port, verify=response_starts_with(b"x"), timeout=0.1)
+        assert not tcp_probe("127.0.0.1", port, verifier=response_starts_with(b"x"), timeout=0.1)
