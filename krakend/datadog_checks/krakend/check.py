@@ -21,9 +21,6 @@ if TYPE_CHECKING:
 
 HTTP_STATUS_CODE_TAG = "http_response_status_code"
 
-DISCOVERY_PORT_HINTS = [9090]
-DISCOVERY_METRICS_PATH = "/metrics"
-
 
 class HttpCodeClassScraper(OpenMetricsScraper):
     def __init__(self, check: AgentCheck, config: Mapping):
@@ -53,56 +50,7 @@ class KrakendCheck(OpenMetricsBaseCheckV2):
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = "krakend.api"
     DEFAULT_METRIC_LIMIT = 0
-
-    DISCOVERY_PORT_HINTS = DISCOVERY_PORT_HINTS
-    DISCOVERY_METRICS_PATH = DISCOVERY_METRICS_PATH
-
-    def __init__(self, name: str, init_config: dict, instances: list) -> None:
-        # When a discovery instance arrives without openmetrics_endpoint the parent's
-        # configure_scrapers (run before check()) would raise ConfigurationError.
-        # Inject a placeholder so the parent init succeeds; _configure_from_discovery
-        # replaces it with the real endpoint on the first check() call.
-        if instances:
-            for inst in instances:
-                if inst.get("__discovery_service__") is not None and not inst.get("openmetrics_endpoint"):
-                    inst["openmetrics_endpoint"] = "http://discovery-pending.invalid/metrics"
-        super().__init__(name, init_config, instances)
-        self._discovery_endpoint: str | None = None
-
-    def check(self, _: InstanceType) -> None:
-        instance = self.instance
-        if instance.get("__discovery_service__") is not None and self._discovery_endpoint is None:
-            self._configure_from_discovery(instance["__discovery_service__"])
-        super().check(_)
-
-    def _configure_from_discovery(self, service_dict: dict) -> None:
-        import datadog_checks.base.utils.discovery.http as http_mod
-        from datadog_checks.base.utils.discovery import Port, Service, candidate_ports, is_prometheus_exposition
-
-        service = Service(
-            id=service_dict["id"],
-            host=service_dict["host"],
-            ports=tuple(Port(number=p["number"], name=p.get("name", "")) for p in service_dict["ports"]),
-        )
-
-        endpoint = None
-        for port in candidate_ports(service, self.DISCOVERY_PORT_HINTS):
-            if http_mod.http_probe(
-                service.host, port.number, self.DISCOVERY_METRICS_PATH, verifier=is_prometheus_exposition()
-            ):
-                endpoint = f"http://{service.host}:{port.number}{self.DISCOVERY_METRICS_PATH}"
-                break
-
-        if endpoint is None:
-            tried = [p.number for p in candidate_ports(service, self.DISCOVERY_PORT_HINTS)]
-            raise Exception(
-                f"krakend discovery: no responding /metrics endpoint on host {service.host} (ports tried: {tried})"
-            )
-
-        self.instance["openmetrics_endpoint"] = endpoint
-        self.scraper_configs = [self.instance]
-        self.configure_scrapers()
-        self._discovery_endpoint = endpoint
+    DISCOVERY_PORT_HINTS = [9090]
 
     def create_scraper(self, config: InstanceType):
         return HttpCodeClassScraper(self, self.get_config_with_defaults(config))

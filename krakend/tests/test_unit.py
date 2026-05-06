@@ -124,19 +124,18 @@ def test_http_code_class_tag(ready_check: KrakendCheck, aggregator: AggregatorSt
     aggregator.assert_metric_has_tag("krakend.api.http_client.duration.bucket", "code_class:5XX")
 
 
-def test_krakend_inherits_base_discover():
-    # KrakendCheck hints port 9090 and uses /metrics path
+def test_krakend_discovery_class_attrs():
+    # KrakendCheck hints port 9090 and inherits the base /metrics path.
     assert KrakendCheck.DISCOVERY_PORT_HINTS == [9090]
     assert KrakendCheck.DISCOVERY_METRICS_PATH == "/metrics"
-    assert KrakendCheck.__dict__.get("discover") is None  # not overridden
 
 
-def test_trial_mode_probes_and_caches_endpoint(monkeypatch):
-    """KrakendCheck in trial mode probes ports and configures itself on
-    first check() call."""
+def test_trial_mode_probes_and_configures_scraper(monkeypatch):
+    """KrakendCheck inherits trial-mode behavior from OpenMetricsBaseCheckV2:
+    on first check() call it probes the port hint and configures the scraper
+    for the responding /metrics endpoint."""
     import datadog_checks.base.utils.discovery.http as http_mod
 
-    # Mock http_probe to succeed only on port 9090.
     def fake_probe(host, port, path, *, verifier, timeout=0.5):
         return port == 9090
 
@@ -155,13 +154,13 @@ def test_trial_mode_probes_and_caches_endpoint(monkeypatch):
 
     check = KrakendCheck("krakend", {}, [instance])
 
-    # Mock the scraper so we don't actually try to scrape during the test.
     fake_scraper = mock.MagicMock()
     monkeypatch.setattr(check, "create_scraper", lambda _config: fake_scraper)
 
     check.check(instance)
 
-    assert check._discovery_endpoint == "http://10.0.0.5:9090/metrics"
+    assert check._discovery_resolved is True
+    assert check.instance["openmetrics_endpoint"] == "http://10.0.0.5:9090/metrics"
     assert "http://10.0.0.5:9090/metrics" in check.scrapers
 
 
