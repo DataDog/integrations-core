@@ -470,11 +470,10 @@ class InfrastructureMonitor:
 
     def _report_host_status_metrics(self, host: dict, hostname: str, host_tags: list[str]) -> None:
         """Report host node status as a gauge (0=OK, 1=WARNING, 2=CRITICAL/UNKNOWN)."""
-        node_status_ok = {"NORMAL", "NEW_NODE", "PREPROTECTED"}
-        node_status_warning = {"TO_BE_PREPROTECTED", "TO_BE_REMOVED", "OK_TO_BE_REMOVED"}
+        node_status_ok = {"normal", "new_node", "preprotected"}
+        node_status_warning = {"to_be_preprotected", "to_be_removed", "ok_to_be_removed"}
 
-        node_status = host.get("nodeStatus")
-        node_status_tag = _normalize_tag_value(node_status)
+        node_status = _normalize_tag_value(host.get("nodeStatus"))
 
         if node_status in node_status_ok:
             status_value = 0
@@ -483,7 +482,7 @@ class InfrastructureMonitor:
         else:
             status_value = 2
 
-        status_tags = host_tags + [f"ntnx_node_status:{node_status_tag}"]
+        status_tags = host_tags + [f"ntnx_node_status:{node_status}"]
         self.check.gauge("host.status", status_value, hostname=hostname, tags=status_tags)
 
     def _extract_host_tags(self, host: dict) -> list[str]:
@@ -495,7 +494,8 @@ class InfrastructureMonitor:
         hypervisor_type = _normalize_tag_value(get_nested(host, "hypervisor/type"))
         connection_state = _normalize_tag_value(get_nested(host, "hypervisor/acropolisConnectionState"))
 
-        tags = ["ntnx_type:host"]
+        tags = []
+        tags.append("ntnx_type:host")
         if host_name:
             tags.append(f"ntnx_host_name:{host_name}")
         tags.append(f"ntnx_host_type:{host_type}")
@@ -529,7 +529,8 @@ class InfrastructureMonitor:
         is_agent_vm = is_affirmative(vm.get("isAgentVm"))
         power_state = _normalize_tag_value(vm.get("powerState"))
 
-        tags = ["ntnx_type:vm"]
+        tags = []
+        tags.append("ntnx_type:vm")
         if vm_name:
             tags.append(f"ntnx_vm_name:{vm_name}")
         tags.extend(self.check.extract_category_tags(vm))
