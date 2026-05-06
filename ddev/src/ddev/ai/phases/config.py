@@ -16,32 +16,26 @@ class FlowConfigError(Exception):
     """Wraps Pydantic ValidationError or YAML errors with a user-friendly message."""
 
 
-def _detect_cycle(dependency_map: dict[str, list[str]]) -> list[str] | None:
-    """Return the first cycle found as an ordered list of phase IDs, or None if acyclic."""
-    visiting: set[str] = set()
-    visited: set[str] = set()
-    path: list[str] = []
+def _detect_cycles(dependency_map: dict[str, list[str]]) -> list[list[str]]:
+    """Return every simple cycle in the dependency graph, each as an ordered list of phase IDs."""
+    # Implementation based in Johnson's algorithm (1975): each cycle is reported exactly once by
+    # only starting DFS from a node when it is the lowest-ranked node in the cycle.
+    rank = {n: i for i, n in enumerate(dependency_map)}
+    cycles: list[list[str]] = []
 
-    def dfs(node: str) -> list[str] | None:
-        visiting.add(node)
-        path.append(node)
-        for dep in dependency_map.get(node, []):
-            if dep in visiting:
-                return path[path.index(dep) :] + [dep]
-            if dep not in visited:
-                result = dfs(dep)
-                if result is not None:
-                    return result
-        path.pop()
-        visiting.discard(node)
-        visited.add(node)
-        return None
+    def dfs(start: str, current: str, path: list[str], on_path: set[str]) -> None:
+        for dep in dependency_map.get(current, []):
+            if dep == start:
+                cycles.append(path + [start])
+            elif rank[dep] > rank[start] and dep not in on_path:
+                on_path.add(dep)
+                dfs(start, dep, path + [dep], on_path)
+                on_path.discard(dep)
 
-    for node in dependency_map:
-        if node not in visited:
-            if (cycle := dfs(node)) is not None:
-                return cycle
-    return None
+    for start in dependency_map:
+        dfs(start, start, [start], {start})
+
+    return cycles
 
 
 class TaskConfig(BaseModel):
@@ -137,8 +131,9 @@ class FlowConfig(BaseModel):
                 raise ValueError(f"Phase {phase_id!r} references unknown agent: {phase.agent!r}")
 
         dependency_map = {entry.phase: entry.dependencies for entry in self.flow}
-        if cycle := _detect_cycle(dependency_map):
-            raise ValueError(f"Cycle detected in flow: {' → '.join(cycle)}")
+        if cycles := _detect_cycles(dependency_map):
+            formatted = "\n  ".join(" → ".join(c) for c in cycles)
+            raise ValueError(f"Cycle(s) detected in flow:\n  {formatted}")
 
         return self
 

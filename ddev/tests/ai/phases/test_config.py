@@ -328,7 +328,7 @@ def test_flow_config_direct_cycle_raises():
         {"phase": "p1", "dependencies": ["p2"]},
         {"phase": "p2", "dependencies": ["p1"]},
     ]
-    with pytest.raises(ValidationError, match="Cycle detected"):
+    with pytest.raises(ValidationError, match="Cycle"):
         FlowConfig.model_validate(raw)
 
 
@@ -339,7 +339,7 @@ def test_flow_config_three_node_cycle_raises():
         {"phase": "p2", "dependencies": ["p1"]},
         {"phase": "p3", "dependencies": ["p2"]},
     ]
-    with pytest.raises(ValidationError, match="Cycle detected"):
+    with pytest.raises(ValidationError, match="Cycle"):
         FlowConfig.model_validate(raw)
 
 
@@ -379,5 +379,34 @@ def test_flow_disjoined_graphs_ok():
 def test_flow_config_self_dependency_raises():
     raw = _minimal_config()
     raw["flow"] = [{"phase": "p1", "dependencies": ["p1"]}]
-    with pytest.raises(ValidationError, match="Cycle detected"):
+    with pytest.raises(ValidationError, match="Cycle"):
         FlowConfig.model_validate(raw)
+
+
+def test_flow_config_two_independent_cycles_reports_both():
+    agent = {"tools": []}
+    task = {"name": "t", "prompt": "Do it."}
+    raw = {
+        "agents": {"writer": agent},
+        "phases": {
+            "p1": {"agent": "writer", "tasks": [task]},
+            "p2": {"agent": "writer", "tasks": [task]},
+            "p3": {"agent": "writer", "tasks": [task]},
+            "p4": {"agent": "writer", "tasks": [task]},
+        },
+        "flow": [
+            # dependency edges: p1→p3→p2→p1 and p1→p4→p2→p1
+            {"phase": "p1", "dependencies": ["p3", "p4"]},
+            {"phase": "p2", "dependencies": ["p1"]},
+            {"phase": "p3", "dependencies": ["p2"]},
+            {"phase": "p4", "dependencies": ["p2"]},
+        ],
+    }
+    with pytest.raises(ValidationError) as exc_info:
+        FlowConfig.model_validate(raw)
+    error = str(exc_info.value)
+    assert "Cycle" in error
+    assert "p1" in error
+    assert "p2" in error
+    assert "p3" in error
+    assert "p4" in error
