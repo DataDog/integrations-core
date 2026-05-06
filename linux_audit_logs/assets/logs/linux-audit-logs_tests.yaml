@@ -1611,8 +1611,18 @@ tests:
         activity_name: "Open"
         actor:
           process:
-            path: "/usr/bin/bash"
             name: "bash"
+            path: "/usr/bin/bash"
+            pid: 226245
+            user:
+              name: "lima"
+              uid: "502"
+          session:
+            terminal: "pts0"
+            uid: "4"
+          user:
+            name: "lima"
+            uid: "502"
         category_name: "Network Activity"
         category_uid: 4
         class_name: "Network Activity"
