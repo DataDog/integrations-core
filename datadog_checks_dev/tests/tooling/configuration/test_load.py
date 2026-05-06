@@ -905,7 +905,7 @@ def test_option_formats_unknown_value():
 
     assert (
         'test, test.yaml, instances, foo: Attribute `formats` contains unknown value(s): '
-        'made_up_format, valid values are java_jvm_options | path | port | url'
+        'made_up_format, valid values are java_jvm_options | path | port | secret | url'
     ) in spec.errors
 
 
@@ -984,7 +984,7 @@ def test_value_type_object_property_formats_invalid():
 
     assert (
         'test, test.yaml, instances, foo: Attribute `formats` for property `bar` contains unknown value(s): '
-        'unknown, valid values are java_jvm_options | path | port | url'
+        'unknown, valid values are java_jvm_options | path | port | secret | url'
     ) in spec.errors
 
 
