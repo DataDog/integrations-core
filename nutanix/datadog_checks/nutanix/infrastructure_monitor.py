@@ -474,6 +474,7 @@ class InfrastructureMonitor:
         node_status_warning = {"TO_BE_PREPROTECTED", "TO_BE_REMOVED", "OK_TO_BE_REMOVED"}
 
         node_status = host.get("nodeStatus")
+        node_status_tag = _norm_state(node_status)
 
         if node_status in node_status_ok:
             status_value = 0
@@ -482,72 +483,62 @@ class InfrastructureMonitor:
         else:
             status_value = 2
 
-        status_tags = host_tags + [f"ntnx_node_status:{_norm_state(node_status)}"]
+        status_tags = host_tags + [f"ntnx_node_status:{node_status_tag}"]
         self.check.gauge("host.status", status_value, hostname=hostname, tags=status_tags)
 
     def _extract_host_tags(self, host: dict) -> list[str]:
         """Extract tags from a host object."""
-        tags = []
+        host_name = host.get("hostName")
+        host_type = _norm_state(host.get("hostType"))
+        maintenance_state = _norm_state(host.get("maintenanceState"))
+        hypervisor_name = get_nested(host, "hypervisor/fullName")
+        hypervisor_type = _norm_state(get_nested(host, "hypervisor/type"))
+        connection_state = _norm_state(get_nested(host, "hypervisor/acropolisConnectionState"))
 
-        tags.append("ntnx_type:host")
-
-        if host_name := host.get("hostName"):
+        tags = ["ntnx_type:host"]
+        if host_name:
             tags.append(f"ntnx_host_name:{host_name}")
-
-        tags.append(f"ntnx_host_type:{_norm_state(host.get('hostType'))}")
-        tags.append(f"ntnx_maintenance_state:{_norm_state(host.get('maintenanceState'))}")
-
-        # hypervisor tags
-        if hypervisor_name := get_nested(host, "hypervisor/fullName"):
+        tags.append(f"ntnx_host_type:{host_type}")
+        tags.append(f"ntnx_maintenance_state:{maintenance_state}")
+        if hypervisor_name:
             tags.append(f"ntnx_hypervisor_name:{hypervisor_name}")
-        tags.append(f"ntnx_hypervisor_type:{_norm_state(get_nested(host, 'hypervisor/type'))}")
-        tags.append(f"ntnx_connection_state:{_norm_state(get_nested(host, 'hypervisor/acropolisConnectionState'))}")
-
-        # Add category tags
+        tags.append(f"ntnx_hypervisor_type:{hypervisor_type}")
+        tags.append(f"ntnx_connection_state:{connection_state}")
         tags.extend(self.check.extract_category_tags(host))
 
         return tags
 
     def _extract_cluster_tags(self, cluster: dict) -> list[str]:
         """Extract tags from a cluster object."""
-        tags = []
-
         cluster_name = cluster.get("name")
+        operation_mode = _norm_state(get_nested(cluster, "config/operationMode"))
+
+        tags = []
         if cluster_name:
             tags.append(f"ntnx_cluster_name:{cluster_name}")
-
-        tags.append(f"ntnx_operation_mode:{_norm_state(get_nested(cluster, 'config/operationMode'))}")
-
-        # Add category tags
+        tags.append(f"ntnx_operation_mode:{operation_mode}")
         tags.extend(self.check.extract_category_tags(cluster))
 
         return tags
 
     def _extract_vm_tags(self, vm: dict) -> list[str]:
         """Extract tags from a VM object."""
-        tags = []
-
-        tags.append("ntnx_type:vm")
-
         vm_name = vm.get("name")
+        host_id = get_nested(vm, "host/extId")
+        cluster_id = get_nested(vm, "cluster/extId")
+        is_agent_vm = is_affirmative(vm.get("isAgentVm"))
+        power_state = _norm_state(vm.get("powerState"))
+
+        tags = ["ntnx_type:vm"]
         if vm_name:
             tags.append(f"ntnx_vm_name:{vm_name}")
-
-        # Add category tags
         tags.extend(self.check.extract_category_tags(vm))
-
-        host_id = get_nested(vm, "host/extId")
         if host_id and host_id in self.host_names:
             tags.append(f"ntnx_host_name:{self.host_names[host_id]}")
-
-        cluster_id = get_nested(vm, "cluster/extId")
         if cluster_id and cluster_id in self.cluster_names:
             tags.append(f"ntnx_cluster_name:{self.cluster_names[cluster_id]}")
-
-        is_agent_vm = is_affirmative(vm.get("isAgentVm"))
         tags.append(f"ntnx_is_agent_vm:{is_agent_vm}")
-
-        tags.append(f"ntnx_power_state:{_norm_state(vm.get('powerState'))}")
+        tags.append(f"ntnx_power_state:{power_state}")
 
         return tags
 
@@ -624,7 +615,8 @@ class InfrastructureMonitor:
     def _get_disk_status_storage_tags(self, host_id: str) -> dict[str, list[str]]:
         """Return per-key extra tags adding ``ntnx_disk_status`` on host storage_* metrics."""
         status = self._aggregate_disk_status(self._disks_by_host.get(host_id, []))
-        return {key: [f"ntnx_disk_status:{status}"] for key in HOST_STORAGE_STAT_KEYS}
+        disk_status_tag = f"ntnx_disk_status:{status}"
+        return {key: [disk_status_tag] for key in HOST_STORAGE_STAT_KEYS}
 
     def _build_stats_params(self) -> dict[str, str | int]:
         """Build the common query parameters for stats API calls."""
