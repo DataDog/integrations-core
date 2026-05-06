@@ -13,7 +13,6 @@ DEFAULT_READY_ENDPOINT = '/healthz/readiness'
 class N8nCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'n8n'
     DEFAULT_METRIC_LIMIT = 0
-    DISCOVERY_PORT_HINTS = [5678]
 
     def __init__(self, name, init_config, instances=None):
         super(N8nCheck, self).__init__(
