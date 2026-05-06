@@ -20,7 +20,9 @@ from .utils import get_version_file, load_manifest
 
 # Maps the Python platform strings to the ones we have in the manifest
 PLATFORMS_TO_PY = {'windows': 'win32', 'mac_os': 'darwin', 'linux': 'linux2', 'aix': 'aix'}
-ALL_PLATFORMS = sorted(k for k in PLATFORMS_TO_PY if k != 'aix')
+# OSes that are not included in the agent requirements file
+PLATFORMS_NOT_IN_AGENT_REQUIREMENTS = frozenset({'aix'})
+ALL_PLATFORMS = sorted(k for k in PLATFORMS_TO_PY if k not in PLATFORMS_NOT_IN_AGENT_REQUIREMENTS)
 VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
 DATADOG_PACKAGE_PREFIX = 'datadog-'
 
@@ -117,7 +119,7 @@ def get_agent_requirement_line(check, version, app):
             elif value == 'macOS':
                 value = 'mac_os'
             platform = value.lower()
-            if platform in set(ALL_PLATFORMS):
+            if platform not in PLATFORMS_NOT_IN_AGENT_REQUIREMENTS:
                 platforms.append(platform)
         platforms.sort()
     else:
