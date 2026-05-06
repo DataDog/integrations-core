@@ -14,18 +14,31 @@ class BoundaryCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     DEFAULT_METRIC_LIMIT = 0
     DISCOVERY_PORT_HINTS = [9203]
 
-    @classmethod
-    def discover(cls, service):
-        instances = super().discover(service)
-        if instances:
-            for instance in instances:
-                base = instance['openmetrics_endpoint'].rsplit('/', 1)[0]
-                instance['health_endpoint'] = f"{base}/health"
-        return instances
-
     SERVICE_CHECK_CONTROLLER_HEALTH = 'controller.health'
 
+    def __init__(self, name, init_config, instances):
+        # Boundary's instance schema requires health_endpoint; placeholder it
+        # for trial-mode instances so InstanceConfig validation passes.
+        # _resolve_discovery overwrites with the real URL and rebuilds the
+        # config model.
+        if instances:
+            for inst in instances:
+                if inst.get("__discovery_service__") is not None and not inst.get("health_endpoint"):
+                    inst["health_endpoint"] = "http://discovery-pending.invalid/health"
+        super().__init__(name, init_config, instances)
+
+    def _post_discovery_hook(self):
+        # Derive health_endpoint from the discovered openmetrics_endpoint.
+        base = self.instance["openmetrics_endpoint"].rsplit('/', 1)[0]
+        self.instance["health_endpoint"] = f"{base}/health"
+        # The cached_property below was computed from the placeholder; clear it.
+        self.__dict__.pop('controller_health_tags', None)
+
     def check(self, _):
+        # Resolve trial-mode discovery before reading self.config.health_endpoint
+        # so the latter returns the real URL rather than the placeholder.
+        self.ensure_discovery_resolved()
+
         try:
             response = self.http.get(self.config.health_endpoint)
         except Exception as e:

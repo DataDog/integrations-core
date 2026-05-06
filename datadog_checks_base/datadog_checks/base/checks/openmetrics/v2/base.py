@@ -83,8 +83,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         Another thing to note is that this check ignores its instance argument completely.
         We take care of instance-level customization at initialization time.
         """
-        if self.instance.get("__discovery_service__") is not None and not self._discovery_resolved:
-            self._resolve_discovery(self.instance["__discovery_service__"])
+        self.ensure_discovery_resolved()
 
         self.refresh_scrapers()
 
@@ -122,13 +121,23 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         self.scrapers.clear()
         self.scrapers.update(scrapers)
 
+    def ensure_discovery_resolved(self):
+        """Run trial-mode discovery if this instance was scheduled by AD with
+        a __discovery_service__ payload and discovery hasn't completed yet.
+        Idempotent. Subclasses can call this before reading self.config
+        fields whose values are derived during discovery (e.g. health_endpoint
+        in boundary), so that the read returns the real value rather than
+        the placeholder injected for instance-config validation."""
+        if self.instance.get("__discovery_service__") is not None and not self._discovery_resolved:
+            self._resolve_discovery(self.instance["__discovery_service__"])
+
     def _resolve_discovery(self, service_dict):
         """Probe candidate ports and configure scrapers for the responding endpoint.
 
-        Called from check() on the first run for trial-mode instances. Subclasses
-        can override to customize behavior after the endpoint is resolved (e.g. to
-        derive related fields from openmetrics_endpoint). The override must call
-        super()._resolve_discovery first.
+        Called from ensure_discovery_resolved() on the first run for trial-mode
+        instances. Subclasses can override _post_discovery_hook to customize
+        behavior after the endpoint is resolved (e.g. to derive related fields
+        from openmetrics_endpoint).
         """
         # Module-attribute access for http_probe so tests can monkeypatch it.
         import datadog_checks.base.utils.discovery.http as http_mod
@@ -166,7 +175,23 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         self.instance["openmetrics_endpoint"] = endpoint
         self.scraper_configs = [self.instance]
         self._discovery_resolved = True
+        # Subclass hook: update other self.instance fields whose values are
+        # derived from the discovered openmetrics_endpoint (e.g. boundary's
+        # health_endpoint). Runs before the config-model rebuild so the
+        # InstanceConfig picks up the new values in one pass.
+        self._post_discovery_hook()
+        # Rebuild the config model so self.config (used by ConfigMixin
+        # subclasses) reflects post-discovery values rather than the
+        # placeholder injected for trial-mode validation.
+        self._config_model_instance = None
+        self.load_configuration_models()
         self.configure_scrapers()
+
+    def _post_discovery_hook(self):
+        """Subclasses can override to update self.instance fields whose
+        values are derived from the discovered openmetrics_endpoint. Called
+        from _resolve_discovery before the config-model rebuild."""
+        pass
 
     def create_scraper(self, config):
         """

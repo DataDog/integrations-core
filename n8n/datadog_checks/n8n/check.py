@@ -13,6 +13,7 @@ DEFAULT_READY_ENDPOINT = '/healthz/readiness'
 class N8nCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'n8n'
     DEFAULT_METRIC_LIMIT = 0
+    DISCOVERY_PORT_HINTS = [5678]
 
     def __init__(self, name, init_config, instances=None):
         super(N8nCheck, self).__init__(
@@ -23,6 +24,11 @@ class N8nCheck(OpenMetricsBaseCheckV2):
         self.openmetrics_endpoint = self.instance["openmetrics_endpoint"]
         self.tags = self.instance.get('tags', [])
         self._ready_endpoint = DEFAULT_READY_ENDPOINT
+
+    def _post_discovery_hook(self):
+        # The real openmetrics_endpoint is now in self.instance; refresh the
+        # cached attribute that __init__ captured from the placeholder.
+        self.openmetrics_endpoint = self.instance["openmetrics_endpoint"]
 
     def get_default_config(self):
         return {

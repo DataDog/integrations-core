@@ -21,14 +21,12 @@ class Kong(AgentCheck):
 
     """ collects metrics for Kong """
 
-    @classmethod
-    def discover(cls, service):
-        return KongCheck.discover(service)
-
     def __new__(cls, name, init_config, instances):
         instance = instances[0]
 
-        if 'openmetrics_endpoint' in instance:
+        # Trial-mode (config-discovery) instances and explicit openmetrics
+        # configurations both go through the V2 OpenMetrics-based check.
+        if 'openmetrics_endpoint' in instance or '__discovery_service__' in instance:
             return KongCheck(name, init_config, instances)
         else:
             return super(Kong, cls).__new__(cls)

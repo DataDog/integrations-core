@@ -12,7 +12,7 @@ def http_probe(
     path: str,
     *,
     verifier: Callable[[requests.Response], bool],
-    timeout: float = 0.5,
+    timeout: float = 2.0,
 ) -> bool:
     """Perform a single GET probe and apply the verifier.
 
