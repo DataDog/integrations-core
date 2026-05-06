@@ -719,45 +719,55 @@ jobs:
     permissions:
       contents: read
 
+    # Extraction is best-effort end-to-end: any failure in setup, install, configure,
+    # or the extraction itself must not block the release. We pre-create an empty
+    # release-notes.md, run the install/extract steps with continue-on-error so they
+    # never fail the job, and always upload the artifact. The publish job can rely on
+    # extract-release-notes succeeding; the body it consumes may be empty.
     steps:
     - name: Checkout code
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
+    - name: Initialize empty release notes
+      working-directory: .
+      run: ': > release-notes.md'
+
     - name: Set up Python ${{ env.PYTHON_VERSION }}
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      continue-on-error: true
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
 
     - name: Install uv
       uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+      continue-on-error: true
       with:
         enable-cache: false
 
     - name: Install ddev from local folder
+      continue-on-error: true
       working-directory: .
       run: uv pip install --system -e ./datadog_checks_dev[cli] -e ./ddev
 
     - name: Configure ddev
+      continue-on-error: true
       working-directory: .
       run: |-
         ddev config override
         ddev config set upgrade_check false
 
-    # Extraction is best-effort: failing here must not block the release. We always
-    # emit release-notes.md (possibly empty) so the publish job's artifact download
-    # succeeds and the release proceeds with an empty body if extraction failed.
     - name: Extract release notes from CHANGELOG
+      continue-on-error: true
       working-directory: .
       run: |
         version="${GITHUB_REF_NAME#ddev-v}"
-        notes_file="release-notes.md"
-        : > "$notes_file"
-        if ! ddev release changelog show ddev "$version" --file "$notes_file"; then
+        if ! ddev release changelog show ddev "$version" --file release-notes.md; then
           echo "::warning::Failed to extract changelog section for ddev $version; release body will be empty."
-          : > "$notes_file"
+          : > release-notes.md
         fi
 
     - name: Upload release notes
+      if: always()
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: release-notes
