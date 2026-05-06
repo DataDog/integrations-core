@@ -3,6 +3,26 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
+# Subset of HOST_STATS_METRICS keys whose emitted metrics carry the ntnx_disk_status tag.
+HOST_STORAGE_STAT_KEYS: frozenset[str] = frozenset(
+    {
+        "freePhysicalStorageBytes",
+        "logicalStorageUsageBytes",
+        "storageCapacityBytes",
+        "storageUsageBytes",
+    }
+)
+
+# Disk status enum values that aggregate to ntnx_disk_status:degraded.
+DEGRADED_DISK_STATUSES: frozenset[str] = frozenset(
+    {
+        "MARKED_FOR_REMOVAL_BUT_NOT_DETACHABLE",
+        "DATA_MIGRATION_INITIATED",
+        "DETACHABLE",
+    }
+)
+
+
 CLUSTER_STATS_METRICS = {
     "aggregateHypervisorMemoryUsagePpm": "cluster.aggregate_hypervisor.memory_usage",  # ppm
     "controllerAvgIoLatencyUsecs": "cluster.controller.avg_io_latency",  # usecs
@@ -103,7 +123,6 @@ VM_STATS_METRICS = {
     "controllerWss3600SecondReadMb": "vm.controller.wss3600second_read_mb",
     "controllerWss3600SecondUnionMb": "vm.controller.wss3600second_union_mb",
     "controllerWss3600SecondWriteMb": "vm.controller.wss3600second_write_mb",
-    "diskCapacityBytes": "vm.disk_capacity_bytes",
     "diskUsagePpm": "vm.disk_usage_ppm",
     "frameBufferUsagePpm": "vm.frame_buffer_usage_ppm",
     "gpuUsagePpm": "vm.gpu_usage_ppm",
