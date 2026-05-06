@@ -103,7 +103,7 @@ SELECT table_name as `name`,
        row_format as `row_format`,
        create_time as `create_time`
        FROM information_schema.TABLES
-       WHERE TABLE_SCHEMA = %s AND TABLE_TYPE="BASE TABLE"
+       WHERE TABLE_SCHEMA = %s AND TABLE_TYPE='BASE TABLE'
 """
 
 SQL_COLUMNS = """\
