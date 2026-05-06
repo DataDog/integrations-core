@@ -19,7 +19,7 @@ from datadog_checks.dev.subprocess import run_command
 from .utils import get_version_file, load_manifest
 
 # Maps the Python platform strings to the ones we have in the manifest
-PLATFORMS_TO_PY = {'windows': 'win32', 'mac_os': 'darwin', 'linux': 'linux2'}
+PLATFORMS_TO_PY = {'windows': 'win32', 'mac_os': 'darwin', 'linux': 'linux2', 'aix': 'aix'}
 ALL_PLATFORMS = sorted(PLATFORMS_TO_PY)
 VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
 DATADOG_PACKAGE_PREFIX = 'datadog-'
@@ -126,7 +126,7 @@ def get_agent_requirement_line(check, version, app):
 
     # all platforms
     # using sets to ignore possible sorting in the overrides, if any
-    if set(platforms) == set(ALL_PLATFORMS):
+    if set(ALL_PLATFORMS).issubset(set(platforms)):
         return f'{package_name}=={version}'
 
     # one specific platform
