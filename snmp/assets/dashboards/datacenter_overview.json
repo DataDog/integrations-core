@@ -1,6 +1,6 @@
 {
   "title": "Network Device Monitoring",
-  "description": "Fleet-wide SNMP snapshot: reachability pulse, hot interfaces, device inventory, shift-level throughput and error trends, then capacity, L2/L3, and routing links. State transitions and flaps are clearer in Events or dedicated monitors than on SNMP gauges alone—see the tips in the first group and the reference note at the bottom.\n\n`datadog_demo_keep:true`\n\n",
+  "description": "Fleet-wide SNMP snapshot: reachability pulse, hot interfaces, device inventory, shift-level throughput and error trends, then capacity, L2/L3, and routing links. State transitions and flaps are clearer in Events or dedicated monitors than on SNMP gauges alone—see the tips in the first group and the reference note at the bottom.\n\n\n",
   "widgets": [
     {
       "id": 1317082135420750,
@@ -4527,7 +4527,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 54,
+        "y": 27,
         "width": 12,
         "height": 1,
         "is_column_break": true
@@ -4660,7 +4660,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 55,
+        "y": 28,
         "width": 12,
         "height": 1
       }
@@ -4694,7 +4694,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 56,
+        "y": 29,
         "width": 12,
         "height": 3
       }
