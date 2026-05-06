@@ -59,7 +59,7 @@ class KrakendCheck(OpenMetricsBaseCheckV2):
             is_prometheus_exposition,
         )
 
-        for port in candidate_ports(service, [9090]):
+        for port in candidate_ports(service, []):
             if http_probe(service.host, port.number, "/metrics",
                           verifier=is_prometheus_exposition()):
                 return [{"openmetrics_endpoint": f"http://{service.host}:{port.number}/metrics"}]
