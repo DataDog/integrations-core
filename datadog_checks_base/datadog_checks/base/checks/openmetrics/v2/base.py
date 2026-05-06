@@ -38,20 +38,6 @@ class OpenMetricsBaseCheckV2(AgentCheck):
     # Subclasses can override if metrics are not at /metrics.
     DISCOVERY_METRICS_PATH: str = "/metrics"
 
-    @classmethod
-    def discover(cls, service):
-        from datadog_checks.base.utils.discovery import (
-            candidate_ports,
-            http_probe,
-            is_prometheus_exposition,
-        )
-
-        path = cls.DISCOVERY_METRICS_PATH
-        for port in candidate_ports(service, cls.DISCOVERY_PORT_HINTS):
-            if http_probe(service.host, port.number, path, verifier=is_prometheus_exposition()):
-                return [{"openmetrics_endpoint": f"http://{service.host}:{port.number}{path}"}]
-        return None
-
     # Allow tracing for openmetrics integrations
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
