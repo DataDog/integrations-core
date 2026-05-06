@@ -13,6 +13,20 @@ CLUSTER_TAGS = [
     'cluster_name:' + CLUSTER_NAME,
 ]
 
+APP_NAME = 'PySparkShell'
+
+YARN_APP_ID = 'application_1459362484344_0011'
+SPARK_APP_ID = 'app_001'
+SPARK_APP2_ID = 'app_002'
+
+TEST_USERNAME = 'admin'
+TEST_PASSWORD = 'password'
+
+CUSTOM_TAGS = ['optional:tag1']
+COMMON_TAGS = [
+    'app_name:' + APP_NAME,
+] + CLUSTER_TAGS
+
 EXPECTED_E2E_METRICS = [
     'spark.driver.total_shuffle_read',
     'spark.stage.num_active_tasks',
@@ -158,4 +172,275 @@ HOSTNAME_TO_PORT_MAPPING = {
     "spark-app-1": ('127.0.0.1', 4040),
     "spark-app-2": ('127.0.0.1', 4050),
     "spark-master": ('127.0.0.1', 8080),
+}
+
+SPARK_JOB_RUNNING_METRIC_VALUES = {
+    'spark.job.count': 2,
+    'spark.job.num_tasks': 20,
+    'spark.job.num_active_tasks': 30,
+    'spark.job.num_completed_tasks': 40,
+    'spark.job.num_skipped_tasks': 50,
+    'spark.job.num_failed_tasks': 60,
+    'spark.job.num_active_stages': 70,
+    'spark.job.num_completed_stages': 80,
+    'spark.job.num_skipped_stages': 90,
+    'spark.job.num_failed_stages': 100,
+}
+
+SPARK_JOB_RUNNING_METRIC_TAGS = [
+    'status:running',
+    'job_id:0',
+    'stage_id:0',
+    'stage_id:1',
+] + COMMON_TAGS
+
+SPARK_JOB_RUNNING_NO_STAGE_METRIC_TAGS = [
+    'status:running',
+    'job_id:0',
+] + COMMON_TAGS
+
+SPARK_JOB_SUCCEEDED_METRIC_VALUES = {
+    'spark.job.count': 3,
+    'spark.job.num_tasks': 1000,
+    'spark.job.num_active_tasks': 2000,
+    'spark.job.num_completed_tasks': 3000,
+    'spark.job.num_skipped_tasks': 4000,
+    'spark.job.num_failed_tasks': 5000,
+    'spark.job.num_active_stages': 6000,
+    'spark.job.num_completed_stages': 7000,
+    'spark.job.num_skipped_stages': 8000,
+    'spark.job.num_failed_stages': 9000,
+}
+
+SPARK_JOB_SUCCEEDED_METRIC_TAGS = [
+    'status:succeeded',
+    'job_id:0',
+    'stage_id:0',
+    'stage_id:1',
+] + COMMON_TAGS
+
+SPARK_JOB_SUCCEEDED_NO_STAGE_METRIC_TAGS = [
+    'status:succeeded',
+    'job_id:0',
+] + COMMON_TAGS
+
+SPARK_STAGE_RUNNING_METRIC_VALUES = {
+    'spark.stage.count': 3,
+    'spark.stage.num_active_tasks': 3 * 3,
+    'spark.stage.num_complete_tasks': 4 * 3,
+    'spark.stage.num_failed_tasks': 5 * 3,
+    'spark.stage.executor_run_time': 6 * 3,
+    'spark.stage.input_bytes': 7 * 3,
+    'spark.stage.input_records': 8 * 3,
+    'spark.stage.output_bytes': 9 * 3,
+    'spark.stage.output_records': 10 * 3,
+    'spark.stage.shuffle_read_bytes': 11 * 3,
+    'spark.stage.shuffle_read_records': 12 * 3,
+    'spark.stage.shuffle_write_bytes': 13 * 3,
+    'spark.stage.shuffle_write_records': 14 * 3,
+    'spark.stage.memory_bytes_spilled': 15 * 3,
+    'spark.stage.disk_bytes_spilled': 16 * 3,
+}
+
+SPARK_STAGE_RUNNING_METRIC_TAGS = [
+    'status:running',
+    'stage_id:1',
+] + COMMON_TAGS
+
+SPARK_STAGE_COMPLETE_METRIC_VALUES = {
+    'spark.stage.count': 2,
+    'spark.stage.num_active_tasks': 100 * 2,
+    'spark.stage.num_complete_tasks': 101 * 2,
+    'spark.stage.num_failed_tasks': 102 * 2,
+    'spark.stage.executor_run_time': 103 * 2,
+    'spark.stage.input_bytes': 104 * 2,
+    'spark.stage.input_records': 105 * 2,
+    'spark.stage.output_bytes': 106 * 2,
+    'spark.stage.output_records': 107 * 2,
+    'spark.stage.shuffle_read_bytes': 108 * 2,
+    'spark.stage.shuffle_read_records': 109 * 2,
+    'spark.stage.shuffle_write_bytes': 110 * 2,
+    'spark.stage.shuffle_write_records': 111 * 2,
+    'spark.stage.memory_bytes_spilled': 112 * 2,
+    'spark.stage.disk_bytes_spilled': 113 * 2,
+}
+
+SPARK_STAGE_COMPLETE_METRIC_TAGS = [
+    'status:complete',
+    'stage_id:0',
+] + COMMON_TAGS
+
+SPARK_DRIVER_METRIC_VALUES = {
+    'spark.driver.rdd_blocks': 99,
+    'spark.driver.memory_used': 98,
+    'spark.driver.disk_used': 97,
+    'spark.driver.active_tasks': 96,
+    'spark.driver.failed_tasks': 95,
+    'spark.driver.completed_tasks': 94,
+    'spark.driver.total_tasks': 93,
+    'spark.driver.total_duration': 92,
+    'spark.driver.total_input_bytes': 91,
+    'spark.driver.total_shuffle_read': 90,
+    'spark.driver.total_shuffle_write': 89,
+    'spark.driver.max_memory': 278019440,
+    'spark.driver.mem.used_on_heap_storage': 79283,
+    'spark.driver.mem.used_off_heap_storage': 0,
+    'spark.driver.mem.total_on_heap_storage': 384093388,
+    'spark.driver.mem.total_off_heap_storage': 0,
+}
+
+SPARK_DRIVER_OPTIONAL_METRIC_VALUES = {
+    'spark.driver.peak_mem.jvm_heap_memory': 345498432,
+    'spark.driver.peak_mem.jvm_off_heap_memory': 196924864,
+    'spark.driver.peak_mem.on_heap_execution': 0,
+    'spark.driver.peak_mem.off_heap_execution': 0,
+    'spark.driver.peak_mem.on_heap_storage': 2445933,
+    'spark.driver.peak_mem.off_heap_storage': 0,
+    'spark.driver.peak_mem.on_heap_unified': 2445933,
+    'spark.driver.peak_mem.off_heap_unified': 0,
+    'spark.driver.peak_mem.direct_pool': 276762,
+    'spark.driver.peak_mem.mapped_pool': 0,
+    'spark.driver.peak_mem.minor_gc_count': 118,
+    'spark.driver.peak_mem.minor_gc_time': 1436,
+    'spark.driver.peak_mem.major_gc_count': 4,
+    'spark.driver.peak_mem.major_gc_time': 419,
+    'spark.driver.peak_mem.process_tree_jvm': 0,
+    'spark.driver.peak_mem.process_tree_jvm_rss': 0,
+    'spark.driver.peak_mem.process_tree_python': 0,
+    'spark.driver.peak_mem.process_tree_python_rss': 0,
+    'spark.driver.peak_mem.process_tree_other': 0,
+    'spark.driver.peak_mem.process_tree_other_rss': 0,
+}
+
+SPARK_EXECUTOR_METRIC_VALUES = {
+    'spark.executor.count': 2,
+    'spark.executor.rdd_blocks': 1,
+    'spark.executor.memory_used': 2,
+    'spark.executor.disk_used': 3,
+    'spark.executor.active_tasks': 4,
+    'spark.executor.failed_tasks': 5,
+    'spark.executor.completed_tasks': 6,
+    'spark.executor.total_tasks': 7,
+    'spark.executor.total_duration': 8,
+    'spark.executor.total_input_bytes': 9,
+    'spark.executor.total_shuffle_read': 10,
+    'spark.executor.total_shuffle_write': 11,
+    'spark.executor.max_memory': 555755765,
+    'spark.executor.mem.used_on_heap_storage': 79283,
+    'spark.executor.mem.used_off_heap_storage': 0,
+    'spark.executor.mem.total_on_heap_storage': 384093388,
+    'spark.executor.mem.total_off_heap_storage': 0,
+}
+
+SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES = {
+    'spark.executor.peak_mem.jvm_heap_memory': 361970928,
+    'spark.executor.peak_mem.jvm_off_heap_memory': 94409256,
+    'spark.executor.peak_mem.on_heap_execution': 16777216,
+    'spark.executor.peak_mem.off_heap_execution': 0,
+    'spark.executor.peak_mem.on_heap_storage': 2181737,
+    'spark.executor.peak_mem.off_heap_storage': 0,
+    'spark.executor.peak_mem.on_heap_unified': 18958953,
+    'spark.executor.peak_mem.off_heap_unified': 0,
+    'spark.executor.peak_mem.direct_pool': 8710,
+    'spark.executor.peak_mem.mapped_pool': 0,
+    'spark.executor.peak_mem.minor_gc_count': 988,
+    'spark.executor.peak_mem.minor_gc_time': 5670,
+    'spark.executor.peak_mem.major_gc_count': 3,
+    'spark.executor.peak_mem.major_gc_time': 252,
+    'spark.executor.peak_mem.process_tree_jvm': 0,
+    'spark.executor.peak_mem.process_tree_jvm_rss': 0,
+    'spark.executor.peak_mem.process_tree_python': 0,
+    'spark.executor.peak_mem.process_tree_python_rss': 0,
+    'spark.executor.peak_mem.process_tree_other': 0,
+    'spark.executor.peak_mem.process_tree_other_rss': 0,
+}
+
+SPARK_EXECUTOR_LEVEL_METRIC_VALUES = {
+    'spark.executor.id.rdd_blocks': 1,
+    'spark.executor.id.memory_used': 2,
+    'spark.executor.id.disk_used': 3,
+    'spark.executor.id.active_tasks': 4,
+    'spark.executor.id.failed_tasks': 5,
+    'spark.executor.id.completed_tasks': 6,
+    'spark.executor.id.total_tasks': 7,
+    'spark.executor.id.total_duration': 8,
+    'spark.executor.id.total_input_bytes': 9,
+    'spark.executor.id.total_shuffle_read': 10,
+    'spark.executor.id.total_shuffle_write': 11,
+    'spark.executor.id.max_memory': 555755765,
+    'spark.executor.id.mem.used_on_heap_storage': 79283,
+    'spark.executor.id.mem.used_off_heap_storage': 0,
+    'spark.executor.id.mem.total_on_heap_storage': 384093388,
+    'spark.executor.id.mem.total_off_heap_storage': 0,
+}
+
+SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES = {
+    'spark.executor.id.peak_mem.jvm_heap_memory': 361970928,
+    'spark.executor.id.peak_mem.jvm_off_heap_memory': 94409256,
+    'spark.executor.id.peak_mem.on_heap_execution': 16777216,
+    'spark.executor.id.peak_mem.off_heap_execution': 0,
+    'spark.executor.id.peak_mem.on_heap_storage': 2181737,
+    'spark.executor.id.peak_mem.off_heap_storage': 0,
+    'spark.executor.id.peak_mem.on_heap_unified': 18958953,
+    'spark.executor.id.peak_mem.off_heap_unified': 0,
+    'spark.executor.id.peak_mem.direct_pool': 8710,
+    'spark.executor.id.peak_mem.mapped_pool': 0,
+    'spark.executor.id.peak_mem.minor_gc_count': 988,
+    'spark.executor.id.peak_mem.minor_gc_time': 5670,
+    'spark.executor.id.peak_mem.major_gc_count': 3,
+    'spark.executor.id.peak_mem.major_gc_time': 252,
+    'spark.executor.id.peak_mem.process_tree_jvm': 0,
+    'spark.executor.id.peak_mem.process_tree_jvm_rss': 0,
+    'spark.executor.id.peak_mem.process_tree_python': 0,
+    'spark.executor.id.peak_mem.process_tree_python_rss': 0,
+    'spark.executor.id.peak_mem.process_tree_other': 0,
+    'spark.executor.id.peak_mem.process_tree_other_rss': 0,
+}
+
+SPARK_EXECUTOR_LEVEL_METRIC_TAGS = [
+    'executor_id:1',
+] + COMMON_TAGS
+
+SPARK_RDD_METRIC_VALUES = {
+    'spark.rdd.count': 1,
+    'spark.rdd.num_partitions': 2,
+    'spark.rdd.num_cached_partitions': 2,
+    'spark.rdd.memory_used': 284,
+    'spark.rdd.disk_used': 0,
+}
+
+SPARK_STREAMING_STATISTICS_METRIC_VALUES = {
+    'spark.streaming.statistics.avg_input_rate': 1.0,
+    'spark.streaming.statistics.avg_processing_time': 175,
+    'spark.streaming.statistics.avg_scheduling_delay': 8,
+    'spark.streaming.statistics.avg_total_delay': 183,
+    'spark.streaming.statistics.batch_duration': 2000,
+    'spark.streaming.statistics.num_active_batches': 2,
+    'spark.streaming.statistics.num_active_receivers': 1,
+    'spark.streaming.statistics.num_inactive_receivers': 3,
+    'spark.streaming.statistics.num_processed_records': 7,
+    'spark.streaming.statistics.num_received_records': 9,
+    'spark.streaming.statistics.num_receivers': 10,
+    'spark.streaming.statistics.num_retained_completed_batches': 27,
+    'spark.streaming.statistics.num_total_completed_batches': 28,
+}
+
+SPARK_STRUCTURED_STREAMING_METRIC_VALUES = {
+    'spark.structured_streaming.input_rate': 12,
+    'spark.structured_streaming.latency': 12,
+    'spark.structured_streaming.processing_rate': 12,
+    'spark.structured_streaming.rows_count': 12,
+    'spark.structured_streaming.used_bytes': 12,
+}
+
+SPARK_STRUCTURED_STREAMING_METRIC_NO_TAGS = {
+    'spark.structured_streaming.input_rate',
+    'spark.structured_streaming.latency',
+}
+
+SPARK_STRUCTURED_STREAMING_METRIC_PUNCTUATED_TAGS = {
+    # Metric to test for punctuation in the query names of stream metrics.
+    'spark.structured_streaming.input_rate': 100,
+    'spark.structured_streaming.latency': 100,
+    'spark.structured_streaming.processing_rate': 100,
 }
