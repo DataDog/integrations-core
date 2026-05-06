@@ -4,11 +4,13 @@
 
 from collections.abc import Callable
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.utils.discovery import Port, Service
 from datadog_checks.krakend import KrakendCheck
 from tests.helpers import get_metrics_from_metadata
 from tests.types import InstanceBuilder
@@ -121,3 +123,40 @@ def test_service_check_emitted(ready_check: KrakendCheck, aggregator: Aggregator
 
 def test_http_code_class_tag(ready_check: KrakendCheck, aggregator: AggregatorStub):
     aggregator.assert_metric_has_tag("krakend.api.http_client.duration.bucket", "code_class:5XX")
+
+
+# ---------------------------------------------------------------------------
+# discover() unit tests
+# ---------------------------------------------------------------------------
+
+
+def _service(*ports: int) -> Service:
+    return Service(id="svc", host="h", ports=tuple(Port(number=p) for p in ports))
+
+
+def test_discover_returns_url_for_first_matching_port():
+    with patch("datadog_checks.base.utils.discovery.http_probe", side_effect=[True]) as probe:
+        result = KrakendCheck.discover(_service(9090))
+    assert result == [{"openmetrics_endpoint": "http://h:9090/metrics"}]
+    probe.assert_called_once()
+
+
+def test_discover_skips_non_matching_ports():
+    with patch("datadog_checks.base.utils.discovery.http_probe", side_effect=[False, True]) as probe:
+        result = KrakendCheck.discover(_service(8080, 9090))
+    assert result == [{"openmetrics_endpoint": "http://h:9090/metrics"}]
+    assert probe.call_count == 2
+
+
+def test_discover_returns_none_when_no_port_matches():
+    with patch("datadog_checks.base.utils.discovery.http_probe", side_effect=[False, False, False]) as probe:
+        result = KrakendCheck.discover(_service(80, 8080, 9090))
+    assert result is None
+    assert probe.call_count == 3
+
+
+def test_discover_returns_none_when_service_has_no_ports():
+    with patch("datadog_checks.base.utils.discovery.http_probe") as probe:
+        result = KrakendCheck.discover(_service())
+    assert result is None
+    probe.assert_not_called()
