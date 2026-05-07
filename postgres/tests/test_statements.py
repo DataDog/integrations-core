@@ -485,6 +485,8 @@ def test_successful_explain(
     # Don't need metrics for this one
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['query_samples']['explain_parameterized_queries'] = False
+    dbm_instance['collect_schemas'] = {'enabled': False}
+    
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -719,6 +721,7 @@ def test_statement_samples_collect(
 ):
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['collect_schemas'] = {'enabled': False}
     dbm_instance['dbstrict'] = dbstrict
     dbm_instance['dbname'] = dbname
     dbm_instance['ignore_databases'] = ignore_databases
@@ -834,6 +837,7 @@ def test_statement_metadata(
     """Tests for metadata in both samples and metrics"""
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
     dbm_instance['query_metrics']['run_sync'] = True
+    dbm_instance['collect_schemas'] = {'enabled': False}
 
     # If query or normalized_query changes, the query_signatures for both will need to be updated as well.
     query = '''
