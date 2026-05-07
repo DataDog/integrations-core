@@ -47,6 +47,7 @@ from datadog_checks.postgres.statements import PostgresStatementMetrics
 
 from .__about__ import __version__
 from .config import build_config, sanitize
+from .diagnose import PostgresDiagnose
 from .util import (
     ANALYZE_PROGRESS_METRICS,
     AWS_RDS_HOSTNAME_SUFFIX,
@@ -99,7 +100,7 @@ except ImportError:
 
 MAX_CUSTOM_RESULTS = 100
 
-PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s, %s)"
+PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s, %s, %s)"
 
 
 class PostgreSql(DatabaseCheck):
@@ -189,6 +190,9 @@ class PostgreSql(DatabaseCheck):
             maxsize=1,
             ttl=self._config.database_instance_collection_interval,
         )  # type: TTLCache
+
+        # Register explicit pre-flight diagnostics for `datadog-agent diagnose`.
+        PostgresDiagnose(self).register()
 
     def _submit_initialization_health_event(self):
         try:
@@ -976,8 +980,11 @@ class PostgreSql(DatabaseCheck):
                 role_arn=self._config.aws.managed_authentication.role_arn,
             )
         elif self._config.azure.managed_authentication.enabled:
+            auth_type = self._config.azure.managed_authentication.auth_type
             return AzureTokenProvider(
+                auth_type=auth_type,
                 client_id=self._config.azure.managed_authentication.client_id,
+                tenant_id=self._config.azure.managed_authentication.tenant_id,
                 identity_scope=self._config.azure.managed_authentication.identity_scope,
             )
         else:
@@ -1014,7 +1021,11 @@ class PostgreSql(DatabaseCheck):
             kwargs["token_provider"] = self.db_pool.token_provider
 
         conn = TokenAwareConnection.connect(**kwargs)
-        self.db_pool._configure_connection(conn)
+        try:
+            self.db_pool._configure_connection(conn)
+        except Exception:
+            conn.close()
+            raise
         return conn
 
     def _connect(self):
@@ -1033,7 +1044,12 @@ class PostgreSql(DatabaseCheck):
                 self.log.debug("Running query [%s]", PG_SETTINGS_QUERY)
                 cursor.execute(
                     PG_SETTINGS_QUERY,
-                    ("pg_stat_statements.max", "track_activity_query_size", "track_io_timing"),
+                    (
+                        "pg_stat_statements.max",
+                        "track_activity_query_size",
+                        "track_io_timing",
+                        "shared_preload_libraries",
+                    ),
                 )
                 rows = cursor.fetchall()
                 self.pg_settings.clear()
