@@ -89,6 +89,7 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['collect_schemas'] = {'enabled': False}
     dbm_instance['query_metrics']['incremental_query_metrics'] = True
     connections = {}
 
@@ -232,6 +233,7 @@ def test_statement_metrics(
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['collect_schemas'] = {'enabled': False}
     connections = {}
 
     def _run_queries():
@@ -339,6 +341,7 @@ def test_wal_metrics(aggregator, integration_check, dbm_instance):
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['collect_schemas'] = {'enabled': False}
 
     connections = {}
 
@@ -372,6 +375,7 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['collect_schemas'] = {'enabled': False}
 
     # The query signature matches the normalized query returned by the mock agent and would need to be
     # updated if the normalized query is updated
@@ -1988,6 +1992,7 @@ def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['collect_schemas'] = {'enabled': False}
 
     connections = {}
 
@@ -2079,6 +2084,7 @@ def test_metrics_encoding(
         dbm_instance['query_encodings'] = ['latin1', 'utf-8']
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['collect_schemas'] = {'enabled': False}
     # dbm_instance['query_activity']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
