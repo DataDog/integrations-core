@@ -65,4 +65,4 @@ def get_optional_metrics(version: str) -> list[str]:
 
 
 def is_legacy(version: str) -> bool:
-    return version in ["18", "19", "20", "21.8", "22.7"]
+    return version in ["18", "19", "20", "21.8", "22.7", "23.2", "23.8"]
