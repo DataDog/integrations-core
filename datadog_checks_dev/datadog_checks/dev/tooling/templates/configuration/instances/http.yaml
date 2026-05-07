@@ -95,6 +95,7 @@
   fleet_configurable: true
 - name: password
   display_priority: 0
+  secret: true
   formats: ["secret"]
   value:
     type: string

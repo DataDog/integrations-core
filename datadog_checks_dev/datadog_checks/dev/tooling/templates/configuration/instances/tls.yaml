@@ -38,6 +38,7 @@
 - name: tls_private_key
   display_priority: 0
   fleet_configurable: true
+  secret: true
   formats: ["secret"]
   value:
     example: <PRIVATE_KEY_PATH>
@@ -50,6 +51,7 @@
     Setting this implicitly sets `tls_verify` to true.
 - name: tls_private_key_password
   display_priority: 0
+  secret: true
   formats: ["secret"]
   fleet_configurable: true
   value:
