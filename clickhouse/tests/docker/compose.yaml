@@ -12,8 +12,13 @@ services:
       - ./volumes/clickhouse.xml:/etc/clickhouse-server/config.d/config.xml
       - ./volumes/users.xml:/etc/clickhouse-server/users.d/users.xml
       - ./volumes/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ./tls_config.xml:/etc/clickhouse-server/config.d/tls.xml
+      - ./certs/server.crt:/etc/clickhouse-server/ssl/server.crt
+      - ./certs/server.key:/etc/clickhouse-server/ssl/server.key
+      - ./certs/dhparam.pem:/etc/clickhouse-server/dhparam.pem
     ports:
       - '8123:8123'
+      - '8134:8443'
       - '9000:9000'
     depends_on:
       clickhouse-keeper:

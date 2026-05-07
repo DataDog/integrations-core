@@ -29,6 +29,19 @@ def dd_environment():
         ),
     ]
 
+    conditions.append(
+        WaitFor(
+            func=ping_clickhouse(
+                common.TLS_CONFIG['server'],
+                common.TLS_CONFIG['port'],
+                common.TLS_CONFIG['username'],
+                common.TLS_CONFIG['password'],
+                secure=True,
+            ),
+            wait=5,
+        )
+    )
+
     compose_file, mount_logs = common.get_compose_file()
     with docker_run(compose_file, conditions=conditions, sleep=10, attempts=2, mount_logs=mount_logs):
         yield config
