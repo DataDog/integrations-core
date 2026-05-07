@@ -571,6 +571,16 @@ async def test_sliding_cache_control_on_last_user_block_only(
     assert "ttl" not in blocks[-1]["cache_control"]
 
 
+async def test_empty_tool_results_produces_empty_content_block() -> None:
+    resp = make_response("end_turn", [make_text_block("ok")])
+    agent, create_mock = make_agent(mock_response=resp)
+
+    await agent.send([])
+
+    blocks = create_mock.call_args.kwargs["messages"][-1]["content"]
+    assert blocks == []
+
+
 # ---------------------------------------------------------------------------
 # Prompt caching: history must not retain cache_control markers
 # (otherwise multi-turn requests would exceed the 4-marker limit)
@@ -613,8 +623,13 @@ async def test_multi_turn_only_latest_user_message_in_request_has_cache_control(
     await agent.send("First")
     await agent.send([ToolResultMessage(tool_call_id="t1", result=ToolResult(success=True, data="r"))])
 
-    sent_messages = client.messages.create.call_args.kwargs["messages"]
-    assert sent_messages[0] == {"role": "user", "content": "First"}
-    latest_blocks = sent_messages[-1]["content"]
+    first_call_messages = client.messages.create.call_args_list[0].kwargs["messages"]
+    assert first_call_messages[-1]["content"] == [
+        {"type": "text", "text": "First", "cache_control": {"type": "ephemeral"}}
+    ]
+
+    second_call_messages = client.messages.create.call_args_list[1].kwargs["messages"]
+    assert second_call_messages[0] == {"role": "user", "content": "First"}
+    latest_blocks = second_call_messages[-1]["content"]
     assert all("cache_control" not in b for b in latest_blocks[:-1])
     assert latest_blocks[-1]["cache_control"] == {"type": "ephemeral"}

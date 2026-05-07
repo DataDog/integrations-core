@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from typing import Final
+from typing import Final, overload
 
 import anthropic
 from anthropic.types import (
@@ -114,13 +114,23 @@ class AnthropicAgent(BaseAgent[MessageParam]):
             for msg in messages
         ]
 
+    @overload
+    @staticmethod
+    def _with_user_cache_breakpoint(content: str) -> list[TextBlockParam]: ...
+
+    @overload
+    @staticmethod
+    def _with_user_cache_breakpoint(content: list[ToolResultBlockParam]) -> list[ToolResultBlockParam]: ...
+
     @staticmethod
     def _with_user_cache_breakpoint(
         content: str | list[ToolResultBlockParam],
-    ) -> list[TextBlockParam | ToolResultBlockParam]:
+    ) -> list[TextBlockParam] | list[ToolResultBlockParam]:
         """Return a block list with a sliding cache breakpoint on the last block."""
         if isinstance(content, str):
             return [{"type": "text", "text": content, "cache_control": SLIDING_CACHE_CONTROL}]
+        if not content:
+            return []
         return [*content[:-1], {**content[-1], "cache_control": SLIDING_CACHE_CONTROL}]
 
     @staticmethod
