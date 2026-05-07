@@ -408,21 +408,11 @@ def record_alerts() -> None:
         "$orderBy": "creationTime asc",
     }
 
-    # Try v4.2 first, fallback to v4.0
     try:
-        print("  Trying alerts API v4.2...")
-        pages = fetch_paginated_endpoint("api/monitoring/v4.2/serviceability/alerts", params=params)
+        pages = fetch_paginated_endpoint("api/monitoring/v4.0/serviceability/alerts", params=params)
         save_fixture("alerts.json", pages)
     except requests.exceptions.HTTPError as e:
-        print(f"  ⚠ v4.2 failed: {e}")
-        try:
-            print("  Falling back to alerts API v4.0...")
-            # v4.0 doesn't support filters
-            params_v40 = {}
-            pages = fetch_paginated_endpoint("api/monitoring/v4.0/serviceability/alerts", params=params_v40)
-            save_fixture("alerts.json", pages)
-        except requests.exceptions.HTTPError as e2:
-            print(f"  ⚠ v4.0 also failed: {e2}")
+        print(f"  ⚠ alerts fetch failed: {e}")
 
 
 def record_tasks() -> None:

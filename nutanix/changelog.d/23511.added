@@ -1,0 +1,1 @@
+Add `ntnx_originating_cluster_name`, `ntnx_alert_user_defined`, and `ntnx_alert_service` (when present) tags to alert events and metrics. Drop redundant `ntnx_alert_status` tag from per-state metrics (state is encoded in the metric name).

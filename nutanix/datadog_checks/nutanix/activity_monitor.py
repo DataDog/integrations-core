@@ -17,6 +17,9 @@ if TYPE_CHECKING:
     from datadog_checks.nutanix.check import NutanixCheck
 
 
+_SEVERITY_TO_ALERT_TYPE = {"CRITICAL": "error", "WARNING": "warning", "INFO": "info"}
+
+
 class _SafeDict(dict):
     """Dict that returns missing keys as template placeholders for safe string formatting."""
 
@@ -31,7 +34,6 @@ class ActivityMonitor:
         self.last_event_collection_time = self.check.read_persistent_cache("last_event_collection_time")
         self.last_task_collection_time = self.check.read_persistent_cache("last_task_collection_time")
         self.last_audit_collection_time = self.check.read_persistent_cache("last_audit_collection_time")
-        self.last_alert_collection_time = self.check.read_persistent_cache("last_alert_collection_time")
         # In-memory caches: id -> raw item (reset each check run)
         self.events: dict[str, dict] = {}
         self.audits: dict[str, dict] = {}
@@ -42,14 +44,9 @@ class ActivityMonitor:
         self.tasks_count = 0
         self.audits_count = 0
         self.alerts_count = 0
-        # Read boolean flag from cache (stored as string)
-        cached_value = self.check.read_persistent_cache("alerts_v42_supported")
-        if cached_value == "True":
-            self.alerts_v42_supported = True
-        elif cached_value == "False":
-            self.alerts_v42_supported = False
-        else:
-            self.alerts_v42_supported = None
+
+        # extId -> last-seen alert dict; reconciled each cycle against the unresolved-alerts API.
+        self._open_alerts: dict[str, dict] = {}
 
     def reset_state(self) -> None:
         """Reset in-memory caches and counters for a new collection run."""
@@ -193,16 +190,65 @@ class ActivityMonitor:
         )
 
     def collect_alerts(self) -> None:
-        self.alerts_count = self._safe_collect(
-            "alert",
-            lambda: self._collect(
-                activity_kind="alert",
-                list_fn=self._list_alerts,
-                process_fn=self._process_alert,
-                time_field="creationTime",
-                cache_key="last_alert_collection_time",
-            ),
-        )
+        self.alerts_count = self._safe_collect("alert", self._reconcile_alerts)
+
+    @staticmethod
+    def _alert_state(alert: dict) -> str:
+        return "acknowledged" if alert.get("isAcknowledged") else "open"
+
+    def _submit_state_metric(self, alert: dict, state: str, value: int) -> None:
+        """Submit nutanix.alert.<state>=<value> (state encoded in metric name, not tag)."""
+        self.check.gauge(f"alert.{state}", value, tags=self._build_alert_tags(alert))
+
+    def _reconcile_alerts(self) -> int:
+        """Reconcile open alerts against the unresolved-alerts API and emit per-state metrics."""
+        try:
+            alerts = self._list_alerts_unresolved()
+        except Exception:
+            # On a transient API failure, keep emitting cached gauges so per-alert
+            # monitors don't auto-resolve while the underlying alert is still open.
+            for alert in self._open_alerts.values():
+                self._submit_state_metric(alert, self._alert_state(alert), 1)
+            raise
+
+        alerts = [a for a in alerts if self._should_collect_activity_item(a, "alert")]
+        api_alerts = {a.get("extId"): a for a in alerts if a.get("extId")}
+
+        # Pre-compute set diffs before mutating _open_alerts so loop ordering is safe.
+        new_ids = api_alerts.keys() - self._open_alerts.keys()
+        gone_ids = frozenset(self._open_alerts.keys() - api_alerts.keys())
+        still_tracked = api_alerts.keys() & self._open_alerts.keys()
+
+        count = 0
+        for ext_id in new_ids:
+            alert = api_alerts[ext_id]
+            self._open_alerts[ext_id] = alert
+            self._process_alert(alert)
+            count += 1
+
+        for ext_id in gone_ids:
+            cached = self._open_alerts.pop(ext_id)
+            # GET-by-id is required: cached only has the open-state alert, but the
+            # resolution event needs resolvedTime / resolvedByUsername / isAutoResolved
+            # which only exist on the post-resolution payload.
+            self._emit_resolution_event(self._get_alert(ext_id) or cached, cached_tags_alert=cached)
+            count += 1
+
+        for ext_id in still_tracked:
+            old_alert = self._open_alerts[ext_id]
+            new_alert = api_alerts[ext_id]
+            old_state = self._alert_state(old_alert)
+            new_state = self._alert_state(new_alert)
+            if old_state != new_state:
+                self._submit_state_metric(old_alert, old_state, 0)
+                self._emit_transition_event(new_alert, old_state, new_state)
+                count += 1
+            self._open_alerts[ext_id] = new_alert
+
+        for alert in self._open_alerts.values():
+            self._submit_state_metric(alert, self._alert_state(alert), 1)
+
+        return count
 
     def _list_activity(self, endpoint: str, time_field: str, start_time_str: str) -> list[dict]:
         """Fetch activity items from Prism Central."""
@@ -212,75 +258,30 @@ class ActivityMonitor:
         }
         return self.check._get_paginated_request_data(endpoint, params=params)
 
-    def _list_alerts(self, start_time_str: str) -> list[dict]:
-        """Fetch alerts from Prism Central with v4.2/v4.0 fallback."""
+    def _list_alerts_unresolved(self) -> list[dict]:
+        """Fetch all currently-unresolved alerts (the source of truth each cycle)."""
         params = {
-            "$filter": f"creationTime gt {start_time_str}",
-            "$orderBy": "creationTime asc",
+            "$filter": "isResolved eq false",
+            "$orderBy": "lastUpdatedTime asc",
         }
-
-        if self.alerts_v42_supported is False:
-            self.check.log.debug("[%s] Using alerts API v4.0 (v4.2 not supported)", self._pc_label)
-            del params["$filter"]
-            return self.check._get_paginated_request_data("api/monitoring/v4.0/serviceability/alerts", params=params)
-
-        try:
-            self.check.log.debug("[%s] Attempting to use alerts API v4.2", self._pc_label)
-            result = self.check._get_paginated_request_data("api/monitoring/v4.2/serviceability/alerts", params=params)
-            if self.alerts_v42_supported is None:
-                self.check.log.debug(
-                    "[%s] Alerts API v4.2 is supported, caching for future use",
-                    self._pc_label,
-                )
-                self.alerts_v42_supported = True
-                self.check.write_persistent_cache("alerts_v42_supported", "True")
-            return result
-        except HTTPError as e:
-            if e.response is not None and e.response.status_code == 404:
-                self.check.log.debug(
-                    "[%s] Alerts API v4.2 not supported, falling back to v4.0 permanently",
-                    self._pc_label,
-                )
-                self.alerts_v42_supported = False
-                self.check.write_persistent_cache("alerts_v42_supported", "False")
-                del params["$filter"]
-                return self.check._get_paginated_request_data(
-                    "api/monitoring/v4.0/serviceability/alerts", params=params
-                )
-            raise
+        alerts = self.check._get_paginated_request_data("api/monitoring/v4.0/serviceability/alerts", params=params)
+        # Client-side safety net in case a server silently ignores $filter.
+        return [a for a in alerts if not a.get("isResolved")]
 
     def _get_alert(self, alert_ext_id: str) -> dict | None:
         """Get an alert by ID, from cache or fetched from the API."""
         if alert := self.alerts.get(alert_ext_id):
             return alert
 
-        endpoint = "api/monitoring/v4.0/serviceability/alerts"
-        if self.alerts_v42_supported is True:
-            endpoint = "api/monitoring/v4.2/serviceability/alerts"
-
-        self.check.log.debug(
-            "[%s] Alert %s not in cache, fetching from API",
-            self._pc_label,
-            alert_ext_id,
-        )
+        self.check.log.debug("[%s] Alert %s not in cache, fetching from API", self._pc_label, alert_ext_id)
         try:
-            alert = self.check._get_request_data(f"{endpoint}/{alert_ext_id}")
+            alert = self.check._get_request_data(f"api/monitoring/v4.0/serviceability/alerts/{alert_ext_id}")
             if alert:
                 self.alerts[alert_ext_id] = alert
-                self.check.log.debug(
-                    "[%s] Fetched alert %s: %s",
-                    self._pc_label,
-                    alert_ext_id,
-                    alert.get("title", ""),
-                )
+                self.check.log.debug("[%s] Fetched alert %s: %s", self._pc_label, alert_ext_id, alert.get("title", ""))
             return alert
         except Exception as e:
-            self.check.log.debug(
-                "[%s] Failed to fetch alert %s: %s",
-                self._pc_label,
-                alert_ext_id,
-                e,
-            )
+            self.check.log.debug("[%s] Failed to fetch alert %s: %s", self._pc_label, alert_ext_id, e)
             return None
 
     def _process_event(self, event: dict) -> None:
@@ -417,44 +418,50 @@ class ActivityMonitor:
             self.check.log.debug("Failed to render alert message template: %s", e)
             return message
 
+    def _build_alert_tags(self, alert: dict, status: str | None = None) -> list[str]:
+        """Build the alert tag set; pass status only for events (metrics encode state in the name)."""
+        tags = self.check.base_tags.copy()
+        if ext_id := alert.get("extId"):
+            tags.append(f"ext_id:{ext_id}")
+        if alert_type := alert.get("alertType"):
+            tags.append(f"ntnx_alert_type:{alert_type}")
+        if severity := alert.get("severity"):
+            tags.append(f"ntnx_alert_severity:{severity}")
+        if (user_defined := alert.get("isUserDefined")) is not None:
+            tags.append(f"ntnx_alert_user_defined:{str(user_defined).lower()}")
+        if service_name := alert.get("serviceName"):
+            tags.append(f"ntnx_alert_service:{service_name}")
+
+        self._add_cluster_name_tag(tags, alert.get("clusterUUID"))
+        self._add_cluster_name_tag(tags, alert.get("originatingClusterUUID"), tag_name="ntnx_originating_cluster_name")
+
+        for classification in alert.get("classifications", []) or []:
+            tags.append(f"ntnx_alert_classification:{classification}")
+        for impact in alert.get("impactTypes", []) or []:
+            tags.append(f"ntnx_alert_impact:{impact}")
+
+        self._add_source_entity_tags(tags, alert)
+
+        tags.append("ntnx_type:alert")
+        if status is not None:
+            tags.append(f"ntnx_alert_status:{status}")
+        return tags
+
     def _process_alert(self, alert: dict) -> None:
         """Process and send a single alert to Datadog."""
+        ext_id = alert.get("extId", "")
         title = alert.get("title", "Nutanix Alert")
         message = alert.get("message", "")
         created_time = alert.get("creationTime")
-        severity = alert.get("severity")
-        alert_type = alert.get("alertType")
+        is_acknowledged = alert.get("isAcknowledged", False)
 
-        # Render template variables in title and message from parameters
         if parameters := alert.get("parameters"):
             title = self._render_message(title, parameters)
             message = self._render_message(message, parameters)
 
-        # map severity to alert_type
-        severity_map = {
-            "CRITICAL": "error",
-            "WARNING": "warning",
-            "INFO": "info",
-        }
-        event_alert_type = severity_map.get(severity, "info")
-
-        alert_tags = self.check.base_tags.copy()
-        if alert_type:
-            alert_tags.append(f"ntnx_alert_type:{alert_type}")
-        if severity:
-            alert_tags.append(f"ntnx_alert_severity:{severity}")
-
-        self._add_cluster_name_tag(alert_tags, alert.get("clusterUUID"))
-
-        for classification in alert.get("classifications", []) or []:
-            alert_tags.append(f"ntnx_alert_classification:{classification}")
-
-        for impact in alert.get("impactTypes", []) or []:
-            alert_tags.append(f"ntnx_alert_impact:{impact}")
-
-        self._add_source_entity_tags(alert_tags, alert)
-
-        alert_tags.append("ntnx_type:alert")
+        # Acknowledged alerts soften to "warning" regardless of severity (operator already triaging).
+        event_alert_type = "warning" if is_acknowledged else _SEVERITY_TO_ALERT_TYPE.get(alert.get("severity"), "info")
+        alert_tags = self._build_alert_tags(alert, "acknowledged" if is_acknowledged else "open")
 
         self.check.event(
             {
@@ -467,6 +474,81 @@ class ActivityMonitor:
                 "alert_type": event_alert_type,
                 "source_type_name": self.check.__NAMESPACE__,
                 "tags": alert_tags,
+                "aggregation_key": f"nutanix-alert-{ext_id}",
+            }
+        )
+
+    def _emit_resolution_event(self, alert: dict, cached_tags_alert: dict | None = None) -> None:
+        """Emit resolution event, close prev-state gauge, and emit nutanix.alert.resolved=1."""
+        ext_id = alert.get("extId", "")
+        title = alert.get("title", "Nutanix Alert")
+        resolved_time = alert.get("resolvedTime")
+        resolved_by = alert.get("resolvedByUsername")
+        is_auto_resolved = alert.get("isAutoResolved", False)
+
+        if parameters := alert.get("parameters"):
+            title = self._render_message(title, parameters)
+
+        msg_text = "Auto-resolved" if is_auto_resolved else f"Resolved by {resolved_by}" if resolved_by else "Resolved"
+
+        prev_alert = cached_tags_alert or alert
+        prev_state = self._alert_state(prev_alert)
+        metric_tags = self._build_alert_tags(prev_alert)
+        event_tags = [
+            *metric_tags,
+            "ntnx_alert_status:resolved",
+            f"ntnx_alert_auto_resolved:{str(is_auto_resolved).lower()}",
+        ]
+
+        self.check.event(
+            {
+                "timestamp": self._parse_timestamp(resolved_time)
+                if resolved_time
+                else get_timestamp(get_current_datetime()),
+                "event_type": self.check.__NAMESPACE__,
+                "msg_title": f"Alert Resolved: {title}",
+                "msg_text": msg_text,
+                "alert_type": "success",
+                "source_type_name": self.check.__NAMESPACE__,
+                "aggregation_key": f"nutanix-alert-{ext_id}",
+                "tags": event_tags,
+            }
+        )
+
+        self.check.gauge(f"alert.{prev_state}", 0, tags=metric_tags)
+        self.check.gauge("alert.resolved", 1, tags=metric_tags)
+
+    def _emit_transition_event(self, alert: dict, old_state: str, new_state: str) -> None:
+        """Emit an event when a tracked alert's state changes (open <-> acknowledged)."""
+        ext_id = alert.get("extId", "")
+        title = alert.get("title", "Nutanix Alert")
+        if parameters := alert.get("parameters"):
+            title = self._render_message(title, parameters)
+
+        if new_state == "acknowledged":
+            prefix = "Alert acknowledged"
+            who = alert.get("acknowledgedByUsername")
+            msg_text = f"Acknowledged by {who}" if who else "Acknowledged"
+            event_alert_type = "warning"
+            timestamp_field = alert.get("acknowledgedTime")
+        else:  # acknowledged -> open
+            prefix = "Alert reopened"
+            msg_text = "Alert is no longer acknowledged"
+            event_alert_type = _SEVERITY_TO_ALERT_TYPE.get(alert.get("severity"), "info")
+            timestamp_field = alert.get("lastUpdatedTime")
+
+        self.check.event(
+            {
+                "timestamp": self._parse_timestamp(timestamp_field)
+                if timestamp_field
+                else get_timestamp(get_current_datetime()),
+                "event_type": self.check.__NAMESPACE__,
+                "msg_title": f"{prefix}: {title}",
+                "msg_text": msg_text,
+                "alert_type": event_alert_type,
+                "source_type_name": self.check.__NAMESPACE__,
+                "tags": self._build_alert_tags(alert, new_state),
+                "aggregation_key": f"nutanix-alert-{ext_id}",
             }
         )
 
@@ -556,14 +638,20 @@ class ActivityMonitor:
                 if entity_name := source_entity.get("name"):
                     tags.append(f"ntnx_{entity_type}_name:{entity_name}")
 
-    def _add_cluster_name_tag(self, tags: list[str], cluster_id: str | None, fallback_name: str | None = None) -> None:
-        """Add cluster name tag from ID lookup, with optional fallback."""
+    def _add_cluster_name_tag(
+        self,
+        tags: list[str],
+        cluster_id: str | None,
+        fallback_name: str | None = None,
+        tag_name: str = "ntnx_cluster_name",
+    ) -> None:
+        """Add a cluster name tag from ID lookup, with optional fallback."""
         if not cluster_id:
             return
         if cluster_id in self.check.cluster_names:
-            tags.append(f"ntnx_cluster_name:{self.check.cluster_names[cluster_id]}")
+            tags.append(f"{tag_name}:{self.check.cluster_names[cluster_id]}")
         elif fallback_name:
-            tags.append(f"ntnx_cluster_name:{fallback_name}")
+            tags.append(f"{tag_name}:{fallback_name}")
 
     def _cluster_resource(self, cluster_id: str) -> tuple[str, dict]:
         """Build a cluster resource tuple from a cluster ID."""

@@ -1,0 +1,1 @@
+Use the v4.0 alerts endpoint exclusively with `$filter=isResolved eq false` on the request. Previously the integration attempted v4.2 first and fell back to v4.0 stripping `$filter`, which fetched the full alert history each cycle. The v4.2 fallback path has been removed entirely; the pre-existing client-side filter remains as a safety net.
