@@ -763,10 +763,10 @@ class PostgresDiagnose:
 
     @property
     def _category(self) -> str:
-        host = self._host_desc()
-        if len(host) > 27:
-            host = f"{host[:12]}...{host[-12:]}"
-        return f"instance={host}"
+        identifier = self._check.database_identifier
+        if len(identifier) > 27:
+            identifier = f"{identifier[:12]}...{identifier[-12:]}"
+        return f"instance={identifier}"
 
     def _host_desc(self):
         host = self._check._config.host or "localhost"
