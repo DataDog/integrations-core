@@ -50,11 +50,18 @@ class ManagedAuthentication1(BaseModel):
     auth_type: Optional[str] = Field('managed_identity', examples=['managed_identity'])
     client_id: Optional[str] = Field(
         None,
-        description='Required for `managed_identity` auth. Optional for `workload_identity`,\nwhere it defaults to the `AZURE_CLIENT_ID` environment variable.\n',
+        description='The client ID of the managed identity or application registration.\nRequired for `managed_identity` auth. Optional for `workload_identity`,\nwhere it defaults to the `AZURE_CLIENT_ID` environment variable.\n',
     )
     enabled: Optional[bool] = Field(None, examples=[False])
-    identity_scope: Optional[str] = Field(None, examples=['https://ossrdbms-aad.database.windows.net/.default'])
-    tenant_id: Optional[str] = Field(None, description='Only used for `workload_identity` auth.\n')
+    identity_scope: Optional[str] = Field(
+        None,
+        description='The permission scope from where to access the identity token.\n',
+        examples=['https://ossrdbms-aad.database.windows.net/.default'],
+    )
+    tenant_id: Optional[str] = Field(
+        None,
+        description='The Azure AD tenant ID. Only used for `workload_identity` auth.\nDefaults to the `AZURE_TENANT_ID` environment variable.\n',
+    )
 
 
 class Azure(BaseModel):
