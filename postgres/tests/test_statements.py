@@ -920,6 +920,7 @@ def test_statement_reported_hostname(
     expected_hostname,
 ):
     dbm_instance['reported_hostname'] = reported_hostname
+    dbm_instance['collect_schemas'] = {'enabled': False}
 
     check = integration_check(dbm_instance)
 
