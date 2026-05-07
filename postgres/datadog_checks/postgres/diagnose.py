@@ -766,7 +766,7 @@ class PostgresDiagnose:
         host = self._host_desc()
         if len(host) > 27:
             host = f"{host[:12]}...{host[-12:]}"
-        return f"postgres:{host}"
+        return f"instance={host}"
 
     def _host_desc(self):
         host = self._check._config.host or "localhost"
