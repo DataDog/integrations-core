@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 
+import pytest
+
 from tests.helpers.api import write_file
 
 error_regex = re.compile(r"(?s)^\s*[A-Za-z0-9_\/.-]+\.toml has the following errors:\n(?:  - .+\n)+")
@@ -179,31 +181,24 @@ def test_core_rejects_unpinned_optional_dependency_default_repo(fake_repo, ddev)
     assert 'Unpinned version' in result.output
 
 
-def test_extras_allows_unpinned_optional_dependency(fake_extras_repo, ddev):
-    """With `-e`, unpinned optional PyPI deps are allowed (no integrations-core pin rules)."""
+@pytest.mark.parametrize(
+    'repo_fixture, flag',
+    [
+        pytest.param('fake_extras_repo', '-e', id='extras'),
+        pytest.param('fake_marketplace_repo', '-m', id='marketplace'),
+    ],
+)
+def test_non_core_repo_allows_unpinned_optional_dependency(repo_fixture, flag, ddev, request):
+    """Non-core repos allow unpinned optional PyPI deps (no integrations-core pin rules)."""
+    repo = request.getfixturevalue(repo_fixture)
     write_file(
-        fake_extras_repo.path,
+        repo.path,
         'agent_requirements.in',
         """datadog-checks-base>=37.21.0
 """,
     )
-    write_file(fake_extras_repo.path, f'{UNPINNED_OPT_CHECK}/pyproject.toml', _PYPROJECT_UNPINNED_OPTIONAL)
-    result = ddev('-e', 'validate', 'dep', UNPINNED_OPT_CHECK)
-    assert result.exit_code == 0, result.output
-    assert 'Unpinned version' not in result.output
-    assert match_regex.match(result.output), f"Unexpected output: {result.output}"
-
-
-def test_marketplace_allows_unpinned_optional_dependency(fake_marketplace_repo, ddev):
-    """With `-m`, unpinned optional PyPI deps are allowed (no integrations-core pin rules)."""
-    write_file(
-        fake_marketplace_repo.path,
-        'agent_requirements.in',
-        """datadog-checks-base>=37.21.0
-""",
-    )
-    write_file(fake_marketplace_repo.path, f'{UNPINNED_OPT_CHECK}/pyproject.toml', _PYPROJECT_UNPINNED_OPTIONAL)
-    result = ddev('-m', 'validate', 'dep', UNPINNED_OPT_CHECK)
+    write_file(repo.path, f'{UNPINNED_OPT_CHECK}/pyproject.toml', _PYPROJECT_UNPINNED_OPTIONAL)
+    result = ddev(flag, 'validate', 'dep', UNPINNED_OPT_CHECK)
     assert result.exit_code == 0, result.output
     assert 'Unpinned version' not in result.output
     assert match_regex.match(result.output), f"Unexpected output: {result.output}"
