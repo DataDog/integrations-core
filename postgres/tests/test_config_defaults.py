@@ -115,7 +115,7 @@ EXPECTED_DEFAULTS = {
     },
     # === DBM: Schema collection ===
     'collect_schemas': {
-        'enabled': False,
+        'enabled': True,
         'max_tables': 300,
         'max_columns': 50,
         'collection_interval': 600,

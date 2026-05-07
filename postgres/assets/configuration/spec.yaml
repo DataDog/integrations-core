@@ -953,7 +953,7 @@ files:
             Enable collection of database schemas. Requires `dbm: true`.
           value:
             type: boolean
-            example: false
+            example: true
         - name: max_tables
           fleet_configurable: true
           description: |

@@ -593,10 +593,10 @@ instances:
     #
     # collect_schemas:
 
-        ## @param enabled - boolean - optional - default: false
+        ## @param enabled - boolean - optional - default: true
         ## Enable collection of database schemas. Requires `dbm: true`.
         #
-        # enabled: false
+        # enabled: true
 
         ## @param max_tables - number - optional - default: 300
         ## Maximum amount of tables the Agent collects from the instance.
