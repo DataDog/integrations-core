@@ -1,1 +1,1 @@
-Enable schema collection for Postgres by default. This functionality still requires `dbm:true`. To disable, set `collect_schemas.enabled: false`.
+Enable schema collection for Postgres by default. This functionality still requires `dbm:true` or `data_observability.enabled:true`. To disable, set `collect_schemas.enabled: false`.
