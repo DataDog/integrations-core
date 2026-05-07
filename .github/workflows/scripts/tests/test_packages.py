@@ -46,15 +46,6 @@ class TestDetectFromTags:
 class TestResolvePackages:
     all_packages = ["mysql", "postgres", "redis"]
 
-    def test_all_keyword(self):
-        packages, mode = resolve_packages(selected="all", all_packages=self.all_packages)
-        assert packages == self.all_packages
-        assert mode == f"all ({len(self.all_packages)} packages in repo)"
-
-    def test_all_keyword_case_insensitive(self):
-        packages, _ = resolve_packages(selected="ALL", all_packages=self.all_packages)
-        assert packages == self.all_packages
-
     def test_json_array(self):
         packages, mode = resolve_packages('["postgres","mysql"]', all_packages=self.all_packages)
         assert packages == ["postgres", "mysql"]

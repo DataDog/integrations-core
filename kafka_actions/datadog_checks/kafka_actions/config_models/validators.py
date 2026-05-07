@@ -2,12 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# Here you can include additional config validators or transformers
-#
-# def initialize_instance(values, **kwargs):
-#     if 'my_option' not in values and 'my_legacy_option' in values:
-#         values['my_option'] = values['my_legacy_option']
-#     if values.get('my_number') > 10:
-#         raise ValueError('my_number max value is 10, got %s' % str(values.get('my_number')))
-#
-#     return values
+
+def initialize_instance(values, **kwargs):
+    # kafka_connect_str may be passed as a list of broker strings (e.g. from kafka_consumer config
+    # via autodiscovery). Normalize to a comma-separated string for librdkafka's bootstrap.servers.
+    kafka_connect_str = values.get('kafka_connect_str')
+    if isinstance(kafka_connect_str, list):
+        values['kafka_connect_str'] = ','.join(str(s) for s in kafka_connect_str)
+
+    return values

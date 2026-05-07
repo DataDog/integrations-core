@@ -2,6 +2,20 @@
 
 <!-- towncrier release notes start -->
 
+## 4.5.0 / 2026-04-15
+
+***Added***:
+
+* Add kafka.broker.start_time metric tagged with broker_id. ([#23020](https://github.com/DataDog/integrations-core/pull/23020))
+* Add kafka.log.partition.size metric for topic partition disk usage. ([#23028](https://github.com/DataDog/integrations-core/pull/23028))
+* Add kafka.log.directory.offline metric to track log directory health status. ([#23038](https://github.com/DataDog/integrations-core/pull/23038))
+
+## 4.4.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
 ## 4.3.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:

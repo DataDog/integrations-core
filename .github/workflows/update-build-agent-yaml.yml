@@ -12,6 +12,9 @@ jobs:
   update:
     name: Update build_agent.yaml (${{ inputs.branch }})
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     env:
       BRANCH: ${{ inputs.branch }}
     steps:
@@ -37,14 +40,13 @@ jobs:
         run: |-
           sed -i "s/^    branch: main$/    branch: $BRANCH/" .gitlab/build_agent.yaml
 
-      - name: Create token
+      - name: Get token via dd-octo-sts
         if: env.needs_update == 'true'
-        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+        uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
         id: token-generator
         with:
-          app-id: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_APP_ID }}
-          private-key: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_PRIVATE_KEY }}
-          repositories: integrations-core
+          scope: DataDog/integrations-core
+          policy: self.update-build-agent-yaml.dispatch
 
       - name: Create Pull Request
         if: env.needs_update == 'true'

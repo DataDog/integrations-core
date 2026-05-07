@@ -8,6 +8,10 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
+def shared_propagate_agent_tags():
+    return False
+
+
 def instance_add_node_tag_to_events():
     return True
 
@@ -50,6 +54,10 @@ def instance_free_storage_metrics():
 
 def instance_min_collection_interval():
     return 15
+
+
+def instance_propagate_agent_tags():
+    return False
 
 
 def instance_replica_check():

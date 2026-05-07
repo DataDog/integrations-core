@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import asyncio
 import json
 import time
 import weakref  # noqa: F401
@@ -25,46 +26,74 @@ def discover_instances(config, interval, check_ref):
     the reference to the instance, the check is garbage collected properly and
     that function can stop.
     """
+    # pysnmp 7.x uses asyncio; worker threads have no event loop by default in Python 3.10+.
+    # Save and restore the current loop so that callers (e.g. tests) that already have a
+    # loop in this thread don't lose it when we clean up.
+    try:
+        _prev_loop = asyncio.get_event_loop()
+    except RuntimeError:
+        _prev_loop = None
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
 
-    while True:
-        start_time = time.time()
-        for host in config.network_hosts():
-            check = check_ref()
-            if check is None or not check._running:
-                return
+    try:
+        while True:
+            start_time = time.time()
+            for host in config.network_hosts():
+                check = check_ref()
+                if check is None or not check._running:
+                    return
 
-            host_config = check._build_autodiscovery_config(config.instance, host)
+                host_config = check._build_autodiscovery_config(config.instance, host)
 
-            try:
-                sys_object_oid = check.fetch_sysobject_oid(host_config)
-            except Exception as e:
-                check.log.debug("Error scanning host %s: %s", host, e)
-                del check
-                continue
-
-            try:
-                profile = check._profile_for_sysobject_oid(sys_object_oid)
-            except ConfigurationError:
-                if not host_config.oid_config.has_oids():
-                    check.log.warning("Host %s didn't match a profile for sysObjectID %s", host, sys_object_oid)
+                try:
+                    sys_object_oid = check.fetch_sysobject_oid(host_config)
+                except Exception as e:
+                    check.log.debug("Error scanning host %s: %s", host, e)
                     del check
                     continue
-            else:
-                host_config.refresh_with_profile(check.profiles[profile])
-                host_config.add_profile_tag(profile)
+                finally:
+                    # Close the host's transport dispatcher to release its UDP socket FD, then
+                    # drain any leftover handle_timeout tasks so they don't stop the next host's loop.
+                    host_config._snmp_engine.transport_dispatcher.close_dispatcher()
+                    _pending = asyncio.all_tasks(loop)
+                    for _t in _pending:
+                        _t.cancel()
+                    if _pending:
+                        loop.run_until_complete(asyncio.gather(*_pending, return_exceptions=True))
 
-            config.discovered_instances[host] = host_config
+                try:
+                    profile = check._profile_for_sysobject_oid(sys_object_oid)
+                except ConfigurationError:
+                    if not host_config.oid_config.has_oids():
+                        check.log.warning("Host %s didn't match a profile for sysObjectID %s", host, sys_object_oid)
+                        del check
+                        continue
+                else:
+                    host_config.refresh_with_profile(check.profiles[profile])
+                    host_config.add_profile_tag(profile)
 
+                config.discovered_instances[host] = host_config
+
+                write_persistent_cache(check.check_id, json.dumps(list(config.discovered_instances)))
+                del check
+
+            check = check_ref()
+            if check is None:
+                return
+            # Write again at the end of the loop, in case some host have been removed since last
             write_persistent_cache(check.check_id, json.dumps(list(config.discovered_instances)))
             del check
 
-        check = check_ref()
-        if check is None:
-            return
-        # Write again at the end of the loop, in case some host have been removed since last
-        write_persistent_cache(check.check_id, json.dumps(list(config.discovered_instances)))
-        del check
-
-        time_elapsed = time.time() - start_time
-        if interval - time_elapsed > 0:
-            time.sleep(interval - time_elapsed)
+            time_elapsed = time.time() - start_time
+            if interval - time_elapsed > 0:
+                time.sleep(interval - time_elapsed)
+    finally:
+        # Cancel pending pysnmp tasks and close the loop to release file descriptors.
+        pending = asyncio.all_tasks(loop)
+        for task in pending:
+            task.cancel()
+        if pending:
+            loop.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
+        loop.close()
+        asyncio.set_event_loop(_prev_loop)

@@ -26,6 +26,7 @@ files:
 
               WARNING: Overriding these defaults could negatively impact your system or
               the performance of the check.
+            fleet_configurable: true
             value:
               example: []
               type: array
@@ -208,6 +209,7 @@ files:
               example: /run/blkid/blkid.tab
               display_default: null
               type: string
+              require_trusted_provider: true
           - name: use_lsblk
             description: |
               Instruct the check to read the labels from the `lsblk` executable instead of `blkid` executable.
@@ -286,6 +288,7 @@ files:
             fleet_configurable: true
             description: |
               Enable this to lowercase the "device" tags for both partition and disk metrics.
+
               This is useful only in very specific circumstances:
                 1. Your "device" tag value is uppercase and your host is running on Linux.
                 2. You cannot use the "device_name" tag.

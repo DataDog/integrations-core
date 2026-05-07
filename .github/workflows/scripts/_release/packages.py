@@ -39,17 +39,13 @@ def resolve_packages(
     """Resolve the list of packages to release.
 
     Resolution order:
-    - ``'all'`` / ``'ALL'`` → every package in the repo
-    - JSON array            → use the provided list verbatim
-    - empty string          → auto-detect from git tags at HEAD
+    - JSON array   → use the provided list verbatim
+    - empty string → auto-detect from git tags at HEAD
 
     Returns ``(packages, mode_description)``.
     Raises ``ValueError`` on invalid input or unknown package names.
     """
     selected = selected.strip()
-
-    if selected.lower() == "all":
-        return all_packages, f"all ({len(all_packages)} packages in repo)"
 
     if selected:
         try:

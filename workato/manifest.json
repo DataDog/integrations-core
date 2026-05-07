@@ -3,7 +3,7 @@
   "app_uuid": "73f0a2e1-f02d-4ad5-8591-9554197a8a6d",
   "app_id": "workato",
   "owner": "saas-integrations",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",

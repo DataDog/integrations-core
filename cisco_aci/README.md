@@ -150,10 +150,6 @@ The Cisco ACI config `.yaml` file can be set up to collect one or both of the fo
 | [send_faultinst_faults][13]     | Set to `true` to enable collection of Cisco ACI `faultInst` faults as logs. |
 | [send_faultdelegate_faults][14] | Set to `true` to enable collection of Cisco ACI `faultDelegate` faults as logs. |
 
-### Events
-
-The Cisco ACI check sends tenant faults as events.
-
 ### Service Checks
 
 See [service_checks.json][8] for a list of service checks provided by this integration.

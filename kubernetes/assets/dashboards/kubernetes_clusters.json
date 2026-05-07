@@ -4524,14 +4524,19 @@
                                     "formulas": [
                                         {
                                             "alias": "OOM killed",
-                                            "formula": "query1"
+                                            "formula": "clamp_min(diff(query1), 0) * query2"
                                         }
                                     ],
                                     "queries": [
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.containers.state.terminated{$cluster,reason:oomkilled,$scope} by {pod_name}"
+                                            "query": "sum:kubernetes.containers.restarts{$cluster,$scope} by {pod_name,kube_container_name}.fill(last)"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:kubernetes.containers.last_state.terminated{$cluster,reason:oomkilled,$scope} by {pod_name,kube_container_name}.rollup(max)"
                                         }
                                     ],
                                     "response_format": "timeseries",

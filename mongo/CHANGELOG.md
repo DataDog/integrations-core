@@ -2,6 +2,26 @@
 
 <!-- towncrier release notes start -->
 
+## 10.10.0 / 2026-04-15
+
+***Added***:
+
+* Update dependencies ([#22996](https://github.com/DataDog/integrations-core/pull/22996))
+* Add `propagate_agent_tags` configuration option to propagate agent host tags to the MongoDB integration, matching existing support in PostgreSQL, MySQL, and SQL Server. ([#23138](https://github.com/DataDog/integrations-core/pull/23138))
+
+***Fixed***:
+
+* Polish fleet-configurable spec descriptions. ([#22967](https://github.com/DataDog/integrations-core/pull/22967))
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+* Bump `datadog-checks-base` to `>=37.34.1`. Notable changes:
+    - Reduce allocations in `StatementMetrics` by deferring dict construction and updating the previous-statements cache in place. ([#23075](https://github.com/DataDog/integrations-core/pull/23075)) ([#23282](https://github.com/DataDog/integrations-core/pull/23282))
+
+## 10.9.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
 ## 10.8.0 / 2026-03-18
 
 ***Added***:

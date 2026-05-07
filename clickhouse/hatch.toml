@@ -5,7 +5,7 @@ base-package-features = ["deps", "db"]
 # https://github.com/ClickHouse/ClickHouse/blob/master/SECURITY.md
 [[envs.default.matrix]]
 python = ["3.13"]
-version = ["18", "19", "20", "21.8", "22.7", "24.8", "25.3", "25.8"]
+version = ["18", "19", "20", "21.8", "22.7", "23.2", "23.8", "24.8", "25.3", "25.8"]
 
 [envs.default.env-vars]
 CLICKHOUSE_REPOSITORY = "clickhouse/clickhouse-server"

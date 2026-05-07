@@ -45,25 +45,34 @@ def instance():
     return config
 
 
-def ping_clickhouse(host, port, username, password):
+@pytest.fixture
+def tls_instance():
+    return deepcopy(common.TLS_CONFIG)
+
+
+def ping_clickhouse(host, port, username, password, secure=False):
     def _ping_clickhouse():
         client = get_clickhouse_client(
             host=host,
             port=port,
             username=username,
             password=password,
+            secure=secure,
+            verify=False,
         )
         return client.ping()
 
     return _ping_clickhouse
 
 
-def get_clickhouse_client(host, port, username, password):
+def get_clickhouse_client(host, port, username, password, secure=False, verify=False):
     return clickhouse_connect.get_client(
         host=host,
         port=port,
         username=username,
         password=password,
+        secure=secure,
+        verify=verify,
     )
 
 

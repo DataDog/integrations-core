@@ -17,6 +17,7 @@ files:
       fleet_configurable: true
       value:
         type: array
+        require_trusted_provider: true
         items:
           type: string
         example:

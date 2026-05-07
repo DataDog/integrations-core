@@ -7,8 +7,9 @@ from pathlib import Path
 from typing import Callable
 
 import pytest
+import requests
 
-from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
+from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints, WaitFor
 from datadog_checks.dev.docker import docker_run, get_docker_hostname
 from datadog_checks.dev.utils import find_free_port
 from datadog_checks.prefect import PrefectCheck
@@ -18,6 +19,23 @@ PREFECT_URL = "http://localhost:4200/api"
 E2E_METADATA = {
     'env_vars': {'DD_LOGS_ENABLED': 'true'},
 }
+
+
+def _check_task_runs_available(prefect_url: str):
+    """Verify that the Prefect API has task runs and task-run events queryable."""
+    resp = requests.post(f"{prefect_url}/task_runs/filter", json={}, timeout=1)
+    resp.raise_for_status()
+    task_runs = resp.json()
+    assert task_runs, "No task runs available in Prefect API yet"
+
+    resp = requests.post(
+        f"{prefect_url}/events/filter",
+        json={"filter": {"event": {"prefix": ["prefect.task-run"]}}},
+        timeout=1,
+    )
+    resp.raise_for_status()
+    events = resp.json().get("events", [])
+    assert events, "No task-run events available in Prefect API yet"
 
 
 @pytest.fixture(scope='session')
@@ -35,6 +53,7 @@ def dd_environment(instance: Callable[[str], dict[str, str | dict[str, list[str]
             COMPOSE_FILE_E2E, patterns=["Finished all tasks"], service="prefect-worker", attempts=120, wait=1
         ),
         CheckDockerLogs(COMPOSE_FILE_E2E, patterns=["Retried"], service="prefect-worker", attempts=120, wait=1),
+        WaitFor(lambda: _check_task_runs_available(prefect_url), attempts=60, wait=2),
     ]
 
     with docker_run(
