@@ -569,6 +569,7 @@ def test_failed_explain_handling(
     # Don't need metrics for this one
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['query_samples']['explain_parameterized_queries'] = False
+    dbm_instance['collect_schemas'] = {'enabled': False}
     if explain_function_override:
         dbm_instance['query_samples']['explain_function'] = explain_function_override
     check = integration_check(dbm_instance)
