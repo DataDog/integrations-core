@@ -44,6 +44,7 @@ env:
   # Default ddev version when callers don't pass `ddev-version`. Tracked by Renovate.
   # renovate: datasource=pypi depName=ddev
   DEFAULT_DDEV_VERSION: "16.0.0"
+  PYTHON_VERSION: "3.13"
 
 jobs:
   prepare:
@@ -59,8 +60,34 @@ jobs:
         with:
           fetch-depth: 0 # ddev needs full tag history
 
+      - name: Checkout integrations-core actions
+        if: github.repository != 'DataDog/integrations-core'
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: "DataDog/integrations-core"
+          ref: master
+          fetch-depth: 1
+          sparse-checkout: .github/actions
+          path: core-temp
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "${{ env.PYTHON_VERSION }}"
+
       - name: Install ddev
-        run: pip install "ddev==${{ inputs.ddev-version || env.DEFAULT_DDEV_VERSION }}"
+        if: github.repository == 'DataDog/integrations-core'
+        uses: ./.github/actions/setup-ddev
+        with:
+          install-mode: pypi
+          ddev-version: "==${{ inputs.ddev-version || env.DEFAULT_DDEV_VERSION }}"
+
+      - name: Install ddev
+        if: github.repository != 'DataDog/integrations-core'
+        uses: ./core-temp/.github/actions/setup-ddev
+        with:
+          install-mode: pypi
+          ddev-version: "==${{ inputs.ddev-version || env.DEFAULT_DDEV_VERSION }}"
 
       - name: Configure ddev
         env:
