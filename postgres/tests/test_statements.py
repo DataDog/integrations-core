@@ -2127,6 +2127,7 @@ def test_samples_encoding(
     dbm_instance,
 ):
     dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['collect_schemas'] = {'enabled': False}
     if POSTGRES_LOCALE == 'C':
         dbm_instance['query_encodings'] = ['latin1', 'utf-8']
     check = integration_check(dbm_instance)
