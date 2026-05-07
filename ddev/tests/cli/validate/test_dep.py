@@ -111,8 +111,8 @@ def test_one_valid_one_invalid_integration(fake_repo, ddev):
 
 UNPINNED_OPT_CHECK = 'unpinned_opt_check'
 
-_UNPINNED_OPTIONAL_DEP = 'acme-unpinned-lib'
-_PYPROJECT_UNPINNED_OPTIONAL = f"""
+UNPINNED_OPTIONAL_DEP = 'acme-unpinned-lib'
+PYPROJECT_UNPINNED_OPTIONAL = f"""
         [project]
         dependencies = [
             "datadog-checks-base>=37.21.0",
@@ -120,7 +120,7 @@ _PYPROJECT_UNPINNED_OPTIONAL = f"""
 
         [project.optional-dependencies]
         libs = [
-            "{_UNPINNED_OPTIONAL_DEP}",
+            "{UNPINNED_OPTIONAL_DEP}",
         ]
         """
 
@@ -157,10 +157,10 @@ def test_core_rejects_unpinned_optional_dependency(fake_repo, ddev):
         fake_repo.path,
         'agent_requirements.in',
         f"""datadog-checks-base==37.21.0
-{_UNPINNED_OPTIONAL_DEP}==1.0.0
+{UNPINNED_OPTIONAL_DEP}==1.0.0
 """,
     )
-    write_file(fake_repo.path, f'{UNPINNED_OPT_CHECK}/pyproject.toml', _PYPROJECT_UNPINNED_OPTIONAL)
+    write_file(fake_repo.path, f'{UNPINNED_OPT_CHECK}/pyproject.toml', PYPROJECT_UNPINNED_OPTIONAL)
     result = ddev('-c', 'validate', 'dep', UNPINNED_OPT_CHECK)
     assert result.exit_code == 1
     assert 'Unpinned version' in result.output
@@ -172,10 +172,10 @@ def test_core_rejects_unpinned_optional_dependency_default_repo(fake_repo, ddev)
         fake_repo.path,
         'agent_requirements.in',
         f"""datadog-checks-base==37.21.0
-{_UNPINNED_OPTIONAL_DEP}==1.0.0
+{UNPINNED_OPTIONAL_DEP}==1.0.0
 """,
     )
-    write_file(fake_repo.path, f'{UNPINNED_OPT_CHECK}/pyproject.toml', _PYPROJECT_UNPINNED_OPTIONAL)
+    write_file(fake_repo.path, f'{UNPINNED_OPT_CHECK}/pyproject.toml', PYPROJECT_UNPINNED_OPTIONAL)
     result = ddev('validate', 'dep', UNPINNED_OPT_CHECK)
     assert result.exit_code == 1
     assert 'Unpinned version' in result.output
@@ -197,7 +197,7 @@ def test_non_core_repo_allows_unpinned_optional_dependency(repo_fixture, flag, d
         """datadog-checks-base>=37.21.0
 """,
     )
-    write_file(repo.path, f'{UNPINNED_OPT_CHECK}/pyproject.toml', _PYPROJECT_UNPINNED_OPTIONAL)
+    write_file(repo.path, f'{UNPINNED_OPT_CHECK}/pyproject.toml', PYPROJECT_UNPINNED_OPTIONAL)
     result = ddev(flag, 'validate', 'dep', UNPINNED_OPT_CHECK)
     assert result.exit_code == 0, result.output
     assert 'Unpinned version' not in result.output
