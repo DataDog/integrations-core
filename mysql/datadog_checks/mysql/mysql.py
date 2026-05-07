@@ -563,6 +563,18 @@ class MySql(DatabaseCheck):
                 self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags, hostname=self.reported_hostname
             )
             yield db
+        except pymysql.err.OperationalError as e:
+            self.service_check(
+                self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, hostname=self.reported_hostname
+            )
+            if e.args[0] == 1045 and not self._config.ssl:
+                self.log.warning(
+                    "Access denied error (1045) with no SSL configuration. If your MySQL instance requires SSL "
+                    "connections, configure the 'ssl' option in the check configuration "
+                    "(e.g. 'ssl.check_hostname: false' for connections without certificate verification). "
+                    "See https://docs.datadoghq.com/database_monitoring/setup_mysql/ for more details."
+                )
+            raise
         except Exception:
             self.service_check(
                 self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, hostname=self.reported_hostname

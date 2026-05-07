@@ -243,7 +243,7 @@
                             "display_format": "countsAndList",
                             "hide_zero_counts": true,
                             "last_triggered_format": "relative",
-                            "query": "tag:(source:ibm_spectrum_lsf)",
+                            "query": "tag:(integration:ibm-spectrum-lsf)",
                             "show_last_triggered": false,
                             "show_priority": false,
                             "show_status": true,
