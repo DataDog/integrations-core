@@ -164,6 +164,21 @@ def test_core_rejects_unpinned_optional_dependency(fake_repo, ddev):
     assert 'Unpinned version' in result.output
 
 
+def test_core_rejects_unpinned_optional_dependency_default_repo(fake_repo, ddev):
+    """Default repo is core: unpinned optional PyPI deps fail without passing `-c`."""
+    write_file(
+        fake_repo.path,
+        'agent_requirements.in',
+        f"""datadog-checks-base==37.21.0
+{_UNPINNED_OPTIONAL_DEP}==1.0.0
+""",
+    )
+    write_file(fake_repo.path, f'{UNPINNED_OPT_CHECK}/pyproject.toml', _PYPROJECT_UNPINNED_OPTIONAL)
+    result = ddev('validate', 'dep', UNPINNED_OPT_CHECK)
+    assert result.exit_code == 1
+    assert 'Unpinned version' in result.output
+
+
 def test_extras_allows_unpinned_optional_dependency(fake_extras_repo, ddev):
     """With `-e`, unpinned optional PyPI deps are allowed (no integrations-core pin rules)."""
     write_file(
