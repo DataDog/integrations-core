@@ -27,7 +27,6 @@ METADATAFILE_PATH = os.path.join(INTEGRATION_DIR, 'metadata.csv')
 METADATAFILE_LEGACY_PATH = os.path.join(INTEGRATION_DIR, 'metadata-legacy.csv')
 
 PREFIX_ASYNC_METRICS = 'asynchronous_metrics'
-PREFIX_ERRORS = 'errors'
 PREFIX_PROFILE_EVENTS = 'events'
 PREFIX_CURRENT_METRICS = 'metrics'
 
@@ -36,13 +35,11 @@ METRIC_TYPE_PATTERN = re.compile(r'\s+M\((?P<metric>\w+),\s*"(?P<description>[^"
 ASYNC_METRICS_PATTERN = re.compile(
     r'new_values\["(?P<metric>[\w.]+)"\]\s*=\s*\{.*,\s*(?P<description>"[^}]*")*?\s*(?:\w+\s*)?\}', re.MULTILINE
 )
-ERRORS_PATTERN = re.compile(r'M\(\d+,\s+(?P<metric>\w+)\)')
 
 RAW_SRC_URL = 'https://raw.githubusercontent.com/ClickHouse/ClickHouse/{branch}/src/'
 SOURCE_URL_CURRENT_METRICS = RAW_SRC_URL + 'Common/CurrentMetrics.cpp'
 SOURCE_URL_PROFILE_EVENTS = RAW_SRC_URL + 'Common/ProfileEvents.cpp'
 SOURCE_URL_ASYNC_METRICS = RAW_SRC_URL + 'Common/AsynchronousMetrics.cpp'
-SOURCE_URL_ERRORS = RAW_SRC_URL + 'Common/ErrorCodes.cpp'
 SOURCE_URL_SERVER_ASYNC_METRICS = RAW_SRC_URL + 'Interpreters/ServerAsynchronousMetrics.cpp'
 
 INTEGRATION_NAME = 'clickhouse'
@@ -74,7 +71,6 @@ class MetricKind(StrEnum):
     ASYNC_METRICS = 'async_metrics'
     METRICS = 'metrics'
     EVENTS = 'events'
-    ERRORS = 'errors'
 
 
 @dataclass
@@ -102,10 +98,6 @@ class Templates(Enum):
     QUERY_METRICS = Template(
         source_path='system_metrics.tpl',
         target_path=os.path.join(QUERIES_DIR, 'system_metrics.py'),
-    )
-    QUERY_ERRORS = Template(
-        source_path='system_errors.tpl',
-        target_path=os.path.join(QUERIES_DIR, 'system_errors.py'),
     )
     TESTS_METRICS = Template(
         source_path='tests_metrics.tpl',
@@ -270,23 +262,6 @@ def fetch_async_metrics(version: str) -> dict[str, ClickhouseMetric]:
     return result
 
 
-def fetch_errors(version: str) -> dict[str, ClickhouseMetric]:
-    raw_metrics = requests.get(SOURCE_URL_ERRORS.format(branch=version), timeout=10).text
-
-    result = {}
-    for match in ERRORS_PATTERN.finditer(raw_metrics):
-        name = match.group('metric')
-        m = ClickhouseMetric(
-            name=name,
-            description=f'The number of {name} errors since last server restart.',
-            prefix=PREFIX_ERRORS,
-            value_type=VALUE_TYPE_NUMBER,
-        )
-        result[m.metric_name()] = m
-
-    return result
-
-
 def generate_queries(template: Template, metrics: Iterable[ClickhouseMetric]):
     config = {
         'items': ',\n'.join(indent_line(metric.get_query_item(), 16) for metric in sorted(metrics)),
@@ -399,8 +374,6 @@ def calculate_metrics(generator: MetricsGenerator) -> CalculatedMetrics:
                 metrics = fetch_profile_events(version)
             case MetricKind.ASYNC_METRICS:
                 metrics = fetch_async_metrics(version)
-            case MetricKind.ERRORS:
-                metrics = fetch_errors(version)
             case _:
                 print(f'Unknown metric kind: {generator.kind}')
                 exit(1)
@@ -504,11 +477,6 @@ def generate():
             kind=MetricKind.METRICS,
             template=Templates.QUERY_METRICS.value,
             is_optional=False,
-        ),
-        MetricsGenerator(
-            kind=MetricKind.ERRORS,
-            template=Templates.QUERY_ERRORS.value,
-            is_optional=True,
         ),
     ]
 

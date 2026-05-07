@@ -282,6 +282,11 @@ SystemEvents = {
                     'type': 'temporal_percent',
                     'scale': 'microsecond',
                 },
+                'CachedReadBufferWaitReadBufferMicroseconds': {
+                    'name': 'events.CachedReadBufferWaitReadBufferMicroseconds',
+                    'type': 'temporal_percent',
+                    'scale': 'microsecond',
+                },
                 'CachedWriteBufferCacheWriteBytes': {
                     'name': 'events.CachedWriteBufferCacheWriteBytes',
                     'type': 'monotonic_gauge',

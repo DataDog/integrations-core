@@ -1260,3 +1260,4 @@ clickhouse.zk.wait.time,gauge,,microsecond,,"Number of microseconds spent waitin
 clickhouse.zk.watch,gauge,,event,,The number of watches (event subscriptions) in ZooKeeper.,0,clickhouse,,,
 clickhouse.zk.watch.count,count,,event,,The number of watches (event subscriptions) in ZooKeeper.,0,clickhouse,,,
 clickhouse.zk.watch.total,gauge,,event,,The number of watches (event subscriptions) in ZooKeeper.,0,clickhouse,,,
+clickhouse.errors.raised,count,,error,,"Number of errors raised since last server restart. Tagged by ``error_name``, ``error_code``, and ``remote`` (whether the error originated on a remote shard).",0,clickhouse,,,"error_name,error_code,remote"
