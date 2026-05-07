@@ -6,7 +6,7 @@ docker container rm dd-agent-current 2>/dev/null || :
 docker run --name dd-agent-current \
   	--network host \
   	-d \
-  	-e DD_LOG_LEVEL=info \
+  	-e DD_LOG_LEVEL=trace \
   	-e DD_HOSTNAME=demo-current \
 	-e DD_CMD_PORT=5002 \
         -v /var/run/docker.sock:/var/run/docker.sock:ro \

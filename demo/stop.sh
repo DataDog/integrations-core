@@ -23,8 +23,8 @@ export WORKER3_METRICS_PORT=19088
 export RAY_LOG_FOLDER=/tmp
 export TEMPORAL_LOG_FOLDER=/tmp
 
-docker stop dd-agent-foo 2>/dev/null || true
-docker rm dd-agent-foo 2>/dev/null || true
+# docker stop dd-agent-foo 2>/dev/null || true
+# docker rm dd-agent-foo 2>/dev/null || true
 
 docker compose -f "$REPO/boundary/tests/docker/docker-compose.yaml" -p demo-boundary down --volumes
 docker compose -f "$REPO/cockroachdb/tests/docker/docker-compose.yaml" -p demo-cockroachdb down --volumes

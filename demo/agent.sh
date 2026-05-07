@@ -3,13 +3,15 @@ set -euo pipefail
 
 REPO=$(cd "$(dirname "$0")/.." && pwd)
 
+TAG=${TAG:-discovery-local}
+
 SITE_PACKAGES=/opt/datadog-agent/embedded/lib/python3.13/site-packages
 CONF_D=/etc/datadog-agent/conf.d
 
 ~/hacks/bin/docker-agent-run.sh \
   --network host \
   -d \
-  -e DD_LOG_LEVEL=info \
+  -e DD_LOG_LEVEL=trace \
   -e DD_HOSTNAME=demo-new \
   -v "$REPO/boundary/datadog_checks/boundary/data/auto_conf_discovery.yaml:$CONF_D/boundary.d/auto_conf_discovery.yaml:ro" \
   -v "$REPO/boundary/datadog_checks/boundary:$SITE_PACKAGES/datadog_checks/boundary:ro" \
@@ -29,4 +31,5 @@ CONF_D=/etc/datadog-agent/conf.d
   -v "$REPO/temporal/datadog_checks/temporal:$SITE_PACKAGES/datadog_checks/temporal:ro" \
   -v "$REPO/datadog_checks_base/datadog_checks/base/utils/discovery:$SITE_PACKAGES/datadog_checks/base/utils/discovery:ro" \
   -v "$REPO/datadog_checks_base/datadog_checks/base/checks/openmetrics/v2/base.py:$SITE_PACKAGES/datadog_checks/base/checks/openmetrics/v2/base.py:ro" \
-  datadog/agent-dev:discovery-local
+  -v "$REPO/datadog_checks_base/datadog_checks/base/checks/base.py:$SITE_PACKAGES/datadog_checks/base/checks/base.py:ro" \
+  datadog/agent-dev:$TAG
