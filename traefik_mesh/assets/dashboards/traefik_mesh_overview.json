@@ -910,7 +910,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "sum:traefik_mesh.service.requests.count{$host,$traefik_service ,$endpoint,code:3*} by {protocol,code,method}.as_count()"
+                                            "query": "sum:traefik_mesh.service.requests.count{$host,$traefik_service,$endpoint,code:3*} by {protocol,code,method}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
