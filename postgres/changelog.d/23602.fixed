@@ -1,0 +1,1 @@
+Fix connection leak and improve error handling during Postgres database connectivity diagnostics
