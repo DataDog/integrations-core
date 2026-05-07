@@ -1,1 +1,0 @@
-Emit a dedicated event on alert state transitions: `Alert acknowledged: ...` when an alert is acknowledged in Prism Central, `Alert reopened: ...` when un-acknowledged. Combined with the existing creation, resolution, and re-creation-after-resolution events, every state change is now visible in the Datadog Events Explorer.
