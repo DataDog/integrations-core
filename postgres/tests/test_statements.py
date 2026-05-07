@@ -1416,6 +1416,7 @@ def test_statement_run_explain_parameterized_queries(
     dbm_instance['query_activity']['enabled'] = False
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['query_samples']['explain_parameterized_queries'] = True
+    dbm_instance['collect_schemas'] = {'enabled': False}
     check = integration_check(dbm_instance)
     check._connect()
 
