@@ -763,7 +763,12 @@ class PostgresDiagnose:
 
     @property
     def _category(self) -> str:
-        identifier = self._check.database_identifier
+        # Fall back to host:port — diagnose must keep working on broken config,
+        # which is exactly when database_identifier (templated over config+tags) can blow up.
+        try:
+            identifier = self._check.database_identifier
+        except Exception:
+            identifier = self._host_desc()
         if len(identifier) > 27:
             identifier = f"{identifier[:12]}...{identifier[-12:]}"
         return f"instance={identifier}"
