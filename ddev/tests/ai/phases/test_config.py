@@ -406,7 +406,5 @@ def test_flow_config_two_independent_cycles_reports_both():
         FlowConfig.model_validate(raw)
     error = str(exc_info.value)
     assert "Cycle" in error
-    assert "p1" in error
-    assert "p2" in error
-    assert "p3" in error
-    assert "p4" in error
+    assert "p1 → p3 → p2 → p1" in error
+    assert "p1 → p4 → p2 → p1" in error

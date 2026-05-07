@@ -16,26 +16,39 @@ class FlowConfigError(Exception):
     """Wraps Pydantic ValidationError or YAML errors with a user-friendly message."""
 
 
-def _detect_cycles(dependency_map: dict[str, list[str]]) -> list[list[str]]:
+def _detect_cycles(
+    dependency_map: dict[str, list[str]],
+    limit: int = 50,
+) -> tuple[list[list[str]], bool]:
     """Return every simple cycle in the dependency graph, each as an ordered list of phase IDs."""
-    # Implementation based in Johnson's algorithm (1975): each cycle is reported exactly once by
-    # only starting DFS from a node when it is the lowest-ranked node in the cycle.
+    # Enumerate every simple cycle exactly once: from each node, DFS only through
+    # higher-ranked nodes, so each cycle is reported only when started from its
+    # lowest-ranked member. (Tiernan-style enumeration with rank canonicalization.)
     rank = {n: i for i, n in enumerate(dependency_map)}
     cycles: list[list[str]] = []
 
-    def dfs(start: str, current: str, path: list[str], on_path: set[str]) -> None:
+    class _LimitReached(Exception):
+        """Raised when the cycle limit is reached."""
+
+        pass
+
+    def dfs(start: str, current: str, path: list[str], on_path: set[str]):
         for dep in dependency_map.get(current, []):
             if dep == start:
                 cycles.append(path + [start])
-            elif rank[dep] > rank[start] and dep not in on_path:
+                if len(cycles) >= limit:
+                    raise _LimitReached
+            elif dep in rank and rank[dep] > rank[start] and dep not in on_path:
                 on_path.add(dep)
                 dfs(start, dep, path + [dep], on_path)
                 on_path.discard(dep)
 
-    for start in dependency_map:
-        dfs(start, start, [start], {start})
-
-    return cycles
+    try:
+        for start in dependency_map:
+            dfs(start, start, [start], {start})
+    except _LimitReached:
+        return cycles, True
+    return cycles, False
 
 
 class TaskConfig(BaseModel):
@@ -131,9 +144,11 @@ class FlowConfig(BaseModel):
                 raise ValueError(f"Phase {phase_id!r} references unknown agent: {phase.agent!r}")
 
         dependency_map = {entry.phase: entry.dependencies for entry in self.flow}
-        if cycles := _detect_cycles(dependency_map):
+        cycles, truncated = _detect_cycles(dependency_map)
+        if cycles:
             formatted = "\n  ".join(" → ".join(c) for c in cycles)
-            raise ValueError(f"Cycle(s) detected in flow:\n  {formatted}")
+            suffix = f"\n  (showing first {len(cycles)}; more cycles exist)" if truncated else ""
+            raise ValueError(f"Cycle(s) detected in flow:\n  {formatted}{suffix}")
 
         return self
 
