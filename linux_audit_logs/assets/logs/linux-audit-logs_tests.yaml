@@ -1636,6 +1636,8 @@ tests:
           product:
             name: "Auditd"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
