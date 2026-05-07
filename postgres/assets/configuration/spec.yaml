@@ -1218,6 +1218,11 @@ files:
             - name: enabled
               type: boolean
               example: false
+            - name: auth_type
+              type: string
+              example: managed_identity
+              description: |
+                The authentication method. Use `managed_identity` (default) or `workload_identity` for AKS.
             - name: client_id
               description: |
                 The client ID of the managed identity or application registration.

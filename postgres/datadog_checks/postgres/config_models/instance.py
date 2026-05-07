@@ -47,7 +47,11 @@ class ManagedAuthentication1(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    auth_type: Optional[str] = Field('managed_identity', examples=['managed_identity'])
+    auth_type: Optional[str] = Field(
+        None,
+        description='The authentication method. Use `managed_identity` (default) or `workload_identity` for AKS.\n',
+        examples=['managed_identity'],
+    )
     client_id: Optional[str] = Field(
         None,
         description='The client ID of the managed identity or application registration.\nRequired for `managed_identity` auth. Optional for `workload_identity`,\nwhere it defaults to the `AZURE_CLIENT_ID` environment variable.\n',
