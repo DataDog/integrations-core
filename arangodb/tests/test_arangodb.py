@@ -49,15 +49,15 @@ def test_invalid_endpoint(aggregator, instance_invalid_endpoint, dd_run_check):
         ),
     ],
 )
-def test_check(instance, dd_run_check, aggregator, tag_condition, base_tags):
+def test_check(instance, dd_run_check, aggregator, tag_condition, base_tags, mock_http):
     check = ArangodbCheck('arangodb', {}, [instance])
 
-    def mock_requests_get(session, url, *args, **kwargs):
+    def mock_requests_get(url, *args, **kwargs):
         fixture = url.rsplit('/', 1)[-1]
         return MockHTTPResponse(file_path=os.path.join(os.path.dirname(__file__), 'fixtures', tag_condition, fixture))
 
-    with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
-        dd_run_check(check)
+    mock_http.get.side_effect = mock_requests_get
+    dd_run_check(check)
 
     aggregator.assert_service_check(
         'arangodb.openmetrics.health',
