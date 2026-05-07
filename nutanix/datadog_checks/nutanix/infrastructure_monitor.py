@@ -238,8 +238,8 @@ class InfrastructureMonitor:
         """Report basic VM metrics (counts and status)."""
         self.check.gauge("vm.count", 1, hostname=hostname, tags=vm_tags)
 
-        power_state = vm.get("powerState", "$UNKNOWN")
-        status_value = 0 if power_state == "ON" else 1 if power_state == "PAUSED" else 2
+        power_state = _normalize_tag_value(vm.get("powerState"))
+        status_value = 0 if power_state == "on" else 1 if power_state == "paused" else 2
         self.check.gauge("vm.status", status_value, hostname=hostname, tags=vm_tags)
 
         self._report_vm_capacity_metrics(vm, hostname, vm_tags)
