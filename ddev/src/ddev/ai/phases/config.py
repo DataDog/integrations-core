@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from __future__ import annotations
+
 from pathlib import Path
 
 import yaml
@@ -14,6 +16,41 @@ class FlowConfigError(Exception):
     """Wraps Pydantic ValidationError or YAML errors with a user-friendly message."""
 
 
+def _detect_cycles(
+    dependency_map: dict[str, list[str]],
+    limit: int = 50,
+) -> tuple[list[list[str]], bool]:
+    """Return every simple cycle in the dependency graph, each as an ordered list of phase IDs."""
+    # Enumerate every simple cycle exactly once: from each node, DFS only through
+    # higher-ranked nodes, so each cycle is reported only when started from its
+    # lowest-ranked member. (Tiernan-style enumeration with rank canonicalization.)
+    rank = {n: i for i, n in enumerate(dependency_map)}
+    cycles: list[list[str]] = []
+
+    class _LimitReached(Exception):
+        """Raised when the cycle limit is reached."""
+
+        pass
+
+    def dfs(start: str, current: str, path: list[str], on_path: set[str]):
+        for dep in dependency_map.get(current, []):
+            if dep == start:
+                cycles.append(path + [start])
+                if len(cycles) >= limit:
+                    raise _LimitReached
+            elif dep in rank and rank[dep] > rank[start] and dep not in on_path:
+                on_path.add(dep)
+                dfs(start, dep, path + [dep], on_path)
+                on_path.discard(dep)
+
+    try:
+        for start in dependency_map:
+            dfs(start, start, [start], {start})
+    except _LimitReached:
+        return cycles, True
+    return cycles, False
+
+
 class TaskConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str
@@ -21,7 +58,7 @@ class TaskConfig(BaseModel):
     prompt: str | None = None
 
     @model_validator(mode="after")
-    def exactly_one_source(self) -> "TaskConfig":
+    def exactly_one_source(self) -> TaskConfig:
         if (self.prompt_path is None) == (self.prompt is None):
             raise ValueError("Exactly one of 'prompt_path' or 'prompt' must be set")
         return self
@@ -35,7 +72,7 @@ class CheckpointConfig(BaseModel):
     memory_prompt_path: Path | None = None
 
     @model_validator(mode="after")
-    def exactly_one_source(self) -> "CheckpointConfig":
+    def exactly_one_source(self) -> CheckpointConfig:
         if (self.memory_prompt is None) == (self.memory_prompt_path is None):
             raise ValueError("Exactly one of 'memory_prompt' or 'memory_prompt_path' must be set")
         return self
@@ -86,7 +123,7 @@ class FlowConfig(BaseModel):
     flow: list[FlowEntry]
 
     @model_validator(mode="after")
-    def cross_references(self) -> "FlowConfig":
+    def cross_references(self) -> FlowConfig:
         """Validate all cross-references between agents, phases, and dependencies."""
         scheduled = {entry.phase for entry in self.flow}
         seen: set[str] = set()
@@ -105,10 +142,18 @@ class FlowConfig(BaseModel):
         for phase_id, phase in self.phases.items():
             if phase.agent not in self.agents:
                 raise ValueError(f"Phase {phase_id!r} references unknown agent: {phase.agent!r}")
+
+        dependency_map = {entry.phase: entry.dependencies for entry in self.flow}
+        cycles, truncated = _detect_cycles(dependency_map)
+        if cycles:
+            formatted = "\n  ".join(" → ".join(c) for c in cycles)
+            suffix = f"\n  (showing first {len(cycles)}; more cycles exist)" if truncated else ""
+            raise ValueError(f"Cycle(s) detected in flow:\n  {formatted}{suffix}")
+
         return self
 
     @classmethod
-    def from_yaml(cls, path: Path, config_dir: Path) -> "FlowConfig":
+    def from_yaml(cls, path: Path, config_dir: Path) -> FlowConfig:
         """Load, parse, and validate flow.yaml. Raises FlowConfigError on any problem."""
         try:
             raw = yaml.safe_load(path.read_text())
