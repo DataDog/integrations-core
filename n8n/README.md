@@ -51,7 +51,13 @@ N8N_METRICS_PREFIX=n8n_
 
 For more details, see the n8n documentation on [enabling Prometheus metrics][10].
 
-Set `openmetrics_endpoint` in `conf.yaml` to the full `/metrics` URL of your n8n process, for example `http://localhost:5678/metrics`.
+If you change `N8N_METRICS_PREFIX` from its default of `n8n_`, you **must** also set `raw_metric_prefix` in the integration's `conf.yaml` to the same value. Otherwise the check will not recognize the exposed metric names and will silently submit nothing:
+
+```yaml
+instances:
+  - openmetrics_endpoint: http://localhost:5678/metrics
+    raw_metric_prefix: my_custom_prefix_
+```
 
 #### Event-driven counters
 
