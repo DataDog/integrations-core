@@ -206,6 +206,10 @@ class PostgresStatementMetrics(DBMAsyncJob):
     def _shutdown(self):
         try:
             self._check = None
+            self._full_statement_text_cache = None
+            self._state = None
+            self._query_calls_cache = None
+            self._baseline_metrics = None
         except Exception:
             pass
 

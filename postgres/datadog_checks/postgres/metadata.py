@@ -125,6 +125,8 @@ class PostgresMetadata(DBMAsyncJob):
     def _shutdown(self):
         try:
             self._check = None
+            self._schema_collector = None
+            self._compiled_patterns_cache = None
         except Exception:
             pass
 
