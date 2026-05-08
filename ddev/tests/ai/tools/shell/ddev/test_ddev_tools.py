@@ -11,6 +11,7 @@ from ddev.ai.tools.shell.ddev.env_start import DdevEnvStartTool, EnvStartInput
 from ddev.ai.tools.shell.ddev.env_stop import DdevEnvStopTool, EnvStopInput
 from ddev.ai.tools.shell.ddev.env_test import DdevEnvTestTool, EnvTestInput
 from ddev.ai.tools.shell.ddev.release_changelog import DdevReleaseChangelogTool, ReleaseChangelogInput
+from ddev.ai.tools.shell.ddev.validate import DdevValidateInput, DdevValidateTool
 
 # --- ddev create ---
 
@@ -163,3 +164,26 @@ def test_release_changelog_cmd_message_placement():
 def test_release_changelog_invalid_change_type_raises():
     with pytest.raises(ValidationError):
         ReleaseChangelogInput(change_type="patch", integration="mycheck", message="Some message")
+
+
+# --- ddev validate ---
+
+
+@pytest.mark.parametrize("subcommand", ["config", "models", "metadata", "all"])
+def test_validate_cmd_all_subcommands(subcommand: str):
+    cmd = DdevValidateTool().cmd(DdevValidateInput(subcommand=subcommand, integration="mycheck"))
+    assert cmd == ["ddev", "--no-interactive", "validate", subcommand, "mycheck"]
+
+
+@pytest.mark.parametrize(
+    "subcommand,expected_flag",
+    [
+        ("config", "-s"),
+        ("models", "-s"),
+        ("metadata", "--sync"),
+        ("all", "--fix"),
+    ],
+)
+def test_validate_cmd_sync_flag_per_subcommand(subcommand: str, expected_flag: str):
+    cmd = DdevValidateTool().cmd(DdevValidateInput(subcommand=subcommand, integration="mycheck", sync=True))
+    assert cmd[4] == expected_flag
