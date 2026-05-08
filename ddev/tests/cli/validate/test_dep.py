@@ -44,7 +44,8 @@ def test_invalid_third_party_integration(fake_repo, ddev):
     assert error_regex.search(result.output), f"Unexpected output: {result.output}"
 
 
-def test_multiple_invalid_third_party_integrations(fake_repo, ddev):
+@pytest.mark.parametrize('check_name', ['bad_check_2', 'bad_check_3'])
+def test_multiple_invalid_third_party_integrations(fake_repo, ddev, check_name):
     write_file(
         fake_repo.path / 'bad_check_2',
         'pyproject.toml',
@@ -69,15 +70,13 @@ def test_multiple_invalid_third_party_integrations(fake_repo, ddev):
         """,
     )
 
-    result = ddev('validate', 'dep', 'bad_check_2')
-    result_2 = ddev('validate', 'dep', 'bad_check_3')
+    result = ddev('validate', 'dep', check_name)
     assert result.exit_code == 1
     assert error_regex.search(result.output), f"Unexpected output: {result.output}"
-    assert result_2.exit_code == 1
-    assert error_regex.search(result_2.output), f"Unexpected output: {result_2.output}"
 
 
-def test_one_valid_one_invalid_integration(fake_repo, ddev):
+@pytest.mark.parametrize('check_name', ['valid_check_2', 'bad_check_4'])
+def test_one_valid_one_invalid_integration(fake_repo, ddev, check_name):
     write_file(
         fake_repo.path / 'valid_check_2',
         'pyproject.toml',
@@ -101,12 +100,13 @@ def test_one_valid_one_invalid_integration(fake_repo, ddev):
         """,
     )
 
-    result = ddev('validate', 'dep', 'valid_check_2')
-    result_2 = ddev('validate', 'dep', 'bad_check_4')
-    assert result.exit_code == 0
-    assert match_regex.match(result.output), f"Unexpected output: {result.output}"
-    assert result_2.exit_code == 1
-    assert error_regex.search(result_2.output), f"Unexpected output: {result_2.output}"
+    result = ddev('validate', 'dep', check_name)
+    if check_name == 'valid_check_2':
+        assert result.exit_code == 0
+        assert match_regex.match(result.output), f"Unexpected output: {result.output}"
+    else:
+        assert result.exit_code == 1
+        assert error_regex.search(result.output), f"Unexpected output: {result.output}"
 
 
 UNPINNED_OPT_CHECK = 'unpinned_opt_check'
