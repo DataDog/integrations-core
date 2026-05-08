@@ -50,7 +50,7 @@ BWC_SUB_FIELDS = [
 ]
 
 # Shared simple metrics across storage pool, protection domain, SDS, and device
-_COMMON_SIMPLE_METRICS = [
+COMMON_SIMPLE_METRICS = [
     ('capacityLimitInKb', 'capacity_limit.in_kb'),
     ('maxCapacityInKb', 'max_capacity.in_kb'),
     ('capacityInUseInKb', 'capacity.in_use_in_kb'),
@@ -70,7 +70,7 @@ _COMMON_SIMPLE_METRICS = [
 ]
 
 # Shared userData BWC metrics across system, volume, storage pool, protection domain, and SDC
-_COMMON_BWC_METRICS = [
+COMMON_BWC_METRICS = [
     ('userDataReadBwc', 'user_data_read_bwc'),
     ('userDataWriteBwc', 'user_data_write_bwc'),
     ('userDataTrimBwc', 'user_data_trim_bwc'),
@@ -80,7 +80,7 @@ _COMMON_BWC_METRICS = [
 ]
 
 # Shared I/O BWC metrics across storage pool, protection domain, SDS, and device
-_COMMON_IO_BWC_METRICS = [
+COMMON_IO_BWC_METRICS = [
     ('primaryReadBwc', 'primary_read_bwc'),
     ('primaryWriteBwc', 'primary_write_bwc'),
     ('secondaryReadBwc', 'secondary_read_bwc'),
@@ -91,7 +91,7 @@ _COMMON_IO_BWC_METRICS = [
     ('targetWriteLatency', 'target_write_latency'),
 ]
 
-SYSTEM_STATS_BWC_METRICS = _COMMON_BWC_METRICS + [
+SYSTEM_STATS_BWC_METRICS = COMMON_BWC_METRICS + [
     ('journalerReadLatency', 'journaler_read_latency'),
     ('journalerWriteLatency', 'journaler_write_latency'),
     ('targetWriteLatency', 'target_write_latency'),
@@ -106,7 +106,7 @@ VOLUME_STATS_SIMPLE_METRICS = [
     ('rplUsedJournalCap', 'rpl_used_journal_cap'),
 ]
 
-VOLUME_STATS_BWC_METRICS = list(_COMMON_BWC_METRICS)
+VOLUME_STATS_BWC_METRICS = list(COMMON_BWC_METRICS)
 
 SDC_METRIC_PREFIX = 'sdc'
 
@@ -114,11 +114,11 @@ SDC_STATS_SIMPLE_METRICS = [
     ('numOfMappedVolumes', 'num_of_mapped_volumes'),
 ]
 
-SDC_STATS_BWC_METRICS = list(_COMMON_BWC_METRICS)
+SDC_STATS_BWC_METRICS = list(COMMON_BWC_METRICS)
 
 STORAGE_POOL_METRIC_PREFIX = 'storage_pool'
 
-STORAGE_POOL_STATS_SIMPLE_METRICS = _COMMON_SIMPLE_METRICS + [
+STORAGE_POOL_STATS_SIMPLE_METRICS = COMMON_SIMPLE_METRICS + [
     ('unreachableUnusedCapacityInKb', 'unreachable_unused_capacity.in_kb'),
     ('unusedCapacityInKb', 'unused_capacity.in_kb'),
     ('spareCapacityInKb', 'spare_capacity.in_kb'),
@@ -134,8 +134,8 @@ STORAGE_POOL_STATS_SIMPLE_METRICS = _COMMON_SIMPLE_METRICS + [
 ]
 
 STORAGE_POOL_STATS_BWC_METRICS = (
-    _COMMON_BWC_METRICS
-    + _COMMON_IO_BWC_METRICS
+    COMMON_BWC_METRICS
+    + COMMON_IO_BWC_METRICS
     + [
         ('rebalanceReadBwc', 'rebalance_read_bwc'),
         ('rebalanceWriteBwc', 'rebalance_write_bwc'),
@@ -150,7 +150,7 @@ STORAGE_POOL_STATS_BWC_METRICS = (
 
 SDS_METRIC_PREFIX = 'sds'
 
-SDS_STATS_SIMPLE_METRICS = _COMMON_SIMPLE_METRICS + [
+SDS_STATS_SIMPLE_METRICS = COMMON_SIMPLE_METRICS + [
     ('unreachableUnusedCapacityInKb', 'unreachable_unused_capacity.in_kb'),
     ('unusedCapacityInKb', 'unused_capacity.in_kb'),
     ('failedVacInKb', 'failed_vac.in_kb'),
@@ -162,7 +162,7 @@ SDS_STATS_SIMPLE_METRICS = _COMMON_SIMPLE_METRICS + [
     ('rmcacheSizeInUseInKb', 'rmcache.size_in_use_in_kb'),
 ]
 
-SDS_STATS_BWC_METRICS = _COMMON_IO_BWC_METRICS + [
+SDS_STATS_BWC_METRICS = COMMON_IO_BWC_METRICS + [
     ('volMigrationReadBwc', 'vol_migration_read_bwc'),
     ('volMigrationWriteBwc', 'vol_migration_write_bwc'),
     ('userDataReadBwc', 'user_data_read_bwc'),
@@ -173,7 +173,7 @@ SDS_STATS_BWC_METRICS = _COMMON_IO_BWC_METRICS + [
 
 DEVICE_METRIC_PREFIX = 'device'
 
-DEVICE_STATS_SIMPLE_METRICS = _COMMON_SIMPLE_METRICS + [
+DEVICE_STATS_SIMPLE_METRICS = COMMON_SIMPLE_METRICS + [
     ('avgReadSizeInBytes', 'avg_read_size_in_bytes'),
     ('avgWriteSizeInBytes', 'avg_write_size_in_bytes'),
     ('avgReadLatencyInMicrosec', 'avg_read_latency_in_microsec'),
@@ -183,11 +183,11 @@ DEVICE_STATS_SIMPLE_METRICS = _COMMON_SIMPLE_METRICS + [
     ('inaccessibleCapacityInKb', 'inaccessible_capacity.in_kb'),
 ]
 
-DEVICE_STATS_BWC_METRICS = list(_COMMON_IO_BWC_METRICS)
+DEVICE_STATS_BWC_METRICS = list(COMMON_IO_BWC_METRICS)
 
 PROTECTION_DOMAIN_METRIC_PREFIX = 'protection_domain'
 
-PROTECTION_DOMAIN_STATS_SIMPLE_METRICS = _COMMON_SIMPLE_METRICS + [
+PROTECTION_DOMAIN_STATS_SIMPLE_METRICS = COMMON_SIMPLE_METRICS + [
     ('exposedCapacityInKb', 'exposed_capacity.in_kb'),
     ('ActualNetCapacityInUseInKb', 'actual_net_capacity.in_use_in_kb'),
     ('unreachableUnusedCapacityInKb', 'unreachable_unused_capacity.in_kb'),
@@ -214,8 +214,8 @@ PROTECTION_DOMAIN_STATS_SIMPLE_METRICS = _COMMON_SIMPLE_METRICS + [
 ]
 
 PROTECTION_DOMAIN_STATS_BWC_METRICS = (
-    _COMMON_BWC_METRICS
-    + _COMMON_IO_BWC_METRICS
+    COMMON_BWC_METRICS
+    + COMMON_IO_BWC_METRICS
     + [
         ('rebalanceReadBwc', 'rebalance_read_bwc'),
         ('rebalanceWriteBwc', 'rebalance_write_bwc'),
