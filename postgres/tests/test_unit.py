@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
+import gc
+import weakref
 
 import mock
 import psycopg
@@ -9,7 +11,7 @@ import pytest
 from pytest import fail
 from semver import VersionInfo
 
-from datadog_checks.postgres import util
+from datadog_checks.postgres import PostgreSql, util
 from datadog_checks.postgres.schemas import PostgresSchemaCollector
 
 pytestmark = pytest.mark.unit
@@ -379,3 +381,46 @@ def test_cancel_closes_main_db_connection(integration_check, pg_instance):
 
     conn.close.assert_called_once()
     assert check._db is None
+
+
+def test_check_gc_after_cancel(pg_instance):
+    """Verify cancel() breaks all reference cycles so refcount alone reclaims the check.
+
+    If this test fails, the assertion message lists the types still holding a
+    reference to the check. To fix it:
+
+    1. Identify the referrer type in the failure message (e.g. ``QueryManager``).
+    2. Find which attribute on that object points back to the check (usually
+       ``self.check`` or ``self._check``).
+    3. Null that attribute in ``cancel()`` or add it to the relevant
+       ``_shutdown()`` method.
+    4. If the referrer is a closure or ``functools.partial``, find the
+       registration site and null or clear the container that holds it.
+    """
+    pg_instance['dbm'] = True
+    pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
+    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 10}
+    pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 1}
+    pg_instance['data_observability'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
+
+    check = PostgreSql('postgres', {}, [pg_instance])
+    ref = weakref.ref(check)
+
+    check.cancel()
+
+    gc.collect()
+    gc.disable()
+    try:
+        del check
+        obj = ref()
+        if obj is not None:
+            import inspect
+
+            referrers = [
+                f"bound method {r.__qualname__}" if inspect.ismethod(r) else type(r).__name__
+                for r in gc.get_referrers(obj)
+            ]
+            del obj
+            fail(f"Check still alive after cancel() + del -- pinned by: {referrers}")
+    finally:
+        gc.enable()

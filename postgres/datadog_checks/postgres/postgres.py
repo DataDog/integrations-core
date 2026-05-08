@@ -17,6 +17,7 @@ from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.core import QueryManager
 from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.utils import (
+    DBMAsyncJob,
     default_json_event_encoding,
     tracked_query,
 )
@@ -472,42 +473,38 @@ class PostgreSql(DatabaseCheck):
 
         return self._dynamic_queries
 
+    @staticmethod
+    def _cancel_async_job(job: DBMAsyncJob):
+        job.cancel()
+        if job._job_loop_future:
+            job._job_loop_future.result()
+            job._job_loop_future = None
+        job._shutdown()
+
     def cancel(self):
         """
         Cancels and sends cancel signal to all threads.
         """
         if self._config.dbm:
-            self.statement_samples.cancel()
-            self.statement_metrics.cancel()
-            self.metadata_samples.cancel()
-            if self.statement_metrics._job_loop_future:
-                self.statement_metrics._job_loop_future.result()
-                self.statement_metrics._job_loop_future = None
-            if self.statement_samples._job_loop_future:
-                self.statement_samples._job_loop_future.result()
-                self.statement_samples._job_loop_future = None
-            if self.metadata_samples._job_loop_future:
-                self.metadata_samples._job_loop_future.result()
-                self.metadata_samples._job_loop_future = None
-            self.statement_metrics._shutdown()
-            self.statement_samples._shutdown()
-            self.metadata_samples._shutdown()
+            self._cancel_async_job(self.statement_metrics)
+            self._cancel_async_job(self.statement_samples)
+            self._cancel_async_job(self.metadata_samples)
         elif self._config.data_observability.enabled:
-            self.metadata_samples.cancel()
-            if self.metadata_samples._job_loop_future:
-                self.metadata_samples._job_loop_future.result()
-                self.metadata_samples._job_loop_future = None
-            self.metadata_samples._shutdown()
+            self._cancel_async_job(self.metadata_samples)
         if self._config.data_observability.enabled:
-            self.data_observability.cancel()
-            if self.data_observability._job_loop_future:
-                self.data_observability._job_loop_future.result()
-                self.data_observability._job_loop_future = None
-            self.data_observability._shutdown()
-        self._dynamic_queries = []
-        self._query_manager.executor = None
+            self._cancel_async_job(self.data_observability)
+        self._clean_state()
+        self._query_manager = None
+        self.health = None
+        self.check_initializations.clear()
+        # TODO: move diagnosis cleanup into AgentCheck.cancel() in the base class
+        self._diagnosis = None
         self._close_db()
         self._close_db_pool()
+        # CheckLoggingAdapter holds self.check until check_id is resolved via
+        # process(), which only happens after the agent scheduler calls run().
+        # If cancel() is called before that, the back-reference is never cleared.
+        self.log.check = None
 
     def _clean_state(self):
         self.log.debug("Cleaning state")

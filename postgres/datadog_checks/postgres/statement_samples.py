@@ -222,6 +222,7 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     def _shutdown(self):
         self._check = None
+        self._explain_parameterized_queries = None
         self._collection_strategy_cache = None
         self._explain_errors_cache = None
         self._explained_statements_ratelimiter = None
