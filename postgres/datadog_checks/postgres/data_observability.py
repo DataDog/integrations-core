@@ -36,7 +36,14 @@ class PostgresDataObservability(DBMAsyncJob):
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg.errors.DatabaseError,),
             job_name="data-observability",
+            shutdown_callback=self._shutdown,
         )
+
+    def _shutdown(self):
+        try:
+            self._check = None
+        except Exception:
+            pass
 
     @property
     def _do_config(self):

@@ -169,6 +169,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             dbms="postgres",
             rate_limit=1 / float(collection_interval),
             job_name="query-metrics",
+            shutdown_callback=self._shutdown,
         )
         self._check = check
         self._metrics_collection_interval = collection_interval
@@ -201,6 +202,12 @@ class PostgresStatementMetrics(DBMAsyncJob):
             maxsize=config.query_metrics.full_statement_text_cache_max_size,
             ttl=60 * 60 / config.query_metrics.full_statement_text_samples_per_hour_per_query,
         )
+
+    def _shutdown(self):
+        try:
+            self._check = None
+        except Exception:
+            pass
 
     def _execute_query(self, query, params=(), binary=False, row_factory=None) -> Tuple[list, list]:
         if self._cancel_event.is_set():

@@ -105,6 +105,7 @@ class PostgresMetadata(DBMAsyncJob):
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg.errors.DatabaseError,),
             job_name="database-metadata",
+            shutdown_callback=self._shutdown,
         )
         self._check = check
         self._config = config
@@ -120,6 +121,12 @@ class PostgresMetadata(DBMAsyncJob):
         self._conn_ttl_ms = self._config.idle_connection_timeout
         self._tags_no_db = None
         self.tags = None
+
+    def _shutdown(self):
+        try:
+            self._check = None
+        except Exception:
+            pass
 
     def _dbtags(self, db, *extra_tags):
         """
