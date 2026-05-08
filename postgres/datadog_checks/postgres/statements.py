@@ -21,13 +21,17 @@ from datadog_checks.postgres.config_models import InstanceConfig
 
 from .query_calls_cache import QueryCallsCache
 from .util import (
-    datadog_agent,
     DatabaseConfigurationError,
     parse_shared_preload_libraries,
     payload_pg_version,
     warning_with_tags,
 )
 from .version_utils import V9_4, V10, V14
+
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
 
 QUERYID_TO_CALLS_QUERY = """
 SELECT queryid, calls

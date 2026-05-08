@@ -12,6 +12,11 @@ from psycopg.rows import dict_row
 
 from .schemas import PostgresSchemaCollector
 
+try:
+    import datadog_agent  # type: ignore
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -21,7 +26,7 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_e
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.config_models import InstanceConfig
 
-from .util import datadog_agent, payload_pg_version
+from .util import payload_pg_version
 
 # PG_EXTENSION_INFO_QUERY is used to collect extension names and versions from
 # the pg_extension table. Schema names and roles are retrieved from their re-

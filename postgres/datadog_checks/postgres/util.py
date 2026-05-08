@@ -9,13 +9,7 @@ from typing import Any, List, Tuple  # noqa: F401
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
 
-# Centralize the import/fallback for the agent
-# We fallback to the stubs during testing
-try:
-    import datadog_agent # type: ignore
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-datadog_agent
+
 class PartialFormatter(string.Formatter):
     """Follows PEP3101, used to format only specified args in a string.
     Ex:

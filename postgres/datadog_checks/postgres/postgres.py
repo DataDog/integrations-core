@@ -49,7 +49,6 @@ from .__about__ import __version__
 from .config import build_config, sanitize
 from .diagnose import PostgresDiagnose
 from .util import (
-    datadog_agent,
     ANALYZE_PROGRESS_METRICS,
     AWS_RDS_HOSTNAME_SUFFIX,
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE,
@@ -93,6 +92,11 @@ from .util import (
     warning_with_tags,
 )
 from .version_utils import V9, V9_2, V10, V12, V13, V14, V15, V16, V17, V18, VersionUtils
+
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
 
 MAX_CUSTOM_RESULTS = 100
 
