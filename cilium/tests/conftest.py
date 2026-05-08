@@ -9,6 +9,7 @@ import pytest
 from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.cilium import CiliumCheck
 from datadog_checks.dev import run_command
+from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.utils import get_active_env
@@ -131,6 +132,51 @@ def setup_cilium():
         )
         if result.stderr:
             raise Exception(result.stderr)
+
+    WaitFor(
+        wait_for_cilium_metric_families,
+        attempts=60,
+        wait=2,
+        args=(
+            pods[0].strip(),
+            [
+                "cilium_forward_bytes_total",
+                "cilium_forward_count_total",
+                "cilium_endpoint_regeneration_time_stats_seconds",
+                "cilium_policy_regeneration_time_stats_seconds",
+            ],
+        ),
+    )()
+
+
+def wait_for_cilium_metric_families(pod, families):
+    missing = []
+    for family in families:
+        result = run_command(
+            [
+                "kubectl",
+                "exec",
+                "-n",
+                "cilium",
+                "-c",
+                "cilium-agent",
+                pod,
+                "--",
+                "cilium",
+                "metrics",
+                "list",
+                "--match-pattern",
+                family,
+            ],
+            capture=True,
+        )
+        if result.stderr:
+            raise Exception(result.stderr)
+        if family not in result.stdout:
+            missing.append(family)
+
+    if missing:
+        raise AssertionError("Cilium metric families are not available yet: {}".format(", ".join(missing)))
 
 
 def get_instances(agent_host, agent_port, operator_host, operator_port, use_openmetrics):
