@@ -136,13 +136,23 @@ class PostgresColumnStatsCollector:
             "collection_interval": self._config.collection_interval,
         }
 
-    def _build_filters(self) -> str:
-        return (
-            regex_exclude_clauses("n.nspname", self._config.exclude_schemas)
-            + regex_include_clause("n.nspname", self._config.include_schemas)
-            + regex_exclude_clauses("c.relname", self._config.exclude_tables)
-            + regex_include_clause("c.relname", self._config.include_tables)
-        )
+    def _build_filters(self) -> tuple[str, list[str]]:
+        query = ""
+        params: list[str] = []
+
+        query += regex_exclude_clauses("n.nspname", self._config.exclude_schemas)
+        params.extend(self._config.exclude_schemas)
+
+        query += regex_include_clause("n.nspname", self._config.include_schemas)
+        params.extend(self._config.include_schemas)
+
+        query += regex_exclude_clauses("c.relname", self._config.exclude_tables)
+        params.extend(self._config.exclude_tables)
+
+        query += regex_include_clause("c.relname", self._config.include_tables)
+        params.extend(self._config.include_tables)
+
+        return query, params
 
     def _get_databases(self):
         if self._check.autodiscovery:
@@ -225,13 +235,14 @@ class PostgresColumnStatsCollector:
         try:
             with self._check.db_pool.get_connection(db_name) as conn:
                 with conn.cursor(row_factory=dict_row) as cursor:
+                    filters_sql, filter_params = self._build_filters()
                     query = COLUMN_STATS_QUERY.format(
-                        filters=self._build_filters(),
+                        filters=filters_sql,
                         max_tables=self._config.max_tables,
                     )
                     cursor.execute(f"SET statement_timeout = '{self._config.max_query_duration}s'")
                     try:
-                        cursor.execute(query)
+                        cursor.execute(query, filter_params)
 
                         self._handle_recovery(db_name)
 

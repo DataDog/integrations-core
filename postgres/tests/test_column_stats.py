@@ -637,25 +637,32 @@ def test_collect_column_stats_metrics_emitted_on_error(check_runner, dbm_instanc
         _assert_metric_with_tag(aggregator, metric, 'status:error')
 
 
-def test_collect_column_stats_special_chars_in_pattern_do_not_crash(
-    check_runner, dbm_instance, pg_instance, aggregator
+def test_collect_column_stats_special_chars_in_pattern_handled_safely(
+    integration_check, dbm_instance, pg_instance, aggregator
 ):
-    """Filter patterns with regex/SQL-special characters must not raise from the collector.
-
-    Agent config is trusted, but the collector should degrade gracefully (log and move on) rather
-    than crash the whole metadata job if a user supplies a malformed pattern.
-    """
+    """Patterns with SQL-special chars (e.g. quotes) bind safely as parameters and don't break the query."""
     _analyze_tables(pg_instance)
-    # Single quote would break SQL if unescaped; brackets form a character class.
-    dbm_instance['collect_column_stats']['include_tables'] = ["bad'pattern", "[invalid"]
+    # `bad'pattern` is a valid regex (literal `bad`, then any char, then `pattern`); matches no real table.
+    dbm_instance['collect_column_stats']['exclude_tables'] = ["bad'pattern"]
+    check = integration_check(dbm_instance)
+    run_one_check(check)
+    events = aggregator.get_event_platform_events("dbm-column-stats")
+    tables_seen = {entry['table'] for evt in events for entry in evt['column_stats']}
+    assert {'persons', 'cities', 'pgtable'}.issubset(tables_seen)
+
+
+def test_collect_column_stats_invalid_regex_does_not_crash(check_runner, dbm_instance, pg_instance, aggregator):
+    """Invalid regex is caught at the per-database boundary; no events emitted, no exception escapes."""
+    _analyze_tables(pg_instance)
+    dbm_instance['collect_column_stats']['include_tables'] = ["[invalid"]
     check = check_runner(dbm_instance)
     collector = check.metadata_samples._column_stats_collector
 
-    # Must not raise — the outer per-database except catches query errors and logs them.
+    # Must not raise — the outer per-database except catches the regex error and logs it.
     collector.collect_column_stats([])
 
     events = aggregator.get_event_platform_events("dbm-column-stats")
-    assert events == [], f"Expected no events for malformed pattern, got {len(events)}"
+    assert events == [], f"Expected no events when pattern is invalid regex, got {len(events)}"
 
 
 def test_collect_column_stats_handles_missing_version(check_runner, dbm_instance, pg_instance, aggregator):
