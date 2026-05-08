@@ -20,7 +20,7 @@
             "new_group_delay": 60,
             "renotify_interval": 0,
             "escalation_message": "",
-            "notify_no_data": false,
+            "on_missing_data": "show_no_data",
             "avalanche_window": 10,
             "silenced": {}
         },
