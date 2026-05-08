@@ -175,17 +175,10 @@ def test_validate_cmd_all_subcommands(subcommand: str):
     assert cmd == ["ddev", "--no-interactive", "validate", subcommand, "mycheck"]
 
 
-@pytest.mark.parametrize(
-    "subcommand,expected_flag",
-    [
-        ("config", "-s"),
-        ("models", "-s"),
-        ("metadata", "--sync"),
-    ],
-)
-def test_validate_cmd_sync_flag_per_subcommand(subcommand: str, expected_flag: str):
+@pytest.mark.parametrize("subcommand", ["config", "models", "metadata"])
+def test_validate_cmd_sync_flag_per_subcommand(subcommand: str):
     cmd = DdevValidateTool().cmd(DdevValidateInput(subcommand=subcommand, integration="mycheck", sync=True))
-    assert cmd == ["ddev", "--no-interactive", "validate", subcommand, expected_flag, "mycheck"]
+    assert cmd == ["ddev", "--no-interactive", "validate", subcommand, "--sync", "mycheck"]
 
 
 def test_validate_invalid_subcommand_raises():

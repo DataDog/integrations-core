@@ -37,13 +37,6 @@ class DdevValidateInput(BaseToolInput):
     ] = False
 
 
-_SYNC_FLAG: dict[ValidateSubcommand, str] = {
-    "config": "-s",
-    "models": "-s",
-    "metadata": "--sync",
-}
-
-
 class DdevValidateTool(CmdTool[DdevValidateInput]):
     """Validates an integration's spec, config example, config models, or metadata.csv.
     Set `sync=true` to regenerate the derived files from spec.yaml."""
@@ -57,6 +50,6 @@ class DdevValidateTool(CmdTool[DdevValidateInput]):
     def cmd(self, tool_input: DdevValidateInput) -> list[str]:
         cmd = ["ddev", "--no-interactive", "validate", tool_input.subcommand]
         if tool_input.sync:
-            cmd.append(_SYNC_FLAG[tool_input.subcommand])
+            cmd.append("--sync")
         cmd.append(tool_input.integration)
         return cmd
