@@ -106,7 +106,7 @@ class PowerFlexAPI:
     def get_alerts(self, since: str | None = None) -> list[dict]:
         filters = []
         if since:
-            filters.append(f'timestamp ge {since}')
+            filters.append(f'last_updated ge {since}')
         filter_str = ' and '.join(filters) if filters else ''
         query = f'/rest/v1/alerts?filter={filter_str}' if filter_str else '/rest/v1/alerts'
         response = self._get(query)
