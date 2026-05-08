@@ -26,15 +26,6 @@ from datadog_checks.base.utils.db.types import Transformer  # noqa: F401
 from datadog_checks.base.utils.format import json
 from datadog_checks.base.utils.tracing import INTEGRATION_TRACING_SERVICE_NAME, tracing_enabled
 
-# Centralize the import/fallback for the agent
-# We fallback to the stubs during testing
-try:
-    import datadog_agent # type: ignore
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-datadog_agent
-
-
 logger = logging.getLogger(__file__)
 
 # AgentCheck methods to transformer name e.g. set_metadata -> metadata

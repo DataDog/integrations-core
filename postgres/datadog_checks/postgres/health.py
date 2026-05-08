@@ -74,7 +74,9 @@ class PostgresHealth(Health):
             if diagnosis.result == Diagnosis.DIAGNOSIS_FAIL:
                 self.submit_health_event(
                     name=diagnosis.name,
-                    status= HealthStatus.WARNING if diagnosis.result == Diagnosis.DIAGNOSIS_WARNING else HealthStatus.ERROR,
+                    status=HealthStatus.WARNING
+                    if diagnosis.result == Diagnosis.DIAGNOSIS_WARNING
+                    else HealthStatus.ERROR,
                     data={
                         "diagnosis": diagnosis,
                     },
