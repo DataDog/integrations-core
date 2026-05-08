@@ -199,14 +199,7 @@ def dep(check, require_base_check_version, min_base_check_version):
     agent_dependencies_file = get_agent_requirements()
     annotate_errors(agent_dependencies_file, agent_errors)
     ctx = click.get_current_context()
-    obj = ctx.obj
-    repo_choice = None
-
-    if hasattr(obj, 'get'):
-        repo_choice = obj.get('repo_choice') or obj.get('repo')
-    if not repo_choice and hasattr(obj, 'repo'):
-        repo_choice = getattr(obj.repo, 'name', None)
-    repo_core = repo_choice == 'core'
+    repo_core = ctx.obj['repo_choice'] == 'core'
 
     if agent_errors:
         for agent_error in agent_errors:
