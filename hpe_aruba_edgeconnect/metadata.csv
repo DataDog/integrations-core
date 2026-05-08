@@ -40,8 +40,8 @@ hpe_aruba_edgeconnect.qos.class.bandwidth.rx.rate,gauge,,byte,second,Receive rat
 hpe_aruba_edgeconnect.qos.class.bandwidth.tx.count,gauge,,byte,,Bytes transmitted for the DSCP class,0,hpe_aruba_edgeconnect,qos class bandwidth tx count,,dscp:be side:wan
 hpe_aruba_edgeconnect.qos.class.bandwidth.tx.max,gauge,,byte,,Peak transmit bandwidth for the DSCP class in bytes,0,hpe_aruba_edgeconnect,qos class bandwidth tx max,,dscp:be side:wan
 hpe_aruba_edgeconnect.qos.class.bandwidth.tx.rate,gauge,,byte,second,Transmit rate for the DSCP class in bytes per second,0,hpe_aruba_edgeconnect,qos class bandwidth tx rate,,dscp:be side:wan
-hpe_aruba_edgeconnect.qos.class.drop.percentage,gauge,,percent,,Percentage of packets shaped that were dropped by QoS,0,hpe_aruba_edgeconnect,qos class drop percentage,,traffic_class:2
-hpe_aruba_edgeconnect.qos.class.drops,gauge,,packet,,QoS or other dropped packets by the traffic shaper,0,hpe_aruba_edgeconnect,qos class drops,,traffic_class:2 drop_type:qos
+hpe_aruba_edgeconnect.qos.class.drop.percentage,gauge,,percent,,Percentage of packets shaped that were dropped by QoS,0,hpe_aruba_edgeconnect,qos class drop percentage,,overlay_name:RealTime
+hpe_aruba_edgeconnect.qos.class.drops,gauge,,packet,,QoS or other dropped packets by the traffic shaper,0,hpe_aruba_edgeconnect,qos class drops,,overlay_name:RealTime drop_type:qos
 hpe_aruba_edgeconnect.tunnel.internet_breakout.bandwidth.rx.count,gauge,,byte,,Bytes received on the internet breakout tunnel,0,hpe_aruba_edgeconnect,tunnel internet breakout bandwidth rx count,,interface_name:wan0
 hpe_aruba_edgeconnect.tunnel.internet_breakout.bandwidth.rx.max,gauge,,byte,second,Maximum configured receive bandwidth on the internet breakout tunnel,0,hpe_aruba_edgeconnect,tunnel internet breakout bandwidth rx max,,interface_name:wan0
 hpe_aruba_edgeconnect.tunnel.internet_breakout.bandwidth.rx.rate,gauge,,byte,second,Receive rate on the internet breakout tunnel in bytes per second,0,hpe_aruba_edgeconnect,tunnel internet breakout bandwidth rx rate,,interface_name:wan0

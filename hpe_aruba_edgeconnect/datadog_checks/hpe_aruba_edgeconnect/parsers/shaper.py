@@ -7,8 +7,12 @@ import csv
 import io
 from collections.abc import Iterator
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from datadog_checks.hpe_aruba_edgeconnect.metrics_store import AggType, MetricsStore
+
+if TYPE_CHECKING:
+    from datadog_checks.base.log import CheckLoggingAdapter
 
 
 @dataclass(init=False, slots=True)
@@ -26,9 +30,24 @@ class ShaperStats:
         self.other_drops = float(row['other_drops'])
         self.total_shaped_packets = float(row['shaped_packets']) if 'shaped_packets' in row else None
 
-    def record(self, store: MetricsStore, base_tags: list[str]) -> None:
+    def record(
+        self,
+        store: MetricsStore,
+        base_tags: list[str],
+        traffic_class_map: dict[str, str] | None = None,
+        logger: CheckLoggingAdapter | None = None,
+    ) -> None:
+        traffic_class_map = traffic_class_map or {}
+        if self.traffic_class in traffic_class_map:
+            overlay_name = traffic_class_map[self.traffic_class]
+        else:
+            overlay_name = self.traffic_class
+            if logger is not None:
+                logger.warning(
+                    "No overlay name mapping found for traffic class %s; falling back to raw id", self.traffic_class
+                )
         tags = base_tags + [
-            f'traffic_class:{self.traffic_class}',
+            f'overlay_name:{overlay_name}',
             f'direction:{self.direction}',
         ]
         store.record('qos.class.drops', self.qos_drops, tags + ['drop_type:qos'], AggType.SUM)

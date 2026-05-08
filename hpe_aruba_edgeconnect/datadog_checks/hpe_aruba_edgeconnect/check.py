@@ -47,6 +47,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         self.http.options['auth'] = None
         self._peer_lookup: dict[str, tuple[str, str]] = {}
         self._overlay_map: dict[str, str] = {}
+        self._traffic_class_map: dict[str, str] = {}
         self._appliance_clients: dict[str, ApplianceClient] = {}
         self._orch_client: OrchestratorClient | None = None
 
@@ -122,10 +123,13 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
             devices.append(create_device_metadata(ap, namespace))
         self._submit_metadata(devices)
         try:
-            self._overlay_map = client.get_overlay_config()
+            self._overlay_map, self._traffic_class_map = client.get_overlay_config()
         except Exception:
-            self.log.warning("Failed to fetch overlay config, overlay names will use raw IDs", exc_info=True)
+            self.log.warning(
+                "Failed to fetch overlay config, overlay and traffic class names will use raw IDs", exc_info=True
+            )
             self._overlay_map = {}
+            self._traffic_class_map = {}
         return appliances
 
     def _create_appliance_client(self, app_ip: str, username: str, password: str) -> ApplianceClient:
@@ -201,7 +205,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
                 try:
                     content = client.get_minute_stats(f'st2-{ts}.tgz')
                     minute_stats = MinuteStats(content, app_ip, ts, self.log)
-                    minute_stats.record(store, base_tags, device_id)
+                    minute_stats.record(store, base_tags, device_id, self._traffic_class_map)
                 except Exception:
                     self.log.warning(
                         "Failed to process minute-stats archive st2-%d.tgz for appliance %s, skipping",

@@ -33,21 +33,26 @@ class OrchestratorClient:
         resp.raise_for_status()
         return resp.json()
 
-    def get_overlay_config(self) -> dict[str, str]:
+    def get_overlay_config(self) -> tuple[dict[str, str], dict[str, str]]:
+        """Fetch overlay configuration and derive id -> name mappings for overlays and traffic classes."""
         resp = self._http.get(f'{self._base_url}/gms/rest/gms/overlays/config')
         resp.raise_for_status()
         data = resp.json()
         overlay_map: dict[str, str] = {}
+        traffic_class_map: dict[str, str] = {}
         if isinstance(data, list):
             for entry in data:
                 if not isinstance(entry, dict):
                     continue
+                name = entry.get('name')
                 overlay_id = entry.get('id')
-                if overlay_id is None:
-                    continue
-                overlay_id_str = str(overlay_id)
-                overlay_map[overlay_id_str] = entry.get('name', overlay_id_str)
-        return overlay_map
+                if overlay_id is not None:
+                    overlay_id_str = str(overlay_id)
+                    overlay_map[overlay_id_str] = name or overlay_id_str
+                traffic_class = entry.get('trafficClass')
+                if traffic_class is not None and name:
+                    traffic_class_map.setdefault(str(traffic_class), name)
+        return overlay_map, traffic_class_map
 
 
 class ApplianceClient:

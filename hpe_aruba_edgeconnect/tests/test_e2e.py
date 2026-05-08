@@ -138,9 +138,9 @@ EXPECTED_VALUES = [
     ('qos.class.bandwidth.tx.rate', 636.0, ['dscp:be', 'side:wan']),
     # DSCP peak: be / pass-through-unshaped wan.
     ('qos.class.bandwidth.tx.max', 636, ['dscp:be', 'side:wan']),
-    # Shaper: traffic_class=2, qos_drops=0.
-    ('qos.class.drops', 0, ['traffic_class:2', 'drop_type:qos']),
-    ('qos.class.drop.percentage', 0, ['traffic_class:2']),
+    # Shaper: traffic_class=2 maps to overlay BulkData via fake_orch.
+    ('qos.class.drops', 0, ['overlay_name:BulkData', 'drop_type:qos']),
+    ('qos.class.drop.percentage', 0, ['overlay_name:BulkData']),
     # Probe: om_passThrough_9 (single-sample averages).
     ('circuit.sla.latency', 0, ['probe_name:om_passThrough_9']),
     ('circuit.sla.loss', 0, ['probe_name:om_passThrough_9']),

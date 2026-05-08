@@ -83,7 +83,13 @@ def appliances():
 
 @app.route("/gms/rest/gms/overlays/config")
 def overlay_config():
-    return jsonify([{"id": 0, "name": "business"}])
+    return jsonify(
+        [
+            {"id": 0, "name": "business"},
+            {"id": 2, "name": "BulkData", "trafficClass": "2"},
+            {"id": 4, "name": "RealTime", "trafficClass": "4"},
+        ]
+    )
 
 
 @app.route("/health")

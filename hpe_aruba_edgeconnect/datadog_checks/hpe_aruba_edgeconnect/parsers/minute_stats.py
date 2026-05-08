@@ -142,13 +142,19 @@ class MinuteStats:
     def get(self, filename: str) -> str:
         return self.files.get(filename, '')
 
-    def record(self, store: MetricsStore, base_tags: list[str], device_id: str) -> None:
+    def record(
+        self,
+        store: MetricsStore,
+        base_tags: list[str],
+        device_id: str,
+        traffic_class_map: dict[str, str] | None = None,
+    ) -> None:
         self._record_interface_stats(store, base_tags, device_id)
         self._record_tunnel_stats(store, base_tags)
         self._record_tunnel_availability_stats(store, base_tags)
         self._record_internet_breakout_stats(store, base_tags, device_id)
         self._record_probe_stats(store, base_tags)
-        self._record_shaper_stats(store, base_tags)
+        self._record_shaper_stats(store, base_tags, traffic_class_map or {})
         self._record_appperf_stats(store, base_tags)
         self._record_dscp_stats(store, base_tags)
 
@@ -185,9 +191,11 @@ class MinuteStats:
         for row in self.probes:
             row.record(store, base_tags)
 
-    def _record_shaper_stats(self, store: MetricsStore, base_tags: list[str]) -> None:
+    def _record_shaper_stats(
+        self, store: MetricsStore, base_tags: list[str], traffic_class_map: dict[str, str]
+    ) -> None:
         for row in self.shaper:
-            row.record(store, base_tags)
+            row.record(store, base_tags, traffic_class_map, self._log)
 
     def _record_appperf_stats(self, store: MetricsStore, base_tags: list[str]) -> None:
         for row in self.appperf:

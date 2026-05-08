@@ -10,7 +10,7 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.hpe_aruba_edgeconnect import HpeArubaEdgeconnectCheck
 from datadog_checks.hpe_aruba_edgeconnect.check import _parse_speed
-from datadog_checks.hpe_aruba_edgeconnect.client import ApplianceClient
+from datadog_checks.hpe_aruba_edgeconnect.client import ApplianceClient, OrchestratorClient
 from datadog_checks.hpe_aruba_edgeconnect.metrics_store import AggType, MetricsStore
 from datadog_checks.hpe_aruba_edgeconnect.models import Appliance, Appliances, _ip_matches_any
 from datadog_checks.hpe_aruba_edgeconnect.ndm_models import PAYLOAD_METADATA_BATCH_SIZE
@@ -279,9 +279,9 @@ EXPECTED_VALUES = [
     ('qos.class.bandwidth.tx.rate', 630.7, ['dscp:be', 'side:wan']),
     # --- DSCP peak: be / pass-through-unshaped wan ---
     ('qos.class.bandwidth.tx.max', 636, ['dscp:be', 'side:wan']),
-    # --- shaper: traffic_class=2, qos_drops=0 ---
-    ('qos.class.drops', 0, ['traffic_class:2', 'drop_type:qos']),
-    ('qos.class.drop.percentage', 0, ['traffic_class:2']),
+    # --- shaper: traffic_class=2 -> overlay BulkData, qos_drops=0 ---
+    ('qos.class.drops', 0, ['overlay_name:BulkData', 'drop_type:qos']),
+    ('qos.class.drop.percentage', 0, ['overlay_name:BulkData']),
     # --- probe: om_passThrough_9 (averaged across two minutes) ---
     ('circuit.sla.latency', 0, ['probe_name:om_passThrough_9']),
     ('circuit.sla.loss', 0, ['probe_name:om_passThrough_9']),
@@ -339,10 +339,10 @@ def _make_appliance(ip='10.0.0.1', **overrides):
     return Appliance(data)
 
 
-def _mock_orch_client(appliance_payload, overlay_map=None):
+def _mock_orch_client(appliance_payload, overlay_map=None, traffic_class_map=None):
     client = MagicMock()
     client.get_appliances.return_value = appliance_payload
-    client.get_overlay_config.return_value = overlay_map or {}
+    client.get_overlay_config.return_value = (overlay_map or {}, traffic_class_map or {})
     return client
 
 
@@ -429,9 +429,16 @@ def _mock_appliance_client(
 
 
 def _setup_mocks(
-    mocker, check, appliance_payload, tgz_bytes=None, appliance_client=None, overlay_map=None, cached_timestamp=None
+    mocker,
+    check,
+    appliance_payload,
+    tgz_bytes=None,
+    appliance_client=None,
+    overlay_map=None,
+    traffic_class_map=None,
+    cached_timestamp=None,
 ):
-    orch = _mock_orch_client(appliance_payload, overlay_map)
+    orch = _mock_orch_client(appliance_payload, overlay_map, traffic_class_map)
     mocker.patch(f'{CHECK_MODULE}.OrchestratorClient', return_value=orch)
 
     if appliance_client is not None:
@@ -478,7 +485,15 @@ def check(instance):
 @pytest.fixture
 def all_metrics_aggregator(dd_run_check, aggregator, mocker, check):
     client = _mock_appliance_client(TGZ_DATA)
-    _setup_mocks(mocker, check, APPLIANCE_PAYLOAD, appliance_client=client, cached_timestamp='99999940')
+    _setup_mocks(
+        mocker,
+        check,
+        APPLIANCE_PAYLOAD,
+        appliance_client=client,
+        cached_timestamp='99999940',
+        overlay_map={'0': 'business'},
+        traffic_class_map={'2': 'BulkData', '4': 'RealTime'},
+    )
     dd_run_check(check)
     return aggregator
 
@@ -675,6 +690,62 @@ def test_timestamps_to_fetch(check, mocker, cached_value, latest_timestamp, expe
     mocker.patch.object(check, 'read_persistent_cache', return_value=cached_value)
     result = check._timestamps_to_fetch('10.0.0.1', latest_timestamp)
     assert result == expected
+
+
+def test_get_overlay_config_returns_overlay_and_traffic_class_maps():
+    http = MagicMock()
+    http.get.return_value = MagicMock(
+        raise_for_status=MagicMock(),
+        json=MagicMock(
+            return_value=[
+                {'id': 1, 'name': 'RealTime', 'trafficClass': '1'},
+                {'id': 2, 'name': 'BulkData', 'trafficClass': '2'},
+                {'id': 3, 'name': 'NoTrafficClass'},
+                {'id': 4},
+                'not-a-dict',
+            ]
+        ),
+    )
+
+    client = OrchestratorClient(http, '10.0.0.1')
+    overlay_map, traffic_class_map = client.get_overlay_config()
+
+    assert overlay_map == {'1': 'RealTime', '2': 'BulkData', '3': 'NoTrafficClass', '4': '4'}
+    assert traffic_class_map == {'1': 'RealTime', '2': 'BulkData'}
+
+
+def test_shaper_record_uses_overlay_name_when_mapped():
+    store = MetricsStore()
+    row = ShaperStats({'traffic_class': '1', 'direction': '0', 'qos_drops': '5', 'other_drops': '0'})
+    row.record(store, [], traffic_class_map={'1': 'RealTime'})
+
+    mock_check = MagicMock()
+    store.flush(mock_check)
+
+    args, kwargs = mock_check.gauge.call_args_list[0]
+    assert 'overlay_name:RealTime' in kwargs['tags']
+    assert 'overlay_name:1' not in kwargs['tags']
+
+
+def test_shaper_record_falls_back_to_raw_id_and_warns_when_not_mapped():
+    store = MetricsStore()
+    row = ShaperStats({'traffic_class': '7', 'direction': '0', 'qos_drops': '0', 'other_drops': '0'})
+    logger = MagicMock()
+    row.record(store, [], traffic_class_map={'1': 'RealTime'}, logger=logger)
+
+    mock_check = MagicMock()
+    store.flush(mock_check)
+
+    args, kwargs = mock_check.gauge.call_args_list[0]
+    assert 'overlay_name:7' in kwargs['tags']
+    logger.warning.assert_called_once()
+    assert '7' in logger.warning.call_args.args
+
+
+def test_shaper_record_does_not_warn_when_no_logger_provided():
+    store = MetricsStore()
+    row = ShaperStats({'traffic_class': '7', 'direction': '0', 'qos_drops': '0', 'other_drops': '0'})
+    row.record(store, [], traffic_class_map={})
 
 
 def test_login_appliance_csrf_token():
