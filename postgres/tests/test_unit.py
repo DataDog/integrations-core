@@ -336,3 +336,46 @@ def test_new_connection_closes_conn_when_configure_raises(integration_check, pg_
             with pytest.raises(psycopg.Error):
                 check._new_connection(check._config.dbname)
     conn.close.assert_called_once()
+
+
+def test_close_db_closes_open_connection(integration_check, pg_instance):
+    check = integration_check(pg_instance)
+    conn = mock.MagicMock()
+    conn.closed = False
+    check._db = conn
+
+    check._close_db()
+
+    conn.close.assert_called_once()
+    assert check._db is None
+
+
+def test_close_db_handles_already_closed_connection(integration_check, pg_instance):
+    check = integration_check(pg_instance)
+    conn = mock.MagicMock()
+    conn.close.side_effect = Exception("already closed")
+    check._db = conn
+
+    check._close_db()
+
+    assert check._db is None
+
+
+def test_close_db_noop_when_no_connection(integration_check, pg_instance):
+    check = integration_check(pg_instance)
+    check._db = None
+
+    check._close_db()
+
+    assert check._db is None
+
+
+def test_cancel_closes_main_db_connection(integration_check, pg_instance):
+    check = integration_check(pg_instance)
+    conn = mock.MagicMock()
+    check._db = conn
+
+    check.cancel()
+
+    conn.close.assert_called_once()
+    assert check._db is None

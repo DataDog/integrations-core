@@ -302,6 +302,15 @@ class PostgreSql(DatabaseCheck):
                 rows = cursor.fetchall()
                 return rows
 
+    def _close_db(self):
+        if self._db:
+            try:
+                self._db.close()
+            except Exception:
+                pass
+            finally:
+                self._db = None
+
     @contextlib.contextmanager
     def db(self):
         """
@@ -322,12 +331,7 @@ class PostgreSql(DatabaseCheck):
             self.log.warning(
                 "Connection to the database %s has been interrupted, closing connection", self._config.dbname
             )
-            try:
-                self._db.close()
-            except Exception:
-                pass
-            finally:
-                self._db = None
+            self._close_db()
             raise
         except Exception:
             self.log.exception("Unhandled exception while using database connection %s", self._config.dbname)
@@ -491,6 +495,7 @@ class PostgreSql(DatabaseCheck):
             self.data_observability.cancel()
             if self.data_observability._job_loop_future:
                 self.data_observability._job_loop_future.result()
+        self._close_db()
         self._close_db_pool()
 
     def _clean_state(self):
