@@ -8,17 +8,18 @@ from pydantic import Field
 from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.shell.base import CmdTool
 
+ValidateSubcommand = Literal["config", "models", "metadata"]
+
 
 class DdevValidateInput(BaseToolInput):
     subcommand: Annotated[
-        Literal["config", "models", "metadata", "all"],
+        ValidateSubcommand,
         Field(
             description=(
                 "Which validator to run. "
                 "'config' validates assets/configuration/spec.yaml against data/conf.yaml.example. "
                 "'models' validates spec.yaml against datadog_checks/<integration>/config_models/. "
                 "'metadata' validates metadata.csv. "
-                "'all' runs the full orchestrator across every validator."
             )
         ),
     ]
@@ -28,30 +29,24 @@ class DdevValidateInput(BaseToolInput):
         Field(
             description=(
                 "Regenerate / auto-fix derived files instead of only checking. "
-                "For 'config' and 'models', regenerates conf.yaml.example and config_models/ from spec.yaml. "
+                "For 'config', regenerates conf.yaml.example. "
+                "For 'models', regenerates config_models/. "
                 "For 'metadata', rewrites metadata.csv into canonical form. "
-                "For 'all', forwards an auto-fix flag to every sub-validator that supports it."
             )
         ),
     ] = False
 
 
-# Maps the user-facing `sync` boolean to the actual CLI flag the underlying
-# `ddev validate <subcommand>` accepts.
-_SYNC_FLAG: dict[str, str] = {
+_SYNC_FLAG: dict[ValidateSubcommand, str] = {
     "config": "-s",
     "models": "-s",
     "metadata": "--sync",
-    "all": "--fix",
 }
 
 
 class DdevValidateTool(CmdTool[DdevValidateInput]):
-    """Validates an integration's spec, generated config example, generated
-    Pydantic config models, or metadata.csv. Set `sync=true` to regenerate the
-    derived files (conf.yaml.example, config_models/, metadata.csv) from the
-    spec, instead of only checking them. Always run with `sync=true` after
-    editing assets/configuration/spec.yaml so the generated files stay in sync."""
+    """Validates an integration's spec, config example, config models, or metadata.csv.
+    Set `sync=true` to regenerate the derived files from spec.yaml."""
 
     timeout = 120
 

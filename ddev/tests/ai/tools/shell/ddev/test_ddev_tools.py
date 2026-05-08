@@ -169,7 +169,7 @@ def test_release_changelog_invalid_change_type_raises():
 # --- ddev validate ---
 
 
-@pytest.mark.parametrize("subcommand", ["config", "models", "metadata", "all"])
+@pytest.mark.parametrize("subcommand", ["config", "models", "metadata"])
 def test_validate_cmd_all_subcommands(subcommand: str):
     cmd = DdevValidateTool().cmd(DdevValidateInput(subcommand=subcommand, integration="mycheck"))
     assert cmd == ["ddev", "--no-interactive", "validate", subcommand, "mycheck"]
@@ -181,9 +181,13 @@ def test_validate_cmd_all_subcommands(subcommand: str):
         ("config", "-s"),
         ("models", "-s"),
         ("metadata", "--sync"),
-        ("all", "--fix"),
     ],
 )
 def test_validate_cmd_sync_flag_per_subcommand(subcommand: str, expected_flag: str):
     cmd = DdevValidateTool().cmd(DdevValidateInput(subcommand=subcommand, integration="mycheck", sync=True))
-    assert cmd[4] == expected_flag
+    assert cmd == ["ddev", "--no-interactive", "validate", subcommand, expected_flag, "mycheck"]
+
+
+def test_validate_invalid_subcommand_raises():
+    with pytest.raises(ValidationError):
+        DdevValidateInput(subcommand="lint", integration="mycheck")
