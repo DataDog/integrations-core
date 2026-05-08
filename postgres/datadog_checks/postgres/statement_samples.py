@@ -222,6 +222,8 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._pg_stat_activity_cols = None
 
     def _shutdown(self):
+        if not self._cancel_event.is_set():
+            return
         try:
             self._check = None
             self._collection_strategy_cache = None

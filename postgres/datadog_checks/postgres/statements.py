@@ -204,6 +204,8 @@ class PostgresStatementMetrics(DBMAsyncJob):
         )
 
     def _shutdown(self):
+        if not self._cancel_event.is_set():
+            return
         try:
             self._check = None
             self._full_statement_text_cache = None

@@ -123,6 +123,8 @@ class PostgresMetadata(DBMAsyncJob):
         self.tags = None
 
     def _shutdown(self):
+        if not self._cancel_event.is_set():
+            return
         try:
             self._check = None
             self._schema_collector = None
