@@ -169,7 +169,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
             dbms="postgres",
             rate_limit=1 / float(collection_interval),
             job_name="query-metrics",
-            shutdown_callback=self._shutdown,
         )
         self._check = check
         self._metrics_collection_interval = collection_interval
@@ -204,16 +203,11 @@ class PostgresStatementMetrics(DBMAsyncJob):
         )
 
     def _shutdown(self):
-        if not self._cancel_event.is_set():
-            return
-        try:
-            self._check = None
-            self._full_statement_text_cache = None
-            self._state = None
-            self._query_calls_cache = None
-            self._baseline_metrics = None
-        except Exception:
-            pass
+        self._check = None
+        self._full_statement_text_cache = None
+        self._state = None
+        self._query_calls_cache = None
+        self._baseline_metrics = None
 
     def _execute_query(self, query, params=(), binary=False, row_factory=None) -> Tuple[list, list]:
         if self._cancel_event.is_set():

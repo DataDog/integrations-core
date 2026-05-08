@@ -490,16 +490,21 @@ class PostgreSql(DatabaseCheck):
             if self.metadata_samples._job_loop_future:
                 self.metadata_samples._job_loop_future.result()
                 self.metadata_samples._job_loop_future = None
+            self.statement_metrics._shutdown()
+            self.statement_samples._shutdown()
+            self.metadata_samples._shutdown()
         elif self._config.data_observability.enabled:
             self.metadata_samples.cancel()
             if self.metadata_samples._job_loop_future:
                 self.metadata_samples._job_loop_future.result()
                 self.metadata_samples._job_loop_future = None
+            self.metadata_samples._shutdown()
         if self._config.data_observability.enabled:
             self.data_observability.cancel()
             if self.data_observability._job_loop_future:
                 self.data_observability._job_loop_future.result()
                 self.data_observability._job_loop_future = None
+            self.data_observability._shutdown()
         self._dynamic_queries = []
         self._query_manager.executor = None
         self._close_db()

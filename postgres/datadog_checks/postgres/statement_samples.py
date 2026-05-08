@@ -161,7 +161,6 @@ class PostgresStatementSamples(DBMAsyncJob):
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg.errors.DatabaseError,),
             job_name="query-samples",
-            shutdown_callback=self._shutdown,
         )
         self._check = check
         self._config = config
@@ -222,17 +221,12 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._pg_stat_activity_cols = None
 
     def _shutdown(self):
-        if not self._cancel_event.is_set():
-            return
-        try:
-            self._check = None
-            self._collection_strategy_cache = None
-            self._explain_errors_cache = None
-            self._explained_statements_ratelimiter = None
-            self._seen_samples_ratelimiter = None
-            self._raw_statement_text_cache = None
-        except Exception:
-            pass
+        self._check = None
+        self._collection_strategy_cache = None
+        self._explain_errors_cache = None
+        self._explained_statements_ratelimiter = None
+        self._seen_samples_ratelimiter = None
+        self._raw_statement_text_cache = None
 
     def _dbtags(self, db, *extra_tags):
         """
