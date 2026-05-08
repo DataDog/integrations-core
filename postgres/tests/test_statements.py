@@ -89,6 +89,7 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['collect_schemas'] = {'enabled': False}
     dbm_instance['query_metrics']['incremental_query_metrics'] = True
     connections = {}
 
@@ -232,6 +233,7 @@ def test_statement_metrics(
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['collect_schemas'] = {'enabled': False}
     connections = {}
 
     def _run_queries():
@@ -339,6 +341,7 @@ def test_wal_metrics(aggregator, integration_check, dbm_instance):
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['collect_schemas'] = {'enabled': False}
 
     connections = {}
 
@@ -372,6 +375,7 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['collect_schemas'] = {'enabled': False}
 
     # The query signature matches the normalized query returned by the mock agent and would need to be
     # updated if the normalized query is updated
@@ -481,6 +485,8 @@ def test_successful_explain(
     # Don't need metrics for this one
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['query_samples']['explain_parameterized_queries'] = False
+    dbm_instance['collect_schemas'] = {'enabled': False}
+
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -563,6 +569,7 @@ def test_failed_explain_handling(
     # Don't need metrics for this one
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['query_samples']['explain_parameterized_queries'] = False
+    dbm_instance['collect_schemas'] = {'enabled': False}
     if explain_function_override:
         dbm_instance['query_samples']['explain_function'] = explain_function_override
     check = integration_check(dbm_instance)
@@ -715,6 +722,7 @@ def test_statement_samples_collect(
 ):
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['collect_schemas'] = {'enabled': False}
     dbm_instance['dbstrict'] = dbstrict
     dbm_instance['dbname'] = dbname
     dbm_instance['ignore_databases'] = ignore_databases
@@ -830,6 +838,7 @@ def test_statement_metadata(
     """Tests for metadata in both samples and metrics"""
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
     dbm_instance['query_metrics']['run_sync'] = True
+    dbm_instance['collect_schemas'] = {'enabled': False}
 
     # If query or normalized_query changes, the query_signatures for both will need to be updated as well.
     query = '''
@@ -911,6 +920,7 @@ def test_statement_reported_hostname(
     expected_hostname,
 ):
     dbm_instance['reported_hostname'] = reported_hostname
+    dbm_instance['collect_schemas'] = {'enabled': False}
 
     check = integration_check(dbm_instance)
 
@@ -1353,6 +1363,7 @@ def test_statement_run_explain_errors(
     dbm_instance['query_activity']['enabled'] = False
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['query_samples']['explain_parameterized_queries'] = False
+    dbm_instance['collect_schemas'] = {'enabled': False}
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -1405,6 +1416,7 @@ def test_statement_run_explain_parameterized_queries(
     dbm_instance['query_activity']['enabled'] = False
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['query_samples']['explain_parameterized_queries'] = True
+    dbm_instance['collect_schemas'] = {'enabled': False}
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -1828,6 +1840,49 @@ def test_statement_metrics_database_extension_errors(
     assert check.warnings == expected_warnings
 
 
+def test_statement_metrics_attributes_undefined_table_to_not_loaded_when_spl_missing(
+    aggregator, integration_check, dbm_instance
+):
+    """When pg_stat_statements is not in shared_preload_libraries, an `UndefinedTable` error on
+    the view should be attributed to `pg_stat_statements_not_loaded` (SPL fix), not
+    `pg_stat_statements_not_created` (which would tell the user to `CREATE EXTENSION`, a command
+    that fails until SPL is fixed and the server restarted)."""
+    dbm_instance['query_samples']['enabled'] = False
+    dbm_instance['query_activity']['enabled'] = False
+    check = integration_check(dbm_instance)
+
+    # Override _load_pg_settings so the test-postgres (which has pg_stat_statements in SPL) doesn't
+    # overwrite our fake settings on connect.
+    def fake_load(self, db):
+        self.pg_settings.clear()
+        self.pg_settings['shared_preload_libraries'] = 'pgaudit'
+
+    err = psycopg.errors.UndefinedTable('relation "pg_stat_statements" does not exist')
+    with (
+        mock.patch(
+            'datadog_checks.postgres.statements.PostgresStatementMetrics._get_pg_stat_statements_columns',
+            return_value=[],
+            side_effect=err,
+        ),
+        mock.patch('datadog_checks.postgres.postgres.PostgreSql._load_pg_settings', fake_load),
+    ):
+        run_one_check(check)
+
+    expected_tags = _get_expected_tags(
+        check, dbm_instance, with_host=False, with_db=True, agent_hostname='stubbed.hostname'
+    ) + ['error:database-UndefinedTable-pg_stat_statements_not_loaded']
+
+    aggregator.assert_metric(
+        'dd.postgres.statement_metrics.error', value=1.0, count=1, tags=expected_tags, hostname='stubbed.hostname'
+    )
+    assert check.warnings == [
+        'Unable to collect statement metrics because pg_stat_statements extension is not loaded in '
+        "database 'datadog_test'. See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
+        'troubleshooting#pg-stat-statements-not-loaded for more details\n'
+        'code=pg-stat-statements-not-loaded dbname=datadog_test host=stubbed.hostname',
+    ]
+
+
 @pytest.mark.parametrize(
     "pg_stat_statements_max_threshold,expected_warnings",
     [
@@ -1945,6 +2000,7 @@ def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['collect_schemas'] = {'enabled': False}
 
     connections = {}
 
@@ -2036,6 +2092,7 @@ def test_metrics_encoding(
         dbm_instance['query_encodings'] = ['latin1', 'utf-8']
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['collect_schemas'] = {'enabled': False}
     # dbm_instance['query_activity']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
@@ -2071,6 +2128,7 @@ def test_samples_encoding(
     dbm_instance,
 ):
     dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['collect_schemas'] = {'enabled': False}
     if POSTGRES_LOCALE == 'C':
         dbm_instance['query_encodings'] = ['latin1', 'utf-8']
     check = integration_check(dbm_instance)
