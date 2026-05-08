@@ -16,6 +16,7 @@ files:
           You should set those environment variables as system-wide variables.
         value:
           type: string
+          require_trusted_provider: true
           example: /usr/bin/nodetool
       - template: init_config/default
   - template: instances
@@ -73,4 +74,5 @@ files:
         This overrides `nodetool` defined in `init_config`.
       value:
         type: string
+        require_trusted_provider: true
     - template: instances/default

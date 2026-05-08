@@ -51,35 +51,6 @@ instances:
     #
   - url: http://localhost:9200
 
-    ## @param node_name_as_host - boolean - optional - default: false
-    ## If each machine only runs a single Elasticsearch node per cluster, you
-    ## want to set each Elasticsearch `node.name` to the machine hostname. You may
-    ## then set `node_name_as_host` to `true` to avoid duplicate hostnames.
-    ## See: https://www.elastic.co/guide/en/elasticsearch/reference/current/node.name.html
-    #
-    # node_name_as_host: false
-
-    ## @param cluster_stats - boolean - optional - default: false
-    ## If your cluster is hosted externally (i.e., you're not pointing to localhost),
-    ## you must set `cluster_stats` to true, otherwise the check only
-    ## submits metrics of the local node.
-    ## This parameter was also called `is_external` and you can still use it but it
-    ## is removed in Agent version 6+.
-    #
-    # cluster_stats: false
-
-    ## @param detailed_index_stats - boolean - optional - default: false
-    ## If you want to obtain index-specific stats, use this flag with `cluster_stats` and `pshard_stats` set to true.
-    ## Without this flag you only get stats from `_all`.
-    ## Do not use it if you are pointing to localhost.
-    #
-    # detailed_index_stats: false
-
-    ## @param index_stats - boolean - optional - default: false
-    ## Set `index_stats` to true to collect metrics for individual indices.
-    #
-    # index_stats: false
-
     ## @param pshard_stats - boolean - optional - default: false
     ## If you enable the `pshard_stats` flag, statistics over primary shards
     ## are collected by the check and sent to the backend with the
@@ -91,16 +62,10 @@ instances:
     #
     # pshard_stats: false
 
-    ## @param slm_stats - boolean - optional - default: false
-    ## Set `slm_stats` to true to collect statistics about Snapshot Lifecycle Management.
-    ## The user must have the `read_slm` cluster privilege to get these metrics.
+    ## @param index_stats - boolean - optional - default: false
+    ## Set `index_stats` to true to collect metrics for individual indices.
     #
-    # slm_stats: false
-
-    ## @param pshard_graceful_timeout - boolean - optional - default: false
-    ## Continue gracefully if pshard stats timeout.
-    #
-    # pshard_graceful_timeout: false
+    # index_stats: false
 
     ## @param pending_task_stats - boolean - optional - default: true
     ## Specifies whether to collect data exposed by the `pending_tasks` cluster endpoint.
@@ -110,11 +75,46 @@ instances:
     #
     # pending_task_stats: true
 
+    ## @param cluster_stats - boolean - optional - default: false
+    ## If your cluster is hosted externally (i.e., you're not pointing to localhost),
+    ## you must set `cluster_stats` to true, otherwise the check only
+    ## submits metrics of the local node.
+    ## This parameter was also called `is_external` and you can still use it but it
+    ## is removed in Agent version 6+.
+    #
+    # cluster_stats: false
+
     ## @param cat_allocation_stats - boolean - optional - default: false
     ## Enable to collect Elastic Cat Allocation metrics. Available only for Elasticsearch 5.0 or higher.
     ## Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-allocation.html.
     #
     # cat_allocation_stats: false
+
+    ## @param slm_stats - boolean - optional - default: false
+    ## Set `slm_stats` to true to collect statistics about Snapshot Lifecycle Management.
+    ## The user must have the `read_slm` cluster privilege to get these metrics.
+    #
+    # slm_stats: false
+
+    ## @param node_name_as_host - boolean - optional - default: false
+    ## If each machine only runs a single Elasticsearch node per cluster, you
+    ## want to set each Elasticsearch `node.name` to the machine hostname. You may
+    ## then set `node_name_as_host` to `true` to avoid duplicate hostnames.
+    ## See: https://www.elastic.co/guide/en/elasticsearch/reference/current/node.name.html
+    #
+    # node_name_as_host: false
+
+    ## @param detailed_index_stats - boolean - optional - default: false
+    ## If you want to obtain index-specific stats, use this flag with `cluster_stats` and `pshard_stats` set to true.
+    ## Without this flag you only get stats from `_all`.
+    ## Do not use it if you are pointing to localhost.
+    #
+    # detailed_index_stats: false
+
+    ## @param pshard_graceful_timeout - boolean - optional - default: false
+    ## Continue gracefully if pshard stats timeout.
+    #
+    # pshard_graceful_timeout: false
 
     ## @param detailed_shard_metrics - boolean - optional - default: false
     ## Enable to collect detailed shard placement metrics with `index_name` and `prirep` (primary/replica) tags.

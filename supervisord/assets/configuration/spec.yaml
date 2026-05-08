@@ -16,7 +16,7 @@ files:
             type: string
             example: <SUPERVISORD_SERVER_NAME>
         - name: host
-          description: The host where supervisord server is running.
+          description: The host where the supervisord server is running.
           fleet_configurable: true
           value: 
             type: string

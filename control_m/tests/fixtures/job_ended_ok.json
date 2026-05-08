@@ -1,0 +1,9 @@
+{
+  "jobId": "ok:001",
+  "numberOfRuns": 1,
+  "ctm": "srv1",
+  "name": "success_job",
+  "status": "Ended OK",
+  "startTime": "20260115100000",
+  "endTime": "20260115103000"
+}

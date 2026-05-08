@@ -7,6 +7,7 @@ from __future__ import annotations
 import copy
 from typing import TYPE_CHECKING, Optional, Tuple
 
+from datadog_checks.postgres.azure import AZURE_AUTH_TYPES, AZURE_DEFAULT_AUTH_TYPE
 from datadog_checks.postgres.config_models import InstanceConfig, defaults, dict_defaults
 from datadog_checks.postgres.config_models.instance import (
     Aws,
@@ -121,6 +122,10 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
             "dbm": instance.get(
                 'dbm', instance.get('deep_database_monitoring', defaults.instance_dbm())
             ),  # Deprecated, use `dbm` instead
+            "data_observability": {
+                **dict_defaults.instance_data_observability().model_dump(),
+                **(instance.get('data_observability') or {}),
+            },
             "custom_metrics": map_custom_metrics(
                 instance.get('custom_metrics', [])
             ),  # Deprecated, use `custom_queries` instead
@@ -356,10 +361,16 @@ def apply_cloud_defaults(args: dict, instance: dict, validation_result: Validati
             'managed_authentication': {**args.get('azure', {}).get('managed_authentication', {}), 'enabled': True},
         }
 
-    if args.get('azure', {}).get('managed_authentication', {}).get('enabled') and not args.get('azure', {}).get(
-        'managed_authentication', {}
-    ).get('client_id'):
-        validation_result.add_error('Azure client_id must be set when using Azure managed authentication')
+    azure_managed_auth = args.get('azure', {}).get('managed_authentication', {})
+    if azure_managed_auth.get('enabled'):
+        azure_auth_type = azure_managed_auth.get('auth_type') or AZURE_DEFAULT_AUTH_TYPE
+        if azure_auth_type not in AZURE_AUTH_TYPES:
+            validation_result.add_error(
+                f"Invalid azure.managed_authentication.auth_type '{azure_auth_type}'. "
+                f"Must be one of {AZURE_AUTH_TYPES}."
+            )
+        if azure_auth_type == 'managed_identity' and not azure_managed_auth.get('client_id'):
+            validation_result.add_error('Azure client_id must be set when using managed_identity authentication')
 
 
 def deprecation_warning(option: str, replacement: str):
@@ -373,7 +384,6 @@ def apply_deprecation_warnings(instance: dict, validation_result: ValidationResu
         ['deep_database_monitoring', 'dbm'],
         ['managed_identity', 'azure.managed_authentication'],
         ['statement_samples', 'query_samples'],
-        ['collect_default_database', 'postgres'],
     ]
 
     for deprecation in deprecations:
@@ -389,12 +399,6 @@ def validate_config(config: InstanceConfig, instance: dict, validation_result: V
     if config.relations and not (config.dbname or config.database_autodiscovery.enabled):
         validation_result.add_error(
             '"dbname" parameter must be set OR autodiscovery must be enabled when using the "relations" parameter.'
-        )
-
-    if config.empty_default_hostname:
-        validation_result.add_warning(
-            'The `empty_default_hostname` option has no effect in the Postgres check. '
-            'Use the `exclude_hostname` option instead.'
         )
 
     # Validate dbname is not excluded when using autodiscovery
@@ -438,6 +442,7 @@ def apply_features(config: InstanceConfig, validation_result: ValidationResult):
     validation_result.add_feature(FeatureKey.QUERY_METRICS, config.query_metrics.enabled and config.dbm)
     validation_result.add_feature(FeatureKey.COLLECT_SETTINGS, config.collect_settings.enabled and config.dbm)
     validation_result.add_feature(FeatureKey.COLLECT_SCHEMAS, config.collect_schemas.enabled and config.dbm)
+    validation_result.add_feature(FeatureKey.DATA_OBSERVABILITY, config.data_observability.enabled)
 
 
 METRIC_TYPES = {

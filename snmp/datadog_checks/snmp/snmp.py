@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import asyncio
 import copy
 import fnmatch
 import functools
@@ -385,7 +386,7 @@ class SnmpCheck(AgentCheck):
 
             sent = []
             for host, discovered in list(config.discovered_instances.items()):
-                future = executor.submit(self._check_device, discovered)  # type: Any
+                future = executor.submit(self._check_device, discovered, True)  # type: Any
                 sent.append(future)
                 future.add_done_callback(functools.partial(self._on_check_device_done, host))
             futures.wait(sent)
@@ -425,55 +426,88 @@ class SnmpCheck(AgentCheck):
             # Reset the counter if not's failing
             config.failing_instances.pop(host, None)
 
-    def _check_device(self, config):
-        # type: (InstanceConfig) -> Tuple[Optional[str], List[str]]
-        # Reset errors
-        if config.device is None:
-            raise RuntimeError('No device set')  # pragma: no cover
+    def _check_device(self, config, isolated_loop=False):
+        # type: (InstanceConfig, bool) -> Tuple[Optional[str], List[str]]
+        # Worker threads must pass isolated_loop=True.  pysnmp 7.x's AsyncioDispatcher
+        # captures asyncio.get_event_loop() when the first transport is registered; if
+        # multiple workers share the same loop, run_dispatcher() returns immediately on
+        # all but the first (loop.is_running() == True), leaving ctx={} and causing
+        # KeyError('error').  A fresh per-worker loop avoids the race and also prevents
+        # stale timer callbacks from stopping a subsequent check's run_forever() early.
+        loop = None
+        _prev_loop = None
+        if isolated_loop:
+            try:
+                _prev_loop = asyncio.get_event_loop()
+            except RuntimeError:
+                _prev_loop = None  # no loop in this thread yet (normal for worker threads)
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            config = copy.copy(config)
+            config.reinitialize_engine()
 
-        instance = config.instance
-        error = results = None
-        tags = config.tags
-        if config.oid_config.should_reset():
-            config.oid_config.reset()
+        # Outer try/finally: event loop teardown. Inner try/except/finally: SNMP error handling.
         try:
-            if not config.oid_config.has_oids():
-                sys_object_oid = self.fetch_sysobject_oid(config)
-                profile = self._profile_for_sysobject_oid(sys_object_oid)
-                config.refresh_with_profile(self.profiles[profile])
-                config.add_profile_tag(profile)
+            if config.device is None:
+                raise RuntimeError('No device set')  # pragma: no cover
 
-            if config.oid_config.has_oids():
-                self.log.debug('Querying %s', config.device)
-                config.add_uptime_metric()
-                results, scalar_oids, error = self.fetch_results(config)
-                config.oid_config.update_scalar_oids(scalar_oids)
-                tags = self.extract_metric_tags(config.parsed_metric_tags, results)
-                tags.extend(config.tags)
-                self.report_metrics(config.parsed_metrics, results, tags)
-        except CheckException as e:
-            error = str(e)
-            self.warning(error)
-        except Exception as e:
-            if not error:
-                error = 'Failed to collect metrics for {} - {}'.format(self._get_instance_name(instance), e)
-            self.log.debug(error, exc_info=True)
-            self.warning(error)
+            instance = config.instance
+            error = results = None
+            tags = config.tags
+            if config.oid_config.should_reset():
+                config.oid_config.reset()
+            try:
+                if not config.oid_config.has_oids():
+                    sys_object_oid = self.fetch_sysobject_oid(config)
+                    profile = self._profile_for_sysobject_oid(sys_object_oid)
+                    config.refresh_with_profile(self.profiles[profile])
+                    config.add_profile_tag(profile)
+
+                if config.oid_config.has_oids():
+                    self.log.debug('Querying %s', config.device)
+                    config.add_uptime_metric()
+                    results, scalar_oids, error = self.fetch_results(config)
+                    config.oid_config.update_scalar_oids(scalar_oids)
+                    tags = self.extract_metric_tags(config.parsed_metric_tags, results)
+                    tags.extend(config.tags)
+                    self.report_metrics(config.parsed_metrics, results, tags)
+            except CheckException as e:
+                error = str(e)
+                self.warning(error)
+            except Exception as e:
+                if not error:
+                    error = 'Failed to collect metrics for {} - {}'.format(self._get_instance_name(instance), e)
+                self.log.debug(error, exc_info=True)
+                self.warning(error)
+            finally:
+                # At this point, `tags` might include some extra tags added in try clause
+
+                # Sending `snmp.devices_monitored` with value 1 will allow users to count devices
+                # by using `sum by {X}` queries in UI. X being a tag like `autodiscovery_subnet`, `snmp_profile`, etc
+                self.gauge('snmp.devices_monitored', 1, tags=tags + [LOADER_TAG])
+
+                # Report service checks
+                status = self.OK
+                if error:
+                    status = self.CRITICAL
+                    if results:
+                        status = self.WARNING
+                self.service_check(self.SC_STATUS, status, tags=tags, message=error)
+            return error, tags
         finally:
-            # At this point, `tags` might include some extra tags added in try clause
-
-            # Sending `snmp.devices_monitored` with value 1 will allow users to count devices
-            # by using `sum by {X}` queries in UI. X being a tag like `autodiscovery_subnet`, `snmp_profile`, etc
-            self.gauge('snmp.devices_monitored', 1, tags=tags + [LOADER_TAG])
-
-            # Report service checks
-            status = self.OK
-            if error:
-                status = self.CRITICAL
-                if results:
-                    status = self.WARNING
-            self.service_check(self.SC_STATUS, status, tags=tags, message=error)
-        return error, tags
+            if loop is not None:
+                # Explicitly close the transport dispatcher to release UDP socket FDs.
+                # asyncio.all_tasks only cancels Task objects; the UdpAsyncioTransport is a
+                # DatagramProtocol/Transport pair — its FD is only released by close_dispatcher().
+                config._snmp_engine.transport_dispatcher.close_dispatcher()
+                # Cancel remaining pysnmp tasks (e.g. handle_timeout) and close the loop.
+                pending = asyncio.all_tasks(loop)
+                for task in pending:
+                    task.cancel()
+                if pending:
+                    loop.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
+                loop.close()
+                asyncio.set_event_loop(_prev_loop)  # restore so callers in the same thread still have a loop
 
     def extract_metric_tags(self, metric_tags, results):
         # type: (List[SymbolTag], Dict[str, dict]) -> List[str]

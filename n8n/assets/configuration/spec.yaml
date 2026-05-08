@@ -19,12 +19,11 @@ files:
           https://docs.n8n.io/hosting/configuration/environment-variables/endpoints/
         raw_metric_prefix.description: |
           The prefix prepended to all metrics from n8n.
-          If not set, the default prefix n8n is used.
+          If not set, the default prefix n8n_ is used.
           If you are using a custom prefix in n8n through N8N_METRICS_PREFIX, you need to set it here.
         raw_metric_prefix.value:
-          display_default: n8n
           type: string
-          example: n8n
+          default: n8n_
         raw_metric_prefix.hidden: false
   - template: logs
     example:

@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: checkpoint-quantum-firewall
 metric_id: checkpoint-quantum-firewall
 backend_only: false
@@ -99,21 +100,21 @@ facets:
     source: log
   - facetType: list
     groups:
-      - Checkpoint Quantum Firewall
+      - Check Point Quantum Firewall
     name: Application Name
     path: checkpoint.quantum.firewall.appi_name
     source: log
     type: string
   - facetType: list
     groups:
-      - Checkpoint Quantum Firewall
+      - Check Point Quantum Firewall
     name: Application Risk
     path: checkpoint.quantum.firewall.app_risk_str
     source: log
     type: string
   - facetType: range
     groups:
-      - Checkpoint Quantum Firewall
+      - Check Point Quantum Firewall
     name: Client Inbound Bytes
     path: checkpoint.quantum.firewall.client_inbound_bytes
     source: log
@@ -123,14 +124,14 @@ facets:
       name: byte
   - facetType: range
     groups:
-      - Checkpoint Quantum Firewall
+      - Check Point Quantum Firewall
     name: Client Inbound Packets
     path: checkpoint.quantum.firewall.client_inbound_packets
     source: log
     type: integer
   - facetType: range
     groups:
-      - Checkpoint Quantum Firewall
+      - Check Point Quantum Firewall
     name: Client Outbound Bytes
     path: checkpoint.quantum.firewall.client_outbound_bytes
     source: log
@@ -140,28 +141,28 @@ facets:
       name: byte
   - facetType: range
     groups:
-      - Checkpoint Quantum Firewall
+      - Check Point Quantum Firewall
     name: Client Outbound Packets
     path: checkpoint.quantum.firewall.client_outbound_packets
     source: log
     type: integer
   - facetType: range
     groups:
-      - Checkpoint Quantum Firewall
+      - Check Point Quantum Firewall
     name: Server Inbound Packets
     path: checkpoint.quantum.firewall.server_inbound_packets
     source: log
     type: integer
   - facetType: range
     groups:
-      - Checkpoint Quantum Firewall
+      - Check Point Quantum Firewall
     name: Server Outbound Packets
     path: checkpoint.quantum.firewall.server_outbound_packets
     source: log
     type: integer
   - facetType: range
     groups:
-      - Checkpoint Quantum Firewall
+      - Check Point Quantum Firewall
     name: Total Bytes
     path: checkpoint.quantum.firewall.bytes
     source: log
@@ -171,7 +172,7 @@ facets:
       name: byte
 pipeline:
   type: pipeline
-  name: Checkpoint Quantum Firewall
+  name: Check Point Quantum Firewall
   enabled: true
   filter:
     query: "source:checkpoint-quantum-firewall"

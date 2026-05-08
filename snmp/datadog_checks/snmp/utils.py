@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import logging
 import os
+import socket
 from typing import Any, Dict, Iterator, List, Mapping, Optional, Pattern, Sequence, Tuple, Union  # noqa: F401
 
 import yaml
@@ -356,7 +357,11 @@ def register_device_target(ip, port, timeout, retries, engine, auth_data, contex
     """
     Register a device by IP and port, and return an opaque string that can be used later to execute PySNMP commands.
     """
-    transport = UdpTransportTarget((ip, port), timeout=timeout, retries=retries)
+    # pysnmp 7.x moved address resolution to an async factory; resolve synchronously here.
+    transport = UdpTransportTarget.__new__(UdpTransportTarget)
+    results = socket.getaddrinfo(ip, port, socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    transport.transport_address = results[0][4][:2]
+    UdpTransportTarget.__init__(transport, timeout=timeout, retries=retries)
     target, _ = lcd.configure(engine, auth_data, transport, context_data.contextName)
     return target
 

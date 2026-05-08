@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: tanium
 metric_id: tanium
 backend_only: false

@@ -106,13 +106,15 @@
                       "query": "sum:sqlserver.server.cpu_count{$host} by {host}",
                       "data_source": "metrics",
                       "name": "query2",
-                      "aggregator": "last"
+                      "aggregator": "last",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "sum:sqlserver.server.uptime{$host} by {host}",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "last"
+                      "aggregator": "last",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "sum:sqlserver.server.committed_memory{$host} by {host}",
@@ -176,7 +178,8 @@
                       "query": "sum:sqlserver.server.uptime{$host}",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "last"
+                      "aggregator": "last",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -313,7 +316,8 @@
                     {
                       "query": "sum:sqlserver.stats.batch_requests{$host} by {host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -355,7 +359,8 @@
                     {
                       "query": "avg:sqlserver.stats.connections{$host} by {host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -397,7 +402,8 @@
                     {
                       "query": "sum:sqlserver.stats.sql_recompilations{$host} by {host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -481,7 +487,8 @@
                     {
                       "query": "sum:sqlserver.stats.sql_compilations{$host} by {host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -523,7 +530,8 @@
                     {
                       "query": "sum:sqlserver.database.write_transactions{$host} by {host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -565,7 +573,8 @@
                     {
                       "query": "sum:sqlserver.database.transactions{$host} by {host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -740,7 +749,8 @@
                     {
                       "query": "avg:sqlserver.access.page_splits{$host} by {host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -842,7 +852,8 @@
                     {
                       "query": "avg:sqlserver.buffer.page_life_expectancy{$host} by {host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1260,12 +1271,14 @@
                     {
                       "query": "sum:sqlserver.files.read_io_stall{$host} by {host,db}.as_count()",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "sum:sqlserver.files.reads{$host} by {host,db}.as_count()",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1287,12 +1300,14 @@
                     {
                       "query": "sum:sqlserver.files.write_io_stall{$host} by {host,db}.as_count()",
                       "data_source": "metrics",
-                      "name": "query0"
+                      "name": "query0",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "sum:sqlserver.files.writes{$host} by {host,db}.as_count()",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1346,7 +1361,8 @@
                     {
                       "query": "sum:sqlserver.files.read_bytes{$host} by {host,db}.as_rate()",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1368,7 +1384,8 @@
                     {
                       "query": "sum:sqlserver.files.written_bytes{$host} by {host,db}.as_rate()",
                       "data_source": "metrics",
-                      "name": "query0"
+                      "name": "query0",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1449,25 +1466,29 @@
                       "query": "sum:sqlserver.files.reads{$host} by {host,logical_name,file_location,db}.as_rate()",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "sum:sqlserver.files.writes{$host} by {host,logical_name,file_location,db}.as_rate()",
                       "data_source": "metrics",
                       "name": "query2",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "sum:sqlserver.files.read_bytes{$host} by {host,logical_name,file_location,db}.as_rate()",
                       "data_source": "metrics",
                       "name": "query3",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "sum:sqlserver.files.written_bytes{$host} by {host,logical_name,file_location,db}.as_rate()",
                       "data_source": "metrics",
                       "name": "query4",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "sum:sqlserver.files.size_on_disk{$host} by {host,logical_name,file_location,db}.as_count()",
@@ -1479,25 +1500,29 @@
                       "query": "sum:sqlserver.files.read_io_stall{$host} by {host,logical_name,file_location,db}.as_count()",
                       "data_source": "metrics",
                       "name": "query10",
-                      "aggregator": "sum"
+                      "aggregator": "sum",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "sum:sqlserver.files.reads{$host} by {host,logical_name,file_location,db}.as_count()",
                       "data_source": "metrics",
                       "name": "query9",
-                      "aggregator": "sum"
+                      "aggregator": "sum",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "sum:sqlserver.files.write_io_stall{$host} by {host,logical_name,file_location,db}.as_count()",
                       "data_source": "metrics",
                       "name": "query11",
-                      "aggregator": "sum"
+                      "aggregator": "sum",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "sum:sqlserver.files.writes{$host} by {host,logical_name,file_location,db}.as_count()",
                       "data_source": "metrics",
                       "name": "query8",
-                      "aggregator": "sum"
+                      "aggregator": "sum",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -1566,7 +1591,8 @@
                       "query": "avg:sqlserver.buffer.cache_hit_ratio{$host}",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -1606,7 +1632,8 @@
                     {
                       "query": "avg:sqlserver.buffer.cache_hit_ratio{$host} by {host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1743,7 +1770,8 @@
                     {
                       "query": "avg:sqlserver.buffer.page_life_expectancy{$host} by {host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1871,7 +1899,8 @@
                     {
                       "query": "avg:sqlserver.stats.procs_blocked{$host} by {host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1913,7 +1942,8 @@
                     {
                       "query": "avg:sqlserver.stats.lock_waits{$host} by {host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {

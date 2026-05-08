@@ -1,0 +1,9 @@
+provides:
+  - id: marklogic-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: marklogic-logs
+    always_on: false
+    data_type: logs
+    direction: inbound

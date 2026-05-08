@@ -41,6 +41,6 @@ instances:
     istio_mesh_endpoint: http://%%host%%:15020/stats/prometheus
 
     ## @param tag_by_endpoint - boolean - optional - default: true
-    ## Wether to include an endpoint tag or not. This only applies if `use openmentrics` is enabled.
+    ## Whether to include an endpoint tag or not. This only applies if `use openmetrics` is enabled.
     #
     tag_by_endpoint: false

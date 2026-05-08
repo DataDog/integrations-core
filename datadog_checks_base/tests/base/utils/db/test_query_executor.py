@@ -265,3 +265,58 @@ class TestQueryExecutor:
 
         with pytest.raises(expected_exception):
             qe.compile_queries()
+
+    def test_query_with_params_forwards_params_to_executor(self, aggregator):
+        """Test that bound params are forwarded to the executor as a keyword argument."""
+        captured = {}
+
+        def executor(query, params=None):
+            captured['params'] = params
+            return [[99]]
+
+        queries = [
+            {
+                'name': 'parameterized',
+                'query': 'SELECT metric FROM t WHERE id = ?',
+                'params': ('some_id',),
+                'columns': [{'name': 'test.metric', 'type': 'gauge'}],
+            }
+        ]
+
+        check = AgentCheck('test', {}, [{}])
+        qe = QueryExecutor(executor, check, queries=queries)
+        qe.compile_queries()
+        qe.execute()
+
+        assert captured['params'] == ('some_id',)
+        aggregator.assert_metric('test.metric', 99, metric_type=aggregator.GAUGE)
+
+    @pytest.mark.parametrize(
+        'params_value,include_in_query',
+        [
+            pytest.param((), True, id='empty_params_tuple'),
+            pytest.param(None, False, id='no_params_key'),
+        ],
+    )
+    def test_query_without_params_does_not_pass_params_to_executor(self, aggregator, params_value, include_in_query):
+        """Test that executor is called without params when params are absent or empty."""
+        received_kwargs = {}
+
+        def executor(query, **kwargs):
+            received_kwargs.update(kwargs)
+            return [[1]]
+
+        query = {
+            'name': 'simple',
+            'query': 'SELECT 1',
+            'columns': [{'name': 'test.metric', 'type': 'gauge'}],
+        }
+        if include_in_query:
+            query['params'] = params_value
+
+        check = AgentCheck('test', {}, [{}])
+        qe = QueryExecutor(executor, check, queries=[query])
+        qe.compile_queries()
+        qe.execute()
+
+        assert 'params' not in received_kwargs

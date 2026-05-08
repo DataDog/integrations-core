@@ -10,6 +10,7 @@ files:
     options:
     - template: instances/openmetrics
       overrides:
+        openmetrics_endpoint.display_priority: 3
         openmetrics_endpoint.value.example: http://localhost:3000/metrics
         openmetrics_endpoint.description: |
           Endpoint exposing the BentoML Prometheus metrics. For more information refer to:

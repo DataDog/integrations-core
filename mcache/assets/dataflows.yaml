@@ -1,0 +1,9 @@
+provides:
+  - id: memcached-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: memcached-logs
+    always_on: false
+    data_type: logs
+    direction: inbound

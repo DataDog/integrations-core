@@ -9,6 +9,9 @@ jobs:
   update_agent_changelog:
     name: Update the Agent Changelog
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -37,13 +40,12 @@ jobs:
     - name: Update the integration changelogs
       run: |-
         ddev release agent integrations-changelog --write
-    - name: Create token
-      uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+    - name: Get token via dd-octo-sts
+      uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
       id: token-generator
       with:
-        app-id: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_APP_ID }}
-        private-key: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_PRIVATE_KEY }}
-        repositories: integrations-core
+        scope: DataDog/integrations-core
+        policy: self.update-agent-changelog.tag-push
     - name: Create Pull Request
       id: cpr
       uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0

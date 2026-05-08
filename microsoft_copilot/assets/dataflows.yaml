@@ -1,0 +1,11 @@
+provides:
+  - id: microsoft-copilot-metrics
+    always_on: true
+    granular: false
+    data_type: metrics
+    direction: inbound
+  - id: microsoft-copilot-logs
+    always_on: true
+    granular: false
+    data_type: logs
+    direction: inbound

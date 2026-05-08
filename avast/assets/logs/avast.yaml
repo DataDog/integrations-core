@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: avast
 metric_id: avast
 backend_only: false

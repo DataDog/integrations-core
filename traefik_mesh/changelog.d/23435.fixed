@@ -1,0 +1,1 @@
+Fix `get_version()` signature so version metadata is actually submitted.

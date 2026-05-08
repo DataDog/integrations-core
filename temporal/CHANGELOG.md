@@ -2,7 +2,25 @@
 
 <!-- towncrier release notes start -->
 
-## 4.3.0 / 2026-02-19
+## 4.5.1 / 2026-04-15
+
+***Fixed***:
+
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+
+## 4.5.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
+## 4.4.0 / 2026-03-18
+
+***Added***:
+
+* Update temporal integration to support metrics up to temporal v1.28.0 ([#20627](https://github.com/DataDog/integrations-core/pull/20627))
+
+## 4.3.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:
 

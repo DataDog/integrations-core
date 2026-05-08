@@ -26,6 +26,7 @@ files:
           type: string
       - name: traefik_controller_api_endpoint
         fleet_configurable: true
+        formats: ["url"]
         required: false
         description: URL of the Traefik Mesh controller to query.
         value:

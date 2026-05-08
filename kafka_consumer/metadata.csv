@@ -25,7 +25,6 @@ kafka.partition.replicas,gauge,,item,,Number of replicas for this partition.,0,k
 kafka.partition.size,gauge,,message,,Number of messages in the partition.,0,kafka_consumer,partition size,,
 kafka.partition.under_replicated,gauge,,,,Whether this partition is under-replicated (1) or not (0).,-1,kafka_consumer,under replicated,,
 kafka.schema_registry.subjects,gauge,,item,,Total number of schema subjects in the registry.,0,kafka_consumer,schema subjects,,
-kafka.schema_registry.versions,gauge,,item,,Number of versions for this schema subject.,0,kafka_consumer,schema versions,,
 kafka.topic.config.max_message_bytes,gauge,,byte,,Topic configuration for maximum message size in bytes.,0,kafka_consumer,max message bytes,,
 kafka.topic.config.retention_bytes,gauge,,byte,,Topic configuration for retention size in bytes.,0,kafka_consumer,topic retention bytes,,
 kafka.topic.config.retention_ms,gauge,,millisecond,,Topic configuration for retention time in milliseconds.,0,kafka_consumer,topic retention ms,,

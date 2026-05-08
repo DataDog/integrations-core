@@ -1,0 +1,35 @@
+# Trust policy for the validation workflow in DataDog/integrations-core
+#
+# This policy grants the workflow permission to post PR comments with
+# validation results when any validation fails.
+#
+# Naming convention:
+#   self:          Only this repository (DataDog/integrations-core) can use this policy
+#   validate:      Grants permissions for the validate workflow
+#   pull-request:  Intended for workflows triggered by pull_request events
+#
+# Security model:
+#   - Workflow runs on pull_request events from any branch
+#   - job_workflow_ref is matched by pattern since PR events reference refs/pull/N/merge
+#   - No ref_protected constraint — PRs originate from any branch
+#
+# Permissions granted:
+#   - pull_requests: write  - Post a comment on the pull request with validation results
+#
+# Usage in workflows:
+#   - uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+#     with:
+#       scope: DataDog/integrations-core
+#       policy: self.validate.pull-request
+
+issuer: https://token.actions.githubusercontent.com
+
+subject_pattern: repo:DataDog/integrations-core:pull_request
+
+claim_pattern:
+  event_name: pull_request
+  job_workflow_ref: DataDog/integrations-core/\.github/workflows/run-validations\.yml@.*
+  repository: DataDog/integrations-core
+
+permissions:
+  pull_requests: write

@@ -22,29 +22,26 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.clickhouse.query_log_job import ClickhouseQueryLogJob, agent_check_getter
 
-# Query to fetch aggregated metrics from system.query_log using checkpoint-based collection
+# Query to fetch aggregated metrics from system.query_log using checkpoint-based collection.
 #
 # Key design decisions:
 # - Uses microsecond precision (event_time_microseconds) to avoid missing queries
 # - Uses exclusive lower bound (>) and inclusive upper bound (<=) to prevent double-counting
-# - Uses {query_log_table} placeholder for ClickHouse Cloud clusterAllReplicas() support
 # - Uses event_date predicate for partition pruning optimization
 # - Uses is_initial_query=1 to only count queries once (not sub-queries)
 # - Uses type != 'QueryStart' to get one record per completed query
 # - Uses any(query) to get raw query text for obfuscation (not normalizeQuery(), which would
 #   produce a different query_signature than the samples pipeline)
-# - Uses quantiles() to calculate p50, p90, p95, p99 simultaneously
 # - Returns max(event_time_microseconds) to track the latest query timestamp in each batch
+# - Always includes hostName() as server_node and groups by it. For single-node deployments
+#   this is a no-op; for multi-node Cloud clusters it enables per-node checkpoint tracking.
 #
-# Note: With checkpoint-based collection, we no longer need derivative calculation.
-# Each collection window is exclusive, so metrics represent the actual values for that window.
-#
-# For ClickHouse Cloud, {query_log_table} becomes clusterAllReplicas('default', system.query_log)
-# to query all nodes in the cluster. For self-hosted, it's just system.query_log.
-
+# Data values use ClickHouse server-side parameter binding ({param:Type}) for
+# injection safety.
 STATEMENTS_QUERY = """
 SELECT
     normalized_query_hash,
+    hostName() as server_node,
     any(query) as query_text,
     any(user) as query_user,
     any(type) as query_type,
@@ -53,7 +50,6 @@ SELECT
     any(tables) as tables,
     count() as execution_count,
     sum(query_duration_ms) as total_duration_ms,
-    quantiles(0.5, 0.9, 0.95, 0.99)(query_duration_ms) as duration_quantiles,
     sum(read_rows) as total_read_rows,
     sum(read_bytes) as total_read_bytes,
     sum(written_rows) as total_written_rows,
@@ -65,17 +61,17 @@ SELECT
     max(event_time_microseconds) as max_event_time_microseconds
 FROM {query_log_table}
 WHERE
-    event_time_microseconds > fromUnixTimestamp64Micro({last_checkpoint_microseconds})
+    {checkpoint_filter}
     AND event_time_microseconds <= now64(6)
     -- Partition pruning: event_date filter allows ClickHouse to skip entire daily partitions
-    AND event_date >= toDate(fromUnixTimestamp64Micro({last_checkpoint_microseconds}))
+    AND event_date >= toDate(fromUnixTimestamp64Micro({min_checkpoint_us:UInt64}))
     AND type != 'QueryStart'
     AND is_initial_query = 1
     AND query != ''
     AND normalized_query_hash != 0
     {internal_user_filter}
-GROUP BY normalized_query_hash
-ORDER BY total_duration_ms DESC  -- Prioritize queries with highest system impact
+GROUP BY normalized_query_hash, server_node
+ORDER BY total_duration_ms DESC
 """
 
 
@@ -125,8 +121,9 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
         Checkpoint is always advanced after collection to prefer dropped data over duplicates.
         """
         try:
-            # Reset pending checkpoint at the start of each collection
+            # Reset pending checkpoints at the start of each collection
             self._current_checkpoint_microseconds = None
+            self._pending_node_checkpoints = {}
 
             rows = self._collect_metrics_rows()
             if not rows:
@@ -164,7 +161,7 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
                 )
                 self._check.database_monitoring_query_metrics(payload)
 
-            if self._current_checkpoint_microseconds:
+            if self._current_checkpoint_microseconds is not None:
                 self._log.info("Collection complete. Checkpoint saved: %d", self._current_checkpoint_microseconds)
 
         except Exception:
@@ -212,51 +209,38 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
         """
         Load aggregated query metrics from system.query_log using checkpoint-based collection.
 
-        This is analogous to Postgres loading from pg_stat_statements, but uses
-        microsecond-precision timestamps to ensure no queries are missed.
-
-        For ClickHouse Cloud: Uses clusterAllReplicas('default', system.query_log) to query
-        all nodes in the cluster, since replicas are abstracted behind the managed service.
-
-        For self-hosted: Queries only the local node's query_log - each ClickHouse node
-        maintains its own query_log table with queries executed on that specific node.
-
-        Optimization: Uses now64(6) directly in the query and derives the checkpoint from
-        max(event_time_microseconds) in the results, reducing DB roundtrips from 2 to 1.
+        Uses per-node checkpoints for all deployments. For single-node self-hosted this
+        is functionally equivalent to a global checkpoint; for multi-node Cloud clusters
+        each node's checkpoint advances independently, preventing the cross-node
+        query_log flush race.
         """
         try:
-            # Get the last checkpoint (only fetches from DB on first run)
-            if self._last_checkpoint_microseconds is None:
-                self._last_checkpoint_microseconds = self._get_last_checkpoint()
-
-            # Get the appropriate table reference based on deployment type
-            # For Cloud: clusterAllReplicas('default', system.query_log)
-            # For self-hosted: system.query_log
             query_log_table = self._check.get_system_table('query_log')
+            checkpoint_filter, min_checkpoint, params = self._build_per_node_checkpoint_filter()
 
-            query = STATEMENTS_QUERY.format(
-                query_log_table=query_log_table,
-                last_checkpoint_microseconds=self._last_checkpoint_microseconds,
-                internal_user_filter=self._get_internal_user_filter(),
+            query = (
+                STATEMENTS_QUERY.replace("{query_log_table}", query_log_table)
+                .replace("{checkpoint_filter}", checkpoint_filter)
+                .replace("{internal_user_filter}", self._get_internal_user_filter())
             )
-            rows = self._execute_query(query)
+            params["min_checkpoint_us"] = min_checkpoint
+
+            rows = self._execute_query(query, parameters=params)
 
             self._log.info(
-                "Loaded %d rows from %s [%s] (last_checkpoint=%d)",
+                "Loaded %d rows from %s [%s]",
                 len(rows),
                 query_log_table,
                 self.deployment_mode,
-                self._last_checkpoint_microseconds,
             )
 
-            # Track the global max event time across all rows for checkpoint
             global_max_event_time = 0
-
-            # Convert to list of dicts
             result_rows = []
+
             for row in rows:
                 (
                     normalized_query_hash,
+                    server_node,
                     query_text,
                     query_user,
                     query_type,
@@ -265,7 +249,6 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
                     tables,
                     execution_count,
                     total_duration_ms,
-                    duration_quantiles,  # Array of [p50, p90, p95, p99]
                     total_read_rows,
                     total_read_bytes,
                     total_written_rows,
@@ -274,55 +257,44 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
                     total_result_bytes,
                     total_memory_usage,
                     peak_memory_usage,
-                    max_event_time_microseconds,  # Per-group max, used to derive global checkpoint
+                    max_event_time_microseconds,
                 ) = row
 
-                # Track global max for checkpoint
                 event_time_int = self.to_microseconds(max_event_time_microseconds)
                 if event_time_int > global_max_event_time:
                     global_max_event_time = event_time_int
 
-                # Parse quantiles array: [p50, p90, p95, p99]
-                p50_time = float(duration_quantiles[0]) if duration_quantiles and len(duration_quantiles) > 0 else 0.0
-                p90_time = float(duration_quantiles[1]) if duration_quantiles and len(duration_quantiles) > 1 else 0.0
-                p95_time = float(duration_quantiles[2]) if duration_quantiles and len(duration_quantiles) > 2 else 0.0
-                p99_time = float(duration_quantiles[3]) if duration_quantiles and len(duration_quantiles) > 3 else 0.0
+                if server_node:
+                    self._track_node_checkpoint(str(server_node), event_time_int)
 
-                # Calculate mean_time directly since we're not using derivatives
-                # With checkpoint-based collection, count is the actual count for this window
                 mean_time = float(total_duration_ms) / execution_count if execution_count > 0 else 0.0
 
-                result_rows.append(
-                    {
-                        'normalized_query_hash': str(normalized_query_hash),
-                        'query': str(query_text) if query_text else '',
-                        'user': str(query_user) if query_user else '',
-                        'query_type': str(query_type) if query_type else '',
-                        'exception_code': str(exception_code) if exception_code else '',
-                        'databases': str(databases[0]) if databases and len(databases) > 0 else '',
-                        'dd_tables': tables if tables else [],  # Use ClickHouse native tables column
-                        'count': int(execution_count) if execution_count else 0,
-                        'total_time': float(total_duration_ms) if total_duration_ms else 0.0,
-                        # Mean time calculated directly (no derivative needed with checkpointing)
-                        'mean_time': mean_time,
-                        # Quantile metrics (p50, p90, p95, p99) - point-in-time aggregates for this window
-                        'p50_time': p50_time,
-                        'p90_time': p90_time,
-                        'p95_time': p95_time,
-                        'p99_time': p99_time,
-                        'result_rows': int(total_result_rows) if total_result_rows else 0,
-                        'read_rows': int(total_read_rows) if total_read_rows else 0,
-                        'read_bytes': int(total_read_bytes) if total_read_bytes else 0,
-                        'written_rows': int(total_written_rows) if total_written_rows else 0,
-                        'written_bytes': int(total_written_bytes) if total_written_bytes else 0,
-                        'result_bytes': int(total_result_bytes) if total_result_bytes else 0,
-                        'memory_usage': int(total_memory_usage) if total_memory_usage else 0,
-                        'peak_memory_usage': int(peak_memory_usage) if peak_memory_usage else 0,
-                    }
-                )
+                result_row = {
+                    'normalized_query_hash': str(normalized_query_hash),
+                    'query': str(query_text) if query_text else '',
+                    'user': str(query_user) if query_user else '',
+                    'query_type': str(query_type) if query_type else '',
+                    'exception_code': str(exception_code) if exception_code else '',
+                    'databases': str(databases[0]) if databases and len(databases) > 0 else '',
+                    'dd_tables': tables if tables else [],
+                    'count': int(execution_count) if execution_count else 0,
+                    'total_time': float(total_duration_ms) if total_duration_ms else 0.0,
+                    'mean_time': mean_time,
+                    'result_rows': int(total_result_rows) if total_result_rows else 0,
+                    'read_rows': int(total_read_rows) if total_read_rows else 0,
+                    'read_bytes': int(total_read_bytes) if total_read_bytes else 0,
+                    'written_rows': int(total_written_rows) if total_written_rows else 0,
+                    'written_bytes': int(total_written_bytes) if total_written_bytes else 0,
+                    'result_bytes': int(total_result_bytes) if total_result_bytes else 0,
+                    'memory_usage': int(total_memory_usage) if total_memory_usage else 0,
+                    'peak_memory_usage': int(peak_memory_usage) if peak_memory_usage else 0,
+                }
+                result_rows.append(result_row)
 
-            # Set checkpoint from results, or fetch current time if no rows (idle period)
             self._set_checkpoint_from_event_time(global_max_event_time)
+
+            if result_rows:
+                result_rows = self._merge_rows_across_nodes(result_rows)
 
             return result_rows
 
@@ -334,9 +306,58 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
                 tags=self.tags + ["error:query_log_load_failed"],
                 raw=True,
             )
-            # Re-raise to let outer handler log the error.
-            # Checkpoint will still advance to avoid duplicates on retry.
             raise
+
+    @staticmethod
+    def _merge_rows_across_nodes(node_rows):
+        """
+        Merge per-(query, node) rows into per-query rows.
+
+        Summable metrics (count, total_time, …) are summed.
+        peak_memory_usage takes the max.
+        Non-metric fields are taken from the node with the highest execution count.
+        """
+        groups = {}
+        for row in node_rows:
+            key = row['normalized_query_hash']
+            if key not in groups:
+                groups[key] = []
+            groups[key].append(row)
+
+        result = []
+        for rows in groups.values():
+            if len(rows) == 1:
+                result.append(rows[0])
+                continue
+
+            base = max(rows, key=lambda r: r.get('count', 0))
+            merged = dict(base)
+
+            sum_fields = [
+                'count',
+                'total_time',
+                'read_rows',
+                'read_bytes',
+                'written_rows',
+                'written_bytes',
+                'result_rows',
+                'result_bytes',
+                'memory_usage',
+            ]
+            for field in sum_fields:
+                merged[field] = sum(r.get(field, 0) for r in rows)
+
+            merged['peak_memory_usage'] = max(r.get('peak_memory_usage', 0) for r in rows)
+
+            total_count = merged['count']
+            if total_count > 0:
+                merged['mean_time'] = merged['total_time'] / total_count
+            else:
+                merged['mean_time'] = 0.0
+
+            result.append(merged)
+
+        return result
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _collect_metrics_rows(self):

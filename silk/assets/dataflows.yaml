@@ -1,0 +1,9 @@
+provides:
+  - id: silk-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: silk-events
+    always_on: true
+    data_type: events
+    direction: inbound

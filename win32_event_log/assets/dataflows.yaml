@@ -1,0 +1,9 @@
+provides:
+  - id: event-viewer-logs
+    always_on: false
+    data_type: logs
+    direction: inbound
+  - id: event-viewer-events
+    always_on: true
+    data_type: events
+    direction: inbound

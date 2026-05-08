@@ -89,6 +89,7 @@ def test_initialize_features_enabled_and_disabled(mock_check, minimal_instance):
             'collect_schemas': {'enabled': True},
             'query_activity': {'enabled': True},
             'query_metrics': {'enabled': True},
+            'data_observability': {'enabled': True},
         }
     )
     mock_check.instance = instance
@@ -102,6 +103,7 @@ def test_initialize_features_enabled_and_disabled(mock_check, minimal_instance):
         FeatureKey.COLLECT_SCHEMAS,
         FeatureKey.QUERY_ACTIVITY,
         FeatureKey.QUERY_METRICS,
+        FeatureKey.DATA_OBSERVABILITY,
     }
     for feature in result.features:
         assert feature['enabled'] is True
@@ -151,15 +153,6 @@ def test_initialize_deprecated_options_warn(mock_check, minimal_instance):
     config, result = build_config(check=mock_check)
     assert config.dbm is True
     assert any("deprecated" in w for w in result.warnings)
-
-
-def test_initialize_empty_default_hostname_warns(mock_check, minimal_instance):
-    instance = minimal_instance
-    instance['empty_default_hostname'] = True
-    mock_check.instance = instance
-    mock_check.init_config = {}
-    config, result = build_config(check=mock_check)
-    assert any("empty_default_hostname" in w for w in result.warnings)
 
 
 @pytest.mark.parametrize(
@@ -333,7 +326,6 @@ def test_apply_validated_defaults_ssl(mock_check, minimal_instance):
         ('deep_database_monitoring', 'dbm', True),
         ('managed_identity', 'azure.managed_authentication', {}),
         ('statement_samples', 'query_samples', {}),
-        ('collect_default_database', 'postgres', True),
     ],
 )
 def test_apply_deprecation_warnings(mock_check, minimal_instance, option, replacement, value):
@@ -366,6 +358,41 @@ def test_cloud_validations(mock_check, minimal_instance):
     config, result = build_config(check=mock_check)
     assert result.valid
     assert config.azure.managed_authentication.enabled
+
+
+def test_cloud_validations_azure_workload_identity(mock_check, minimal_instance):
+    """Test that workload_identity auth_type is valid without client_id."""
+    instance = minimal_instance.copy()
+    instance['azure'] = {'managed_authentication': {'enabled': True, 'auth_type': 'workload_identity'}}
+    instance['password'] = None
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid
+    assert config.azure.managed_authentication.auth_type == 'workload_identity'
+
+
+@pytest.mark.parametrize(
+    'auth_type, has_client_id, expect_valid',
+    [
+        ('workload_identity', False, True),
+        ('managed_identity', True, True),
+        ('managed_identity', False, False),
+        ('bad_type', True, False),
+    ],
+    ids=['workload_no_client_id', 'managed_with_client_id', 'managed_missing_client_id', 'invalid_auth_type'],
+)
+def test_azure_auth_type_validation(mock_check, minimal_instance, auth_type, has_client_id, expect_valid):
+    instance = minimal_instance.copy()
+    auth_cfg = {'enabled': True, 'auth_type': auth_type}
+    if has_client_id:
+        auth_cfg['client_id'] = 'some-id'
+    instance['azure'] = {'managed_authentication': auth_cfg}
+    instance['password'] = None
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    _, result = build_config(check=mock_check)
+    assert result.valid == expect_valid
 
 
 @pytest.mark.parametrize(
