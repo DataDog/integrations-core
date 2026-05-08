@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 # Metrics emitted by n8n's /metrics endpoint, verified live against n8n@1.118.1
-# and n8n@2.19.5 with the test environment in `tests/docker/`.
+# and n8n@2.19.5.
 #
 # The OpenMetrics base check strips `_total` from counter names before lookup
 # and appends `.count` on submission, so counter keys here are written without
@@ -13,7 +13,7 @@
 # `n8n.<a>.<b>.<c>` becomes counter `<a>_<b>_<c>_total`) and only appear once
 # the corresponding event fires at runtime. In queue mode, worker processes
 # emit `node_started_total`, `node_finished_total`, `queue_job_dequeued_total`,
-# and (n8n 2.x+) `runner_task_requested_total`.
+# and `runner_task_requested_total`.
 #
 # Several families were introduced in n8n 2.x (see the README "Version-specific
 # metrics" section). The `workflow_statistics_*` and SSO/embed token-exchange
@@ -22,7 +22,11 @@
 METRIC_MAP = {
     'active_workflow_count': 'active.workflow.count',
     'audit_workflow_activated': 'audit.workflow.activated',  # n8n 2.x+
+    'audit_workflow_deactivated': 'audit.workflow.deactivated',  # n8n 2.x+
     'audit_workflow_executed': 'audit.workflow.executed',  # n8n 2.x+
+    'audit_workflow_resumed': 'audit.workflow.resumed',  # n8n 2.x+
+    'audit_workflow_version_updated': 'audit.workflow.version.updated',  # n8n 2.x+
+    'audit_workflow_waiting': 'audit.workflow.waiting',  # n8n 2.x+
     'cache_hits': 'cache.hits',
     'cache_misses': 'cache.misses',
     'cache_updates': 'cache.updates',
@@ -80,7 +84,7 @@ METRIC_MAP = {
     'queue_job_dequeued': 'queue.job.dequeued',
     'queue_job_enqueued': 'queue.job.enqueued',
     'queue_job_failed': 'queue.job.failed',
-    'runner_task_requested': 'runner.task.requested',  # n8n 2.x+
+    'runner_task_requested': 'runner.task.requested',
     'scaling_mode_queue_jobs_active': 'scaling.mode.queue.jobs.active',
     'scaling_mode_queue_jobs_completed': 'scaling.mode.queue.jobs.completed',
     'scaling_mode_queue_jobs_failed': 'scaling.mode.queue.jobs.failed',

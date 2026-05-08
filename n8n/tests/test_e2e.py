@@ -13,12 +13,8 @@ from . import common
 @pytest.mark.e2e
 def test_check_n8n_e2e(
     dd_agent_check: Callable[..., Any],
-    instance: dict[str, Any],
-    worker_instance: dict[str, Any],
 ):
-    config = {'init_config': {}, 'instances': [instance, worker_instance]}
-
-    aggregator = dd_agent_check(config, rate=True)
+    aggregator = dd_agent_check(rate=True)
 
     aggregator.assert_metric('n8n.readiness.check', value=1, tags=['status_code:200', 'n8n_process:main'], at_least=1)
     # Worker also exposes /healthz/readiness via QUEUE_HEALTH_CHECK_ACTIVE on its own port.

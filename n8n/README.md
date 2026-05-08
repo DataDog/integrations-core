@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [n8n][1] through the Datadog Agent. 
+This check monitors [n8n][1] through the Datadog Agent.
 
 Collect n8n metrics including:
 - Cache metrics: hit, miss, and update counts.
@@ -42,7 +42,7 @@ N8N_METRICS_INCLUDE_WORKFLOW_ID_LABEL=true
 N8N_METRICS_INCLUDE_API_ENDPOINTS=true
 N8N_METRICS_INCLUDE_QUEUE_METRICS=true
 
-# Optional: n8n 2.x adds workflow_statistics gauges (workflows, users, executions, ...) — opt in
+# Optional: n8n 2.x adds workflow_statistics gauges (workflows, users, executions, ...) - opt in
 N8N_METRICS_INCLUDE_WORKFLOW_STATISTICS=true
 
 # Optional: Customize the metric prefix (default is 'n8n_')
@@ -59,7 +59,7 @@ Some n8n counters are registered dynamically the first time the corresponding ev
 
 #### Queue mode and workers
 
-In queue mode, n8n runs separate worker processes that execute jobs picked up from a Redis-backed queue. Each worker exposes its own `/metrics` endpoint and emits a different subset of metrics than the main process. Worker-observed metrics include `n8n.queue.job.dequeued.count`, `n8n.node.started.count`, `n8n.node.finished.count`, and (n8n 2.x) `n8n.runner.task.requested.count`. Main-only metrics include `n8n.instance.role.leader` and the `n8n.scaling.mode.queue.jobs.*` family.
+In queue mode, n8n runs separate worker processes that execute jobs picked up from a Redis-backed queue. Each worker exposes its own `/metrics` endpoint and emits a different subset of metrics than the main process. Worker-observed metrics include `n8n.queue.job.dequeued.count`, `n8n.node.started.count`, `n8n.node.finished.count`, and `n8n.runner.task.requested.count`. Main-only metrics include `n8n.instance.role.leader` and the `n8n.scaling.mode.queue.jobs.*` family.
 
 To expose worker metrics, set `QUEUE_HEALTH_CHECK_ACTIVE=true` and `QUEUE_HEALTH_CHECK_PORT=<port>` on each worker. **In n8n 2.x, port `5679` is reserved for the task runner broker, so pick a different port (for example `5680`).**
 
@@ -76,16 +76,13 @@ instances:
 Several metric families were introduced in n8n 2.x and are not emitted on n8n 1.x:
 
 - `n8n.workflow.execution.duration.seconds.*` (histogram)
-- `n8n.audit.workflow.activated.count`, `n8n.audit.workflow.executed.count`
+- `n8n.audit.workflow.activated.count`, `n8n.audit.workflow.deactivated.count`, `n8n.audit.workflow.executed.count`, `n8n.audit.workflow.resumed.count`, `n8n.audit.workflow.version.updated.count`, and `n8n.audit.workflow.waiting.count`
 - `n8n.embed.login.requests.count` (tagged with `result:success`/`failure`), `n8n.embed.login.failures.count` (tagged with `reason`)
 - `n8n.token.exchange.requests.count` (tagged with `result:success`/`failure`), `n8n.token.exchange.failures.count` (tagged with `reason`), `n8n.token.exchange.identity.linked.count`, `n8n.token.exchange.jit.provisioning.count`
 - `n8n.process.pss.bytes` (Linux only)
-- `n8n.runner.task.requested.count` (worker-only)
-- The `n8n.{production,manual,production.root}.executions`, `n8n.users.total`, `n8n.enabled.users`, `n8n.workflows.total`, and `n8n.credentials.total` family — only emitted when `N8N_METRICS_INCLUDE_WORKFLOW_STATISTICS=true` is set.
+- The `n8n.{production,manual,production.root}.executions`, `n8n.users.total`, `n8n.enabled.users`, `n8n.workflows.total`, and `n8n.credentials.total` family - only emitted when `N8N_METRICS_INCLUDE_WORKFLOW_STATISTICS=true` is set.
 
-The failures-only counters (`*.failures.count`) and the libuv `n8n.nodejs.active.requests` gauge only emit samples once the corresponding event fires (an auth failure, an in-flight libuv request); a healthy idle deployment may not produce any data points for them.
-
-The `metadata.csv` description for each affected metric calls out its version requirement.
+Some metrics only emit samples after the corresponding runtime event occurs. For example, failures-only counters (`*.failures.count`) need an authentication failure, audit workflow counters need the matching workflow state transition, and the libuv `n8n.nodejs.active.requests` gauge needs an in-flight libuv request. A healthy idle deployment may not produce data points for these metrics until that activity occurs.
 
 #### Tag cardinality
 

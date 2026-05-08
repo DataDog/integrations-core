@@ -351,6 +351,10 @@ test_token_exchange_identity_linked_total 0
 test_audit_workflow_activated_total{workflow_id="testWorkflowOk"} 1
 test_audit_workflow_activated_total{workflow_id="testWorkflowFail"} 1
 
+# HELP test_audit_workflow_deactivated_total Total number of n8n.audit.workflow.deactivated events.
+# TYPE test_audit_workflow_deactivated_total counter
+test_audit_workflow_deactivated_total{workflow_id="testWorkflowOk"} 1
+
 # HELP test_queue_job_enqueued_total Total number of n8n.queue.job.enqueued events.
 # TYPE test_queue_job_enqueued_total counter
 test_queue_job_enqueued_total 8
@@ -364,6 +368,18 @@ test_workflow_started_total{workflow_id="testWorkflowFail"} 4
 # TYPE test_audit_workflow_executed_total counter
 test_audit_workflow_executed_total{workflow_id="testWorkflowOk"} 4
 test_audit_workflow_executed_total{workflow_id="testWorkflowFail"} 4
+
+# HELP test_audit_workflow_resumed_total Total number of n8n.audit.workflow.resumed events.
+# TYPE test_audit_workflow_resumed_total counter
+test_audit_workflow_resumed_total{workflow_id="testWorkflowOk"} 1
+
+# HELP test_audit_workflow_version_updated_total Total number of n8n.audit.workflow.version.updated events.
+# TYPE test_audit_workflow_version_updated_total counter
+test_audit_workflow_version_updated_total{workflow_id="testWorkflowOk"} 1
+
+# HELP test_audit_workflow_waiting_total Total number of n8n.audit.workflow.waiting events.
+# TYPE test_audit_workflow_waiting_total counter
+test_audit_workflow_waiting_total{workflow_id="testWorkflowOk"} 1
 
 # HELP test_workflow_success_total Total number of n8n.workflow.success events.
 # TYPE test_workflow_success_total counter
