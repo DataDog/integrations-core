@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
 
@@ -46,11 +47,31 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         self.http.options['auth'] = None
         self._peer_lookup: dict[str, tuple[str, str]] = {}
         self._overlay_map: dict[str, str] = {}
+        self._appliance_clients: dict[str, ApplianceClient] = {}
+        self._orch_client: OrchestratorClient | None = None
+
+    def _get_orch_client(self) -> OrchestratorClient:
+        if self._orch_client is not None:
+            try:
+                self._orch_client.get_overlay_config()
+                self.log.debug("Reusing cached orchestrator session")
+                return self._orch_client
+            except Exception:
+                self.log.debug("Cached orchestrator session expired, re-logging in")
+                self._orch_client.login(self.config.username, self.config.password)
+                return self._orch_client
+        client = OrchestratorClient(self.http, self.config.orch_ip)
+        client.login(self.config.username, self.config.password)
+        self._orch_client = client
+        return client
 
     def check(self, _: Any) -> None:
-        orch_client = OrchestratorClient(self.http, self.config.orch_ip)
-        orch_client.login(self.config.username, self.config.password)
+        orch_client = self._get_orch_client()
         appliances = self._collect_appliances_from_orch(orch_client)
+        current_ips = {ap.ip for ap in appliances}
+        stale_ips = set(self._appliance_clients) - current_ips
+        for ip in stale_ips:
+            del self._appliance_clients[ip]
         with ThreadPoolExecutor(max_workers=self.config.max_concurrency) as pool:
             futs = {pool.submit(self._collect_appliance, ap): ap for ap in appliances}
             for f in as_completed(futs):
@@ -108,11 +129,22 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         return appliances
 
     def _create_appliance_client(self, app_ip: str, username: str, password: str) -> ApplianceClient:
+        cached = self._appliance_clients.get(app_ip)
+        if cached is not None:
+            try:
+                cached.get_newest_timestamp()
+                self.log.debug("Reusing cached session for appliance %s", app_ip)
+                return cached
+            except Exception:
+                self.log.debug("Cached session expired for appliance %s, re-logging in", app_ip)
+                cached.login(username, password)
+                return cached
         http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
         http.persist_connections = True
         http.options['auth'] = None
         client = ApplianceClient(http, app_ip, self.log)
         client.login(username, password)
+        self._appliance_clients[app_ip] = client
         return client
 
     def _timestamps_to_fetch(self, app_ip: str, newest: int) -> list[int]:
@@ -213,11 +245,13 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
                     newest,
                 )
             )
-        for collect in collectors:
-            try:
-                collect()
-            except Exception:
-                self.log.warning("Collection step failed for appliance %s", app_ip, exc_info=True)
+        with ThreadPoolExecutor(max_workers=len(collectors)) as pool:
+            futs = {pool.submit(fn): fn for fn in collectors}
+            for f in as_completed(futs):
+                try:
+                    f.result()
+                except Exception:
+                    self.log.warning("Collection step failed for appliance %s", app_ip, exc_info=True)
 
     def _collect_network_interfaces(
         self,
@@ -240,8 +274,9 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
                 f'oper_status:{_interface_status_label(iface.get("oper"))}',
             ]
             self.gauge('interface.status', 1, tags=status_tags)
-            if iface.get('speed') is not None:
-                self.gauge('interface.speed', iface['speed'], tags=iface_tags)
+            speed = _parse_speed(iface.get('speed'))
+            if speed is not None:
+                self.gauge('interface.speed', speed, tags=iface_tags)
             interfaces.append(create_interface_metadata(client.app_ip, iface, namespace))
         self._submit_metadata(interfaces, collect_timestamp)
 
@@ -323,6 +358,27 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         if hw_alarm:
             self.log.debug("Hardware alarm detected on appliance %s", client.app_ip)
         self.gauge('device.hardware.ok', 0 if hw_alarm else 1, tags=base_tags)
+
+
+_SPEED_RE = re.compile(r'^(\d+)\s*(Mb/s|Gb/s|Kb/s)', re.IGNORECASE)
+
+_SPEED_MULTIPLIERS = {
+    'kb/s': 1_000,
+    'mb/s': 1_000_000,
+    'gb/s': 1_000_000_000,
+}
+
+
+def _parse_speed(value: Any) -> float | None:
+    """Parse interface speed to bits per second."""
+    if value is None:
+        return None
+    if isinstance(value, (int, float)):
+        return float(value)
+    m = _SPEED_RE.match(str(value))
+    if m:
+        return float(m.group(1)) * _SPEED_MULTIPLIERS[m.group(2).lower()]
+    return None
 
 
 def _interface_status_label(value: Any) -> str:

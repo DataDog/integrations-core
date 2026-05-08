@@ -9,6 +9,7 @@ import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.hpe_aruba_edgeconnect import HpeArubaEdgeconnectCheck
+from datadog_checks.hpe_aruba_edgeconnect.check import _parse_speed
 from datadog_checks.hpe_aruba_edgeconnect.client import ApplianceClient
 from datadog_checks.hpe_aruba_edgeconnect.metrics_store import AggType, MetricsStore
 from datadog_checks.hpe_aruba_edgeconnect.models import Appliance, Appliances, _ip_matches_any
@@ -243,7 +244,7 @@ EXPECTED_VALUES = [
     ('device.hardware.ok', 0, []),
     # --- interface status / speed (from mock) ---
     ('interface.status', 1, ['interface_name:wan0', 'admin_status:up', 'oper_status:up']),
-    ('interface.speed', 1000000, ['interface_name:wan0']),
+    ('interface.speed', 1000000000, ['interface_name:wan0']),
     # --- interface bandwidth: wan0 pass-through-unshaped (aggregated across two minutes) ---
     ('interface.bandwidth.tx.count', 158508, ['interface_name:wan0', 'traffic_type:pass-through-unshaped']),
     ('interface.bandwidth.tx.rate', 1320.9, ['interface_name:wan0', 'traffic_type:pass-through-unshaped']),
@@ -414,7 +415,7 @@ def _mock_appliance_client(
     else:
         client.get_minute_stats.return_value = tgz_data
     client.get_network_interfaces.return_value = {
-        'ifInfo': [{'ifName': 'wan0', 'admin': 1, 'oper': 1, 'speed': 1000000}]
+        'ifInfo': [{'ifName': 'wan0', 'admin': 1, 'oper': 1, 'speed': '1000Mb/s (auto)'}]
     }
     client.get_cpu_stats.return_value = _build_cpu_payload(cpu)
     client.get_memory_stats.return_value = mem if mem is not None else MEMORY_PAYLOAD
@@ -592,6 +593,24 @@ def test_appliances_filter(ips, filter_config, expected_ips):
 )
 def test_ip_matches_any(ip, patterns, expected):
     assert _ip_matches_any(ip, patterns) is expected
+
+
+@pytest.mark.parametrize(
+    'value, expected',
+    [
+        pytest.param('1000Mb/s (auto)', 1_000_000_000, id='1000mbps_auto'),
+        pytest.param('25000Mb/s (auto)', 25_000_000_000, id='25000mbps_auto'),
+        pytest.param('100Mb/s', 100_000_000, id='100mbps'),
+        pytest.param('10Gb/s', 10_000_000_000, id='10gbps'),
+        pytest.param('100Kb/s', 100_000, id='100kbps'),
+        pytest.param(1000000, 1000000, id='int_passthrough'),
+        pytest.param(1000000.0, 1000000.0, id='float_passthrough'),
+        pytest.param(None, None, id='none'),
+        pytest.param('unknown', None, id='unparseable'),
+    ],
+)
+def test_parse_speed(value, expected):
+    assert _parse_speed(value) == expected
 
 
 # ---------------------------------------------------------------------------
@@ -826,7 +845,7 @@ def test_ndm_metadata_submitted(dd_run_check, aggregator, mocker, check):
     client = _mock_appliance_client(tgz_bytes)
     client.get_network_interfaces.return_value = {
         'ifInfo': [
-            {'ifName': 'wan0', 'mac': 'aa:bb:cc:dd:ee:ff', 'admin': True, 'oper': True, 'speed': 1000000},
+            {'ifName': 'wan0', 'mac': 'aa:bb:cc:dd:ee:ff', 'admin': True, 'oper': True, 'speed': '1000Mb/s (auto)'},
             {'ifName': 'wan0:v100', 'admin': False, 'oper': None},
         ]
     }
@@ -913,3 +932,25 @@ def test_ndm_metadata_submitted(dd_run_check, aggregator, mocker, check):
         assert 0 < size <= PAYLOAD_METADATA_BATCH_SIZE
         assert payload['namespace'] == 'default'
         assert payload['collect_timestamp'] is not None
+
+
+def test_stale_appliance_clients_cleaned_up(dd_run_check, mocker, check):
+    client = MagicMock()
+
+    # First run: orch returns appliances at 10.0.0.1 and 10.0.0.99
+    payload_with_extra = APPLIANCE_PAYLOAD[:1] + [
+        {**APPLIANCE_PAYLOAD[0], 'ip': '10.0.0.99', 'hostName': 'StaleAppliance'},
+    ]
+    _setup_mocks(mocker, check, payload_with_extra, appliance_client=client)
+    dd_run_check(check)
+
+    check._appliance_clients['10.0.0.1'] = MagicMock()
+    check._appliance_clients['10.0.0.99'] = MagicMock()
+    assert '10.0.0.99' in check._appliance_clients
+
+    # Second run: orch no longer returns 10.0.0.99
+    _setup_mocks(mocker, check, APPLIANCE_PAYLOAD[:1], appliance_client=client)
+    dd_run_check(check)
+
+    assert '10.0.0.1' in check._appliance_clients
+    assert '10.0.0.99' not in check._appliance_clients

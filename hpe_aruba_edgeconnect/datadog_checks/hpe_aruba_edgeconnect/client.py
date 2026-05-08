@@ -80,7 +80,7 @@ class ApplianceClient:
     def get_newest_timestamp(self) -> int:
         resp = self._http.get(f'{self._base_url}/rest/json/stats/minuteRange')
         resp.raise_for_status()
-        return resp.json()['newest']
+        return int(resp.json()['newest'])
 
     def get_minute_stats(self, filename: str) -> bytes:
         resp = self._http.get(

@@ -103,7 +103,7 @@ EXPECTED_VALUES = [
     ('device.hardware.ok', 1, []),
     # Interface status / speed (from /networkInterfaces).
     ('interface.status', 1, ['interface_name:wan0', 'admin_status:up', 'oper_status:up']),
-    ('interface.speed', 1000000, ['interface_name:wan0']),
+    ('interface.speed', 1000000000, ['interface_name:wan0']),
     # Interface bandwidth: wan0 pass-through-unshaped (single-archive aggregation).
     ('interface.bandwidth.tx.count', 79920, ['interface_name:wan0', 'traffic_type:pass-through-unshaped']),
     ('interface.bandwidth.tx.rate', 1332.0, ['interface_name:wan0', 'traffic_type:pass-through-unshaped']),

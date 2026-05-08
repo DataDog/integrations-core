@@ -30,7 +30,12 @@ def dd_environment(instance, dd_save_state):
         orch_ip = os.environ['EDGECONNECT_ORCH_IP']
         username = os.environ['EDGECONNECT_ORCH_USERNAME']
         password = os.environ['EDGECONNECT_ORCH_PASSWORD']
-        inst = instance(orch_ip, username=username, password=password)
+        appliance_username = os.environ.get('EDGECONNECT_APPLIANCE_USERNAME', username)
+        appliance_password = os.environ.get('EDGECONNECT_APPLIANCE_PASSWORD', password)
+        appliance_credentials = [
+            {'cidr': '0.0.0.0/0', 'username': appliance_username, 'password': appliance_password},
+        ]
+        inst = instance(orch_ip, username=username, password=password, appliance_credentials=appliance_credentials)
         dd_save_state('e2e_instance', inst)
         yield {
             'instances': [inst],
