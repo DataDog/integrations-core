@@ -53,10 +53,10 @@
         "source": "klaviyo"
     },
     "monitors": {
-      "High number of refunded orders" : "assets/monitors/high_number_of_refunds.json",
-      "High percentage of dropped or bounced email" : "assets/monitors/high_percentage_of_email_failures.json",
-      "High percentage of email marked as spam" : "assets/monitors/high_percentage_of_email_marked_as_spam.json",
-      "High percentage of SMS delivery failures" : "assets/monitors/high_percentage_of_sms_failures.json"
+      "High number of refunded orders": "assets/monitors/high_number_of_refunds.json",
+      "High percentage of dropped or bounced email": "assets/monitors/high_percentage_of_email_failures.json",
+      "High percentage of email marked as spam": "assets/monitors/high_percentage_of_email_marked_as_spam.json",
+      "High percentage of SMS delivery failures": "assets/monitors/high_percentage_of_sms_failures.json"
     }
   },
   "author": {
