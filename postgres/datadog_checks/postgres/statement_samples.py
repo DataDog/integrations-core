@@ -152,8 +152,6 @@ class PostgresStatementSamples(DBMAsyncJob):
         if not config.query_samples.enabled:
             collection_interval = config.query_activity.collection_interval
 
-        self.db_pool = check.db_pool
-
         super(PostgresStatementSamples, self).__init__(
             check,
             rate_limit=1 / collection_interval,
@@ -646,7 +644,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _get_db_explain_setup_state(self, dbname):
         # type: (str) -> Tuple[Optional[DBExplainError], Optional[Exception]]
         try:
-            self.db_pool.get_connection(dbname)
+            self._check.db_pool.get_connection(dbname)
         except psycopg.OperationalError as e:
             self._log.warning(
                 "cannot collect execution plans due to failed DB connection to dbname=%s: %s", dbname, repr(e)
@@ -712,7 +710,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         start_time = time.time()
         if self._cancel_event.is_set():
             raise Exception("Job loop cancelled. Aborting query.")
-        with self.db_pool.get_connection(dbname) as conn:
+        with self._check.db_pool.get_connection(dbname) as conn:
             # When sending potentially non-ascii data, e.g. UTF8, we need to force
             # the client encoding to UTF-8 to match Python string encoding
             if conn.info.encoding.lower() in ["ascii", "sqlascii", "sql_ascii"]:
