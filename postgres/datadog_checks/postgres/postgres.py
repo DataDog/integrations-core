@@ -495,6 +495,8 @@ class PostgreSql(DatabaseCheck):
             self.data_observability.cancel()
             if self.data_observability._job_loop_future:
                 self.data_observability._job_loop_future.result()
+        self._dynamic_queries = []
+        self._query_manager.executor = None
         self._close_db()
         self._close_db_pool()
 
