@@ -315,7 +315,7 @@ def test_run_explain_uses_parameterized_statement(pg_instance, integration_check
     conn_cm = mock.MagicMock()
     conn_cm.__enter__.return_value = mock_conn
 
-    with mock.patch.object(check.statement_samples.db_pool, 'get_connection', return_value=conn_cm):
+    with mock.patch.object(check.db_pool, 'get_connection', return_value=conn_cm):
         with mock.patch.object(check, 'histogram'):
             check.statement_samples._run_explain('testdb', statement, statement)
 
