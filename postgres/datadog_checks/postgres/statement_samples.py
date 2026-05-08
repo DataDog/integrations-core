@@ -15,11 +15,6 @@ from psycopg.rows import dict_row
 
 from datadog_checks.postgres.config_models import InstanceConfig
 
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
 
 from typing import TYPE_CHECKING
 
@@ -40,7 +35,7 @@ from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.explain_parameterized_queries import ExplainParameterizedQueries
 
-from .util import DatabaseConfigurationError, DBExplainError, trim_leading_set_stmts, warning_with_tags
+from .util import datadog_agent, DatabaseConfigurationError, DBExplainError, trim_leading_set_stmts, warning_with_tags
 from .version_utils import V9_6, V10
 
 # according to https://unicodebook.readthedocs.io/unicode_encodings.html, the max supported size of a UTF-8 encoded
