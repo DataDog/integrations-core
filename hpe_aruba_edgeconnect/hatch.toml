@@ -9,7 +9,6 @@ setup = ["lab"]
 
 [envs.default.overrides]
 name."^py3\\.13$".e2e-env = { value = true }
-matrix.setup.e2e-env = { value = true, if = ["lab"], env = ["EDGECONNECT_ORCH_IP", "EDGECONNECT_ORCH_USERNAME", "EDGECONNECT_ORCH_PASSWORD"] }
 matrix.setup.env-vars = [
   { key = "USE_EDGECONNECT_LAB", value = "True", if = ["lab"] },
 ]

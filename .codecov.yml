@@ -290,6 +290,10 @@ coverage:
         target: 75
         flags:
         - hdfs_namenode
+      HPE_Aruba_EdgeConnect:
+        target: 75
+        flags:
+        - hpe_aruba_edgeconnect
       HTTP:
         target: 75
         flags:
@@ -1242,6 +1246,11 @@ flags:
     paths:
     - hdfs_namenode/datadog_checks/hdfs_namenode
     - hdfs_namenode/tests
+  hpe_aruba_edgeconnect:
+    carryforward: true
+    paths:
+    - hpe_aruba_edgeconnect/datadog_checks/hpe_aruba_edgeconnect
+    - hpe_aruba_edgeconnect/tests
   http_check:
     carryforward: true
     paths:
@@ -1412,11 +1421,6 @@ flags:
     paths:
     - kyverno/datadog_checks/kyverno
     - kyverno/tests
-  lparstats:
-    carryforward: true
-    paths:
-    - lparstats/datadog_checks/lparstats
-    - lparstats/tests
   lighttpd:
     carryforward: true
     paths:
@@ -1437,6 +1441,11 @@ flags:
     paths:
     - litellm/datadog_checks/litellm
     - litellm/tests
+  lparstats:
+    carryforward: true
+    paths:
+    - lparstats/datadog_checks/lparstats
+    - lparstats/tests
   lustre:
     carryforward: true
     paths:
