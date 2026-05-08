@@ -3,6 +3,27 @@
   "description": "Monitor GPU cost allocation across Kubernetes clusters, including unused GPU capacity (cluster idle and workload idle), namespace-level attribution, and workload cost breakdowns.",
   "widgets": [
     {
+      "id": 8118165145589914,
+      "definition": {
+        "type": "note",
+        "content": "Cost data reflects total cloud spend. Utilization values reflect only hosts reporting the Datadog Agent \u2014 [set up GPU Monitoring](https://docs.datadoghq.com/gpu_monitoring/setup/) to populate utilization widgets.",
+        "background_color": "green",
+        "font_size": "14",
+        "text_align": "center",
+        "vertical_align": "center",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "bottom",
+        "has_padding": false
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 1
+      }
+    },
+    {
       "id": 8118165145589911,
       "definition": {
         "title": "GPU Spend by Cluster (past 1 month)",
@@ -27,20 +48,39 @@
               }
             ],
             "formulas": [
-              {"formula": "query1"}
+              {
+                "formula": "query1"
+              }
             ]
           }
         ],
         "graph_options": [
-          {"type": "query_value", "view": "total"},
-          {"type": "query_value", "view": "change"},
-          {"type": "timeseries", "display_type": "bars"},
-          {"type": "cloud_cost_table", "view": "summary", "sort": {"type": "formula", "index": 0, "order": "desc"}}
+          {
+            "type": "query_value",
+            "view": "total"
+          },
+          {
+            "type": "query_value",
+            "view": "change"
+          },
+          {
+            "type": "timeseries",
+            "display_type": "bars"
+          },
+          {
+            "type": "cloud_cost_table",
+            "view": "summary",
+            "sort": {
+              "type": "formula",
+              "index": 0,
+              "order": "desc"
+            }
+          }
         ]
       },
       "layout": {
         "x": 0,
-        "y": 0,
+        "y": 1,
         "width": 12,
         "height": 4
       }
@@ -424,7 +464,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 50,
+        "y": 51,
         "width": 12,
         "height": 10
       }
@@ -642,7 +682,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 60,
+        "y": 61,
         "width": 12,
         "height": 7
       }

@@ -3,6 +3,27 @@
   "description": "Use this dashboard to investigate Azure GPU compute spend, understand where spend is concentrated across N-series VM families and pricing terms, and correlate costs with GPU hardware utilization.",
   "widgets": [
     {
+      "id": 7908004665252823,
+      "definition": {
+        "type": "note",
+        "content": "Cost data reflects total cloud spend. Utilization values reflect only hosts reporting the Datadog Agent \u2014 [set up GPU Monitoring](https://docs.datadoghq.com/gpu_monitoring/setup/) to populate utilization widgets.",
+        "background_color": "green",
+        "font_size": "14",
+        "text_align": "center",
+        "vertical_align": "center",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "bottom",
+        "has_padding": false
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 1
+      }
+    },
+    {
       "id": 3011001287453001,
       "definition": {
         "title": "GPU Spend by Instance Type (past 1 month)",
@@ -59,7 +80,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 0,
+        "y": 1,
         "width": 12,
         "height": 6
       }
@@ -106,7 +127,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 6,
+        "y": 7,
         "width": 3,
         "height": 2
       }
@@ -162,7 +183,7 @@
       },
       "layout": {
         "x": 3,
-        "y": 6,
+        "y": 7,
         "width": 3,
         "height": 2
       }
@@ -181,7 +202,7 @@
       },
       "layout": {
         "x": 6,
-        "y": 6,
+        "y": 7,
         "width": 6,
         "height": 2
       }
@@ -233,7 +254,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 8,
+        "y": 9,
         "width": 6,
         "height": 3
       }
@@ -294,7 +315,7 @@
       },
       "layout": {
         "x": 6,
-        "y": 8,
+        "y": 9,
         "width": 6,
         "height": 3
       }
@@ -393,7 +414,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 11,
+        "y": 12,
         "width": 6,
         "height": 4
       }
@@ -445,7 +466,7 @@
       },
       "layout": {
         "x": 6,
-        "y": 11,
+        "y": 12,
         "width": 6,
         "height": 4
       }
@@ -500,7 +521,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 15,
+        "y": 16,
         "width": 12,
         "height": 3
       }
@@ -551,7 +572,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 18,
+        "y": 19,
         "width": 12,
         "height": 4
       }
@@ -873,7 +894,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 23,
+        "y": 24,
         "width": 12,
         "height": 6
       }
