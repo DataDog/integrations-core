@@ -20,7 +20,11 @@ def dd_environment():
 
 @pytest.fixture
 def instance():
-    return {'powerflex_gateway_url': 'https://localhost:443'}
+    return {
+        'powerflex_gateway_url': 'https://localhost:443',
+        'powerflex_username': 'admin',
+        'powerflex_password': 'password',
+    }
 
 
 def _get_url_path(url):
@@ -63,7 +67,17 @@ def mock_http_call(mock_responses):
 
 
 @pytest.fixture
-def mock_http_get(monkeypatch, mock_http_call):
+def mock_auth(monkeypatch):
+    def post(url, *args, **kwargs):
+        token_response = {'access_token': 'fake-token', 'expires_in': 300}
+        mock_json = mock.MagicMock(return_value=token_response)
+        return mock.MagicMock(json=mock_json, status_code=200)
+
+    monkeypatch.setattr('requests.Session.post', mock.MagicMock(side_effect=post))
+
+
+@pytest.fixture
+def mock_http_get(monkeypatch, mock_http_call, mock_auth):
     def get(url, *args, **kwargs):
         mock_json = mock.MagicMock(return_value=mock_http_call(url, **kwargs))
         return mock.MagicMock(json=mock_json, status_code=200)

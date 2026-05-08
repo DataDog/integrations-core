@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from time import time
 
-
 TOKEN_PATH = '/auth/realms/powerflex/protocol/openid-connect/token'
 
 
@@ -105,9 +104,13 @@ class PowerFlexAPI:
         return self._get(f'/api/instances/ProtectionDomain::{pd_id}/relationships/Statistics')
 
     def get_events(self, since: str | None = None) -> list[dict]:
-        filters = ['(severity eq CRITICAL or severity eq MAJOR)']
+        filters = []
         if since:
             filters.append(f'timestamp ge {since}')
-        filter_str = ' and '.join(filters)
-        response = self._get(f'/rest/v1/events?filter={filter_str}')
-        return response.get('results', []) if isinstance(response, dict) else []
+        filter_str = ' and '.join(filters) if filters else ''
+        query = f'/rest/v1/events?filter={filter_str}' if filter_str else '/rest/v1/events'
+        response = self._get(query)
+        results = response.get('results', []) if isinstance(response, dict) else []
+        events = [e for e in results if e.get('severity') in ('CRITICAL', 'MAJOR')]
+        self._log.debug('Collected %d events', len(events))
+        return events

@@ -19,7 +19,6 @@ files:
       description: Username for PowerFlex Gateway authentication via Keycloak.
       value:
         type: string
-        example: admin
     - name: powerflex_password
       display_priority: 1
       description: Password for PowerFlex Gateway authentication via Keycloak.

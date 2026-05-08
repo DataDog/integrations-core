@@ -50,7 +50,7 @@ def test_can_connect_down(dd_run_check, aggregator, instance, mocker):
     )
 
 
-def test_can_connect_up(dd_run_check, aggregator, instance, mocker):
+def test_can_connect_up(dd_run_check, aggregator, instance, mock_auth, mocker):
     mocker.patch('requests.Session.get', return_value=MagicMock(raise_for_status=MagicMock()))
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
@@ -349,7 +349,7 @@ def test_collect_devices(dd_run_check, aggregator, instance, mock_http_get):
     assert_bwc_metrics(aggregator, DEVICE_STATS_BWC_METRICS, dev3_tags)
 
 
-def test_collect_system_with_name(dd_run_check, aggregator, instance, mocker):
+def test_collect_system_with_name(dd_run_check, aggregator, instance, mock_auth, mocker):
     instances_response = [
         {
             'id': '1fcf40fc60c6520f',

@@ -279,6 +279,8 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         else:
             timestamp = datetime.now(tz=timezone.utc).timestamp()
 
+        # TODO: remap Severity to Datadog severity
+        # information -> info
         severity = event.get('severity', '')
 
         tags = list(self._base_tags)
@@ -286,7 +288,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         tags.append(f"severity:{severity}")
         tags.append(f"category:{event.get('category', '')}")
         tags.append(f"domain:{event.get('domain', '')}")
-        tags.append(f"resource_type:{event.get('resource_type', '')}")
+        tags.append(f"dell_type:{event.get('resource_type', '')}")
         tags.append(f"resource_name:{event.get('resource_name', '')}")
         tags.append(f"service_name:{event.get('service_name', '')}")
 

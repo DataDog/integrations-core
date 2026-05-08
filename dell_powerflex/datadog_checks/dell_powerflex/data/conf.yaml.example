@@ -18,10 +18,10 @@ instances:
     #
   - powerflex_gateway_url: https://localhost:443
 
-    ## @param powerflex_username - string - optional - default: admin
+    ## @param powerflex_username - string - optional
     ## Username for PowerFlex Gateway authentication via Keycloak.
     #
-    # powerflex_username: admin
+    # powerflex_username: <POWERFLEX_USERNAME>
 
     ## @param powerflex_password - string - optional
     ## Password for PowerFlex Gateway authentication via Keycloak.
