@@ -34,7 +34,6 @@ class Appliance:
     # system_bandwidth: int
     state: int
     site: str | None
-    startup_time: int | None
     # network_role: str
     # group_id: str
     # bypass: bool
@@ -68,7 +67,6 @@ class Appliance:
         # self.system_bandwidth = data.get('systemBandwidth', 0)
         self.state = data.get('state', 0)
         self.site = data.get('site')
-        self.startup_time = data.get('startupTime')
         # self.network_role = data.get('networkRole', '')
         # self.group_id = data.get('groupId', '')
         # self.bypass = data.get('bypass', False)

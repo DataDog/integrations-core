@@ -116,3 +116,8 @@ class ApplianceClient:
         resp = self._http.get(f'{self._base_url}/rest/json/alarm')
         resp.raise_for_status()
         return resp.json()
+
+    def get_system_info(self) -> dict[str, Any]:
+        resp = self._http.get(f'{self._base_url}/rest/json/systemInfo')
+        resp.raise_for_status()
+        return resp.json()

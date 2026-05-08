@@ -50,7 +50,6 @@ APPLIANCE_PAYLOAD = [
         'serial': 'SN001',
         'mode': 'router',
         'softwareVersion': '9.3.1',
-        'startupTime': 86400,
     },
     {
         'hostName': 'NewYorkSP01',
@@ -62,7 +61,6 @@ APPLIANCE_PAYLOAD = [
         'serial': 'SN002',
         'mode': 'router',
         'softwareVersion': '9.3.1',
-        'startupTime': 86400,
     },
     {
         'hostName': 'SanFranSP02',
@@ -74,17 +72,62 @@ APPLIANCE_PAYLOAD = [
         'serial': 'SN003',
         'mode': 'router',
         'softwareVersion': '9.3.1',
-        'startupTime': 86400,
     },
 ]
+
+SYSTEM_INFO_PAYLOAD = {
+    'hostName': 'SanFranSP01',
+    'applianceid': 193645,
+    'model': 'EC-V 209005002001 Rev 102786',
+    'modelShort': 'EC-V',
+    'platform': 'VMware',
+    'status': 'Normal',
+    'uptime': 816745152,
+    'uptimeString': '9d 10h 52m 25s',
+    'datetime': '2026/05/08 07:53:33 Etc/UTC',
+    'timezone': 'Etc/UTC',
+    'gmtOffset': 0,
+    'release': 'ECOS 9.5.2.1_102786',
+    'releaseWithoutPrefix': '9.5.2.1_102786',
+    'serial': '00-00-00-02-F4-6D',
+    'uuid': '3dbcbf55-33e0-418f-b98c-3626f98cb0da',
+    'nepk': '',
+    'portalObjectId': '69f11f4fa66feceed31bde83',
+    'deploymentMode': 'router',
+    'inlineRouter': True,
+    'licenseRequired': False,
+    'isLicenseInstalled': False,
+    'licenseExpiryDate': '',
+    'licenseExpirationDaysLeft': 1.7976931348623157e308,
+    'hasUnsavedChanges': False,
+    'rebootRequired': False,
+    'biosVersion': '6.00',
+    'alarmSummary': {
+        'num_cleared': 0,
+        'num_critical': 0,
+        'num_equipment_outstanding': 0,
+        'num_major': 0,
+        'num_minor': 0,
+        'num_outstanding': 1,
+        'num_raise_ignore': 0,
+        'num_software_outstanding': 1,
+        'num_tca_outstanding': 0,
+        'num_traffic_class_outstanding': 0,
+        'num_tunnel_outstanding': 0,
+        'num_warning': 1,
+    },
+    'suricata': '6.0.10',
+    'ccStatus': False,
+    'sku': 'N/A',
+}
 
 EXPECTED_METRIC_COUNTS = {
     # Device health (orchestrator + appliance client)
     'device.reachability': 1,
     'device.uptime': 1,
-    'device.cpu.usage': 1,
-    'device.memory.usage': 1,
-    'device.disk.usage': 1,
+    'device.cpu.usage': 5,
+    'device.memory.usage': 5,
+    'device.disk.usage': 10,
     'device.hardware.ok': 1,
     # Interface status/speed (from mock — 1 interface)
     'interface.status': 1,
@@ -182,10 +225,21 @@ BASE_DEVICE_TAGS = [
 EXPECTED_VALUES = [
     # --- device health ---
     ('device.reachability', 1, []),
-    ('device.uptime', 86400, []),
-    ('device.cpu.usage', 50, []),
-    ('device.memory.usage', 60, []),
-    ('device.disk.usage', 40, []),
+    ('device.uptime', 816745.152, []),
+    ('device.cpu.usage', 30.0, ['cpu_state:user']),
+    ('device.cpu.usage', 15.0, ['cpu_state:system']),
+    ('device.cpu.usage', 3.0, ['cpu_state:irq']),
+    ('device.cpu.usage', 2.0, ['cpu_state:nice']),
+    ('device.cpu.usage', 50.0, ['cpu_state:idle']),
+    ('device.memory.usage', 3945080, ['memory_type:total']),
+    ('device.memory.usage', 770848, ['memory_type:free']),
+    ('device.memory.usage', 3174232, ['memory_type:used']),
+    ('device.memory.usage', 2516, ['memory_type:buffers']),
+    ('device.memory.usage', 729568, ['memory_type:cached']),
+    ('device.disk.usage', 1193348 * 1024, ['mount:/', 'disk_type:used']),
+    ('device.disk.usage', 4619060 * 1024, ['mount:/', 'disk_type:free']),
+    ('device.disk.usage', 4328968 * 1024, ['mount:/var', 'disk_type:used']),
+    ('device.disk.usage', 35553256 * 1024, ['mount:/var', 'disk_type:free']),
     ('device.hardware.ok', 0, []),
     # --- interface status / speed (from mock) ---
     ('interface.status', 1, ['interface_name:wan0', 'admin_status:up', 'oper_status:up']),
@@ -291,7 +345,68 @@ def _mock_orch_client(appliance_payload, overlay_map=None):
     return client
 
 
-def _mock_appliance_client(tgz_data, newest_timestamp=NEWEST_TS, cpu=50, mem=60, disk=40, alarms=None):
+MEMORY_PAYLOAD = {
+    'total': 3945080,
+    'free': 770848,
+    'buffers': 2516,
+    'cached': 729568,
+    'used': 3174232,
+}
+
+DISK_PAYLOAD = {
+    '/dev': {'1k-blocks': 1965848, 'used': 0, 'available': 1965848, 'usedpercent': 0, 'filesystem': 'none'},
+    '/': {
+        '1k-blocks': 6126976,
+        'used': 1193348,
+        'available': 4619060,
+        'usedpercent': 21,
+        'filesystem': '/dev/disk/by-label/ROOT_1',
+    },
+    '/var': {
+        '1k-blocks': 42030588,
+        'used': 4328968,
+        'available': 35553256,
+        'usedpercent': 11,
+        'filesystem': '/root/dev/disk/by-label/VAR',
+    },
+    '/boot': {'1k-blocks': 999288, 'used': 31676, 'available': 915188, 'usedpercent': 4, 'filesystem': '/dev/sda5'},
+    '/bootmgr': {'1k-blocks': 999320, 'used': 3268, 'available': 943624, 'usedpercent': 1, 'filesystem': '/dev/sda1'},
+    '/config': {'1k-blocks': 1015700, 'used': 1632, 'available': 961640, 'usedpercent': 1, 'filesystem': '/dev/sda3'},
+    '/run': {'1k-blocks': 1972540, 'used': 4776, 'available': 1967764, 'usedpercent': 1, 'filesystem': 'tmpfs'},
+    '/var/volatile': {
+        '1k-blocks': 1972540,
+        'used': 2384,
+        'available': 1970156,
+        'usedpercent': 1,
+        'filesystem': 'tmpfs',
+    },
+}
+
+
+def _build_cpu_payload(usage):
+    idle = 100 - usage
+    return {
+        'latestTimestamp': NEWEST_TS,
+        'data': [
+            {
+                str(NEWEST_TS): [
+                    {
+                        'cpu_number': 'ALL',
+                        'pIdle': str(idle),
+                        'pUser': str(usage * 0.6),
+                        'pSys': str(usage * 0.3),
+                        'pIRQ': str(usage * 0.06),
+                        'pNice': str(usage * 0.04),
+                    },
+                ],
+            },
+        ],
+    }
+
+
+def _mock_appliance_client(
+    tgz_data, newest_timestamp=NEWEST_TS, cpu=50, mem=None, disk=None, alarms=None, system_info=None
+):
     client = MagicMock()
     client.get_newest_timestamp.return_value = newest_timestamp
     if isinstance(tgz_data, dict):
@@ -301,12 +416,13 @@ def _mock_appliance_client(tgz_data, newest_timestamp=NEWEST_TS, cpu=50, mem=60,
     client.get_network_interfaces.return_value = {
         'ifInfo': [{'ifName': 'wan0', 'admin': 1, 'oper': 1, 'speed': 1000000}]
     }
-    client.get_cpu_stats.return_value = {'cpuPct': cpu}
-    client.get_memory_stats.return_value = {'memPct': mem}
-    client.get_disk_usage.return_value = {'diskPct': disk}
+    client.get_cpu_stats.return_value = _build_cpu_payload(cpu)
+    client.get_memory_stats.return_value = mem if mem is not None else MEMORY_PAYLOAD
+    client.get_disk_usage.return_value = disk if disk is not None else DISK_PAYLOAD
     client.get_alarms.return_value = (
         alarms if alarms is not None else {'outstanding': [{'type': 'HW'}, {'type': 'TUNNEL'}]}
     )
+    client.get_system_info.return_value = system_info if system_info is not None else SYSTEM_INFO_PAYLOAD
     client.app_ip = '10.0.0.1'
     return client
 
@@ -689,7 +805,8 @@ def test_collection_step_failure_does_not_block_others(dd_run_check, aggregator,
 
     dd_run_check(check)
 
-    aggregator.assert_metric(f'{NS}.device.cpu.usage', value=42, count=1)
+    aggregator.assert_metric(f'{NS}.device.cpu.usage', count=5)
+    aggregator.assert_metric(f'{NS}.device.cpu.usage', value=58.0, tags=BASE_DEVICE_TAGS + ['cpu_state:idle'])
     aggregator.assert_metric(f'{NS}.device.hardware.ok', count=1)
 
 

@@ -97,3 +97,9 @@ files:
       overrides:
         min_collection_interval.value.example: 60
         min_collection_interval.value.display_default: 60
+  - template: logs
+    example:
+    - type: tcp
+      port: 10514
+      service: edgeconnect
+      source: aruba_edgeconnect

@@ -11,6 +11,8 @@ import pytest
 from datadog_checks.dev import WaitFor, docker_run, get_docker_hostname, get_here
 from datadog_checks.dev.utils import find_free_port
 
+USE_EDGECONNECT_LAB = os.environ.get('USE_EDGECONNECT_LAB')
+
 
 @pytest.fixture(scope='session')
 def logger() -> logging.Logger:
@@ -24,36 +26,54 @@ COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 
 @pytest.fixture(scope='session')
 def dd_environment(instance, dd_save_state):
-    orch_port = find_free_port(HOST)
-    appliance_port = find_free_port(HOST)
-    orch_ip = f'{HOST}:{orch_port}'
-    appliance_ip = f'{HOST}:{appliance_port}'
+    if USE_EDGECONNECT_LAB:
+        orch_ip = os.environ['EDGECONNECT_ORCH_IP']
+        username = os.environ['EDGECONNECT_ORCH_USERNAME']
+        password = os.environ['EDGECONNECT_ORCH_PASSWORD']
+        inst = instance(orch_ip, username=username, password=password)
+        dd_save_state('e2e_instance', inst)
+        yield {
+            'instances': [inst],
+            'logs': [
+                {
+                    'type': 'tcp',
+                    'port': 10514,
+                    'service': 'edgeconnect',
+                    'source': 'aruba_edgeconnect',
+                }
+            ],
+        }
+    else:
+        orch_port = find_free_port(HOST)
+        appliance_port = find_free_port(HOST)
+        orch_ip = f'{HOST}:{orch_port}'
+        appliance_ip = f'{HOST}:{appliance_port}'
 
-    def _ready():
-        ctx = ssl.create_default_context()
-        ctx.check_hostname = False
-        ctx.verify_mode = ssl.CERT_NONE
-        urlopen(f'https://{orch_ip}/health', timeout=2, context=ctx)
-        urlopen(f'https://{appliance_ip}/health', timeout=2, context=ctx)
+        def _ready():
+            ctx = ssl.create_default_context()
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+            urlopen(f'https://{orch_ip}/health', timeout=2, context=ctx)
+            urlopen(f'https://{appliance_ip}/health', timeout=2, context=ctx)
 
-    inst = instance(orch_ip, connect_timeout=2)
-    dd_save_state('e2e_instance', inst)
+        inst = instance(orch_ip, connect_timeout=2)
+        dd_save_state('e2e_instance', inst)
 
-    with docker_run(
-        compose_file=COMPOSE_FILE,
-        build=True,
-        conditions=[WaitFor(_ready, attempts=60, wait=1)],
-        env_vars={
-            'HOST_PORT': str(orch_port),
-            'APPLIANCE_PORT': str(appliance_port),
-            'ORCH_USERNAME': 'admin',
-            'ORCH_PASSWORD': '',
-            'APPLIANCE_USERNAME': 'admin',
-            'APPLIANCE_PASSWORD': '',
-            'APPLIANCE_IP': appliance_ip,
-        },
-    ):
-        yield {'instances': [inst]}
+        with docker_run(
+            compose_file=COMPOSE_FILE,
+            build=True,
+            conditions=[WaitFor(_ready, attempts=60, wait=1)],
+            env_vars={
+                'HOST_PORT': str(orch_port),
+                'APPLIANCE_PORT': str(appliance_port),
+                'ORCH_USERNAME': 'admin',
+                'ORCH_PASSWORD': '',
+                'APPLIANCE_USERNAME': 'admin',
+                'APPLIANCE_PASSWORD': '',
+                'APPLIANCE_IP': appliance_ip,
+            },
+        ):
+            yield {'instances': [inst]}
 
 
 @pytest.fixture(scope='session')

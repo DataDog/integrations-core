@@ -27,6 +27,14 @@ from .ndm_models import (
 from .parsers.minute_stats import MinuteStats
 from .parsers.tunnel import TunnelV2Stats
 
+_CPU_STATE_FIELDS = {
+    'user': 'pUser',
+    'system': 'pSys',
+    'irq': 'pIRQ',
+    'nice': 'pNice',
+    'idle': 'pIdle',
+}
+
 
 class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
     __NAMESPACE__ = 'hpe_aruba_edgeconnect'
@@ -34,6 +42,8 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.http.persist_connections = True
+        # Auth is handled via session cookies from the login endpoint, not HTTP Basic Auth
+        self.http.options['auth'] = None
         self._peer_lookup: dict[str, tuple[str, str]] = {}
         self._overlay_map: dict[str, str] = {}
 
@@ -88,9 +98,6 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         for ap in appliances:
             tags = ap.tags(namespace)
             self.gauge('device.reachability', 1 if ap.is_reachable else 0, tags=tags)
-            if ap.startup_time is not None:
-                # TODO is this actual time or seconds since last reboot? - change for /systemInfo
-                self.gauge('device.uptime', ap.startup_time, tags=tags)
             devices.append(create_device_metadata(ap, namespace))
         self._submit_metadata(devices)
         try:
@@ -103,6 +110,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
     def _create_appliance_client(self, app_ip: str, username: str, password: str) -> ApplianceClient:
         http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
         http.persist_connections = True
+        http.options['auth'] = None
         client = ApplianceClient(http, app_ip, self.log)
         client.login(username, password)
         return client
@@ -185,6 +193,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
             lambda: self._collect_memory_stats(client, base_tags),
             lambda: self._collect_disk_stats(client, base_tags),
             lambda: self._collect_alarm_stats(client, base_tags),
+            lambda: self._collect_system_info(client, base_tags),
         ]
         if latest_tunnel_stats:
             collectors.append(
@@ -238,18 +247,73 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
 
     def _collect_cpu_stats(self, client: ApplianceClient, base_tags: list[str], newest: int) -> None:
         cpu_data = client.get_cpu_stats(newest)
-        if cpu_data is not None and cpu_data.get('cpuPct') is not None:
-            self.gauge('device.cpu.usage', cpu_data['cpuPct'], tags=base_tags)
+        if not cpu_data:
+            return
+        buckets = cpu_data.get('data') or []
+        if not buckets:
+            return
+        latest_ts = cpu_data.get('latestTimestamp')
+        bucket = next((b for b in buckets if str(latest_ts) in b), buckets[-1])
+        entries = next(iter(bucket.values()), [])
+        aggregate = next((e for e in entries if str(e.get('cpu_number')).upper() == 'ALL'), None)
+        if aggregate is None:
+            self.log.warning("No aggregate CPU data found for appliance %s", client.app_ip)
+            return
+        for state, field in _CPU_STATE_FIELDS.items():
+            value = aggregate.get(field)
+            if value is None:
+                continue
+            try:
+                self.gauge('device.cpu.usage', float(value), tags=base_tags + [f'cpu_state:{state}'])
+            except (TypeError, ValueError):
+                continue
 
     def _collect_memory_stats(self, client: ApplianceClient, base_tags: list[str]) -> None:
         mem_data = client.get_memory_stats()
-        if mem_data.get('memPct') is not None:
-            self.gauge('device.memory.usage', mem_data['memPct'], tags=base_tags)
+        if not isinstance(mem_data, dict):
+            return
+        memory_fields = {
+            'total': 'total',
+            'free': 'free',
+            'used': 'used',
+            'buffers': 'buffers',
+            'cached': 'cached',
+        }
+        for field, tag_value in memory_fields.items():
+            value = mem_data.get(field)
+            if value is not None:
+                self.gauge('device.memory.usage', value, tags=base_tags + [f'memory_type:{tag_value}'])
 
     def _collect_disk_stats(self, client: ApplianceClient, base_tags: list[str]) -> None:
         disk_data = client.get_disk_usage()
-        if disk_data.get('diskPct') is not None:
-            self.gauge('device.disk.usage', disk_data['diskPct'], tags=base_tags)
+        if not isinstance(disk_data, dict):
+            return
+        for mount, entry in disk_data.items():
+            if not isinstance(entry, dict):
+                continue
+            filesystem = entry.get('filesystem')
+            if filesystem in (None, 'none', 'tmpfs'):
+                continue
+            mount_tags = base_tags + [f'mount:{mount}', f'device:{filesystem}']
+            used_kb = entry.get('used')
+            available_kb = entry.get('available')
+            if used_kb is not None:
+                self.gauge('device.disk.usage', used_kb * 1024, tags=mount_tags + ['disk_type:used'])
+            if available_kb is not None:
+                self.gauge('device.disk.usage', available_kb * 1024, tags=mount_tags + ['disk_type:free'])
+
+    def _collect_system_info(self, client: ApplianceClient, base_tags: list[str]) -> None:
+        info = client.get_system_info()
+        if not isinstance(info, dict):
+            return
+        uptime_ms = info.get('uptime')
+        if uptime_ms is None:
+            self.log.warning("No uptime found for appliance %s", client.app_ip)
+            return
+        try:
+            self.gauge('device.uptime', float(uptime_ms) / 1000.0, tags=base_tags)
+        except (TypeError, ValueError):
+            return
 
     def _collect_alarm_stats(self, client: ApplianceClient, base_tags: list[str]) -> None:
         alarms = client.get_alarms()
