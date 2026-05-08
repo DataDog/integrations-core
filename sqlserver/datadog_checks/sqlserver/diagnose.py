@@ -58,8 +58,11 @@ DIAGNOSTIC_METADATA = {
         "docs_url": SQLSERVER_SETUP_DOCS_URL,
     },
     SQLServerConfigurationError.missing_view_server_state: {
-        "description": "Verifies VIEW SERVER STATE for server state, query metrics, and query activity collection.",
-        "remediation": "Grant VIEW SERVER STATE to the Datadog login.",
+        "description": (
+            "Verifies VIEW SERVER STATE (or VIEW DATABASE STATE on Azure SQL Database) for server state, "
+            "query metrics, and query activity collection."
+        ),
+        "remediation": "Grant VIEW SERVER STATE (or VIEW DATABASE STATE on Azure SQL Database) to the Datadog login.",
         "docs_url": SQLSERVER_SETUP_DOCS_URL,
     },
     SQLServerConfigurationError.missing_connect_any_database: {
@@ -94,6 +97,7 @@ class SqlserverDiagnose:
         self._failed: set[str] = set()
         self._major_version: int | None = None
         self._engine_edition: int | None = None
+        self._is_rds: bool | None = None
 
     def register(self) -> None:
         """Register the diagnostic entry point with the check's Diagnosis object."""
@@ -108,6 +112,7 @@ class SqlserverDiagnose:
         self._failed = set()
         self._major_version = None
         self._engine_edition = None
+        self._is_rds = None
 
         try:
             with self._check.connection.open_managed_default_connection(KEY_PREFIX):
@@ -121,6 +126,7 @@ class SqlserverDiagnose:
                     if self._needs_view_any_definition():
                         self._diagnose_view_any_definition(cursor)
                     if self._needs_msdb_select():
+                        self._detect_rds(cursor)
                         self._diagnose_msdb_select(cursor)
         except SQLConnectionError as e:
             code = SQLServerConfigurationError.connection_failure
@@ -191,22 +197,24 @@ class SqlserverDiagnose:
 
     def _diagnose_view_server_state(self, cursor: Any) -> None:
         code = SQLServerConfigurationError.missing_view_server_state
+        azure = self._is_azure_sql_database()
+        permission_label = "VIEW DATABASE STATE" if azure else "VIEW SERVER STATE"
         try:
-            if not _has_server_permission(cursor, "VIEW SERVER STATE"):
+            if not azure and not _has_server_permission(cursor, "VIEW SERVER STATE"):
                 self._fail(code, diagnosis="The Datadog login does not have VIEW SERVER STATE.")
                 return
             _execute_read_probe(cursor, "SELECT TOP 1 session_id FROM sys.dm_exec_sessions")
         except Exception as e:
             self._fail(
                 code,
-                diagnosis="Unable to validate VIEW SERVER STATE with sys.dm_exec_sessions: {}".format(e),
+                diagnosis="Unable to validate {} with sys.dm_exec_sessions: {}".format(permission_label, e),
                 rawerror=str(e),
             )
             return
 
         self._check.diagnosis.success(
             name=code.value,
-            diagnosis="VIEW SERVER STATE is granted and sys.dm_exec_sessions is readable.",
+            diagnosis="{} is granted and sys.dm_exec_sessions is readable.".format(permission_label),
             category=CATEGORY_SQLSERVER,
         )
 
@@ -334,6 +342,8 @@ class SqlserverDiagnose:
                     ("msdb.dbo.sysjobactivity", "SELECT TOP 1 1 FROM msdb.dbo.sysjobactivity"),
                 ]
             )
+            if not self._is_rds:
+                probes.append(("msdb.dbo.syssessions", "SELECT TOP 1 1 FROM msdb.dbo.syssessions"))
         return probes
 
     def _agent_jobs_enabled(self) -> bool:
@@ -343,6 +353,14 @@ class SqlserverDiagnose:
     def _is_azure_sql_database(self) -> bool:
         engine_edition = self._engine_edition or self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
         return engine_edition == ENGINE_EDITION_SQL_DATABASE
+
+    def _detect_rds(self, cursor: Any) -> None:
+        try:
+            row = _fetchone(cursor, "SELECT name FROM sys.databases WHERE name = 'rdsadmin'")
+        except Exception:
+            self._is_rds = False
+            return
+        self._is_rds = bool(row)
 
     def _fail(self, code: SQLServerConfigurationError, diagnosis: str, rawerror: str | None = None) -> None:
         self._check.diagnosis.fail(

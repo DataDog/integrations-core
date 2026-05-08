@@ -100,7 +100,14 @@ def _check(instance_minimal_defaults, responses, **instance_overrides):
     return check
 
 
-def _happy_responses(*, major_version=16, engine_edition=2, connect_any_database=True, view_any_definition=True):
+def _happy_responses(
+    *,
+    major_version=16,
+    engine_edition=2,
+    connect_any_database=True,
+    view_any_definition=True,
+    is_rds=False,
+):
     return [
         ("SERVERPROPERTY('ProductMajorVersion')", [(major_version, engine_edition)]),
         ("sys.dm_os_performance_counters", [(1,)]),
@@ -108,10 +115,12 @@ def _happy_responses(*, major_version=16, engine_edition=2, connect_any_database
         ("sys.dm_exec_sessions", [(1,)]),
         (_permission("CONNECT ANY DATABASE"), [(1 if connect_any_database else 0,)]),
         (_permission("VIEW ANY DEFINITION"), [(1 if view_any_definition else 0,)]),
+        ("'rdsadmin'", [("rdsadmin",)] if is_rds else []),
         ("msdb.dbo.backupset", []),
         ("msdb.dbo.sysjobs", []),
         ("msdb.dbo.sysjobhistory", []),
         ("msdb.dbo.sysjobactivity", []),
+        ("msdb.dbo.syssessions", []),
     ]
 
 
@@ -119,6 +128,18 @@ def _assert_result(diagnoses, code, result):
     rows = _by_name(diagnoses, code.value)
     assert rows, "missing diagnosis for {}".format(code.value)
     assert rows[0]['result'] == result, rows
+
+
+def _replace_response(responses, matcher_key, new_result):
+    """Return responses with the entry whose matcher matches matcher_key replaced with new_result.
+
+    String matcher_keys compare equal to string matchers; callable matcher_keys compare via __qualname__.
+    """
+    target = getattr(matcher_key, '__qualname__', matcher_key)
+    return [
+        (matcher, new_result) if getattr(matcher, '__qualname__', matcher) == target else (matcher, result)
+        for matcher, result in responses
+    ]
 
 
 def test_register_is_idempotent(instance_minimal_defaults):
@@ -236,8 +257,7 @@ def test_missing_view_any_definition_fails_for_dbm(instance_minimal_defaults):
 
 
 def test_missing_msdb_select_fails_when_enabled_feature_needs_msdb(instance_minimal_defaults):
-    responses = _happy_responses()
-    responses[6] = ("msdb.dbo.backupset", Exception("permission denied"))
+    responses = _replace_response(_happy_responses(), "msdb.dbo.backupset", Exception("permission denied"))
     check = _check(instance_minimal_defaults, responses)
 
     diagnoses = _get_diagnoses(check)
@@ -263,6 +283,34 @@ def test_agent_jobs_adds_msdb_job_table_probes(instance_minimal_defaults):
     assert "msdb.dbo.sysjobs" in row['diagnosis']
     assert "msdb.dbo.sysjobhistory" in row['diagnosis']
     assert "msdb.dbo.sysjobactivity" in row['diagnosis']
+    assert "msdb.dbo.syssessions" in row['diagnosis']
+
+
+def test_agent_jobs_skips_syssessions_on_rds(instance_minimal_defaults):
+    check = _check(
+        instance_minimal_defaults,
+        _happy_responses(is_rds=True),
+        dbm=True,
+        agent_jobs={'enabled': True},
+    )
+
+    diagnoses = _get_diagnoses(check)
+
+    row = _by_name(diagnoses, SQLServerConfigurationError.missing_msdb_select.value)[0]
+    assert row['result'] == Diagnosis.DIAGNOSIS_SUCCESS
+    assert "msdb.dbo.syssessions" not in row['diagnosis']
+
+
+def test_agent_jobs_missing_syssessions_select_fails(instance_minimal_defaults):
+    responses = _replace_response(_happy_responses(), "msdb.dbo.syssessions", Exception("permission denied"))
+    check = _check(instance_minimal_defaults, responses, dbm=True, agent_jobs={'enabled': True})
+
+    diagnoses = _get_diagnoses(check)
+
+    row = _by_name(diagnoses, SQLServerConfigurationError.missing_msdb_select.value)[0]
+    assert row['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert "msdb.dbo.syssessions" in row['diagnosis']
+    assert "permission denied" in row['rawerror']
 
 
 def test_azure_sql_database_skips_server_and_msdb_specific_dbm_diagnostics(instance_minimal_defaults):
@@ -273,6 +321,38 @@ def test_azure_sql_database_skips_server_and_msdb_specific_dbm_diagnostics(insta
     assert not _by_name(diagnoses, SQLServerConfigurationError.missing_connect_any_database.value)
     assert not _by_name(diagnoses, SQLServerConfigurationError.missing_view_any_definition.value)
     assert not _by_name(diagnoses, SQLServerConfigurationError.missing_msdb_select.value)
+
+
+def test_azure_sql_database_uses_view_database_state_probe(instance_minimal_defaults):
+    responses = _replace_response(
+        _happy_responses(engine_edition=5),
+        _permission("VIEW SERVER STATE"),
+        [(0,)],
+    )
+    check = _check(instance_minimal_defaults, responses)
+
+    diagnoses = _get_diagnoses(check)
+
+    row = _by_name(diagnoses, SQLServerConfigurationError.missing_view_server_state.value)[0]
+    assert row['result'] == Diagnosis.DIAGNOSIS_SUCCESS
+    assert "VIEW DATABASE STATE" in row['diagnosis']
+
+
+def test_azure_sql_database_view_database_state_failure(instance_minimal_defaults):
+    responses = _replace_response(
+        _happy_responses(engine_edition=5),
+        "sys.dm_exec_sessions",
+        Exception("permission denied"),
+    )
+    check = _check(instance_minimal_defaults, responses)
+
+    diagnoses = _get_diagnoses(check)
+
+    row = _by_name(diagnoses, SQLServerConfigurationError.missing_view_server_state.value)[0]
+    assert row['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert "VIEW DATABASE STATE" in row['diagnosis']
+    assert "VIEW SERVER STATE" not in row['diagnosis']
+    assert "permission denied" in row['rawerror']
 
 
 def test_get_diagnoses_returns_json(instance_minimal_defaults):
