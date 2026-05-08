@@ -103,6 +103,17 @@ class PowerFlexAPI:
     def get_protection_domain_statistics(self, pd_id: str) -> dict:
         return self._get(f'/api/instances/ProtectionDomain::{pd_id}/relationships/Statistics')
 
+    def get_alerts(self, since: str | None = None) -> list[dict]:
+        filters = []
+        if since:
+            filters.append(f'timestamp ge {since}')
+        filter_str = ' and '.join(filters) if filters else ''
+        query = f'/rest/v1/alerts?filter={filter_str}' if filter_str else '/rest/v1/alerts'
+        response = self._get(query)
+        results = response.get('results', []) if isinstance(response, dict) else []
+        self._log.debug('Collected %d alerts', len(results))
+        return results
+
     def get_events(self, since: str | None = None) -> list[dict]:
         filters = []
         if since:

@@ -61,6 +61,7 @@ class InstanceConfig(BaseModel):
     aws_host: Optional[str] = None
     aws_region: Optional[str] = None
     aws_service: Optional[str] = None
+    collect_alerts: Optional[bool] = None
     collect_events: Optional[bool] = None
     connect_timeout: Optional[float] = None
     disable_generic_tags: Optional[bool] = None

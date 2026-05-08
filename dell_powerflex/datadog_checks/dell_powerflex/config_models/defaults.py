@@ -16,6 +16,10 @@ def instance_auth_type():
     return 'basic'
 
 
+def instance_collect_alerts():
+    return False
+
+
 def instance_collect_events():
     return False
 

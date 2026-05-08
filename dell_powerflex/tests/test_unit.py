@@ -762,3 +762,51 @@ def test_collect_events_failure(dd_run_check, aggregator, instance, mock_http_ge
     assert 'Failed to collect events' in caplog.text
     assert len(aggregator.events) == 0
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
+
+
+def test_collect_alerts(dd_run_check, aggregator, instance, mock_http_get):
+    instance['collect_alerts'] = True
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+
+    alerts = aggregator.events
+    assert len(alerts) == 2
+    for alert in alerts:
+        assert alert['event_type'] == 'dell_powerflex'
+        assert alert['source_type_name'] == 'dell_powerflex'
+        assert 'powerflex_gateway_url:https://localhost:443' in alert['tags']
+
+    mdm_alert = next(a for a in alerts if a['msg_title'] == 'Unable To Receive Mdm Events')
+    assert 'MDM1: Unable to receive mdm events from [10.0.1.250] .' in mdm_alert['msg_text']
+    assert 'powerflex_alert_name:UNABLE_TO_RECEIVE_MDM_EVENTS' in mdm_alert['tags']
+    assert 'severity:MAJOR' in mdm_alert['tags']
+    assert 'category:MAINTENANCE' in mdm_alert['tags']
+    assert 'domain:BLOCK' in mdm_alert['tags']
+    assert 'dell_type:mdms' in mdm_alert['tags']
+    assert 'service_name:block-events-gw' in mdm_alert['tags']
+
+    license_alert = next(a for a in alerts if a['msg_title'] == 'Trial License Used')
+    assert 'PowerFlex is using a trial license' in license_alert['msg_text']
+    assert 'severity:MINOR' in license_alert['tags']
+
+
+def test_collect_alerts_disabled(dd_run_check, aggregator, instance, mock_http_get):
+    instance['collect_alerts'] = False
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+    assert len(aggregator.events) == 0
+    aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
+
+
+def test_collect_alerts_failure(dd_run_check, aggregator, instance, mock_http_get, mocker, caplog):
+    instance['collect_alerts'] = True
+    mocker.patch(
+        'datadog_checks.dell_powerflex.api.PowerFlexAPI.get_alerts',
+        side_effect=Exception('alerts API failed'),
+    )
+    caplog.set_level(logging.WARNING)
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+    assert 'Failed to collect alerts' in caplog.text
+    assert len(aggregator.events) == 0
+    aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)

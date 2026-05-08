@@ -76,8 +76,16 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         self._collect_sds_list()
         self._collect_sdc_list()
         self._collect_devices()
-        if self.config.collect_events:
-            self._collect_events()
+        if self.config.collect_events or self.config.collect_alerts:
+            now = datetime.now(tz=timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+            last_ts = self.read_persistent_cache('last_event_timestamp') or now
+            if self.config.collect_events:
+                self._collect_events(last_ts)
+            if self.config.collect_alerts:
+                self._collect_alerts(last_ts)
+            self.write_persistent_cache(
+                'last_event_timestamp', datetime.now(tz=timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+            )
 
     def _collect_systems(self) -> None:
         for system in self._api.get_systems():
@@ -257,17 +265,12 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             self.gauge(metric_suffix, stats.get(api_field), tags=tags)
         self._collect_bwc_metrics(stats, DEVICE_STATS_BWC_METRICS, tags)
 
-    def _collect_events(self) -> None:
-        now = datetime.now(tz=timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
-        last_ts = self.read_persistent_cache('last_event_timestamp') or now
+    def _collect_events(self, since: str) -> None:
         try:
-            events = self._api.get_events(since=last_ts)
+            events = self._api.get_events(since=since)
         except Exception as e:
             self.log.warning('Failed to collect events: %s', e)
             return
-        self.write_persistent_cache(
-            'last_event_timestamp', datetime.now(tz=timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
-        )
         for event in events:
             dd_event = self._create_dd_event(event)
             self.event(dd_event)
@@ -296,6 +299,50 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         title = name.replace('_', ' ').title()
         resource_name = event.get('resource_name', '')
         description = event.get('description', '')
+        msg_text = f"{resource_name}: {description}" if resource_name else description
+
+        return {
+            'timestamp': timestamp,
+            'event_type': self.__NAMESPACE__,
+            'msg_title': title,
+            'msg_text': msg_text,
+            'alert_type': 'error',
+            'source_type_name': self.__NAMESPACE__,
+            'tags': tags,
+        }
+
+    def _collect_alerts(self, since: str) -> None:
+        try:
+            alerts = self._api.get_alerts(since=since)
+        except Exception as e:
+            self.log.warning('Failed to collect alerts: %s', e)
+            return
+        for alert in alerts:
+            dd_event = self._create_dd_alert(alert)
+            self.event(dd_event)
+
+    def _create_dd_alert(self, alert: dict) -> dict:
+        raw_ts = alert.get('timestamp')
+        if raw_ts:
+            timestamp = datetime.fromisoformat(raw_ts.replace('Z', '+00:00')).timestamp()
+        else:
+            timestamp = datetime.now(tz=timezone.utc).timestamp()
+
+        severity = alert.get('severity', '')
+
+        tags = list(self._base_tags)
+        tags.append(f"powerflex_alert_name:{alert.get('name', '')}")
+        tags.append(f"severity:{severity}")
+        tags.append(f"category:{alert.get('category', '')}")
+        tags.append(f"domain:{alert.get('domain', '')}")
+        tags.append(f"dell_type:{alert.get('resource_type', '')}")
+        tags.append(f"resource_name:{alert.get('resource_name', '')}")
+        tags.append(f"service_name:{alert.get('service', '')}")
+
+        name = alert.get('name', '')
+        title = name.replace('_', ' ').title()
+        resource_name = alert.get('resource_name', '')
+        description = alert.get('description', '')
         msg_text = f"{resource_name}: {description}" if resource_name else description
 
         return {

@@ -38,6 +38,11 @@ instances:
     #
     # collect_events: false
 
+    ## @param collect_alerts - boolean - optional - default: false
+    ## Enable collection of alerts from the PowerFlex Gateway.
+    #
+    # collect_alerts: false
+
     ## @param resource_filters - list of mappings - optional
     ## Filter resources by property regex patterns and control statistics
     ## collection per resource type. Exclude takes precedence over include.

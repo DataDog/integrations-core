@@ -36,6 +36,11 @@ files:
       value:
         type: boolean
         example: false
+    - name: collect_alerts
+      description: Enable collection of alerts from the PowerFlex Gateway.
+      value:
+        type: boolean
+        example: false
     - name: resource_filters
       description: |
         Filter resources by property regex patterns and control statistics
