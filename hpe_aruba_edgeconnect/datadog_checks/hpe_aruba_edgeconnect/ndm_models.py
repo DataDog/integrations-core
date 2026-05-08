@@ -151,7 +151,7 @@ def create_device_metadata(appliance: Appliance, namespace: str) -> DeviceMetada
 
 
 def create_interface_metadata(appliance_ip: str, iface: dict[str, Any], namespace: str) -> InterfaceMetadata:
-    ifname = iface.get('ifName', '')
+    ifname = iface.get('ifname', '')
     return InterfaceMetadata(
         device_id=f'{namespace}:{appliance_ip}',
         raw_id=ifname,
