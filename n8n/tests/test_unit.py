@@ -2,91 +2,121 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from typing import Any, Callable
 from unittest import mock
 
-from datadog_checks.dev.utils import get_metadata_metrics
+import pytest
+from requests.exceptions import ConnectionError
+
+from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub
 from datadog_checks.n8n import N8nCheck
 
 from . import common
 
 
-def test_unit_metrics(dd_run_check, instance, aggregator, mock_http_response):
+def test_check_emits_metrics_as_in_metadata(
+    dd_run_check: Callable[[N8nCheck], Any],
+    aggregator: AggregatorStub,
+    mock_http_response: Callable[..., Any],
+):
     mock_http_response(file_path=common.get_fixture_path('n8n.txt'))
+    instance: dict[str, Any] = {'openmetrics_endpoint': 'http://localhost:5678/metrics'}
     check = N8nCheck('n8n', {}, [instance])
-    dd_run_check(check)
+    with mock.patch.object(N8nCheck, '_check_n8n_readiness', return_value=None):
+        dd_run_check(check)
 
-    for metric in common.TEST_METRICS:
-        aggregator.assert_metric(metric)
-    aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(
+        common.get_openmetrics_metadata_metrics(major=2),
+        check_submission_type=True,
+        check_symmetric_inclusion=True,
+    )
 
 
-def test_metrics_custom_prefx(dd_run_check, aggregator, mock_http_response):
+def test_metrics_custom_prefix(
+    dd_run_check: Callable[[N8nCheck], Any],
+    aggregator: AggregatorStub,
+    mock_http_response: Callable[..., Any],
+):
     mock_http_response(file_path=common.get_fixture_path('n8n_custom.txt'))
-    instance = {
+    instance: dict[str, Any] = {
         'openmetrics_endpoint': 'http://localhost:5678/metrics',
         'raw_metric_prefix': 'test_',
     }
     check = N8nCheck('n8n', {}, [instance])
-    dd_run_check(check)
+    with mock.patch.object(N8nCheck, '_check_n8n_readiness', return_value=None):
+        dd_run_check(check)
 
-    for metric in common.TEST_METRICS:
-        aggregator.assert_metric(metric)
-    aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(
+        common.get_openmetrics_metadata_metrics(major=2),
+        check_submission_type=True,
+        check_symmetric_inclusion=True,
+    )
 
 
-def test_readiness_check_ready(aggregator, instance):
+@pytest.fixture
+def initialized_check(instance: dict[str, Any]) -> N8nCheck:
+    check = N8nCheck('n8n', {}, [instance])
+    check.load_configuration_models()
+    return check
+
+
+@pytest.mark.parametrize(
+    'status_code, expected_value',
+    [
+        pytest.param(200, 1, id='ready'),
+        pytest.param(503, 0, id='not_ready'),
+    ],
+)
+def test_readiness_check(
+    aggregator: AggregatorStub,
+    initialized_check: N8nCheck,
+    status_code: int,
+    expected_value: int,
+):
     with mock.patch(
         'requests.Session.get',
-        return_value=mock.Mock(ok=True, status_code=200),
+        return_value=mock.Mock(ok=expected_value == 1, status_code=status_code),
     ):
-        check = N8nCheck('n8n', {}, [instance])
-        check._check_n8n_readiness()
+        initialized_check._check_n8n_readiness()
 
-    # Assert metric value is 1 (ready) with status_code:200 tag
-    aggregator.assert_metric('n8n.readiness.check', value=1, tags=['status_code:200'])
-
-
-def test_readiness_check_not_ready(aggregator, instance):
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.Mock(ok=False, status_code=503),
-    ):
-        check = N8nCheck('n8n', {}, [instance])
-        check._check_n8n_readiness()
-
-    # Assert metric value is 0 (not ready) with status_code:503 tag
-    aggregator.assert_metric('n8n.readiness.check', value=0, tags=['status_code:503'])
+    aggregator.assert_metric(
+        'n8n.readiness.check',
+        value=expected_value,
+        tags=['n8n_process:main', f'status_code:{status_code}'],
+    )
 
 
-def test_readiness_check_no_status_code(aggregator, instance):
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.Mock(ok=False, status_code=None),
-    ):
-        check = N8nCheck('n8n', {}, [instance])
-        check._check_n8n_readiness()
+def test_readiness_check_unreachable(aggregator: AggregatorStub, initialized_check: N8nCheck):
+    with mock.patch('requests.Session.get', side_effect=ConnectionError('boom')):
+        initialized_check._check_n8n_readiness()
 
-    # Assert metric value is 0 (not ready) with status_code:null tag
-    aggregator.assert_metric('n8n.readiness.check', value=0, tags=['status_code:null'])
+    aggregator.assert_metric('n8n.readiness.check', value=0, tags=['n8n_process:main', 'status_code:none'])
 
 
-def test_version_metadata(datadog_agent, dd_run_check, mock_http_response, instance):
-    """
-    Test version metadata collection from Prometheus metrics
-    """
+def test_readiness_uses_endpoint_host_not_metrics_path(initialized_check: N8nCheck):
+    """The readiness endpoint must be derived from the host, not appended to /metrics."""
+    expected = f'http://{common.HOST}:{common.MAIN_PORT}/healthz/readiness'
+    assert initialized_check._readiness_endpoint() == expected
+
+
+def test_version_metadata(
+    datadog_agent: DatadogAgentStub,
+    dd_run_check: Callable[[N8nCheck], Any],
+    mock_http_response: Callable[..., Any],
+    instance: dict[str, Any],
+):
     mock_http_response(file_path=common.get_fixture_path('n8n.txt'))
     check = N8nCheck('n8n', {}, [instance])
     check.check_id = 'n8n_test'
-    dd_run_check(check)
-    # Version from fixture: n8n_version_info{version="v1.117.2",major="1",minor="117",patch="2"} 1
+    with mock.patch.object(N8nCheck, '_check_n8n_readiness', return_value=None):
+        dd_run_check(check)
     version_metadata = {
         'version.scheme': 'semver',
-        'version.major': '1',
-        'version.minor': '117',
-        'version.patch': '2',
-        'version.raw': 'v1.117.2',
+        'version.major': '2',
+        'version.minor': '19',
+        'version.patch': '5',
+        'version.raw': 'v2.19.5',
     }
 
     datadog_agent.assert_metadata('n8n_test', version_metadata)

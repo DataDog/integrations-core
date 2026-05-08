@@ -3,103 +3,127 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
+from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev import get_docker_hostname
+from datadog_checks.dev.utils import find_free_ports, get_metadata_metrics
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 HOST = get_docker_hostname()
-PORT = 5678
+
+# Allocate free host ports once per session. The values are forwarded to docker compose via
+# the ``env_vars`` argument of ``docker_run`` (see ``conftest.py``) so re-runs don't collide
+# with stale containers or other locally-bound services. The in-container ports stay fixed.
+MAIN_PORT, WORKER_PORT = find_free_ports('127.0.0.1', 2)
 
 
-def get_fixture_path(filename):
+def get_compose_env_vars() -> dict[str, str]:
+    """Variables consumed by docker-compose.yaml's ``${...}`` placeholders."""
+    return {
+        'N8N_MAIN_HOST_PORT': str(MAIN_PORT),
+        'N8N_WORKER_HOST_PORT': str(WORKER_PORT),
+    }
+
+
+N8N_VERSION = os.environ.get('N8N_VERSION', '1.118.1')
+N8N_MAJOR = int(N8N_VERSION.split('.', 1)[0])
+
+# Submitted by the check itself, not by the OpenMetrics scrape.
+CHECK_LEVEL_METRIC_NAMES = frozenset({'n8n.readiness.check'})
+
+# Metric families introduced in n8n 2.x — verified live against n8n@1.118.1 and n8n@2.19.5.
+V2_ONLY_METRIC_NAMES = frozenset(
+    {
+        'n8n.audit.workflow.activated.count',
+        'n8n.audit.workflow.executed.count',
+        'n8n.credentials.total',
+        'n8n.embed.login.failures.count',
+        'n8n.embed.login.requests.count',
+        'n8n.enabled.users',
+        'n8n.manual.executions',
+        'n8n.process.pss.bytes',
+        'n8n.production.executions',
+        'n8n.production.root.executions',
+        'n8n.runner.task.requested.count',
+        'n8n.token.exchange.failures.count',
+        'n8n.token.exchange.identity.linked.count',
+        'n8n.token.exchange.jit.provisioning.count',
+        'n8n.token.exchange.requests.count',
+        'n8n.users.total',
+        'n8n.workflow.execution.duration.seconds.bucket',
+        'n8n.workflow.execution.duration.seconds.count',
+        'n8n.workflow.execution.duration.seconds.sum',
+        'n8n.workflows.total',
+    }
+)
+
+# Metrics that are mapped and present in metadata but only emit samples after a specific
+# event fires (auth failure, libuv request mid-flight). The unit fixture has synthetic
+# samples for them; live integration/e2e runs cannot guarantee samples and exclude them
+# from the symmetric metadata assertion.
+RARE_EVENT_METRIC_NAMES = frozenset(
+    {
+        'n8n.embed.login.failures.count',
+        'n8n.token.exchange.failures.count',
+        # prom-client's per-type libuv request gauge: only has samples while a libuv request is in flight
+        # at scrape time, so live containers can produce or omit it depending on timing.
+        'n8n.nodejs.active.requests',
+    }
+)
+
+
+def get_fixture_path(filename: str) -> str:
     return os.path.join(HERE, 'fixtures', filename)
 
 
-OPENMETRICS_URL = f'http://{HOST}:{PORT}'
-INSTANCE = {
-    'openmetrics_endpoint': f'{OPENMETRICS_URL}/metrics',
+def get_metadata_metrics_for_version(major: int = N8N_MAJOR, *, exclude_rare: bool = False) -> dict:
+    """Return the metadata.csv subset that the given n8n major version is expected to emit."""
+    metadata = get_metadata_metrics()
+    if major < 2:
+        for name in V2_ONLY_METRIC_NAMES:
+            metadata.pop(name, None)
+    if exclude_rare:
+        for name in RARE_EVENT_METRIC_NAMES:
+            metadata.pop(name, None)
+    return metadata
+
+
+def get_openmetrics_metadata_metrics(major: int = N8N_MAJOR, *, exclude_rare: bool = False) -> dict:
+    """Version-aware metadata subset minus metrics submitted by the check itself."""
+    metadata = get_metadata_metrics_for_version(major, exclude_rare=exclude_rare)
+    for name in CHECK_LEVEL_METRIC_NAMES:
+        metadata.pop(name, None)
+    return metadata
+
+
+def get_all_metadata_metrics(major: int = N8N_MAJOR, *, exclude_rare: bool = False) -> dict:
+    """Version-aware metadata subset including the readiness gauge submitted by the check."""
+    return get_metadata_metrics_for_version(major, exclude_rare=exclude_rare)
+
+
+def drop_rare_event_metrics(aggregator: AggregatorStub):
+    """Strip rare-event metrics from the aggregator before a symmetric metadata assertion.
+
+    These metrics are mapped and present in metadata.csv but only emit samples opportunistically
+    (auth failures, libuv requests in flight). Live containers may submit them or not depending on
+    timing, which makes ``check_symmetric_inclusion=True`` flaky in either direction. Dropping them
+    from the aggregator (and from the metadata subset via ``exclude_rare=True``) keeps the
+    symmetric check stable while still verifying the rest of the surface end-to-end.
+    """
+    for name in RARE_EVENT_METRIC_NAMES:
+        aggregator._metrics.pop(name, None)
+
+
+MAIN_INSTANCE = {
+    'openmetrics_endpoint': f'http://{HOST}:{MAIN_PORT}/metrics',
+    'tags': ['n8n_process:main'],
 }
+WORKER_INSTANCE = {
+    'openmetrics_endpoint': f'http://{HOST}:{WORKER_PORT}/metrics',
+    'tags': ['n8n_process:worker'],
+}
+INSTANCE = MAIN_INSTANCE  # back-compat default for unit tests
 
 E2E_METADATA = {
     'docker_volumes': ['/var/run/docker.sock:/var/run/docker.sock:ro'],
 }
-
-TEST_METRICS = [
-    'n8n.active.workflow.count',
-    'n8n.api.request.duration.seconds.bucket',
-    'n8n.api.request.duration.seconds.count',
-    'n8n.api.request.duration.seconds.sum',
-    'n8n.api.requests.count',
-    'n8n.cache.errors.count',
-    'n8n.cache.hits.count',
-    'n8n.cache.latency.seconds.bucket',
-    'n8n.cache.latency.seconds.count',
-    'n8n.cache.latency.seconds.sum',
-    'n8n.cache.misses.count',
-    'n8n.cache.operations.count',
-    'n8n.eventbus.connections.total',
-    'n8n.eventbus.events.failed.count',
-    'n8n.eventbus.events.processed.count',
-    'n8n.eventbus.events.count',
-    'n8n.eventbus.queue.size',
-    'n8n.instance.role.leader',
-    'n8n.last.activity',
-    'n8n.nodejs.active.handles',
-    'n8n.nodejs.active.handles.total',
-    'n8n.nodejs.active.requests.total',
-    'n8n.nodejs.active.resources',
-    'n8n.nodejs.active.resources.total',
-    'n8n.nodejs.event.loop.lag.seconds',
-    'n8n.nodejs.eventloop.lag.max.seconds',
-    'n8n.nodejs.eventloop.lag.mean.seconds',
-    'n8n.nodejs.eventloop.lag.min.seconds',
-    'n8n.nodejs.eventloop.lag.p50.seconds',
-    'n8n.nodejs.eventloop.lag.p90.seconds',
-    'n8n.nodejs.eventloop.lag.p99.seconds',
-    'n8n.nodejs.eventloop.lag.seconds',
-    'n8n.nodejs.eventloop.lag.stddev.seconds',
-    'n8n.nodejs.external.memory.bytes',
-    'n8n.nodejs.gc.duration.seconds.bucket',
-    'n8n.nodejs.gc.duration.seconds.count',
-    'n8n.nodejs.gc.duration.seconds.sum',
-    'n8n.nodejs.heap.size.total.bytes',
-    'n8n.nodejs.heap.size.used.bytes',
-    'n8n.nodejs.heap.space.size.available.bytes',
-    'n8n.nodejs.heap.space.size.total.bytes',
-    'n8n.nodejs.heap.space.size.used.bytes',
-    'n8n.nodejs.heap.total.bytes',
-    'n8n.nodejs.heap.used.bytes',
-    'n8n.process.cpu.system.seconds.count',
-    'n8n.process.cpu.user.seconds.count',
-    'n8n.process.heap.bytes',
-    'n8n.process.max.fds',
-    'n8n.process.open.fds',
-    'n8n.process.resident.memory.bytes',
-    'n8n.process.uptime.seconds',
-    'n8n.process.virtual.memory.bytes',
-    'n8n.queue.job.active.total',
-    'n8n.queue.job.attempts.count',
-    'n8n.queue.job.completed.count',
-    'n8n.queue.job.delayed.total',
-    'n8n.queue.job.dequeued.count',
-    'n8n.queue.job.enqueued.count',
-    'n8n.queue.job.failed.count',
-    'n8n.queue.job.waiting.duration.seconds.bucket',
-    'n8n.queue.job.waiting.duration.seconds.count',
-    'n8n.queue.job.waiting.duration.seconds.sum',
-    'n8n.queue.job.waiting.total',
-    'n8n.queue.jobs.duration.seconds.bucket',
-    'n8n.queue.jobs.duration.seconds.count',
-    'n8n.queue.jobs.duration.seconds.sum',
-    'n8n.queue.jobs.count',
-    'n8n.readiness.check',
-    'n8n.workflow.executions.active',
-    'n8n.workflow.executions.duration.seconds.bucket',
-    'n8n.workflow.executions.duration.seconds.count',
-    'n8n.workflow.executions.duration.seconds.sum',
-    'n8n.workflow.executions.count',
-    'n8n.workflow.failed.count',
-    'n8n.workflow.started.count',
-    'n8n.workflow.success.count',
-    'n8n.process.cpu.seconds.count',
-]
