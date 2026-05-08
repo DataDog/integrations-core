@@ -163,9 +163,18 @@ def check_root():
     return False
 
 
+def repo_choice_from_root(root: str) -> str:
+    """Derive ``repo_choice`` from a repo root path (same rule as ``--here``)."""
+    return os.path.basename(root).replace('integrations-', '')
+
+
 def initialize_root(config, agent=False, core=False, extras=False, marketplace=False, here=False, **kwargs):
     """Initialize root directory based on config and options"""
     if check_root():
+        root = get_root()
+        if root:
+            config['repo_choice'] = repo_choice_from_root(root)
+            config['repo_name'] = REPO_CHOICES.get(config['repo_choice'], config['repo_choice'])
         return
 
     repo_choice = (
@@ -197,8 +206,7 @@ def initialize_root(config, agent=False, core=False, extras=False, marketplace=F
 
         root = os.getcwd()
         if here:
-            # Repo choices use the integration repo name without the `integrations-` prefix
-            config['repo_choice'] = os.path.basename(root).replace('integrations-', '')
+            config['repo_choice'] = repo_choice_from_root(root)
 
     config['repo_name'] = REPO_CHOICES.get(config['repo_choice'], config['repo_choice'])
     set_root(root)
