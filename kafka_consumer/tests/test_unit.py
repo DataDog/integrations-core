@@ -28,14 +28,6 @@ from datadog_checks.kafka_consumer.kafka_consumer import (
 pytestmark = [pytest.mark.unit]
 
 
-def _is_gcp_auth_available():
-    try:
-        import google.auth  # noqa: F401
-
-        return True
-    except ImportError:
-        return False
-
 
 def fake_consumer_offsets_for_times(partitions, offset=-1):
     """In our testing environment the offset is 80 for all partitions and topics."""
@@ -203,7 +195,6 @@ mock_client.consumer_get_cluster_id_and_list_topics.return_value = (
             does_not_raise(),
             mock_client,
             id="valid GCP Cloud Managed Kafka config",
-            marks=pytest.mark.skipif(not _is_gcp_auth_available(), reason="google-auth not installed"),
         ),
         pytest.param(
             {
@@ -215,7 +206,6 @@ mock_client.consumer_get_cluster_id_and_list_topics.return_value = (
             does_not_raise(),
             mock_client,
             id="valid GCP Cloud Managed Kafka config with credentials file",
-            marks=pytest.mark.skipif(not _is_gcp_auth_available(), reason="google-auth not installed"),
         ),
         pytest.param(
             {'sasl_oauth_token_provider': {'method': 'invalid_method'}},
@@ -1442,7 +1432,6 @@ def test_count_consumer_contexts(check, kafka_instance):
             {'method': 'gcp_cloud_managed_kafka'},
             ['oauth_cb'],  # GCP Cloud Managed Kafka uses oauth_cb callback
             id="GCP Cloud Managed Kafka authentication",
-            marks=pytest.mark.skipif(not _is_gcp_auth_available(), reason="google-auth not installed"),
         ),
         pytest.param(
             {'method': 'oidc', 'url': 'http://fake.url', 'client_id': 'test_id', 'client_secret': 'test_secret'},
@@ -1555,7 +1544,6 @@ def test_aws_msk_iam_region_handling(
                     oauth_callback(None)
 
 
-@pytest.mark.skipif(not _is_gcp_auth_available(), reason="google-auth not installed")
 @pytest.mark.parametrize(
     'oauth_config, use_credentials_file',
     [
@@ -1592,45 +1580,43 @@ def test_gcp_cloud_managed_kafka_token_handling(oauth_config, use_credentials_fi
     import json
     from datetime import datetime, timezone
 
-    mock_credentials = mock.Mock()
-    mock_credentials.token = 'fake_gcp_token'
-    mock_credentials.expiry = datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
-    mock_credentials.service_account_email = 'sa@test.iam.gserviceaccount.com'
+    from datadog_checks.base.utils.gcp_auth import GcpCredentials
 
-    with mock.patch('datadog_checks.kafka_consumer.client.google.auth') as mock_google_auth:
-        mock_google_auth.default.return_value = (mock_credentials, 'test-project')
-        mock_google_auth.load_credentials_from_file.return_value = (mock_credentials, 'test-project')
-        mock_google_auth.transport.requests.Request.return_value = mock.Mock()
+    mock_credentials = GcpCredentials(
+        token='fake_gcp_token',
+        expiry=datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
+        service_account_email='sa@test.iam.gserviceaccount.com',
+    )
 
-        token, expiry = oauth_callback(None)
+    with mock.patch('datadog_checks.base.utils.gcp_auth.load_credentials_from_file', return_value=mock_credentials) as mock_load:
+        with mock.patch('datadog_checks.base.utils.gcp_auth.default', return_value=mock_credentials) as mock_default:
+            token, expiry = oauth_callback(None)
 
-        parts = token.split('.')
-        assert len(parts) == 3
+            parts = token.split('.')
+            assert len(parts) == 3
 
-        def _b64decode(s):
-            return base64.urlsafe_b64decode(s + '=' * (-len(s) % 4))
+            def _b64decode(s):
+                return base64.urlsafe_b64decode(s + '=' * (-len(s) % 4))
 
-        header = json.loads(_b64decode(parts[0]))
-        claims = json.loads(_b64decode(parts[1]))
-        raw_token = _b64decode(parts[2]).decode()
+            header = json.loads(_b64decode(parts[0]))
+            claims = json.loads(_b64decode(parts[1]))
+            raw_token = _b64decode(parts[2]).decode()
 
-        assert header == {'typ': 'JWT', 'alg': 'GOOG_OAUTH2_TOKEN'}
-        assert claims['iss'] == 'Google'
-        assert claims['sub'] == 'sa@test.iam.gserviceaccount.com'
-        assert claims['exp'] == mock_credentials.expiry.timestamp()
-        assert raw_token == 'fake_gcp_token'
-        assert expiry == mock_credentials.expiry.timestamp()
+            assert header == {'typ': 'JWT', 'alg': 'GOOG_OAUTH2_TOKEN'}
+            assert claims['iss'] == 'Google'
+            assert claims['sub'] == 'sa@test.iam.gserviceaccount.com'
+            assert claims['exp'] == mock_credentials.expiry.timestamp()
+            assert raw_token == 'fake_gcp_token'
+            assert expiry == mock_credentials.expiry.timestamp()
 
-        if use_credentials_file:
-            mock_google_auth.load_credentials_from_file.assert_called_once_with(
-                '/path/to/sa.json', scopes=['https://www.googleapis.com/auth/cloud-platform']
-            )
-            mock_google_auth.default.assert_not_called()
-        else:
-            mock_google_auth.default.assert_called_once_with(scopes=['https://www.googleapis.com/auth/cloud-platform'])
-            mock_google_auth.load_credentials_from_file.assert_not_called()
-
-        mock_credentials.refresh.assert_called_once()
+            if use_credentials_file:
+                mock_load.assert_called_once_with(
+                    '/path/to/sa.json', scopes=['https://www.googleapis.com/auth/cloud-platform']
+                )
+                mock_default.assert_not_called()
+            else:
+                mock_default.assert_called_once_with(scopes=['https://www.googleapis.com/auth/cloud-platform'])
+                mock_load.assert_not_called()
 
 
 def test_consumer_group_state_fetched_once_per_group(check, kafka_instance, dd_run_check, aggregator):

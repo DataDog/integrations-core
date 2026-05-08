@@ -5,6 +5,7 @@ from concurrent.futures import as_completed
 
 from confluent_kafka import Consumer, ConsumerGroupTopicPartitions, KafkaException, TopicPartition
 from confluent_kafka.admin import AdminClient
+from datadog_checks.base.utils import gcp_auth
 
 # AWS MSK IAM authentication support
 try:
@@ -14,15 +15,6 @@ try:
     AWS_MSK_IAM_AVAILABLE = True
 except ImportError:
     AWS_MSK_IAM_AVAILABLE = False
-
-# GCP Cloud Managed Kafka IAM authentication support
-try:
-    import google.auth
-    import google.auth.transport.requests
-
-    GCP_IAM_AVAILABLE = True
-except ImportError:
-    GCP_IAM_AVAILABLE = False
 
 
 def _build_gcp_managed_kafka_token(credentials):
@@ -153,12 +145,6 @@ class KafkaClient:
                 extras_parameters['oauth_cb'] = _aws_msk_iam_oauth_cb
 
             elif method == "gcp_cloud_managed_kafka":
-                if not GCP_IAM_AVAILABLE:
-                    raise Exception(
-                        "GCP Cloud Managed Kafka IAM authentication requires 'google-auth' library. "
-                        "Install it with: pip install google-auth"
-                    )
-
                 def _gcp_oauth_cb(oauth_config):
                     """OAuth callback that generates GCP IAM access tokens for Cloud Managed Kafka."""
                     try:
@@ -166,14 +152,9 @@ class KafkaClient:
                         scopes = ["https://www.googleapis.com/auth/cloud-platform"]
 
                         if credentials_file:
-                            credentials, project = google.auth.load_credentials_from_file(
-                                credentials_file, scopes=scopes
-                            )
+                            credentials = gcp_auth.load_credentials_from_file(credentials_file, scopes=scopes)
                         else:
-                            credentials, project = google.auth.default(scopes=scopes)
-
-                        request = google.auth.transport.requests.Request()
-                        credentials.refresh(request)
+                            credentials = gcp_auth.default(scopes=scopes)
 
                         token, expiry_seconds = _build_gcp_managed_kafka_token(credentials)
                         self.log.debug(

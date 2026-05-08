@@ -167,13 +167,7 @@ class KafkaConfig:
                             "libraries. Install them with: pip install boto3 aws-msk-iam-sasl-signer-python"
                         )
             elif method == "gcp_cloud_managed_kafka":
-                try:
-                    import google.auth  # noqa: F401
-                except ImportError:
-                    raise ConfigurationError(
-                        "GCP Cloud Managed Kafka IAM authentication requires 'google-auth' library. "
-                        "Install it with: pip install google-auth"
-                    )
+                pass
             elif method == "oidc":
                 if self._sasl_oauth_token_provider.get("url") is None:
                     raise ConfigurationError("The `url` setting of `auth_token` reader is required")
