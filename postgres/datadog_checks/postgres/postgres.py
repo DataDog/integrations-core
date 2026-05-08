@@ -47,7 +47,7 @@ from datadog_checks.postgres.statements import PostgresStatementMetrics
 
 from .__about__ import __version__
 from .config import build_config, sanitize
-from .diagnose import PostgresDiagnose
+from .diagnose import run_diagnostics
 from .util import (
     ANALYZE_PROGRESS_METRICS,
     AWS_RDS_HOSTNAME_SUFFIX,
@@ -191,8 +191,7 @@ class PostgreSql(DatabaseCheck):
             ttl=self._config.database_instance_collection_interval,
         )  # type: TTLCache
 
-        # Register explicit pre-flight diagnostics for `datadog-agent diagnose`.
-        PostgresDiagnose(self).register()
+        self.diagnosis.register(functools.partial(run_diagnostics, self))
 
     def _submit_initialization_health_event(self):
         try:
