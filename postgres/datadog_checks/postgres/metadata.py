@@ -108,7 +108,6 @@ class PostgresMetadata(DBMAsyncJob):
         )
         self._check = check
         self._config = config
-        self.db_pool = self._check.db_pool
         self._collect_pg_settings_enabled = config.collect_settings.enabled
         self._collect_extensions_enabled = self._collect_pg_settings_enabled
         self._collect_schemas_enabled = config.collect_schemas.enabled
