@@ -52,7 +52,12 @@ def mock_hide_server_version(mock_http):
     def filter_server_version(url, *args, **kwargs):
         r = requests.get(url, **kwargs)
         content = '\n'.join(line for line in r.text.splitlines() if 'ServerVersion' not in line)
-        return MockHTTPResponse(content=content, headers=dict(r.headers))
+        return MockHTTPResponse(
+            content=content,
+            status_code=r.status_code,
+            headers=dict(r.headers),
+            url=r.url,
+        )
 
     mock_http.get.side_effect = filter_server_version
     yield
