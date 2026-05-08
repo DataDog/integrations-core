@@ -192,7 +192,8 @@ class PostgreSql(DatabaseCheck):
         )  # type: TTLCache
 
         # Register explicit pre-flight diagnostics for `datadog-agent diagnose`.
-        PostgresDiagnose(self).register()
+        self.diagnose = PostgresDiagnose(self)
+        self.diagnose.register()
 
     def _submit_initialization_health_event(self):
         try:
@@ -492,6 +493,7 @@ class PostgreSql(DatabaseCheck):
             if self.data_observability._job_loop_future:
                 self.data_observability._job_loop_future.result()
         self._close_db_pool()
+        self.diagnose = None
 
     def _clean_state(self):
         self.log.debug("Cleaning state")
@@ -1206,6 +1208,9 @@ class PostgreSql(DatabaseCheck):
                 hostname=self.reported_hostname,
                 raw=True,
             )
+
+            self.health.diagnose()
+
             raise e
         else:
             self.service_check(

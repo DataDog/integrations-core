@@ -5,6 +5,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from datadog_checks.base.utils.diagnose import Diagnosis
+
 if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql
 
@@ -62,3 +64,18 @@ class PostgresHealth(Health):
             },
             **kwargs,
         )
+
+    def diagnose(self):
+        """
+        Run the diagnostics for the Postgres check.
+        """
+        self.check.diagnose.run()
+        for diagnosis in self.check.diagnosis.diagnoses:
+            if diagnosis.result == Diagnosis.DIAGNOSIS_FAIL:
+                self.submit_health_event(
+                    name=diagnosis.name,
+                    status= HealthStatus.WARNING if diagnosis.result == Diagnosis.DIAGNOSIS_WARNING else HealthStatus.ERROR,
+                    data={
+                        "diagnosis": diagnosis,
+                    },
+                )

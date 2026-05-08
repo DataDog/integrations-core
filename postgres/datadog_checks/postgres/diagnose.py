@@ -15,8 +15,13 @@ Caveats:
       validation failures) surface via ``log.error`` and the initialization
       health event instead.
 """
+from __future__ import annotations
 
 import psycopg
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .postgres import PostgreSql
 
 from .util import (
     DIAGNOSTIC_METADATA,
@@ -35,7 +40,7 @@ RECOMMENDED_TRACK_ACTIVITY_QUERY_SIZE = 4096
 class PostgresDiagnose:
     """Explicit pre-flight diagnostics for `datadog-agent diagnose`."""
 
-    def __init__(self, check):
+    def __init__(self, check: PostgreSql):
         self._check = check
         # Codes that have FAIL'd in the current explicit run. Used for cascade skipping so we
         # don't emit downstream-effect FAILs with nonsensical remediations (e.g. "CREATE EXTENSION"
