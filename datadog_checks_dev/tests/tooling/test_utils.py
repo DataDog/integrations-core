@@ -5,6 +5,7 @@ import os
 from os.path import join
 
 import mock
+import pytest
 
 from datadog_checks.dev.tooling.config import copy_default_config
 from datadog_checks.dev.tooling.utils import (
@@ -85,6 +86,27 @@ def test_initialize_root_env_var(set_root, get_root):
         initialize_root(config)
         assert set_root.called
         set_root.assert_called_with(os.path.expanduser(ddev_env))
+
+
+@pytest.mark.parametrize(
+    'root_path, expected_choice, expected_name',
+    [
+        ('/fake/path/integrations-core', 'core', 'integrations-core'),
+        ('/fake/path/integrations-extras', 'extras', 'integrations-extras'),
+        ('/fake/path/marketplace', 'marketplace', 'marketplace'),
+    ],
+)
+@mock.patch('datadog_checks.dev.tooling.utils.get_root')
+@mock.patch('datadog_checks.dev.tooling.utils.set_root')
+def test_initialize_root_sets_repo_when_root_already_set(set_root, get_root, root_path, expected_choice, expected_name):
+    get_root.return_value = root_path
+
+    config = copy_default_config()
+    initialize_root(config)
+
+    assert not set_root.called
+    assert config['repo_choice'] == expected_choice
+    assert config['repo_name'] == expected_name
 
 
 @not_windows_ci
