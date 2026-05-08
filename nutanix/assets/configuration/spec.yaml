@@ -66,7 +66,7 @@ files:
               The actual backoff time uses exponential backoff: base * (2 ^ attempt) + jitter.
               Default is 1 second.
             value:
-              type: number
+              type: integer
               example: 1
           - name: pc_max_backoff_seconds
             description: |
@@ -74,7 +74,7 @@ files:
               This caps the exponential backoff calculation to prevent excessive wait times.
               Default is 30 seconds.
             value:
-              type: number
+              type: integer
               example: 30
           - name: resource_filters
             description: |

@@ -8,7 +8,13 @@ The MySQL integration tracks the performance of your MySQL instances. It collect
 
 Enable [Database Monitoring][32] (DBM) for enhanced insights into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live and historical query snapshots, wait event analysis, database load, and query explain plans.
 
-MySQL version 5.6, 5.7, 8.0, and MariaDB versions 10.5, 10.6, 10.11 and 11.1 are supported.
+Supported versions:
+
+| Distribution | Versions          |
+|--------------|-------------------|
+| MySQL        | 5.6, 5.7, 8.0, 8.4 |
+| MariaDB      | 10.5, 10.6, 10.11, 11.4 |
+| Percona      | 8.0, 8.4          |
 
 **Minimum Agent version:** 6.0.0
 
@@ -557,15 +563,10 @@ See [service_checks.json][22] for a list of service checks provided by this inte
 
 ## Troubleshooting
 
-- [Connection Issues with the SQL Server Integration][23]
 - [MySQL Localhost Error - Localhost VS 127.0.0.1][6]
-- [Can I use a named instance in the SQL Server integration?][24]
 - [Can I set up the dd-agent MySQL check on my Google CloudSQL?][25]
 - [MySQL Custom Queries][26]
-- [Use WMI to collect more SQL Server performance metrics][27]
-- [How can I collect more metrics from my SQL Server integration?][28]
 - [Database user lacks privileges][29]
-- [How to collect metrics with a SQL Stored Procedure?][30]
 
 ## Further Reading
 
@@ -579,7 +580,7 @@ Additional helpful documentation, links, and articles:
 [6]: https://docs.datadoghq.com/integrations/faq/mysql-localhost-error-localhost-vs-127-0-0-1/
 [7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [8]: https://github.com/DataDog/integrations-core/blob/master/mysql/datadog_checks/mysql/data/conf.yaml.example
-[9]: https://dev.mysql.com/doc/refman/5.7/en/performance-schema-quick-start.html
+[9]: https://dev.mysql.com/doc/refman/8.4/en/performance-schema-quick-start.html
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [11]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
 [12]: https://docs.datadoghq.com/agent/faq/template_variables/
@@ -593,14 +594,9 @@ Additional helpful documentation, links, and articles:
 [20]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [21]: https://github.com/DataDog/integrations-core/blob/master/mysql/metadata.csv
 [22]: https://github.com/DataDog/integrations-core/blob/master/mysql/assets/service_checks.json
-[23]: https://docs.datadoghq.com/integrations/guide/connection-issues-with-the-sql-server-integration/
-[24]: https://docs.datadoghq.com/integrations/faq/can-i-use-a-named-instance-in-the-sql-server-integration/
 [25]: https://docs.datadoghq.com/integrations/faq/can-i-set-up-the-dd-agent-mysql-check-on-my-google-cloudsql/
 [26]: https://docs.datadoghq.com/integrations/faq/how-to-collect-metrics-from-custom-mysql-queries/
-[27]: https://docs.datadoghq.com/integrations/guide/use-wmi-to-collect-more-sql-server-performance-metrics/
-[28]: https://docs.datadoghq.com/integrations/faq/how-can-i-collect-more-metrics-from-my-sql-server-integration/
 [29]: https://docs.datadoghq.com/integrations/faq/database-user-lacks-privileges/
-[30]: https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/#collecting-metrics-from-a-custom-procedure
 [31]: https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics
 [32]: https://docs.datadoghq.com/database_monitoring/setup_mysql/
 [33]: https://docs.datadoghq.com/database_monitoring/#mysql

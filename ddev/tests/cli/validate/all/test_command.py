@@ -23,7 +23,10 @@ def test_all_command_passes_when_all_validations_succeed(ddev):
         invoked.append(cmd[-1])
         return completed_process(returncode=0, stdout="ok")
 
-    with patch("subprocess.run", side_effect=fake_run):
+    with (
+        patch("ddev.cli.validate.all._load_validations", return_value=VALIDATIONS),
+        patch("subprocess.run", side_effect=fake_run),
+    ):
         result = ddev("validate", "all", *FAST_ORCHESTRATOR_OPTS)
 
     assert result.exit_code == 0, result.output
@@ -68,7 +71,10 @@ def test_all_command_passes_target_to_per_integration_validations(ddev):
         captured[cmd[-1] if cmd[-1] != "changed" else cmd[-2]] = list(cmd)
         return completed_process(returncode=0, stdout="ok")
 
-    with patch("subprocess.run", side_effect=fake_run):
+    with (
+        patch("ddev.cli.validate.all._load_validations", return_value=VALIDATIONS),
+        patch("subprocess.run", side_effect=fake_run),
+    ):
         result = ddev("validate", "all", "changed", *FAST_ORCHESTRATOR_OPTS)
 
     assert result.exit_code == 0, result.output
@@ -88,7 +94,10 @@ def test_all_command_fix_passes_correct_flags(ddev):
         captured[name] = list(cmd)
         return completed_process(returncode=0, stdout="ok")
 
-    with patch("subprocess.run", side_effect=fake_run):
+    with (
+        patch("ddev.cli.validate.all._load_validations", return_value=VALIDATIONS),
+        patch("subprocess.run", side_effect=fake_run),
+    ):
         result = ddev("validate", "all", "--fix", *FAST_ORCHESTRATOR_OPTS)
 
     assert result.exit_code == 0, result.output

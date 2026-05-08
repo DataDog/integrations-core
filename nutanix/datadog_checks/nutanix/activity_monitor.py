@@ -76,7 +76,9 @@ class ActivityMonitor:
         start_time = last_time
         if not start_time:
             now = get_current_datetime()
-            start_time = (now - timedelta(seconds=self.check.sampling_interval)).isoformat().replace("+00:00", "Z")
+            start_time = (
+                (now - timedelta(seconds=self.check.config.min_collection_interval)).isoformat().replace("+00:00", "Z")
+            )
 
         self.check.log.debug("[%s] Collecting %ss since: %s", self._pc_label, activity_kind, start_time)
 
@@ -162,7 +164,7 @@ class ActivityMonitor:
 
     def collect_tasks(self) -> None:
         def _filter_subtasks(tasks: list[dict]) -> list[dict]:
-            if not self.check.collect_subtasks_enabled:
+            if not self.check.config.collect_subtasks:
                 return [t for t in tasks if not t.get("parentTask")]
             return tasks
 

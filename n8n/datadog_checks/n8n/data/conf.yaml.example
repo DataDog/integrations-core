@@ -20,12 +20,12 @@ instances:
     #
   - openmetrics_endpoint: http://localhost:5678
 
-    ## @param raw_metric_prefix - string - optional - default: n8n
+    ## @param raw_metric_prefix - string - optional - default: n8n_
     ## The prefix prepended to all metrics from n8n.
-    ## If not set, the default prefix n8n is used.
+    ## If not set, the default prefix n8n_ is used.
     ## If you are using a custom prefix in n8n through N8N_METRICS_PREFIX, you need to set it here.
     #
-    # raw_metric_prefix: n8n
+    # raw_metric_prefix: <RAW_METRIC_PREFIX>
 
     ## @param extra_metrics - (list of string or mapping) - optional
     ## This list defines metrics to collect from the `openmetrics_endpoint`, in addition to
