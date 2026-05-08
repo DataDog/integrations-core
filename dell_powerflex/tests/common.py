@@ -107,8 +107,11 @@ STORAGE_POOL_STATS_BWC_METRICS = [
     'dell_powerflex.target_read_latency',
     'dell_powerflex.target_write_latency',
     'dell_powerflex.fwd_rebuild_read_bwc',
+    'dell_powerflex.fwd_rebuild_write_bwc',
     'dell_powerflex.bck_rebuild_read_bwc',
+    'dell_powerflex.bck_rebuild_write_bwc',
     'dell_powerflex.norm_rebuild_read_bwc',
+    'dell_powerflex.norm_rebuild_write_bwc',
 ]
 
 PROTECTION_DOMAIN_STATS_SIMPLE_METRICS = [

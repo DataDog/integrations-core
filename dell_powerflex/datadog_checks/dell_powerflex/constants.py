@@ -140,8 +140,11 @@ STORAGE_POOL_STATS_BWC_METRICS = (
         ('rebalanceReadBwc', 'rebalance_read_bwc'),
         ('rebalanceWriteBwc', 'rebalance_write_bwc'),
         ('fwdRebuildReadBwc', 'fwd_rebuild_read_bwc'),
+        ('fwdRebuildWriteBwc', 'fwd_rebuild_write_bwc'),
         ('bckRebuildReadBwc', 'bck_rebuild_read_bwc'),
+        ('bckRebuildWriteBwc', 'bck_rebuild_write_bwc'),
         ('normRebuildReadBwc', 'norm_rebuild_read_bwc'),
+        ('normRebuildWriteBwc', 'norm_rebuild_write_bwc'),
     ]
 )
 
