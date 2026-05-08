@@ -1,0 +1,1 @@
+Run `diagnose` when the main Postgres check fails then emit any warnings and failures as Agent Health events.
