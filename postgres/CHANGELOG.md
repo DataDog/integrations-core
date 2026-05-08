@@ -2,7 +2,26 @@
 
 <!-- towncrier release notes start -->
 
-## 23.6.0 / 2026-04-01
+## 23.7.0 / 2026-04-15
+
+***Added***:
+
+* Update dependencies ([#22996](https://github.com/DataDog/integrations-core/pull/22996))
+* Adds metrics `postgresql.database_connections` and `postgresql.percent_database_usage_connections` to support per logical database connection monitoring ([#22999](https://github.com/DataDog/integrations-core/pull/22999))
+
+***Fixed***:
+
+* Respect exclude_hostname config parameter for debug metrics. If this setting is not respected, we can still submit metrics with a hostname tag, which can have undesirable effects throughout the platform. For example, a host can appear in the Host list where it should not. ([#22938](https://github.com/DataDog/integrations-core/pull/22938))
+* Polish fleet-configurable spec descriptions. ([#22967](https://github.com/DataDog/integrations-core/pull/22967))
+* Remove incorrect deprecation warning from Postgres config ([#23044](https://github.com/DataDog/integrations-core/pull/23044))
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+* Remove `empty_default_hostname` warning. The Cluster Agent injects this option unconditionally on cluster checks, causing a confusing warning that customers cannot prevent. ([#23082](https://github.com/DataDog/integrations-core/pull/23082))
+* Bump `datadog-checks-base` to `>=37.34.1`. Notable changes:
+    - Fix schema collection silently dropping all collected metadata when the last discovered database has no tables. ([#22880](https://github.com/DataDog/integrations-core/pull/22880))
+    - Reduce allocations in `StatementMetrics` by deferring dict construction and updating the previous-statements cache in place. ([#23075](https://github.com/DataDog/integrations-core/pull/23075))
+    - Improve compile-time error messages for invalid syntax in DB query extras expressions. ([#23140](https://github.com/DataDog/integrations-core/pull/23140)) ([#23282](https://github.com/DataDog/integrations-core/pull/23282))
+
+## 23.6.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:
 

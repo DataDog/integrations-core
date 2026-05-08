@@ -7,7 +7,6 @@ import logging
 
 import pytest
 
-from datadog_checks.base import ConfigurationError
 from datadog_checks.nutanix import NutanixCheck
 from tests.constants import BASE_TAGS, CLUSTER_TAGS
 
@@ -93,29 +92,30 @@ def test_prism_central_cluster_skipped(dd_run_check, aggregator, mock_instance, 
     assert len(pc_metrics) == 0
 
 
-def test_missing_pc_ip_raises_error():
-    with pytest.raises(ConfigurationError, match="pc_ip is required"):
-        NutanixCheck('nutanix', {}, [{"pc_username": "admin", "pc_password": "secret"}])
+def test_missing_pc_ip_raises_error(dd_run_check):
+    with pytest.raises(Exception, match="(?s)pc_ip.*required"):
+        check = NutanixCheck('nutanix', {}, [{"pc_username": "admin", "pc_password": "secret"}])
+        dd_run_check(check)
 
 
-def test_pc_ip_with_port_raises_error(mock_instance):
+def test_pc_ip_with_port_raises_error(dd_run_check, mock_instance):
     """Test that ConfigurationError is raised when pc_ip contains a port."""
 
     instance = mock_instance.copy()
     instance['pc_ip'] = '10.0.0.197:9440'
 
-    with pytest.raises(ConfigurationError) as exc_info:
-        NutanixCheck('nutanix', {}, [instance])
+    with pytest.raises(Exception, match="Conflicting port configuration"):
+        check = NutanixCheck('nutanix', {}, [instance])
+        dd_run_check(check)
 
-    assert "Conflicting port configuration between pc_ip (9440) and pc_port (9440)" in str(exc_info.value)
 
-
-def test_pc_ip_without_port(mock_instance):
+def test_pc_ip_without_port(dd_run_check, mock_instance, mock_http_get):
     """Test that pc_port is used when pc_ip has no port."""
     instance = mock_instance.copy()
     instance['pc_ip'] = '10.0.0.197'
 
     check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
 
     assert check.pc_ip == '10.0.0.197'
     assert check.pc_port == 9440

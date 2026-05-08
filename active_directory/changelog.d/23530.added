@@ -1,0 +1,1 @@
+Expose the `include_total` option in the perf-counter spec, allowing the `_Total` aggregate instance to be collected for selected performance objects.

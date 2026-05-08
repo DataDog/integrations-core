@@ -28,12 +28,10 @@ def test__get_data(check):
     r = mock.MagicMock()
     with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
         r.get.side_effect = [requests.exceptions.HTTPError, ValueError]
-        with pytest.raises(RabbitMQException) as e:
+        with pytest.raises(RabbitMQException):
             check._get_data('')
-            assert isinstance(e, RabbitMQException)
-        with pytest.raises(RabbitMQException) as e:
+        with pytest.raises(RabbitMQException):
             check._get_data('')
-            assert isinstance(e, RabbitMQException)
 
 
 def test_status_check(check, aggregator):
@@ -87,9 +85,8 @@ def test__check_aliveness(check, aggregator):
 
     # in case of connection errors, this check should stay silent
     check._get_data.side_effect = RabbitMQException
-    with pytest.raises(RabbitMQException) as e:
+    with pytest.raises(RabbitMQException):
         check._get_vhosts(instance, '')
-        assert isinstance(e, RabbitMQException)
 
 
 def test__get_metrics(check, aggregator):

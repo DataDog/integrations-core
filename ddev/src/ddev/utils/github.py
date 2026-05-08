@@ -69,11 +69,23 @@ class GitHubManager:
     # https://docs.github.com/en/rest/issues/labels?apiVersion=2022-11-28#create-a-label
     LABELS_API = 'https://api.github.com/repos/{repo_id}/labels'
 
+    # https://docs.github.com/en/rest/issues/milestones?apiVersion=2022-11-28#create-a-milestone
+    MILESTONES_API = 'https://api.github.com/repos/{repo_id}/milestones'
+
+    # https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#create-a-pull-request
+    PULLS_API = 'https://api.github.com/repos/{repo_id}/pulls'
+
     # https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#list-pull-requests-files
     PULL_REQUEST_FILES_API = 'https://api.github.com/repos/{repo_id}/pulls/{pr_number}/files'
 
     # https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#list-commits-on-a-repository
     COMMIT_API = 'https://api.github.com/repos/{repo_id}/commits/{sha}'
+
+    # https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#get-a-pull-request
+    PULL_REQUEST_API = 'https://api.github.com/repos/{repo_id}/pulls/{pr_number}'
+
+    # https://docs.github.com/en/rest/actions/workflows?apiVersion=2022-11-28#create-a-workflow-dispatch-event
+    WORKFLOW_DISPATCH_API = 'https://api.github.com/repos/{repo_id}/actions/workflows/{workflow_id}/dispatches'
 
     # https://docs.github.com/en/rest/issues/comments?apiVersion=2022-11-28#create-an-issue-comment
     ISSUE_COMMENTS_API = 'https://api.github.com/repos/{repo_id}/issues/{issue_number}/comments'
@@ -108,6 +120,45 @@ class GitHubManager:
             return None
 
         return PullRequest(data['items'][0])
+
+    def list_open_pull_requests_targeting_base(self, base_branch: str, *, limit: int = 100) -> list[PullRequest]:
+        """
+        List open pull requests targeting the given base branch. Limit to 100 by default.
+        """
+        if limit < 1:
+            return []
+
+        prs: list[PullRequest] = []
+        max_per_page = 100
+        page = 1
+
+        # https://docs.github.com/en/search-github/searching-on-github/searching-issues-and-pull-requests
+        query = f'repo:{self.repo_id} is:pull-request is:open base:{base_branch}'
+
+        while len(prs) < limit:
+            requested_count = min(max_per_page, limit - len(prs))
+            response = self.__api_get(
+                self.ISSUE_SEARCH_API,
+                params={
+                    'q': query,
+                    'sort': 'updated',
+                    'order': 'desc',
+                    'per_page': requested_count,
+                    'page': page,
+                },
+            )
+            data = json.loads(response.text)
+            items = data.get('items', [])
+            if not items:
+                break
+
+            prs.extend(PullRequest(item) for item in items)
+            if len(items) < requested_count:
+                break
+
+            page += 1
+
+        return prs[:limit]
 
     def get_pull_request_by_number(self, number: str) -> PullRequest | None:
         response = self.__api_get(
@@ -150,6 +201,19 @@ class GitHubManager:
             return None
         return [file_data['filename'] for file_data in response.json().get('files', [])]
 
+    def get_pr_head(self, pr_number: int) -> tuple[str, str]:
+        """Return the (head SHA, head branch ref) of a pull request."""
+        response = self.__api_get(self.PULL_REQUEST_API.format(repo_id=self.repo_id, pr_number=pr_number))
+        data = response.json()
+        return data['head']['sha'], data['head']['ref']
+
+    def dispatch_workflow(self, workflow_id: str, ref: str, inputs: dict[str, Any]) -> None:
+        """Trigger a workflow_dispatch event."""
+        self.__api_post(
+            self.WORKFLOW_DISPATCH_API.format(repo_id=self.repo_id, workflow_id=workflow_id),
+            content=json.dumps({'ref': ref, 'inputs': inputs}),
+        )
+
     def get_pull_request_comments(self, pr_number: int) -> list[dict]:
         response = self.__api_get(
             self.ISSUE_COMMENTS_API.format(repo_id=self.repo_id, issue_number=pr_number),
@@ -172,6 +236,16 @@ class GitHubManager:
         self.__api_post(
             self.LABELS_API.format(repo_id=self.repo_id), content=json.dumps({'name': name, 'color': color})
         )
+
+    def create_milestone(self, title: str) -> None:
+        self.__api_post(self.MILESTONES_API.format(repo_id=self.repo_id), content=json.dumps({'title': title}))
+
+    def create_pull_request(self, title: str, head: str, base: str, body: str = '') -> str:
+        response = self.__api_post(
+            self.PULLS_API.format(repo_id=self.repo_id),
+            content=json.dumps({'title': title, 'head': head, 'base': base, 'body': body}),
+        )
+        return response.json()['html_url']
 
     def get_label(self, name):
         return self.__api_get(f'{self.LABELS_API.format(repo_id=self.repo_id)}/{name}')

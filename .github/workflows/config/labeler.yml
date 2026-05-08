@@ -894,6 +894,10 @@ integration/langchain:
 - changed-files:
   - any-glob-to-any-file:
     - langchain/**/*
+integration/lparstats:
+- changed-files:
+  - any-glob-to-any-file:
+    - lparstats/**/*
 integration/lastpass:
 - changed-files:
   - any-glob-to-any-file:
@@ -1002,6 +1006,10 @@ integration/nagios:
 - changed-files:
   - any-glob-to-any-file:
     - nagios/**/*
+integration/nifi:
+- changed-files:
+  - any-glob-to-any-file:
+    - nifi/**/*
 integration/network:
 - changed-files:
   - any-glob-to-any-file:
@@ -1138,6 +1146,10 @@ integration/ping_one:
 - changed-files:
   - any-glob-to-any-file:
     - ping_one/**/*
+integration/ping_one_aic:
+- changed-files:
+  - any-glob-to-any-file:
+    - ping_one_aic/**/*
 integration/pivotal_pks:
 - changed-files:
   - any-glob-to-any-file:

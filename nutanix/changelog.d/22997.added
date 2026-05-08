@@ -1,1 +1,0 @@
-Add `exclude_filtered_resources_from_cluster_capacity` option to control whether filtered resources contribute to cluster capacity metrics.

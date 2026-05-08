@@ -115,7 +115,7 @@ EXPECTED_DEFAULTS = {
     },
     # === DBM: Schema collection ===
     'collect_schemas': {
-        'enabled': False,
+        'enabled': True,
         'max_tables': 300,
         'max_columns': 50,
         'collection_interval': 600,
@@ -179,6 +179,14 @@ EXPECTED_DEFAULTS = {
     # === DBM: Raw query statements ===
     'collect_raw_query_statement': {
         'enabled': False,
+    },
+    # === Data Observability ===
+    'data_observability': {
+        'enabled': False,
+        'collection_interval': 10,
+        'run_sync': False,
+        'config_id': None,
+        'queries': (),
     },
     # === Relations configuration ===
     'relations': [],

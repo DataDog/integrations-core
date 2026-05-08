@@ -1,6 +1,6 @@
 ## Overview
 
-[Trend Micro Vision One XDR][1] collects and automatically correlates data across multiple security layers: email, endpoint, server, cloud workload, and network. This enables faster threat detection, enhances investigation and response times through improved security analysis.
+[TrendAI Vision One XDR][1] collects and automatically correlates data across multiple security layers: email, endpoint, server, cloud workload, and network. This enables faster threat detection, enhances investigation and response times through improved security analysis.
 
 This integration ingests the following logs:
 
@@ -13,9 +13,9 @@ This integration collects logs from the sources listed above and sends them to D
 
 ## Setup
 
-### Generate API Credentials in Trend Micro Vision One XDR
+### Generate API Credentials in TrendAI Vision One XDR
 
-1. In the Trend Vision One console, go to on the left side-bar menu and visit **Administration > API Keys**.
+1. In the TrendAI Vision One console, go to on the left side-bar menu and visit **Administration > API Keys**.
 2. Generate a new authentication token. Click **Add API key**. Specify the settings of the new API key with the following:
     - **Name**: A meaningful name that can help you identify the API key
     - **Role**: The user role assigned to the key. Select **SIEM** from dropdown.
@@ -23,34 +23,34 @@ This integration collects logs from the sources listed above and sends them to D
     - **Status**: Whether the API key is enabled.
     - **Details**: Extra information about the API key.
 3. Click **Add**.
-4. To identify the Host Region of your Trend Micro Vision One XDR console please refer [here][5].
+4. To identify the Host Region of your TrendAI Vision One XDR console please refer [here][5].
 
-### Connect your Trend Micro Vision One XDR Account to Datadog
+### Connect your TrendAI Vision One XDR Account to Datadog
 
 1. Add your Host Region and API Key.
     | Parameters  | Description                                             |
     | ----------- | ------------------------------------------------------- |
-    | Host Region | The Region of your Trend Micro Vision One XDR Console.  |
-    | API Key     | The API Key of your Trend Micro Vision One XDR Console. |
+    | Host Region | The Region of your TrendAI Vision One XDR Console.  |
+    | API Key     | The API Key of your TrendAI Vision One XDR Console. |
 
 2. Click the Save button to save your settings.
 
 ## Data Collected
 
 ### Logs
-The Trend Micro Vision One XDR integration collects and forwards Workbench Alerts and Observed Attack Techniques logs to Datadog.
+The TrendAI Vision One XDR integration collects and forwards Workbench Alerts and Observed Attack Techniques logs to Datadog.
 
 ### Metrics
 
-Trend Micro Vision One XDR does not include any metrics.
+TrendAI Vision One XDR does not include any metrics.
 
 ### Service Checks
 
-Trend Micro Vision One XDR does not include any service checks.
+TrendAI Vision One XDR does not include any service checks.
 
 ### Events
 
-Trend Micro Vision One XDR does not include any events.
+TrendAI Vision One XDR does not include any events.
 
 ## Support
 

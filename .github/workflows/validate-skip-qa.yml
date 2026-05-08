@@ -1,7 +1,24 @@
 name: 'Validate skip QA label'
 
+# Runs under the fork-PR threat model:
+# - No repository secrets are exposed (pull_request from a fork).
+# - GITHUB_TOKEN is forcibly read-only.
+# - No id-token: write and no OIDC/STS exchange happen here, so even if a
+#   fork PR modifies this workflow or the render composite action, there is
+#   no writable credential to steal.
+#
+# The rendered comment body is handed off to .github/workflows/post-pr-comment.yml
+# (triggered via workflow_run, always runs from master) using this artifact
+# contract:
+#   - name: pr-comment
+#   - files:
+#       body.md   rendered markdown (treated as opaque, attacker-controlled text)
+#
+# The central workflow owns the hidden marker used by find-comment; producers
+# here are not concerned with it.
+
 on:
-  pull_request_target:
+  pull_request:
     types: [opened, synchronize]
     branches:
       - master
@@ -10,16 +27,32 @@ jobs:
     if: '!github.event.pull_request.draft'
     runs-on: ubuntu-latest
     permissions:
-      pull-requests: write
+      contents: read
+    env:
+      PYTHON_VERSION: "3.13"
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "${{ env.PYTHON_VERSION }}"
+
+      # json: true produces a JSON array. escape_json / safe_output are
+      # string-mode sanitizers that would double-encode a JSON array, so we
+      # disable them. The JSON flows through env vars into a Python json.loads
+      # in the composite action, never through a shell expansion.
       - name: Get files changed
         id: changed_files
         uses: tj-actions/changed-files@22103cc46bda19c2b464ffe86db46df6922fd323 # v47.0.5
         with:
+          json: true
+          escape_json: false
+          safe_output: false
           files: |
             **/datadog_checks/**
             **/changelog.d/**
@@ -29,70 +62,49 @@ jobs:
             ddev/**
             datadog_checks_dev/**
             datadog_checks_tests_helper/**
-  
-      - name: Find comment
-        uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4.0.0
-        id: find_comment
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          body-includes: "`qa/skip-qa` label"
-          comment-author: "github-actions[bot]"
 
-      - name: Post message - Add skip qa label
+      - name: Debug - Show detected changed files
+        env:
+          ANY_CHANGED: ${{ steps.changed_files.outputs.any_changed }}
+          ALL_CHANGED_FILES: ${{ steps.changed_files.outputs.all_changed_files }}
+          ALL_MODIFIED_FILES: ${{ steps.changed_files.outputs.all_modified_files }}
+          ADDED_FILES: ${{ steps.changed_files.outputs.added_files }}
+          MODIFIED_FILES: ${{ steps.changed_files.outputs.modified_files }}
+          DELETED_FILES: ${{ steps.changed_files.outputs.deleted_files }}
+          RENAMED_FILES: ${{ steps.changed_files.outputs.renamed_files }}
+          HAS_SKIP_QA_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'qa/skip-qa') }}
+        run: |
+          echo "any_changed=${ANY_CHANGED}"
+          echo "has_skip_qa_label=${HAS_SKIP_QA_LABEL}"
+          echo "all_changed_files=${ALL_CHANGED_FILES}"
+          echo "all_modified_files=${ALL_MODIFIED_FILES}"
+          echo "added_files=${ADDED_FILES}"
+          echo "modified_files=${MODIFIED_FILES}"
+          echo "deleted_files=${DELETED_FILES}"
+          echo "renamed_files=${RENAMED_FILES}"
+
+      - name: Render comment body - Add skip qa label
+        id: render_add
         if: steps.changed_files.outputs.any_changed == 'false' && !contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
-        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
+        uses: ./.github/actions/render-skip-qa-comment
         with:
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            ⚠️ **Recommendation: Add `qa/skip-qa` label**
+          mode: add-label
+          output: pr-comment/body.md
 
-            This PR does not modify any files shipped with the agent.
-
-            To help streamline the release process, please consider adding the `qa/skip-qa` label if these changes do not require QA testing.
-
-          comment-id: ${{ steps.find_comment.outputs.comment-id }}
-          edit-mode: "replace"
-
-      - name: Format file list for comment
-        id: format_files
+      - name: Render comment body - Remove skip qa label
+        id: render_remove
         if: steps.changed_files.outputs.any_changed == 'true' && contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
-        run: |
-            formatted_list=$(echo "${{ steps.changed_files.outputs.all_changed_files }}" | tr ' ' '\n')
-            echo "file_list<<EOF" >> $GITHUB_OUTPUT
-            echo "$formatted_list" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
-
-      - name: Construct "Remove skip qa label" comment body
-        id: construct_remove_label_comment
-        if: steps.changed_files.outputs.any_changed == 'true' && contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
-        run: |
-          comment_body=$(cat <<EOF
-          ⚠️ **The \`qa/skip-qa\` label has been added with shippable changes**
-
-          The following files, which will be shipped with the agent, were modified in this PR and
-          the \`qa/skip-qa\` label has been added.
-
-          You can ignore this if you are sure the changes in this PR do not require QA. Otherwise, consider removing the label.
-
-          <details>
-          <summary>List of modified files that will be shipped with the agent</summary>
-
-          \`\`\`
-          ${{ steps.format_files.outputs.file_list }}
-          \`\`\`
-
-          </details>
-          EOF
-          )
-          echo "body<<EOF" >> $GITHUB_OUTPUT
-          echo "$comment_body" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-      - name: Post comment - Remove skip qa label
-        if: steps.changed_files.outputs.any_changed == 'true' && contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
-        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
+        uses: ./.github/actions/render-skip-qa-comment
         with:
-          issue-number: ${{ github.event.pull_request.number }}
-          body: ${{ steps.construct_remove_label_comment.outputs.body }}
-          comment-id: ${{ steps.find_comment.outputs.comment-id }}
-          edit-mode: "replace"
+          mode: remove-label
+          changed-files-json: ${{ steps.changed_files.outputs.all_changed_files }}
+          output: pr-comment/body.md
+
+      - name: Upload comment artifact
+        if: steps.render_add.outcome == 'success' || steps.render_remove.outcome == 'success'
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: pr-comment
+          path: pr-comment/
+          retention-days: 1
+          if-no-files-found: error
