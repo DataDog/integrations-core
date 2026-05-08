@@ -33,8 +33,8 @@ def login():
 
 @app.route("/rest/json/stats/minuteRange")
 def minute_range():
-    elapsed = int(time.time() - app.config["start_time"])
-    newest = _BASE_TIMESTAMP + (elapsed // MINUTE_STATS_INTERVAL) * MINUTE_STATS_INTERVAL
+    app.config["minute_counter"] = app.config.get("minute_counter", 0) + 1
+    newest = _BASE_TIMESTAMP + app.config["minute_counter"]
     return jsonify({"newest": str(newest)})
 
 
@@ -52,7 +52,7 @@ def network_interfaces():
     return jsonify(
         {
             "ifInfo": [
-                {"ifName": "wan0", "admin": 1, "oper": 1, "speed": "1000Mb/s (auto)"},
+                {"ifname": "wan0", "admin": 1, "oper": 1, "speed": "1000Mb/s (auto)"},
             ]
         }
     )

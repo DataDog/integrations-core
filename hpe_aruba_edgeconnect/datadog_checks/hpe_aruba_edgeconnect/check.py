@@ -264,7 +264,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         namespace = self.config.namespace
         interfaces = []
         for iface in data.get('ifInfo', []):
-            ifname = iface.get('ifName', 'unknown')
+            ifname = iface.get('ifname', 'unknown')
             iface_tags = base_tags + [
                 f'interface_name:{ifname}',
                 f'{NDM_INTERFACE_RESOURCE_TAG}:{device_id}',

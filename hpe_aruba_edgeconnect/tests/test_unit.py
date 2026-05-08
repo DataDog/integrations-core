@@ -415,7 +415,7 @@ def _mock_appliance_client(
     else:
         client.get_minute_stats.return_value = tgz_data
     client.get_network_interfaces.return_value = {
-        'ifInfo': [{'ifName': 'wan0', 'admin': 1, 'oper': 1, 'speed': '1000Mb/s (auto)'}]
+        'ifInfo': [{'ifname': 'wan0', 'admin': 1, 'oper': 1, 'speed': '1000Mb/s (auto)'}]
     }
     client.get_cpu_stats.return_value = _build_cpu_payload(cpu)
     client.get_memory_stats.return_value = mem if mem is not None else MEMORY_PAYLOAD
@@ -845,8 +845,8 @@ def test_ndm_metadata_submitted(dd_run_check, aggregator, mocker, check):
     client = _mock_appliance_client(tgz_bytes)
     client.get_network_interfaces.return_value = {
         'ifInfo': [
-            {'ifName': 'wan0', 'mac': 'aa:bb:cc:dd:ee:ff', 'admin': True, 'oper': True, 'speed': '1000Mb/s (auto)'},
-            {'ifName': 'wan0:v100', 'admin': False, 'oper': None},
+            {'ifname': 'wan0', 'mac': 'aa:bb:cc:dd:ee:ff', 'admin': True, 'oper': True, 'speed': '1000Mb/s (auto)'},
+            {'ifname': 'wan0:v100', 'admin': False, 'oper': None},
         ]
     }
 
