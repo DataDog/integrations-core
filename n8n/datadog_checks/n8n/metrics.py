@@ -13,7 +13,7 @@
 # `n8n.<a>.<b>.<c>` becomes counter `<a>_<b>_<c>_total`) and only appear once
 # the corresponding event fires at runtime. In queue mode, worker processes
 # emit `node_started_total`, `node_finished_total`, `queue_job_dequeued_total`,
-# and `runner_task_requested_total`.
+# `queue_job_stalled_total`, and `runner_task_requested_total`.
 #
 # Several families were introduced in n8n 2.x (see the README "Version-specific
 # metrics" section). The `workflow_statistics_*` and SSO/embed token-exchange
@@ -22,9 +22,14 @@
 METRIC_MAP = {
     'active_workflow_count': 'active.workflow.count',
     'audit_workflow_activated': 'audit.workflow.activated',  # n8n 2.x+
+    'audit_workflow_archived': 'audit.workflow.archived',
+    'audit_workflow_created': 'audit.workflow.created',
     'audit_workflow_deactivated': 'audit.workflow.deactivated',  # n8n 2.x+
+    'audit_workflow_deleted': 'audit.workflow.deleted',
     'audit_workflow_executed': 'audit.workflow.executed',  # n8n 2.x+
     'audit_workflow_resumed': 'audit.workflow.resumed',  # n8n 2.x+
+    'audit_workflow_unarchived': 'audit.workflow.unarchived',
+    'audit_workflow_updated': 'audit.workflow.updated',
     'audit_workflow_version_updated': 'audit.workflow.version.updated',  # n8n 2.x+
     'audit_workflow_waiting': 'audit.workflow.waiting',  # n8n 2.x+
     'cache_hits': 'cache.hits',
@@ -84,6 +89,7 @@ METRIC_MAP = {
     'queue_job_dequeued': 'queue.job.dequeued',
     'queue_job_enqueued': 'queue.job.enqueued',
     'queue_job_failed': 'queue.job.failed',
+    'queue_job_stalled': 'queue.job.stalled',
     'runner_task_requested': 'runner.task.requested',
     'scaling_mode_queue_jobs_active': 'scaling.mode.queue.jobs.active',
     'scaling_mode_queue_jobs_completed': 'scaling.mode.queue.jobs.completed',

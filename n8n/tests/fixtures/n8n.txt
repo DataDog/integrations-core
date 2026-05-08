@@ -351,9 +351,21 @@ n8n_token_exchange_identity_linked_total 0
 n8n_audit_workflow_activated_total{workflow_id="testWorkflowOk"} 1
 n8n_audit_workflow_activated_total{workflow_id="testWorkflowFail"} 1
 
+# HELP n8n_audit_workflow_archived_total Total number of n8n.audit.workflow.archived events.
+# TYPE n8n_audit_workflow_archived_total counter
+n8n_audit_workflow_archived_total{workflow_id="testWorkflowOk"} 1
+
+# HELP n8n_audit_workflow_created_total Total number of n8n.audit.workflow.created events.
+# TYPE n8n_audit_workflow_created_total counter
+n8n_audit_workflow_created_total{workflow_id="testWorkflowOk"} 1
+
 # HELP n8n_audit_workflow_deactivated_total Total number of n8n.audit.workflow.deactivated events.
 # TYPE n8n_audit_workflow_deactivated_total counter
 n8n_audit_workflow_deactivated_total{workflow_id="testWorkflowOk"} 1
+
+# HELP n8n_audit_workflow_deleted_total Total number of n8n.audit.workflow.deleted events.
+# TYPE n8n_audit_workflow_deleted_total counter
+n8n_audit_workflow_deleted_total{workflow_id="testWorkflowOk"} 1
 
 # HELP n8n_queue_job_enqueued_total Total number of n8n.queue.job.enqueued events.
 # TYPE n8n_queue_job_enqueued_total counter
@@ -372,6 +384,14 @@ n8n_audit_workflow_executed_total{workflow_id="testWorkflowFail"} 4
 # HELP n8n_audit_workflow_resumed_total Total number of n8n.audit.workflow.resumed events.
 # TYPE n8n_audit_workflow_resumed_total counter
 n8n_audit_workflow_resumed_total{workflow_id="testWorkflowOk"} 1
+
+# HELP n8n_audit_workflow_unarchived_total Total number of n8n.audit.workflow.unarchived events.
+# TYPE n8n_audit_workflow_unarchived_total counter
+n8n_audit_workflow_unarchived_total{workflow_id="testWorkflowOk"} 1
+
+# HELP n8n_audit_workflow_updated_total Total number of n8n.audit.workflow.updated events.
+# TYPE n8n_audit_workflow_updated_total counter
+n8n_audit_workflow_updated_total{workflow_id="testWorkflowOk"} 1
 
 # HELP n8n_audit_workflow_version_updated_total Total number of n8n.audit.workflow.version.updated events.
 # TYPE n8n_audit_workflow_version_updated_total counter
@@ -396,6 +416,9 @@ n8n_workflow_failed_total{workflow_id="testWorkflowFail"} 4
 # HELP n8n_queue_job_failed_total Total number of n8n.queue.job.failed events.
 # TYPE n8n_queue_job_failed_total counter
 n8n_queue_job_failed_total 4
+# HELP n8n_queue_job_stalled_total Total number of n8n.queue.job.stalled events.
+# TYPE n8n_queue_job_stalled_total counter
+n8n_queue_job_stalled_total 1
 # HELP n8n_queue_job_dequeued_total Total number of n8n.queue.job.dequeued events.
 # TYPE n8n_queue_job_dequeued_total counter
 n8n_queue_job_dequeued_total 8

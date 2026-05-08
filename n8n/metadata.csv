@@ -1,9 +1,14 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
 n8n.active.workflow.count,gauge,,,,Total number of active workflows.,0,n8n,,,
 n8n.audit.workflow.activated.count,count,,,,Total number of audited workflow activations. Available in n8n 2.x and later.,0,n8n,,,
+n8n.audit.workflow.archived.count,count,,,,Total number of audited workflow archive events.,0,n8n,,,
+n8n.audit.workflow.created.count,count,,,,Total number of audited workflow creations.,0,n8n,,,
 n8n.audit.workflow.deactivated.count,count,,,,Total number of audited workflow deactivations. Available in n8n 2.x and later.,0,n8n,,,
+n8n.audit.workflow.deleted.count,count,,,,Total number of audited workflow deletions.,0,n8n,,,
 n8n.audit.workflow.executed.count,count,,,,Total number of audited workflow executions. Available in n8n 2.x and later.,0,n8n,,,
 n8n.audit.workflow.resumed.count,count,,,,Total number of audited workflow resumptions. Available in n8n 2.x and later.,0,n8n,,,
+n8n.audit.workflow.unarchived.count,count,,,,Total number of audited workflow unarchive events.,0,n8n,,,
+n8n.audit.workflow.updated.count,count,,,,Total number of audited workflow updates.,0,n8n,,,
 n8n.audit.workflow.version.updated.count,count,,,,Total number of audited workflow version updates. Available in n8n 2.x and later.,0,n8n,,,
 n8n.audit.workflow.waiting.count,count,,,,Total number of audited workflow executions entering a waiting state. Available in n8n 2.x and later.,0,n8n,,,
 n8n.cache.hits.count,count,,,,Total number of cache hits.,0,n8n,,,
@@ -60,6 +65,7 @@ n8n.queue.job.completed.count,count,,,,Number of jobs completed successfully (n8
 n8n.queue.job.dequeued.count,count,,,,Number of jobs dequeued by workers (n8n.queue.job.dequeued event). Emitted by worker processes in queue mode.,0,n8n,,,
 n8n.queue.job.enqueued.count,count,,,,Number of jobs added to the queue (n8n.queue.job.enqueued event).,0,n8n,,,
 n8n.queue.job.failed.count,count,,,,Number of jobs that have failed (n8n.queue.job.failed event).,0,n8n,,,
+n8n.queue.job.stalled.count,count,,,,Number of jobs that stalled (n8n.queue.job.stalled event).,0,n8n,,,
 n8n.readiness.check,gauge,,,,Readiness check status (1 if ready with status code 200 otherwise 0) with status code tag.,0,n8n,,,status_code
 n8n.runner.task.requested.count,count,,,,Total number of runner tasks requested by worker processes.,0,n8n,,,
 n8n.scaling.mode.queue.jobs.active,gauge,,,,Current number of jobs being processed across all workers in scaling mode.,0,n8n,,,

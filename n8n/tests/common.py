@@ -57,11 +57,17 @@ V2_ONLY_METRIC_NAMES = frozenset(
 # samples and exclude them from the symmetric metadata assertion.
 RARE_EVENT_METRIC_NAMES = frozenset(
     {
+        'n8n.audit.workflow.archived.count',
+        'n8n.audit.workflow.created.count',
         'n8n.audit.workflow.deactivated.count',
+        'n8n.audit.workflow.deleted.count',
         'n8n.audit.workflow.resumed.count',
+        'n8n.audit.workflow.unarchived.count',
+        'n8n.audit.workflow.updated.count',
         'n8n.audit.workflow.version.updated.count',
         'n8n.audit.workflow.waiting.count',
         'n8n.embed.login.failures.count',
+        'n8n.queue.job.stalled.count',
         'n8n.runner.task.requested.count',
         'n8n.token.exchange.failures.count',
         # prom-client's per-type libuv request gauge: only has samples while a libuv request is in flight
