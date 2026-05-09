@@ -280,6 +280,8 @@ class KafkaActionsCheck(AgentCheck):
             'key_schema': config.get('key_schema'),
             'key_uses_schema_registry': config.get('key_uses_schema_registry', False),
             'key_skip_bytes': config.get('key_skip_bytes', 0),
+            'value_compression': config.get('value_compression'),
+            'key_compression': config.get('key_compression'),
         }
 
         self.log.debug(

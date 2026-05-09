@@ -43,6 +43,14 @@ deps = [
     "pymongo[srv]==4.8.0; python_version >= '3.9'",
 ]
 
+[project.entry-points."datadog_kafka_actions.formats"]
+json = "datadog_checks.kafka_actions.formats.builtins:JsonHandler"
+string = "datadog_checks.kafka_actions.formats.builtins:StringHandler"
+raw = "datadog_checks.kafka_actions.formats.builtins:RawHandler"
+bson = "datadog_checks.kafka_actions.formats.builtins:BsonHandler"
+avro = "datadog_checks.kafka_actions.formats.builtins:AvroHandler"
+protobuf = "datadog_checks.kafka_actions.formats.builtins:ProtobufHandler"
+
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"
 
