@@ -27,6 +27,24 @@ class AnnotationLevel(StrEnum):
     WARNING = 'warning'
 
 
+def _escape_workflow_data(value: str) -> str:
+    """Escape a value for the ``message`` portion of a workflow command.
+
+    Mirrors ``escapeData`` from ``@actions/core``:
+    https://github.com/actions/toolkit/blob/main/packages/core/src/command.ts
+    """
+    return value.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+
+
+def _escape_workflow_property(value: str) -> str:
+    """Escape a value for a workflow-command property (``file=...``, ``line=...``).
+
+    Mirrors ``escapeProperty`` from ``@actions/core``: same as ``_escape_workflow_data``
+    plus ``:`` and ``,`` so they don't terminate the property or the property list.
+    """
+    return _escape_workflow_data(value).replace(':', '%3A').replace(',', '%2C')
+
+
 class AppLoggingHandler(logging.Handler):
     """Routes Python logging through the Application display methods."""
 
@@ -133,8 +151,8 @@ class Application(Terminal):
     ) -> None:
         """Emit one annotation per level from a queue of ``(level, message)`` tuples.
 
-        Messages at the same level are joined with the GitHub Actions newline escape
-        (``%0A``) so they render as a single multi-line annotation.
+        Messages at the same level are joined with a newline so they render as a single
+        multi-line annotation (``_escape_workflow_data`` rewrites it to ``%0A``).
         """
         grouped: defaultdict[AnnotationLevel, list[str]] = defaultdict(list)
         for level, message in display_queue:
@@ -142,14 +160,20 @@ class Application(Terminal):
 
         for level in AnnotationLevel:
             if messages := grouped.get(level):
-                self._emit_github_annotation(level, file, '%0A'.join(messages), line)
+                self._emit_github_annotation(level, file, '\n'.join(messages), line)
 
     def _emit_github_annotation(self, level: AnnotationLevel, file: str, message: str, line: int) -> None:
         if not running_in_ci():
             return
         # `print` (not `os.system("echo ...")`): the GH runner parses workflow commands
         # off stdout, and shelling out would corrupt messages containing quotes / `$()`.
-        print(f'::{level} file={file},line={line}::{message}')
+        # The escapers below match `@actions/core`'s `escapeData` / `escapeProperty` —
+        # they ensure newlines, `%`, and (for properties) `:` / `,` don't break the
+        # command's framing. Do not remove them.
+        escaped_file = _escape_workflow_property(file)
+        escaped_line = _escape_workflow_property(str(line))
+        escaped_message = _escape_workflow_data(message)
+        print(f'::{level} file={escaped_file},line={escaped_line}::{escaped_message}')
 
     # TODO: remove everything below when the old CLI is gone
     def initialize_old_cli(self):

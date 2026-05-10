@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import pytest
 
-from ddev.cli.application import AnnotationLevel
+from ddev.cli.application import AnnotationLevel, _escape_workflow_data, _escape_workflow_property
 
 
 @pytest.fixture
@@ -112,3 +112,73 @@ def test_annotate_display_queue_orders_errors_before_warnings(app, capsys, on_ci
 
     out = capsys.readouterr().out
     assert out == '::error file=file.py,line=1::e1\n::warning file=file.py,line=1::w1%0Aw2\n'
+
+
+@pytest.mark.parametrize(
+    'raw, expected',
+    [
+        ('plain ascii', 'plain ascii'),
+        ('100%', '100%25'),
+        ('line1\nline2', 'line1%0Aline2'),
+        ('line1\r\nline2', 'line1%0D%0Aline2'),
+        ('mix % \n and \r', 'mix %25 %0A and %0D'),
+        ('keeps : and , intact', 'keeps : and , intact'),
+    ],
+)
+def test_escape_workflow_data(raw, expected):
+    assert _escape_workflow_data(raw) == expected
+
+
+@pytest.mark.parametrize(
+    'raw, expected',
+    [
+        ('plain ascii', 'plain ascii'),
+        ('a,b:c', 'a%2Cb%3Ac'),
+        ('100%,end', '100%25%2Cend'),
+        ('line1\nline2', 'line1%0Aline2'),
+        ('C:\\path,with,commas', 'C%3A\\path%2Cwith%2Ccommas'),
+    ],
+)
+def test_escape_workflow_property(raw, expected):
+    assert _escape_workflow_property(raw) == expected
+
+
+def test_annotate_escapes_newlines_in_message(app, capsys, on_ci):
+    app.annotate_error('file.py', 'line one\nline two\nline three')
+
+    assert capsys.readouterr().out == '::error file=file.py,line=1::line one%0Aline two%0Aline three\n'
+
+
+def test_annotate_escapes_percent_in_message(app, capsys, on_ci):
+    app.annotate_warning('file.py', '100% broken')
+
+    assert capsys.readouterr().out == '::warning file=file.py,line=1::100%25 broken\n'
+
+
+def test_annotate_escapes_property_separators_in_file(app, capsys, on_ci):
+    app.annotate_error('weird,path:with,separators.py', 'msg')
+
+    out = capsys.readouterr().out
+    assert out == '::error file=weird%2Cpath%3Awith%2Cseparators.py,line=1::msg\n'
+
+
+def test_annotate_display_queue_joins_with_real_newline_escaped(app, capsys, on_ci):
+    """The join uses ``\\n`` so the escaper emits ``%0A`` cleanly (no double-encoding)."""
+    queue = [
+        (AnnotationLevel.ERROR, 'first'),
+        (AnnotationLevel.ERROR, 'second'),
+    ]
+    app.annotate_display_queue('file.py', queue)
+
+    assert capsys.readouterr().out == '::error file=file.py,line=1::first%0Asecond\n'
+
+
+def test_annotate_display_queue_preserves_literal_percent_in_messages(app, capsys, on_ci):
+    """Per-message ``%`` is escaped to ``%25`` (not collapsed with the join separator)."""
+    queue = [
+        (AnnotationLevel.ERROR, '100% bad'),
+        (AnnotationLevel.ERROR, 'newline\nin message'),
+    ]
+    app.annotate_display_queue('file.py', queue)
+
+    assert capsys.readouterr().out == '::error file=file.py,line=1::100%25 bad%0Anewline%0Ain message\n'
