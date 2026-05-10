@@ -9,7 +9,7 @@ import pytest
 from ddev.integration.core import Integration
 from ddev.repo.config import RepositoryConfig
 from ddev.repo.constants import NOT_SHIPPABLE
-from ddev.repo.core import IntegrationRegistry, Repository, parse_remote_url
+from ddev.repo.core import IntegrationRegistry, Repository
 from ddev.utils.fs import Path
 
 
@@ -23,63 +23,25 @@ def test_attributes(local_repo):
 
 
 @pytest.mark.parametrize(
-    'url, expected',
-    [
-        pytest.param(
-            'git@github.com:DataDog/integrations-core.git', ('DataDog', 'integrations-core'), id='ssh-with-suffix'
-        ),
-        pytest.param('git@github.com:DataDog/integrations-core', ('DataDog', 'integrations-core'), id='ssh-no-suffix'),
-        pytest.param(
-            'https://github.com/DataDog/integrations-core.git',
-            ('DataDog', 'integrations-core'),
-            id='https-with-suffix',
-        ),
-        pytest.param(
-            'https://github.com/DataDog/integrations-core', ('DataDog', 'integrations-core'), id='https-no-suffix'
-        ),
-        pytest.param(
-            'https://github.com/DataDog/integrations-core/', ('DataDog', 'integrations-core'), id='https-trailing-slash'
-        ),
-        pytest.param(
-            'https://user:token@github.com/DataDog/integrations-core.git',
-            ('DataDog', 'integrations-core'),
-            id='https-with-credentials',
-        ),
-        pytest.param(
-            'ssh://git@github.com:22/DataDog/integrations-core.git',
-            ('DataDog', 'integrations-core'),
-            id='ssh-scheme-with-port',
-        ),
-        pytest.param(
-            'git://github.com/DataDog/integrations-core.git', ('DataDog', 'integrations-core'), id='git-proto'
-        ),
-        pytest.param('git@github.com:fork-user/my-fork.git', ('fork-user', 'my-fork'), id='ssh-non-datadog-fork'),
-    ],
-)
-def test_parse_remote_url_known_forms(url, expected):
-    assert parse_remote_url(url) == expected
-
-
-@pytest.mark.parametrize(
-    'url',
-    [
-        pytest.param('', id='empty'),
-        pytest.param('not-a-url', id='garbage'),
-        pytest.param('https://github.com/only-one-segment', id='single-segment'),
-    ],
-)
-def test_parse_remote_url_unrecognised_forms(url):
-    assert parse_remote_url(url) is None
-
-
-@pytest.mark.parametrize(
     'remote_url, expected_org, expected_full_name',
     [
         pytest.param(
             'git@github.com:DataDog/integrations-core.git',
             'DataDog',
             'integrations-core',
-            id='ssh-canonical',
+            id='ssh-with-suffix',
+        ),
+        pytest.param(
+            'git@github.com:DataDog/integrations-core',
+            'DataDog',
+            'integrations-core',
+            id='ssh-no-suffix',
+        ),
+        pytest.param(
+            'https://github.com/DataDog/integrations-core.git',
+            'DataDog',
+            'integrations-core',
+            id='https-with-suffix',
         ),
         pytest.param(
             'https://github.com/DataDog/integrations-core',
@@ -88,10 +50,34 @@ def test_parse_remote_url_unrecognised_forms(url):
             id='https-no-suffix',
         ),
         pytest.param(
-            'https://github.com/some-fork/integrations-core.git',
-            'some-fork',
+            'https://github.com/DataDog/integrations-core/',
+            'DataDog',
             'integrations-core',
-            id='https-fork',
+            id='https-trailing-slash',
+        ),
+        pytest.param(
+            'https://user:token@github.com/DataDog/integrations-core.git',
+            'DataDog',
+            'integrations-core',
+            id='https-with-credentials',
+        ),
+        pytest.param(
+            'ssh://git@github.com:22/DataDog/integrations-core.git',
+            'DataDog',
+            'integrations-core',
+            id='ssh-scheme-with-port',
+        ),
+        pytest.param(
+            'git://github.com/DataDog/integrations-core.git',
+            'DataDog',
+            'integrations-core',
+            id='git-proto',
+        ),
+        pytest.param(
+            'git@github.com:fork-user/my-fork.git',
+            'fork-user',
+            'my-fork',
+            id='ssh-non-datadog-fork',
         ),
     ],
 )
@@ -113,12 +99,20 @@ def test_repository_identity_falls_back_when_no_remote(mocker, tmp_path):
     assert repo.full_name == 'integrations-core'
 
 
-def test_repository_identity_falls_back_when_remote_unparseable(mocker, tmp_path):
-    mocker.patch('ddev.repo.core._read_origin_url_from_git_config', return_value='not-a-recognised-url')
-    repo = Repository('extras', str(tmp_path))
+@pytest.mark.parametrize(
+    'remote_url, name, expected_full_name',
+    [
+        pytest.param('', 'core', 'integrations-core', id='empty'),
+        pytest.param('not-a-url', 'extras', 'integrations-extras', id='garbage'),
+        pytest.param('https://github.com/only-one-segment', 'core', 'integrations-core', id='single-segment'),
+    ],
+)
+def test_repository_identity_falls_back_when_remote_unparseable(mocker, tmp_path, remote_url, name, expected_full_name):
+    mocker.patch('ddev.repo.core._read_origin_url_from_git_config', return_value=remote_url)
+    repo = Repository(name, str(tmp_path))
 
     assert repo.org == 'DataDog'
-    assert repo.full_name == 'integrations-extras'
+    assert repo.full_name == expected_full_name
 
 
 def test_repository_identity_unknown_name_falls_back_to_name(mocker, tmp_path):
