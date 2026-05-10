@@ -135,16 +135,18 @@ def _duplicate_bean_check(bean_list: list[dict[str, Any]]) -> dict[str, list[str
     bean_dict: dict[str, list[str]] = defaultdict(list)
     duplicate_bean: dict[str, list[str]] = defaultdict(list)
     for beans in bean_list:
-        bean = beans.get("include").get("bean")
+        include = beans.get("include") or {}
+        bean = include.get("bean")
+        attributes = include.get("attribute", {}) or {}
         if isinstance(bean, list):
             for b in bean:
-                for attr in beans.get("include").get("attribute", {}).keys():
+                for attr in attributes.keys():
                     if attr in bean_dict[b]:
                         duplicate_bean[b].append(attr)
                     else:
                         bean_dict[b].append(attr)
         elif bean:
-            for attr in beans.get("include").get("attribute", {}).keys():
+            for attr in attributes.keys():
                 if attr in bean_dict[bean]:
                     duplicate_bean[bean].append(attr)
                 else:
