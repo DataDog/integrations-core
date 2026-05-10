@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import pytest
 
-from ddev.cli.application import ANNOTATION_LEVEL_ERROR, ANNOTATION_LEVEL_WARNING
+from ddev.cli.application import AnnotationLevel
 
 
 @pytest.fixture
@@ -23,8 +23,8 @@ def off_ci(monkeypatch):
 @pytest.mark.parametrize(
     'method, expected_level',
     [
-        ('annotate_error', ANNOTATION_LEVEL_ERROR),
-        ('annotate_warning', ANNOTATION_LEVEL_WARNING),
+        ('annotate_error', AnnotationLevel.ERROR),
+        ('annotate_warning', AnnotationLevel.WARNING),
     ],
 )
 def test_annotate_emits_workflow_command_on_ci(app, capsys, on_ci, method, expected_level):
@@ -56,12 +56,19 @@ def test_annotate_preserves_special_characters(app, capsys, on_ci):
     assert capsys.readouterr().out == "::warning file=a file.py,line=1::shell-unsafe ' \" $(echo)\n"
 
 
+def test_annotation_level_is_str():
+    """`AnnotationLevel` is a `StrEnum`; f-string interpolation yields the raw value."""
+    assert AnnotationLevel.ERROR == 'error'
+    assert AnnotationLevel.WARNING == 'warning'
+    assert f'{AnnotationLevel.ERROR}' == 'error'
+
+
 def test_annotate_display_queue_groups_levels(app, capsys, on_ci):
     queue = [
-        (ANNOTATION_LEVEL_ERROR, 'first error'),
-        (ANNOTATION_LEVEL_WARNING, 'first warning'),
-        (ANNOTATION_LEVEL_ERROR, 'second error'),
-        (ANNOTATION_LEVEL_WARNING, 'second warning'),
+        (AnnotationLevel.ERROR, 'first error'),
+        (AnnotationLevel.WARNING, 'first warning'),
+        (AnnotationLevel.ERROR, 'second error'),
+        (AnnotationLevel.WARNING, 'second warning'),
     ]
     app.annotate_display_queue('file.py', queue)
 
@@ -72,19 +79,15 @@ def test_annotate_display_queue_groups_levels(app, capsys, on_ci):
     )
 
 
-def test_annotate_display_queue_skips_unknown_levels(app, capsys, on_ci):
-    queue = [
-        (ANNOTATION_LEVEL_ERROR, 'real error'),
-        ('info', 'ignored'),
-        ('debug', 'also ignored'),
-    ]
+def test_annotate_display_queue_emits_only_present_levels(app, capsys, on_ci):
+    queue = [(AnnotationLevel.ERROR, 'just an error')]
     app.annotate_display_queue('file.py', queue)
 
-    assert capsys.readouterr().out == '::error file=file.py,line=1::real error\n'
+    assert capsys.readouterr().out == '::error file=file.py,line=1::just an error\n'
 
 
 def test_annotate_display_queue_is_noop_outside_ci(app, capsys, off_ci):
-    queue = [(ANNOTATION_LEVEL_ERROR, 'err'), (ANNOTATION_LEVEL_WARNING, 'warn')]
+    queue = [(AnnotationLevel.ERROR, 'err'), (AnnotationLevel.WARNING, 'warn')]
     app.annotate_display_queue('file.py', queue)
 
     captured = capsys.readouterr()
@@ -96,3 +99,16 @@ def test_annotate_display_queue_empty_emits_nothing(app, capsys, on_ci):
     app.annotate_display_queue('file.py', [])
 
     assert capsys.readouterr().out == ''
+
+
+def test_annotate_display_queue_orders_errors_before_warnings(app, capsys, on_ci):
+    """Output order follows `AnnotationLevel` declaration order regardless of input order."""
+    queue = [
+        (AnnotationLevel.WARNING, 'w1'),
+        (AnnotationLevel.ERROR, 'e1'),
+        (AnnotationLevel.WARNING, 'w2'),
+    ]
+    app.annotate_display_queue('file.py', queue)
+
+    out = capsys.readouterr().out
+    assert out == '::error file=file.py,line=1::e1\n::warning file=file.py,line=1::w1%0Aw2\n'
