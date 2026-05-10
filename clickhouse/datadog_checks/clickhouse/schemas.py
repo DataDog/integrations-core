@@ -154,7 +154,9 @@ class ClickhouseSchemaCollector(SchemaCollector):
         self._db_client = self._check.create_dbm_client()
         self._db_client.set_client_setting('max_execution_time', self._config.max_query_duration)
         try:
-            db_filters = _build_match_clauses('database', self._config.include_databases, self._config.exclude_databases)
+            db_filters = _build_match_clauses(
+                'database', self._config.include_databases, self._config.exclude_databases
+            )
             table_filters = _build_match_clauses('name', self._config.include_tables, self._config.exclude_tables)
 
             refresh_rows = self._collect_view_refreshes(db_filters)
