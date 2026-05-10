@@ -17,11 +17,13 @@ from . import advanced_queries, queries, utils
 from .__about__ import __version__
 from .config import build_config, sanitize
 from .health import ClickhouseHealth, HealthEvent, HealthStatus
+from .metadata import ClickhouseMetadata
 from .parts_and_merges import ClickhousePartsAndMerges
 from .query_completions import ClickhouseQueryCompletions
 from .query_errors import ClickhouseQueryErrors
 from .statement_samples import ClickhouseStatementSamples
 from .statements import ClickhouseStatementMetrics
+from .table_metrics import ClickhouseTableMetrics
 from .utils import ErrorSanitizer
 
 try:
@@ -122,7 +124,16 @@ class ClickhouseCheck(DatabaseCheck):
         else:
             self.query_errors = None
 
-        # Initialize parts and merges monitoring (from system.parts, merges, mutations, replication_queue)
+        if self._config.dbm and self._config.collect_schemas and self._config.collect_schemas.enabled:
+            self.metadata = ClickhouseMetadata(self)
+        else:
+            self.metadata = None
+
+        if self._config.dbm and self._config.schema_metrics and self._config.schema_metrics.enabled:
+            self.table_metrics = ClickhouseTableMetrics(self, self._config.schema_metrics)
+        else:
+            self.table_metrics = None
+
         if self._config.dbm and self._config.parts_and_merges.enabled:
             self.parts_and_merges = ClickhousePartsAndMerges(self, self._config.parts_and_merges)
         else:
@@ -260,6 +271,12 @@ class ClickhouseCheck(DatabaseCheck):
         if self.query_errors:
             self.query_errors.run_job_loop(self.tags)
 
+        if self.metadata:
+            self.metadata.run_job_loop(self.tags)
+
+        if self.table_metrics:
+            self.table_metrics.run_job_loop(self.tags)
+
         # Run parts and merges monitoring if enabled
         if self.parts_and_merges:
             self.parts_and_merges.run_job_loop(self.tags)
@@ -363,6 +380,10 @@ class ClickhouseCheck(DatabaseCheck):
             tag_dict['db'] = str(self._config.db)
             self._database_identifier = template.safe_substitute(**tag_dict)
         return self._database_identifier
+
+    @property
+    def dbms(self) -> str:
+        return "clickhouse"
 
     @property
     def dbms_version(self) -> str:
@@ -525,6 +546,10 @@ class ClickhouseCheck(DatabaseCheck):
             self.query_completions.cancel()
         if self.query_errors:
             self.query_errors.cancel()
+        if self.metadata:
+            self.metadata.cancel()
+        if self.table_metrics:
+            self.table_metrics.cancel()
         if self.parts_and_merges:
             self.parts_and_merges.cancel()
 
@@ -537,6 +562,10 @@ class ClickhouseCheck(DatabaseCheck):
             self.query_completions._job_loop_future.result()
         if self.query_errors and self.query_errors._job_loop_future:
             self.query_errors._job_loop_future.result()
+        if self.metadata and self.metadata._job_loop_future:
+            self.metadata._job_loop_future.result()
+        if self.table_metrics and self.table_metrics._job_loop_future:
+            self.table_metrics._job_loop_future.result()
         if self.parts_and_merges and self.parts_and_merges._job_loop_future:
             self.parts_and_merges._job_loop_future.result()
 
