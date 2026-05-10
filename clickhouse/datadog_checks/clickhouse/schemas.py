@@ -13,11 +13,10 @@ from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollecto
 
 _VIEW_ENGINES = frozenset(['View', 'MaterializedView', 'LiveView', 'WindowView'])
 
-# Internal ClickHouse schemas we never want to surface as user databases.
 _SYSTEM_DATABASE_NAMES = ("'system'", "'INFORMATION_SCHEMA'", "'information_schema'")
 
-# Single stub passed to the base-class loop so it runs exactly once.
-# Actual database names come from the `database` column of each cursor row.
+# Single stub so the base-class loop runs exactly once; actual database names
+# come from the `database` column of each cursor row.
 _CLUSTER_STUB = {'name': '_cluster_'}
 
 _TABLES_COLUMNS_QUERY = """\
@@ -97,15 +96,7 @@ class ClickhouseSchemaCollectorConfig(SchemaCollectorConfig):
 
 
 class ClickhouseSchemaCollector(SchemaCollector):
-    """ClickHouse implementation of the shared schema collector.
-
-    Uses a single connection for the full collection cycle. _get_databases
-    returns a single stub so the base loop runs exactly once. The main query
-    is a CTE that joins tables and columns server-side via groupArrayIf,
-    returning one fully-assembled row per table. view_refreshes is a separate
-    optional query for version compatibility. _map_row extracts the actual
-    database name from each cursor row.
-    """
+    """Collects ClickHouse schema metadata via a single CTE query per cycle."""
 
     _check: ClickhouseCheck
     _config: ClickhouseSchemaCollectorConfig
