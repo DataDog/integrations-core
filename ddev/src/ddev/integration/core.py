@@ -222,8 +222,12 @@ class Integration:
         return contents.count('import ') > 1
 
     @cached_property
+    def jmx_metrics_file(self) -> Path:
+        return self.path / 'datadog_checks' / self.package_directory_name / 'data' / 'metrics.yaml'
+
+    @cached_property
     def is_jmx_check(self) -> bool:
-        return (self.path / 'datadog_checks' / self.package_directory_name / 'data' / 'metrics.yaml').is_file()
+        return self.jmx_metrics_file.is_file()
 
     def __eq__(self, other):
         return other.path == self.path

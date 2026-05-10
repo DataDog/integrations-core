@@ -1,94 +1,108 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
 from ast import literal_eval
 from collections import defaultdict
+from typing import TYPE_CHECKING, Any
 
 import click
-import yaml
 
-from datadog_checks.dev.tooling.commands.console import (
-    CONTEXT_SETTINGS,
-    abort,
-    annotate_error,
-    echo_failure,
-    echo_info,
-    echo_success,
-)
-from datadog_checks.dev.tooling.testing import process_checks_option
-from datadog_checks.dev.tooling.utils import (
-    complete_valid_checks,
-    file_exists,
-    get_default_config_spec,
-    get_jmx_metrics_file,
-    is_jmx_integration,
-    read_file,
-)
+if TYPE_CHECKING:
+    from ddev.cli.application import Application
+    from ddev.integration.core import Integration
 
 
-@click.command('jmx-metrics', context_settings=CONTEXT_SETTINGS, short_help='Validate JMX metrics files')
-@click.argument('check', shell_complete=complete_valid_checks, required=False)
+@click.command('jmx-metrics', short_help='Validate JMX metrics files')
+@click.argument('check', required=False)
 @click.option('--verbose', '-v', is_flag=True, help='Verbose mode')
-def jmx_metrics(check, verbose):
+@click.pass_obj
+def jmx_metrics(app: Application, check: str | None, verbose: bool):
     """Validate all default JMX metrics definitions.
 
     If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
     checks, an 'all' or empty `check` value will validate all README files.
     """
+    if check and check.lower() == 'changed':
+        candidates = app.repo.integrations.iter_changed_code()
+    else:
+        selection: tuple[str, ...] = (check,) if check and check.lower() != 'all' else ()
+        candidates = app.repo.integrations.iter(selection)
+    integrations = sorted(
+        (i for i in candidates if _is_jmx_integration(i)),
+        key=lambda i: i.name,
+    )
+    app.display_info(f"Validating JMX metrics files for {len(integrations)} checks ...")
 
-    checks = process_checks_option(check, source='integrations')
-    integrations = sorted(check for check in checks if is_jmx_integration(check))
-    echo_info(f"Validating JMX metrics files for {len(integrations)} checks ...")
+    saved_errors: dict[tuple[str, str | None], list[str]] = defaultdict(list)
 
-    saved_errors = defaultdict(list)
-
-    for check_name in integrations:
-        validate_jmx_metrics(check_name, saved_errors, verbose)
-        validate_config_spec(check_name, saved_errors)
+    for integration in integrations:
+        _validate_jmx_metrics(integration, saved_errors, verbose)
+        _validate_config_spec(integration, saved_errors)
 
     for key, errors in saved_errors.items():
         if not errors:
             continue
-        check_name, filepath = key
-        annotate_error(filepath, "\n".join(errors))
-        echo_info(f"{check_name}:")
+        check_name, _ = key
+        app.display_info(f"{check_name}:")
         for err in errors:
-            echo_failure(f"    - {err}")
+            app.display_error(f"    - {err}")
 
-    echo_info(f"{len(integrations)} total JMX integrations")
-    echo_success(f"{len(integrations) - len(saved_errors)} valid metrics files")
+    app.display_info(f"{len(integrations)} total JMX integrations")
+    app.display_success(f"{len(integrations) - len(saved_errors)} valid metrics files")
     if saved_errors:
-        echo_failure(f"{len(saved_errors)} invalid metrics files")
-        abort()
+        app.display_error(f"{len(saved_errors)} invalid metrics files")
+        app.abort()
 
 
-def validate_jmx_metrics(check_name, saved_errors, verbose):
-    jmx_metrics_file, metrics_file_exists = get_jmx_metrics_file(check_name)
+def _is_jmx_integration(integration: Integration) -> bool:
+    import yaml
 
-    if not metrics_file_exists:
+    config_file = integration.path / 'datadog_checks' / integration.package_directory_name / 'data' / 'conf.yaml.example'
+    if not config_file.is_file():
+        return False
+    config_content = yaml.safe_load(config_file.read_text())
+    if not config_content:
+        return False
+    init_config = config_content.get('init_config', None)
+    if not init_config:
+        return False
+    return init_config.get('is_jmx', False)
+
+
+def _validate_jmx_metrics(integration: Integration, saved_errors: dict[tuple[str, str | None], list[str]], verbose: bool):
+    import yaml
+
+    check_name = integration.name
+    jmx_metrics_file = str(integration.jmx_metrics_file)
+
+    if not integration.jmx_metrics_file.is_file():
         saved_errors[(check_name, None)].append(f'{jmx_metrics_file} does not exist')
         return
+
+    contents = integration.jmx_metrics_file.read_text()
     try:
         # Load yaml config with custom constructor. The default loader overwrites duplicate keys:
         # https://github.com/yaml/pyyaml/issues/165
-        yaml.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, no_duplicates_constructor)
-        yaml.load(read_file(jmx_metrics_file), Loader=yaml.FullLoader).get('jmx_metrics')
+        yaml.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _no_duplicates_constructor)
+        yaml.load(contents, Loader=yaml.FullLoader).get('jmx_metrics')
     except Exception as errors:
         saved_errors[(check_name, jmx_metrics_file)].append("The config contains the following duplicates entries:")
         # Convert Exception -> String -> List
-        errors = literal_eval(str(errors))
-        for e in errors:
+        parsed = literal_eval(str(errors))
+        for e in parsed:
             saved_errors[(check_name, jmx_metrics_file)].append(f"{e[0]} on line {e[-1]}")
 
-    jmx_metrics_data = yaml.safe_load(read_file(jmx_metrics_file)).get('jmx_metrics')
+    jmx_metrics_data = yaml.safe_load(contents).get('jmx_metrics')
     if jmx_metrics_data is None:
         saved_errors[(check_name, jmx_metrics_file)].append(f'{jmx_metrics_file} does not have jmx_metrics definition')
         return
 
     for rule in jmx_metrics_data:
         include = rule.get('include')
-        include_str = truncate_message(str(include), verbose)
-        rule_str = truncate_message(str(rule), verbose)
+        include_str = _truncate_message(str(include), verbose)
+        rule_str = _truncate_message(str(rule), verbose)
 
         if not include:
             saved_errors[(check_name, jmx_metrics_file)].append(f"missing include: {rule_str}")
@@ -104,7 +118,7 @@ def validate_jmx_metrics(check_name, saved_errors, verbose):
                 f"domain, domain_regex or bean attribute is missing for rule: {include_str}"
             )
 
-    duplicates = duplicate_bean_check(jmx_metrics_data)
+    duplicates = _duplicate_bean_check(jmx_metrics_data)
     if duplicates:
         saved_errors[(check_name, jmx_metrics_file)].append(
             "The following bean and attribute combination is a duplicate:"
@@ -113,9 +127,9 @@ def validate_jmx_metrics(check_name, saved_errors, verbose):
             saved_errors[(check_name, jmx_metrics_file)].append(f"{k}: {v}")
 
 
-def duplicate_bean_check(bean_list):
-    bean_dict = defaultdict(list)
-    duplicate_bean = defaultdict(list)
+def _duplicate_bean_check(bean_list: list[dict[str, Any]]) -> dict[str, list[str]]:
+    bean_dict: dict[str, list[str]] = defaultdict(list)
+    duplicate_bean: dict[str, list[str]] = defaultdict(list)
     for beans in bean_list:
         bean = beans.get("include").get("bean")
         if type(bean) == list:
@@ -134,14 +148,18 @@ def duplicate_bean_check(bean_list):
     return dict(duplicate_bean)
 
 
-def validate_config_spec(check_name, saved_errors):
-    config_file = get_default_config_spec(check_name)
+def _validate_config_spec(integration: Integration, saved_errors: dict[tuple[str, str | None], list[str]]):
+    import yaml
 
-    if not file_exists(config_file):
-        saved_errors[(check_name, None)].append(f"config spec does not exist: {config_file}")
+    check_name = integration.name
+    config_file = integration.config_spec
+    config_file_str = str(config_file)
+
+    if not config_file.is_file():
+        saved_errors[(check_name, None)].append(f"config spec does not exist: {config_file_str}")
         return
 
-    spec_files = yaml.safe_load(read_file(config_file)).get('files')
+    spec_files = yaml.safe_load(config_file.read_text()).get('files')
     init_config_jmx = False
     instances_jmx = False
 
@@ -156,12 +174,12 @@ def validate_config_spec(check_name, saved_errors):
                     instances_jmx = True
 
     if not init_config_jmx:
-        saved_errors[(check_name, config_file)].append("config spec: does not use `init_config/jmx` template")
+        saved_errors[(check_name, config_file_str)].append("config spec: does not use `init_config/jmx` template")
     if not instances_jmx:
-        saved_errors[(check_name, config_file)].append("config spec: does not use `instances/jmx` template")
+        saved_errors[(check_name, config_file_str)].append("config spec: does not use `instances/jmx` template")
 
 
-def truncate_message(s, verbose):
+def _truncate_message(s: str, verbose: bool) -> str:
     if not verbose:
         s = (s[:100] + '...') if len(s) > 100 else s
     return s
@@ -169,7 +187,7 @@ def truncate_message(s, verbose):
 
 # Modified version of:
 # https://gist.github.com/pypt/94d747fe5180851196eb
-def no_duplicates_constructor(loader, node, deep=False):
+def _no_duplicates_constructor(loader, node, deep: bool = False):
     """Check for duplicate keys."""
 
     mapping = {}
