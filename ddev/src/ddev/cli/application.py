@@ -12,9 +12,14 @@ from ddev.cli.terminal import Terminal
 from ddev.config.constants import AppEnvVars, ConfigEnvVars, VerbosityLevels
 from ddev.config.file import ConfigFileWithOverrides, RootConfig
 from ddev.repo.core import Repository
+from ddev.utils.ci import running_in_ci
 from ddev.utils.fs import Path
 from ddev.utils.github import GitHubManager
 from ddev.utils.platform import Platform
+
+ANNOTATION_LEVEL_ERROR = 'error'
+ANNOTATION_LEVEL_WARNING = 'warning'
+_GH_ANNOTATION_LEVELS = frozenset({ANNOTATION_LEVEL_ERROR, ANNOTATION_LEVEL_WARNING})
 
 
 class AppLoggingHandler(logging.Handler):
@@ -109,6 +114,38 @@ class Application(Terminal):
         if text:
             self.display_error(text, **kwargs)
         self.__exit_func(code)
+
+    def annotate_error(self, file: str, message: str, line: int = 1) -> None:
+        """Emit a GitHub Actions ``error`` workflow annotation; no-op outside CI."""
+        self._emit_github_annotation(ANNOTATION_LEVEL_ERROR, file, message, line)
+
+    def annotate_warning(self, file: str, message: str, line: int = 1) -> None:
+        """Emit a GitHub Actions ``warning`` workflow annotation; no-op outside CI."""
+        self._emit_github_annotation(ANNOTATION_LEVEL_WARNING, file, message, line)
+
+    def annotate_display_queue(self, file: str, display_queue: list[tuple[str, str]], line: int = 1) -> None:
+        """Emit one annotation per level from a queue of ``(level, message)`` tuples.
+
+        Messages at the same level are joined with the GitHub Actions newline escape
+        (``%0A``) so they render as a single multi-line annotation. Entries whose
+        level is not ``error`` or ``warning`` are ignored.
+        """
+        grouped: dict[str, list[str]] = {ANNOTATION_LEVEL_ERROR: [], ANNOTATION_LEVEL_WARNING: []}
+        for level, message in display_queue:
+            if level in grouped:
+                grouped[level].append(message)
+
+        if grouped[ANNOTATION_LEVEL_ERROR]:
+            self.annotate_error(file, '%0A'.join(grouped[ANNOTATION_LEVEL_ERROR]), line=line)
+        if grouped[ANNOTATION_LEVEL_WARNING]:
+            self.annotate_warning(file, '%0A'.join(grouped[ANNOTATION_LEVEL_WARNING]), line=line)
+
+    def _emit_github_annotation(self, level: str, file: str, message: str, line: int) -> None:
+        if not running_in_ci():
+            return
+        if level not in _GH_ANNOTATION_LEVELS:
+            level = ANNOTATION_LEVEL_ERROR
+        print(f'::{level} file={file},line={line}::{message}')
 
     # TODO: remove everything below when the old CLI is gone
     def initialize_old_cli(self):
