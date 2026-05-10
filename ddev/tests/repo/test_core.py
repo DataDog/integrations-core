@@ -9,7 +9,7 @@ import pytest
 from ddev.integration.core import Integration
 from ddev.repo.config import RepositoryConfig
 from ddev.repo.constants import NOT_SHIPPABLE
-from ddev.repo.core import IntegrationRegistry, Repository
+from ddev.repo.core import IntegrationRegistry, Repository, parse_remote_url
 from ddev.utils.fs import Path
 
 
@@ -20,6 +20,142 @@ def test_attributes(local_repo):
     assert repo.path == local_repo
     assert isinstance(repo.integrations, IntegrationRegistry)
     assert isinstance(repo.config, RepositoryConfig)
+
+
+@pytest.mark.parametrize(
+    'url, expected',
+    [
+        pytest.param(
+            'git@github.com:DataDog/integrations-core.git', ('DataDog', 'integrations-core'), id='ssh-with-suffix'
+        ),
+        pytest.param('git@github.com:DataDog/integrations-core', ('DataDog', 'integrations-core'), id='ssh-no-suffix'),
+        pytest.param(
+            'https://github.com/DataDog/integrations-core.git',
+            ('DataDog', 'integrations-core'),
+            id='https-with-suffix',
+        ),
+        pytest.param(
+            'https://github.com/DataDog/integrations-core', ('DataDog', 'integrations-core'), id='https-no-suffix'
+        ),
+        pytest.param(
+            'https://github.com/DataDog/integrations-core/', ('DataDog', 'integrations-core'), id='https-trailing-slash'
+        ),
+        pytest.param(
+            'https://user:token@github.com/DataDog/integrations-core.git',
+            ('DataDog', 'integrations-core'),
+            id='https-with-credentials',
+        ),
+        pytest.param(
+            'ssh://git@github.com:22/DataDog/integrations-core.git',
+            ('DataDog', 'integrations-core'),
+            id='ssh-scheme-with-port',
+        ),
+        pytest.param(
+            'git://github.com/DataDog/integrations-core.git', ('DataDog', 'integrations-core'), id='git-proto'
+        ),
+        pytest.param('git@github.com:fork-user/my-fork.git', ('fork-user', 'my-fork'), id='ssh-non-datadog-fork'),
+    ],
+)
+def test_parse_remote_url_known_forms(url, expected):
+    assert parse_remote_url(url) == expected
+
+
+@pytest.mark.parametrize(
+    'url',
+    [
+        pytest.param('', id='empty'),
+        pytest.param('not-a-url', id='garbage'),
+        pytest.param('https://github.com/only-one-segment', id='single-segment'),
+    ],
+)
+def test_parse_remote_url_unrecognised_forms(url):
+    assert parse_remote_url(url) is None
+
+
+@pytest.mark.parametrize(
+    'remote_url, expected_org, expected_full_name',
+    [
+        pytest.param(
+            'git@github.com:DataDog/integrations-core.git',
+            'DataDog',
+            'integrations-core',
+            id='ssh-canonical',
+        ),
+        pytest.param(
+            'https://github.com/DataDog/integrations-core',
+            'DataDog',
+            'integrations-core',
+            id='https-no-suffix',
+        ),
+        pytest.param(
+            'https://github.com/some-fork/integrations-core.git',
+            'some-fork',
+            'integrations-core',
+            id='https-fork',
+        ),
+    ],
+)
+def test_repository_identity_uses_git_remote(mocker, tmp_path, remote_url, expected_org, expected_full_name):
+    mocker.patch('ddev.repo.core._read_origin_url_from_git_config', return_value=remote_url)
+    repo = Repository('weird-dir-name', str(tmp_path))
+
+    assert repo.name == 'weird-dir-name'
+    assert repo.org == expected_org
+    assert repo.full_name == expected_full_name
+
+
+def test_repository_identity_falls_back_when_no_remote(mocker, tmp_path):
+    mocker.patch('ddev.repo.core._read_origin_url_from_git_config', return_value=None)
+    repo = Repository('core', str(tmp_path))
+
+    assert repo.name == 'core'
+    assert repo.org == 'DataDog'
+    assert repo.full_name == 'integrations-core'
+
+
+def test_repository_identity_falls_back_when_remote_unparseable(mocker, tmp_path):
+    mocker.patch('ddev.repo.core._read_origin_url_from_git_config', return_value='not-a-recognised-url')
+    repo = Repository('extras', str(tmp_path))
+
+    assert repo.org == 'DataDog'
+    assert repo.full_name == 'integrations-extras'
+
+
+def test_repository_identity_unknown_name_falls_back_to_name(mocker, tmp_path):
+    mocker.patch('ddev.repo.core._read_origin_url_from_git_config', return_value=None)
+    repo = Repository('custom-repo', str(tmp_path))
+
+    assert repo.org == 'DataDog'
+    assert repo.full_name == 'custom-repo'
+
+
+def test_repository_identity_reads_real_dot_git_config(tmp_path):
+    git_dir = tmp_path / '.git'
+    git_dir.mkdir()
+    (git_dir / 'config').write_text('[remote "origin"]\n\turl = git@github.com:DataDog/integrations-core.git\n')
+    repo = Repository('weird-dir-name', str(tmp_path))
+
+    assert repo.org == 'DataDog'
+    assert repo.full_name == 'integrations-core'
+
+
+def test_repository_identity_follows_worktree_gitdir_pointer(tmp_path):
+    primary_git = tmp_path / 'primary' / '.git'
+    primary_git.mkdir(parents=True)
+    (primary_git / 'config').write_text('[remote "origin"]\n\turl = https://github.com/DataDog/integrations-core.git\n')
+
+    worktrees_dir = primary_git / 'worktrees' / 'feature'
+    worktrees_dir.mkdir(parents=True)
+    (worktrees_dir / 'commondir').write_text('../..\n')
+
+    worktree_path = tmp_path / 'feature'
+    worktree_path.mkdir()
+    (worktree_path / '.git').write_text(f'gitdir: {worktrees_dir}\n')
+
+    repo = Repository('feature', str(worktree_path))
+
+    assert repo.org == 'DataDog'
+    assert repo.full_name == 'integrations-core'
 
 
 class TestGetIntegration:

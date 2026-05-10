@@ -3,11 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import re
 from functools import cached_property
 from typing import TYPE_CHECKING, Dict, Iterable
 
 from ddev.integration.core import Integration
-from ddev.repo.constants import CONFIG_DIRECTORY, FULL_NAMES
+from ddev.repo.constants import CONFIG_DIRECTORY, DEFAULT_ORG, FULL_NAMES
 from ddev.utils.fs import Path
 from ddev.utils.git import GitRepository
 
@@ -15,17 +16,88 @@ if TYPE_CHECKING:
     from ddev.repo.config import RepositoryConfig
 
 
+_GIT_REMOTE_PATTERNS = (
+    # SSH form: git@github.com:Org/repo(.git)?
+    re.compile(r'^(?:[^@]+@)?[^:/]+:(?P<org>[^/]+)/(?P<repo>[^/]+?)(?:\.git)?/?$'),
+    # HTTP(S) / git:// form: scheme://[user[:pass]@]host[:port]/Org/repo(.git)?
+    re.compile(r'^[a-zA-Z][a-zA-Z0-9+.-]*://[^/]+/(?P<org>[^/]+)/(?P<repo>[^/]+?)(?:\.git)?/?$'),
+)
+
+
+def parse_remote_url(url: str) -> tuple[str, str] | None:
+    """Parse a git remote URL into `(org, repo)`. Returns None if the URL form is unrecognised."""
+    for pattern in _GIT_REMOTE_PATTERNS:
+        match = pattern.match(url)
+        if match:
+            return match.group('org'), match.group('repo')
+    return None
+
+
+def _read_origin_url_from_git_config(repo_path: Path) -> str | None:
+    """Read the `origin` remote URL from `.git/config`, following worktree pointers if needed.
+
+    Implemented as file IO (no subprocess) so it is invisible to test mocks that intercept
+    `subprocess.run` or `GitRepository.capture`.
+    """
+    import configparser
+
+    git_dir = repo_path / '.git'
+    try:
+        if git_dir.is_file():
+            content = git_dir.read_text()
+            for line in content.splitlines():
+                if line.startswith('gitdir:'):
+                    pointer = line.split(':', 1)[1].strip()
+                    git_dir = Path(pointer)
+                    if not git_dir.is_absolute():
+                        git_dir = (repo_path / git_dir).resolve()
+                    break
+            else:
+                return None
+        config_path = git_dir / 'config'
+        if not config_path.is_file():
+            common_pointer = git_dir / 'commondir'
+            if common_pointer.is_file():
+                common = common_pointer.read_text().strip()
+                common_dir = Path(common)
+                if not common_dir.is_absolute():
+                    common_dir = (git_dir / common_dir).resolve()
+                config_path = common_dir / 'config'
+        if not config_path.is_file():
+            return None
+        parser = configparser.ConfigParser(strict=False)
+        parser.read(config_path, encoding='utf-8')
+        section = 'remote "origin"'
+        if parser.has_option(section, 'url'):
+            return parser.get(section, 'url').strip() or None
+    except (OSError, configparser.Error):
+        return None
+    return None
+
+
 class Repository:
     def __init__(self, name: str, path: str):
         self.__name = name
-        self.__full_name = FULL_NAMES.get(name, name)
         self.__path = Path(path).expand()
         self.__git = GitRepository(self.__path)
+        self.__org, self.__full_name = self.__derive_identity()
         self.__integrations = IntegrationRegistry(self)
+
+    def __derive_identity(self) -> tuple[str, str]:
+        remote_url = _read_origin_url_from_git_config(self.__path)
+        if remote_url:
+            parsed = parse_remote_url(remote_url)
+            if parsed is not None:
+                return parsed
+        return DEFAULT_ORG, FULL_NAMES.get(self.__name, self.__name)
 
     @property
     def name(self) -> str:
         return self.__name
+
+    @property
+    def org(self) -> str:
+        return self.__org
 
     @property
     def full_name(self) -> str:

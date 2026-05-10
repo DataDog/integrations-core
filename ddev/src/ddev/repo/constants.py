@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 CONFIG_DIRECTORY = '.ddev'
 NOT_SHIPPABLE = frozenset(['datadog_checks_dev', 'datadog_checks_tests_helper', 'ddev'])
+DEFAULT_ORG = 'DataDog'
 FULL_NAMES = {
     'core': 'integrations-core',
     'extras': 'integrations-extras',
