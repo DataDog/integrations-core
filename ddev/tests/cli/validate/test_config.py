@@ -99,7 +99,13 @@ def test_missing_spec_with_example_file(repo_fixture, expect_failure, request, d
 
 @pytest.mark.parametrize(
     'check',
-    ['ddev', 'datadog_checks_dev', 'datadog_checks_base', 'datadog_checks_dependency_provider', 'datadog_checks_downloader'],
+    [
+        'ddev',
+        'datadog_checks_dev',
+        'datadog_checks_base',
+        'datadog_checks_dependency_provider',
+        'datadog_checks_downloader',
+    ],
 )
 def test_configless_check_is_skipped(check, fake_repo, ddev):
     """Checks that do not ship Agent configuration are skipped."""

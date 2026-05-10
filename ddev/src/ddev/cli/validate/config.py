@@ -106,7 +106,9 @@ def _validate_config_legacy(
             files_failed[str(config_file)] = True
             error = str(e)
 
-            check_display_queue.append(lambda file_name=file_name: app.display_info(f'{file_name}:', indent=DEFAULT_INDENT))
+            check_display_queue.append(
+                lambda file_name=file_name: app.display_info(f'{file_name}:', indent=DEFAULT_INDENT)
+            )
             check_display_queue.append(lambda: app.display_error('Invalid YAML -', indent=FILE_INDENT))
             check_display_queue.append(lambda error=error: app.display_info(error, indent=FILE_INDENT * 2))
             continue
