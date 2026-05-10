@@ -133,9 +133,7 @@ class CodeOwners:
         paths.reverse()
         self.paths = paths
 
-    def matching_lines(
-        self, filepath: str
-    ) -> Iterator[tuple[list[OwnerTuple], int | None, str | None, str | None]]:
+    def matching_lines(self, filepath: str) -> Iterator[tuple[list[OwnerTuple], int | None, str | None, str | None]]:
         for pattern, path, owners, line_num, section_name in self.paths:
             if pattern.search(filepath.replace(" ", MASK)) is not None:
                 yield (owners, line_num, path, section_name)
