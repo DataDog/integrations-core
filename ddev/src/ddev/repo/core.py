@@ -8,7 +8,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Dict, Iterable
 
 from ddev.integration.core import Integration
-from ddev.repo.constants import CONFIG_DIRECTORY, DEFAULT_ORG, FULL_NAMES
+from ddev.repo.constants import CONFIG_DIRECTORY, FULL_NAMES
 from ddev.utils.fs import Path
 from ddev.utils.git import GitRepository
 
@@ -24,12 +24,12 @@ GIT_REMOTE_PATTERNS = (
 )
 
 
-def parse_remote_url(url: str) -> tuple[str, str] | None:
-    """Parse a git remote URL into `(org, repo)`. Returns None if the URL form is unrecognised."""
+def parse_remote_url(url: str) -> str | None:
+    """Parse a git remote URL and return the bare repository name (without `.git`). Returns None if unrecognised."""
     for pattern in GIT_REMOTE_PATTERNS:
         match = pattern.match(url)
         if match:
-            return match.group('org'), match.group('repo')
+            return match.group('repo')
     return None
 
 
@@ -80,24 +80,20 @@ class Repository:
         self.__name = name
         self.__path = Path(path).expand()
         self.__git = GitRepository(self.__path)
-        self.__org, self.__full_name = self.__derive_identity()
+        self.__full_name = self.__derive_full_name()
         self.__integrations = IntegrationRegistry(self)
 
-    def __derive_identity(self) -> tuple[str, str]:
+    def __derive_full_name(self) -> str:
         remote_url = _read_origin_url_from_git_config(self.__path)
         if remote_url:
             parsed = parse_remote_url(remote_url)
             if parsed is not None:
                 return parsed
-        return DEFAULT_ORG, FULL_NAMES.get(self.__name, self.__name)
+        return FULL_NAMES.get(self.__name, self.__name)
 
     @property
     def name(self) -> str:
         return self.__name
-
-    @property
-    def org(self) -> str:
-        return self.__org
 
     @property
     def full_name(self) -> str:

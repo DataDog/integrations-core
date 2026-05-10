@@ -94,7 +94,7 @@ class GitHubManager:
         self.__repo = repo
         self.__auth = (user, token)
         self.__status = status
-        self.__repo_id = f'{self.__repo.org}/{self.__repo.full_name}'
+        self.__repo_id = f'DataDog/{self.__repo.full_name}'
 
     @property
     def repo_id(self) -> str:
