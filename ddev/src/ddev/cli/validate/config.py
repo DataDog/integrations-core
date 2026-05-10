@@ -147,13 +147,11 @@ def _iter_target_checks(app: Application, check: str | None) -> list[str]:
     if app.repo.name == 'agent':
         return ['agent']
 
-    selection: tuple[str, ...]
     if check is None or check.lower() == 'all':
-        selection = ()
-        names = sorted({integration.name for integration in app.repo.integrations.iter_all(selection)})
+        names = sorted({integration.name for integration in app.repo.integrations.iter_all(('all',))})
     elif check.lower() == 'changed':
         changed = sorted({integration.name for integration in app.repo.integrations.iter_changed_code()})
-        valid = {integration.name for integration in app.repo.integrations.iter_all(())}
+        valid = {integration.name for integration in app.repo.integrations.iter_all(('all',))}
         names = [name for name in changed if name in valid]
         if 'datadog_checks_dev' in names or 'datadog_checks_base' in names:
             names = sorted(valid)

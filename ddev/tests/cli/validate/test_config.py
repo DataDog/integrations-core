@@ -61,15 +61,15 @@ name = "datadog-my-check"
 ABOUT = '__version__ = "1.0.0"\n'
 
 
-def _write_check(repo_path, *, with_spec: bool = True, with_example: bool = False):
-    write_file(repo_path / 'my_check', 'manifest.json', MANIFEST)
-    write_file(repo_path / 'my_check', 'pyproject.toml', PYPROJECT)
-    write_file(repo_path / 'my_check/datadog_checks/my_check', '__about__.py', ABOUT)
+def _write_check(repo_path, *, name: str = 'my_check', with_spec: bool = True, with_example: bool = False):
+    write_file(repo_path / name, 'manifest.json', MANIFEST)
+    write_file(repo_path / name, 'pyproject.toml', PYPROJECT)
+    write_file(repo_path / f'{name}/datadog_checks/{name}', '__about__.py', ABOUT)
     if with_spec:
-        write_file(repo_path / 'my_check/assets/configuration', 'spec.yaml', SPEC_YAML)
+        write_file(repo_path / f'{name}/assets/configuration', 'spec.yaml', SPEC_YAML)
     if with_example:
         # Use a non-standard filename so the legacy YAML validator doesn't pick it up
-        write_file(repo_path / 'my_check/datadog_checks/my_check/data', 'conf.example.yaml', '# placeholder\n')
+        write_file(repo_path / f'{name}/datadog_checks/{name}/data', 'conf.example.yaml', '# placeholder\n')
 
 
 @pytest.mark.parametrize(
@@ -142,3 +142,15 @@ def test_out_of_sync_example_file_fails(fake_repo, ddev):
     assert result.exit_code == 1
     assert 'is not in sync' in result.output
     assert 'Files with errors:' in result.output
+
+
+@pytest.mark.parametrize('argv', [(), ('all',)], ids=['no_arg', 'all'])
+def test_no_arg_and_all_iterate_every_valid_check(argv, fake_repo, ddev):
+    """Both `validate config` and `validate config all` must iterate every valid integration, not just changed."""
+    _write_check(fake_repo.path, name='check_a')
+    _write_check(fake_repo.path, name='check_b')
+    _write_check(fake_repo.path, name='check_c')
+
+    result = ddev('validate', 'config', *argv)
+    for name in ('check_a', 'check_b', 'check_c'):
+        assert name in result.output, f'expected {name} to be iterated but it was not (output: {result.output!r})'
