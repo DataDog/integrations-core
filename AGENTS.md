@@ -153,7 +153,7 @@ The valid types are defined in `ddev/src/ddev/release/constants.py` (`ENTRY_TYPE
 - `deprecated` - Marks functionality as deprecated. Bumps the **minor** version.
 - `removed` - Removes functionality. Bumps the **major** version.
 - `fixed` - Bug fixes. Bumps the **patch** version (e.g., 1.0.0 → 1.0.1).
-- `security` - Security-related fixes. Bumps the **patch** version.
+- `security` - Security-related fixes. Bumps the **minor** version.
 
 ### Examples
 
