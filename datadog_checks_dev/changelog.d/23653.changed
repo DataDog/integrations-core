@@ -1,0 +1,1 @@
+Legacy migration: remove `validate config` from the legacy CLI; the command is now provided natively by ddev.
