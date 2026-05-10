@@ -36,8 +36,8 @@ def spec_validator(spec: dict, loader) -> None:
 
 def files_validator(files, loader) -> None:
     num_files = len(files)
-    file_names_origin = {}
-    example_file_names_origin = {}
+    file_names_origin: dict[str, int] = {}
+    example_file_names_origin: dict[str, int] = {}
     for file_index, config_file in enumerate(files, 1):
         if not isinstance(config_file, dict):
             loader.errors.append(f'{loader.source}, file #{file_index}: File attribute must be a mapping object')

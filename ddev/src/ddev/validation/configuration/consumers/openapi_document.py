@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from keyword import iskeyword
-from typing import List
+from typing import Any, List
 
 from pydantic import BaseModel
 
@@ -13,7 +13,7 @@ from ddev.validation.configuration.consumers.model.model_info import ModelInfo
 ALLOWED_TYPE_FIELDS = OPENAPI_SCHEMA_PROPERTIES - {'default', 'description', 'example', 'title'}
 
 
-def build_openapi_document(section: dict, model_id: str, schema_name: str, errors: List[str]) -> (dict, ModelInfo):
+def build_openapi_document(section: dict, model_id: str, schema_name: str, errors: List[str]) -> tuple[dict, ModelInfo]:
     """
     :param section: The section on a config spec: ie: init_config or instances
     :param model_id: The model id, which is either 'shared' or 'instance'
@@ -44,7 +44,7 @@ def build_openapi_document(section: dict, model_id: str, schema_name: str, error
     #         timeout:
     #           ...
     #         ...
-    openapi_document = {
+    openapi_document: dict[str, Any] = {
         'paths': {
             f'/{model_id}': {
                 'get': {
@@ -58,9 +58,9 @@ def build_openapi_document(section: dict, model_id: str, schema_name: str, error
         },
         'components': {'schemas': {}},
     }
-    schema = {}
-    options = {}
-    required_options = []
+    schema: dict[str, Any] = {}
+    options: dict[str, Any] = {}
+    required_options: list[str] = []
 
     schema['properties'] = options
     schema['required'] = required_options
@@ -117,18 +117,18 @@ def _normalize_option_name(option_name):
     return option_name.replace('-', '_')
 
 
-def _build_type_data(section_option: dict) -> dict:
+def _build_type_data(section_option: dict) -> dict | None:
     """
     Builds the data structure with the type information (example, default value, nested types...)
     """
-    type_data = None
+    type_data: dict | None = None
     if 'value' in section_option:
         # Simple type like str, number
         type_data = section_option['value']
     # Some integrations (like `mysql`) have options that are grouped under a top-level option
     elif 'options' in section_option:
         # Object type
-        nested_properties = []
+        nested_properties: list[dict] = []
         type_data = {'type': 'object', 'properties': nested_properties}
         for nested_option in section_option['options']:
             nested_type_data = nested_option['value']

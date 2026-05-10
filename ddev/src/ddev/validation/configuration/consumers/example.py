@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from collections.abc import Mapping
 from io import StringIO
 
 import yaml
@@ -96,8 +97,13 @@ def option_enabled(option):
 
 
 def validate_fields(
-    fields_dict: dict[str, any], option_name: str, allowed_fields: set[str], field_level: str, writer: OptionWriter
+    fields_dict: Mapping[str, object],
+    option_name: str,
+    allowed_fields: set[str],
+    field_level: str,
+    writer: OptionWriter,
 ):
+    # The function only inspects keys, never values, so any Mapping-of-strings will do.
     invalid_fields = [field for field in fields_dict if field not in allowed_fields]
 
     if invalid_fields:

@@ -35,12 +35,16 @@ class ModelConsumer:
         self.spec = spec
         self.code_formatter = code_formatter or self.create_code_formatter()
 
-    def render(self) -> Dict[str, Dict[str, str]]:
+    def render(self) -> Dict[str, Dict[str, Tuple[str, List[str]]]]:
         """
-        Returns a dictionary containing for each spec file the list of rendered models
+        Returns a dictionary containing for each spec file the list of rendered models.
+
+        Shape: ``{spec_file_name: {model_file_name: (file_contents, errors)}}``.
+        The legacy type annotation claimed the inner value was ``str`` but it has always
+        been ``Tuple[contents, errors]``; this matches the runtime.
         """
-        # { spec_file_name: {model_file_name: model_file_contents }
-        rendered_files = {}
+        # { spec_file_name: {model_file_name: (model_file_contents, errors)}}
+        rendered_files: Dict[str, Dict[str, Tuple[str, List[str]]]] = {}
 
         for spec_file in self.spec['files']:
             # (<file name>, (<contents>, <errors>))
@@ -69,7 +73,7 @@ class ModelConsumer:
 
         return rendered_files
 
-    def _process_section(self, section) -> (List[Tuple[str, str]], dict, ModelInfo):
+    def _process_section(self, section) -> Tuple[List[Tuple[str, str]], Dict[str, Tuple[str, List[str]]], ModelInfo]:
         # Values to return
         # [(model_id, schema_name)]
         package_info: List[Tuple[str, str]] = []
@@ -148,7 +152,7 @@ class ModelConsumer:
 
     def _build_model_files(
         self, model_info: ModelInfo, package_info: List[Tuple[str, str]]
-    ) -> Dict[str, Tuple[str, List]]:
+    ) -> Dict[str, Tuple[str, List[str]]]:
         """Builds the model files others than instace.py and shared.py
         In particular it builds, if relevant:
             - defaults.py
@@ -157,7 +161,7 @@ class ModelConsumer:
             - validators.py
         Returns a Dict[ file_name, Tuple[file_contents, List[errors])]
         """
-        model_files = {}
+        model_files: Dict[str, Tuple[str, List[str]]] = {}
         if model_info.defaults_file_lines:
             defaults_file_contents = self._build_defaults_file(model_info)
             model_files['defaults.py'] = (f'\n{defaults_file_contents}', [])
@@ -185,7 +189,7 @@ class ModelConsumer:
         # If one of these option is different for 2 options with the same name, an error is raised
         required_consistent_options = ['required', 'deprecation', 'metadata_tags']
         # Cache the option index to ease option checking before merging
-        options_name_idx = {}
+        options_name_idx: dict[str, int] = {}
 
         for instance in section['options']:
             for opt in instance['options']:
