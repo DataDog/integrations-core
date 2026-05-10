@@ -27,7 +27,7 @@ def jmx_metrics(app: Application, check: str | None, verbose: bool):
     if check and check.lower() == 'changed':
         candidates = app.repo.integrations.iter_changed_code()
     else:
-        selection: tuple[str, ...] = (check,) if check and check.lower() != 'all' else ()
+        selection: tuple[str, ...] = (check,) if check and check.lower() != 'all' else ('all',)
         candidates = app.repo.integrations.iter(selection)
     integrations = sorted(
         (i for i in candidates if _is_jmx_integration(i)),

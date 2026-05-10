@@ -58,6 +58,25 @@ def test_validate_jmx_metrics_valid(jmx_repo, ddev):
     assert '1 valid metrics files' in result.output
 
 
+@pytest.fixture
+def multi_jmx_repo(fake_repo):
+    _write_jmx_check(fake_repo.path, 'jmxone')
+    _write_jmx_check(fake_repo.path, 'jmxtwo')
+    _write_jmx_check(fake_repo.path, 'jmxthree')
+    yield fake_repo
+
+
+@pytest.mark.parametrize('args', [(), ('all',)], ids=['no_arg', 'all'])
+def test_validate_jmx_metrics_iterates_all_jmx_integrations(multi_jmx_repo, ddev, args):
+    # Regression: empty selection used to trip ddev's `changed`-roots branch, validating zero
+    # integrations. Both `ddev validate jmx-metrics` and `ddev validate jmx-metrics all` must
+    # iterate every JMX integration in the repo.
+    result = ddev('validate', 'jmx-metrics', *args)
+    assert result.exit_code == 0, result.output
+    assert 'Validating JMX metrics files for 3 checks' in result.output
+    assert '3 valid metrics files' in result.output
+
+
 def test_validate_jmx_metrics_no_jmx_integrations(fake_repo, ddev):
     # dummy and dummy2 in fake_repo do not have is_jmx config
     result = ddev('validate', 'jmx-metrics', 'dummy')
