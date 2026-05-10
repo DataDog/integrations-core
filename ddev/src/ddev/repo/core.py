@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from ddev.repo.config import RepositoryConfig
 
 
-_GIT_REMOTE_PATTERNS = (
+GIT_REMOTE_PATTERNS = (
     # SSH form: git@github.com:Org/repo(.git)?
     re.compile(r'^(?:[^@]+@)?[^:/]+:(?P<org>[^/]+)/(?P<repo>[^/]+?)(?:\.git)?/?$'),
     # HTTP(S) / git:// form: scheme://[user[:pass]@]host[:port]/Org/repo(.git)?
@@ -26,7 +26,7 @@ _GIT_REMOTE_PATTERNS = (
 
 def parse_remote_url(url: str) -> tuple[str, str] | None:
     """Parse a git remote URL into `(org, repo)`. Returns None if the URL form is unrecognised."""
-    for pattern in _GIT_REMOTE_PATTERNS:
+    for pattern in GIT_REMOTE_PATTERNS:
         match = pattern.match(url)
         if match:
             return match.group('org'), match.group('repo')
