@@ -59,7 +59,9 @@ def jmx_metrics(app: Application, check: str | None, verbose: bool):
 def _is_jmx_integration(integration: Integration) -> bool:
     import yaml
 
-    config_file = integration.path / 'datadog_checks' / integration.package_directory_name / 'data' / 'conf.yaml.example'
+    config_file = (
+        integration.path / 'datadog_checks' / integration.package_directory_name / 'data' / 'conf.yaml.example'
+    )
     if not config_file.is_file():
         return False
     config_content = yaml.safe_load(config_file.read_text())
@@ -71,7 +73,9 @@ def _is_jmx_integration(integration: Integration) -> bool:
     return init_config.get('is_jmx', False)
 
 
-def _validate_jmx_metrics(integration: Integration, saved_errors: dict[tuple[str, str | None], list[str]], verbose: bool):
+def _validate_jmx_metrics(
+    integration: Integration, saved_errors: dict[tuple[str, str | None], list[str]], verbose: bool
+):
     import yaml
 
     check_name = integration.name
@@ -132,7 +136,7 @@ def _duplicate_bean_check(bean_list: list[dict[str, Any]]) -> dict[str, list[str
     duplicate_bean: dict[str, list[str]] = defaultdict(list)
     for beans in bean_list:
         bean = beans.get("include").get("bean")
-        if type(bean) == list:
+        if isinstance(bean, list):
             for b in bean:
                 for attr in beans.get("include").get("attribute", {}).keys():
                     if attr in bean_dict[b]:

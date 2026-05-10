@@ -7,7 +7,6 @@ import pytest
 
 from tests.helpers.api import write_file
 
-
 VALID_METRICS_YAML = """\
 jmx_metrics:
   - include:
@@ -127,7 +126,9 @@ jmx_metrics:
 def test_validate_jmx_metrics_missing_config_spec(fake_repo, ddev):
     # Write a JMX check without the spec.yaml file.
     write_file(fake_repo.path / 'jmxnospec', 'manifest.json', '{}')
-    write_file(fake_repo.path / 'jmxnospec' / 'datadog_checks' / 'jmxnospec' / 'data', 'metrics.yaml', VALID_METRICS_YAML)
+    write_file(
+        fake_repo.path / 'jmxnospec' / 'datadog_checks' / 'jmxnospec' / 'data', 'metrics.yaml', VALID_METRICS_YAML
+    )
     write_file(
         fake_repo.path / 'jmxnospec' / 'datadog_checks' / 'jmxnospec' / 'data', 'conf.yaml.example', JMX_CONF_EXAMPLE
     )
