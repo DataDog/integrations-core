@@ -162,16 +162,16 @@ class ClickhouseSchemaCollector(SchemaCollector):
             refresh_rows = self._collect_view_refreshes(db_filters)
             self._refreshable_views = {(row[0], row[1]) for row in refresh_rows}
 
-            fmt = dict(
-                tables_table=self._check.get_system_table('tables'),
-                columns_table=self._check.get_system_table('columns'),
-                system_dbs=", ".join(_SYSTEM_DATABASE_NAMES),
-                max_tables=self._config.max_tables,
-                max_columns=self._config.max_columns,
-                limit_columns=self._config.max_tables * self._config.max_columns,
-                db_filters=db_filters,
-                table_filters=table_filters,
-            )
+            fmt = {
+                'tables_table': self._check.get_system_table('tables'),
+                'columns_table': self._check.get_system_table('columns'),
+                'system_dbs': ", ".join(_SYSTEM_DATABASE_NAMES),
+                'max_tables': self._config.max_tables,
+                'max_columns': self._config.max_columns,
+                'limit_columns': self._config.max_tables * self._config.max_columns,
+                'db_filters': db_filters,
+                'table_filters': table_filters,
+            }
             rows = self._execute_query(_TABLES_COLUMNS_QUERY.format(**fmt))
             yield iter(rows)
         finally:
