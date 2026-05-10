@@ -1,0 +1,4 @@
+name: init_config
+enabled: true
+description: |
+  All options defined here are available to all instances.
