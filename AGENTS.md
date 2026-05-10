@@ -56,6 +56,11 @@ If a single argument is present in the function, `str | bytes` is preferred.
 - Small, focused functions with descriptive names are better than repeated code blocks
 - Reusable helpers improve maintainability and reduce the need for comments
 
+### Module Globals
+
+- Do not introduce leading-underscore module globals (for example `_GIT_REMOTE_PATTERNS`) to share data between functions in the same module. The underscore signals "private", but the value still lives for the lifetime of the process and quietly couples every caller to the same state.
+- Prefer plain locals, function parameters, or a small dataclass passed explicitly. If a value is genuinely a shared constant, make it a public module constant (uppercase, no leading underscore).
+
 ## Configuration Models
 
 **Applicable to:** `**/config_models/*.py`, `*/assets/configuration/spec.yaml`
