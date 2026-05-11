@@ -202,6 +202,13 @@ class PostgresStatementMetrics(DBMAsyncJob):
             ttl=60 * 60 / config.query_metrics.full_statement_text_samples_per_hour_per_query,
         )
 
+    def _shutdown(self):
+        self._check = None
+        self._full_statement_text_cache = None
+        self._state = None
+        self._query_calls_cache = None
+        self._baseline_metrics = None
+
     def _execute_query(self, query, params=(), binary=False, row_factory=None) -> Tuple[list, list]:
         if self._cancel_event.is_set():
             raise Exception("Job loop cancelled. Aborting query.")
