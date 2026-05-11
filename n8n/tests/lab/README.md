@@ -2,7 +2,9 @@
 
 A long-running n8n simulation that pushes real metrics to a Datadog org so you can iterate on dashboards, monitors, and customer reports against live data.
 
-It reuses the integration test environment (so you get queue mode, a worker, the full Datadog Agent) and layers on top:
+It uses a dedicated docker-compose (`tests/lab/docker-compose.yaml`) that pulls the integration test stack — queue mode, a worker, redis, the Datadog Agent — and bind-mounts both the test workflows and the lab workflows into `/workflows/`. `tests/conftest.py` (gated on the `N8N_IS_LAB` env var that the `lab` hatch env sets) imports and activates everything it finds there as part of `ddev env start`. Ports are hardcoded to `5678` (main) and `5680` (worker) since the lab owns the host.
+
+On top you get:
 
 - five lab-only workflows with distinct shapes (fast, slow, always-fail, flaky, multi-step chain), and
 - an async traffic generator that drives a configurable webhook + REST API mix and reloads its config on the fly.
@@ -51,12 +53,12 @@ Edit this file while the lab is running and the generator will pick it up on the
 ./tests/lab/run_lab.sh -e py3.13-1    # n8n 1.118.1
 ```
 
-The script brings up the env, imports & activates the lab workflows, restarts n8n so webhooks register, and starts the traffic generator. `Ctrl+C` triggers a `cleanup` trap that runs `lab:stop` to tear everything down.
+The script brings up the env (which goes through `dd_environment` and activates every mounted workflow) and starts the traffic generator. `Ctrl+C` triggers a `cleanup` trap that runs `lab:stop` to tear everything down.
 
 ### Individual hatch commands
 
 ```bash
-hatch run lab:start -e py3.13-2     # ddev env start + import lab workflows + restart
+hatch run lab:start -e py3.13-2     # ddev env start (lab compose; imports + activates workflows)
 hatch run lab:generate              # traffic loop (foreground; Ctrl+C to stop)
 hatch run lab:stop -e py3.13-2      # ddev env stop
 ```
@@ -81,6 +83,13 @@ What it does **not** exercise (these need extra infra and are documented in the 
 
 - `n8n.token.exchange.*` and `n8n.embed.login.*` — require an SSO IdP / embed integration.
 - `n8n.audit.workflow.*` — fire on UI-driven activate/deactivate; not currently driven by the generator. Future iteration could call the n8n REST API to toggle workflow active state on a slow timer.
+
+## Log pipeline validation
+
+The lab validates both n8n log surfaces:
+
+- The main and worker containers set `N8N_LOG_OUTPUT=console` and `N8N_LOG_FORMAT=json`. The Datadog autodiscovery labels on those services mark Docker stdout logs with `source:n8n`, so the n8n log pipeline can parse JSON application logs from both processes.
+- The Agent also mounts the n8n data volume read-only at `/n8n-event-logs` and tails `/n8n-event-logs/n8nEventLog*.log` with `source:n8n`. This lets the same pipeline parse workflow, node, queue, runner, and audit event-bus logs.
 
 ## Stopping the lab
 

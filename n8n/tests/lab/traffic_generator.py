@@ -3,10 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """n8n lab traffic generator.
 
-Brings up the standard n8n test environment via ``ddev env start --base``,
-imports a richer set of workflows than the integration tests use, activates
-them, and then drives a continuous, configurable traffic mix against the
-running container so a real Datadog Agent can ship the resulting metrics.
+The lab brings up a dedicated docker-compose (``tests/lab/docker-compose.yaml``)
+that bind-mounts both the test fixtures and the lab workflow JSONs under
+``/workflows/``. ``tests/conftest.py`` (gated on ``N8N_IS_LAB``) imports and
+activates every workflow it finds there as part of ``ddev env start --base``,
+so by the time this generator runs the webhooks are already live.
+
+Ports are hardcoded in the lab compose, so the generator can assume
+``localhost:5678`` and skip the dynamic discovery the integration tests need.
 """
 
 from __future__ import annotations
@@ -28,21 +32,9 @@ from rich.table import Table
 
 ConfigDict = dict[str, Any]
 LAB_DIR = Path(__file__).resolve().parent
-WORKFLOWS_DIR = LAB_DIR / "workflows"
 CONFIG_PATH = LAB_DIR / "config.yaml"
 
-CONTAINER = "n8n-test"
 MAIN_BASE_URL = "http://localhost:5678"
-
-# Stable IDs that match the workflow JSON files. Kept here to drive the
-# import/activate/restart loop without re-parsing the JSON.
-LAB_WORKFLOW_IDS: list[str] = [
-    "labFastSuccess",
-    "labSlowSuccess",
-    "labAlwaysFail",
-    "labFlaky",
-    "labLongChain",
-]
 
 shutdown_event = asyncio.Event()
 current_config: ConfigDict = {}
@@ -63,19 +55,6 @@ def _load_config(path: Path) -> tuple[ConfigDict, str]:
     return data, ""
 
 
-def _docker_exec(*cmd: str, check: bool = True) -> subprocess.CompletedProcess:
-    return subprocess.run(
-        ["docker", "exec", CONTAINER, *cmd],
-        check=check,
-        capture_output=True,
-        text=True,
-    )
-
-
-def _docker_cp(src: Path, dest: str) -> None:
-    subprocess.check_call(["docker", "cp", str(src), f"{CONTAINER}:{dest}"])
-
-
 def _wait_for_endpoint(url: str, *, timeout: int = 90) -> None:
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
@@ -86,30 +65,6 @@ def _wait_for_endpoint(url: str, *, timeout: int = 90) -> None:
             pass
         time.sleep(2)
     raise RuntimeError(f"Endpoint {url} never became reachable")
-
-
-def _import_lab_workflows(console: Console) -> None:
-    """Copy the lab workflow files into the running container, import & activate them."""
-    console.print("[bold cyan]Copying lab workflows into the container...[/bold cyan]")
-    _docker_exec("mkdir", "-p", "/lab/workflows")
-    for path in sorted(WORKFLOWS_DIR.glob("*.json")):
-        _docker_cp(path, f"/lab/workflows/{path.name}")
-
-    console.print("[bold cyan]Importing & activating lab workflows...[/bold cyan]")
-    for path in sorted(WORKFLOWS_DIR.glob("*.json")):
-        result = _docker_exec("n8n", "import:workflow", f"--input=/lab/workflows/{path.name}", check=False)
-        if result.returncode != 0:
-            console.print(f"[bold red]Failed to import {path.name}:[/bold red]\n{result.stdout}\n{result.stderr}")
-            sys.exit(1)
-    for wf_id in LAB_WORKFLOW_IDS:
-        _docker_exec("n8n", "update:workflow", f"--id={wf_id}", "--active=true")
-
-    console.print("[bold cyan]Restarting n8n so webhooks register...[/bold cyan]")
-    subprocess.check_call(
-        ["docker", "compose", "-f", str(LAB_DIR.parent / "docker" / "docker-compose.yaml"), "restart", "n8n"]
-    )
-    _wait_for_endpoint(f"{MAIN_BASE_URL}/healthz")
-    console.print("[bold green]Lab workflows are live.[/bold green]")
 
 
 def _signal_handler(_sig, _frame) -> None:
@@ -176,7 +131,11 @@ async def _run_traffic(console: Console) -> None:
         console.print(f"[bold red]{error}[/bold red]")
         sys.exit(1)
 
-    console.print(f"[dim]Traffic config: {CONFIG_PATH}\nEdit it while the lab runs to change the mix.[/dim]\n")
+    console.print(
+        f"[dim]Traffic config: {CONFIG_PATH}\n"
+        f"n8n base URL: {MAIN_BASE_URL}\n"
+        "Edit config.yaml while the lab runs to change the mix.[/dim]\n"
+    )
 
     reloader = asyncio.create_task(_config_reloader(CONFIG_PATH, console))
     async with httpx.AsyncClient() as client:
@@ -214,16 +173,36 @@ def cli() -> None:
 @cli.command()
 @click.option("-e", "--env", default="py3.13-2", help="ddev env name to start (matches hatch matrix entry).")
 def start(env: str) -> None:
-    """Bring up the n8n test environment + agent and import lab workflows on top."""
+    """Bring up the n8n lab compose + Datadog Agent.
+
+    The lab compose bind-mounts the lab + test workflow JSONs under ``/workflows/``,
+    and ``tests/conftest.py`` (in lab mode, gated on ``N8N_IS_LAB``) imports and
+    activates them as part of ``ddev env start``. This command therefore does
+    nothing fancy — it just hands off to ddev.
+    """
     console = Console()
     console.print(f"[bold cyan]Starting environment {env} via ddev (this also starts the Agent)...[/bold cyan]")
-    rc = subprocess.call(["ddev", "env", "start", "n8n", "--base", env, "-e", "DD_LOGS_ENABLED=true"])
+    rc = subprocess.call(
+        [
+            "ddev",
+            "env",
+            "start",
+            "n8n",
+            "--base",
+            env,
+            "-e",
+            "DD_LOGS_ENABLED=true",
+            # Attach stdout tailers via Docker autodiscovery. Event-bus file logs are
+            # configured in ``tests/conftest.py`` through the lab-only ``logs`` block.
+            "-e",
+            "DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true",
+        ]
+    )
     if rc != 0:
         console.print(f"[bold red]ddev env start failed (exit {rc})[/bold red]")
         sys.exit(rc)
 
     _wait_for_endpoint(f"{MAIN_BASE_URL}/healthz")
-    _import_lab_workflows(console)
     console.print(
         "\n[bold green]Lab is up.[/bold green] "
         "Run [bold]hatch run lab:generate[/bold] to start traffic, "

@@ -107,27 +107,32 @@ _Available for Agent versions >6.0_
 
 #### Enable n8n logging
 
-Configure n8n to output logs by setting the following environment variables:
+Configure n8n application logs by setting the following environment variables:
 
 ```bash
 # Set the log level (error, warn, info, debug)
 N8N_LOG_LEVEL=info
 
-# Output logs to console (for containerized environments) or file
+# Output application logs to console or file
 N8N_LOG_OUTPUT=console
 
-# If using file output, specify the log file location
+# Use JSON formatting so Datadog can parse n8n application log attributes
+N8N_LOG_FORMAT=json
+
+# If using file output, specify the application log file location
 N8N_LOG_FILE_LOCATION=/var/log/n8n/n8n.log
 ```
 
 #### Structured event logs
 
-n8n can output structured JSON logs to `n8nEventLog.log` containing detailed workflow execution events. Enable this by setting the log output to file:
+n8n also writes structured event bus logs to `n8nEventLog*.log`. These logs contain workflow, node, queue, runner, and audit events and are separate from the application logs controlled by `N8N_LOG_OUTPUT` and `N8N_LOG_FILE_LOCATION`.
 
-```bash
-N8N_LOG_OUTPUT=file
-N8N_LOG_FILE_LOCATION=/var/log/n8n/
-```
+By default, event bus log files are written under the n8n user folder, for example:
+
+- Host installations: `~/.n8n/n8nEventLog*.log`
+- Official Docker image: `/home/node/.n8n/n8nEventLog*.log`
+
+If you use a custom n8n user folder, collect the event bus logs from that folder instead. If you customize the event bus log file base name with `N8N_EVENTBUS_LOGWRITER_LOGBASENAME`, update the Datadog log path to match.
 
 The event log includes the following event types:
 
@@ -150,24 +155,38 @@ Each event contains rich metadata including `executionId`, `workflowId`, `workfl
    logs_enabled: true
    ```
 
-2. Add this configuration block to your `n8n.d/conf.yaml` file to start collecting your n8n logs:
+2. Add log collection entries to your `n8n.d/conf.yaml` file.
+
+   For a host-based n8n installation where the Agent can read local files, collect the application log file and the event bus log files:
 
    ```yaml
    logs:
      - type: file
        path: /var/log/n8n/*.log
        source: n8n
-       service: n8n
+       service: <SERVICE>
+     - type: file
+       path: /home/n8n/.n8n/n8nEventLog*.log
+       source: n8n
+       service: <SERVICE>
    ```
 
-   For containerized environments using Docker, use the following configuration instead:
+   Adjust `/home/n8n/.n8n/n8nEventLog*.log` to the n8n user folder on your host.
+
+   For a containerized n8n deployment, collect stdout/stderr from the n8n container for application logs and make the n8n user folder available to the Agent for event bus file logs. For example, if the n8n data directory is mounted on the host at `/var/lib/n8n`, configure:
 
    ```yaml
    logs:
      - type: docker
        source: n8n
-       service: n8n
+       service: <SERVICE>
+     - type: file
+       path: /var/lib/n8n/n8nEventLog*.log
+       source: n8n
+       service: <SERVICE>
    ```
+
+   If the Agent runs in a container, mount the n8n data volume or host directory into the Agent container and use the path as seen from inside the Agent container.
 
 3. [Restart the Agent][5].
 
@@ -204,3 +223,11 @@ Need help? Contact [Datadog support][9].
 [8]: https://github.com/DataDog/integrations-core/blob/master/n8n/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
 [10]: https://docs.n8n.io/hosting/configuration/configuration-examples/prometheus/
+
+
+  1. Why are we identifying the repo name from the directory? This is brittle as anyone could clone the repo into a different folder. We should be taking the repo name from
+  git information right? If you agree I would probably open a separate pr to fix this.
+  2. I need more details about what these annotations are. I am not 100% I understand what the problem is
+  3. Ok, do we have a way to ensure that any learning from the done prs is carried over to the next ones? Like the cross-pr memory we talked about. It would be good to actually do this. If an agent raises any infroation, new things learned or something, you should take that knowledge and if needed add it to the wave where it applies? What do you think?
+
+  Include to all agents that are going to be launched in the future that the changelog eneds to be added after the PR is opened, otherwise they won't know what number to add and that they do not need to run ddev release changelog new, just create the changelog file by hand following the changelog rules.

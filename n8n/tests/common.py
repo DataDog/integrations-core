@@ -8,13 +8,24 @@ from datadog_checks.dev import get_docker_hostname
 from datadog_checks.dev.utils import find_free_ports, get_metadata_metrics
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 HOST = get_docker_hostname()
 
-# Allocate free host ports once per session. The values are forwarded to docker compose via
-# the ``env_vars`` argument of ``docker_run`` (see ``conftest.py``) so re-runs don't collide
-# with stale containers or other locally-bound services. The in-container ports stay fixed.
-MAIN_PORT, WORKER_PORT = find_free_ports('127.0.0.1', 2)
+# The lab uses its own compose file with bind-mounted lab workflows and fixed ports.
+# Selected via the ``N8N_IS_LAB`` env var that hatch sets in ``[envs.lab.env-vars]``.
+IS_LAB = os.environ.get('N8N_IS_LAB') == 'true'
+
+if IS_LAB:
+    COMPOSE_FILE = os.path.join(HERE, 'lab', 'docker-compose.yaml')
+    # The lab is meant to run interactively on a developer machine, so we own host port
+    # allocation and just hardcode 5678/5680 to keep the README, traffic generator, and
+    # agent config consistent.
+    MAIN_PORT, WORKER_PORT = 5678, 5680
+else:
+    COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
+    # Allocate free host ports once per session. The values are forwarded to docker compose
+    # via the ``env_vars`` argument of ``docker_run`` (see ``conftest.py``) so re-runs don't
+    # collide with stale containers or other locally-bound services.
+    MAIN_PORT, WORKER_PORT = find_free_ports('127.0.0.1', 2)
 
 N8N_VERSION = os.environ.get('N8N_VERSION', '1.118.1')
 N8N_MAJOR = int(N8N_VERSION.split('.', 1)[0])
@@ -115,7 +126,11 @@ E2E_METADATA = {'docker_volumes': ['/var/run/docker.sock:/var/run/docker.sock:ro
 
 
 def get_compose_env_vars() -> dict[str, str]:
-    """Variables consumed by docker-compose.yaml's ``${...}`` placeholders."""
+    """Variables consumed by ``tests/docker/docker-compose.yaml``'s ``${...}`` placeholders.
+
+    The lab compose hardcodes ports, so it doesn't need these — but passing the dict in either
+    mode is harmless and keeps ``conftest.py`` simple.
+    """
     return {
         'N8N_MAIN_HOST_PORT': str(MAIN_PORT),
         'N8N_WORKER_HOST_PORT': str(WORKER_PORT),
