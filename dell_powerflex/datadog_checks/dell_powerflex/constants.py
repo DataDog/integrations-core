@@ -91,12 +91,14 @@ COMMON_IO_BWC_METRICS = [
     ('targetWriteLatency', 'target_write_latency'),
 ]
 
-SYSTEM_STATS_BWC_METRICS = COMMON_BWC_METRICS + [
-    ('journalerReadLatency', 'journaler_read_latency'),
-    ('journalerWriteLatency', 'journaler_write_latency'),
-    ('targetReadLatency', 'target_read_latency'),
-    ('targetWriteLatency', 'target_write_latency'),
-]
+SYSTEM_STATS_BWC_METRICS = (
+    COMMON_BWC_METRICS
+    + COMMON_IO_BWC_METRICS
+    + [
+        ('journalerReadLatency', 'journaler_read_latency'),
+        ('journalerWriteLatency', 'journaler_write_latency'),
+    ]
+)
 
 VOLUME_METRIC_PREFIX = 'volume'
 
@@ -134,20 +136,18 @@ STORAGE_POOL_STATS_SIMPLE_METRICS = COMMON_SIMPLE_METRICS + [
     ('ActualNetCapacityInUseInKb', 'actual_net_capacity.in_use_in_kb'),
 ]
 
-STORAGE_POOL_STATS_BWC_METRICS = (
-    COMMON_BWC_METRICS
-    + COMMON_IO_BWC_METRICS
-    + [
-        ('rebalanceReadBwc', 'rebalance_read_bwc'),
-        ('rebalanceWriteBwc', 'rebalance_write_bwc'),
-        ('fwdRebuildReadBwc', 'fwd_rebuild_read_bwc'),
-        ('fwdRebuildWriteBwc', 'fwd_rebuild_write_bwc'),
-        ('bckRebuildReadBwc', 'bck_rebuild_read_bwc'),
-        ('bckRebuildWriteBwc', 'bck_rebuild_write_bwc'),
-        ('normRebuildReadBwc', 'norm_rebuild_read_bwc'),
-        ('normRebuildWriteBwc', 'norm_rebuild_write_bwc'),
-    ]
-)
+COMMON_REBUILD_BWC_METRICS = [
+    ('rebalanceReadBwc', 'rebalance_read_bwc'),
+    ('rebalanceWriteBwc', 'rebalance_write_bwc'),
+    ('fwdRebuildReadBwc', 'fwd_rebuild_read_bwc'),
+    ('fwdRebuildWriteBwc', 'fwd_rebuild_write_bwc'),
+    ('bckRebuildReadBwc', 'bck_rebuild_read_bwc'),
+    ('bckRebuildWriteBwc', 'bck_rebuild_write_bwc'),
+    ('normRebuildReadBwc', 'norm_rebuild_read_bwc'),
+    ('normRebuildWriteBwc', 'norm_rebuild_write_bwc'),
+]
+
+STORAGE_POOL_STATS_BWC_METRICS = COMMON_BWC_METRICS + COMMON_IO_BWC_METRICS + COMMON_REBUILD_BWC_METRICS
 
 SDS_METRIC_PREFIX = 'sds'
 
@@ -217,15 +217,8 @@ PROTECTION_DOMAIN_STATS_SIMPLE_METRICS = COMMON_SIMPLE_METRICS + [
 PROTECTION_DOMAIN_STATS_BWC_METRICS = (
     COMMON_BWC_METRICS
     + COMMON_IO_BWC_METRICS
+    + COMMON_REBUILD_BWC_METRICS
     + [
-        ('rebalanceReadBwc', 'rebalance_read_bwc'),
-        ('rebalanceWriteBwc', 'rebalance_write_bwc'),
-        ('fwdRebuildReadBwc', 'fwd_rebuild_read_bwc'),
-        ('fwdRebuildWriteBwc', 'fwd_rebuild_write_bwc'),
-        ('bckRebuildReadBwc', 'bck_rebuild_read_bwc'),
-        ('bckRebuildWriteBwc', 'bck_rebuild_write_bwc'),
-        ('normRebuildReadBwc', 'norm_rebuild_read_bwc'),
-        ('normRebuildWriteBwc', 'norm_rebuild_write_bwc'),
         ('volMigrationReadBwc', 'vol_migration_read_bwc'),
         ('volMigrationWriteBwc', 'vol_migration_write_bwc'),
     ]

@@ -285,10 +285,16 @@ SYSTEM_STATS_BWC_METRICS = [
     'dell_powerflex.user_data_sdc_read_latency',
     'dell_powerflex.user_data_sdc_write_latency',
     'dell_powerflex.user_data_sdc_trim_latency',
-    'dell_powerflex.journaler_read_latency',
-    'dell_powerflex.journaler_write_latency',
+    'dell_powerflex.primary_read_bwc',
+    'dell_powerflex.primary_write_bwc',
+    'dell_powerflex.secondary_read_bwc',
+    'dell_powerflex.secondary_write_bwc',
+    'dell_powerflex.total_read_bwc',
+    'dell_powerflex.total_write_bwc',
     'dell_powerflex.target_read_latency',
     'dell_powerflex.target_write_latency',
+    'dell_powerflex.journaler_read_latency',
+    'dell_powerflex.journaler_write_latency',
 ]
 
 RESOURCE_STATS_METRIC = {

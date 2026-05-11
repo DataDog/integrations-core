@@ -43,7 +43,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
     __NAMESPACE__ = 'dell_powerflex'
 
     def __init__(self, name, init_config, instances):
-        super(DellPowerflexCheck, self).__init__(name, init_config, instances)
+        super().__init__(name, init_config, instances)
         self._base_tags: list[str] = []
         self._api: PowerFlexAPI | None = None
         self._resource_filters: dict = {}
