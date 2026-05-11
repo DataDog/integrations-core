@@ -149,10 +149,10 @@ def run_downloader(tuf_downloader, standard_distribution_name, version, ignore_p
 def download():
     # Peek at --index before delegating so that v1 call-sites are unaffected.
     parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument('--index', action='store_true', default=False)
+    parser.add_argument('--v2', action='store_true', default=False)
     partial_args, _ = parser.parse_known_args()
 
-    if partial_args.index:
+    if partial_args.v2:
         _download_v2()
     else:
         tuf_downloader, standard_distribution_name, version, ignore_python_version = instantiate_downloader()
@@ -176,7 +176,7 @@ def _download_v2():
         help='Disable TUF verification and wheel digest checks.',
     )
     parser.add_argument('-v', '--verbose', action='count', default=0)
-    parser.add_argument('--index', action='store_true', default=True)  # consumed upstream; kept for completeness
+    parser.add_argument('--v2', action='store_true', default=True)  # consumed upstream; kept for completeness
 
     # v1 flags that are not applicable in v2: accept and warn so that callers
     # upgrading from v1 get a clear message instead of an argument error.
@@ -196,10 +196,10 @@ def _download_v2():
         raise NonCanonicalVersion(args.version)
 
     if args._type_ignored is not None:
-        sys.stderr.write('WARNING: --type is not applicable with --index and will be ignored.\n')
+        sys.stderr.write('WARNING: --type is not applicable with --v2 and will be ignored.\n')
     if args._ignore_python_version:
         sys.stderr.write(
-            'NOTE: --ignore-python-version is not applicable with --index '
+            'NOTE: --ignore-python-version is not applicable with --v2 '
             '(wheel selection happens at publish time).\n'
         )
 
