@@ -337,12 +337,12 @@ _BWC_METRIC_LISTS = [
     DEVICE_STATS_BWC_METRICS,
 ]
 
-ALL_METRICS = {'dell_powerflex.api.can_connect', 'dell_powerflex.volume.sdc_mapping'}
+ALL_METRICS_SET: set[str] = {'dell_powerflex.api.can_connect', 'dell_powerflex.volume.sdc_mapping'}
 for _metrics in _SIMPLE_METRIC_LISTS:
     for _m in _metrics:
-        ALL_METRICS.add(_m['name'])
+        ALL_METRICS_SET.add(str(_m['name']))
 for _bwc_list in _BWC_METRIC_LISTS:
     for _prefix in _bwc_list:
         for _suffix in BWC_SUFFIXES:
-            ALL_METRICS.add(f'{_prefix}.{_suffix}')
-ALL_METRICS = sorted(ALL_METRICS)
+            ALL_METRICS_SET.add(f'{_prefix}.{_suffix}')
+ALL_METRICS: list[str] = sorted(ALL_METRICS_SET)
