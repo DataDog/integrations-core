@@ -1609,6 +1609,20 @@ tests:
       ocsf:
         activity_id: 1
         activity_name: "Open"
+        actor:
+          process:
+            name: "bash"
+            path: "/usr/bin/bash"
+            pid: 226245
+            user:
+              name: "lima"
+              uid: "502"
+          session:
+            terminal: "pts0"
+            uid: "4"
+          user:
+            name: "lima"
+            uid: "502"
         category_name: "Network Activity"
         category_uid: 4
         class_name: "Network Activity"
@@ -1622,6 +1636,8 @@ tests:
           product:
             name: "Auditd"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1

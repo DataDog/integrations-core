@@ -593,10 +593,10 @@ instances:
     #
     # collect_schemas:
 
-        ## @param enabled - boolean - optional - default: false
+        ## @param enabled - boolean - optional - default: true
         ## Enable collection of database schemas. Requires `dbm: true`.
         #
-        # enabled: false
+        # enabled: true
 
         ## @param max_tables - number - optional - default: 300
         ## Maximum amount of tables the Agent collects from the instance.
@@ -771,7 +771,10 @@ instances:
         ## @param managed_authentication - mapping - optional
         ## Configuration section used for Azure AD Authentication.
         ##
-        ## This supports using System or User assigned managed identities.
+        ## This supports using System or User assigned managed identities, as well as
+        ## workload identity federation (e.g. on AKS).
+        ##
+        ## If enabled, the `password` field will be ignored.
         ##
         ## For more information on configuration, see
         ## https://docs.datadoghq.com/database_monitoring/guide/managed_authentication
@@ -779,12 +782,18 @@ instances:
         ## For more information on Managed Identities, see the Azure docs
         ## https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
         ##
-        ## To enable Azure AD Authentication, set `azure.managed_authentication.enabled` to `true`.
-        ## If `azure.managed_authentication.enabled` is set, then the `password` fields will be ignored.
-        ## `azure.managed_authentication.client_id` is required to enable Azure AD Authentication.
+        ## For more information on Workload Identity, see the Azure docs
+        ## https://learn.microsoft.com/en-us/azure/aks/workload-identity-overview
         ##
-        ## For more information on scopes, see the Azure docs
-        ## https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
+        ## The following fields are supported:
+        ##
+        ## enabled: Set to `true` to enable Azure AD authentication.
+        ## auth_type: The authentication method. Use `managed_identity` (default) or `workload_identity` for AKS.
+        ## client_id: The client ID of the managed identity or app registration. Required for `managed_identity`.
+        ##   Optional for `workload_identity` (defaults to the `AZURE_CLIENT_ID` environment variable).
+        ## tenant_id: The Azure AD tenant ID. Only used for `workload_identity`
+        ##   (defaults to the `AZURE_TENANT_ID` environment variable).
+        ## identity_scope: The permission scope for the identity token.
         #
         # managed_authentication: {}
 
