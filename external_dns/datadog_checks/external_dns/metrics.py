@@ -10,5 +10,5 @@ DEFAULT_METRICS = {
     'registry_errors_total': 'registry.errors.total',
     'external_dns_controller_last_sync_timestamp_seconds': 'controller.last_sync',
     'external_dns_controller_consecutive_soft_errors': 'controller.consecutive.soft.errors',
-    'external_dns_controller_last_reconcile_timestamp_seconds': 'controller.last.reconcile.timestamp.seconds',
+    'external_dns_controller_last_reconcile_timestamp_seconds': 'controller.last_reconcile',
 }
