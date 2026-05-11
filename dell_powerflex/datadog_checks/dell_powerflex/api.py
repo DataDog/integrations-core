@@ -108,6 +108,7 @@ class PowerFlexAPI:
         return self._get(f'/api/instances/ProtectionDomain::{pd_id}/relationships/Statistics')
 
     def get_alerts(self, since: str) -> list[dict]:
+        # All severities are collected as alerts are less noisy than events.
         query = f'/rest/v1/alerts?filter=last_updated ge {since}'
         response = self._get(query)
         results = response.get('results', []) if isinstance(response, dict) else []
