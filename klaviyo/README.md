@@ -8,28 +8,16 @@ Integrate Klaviyo with Datadog to gain insights into marketing campaign communic
 
 ## Setup
 
-Follow the instructions below to configure this integration for Klaviyo Marketing and eCommerce events.
+The user who authenticates this integration must have access to the following Klaviyo Scopes:
 
-### Configuration
+- `accounts:read`
+- `events:read`
+- `flows:read`
+- `metrics:read`
 
-#### Install Datadog Integration in Klaviyo
-Within your Klaviyo account, first add the Datadog integration. The integration allows Datadog
-to see Klaviyo events and metrics via the Klaviyo API.
+To add a new Klaviyo account, click the **Authorize** button and follow the instructions. Once you are redirected back to this page and the authentication is successful, your logs should be available within 5 minutes.
 
-1. Log in to your [Klaviyo account][2].
-2. In the left-side panel, navigate to **Integrations**.
-3. Click **Add integrations**.
-4. Search for Datadog and click on the tile.
-5. Click **Install**. 
-6. Navigate to Datadog, then log in.
-
-#### Install Klaviyo Integration in Datadog
-After the above installation within Klaviyo is performed, complete the Datadog integration by clicking 
-**Install Integration** which guides you through an authorization process with Klaviyo.
-
-The authorization process will include an approval dialog which asks to give Datadog permission to
-read Klaviyo events and metrics. The scopes involved for this
-access are "accounts:read metrics:read events:read" and nothing more.
+You can view your logs in the [Log Explorer][2]. Ensure you have a [Logs Index][3] set up for `source:klaviyo`.
 
 ## Data Collected
 
@@ -53,6 +41,7 @@ Klaviyo does not include any events.
 Need help? Contact [Datadog support][3].
 
 [1]: https://www.klaviyo.com/
-[2]: https://www.klaviyo.com/login
+[2]: /logs?query=source%3Aklaviyo%2A
+[3]: /logs/pipelines/indexes
 [3]: https://docs.datadoghq.com/help/
 
