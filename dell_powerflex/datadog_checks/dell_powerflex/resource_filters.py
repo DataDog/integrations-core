@@ -48,12 +48,11 @@ def parse_resource_filters(
 
         include = _compile_patterns(f.get('include', []), resource, logger)
         exclude = _compile_patterns(f.get('exclude', []), resource, logger)
+        collect_statistics = f.get('collect_statistics', True)
 
-        if not include and not exclude:
+        if not include and not exclude and collect_statistics:
             logger.warning('No valid include or exclude patterns in resource_filters for %s', resource)
             continue
-
-        collect_statistics = f.get('collect_statistics', True)
 
         if resource in result:
             logger.warning('Duplicate resource_filters entry for %s, using the last one', resource)

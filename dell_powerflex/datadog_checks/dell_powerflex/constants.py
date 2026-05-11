@@ -94,6 +94,7 @@ COMMON_IO_BWC_METRICS = [
 SYSTEM_STATS_BWC_METRICS = COMMON_BWC_METRICS + [
     ('journalerReadLatency', 'journaler_read_latency'),
     ('journalerWriteLatency', 'journaler_write_latency'),
+    ('targetReadLatency', 'target_read_latency'),
     ('targetWriteLatency', 'target_write_latency'),
 ]
 

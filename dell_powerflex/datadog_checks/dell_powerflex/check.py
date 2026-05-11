@@ -59,7 +59,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             client_id=self.config.powerflex_client_id,
             logger=self.log,
         )
-        self._resource_filters = parse_resource_filters(self.instance.get('resource_filters'), self.log)
+        self._resource_filters = parse_resource_filters(self.config.resource_filters, self.log)
 
     def check(self, _: Any) -> None:
         try:
@@ -76,16 +76,15 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         self._collect_sds_list()
         self._collect_sdc_list()
         self._collect_devices()
-        if self.config.collect_events or self.config.collect_alerts:
-            now = datetime.now(tz=timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
-            last_ts = self.read_persistent_cache('last_event_timestamp') or now
-            if self.config.collect_events:
-                self._collect_events(last_ts)
-            if self.config.collect_alerts:
-                self._collect_alerts(last_ts)
-            self.write_persistent_cache(
-                'last_event_timestamp', datetime.now(tz=timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
-            )
+        now = datetime.now(tz=timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+        if self.config.collect_events:
+            last_event_ts = self.read_persistent_cache('last_event_timestamp') or now
+            if self._collect_events(last_event_ts):
+                self.write_persistent_cache('last_event_timestamp', now)
+        if self.config.collect_alerts:
+            last_alert_ts = self.read_persistent_cache('last_alert_timestamp') or now
+            if self._collect_alerts(last_alert_ts):
+                self.write_persistent_cache('last_alert_timestamp', now)
 
     def _collect_systems(self) -> None:
         for system in self._api.get_systems():
@@ -265,15 +264,16 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             self.gauge(metric_suffix, stats.get(api_field), tags=tags)
         self._collect_bwc_metrics(stats, DEVICE_STATS_BWC_METRICS, tags)
 
-    def _collect_events(self, since: str) -> None:
+    def _collect_events(self, since: str) -> bool:
         try:
             events = self._api.get_events(since=since)
         except Exception as e:
             self.log.warning('Failed to collect events: %s', e)
-            return
+            return False
         for event in events:
             dd_event = self._create_dd_event(event)
             self.event(dd_event)
+        return True
 
     def _create_dd_event(self, event: dict) -> dict:
         raw_ts = event.get('timestamp')
@@ -311,15 +311,16 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             'tags': tags,
         }
 
-    def _collect_alerts(self, since: str) -> None:
+    def _collect_alerts(self, since: str) -> bool:
         try:
             alerts = self._api.get_alerts(since=since)
         except Exception as e:
             self.log.warning('Failed to collect alerts: %s', e)
-            return
+            return False
         for alert in alerts:
             dd_event = self._create_dd_alert(alert)
             self.event(dd_event)
+        return True
 
     def _create_dd_alert(self, alert: dict) -> dict:
         raw_ts = alert.get('timestamp')

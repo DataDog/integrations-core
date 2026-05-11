@@ -287,6 +287,7 @@ SYSTEM_STATS_BWC_METRICS = [
     'dell_powerflex.user_data_sdc_trim_latency',
     'dell_powerflex.journaler_read_latency',
     'dell_powerflex.journaler_write_latency',
+    'dell_powerflex.target_read_latency',
     'dell_powerflex.target_write_latency',
 ]
 

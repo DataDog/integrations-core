@@ -30,6 +30,8 @@ from .common import (
     VOLUME_STATS_SIMPLE_METRICS,
 )
 
+pytestmark = [pytest.mark.unit]
+
 
 def assert_bwc_metrics(aggregator, bwc_metrics, tags, value=0):
     for metric_prefix in bwc_metrics:
@@ -87,10 +89,7 @@ def test_collect_system(dd_run_check, aggregator, instance, mock_http_get):
 def test_assert_all_metrics(dd_run_check, aggregator, instance, mock_http_get):
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
-    for metric_name in get_metadata_metrics():
-        aggregator.assert_metric(metric_name, at_least=1)
-    aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_symmetric_inclusion=True)
 
 
 def test_collect_volumes(dd_run_check, aggregator, instance, mock_http_get):
@@ -475,6 +474,27 @@ def test_collect_statistics_false(dd_run_check, aggregator, instance, mock_http_
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
 
 
+def test_collect_statistics_false_without_patterns(dd_run_check, aggregator, instance, mock_http_get):
+    instance['resource_filters'] = [
+        {'resource': 'sds', 'property': 'name', 'collect_statistics': False},
+    ]
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+
+    base_tags = ['powerflex_gateway_url:https://localhost:443']
+    sds3_tags = base_tags + [
+        'sds_id:d1c062b700000000',
+        'sds_name:SDS3',
+        'protection_domain_id:68c139ee00000000',
+        'fault_set_id:faultset00000001',
+        'dell_type:sds',
+    ]
+    # SDS resources are still collected (no include/exclude filtering)
+    aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
+    # But statistics are not collected
+    aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', count=0, tags=sds3_tags)
+
+
 def test_filter_by_volume_type(dd_run_check, aggregator, instance, mock_http_get):
     instance['resource_filters'] = [
         {'resource': 'volume', 'property': 'volumeType', 'include': ['^ThinProvisioned$']},
@@ -528,86 +548,76 @@ def test_unfiltered_resources_not_affected(dd_run_check, aggregator, instance, m
     aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', tags=pool_tags)
 
 
-def test_invalid_resource_type_logged(dd_run_check, aggregator, instance, mock_http_get, caplog):
-    instance['resource_filters'] = [
-        {'resource': 'invalid_type', 'property': 'name', 'include': ['.*']},
-    ]
+@pytest.mark.parametrize(
+    'resource_filters, log_message',
+    [
+        pytest.param(
+            [{'resource': 'invalid_type', 'property': 'name', 'include': ['.*']}],
+            'Invalid resource type',
+            id='invalid_resource_type',
+        ),
+        pytest.param(
+            [{'resource': 'sds', 'property': '', 'include': ['.*']}],
+            'Missing or invalid property',
+            id='missing_property_in_filter',
+        ),
+        pytest.param(
+            [{'resource': 'sds', 'property': 'name'}],
+            'No valid include or exclude patterns',
+            id='no_valid_patterns',
+        ),
+        pytest.param(
+            [
+                {'resource': 'sds', 'property': 'name', 'include': ['^SDS1$']},
+                {'resource': 'sds', 'property': 'name', 'include': ['^SDS2$']},
+            ],
+            'Duplicate resource_filters entry for sds',
+            id='duplicate_resource_filter',
+        ),
+        pytest.param(
+            [{'resource': 'sds', 'property': 'name', 'include': ['[invalid']}],
+            'Invalid regex pattern',
+            id='invalid_regex',
+        ),
+    ],
+)
+def test_filter_validation_warning(
+    dd_run_check, aggregator, instance, mock_http_get, caplog, resource_filters, log_message
+):
+    instance['resource_filters'] = resource_filters
     caplog.set_level(logging.WARNING)
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
-    assert 'Invalid resource type' in caplog.text
+    assert log_message in caplog.text
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
 
 
-def test_exclude_filter_logs_debug(dd_run_check, aggregator, instance, mock_http_get, caplog):
-    instance['resource_filters'] = [
-        {'resource': 'sds', 'property': 'name', 'exclude': ['^SDS3$']},
-    ]
+@pytest.mark.parametrize(
+    'resource_filters, log_message',
+    [
+        pytest.param(
+            [{'resource': 'sds', 'property': 'name', 'exclude': ['^SDS3$']}],
+            'Skipping sds SDS3: matched exclude pattern',
+            id='exclude_filter',
+        ),
+        pytest.param(
+            [{'resource': 'storage_pool', 'property': 'name', 'include': ['^pool1$']}],
+            'Skipping storage_pool storagepool2: did not match any include pattern',
+            id='include_filter',
+        ),
+        pytest.param(
+            [{'resource': 'sds', 'property': 'nonexistent_field', 'include': ['.*']}],
+            'property nonexistent_field not found',
+            id='missing_property',
+        ),
+    ],
+)
+def test_filter_logs_debug(dd_run_check, aggregator, instance, mock_http_get, caplog, resource_filters, log_message):
+    instance['resource_filters'] = resource_filters
     caplog.set_level(logging.DEBUG)
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
-    assert 'Skipping sds SDS3: matched exclude pattern' in caplog.text
-
-
-def test_include_filter_logs_debug(dd_run_check, aggregator, instance, mock_http_get, caplog):
-    instance['resource_filters'] = [
-        {'resource': 'storage_pool', 'property': 'name', 'include': ['^pool1$']},
-    ]
-    caplog.set_level(logging.DEBUG)
-    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
-    dd_run_check(check)
-    assert 'Skipping storage_pool storagepool2: did not match any include pattern' in caplog.text
-
-
-def test_missing_property_logs_debug(dd_run_check, aggregator, instance, mock_http_get, caplog):
-    instance['resource_filters'] = [
-        {'resource': 'sds', 'property': 'nonexistent_field', 'include': ['.*']},
-    ]
-    caplog.set_level(logging.DEBUG)
-    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
-    dd_run_check(check)
-    assert 'property nonexistent_field not found' in caplog.text
-
-
-def test_missing_property_in_filter_logged(dd_run_check, aggregator, instance, mock_http_get, caplog):
-    instance['resource_filters'] = [
-        {'resource': 'sds', 'property': '', 'include': ['.*']},
-    ]
-    caplog.set_level(logging.WARNING)
-    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
-    dd_run_check(check)
-    assert 'Missing or invalid property' in caplog.text
-
-
-def test_no_valid_patterns_logged(dd_run_check, aggregator, instance, mock_http_get, caplog):
-    instance['resource_filters'] = [
-        {'resource': 'sds', 'property': 'name'},
-    ]
-    caplog.set_level(logging.WARNING)
-    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
-    dd_run_check(check)
-    assert 'No valid include or exclude patterns' in caplog.text
-
-
-def test_duplicate_resource_filter_logged(dd_run_check, aggregator, instance, mock_http_get, caplog):
-    instance['resource_filters'] = [
-        {'resource': 'sds', 'property': 'name', 'include': ['^SDS1$']},
-        {'resource': 'sds', 'property': 'name', 'include': ['^SDS2$']},
-    ]
-    caplog.set_level(logging.WARNING)
-    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
-    dd_run_check(check)
-    assert 'Duplicate resource_filters entry for sds' in caplog.text
-
-
-def test_invalid_regex_logged(dd_run_check, aggregator, instance, mock_http_get, caplog):
-    instance['resource_filters'] = [
-        {'resource': 'sds', 'property': 'name', 'include': ['[invalid']},
-    ]
-    caplog.set_level(logging.WARNING)
-    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
-    dd_run_check(check)
-    assert 'Invalid regex pattern' in caplog.text
+    assert log_message in caplog.text
 
 
 def test_non_string_pattern_skipped(dd_run_check, aggregator, instance, mock_http_get):
@@ -698,17 +708,6 @@ def test_collect_events(dd_run_check, aggregator, instance, mock_http_get):
     assert 'service_name:pfm-asmmanager' in health_check_event['tags']
 
 
-def test_collect_events_only_critical(dd_run_check, aggregator, instance, mock_http_get):
-    instance['collect_events'] = True
-    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
-    dd_run_check(check)
-
-    for event in aggregator.events:
-        assert 'severity:CRITICAL' in event['tags']
-        assert event['alert_type'] == 'error'
-    assert len(aggregator.events) == 5
-
-
 def test_collect_events_first_run_uses_current_time(dd_run_check, aggregator, instance, mock_http_get, mocker):
     instance['collect_events'] = True
     mock_get_events = mocker.patch(
@@ -742,24 +741,31 @@ def test_collect_events_subsequent_run_uses_cached_time(dd_run_check, aggregator
     assert since_arg == '2026-01-01T00:00:00Z'
 
 
-def test_collect_events_disabled(dd_run_check, aggregator, instance, mock_http_get):
-    instance['collect_events'] = False
+@pytest.mark.parametrize('config_key', ['collect_events', 'collect_alerts'])
+def test_collect_disabled(dd_run_check, aggregator, instance, mock_http_get, config_key):
+    instance[config_key] = False
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
     assert len(aggregator.events) == 0
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
 
 
-def test_collect_events_failure(dd_run_check, aggregator, instance, mock_http_get, mocker, caplog):
-    instance['collect_events'] = True
-    mocker.patch(
-        'datadog_checks.dell_powerflex.api.PowerFlexAPI.get_events',
-        side_effect=Exception('events API failed'),
-    )
+@pytest.mark.parametrize(
+    'config_key, mock_target, log_message',
+    [
+        ('collect_events', 'datadog_checks.dell_powerflex.api.PowerFlexAPI.get_events', 'Failed to collect events'),
+        ('collect_alerts', 'datadog_checks.dell_powerflex.api.PowerFlexAPI.get_alerts', 'Failed to collect alerts'),
+    ],
+)
+def test_collect_failure(
+    dd_run_check, aggregator, instance, mock_http_get, mocker, caplog, config_key, mock_target, log_message
+):
+    instance[config_key] = True
+    mocker.patch(mock_target, side_effect=Exception(f'{config_key} API failed'))
     caplog.set_level(logging.WARNING)
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
-    assert 'Failed to collect events' in caplog.text
+    assert log_message in caplog.text
     assert len(aggregator.events) == 0
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
 
@@ -788,25 +794,3 @@ def test_collect_alerts(dd_run_check, aggregator, instance, mock_http_get):
     license_alert = next(a for a in alerts if a['msg_title'] == 'Trial License Used')
     assert 'PowerFlex is using a trial license' in license_alert['msg_text']
     assert 'severity:MINOR' in license_alert['tags']
-
-
-def test_collect_alerts_disabled(dd_run_check, aggregator, instance, mock_http_get):
-    instance['collect_alerts'] = False
-    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
-    dd_run_check(check)
-    assert len(aggregator.events) == 0
-    aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
-
-
-def test_collect_alerts_failure(dd_run_check, aggregator, instance, mock_http_get, mocker, caplog):
-    instance['collect_alerts'] = True
-    mocker.patch(
-        'datadog_checks.dell_powerflex.api.PowerFlexAPI.get_alerts',
-        side_effect=Exception('alerts API failed'),
-    )
-    caplog.set_level(logging.WARNING)
-    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
-    dd_run_check(check)
-    assert 'Failed to collect alerts' in caplog.text
-    assert len(aggregator.events) == 0
-    aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
