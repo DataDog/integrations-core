@@ -1,7 +1,11 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
 from time import time
+from typing import Any
+
+from datadog_checks.base.utils.http import RequestsWrapper
 
 TOKEN_PATH = '/auth/realms/powerflex/protocol/openid-connect/token'
 
@@ -9,9 +13,9 @@ TOKEN_PATH = '/auth/realms/powerflex/protocol/openid-connect/token'
 class PowerFlexAPI:
     def __init__(
         self,
-        http,
+        http: RequestsWrapper,
         gateway_url: str,
-        logger,
+        logger: logging.Logger,
         username: str | None = None,
         password: str | None = None,
         client_id: str = 'powerflexUI',
@@ -52,7 +56,7 @@ class PowerFlexAPI:
         self._http.options['headers']['Authorization'] = f'Bearer {self._token}'
         self._log.debug('Refreshed PowerFlex auth token, expires in %ds', expires_in)
 
-    def _get(self, path: str):
+    def _get(self, path: str) -> Any:
         self._ensure_authenticated()
         response = self._http.get(f"{self._gateway_url}{path}")
         response.raise_for_status()

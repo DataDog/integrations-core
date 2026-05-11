@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
 import re
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
@@ -40,7 +41,7 @@ class ResourceFilter:
 
 def parse_resource_filters(
     raw_filters: Sequence[Mapping[str, Any]] | None,
-    logger: Any,
+    logger: logging.Logger,
 ) -> list[ResourceFilter]:
     """Parse raw filter configs into a list of validated filters."""
     if not raw_filters:
@@ -87,7 +88,7 @@ def should_collect_resource(
     resource_type: str,
     entity: dict[str, Any],
     filters: list[ResourceFilter],
-    logger: Any,
+    logger: logging.Logger,
 ) -> bool:
     """Return True if the entity passes all filters for its resource type.
 
@@ -141,7 +142,7 @@ def should_collect_statistics(
 def _compile_patterns(
     raw_patterns: list[str] | None,
     resource: str,
-    logger: Any,
+    logger: logging.Logger,
 ) -> list[re.Pattern[str]]:
     """Compile a list of regex pattern strings."""
     compiled = []

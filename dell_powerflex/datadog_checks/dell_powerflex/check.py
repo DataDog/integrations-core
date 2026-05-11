@@ -37,7 +37,7 @@ from .constants import (
     VOLUME_STATS_BWC_METRICS,
     VOLUME_STATS_SIMPLE_METRICS,
 )
-from .resource_filters import parse_resource_filters, should_collect_resource, should_collect_statistics
+from .resource_filters import ResourceFilter, parse_resource_filters, should_collect_resource, should_collect_statistics
 
 
 class DellPowerflexCheck(AgentCheck, ConfigMixin):
@@ -47,7 +47,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         super().__init__(name, init_config, instances)
         self._base_tags: list[str] = []
         self._api: PowerFlexAPI
-        self._resource_filters: list = []
+        self._resource_filters: list[ResourceFilter] = []
         self.check_initializations.append(self._parse_config)
 
     def _parse_config(self) -> None:
@@ -317,11 +317,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
 
     def _build_dd_event(self, raw: dict, name_tag_key: str, service_key: str) -> dict:
         raw_ts = raw.get('timestamp')
-        timestamp = (
-            datetime.fromisoformat(raw_ts.replace('Z', '+00:00')).timestamp()
-            if raw_ts
-            else datetime.now(tz=timezone.utc).timestamp()
-        )
+        timestamp = datetime.fromisoformat(raw_ts).timestamp() if raw_ts else datetime.now(tz=timezone.utc).timestamp()
 
         severity = raw.get('severity', '')
         alert_type = SEVERITY_TO_ALERT_TYPE.get(severity.upper(), 'info') if severity else 'info'

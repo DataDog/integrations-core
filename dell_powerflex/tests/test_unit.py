@@ -6,7 +6,7 @@ import logging
 from unittest.mock import MagicMock
 
 import pytest
-from requests.exceptions import ConnectionError
+from requests.exceptions import ConnectionError, HTTPError
 
 from datadog_checks.dell_powerflex import DellPowerflexCheck
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -51,6 +51,23 @@ def test_can_connect_down(dd_run_check, aggregator, instance, mocker):
         value=0,
         tags=['powerflex_gateway_url:https://localhost:443'],
     )
+
+
+def test_auth_failure(dd_run_check, aggregator, instance, mocker, caplog):
+    response = MagicMock(status_code=401, reason='Unauthorized')
+    response.raise_for_status.side_effect = HTTPError(response=response)
+    mocker.patch('requests.Session.post', return_value=response)
+
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    caplog.set_level(logging.WARNING)
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'dell_powerflex.api.can_connect',
+        value=0,
+        tags=['powerflex_gateway_url:https://localhost:443'],
+    )
+    assert 'Could not connect to PowerFlex Gateway' in caplog.text
 
 
 def test_can_connect_up(dd_run_check, aggregator, instance, mock_auth, mocker):
@@ -641,6 +658,11 @@ def test_multiple_filters_same_resource_type(dd_run_check, aggregator, instance,
             'Invalid regex pattern',
             id='invalid_regex',
         ),
+        pytest.param(
+            [{'resource': 'sds', 'property': 'name', 'type': 'bad', 'patterns': ['.*']}],
+            'Invalid filter type',
+            id='invalid_filter_type',
+        ),
     ],
 )
 def test_filter_validation_warning(
@@ -680,6 +702,23 @@ def test_filter_logs_debug(dd_run_check, aggregator, instance, mock_http_get, ca
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
     assert log_message in caplog.text
+
+
+def test_exclude_filter_missing_property(dd_run_check, aggregator, instance, mock_http_get):
+    instance['resource_filters'] = [
+        {'resource': 'sds', 'property': 'nonexistent_field', 'type': 'exclude', 'patterns': ['.*']},
+    ]
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+    base_tags = ['powerflex_gateway_url:https://localhost:443']
+    sds_tags = base_tags + [
+        'sds_id:d1c062b700000000',
+        'sds_name:SDS3',
+        'protection_domain_id:68c139ee00000000',
+        'fault_set_id:faultset00000001',
+        'dell_type:sds',
+    ]
+    aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', tags=sds_tags)
 
 
 def test_non_string_pattern_skipped(dd_run_check, aggregator, instance, mock_http_get):
