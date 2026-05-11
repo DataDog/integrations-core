@@ -16,12 +16,31 @@ files:
               Host of the VoltDB cluster member to connect to via the native binary
               protocol. Use this (with `port`) for direct connections to a database
               node. Set `url` instead to talk to the VoltDB Management Center (VMC)
-              over HTTP/JSON.
+              over HTTP/JSON. For failover across multiple cluster members, use
+              `hosts` instead.
             fleet_configurable: true
             display_priority: 5
             value:
               type: string
               example: localhost
+
+          - name: hosts
+            description: |
+              List of VoltDB cluster members to try when connecting via the native
+              binary protocol. Each entry is either `hostname` (uses the global
+              `port`) or `hostname:port`. The Agent connects to the first
+              reachable entry and silently fails over to subsequent entries if
+              the active node becomes unavailable. Takes precedence over `host`.
+            fleet_configurable: true
+            display_priority: 5
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - voltdb-1.example:21212
+                - voltdb-2.example:21212
+                - voltdb-3.example:21212
 
           - name: url
             description: |

@@ -30,9 +30,9 @@ No additional installation is needed on your server.
 
 2. Edit the `voltdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your VoltDB performance data. See the [sample voltdb.d/conf.yaml][4] for all available configuration options.
 
-    The integration supports two transports:
+    The integration supports two transports. Pick the one that matches your network topology:
 
-    **Native binary client (recommended)** - direct connection to a database node on the VoltDB client port (default `21212`), using the [VoltDB Python client][12]:
+    **Native binary client** - direct connection to a database node on the VoltDB client port (default `21212`), using the [VoltDB Python client][12]. Recommended when the Agent host can reach the database nodes directly:
 
     ```yaml
     init_config:
@@ -44,18 +44,30 @@ No additional installation is needed on your server.
         password: "<PASSWORD>"
     ```
 
-    **HTTP/JSON via the VoltDB Management Center (VMC)** - useful when database nodes aren't directly reachable but the VMC endpoint is. Set `url` to the VMC HTTP endpoint:
+    For failover across cluster members, use `hosts` instead of `host`. The Agent connects to the first reachable entry and silently fails over to the others if the active node becomes unavailable:
 
     ```yaml
-    init_config:
+    instances:
+      - hosts:
+          - voltdb-1.example:21212
+          - voltdb-2.example:21212
+          - voltdb-3.example:21212
+        username: datadog-agent
+        password: "<PASSWORD>"
+    ```
 
+    **HTTP/JSON via the VoltDB Management Center (VMC)** - useful when database nodes aren't directly reachable but the VMC endpoint is, or when you prefer to keep the existing HTTP/JSON wire format. Set `url` to the VMC endpoint:
+
+    ```yaml
     instances:
       - url: http://vmc.example.com:8080
         username: datadog-agent
         password: "<PASSWORD>"
     ```
 
-    When `url` is set, the integration uses the HTTP transport. Otherwise it uses the native binary client against `host`/`port`. The HTTP mode supports the same `password_hashed` option as previous releases and all the proxy/TLS-via-PEM options from `instances/http`.
+    The check picks the transport based on which option is set: `url` selects HTTP mode, `host`/`hosts` selects native mode. HTTP mode keeps all the options earlier releases supported (`password_hashed`, `tls_cert`, `tls_ca_cert`, `tls_verify`, `proxy`, `headers`, etc.) - see the [sample config][4] for the full list.
+
+    **Backwards compatibility**: existing configurations that point `url` at the legacy HTTP endpoint continue to work without changes. This release adds the native binary transport as an option; it does not remove the HTTP one. The `url`-style config still emits the same metrics and service checks against the same VMC or HTTP-enabled database node it always pointed at.
 
 3. [Restart the Agent][5].
 

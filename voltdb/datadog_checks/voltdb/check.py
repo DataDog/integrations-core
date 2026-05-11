@@ -36,14 +36,14 @@ class VoltDBCheck(AgentCheck):
             )
         else:
             self._client = Client(
-                host=self._config.host,
-                port=self._config.port,
+                endpoints=self._config.endpoints,
                 username=self._config.username,
                 password=self._config.password,
                 use_ssl=self._config.use_ssl,
                 ssl_config_file=self._config.ssl_config_file,
                 connect_timeout=self._config.connect_timeout,
                 procedure_timeout=self._config.procedure_timeout,
+                log=self.log,
             )
 
         self._query_manager = QueryManager(

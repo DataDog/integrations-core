@@ -21,7 +21,7 @@ from . import common
     [
         pytest.param(
             {'username': 'doggo', 'password': 'doggopass'},
-            "'host' is required",
+            "either 'host' or 'hosts' is required",
             id='host-missing',
         ),
         pytest.param(
@@ -134,6 +134,106 @@ def test_host_without_url_uses_native_mode():
     config = Config({'host': 'db-1.example', 'username': 'u', 'password': 'p'})
     assert config.mode == MODE_NATIVE
     assert config.netloc == ('db-1.example', 21212)
+    assert config.endpoints == [('db-1.example', 21212)]
+
+
+def test_hosts_list_expands_to_endpoints():
+    """`hosts:` accepts either bare hostnames (using the global `port`) or
+    'host:port' strings. Endpoints are tried in order."""
+    config = Config(
+        {
+            'hosts': ['db-1.example', 'db-2.example:21222', 'db-3.example'],
+            'port': 21232,
+            'username': 'u',
+            'password': 'p',
+        }
+    )
+    assert config.endpoints == [
+        ('db-1.example', 21232),
+        ('db-2.example', 21222),
+        ('db-3.example', 21232),
+    ]
+    # netloc points at the first endpoint for stable tag values.
+    assert config.netloc == ('db-1.example', 21232)
+
+
+def test_hosts_takes_precedence_over_host():
+    """If both `host` and `hosts` are set, `hosts` wins so users can opt into
+    failover by just adding a `hosts:` entry."""
+    config = Config({'host': 'ignored.example', 'hosts': ['db-1.example', 'db-2.example']})
+    assert config.endpoints == [('db-1.example', 21212), ('db-2.example', 21212)]
+
+
+@pytest.mark.parametrize(
+    'instance, match',
+    [
+        pytest.param(
+            {'hosts': ['db-1.example:abc']},
+            'has an invalid port',
+            id='non-numeric-port',
+        ),
+        pytest.param(
+            {'hosts': ['db-1.example:0']},
+            'non-positive port',
+            id='zero-port',
+        ),
+        pytest.param(
+            {'hosts': ['']},
+            'non-empty',
+            id='empty-entry',
+        ),
+        pytest.param(
+            {'hosts': 'db-1.example'},
+            "'hosts' must be a list",
+            id='hosts-not-a-list',
+        ),
+    ],
+)
+def test_hosts_validation_errors(instance, match):
+    with pytest.raises(ConfigurationError, match=match):
+        Config(instance)
+
+
+def test_client_failover_tries_each_endpoint(monkeypatch):
+    """When the first endpoint refuses connection, the client tries the next one."""
+    from datadog_checks.voltdb.client import Client
+
+    attempts = []
+
+    class FakeFser:
+        def close(self):
+            pass
+
+    def fake_init(host, port, **_):
+        attempts.append((host, port))
+        if host == 'down.example':
+            raise ConnectionRefusedError('first node is down')
+        return FakeFser()
+
+    monkeypatch.setattr(Client, '_open', lambda self, host, port: fake_init(host, port))
+
+    client = Client(
+        endpoints=[('down.example', 21212), ('up.example', 21212)],
+    )
+    fser = client._get_connection()
+    assert isinstance(fser, FakeFser)
+    assert attempts == [('down.example', 21212), ('up.example', 21212)]
+    assert client.active_endpoint == ('up.example', 21212)
+
+
+def test_client_raises_when_no_endpoint_is_reachable(monkeypatch):
+    """If every endpoint refuses connection, the client surfaces the last error."""
+    from datadog_checks.voltdb.client import Client
+
+    def always_refuse(self, host, port):
+        raise ConnectionRefusedError('{}:{} is down'.format(host, port))
+
+    monkeypatch.setattr(Client, '_open', always_refuse)
+
+    client = Client(endpoints=[('a.example', 21212), ('b.example', 21212)])
+    with pytest.raises(ConnectionRefusedError, match='b.example:21212 is down'):
+        client._get_connection()
+    assert client.active_endpoint is None
 
 
 def test_url_takes_precedence_over_host():

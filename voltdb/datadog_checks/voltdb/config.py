@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Callable, List, Optional  # noqa: F401
+from typing import Callable, List, Optional, Tuple  # noqa: F401
 from urllib.parse import urlparse
 
 from datadog_checks.base import ConfigurationError, is_affirmative
@@ -71,6 +71,46 @@ MODE_NATIVE = 'native'
 MODE_HTTP = 'http'
 
 
+def _parse_hostport(entry, default_port):
+    # type: (str, int) -> Tuple[str, int]
+    """Parse a `host` or `host:port` string into a (host, port) tuple."""
+    entry = entry.strip()
+    if not entry:
+        raise ConfigurationError("'hosts' entries must be non-empty 'host' or 'host:port' strings")
+    if ':' in entry:
+        host, _, port_str = entry.rpartition(':')
+        host = host.strip()
+        try:
+            port = int(port_str)
+        except ValueError:
+            raise ConfigurationError("'hosts' entry {!r} has an invalid port".format(entry))
+    else:
+        host = entry
+        port = default_port
+    if not host:
+        raise ConfigurationError("'hosts' entry {!r} has an empty hostname".format(entry))
+    if port <= 0:
+        raise ConfigurationError("'hosts' entry {!r} has a non-positive port".format(entry))
+    return host, port
+
+
+def _resolve_endpoints(host, hosts, default_port):
+    # type: (Optional[str], Optional[List[str]], int) -> List[Tuple[str, int]]
+    """Build the ordered endpoint list for the native client.
+
+    `hosts` (a list) takes precedence over `host` (a single string) when both
+    are set so users can opt into failover by adding a `hosts:` entry without
+    having to remove their existing `host:`.
+    """
+    if hosts:
+        if not isinstance(hosts, list):
+            raise ConfigurationError("'hosts' must be a list of 'host' or 'host:port' strings")
+        return [_parse_hostport(entry, default_port) for entry in hosts]
+    if host:
+        return [(host, default_port)]
+    return []
+
+
 class Config(object):
     def __init__(self, instance, debug=lambda *args: None, warning=lambda *args: None):
         # type: (Instance, Callable, Callable) -> None
@@ -78,6 +118,7 @@ class Config(object):
 
         host = instance.get('host')  # type: Optional[str]
         port = instance.get('port')  # type: Optional[int]
+        hosts = instance.get('hosts')  # type: Optional[List[str]]
         url = instance.get('url')  # type: Optional[str]
         username = instance.get('username', '')  # type: str
         password = instance.get('password', '')  # type: str
@@ -115,12 +156,20 @@ class Config(object):
             mode = MODE_NATIVE
             if port is None:
                 port = DEFAULT_PORT
-            use_ssl = is_affirmative(use_ssl) if use_ssl is not None else False
-            if not host:
-                raise ConfigurationError("'host' is required (or set 'url' to use the HTTP/VMC transport)")
-            if not isinstance(port, int) or port <= 0:
+            elif not isinstance(port, int) or port <= 0:
                 raise ConfigurationError('port must be a positive integer')
-            netloc = (host, port)
+            use_ssl = is_affirmative(use_ssl) if use_ssl is not None else False
+            endpoints = _resolve_endpoints(host, hosts, port)
+            if not endpoints:
+                raise ConfigurationError(
+                    "either 'host' or 'hosts' is required for the native transport "
+                    "(or set 'url' to use the HTTP/VMC transport)"
+                )
+            netloc = endpoints[0]
+            # Keep `host`/`port` reflecting the *first* endpoint so log/tag messages
+            # match what users see in their config when they specified a single host.
+            host = netloc[0]
+            port = netloc[1]
 
         if not isinstance(statistics_components, list):
             raise ConfigurationError("'statistics_components' must be a list of strings")
@@ -150,6 +199,9 @@ class Config(object):
         self.host = host
         self.port = port
         self.netloc = netloc
+        # Endpoints list — populated only for native mode. HTTP mode connects to
+        # a single URL.
+        self.endpoints = endpoints if mode == MODE_NATIVE else [netloc]
         self.username = username
         self.password = password
         self.password_hashed = password_hashed
