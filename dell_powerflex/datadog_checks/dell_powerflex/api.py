@@ -11,10 +11,10 @@ class PowerFlexAPI:
         self,
         http,
         gateway_url: str,
+        logger,
         username: str | None = None,
         password: str | None = None,
         client_id: str = 'powerflexUI',
-        logger=None,
     ) -> None:
         self._http = http
         self._gateway_url = gateway_url
@@ -49,8 +49,7 @@ class PowerFlexAPI:
         expires_in = data.get('expires_in', 300)
         self._token_expiry = time() + expires_in - 30
         self._http.options['headers']['Authorization'] = f'Bearer {self._token}'
-        if self._log:
-            self._log.debug('Refreshed PowerFlex auth token, expires in %ds', expires_in)
+        self._log.debug('Refreshed PowerFlex auth token, expires in %ds', expires_in)
 
     def _get(self, path: str):
         self._ensure_authenticated()

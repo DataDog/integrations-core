@@ -128,7 +128,8 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         if volume.get('ancestorVolumeId'):
             tags = tags + [f"ancestor_volume_id:{volume['ancestorVolumeId']}"]
         for sdc in volume.get('mappedSdcInfo') or []:
-            tags = tags + [f"sdc_id:{sdc['sdcId']}"]
+            mapping_tags = tags + [f"sdc_id:{sdc['sdcId']}"]
+            self.gauge('volume.sdc_mapping', 1, tags=mapping_tags)
         if should_collect_statistics('volume', self._resource_filters):
             self._collect_volume_statistics(volume['id'], tags)
 
@@ -271,34 +272,34 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             self.log.warning('Failed to collect events: %s', e)
             return False
         for event in events:
-            dd_event = self._create_dd_event(event)
-            self.event(dd_event)
+            self.event(self._build_dd_event(event, 'powerflex_event_name', 'service_name'))
         return True
 
-    def _create_dd_event(self, event: dict) -> dict:
-        raw_ts = event.get('timestamp')
-        if raw_ts:
-            timestamp = datetime.fromisoformat(raw_ts.replace('Z', '+00:00')).timestamp()
-        else:
-            timestamp = datetime.now(tz=timezone.utc).timestamp()
+    def _build_dd_event(self, raw: dict, name_tag_key: str, service_key: str) -> dict:
+        raw_ts = raw.get('timestamp')
+        timestamp = (
+            datetime.fromisoformat(raw_ts.replace('Z', '+00:00')).timestamp()
+            if raw_ts
+            else datetime.now(tz=timezone.utc).timestamp()
+        )
 
         # TODO: remap Severity to Datadog severity
         # information -> info
-        severity = event.get('severity', '')
+        severity = raw.get('severity', '')
 
         tags = list(self._base_tags)
-        tags.append(f"powerflex_event_name:{event.get('name', '')}")
+        tags.append(f"{name_tag_key}:{raw.get('name', '')}")
         tags.append(f"severity:{severity}")
-        tags.append(f"category:{event.get('category', '')}")
-        tags.append(f"domain:{event.get('domain', '')}")
-        tags.append(f"dell_type:{event.get('resource_type', '')}")
-        tags.append(f"resource_name:{event.get('resource_name', '')}")
-        tags.append(f"service_name:{event.get('service_name', '')}")
+        tags.append(f"category:{raw.get('category', '')}")
+        tags.append(f"domain:{raw.get('domain', '')}")
+        tags.append(f"dell_type:{raw.get('resource_type', '')}")
+        tags.append(f"resource_name:{raw.get('resource_name', '')}")
+        tags.append(f"service_name:{raw.get(service_key, '')}")
 
-        name = event.get('name', '')
+        name = raw.get('name', '')
         title = name.replace('_', ' ').title()
-        resource_name = event.get('resource_name', '')
-        description = event.get('description', '')
+        resource_name = raw.get('resource_name', '')
+        description = raw.get('description', '')
         msg_text = f"{resource_name}: {description}" if resource_name else description
 
         return {
@@ -318,43 +319,8 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             self.log.warning('Failed to collect alerts: %s', e)
             return False
         for alert in alerts:
-            dd_event = self._create_dd_alert(alert)
-            self.event(dd_event)
+            self.event(self._build_dd_event(alert, 'powerflex_alert_name', 'service'))
         return True
-
-    def _create_dd_alert(self, alert: dict) -> dict:
-        raw_ts = alert.get('timestamp')
-        if raw_ts:
-            timestamp = datetime.fromisoformat(raw_ts.replace('Z', '+00:00')).timestamp()
-        else:
-            timestamp = datetime.now(tz=timezone.utc).timestamp()
-
-        severity = alert.get('severity', '')
-
-        tags = list(self._base_tags)
-        tags.append(f"powerflex_alert_name:{alert.get('name', '')}")
-        tags.append(f"severity:{severity}")
-        tags.append(f"category:{alert.get('category', '')}")
-        tags.append(f"domain:{alert.get('domain', '')}")
-        tags.append(f"dell_type:{alert.get('resource_type', '')}")
-        tags.append(f"resource_name:{alert.get('resource_name', '')}")
-        tags.append(f"service_name:{alert.get('service', '')}")
-
-        name = alert.get('name', '')
-        title = name.replace('_', ' ').title()
-        resource_name = alert.get('resource_name', '')
-        description = alert.get('description', '')
-        msg_text = f"{resource_name}: {description}" if resource_name else description
-
-        return {
-            'timestamp': timestamp,
-            'event_type': self.__NAMESPACE__,
-            'msg_title': title,
-            'msg_text': msg_text,
-            'alert_type': 'error',
-            'source_type_name': self.__NAMESPACE__,
-            'tags': tags,
-        }
 
     def _collect_bwc_metrics(self, stats: dict, bwc_metrics: list[tuple[str, str]], tags: list[str]) -> None:
         for api_field, metric_suffix in bwc_metrics:

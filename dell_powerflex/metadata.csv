@@ -141,4 +141,5 @@ dell_powerflex.vol_migration_read_bwc.total_weight_in_kb,gauge,,kibibyte,,Total 
 dell_powerflex.vol_migration_write_bwc.num_occured,gauge,,,,Number of volume migration write I/O operations.,0,dell_powerflex,vol migration write occurrences,,
 dell_powerflex.vol_migration_write_bwc.num_seconds,gauge,,second,,Duration of the volume migration write sampling window.,0,dell_powerflex,vol migration write seconds,,
 dell_powerflex.vol_migration_write_bwc.total_weight_in_kb,gauge,,kibibyte,,Total volume migration write bandwidth.,0,dell_powerflex,vol migration write bandwidth,,
+dell_powerflex.volume.sdc_mapping,gauge,,,,Indicates a volume-to-SDC mapping relationship. A value of 1 is emitted for each SDC mapped to a volume.,0,dell_powerflex,volume sdc mapping,,
 dell_powerflex.volume_allocation_limit.in_kb,gauge,,kibibyte,,Volume allocation limit.,0,dell_powerflex,volume allocation limit,,

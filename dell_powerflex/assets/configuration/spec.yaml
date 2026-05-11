@@ -20,6 +20,7 @@ files:
       value:
         type: string
     - name: powerflex_password
+      secret: true
       display_priority: 1
       description: Password for PowerFlex Gateway authentication via Keycloak.
       value:
@@ -32,7 +33,7 @@ files:
         example: powerflexUI
         default: powerflexUI
     - name: collect_events
-      description: Enable collection of CRITICAL events from the PowerFlex Gateway.
+      description: Enable collection of CRITICAL and MAJOR severity events from the PowerFlex Gateway.
       value:
         type: boolean
         example: false

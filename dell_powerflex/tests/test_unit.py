@@ -104,11 +104,14 @@ def test_collect_volumes(dd_run_check, aggregator, instance, mock_http_get):
         'volume_type:ThinProvisioned',
         'storage_pool_id:25155ba600000000',
         'dell_type:volume',
-        'sdc_id:1b8659fd00000001',
     ]
     for metric in VOLUME_STATS_SIMPLE_METRICS:
         aggregator.assert_metric(metric['name'], value=metric['value'], tags=volume_tags)
     assert_bwc_metrics(aggregator, VOLUME_STATS_BWC_METRICS, volume_tags)
+    # volume-to-SDC mapping metric
+    aggregator.assert_metric(
+        'dell_powerflex.volume.sdc_mapping', value=1, tags=volume_tags + ['sdc_id:1b8659fd00000001']
+    )
 
     # bigvolume: ThinProvisioned, mapped to one SDC, no children
     bigvolume_tags = base_tags + [
@@ -117,10 +120,12 @@ def test_collect_volumes(dd_run_check, aggregator, instance, mock_http_get):
         'volume_type:ThinProvisioned',
         'storage_pool_id:25155ba600000000',
         'dell_type:volume',
-        'sdc_id:1b8659fd00000001',
     ]
     aggregator.assert_metric('dell_powerflex.num_of_child_volumes', value=0, tags=bigvolume_tags)
     aggregator.assert_metric('dell_powerflex.num_of_mapped_sdcs', value=1, tags=bigvolume_tags)
+    aggregator.assert_metric(
+        'dell_powerflex.volume.sdc_mapping', value=1, tags=bigvolume_tags + ['sdc_id:1b8659fd00000001']
+    )
 
     # volumee-snap-01: Snapshot, no SDC mapping, has ancestor, 1 child
     snap01_tags = base_tags + [
@@ -508,7 +513,6 @@ def test_filter_by_volume_type(dd_run_check, aggregator, instance, mock_http_get
         'volume_name:volumee',
         'volume_type:ThinProvisioned',
         'storage_pool_id:25155ba600000000',
-        'sdc_id:1b8659fd00000001',
         'dell_type:volume',
     ]
     snap_tags = base_tags + [

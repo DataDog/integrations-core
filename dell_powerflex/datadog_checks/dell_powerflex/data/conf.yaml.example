@@ -34,7 +34,7 @@ instances:
     # powerflex_client_id: powerflexUI
 
     ## @param collect_events - boolean - optional - default: false
-    ## Enable collection of CRITICAL events from the PowerFlex Gateway.
+    ## Enable collection of CRITICAL and MAJOR severity events from the PowerFlex Gateway.
     #
     # collect_events: false
 
