@@ -24,6 +24,7 @@ from .constants import (
     SDS_RESOURCE_TYPE,
     SDS_STATS_BWC_METRICS,
     SDS_STATS_SIMPLE_METRICS,
+    SEVERITY_TO_ALERT_TYPE,
     STORAGE_POOL_RESOURCE_TYPE,
     STORAGE_POOL_STATS_BWC_METRICS,
     STORAGE_POOL_STATS_SIMPLE_METRICS,
@@ -322,9 +323,8 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             else datetime.now(tz=timezone.utc).timestamp()
         )
 
-        # TODO: remap Severity to Datadog severity
-        # information -> info
         severity = raw.get('severity', '')
+        alert_type = SEVERITY_TO_ALERT_TYPE.get(severity.upper(), 'info') if severity else 'info'
 
         tags = list(self._base_tags)
         tags.append(f"{name_tag_key}:{raw.get('name', '')}")
@@ -346,7 +346,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             'event_type': self.__NAMESPACE__,
             'msg_title': title,
             'msg_text': msg_text,
-            'alert_type': 'error',
+            'alert_type': alert_type,
             'source_type_name': self.__NAMESPACE__,
             'tags': tags,
         }

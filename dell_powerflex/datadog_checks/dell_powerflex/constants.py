@@ -2,6 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+SEVERITY_TO_ALERT_TYPE = {
+    'CRITICAL': 'error',
+    'MAJOR': 'error',
+    'MINOR': 'warning',
+    'INFORMATION': 'info',
+}
+
 SYSTEM_RESOURCE_TYPE = 'system'
 
 SYSTEM_MDM_CLUSTER_SIMPLE_METRICS = [

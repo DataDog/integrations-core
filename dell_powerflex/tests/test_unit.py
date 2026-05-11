@@ -819,6 +819,7 @@ def test_collect_alerts(dd_run_check, aggregator, instance, mock_http_get):
         assert 'powerflex_gateway_url:https://localhost:443' in alert['tags']
 
     mdm_alert = next(a for a in alerts if a['msg_title'] == 'Unable To Receive Mdm Events')
+    assert mdm_alert['alert_type'] == 'error'
     assert 'MDM1: Unable to receive mdm events from [10.0.1.250] .' in mdm_alert['msg_text']
     assert 'powerflex_alert_name:UNABLE_TO_RECEIVE_MDM_EVENTS' in mdm_alert['tags']
     assert 'severity:MAJOR' in mdm_alert['tags']
@@ -828,5 +829,6 @@ def test_collect_alerts(dd_run_check, aggregator, instance, mock_http_get):
     assert 'service_name:block-events-gw' in mdm_alert['tags']
 
     license_alert = next(a for a in alerts if a['msg_title'] == 'Trial License Used')
+    assert license_alert['alert_type'] == 'warning'
     assert 'PowerFlex is using a trial license' in license_alert['msg_text']
     assert 'severity:MINOR' in license_alert['tags']
