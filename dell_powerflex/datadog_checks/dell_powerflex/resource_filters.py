@@ -26,13 +26,15 @@ FILTERABLE_RESOURCE_TYPES = frozenset(
     }
 )
 
+FILTER_TYPES = frozenset({'include', 'exclude'})
+
 
 @dataclass(frozen=True)
 class ResourceFilter:
     resource: str
     property_name: str
-    include: tuple[re.Pattern[str], ...] = ()
-    exclude: tuple[re.Pattern[str], ...] = ()
+    patterns: tuple[re.Pattern[str], ...] = ()
+    filter_type: str = 'include'
     collect_statistics: bool = True
 
 
@@ -56,20 +58,24 @@ def parse_resource_filters(
             logger.warning('Missing or invalid property in resource_filters for %s', resource)
             continue
 
-        include = _compile_patterns(f.get('include', []), resource, logger)
-        exclude = _compile_patterns(f.get('exclude', []), resource, logger)
+        filter_type = str(f.get('type', 'include')).lower()
+        if filter_type not in FILTER_TYPES:
+            logger.warning('Invalid filter type in resource_filters for %s: %s', resource, filter_type)
+            filter_type = 'include'
+
+        compiled = _compile_patterns(f.get('patterns', []), resource, logger)
         collect_statistics = f.get('collect_statistics', True)
 
-        if not include and not exclude and collect_statistics:
-            logger.warning('No valid include or exclude patterns in resource_filters for %s', resource)
+        if not compiled and collect_statistics:
+            logger.warning('No valid patterns in resource_filters for %s', resource)
             continue
 
         result.append(
             ResourceFilter(
                 resource=resource,
                 property_name=prop,
-                include=tuple(include),
-                exclude=tuple(exclude),
+                patterns=tuple(compiled),
+                filter_type=filter_type,
                 collect_statistics=collect_statistics,
             )
         )
@@ -83,25 +89,35 @@ def should_collect_resource(
     filters: list[ResourceFilter],
     logger: Any,
 ) -> bool:
-    """Return True if the entity passes all filters for its resource type."""
+    """Return True if the entity passes all filters for its resource type.
+
+    Exclude filters take precedence over include filters.
+    """
     relevant = [rf for rf in filters if rf.resource == resource_type]
     if not relevant:
         return True
 
-    for rf in relevant:
+    excludes = [rf for rf in relevant if rf.filter_type == 'exclude']
+    for rf in excludes:
+        value = entity.get(rf.property_name)
+        if value is None:
+            continue
+        value_str = str(value)
+        if any(pattern.search(value_str) for pattern in rf.patterns):
+            logger.debug('Skipping %s %s: matched exclude pattern on %s', resource_type, value_str, rf.property_name)
+            return False
+
+    includes = [rf for rf in relevant if rf.filter_type == 'include']
+    if not includes:
+        return True
+
+    for rf in includes:
         value = entity.get(rf.property_name)
         if value is None:
             logger.debug('Skipping %s: property %s not found', resource_type, rf.property_name)
             return False
-
         value_str = str(value)
-
-        for pattern in rf.exclude:
-            if pattern.search(value_str):
-                logger.debug('Skipping %s %s: matched exclude pattern %s', resource_type, value_str, pattern.pattern)
-                return False
-
-        if rf.include and not any(pattern.search(value_str) for pattern in rf.include):
+        if not any(pattern.search(value_str) for pattern in rf.patterns):
             logger.debug('Skipping %s %s: did not match any include pattern', resource_type, value_str)
             return False
 

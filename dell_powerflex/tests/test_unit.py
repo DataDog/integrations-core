@@ -106,7 +106,7 @@ def test_collect_system(dd_run_check, aggregator, instance, mock_http_get):
 
 def test_assert_all_metrics(dd_run_check, aggregator, instance, mock_http_get):
     instance['resource_filters'] = [
-        {'resource': 'device', 'property': 'name', 'include': ['.*'], 'collect_statistics': True},
+        {'resource': 'device', 'property': 'name', 'patterns': ['.*'], 'collect_statistics': True},
     ]
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
@@ -338,7 +338,7 @@ def test_collect_sdc(dd_run_check, aggregator, instance, mock_http_get):
 
 def test_collect_devices(dd_run_check, aggregator, instance, mock_http_get):
     instance['resource_filters'] = [
-        {'resource': 'device', 'property': 'name', 'include': ['.*'], 'collect_statistics': True},
+        {'resource': 'device', 'property': 'name', 'patterns': ['.*'], 'collect_statistics': True},
     ]
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
@@ -421,7 +421,7 @@ def test_collect_system_with_name(dd_run_check, aggregator, instance, mock_auth,
 
 def test_include_filter_by_name(dd_run_check, aggregator, instance, mock_http_get):
     instance['resource_filters'] = [
-        {'resource': 'storage_pool', 'property': 'name', 'include': ['^pool1$']},
+        {'resource': 'storage_pool', 'property': 'name', 'patterns': ['^pool1$']},
     ]
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
@@ -445,7 +445,7 @@ def test_include_filter_by_name(dd_run_check, aggregator, instance, mock_http_ge
 
 def test_exclude_filter_by_name(dd_run_check, aggregator, instance, mock_http_get):
     instance['resource_filters'] = [
-        {'resource': 'sds', 'property': 'name', 'exclude': ['^SDS3$']},
+        {'resource': 'sds', 'property': 'name', 'type': 'exclude', 'patterns': ['^SDS3$']},
     ]
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
@@ -470,7 +470,8 @@ def test_exclude_filter_by_name(dd_run_check, aggregator, instance, mock_http_ge
 
 def test_exclude_takes_precedence_over_include(dd_run_check, aggregator, instance, mock_http_get):
     instance['resource_filters'] = [
-        {'resource': 'storage_pool', 'property': 'name', 'include': ['.*'], 'exclude': ['^pool1$']},
+        {'resource': 'storage_pool', 'property': 'name', 'patterns': ['.*']},
+        {'resource': 'storage_pool', 'property': 'name', 'type': 'exclude', 'patterns': ['^pool1$']},
     ]
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
@@ -494,7 +495,7 @@ def test_exclude_takes_precedence_over_include(dd_run_check, aggregator, instanc
 
 def test_collect_statistics_false(dd_run_check, aggregator, instance, mock_http_get):
     instance['resource_filters'] = [
-        {'resource': 'sds', 'property': 'name', 'include': ['.*'], 'collect_statistics': False},
+        {'resource': 'sds', 'property': 'name', 'patterns': ['.*'], 'collect_statistics': False},
     ]
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
@@ -534,7 +535,7 @@ def test_collect_statistics_false_without_patterns(dd_run_check, aggregator, ins
 
 def test_filter_by_volume_type(dd_run_check, aggregator, instance, mock_http_get):
     instance['resource_filters'] = [
-        {'resource': 'volume', 'property': 'volumeType', 'include': ['^ThinProvisioned$']},
+        {'resource': 'volume', 'property': 'volumeType', 'patterns': ['^ThinProvisioned$']},
     ]
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
@@ -561,7 +562,7 @@ def test_filter_by_volume_type(dd_run_check, aggregator, instance, mock_http_get
 
 def test_unfiltered_resources_not_affected(dd_run_check, aggregator, instance, mock_http_get):
     instance['resource_filters'] = [
-        {'resource': 'sds', 'property': 'name', 'include': ['^nonexistent$']},
+        {'resource': 'sds', 'property': 'name', 'patterns': ['^nonexistent$']},
     ]
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
@@ -586,8 +587,8 @@ def test_unfiltered_resources_not_affected(dd_run_check, aggregator, instance, m
 
 def test_multiple_filters_same_resource_type(dd_run_check, aggregator, instance, mock_http_get):
     instance['resource_filters'] = [
-        {'resource': 'sds', 'property': 'name', 'include': ['^SDS[12]$']},
-        {'resource': 'sds', 'property': 'id', 'exclude': ['^d1c062b800000001$']},
+        {'resource': 'sds', 'property': 'name', 'patterns': ['^SDS[12]$']},
+        {'resource': 'sds', 'property': 'id', 'type': 'exclude', 'patterns': ['^d1c062b800000001$']},
     ]
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
@@ -621,22 +622,22 @@ def test_multiple_filters_same_resource_type(dd_run_check, aggregator, instance,
     'resource_filters, log_message',
     [
         pytest.param(
-            [{'resource': 'invalid_type', 'property': 'name', 'include': ['.*']}],
+            [{'resource': 'invalid_type', 'property': 'name', 'patterns': ['.*']}],
             'Invalid resource type',
             id='invalid_resource_type',
         ),
         pytest.param(
-            [{'resource': 'sds', 'property': '', 'include': ['.*']}],
+            [{'resource': 'sds', 'property': '', 'patterns': ['.*']}],
             'Missing or invalid property',
             id='missing_property_in_filter',
         ),
         pytest.param(
             [{'resource': 'sds', 'property': 'name'}],
-            'No valid include or exclude patterns',
+            'No valid patterns',
             id='no_valid_patterns',
         ),
         pytest.param(
-            [{'resource': 'sds', 'property': 'name', 'include': ['[invalid']}],
+            [{'resource': 'sds', 'property': 'name', 'patterns': ['[invalid']}],
             'Invalid regex pattern',
             id='invalid_regex',
         ),
@@ -657,17 +658,17 @@ def test_filter_validation_warning(
     'resource_filters, log_message',
     [
         pytest.param(
-            [{'resource': 'sds', 'property': 'name', 'exclude': ['^SDS3$']}],
+            [{'resource': 'sds', 'property': 'name', 'type': 'exclude', 'patterns': ['^SDS3$']}],
             'Skipping sds SDS3: matched exclude pattern',
             id='exclude_filter',
         ),
         pytest.param(
-            [{'resource': 'storage_pool', 'property': 'name', 'include': ['^pool1$']}],
+            [{'resource': 'storage_pool', 'property': 'name', 'patterns': ['^pool1$']}],
             'Skipping storage_pool storagepool2: did not match any include pattern',
             id='include_filter',
         ),
         pytest.param(
-            [{'resource': 'sds', 'property': 'nonexistent_field', 'include': ['.*']}],
+            [{'resource': 'sds', 'property': 'nonexistent_field', 'patterns': ['.*']}],
             'property nonexistent_field not found',
             id='missing_property',
         ),
@@ -683,7 +684,7 @@ def test_filter_logs_debug(dd_run_check, aggregator, instance, mock_http_get, ca
 
 def test_non_string_pattern_skipped(dd_run_check, aggregator, instance, mock_http_get):
     instance['resource_filters'] = [
-        {'resource': 'sds', 'property': 'name', 'include': [123, '.*']},
+        {'resource': 'sds', 'property': 'name', 'patterns': [123, '.*']},
     ]
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
@@ -699,16 +700,16 @@ def test_non_string_pattern_skipped(dd_run_check, aggregator, instance, mock_htt
 
 
 @pytest.mark.parametrize(
-    'resource, property, include',
+    'resource, property, patterns',
     [
         ('protection_domain', 'name', ['^nonexistent$']),
         ('sdc', 'sdcIp', ['^192\\.168\\.']),
         ('device', 'name', ['^nonexistent$']),
     ],
 )
-def test_filter_excludes_all_resources(dd_run_check, aggregator, instance, mock_http_get, resource, property, include):
+def test_filter_excludes_all_resources(dd_run_check, aggregator, instance, mock_http_get, resource, property, patterns):
     instance['resource_filters'] = [
-        {'resource': resource, 'property': property, 'include': include},
+        {'resource': resource, 'property': property, 'patterns': patterns},
     ]
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
@@ -731,7 +732,7 @@ def test_filter_excludes_all_resources(dd_run_check, aggregator, instance, mock_
 )
 def test_collect_statistics_false_per_resource(dd_run_check, aggregator, instance, mock_http_get, resource, property):
     instance['resource_filters'] = [
-        {'resource': resource, 'property': property, 'include': ['.*'], 'collect_statistics': False},
+        {'resource': resource, 'property': property, 'patterns': ['.*'], 'collect_statistics': False},
     ]
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)

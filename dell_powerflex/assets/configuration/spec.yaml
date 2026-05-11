@@ -53,8 +53,9 @@ files:
         Each filter entry has the following fields:
           resource: The resource type to filter.
           property: The API property name to match against.
-          include: List of regex patterns. Resource must match at least one.
-          exclude: List of regex patterns. Matching resources are excluded.
+          patterns: List of regex patterns to match against the property value.
+          type: Either 'include' (default) or 'exclude'. If a resource matches
+            both an include and exclude filter, it is excluded.
           collect_statistics: When false, skip per-resource statistics API
             calls to reduce load. Defaults to true.
 
@@ -72,24 +73,25 @@ files:
         example:
           - resource: volume
             property: name
-            include:
+            patterns:
               - ".*"
           - resource: storage_pool
             property: name
             collect_statistics: true
-            include:
+            patterns:
               - "^prod-"
           - resource: protection_domain
             property: name
-            include:
+            patterns:
               - ".*"
           - resource: sds
             property: name
-            exclude:
+            type: exclude
+            patterns:
               - "^standby-"
           - resource: sdc
             property: sdcType
-            include:
+            patterns:
               - "^AppSdc$"
           - resource: device
             property: name
