@@ -1,1 +1,1 @@
-Fall back to the configured host when serverStatus hostname resolution fails, preventing a TypeError crash when the MongoDB check runs without reported_database_hostname and the server is unreachable via Private Link or proxy.
+Fix ``TypeError: argument 3 must be str, not None`` crash when ``serverStatus`` hostname lookup fails and ``reported_database_hostname`` is not set.
