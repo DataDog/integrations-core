@@ -104,6 +104,9 @@ def test_collect_system(dd_run_check, aggregator, instance, mock_http_get):
 
 
 def test_assert_all_metrics(dd_run_check, aggregator, instance, mock_http_get):
+    instance['resource_filters'] = [
+        {'resource': 'device', 'property': 'name', 'include': ['.*'], 'collect_statistics': True},
+    ]
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_symmetric_inclusion=True)
@@ -325,6 +328,9 @@ def test_collect_sdc(dd_run_check, aggregator, instance, mock_http_get):
 
 
 def test_collect_devices(dd_run_check, aggregator, instance, mock_http_get):
+    instance['resource_filters'] = [
+        {'resource': 'device', 'property': 'name', 'include': ['.*'], 'collect_statistics': True},
+    ]
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
 

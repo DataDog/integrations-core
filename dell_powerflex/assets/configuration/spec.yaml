@@ -47,7 +47,8 @@ files:
         Filter resources by property regex patterns and control statistics
         collection per resource type. Exclude takes precedence over include.
         If no filter is configured for a resource type, all resources of
-        that type are collected with statistics enabled.
+        that type are collected with statistics enabled, except for devices
+        which have statistics disabled by default.
 
         Each filter entry has the following fields:
           resource: The resource type to filter.

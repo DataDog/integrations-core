@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-SYSTEM_METRIC_PREFIX = 'system'
+SYSTEM_RESOURCE_TYPE = 'system'
 
 SYSTEM_MDM_CLUSTER_SIMPLE_METRICS = [
     ('goodNodesNum', 'mdm_cluster.good_nodes'),
@@ -100,7 +100,7 @@ SYSTEM_STATS_BWC_METRICS = (
     ]
 )
 
-VOLUME_METRIC_PREFIX = 'volume'
+VOLUME_RESOURCE_TYPE = 'volume'
 
 VOLUME_STATS_SIMPLE_METRICS = [
     ('numOfChildVolumes', 'num_of_child_volumes'),
@@ -111,7 +111,7 @@ VOLUME_STATS_SIMPLE_METRICS = [
 
 VOLUME_STATS_BWC_METRICS = list(COMMON_BWC_METRICS)
 
-SDC_METRIC_PREFIX = 'sdc'
+SDC_RESOURCE_TYPE = 'sdc'
 
 SDC_STATS_SIMPLE_METRICS = [
     ('numOfMappedVolumes', 'num_of_mapped_volumes'),
@@ -119,7 +119,7 @@ SDC_STATS_SIMPLE_METRICS = [
 
 SDC_STATS_BWC_METRICS = list(COMMON_BWC_METRICS)
 
-STORAGE_POOL_METRIC_PREFIX = 'storage_pool'
+STORAGE_POOL_RESOURCE_TYPE = 'storage_pool'
 
 STORAGE_POOL_STATS_SIMPLE_METRICS = COMMON_SIMPLE_METRICS + [
     ('unreachableUnusedCapacityInKb', 'unreachable_unused_capacity.in_kb'),
@@ -149,7 +149,7 @@ COMMON_REBUILD_BWC_METRICS = [
 
 STORAGE_POOL_STATS_BWC_METRICS = COMMON_BWC_METRICS + COMMON_IO_BWC_METRICS + COMMON_REBUILD_BWC_METRICS
 
-SDS_METRIC_PREFIX = 'sds'
+SDS_RESOURCE_TYPE = 'sds'
 
 SDS_STATS_SIMPLE_METRICS = COMMON_SIMPLE_METRICS + [
     ('unreachableUnusedCapacityInKb', 'unreachable_unused_capacity.in_kb'),
@@ -172,7 +172,7 @@ SDS_STATS_BWC_METRICS = COMMON_IO_BWC_METRICS + [
     ('userDataSdcWriteLatency', 'user_data_sdc_write_latency'),
 ]
 
-DEVICE_METRIC_PREFIX = 'device'
+DEVICE_RESOURCE_TYPE = 'device'
 
 DEVICE_STATS_SIMPLE_METRICS = COMMON_SIMPLE_METRICS + [
     ('avgReadSizeInBytes', 'avg_read_size_in_bytes'),
@@ -186,7 +186,7 @@ DEVICE_STATS_SIMPLE_METRICS = COMMON_SIMPLE_METRICS + [
 
 DEVICE_STATS_BWC_METRICS = list(COMMON_IO_BWC_METRICS)
 
-PROTECTION_DOMAIN_METRIC_PREFIX = 'protection_domain'
+PROTECTION_DOMAIN_RESOURCE_TYPE = 'protection_domain'
 
 PROTECTION_DOMAIN_STATS_SIMPLE_METRICS = COMMON_SIMPLE_METRICS + [
     ('exposedCapacityInKb', 'exposed_capacity.in_kb'),

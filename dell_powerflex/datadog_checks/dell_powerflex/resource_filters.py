@@ -6,14 +6,23 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
+from .constants import (
+    DEVICE_RESOURCE_TYPE,
+    PROTECTION_DOMAIN_RESOURCE_TYPE,
+    SDC_RESOURCE_TYPE,
+    SDS_RESOURCE_TYPE,
+    STORAGE_POOL_RESOURCE_TYPE,
+    VOLUME_RESOURCE_TYPE,
+)
+
 FILTERABLE_RESOURCE_TYPES = frozenset(
     {
-        'volume',
-        'storage_pool',
-        'protection_domain',
-        'sds',
-        'sdc',
-        'device',
+        VOLUME_RESOURCE_TYPE,
+        STORAGE_POOL_RESOURCE_TYPE,
+        PROTECTION_DOMAIN_RESOURCE_TYPE,
+        SDS_RESOURCE_TYPE,
+        SDC_RESOURCE_TYPE,
+        DEVICE_RESOURCE_TYPE,
     }
 )
 
@@ -99,6 +108,9 @@ def should_collect_resource(
     return True
 
 
+STATISTICS_DISABLED_BY_DEFAULT = frozenset({DEVICE_RESOURCE_TYPE})
+
+
 def should_collect_statistics(
     resource_type: str,
     filters: dict[str, ResourceFilter],
@@ -106,7 +118,7 @@ def should_collect_statistics(
     """Return True if statistics should be collected for this resource type."""
     rf = filters.get(resource_type)
     if rf is None:
-        return True
+        return resource_type not in STATISTICS_DISABLED_BY_DEFAULT
     return rf.collect_statistics
 
 
