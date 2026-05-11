@@ -3,10 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import contextlib
 import json
+import threading
 from unittest import mock
 
 import pytest
-
 from datadog_checks.clickhouse import ClickhouseCheck
 from datadog_checks.clickhouse.metadata import ClickhouseMetadata
 from datadog_checks.clickhouse.schemas import (
@@ -550,3 +550,44 @@ def test_collect_uses_local_system_tables_in_direct_mode(check):
     assert 'FROM system.tables' in joined
     assert 'FROM system.columns' in joined
     assert 'FROM system.view_refreshes' in joined
+
+
+def test_max_execution_time_set_on_client(collector):
+    _capture_payloads(collector._check)
+    with _patch_query(collector) as mock_client:
+        collector.collect_schemas()
+
+    mock_client.set_client_setting.assert_called_once_with(
+        'max_execution_time', collector._config.max_query_duration
+    )
+
+
+def test_main_query_failure_closes_client(collector):
+    def fake_query(query, *args, **kwargs):
+        if 'view_refreshes' in query:
+            return _make_query_result([])
+        raise Exception("main query failed")
+
+    mock_client = mock.MagicMock()
+    mock_client.query.side_effect = fake_query
+
+    _capture_payloads(collector._check)
+    with mock.patch.object(collector._check, 'create_dbm_client', return_value=mock_client):
+        with pytest.raises(Exception, match="main query failed"):
+            collector.collect_schemas()
+
+    mock_client.close.assert_called_once()
+    assert collector._db_client is None
+
+
+def test_cancel_event_aborts_before_query(collector):
+    cancel_event = threading.Event()
+    collector._cancel_event = cancel_event
+    cancel_event.set()
+
+    collector._db_client = mock.MagicMock()
+
+    with pytest.raises(Exception, match="cancelled"):
+        collector._execute_query("SELECT 1")
+
+    collector._db_client.query.assert_not_called()

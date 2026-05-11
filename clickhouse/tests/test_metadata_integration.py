@@ -6,7 +6,6 @@ from copy import deepcopy
 
 import clickhouse_connect
 import pytest
-
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.clickhouse import ClickhouseCheck
 
@@ -261,6 +260,56 @@ def test_metadata_disabled_emits_no_payload(aggregator, instance, dd_run_check):
     assert _catalog_events(aggregator) == [], (
         'Expected no clickhouse_databases payload when collect_schemas is disabled'
     )
+
+
+def test_metadata_exclude_tables_filter(aggregator, metadata_instance, dd_run_check):
+    client = _client(metadata_instance)
+    table_keep = 'dd_md_filter_keep'
+    table_drop = 'dd_md_filter_drop'
+    try:
+        for t in (table_keep, table_drop):
+            client.command(f'DROP TABLE IF EXISTS default.{t}')
+            client.command(f'CREATE TABLE default.{t} (id UInt64) ENGINE = MergeTree ORDER BY id')
+
+        instance = deepcopy(metadata_instance)
+        instance['collect_schemas']['exclude_tables'] = [f'^{table_drop}$']
+
+        check = ClickhouseCheck('clickhouse', {}, [instance])
+        dd_run_check(check)
+
+        db = _find_database(_catalog_events(aggregator), 'default')
+        assert db is not None
+        table_names = {t['name'] for t in db['tables']}
+        assert table_keep in table_names
+        assert table_drop not in table_names
+    finally:
+        for t in (table_keep, table_drop):
+            client.command(f'DROP TABLE IF EXISTS default.{t} SYNC')
+
+
+def test_metadata_include_tables_filter(aggregator, metadata_instance, dd_run_check):
+    client = _client(metadata_instance)
+    table_included = 'dd_md_include_target'
+    table_other = 'dd_md_include_other'
+    try:
+        for t in (table_included, table_other):
+            client.command(f'DROP TABLE IF EXISTS default.{t}')
+            client.command(f'CREATE TABLE default.{t} (id UInt64) ENGINE = MergeTree ORDER BY id')
+
+        instance = deepcopy(metadata_instance)
+        instance['collect_schemas']['include_tables'] = [f'^{table_included}$']
+
+        check = ClickhouseCheck('clickhouse', {}, [instance])
+        dd_run_check(check)
+
+        db = _find_database(_catalog_events(aggregator), 'default')
+        assert db is not None
+        table_names = {t['name'] for t in db['tables']}
+        assert table_included in table_names
+        assert table_other not in table_names
+    finally:
+        for t in (table_included, table_other):
+            client.command(f'DROP TABLE IF EXISTS default.{t} SYNC')
 
 
 @pytest.mark.skipif(
