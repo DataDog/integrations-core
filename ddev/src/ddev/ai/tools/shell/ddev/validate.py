@@ -8,7 +8,7 @@ from pydantic import Field
 from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.shell.base import CmdTool
 
-ValidateSubcommand = Literal["config", "models", "metadata"]
+ValidateSubcommand = Literal["config", "models", "metadata", "all"]
 
 
 class DdevValidateInput(BaseToolInput):
@@ -16,10 +16,15 @@ class DdevValidateInput(BaseToolInput):
         ValidateSubcommand,
         Field(
             description=(
-                "Which validator to run. "
-                "'config' validates assets/configuration/spec.yaml against data/conf.yaml.example. "
-                "'models' validates spec.yaml against datadog_checks/<integration>/config_models/. "
-                "'metadata' validates metadata.csv. "
+                "Which validator to run. Options:"
+                "- 'config': validates assets/configuration/spec.yaml against data/conf.yaml.example. "
+                "- 'models': validates spec.yaml against datadog_checks/<integration>/config_models/. "
+                "- 'metadata': validates metadata.csv. "
+                "- 'all': runs all ~20 validators in parallel. Some of these always scan the entire "
+                "repository, so the output may include failures for files outside of <integration>. "
+                "IGNORE those unrelated failures — only act on failures that reference files inside "
+                "your integration's directory.  It might take a long time to run. Use 'all' only as "
+                "a final sweep to catch issues the targeted validators do not cover."
             )
         ),
     ]
@@ -32,6 +37,7 @@ class DdevValidateInput(BaseToolInput):
                 "For 'config', regenerates conf.yaml.example. "
                 "For 'models', regenerates config_models/. "
                 "For 'metadata', rewrites metadata.csv into canonical form. "
+                "For 'all', auto-fixes every validator that supports it."
             )
         ),
     ] = False
@@ -41,7 +47,7 @@ class DdevValidateTool(CmdTool[DdevValidateInput]):
     """Validates an integration's spec, config example, config models, or metadata.csv.
     Set `sync=true` to regenerate the derived files from spec.yaml."""
 
-    timeout = 120
+    timeout = 660
 
     @property
     def name(self) -> str:
@@ -50,6 +56,6 @@ class DdevValidateTool(CmdTool[DdevValidateInput]):
     def cmd(self, tool_input: DdevValidateInput) -> list[str]:
         cmd = ["ddev", "--no-interactive", "validate", tool_input.subcommand]
         if tool_input.sync:
-            cmd.append("--sync")
+            cmd.append("--fix" if tool_input.subcommand == "all" else "--sync")
         cmd.append(tool_input.integration)
         return cmd
