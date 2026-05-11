@@ -6,6 +6,7 @@ from copy import deepcopy
 
 import clickhouse_connect
 import pytest
+
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.clickhouse import ClickhouseCheck
 

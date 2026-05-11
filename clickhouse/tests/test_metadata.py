@@ -7,6 +7,7 @@ import threading
 from unittest import mock
 
 import pytest
+
 from datadog_checks.clickhouse import ClickhouseCheck
 from datadog_checks.clickhouse.metadata import ClickhouseMetadata
 from datadog_checks.clickhouse.schemas import (
