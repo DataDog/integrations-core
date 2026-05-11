@@ -10,12 +10,48 @@ import mock
 import pytest
 import requests
 
+from datadog_checks.dev import docker_run
+from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 from datadog_checks.dev.fs import get_here
+
+USE_POWERFLEX_LAB = os.environ.get('USE_POWERFLEX_LAB')
+POWERFLEX_GATEWAY_URL = os.environ.get('POWERFLEX_GATEWAY_URL')
+POWERFLEX_USERNAME = os.environ.get('POWERFLEX_USERNAME')
+POWERFLEX_PASSWORD = os.environ.get('POWERFLEX_PASSWORD')
+
+COMPOSE_FILE = os.path.join(get_here(), 'docker', 'docker-compose.yaml')
+
+CADDY_INSTANCE = {
+    'powerflex_gateway_url': 'http://localhost:8080',
+    'powerflex_username': 'admin',
+    'powerflex_password': 'password',
+    'collect_events': True,
+    'collect_alerts': True,
+    'resource_filters': [
+        {'resource': 'device', 'property': 'name', 'patterns': ['.*'], 'collect_statistics': True},
+    ],
+}
+
+LAB_INSTANCE = {
+    'powerflex_gateway_url': POWERFLEX_GATEWAY_URL,
+    'powerflex_username': POWERFLEX_USERNAME,
+    'powerflex_password': POWERFLEX_PASSWORD,
+    'collect_events': True,
+    'collect_alerts': True,
+}
 
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    yield
+    if USE_POWERFLEX_LAB:
+        yield LAB_INSTANCE
+    else:
+        conditions = [
+            CheckDockerLogs(identifier='powerflex-api', patterns=['server running']),
+            CheckEndpoints('http://localhost:8080/api/version'),
+        ]
+        with docker_run(COMPOSE_FILE, conditions=conditions):
+            yield CADDY_INSTANCE
 
 
 @pytest.fixture

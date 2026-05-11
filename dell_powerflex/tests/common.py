@@ -313,3 +313,36 @@ RESOURCE_STATS_METRIC = {
     'sdc': ('dell_powerflex.num_of_mapped_volumes', ['dell_type:sdc']),
     'device': ('dell_powerflex.capacity.in_use_in_kb', ['dell_type:device']),
 }
+
+BWC_SUFFIXES = ['num_seconds', 'total_weight_in_kb', 'num_occured']
+
+_SIMPLE_METRIC_LISTS = [
+    SYSTEM_MDM_CLUSTER_METRICS,
+    SYSTEM_STATS_SIMPLE_METRICS,
+    VOLUME_STATS_SIMPLE_METRICS,
+    STORAGE_POOL_STATS_SIMPLE_METRICS,
+    PROTECTION_DOMAIN_STATS_SIMPLE_METRICS,
+    SDS_STATS_SIMPLE_METRICS,
+    SDC_STATS_SIMPLE_METRICS,
+    DEVICE_STATS_SIMPLE_METRICS,
+]
+
+_BWC_METRIC_LISTS = [
+    SYSTEM_STATS_BWC_METRICS,
+    VOLUME_STATS_BWC_METRICS,
+    STORAGE_POOL_STATS_BWC_METRICS,
+    PROTECTION_DOMAIN_STATS_BWC_METRICS,
+    SDS_STATS_BWC_METRICS,
+    SDC_STATS_BWC_METRICS,
+    DEVICE_STATS_BWC_METRICS,
+]
+
+ALL_METRICS = {'dell_powerflex.api.can_connect', 'dell_powerflex.volume.sdc_mapping'}
+for _metrics in _SIMPLE_METRIC_LISTS:
+    for _m in _metrics:
+        ALL_METRICS.add(_m['name'])
+for _bwc_list in _BWC_METRIC_LISTS:
+    for _prefix in _bwc_list:
+        for _suffix in BWC_SUFFIXES:
+            ALL_METRICS.add(f'{_prefix}.{_suffix}')
+ALL_METRICS = sorted(ALL_METRICS)
