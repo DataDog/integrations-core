@@ -64,6 +64,23 @@ def test_can_connect_up(dd_run_check, aggregator, instance, mock_auth, mocker):
     )
 
 
+def test_unauthenticated_mode(dd_run_check, aggregator, monkeypatch, mock_http_call, mocker):
+    instance = {'powerflex_gateway_url': 'https://localhost:443'}
+    mock_get = mocker.patch(
+        'requests.Session.get',
+        side_effect=lambda url, *args, **kwargs: MagicMock(
+            json=MagicMock(return_value=mock_http_call(url)), status_code=200
+        ),
+    )
+    mock_post = mocker.patch('requests.Session.post')
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+
+    mock_post.assert_not_called()
+    aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
+    aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', at_least=1)
+
+
 def test_collect_system(dd_run_check, aggregator, instance, mock_http_get):
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
