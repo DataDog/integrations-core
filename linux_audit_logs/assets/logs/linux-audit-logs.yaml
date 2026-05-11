@@ -3210,7 +3210,8 @@ pipeline:
             className: Network Activity
             classUid: 4001
             extensions: []
-            profiles: []
+            profiles:
+              - host
           mappers:
             - name: ocsf.activity_id
               categories:
@@ -3319,5 +3320,86 @@ pipeline:
               target: ocsf.metadata.original_time
               targetFormat: string
               preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `exe` to `ocsf.actor.process.path`
+              sources:
+                - exe
+              sourceType: attribute
+              target: ocsf.actor.process.path
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `comm` to `ocsf.actor.process.name`
+              sources:
+                - comm
+              sourceType: attribute
+              target: ocsf.actor.process.name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `pid` to `ocsf.actor.process.pid`
+              sources:
+                - pid
+              sourceType: attribute
+              target: ocsf.actor.process.pid
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `uid` to `ocsf.actor.process.user.uid`
+              sources:
+                - uid
+              sourceType: attribute
+              target: ocsf.actor.process.user.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `UID` to `ocsf.actor.process.user.name`
+              sources:
+                - UID
+              sourceType: attribute
+              target: ocsf.actor.process.user.name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `auid` to `ocsf.actor.user.uid`
+              sources:
+                - auid
+              sourceType: attribute
+              target: ocsf.actor.user.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `AUID` to `ocsf.actor.user.name`
+              sources:
+                - AUID
+              sourceType: attribute
+              target: ocsf.actor.user.name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ses` to `ocsf.actor.session.uid`
+              sources:
+                - ses
+              sourceType: attribute
+              target: ocsf.actor.session.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `tty` to `ocsf.actor.session.terminal`
+              sources:
+                - tty
+              sourceType: attribute
+              target: ocsf.actor.session.terminal
+              targetFormat: string
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper

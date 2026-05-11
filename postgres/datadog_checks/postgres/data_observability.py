@@ -38,6 +38,9 @@ class PostgresDataObservability(DBMAsyncJob):
             job_name="data-observability",
         )
 
+    def _shutdown(self):
+        self._check = None
+
     @property
     def _do_config(self):
         return self._config.data_observability

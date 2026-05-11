@@ -49,6 +49,10 @@ def test_vm_capacity_metrics(dd_run_check, aggregator, mock_instance, mock_http_
     aggregator.assert_metric("nutanix.vm.memory.allocated_bytes", value=8589934592, tags=UBUNTU_VM_TAGS)
     aggregator.assert_metric("nutanix.vm.memory.allocated_bytes", value=8589934592, tags=RANDOM_VM_TAGS)
 
+    aggregator.assert_metric("nutanix.vm.disk_capacity_bytes", value=1118240243712, tags=PCVM_TAGS)
+    aggregator.assert_metric("nutanix.vm.disk_capacity_bytes", value=21474836480, tags=UBUNTU_VM_TAGS)
+    aggregator.assert_metric("nutanix.vm.disk_capacity_bytes", value=21474836480, tags=RANDOM_VM_TAGS)
+
 
 def test_host_capacity_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
     check = NutanixCheck('nutanix', {}, [mock_instance])
