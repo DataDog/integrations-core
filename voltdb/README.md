@@ -32,6 +32,8 @@ No additional installation is needed on your server.
 
     **Note**: If you previously configured the integration with `url: http://host:8080`, the check still accepts that option for backwards compatibility - the host is parsed from the URL and the default native client port (`21212`) is used. A deprecation warning is logged; switch to `host` and `port` at your convenience.
 
+    **Note on `password_hashed`**: The legacy HTTP integration accepted a pre-hashed password via `password_hashed: true`. The native client library always hashes the cleartext password client-side, so this option is no longer supported. Use the [Datadog Agent secrets backend][13] (`ENC[<secret_name>]`) to keep the cleartext password out of the configuration file on disk.
+
     ```yaml
     init_config:
 
@@ -140,3 +142,4 @@ Need help? Contact [Datadog support][11].
 [10]: https://github.com/DataDog/integrations-core/blob/master/voltdb/assets/service_checks.json
 [11]: https://docs.datadoghq.com/help/
 [12]: https://pypi.org/project/voltdbclient/
+[13]: https://docs.datadoghq.com/agent/configuration/secrets-management/
