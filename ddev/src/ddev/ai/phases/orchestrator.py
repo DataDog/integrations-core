@@ -82,9 +82,10 @@ class PhaseOrchestrator(EventBusOrchestrator):
                 self._logger.warning("Phase %r is defined but not referenced in flow — it will not run", phase_id)
                 continue
             try:
-                self._phase_registry.get(phase_config.type)
+                phase_cls = self._phase_registry.get(phase_config.type)
             except ValueError as e:
                 raise FlowConfigError(str(e)) from e
+            phase_cls.validate_config(phase_id, phase_config, config.agents)
 
         checkpoint_manager = CheckpointManager(self._checkpoint_path)
 

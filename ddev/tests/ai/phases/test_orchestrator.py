@@ -8,6 +8,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from ddev.ai.phases.agent_phase import AgentPhase
 from ddev.ai.phases.base import Phase, PhaseRegistry
 from ddev.ai.phases.config import FlowConfigError
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
@@ -24,6 +25,8 @@ def test_discover_registers_phase_itself():
     _discover_and_register_phases(registry)
     assert "Phase" in registry.known_names()
     assert registry.get("Phase") is Phase
+    assert "AgentPhase" in registry.known_names()
+    assert registry.get("AgentPhase") is AgentPhase
 
 
 def test_discover_registers_custom_subclass(tmp_path, monkeypatch):
@@ -182,13 +185,11 @@ def minimal_flow(tmp_path):
             tools: []
         phases:
           a:
-            type: Phase
             agent: writer
             tasks:
               - name: task_a
                 prompt: task a
           b:
-            type: Phase
             agent: writer
             tasks:
               - name: task_b
@@ -288,7 +289,6 @@ async def test_on_initialize_missing_agent_raises(tmp_path, file_access_policy):
             tools: []
         phases:
           a:
-            type: Phase
             agent: nonexistent_agent
             tasks:
               - name: task_a
@@ -338,7 +338,6 @@ async def test_orphan_phase_with_unknown_type_does_not_block_init(tmp_path, file
             tools: []
         phases:
           real:
-            type: Phase
             agent: writer
             tasks:
               - name: t1
@@ -410,13 +409,11 @@ async def test_orphan_phase_logs_warning(tmp_path, file_access_policy, caplog):
             tools: []
         phases:
           real:
-            type: Phase
             agent: writer
             tasks:
               - name: t1
                 prompt: do it
           orphan:
-            type: Phase
             agent: writer
             tasks:
               - name: t2
@@ -436,6 +433,71 @@ async def test_orphan_phase_logs_warning(tmp_path, file_access_policy, caplog):
         await orchestrator.on_initialize()
 
     assert any("orphan" in record.message for record in caplog.records)
+
+
+# ---------------------------------------------------------------------------
+# PhaseOrchestrator.on_initialize — validate_config invocation
+# ---------------------------------------------------------------------------
+
+
+async def test_on_initialize_invokes_validate_config(tmp_path, file_access_policy):
+    """validate_config is called for each scheduled phase; raising propagates as FlowConfigError."""
+    (tmp_path / "prompts").mkdir()
+    (tmp_path / "prompts" / "writer.md").write_text("system prompt")
+    (tmp_path / "flow.yaml").write_text(
+        dedent("""\
+        agents:
+          writer:
+            tools: []
+        phases:
+          a:
+            agent: writer
+            tasks: []
+        flow:
+          - phase: a
+        """)
+    )
+    orchestrator = PhaseOrchestrator(
+        flow_yaml_path=tmp_path / "flow.yaml",
+        checkpoint_path=tmp_path / "checkpoints.yaml",
+        runtime_variables={},
+        anthropic_client=MagicMock(),
+        file_access_policy=file_access_policy,
+    )
+    with pytest.raises(FlowConfigError, match="at least one task"):
+        await orchestrator.on_initialize()
+
+
+async def test_on_initialize_skips_validate_config_for_orphan(tmp_path, file_access_policy):
+    """A phase defined but not in flow must not trigger its validate_config."""
+    (tmp_path / "prompts").mkdir()
+    (tmp_path / "prompts" / "writer.md").write_text("system prompt")
+    (tmp_path / "flow.yaml").write_text(
+        dedent("""\
+        agents:
+          writer:
+            tools: []
+        phases:
+          real:
+            agent: writer
+            tasks:
+              - name: t1
+                prompt: do it
+          orphan:
+            agent: writer
+            tasks: []
+        flow:
+          - phase: real
+        """)
+    )
+    orchestrator = PhaseOrchestrator(
+        flow_yaml_path=tmp_path / "flow.yaml",
+        checkpoint_path=tmp_path / "checkpoints.yaml",
+        runtime_variables={},
+        anthropic_client=MagicMock(),
+        file_access_policy=file_access_policy,
+    )
+    await orchestrator.on_initialize()  # must not raise
 
 
 # ---------------------------------------------------------------------------
