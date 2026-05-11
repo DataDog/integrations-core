@@ -271,5 +271,5 @@ class MongoApi(object):
                 self.__hostname += ':27017'
             return self.__hostname
         except Exception as e:
-            self._log.error('Unable to get hostname: %s', e)
-            return None
+            self._log.error('Unable to get hostname from serverStatus, falling back to configured host: %s', e)
+            return self._config.hosts[0] if self._config.hosts else None
