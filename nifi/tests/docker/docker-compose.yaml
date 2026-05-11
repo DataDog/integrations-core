@@ -7,7 +7,7 @@ services:
       SINGLE_USER_CREDENTIALS_USERNAME: admin
       SINGLE_USER_CREDENTIALS_PASSWORD: ctsBtRBKHRAx69EqUghvvgEvjnaLjFEB
     healthcheck:
-      test: ["CMD-SHELL", "curl -sk -o /dev/null -w '%{http_code}' https://localhost:8443/nifi-api/flow/about | grep -qv 000"]
+      test: ["CMD-SHELL", "curl -sk -o /dev/null -w '%{http_code}' https://$$(hostname):8443/nifi-api/flow/about | grep -qv 000"]
       interval: 10s
       timeout: 5s
       retries: 30

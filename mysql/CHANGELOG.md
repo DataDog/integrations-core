@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 15.16.1 / 2026-04-28
+
+***Fixed***:
+
+* Bump cryptography from 46.0.6 to 46.0.7 to address CVE-2026-39892. ([#23403](https://github.com/DataDog/integrations-core/pull/23403))
+
 ## 15.16.0 / 2026-04-15
 
 ***Added***:

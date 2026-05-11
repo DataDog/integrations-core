@@ -16,7 +16,7 @@
             "id": 6107883287952970,
             "definition": {
               "type": "image",
-              "url": "/api/v2/images/32d08fa3-bbc7-4285-ad3f-72cc275a4eb9",
+              "url": "/static/images/logos/versa_large.svg",
               "sizing": "contain",
               "has_background": true,
               "has_border": true,

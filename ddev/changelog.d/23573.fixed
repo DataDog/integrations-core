@@ -1,0 +1,1 @@
+Include .yaml workflow files in update-python-config so all workflow Python pins are updated.

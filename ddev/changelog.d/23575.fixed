@@ -1,0 +1,1 @@
+Fix type annotation of on_error in the EventBusOrchestrator by narrowing it down to OrchestratorHookError. This better represents the actual error passed to the method.
