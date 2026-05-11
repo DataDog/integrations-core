@@ -58,6 +58,7 @@ jobs:
     name: Release
     needs: context
     uses: ./.github/workflows/release-dispatch.yml
+    environment: release
     with:
       source-repo: integrations-core
       packages: ${{ inputs.packages || '' }}
