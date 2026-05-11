@@ -584,6 +584,39 @@ def test_unfiltered_resources_not_affected(dd_run_check, aggregator, instance, m
     aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', tags=pool_tags)
 
 
+def test_multiple_filters_same_resource_type(dd_run_check, aggregator, instance, mock_http_get):
+    instance['resource_filters'] = [
+        {'resource': 'sds', 'property': 'name', 'include': ['^SDS[12]$']},
+        {'resource': 'sds', 'property': 'id', 'exclude': ['^d1c062b800000001$']},
+    ]
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+
+    base_tags = ['powerflex_gateway_url:https://localhost:443']
+    sds1_tags = base_tags + [
+        'sds_id:d1c062b900000002',
+        'sds_name:SDS1',
+        'protection_domain_id:68c139ee00000000',
+        'dell_type:sds',
+    ]
+    sds2_tags = base_tags + [
+        'sds_id:d1c062b800000001',
+        'sds_name:SDS2',
+        'protection_domain_id:68c139ee00000000',
+        'dell_type:sds',
+    ]
+    sds3_tags = base_tags + [
+        'sds_id:d1c062b700000000',
+        'sds_name:SDS3',
+        'protection_domain_id:68c139ee00000000',
+        'fault_set_id:faultset00000001',
+        'dell_type:sds',
+    ]
+    aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', count=1, tags=sds1_tags)
+    aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', count=0, tags=sds2_tags)
+    aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', count=0, tags=sds3_tags)
+
+
 @pytest.mark.parametrize(
     'resource_filters, log_message',
     [
@@ -601,14 +634,6 @@ def test_unfiltered_resources_not_affected(dd_run_check, aggregator, instance, m
             [{'resource': 'sds', 'property': 'name'}],
             'No valid include or exclude patterns',
             id='no_valid_patterns',
-        ),
-        pytest.param(
-            [
-                {'resource': 'sds', 'property': 'name', 'include': ['^SDS1$']},
-                {'resource': 'sds', 'property': 'name', 'include': ['^SDS2$']},
-            ],
-            'Duplicate resource_filters entry for sds',
-            id='duplicate_resource_filter',
         ),
         pytest.param(
             [{'resource': 'sds', 'property': 'name', 'include': ['[invalid']}],

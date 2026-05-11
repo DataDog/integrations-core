@@ -47,7 +47,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         super().__init__(name, init_config, instances)
         self._base_tags: list[str] = []
         self._api: PowerFlexAPI
-        self._resource_filters: dict = {}
+        self._resource_filters: list = []
         self.check_initializations.append(self._parse_config)
 
     def _parse_config(self) -> None:

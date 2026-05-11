@@ -2,13 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-SEVERITY_TO_ALERT_TYPE = {
-    'CRITICAL': 'error',
-    'MAJOR': 'error',
-    'MINOR': 'warning',
-    'INFORMATION': 'info',
-}
-
 SYSTEM_RESOURCE_TYPE = 'system'
 
 SYSTEM_MDM_CLUSTER_SIMPLE_METRICS = [
@@ -230,3 +223,10 @@ PROTECTION_DOMAIN_STATS_BWC_METRICS = (
         ('volMigrationWriteBwc', 'vol_migration_write_bwc'),
     ]
 )
+
+SEVERITY_TO_ALERT_TYPE = {
+    'CRITICAL': 'error',
+    'MAJOR': 'error',
+    'MINOR': 'warning',
+    'INFORMATION': 'info',
+}

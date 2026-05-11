@@ -30,7 +30,7 @@ FILTERABLE_RESOURCE_TYPES = frozenset(
 @dataclass(frozen=True)
 class ResourceFilter:
     resource: str
-    property: str
+    property_name: str
     include: tuple[re.Pattern[str], ...] = ()
     exclude: tuple[re.Pattern[str], ...] = ()
     collect_statistics: bool = True
@@ -39,12 +39,12 @@ class ResourceFilter:
 def parse_resource_filters(
     raw_filters: Sequence[Mapping[str, Any]] | None,
     logger: Any,
-) -> dict[str, ResourceFilter]:
-    """Parse raw filter configs into a dict keyed by resource type."""
+) -> list[ResourceFilter]:
+    """Parse raw filter configs into a list of validated filters."""
     if not raw_filters:
-        return {}
+        return []
 
-    result: dict[str, ResourceFilter] = {}
+    result: list[ResourceFilter] = []
     for f in raw_filters:
         resource = f.get('resource', '')
         if not isinstance(resource, str) or resource not in FILTERABLE_RESOURCE_TYPES:
@@ -64,15 +64,14 @@ def parse_resource_filters(
             logger.warning('No valid include or exclude patterns in resource_filters for %s', resource)
             continue
 
-        if resource in result:
-            logger.warning('Duplicate resource_filters entry for %s, using the last one', resource)
-
-        result[resource] = ResourceFilter(
-            resource=resource,
-            property=prop,
-            include=tuple(include),
-            exclude=tuple(exclude),
-            collect_statistics=collect_statistics,
+        result.append(
+            ResourceFilter(
+                resource=resource,
+                property_name=prop,
+                include=tuple(include),
+                exclude=tuple(exclude),
+                collect_statistics=collect_statistics,
+            )
         )
 
     return result
@@ -81,29 +80,30 @@ def parse_resource_filters(
 def should_collect_resource(
     resource_type: str,
     entity: dict[str, Any],
-    filters: dict[str, ResourceFilter],
+    filters: list[ResourceFilter],
     logger: Any,
 ) -> bool:
-    """Return True if the entity passes the filter for its resource type."""
-    rf = filters.get(resource_type)
-    if rf is None:
+    """Return True if the entity passes all filters for its resource type."""
+    relevant = [rf for rf in filters if rf.resource == resource_type]
+    if not relevant:
         return True
 
-    value = entity.get(rf.property)
-    if value is None:
-        logger.debug('Skipping %s: property %s not found', resource_type, rf.property)
-        return False
-
-    value_str = str(value)
-
-    for pattern in rf.exclude:
-        if pattern.search(value_str):
-            logger.debug('Skipping %s %s: matched exclude pattern %s', resource_type, value_str, pattern.pattern)
+    for rf in relevant:
+        value = entity.get(rf.property_name)
+        if value is None:
+            logger.debug('Skipping %s: property %s not found', resource_type, rf.property_name)
             return False
 
-    if rf.include and not any(pattern.search(value_str) for pattern in rf.include):
-        logger.debug('Skipping %s %s: did not match any include pattern', resource_type, value_str)
-        return False
+        value_str = str(value)
+
+        for pattern in rf.exclude:
+            if pattern.search(value_str):
+                logger.debug('Skipping %s %s: matched exclude pattern %s', resource_type, value_str, pattern.pattern)
+                return False
+
+        if rf.include and not any(pattern.search(value_str) for pattern in rf.include):
+            logger.debug('Skipping %s %s: did not match any include pattern', resource_type, value_str)
+            return False
 
     return True
 
@@ -113,13 +113,13 @@ STATISTICS_DISABLED_BY_DEFAULT = frozenset({DEVICE_RESOURCE_TYPE})
 
 def should_collect_statistics(
     resource_type: str,
-    filters: dict[str, ResourceFilter],
+    filters: list[ResourceFilter],
 ) -> bool:
     """Return True if statistics should be collected for this resource type."""
-    rf = filters.get(resource_type)
-    if rf is None:
+    relevant = [rf for rf in filters if rf.resource == resource_type]
+    if not relevant:
         return resource_type not in STATISTICS_DISABLED_BY_DEFAULT
-    return rf.collect_statistics
+    return all(rf.collect_statistics for rf in relevant)
 
 
 def _compile_patterns(
