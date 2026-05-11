@@ -12,7 +12,7 @@ import anthropic
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.base import Phase, PhaseRegistry
 from ddev.ai.phases.checkpoint import CheckpointManager
-from ddev.ai.phases.config import FlowConfig, FlowConfigError
+from ddev.ai.phases.config import AgentConfig, FlowConfig, FlowConfigError
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
@@ -93,7 +93,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         for entry in config.flow:
             phase_id = entry.phase
             phase_config = config.phases[phase_id]
-            agent_config = config.agents[phase_config.agent]
+            agent_config = config.agents[phase_config.agent] if phase_config.agent is not None else AgentConfig()
             dependencies = dependency_map[phase_id]
 
             phase_cls = self._phase_registry.get(phase_config.type)

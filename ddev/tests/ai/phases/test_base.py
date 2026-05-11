@@ -37,7 +37,7 @@ def _make_stub_phase(
     phase = _StubPhase(
         phase_id=phase_id,
         dependencies=dependencies or [],
-        config=PhaseConfig.model_construct(agent=None, tasks=[]),
+        config=PhaseConfig(),
         agent_config=AgentConfig(),
         anthropic_client=MagicMock(),
         checkpoint_manager=checkpoint_manager,

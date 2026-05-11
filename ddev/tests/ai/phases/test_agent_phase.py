@@ -130,7 +130,7 @@ def test_render_memory_prompt_raises_when_both_unset():
 
 
 def test_agent_phase_validate_config_rejects_missing_agent():
-    config = PhaseConfig.model_construct(agent=None, tasks=[TaskConfig(name="t1", prompt="x")])
+    config = PhaseConfig(tasks=[TaskConfig(name="t1", prompt="x")])
     with pytest.raises(FlowConfigError, match="requires 'agent'"):
         AgentPhase.validate_config("p1", config, {})
 
@@ -142,7 +142,7 @@ def test_agent_phase_validate_config_rejects_unknown_agent():
 
 
 def test_agent_phase_validate_config_rejects_empty_tasks():
-    config = PhaseConfig.model_construct(agent="writer", tasks=[])
+    config = PhaseConfig(agent="writer")
     with pytest.raises(FlowConfigError, match="at least one task"):
         AgentPhase.validate_config("p1", config, {"writer": AgentConfig()})
 
