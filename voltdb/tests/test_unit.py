@@ -236,6 +236,168 @@ def test_client_raises_when_no_endpoint_is_reachable(monkeypatch):
     assert client.active_endpoint is None
 
 
+def test_client_requires_at_least_one_endpoint():
+    from datadog_checks.voltdb.client import Client
+
+    with pytest.raises(ValueError, match='at least one'):
+        Client(endpoints=[])
+
+
+def test_client_call_procedure_returns_response(monkeypatch):
+    """Happy path: the client opens a connection, hands it to VoltProcedure,
+    and returns the response object."""
+    import mock
+    import voltdbclient
+
+    from datadog_checks.voltdb.client import Client
+
+    fake_fser = mock.MagicMock()
+    monkeypatch.setattr(Client, '_open', lambda self, host, port: fake_fser)
+
+    fake_response = mock.MagicMock()
+    fake_proc = mock.MagicMock()
+    fake_proc.call.return_value = fake_response
+    monkeypatch.setattr(voltdbclient, 'VoltProcedure', lambda fser, name, types: fake_proc)
+
+    client = Client(endpoints=[('h.example', 21212)])
+    resp = client.call_procedure('@Statistics', ['CPU', 0])
+    assert resp is fake_response
+    fake_proc.call.assert_called_once_with(['CPU', 0])
+
+
+def test_client_call_procedure_retries_once_on_stale_connection(monkeypatch):
+    """If a procedure call fails on an existing connection, the client closes,
+    reconnects, and retries once. Verifies the second-attempt path."""
+    import mock
+    import voltdbclient
+
+    from datadog_checks.voltdb.client import Client
+
+    opens = []
+
+    def fake_open(self, host, port):
+        f = mock.MagicMock(name='fser-{}'.format(len(opens)))
+        opens.append(f)
+        return f
+
+    monkeypatch.setattr(Client, '_open', fake_open)
+
+    good_response = mock.MagicMock(name='good')
+    call_count = {'n': 0}
+
+    def fake_proc(fser, name, types):
+        proc = mock.MagicMock()
+
+        def call(params, timeout=None):
+            call_count['n'] += 1
+            if call_count['n'] == 1:
+                # Pretend the first call (on the cached connection) fails mid-flight.
+                raise BrokenPipeError('mid-flight failure')
+            return good_response
+
+        proc.call.side_effect = call
+        return proc
+
+    monkeypatch.setattr(voltdbclient, 'VoltProcedure', fake_proc)
+
+    client = Client(endpoints=[('h.example', 21212)])
+    # Prime the cached connection so the next call_procedure goes through the
+    # 'had_connection = True' branch.
+    client._get_connection()
+    resp = client.call_procedure('@Ping')
+    assert resp is good_response
+    assert call_count['n'] == 2  # initial failure + retry success
+
+
+def test_client_raise_for_status():
+    from datadog_checks.voltdb.client import Client, VoltDBError
+
+    client = Client(endpoints=[('h.example', 21212)])
+    # Success path: should not raise.
+    ok_resp = type('R', (), {'status': Client.SUCCESS, 'statusString': None})()
+    client.raise_for_status(ok_resp)
+    # Failure path: VoltDBError carries the status code and string.
+    bad_resp = type('R', (), {'status': -2, 'statusString': 'connection lost'})()
+    with pytest.raises(VoltDBError, match='connection lost') as exc:
+        client.raise_for_status(bad_resp)
+    assert exc.value.status == -2
+    assert exc.value.status_string == 'connection lost'
+
+
+def test_client_close_is_idempotent(monkeypatch):
+    """close() can run safely whether or not a connection has been opened, and
+    swallows exceptions from FastSerializer.close()."""
+    import mock
+
+    from datadog_checks.voltdb.client import Client
+
+    client = Client(endpoints=[('h.example', 21212)])
+    client.close()  # no-op when nothing is open
+    assert client.active_endpoint is None
+
+    bad_fser = mock.MagicMock()
+    bad_fser.close.side_effect = OSError('underlying socket already dead')
+    monkeypatch.setattr(Client, '_open', lambda self, host, port: bad_fser)
+    client._get_connection()
+    assert client.active_endpoint == ('h.example', 21212)
+    client.close()  # must not propagate the OSError
+    assert client.active_endpoint is None
+
+
+def test_infer_volt_type_distinguishes_bool_int_float_string():
+    from voltdbclient import FastSerializer
+
+    from datadog_checks.voltdb.client import _infer_volt_type
+
+    # bool must come before int (bool is a subclass of int in Python).
+    assert _infer_volt_type(True) == FastSerializer.VOLTTYPE_TINYINT
+    assert _infer_volt_type(42) == FastSerializer.VOLTTYPE_INTEGER
+    assert _infer_volt_type(3.14) == FastSerializer.VOLTTYPE_FLOAT
+    assert _infer_volt_type('CPU') == FastSerializer.VOLTTYPE_STRING
+
+
+def test_http_client_serializes_list_params_as_json():
+    """`HttpClient.call_procedure` accepts both pre-serialized parameter strings
+    and Python lists; lists must be JSON-encoded the way VoltDB's HTTP/JSON
+    interface expects."""
+    import json
+
+    import mock
+
+    from datadog_checks.voltdb.http_client import HttpClient
+
+    calls = []
+
+    def fake_get(url, auth=None, params=None, **_):
+        calls.append(params)
+        resp = mock.MagicMock()
+        resp.raise_for_status = lambda: None
+        resp.json = lambda: {'status': 1, 'results': []}
+        return resp
+
+    client = HttpClient(url='http://vmc.example:8080', http_get=fake_get, username='u', password='p')
+    client.call_procedure('@Statistics', ['CPU', 0])
+    client.call_procedure('@Statistics', '[CPU, 0]')  # passthrough string
+    client.call_procedure('@Ping')  # no parameters
+
+    assert calls[0] == {'Procedure': '@Statistics', 'Parameters': json.dumps(['CPU', 0])}
+    assert calls[1] == {'Procedure': '@Statistics', 'Parameters': '[CPU, 0]'}
+    assert calls[2] == {'Procedure': '@Ping'}
+
+
+def test_http_client_raise_for_status():
+    from datadog_checks.voltdb.client import VoltDBError
+    from datadog_checks.voltdb.http_client import HttpClient, HttpResponse
+
+    client = HttpClient(url='http://vmc.example:8080', http_get=lambda *a, **k: None, username='u', password='p')
+    ok = HttpResponse({'status': 1, 'results': []})
+    client.raise_for_status(ok)
+
+    bad = HttpResponse({'status': 0, 'statusstring': 'unauthorized', 'results': []})
+    with pytest.raises(VoltDBError, match='unauthorized'):
+        client.raise_for_status(bad)
+
+
 def test_url_takes_precedence_over_host():
     """When both `url` and `host` are set, the HTTP transport is chosen — the
     URL points at the VMC endpoint and `host` is ignored."""
