@@ -172,8 +172,9 @@ class ClickhouseSchemaCollector(SchemaCollector):
                 'db_filters': db_filters,
                 'table_filters': table_filters,
             }
-            rows = self._execute_query(_TABLES_COLUMNS_QUERY.format(**fmt))
-            yield iter(rows)
+            self._check_cancelled()
+            with self._db_client.query_rows_stream(_TABLES_COLUMNS_QUERY.format(**fmt)) as stream:
+                yield stream
         finally:
             self._refreshable_views = set()
             self.close()

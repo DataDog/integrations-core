@@ -125,7 +125,7 @@ def _patch_query(collector, table_rows=None, refresh_rows=None):
     """Mocks the DBM client for the two cluster-wide queries.
 
     - view_refreshes goes through client.query() → result_rows
-    - combined tables+columns CTE goes through client.query() → result_rows
+    - combined tables+columns CTE goes through client.query_rows_stream()
     """
     table_rows = table_rows or []
     refresh_rows = refresh_rows or []
@@ -133,10 +133,15 @@ def _patch_query(collector, table_rows=None, refresh_rows=None):
     def fake_client_query(query, *args, **kwargs):
         if 'view_refreshes' in query:
             return _make_query_result(refresh_rows)
-        return _make_query_result(table_rows)
+        return _make_query_result([])
+
+    @contextlib.contextmanager
+    def fake_stream(query, *args, **kwargs):
+        yield iter(table_rows)
 
     mock_client = mock.MagicMock()
     mock_client.query.side_effect = fake_client_query
+    mock_client.query_rows_stream.side_effect = fake_stream
 
     with mock.patch.object(collector._check, 'create_dbm_client', return_value=mock_client):
         yield mock_client
@@ -165,8 +170,14 @@ def _capture_all_queries(collector):
         seen.append(query)
         return _make_query_result([])
 
+    @contextlib.contextmanager
+    def fake_stream(query, *args, **kwargs):
+        seen.append(query)
+        yield iter([])
+
     mock_client = mock.MagicMock()
     mock_client.query.side_effect = fake_client_query
+    mock_client.query_rows_stream.side_effect = fake_stream
 
     with mock.patch.object(collector._check, 'create_dbm_client', return_value=mock_client):
         yield seen
@@ -565,10 +576,11 @@ def test_main_query_failure_closes_client(collector):
     def fake_query(query, *args, **kwargs):
         if 'view_refreshes' in query:
             return _make_query_result([])
-        raise Exception("main query failed")
+        return _make_query_result([])
 
     mock_client = mock.MagicMock()
     mock_client.query.side_effect = fake_query
+    mock_client.query_rows_stream.return_value.__enter__.side_effect = Exception("main query failed")
 
     _capture_payloads(collector._check)
     with mock.patch.object(collector._check, 'create_dbm_client', return_value=mock_client):
