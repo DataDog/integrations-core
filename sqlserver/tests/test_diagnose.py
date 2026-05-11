@@ -9,7 +9,7 @@ import pytest
 from datadog_checks.base.utils.diagnose import Diagnosis
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection_errors import SQLConnectionError
-from datadog_checks.sqlserver.diagnose import SQLServerConfigurationError, SqlserverDiagnose
+from datadog_checks.sqlserver.diagnose import SQLServerConfigurationError
 
 from .common import CHECK_NAME
 
@@ -142,15 +142,6 @@ def _replace_response(responses, matcher_key, new_result):
         (matcher, new_result) if getattr(matcher, '__qualname__', matcher) == target else (matcher, result)
         for matcher, result in responses
     ]
-
-
-def test_register_is_idempotent(instance_minimal_defaults):
-    check = SQLServer(CHECK_NAME, {}, [instance_minimal_defaults])
-    registered = list(check.diagnosis._diagnostics)
-
-    SqlserverDiagnose(check).register()
-
-    assert check.diagnosis._diagnostics == registered
 
 
 def test_standard_diagnostics_success(instance_minimal_defaults):

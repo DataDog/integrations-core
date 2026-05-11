@@ -89,6 +89,11 @@ def build_remediation(code: SQLServerConfigurationError) -> str:
     return "{} See {}.".format(metadata["remediation"], metadata["docs_url"])
 
 
+def run_diagnostics(check: Any) -> None:
+    """Entry point for ``Diagnosis.register()``; creates a short-lived worker per invocation."""
+    SqlserverDiagnose(check)._run()
+
+
 class SqlserverDiagnose:
     """Explicit pre-flight diagnostics for `datadog-agent diagnose`."""
 
@@ -98,14 +103,6 @@ class SqlserverDiagnose:
         self._major_version: int | None = None
         self._engine_edition: int | None = None
         self._is_rds: bool | None = None
-
-    def register(self) -> None:
-        """Register the diagnostic entry point with the check's Diagnosis object."""
-        diagnosis = self._check.diagnosis
-        if getattr(diagnosis, '_sqlserver_diagnostics_registered', False):
-            return
-        diagnosis._sqlserver_diagnostics_registered = True
-        diagnosis.register(self._run)
 
     def _run(self) -> None:
         """Open one probe connection and run enabled diagnostics."""
