@@ -1,0 +1,77 @@
+id: anthropic-compliance-logs
+backend_only: false
+pipeline:
+  type: pipeline
+  name: Anthropic Compliance Logs
+  enabled: true
+  filter:
+    query: source:anthropic service:anthropic.compliance
+  processors:
+    - type: date-remapper
+      name: Define `created_at` as the official date of the log
+      enabled: true
+      sources:
+        - created_at
+    - type: attribute-remapper
+      name: Map `type` to `evt.name`
+      enabled: true
+      sources:
+        - type
+      sourceType: attribute
+      target: evt.name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    - type: attribute-remapper
+      name: Map `actor.email_address` to `usr.email`
+      enabled: true
+      sources:
+        - actor.email_address
+      sourceType: attribute
+      target: usr.email
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    - type: attribute-remapper
+      name: Map `actor.user_id` to `usr.id`
+      enabled: true
+      sources:
+        - actor.user_id
+      sourceType: attribute
+      target: usr.id
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    - type: attribute-remapper
+      name: Map `actor.ip_address` to `network.client.ip`
+      enabled: true
+      sources:
+        - actor.ip_address
+      sourceType: attribute
+      target: network.client.ip
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    - type: attribute-remapper
+      name: Map `actor.user_agent` to `http.useragent`
+      enabled: true
+      sources:
+        - actor.user_agent
+      sourceType: attribute
+      target: http.useragent
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    - type: geo-ip-parser
+      name: GeoIP parser on `network.client.ip`
+      enabled: true
+      sources:
+        - network.client.ip
+      target: network.client.geoip
+    - type: user-agent-parser
+      name: User-Agent parser on `http.useragent`
+      enabled: true
+      sources:
+        - http.useragent
+      target: http.useragent_details
+      encoded: false

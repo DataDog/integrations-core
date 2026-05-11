@@ -1,0 +1,6 @@
+provides:
+  - id: compliance_logs
+    always_on: false
+    granular: true
+    data_type: logs
+    direction: inbound
