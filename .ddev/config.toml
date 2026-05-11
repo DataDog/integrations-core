@@ -44,6 +44,7 @@ prefect = "Prefect"
 n8n = "n8n"
 control_m = "Control-M"
 nifi = "Apache NiFi"
+dell_powerflex = "Dell Powerflex"
 
 [overrides.metrics-prefix]
 krakend = "krakend.api."
@@ -52,6 +53,7 @@ prefect = "prefect.server."
 n8n = "n8n."
 control_m = "control_m."
 nifi = "nifi."
+dell_powerflex = "dell_powerflex."
 
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]
@@ -200,7 +202,7 @@ ecs_fargate = "amazon_fargate"
 kube_scheduler = "kube_scheduler"
 nifi = "nifi"
 nginx_ingress_controller = "nginx-ingress-controller"
-
+dell_powerflex = "dell-powerflex"
 
 [overrides.dep.updates]
 exclude = [
@@ -252,3 +254,4 @@ prefect = ["linux", "windows", "mac_os"]
 n8n = ["linux", "windows", "mac_os"]
 control_m = ["linux", "windows", "mac_os"]
 nifi = ["linux", "windows", "mac_os"]
+dell_powerflex = ["linux", "windows", "mac_os"]

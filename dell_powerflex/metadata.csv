@@ -1,6 +1,6 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
-dell_powerflex.api.can_connect,gauge,,,,Whether or not the PowerFlex Gateway API is reachable.,0,dell_powerflex,api can connect,,
 dell_powerflex.actual_net_capacity.in_use_in_kb,gauge,,kibibyte,,Actual net capacity in use.,0,dell_powerflex,actual net capacity in use,,
+dell_powerflex.api.can_connect,gauge,,,,Whether or not the PowerFlex Gateway API is reachable.,0,dell_powerflex,api can connect,,
 dell_powerflex.avg_read_latency_in_microsec,gauge,,microsecond,,Average read latency in microseconds.,0,dell_powerflex,avg read latency,,
 dell_powerflex.avg_read_size_in_bytes,gauge,,byte,,Average read size in bytes.,0,dell_powerflex,avg read size,,
 dell_powerflex.avg_write_latency_in_microsec,gauge,,microsecond,,Average write latency in microseconds.,0,dell_powerflex,avg write latency,,
