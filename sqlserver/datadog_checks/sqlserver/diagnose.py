@@ -392,7 +392,10 @@ def _has_server_permission(cursor: Any, permission: str) -> bool:
 
 
 def _has_database_permission(cursor: Any, permission: str) -> bool:
-    row = _fetchone(cursor, "SELECT HAS_PERMS_BY_NAME(DB_NAME(), 'DATABASE', ?)", (permission,))
+    # NULL securable targets the current database. Passing DB_NAME() instead would
+    # be parsed by HAS_PERMS_BY_NAME as a multipart identifier, which returns 0
+    # for Azure SQL databases whose names contain a dot.
+    row = _fetchone(cursor, "SELECT HAS_PERMS_BY_NAME(NULL, 'DATABASE', ?)", (permission,))
     return bool(row and row[0] == 1)
 
 
