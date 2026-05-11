@@ -72,7 +72,13 @@ class KafkaActionsCheck(AgentCheck):
         if schema_registry_url:
             schema_registry = SchemaRegistryClient(self.http, schema_registry_url, self.log, self.instance)
 
-        self.deserializer = MessageDeserializer(self.log, schema_registry=schema_registry)
+        read_messages_config = self.config.read_messages or {}
+        self.deserializer = MessageDeserializer(
+            self.log,
+            schema_registry=schema_registry,
+            value_compression=read_messages_config.get('value_compression'),
+            key_compression=read_messages_config.get('key_compression'),
+        )
 
         self.action_handlers = {
             'read_messages': self._action_read_messages,
@@ -280,8 +286,6 @@ class KafkaActionsCheck(AgentCheck):
             'key_schema': config.get('key_schema'),
             'key_uses_schema_registry': config.get('key_uses_schema_registry', False),
             'key_skip_bytes': config.get('key_skip_bytes', 0),
-            'value_compression': config.get('value_compression'),
-            'key_compression': config.get('key_compression'),
         }
 
         self.log.debug(

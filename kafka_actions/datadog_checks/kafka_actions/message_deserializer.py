@@ -51,9 +51,11 @@ _bootstrap_format_handlers()
 class MessageDeserializer:
     """Deserialize Kafka messages with pluggable format + compression support."""
 
-    def __init__(self, log, schema_registry=None):
+    def __init__(self, log, schema_registry=None, value_compression=None, key_compression=None):
         self.log = log
         self.schema_registry = schema_registry
+        self.value_compression = value_compression
+        self.key_compression = key_compression
         self._schema_cache: dict[tuple[str, str], object] = {}
         self._registry_schema_cache: dict[tuple[str, int], tuple[object, str]] = {}
 
@@ -266,7 +268,7 @@ class DeserializedMessage:
                 self.config.get('key_schema'),
                 self.config.get('key_uses_schema_registry', False),
                 skip_bytes=self.config.get('key_skip_bytes', 0),
-                compression=self.config.get('key_compression'),
+                compression=self.deserializer.key_compression,
             )
             self._key_deserialized = self._parse_deserialized(deserialized)
             self._key_schema_id = schema_id
@@ -281,7 +283,7 @@ class DeserializedMessage:
                 self.config.get('value_schema'),
                 self.config.get('value_uses_schema_registry', False),
                 skip_bytes=self.config.get('value_skip_bytes', 0),
-                compression=self.config.get('value_compression'),
+                compression=self.deserializer.value_compression,
             )
             self._value_deserialized = self._parse_deserialized(deserialized)
             self._value_schema_id = schema_id
