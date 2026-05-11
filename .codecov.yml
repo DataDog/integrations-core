@@ -194,6 +194,10 @@ coverage:
         target: 75
         flags:
         - datadog_cluster_agent
+      Dell_Powerflex:
+        target: 75
+        flags:
+        - dell_powerflex
       Directory:
         target: 75
         flags:
@@ -814,10 +818,6 @@ coverage:
         target: 75
         flags:
         - ddev
-      dell_powerflex:
-        target: 75
-        flags:
-        - dell_powerflex
       etcd:
         target: 75
         flags:
@@ -1421,11 +1421,6 @@ flags:
     paths:
     - kyverno/datadog_checks/kyverno
     - kyverno/tests
-  lparstats:
-    carryforward: true
-    paths:
-    - lparstats/datadog_checks/lparstats
-    - lparstats/tests
   lighttpd:
     carryforward: true
     paths:

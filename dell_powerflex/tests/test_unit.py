@@ -66,7 +66,7 @@ def test_can_connect_up(dd_run_check, aggregator, instance, mock_auth, mocker):
 
 def test_unauthenticated_mode(dd_run_check, aggregator, monkeypatch, mock_http_call, mocker):
     instance = {'powerflex_gateway_url': 'https://localhost:443'}
-    mock_get = mocker.patch(
+    mocker.patch(
         'requests.Session.get',
         side_effect=lambda url, *args, **kwargs: MagicMock(
             json=MagicMock(return_value=mock_http_call(url)), status_code=200

@@ -997,10 +997,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jb1a9d33:
+  jc346754:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: dell_powerflex
+      job-name: Dell Powerflex
       target: dell_powerflex
       platform: linux
       runner: '["ubuntu-22.04"]'
