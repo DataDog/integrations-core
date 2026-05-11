@@ -557,9 +557,7 @@ def test_max_execution_time_set_on_client(collector):
     with _patch_query(collector) as mock_client:
         collector.collect_schemas()
 
-    mock_client.set_client_setting.assert_called_once_with(
-        'max_execution_time', collector._config.max_query_duration
-    )
+    mock_client.set_client_setting.assert_called_once_with('max_execution_time', collector._config.max_query_duration)
 
 
 def test_main_query_failure_closes_client(collector):
