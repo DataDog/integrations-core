@@ -12,6 +12,7 @@ from datadog_checks.dell_powerflex import DellPowerflexCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import (
+    DEVICE_ONLY_METRICS,
     DEVICE_STATS_BWC_METRICS,
     DEVICE_STATS_SIMPLE_METRICS,
     PROTECTION_DOMAIN_STATS_BWC_METRICS,
@@ -110,6 +111,14 @@ def test_assert_all_metrics(dd_run_check, aggregator, instance, mock_http_get):
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_symmetric_inclusion=True)
+
+
+def test_device_statistics_disabled_by_default(dd_run_check, aggregator, instance, mock_http_get):
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+
+    for metric in DEVICE_ONLY_METRICS:
+        aggregator.assert_metric(metric, count=0)
 
 
 def test_collect_volumes(dd_run_check, aggregator, instance, mock_http_get):

@@ -254,6 +254,14 @@ DEVICE_STATS_SIMPLE_METRICS = [
     {'name': 'dell_powerflex.inaccessible_capacity.in_kb', 'value': 0},
 ]
 
+DEVICE_ONLY_METRICS = [
+    'dell_powerflex.avg_read_size_in_bytes',
+    'dell_powerflex.avg_write_size_in_bytes',
+    'dell_powerflex.avg_read_latency_in_microsec',
+    'dell_powerflex.avg_write_latency_in_microsec',
+    'dell_powerflex.inaccessible_capacity.in_kb',
+]
+
 DEVICE_STATS_BWC_METRICS = [
     'dell_powerflex.primary_read_bwc',
     'dell_powerflex.primary_write_bwc',
