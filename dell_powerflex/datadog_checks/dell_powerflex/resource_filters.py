@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -27,7 +28,7 @@ class ResourceFilter:
 
 
 def parse_resource_filters(
-    raw_filters: list[dict[str, Any]] | None,
+    raw_filters: Sequence[Mapping[str, Any]] | None,
     logger: Any,
 ) -> dict[str, ResourceFilter]:
     """Parse raw filter configs into a dict keyed by resource type."""
