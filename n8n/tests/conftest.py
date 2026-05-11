@@ -40,6 +40,19 @@ def _n8n_healthy() -> None:
     requests.get(f'http://{common.HOST}:{common.MAIN_PORT}/healthz', timeout=2).raise_for_status()
 
 
+def _test_webhook_registered() -> None:
+    """WaitFor predicate: succeeds once /webhook/test responds non-404.
+
+    After ``docker compose restart n8n`` the ``/healthz`` endpoint can be served before n8n has
+    finished re-registering active workflows' webhook routes. On n8n 2.x that gap is wide enough
+    to make ``_generate_workflow_traffic`` race the registration and observe a 404. Polling the
+    webhook itself closes the race.
+    """
+    response = requests.get(f'http://{common.HOST}:{common.MAIN_PORT}{WEBHOOK_OK_PATH}', timeout=5)
+    if response.status_code == 404:
+        raise RuntimeError(f'Webhook {WEBHOOK_OK_PATH} not yet registered (status 404)')
+
+
 def _workflow_files() -> list[Path]:
     """Return every workflow JSON file that the active compose mounts into the container.
 
@@ -72,6 +85,10 @@ def _activate_imported_workflows() -> None:
         stderr=subprocess.STDOUT,
     )
     WaitFor(_n8n_healthy, attempts=45, wait=2)()
+    if not common.IS_LAB:
+        # /healthz returns 200 before webhook routes are re-registered (visible on n8n 2.x);
+        # wait for the integration-test webhook to actually serve before downstream conditions.
+        WaitFor(_test_webhook_registered, attempts=30, wait=2)()
 
 
 def _generate_workflow_traffic(iterations: int = 5) -> None:
