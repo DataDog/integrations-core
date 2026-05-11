@@ -80,7 +80,11 @@ class Config(object):
         use_ssl = instance.get('use_ssl')
         ssl_config_file = instance.get('ssl_config_file')  # type: Optional[str]
         connect_timeout = instance.get('connect_timeout', 8)  # type: float
-        procedure_timeout = instance.get('procedure_timeout')  # type: Optional[float]
+        # `procedure_timeout` of 0 (or negative) disables the timeout, matching
+        # the `voltdbclient` semantics where `None` means wait forever.
+        procedure_timeout = instance.get('procedure_timeout', 60)  # type: Optional[float]
+        if procedure_timeout is not None and procedure_timeout <= 0:
+            procedure_timeout = None
         statistics_components = instance.get('statistics_components', DEFAULT_STATISTICS_COMPONENTS)
         tags = instance.get('tags', [])  # type: List[str]
 

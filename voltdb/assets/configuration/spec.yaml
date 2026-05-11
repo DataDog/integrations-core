@@ -88,12 +88,13 @@ files:
 
           - name: procedure_timeout
             description: |
-              Timeout (in seconds) for individual stored procedure calls.
-              If unset, the call waits indefinitely for a response.
+              Timeout (in seconds) for individual stored procedure calls. Set to
+              `0` to wait indefinitely for a response.
             display_priority: 1
             value:
               type: number
               example: 60
+              default: 60
 
           - name: statistics_components
             fleet_configurable: true

@@ -69,8 +69,8 @@ instances:
     # connect_timeout: 8
 
     ## @param procedure_timeout - number - optional - default: 60
-    ## Timeout (in seconds) for individual stored procedure calls.
-    ## If unset, the call waits indefinitely for a response.
+    ## Timeout (in seconds) for individual stored procedure calls. Set to
+    ## `0` to wait indefinitely for a response.
     #
     # procedure_timeout: 60
 

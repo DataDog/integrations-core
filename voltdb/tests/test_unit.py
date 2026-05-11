@@ -85,6 +85,23 @@ def test_no_credentials():
 
 
 @pytest.mark.parametrize(
+    'instance, expected',
+    [
+        pytest.param({'host': 'localhost'}, 60, id='default'),
+        pytest.param({'host': 'localhost', 'procedure_timeout': 30}, 30, id='explicit'),
+        pytest.param({'host': 'localhost', 'procedure_timeout': 0}, None, id='zero-disables'),
+        pytest.param({'host': 'localhost', 'procedure_timeout': -1}, None, id='negative-disables'),
+    ],
+)
+def test_procedure_timeout_default(instance, expected):
+    """procedure_timeout defaults to 60s so a hung VoltDB procedure can't block
+    the check forever. Setting it to 0 (or any non-positive number) restores
+    the 'wait indefinitely' behavior."""
+    config = Config(instance)
+    assert config.procedure_timeout == expected
+
+
+@pytest.mark.parametrize(
     'url, expected_host, expected_use_ssl',
     [
         pytest.param('http://localhost:8080', 'localhost', False, id='http'),
