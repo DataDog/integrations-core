@@ -88,9 +88,9 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
                 self.log.warning('Failed to collect metrics for system %s: %s', system.get('id'), e)
 
     def _collect_system(self, system: dict) -> None:
-        tags = self._base_tags + [f"system_id:{system.get('id')}", f"dell_type:{SYSTEM_METRIC_PREFIX}"]
+        tags = self._base_tags + [f"system_id:{system.get('id', '')}", f"dell_type:{SYSTEM_METRIC_PREFIX}"]
         if system.get('name'):
-            tags = tags + [f"system_name:{system.get('name')}"]
+            tags = tags + [f"system_name:{system.get('name', '')}"]
         mdm_cluster = system.get('mdmCluster', {})
         for api_field, metric_suffix in SYSTEM_MDM_CLUSTER_SIMPLE_METRICS:
             self.gauge(metric_suffix, mdm_cluster.get(api_field), tags=tags)
@@ -98,9 +98,9 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             self.gauge(
                 metric_suffix,
                 1,
-                tags=tags + [f"{tag_key}:{mdm_cluster.get(api_field)}"],
+                tags=tags + [f"{tag_key}:{mdm_cluster.get(api_field, '')}"],
             )
-        self._collect_system_statistics(system.get('id'), tags)
+        self._collect_system_statistics(system.get('id', ''), tags)
 
     def _collect_volumes(self) -> None:
         volumes = self._api.get_volumes()
@@ -115,19 +115,19 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
 
     def _collect_volume(self, volume: dict) -> None:
         tags = self._base_tags + [
-            f"volume_id:{volume.get('id')}",
-            f"volume_name:{volume.get('name')}",
-            f"volume_type:{volume.get('volumeType')}",
-            f"storage_pool_id:{volume.get('storagePoolId')}",
+            f"volume_id:{volume.get('id', '')}",
+            f"volume_name:{volume.get('name', '')}",
+            f"volume_type:{volume.get('volumeType', '')}",
+            f"storage_pool_id:{volume.get('storagePoolId', '')}",
             f"dell_type:{VOLUME_METRIC_PREFIX}",
         ]
         if volume.get('ancestorVolumeId'):
-            tags = tags + [f"ancestor_volume_id:{volume.get('ancestorVolumeId')}"]
+            tags = tags + [f"ancestor_volume_id:{volume.get('ancestorVolumeId', '')}"]
         for sdc in volume.get('mappedSdcInfo') or []:
-            mapping_tags = tags + [f"sdc_id:{sdc.get('sdcId')}"]
+            mapping_tags = tags + [f"sdc_id:{sdc.get('sdcId', '')}"]
             self.gauge('volume.sdc_mapping', 1, tags=mapping_tags)
         if should_collect_statistics('volume', self._resource_filters):
-            self._collect_volume_statistics(volume.get('id'), tags)
+            self._collect_volume_statistics(volume.get('id', ''), tags)
 
     def _collect_storage_pools(self) -> None:
         storage_pools = self._api.get_storage_pools()
@@ -142,15 +142,15 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
 
     def _collect_storage_pool(self, pool: dict) -> None:
         tags = self._base_tags + [
-            f"storage_pool_id:{pool.get('id')}",
-            f"storage_pool_name:{pool.get('name')}",
-            f"protection_domain_id:{pool.get('protectionDomainId')}",
+            f"storage_pool_id:{pool.get('id', '')}",
+            f"storage_pool_name:{pool.get('name', '')}",
+            f"protection_domain_id:{pool.get('protectionDomainId', '')}",
             f"dell_type:{STORAGE_POOL_METRIC_PREFIX}",
         ]
         if should_collect_statistics('storage_pool', self._resource_filters):
-            self._collect_storage_pool_statistics(pool.get('id'), tags)
+            self._collect_storage_pool_statistics(pool.get('id', ''), tags)
 
-    def _collect_storage_pool_statistics(self, pool_id: str | None, tags: list[str]) -> None:
+    def _collect_storage_pool_statistics(self, pool_id: str, tags: list[str]) -> None:
         stats = self._api.get_storage_pool_statistics(pool_id)
         for api_field, metric_suffix in STORAGE_POOL_STATS_SIMPLE_METRICS:
             self.gauge(metric_suffix, stats.get(api_field), tags=tags)
@@ -169,15 +169,15 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
 
     def _collect_protection_domain(self, pd: dict) -> None:
         tags = self._base_tags + [
-            f"protection_domain_id:{pd.get('id')}",
-            f"protection_domain_name:{pd.get('name')}",
-            f"system_id:{pd.get('systemId')}",
+            f"protection_domain_id:{pd.get('id', '')}",
+            f"protection_domain_name:{pd.get('name', '')}",
+            f"system_id:{pd.get('systemId', '')}",
             f"dell_type:{PROTECTION_DOMAIN_METRIC_PREFIX}",
         ]
         if should_collect_statistics('protection_domain', self._resource_filters):
-            self._collect_protection_domain_statistics(pd.get('id'), tags)
+            self._collect_protection_domain_statistics(pd.get('id', ''), tags)
 
-    def _collect_protection_domain_statistics(self, pd_id: str | None, tags: list[str]) -> None:
+    def _collect_protection_domain_statistics(self, pd_id: str, tags: list[str]) -> None:
         stats = self._api.get_protection_domain_statistics(pd_id)
         for api_field, metric_suffix in PROTECTION_DOMAIN_STATS_SIMPLE_METRICS:
             self.gauge(metric_suffix, stats.get(api_field), tags=tags)
@@ -196,18 +196,18 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
 
     def _collect_sdc(self, sdc: dict) -> None:
         tags = self._base_tags + [
-            f"sdc_id:{sdc.get('id')}",
-            f"sdc_guid:{sdc.get('sdcGuid')}",
-            f"sdc_type:{sdc.get('sdcType')}",
-            f"sdc_ip:{sdc.get('sdcIp')}",
+            f"sdc_id:{sdc.get('id', '')}",
+            f"sdc_guid:{sdc.get('sdcGuid', '')}",
+            f"sdc_type:{sdc.get('sdcType', '')}",
+            f"sdc_ip:{sdc.get('sdcIp', '')}",
             f"dell_type:{SDC_METRIC_PREFIX}",
         ]
         if sdc.get('peerMdmId'):
-            tags = tags + [f"peer_mdm_id:{sdc.get('peerMdmId')}"]
+            tags = tags + [f"peer_mdm_id:{sdc.get('peerMdmId', '')}"]
         if should_collect_statistics('sdc', self._resource_filters):
-            self._collect_sdc_statistics(sdc.get('id'), tags)
+            self._collect_sdc_statistics(sdc.get('id', ''), tags)
 
-    def _collect_sdc_statistics(self, sdc_id: str | None, tags: list[str]) -> None:
+    def _collect_sdc_statistics(self, sdc_id: str, tags: list[str]) -> None:
         stats = self._api.get_sdc_statistics(sdc_id)
         for api_field, metric_suffix in SDC_STATS_SIMPLE_METRICS:
             self.gauge(metric_suffix, stats.get(api_field), tags=tags)
@@ -226,17 +226,17 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
 
     def _collect_sds(self, sds: dict) -> None:
         tags = self._base_tags + [
-            f"sds_id:{sds.get('id')}",
-            f"sds_name:{sds.get('name')}",
-            f"protection_domain_id:{sds.get('protectionDomainId')}",
+            f"sds_id:{sds.get('id', '')}",
+            f"sds_name:{sds.get('name', '')}",
+            f"protection_domain_id:{sds.get('protectionDomainId', '')}",
             f"dell_type:{SDS_METRIC_PREFIX}",
         ]
         if sds.get('faultSetId'):
-            tags = tags + [f"fault_set_id:{sds.get('faultSetId')}"]
+            tags = tags + [f"fault_set_id:{sds.get('faultSetId', '')}"]
         if should_collect_statistics('sds', self._resource_filters):
-            self._collect_sds_statistics(sds.get('id'), tags)
+            self._collect_sds_statistics(sds.get('id', ''), tags)
 
-    def _collect_sds_statistics(self, sds_id: str | None, tags: list[str]) -> None:
+    def _collect_sds_statistics(self, sds_id: str, tags: list[str]) -> None:
         stats = self._api.get_sds_statistics(sds_id)
         for api_field, metric_suffix in SDS_STATS_SIMPLE_METRICS:
             self.gauge(metric_suffix, stats.get(api_field), tags=tags)
@@ -255,17 +255,17 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
 
     def _collect_device(self, device: dict) -> None:
         tags = self._base_tags + [
-            f"device_id:{device.get('id')}",
-            f"device_name:{device.get('name')}",
-            f"current_path_name:{device.get('deviceCurrentPathName')}",
-            f"storage_pool_id:{device.get('storagePoolId')}",
-            f"sds_id:{device.get('sdsId')}",
+            f"device_id:{device.get('id', '')}",
+            f"device_name:{device.get('name', '')}",
+            f"current_path_name:{device.get('deviceCurrentPathName', '')}",
+            f"storage_pool_id:{device.get('storagePoolId', '')}",
+            f"sds_id:{device.get('sdsId', '')}",
             f"dell_type:{DEVICE_METRIC_PREFIX}",
         ]
         if should_collect_statistics('device', self._resource_filters):
-            self._collect_device_statistics(device.get('id'), tags)
+            self._collect_device_statistics(device.get('id', ''), tags)
 
-    def _collect_device_statistics(self, device_id: str | None, tags: list[str]) -> None:
+    def _collect_device_statistics(self, device_id: str, tags: list[str]) -> None:
         stats = self._api.get_device_statistics(device_id)
         for api_field, metric_suffix in DEVICE_STATS_SIMPLE_METRICS:
             self.gauge(metric_suffix, stats.get(api_field), tags=tags)
@@ -345,13 +345,13 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             for bwc_field, bwc_suffix in BWC_SUB_FIELDS:
                 self.gauge(f'{metric_suffix}.{bwc_suffix}', bwc.get(bwc_field), tags=tags)
 
-    def _collect_volume_statistics(self, volume_id: str | None, tags: list[str]) -> None:
+    def _collect_volume_statistics(self, volume_id: str, tags: list[str]) -> None:
         stats = self._api.get_volume_statistics(volume_id)
         for api_field, metric_suffix in VOLUME_STATS_SIMPLE_METRICS:
             self.gauge(metric_suffix, stats.get(api_field), tags=tags)
         self._collect_bwc_metrics(stats, VOLUME_STATS_BWC_METRICS, tags)
 
-    def _collect_system_statistics(self, system_id: str | None, tags: list[str]) -> None:
+    def _collect_system_statistics(self, system_id: str, tags: list[str]) -> None:
         stats = self._api.get_system_statistics(system_id)
         for api_field, metric_suffix in SYSTEM_STATS_SIMPLE_METRICS:
             self.gauge(metric_suffix, stats.get(api_field), tags=tags)
