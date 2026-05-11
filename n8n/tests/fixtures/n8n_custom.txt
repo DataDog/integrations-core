@@ -436,3 +436,42 @@ test_node_finished_total{workflow_id="testWorkflowFail"} 8
 # HELP test_runner_task_requested_total Total number of n8n.runner.task.requested events.
 # TYPE test_runner_task_requested_total counter
 test_runner_task_requested_total 4
+
+# HELP test_expression_code_cache_hit_total Expression code cache hits.
+# TYPE test_expression_code_cache_hit_total counter
+test_expression_code_cache_hit_total 0
+
+# HELP test_expression_code_cache_miss_total Expression code cache misses.
+# TYPE test_expression_code_cache_miss_total counter
+test_expression_code_cache_miss_total 0
+
+# HELP test_expression_code_cache_eviction_total Expression code cache evictions.
+# TYPE test_expression_code_cache_eviction_total counter
+test_expression_code_cache_eviction_total 0
+
+# HELP test_expression_code_cache_size Current expression code cache size.
+# TYPE test_expression_code_cache_size gauge
+test_expression_code_cache_size 0
+
+# HELP test_expression_evaluation_duration_seconds Duration of VM-based expression evaluation in seconds.
+# TYPE test_expression_evaluation_duration_seconds histogram
+test_expression_evaluation_duration_seconds_bucket{le="0.0001",status="success",type="none"} 0
+test_expression_evaluation_duration_seconds_bucket{le="+Inf",status="success",type="none"} 0
+test_expression_evaluation_duration_seconds_count{status="success",type="none"} 0
+test_expression_evaluation_duration_seconds_sum{status="success",type="none"} 0
+
+# HELP test_expression_pool_acquired_total Bridges acquired from the expression pool.
+# TYPE test_expression_pool_acquired_total counter
+test_expression_pool_acquired_total 0
+
+# HELP test_expression_pool_replenish_failed_total Failed pool bridge replenishments.
+# TYPE test_expression_pool_replenish_failed_total counter
+test_expression_pool_replenish_failed_total 0
+
+# HELP test_expression_pool_scaled_up_total Expression pool scaled up from idle.
+# TYPE test_expression_pool_scaled_up_total counter
+test_expression_pool_scaled_up_total 0
+
+# HELP test_expression_pool_scaled_to_zero_total Expression pool scaled to zero after inactivity.
+# TYPE test_expression_pool_scaled_to_zero_total counter
+test_expression_pool_scaled_to_zero_total 0

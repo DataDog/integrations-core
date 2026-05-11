@@ -436,3 +436,42 @@ n8n_node_finished_total{workflow_id="testWorkflowFail"} 8
 # HELP n8n_runner_task_requested_total Total number of n8n.runner.task.requested events.
 # TYPE n8n_runner_task_requested_total counter
 n8n_runner_task_requested_total 4
+
+# HELP n8n_expression_code_cache_hit_total Expression code cache hits.
+# TYPE n8n_expression_code_cache_hit_total counter
+n8n_expression_code_cache_hit_total 0
+
+# HELP n8n_expression_code_cache_miss_total Expression code cache misses.
+# TYPE n8n_expression_code_cache_miss_total counter
+n8n_expression_code_cache_miss_total 0
+
+# HELP n8n_expression_code_cache_eviction_total Expression code cache evictions.
+# TYPE n8n_expression_code_cache_eviction_total counter
+n8n_expression_code_cache_eviction_total 0
+
+# HELP n8n_expression_code_cache_size Current expression code cache size.
+# TYPE n8n_expression_code_cache_size gauge
+n8n_expression_code_cache_size 0
+
+# HELP n8n_expression_evaluation_duration_seconds Duration of VM-based expression evaluation in seconds.
+# TYPE n8n_expression_evaluation_duration_seconds histogram
+n8n_expression_evaluation_duration_seconds_bucket{le="0.0001",status="success",type="none"} 0
+n8n_expression_evaluation_duration_seconds_bucket{le="+Inf",status="success",type="none"} 0
+n8n_expression_evaluation_duration_seconds_count{status="success",type="none"} 0
+n8n_expression_evaluation_duration_seconds_sum{status="success",type="none"} 0
+
+# HELP n8n_expression_pool_acquired_total Bridges acquired from the expression pool.
+# TYPE n8n_expression_pool_acquired_total counter
+n8n_expression_pool_acquired_total 0
+
+# HELP n8n_expression_pool_replenish_failed_total Failed pool bridge replenishments.
+# TYPE n8n_expression_pool_replenish_failed_total counter
+n8n_expression_pool_replenish_failed_total 0
+
+# HELP n8n_expression_pool_scaled_up_total Expression pool scaled up from idle.
+# TYPE n8n_expression_pool_scaled_up_total counter
+n8n_expression_pool_scaled_up_total 0
+
+# HELP n8n_expression_pool_scaled_to_zero_total Expression pool scaled to zero after inactivity.
+# TYPE n8n_expression_pool_scaled_to_zero_total counter
+n8n_expression_pool_scaled_to_zero_total 0

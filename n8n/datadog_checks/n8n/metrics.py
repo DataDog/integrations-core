@@ -39,6 +39,18 @@ METRIC_MAP = {
     'embed_login_failures': 'embed.login.failures',  # n8n 2.x+
     'embed_login_requests': 'embed.login.requests',  # n8n 2.x+
     'enabled_users': 'enabled.users',  # n8n 2.x+, requires N8N_METRICS_INCLUDE_WORKFLOW_STATISTICS
+    # n8n 2.x VM-isolated expression engine. Requires N8N_EXPRESSION_ENGINE=vm and
+    # N8N_EXPRESSION_ENGINE_OBSERVABILITY_ENABLED=true; emitted by
+    # `@n8n/expression-runtime`'s ExpressionEvaluator + IdleScalingPool.
+    'expression_code_cache_eviction': 'expression.code.cache.eviction',
+    'expression_code_cache_hit': 'expression.code.cache.hit',
+    'expression_code_cache_miss': 'expression.code.cache.miss',
+    'expression_code_cache_size': 'expression.code.cache.size',
+    'expression_evaluation_duration_seconds': 'expression.evaluation.duration.seconds',
+    'expression_pool_acquired': 'expression.pool.acquired',
+    'expression_pool_replenish_failed': 'expression.pool.replenish.failed',
+    'expression_pool_scaled_to_zero': 'expression.pool.scaled.to.zero',
+    'expression_pool_scaled_up': 'expression.pool.scaled.up',
     'http_request_duration_seconds': 'http.request.duration.seconds',
     'instance_role_leader': 'instance.role.leader',
     'last_activity': {
