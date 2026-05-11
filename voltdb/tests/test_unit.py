@@ -21,7 +21,7 @@ from . import common
     [
         pytest.param(
             {'username': 'doggo', 'password': 'doggopass'},
-            'host is required',
+            "'host' is required",
             id='host-missing',
         ),
         pytest.param(
@@ -33,6 +33,11 @@ from . import common
             },
             'port must be a positive integer',
             id='port-invalid',
+        ),
+        pytest.param(
+            {'url': 'http://localhost:8080'},
+            "'username' and 'password' are required when 'url' is set",
+            id='http-mode-needs-credentials',
         ),
     ],
 )
@@ -103,32 +108,107 @@ def test_procedure_timeout_default(instance, expected):
 
 
 @pytest.mark.parametrize(
-    'url, expected_host, expected_use_ssl',
+    'url, expected_netloc',
     [
-        pytest.param('http://localhost:8080', 'localhost', False, id='http'),
-        pytest.param('https://voltdb.example:8443', 'voltdb.example', True, id='https'),
-        pytest.param('http://my-cluster', 'my-cluster', False, id='no-port'),
+        pytest.param('http://localhost:8080', ('localhost', 8080), id='http-explicit-port'),
+        pytest.param('https://voltdb.example:8443', ('voltdb.example', 8443), id='https-explicit-port'),
+        pytest.param('http://my-cluster', ('my-cluster', 80), id='http-default-port'),
+        pytest.param('https://my-cluster', ('my-cluster', 443), id='https-default-port'),
     ],
 )
-def test_url_backwards_compat(url, expected_host, expected_use_ssl):
-    """The legacy `url` option keeps working: host is parsed from the URL,
-    `https` flips on `use_ssl`, and the port defaults to the native client port."""
-    warnings = []
-    config = Config(
-        {'url': url, 'username': 'u', 'password': 'p'},
-        warning=lambda *args: warnings.append(args),
+def test_url_activates_http_mode(url, expected_netloc):
+    """Setting `url` selects the HTTP/VMC transport. The URL's host and port are
+    used directly (no port-coercion to 21212 — that's the native client port)."""
+    from datadog_checks.voltdb.config import MODE_HTTP
+
+    config = Config({'url': url, 'username': 'u', 'password': 'p'})
+    assert config.mode == MODE_HTTP
+    assert config.url == url
+    assert config.netloc == expected_netloc
+
+
+def test_host_without_url_uses_native_mode():
+    """Setting `host` (without `url`) selects the native binary transport."""
+    from datadog_checks.voltdb.config import MODE_NATIVE
+
+    config = Config({'host': 'db-1.example', 'username': 'u', 'password': 'p'})
+    assert config.mode == MODE_NATIVE
+    assert config.netloc == ('db-1.example', 21212)
+
+
+def test_url_takes_precedence_over_host():
+    """When both `url` and `host` are set, the HTTP transport is chosen — the
+    URL points at the VMC endpoint and `host` is ignored."""
+    from datadog_checks.voltdb.config import MODE_HTTP
+
+    config = Config({'host': 'db-1.example', 'url': 'http://vmc.example:8080', 'username': 'u', 'password': 'p'})
+    assert config.mode == MODE_HTTP
+    assert config.netloc == ('vmc.example', 8080)
+
+
+def test_password_hashed_only_kept_for_http():
+    """`password_hashed` is forwarded to the HTTP client; the native client
+    ignores it (handled at client-construction time in check.py)."""
+    config = Config({'url': 'http://vmc:8080', 'username': 'u', 'password': 'abc', 'password_hashed': True})
+    assert config.password_hashed is True
+
+
+def test_http_mode_end_to_end(aggregator, dd_run_check):
+    """When `url` is set, the check uses the HTTP transport and unwraps the
+    JSON response into the same `tables[].columns[].name` / `tuples` shape the
+    native code path uses."""
+    import mock
+
+    def fake_get(url, auth=None, params=None, **_):
+        proc = params['Procedure']
+        resp = mock.MagicMock()
+        resp.status_code = 200
+        resp.raise_for_status = lambda: None
+        if proc == '@SystemInformation':
+            resp.json = lambda: {
+                'status': 1,
+                'results': [
+                    {
+                        'schema': [{'name': 'HOST_ID'}, {'name': 'KEY'}, {'name': 'VALUE'}],
+                        'data': [[0, 'VERSION', '14.2']],
+                    }
+                ],
+            }
+        elif proc == '@Statistics' and '"CPU"' in params['Parameters']:
+            resp.json = lambda: {
+                'status': 1,
+                'results': [
+                    {
+                        'schema': [
+                            {'name': 'TIMESTAMP'},
+                            {'name': 'HOST_ID'},
+                            {'name': 'HOSTNAME'},
+                            {'name': 'PERCENT_USED'},
+                        ],
+                        'data': [[1234567890, 7, 'host-X', 42.5]],
+                    }
+                ],
+            }
+        else:
+            resp.json = lambda: {'status': 1, 'results': []}
+        return resp
+
+    instance = {
+        'url': 'http://vmc.example:8080',
+        'username': 'doggo',
+        'password': 'doggopass',
+        'statistics_components': ['CPU'],
+        'tags': ['live:test'],
+    }
+    with mock.patch('requests.Session.get', side_effect=fake_get):
+        check = VoltDBCheck('voltdb', {}, [instance])
+        dd_run_check(check)
+
+    aggregator.assert_metric(
+        'voltdb.cpu.percent_used',
+        value=42.5,
+        tags=['host_id:7', 'voltdb_hostname:host-X', 'live:test'],
     )
-    assert config.host == expected_host
-    assert config.port == 21212
-    assert config.use_ssl is expected_use_ssl
-    assert warnings, 'expected a deprecation warning when `url` is used'
-
-
-def test_url_does_not_override_explicit_host():
-    """If both `host` and `url` are set, `host` wins."""
-    config = Config({'host': 'explicit-host', 'url': 'http://other-host:8080'})
-    assert config.host == 'explicit-host'
-    assert config.port == 21212
 
 
 @pytest.mark.parametrize(

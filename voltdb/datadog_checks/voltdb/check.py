@@ -7,7 +7,8 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryManager
 
 from .client import Client
-from .config import Config
+from .config import MODE_HTTP, Config
+from .http_client import HttpClient
 from .types import Instance
 
 
@@ -25,16 +26,25 @@ class VoltDBCheck(AgentCheck):
         )
         if self._config.password:
             self.register_secret(self._config.password)
-        self._client = Client(
-            host=self._config.host,
-            port=self._config.port,
-            username=self._config.username,
-            password=self._config.password,
-            use_ssl=self._config.use_ssl,
-            ssl_config_file=self._config.ssl_config_file,
-            connect_timeout=self._config.connect_timeout,
-            procedure_timeout=self._config.procedure_timeout,
-        )
+        if self._config.mode == MODE_HTTP:
+            self._client = HttpClient(
+                url=self._config.url,
+                http_get=self.http.get,
+                username=self._config.username,
+                password=self._config.password,
+                password_hashed=self._config.password_hashed,
+            )
+        else:
+            self._client = Client(
+                host=self._config.host,
+                port=self._config.port,
+                username=self._config.username,
+                password=self._config.password,
+                use_ssl=self._config.use_ssl,
+                ssl_config_file=self._config.ssl_config_file,
+                connect_timeout=self._config.connect_timeout,
+                procedure_timeout=self._config.procedure_timeout,
+            )
 
         self._query_manager = QueryManager(
             self,
@@ -113,9 +123,9 @@ class VoltDBCheck(AgentCheck):
             # to consume positionally.
             return [tuple(row) for row in table.tuples]
 
-            # Project the response onto the source columns declared in queries.py,
-            # looking them up by name. Missing columns become None so newer/older
-            # VoltDB releases that add or drop columns don't break the check.
+        # Project the response onto the source columns declared in queries.py,
+        # looking them up by name. Missing columns become None so newer/older
+        # VoltDB releases that add or drop columns don't break the check.
         col_index = {col.name: i for i, col in enumerate(table.columns)}
         indices = [col_index.get(source) if source else None for source in sources]
         missing = [s for s, i in zip(sources, indices) if s and i is None]

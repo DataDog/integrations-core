@@ -67,6 +67,10 @@ def _strip_sources(query_def):
     return cleaned, sources
 
 
+MODE_NATIVE = 'native'
+MODE_HTTP = 'http'
+
+
 class Config(object):
     def __init__(self, instance, debug=lambda *args: None, warning=lambda *args: None):
         # type: (Instance, Callable, Callable) -> None
@@ -77,6 +81,7 @@ class Config(object):
         url = instance.get('url')  # type: Optional[str]
         username = instance.get('username', '')  # type: str
         password = instance.get('password', '')  # type: str
+        password_hashed = is_affirmative(instance.get('password_hashed', False))  # type: bool
         use_ssl = instance.get('use_ssl')
         ssl_config_file = instance.get('ssl_config_file')  # type: Optional[str]
         connect_timeout = instance.get('connect_timeout', 8)  # type: float
@@ -88,32 +93,34 @@ class Config(object):
         statistics_components = instance.get('statistics_components', DEFAULT_STATISTICS_COMPONENTS)
         tags = instance.get('tags', [])  # type: List[str]
 
-        # Backwards compatibility: the legacy HTTP/JSON-based config used `url`
-        # to point at the HTTP interface (e.g. `http://host:8080`). The native
-        # Python client speaks the binary protocol on a different port, so we
-        # only extract the host (and `https` → `use_ssl`) and fall back to the
-        # default native client port.
-        if url and not host:
-            warning(
-                "The 'url' option is deprecated; use 'host' and 'port' instead. "
-                "The native Python client uses port %d by default. Set 'port' "
-                "explicitly if your cluster listens on a different port.",
-                DEFAULT_PORT,
-            )
+        # Mode selection: presence of `url` activates the HTTP transport (talks
+        # to the VoltDB Management Center HTTP/JSON endpoint), otherwise we use
+        # the native binary client against `host`/`port`. The two transports
+        # share the rest of the configuration (auth, statistics components,
+        # custom queries, tags).
+        if url:
+            mode = MODE_HTTP
             parsed = urlparse(url)
-            host = parsed.hostname
-            if use_ssl is None and parsed.scheme == 'https':
-                use_ssl = True
-
-        if port is None:
-            port = DEFAULT_PORT
-        use_ssl = is_affirmative(use_ssl) if use_ssl is not None else False
-
-        if not host:
-            raise ConfigurationError('host is required')
-
-        if not isinstance(port, int) or port <= 0:
-            raise ConfigurationError('port must be a positive integer')
+            url_host = parsed.hostname
+            if not url_host:  # pragma: no cover
+                raise ConfigurationError("URL must contain a host")
+            url_port = parsed.port
+            if not url_port:
+                url_port = 443 if parsed.scheme == 'https' else 80
+                self._debug('No port detected in url, defaulting to port %d', url_port)
+            if not username or not password:
+                raise ConfigurationError("'username' and 'password' are required when 'url' is set")
+            netloc = (url_host, url_port)
+        else:
+            mode = MODE_NATIVE
+            if port is None:
+                port = DEFAULT_PORT
+            use_ssl = is_affirmative(use_ssl) if use_ssl is not None else False
+            if not host:
+                raise ConfigurationError("'host' is required (or set 'url' to use the HTTP/VMC transport)")
+            if not isinstance(port, int) or port <= 0:
+                raise ConfigurationError('port must be a positive integer')
+            netloc = (host, port)
 
         if not isinstance(statistics_components, list):
             raise ConfigurationError("'statistics_components' must be a list of strings")
@@ -138,11 +145,14 @@ class Config(object):
             if sources:
                 self.query_sources[query_def['query']] = sources
 
+        self.mode = mode
+        self.url = url
         self.host = host
         self.port = port
-        self.netloc = (host, port)
+        self.netloc = netloc
         self.username = username
         self.password = password
+        self.password_hashed = password_hashed
         self.use_ssl = use_ssl
         self.ssl_config_file = ssl_config_file
         self.connect_timeout = connect_timeout

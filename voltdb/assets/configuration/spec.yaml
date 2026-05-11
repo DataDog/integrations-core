@@ -5,13 +5,18 @@ files:
     options:
       - template: init_config
         options:
+          - template: init_config/http
           - template: init_config/db
           - template: init_config/default
 
       - template: instances
         options:
           - name: host
-            description: Host of the VoltDB cluster member to connect to.
+            description: |
+              Host of the VoltDB cluster member to connect to via the native binary
+              protocol. Use this (with `port`) for direct connections to a database
+              node. Set `url` instead to talk to the VoltDB Management Center (VMC)
+              over HTTP/JSON.
             fleet_configurable: true
             display_priority: 5
             value:
@@ -20,14 +25,14 @@ files:
 
           - name: url
             description: |
-              **Deprecated**: The legacy HTTP/JSON endpoint URL (e.g. `http://localhost:8080`).
-              Use `host` and `port` instead. If `url` is set and `host` is not, the host is
-              extracted from the URL and the default native client port (21212) is used.
-            hidden: true
-            deprecation:
-              Agent version: 7.80.0
-              Migration: |
-                Use `host` and (optionally) `port` instead.
+              URL of a VoltDB HTTP/JSON endpoint, typically served by the
+              VoltDB Management Center (VMC). When set, the integration uses the
+              HTTP/JSON transport instead of the native binary client. The
+              `username` and `password` options are required in this mode.
+
+              For direct connections to a database node, prefer `host` (and
+              optionally `port`), which uses the native Python client.
+            display_priority: 5
             value:
               type: string
               example: http://localhost:8080
@@ -137,6 +142,35 @@ files:
                 - SNAPSHOTSTATUS
                 - TABLE
 
+          - name: password_hashed
+            description: |
+              Only applicable to the HTTP/VMC transport (`url` is set). Set to
+              `true` if the `password` value is the SHA-256 hex digest of the
+              password instead of the cleartext. The native binary client does
+              not support pre-hashed passwords.
+            display_priority: 1
+            value:
+              type: boolean
+              example: false
+
+          - template: instances/http
+            overrides:
+              auth_type.hidden: true
+              ntlm_domain.hidden: true
+              kerberos_auth.hidden: true
+              kerberos_cache.hidden: true
+              kerberos_delegate.hidden: true
+              kerberos_force_initiate.hidden: true
+              kerberos_hostname.hidden: true
+              kerberos_principal.hidden: true
+              kerberos_keytab.hidden: true
+              auth_token.hidden: true
+              aws_region.hidden: true
+              aws_host.hidden: true
+              aws_service.hidden: true
+              username.hidden: true
+              password.hidden: true
+              connect_timeout.hidden: true
           - template: instances/db
           - template: instances/default
 

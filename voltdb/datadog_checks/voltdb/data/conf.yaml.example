@@ -2,6 +2,38 @@
 #
 init_config:
 
+    ## @param proxy - mapping - optional
+    ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
+    ## to specify hosts that must bypass proxies.
+    ##
+    ## The SOCKS protocol is also supported like so:
+    ##
+    ##   socks5://user:pass@host:port
+    ##
+    ## Using the scheme `socks5` causes the DNS resolution to happen on the
+    ## client, rather than on the proxy server. This is in line with `curl`,
+    ## which uses the scheme to decide whether to do the DNS resolution on
+    ## the client or proxy. If you want to resolve the domains on the proxy
+    ## server, use `socks5h` as the scheme.
+    #
+    # proxy:
+    #   http: http://<PROXY_SERVER_FOR_HTTP>:<PORT>
+    #   https: https://<PROXY_SERVER_FOR_HTTPS>:<PORT>
+    #   no_proxy:
+    #   - <HOSTNAME_1>
+    #   - <HOSTNAME_2>
+
+    ## @param skip_proxy - boolean - optional - default: false
+    ## If set to `true`, this makes the check bypass any proxy
+    ## settings enabled and attempt to reach services directly.
+    #
+    # skip_proxy: false
+
+    ## @param timeout - number - optional - default: 10
+    ## The timeout for connecting to services.
+    #
+    # timeout: 10
+
     ## @param global_custom_queries - list of mappings - optional
     ## See `custom_queries` defined below.
     ##
@@ -27,9 +59,23 @@ instances:
 
   -
     ## @param host - string - optional - default: localhost
-    ## Host of the VoltDB cluster member to connect to.
+    ## Host of the VoltDB cluster member to connect to via the native binary
+    ## protocol. Use this (with `port`) for direct connections to a database
+    ## node. Set `url` instead to talk to the VoltDB Management Center (VMC)
+    ## over HTTP/JSON.
     #
     # host: localhost
+
+    ## @param url - string - optional - default: http://localhost:8080
+    ## URL of a VoltDB HTTP/JSON endpoint, typically served by the
+    ## VoltDB Management Center (VMC). When set, the integration uses the
+    ## HTTP/JSON transport instead of the native binary client. The
+    ## `username` and `password` options are required in this mode.
+    ##
+    ## For direct connections to a database node, prefer `host` (and
+    ## optionally `port`), which uses the native Python client.
+    #
+    # url: http://localhost:8080
 
     ## @param port - integer - optional - default: 21212
     ## Native client port of the VoltDB cluster member.
@@ -107,6 +153,161 @@ instances:
     #   - PROCEDURE
     #   - SNAPSHOTSTATUS
     #   - TABLE
+
+    ## @param password_hashed - boolean - optional - default: false
+    ## Only applicable to the HTTP/VMC transport (`url` is set). Set to
+    ## `true` if the `password` value is the SHA-256 hex digest of the
+    ## password instead of the cleartext. The native binary client does
+    ## not support pre-hashed passwords.
+    #
+    # password_hashed: false
+
+    ## @param proxy - mapping - optional
+    ## This overrides the `proxy` setting in `init_config`.
+    ##
+    ## Set HTTP or HTTPS proxies for this instance. Use the `no_proxy` list
+    ## to specify hosts that must bypass proxies.
+    ##
+    ## The SOCKS protocol is also supported, for example:
+    ##
+    ##   socks5://user:pass@host:port
+    ##
+    ## Using the scheme `socks5` causes the DNS resolution to happen on the
+    ## client, rather than on the proxy server. This is in line with `curl`,
+    ## which uses the scheme to decide whether to do the DNS resolution on
+    ## the client or proxy. If you want to resolve the domains on the proxy
+    ## server, use `socks5h` as the scheme.
+    #
+    # proxy:
+    #   http: http://<PROXY_SERVER_FOR_HTTP>:<PORT>
+    #   https: https://<PROXY_SERVER_FOR_HTTPS>:<PORT>
+    #   no_proxy:
+    #   - <HOSTNAME_1>
+    #   - <HOSTNAME_2>
+
+    ## @param skip_proxy - boolean - optional - default: false
+    ## This overrides the `skip_proxy` setting in `init_config`.
+    ##
+    ## If set to `true`, this makes the check bypass any proxy
+    ## settings enabled and attempt to reach services directly.
+    #
+    # skip_proxy: false
+
+    ## @param use_legacy_auth_encoding - boolean - optional - default: true
+    ## When `auth_type` is set to `basic`, this determines whether to encode as `latin1` rather than `utf-8`.
+    #
+    # use_legacy_auth_encoding: true
+
+    ## @param tls_verify - boolean - optional - default: true
+    ## Instructs the check to validate the TLS certificate of services.
+    #
+    # tls_verify: true
+
+    ## @param tls_use_host_header - boolean - optional - default: false
+    ## If a `Host` header is set, this enables its use for SNI (matching against the TLS certificate CN or SAN).
+    #
+    # tls_use_host_header: false
+
+    ## @param tls_ignore_warning - boolean - optional - default: false
+    ## If `tls_verify` is disabled, security warnings are logged by the check.
+    ## Disable those by setting `tls_ignore_warning` to true.
+    #
+    # tls_ignore_warning: false
+
+    ## @param tls_cert - string - optional
+    ## The path to a single file in PEM format containing a certificate as well as any
+    ## number of CA certificates needed to establish the certificate's authenticity for
+    ## use when connecting to services. It may also contain an unencrypted private key to use.
+    #
+    # tls_cert: <CERT_PATH>
+
+    ## @param tls_private_key - string - optional
+    ## The unencrypted private key to use for `tls_cert` when connecting to services. This is
+    ## required if `tls_cert` is set and it does not already contain a private key.
+    #
+    # tls_private_key: <PRIVATE_KEY_PATH>
+
+    ## @param tls_ca_cert - string - optional
+    ## The path to a file of concatenated CA certificates in PEM format or a directory
+    ## containing several CA certificates in PEM format. If a directory, the directory
+    ## must have been processed using the `openssl rehash` command. See:
+    ## https://www.openssl.org/docs/man3.2/man1/c_rehash.html
+    #
+    # tls_ca_cert: <CA_CERT_PATH>
+
+    ## @param tls_protocols_allowed - list of strings - optional
+    ## The expected versions of TLS/SSL when fetching intermediate certificates.
+    ## Only `SSLv3`, `TLSv1.2`, `TLSv1.3` are allowed by default. The possible values are:
+    ##   SSLv3
+    ##   TLSv1
+    ##   TLSv1.1
+    ##   TLSv1.2
+    ##   TLSv1.3
+    #
+    # tls_protocols_allowed:
+    #   - SSLv3
+    #   - TLSv1.2
+    #   - TLSv1.3
+
+    ## @param tls_ciphers - list of strings - optional
+    ## The list of ciphers suites to use when connecting to an endpoint. If not specified, 
+    ## `ALL` ciphers are used. For list of ciphers see: 
+    ## https://www.openssl.org/docs/man1.0.2/man1/ciphers.html
+    #
+    # tls_ciphers:
+    #   - TLS_AES_256_GCM_SHA384
+    #   - TLS_CHACHA20_POLY1305_SHA256
+    #   - TLS_AES_128_GCM_SHA256
+
+    ## @param headers - mapping - optional
+    ## The headers parameter allows you to send specific headers with every request.
+    ## You can use it for explicitly specifying the host header or adding headers for
+    ## authorization purposes.
+    ##
+    ## This overrides any default headers.
+    #
+    # headers:
+    #   Host: <ALTERNATIVE_HOSTNAME>
+    #   X-Auth-Token: <AUTH_TOKEN>
+
+    ## @param extra_headers - mapping - optional
+    ## Additional headers to send with every request.
+    #
+    # extra_headers:
+    #   Host: <ALTERNATIVE_HOSTNAME>
+    #   X-Auth-Token: <AUTH_TOKEN>
+
+    ## @param timeout - number - optional - default: 10
+    ## The timeout for accessing services.
+    ##
+    ## This overrides the `timeout` setting in `init_config`.
+    #
+    # timeout: 10
+
+    ## @param read_timeout - number - optional
+    ## The read timeout for accessing services. Defaults to `timeout`.
+    #
+    # read_timeout: <READ_TIMEOUT>
+
+    ## @param request_size - number - optional - default: 16
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 16
+
+    ## @param log_requests - boolean - optional - default: false
+    ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
+    #
+    # log_requests: false
+
+    ## @param persist_connections - boolean - optional - default: false
+    ## Whether or not to persist cookies and use connection pooling for improved performance.
+    #
+    # persist_connections: false
+
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true
 
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.

@@ -28,11 +28,11 @@ No additional installation is needed on your server.
     </users>
     ```
 
-2. Edit the `voltdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your VoltDB performance data. The check uses the [VoltDB native Python client][12] and connects to the VoltDB client port (default `21212`). See the [sample voltdb.d/conf.yaml][4] for all available configuration options.
+2. Edit the `voltdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your VoltDB performance data. See the [sample voltdb.d/conf.yaml][4] for all available configuration options.
 
-    **Note**: If you previously configured the integration with `url: http://host:8080`, the check still accepts that option for backwards compatibility - the host is parsed from the URL and the default native client port (`21212`) is used. A deprecation warning is logged; switch to `host` and `port` at your convenience.
+    The integration supports two transports:
 
-    **Note on `password_hashed`**: The legacy HTTP integration accepted a pre-hashed password via `password_hashed: true`. The native client library always hashes the cleartext password client-side, so this option is no longer supported. Use the [Datadog Agent secrets backend][13] (`ENC[<secret_name>]`) to keep the cleartext password out of the configuration file on disk.
+    **Native binary client (recommended)** - direct connection to a database node on the VoltDB client port (default `21212`), using the [VoltDB Python client][12]:
 
     ```yaml
     init_config:
@@ -43,6 +43,19 @@ No additional installation is needed on your server.
         username: datadog-agent
         password: "<PASSWORD>"
     ```
+
+    **HTTP/JSON via the VoltDB Management Center (VMC)** - useful when database nodes aren't directly reachable but the VMC endpoint is. Set `url` to the VMC HTTP endpoint:
+
+    ```yaml
+    init_config:
+
+    instances:
+      - url: http://vmc.example.com:8080
+        username: datadog-agent
+        password: "<PASSWORD>"
+    ```
+
+    When `url` is set, the integration uses the HTTP transport. Otherwise it uses the native binary client against `host`/`port`. The HTTP mode supports the same `password_hashed` option as previous releases and all the proxy/TLS-via-PEM options from `instances/http`.
 
 3. [Restart the Agent][5].
 
