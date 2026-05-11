@@ -59,9 +59,9 @@ def _workflow_id(path: Path) -> str:
 def _activate_imported_workflows() -> None:
     """Import all bind-mounted workflows by stable id, activate them, restart n8n so webhooks register.
 
-    Used as a ``docker_run`` condition. The CheckEndpoints conditions placed *after* this one
-    handle the post-restart reachability wait, and the ``WaitFor(_n8n_healthy)`` condition placed
-    *before* it ensures n8n's DB is initialized before we issue CLI commands.
+    Used as a ``docker_run`` condition. The earlier ``CheckEndpoints`` conditions guarantee n8n is
+    booted before we issue CLI commands; the internal ``WaitFor(_n8n_healthy)`` re-waits for n8n
+    after the restart so the next condition runs against a live process.
     """
     for path in _workflow_files():
         _docker_exec('n8n', 'import:workflow', f'--input=/workflows/{path.name}')
@@ -71,6 +71,7 @@ def _activate_imported_workflows() -> None:
         ['docker', 'compose', '-f', common.COMPOSE_FILE, 'restart', 'n8n'],
         stderr=subprocess.STDOUT,
     )
+    WaitFor(_n8n_healthy, attempts=45, wait=2)()
 
 
 def _generate_workflow_traffic(iterations: int = 5) -> None:
@@ -123,20 +124,23 @@ def _workflow_started_non_zero() -> None:
 
 @pytest.fixture(scope='session')
 def dd_environment() -> Iterator[Any]:
-    conditions = [
-        # n8n must be booted (DB initialized, HTTP up) before we issue CLI commands.
-        WaitFor(_n8n_healthy, attempts=45, wait=2),
-        # Import + activate workflows, then restart n8n so the active set re-registers webhooks.
-        _activate_imported_workflows,
-        # Confirm both /metrics endpoints are reachable after the restart.
+    conditions: list[Any] = [
+        # n8n is booted and serving /metrics on both processes.
         CheckEndpoints(common.MAIN_INSTANCE['openmetrics_endpoint']),
         CheckEndpoints(common.WORKER_INSTANCE['openmetrics_endpoint']),
+        # Import + activate workflows, restart n8n so webhooks register, wait for /healthz.
+        _activate_imported_workflows,
     ]
+    if not common.IS_LAB:
+        # Fire enough webhook traffic to register samples for the workflow and HTTP histograms,
+        # then wait until ``n8n_workflow_started_total`` actually goes non-zero. Both stay in
+        # ``conditions`` so that ``docker_run``'s ``attempts=2`` retry covers transient failures
+        # without leaving these calls exposed to the post-yield teardown path.
+        conditions.append(_generate_workflow_traffic)
+        conditions.append(WaitFor(_workflow_started_non_zero, attempts=15, wait=2))
+
     instances = {'instances': [common.MAIN_INSTANCE, common.WORKER_INSTANCE]}
     with docker_run(common.COMPOSE_FILE, conditions=conditions, env_vars=common.get_compose_env_vars()):
-        _generate_workflow_traffic()
-        if not common.IS_LAB:
-            WaitFor(_workflow_started_non_zero, attempts=15, wait=2)()
         if common.IS_LAB:
             lab_config = copy.deepcopy(instances)
             lab_config['logs'] = [
@@ -161,7 +165,7 @@ def dd_environment() -> Iterator[Any]:
                 },
             )
         else:
-            yield instances
+            yield instances, common.E2E_METADATA
 
 
 @pytest.fixture
