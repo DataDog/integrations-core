@@ -71,13 +71,18 @@ def _wait_for_endpoint(url: str, *, timeout: int = 90) -> None:
     raise RuntimeError(f"Endpoint {url} never became reachable")
 
 
-def _print_row(console: Console, ts: str, scenario: str, target: str, status: str, latency_ms: str) -> None:
+def _make_output_table() -> Table:
     table = Table(show_header=False, box=None, show_edge=False)
     table.add_column("Timestamp", style="dim", width=20)
     table.add_column("Scenario", width=10)
     table.add_column("Endpoint", width=28)
     table.add_column("Status", justify="right", width=14)
     table.add_column("Latency (ms)", justify="right", width=14)
+    return table
+
+
+def _print_row(console: Console, ts: str, scenario: str, target: str, status: str, latency_ms: str) -> None:
+    table = _make_output_table()
     table.add_row(ts, scenario, target, status, latency_ms)
     console.print(table)
 

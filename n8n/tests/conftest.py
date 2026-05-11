@@ -135,11 +135,14 @@ def _workflow_started_non_zero() -> None:
 @pytest.fixture(scope='session')
 def dd_environment() -> Iterator[Any]:
     conditions: list[Any] = [
-        # n8n is booted and serving /metrics on both processes.
+        # n8n main is booted and serving /metrics.
         CheckEndpoints(common.MAIN_INSTANCE['openmetrics_endpoint']),
-        CheckEndpoints(common.WORKER_INSTANCE['openmetrics_endpoint']),
         # Import + activate workflows, restart n8n so webhooks register, wait for /healthz.
         _activate_imported_workflows,
+        # Worker is checked *after* the main restart so any cascade effect on the worker is caught
+        # before downstream conditions try to talk to it. ``docker compose restart n8n`` does not
+        # touch the worker today, but the assertion is cheap and forward-proofs against changes.
+        CheckEndpoints(common.WORKER_INSTANCE['openmetrics_endpoint']),
     ]
     if not common.IS_LAB:
         # Fire enough webhook traffic to register samples for the workflow and HTTP histograms,
