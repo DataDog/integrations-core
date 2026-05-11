@@ -46,7 +46,7 @@ No additional installation is needed on your server.
 
 #### TLS support
 
-If [TLS/SSL][6] is enabled on the VoltDB client port, set `use_ssl: true` and point `ssl_config_file` at a VoltDB SSL configuration file describing the Java keystore and truststore (see the VoltDB SSL documentation):
+If [TLS/SSL][6] is enabled on the VoltDB client port, set `use_ssl: true` and point `ssl_config_file` at a VoltDB SSL properties file that describes how to locate the truststore (and optionally a client keystore for mutual TLS):
 
 ```yaml
 instances:
@@ -57,6 +57,27 @@ instances:
     use_ssl: true
     ssl_config_file: /etc/voltdb/ssl.properties
 ```
+
+The properties file is the same format VoltDB's own tools (`sqlcmd`, `voltadmin`) consume. The native Python client supports Java keystores (`.jks`), PKCS12 (`.p12`/`.pfx`), and PEM. A minimal one-way TLS configuration looks like:
+
+```properties
+# /etc/voltdb/ssl.properties
+truststore=/etc/voltdb/certs/truststore.jks
+truststorepassword=<TRUSTSTORE_PASSWORD>
+```
+
+For mutual TLS, also add a keystore that identifies the Agent to the server:
+
+```properties
+truststore=/etc/voltdb/certs/truststore.jks
+truststorepassword=<TRUSTSTORE_PASSWORD>
+keystore=/etc/voltdb/certs/agent-keystore.jks
+keystorepassword=<KEYSTORE_PASSWORD>
+```
+
+If you have a PEM CA bundle instead of a Java keystore, you can either point `ssl_config_file` directly at the PEM file (it is treated as the truststore), or reference it explicitly with `cacerts=<PATH>` inside the properties file.
+
+When the Agent runs in a container, make sure the properties file and every path it references are mounted into the container. See the [VoltDB TLS/SSL documentation][6] for details on generating keystores with `keytool` and rotating certificates.
 
 #### Log collection
 
