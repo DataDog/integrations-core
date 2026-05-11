@@ -78,7 +78,7 @@ class Azure(BaseModel):
     managed_authentication: Optional[ManagedAuthentication1] = None
 
 
-class CollectColumnStats(BaseModel):
+class CollectColumnStatistics(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -332,7 +332,7 @@ class InstanceConfig(BaseModel):
     collect_bloat_metrics: Optional[bool] = None
     collect_buffercache_metrics: Optional[bool] = None
     collect_checksum_metrics: Optional[bool] = None
-    collect_column_stats: Optional[CollectColumnStats] = None
+    collect_column_statistics: Optional[CollectColumnStatistics] = None
     collect_count_metrics: Optional[bool] = None
     collect_database_size_metrics: Optional[bool] = None
     collect_default_database: Optional[bool] = None

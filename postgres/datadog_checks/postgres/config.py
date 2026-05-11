@@ -160,9 +160,9 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
                 **dict_defaults.instance_collect_schemas().model_dump(),
                 **(instance.get('collect_schemas', {})),
             },
-            "collect_column_stats": {
-                **dict_defaults.instance_collect_column_stats().model_dump(),
-                **(instance.get('collect_column_stats', {})),
+            "collect_column_statistics": {
+                **dict_defaults.instance_collect_column_statistics().model_dump(),
+                **(instance.get('collect_column_statistics', {})),
             },
             # Cloud
             "aws": {
@@ -434,7 +434,7 @@ def validate_config(config: InstanceConfig, instance: dict, validation_result: V
         'query_metrics',
         'collect_settings',
         'collect_schemas',
-        'collect_column_stats',
+        'collect_column_statistics',
     ]
     for feature in dbm_required:
         if instance.get(feature, {}).get('enabled') and not config.dbm:
@@ -454,7 +454,9 @@ def apply_features(config: InstanceConfig, validation_result: ValidationResult):
     validation_result.add_feature(FeatureKey.COLLECT_SETTINGS, config.collect_settings.enabled and config.dbm)
     validation_result.add_feature(FeatureKey.COLLECT_SCHEMAS, config.collect_schemas.enabled and config.dbm)
     validation_result.add_feature(FeatureKey.DATA_OBSERVABILITY, config.data_observability.enabled)
-    validation_result.add_feature(FeatureKey.COLLECT_COLUMN_STATS, config.collect_column_stats.enabled and config.dbm)
+    validation_result.add_feature(
+        FeatureKey.COLLECT_COLUMN_STATISTICS, config.collect_column_statistics.enabled and config.dbm
+    )
 
 
 METRIC_TYPES = {

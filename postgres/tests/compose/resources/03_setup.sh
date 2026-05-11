@@ -62,7 +62,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" "$DBNAME" <<-'EOSQL'
     LANGUAGE sql
     SECURITY DEFINER;
 
-    CREATE OR REPLACE FUNCTION datadog.column_stats()
+    CREATE OR REPLACE FUNCTION datadog.column_statistics()
     RETURNS TABLE (
         schemaname name, tablename name, attname name,
         n_distinct real, avg_width integer, null_frac real
@@ -73,7 +73,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" "$DBNAME" <<-'EOSQL'
 
     ALTER FUNCTION datadog.explain_statement(l_query text, out explain json) OWNER TO postgres;
     ALTER FUNCTION datadog.pg_stat_activity() owner to postgres;
-    ALTER FUNCTION datadog.column_stats() OWNER TO postgres;
+    ALTER FUNCTION datadog.column_statistics() OWNER TO postgres;
 
     -- datadog.explain_statement_noaccess is not part of the standard setup
     -- it's added only for the purpose of testing an explain function owned by a user with inadequate permissions
@@ -115,7 +115,7 @@ done
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" dogs_nofunc <<-'EOSQL'
     DROP FUNCTION datadog.explain_statement(l_query text, out explain JSON);
-    DROP FUNCTION datadog.column_stats();
+    DROP FUNCTION datadog.column_statistics();
 EOSQL
 
 # Somehow, on old postgres version (11 and 12), wal_level is incorrectly set despite

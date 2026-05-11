@@ -33,7 +33,7 @@ def agent_check_getter(self):
     return self._check
 
 
-COLUMN_STATS_QUERY = """\
+COLUMN_STATISTICS_QUERY = """\
 WITH tables AS (
     SELECT n.nspname AS schemaname, c.relname AS tablename
     FROM pg_class c
@@ -59,7 +59,7 @@ column_data AS (
         EXTRACT(EPOCH FROM (NOW() - st.last_vacuum))::bigint AS last_vacuum_age,
         EXTRACT(EPOCH FROM (NOW() - st.last_autovacuum))::bigint AS last_autovacuum_age,
         EXTRACT(EPOCH FROM (NOW() - GREATEST(st.last_analyze, st.last_autoanalyze)))::bigint AS stats_age
-    FROM datadog.column_stats() s
+    FROM datadog.column_statistics() s
     JOIN tables t ON t.schemaname = s.schemaname AND t.tablename = s.tablename
     JOIN pg_stat_all_tables st ON st.schemaname = t.schemaname AND st.relname = t.tablename
 )
@@ -81,7 +81,7 @@ ORDER BY schemaname, tablename
 PAYLOAD_MAX_COLUMNS = 5_000
 
 
-class PostgresColumnStatsCollectorConfig:
+class PostgresColumnStatisticsCollectorConfig:
     def __init__(self):
         self.collection_interval = 14400
         self.max_tables = 500
@@ -94,23 +94,23 @@ class PostgresColumnStatsCollectorConfig:
         self.exclude_tables: list[str] = []
 
 
-class PostgresColumnStatsCollector:
-    """Collects column statistics from pg_stats via the datadog.column_stats() function."""
+class PostgresColumnStatisticsCollector:
+    """Collects column statistics from pg_stats via the datadog.column_statistics() function."""
 
     def __init__(self, check: PostgreSql, cancel_event):
         self._check = check
         self._log = check.log
         self._cancel_event = cancel_event
-        self._config = PostgresColumnStatsCollectorConfig()
-        self._config.collection_interval = check._config.collect_column_stats.collection_interval
-        self._config.max_tables = check._config.collect_column_stats.max_tables
-        self._config.max_query_duration = int(check._config.collect_column_stats.max_query_duration)
-        self._config.include_databases = list(check._config.collect_column_stats.include_databases or [])
-        self._config.exclude_databases = list(check._config.collect_column_stats.exclude_databases or [])
-        self._config.include_schemas = list(check._config.collect_column_stats.include_schemas or [])
-        self._config.exclude_schemas = list(check._config.collect_column_stats.exclude_schemas or [])
-        self._config.include_tables = list(check._config.collect_column_stats.include_tables or [])
-        self._config.exclude_tables = list(check._config.collect_column_stats.exclude_tables or [])
+        self._config = PostgresColumnStatisticsCollectorConfig()
+        self._config.collection_interval = check._config.collect_column_statistics.collection_interval
+        self._config.max_tables = check._config.collect_column_statistics.max_tables
+        self._config.max_query_duration = int(check._config.collect_column_statistics.max_query_duration)
+        self._config.include_databases = list(check._config.collect_column_statistics.include_databases or [])
+        self._config.exclude_databases = list(check._config.collect_column_statistics.exclude_databases or [])
+        self._config.include_schemas = list(check._config.collect_column_statistics.include_schemas or [])
+        self._config.exclude_schemas = list(check._config.collect_column_statistics.exclude_schemas or [])
+        self._config.include_tables = list(check._config.collect_column_statistics.include_tables or [])
+        self._config.exclude_tables = list(check._config.collect_column_statistics.exclude_tables or [])
         self._function_not_found_dbs: set[str] = set()
         self._insufficient_privilege_dbs: set[str] = set()
         self._reset()
@@ -132,7 +132,7 @@ class PostgresColumnStatsCollector:
             "dbms": "postgres",
             "dbms_version": payload_pg_version(self._check.version),
             "cloud_metadata": self._check.cloud_metadata,
-            "dbm_type": "column_stats",
+            "dbm_type": "column_statistics",
             "collection_interval": self._config.collection_interval,
         }
 
@@ -166,7 +166,7 @@ class PostgresColumnStatsCollector:
         return databases
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def collect_column_stats(self, tags_no_db: list[str]) -> bool:
+    def collect_column_statistics(self, tags_no_db: list[str]) -> bool:
         """Collect column statistics across all discovered databases."""
         status = "success"
         try:
@@ -201,28 +201,28 @@ class PostgresColumnStatsCollector:
             elapsed = (time.time() * 1000) - self._collection_started_at if self._collection_started_at else 0
             tags = self._check.tags + ["status:" + status]
             self._check.histogram(
-                "dd.postgres.column_stats.time",
+                "dd.postgres.column_statistics.time",
                 elapsed,
                 tags=tags,
                 hostname=self._check.reported_hostname,
                 raw=True,
             )
             self._check.gauge(
-                "dd.postgres.column_stats.tables_count",
+                "dd.postgres.column_statistics.tables_count",
                 self._total_tables_count,
                 tags=tags,
                 hostname=self._check.reported_hostname,
                 raw=True,
             )
             self._check.gauge(
-                "dd.postgres.column_stats.columns_count",
+                "dd.postgres.column_statistics.columns_count",
                 self._total_columns_count,
                 tags=tags,
                 hostname=self._check.reported_hostname,
                 raw=True,
             )
             self._check.gauge(
-                "dd.postgres.column_stats.payloads_count",
+                "dd.postgres.column_statistics.payloads_count",
                 self._payloads_count,
                 tags=tags,
                 hostname=self._check.reported_hostname,
@@ -236,7 +236,7 @@ class PostgresColumnStatsCollector:
             with self._check.db_pool.get_connection(db_name) as conn:
                 with conn.cursor(row_factory=dict_row) as cursor:
                     filters_sql, filter_params = self._build_filters()
-                    query = COLUMN_STATS_QUERY.format(
+                    query = COLUMN_STATISTICS_QUERY.format(
                         filters=filters_sql,
                         max_tables=self._config.max_tables,
                     )
@@ -273,25 +273,25 @@ class PostgresColumnStatsCollector:
                 if db_name not in self._function_not_found_dbs:
                     self._function_not_found_dbs.add(db_name)
                     self._log.warning(
-                        "datadog.column_stats() function not found in database '%s'. "
+                        "datadog.column_statistics() function not found in database '%s'. "
                         "Please create the function as described in the documentation: "
                         "https://docs.datadoghq.com/database_monitoring/setup_postgres/",
                         db_name,
                     )
                     self._check.health.submit_health_event(
-                        name=PostgresHealthEvent.COLUMN_STATS_FUNCTION_NOT_FOUND,
+                        name=PostgresHealthEvent.COLUMN_STATISTICS_FUNCTION_NOT_FOUND,
                         status=HealthStatus.WARNING,
                     )
             elif isinstance(e, psycopg.errors.InsufficientPrivilege):
                 if db_name not in self._insufficient_privilege_dbs:
                     self._insufficient_privilege_dbs.add(db_name)
                     self._log.warning(
-                        "Insufficient privileges to execute datadog.column_stats() in database '%s'. "
+                        "Insufficient privileges to execute datadog.column_statistics() in database '%s'. "
                         "Please check the function permissions.",
                         db_name,
                     )
                     self._check.health.submit_health_event(
-                        name=PostgresHealthEvent.COLUMN_STATS_INSUFFICIENT_PRIVILEGE,
+                        name=PostgresHealthEvent.COLUMN_STATISTICS_INSUFFICIENT_PRIVILEGE,
                         status=HealthStatus.WARNING,
                     )
             else:
@@ -302,18 +302,18 @@ class PostgresColumnStatsCollector:
     def _handle_recovery(self, db_name: str):
         if db_name in self._function_not_found_dbs:
             self._function_not_found_dbs.discard(db_name)
-            self._log.info("datadog.column_stats() function is now available in database '%s'", db_name)
+            self._log.info("datadog.column_statistics() function is now available in database '%s'", db_name)
             if not self._function_not_found_dbs:
                 self._check.health.submit_health_event(
-                    name=PostgresHealthEvent.COLUMN_STATS_FUNCTION_NOT_FOUND,
+                    name=PostgresHealthEvent.COLUMN_STATISTICS_FUNCTION_NOT_FOUND,
                     status=HealthStatus.OK,
                 )
         if db_name in self._insufficient_privilege_dbs:
             self._insufficient_privilege_dbs.discard(db_name)
-            self._log.info("datadog.column_stats() privileges restored in database '%s'", db_name)
+            self._log.info("datadog.column_statistics() privileges restored in database '%s'", db_name)
             if not self._insufficient_privilege_dbs:
                 self._check.health.submit_health_event(
-                    name=PostgresHealthEvent.COLUMN_STATS_INSUFFICIENT_PRIVILEGE,
+                    name=PostgresHealthEvent.COLUMN_STATISTICS_INSUFFICIENT_PRIVILEGE,
                     status=HealthStatus.OK,
                 )
 
@@ -335,8 +335,8 @@ class PostgresColumnStatsCollector:
             event = self._base_event
             event["tags"] = tags_no_db
             event["timestamp"] = time.time() * 1000
-            event["column_stats"] = self._queued_tables
+            event["column_statistics"] = self._queued_tables
             self._payloads_count += 1
-            self._check.database_monitoring_column_stats(json.dumps(event, default=default_json_event_encoding))
+            self._check.database_monitoring_column_statistics(json.dumps(event, default=default_json_event_encoding))
             self._queued_tables = []
             self._queued_columns_count = 0

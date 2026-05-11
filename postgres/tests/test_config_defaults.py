@@ -114,7 +114,7 @@ EXPECTED_DEFAULTS = {
         'ignored_settings_patterns': ['plpgsql%'],
     },
     # === DBM: Column stats collection ===
-    'collect_column_stats': {
+    'collect_column_statistics': {
         'enabled': False,
         'max_tables': 500,
         'collection_interval': 14400,

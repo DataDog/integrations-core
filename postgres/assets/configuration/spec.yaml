@@ -1065,10 +1065,10 @@ files:
             example:
               - "customer.*"
 
-    - name: collect_column_stats
+    - name: collect_column_statistics
       description: |
         Enable collection of column statistics from pg_stats.
-        Requires the `datadog.column_stats()` function to be created in the database.
+        Requires the `datadog.column_statistics()` function to be created in the database.
       options:
         - name: enabled
           description: |
