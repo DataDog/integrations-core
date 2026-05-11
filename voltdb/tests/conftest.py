@@ -9,6 +9,7 @@ import mock
 import pytest
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
+
 from datadog_checks.voltdb.types import Instance  # noqa: F401
 
 from . import common

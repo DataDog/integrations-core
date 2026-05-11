@@ -8,6 +8,7 @@ from typing import Optional  # noqa: F401
 import pytest
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.utils import get_metadata_metrics
+
 from datadog_checks.voltdb.check import VoltDBCheck, _parse_query
 from datadog_checks.voltdb.config import Config
 from datadog_checks.voltdb.types import Instance  # noqa: F401
@@ -183,7 +184,7 @@ def test_columns_resolved_by_name(aggregator, dd_run_check):
         params = params or []
         if procedure == '@SystemInformation':
             return _make_response(_make_table(['HOST_ID', 'KEY', 'VALUE'], [(0, 'VERSION', '14.2')]))
-            # @Statistics CPU response with columns shuffled and an extra trailing column.
+        # @Statistics CPU response with columns shuffled and an extra trailing column.
         if procedure == '@Statistics' and params and params[0] == 'CPU':
             headers = [
                 'EXTRA_NEW_COL',
@@ -194,7 +195,7 @@ def test_columns_resolved_by_name(aggregator, dd_run_check):
             ]
             rows = [(999, 42.5, 1234567890, 'voltdb-host-X', 7)]
             return _make_response(_make_table(headers, rows))
-            # Other statistics: missing entirely.
+        # Other statistics: missing entirely.
         return _make_response(_make_table([], []))
 
     with mock.patch('datadog_checks.voltdb.check.Client') as m:

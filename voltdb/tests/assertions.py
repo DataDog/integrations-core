@@ -7,6 +7,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.base.types import ServiceCheckStatus  # noqa: F401
 from datadog_checks.dev.utils import get_metadata_metrics
+
 from datadog_checks.voltdb.types import Instance  # noqa: F401
 
 from . import common
