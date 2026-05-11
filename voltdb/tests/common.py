@@ -167,7 +167,9 @@ METADATA_EXCLUDE_METRICS = [
 
 TLS_ENABLED = is_affirmative(os.environ.get('TLS_ENABLED'))
 TLS_CERTS_DIR = os.path.join(HERE, 'compose', 'certs')
-TLS_CONFIG_FILE = os.path.join(TLS_CERTS_DIR, 'client_ssl.properties')
+# voltdbclient supports pointing `ssl_config_file` at a PEM truststore directly,
+# so we reuse the same `ca.pem` the docker compose fixture already ships.
+TLS_CONFIG_FILE = os.path.join(TLS_CERTS_DIR, 'ca.pem')
 
 VOLTDB_DEPLOYMENT = os.path.join(HERE, 'compose', 'deployment-tls.xml' if TLS_ENABLED else 'deployment.xml')
 VOLTDB_CLIENT_PORT = 21212
