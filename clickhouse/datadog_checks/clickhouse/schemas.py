@@ -11,8 +11,6 @@ if TYPE_CHECKING:
 
 from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollectorConfig
 
-_VIEW_ENGINES = frozenset(['View', 'MaterializedView', 'LiveView', 'WindowView'])
-
 _SYSTEM_DATABASE_NAMES = ("'system'", "'INFORMATION_SCHEMA'", "'information_schema'")
 
 # Single stub so the base-class loop runs exactly once; actual database names
@@ -183,15 +181,13 @@ class ClickhouseSchemaCollector(SchemaCollector):
         return next(cursor, None)
 
     def _map_row(self, _database: dict[str, str], cursor_row: tuple) -> dict[str, Any]:
-        item, bucket = self._build_table_or_view_item(cursor_row)
         actual_db_name = cursor_row[0]
         return {
             'name': actual_db_name,
-            'tables': [item] if bucket == 'tables' else [],
-            'views': [item] if bucket == 'views' else [],
+            'tables': [self._build_item(cursor_row)],
         }
 
-    def _build_table_or_view_item(self, row: tuple) -> tuple[dict[str, Any], str]:
+    def _build_item(self, row: tuple) -> dict[str, Any]:
         (
             database,
             name,
@@ -215,18 +211,7 @@ class ClickhouseSchemaCollector(SchemaCollector):
             }
             for col in (raw_columns or [])
         ]
-        if engine in _VIEW_ENGINES:
-            item = self._make_view(
-                name=name,
-                engine=engine,
-                uuid_str=uuid_str,
-                create_query=create_query,
-                columns=cols,
-                metadata_modified_at=metadata_modified_at,
-                is_refreshable=(database, name) in self._refreshable_views,
-            )
-            return item, 'views'
-        item = {
+        return {
             'name': name,
             'engine': engine,
             'uuid': uuid_str,
@@ -237,27 +222,7 @@ class ClickhouseSchemaCollector(SchemaCollector):
             'create_query': create_query,
             'columns': cols,
             'metadata_modified_at': int(metadata_modified_at or 0),
-        }
-        return item, 'tables'
-
-    def _make_view(
-        self,
-        name: str,
-        engine: str,
-        uuid_str: str,
-        create_query: str,
-        columns: list[dict[str, Any]],
-        metadata_modified_at: int | None,
-        is_refreshable: bool,
-    ) -> dict[str, Any]:
-        return {
-            'name': name,
-            'engine': engine,
-            'uuid': uuid_str,
-            'create_query': create_query,
-            'columns': columns,
-            'metadata_modified_at': int(metadata_modified_at or 0),
-            'is_refreshable': is_refreshable,
+            'is_refreshable': (database, name) in self._refreshable_views,
         }
 
     def _collect_view_refreshes(self, db_filters: str) -> list:
