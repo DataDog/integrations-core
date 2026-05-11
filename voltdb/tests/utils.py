@@ -56,8 +56,7 @@ class EnsureExpectedMetricsShowUp(LazyFunction):
     def __init__(self, instance):
         # type: (Instance) -> None
         self._client = Client(
-            host=instance['host'],
-            port=instance.get('port', 21212),
+            endpoints=[(instance['host'], instance.get('port', 21212))],
             username='admin',
             password='admin',
             use_ssl=instance.get('use_ssl', False),
