@@ -200,7 +200,14 @@ class SqlserverDiagnose:
         azure = self._is_azure_sql_database()
         permission_label = "VIEW DATABASE STATE" if azure else "VIEW SERVER STATE"
         try:
-            if not azure and not _has_server_permission(cursor, "VIEW SERVER STATE"):
+            if azure:
+                if not _has_database_permission(cursor, "VIEW DATABASE STATE"):
+                    self._fail(
+                        code,
+                        diagnosis="The Datadog login does not have VIEW DATABASE STATE on the current database.",
+                    )
+                    return
+            elif not _has_server_permission(cursor, "VIEW SERVER STATE"):
                 self._fail(code, diagnosis="The Datadog login does not have VIEW SERVER STATE.")
                 return
             _execute_read_probe(cursor, "SELECT TOP 1 session_id FROM sys.dm_exec_sessions")
@@ -384,6 +391,11 @@ class SqlserverDiagnose:
 
 def _has_server_permission(cursor: Any, permission: str) -> bool:
     row = _fetchone(cursor, "SELECT HAS_PERMS_BY_NAME(NULL, NULL, ?)", (permission,))
+    return bool(row and row[0] == 1)
+
+
+def _has_database_permission(cursor: Any, permission: str) -> bool:
+    row = _fetchone(cursor, "SELECT HAS_PERMS_BY_NAME(DB_NAME(), 'DATABASE', ?)", (permission,))
     return bool(row and row[0] == 1)
 
 

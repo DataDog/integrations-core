@@ -104,6 +104,7 @@ def _happy_responses(
     *,
     major_version=16,
     engine_edition=2,
+    view_database_state=True,
     connect_any_database=True,
     view_any_definition=True,
     is_rds=False,
@@ -112,6 +113,7 @@ def _happy_responses(
         ("SERVERPROPERTY('ProductMajorVersion')", [(major_version, engine_edition)]),
         ("sys.dm_os_performance_counters", [(1,)]),
         (_permission("VIEW SERVER STATE"), [(1,)]),
+        (_permission("VIEW DATABASE STATE"), [(1 if view_database_state else 0,)]),
         ("sys.dm_exec_sessions", [(1,)]),
         (_permission("CONNECT ANY DATABASE"), [(1 if connect_any_database else 0,)]),
         (_permission("VIEW ANY DEFINITION"), [(1 if view_any_definition else 0,)]),
@@ -336,6 +338,20 @@ def test_azure_sql_database_uses_view_database_state_probe(instance_minimal_defa
     row = _by_name(diagnoses, SQLServerConfigurationError.missing_view_server_state.value)[0]
     assert row['result'] == Diagnosis.DIAGNOSIS_SUCCESS
     assert "VIEW DATABASE STATE" in row['diagnosis']
+
+
+def test_azure_sql_database_missing_view_database_state_fails(instance_minimal_defaults):
+    check = _check(
+        instance_minimal_defaults,
+        _happy_responses(engine_edition=5, view_database_state=False),
+    )
+
+    diagnoses = _get_diagnoses(check)
+
+    row = _by_name(diagnoses, SQLServerConfigurationError.missing_view_server_state.value)[0]
+    assert row['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert "VIEW DATABASE STATE" in row['diagnosis']
+    assert "VIEW SERVER STATE" not in row['diagnosis']
 
 
 def test_azure_sql_database_view_database_state_failure(instance_minimal_defaults):
