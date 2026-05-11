@@ -283,6 +283,46 @@ def test_probe_connection_uses_pool_configuration(integration_check, pg_instance
     configure.assert_called_once_with(conn)
 
 
+@pytest.mark.parametrize(
+    'err',
+    [
+        pytest.param(
+            __import__('botocore.exceptions', fromlist=['NoCredentialsError']).NoCredentialsError(),
+            id='aws-no-credentials',
+        ),
+        pytest.param(
+            __import__('azure.core.exceptions', fromlist=['ClientAuthenticationError']).ClientAuthenticationError(
+                message='managed identity unavailable'
+            ),
+            id='azure-auth-error',
+        ),
+    ],
+)
+def test_non_psycopg_connection_error_surfaces_fail_diagnostic(integration_check, pg_instance, err):
+    """Non-psycopg exceptions from AWS/Azure token providers must produce a
+    connection-failure FAIL row, not an unhandled traceback."""
+    check = integration_check(pg_instance)
+    with mock.patch('datadog_checks.postgres.postgres.TokenAwareConnection.connect', side_effect=err):
+        diagnoses = _get_diagnoses(check)
+    rows = _by_name(diagnoses, DatabaseConfigurationError.connection_failure.value)
+    assert len(rows) == 1
+    assert rows[0]['result'] == Diagnosis.DIAGNOSIS_FAIL
+
+
+def test_configure_connection_failure_emits_connection_fail_diagnostic(integration_check, pg_instance):
+    """When _configure_connection raises on the probe connection, diagnose must close the
+    leaked connection and emit a connection-failure FAIL row rather than crashing."""
+    check = integration_check(pg_instance)
+    conn = mock.MagicMock()
+    with mock.patch('datadog_checks.postgres.postgres.TokenAwareConnection.connect', return_value=conn):
+        with mock.patch.object(check.db_pool, '_configure_connection', side_effect=psycopg.Error('SET failed')):
+            diagnoses = _get_diagnoses(check)
+    conn.close.assert_called()
+    rows = _by_name(diagnoses, DatabaseConfigurationError.connection_failure.value)
+    assert len(rows) == 1
+    assert rows[0]['result'] == Diagnosis.DIAGNOSIS_FAIL
+
+
 # -- Server config diagnostics ------------------------------------------------
 
 
@@ -367,6 +407,34 @@ def test_unsupported_postgres_version_fails(integration_check, pg_instance):
     assert '9.5' in entry['diagnosis']
 
 
+def test_version_probe_psycopg_error_surfaces_underlying_message(integration_check, pg_instance):
+    """A transient connection error during the version probe should surface the underlying
+    psycopg error, not 'NoneType' object is not subscriptable from indexing a swallowed None."""
+    check = integration_check(pg_instance)
+    responses = _override(
+        _happy_server_responses(),
+        'SHOW SERVER_VERSION',
+        psycopg.OperationalError('server closed the connection unexpectedly'),
+    )
+    diagnoses = _run(check, responses)
+    entry = _by_name(diagnoses, DatabaseConfigurationError.postgres_version_unsupported.value)[0]
+    assert entry['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert 'server closed the connection unexpectedly' in entry['diagnosis']
+    assert 'NoneType' not in entry['diagnosis']
+
+
+def test_version_probe_no_rows_fails_clearly(integration_check, pg_instance):
+    """An empty result from SHOW SERVER_VERSION should fail with a clear message rather than
+    crash on None subscripting."""
+    check = integration_check(pg_instance)
+    responses = _override(_happy_server_responses(), 'SHOW SERVER_VERSION', [])
+    diagnoses = _run(check, responses)
+    entry = _by_name(diagnoses, DatabaseConfigurationError.postgres_version_unsupported.value)[0]
+    assert entry['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert 'NoneType' not in entry['diagnosis']
+    assert 'SHOW SERVER_VERSION' in entry['diagnosis']
+
+
 # -- Privilege diagnostics ----------------------------------------------------
 
 
@@ -377,6 +445,35 @@ def test_missing_pg_monitor_role_fails(integration_check, pg_instance):
     entry = _by_name(diagnoses, DatabaseConfigurationError.missing_pg_monitor_role.value)[0]
     assert entry['result'] == Diagnosis.DIAGNOSIS_FAIL
     assert 'pg_monitor' in entry['remediation']
+
+
+def test_pg_monitor_role_existence_probe_psycopg_error_surfaces_underlying_message(integration_check, pg_instance):
+    """A transient error on the pg_roles probe must not be mistaken for PG < 10 (silent skip)."""
+    check = integration_check(pg_instance)
+    responses = _override(
+        _happy_server_responses(),
+        "rolname = 'pg_monitor'",
+        psycopg.OperationalError('server closed the connection unexpectedly'),
+    )
+    diagnoses = _run(check, responses)
+    entry = _by_name(diagnoses, DatabaseConfigurationError.missing_pg_monitor_role.value)[0]
+    assert entry['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert 'server closed the connection unexpectedly' in entry['diagnosis']
+
+
+def test_pg_monitor_has_role_probe_psycopg_error_surfaces_underlying_message(integration_check, pg_instance):
+    """A transient error on the pg_has_role probe must not be misclassified as 'not a member'."""
+    check = integration_check(pg_instance)
+    responses = _override(
+        _happy_server_responses(),
+        'pg_has_role',
+        psycopg.OperationalError('server closed the connection unexpectedly'),
+    )
+    diagnoses = _run(check, responses)
+    entry = _by_name(diagnoses, DatabaseConfigurationError.missing_pg_monitor_role.value)[0]
+    assert entry['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert 'server closed the connection unexpectedly' in entry['diagnosis']
+    assert 'not a member' not in entry['diagnosis']
 
 
 def test_pg_stat_database_access_fails_on_permission_error(integration_check, pg_instance):

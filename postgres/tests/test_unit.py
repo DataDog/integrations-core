@@ -325,3 +325,14 @@ def test_run_explain_uses_parameterized_statement(pg_instance, integration_check
     assert '$stmt$' not in query, "Dollar-quote tag must not appear in the SQL template"
     assert statement not in query, "Statement must not be interpolated into the SQL template"
     assert params == (statement,), "Statement must be passed as a bound parameter"
+
+
+def test_new_connection_closes_conn_when_configure_raises(integration_check, pg_instance):
+    """If _configure_connection raises after connect() succeeds, the connection must be closed."""
+    check = integration_check(pg_instance)
+    conn = mock.MagicMock()
+    with mock.patch('datadog_checks.postgres.postgres.TokenAwareConnection.connect', return_value=conn):
+        with mock.patch.object(check.db_pool, '_configure_connection', side_effect=psycopg.Error('SET failed')):
+            with pytest.raises(psycopg.Error):
+                check._new_connection(check._config.dbname)
+    conn.close.assert_called_once()
