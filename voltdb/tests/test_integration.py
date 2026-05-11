@@ -5,9 +5,9 @@ from typing import Callable  # noqa: F401
 
 import mock
 import pytest
+
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub  # noqa: F401
-
 from datadog_checks.voltdb import VoltDBCheck
 from datadog_checks.voltdb.client import Client
 from datadog_checks.voltdb.types import Instance  # noqa: F401

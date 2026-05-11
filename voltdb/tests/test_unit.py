@@ -6,9 +6,9 @@ import os
 from typing import Optional  # noqa: F401
 
 import pytest
+
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.utils import get_metadata_metrics
-
 from datadog_checks.voltdb.check import VoltDBCheck, _parse_query
 from datadog_checks.voltdb.config import Config
 from datadog_checks.voltdb.types import Instance  # noqa: F401

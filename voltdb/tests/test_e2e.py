@@ -4,6 +4,7 @@
 from typing import Callable  # noqa: F401
 
 import pytest
+
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 
 from . import assertions
