@@ -77,12 +77,7 @@ class TestHappyPath:
         mock_urlopen.return_value.read.return_value = _WHEEL_CONTENT
 
         # Bootstrap root.json from trust anchor
-        trust_anchor = tmp_path / 'root.json'
-        trust_anchor.write_text('{}')
-
-        downloader = TUFPointerDownloader(
-            repository_url=_REPO_URL, trust_anchor=trust_anchor
-        )
+        downloader = TUFPointerDownloader(repository_url=_REPO_URL)
         wheel_path = downloader.download(_PROJECT, version=_VERSION, dest_dir=tmp_path)
 
         assert wheel_path.exists()
@@ -118,10 +113,7 @@ class TestHappyPath:
 
         mock_urlopen.side_effect = fake_urlopen
 
-        trust_anchor = tmp_path / 'root.json'
-        trust_anchor.write_text('{}')
-
-        downloader = TUFPointerDownloader(repository_url=staging_url, trust_anchor=trust_anchor)
+        downloader = TUFPointerDownloader(repository_url=staging_url)
         downloader.download(_PROJECT, version=_VERSION, dest_dir=tmp_path)
 
         wheel_fetch_url = captured_urls[-1]
@@ -135,12 +127,7 @@ class TestHappyPath:
         """get_pointer returns the parsed JSON without downloading the wheel."""
         mock_updater_cls.return_value = _mock_tuf_updater(_POINTER)
 
-        trust_anchor = tmp_path / 'root.json'
-        trust_anchor.write_text('{}')
-
-        downloader = TUFPointerDownloader(
-            repository_url=_REPO_URL, trust_anchor=trust_anchor
-        )
+        downloader = TUFPointerDownloader(repository_url=_REPO_URL)
         pointer = downloader.get_pointer(_PROJECT, version=_VERSION)
 
         assert pointer['version'] == _VERSION
@@ -161,9 +148,7 @@ class TestHappyPath:
         mock_urlopen.return_value.__exit__ = MagicMock(return_value=False)
         mock_urlopen.return_value.read.return_value = _WHEEL_CONTENT
 
-        downloader = TUFPointerDownloader(
-            repository_url=_REPO_URL, trust_anchor=trust_anchor
-        )
+        downloader = TUFPointerDownloader(repository_url=_REPO_URL)
         downloader.download(_PROJECT, dest_dir=tmp_path)
 
         mock_updater.get_targetinfo.assert_called_once_with(target_path)
@@ -184,12 +169,7 @@ class TestTargetNotFound:
         mock_updater.get_targetinfo.return_value = None  # not in TUF metadata
         mock_updater_cls.return_value = mock_updater
 
-        trust_anchor = tmp_path / 'root.json'
-        trust_anchor.write_text('{}')
-
-        downloader = TUFPointerDownloader(
-            repository_url=_REPO_URL, trust_anchor=trust_anchor
-        )
+        downloader = TUFPointerDownloader(repository_url=_REPO_URL)
         with pytest.raises(TargetNotFoundError, match=_PROJECT):
             downloader.get_pointer(_PROJECT, version='99.99.99')
 
@@ -208,12 +188,7 @@ class TestDigestMismatch:
         mock_urlopen.return_value.__exit__ = MagicMock(return_value=False)
         mock_urlopen.return_value.read.return_value = tampered
 
-        trust_anchor = tmp_path / 'root.json'
-        trust_anchor.write_text('{}')
-
-        downloader = TUFPointerDownloader(
-            repository_url=_REPO_URL, trust_anchor=trust_anchor
-        )
+        downloader = TUFPointerDownloader(repository_url=_REPO_URL)
         with pytest.raises(DigestMismatch, match=_PROJECT):
             downloader.download(_PROJECT, version=_VERSION, dest_dir=tmp_path)
 
@@ -229,12 +204,7 @@ class TestDigestMismatch:
         mock_urlopen.return_value.__exit__ = MagicMock(return_value=False)
         mock_urlopen.return_value.read.return_value = _WHEEL_CONTENT
 
-        trust_anchor = tmp_path / 'root.json'
-        trust_anchor.write_text('{}')
-
-        downloader = TUFPointerDownloader(
-            repository_url=_REPO_URL, trust_anchor=trust_anchor
-        )
+        downloader = TUFPointerDownloader(repository_url=_REPO_URL)
         with pytest.raises(DigestMismatch, match='length'):
             downloader.download(_PROJECT, version=_VERSION, dest_dir=tmp_path)
 

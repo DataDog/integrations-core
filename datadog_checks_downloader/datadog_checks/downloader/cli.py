@@ -97,27 +97,7 @@ def instantiate_downloader():
         '-v', '--verbose', action='count', default=0, help='Show verbose information about TUF and in-toto.'
     )
 
-    parser.add_argument(
-        '--format',
-        type=str,
-        default='v1',
-        choices=['v1', 'v2'],
-        help=(
-            'Repository format: v1 (default, simple-index + in-toto) or '
-            'v2 (pointer-file + sha256, used by agent-integrations-tuf).'
-        ),
-    )
 
-    parser.add_argument(
-        '--root-json',
-        type=str,
-        default=None,
-        metavar='PATH',
-        help=(
-            '[v2 only] Path to the initial root.json that bootstraps the TUF trust chain. '
-            'Defaults to TOFU (fetch from the repository) when omitted.'
-        ),
-    )
 
     args = parser.parse_args()
     repository_url_prefix = args.repository
@@ -167,13 +147,12 @@ def run_downloader(tuf_downloader, standard_distribution_name, version, ignore_p
 
 
 def download():
-    # Peek at --format before delegating.  instantiate_downloader() handles v1
-    # only; we handle v2 here so that v1 call-sites are unaffected.
+    # Peek at --index before delegating so that v1 call-sites are unaffected.
     parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument('--format', default='v1', choices=['v1', 'v2'])
+    parser.add_argument('--index', action='store_true', default=False)
     partial_args, _ = parser.parse_known_args()
 
-    if partial_args.format == 'v2':
+    if partial_args.index:
         _download_v2()
     else:
         tuf_downloader, standard_distribution_name, version, ignore_python_version = instantiate_downloader()
@@ -192,19 +171,12 @@ def _download_v2():
     parser.add_argument('--repository', type=str, required=True, help='HTTPS base URL of the v2 TUF repository.')
     parser.add_argument('--version', type=str, default=None, help='Version to download (default: latest stable).')
     parser.add_argument(
-        '--root-json',
-        type=str,
-        default=None,
-        metavar='PATH',
-        help='Path to the initial root.json trust anchor (omit to use TOFU).',
-    )
-    parser.add_argument(
         '--unsafe-disable-verification',
         action='store_true',
         help='Disable TUF verification and wheel digest checks.',
     )
     parser.add_argument('-v', '--verbose', action='count', default=0)
-    parser.add_argument('--format', default='v2', choices=['v1', 'v2'])  # consumed upstream; kept for completeness
+    parser.add_argument('--index', action='store_true', default=True)  # consumed upstream; kept for completeness
 
     # v1 flags that are not applicable in v2: accept and warn so that callers
     # upgrading from v1 get a clear message instead of an argument error.
@@ -224,17 +196,15 @@ def _download_v2():
         raise NonCanonicalVersion(args.version)
 
     if args._type_ignored is not None:
-        sys.stderr.write('WARNING: --type is not applicable with --format v2 and will be ignored.\n')
+        sys.stderr.write('WARNING: --type is not applicable with --index and will be ignored.\n')
     if args._ignore_python_version:
         sys.stderr.write(
-            'NOTE: --ignore-python-version is not applicable with --format v2 '
+            'NOTE: --ignore-python-version is not applicable with --index '
             '(wheel selection happens at publish time).\n'
         )
 
-    trust_anchor = Path(args.root_json) if args.root_json else None
     downloader = TUFPointerDownloader(
         repository_url=args.repository,
-        trust_anchor=trust_anchor,
         verbose=args.verbose,
         disable_verification=args.unsafe_disable_verification,
     )

@@ -6,8 +6,7 @@
 
 The v2 format stores a JSON pointer file as a TUF target at:
 
-    targets/<project>/<version>.json   (versioned)
-    targets/<project>/latest.json      (latest stable, updated on each release)
+    targets/<project>/<version>.json   (versioned pointer)
 
 Each pointer file contains:
 
@@ -26,9 +25,9 @@ before writing to disk.
 """
 
 import hashlib
+import importlib.resources
 import json
 import logging
-import shutil
 import tempfile
 import urllib.error
 import urllib.request
@@ -47,18 +46,12 @@ class TUFPointerDownloader:
     def __init__(
         self,
         repository_url: str,
-        trust_anchor: Path | None = None,
         verbose: int = 0,
         disable_verification: bool = False,
     ):
         """
         repository_url:       HTTPS base URL of the TUF repository, e.g.
                               'https://agent-integration-wheels-staging.s3.amazonaws.com'
-        trust_anchor:         Path to the initial root.json that seeds the TUF
-                              trust chain.  When None, root.json is fetched from
-                              the repository on first use (TOFU — only safe in
-                              controlled CI environments where the caller already
-                              trusts the transport, e.g. via GitHub Actions OIDC).
         disable_verification: Skip TUF metadata verification and wheel digest
                               checks.  Use only as a break-glass escape hatch
                               (mirrors --unsafe-disable-verification in v1).
@@ -68,7 +61,6 @@ class TUFPointerDownloader:
         logging.basicConfig(format='%(levelname)-8s: %(message)s', level=level)
 
         self._repository_url = repository_url.rstrip('/')
-        self._trust_anchor = trust_anchor
         self._disable_verification = disable_verification
 
         if disable_verification:
@@ -82,16 +74,10 @@ class TUFPointerDownloader:
     # ------------------------------------------------------------------
 
     def _bootstrap_metadata_dir(self, metadata_dir: Path) -> None:
-        """Seed *metadata_dir* with the initial root.json trust anchor."""
+        """Seed *metadata_dir* with the bundled initial root.json trust anchor."""
         dest = metadata_dir / 'root.json'
-        if self._trust_anchor is not None:
-            shutil.copy2(self._trust_anchor, dest)
-        else:
-            # TOFU: fetch the versioned initial root from the repository.
-            url = f'{self._repository_url}/metadata/1.root.json'
-            logger.debug('Fetching initial root from %s (TOFU)', url)
-            with urllib.request.urlopen(url) as resp:
-                dest.write_bytes(resp.read())
+        pkg = importlib.resources.files('datadog_checks.downloader')
+        dest.write_bytes((pkg / '1.root.json').read_bytes())
 
     def _make_updater(self, metadata_dir: Path, target_dir: Path) -> Updater:
         return Updater(
