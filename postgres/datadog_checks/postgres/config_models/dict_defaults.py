@@ -86,7 +86,7 @@ def instance_collect_settings():
 
 def instance_collect_schemas():
     return instance.CollectSchemas(
-        enabled=False,
+        enabled=True,
         max_tables=300,
         max_columns=50,
         collection_interval=600,
