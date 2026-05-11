@@ -89,6 +89,7 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['collect_schemas'] = {'enabled': False}
     dbm_instance['query_metrics']['incremental_query_metrics'] = True
     connections = {}
 
@@ -232,6 +233,7 @@ def test_statement_metrics(
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['collect_schemas'] = {'enabled': False}
     connections = {}
 
     def _run_queries():
@@ -339,6 +341,7 @@ def test_wal_metrics(aggregator, integration_check, dbm_instance):
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['collect_schemas'] = {'enabled': False}
 
     connections = {}
 
@@ -372,6 +375,7 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['collect_schemas'] = {'enabled': False}
 
     # The query signature matches the normalized query returned by the mock agent and would need to be
     # updated if the normalized query is updated
@@ -481,6 +485,8 @@ def test_successful_explain(
     # Don't need metrics for this one
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['query_samples']['explain_parameterized_queries'] = False
+    dbm_instance['collect_schemas'] = {'enabled': False}
+
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -563,6 +569,7 @@ def test_failed_explain_handling(
     # Don't need metrics for this one
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['query_samples']['explain_parameterized_queries'] = False
+    dbm_instance['collect_schemas'] = {'enabled': False}
     if explain_function_override:
         dbm_instance['query_samples']['explain_function'] = explain_function_override
     check = integration_check(dbm_instance)
@@ -715,6 +722,7 @@ def test_statement_samples_collect(
 ):
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['collect_schemas'] = {'enabled': False}
     dbm_instance['dbstrict'] = dbstrict
     dbm_instance['dbname'] = dbname
     dbm_instance['ignore_databases'] = ignore_databases
@@ -830,6 +838,7 @@ def test_statement_metadata(
     """Tests for metadata in both samples and metrics"""
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
     dbm_instance['query_metrics']['run_sync'] = True
+    dbm_instance['collect_schemas'] = {'enabled': False}
 
     # If query or normalized_query changes, the query_signatures for both will need to be updated as well.
     query = '''
@@ -911,6 +920,7 @@ def test_statement_reported_hostname(
     expected_hostname,
 ):
     dbm_instance['reported_hostname'] = reported_hostname
+    dbm_instance['collect_schemas'] = {'enabled': False}
 
     check = integration_check(dbm_instance)
 
@@ -1205,7 +1215,7 @@ def test_activity_reported_hostname(
     check = integration_check(dbm_instance)
     check._connect()
 
-    run_one_check(check)
+    run_one_check(check, cancel=False)
     run_one_check(check)
 
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
@@ -1353,6 +1363,7 @@ def test_statement_run_explain_errors(
     dbm_instance['query_activity']['enabled'] = False
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['query_samples']['explain_parameterized_queries'] = False
+    dbm_instance['collect_schemas'] = {'enabled': False}
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -1405,6 +1416,7 @@ def test_statement_run_explain_parameterized_queries(
     dbm_instance['query_activity']['enabled'] = False
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['query_samples']['explain_parameterized_queries'] = True
+    dbm_instance['collect_schemas'] = {'enabled': False}
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -1468,7 +1480,7 @@ def test_async_job_enabled(
     dbm_instance['query_metrics'] = {'enabled': statement_metrics_enabled, 'run_sync': False}
     check = integration_check(dbm_instance)
     check._connect()
-    run_one_check(check)
+    run_one_check(check, cancel=False)
     if statement_samples_enabled or statement_activity_enabled:
         assert check.statement_samples._job_loop_future is not None
     else:
@@ -1701,8 +1713,8 @@ def test_async_job_cancel_cancel(aggregator, integration_check, dbm_instance):
     check = integration_check(dbm_instance)
     check._connect()
     run_one_check(check)
-    assert not check.statement_samples._job_loop_future.running(), "samples thread should be stopped"
-    assert not check.statement_metrics._job_loop_future.running(), "metrics thread should be stopped"
+    assert check.statement_samples._job_loop_future is None, "samples future should be cleaned up after cancel"
+    assert check.statement_metrics._job_loop_future is None, "metrics future should be cleaned up after cancel"
     # if the thread doesn't start until after the cancel signal is set then the db connection will never
     # be created in the first place
     assert check.db_pool.pools.get(dbm_instance['dbname']) is None, "db connection should be gone"
@@ -1988,6 +2000,7 @@ def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['collect_schemas'] = {'enabled': False}
 
     connections = {}
 
@@ -2079,6 +2092,7 @@ def test_metrics_encoding(
         dbm_instance['query_encodings'] = ['latin1', 'utf-8']
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['collect_schemas'] = {'enabled': False}
     # dbm_instance['query_activity']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
@@ -2114,6 +2128,7 @@ def test_samples_encoding(
     dbm_instance,
 ):
     dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['collect_schemas'] = {'enabled': False}
     if POSTGRES_LOCALE == 'C':
         dbm_instance['query_encodings'] = ['latin1', 'utf-8']
     check = integration_check(dbm_instance)

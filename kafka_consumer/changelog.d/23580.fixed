@@ -1,0 +1,1 @@
+Switch cluster monitoring's earliest-offset fetch to AdminClient.list_offsets(earliest), and isolate its failures so an earliest-offset error no longer drops topic.message_rate, partition.isr, topic.config.*, and other unrelated topic-metadata metrics.

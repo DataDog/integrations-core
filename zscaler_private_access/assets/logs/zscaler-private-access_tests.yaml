@@ -664,7 +664,6 @@ tests:
         "Idp" : "Okta",
         "PRAConnectionID" : "PRA-SESSION-1",
         "PRAErrorStatus" : "",
-        "PRASharedUserList" : "{\"shared_user_list\":[{\"name\":\"secops@global.com\"}]}",
         "PRASharedMode" : "control",
         "ConnectionStatus" : "active",
         "PRAApprovalID" : 11111,
@@ -710,7 +709,6 @@ tests:
         PRAErrorStatus: ""
         PRARecordingStatus: "Available"
         PRASharedMode: "control"
-        PRASharedUserList: "{\"shared_user_list\":[{\"name\":\"secops@global.com\"}]}"
         Platform: "linux"
         Policy: "PRA SSH Policy"
         ServicePort: 22
@@ -738,7 +736,6 @@ tests:
           "Idp" : "Okta",
           "PRAConnectionID" : "PRA-SESSION-1",
           "PRAErrorStatus" : "",
-          "PRASharedUserList" : "{\"shared_user_list\":[{\"name\":\"secops@global.com\"}]}",
           "PRASharedMode" : "control",
           "ConnectionStatus" : "active",
           "PRAApprovalID" : 11111,

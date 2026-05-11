@@ -1,0 +1,1 @@
+Make the health check status cache size and TTL configurable via ``health_checks_cache_size`` and ``health_checks_cache_ttl``.

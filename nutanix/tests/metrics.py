@@ -2,8 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from datadog_checks.nutanix.metrics import HOST_STATS_METRICS, HOST_STORAGE_STAT_KEYS
 
 HEALTH_METRICS = ["nutanix.health.up"]
+
+# Host storage_* metric names — derived so test guards stay in sync with the production map.
+HOST_STORAGE_METRICS: frozenset[str] = frozenset(f"nutanix.{HOST_STATS_METRICS[k]}" for k in HOST_STORAGE_STAT_KEYS)
 
 CLUSTER_STATS_METRICS_REQUIRED = [
     "nutanix.cluster.aggregate_hypervisor.memory_usage",
@@ -60,7 +64,7 @@ HOST_STATS_METRICS_REQUIRED = [
 HOST_STATS_METRICS_OPTIONAL = [
     "nutanix.host.cpu_usage",
     "nutanix.host.overall_memory_usage",
-    "nutanix.host.power.consumption.instant_watt",
+    "nutanix.host.power_consumption_instant_watt",
 ]
 
 VM_STATS_METRICS_REQUIRED = [
