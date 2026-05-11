@@ -12,7 +12,7 @@ from pathlib import Path
 
 # 2nd party.
 from .download import DEFAULT_ROOT_LAYOUT_TYPE, REPOSITORY_URL_PREFIX, ROOT_LAYOUTS, TUFDownloader
-from .download_v2 import TUFPointerDownloader
+from .download_v2 import TUFPointerDownloader, V2_REPOSITORY_URL
 from .exceptions import NonCanonicalVersion, NonDatadogPackage
 
 # Private module functions.
@@ -147,16 +147,24 @@ def run_downloader(tuf_downloader, standard_distribution_name, version, ignore_p
 
 
 def download():
-    # Peek at --index before delegating so that v1 call-sites are unaffected.
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument('--v2', action='store_true', default=False)
     partial_args, _ = parser.parse_known_args()
 
     if partial_args.v2:
+        # Explicit --v2: strict v2, no fallback.
         _download_v2()
     else:
-        tuf_downloader, standard_distribution_name, version, ignore_python_version = instantiate_downloader()
-        run_downloader(tuf_downloader, standard_distribution_name, version, ignore_python_version)
+        # Default: attempt v2, fall back to v1 on any failure.
+        try:
+            _download_v2()
+        except Exception as exc:
+            import logging
+            logging.getLogger(__name__).info(
+                'v2 download failed (%s: %s), falling back to v1', type(exc).__name__, exc
+            )
+            tuf_downloader, standard_distribution_name, version, ignore_python_version = instantiate_downloader()
+            run_downloader(tuf_downloader, standard_distribution_name, version, ignore_python_version)
 
 
 def _download_v2():
@@ -168,7 +176,7 @@ def _download_v2():
         type=str,
         help='Standard distribution name of the desired Datadog check, e.g. datadog-postgres.',
     )
-    parser.add_argument('--repository', type=str, required=True, help='HTTPS base URL of the v2 TUF repository.')
+    parser.add_argument('--repository', type=str, default=V2_REPOSITORY_URL, help='HTTPS base URL of the v2 TUF repository.')
     parser.add_argument('--version', type=str, default=None, help='Version to download (default: latest stable).')
     parser.add_argument(
         '--unsafe-disable-verification',

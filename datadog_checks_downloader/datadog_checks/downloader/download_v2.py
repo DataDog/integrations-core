@@ -37,6 +37,8 @@ from tuf.ngclient import Updater
 
 from .exceptions import DigestMismatch, TargetNotFoundError
 
+V2_REPOSITORY_URL = "https://agent-integration-wheels-prod.s3.amazonaws.com"
+
 logger = logging.getLogger(__name__)
 
 
