@@ -20,7 +20,12 @@ from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.config_models import InstanceConfig
 
 from .query_calls_cache import QueryCallsCache
-from .util import DatabaseConfigurationError, payload_pg_version, warning_with_tags
+from .util import (
+    DatabaseConfigurationError,
+    parse_shared_preload_libraries,
+    payload_pg_version,
+    warning_with_tags,
+)
 from .version_utils import V9_4, V10, V14
 
 try:
@@ -196,6 +201,13 @@ class PostgresStatementMetrics(DBMAsyncJob):
             maxsize=config.query_metrics.full_statement_text_cache_max_size,
             ttl=60 * 60 / config.query_metrics.full_statement_text_samples_per_hour_per_query,
         )
+
+    def _shutdown(self):
+        self._check = None
+        self._full_statement_text_cache = None
+        self._state = None
+        self._query_calls_cache = None
+        self._baseline_metrics = None
 
     def _execute_query(self, query, params=(), binary=False, row_factory=None) -> Tuple[list, list]:
         if self._cancel_event.is_set():
@@ -424,35 +436,33 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
             if (isinstance(e, psycopg.errors.ObjectNotInPrerequisiteState)) and 'pg_stat_statements' in str(e):
                 error_tag = "error:database-{}-pg_stat_statements_not_loaded".format(type(e).__name__)
-                self._check.record_warning(
-                    DatabaseConfigurationError.pg_stat_statements_not_loaded,
-                    warning_with_tags(
-                        "Unable to collect statement metrics because pg_stat_statements "
-                        "extension is not loaded in database '%s'. "
-                        "See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
-                        "troubleshooting#%s for more details",
-                        self._config.dbname,
-                        DatabaseConfigurationError.pg_stat_statements_not_loaded.value,
-                        host=self._check.reported_hostname,
-                        dbname=self._config.dbname,
-                        code=DatabaseConfigurationError.pg_stat_statements_not_loaded.value,
-                    ),
-                )
+                self._record_pg_stat_statements_not_loaded()
             elif isinstance(e, psycopg.errors.UndefinedTable) and 'pg_stat_statements' in str(e):
-                error_tag = "error:database-{}-pg_stat_statements_not_created".format(type(e).__name__)
-                self._check.record_warning(
-                    DatabaseConfigurationError.pg_stat_statements_not_created,
-                    warning_with_tags(
-                        "Unable to collect statement metrics because pg_stat_statements is not created "
-                        "in database '%s'. See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
-                        "troubleshooting#%s for more details",
-                        self._config.dbname,
-                        DatabaseConfigurationError.pg_stat_statements_not_created.value,
-                        host=self._check.reported_hostname,
-                        dbname=self._config.dbname,
-                        code=DatabaseConfigurationError.pg_stat_statements_not_created.value,
-                    ),
-                )
+                # UndefinedTable fires whether the extension was never CREATEd OR the library was
+                # never loaded via shared_preload_libraries (you can't CREATE EXTENSION without SPL).
+                # Inspect pg_settings (populated at connect time) to attribute correctly -- otherwise
+                # we'd tell the user to `CREATE EXTENSION` when that command will fail until SPL is
+                # fixed and the server restarted. pg_settings returns an empty string when the
+                # datadog user lacks pg_monitor and can't read SPL; fall back to `not_created` then.
+                spl = self._check.pg_settings.get("shared_preload_libraries", "") or ""
+                if spl and "pg_stat_statements" not in parse_shared_preload_libraries(spl):
+                    error_tag = "error:database-{}-pg_stat_statements_not_loaded".format(type(e).__name__)
+                    self._record_pg_stat_statements_not_loaded()
+                else:
+                    error_tag = "error:database-{}-pg_stat_statements_not_created".format(type(e).__name__)
+                    self._check.record_warning(
+                        DatabaseConfigurationError.pg_stat_statements_not_created,
+                        warning_with_tags(
+                            "Unable to collect statement metrics because pg_stat_statements is not created "
+                            "in database '%s'. See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
+                            "troubleshooting#%s for more details",
+                            self._config.dbname,
+                            DatabaseConfigurationError.pg_stat_statements_not_created.value,
+                            host=self._check.reported_hostname,
+                            dbname=self._config.dbname,
+                            code=DatabaseConfigurationError.pg_stat_statements_not_created.value,
+                        ),
+                    )
             else:
                 self._check.warning(
                     warning_with_tags(
@@ -475,6 +485,23 @@ class PostgresStatementMetrics(DBMAsyncJob):
             )
 
             return []
+
+    def _record_pg_stat_statements_not_loaded(self):
+        code = DatabaseConfigurationError.pg_stat_statements_not_loaded
+        self._check.record_warning(
+            code,
+            warning_with_tags(
+                "Unable to collect statement metrics because pg_stat_statements "
+                "extension is not loaded in database '%s'. "
+                "See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
+                "troubleshooting#%s for more details",
+                self._config.dbname,
+                code.value,
+                host=self._check.reported_hostname,
+                dbname=self._config.dbname,
+                code=code.value,
+            ),
+        )
 
     def _emit_pg_stat_statements_dealloc(self):
         if self._check.version < V14:
