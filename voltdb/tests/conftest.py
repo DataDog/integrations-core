@@ -7,7 +7,6 @@ from typing import Iterator  # noqa: F401
 
 import mock
 import pytest
-
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.voltdb.types import Instance  # noqa: F401
@@ -26,9 +25,21 @@ def dd_environment(instance):
         schema = f.read()
 
     conditions = [
-        CheckDockerLogs(compose_file, patterns=['Server completed initialization'], service='voltdb0'),
-        CheckDockerLogs(compose_file, patterns=['Server completed initialization'], service='voltdb1'),
-        CheckDockerLogs(compose_file, patterns=['Server completed initialization'], service='voltdb2'),
+        CheckDockerLogs(
+            compose_file,
+            patterns=['Server completed initialization'],
+            service='voltdb0',
+        ),
+        CheckDockerLogs(
+            compose_file,
+            patterns=['Server completed initialization'],
+            service='voltdb1',
+        ),
+        CheckDockerLogs(
+            compose_file,
+            patterns=['Server completed initialization'],
+            service='voltdb2',
+        ),
         CreateSchema(compose_file, schema, container_name='voltdb0'),
         EnsureExpectedMetricsShowUp(instance),
     ]
@@ -42,13 +53,18 @@ def dd_environment(instance):
     if common.TLS_ENABLED:
         # Must refer to a path within the Agent container.
         instance = instance.copy()
-        instance['tls_cert'] = '/tmp/voltdb-certs/client.pem'
-        instance['tls_ca_cert'] = '/tmp/voltdb-certs/ca.pem'
+        instance['ssl_config_file'] = '/tmp/voltdb-certs/client_ssl.properties'
         e2e_metadata = {'docker_volumes': ['{}:/tmp/voltdb-certs'.format(common.TLS_CERTS_DIR)]}
     else:
         e2e_metadata = {}
 
-    with docker_run(compose_file, conditions=conditions, env_vars=env_vars, mount_logs=True, attempts=2):
+    with docker_run(
+        compose_file,
+        conditions=conditions,
+        env_vars=env_vars,
+        mount_logs=True,
+        attempts=2,
+    ):
         yield instance, e2e_metadata
 
 
@@ -68,8 +84,8 @@ def instance():
     ]
 
     if common.TLS_ENABLED:
-        instance['tls_cert'] = common.TLS_CERT
-        instance['tls_ca_cert'] = common.TLS_CA_CERT
+        instance['use_ssl'] = True
+        instance['ssl_config_file'] = common.TLS_CONFIG_FILE
 
     return instance
 
@@ -79,25 +95,245 @@ def instance_all(instance):
     # type: (Instance) -> Instance
     instance = common.BASE_INSTANCE.copy()
     instance['statistics_components'] = [
-        "COMMANDLOG",
-        "CPU",
-        "EXPORT",
-        "GC",
-        "IDLETIME",
-        "IMPORT",
-        "INDEX",
-        "IOSTATS",
-        "LATENCY",
-        "MEMORY",
-        "PROCEDURE",
-        "PROCEDUREOUTPUT",
-        "PROCEDUREPROFILE",
-        "QUEUE",
-        "SNAPSHOTSTATUS",
-        "TABLE",
+        'COMMANDLOG',
+        'CPU',
+        'EXPORT',
+        'GC',
+        'IDLETIME',
+        'IMPORT',
+        'INDEX',
+        'IOSTATS',
+        'LATENCY',
+        'MEMORY',
+        'PROCEDURE',
+        'PROCEDUREOUTPUT',
+        'PROCEDUREPROFILE',
+        'QUEUE',
+        'SNAPSHOTSTATUS',
+        'TABLE',
     ]
 
     return instance
+
+    # Column headers for each `@Statistics` component, matching the positional
+    # layout of rows in tests/fixtures/mock_results.json. Used by the mock to expose
+    # `VoltTable.columns` so that the check can look up values by name.
+
+
+MOCK_COLUMN_HEADERS = {
+    'CPU': ['TIMESTAMP', 'HOST_ID', 'HOSTNAME', 'PERCENT_USED'],
+    'MEMORY': [
+        'TIMESTAMP',
+        'HOST_ID',
+        'HOSTNAME',
+        'RSS',
+        'JAVAUSED',
+        'JAVAUNUSED',
+        'TUPLEDATA',
+        'TUPLEALLOCATED',
+        'INDEXMEMORY',
+        'STRINGMEMORY',
+        'TUPLECOUNT',
+        'POOLEDMEMORY',
+        'PHYSICALMEMORY',
+        'JAVAMAXHEAP',
+    ],
+    'SNAPSHOTSTATUS': [
+        'TIMESTAMP',
+        'HOST_ID',
+        'HOSTNAME',
+        'TABLE',
+        'PATH',
+        'FILENAME',
+        'NONCE',
+        'TXNID',
+        'START_TIME',
+        'END_TIME',
+        'SIZE',
+        'DURATION',
+        'THROUGHPUT',
+        'RESULT',
+        'TYPE',
+    ],
+    'COMMANDLOG, 1': [
+        'TIMESTAMP',
+        'HOST_ID',
+        'HOSTNAME',
+        'OUTSTANDING_BYTES',
+        'OUTSTANDING_TXNS',
+        'IN_USE_SEGMENT_COUNT',
+        'SEGMENT_COUNT',
+        'FSYNC_INTERVAL',
+    ],
+    'PROCEDURE, 1': [
+        'TIMESTAMP',
+        'HOST_ID',
+        'HOSTNAME',
+        'SITE_ID',
+        'PARTITION_ID',
+        'PROCEDURE',
+        'INVOCATIONS',
+        'TIMED_INVOCATIONS',
+        'MIN_EXECUTION_TIME',
+        'MAX_EXECUTION_TIME',
+        'AVG_EXECUTION_TIME',
+        'MIN_RESULT_SIZE',
+        'MAX_RESULT_SIZE',
+        'AVG_RESULT_SIZE',
+        'MIN_PARAMETER_SET_SIZE',
+        'MAX_PARAMETER_SET_SIZE',
+        'AVG_PARAMETER_SET_SIZE',
+        'ABORTS',
+        'FAILURES',
+        'TRANSACTIONAL',
+    ],
+    'LATENCY': [
+        'TIMESTAMP',
+        'HOST_ID',
+        'HOSTNAME',
+        'INTERVAL',
+        'COUNT',
+        'TPS',
+        'P50',
+        'P95',
+        'P99',
+        'P99.9',
+        'P99.99',
+        'P99.999',
+        'MAX',
+    ],
+    'GC, 1': [
+        'TIMESTAMP',
+        'HOST_ID',
+        'HOSTNAME',
+        'NEWGEN_GC_COUNT',
+        'NEWGEN_AVG_GC_TIME',
+        'OLDGEN_GC_COUNT',
+        'OLDGEN_AVG_GC_TIME',
+    ],
+    'IOSTATS, 1': [
+        'TIMESTAMP',
+        'HOST_ID',
+        'HOSTNAME',
+        'CONNECTION_ID',
+        'CONNECTION_HOSTNAME',
+        'BYTES_READ',
+        'MESSAGES_READ',
+        'BYTES_WRITTEN',
+        'MESSAGES_WRITTEN',
+    ],
+    'TABLE, 1': [
+        'TIMESTAMP',
+        'HOST_ID',
+        'HOSTNAME',
+        'SITE_ID',
+        'PARTITION_ID',
+        'TABLE_NAME',
+        'TABLE_TYPE',
+        'TUPLE_COUNT',
+        'TUPLE_ALLOCATED_MEMORY',
+        'TUPLE_DATA_MEMORY',
+        'STRING_DATA_MEMORY',
+        'TUPLE_LIMIT',
+        'PERCENT_FULL',
+    ],
+    'INDEX, 1': [
+        'TIMESTAMP',
+        'HOST_ID',
+        'HOSTNAME',
+        'SITE_ID',
+        'PARTITION_ID',
+        'INDEX_NAME',
+        'TABLE_NAME',
+        'INDEX_TYPE',
+        'IS_UNIQUE',
+        'IS_COUNTABLE',
+        'ENTRY_COUNT',
+        'MEMORY_ESTIMATE',
+    ],
+    'EXPORT, 1': [
+        'TIMESTAMP',
+        'HOST_ID',
+        'HOSTNAME',
+        'SITE_ID',
+        'PARTITION_ID',
+        'SOURCE',
+        'TARGET',
+        'ACTIVE',
+        'TUPLE_COUNT',
+        'TUPLE_PENDING',
+        'LAST_QUEUED_TIMESTAMP',
+        'LAST_ACKED_TIMESTAMP',
+        'AVERAGE_LATENCY',
+        'MAX_LATENCY',
+        'QUEUE_GAP',
+        'STATUS',
+    ],
+    'IMPORT, 1': [
+        'TIMESTAMP',
+        'HOST_ID',
+        'HOSTNAME',
+        'SITE_ID',
+        'IMPORTER_NAME',
+        'PROCEDURE_NAME',
+        'SUCCESSES',
+        'FAILURES',
+        'OUTSTANDING_REQUESTS',
+        'RETRIES',
+    ],
+    'QUEUE, 1': [
+        'TIMESTAMP',
+        'HOST_ID',
+        'HOSTNAME',
+        'SITE_ID',
+        'CURRENT_DEPTH',
+        'POLL_COUNT',
+        'AVG_WAIT',
+        'MAX_WAIT',
+    ],
+    'IDLETIME, 1': [
+        'TIMESTAMP',
+        'HOST_ID',
+        'HOSTNAME',
+        'SITE_ID',
+        'COUNT',
+        'PERCENT',
+        'AVG',
+        'MIN',
+        'MAX',
+        'STDDEV',
+    ],
+    'PROCEDUREOUTPUT': [
+        'TIMESTAMP',
+        'PROCEDURE',
+        'WEIGHTED_PERC',
+        'INVOCATIONS',
+        'MIN_RESULT_SIZE',
+        'MAX_RESULT_SIZE',
+        'AVG_RESULT_SIZE',
+        'TOTAL_RESULT_SIZE_MB',
+    ],
+    'PROCEDUREPROFILE': [
+        'TIMESTAMP',
+        'PROCEDURE',
+        'WEIGHTED_PERC',
+        'INVOCATIONS',
+        'AVG',
+        'MIN',
+        'MAX',
+        'ABORTS',
+        'FAILURES',
+    ],
+}
+
+
+def _mock_columns(header_names):
+    columns = []
+    for name in header_names:
+        col = mock.MagicMock()
+        col.name = name
+        columns.append(col)
+    return columns
 
 
 @pytest.fixture(scope='session')
@@ -106,22 +342,35 @@ def mock_results():
     with open(os.path.join(common.HERE, 'fixtures', 'mock_results.json'), 'r') as f:
         mocked_data = json.load(f)
 
-    def mocked_response(data):
-        m = mock.MagicMock()
-        m.json = lambda: {"results": [{"data": data}]}
-        return m
+    def mocked_response(rows, header_names):
+        table = mock.MagicMock()
+        table.tuples = rows
+        table.columns = _mock_columns(header_names)
+        resp = mock.MagicMock()
+        resp.status = 1  # Client.SUCCESS
+        resp.statusString = None
+        resp.tables = [table]
+        return resp
 
-    def mocked_request(procedure, parameters=None):
-        if procedure == '@SystemInformation' and parameters == ['OVERVIEW']:
-            return mocked_response([["host-0", "VERSION", "8.4"]])
+    def mocked_call_procedure(procedure, params=None):
+        params = params or []
+        if procedure == '@SystemInformation' and params == ['OVERVIEW']:
+            return mocked_response([['host-0', 'VERSION', '8.4']], ['HOST_ID', 'KEY', 'VALUE'])
         if procedure != '@Statistics':
-            raise Exception("Bad procedure name")
-        parameters = parameters.strip('[').strip(']')
-        if parameters not in mocked_data:
-            raise Exception("Invalid parameter %s" % parameters)
-
-        return mocked_response(mocked_data[parameters])
+            raise Exception('Bad procedure name: %s' % procedure)
+            # @Statistics params look like ['CPU'] or ['COMMANDLOG', 1].
+        if len(params) == 1:
+            key = params[0]
+        else:
+            key = '{}, {}'.format(params[0], params[1])
+        if key not in mocked_data:
+            raise Exception('Invalid parameter %s' % key)
+        return mocked_response(mocked_data[key], MOCK_COLUMN_HEADERS[key])
 
     with mock.patch('datadog_checks.voltdb.check.Client') as m:
-        m.return_value.request = mocked_request
+        client = m.return_value
+        client.SUCCESS = 1
+        client.call_procedure = mocked_call_procedure
+        client.raise_for_status = lambda r: None
+        client.close = lambda: None
         yield

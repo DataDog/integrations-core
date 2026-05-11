@@ -122,7 +122,14 @@ METRICS = [
             'voltdb.table.string_data_memory',
             'voltdb.table.percent_full',
         ],
-        {'host_id', 'voltdb_hostname', 'site_id', 'partition_id', 'table', 'table_type'},
+        {
+            'host_id',
+            'voltdb_hostname',
+            'site_id',
+            'partition_id',
+            'table',
+            'table_type',
+        },
     ),
     (
         # INDEX
@@ -160,14 +167,10 @@ METADATA_EXCLUDE_METRICS = [
 
 TLS_ENABLED = is_affirmative(os.environ.get('TLS_ENABLED'))
 TLS_CERTS_DIR = os.path.join(HERE, 'compose', 'certs')
-TLS_CERT = os.path.join(TLS_CERTS_DIR, 'client.pem')
-TLS_CA_CERT = os.path.join(TLS_CERTS_DIR, 'ca.pem')
-TLS_PASSWORD = 'tlspass'
+TLS_CONFIG_FILE = os.path.join(TLS_CERTS_DIR, 'client_ssl.properties')
 
 VOLTDB_DEPLOYMENT = os.path.join(HERE, 'compose', 'deployment-tls.xml' if TLS_ENABLED else 'deployment.xml')
-VOLTDB_SCHEME = 'https' if TLS_ENABLED else 'http'
-VOLTDB_CLIENT_PORT = 8443 if TLS_ENABLED else 8080
-VOLTDB_URL = '{}://{}:{}'.format(VOLTDB_SCHEME, HOST, VOLTDB_CLIENT_PORT)
+VOLTDB_CLIENT_PORT = 21212
 
 SERVICE_CHECK_TAGS = ['host:{}'.format(HOST), 'port:{}'.format(VOLTDB_CLIENT_PORT)]
 
@@ -175,8 +178,9 @@ VOLTDB_VERSION = os.environ['VOLTDB_VERSION']
 VOLTDB_IMAGE = os.environ['VOLTDB_IMAGE']
 
 BASE_INSTANCE = {
-    'url': VOLTDB_URL,
+    'host': HOST,
+    'port': VOLTDB_CLIENT_PORT,
     'username': 'doggo',
-    'password': 'doggopass',  # SHA256: e81255cee7bd2c4fbb4c8d6e9d6ba1d33a912bdfa9901dc9acfb2bd7f3e8eeb1
+    'password': 'doggopass',
     'tags': ['test:voltdb'],
 }  # type: Instance

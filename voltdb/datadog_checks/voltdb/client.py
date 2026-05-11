@@ -1,50 +1,108 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
-from typing import Callable, Union  # noqa: F401
-from urllib.parse import urljoin
+from typing import List, Optional  # noqa: F401
 
-import requests
+import voltdbclient
+
+
+class VoltDBError(Exception):
+    """Raised when a VoltDB procedure call returns a non-success status."""
+
+    def __init__(self, status, status_string):
+        # type: (int, Optional[str]) -> None
+        super().__init__('VoltDB procedure failed (status={}): {}'.format(status, status_string))
+        self.status = status
+        self.status_string = status_string
 
 
 class Client(object):
     """
-    A wrapper around the VoltDB HTTP JSON interface.
+    A wrapper around the VoltDB native Python client.
 
-    See: https://docs.voltdb.com/UsingVoltDB/ProgLangJson.php
+    See: https://pypi.org/project/voltdbclient/
     """
 
-    def __init__(self, url, http_get, username, password, password_hashed=False):
-        # type: (str, Callable[..., requests.Response], str, str, bool) -> None
-        self._api_url = urljoin(url, '/api/1.0/')
-        self._auth = VoltDBAuth(username, password, password_hashed)
-        self._http_get = http_get
+    # ClientResponse status code for success.
+    # See: voltdbclient.VoltResponse.status
+    SUCCESS = 1
 
-    def request(self, procedure, parameters=None):
-        # type: (str, Union[str, list]) -> requests.Response
-        url = self._api_url
-        auth = self._auth
-        params = {'Procedure': procedure}
+    def __init__(
+        self,
+        host,
+        port,
+        username='',
+        password='',
+        use_ssl=False,
+        ssl_config_file=None,
+        connect_timeout=8,
+        procedure_timeout=None,
+    ):
+        # type: (str, int, str, str, bool, Optional[str], Optional[float], Optional[float]) -> None
+        self._host = host
+        self._port = port
+        self._username = username or ''
+        self._password = password or ''
+        self._use_ssl = use_ssl
+        self._ssl_config_file = ssl_config_file
+        self._connect_timeout = connect_timeout
+        self._procedure_timeout = procedure_timeout
+        self._fser = None  # type: Optional[voltdbclient.FastSerializer]
 
-        if parameters:
-            if not isinstance(parameters, str):
-                parameters = json.dumps(parameters)
-            params['Parameters'] = parameters
+    def _connect(self):
+        # type: () -> voltdbclient.FastSerializer
+        return voltdbclient.FastSerializer(
+            host=self._host,
+            port=self._port,
+            usessl=self._use_ssl,
+            ssl_config_file=self._ssl_config_file,
+            username=self._username,
+            password=self._password,
+            connect_timeout=self._connect_timeout,
+            procedure_timeout=self._procedure_timeout,
+            default_cacerts=False,
+        )
 
-        return self._http_get(url, auth=auth, params=params)  # SKIP_HTTP_VALIDATION
+    def _get_connection(self):
+        # type: () -> voltdbclient.FastSerializer
+        if self._fser is None:
+            self._fser = self._connect()
+        return self._fser
+
+    def close(self):
+        # type: () -> None
+        if self._fser is not None:
+            try:
+                self._fser.close()
+            except Exception:
+                pass
+            self._fser = None
+
+    def call_procedure(self, procedure, params=None):
+        # type: (str, Optional[list]) -> voltdbclient.VoltResponse
+        params = list(params) if params else []
+        param_types = [_infer_volt_type(p) for p in params]
+        try:
+            fser = self._get_connection()
+            proc = voltdbclient.VoltProcedure(fser, procedure, param_types)
+            return proc.call(params)
+        except Exception:
+            self.close()
+            raise
+
+    def raise_for_status(self, response):
+        # type: (voltdbclient.VoltResponse) -> None
+        if response.status != self.SUCCESS:
+            raise VoltDBError(response.status, response.statusString)
 
 
-class VoltDBAuth(requests.auth.AuthBase):
-    def __init__(self, username, password, password_hashed):
-        # type: (str, str, bool) -> None
-        self._username = username
-        self._password = password
-        self._password_hashed = password_hashed
-
-    def __call__(self, r):
-        # type: (requests.PreparedRequest) -> requests.PreparedRequest
-        # See: https://docs.voltdb.com/UsingVoltDB/ProgLangJson.php
-        params = {'User': self._username, 'Hashedpassword' if self._password_hashed else 'Password': self._password}
-        r.prepare_url(r.url, params)
-        return r
+def _infer_volt_type(value):
+    # type: (object) -> int
+    fs = voltdbclient.FastSerializer
+    if isinstance(value, bool):
+        return fs.VOLTTYPE_TINYINT
+    if isinstance(value, int):
+        return fs.VOLTTYPE_INTEGER
+    if isinstance(value, float):
+        return fs.VOLTTYPE_FLOAT
+    return fs.VOLTTYPE_STRING

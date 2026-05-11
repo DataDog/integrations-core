@@ -1,13 +1,10 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import hashlib
 from typing import Callable  # noqa: F401
 
 import mock
 import pytest
-import requests
-
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub  # noqa: F401
 from datadog_checks.voltdb import VoltDBCheck
@@ -27,33 +24,19 @@ class TestCheck:
         assertions.assert_service_checks(aggregator, instance)
         assertions.assert_metrics(aggregator)
 
-    def test_password_hashed(self, aggregator, instance):
-        # type: (AggregatorStub, Instance) -> None
-        instance = instance.copy()
-        instance['password'] = hashlib.sha256(instance['password'].encode()).hexdigest()
-        instance['password_hashed'] = True
-
-        check = VoltDBCheck('voltdb', {}, [instance])
-        check.run()
-
-        assertions.assert_service_checks(aggregator, instance)
-        assertions.assert_metrics(aggregator)
-
     def test_failure_connection_refused(self, aggregator, instance):
         # type: (AggregatorStub, Instance) -> None
         instance = instance.copy()
-        instance['url'] = 'http://doesnotexist:8080'
+        instance['host'] = 'doesnotexist'
         # Speed up the test
-        instance["timeout"] = 2
+        instance['connect_timeout'] = 2
 
         check = VoltDBCheck('voltdb', {}, [instance])
 
-        with pytest.raises(Exception) as ctx:
+        with pytest.raises(Exception):
             check.check(instance)
-        error = str(ctx.value)
-        assert error
 
-        tags = ['host:doesnotexist', 'port:8080']
+        tags = ['host:doesnotexist', 'port:{}'.format(instance.get('port', 21212))]
         assertions.assert_service_checks(aggregator, instance, connect_status=VoltDBCheck.CRITICAL, tags=tags)
 
     def test_failure_unauthorized(self, aggregator, instance):
@@ -63,38 +46,10 @@ class TestCheck:
 
         check = VoltDBCheck('voltdb', {}, [instance])
 
-        with pytest.raises(Exception) as ctx:
+        with pytest.raises(Exception):
             check.check(instance)
-        error = str(ctx.value)
-        assert '401 Client Error: Unauthorized' in error
 
         assertions.assert_service_checks(aggregator, instance, connect_status=VoltDBCheck.CRITICAL)
-
-    def test_http_error(self, aggregator, instance):
-        # type: (AggregatorStub, Instance) -> None
-        check = VoltDBCheck('voltdb', {}, [instance])
-
-        with mock.patch('requests.Session.get', side_effect=requests.RequestException('Something failed')):
-            error = check.run()
-
-        assert 'Something failed' in error
-
-        assertions.assert_service_checks(aggregator, instance, connect_status=VoltDBCheck.CRITICAL)
-        aggregator.assert_all_metrics_covered()  # No metrics collected.
-
-    def test_http_response_error(self, aggregator, instance):
-        # type: (AggregatorStub, Instance) -> None
-        check = VoltDBCheck('voltdb', {}, [instance])
-
-        resp = requests.Response()
-        resp.status_code = 503
-        with mock.patch('requests.Session.get', return_value=resp):
-            error = check.run()
-
-        assert '503 Server Error' in error
-
-        assertions.assert_service_checks(aggregator, instance, connect_status=VoltDBCheck.CRITICAL)
-        aggregator.assert_all_metrics_covered()  # No metrics collected.
 
     def test_custom_tags(self, aggregator, instance):
         # type: (AggregatorStub, Instance) -> None
@@ -120,10 +75,18 @@ class MockSysInfoClient(Client):
         self._client = client
         self._app = app
 
-    def request(self, procedure, parameters=None):
+    def call_procedure(self, procedure, params=None):
         if procedure == '@SystemInformation':
             return self._app()
-        return self._client.request(procedure, parameters=parameters)
+        return self._client.call_procedure(procedure, params=params)
+
+    def raise_for_status(self, response):
+        # Mock responses already have status set by the test app.
+        if response.status != Client.SUCCESS:
+            self._client.raise_for_status(response)
+
+    def close(self):
+        self._client.close()
 
 
 @pytest.mark.integration
@@ -153,9 +116,17 @@ class TestVersionMetadata:
     def test_malformed(self, instance, datadog_agent):
         # type: (Instance, DatadogAgentStub) -> None
         def app():
-            r = mock.MagicMock()
-            r.json.return_value = {'results': [{'data': [('0', 'VERSION', 'not_a_version_string')]}]}
-            return r
+            table = mock.MagicMock()
+            table.tuples = [('0', 'VERSION', 'not_a_version_string')]
+            table.columns = [
+                mock.MagicMock(**{'name': 'HOST_ID'}),
+                mock.MagicMock(**{'name': 'KEY'}),
+                mock.MagicMock(**{'name': 'VALUE'}),
+            ]
+            resp = mock.MagicMock()
+            resp.status = Client.SUCCESS
+            resp.tables = [table]
+            return resp
 
         check_id = 'test'
         check = VoltDBCheck('voltdb', {}, [instance])
@@ -183,9 +154,17 @@ class TestVersionMetadata:
     def test_no_version_column(self, aggregator, instance, datadog_agent):
         # type: (AggregatorStub, Instance, DatadogAgentStub) -> None
         def app():
-            r = mock.MagicMock()
-            r.json.return_value = {'results': [{'data': [('0', 'THIS_IS_NOT_VERSION', 'test')]}]}
-            return r
+            table = mock.MagicMock()
+            table.tuples = [('0', 'THIS_IS_NOT_VERSION', 'test')]
+            table.columns = [
+                mock.MagicMock(**{'name': 'HOST_ID'}),
+                mock.MagicMock(**{'name': 'KEY'}),
+                mock.MagicMock(**{'name': 'VALUE'}),
+            ]
+            resp = mock.MagicMock()
+            resp.status = Client.SUCCESS
+            resp.tables = [table]
+            return resp
 
         check_id = 'test'
         check = VoltDBCheck('voltdb', {}, [instance])

@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any, List, Optional, cast  # noqa: F401
 
-import requests  # noqa: F401
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryManager
 
@@ -20,14 +18,22 @@ class VoltDBCheck(AgentCheck):
         # type: (str, dict, list) -> None
         super(VoltDBCheck, self).__init__(name, init_config, instances)
 
-        self._config = Config(cast(Instance, self.instance), debug=self.log.debug)
-        self.register_secret(self._config.password)
+        self._config = Config(
+            cast(Instance, self.instance),
+            debug=self.log.debug,
+            warning=self.log.warning,
+        )
+        if self._config.password:
+            self.register_secret(self._config.password)
         self._client = Client(
-            url=self._config.url,
-            http_get=self.http.get,
+            host=self._config.host,
+            port=self._config.port,
             username=self._config.username,
             password=self._config.password,
-            password_hashed=self._config.password_hashed,
+            use_ssl=self._config.use_ssl,
+            ssl_config_file=self._config.ssl_config_file,
+            connect_timeout=self._config.connect_timeout,
+            procedure_timeout=self._config.procedure_timeout,
         )
 
         self._query_manager = QueryManager(
@@ -38,37 +44,22 @@ class VoltDBCheck(AgentCheck):
         )
         self.check_initializations.append(self._query_manager.compile_queries)
 
-    def _raise_for_status_with_details(self, response):
-        # type: (requests.Response) -> None
-        try:
-            response.raise_for_status()
-        except Exception as exc:
-            message = 'Error response from VoltDB: {}'.format(exc)
-            try:
-                # Try including detailed error message from response.
-                details = response.json()['statusstring']
-            except Exception:
-                pass
-            else:
-                message += ' (details: {})'.format(details)
-            raise Exception(message) from exc
-
     def _fetch_version(self):
         # type: () -> Optional[str]
         # See: https://docs.voltdb.com/UsingVoltDB/sysprocsysteminfo.php#sysprocsysinforetvalovervw
-        response = self._client.request('@SystemInformation', parameters=['OVERVIEW'])
-        self._raise_for_status_with_details(response)
+        response = self._client.call_procedure('@SystemInformation', ['OVERVIEW'])
+        self._client.raise_for_status(response)
 
-        data = response.json()
-        rows = data['results'][0]['data']  # type: List[tuple]
+        rows = response.tables[0].tuples  # type: List[list]
 
         # NOTE: there will be one VERSION row per server in the cluster.
         # Arbitrarily use the first one we see.
-        for _, column, value in rows:
+        for row in rows:
+            _, column, value = row[0], row[1], row[2]
             if column == 'VERSION':
                 return self._transform_version(value)
 
-        self.log.debug('VERSION column not found: %s', [column for _, column, _ in rows])
+        self.log.debug('VERSION column not found: %s', [row[1] for row in rows])
         return None
 
     def _transform_version(self, raw):
@@ -109,17 +100,58 @@ class VoltDBCheck(AgentCheck):
 
     def _execute_query_raw(self, query):
         # type: (str) -> List[tuple]
-        # Ad-hoc format, close to the HTTP API format.
-        # Eg 'A:[B, C]' -> '?Procedure=A&Parameters=[B, C]'
-        procedure, _, parameters = query.partition(":")
+        # Ad-hoc format: 'A:[B, C]' -> procedure A called with parameters [B, C].
+        procedure, params = _parse_query(query)
 
-        response = self._client.request(procedure, parameters=parameters)
-        self._raise_for_status_with_details(response)
+        response = self._client.call_procedure(procedure, params)
+        self._client.raise_for_status(response)
 
-        data = response.json()
-        return data['results'][0]['data']
+        table = response.tables[0]
+        sources = self._config.query_sources.get(query)
+        if not sources:
+            # Custom query or no source mapping: return rows as-is for QueryManager
+            # to consume positionally.
+            return [tuple(row) for row in table.tuples]
+
+            # Project the response onto the source columns declared in queries.py,
+            # looking them up by name. Missing columns become None so newer/older
+            # VoltDB releases that add or drop columns don't break the check.
+        col_index = {col.name: i for i, col in enumerate(table.columns)}
+        indices = [col_index.get(source) if source else None for source in sources]
+        missing = [s for s, i in zip(sources, indices) if s and i is None]
+        if missing:
+            self.log.debug(
+                'VoltDB response for %s is missing columns %s; values will be reported as None.',
+                procedure,
+                missing,
+            )
+
+        return [tuple(row[i] if i is not None else None for i in indices) for row in table.tuples]
+
+    def cancel(self):
+        # type: () -> None
+        self._client.close()
 
     def check(self, _):
         # type: (Any) -> None
         self._check_can_connect_and_submit_version()
         self._query_manager.execute()
+
+
+def _parse_query(query):
+    # type: (str) -> tuple
+    procedure, _, params_str = query.partition(':')
+    procedure = procedure.strip()
+    params_str = params_str.strip()
+    if not params_str:
+        return procedure, []
+    if params_str.startswith('[') and params_str.endswith(']'):
+        params_str = params_str[1:-1]
+    parts = [p.strip() for p in params_str.split(',') if p.strip()]
+    params = []
+    for part in parts:
+        try:
+            params.append(int(part))
+        except ValueError:
+            params.append(part)
+    return procedure, params

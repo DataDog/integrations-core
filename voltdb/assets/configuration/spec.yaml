@@ -5,29 +5,95 @@ files:
     options:
       - template: init_config
         options:
-          - template: init_config/http
           - template: init_config/db
           - template: init_config/default
 
       - template: instances
         options:
-          - name: url
-            description: URL to a VoltDB client endpoint.
+          - name: host
+            description: Host of the VoltDB cluster member to connect to.
             fleet_configurable: true
-            formats: ["url"]
-            required: true
-            display_priority: 3
+            display_priority: 5
+            value:
+              type: string
+              example: localhost
+
+          - name: url
+            description: |
+              **Deprecated**: The legacy HTTP/JSON endpoint URL (e.g. `http://localhost:8080`).
+              Use `host` and `port` instead. If `url` is set and `host` is not, the host is
+              extracted from the URL and the default native client port (21212) is used.
+            hidden: true
+            deprecation:
+              Agent version: 7.80.0
+              Migration: |
+                Use `host` and (optionally) `port` instead.
             value:
               type: string
               example: http://localhost:8080
 
-          - name: password_hashed
+          - name: port
             description: |
-              Set to true if the `password` value refers to a hashed version of the password.
-            display_priority: 1
+              Native client port of the VoltDB cluster member.
+
+              See: https://docs.voltdb.com/UsingVoltDB/HostConfigPortOpts.php
+            fleet_configurable: true
+            display_priority: 4
+            value:
+              type: integer
+              example: 21212
+
+          - name: username
+            description: The username to use to authenticate with VoltDB.
+            display_priority: 3
+            value:
+              type: string
+              example: <USERNAME>
+
+          - name: password
+            description: The password to use to authenticate with VoltDB.
+            display_priority: 3
+            secret: true
+            value:
+              type: string
+              example: <PASSWORD>
+
+          - name: use_ssl
+            description: |
+              Set to `true` to connect to VoltDB using TLS.
+
+              See: https://docs.voltdb.com/UsingVoltDB/SecuritySSL.php
+            display_priority: 2
             value:
               type: boolean
               example: false
+
+          - name: ssl_config_file
+            description: |
+              Path to a VoltDB SSL configuration file that defines the Java keystore
+              and truststore files used by the native Python client.
+
+              See: https://docs.voltdb.com/UsingVoltDB/SecuritySSL.php
+            display_priority: 2
+            value:
+              type: string
+              example: <SSL_CONFIG_FILE_PATH>
+
+          - name: connect_timeout
+            description: Connection timeout (in seconds) when establishing the native client connection.
+            display_priority: 1
+            value:
+              type: number
+              example: 8
+
+          - name: procedure_timeout
+            description: |
+              Timeout (in seconds) for individual stored procedure calls.
+              If unset, the call waits indefinitely for a response.
+            display_priority: 1
+            value:
+              type: number
+              example: 60
 
           - name: statistics_components
             fleet_configurable: true
@@ -70,27 +136,6 @@ files:
                 - SNAPSHOTSTATUS
                 - TABLE
 
-          - template: instances/http
-            overrides:
-              username.display_priority: 2
-              username.required: true
-              username.description: The username to use to authenticate with VoltDB.
-              password.display_priority: 2
-              password.required: true
-              password.description: The password to use to authenticate with VoltDB.
-              auth_type.hidden: true
-              ntlm_domain.hidden: true
-              kerberos_auth.hidden: true
-              kerberos_cache.hidden: true
-              kerberos_delegate.hidden: true
-              kerberos_force_initiate.hidden: true
-              kerberos_hostname.hidden: true
-              kerberos_principal.hidden: true
-              kerberos_keytab.hidden: true
-              auth_token.hidden: true
-              aws_region.hidden: true
-              aws_host.hidden: true
-              aws_service.hidden: true
           - template: instances/db
           - template: instances/default
 
