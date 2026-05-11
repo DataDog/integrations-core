@@ -114,11 +114,21 @@ def _workflow_started_non_zero() -> None:
 
     Raises with the last seen samples on failure so that ``WaitFor``'s ``RetryError`` surfaces
     actionable diagnostics on timeout (e.g. n8n renamed the counter, or no execution fired).
+    Parses the metric value as a float so that ``0.0`` / ``0e+0`` are recognised as zero and
+    ``# HELP``/``# TYPE`` comment lines that happen to share the prefix are skipped.
     """
     payload = requests.get(common.MAIN_INSTANCE['openmetrics_endpoint'], timeout=3).text
-    matching = [line for line in payload.splitlines() if line.startswith('n8n_workflow_started_total')]
-    if any(not line.endswith(' 0') for line in matching):
-        return
+    matching: list[str] = []
+    for line in payload.splitlines():
+        if line.startswith('#') or not line.startswith('n8n_workflow_started_total'):
+            continue
+        matching.append(line)
+        try:
+            value = float(line.rsplit(' ', 1)[-1])
+        except ValueError:
+            continue
+        if value > 0:
+            return
     raise RuntimeError(f'No non-zero workflow_started_total samples yet. Last seen: {matching or "<none>"}')
 
 

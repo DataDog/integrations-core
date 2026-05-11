@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from functools import cached_property
+from typing import Any
 from urllib.parse import urljoin, urlparse
 
 from requests.exceptions import RequestException
@@ -18,20 +20,21 @@ class N8nCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = 'n8n'
     DEFAULT_METRIC_LIMIT = 0
 
-    def get_default_config(self) -> dict:
+    def get_default_config(self) -> dict[str, Any]:
         return {
             'metrics': [METRIC_MAP],
             'rename_labels': RENAME_LABELS_MAP,
             'raw_metric_prefix': 'n8n_',
         }
 
+    @cached_property
     def _readiness_endpoint(self) -> str:
         parsed = urlparse(self.config.openmetrics_endpoint)
         base = f'{parsed.scheme}://{parsed.netloc}'
         return urljoin(base, DEFAULT_READY_PATH)
 
     def _check_n8n_readiness(self) -> None:
-        endpoint = self._readiness_endpoint()
+        endpoint = self._readiness_endpoint
         tags = list(self.config.tags or ())
 
         try:
@@ -48,6 +51,6 @@ class N8nCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             tags=tags + [f'status_code:{response.status_code}'],
         )
 
-    def check(self, instance: dict) -> None:
+    def check(self, instance: dict[str, Any]) -> None:
         self._check_n8n_readiness()
         super().check(instance)

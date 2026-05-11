@@ -51,7 +51,7 @@ def test_all_metadata_metrics_emitted(warmed_both: AggregatorStub):
     # ``exclude_rare=True`` metadata subset symmetrically drops them from the expected
     # set so check_symmetric_inclusion stays stable in both directions.
     warmed_both.assert_metrics_using_metadata(
-        common.get_all_metadata_metrics(exclude_rare=True),
+        common.get_metadata_metrics_for_version(exclude_rare=True),
         check_submission_type=True,
         check_symmetric_inclusion=True,
         exclude=list(common.RARE_EVENT_METRIC_NAMES),

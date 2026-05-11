@@ -75,7 +75,10 @@ V2_ONLY_METRIC_NAMES = frozenset(
 # Metrics that are mapped and present in metadata but only emit samples after a specific
 # event fires (auth failure, audit state transition, libuv request mid-flight). The unit
 # fixture has synthetic samples for them; live integration/e2e runs cannot guarantee
-# samples and exclude them from the symmetric metadata assertion.
+# samples and exclude them from the symmetric metadata assertion. A metric can appear in
+# both ``V2_ONLY_METRIC_NAMES`` and this set when it is 2.x-only *and* event-gated; the
+# duplication is intentional, so each rule stays auditable in isolation when v1 runs (which
+# strip ``V2_ONLY_METRIC_NAMES`` first) and v2 runs (which strip this set on top).
 RARE_EVENT_METRIC_NAMES = frozenset(
     {
         'n8n.audit.workflow.archived.count',
@@ -141,7 +144,12 @@ def get_fixture_path(filename: str) -> str:
 
 
 def get_metadata_metrics_for_version(major: int = N8N_MAJOR, *, exclude_rare: bool = False) -> dict:
-    """Return the metadata.csv subset that the given n8n major version is expected to emit."""
+    """Return the metadata.csv subset that the given n8n major version is expected to emit.
+
+    Includes ``CHECK_LEVEL_METRIC_NAMES`` (e.g. ``n8n.readiness.check``) because they are submitted
+    by the check itself, not by the OpenMetrics scrape. Use ``get_openmetrics_metadata_metrics``
+    when asserting only against the OpenMetrics surface.
+    """
     metadata = get_metadata_metrics()
     if major < 2:
         for name in V2_ONLY_METRIC_NAMES:
@@ -158,8 +166,3 @@ def get_openmetrics_metadata_metrics(major: int = N8N_MAJOR, *, exclude_rare: bo
     for name in CHECK_LEVEL_METRIC_NAMES:
         metadata.pop(name, None)
     return metadata
-
-
-def get_all_metadata_metrics(major: int = N8N_MAJOR, *, exclude_rare: bool = False) -> dict:
-    """Version-aware metadata subset including the readiness gauge submitted by the check."""
-    return get_metadata_metrics_for_version(major, exclude_rare=exclude_rare)

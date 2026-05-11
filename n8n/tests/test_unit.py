@@ -89,7 +89,7 @@ def test_readiness_check_unreachable(aggregator: AggregatorStub, initialized_che
 def test_readiness_uses_endpoint_host_not_metrics_path(initialized_check: N8nCheck):
     """The readiness endpoint must be derived from the host, not appended to /metrics."""
     expected = f'http://{common.HOST}:{common.MAIN_PORT}/healthz/readiness'
-    assert initialized_check._readiness_endpoint() == expected
+    assert initialized_check._readiness_endpoint == expected
 
 
 def test_version_metadata(

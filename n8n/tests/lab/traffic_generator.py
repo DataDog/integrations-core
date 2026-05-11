@@ -36,22 +36,24 @@ CONFIG_PATH = LAB_DIR / "config.yaml"
 
 MAIN_BASE_URL = "http://localhost:5678"
 
-shutdown_event = asyncio.Event()
-current_config: ConfigDict = {}
 
+def _load_config(path: Path, fallback: ConfigDict) -> tuple[ConfigDict, str]:
+    """Read ``path`` and return ``(new_config, error_message)``.
 
-def _load_config(path: Path) -> tuple[ConfigDict, str]:
+    On any failure the ``fallback`` config is returned unchanged together with a non-empty
+    error message describing why the reload was rejected.
+    """
     try:
         with open(path) as f:
             data = yaml.safe_load(f) or {}
     except FileNotFoundError:
-        return current_config, f"Reload failed: config file {path} not found — lab still running with previous config."
+        return fallback, f"Reload failed: config file {path} not found. Lab still running with previous config."
     except yaml.YAMLError as exc:
-        return current_config, f"Reload failed: cannot parse {path} ({exc}) — lab still running with previous config."
+        return fallback, f"Reload failed: cannot parse {path} ({exc}). Lab still running with previous config."
 
     if not isinstance(data, dict):
-        return current_config, (
-            f"Reload failed: {path} must be a mapping at the top level — lab still running with previous config."
+        return fallback, (
+            f"Reload failed: {path} must be a mapping at the top level. Lab still running with previous config."
         )
 
     return data, ""
@@ -67,10 +69,6 @@ def _wait_for_endpoint(url: str, *, timeout: int = 90) -> None:
             pass
         time.sleep(2)
     raise RuntimeError(f"Endpoint {url} never became reachable")
-
-
-def _signal_handler(_sig, _frame) -> None:
-    shutdown_event.set()
 
 
 def _print_row(console: Console, ts: str, scenario: str, target: str, status: str, latency_ms: str) -> None:
@@ -111,27 +109,33 @@ def _draws(probability: float) -> int:
     return whole + extra
 
 
-async def _config_reloader(path: Path, console: Console) -> None:
-    global current_config
+async def _config_reloader(
+    path: Path, console: Console, shutdown_event: asyncio.Event, state: dict[str, ConfigDict]
+) -> None:
     while not shutdown_event.is_set():
-        new_config, error = _load_config(path)
+        new_config, error = _load_config(path, state["current"])
         if error:
             console.print(f"[bold yellow]{error}[/bold yellow]")
-        elif new_config != current_config:
-            current_config = new_config
+        elif new_config != state["current"]:
+            state["current"] = new_config
             console.print(f"[bold cyan]Reloaded config from {path}[/bold cyan]")
         try:
-            await asyncio.wait_for(shutdown_event.wait(), timeout=float(current_config.get("reload_interval", 5)))
+            await asyncio.wait_for(shutdown_event.wait(), timeout=float(state["current"].get("reload_interval", 5)))
         except asyncio.TimeoutError:
             pass
 
 
 async def _run_traffic(console: Console) -> None:
-    global current_config
-    current_config, error = _load_config(CONFIG_PATH)
+    shutdown_event = asyncio.Event()
+    loop = asyncio.get_running_loop()
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        loop.add_signal_handler(sig, shutdown_event.set)
+
+    initial, error = _load_config(CONFIG_PATH, {})
     if error:
         console.print(f"[bold red]{error}[/bold red]")
         sys.exit(1)
+    state: dict[str, ConfigDict] = {"current": initial}
 
     console.print(
         f"[dim]Traffic config: {CONFIG_PATH}\n"
@@ -139,15 +143,16 @@ async def _run_traffic(console: Console) -> None:
         "Edit config.yaml while the lab runs to change the mix.[/dim]\n"
     )
 
-    reloader = asyncio.create_task(_config_reloader(CONFIG_PATH, console))
+    reloader = asyncio.create_task(_config_reloader(CONFIG_PATH, console, shutdown_event, state))
     async with httpx.AsyncClient() as client:
         try:
             while not shutdown_event.is_set():
+                current = state["current"]
                 tasks = []
-                for path, probability in (current_config.get("webhook_probabilities") or {}).items():
+                for path, probability in (current.get("webhook_probabilities") or {}).items():
                     for _ in range(_draws(float(probability))):
                         tasks.append(_hit(client, console, "webhook", path))
-                for path, probability in (current_config.get("api_probabilities") or {}).items():
+                for path, probability in (current.get("api_probabilities") or {}).items():
                     for _ in range(_draws(float(probability))):
                         tasks.append(_hit(client, console, "api", path))
                 if tasks:
@@ -155,7 +160,7 @@ async def _run_traffic(console: Console) -> None:
                 try:
                     await asyncio.wait_for(
                         shutdown_event.wait(),
-                        timeout=float(current_config.get("tick_seconds", 1.0)),
+                        timeout=float(state["current"].get("tick_seconds", 1.0)),
                     )
                 except asyncio.TimeoutError:
                     pass
@@ -216,8 +221,6 @@ def start(env: str) -> None:
 def generate() -> None:
     """Drive a continuous, configurable traffic mix against the running lab."""
     console = Console()
-    signal.signal(signal.SIGINT, _signal_handler)
-    signal.signal(signal.SIGTERM, _signal_handler)
     try:
         asyncio.run(_run_traffic(console))
     except KeyboardInterrupt:

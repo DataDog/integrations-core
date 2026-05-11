@@ -21,7 +21,7 @@ def test_check_n8n_e2e(
     aggregator.assert_metric('n8n.readiness.check', value=1, tags=['status_code:200', 'n8n_process:worker'], at_least=1)
 
     aggregator.assert_metrics_using_metadata(
-        common.get_all_metadata_metrics(exclude_rare=True),
+        common.get_metadata_metrics_for_version(exclude_rare=True),
         check_submission_type=True,
         check_symmetric_inclusion=True,
         exclude=list(common.RARE_EVENT_METRIC_NAMES),
