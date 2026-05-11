@@ -5,6 +5,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from requests import Response
+
 from datadog_checks.base.utils.http import RequestsWrapper
 
 if TYPE_CHECKING:
@@ -17,8 +19,13 @@ class OrchestratorClient:
     def __init__(self, http: RequestsWrapper, orch_ip: str) -> None:
         self._http = http
         self._base_url = f'https://{orch_ip}'
+        self._creds: tuple[str, str] | None = None
 
     def login(self, username: str, password: str) -> None:
+        self._do_login(username, password)
+        self._creds = (username, password)
+
+    def _do_login(self, username: str, password: str) -> None:
         resp = self._http.post(
             f'{self._base_url}/gms/rest/authentication/login',
             json={'user': username, 'password': password},
@@ -28,6 +35,18 @@ class OrchestratorClient:
         if csrf_token:
             self._http.session.headers.update({'X-XSRF-TOKEN': csrf_token})
 
+    def _request(self, method: str, path: str, *, raise_on_error: bool = True, **kwargs: Any) -> Response:
+        """Issue an HTTP request, transparently re-logging in once on 401 (expired session)."""
+        url = f'{self._base_url}{path}'
+        send = getattr(self._http, method)
+        resp = send(url, **kwargs)
+        if resp.status_code == 401 and self._creds is not None:
+            self._do_login(*self._creds)
+            resp = send(url, **kwargs)
+        if raise_on_error:
+            resp.raise_for_status()
+        return resp
+
     def get_appliances(self) -> list[dict[str, Any]]:
         resp = self._http.get(f'{self._base_url}/gms/rest/appliance')
         resp.raise_for_status()
@@ -35,8 +54,7 @@ class OrchestratorClient:
 
     def get_overlay_config(self) -> tuple[dict[str, str], dict[str, str]]:
         """Fetch overlay configuration and derive id -> name mappings for overlays and traffic classes."""
-        resp = self._http.get(f'{self._base_url}/gms/rest/gms/overlays/config')
-        resp.raise_for_status()
+        resp = self._request('get', '/gms/rest/gms/overlays/config')
         data = resp.json()
         overlay_map: dict[str, str] = {}
         traffic_class_map: dict[str, str] = {}
@@ -63,12 +81,17 @@ class ApplianceClient:
         self._base_url = f'https://{app_ip}'
         self._app_ip = app_ip
         self._log = logger
+        self._creds: tuple[str, str] | None = None
 
     @property
     def app_ip(self) -> str:
         return self._app_ip
 
     def login(self, username: str, password: str) -> None:
+        self._do_login(username, password)
+        self._creds = (username, password)
+
+    def _do_login(self, username: str, password: str) -> None:
         resp = self._http.post(
             f'{self._base_url}/rest/json/login',
             json={'user': username, 'password': password},
@@ -82,25 +105,39 @@ class ApplianceClient:
             if session_id:
                 self._http.session.headers.update({'vxoaSessionID': session_id})
 
+    def _request(self, method: str, path: str, *, raise_on_error: bool = True, **kwargs: Any) -> Response:
+        """Issue an HTTP request, transparently re-logging in once on 401 (expired session)."""
+        url = f'{self._base_url}{path}'
+        send = getattr(self._http, method)
+        resp = send(url, **kwargs)
+        if resp.status_code == 401 and self._creds is not None:
+            self._do_login(*self._creds)
+            resp = send(url, **kwargs)
+        if raise_on_error:
+            resp.raise_for_status()
+        return resp
+
     def get_newest_timestamp(self) -> int:
-        resp = self._http.get(f'{self._base_url}/rest/json/stats/minuteRange')
-        resp.raise_for_status()
-        return int(resp.json()['newest'])
+        resp = self._request('get', '/rest/json/stats/minuteRange')
+        payload = resp.json()
+        newest = payload.get('newest')
+        if newest is None:
+            raise ValueError(
+                f"Missing 'newest' field in minuteRange response from appliance {self._app_ip}: {payload!r}"
+            )
+        return int(newest)
 
     def get_minute_stats(self, filename: str) -> bytes:
-        resp = self._http.get(
-            f'{self._base_url}/rest/json/stats/minuteStats/{filename}',
-        )
-        resp.raise_for_status()
+        resp = self._request('get', f'/rest/json/stats/minuteStats/{filename}')
         return resp.content
 
     def get_network_interfaces(self) -> dict[str, Any]:
-        resp = self._http.get(f'{self._base_url}/rest/json/networkInterfaces')
-        resp.raise_for_status()
+        resp = self._request('get', '/rest/json/networkInterfaces')
         return resp.json()
 
     def get_cpu_stats(self, timestamp: int) -> dict[str, Any] | None:
-        resp = self._http.get(f'{self._base_url}/rest/json/cpustat?time={timestamp}')
+        # 403 here means the user lacks admin permission, not an expired session, so we don't retry.
+        resp = self._request('get', f'/rest/json/cpustat?time={timestamp}', raise_on_error=False)
         if resp.status_code == 403:
             self._log.warning("403 fetching CPU stats from %s, no admin permissions", self._app_ip)
             return None
@@ -108,21 +145,17 @@ class ApplianceClient:
         return resp.json()
 
     def get_memory_stats(self) -> dict[str, Any]:
-        resp = self._http.get(f'{self._base_url}/rest/json/memory')
-        resp.raise_for_status()
+        resp = self._request('get', '/rest/json/memory')
         return resp.json()
 
     def get_disk_usage(self) -> dict[str, Any]:
-        resp = self._http.get(f'{self._base_url}/rest/json/diskUsage')
-        resp.raise_for_status()
+        resp = self._request('get', '/rest/json/diskUsage')
         return resp.json()
 
     def get_alarms(self) -> dict[str, Any]:
-        resp = self._http.get(f'{self._base_url}/rest/json/alarm')
-        resp.raise_for_status()
+        resp = self._request('get', '/rest/json/alarm')
         return resp.json()
 
     def get_system_info(self) -> dict[str, Any]:
-        resp = self._http.get(f'{self._base_url}/rest/json/systemInfo')
-        resp.raise_for_status()
+        resp = self._request('get', '/rest/json/systemInfo')
         return resp.json()

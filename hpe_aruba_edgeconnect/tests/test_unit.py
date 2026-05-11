@@ -14,22 +14,22 @@ from datadog_checks.hpe_aruba_edgeconnect.client import ApplianceClient, Orchest
 from datadog_checks.hpe_aruba_edgeconnect.metrics_store import AggType, MetricsStore
 from datadog_checks.hpe_aruba_edgeconnect.models import Appliance, Appliances, _ip_matches_any
 from datadog_checks.hpe_aruba_edgeconnect.ndm_models import PAYLOAD_METADATA_BATCH_SIZE
-from datadog_checks.hpe_aruba_edgeconnect.parsers.appperf import AppperfStats
-from datadog_checks.hpe_aruba_edgeconnect.parsers.dscp import DscpStats
-from datadog_checks.hpe_aruba_edgeconnect.parsers.interface import (
+from datadog_checks.hpe_aruba_edgeconnect.parsers.minute_stats import (
+    AppperfStats,
+    DscpStats,
     InterfaceOverlayStats,
     InterfacePeakStats,
     InterfaceStats,
-)
-from datadog_checks.hpe_aruba_edgeconnect.parsers.minute_stats import MinuteStats
-from datadog_checks.hpe_aruba_edgeconnect.parsers.probe import ProbeStats
-from datadog_checks.hpe_aruba_edgeconnect.parsers.shaper import ShaperStats
-from datadog_checks.hpe_aruba_edgeconnect.parsers.tunnel import (
     JitterStats,
+    MinuteStats,
     MosStats,
+    ProbeStats,
+    ShaperStats,
     TunnelPeakStats,
     TunnelV2Stats,
 )
+
+pytestmark = pytest.mark.unit
 
 FIXTURE_DIR = Path(__file__).parent / 'fixtures'
 TGZ_FILES = sorted(FIXTURE_DIR.glob('*.tgz'))
@@ -159,18 +159,18 @@ EXPECTED_METRIC_COUNTS = {
     'interface.utilization.tx.max': 5,
     'interface.utilization.rx.max': 5,
     # Tunnel throughput (33 tunnels × 2 sides)
-    'tunnel.throughput.tx.bps.count': 66,
-    'tunnel.throughput.rx.bps.count': 66,
-    'tunnel.throughput.tx.bps.rate': 66,
-    'tunnel.throughput.rx.bps.rate': 66,
-    'tunnel.throughput.tx.pps.count': 66,
-    'tunnel.throughput.rx.pps.count': 66,
-    'tunnel.throughput.tx.pps.rate': 66,
-    'tunnel.throughput.rx.pps.rate': 66,
-    'tunnel.throughput.tx.bps.max': 66,
-    'tunnel.throughput.rx.bps.max': 66,
-    'tunnel.throughput.tx.pps.max': 66,
-    'tunnel.throughput.rx.pps.max': 66,
+    'tunnel.throughput.tx.bytes.count': 66,
+    'tunnel.throughput.rx.bytes.count': 66,
+    'tunnel.throughput.tx.bytes.rate': 66,
+    'tunnel.throughput.rx.bytes.rate': 66,
+    'tunnel.throughput.tx.packets.count': 66,
+    'tunnel.throughput.rx.packets.count': 66,
+    'tunnel.throughput.tx.packets.rate': 66,
+    'tunnel.throughput.rx.packets.rate': 66,
+    'tunnel.throughput.tx.bytes.max': 66,
+    'tunnel.throughput.rx.bytes.max': 66,
+    'tunnel.throughput.tx.packets.max': 66,
+    'tunnel.throughput.rx.packets.max': 66,
     # Tunnel latency (33 tunnels)
     'tunnel.latency': 33,
     'tunnel.latency.min': 33,
@@ -253,15 +253,15 @@ EXPECTED_VALUES = [
     ('interface.bandwidth.tx.max', 1332, ['interface_name:wan0', 'traffic_type:pass-through-unshaped']),
     ('interface.bandwidth.rx.max', 696, ['interface_name:wan0', 'traffic_type:pass-through-unshaped']),
     # --- tunnel throughput: pass-through-unshaped wan (aggregated across two minutes) ---
-    ('tunnel.throughput.tx.bps.count', 76320, ['tunnel_name:pass-through-unshaped', 'side:wan']),
-    ('tunnel.throughput.tx.bps.rate', 5088.0, ['tunnel_name:pass-through-unshaped', 'side:wan']),
-    ('tunnel.throughput.rx.bps.count', 83984, ['tunnel_name:pass-through-unshaped', 'side:wan']),
+    ('tunnel.throughput.tx.bytes.count', 76320, ['tunnel_name:pass-through-unshaped', 'side:wan']),
+    ('tunnel.throughput.tx.bytes.rate', 636.0, ['tunnel_name:pass-through-unshaped', 'side:wan']),
+    ('tunnel.throughput.rx.bytes.count', 83984, ['tunnel_name:pass-through-unshaped', 'side:wan']),
     # --- tunnel latency: tunnel_12 → to_NewYorkSP01_MPLS1-MPLS1 ---
     ('tunnel.latency', 1.4, ['tunnel_name:to_NewYorkSP01_MPLS1-MPLS1']),
     ('tunnel.latency.min', 1.38, ['tunnel_name:to_NewYorkSP01_MPLS1-MPLS1']),
     # --- tunnel peak: pass-through-unshaped wan ---
-    ('tunnel.throughput.tx.bps.max', 1272, ['tunnel_name:pass-through-unshaped', 'side:wan']),
-    ('tunnel.throughput.rx.bps.max', 1160, ['tunnel_name:pass-through-unshaped', 'side:wan']),
+    ('tunnel.throughput.tx.bytes.max', 1272, ['tunnel_name:pass-through-unshaped', 'side:wan']),
+    ('tunnel.throughput.rx.bytes.max', 1160, ['tunnel_name:pass-through-unshaped', 'side:wan']),
     # --- tunnel jitter: bondedTunnel_16 ---
     ('tunnel.jitter', 350, ['tunnel_name:bondedTunnel_16']),
     ('tunnel.jitter.max', 6, ['tunnel_name:bondedTunnel_16']),
@@ -463,10 +463,7 @@ def _call_record(row, store, tags):
 
 
 def _parse(parser_cls, content, logger):
-    try:
-        return list(parser_cls.parse(content, logger))
-    except TypeError:
-        return list(parser_cls.parse(content))
+    return list(parser_cls.parse(content, logger))
 
 
 # ---------------------------------------------------------------------------
@@ -684,12 +681,25 @@ def test_resolve_credentials(ip, overrides, expected_username, expected_password
         pytest.param(None, 1000, [1000], id='first_run'),
         pytest.param('1000', 1000, [], id='up_to_date'),
         pytest.param('100', 220, [220, 160], id='catchup_newest_first'),
+        pytest.param(
+            '100',
+            100 + 12 * 60,
+            [(100 + 12 * 60) - i * 60 for i in range(10)],
+            id='catchup_capped_at_max_backfill',
+        ),
     ],
 )
 def test_timestamps_to_fetch(check, mocker, cached_value, latest_timestamp, expected):
     mocker.patch.object(check, 'read_persistent_cache', return_value=cached_value)
+    warning = mocker.patch.object(check.log, 'warning')
+
     result = check._timestamps_to_fetch('10.0.0.1', latest_timestamp)
+
     assert result == expected
+    if len(expected) == check.config.max_backfill_minutes and cached_value is not None:
+        warning.assert_called_once()
+    else:
+        warning.assert_not_called()
 
 
 def test_get_overlay_config_returns_overlay_and_traffic_class_maps():
@@ -862,7 +872,12 @@ def test_interface_stats_record_skips_utilization_when_max_bw_zero(logger):
 
 
 def test_all_metrics_covered(all_metrics_aggregator):
-    all_metrics_aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    all_metrics_aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(),
+        check_submission_type=True,
+        check_metric_type=True,
+        check_symmetric_inclusion=True,
+    )
 
 
 def test_metric_counts(all_metrics_aggregator):
@@ -898,6 +913,32 @@ def test_collection_step_failure_does_not_block_others(dd_run_check, aggregator,
     aggregator.assert_metric(f'{NS}.device.cpu.usage', count=5)
     aggregator.assert_metric(f'{NS}.device.cpu.usage', value=58.0, tags=BASE_DEVICE_TAGS + ['cpu_state:idle'])
     aggregator.assert_metric(f'{NS}.device.hardware.ok', count=1)
+
+
+def test_orchestrator_login_failure_emits_no_metrics(dd_run_check, aggregator, mocker, check):
+    orch = _setup_mocks(mocker, check, APPLIANCE_PAYLOAD)
+    orch.login.side_effect = Exception('bad credentials')
+
+    with pytest.raises(Exception, match='bad credentials'):
+        dd_run_check(check, extract_message=True)
+
+    assert not [m for m in aggregator.metric_names if m.startswith(f'{NS}.')]
+    assert aggregator.get_event_platform_events('network-devices-metadata') == []
+    orch.get_appliances.assert_not_called()
+    assert check._orch_client is None
+
+
+def test_orchestrator_get_appliances_failure_emits_no_metrics(dd_run_check, aggregator, mocker, check):
+    orch = _setup_mocks(mocker, check, APPLIANCE_PAYLOAD)
+    orch.get_appliances.side_effect = Exception('orch unreachable')
+
+    with pytest.raises(Exception, match='orch unreachable'):
+        dd_run_check(check, extract_message=True)
+
+    assert not [m for m in aggregator.metric_names if m.startswith(f'{NS}.')]
+    assert aggregator.get_event_platform_events('network-devices-metadata') == []
+    orch.login.assert_called_once()
+    assert check._orch_client is None
 
 
 def test_up_to_date_appliance_skips_minute_stats_recording(dd_run_check, aggregator, mocker, check):

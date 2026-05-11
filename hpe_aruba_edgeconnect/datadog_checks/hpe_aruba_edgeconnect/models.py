@@ -7,11 +7,24 @@ import ipaddress
 import logging
 from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, NotRequired, TypedDict
 
 from .constants import NDM_DEVICE_RESOURCE_TAG, NDM_DEVICE_USER_TAGS_RESOURCE_TAG
 
 log = logging.getLogger(__name__)
+
+
+class IpFilter(TypedDict):
+    """Filter selecting which appliance IPs to monitor (matches ``ApplianceIps`` config model)."""
+
+    include: NotRequired[list[str] | None]
+    exclude: NotRequired[list[str] | None]
+
+
+class ApplianceCredentialOverride(TypedDict):
+    cidr: str
+    username: str
+    password: str
 
 
 @dataclass(init=False, slots=True)
@@ -132,7 +145,7 @@ class Appliances:
     def __len__(self) -> int:
         return len(self._appliances)
 
-    def filter(self, ip_filter: dict[str, Any] | None) -> None:
+    def filter(self, ip_filter: IpFilter | None) -> None:
         if not ip_filter:
             return
         include = ip_filter.get('include')
@@ -146,27 +159,22 @@ class Appliances:
         self,
         default_username: str,
         default_password: str,
-        overrides: list[dict[str, Any]] | None = None,
+        overrides: list[ApplianceCredentialOverride] | None = None,
     ) -> None:
         for appliance in self._appliances:
             appliance.username = default_username
             appliance.password = default_password
             for cred in overrides or []:
                 cidr = cred.get('cidr')
-                if not cidr:
-                    continue
                 try:
                     if ipaddress.ip_address(appliance.ip) in ipaddress.ip_network(cidr, strict=False):
-                        username = cred.get('username')
-                        password = cred.get('password')
-                        if username and password:
-                            appliance.username = username
-                            appliance.password = password
-                            log.debug(
-                                "Using CIDR-matched credentials for appliance %s (matched %s)",
-                                appliance.ip,
-                                cidr,
-                            )
+                        appliance.username = cred.get('username')
+                        appliance.password = cred.get('password')
+                        log.debug(
+                            "Using CIDR-matched credentials for appliance %s (matched %s)",
+                            appliance.ip,
+                            cidr,
+                        )
                         break
                 except ValueError:
                     continue

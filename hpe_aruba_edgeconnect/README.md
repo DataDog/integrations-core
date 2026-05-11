@@ -74,7 +74,7 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
     ```
     logs_enabled: true
     ```
-2. Uncomment and edit the logs configuration block in your `prefect.d/conf.yaml` file. For example:
+2. Uncomment and edit the logs configuration block in your `hpe_aruba_edgeconnect.d/conf.yaml` file. For example:
 
     ```
     logs:
@@ -94,7 +94,7 @@ The HPE Aruba EdgeConnect integration does not include any service checks.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][8].
 
 
 [1]: https://www.hpe.com/es/es/aruba-edgeconnect-sd-wan.html
@@ -104,5 +104,4 @@ Need help? Contact [Datadog support][9].
 [5]: https://docs.datadoghq.com/agent/configuration/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/configuration/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/hpe_aruba_edgeconnect/metadata.csv
-[8]: https://github.com/DataDog/integrations-core/blob/master/hpe_aruba_edgeconnect/assets/service_checks.json
-[9]: https://docs.datadoghq.com/help/
+[8]: https://docs.datadoghq.com/help/

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import re
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
 
@@ -25,8 +26,7 @@ from .ndm_models import (
     create_interface_metadata,
     create_tunnel_metadata,
 )
-from .parsers.minute_stats import MinuteStats
-from .parsers.tunnel import TunnelV2Stats
+from .parsers.minute_stats import MinuteStats, TunnelV2Stats
 
 _CPU_STATE_FIELDS = {
     'user': 'pUser',
@@ -53,22 +53,19 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
 
     def _get_orch_client(self) -> OrchestratorClient:
         if self._orch_client is not None:
-            try:
-                self._orch_client.get_overlay_config()
-                self.log.debug("Reusing cached orchestrator session")
-                return self._orch_client
-            except Exception:
-                self.log.debug("Cached orchestrator session expired, re-logging in")
-                self._orch_client.login(self.config.username, self.config.password)
-                return self._orch_client
+            return self._orch_client
         client = OrchestratorClient(self.http, self.config.orch_ip)
         client.login(self.config.username, self.config.password)
         self._orch_client = client
         return client
 
     def check(self, _: Any) -> None:
-        orch_client = self._get_orch_client()
-        appliances = self._collect_appliances_from_orch(orch_client)
+        try:
+            orch_client = self._get_orch_client()
+            appliances = self._collect_appliances_from_orch(orch_client)
+        except Exception:
+            self._orch_client = None
+            raise
         current_ips = {ap.ip for ap in appliances}
         stale_ips = set(self._appliance_clients) - current_ips
         for ip in stale_ips:
@@ -80,6 +77,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
                 try:
                     f.result()
                 except Exception:
+                    self._appliance_clients.pop(ap.ip, None)
                     self.log.warning("Failed to collect from appliance %s", ap.ip, exc_info=True)
 
     def _submit_metadata(
@@ -135,14 +133,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
     def _create_appliance_client(self, app_ip: str, username: str, password: str) -> ApplianceClient:
         cached = self._appliance_clients.get(app_ip)
         if cached is not None:
-            try:
-                cached.get_newest_timestamp()
-                self.log.debug("Reusing cached session for appliance %s", app_ip)
-                return cached
-            except Exception:
-                self.log.debug("Cached session expired for appliance %s, re-logging in", app_ip)
-                cached.login(username, password)
-                return cached
+            return cached
         http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
         http.persist_connections = True
         http.options['auth'] = None
@@ -223,39 +214,43 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         else:
             self.log.debug("Appliance %s stats are up to date (last timestamp: %d)", app_ip, newest)
 
-        collectors = [
-            lambda: self._collect_network_interfaces(client, base_tags, device_id, newest),
-            lambda: self._collect_cpu_stats(client, base_tags, newest),
-            lambda: self._collect_memory_stats(client, base_tags),
-            lambda: self._collect_disk_stats(client, base_tags),
-            lambda: self._collect_alarm_stats(client, base_tags),
-            lambda: self._collect_system_info(client, base_tags),
+        collectors: list[tuple[str, Callable[[], None]]] = [
+            ('network_interfaces', lambda: self._collect_network_interfaces(client, base_tags, device_id, newest)),
+            ('cpu_stats', lambda: self._collect_cpu_stats(client, base_tags, newest)),
+            ('memory_stats', lambda: self._collect_memory_stats(client, base_tags)),
+            ('disk_stats', lambda: self._collect_disk_stats(client, base_tags)),
+            ('alarm_stats', lambda: self._collect_alarm_stats(client, base_tags)),
+            ('system_info', lambda: self._collect_system_info(client, base_tags)),
         ]
         if latest_tunnel_stats:
             collectors.append(
-                lambda: self._submit_metadata(
-                    [
-                        create_tunnel_metadata(
-                            t,
-                            app_ip,
-                            appliance.site,
-                            namespace,
-                            self._peer_lookup,
-                            self._overlay_map,
-                            self.log,
-                        )
-                        for t in latest_tunnel_stats
-                    ],
-                    newest,
+                (
+                    'tunnel_metadata',
+                    lambda: self._submit_metadata(
+                        [
+                            create_tunnel_metadata(
+                                t,
+                                app_ip,
+                                appliance.site,
+                                namespace,
+                                self._peer_lookup,
+                                self._overlay_map,
+                                self.log,
+                            )
+                            for t in latest_tunnel_stats
+                        ],
+                        newest,
+                    ),
                 )
             )
-        with ThreadPoolExecutor(max_workers=len(collectors)) as pool:
-            futs = {pool.submit(fn): fn for fn in collectors}
+        max_workers = min(len(collectors), self.config.max_concurrency)
+        with ThreadPoolExecutor(max_workers=max_workers) as pool:
+            futs = {pool.submit(fn): name for name, fn in collectors}
             for f in as_completed(futs):
                 try:
                     f.result()
                 except Exception:
-                    self.log.warning("Collection step failed for appliance %s", app_ip, exc_info=True)
+                    self.log.warning("Collection step %s failed for appliance %s", futs[f], app_ip, exc_info=True)
 
     def _collect_network_interfaces(
         self,

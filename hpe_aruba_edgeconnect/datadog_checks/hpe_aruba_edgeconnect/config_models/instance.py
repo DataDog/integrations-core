@@ -31,9 +31,9 @@ class ApplianceCredential(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    cidr: Optional[str] = None
-    password: Optional[str] = None
-    username: Optional[str] = None
+    cidr: str
+    password: str
+    username: str
 
 
 class ApplianceIps(BaseModel):

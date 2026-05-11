@@ -10,13 +10,13 @@ from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from .parsers.tunnel import parse_tunnel_alias
+from .parsers.minute_stats import parse_tunnel_alias
 
 if TYPE_CHECKING:
     from datadog_checks.base.log import CheckLoggingAdapter
 
     from .models import Appliance
-    from .parsers.tunnel import TunnelV2Stats
+    from .parsers.minute_stats import TunnelV2Stats
 
 INTEGRATION = 'hpe_aruba_edgeconnect'
 VENDOR = 'aruba'
@@ -135,7 +135,7 @@ def create_device_metadata(appliance: Appliance, namespace: str) -> DeviceMetada
             f'device_id:{device_id}',
         ],
         ip_address=appliance.ip,
-        status=STATUS_REACHABLE if appliance.state == 1 else STATUS_UNREACHABLE,
+        status=STATUS_REACHABLE if appliance.is_reachable else STATUS_UNREACHABLE,
         name=appliance.host_name,
         vendor=VENDOR,
         serial_number=appliance.serial,
@@ -175,7 +175,7 @@ def create_tunnel_metadata(
 ) -> TunnelMetadata:
     peer_hostname, wan_labels = parse_tunnel_alias(tunnel.tunnel_alias)
     if not peer_hostname:
-        log.debug("Peer hostname is not present on the tunnel alias %r", peer_hostname, tunnel.tunnel_alias)
+        log.debug("Peer hostname is not present on the tunnel alias %r", tunnel.tunnel_alias)
     peer_ip, peer_site = peer_lookup.get(peer_hostname, ('', ''))
     if peer_hostname and not peer_ip:
         log.warning(

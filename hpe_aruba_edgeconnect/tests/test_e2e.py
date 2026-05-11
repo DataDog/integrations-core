@@ -39,18 +39,18 @@ EXPECTED_METRIC_COUNTS = {
     'interface.utilization.rx.avg': 3,
     'interface.utilization.tx.max': 3,
     'interface.utilization.rx.max': 3,
-    'tunnel.throughput.tx.bps.count': 66,
-    'tunnel.throughput.rx.bps.count': 66,
-    'tunnel.throughput.tx.bps.rate': 66,
-    'tunnel.throughput.rx.bps.rate': 66,
-    'tunnel.throughput.tx.pps.count': 66,
-    'tunnel.throughput.rx.pps.count': 66,
-    'tunnel.throughput.tx.pps.rate': 66,
-    'tunnel.throughput.rx.pps.rate': 66,
-    'tunnel.throughput.tx.bps.max': 66,
-    'tunnel.throughput.rx.bps.max': 66,
-    'tunnel.throughput.tx.pps.max': 66,
-    'tunnel.throughput.rx.pps.max': 66,
+    'tunnel.throughput.tx.bytes.count': 66,
+    'tunnel.throughput.rx.bytes.count': 66,
+    'tunnel.throughput.tx.bytes.rate': 66,
+    'tunnel.throughput.rx.bytes.rate': 66,
+    'tunnel.throughput.tx.packets.count': 66,
+    'tunnel.throughput.rx.packets.count': 66,
+    'tunnel.throughput.tx.packets.rate': 66,
+    'tunnel.throughput.rx.packets.rate': 66,
+    'tunnel.throughput.tx.bytes.max': 66,
+    'tunnel.throughput.rx.bytes.max': 66,
+    'tunnel.throughput.tx.packets.max': 66,
+    'tunnel.throughput.rx.packets.max': 66,
     'tunnel.latency': 33,
     'tunnel.latency.min': 33,
     'tunnel.latency.max': 33,
@@ -78,6 +78,7 @@ EXPECTED_METRIC_COUNTS = {
     'qos.class.bandwidth.rx.rate': 4,
     'qos.class.bandwidth.tx.max': 4,
     'qos.class.bandwidth.rx.max': 4,
+    'application.latency': 6,
 }
 
 
@@ -112,15 +113,15 @@ EXPECTED_VALUES = [
     ('interface.bandwidth.tx.max', 1332, ['interface_name:wan0', 'traffic_type:pass-through-unshaped']),
     ('interface.bandwidth.rx.max', 696, ['interface_name:wan0', 'traffic_type:pass-through-unshaped']),
     # Tunnel throughput: pass-through-unshaped wan (single-archive aggregation).
-    ('tunnel.throughput.tx.bps.count', 38796, ['tunnel_name:pass-through-unshaped', 'side:wan']),
-    ('tunnel.throughput.tx.bps.rate', 5172.8, ['tunnel_name:pass-through-unshaped', 'side:wan']),
-    ('tunnel.throughput.rx.bps.count', 42456, ['tunnel_name:pass-through-unshaped', 'side:wan']),
+    ('tunnel.throughput.tx.bytes.count', 38796, ['tunnel_name:pass-through-unshaped', 'side:wan']),
+    ('tunnel.throughput.tx.bytes.rate', 646.6, ['tunnel_name:pass-through-unshaped', 'side:wan']),
+    ('tunnel.throughput.rx.bytes.count', 42456, ['tunnel_name:pass-through-unshaped', 'side:wan']),
     # Tunnel latency: tunnel_12 → to_NewYorkSP01_MPLS1-MPLS1.
     ('tunnel.latency', 1.39, ['tunnel_name:to_NewYorkSP01_MPLS1-MPLS1']),
     ('tunnel.latency.min', 1.38, ['tunnel_name:to_NewYorkSP01_MPLS1-MPLS1']),
     # Tunnel peak: pass-through-unshaped wan.
-    ('tunnel.throughput.tx.bps.max', 1272, ['tunnel_name:pass-through-unshaped', 'side:wan']),
-    ('tunnel.throughput.rx.bps.max', 1160, ['tunnel_name:pass-through-unshaped', 'side:wan']),
+    ('tunnel.throughput.tx.bytes.max', 1272, ['tunnel_name:pass-through-unshaped', 'side:wan']),
+    ('tunnel.throughput.rx.bytes.max', 1160, ['tunnel_name:pass-through-unshaped', 'side:wan']),
     # Tunnel jitter: bondedTunnel_16 (single sample).
     ('tunnel.jitter', 600, ['tunnel_name:bondedTunnel_16']),
     ('tunnel.jitter.max', 6, ['tunnel_name:bondedTunnel_16']),
@@ -148,6 +149,8 @@ EXPECTED_VALUES = [
     # Nexthop: om_passThrough_6 admin=60, oper=0.
     ('nexthop.status', 60, ['probe_name:om_passThrough_6', 'status_type:admin']),
     ('nexthop.status', 0, ['probe_name:om_passThrough_6', 'status_type:oper']),
+    # Application latency: microsoft cnd from appperf_v2.txt (single-archive aggregation).
+    ('application.latency', 5.0, ['application:microsoft', 'tunnel_name:bondedTunnel_16', 'latency_type:cnd']),
 ]
 
 

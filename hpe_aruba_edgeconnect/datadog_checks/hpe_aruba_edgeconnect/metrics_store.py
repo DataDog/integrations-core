@@ -42,14 +42,16 @@ class MetricsStore:
 
 
 def _aggregate(agg_type: AggType, values: list[float]) -> float:
-    if agg_type is AggType.SUM:
-        return sum(values)
-    if agg_type is AggType.AVG:
-        return sum(values) / len(values)
-    if agg_type is AggType.MAX:
-        return max(values)
-    if agg_type is AggType.MIN:
-        return min(values)
-    if agg_type is AggType.LAST:
-        return values[-1]
-    raise ValueError(f"Invalid aggregation type: {agg_type}")
+    match agg_type:
+        case AggType.SUM:
+            return sum(values)
+        case AggType.AVG:
+            return sum(values) / len(values)
+        case AggType.MAX:
+            return max(values)
+        case AggType.MIN:
+            return min(values)
+        case AggType.LAST:
+            return values[-1]
+        case _:
+            raise ValueError(f"Invalid aggregation type: {agg_type}")
