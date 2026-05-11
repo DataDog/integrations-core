@@ -66,7 +66,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             self._api.get_version()
             self.gauge('api.can_connect', 1, tags=self._base_tags)
         except (ConnectionError, HTTPError, InvalidURL, Timeout) as e:
-            self.log.warning('Could not connect to PowerFlex Gateway: %s', e)
+            self.log.warning('Could not connect to PowerFlex Gateway, skipping metric collection: %s', e)
             self.gauge('api.can_connect', 0, tags=self._base_tags)
             return
         self._collect_systems()
@@ -76,18 +76,12 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         self._collect_sds_list()
         self._collect_sdc_list()
         self._collect_devices()
-        now = datetime.now(tz=timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
-        if self.config.collect_events:
-            last_event_ts = self.read_persistent_cache('last_event_timestamp') or now
-            if self._collect_events(last_event_ts):
-                self.write_persistent_cache('last_event_timestamp', now)
-        if self.config.collect_alerts:
-            last_alert_ts = self.read_persistent_cache('last_alert_timestamp') or now
-            if self._collect_alerts(last_alert_ts):
-                self.write_persistent_cache('last_alert_timestamp', now)
+        self._collect_events_and_alerts()
 
     def _collect_systems(self) -> None:
-        for system in self._api.get_systems():
+        systems = self._api.get_systems()
+        self.log.debug('Collected %d systems', len(systems))
+        for system in systems:
             try:
                 self._collect_system(system)
             except Exception as e:
@@ -109,7 +103,9 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         self._collect_system_statistics(system['id'], tags)
 
     def _collect_volumes(self) -> None:
-        for volume in self._api.get_volumes():
+        volumes = self._api.get_volumes()
+        self.log.debug('Collected %d volumes', len(volumes))
+        for volume in volumes:
             try:
                 if not should_collect_resource('volume', volume, self._resource_filters, self.log):
                     continue
@@ -134,7 +130,9 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             self._collect_volume_statistics(volume['id'], tags)
 
     def _collect_storage_pools(self) -> None:
-        for pool in self._api.get_storage_pools():
+        storage_pools = self._api.get_storage_pools()
+        self.log.debug('Collected %d storage pools', len(storage_pools))
+        for pool in storage_pools:
             try:
                 if not should_collect_resource('storage_pool', pool, self._resource_filters, self.log):
                     continue
@@ -159,7 +157,9 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         self._collect_bwc_metrics(stats, STORAGE_POOL_STATS_BWC_METRICS, tags)
 
     def _collect_protection_domains(self) -> None:
-        for pd in self._api.get_protection_domains():
+        protection_domains = self._api.get_protection_domains()
+        self.log.debug('Collected %d protection domains', len(protection_domains))
+        for pd in protection_domains:
             try:
                 if not should_collect_resource('protection_domain', pd, self._resource_filters, self.log):
                     continue
@@ -184,7 +184,9 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         self._collect_bwc_metrics(stats, PROTECTION_DOMAIN_STATS_BWC_METRICS, tags)
 
     def _collect_sdc_list(self) -> None:
-        for sdc in self._api.get_sdc_list():
+        sdc_list = self._api.get_sdc_list()
+        self.log.debug('Collected %d SDCs', len(sdc_list))
+        for sdc in sdc_list:
             try:
                 if not should_collect_resource('sdc', sdc, self._resource_filters, self.log):
                     continue
@@ -212,7 +214,9 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         self._collect_bwc_metrics(stats, SDC_STATS_BWC_METRICS, tags)
 
     def _collect_sds_list(self) -> None:
-        for sds in self._api.get_sds_list():
+        sds_list = self._api.get_sds_list()
+        self.log.debug('Collected %d SDSs', len(sds_list))
+        for sds in sds_list:
             try:
                 if not should_collect_resource('sds', sds, self._resource_filters, self.log):
                     continue
@@ -239,7 +243,9 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         self._collect_bwc_metrics(stats, SDS_STATS_BWC_METRICS, tags)
 
     def _collect_devices(self) -> None:
-        for device in self._api.get_devices():
+        devices = self._api.get_devices()
+        self.log.debug('Collected %d devices', len(devices))
+        for device in devices:
             try:
                 if not should_collect_resource('device', device, self._resource_filters, self.log):
                     continue
@@ -264,6 +270,17 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         for api_field, metric_suffix in DEVICE_STATS_SIMPLE_METRICS:
             self.gauge(metric_suffix, stats.get(api_field), tags=tags)
         self._collect_bwc_metrics(stats, DEVICE_STATS_BWC_METRICS, tags)
+
+    def _collect_events_and_alerts(self) -> None:
+        now = datetime.now(tz=timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+        if self.config.collect_events:
+            last_event_ts = self.read_persistent_cache('last_event_timestamp') or now
+            if self._collect_events(last_event_ts):
+                self.write_persistent_cache('last_event_timestamp', now)
+        if self.config.collect_alerts:
+            last_alert_ts = self.read_persistent_cache('last_alert_timestamp') or now
+            if self._collect_alerts(last_alert_ts):
+                self.write_persistent_cache('last_alert_timestamp', now)
 
     def _collect_events(self, since: str) -> bool:
         try:

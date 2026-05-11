@@ -27,6 +27,7 @@ class PowerFlexAPI:
 
     def _ensure_authenticated(self) -> None:
         if not self._username:
+            self._log.debug('No username configured, skipping authentication')
             return
         if self._token and time() < self._token_expiry:
             return
