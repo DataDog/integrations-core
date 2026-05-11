@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev import get_docker_hostname
 from datadog_checks.dev.utils import find_free_ports, get_metadata_metrics
 
@@ -164,16 +163,3 @@ def get_openmetrics_metadata_metrics(major: int = N8N_MAJOR, *, exclude_rare: bo
 def get_all_metadata_metrics(major: int = N8N_MAJOR, *, exclude_rare: bool = False) -> dict:
     """Version-aware metadata subset including the readiness gauge submitted by the check."""
     return get_metadata_metrics_for_version(major, exclude_rare=exclude_rare)
-
-
-def drop_rare_event_metrics(aggregator: AggregatorStub):
-    """Strip rare-event metrics from the aggregator before a symmetric metadata assertion.
-
-    These metrics are mapped and present in metadata.csv but only emit samples opportunistically
-    (auth failures, libuv requests in flight). Live containers may submit them or not depending on
-    timing, which makes ``check_symmetric_inclusion=True`` flaky in either direction. Dropping them
-    from the aggregator (and from the metadata subset via ``exclude_rare=True``) keeps the
-    symmetric check stable while still verifying the rest of the surface end-to-end.
-    """
-    for name in RARE_EVENT_METRIC_NAMES:
-        aggregator._metrics.pop(name, None)

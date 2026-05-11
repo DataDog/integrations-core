@@ -14,35 +14,27 @@ from datadog_checks.n8n import N8nCheck
 
 from . import common
 
+pytestmark = pytest.mark.unit
 
+
+@pytest.mark.parametrize(
+    'fixture, extra_instance',
+    [
+        pytest.param('n8n.txt', {}, id='default-prefix'),
+        pytest.param('n8n_custom.txt', {'raw_metric_prefix': 'test_'}, id='custom-prefix'),
+    ],
+)
 def test_check_emits_metrics_as_in_metadata(
     dd_run_check: Callable[[N8nCheck], Any],
     aggregator: AggregatorStub,
     mock_http_response: Callable[..., Any],
+    fixture: str,
+    extra_instance: dict[str, Any],
 ):
-    mock_http_response(file_path=common.get_fixture_path('n8n.txt'))
-    instance: dict[str, Any] = {'openmetrics_endpoint': 'http://localhost:5678/metrics'}
-    check = N8nCheck('n8n', {}, [instance])
-    with mock.patch.object(N8nCheck, '_check_n8n_readiness', return_value=None):
-        dd_run_check(check)
-
-    aggregator.assert_metrics_using_metadata(
-        common.get_openmetrics_metadata_metrics(major=2),
-        check_submission_type=True,
-        check_symmetric_inclusion=True,
-    )
-
-
-def test_metrics_custom_prefix(
-    dd_run_check: Callable[[N8nCheck], Any],
-    aggregator: AggregatorStub,
-    mock_http_response: Callable[..., Any],
-):
-    mock_http_response(file_path=common.get_fixture_path('n8n_custom.txt'))
-    instance: dict[str, Any] = {
-        'openmetrics_endpoint': 'http://localhost:5678/metrics',
-        'raw_metric_prefix': 'test_',
-    }
+    # The fixtures are a static capture of n8n@2.19.5; the assertion is version-pinned
+    # to major=2 regardless of which hatch matrix leg runs the unit tier.
+    mock_http_response(file_path=common.get_fixture_path(fixture))
+    instance: dict[str, Any] = {'openmetrics_endpoint': 'http://localhost:5678/metrics', **extra_instance}
     check = N8nCheck('n8n', {}, [instance])
     with mock.patch.object(N8nCheck, '_check_n8n_readiness', return_value=None):
         dd_run_check(check)

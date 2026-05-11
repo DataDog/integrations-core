@@ -45,12 +45,14 @@ def _load_config(path: Path) -> tuple[ConfigDict, str]:
         with open(path) as f:
             data = yaml.safe_load(f) or {}
     except FileNotFoundError:
-        return current_config, f"Config file {path} not found; using current values."
+        return current_config, f"Reload failed: config file {path} not found — lab still running with previous config."
     except yaml.YAMLError as exc:
-        return current_config, f"Failed to parse {path}: {exc}; using current values."
+        return current_config, f"Reload failed: cannot parse {path} ({exc}) — lab still running with previous config."
 
     if not isinstance(data, dict):
-        return current_config, f"{path} must be a mapping at the top level; using current values."
+        return current_config, (
+            f"Reload failed: {path} must be a mapping at the top level — lab still running with previous config."
+        )
 
     return data, ""
 

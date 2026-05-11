@@ -81,7 +81,7 @@ instances:
 
 Several metric families were introduced in n8n 2.x and are not emitted on n8n 1.x:
 
-- `n8n.workflow.execution.duration.seconds.*` (histogram)
+- `n8n.workflow.execution.duration.seconds.*` (histogram) - gated by `N8N_METRICS_INCLUDE_WORKFLOW_EXECUTION_DURATION`, which defaults to `true` in n8n 2.x.
 - `n8n.audit.workflow.activated.count`, `n8n.audit.workflow.deactivated.count`, `n8n.audit.workflow.executed.count`, `n8n.audit.workflow.resumed.count`, `n8n.audit.workflow.version.updated.count`, and `n8n.audit.workflow.waiting.count`
 - `n8n.embed.login.requests.count` (tagged with `result:success`/`failure`), `n8n.embed.login.failures.count` (tagged with `reason`)
 - `n8n.token.exchange.requests.count` (tagged with `result:success`/`failure`), `n8n.token.exchange.failures.count` (tagged with `reason`), `n8n.token.exchange.identity.linked.count`, `n8n.token.exchange.jit.provisioning.count`

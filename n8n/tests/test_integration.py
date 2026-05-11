@@ -46,11 +46,15 @@ def warmed_both(
 
 def test_all_metadata_metrics_emitted(warmed_both: AggregatorStub):
     """Across main and worker, every metadata metric for this n8n version is emitted."""
-    common.drop_rare_event_metrics(warmed_both)
+    # ``exclude`` skips the rare-event metrics from the submitted-side iteration (live
+    # containers may or may not produce samples for them depending on timing); the
+    # ``exclude_rare=True`` metadata subset symmetrically drops them from the expected
+    # set so check_symmetric_inclusion stays stable in both directions.
     warmed_both.assert_metrics_using_metadata(
         common.get_all_metadata_metrics(exclude_rare=True),
         check_submission_type=True,
         check_symmetric_inclusion=True,
+        exclude=list(common.RARE_EVENT_METRIC_NAMES),
     )
 
 
