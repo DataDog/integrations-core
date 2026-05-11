@@ -8,7 +8,7 @@ Collect n8n metrics including:
 - Cache metrics: hit, miss, and update counts.
 - Workflow metrics: started, success, failed counters, audit workflow lifecycle counters; in n8n 2.x, an execution-duration histogram.
 - Node metrics: per-node started and finished counters emitted by worker processes in queue mode.
-- Queue metrics: queue depth, enqueued/dequeued/completed/failed/stalled counters, and scaling-mode worker gauges.
+- Queue metrics: queue depth; enqueued, dequeued, completed, failed, and stalled counters; and scaling-mode worker gauges.
 - HTTP metrics: request duration histograms tagged with status code.
 - Process and Node.js runtime metrics.
 
@@ -81,13 +81,13 @@ instances:
 
 Several metric families were introduced in n8n 2.x and are not emitted on n8n 1.x:
 
-- `n8n.workflow.execution.duration.seconds.*` (histogram) - gated by `N8N_METRICS_INCLUDE_WORKFLOW_EXECUTION_DURATION`, which defaults to `true` in n8n 2.x.
+- `n8n.workflow.execution.duration.seconds.*` (histogram). Gated by `N8N_METRICS_INCLUDE_WORKFLOW_EXECUTION_DURATION`, which defaults to `true` in n8n 2.x.
 - `n8n.audit.workflow.activated.count`, `n8n.audit.workflow.deactivated.count`, `n8n.audit.workflow.executed.count`, `n8n.audit.workflow.resumed.count`, `n8n.audit.workflow.version.updated.count`, and `n8n.audit.workflow.waiting.count`
-- `n8n.embed.login.requests.count` (tagged with `result:success`/`failure`), `n8n.embed.login.failures.count` (tagged with `reason`)
-- `n8n.token.exchange.requests.count` (tagged with `result:success`/`failure`), `n8n.token.exchange.failures.count` (tagged with `reason`), `n8n.token.exchange.identity.linked.count`, `n8n.token.exchange.jit.provisioning.count`
+- `n8n.embed.login.requests.count` (tagged with `result:success` or `result:failure`), `n8n.embed.login.failures.count` (tagged with `reason`)
+- `n8n.token.exchange.requests.count` (tagged with `result:success` or `result:failure`), `n8n.token.exchange.failures.count` (tagged with `reason`), `n8n.token.exchange.identity.linked.count`, `n8n.token.exchange.jit.provisioning.count`
 - `n8n.process.pss.bytes` (Linux only)
-- The `n8n.{production,manual,production.root}.executions`, `n8n.users.total`, `n8n.enabled.users`, `n8n.workflows.total`, and `n8n.credentials.total` family - only emitted when `N8N_METRICS_INCLUDE_WORKFLOW_STATISTICS=true` is set.
-- The `n8n.expression.*` family (`evaluation.duration.seconds`, `code.cache.{hit,miss,eviction,size}`, `pool.{acquired,replenish.failed,scaled.up,scaled.to.zero}`) - only emitted when n8n is running the new VM-isolated expression engine *and* observability for it is on. Set `N8N_EXPRESSION_ENGINE=vm` and `N8N_EXPRESSION_ENGINE_OBSERVABILITY_ENABLED=true` on the n8n process; both default to off (the engine defaults to `legacy`). These metrics surface the per-expression evaluation latency, the compiled-expression LRU cache hit/miss rate, and the V8-isolate pool's idle scaling behavior - most useful for troubleshooting workflow latency that traces back to slow `{{ ... }}` evaluation.
+- The `n8n.{production,manual,production.root}.executions`, `n8n.users.total`, `n8n.enabled.users`, `n8n.workflows.total`, and `n8n.credentials.total` family. Only emitted when `N8N_METRICS_INCLUDE_WORKFLOW_STATISTICS=true` is set.
+- The `n8n.expression.*` family (`evaluation.duration.seconds`, `code.cache.{hit,miss,eviction,size}`, `pool.{acquired,replenish.failed,scaled.up,scaled.to.zero}`). Only emitted when n8n is running the new VM-isolated expression engine *and* observability for it is on. Set `N8N_EXPRESSION_ENGINE=vm` and `N8N_EXPRESSION_ENGINE_OBSERVABILITY_ENABLED=true` on the n8n process; both default to off (the engine defaults to `legacy`). These metrics surface the per-expression evaluation latency, the compiled-expression LRU cache hit and miss rates, and the V8-isolate pool's idle scaling behavior. They are most useful for troubleshooting workflow latency that traces back to slow `{{ ... }}` evaluation.
 
 Some metrics only emit samples after the corresponding runtime event occurs. For example, failures-only counters (`*.failures.count`) need an authentication failure, audit workflow counters need the matching workflow state transition, and the libuv `n8n.nodejs.active.requests` gauge needs an in-flight libuv request. A healthy idle deployment may not produce data points for these metrics until that activity occurs.
 
@@ -173,7 +173,7 @@ Each event contains rich metadata including `executionId`, `workflowId`, `workfl
 
    Adjust `/home/n8n/.n8n/n8nEventLog*.log` to the n8n user folder on your host.
 
-   For a containerized n8n deployment, collect stdout/stderr from the n8n container for application logs and make the n8n user folder available to the Agent for event bus file logs. For example, if the n8n data directory is mounted on the host at `/var/lib/n8n`, configure:
+   For a containerized n8n deployment, collect stdout and stderr from the n8n container for application logs, and make the n8n user folder available to the Agent for event bus file logs. For example, if the n8n data directory is mounted on the host at `/var/lib/n8n`, configure:
 
    ```yaml
    logs:
@@ -194,7 +194,7 @@ Each event contains rich metadata including `executionId`, `workflowId`, `workfl
 
 [Run the Agent's status subcommand][6] and look for `n8n` under the Checks section.
 
-## Data Collected
+## Data collected
 
 ### Metrics
 
@@ -204,7 +204,7 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 The n8n integration does not include any events.
 
-### Service Checks
+### Service checks
 
 See [service_checks.json][8] for a list of service checks provided by this integration.
 
@@ -223,11 +223,3 @@ Need help? Contact [Datadog support][9].
 [8]: https://github.com/DataDog/integrations-core/blob/master/n8n/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
 [10]: https://docs.n8n.io/hosting/configuration/configuration-examples/prometheus/
-
-
-  1. Why are we identifying the repo name from the directory? This is brittle as anyone could clone the repo into a different folder. We should be taking the repo name from
-  git information right? If you agree I would probably open a separate pr to fix this.
-  2. I need more details about what these annotations are. I am not 100% I understand what the problem is
-  3. Ok, do we have a way to ensure that any learning from the done prs is carried over to the next ones? Like the cross-pr memory we talked about. It would be good to actually do this. If an agent raises any infroation, new things learned or something, you should take that knowledge and if needed add it to the wave where it applies? What do you think?
-
-  Include to all agents that are going to be launched in the future that the changelog eneds to be added after the PR is opened, otherwise they won't know what number to add and that they do not need to run ddev release changelog new, just create the changelog file by hand following the changelog rules.
