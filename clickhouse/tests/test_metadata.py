@@ -591,6 +591,38 @@ def test_main_query_failure_closes_client(collector):
     assert collector._db_client is None
 
 
+def test_payload_chunking(check, collector):
+    # Set a small chunk size so 7 tables produce 3 separate payloads.
+    collector._config.payload_chunk_size = 3
+    table_rows = [_table_row(name=f'tbl_{i}') for i in range(7)]
+    captured = _run_collect(check, table_rows=table_rows)
+
+    # Three payloads: rows 0-2, rows 3-5, row 6
+    assert len(captured) == 3
+
+    # Only the last payload carries collection_payloads_count (snapshot marker)
+    assert 'collection_payloads_count' not in captured[0]
+    assert 'collection_payloads_count' not in captured[1]
+    assert captured[2]['collection_payloads_count'] == 3
+
+    # Non-final chunks hold exactly chunk_size rows; final chunk holds the remainder
+    assert len(captured[0]['metadata']) == 3
+    assert len(captured[1]['metadata']) == 3
+    assert len(captured[2]['metadata']) == 1
+
+    # Every table appears exactly once across all payloads
+    all_names = [
+        entry['tables'][0]['name']
+        for payload in captured
+        for entry in payload['metadata']
+        if entry.get('tables')
+    ]
+    assert sorted(all_names) == sorted(f'tbl_{i}' for i in range(7))
+
+    # Schema kind is correct on every payload
+    assert all(p['kind'] == 'clickhouse_databases' for p in captured)
+
+
 def test_cancel_event_aborts_before_query(collector):
     cancel_event = threading.Event()
     collector._cancel_event = cancel_event
