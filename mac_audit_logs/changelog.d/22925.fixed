@@ -1,1 +1,1 @@
-Robust handling of audit log file rotation. The check can keep up with audit log files that get rotated every few seconds.
+Batch audit log files into a single auditreduce invocation so the check keeps up with frequent file rotation.

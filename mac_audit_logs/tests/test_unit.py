@@ -43,6 +43,7 @@ log_cursor = {
 }
 
 
+@pytest.mark.unit
 def test_instance_check(dd_run_check, aggregator, instance):
     check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
 
@@ -367,14 +368,16 @@ def test_fetch_audit_logs(mock_popen, instance):
     output, error = check.fetch_audit_logs(file_paths, time_filter_arg)
 
     mock_popen.assert_any_call(
-        f"sudo auditreduce -a {time_filter_arg} {file_paths[0]} {file_paths[1]}",
-        shell=True,
+        ["sudo", "auditreduce", "-a", time_filter_arg, file_paths[0], file_paths[1]],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         env={**os.environ, "TZ": "UTC"},
     )
     mock_popen.assert_any_call(
-        'sudo praudit -xsl', shell=True, stdin=mock_auditreduce_stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        ["sudo", "praudit", "-xsl"],
+        stdin=mock_auditreduce_stdout,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
     )
 
     mock_praudit_process.communicate.assert_called_once()
@@ -402,8 +405,7 @@ def test_fetch_audit_logs_single_file(mock_popen, instance):
     output, error = check.fetch_audit_logs([file_path], time_filter_arg)
 
     mock_popen.assert_any_call(
-        f"sudo auditreduce -a {time_filter_arg} {file_path}",
-        shell=True,
+        ["sudo", "auditreduce", "-a", time_filter_arg, file_path],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         env={**os.environ, "TZ": "UTC"},
@@ -497,6 +499,30 @@ def test_collect_data_from_files_excludes_missing_files(mock_utc, instance):
 @patch(
     "os.listdir",
     return_value=[
+        "20230401000000.crash_recovery",
+        "20230401040000.crash_recovery",
+    ],
+)
+def test_collect_relevant_files_drops_crash_recovery_before_cutoff(
+    _mock_listdir, _mock_get_utc, _mock_isfile, _mock_isdir, instance
+):
+    """Crash-recovery files whose start time is before the look-back cutoff are dropped;
+    only those at or after the cutoff carry through as still-open candidates."""
+    check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
+    closed, still_open = check.collect_relevant_files("20230401030000")
+    assert closed == []
+    assert still_open == [
+        (utils.time_string_to_datetime_utc("20230401040000"), "20230401040000.crash_recovery"),
+    ]
+
+
+@pytest.mark.unit
+@patch("os.path.isdir", return_value=True)
+@patch("os.path.isfile", return_value=True)
+@patch("datadog_checks.mac_audit_logs.utils.get_utc_timestamp_minus_hours", return_value="20230401030000")
+@patch(
+    "os.listdir",
+    return_value=[
         "20230401000000.20230401010000",
         "20230401010000.20230401020000",
         "20230401030000.20230401040000",
@@ -518,6 +544,7 @@ def test_collect_relevant_files_excludes_out_of_window(
     assert still_open == []
 
 
+@pytest.mark.unit
 @patch.object(MacAuditLogsCheck, 'send_log')
 def test_process_and_ingest_log_entries_skipping_logs_milli_seconds(mock_send_log, instance):
     logs = (
@@ -590,6 +617,49 @@ def test_records_after_the_resume_point_are_emitted(mock_send_log, instance):
 # ---------------------------------------------------------------------------
 # Cursor monotonicity
 # ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+@patch.object(MacAuditLogsCheck, "send_log")
+@patch("os.path.exists", return_value=True)
+@patch("datadog_checks.mac_audit_logs.utils.get_utc_timestamp_minus_hours", return_value="20250605000000")
+def test_clean_resume_at_same_second_emits_only_new_records(_mock_utc, _mock_exists, mock_send_log, instance):
+    """After a cleanly-completed cycle (`record_milli_sec=None`) the next cycle calls auditreduce
+    with the cursor's `record_time` and must emit every record returned, including any that share
+    the cursor's UTC second but come from a newly-rotated file. No record is dropped, no record is
+    duplicated, because already-completed files are excluded before the batch."""
+    completed_file = "20250605135137.20250605135138"
+    new_file = "20250605135138.not_terminated"
+
+    next_batch_logs = (
+        b"<record time=\"Thu Jun  5 13:51:38 2025\" msec=\" + 950 msec\" > /></record>\n"
+        b"<record time=\"Thu Jun  5 13:51:39 2025\" msec=\" + 010 msec\" > /></record>"
+    )
+    check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
+    check.fetch_audit_logs = MagicMock(return_value=(next_batch_logs, b""))
+
+    closed: list[tuple[datetime, datetime, str]] = []
+    still_open = [(utils.time_string_to_datetime_utc("20250605135138"), new_file)]
+
+    check.collect_data_from_files(
+        closed,
+        still_open,
+        [completed_file],
+        [],
+        "20250605135138",
+        None,
+        "+0000",
+    )
+
+    check.fetch_audit_logs.assert_called_once()
+    forwarded_paths, time_filter = check.fetch_audit_logs.call_args.args
+    assert forwarded_paths == [_path(check, new_file)]
+    assert time_filter == "20250605135138"
+
+    emitted_msecs = [call.args[0]["message"] for call in mock_send_log.call_args_list]
+    assert len(emitted_msecs) == 2
+    assert " + 950 msec" in emitted_msecs[0]
+    assert " + 010 msec" in emitted_msecs[1]
 
 
 @pytest.mark.unit

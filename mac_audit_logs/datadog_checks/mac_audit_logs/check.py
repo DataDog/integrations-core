@@ -123,22 +123,19 @@ class MacAuditLogsCheck(AgentCheck):
 
     def fetch_audit_logs(self, file_paths: list[str], time_filter_arg: str) -> tuple[bytes, bytes]:
         output = error = b""
-
-        auditreduce_command = f"sudo auditreduce -a {time_filter_arg} {' '.join(file_paths)}"
-        praudit_command = "sudo praudit -xsl"
+        auditreduce_process = None
+        praudit_process = None
 
         try:
             # use TZ=UTC because auditreduce does not translate daylight savings to UTC and always uses standard time
             auditreduce_process = subprocess.Popen(
-                auditreduce_command,
-                shell=True,
+                ["sudo", "auditreduce", "-a", time_filter_arg, *file_paths],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 env={**os.environ, "TZ": "UTC"},
             )
             praudit_process = subprocess.Popen(
-                praudit_command,
-                shell=True,
+                ["sudo", "praudit", "-xsl"],
                 stdin=auditreduce_process.stdout,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
@@ -147,19 +144,20 @@ class MacAuditLogsCheck(AgentCheck):
             auditreduce_process.stdout.close()
 
             output, error = praudit_process.communicate()
-
-            return output, error
-
         except Exception as e:
             err_message = f"Error processing files {file_paths}: {e}"
             self.log.exception(constants.LOG_TEMPLATE.format(message=err_message))
         finally:
-            message = "Processes auditreduce and praudit have been closed."
-            if auditreduce_process.poll() is None:
-                auditreduce_process.terminate()
-            if praudit_process.poll() is None:
-                praudit_process.terminate()
-            self.log.info(constants.LOG_TEMPLATE.format(message=message))
+            for proc in (auditreduce_process, praudit_process):
+                if proc is not None and proc.poll() is None:
+                    proc.terminate()
+                    try:
+                        proc.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        proc.kill()
+            self.log.info(constants.LOG_TEMPLATE.format(message="Processes auditreduce and praudit have been closed."))
+
+        return output, error
 
     def process_and_ingest_log_entries(
         self,
@@ -252,6 +250,14 @@ class MacAuditLogsCheck(AgentCheck):
         ]
 
         if not valid_paths:
+            self.log.debug(
+                constants.LOG_TEMPLATE.format(
+                    message=(
+                        f"No files to collect from this cycle "
+                        f"(closed candidates: {len(closed)}, open candidates: {len(still_open)})."
+                    )
+                )
+            )
             return
 
         completed_closed = [c[2] for c in valid_closed]
