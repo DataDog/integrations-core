@@ -75,6 +75,9 @@ class GitHubManager:
     # https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#create-a-pull-request
     PULLS_API = 'https://api.github.com/repos/{repo_id}/pulls'
 
+    # https://docs.github.com/en/rest/issues/labels?apiVersion=2022-11-28#add-labels-to-an-issue
+    ISSUES_LABELS_API = 'https://api.github.com/repos/{repo_id}/issues/{issue_number}/labels'
+
     # https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#list-pull-requests-files
     PULL_REQUEST_FILES_API = 'https://api.github.com/repos/{repo_id}/pulls/{pr_number}/files'
 
@@ -240,12 +243,27 @@ class GitHubManager:
     def create_milestone(self, title: str) -> None:
         self.__api_post(self.MILESTONES_API.format(repo_id=self.repo_id), content=json.dumps({'title': title}))
 
-    def create_pull_request(self, title: str, head: str, base: str, body: str = '') -> str:
+    def create_pull_request(
+        self,
+        title: str,
+        head: str,
+        base: str,
+        body: str = '',
+        *,
+        draft: bool = False,
+        labels: list[str] | None = None,
+    ) -> str:
         response = self.__api_post(
             self.PULLS_API.format(repo_id=self.repo_id),
-            content=json.dumps({'title': title, 'head': head, 'base': base, 'body': body}),
+            content=json.dumps({'title': title, 'head': head, 'base': base, 'body': body, 'draft': draft}),
         )
-        return response.json()['html_url']
+        pr_data = response.json()
+        if labels:
+            self.__api_post(
+                self.ISSUES_LABELS_API.format(repo_id=self.repo_id, issue_number=pr_data['number']),
+                content=json.dumps({'labels': labels}),
+            )
+        return pr_data['html_url']
 
     def get_label(self, name):
         return self.__api_get(f'{self.LABELS_API.format(repo_id=self.repo_id)}/{name}')
