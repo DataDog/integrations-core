@@ -12,6 +12,7 @@ from psycopg.rows import dict_row
 
 from .column_statistics import PostgresColumnStatisticsCollector
 from .schemas import PostgresSchemaCollector
+from .util import collection_interval_gcd
 
 try:
     import datadog_agent  # type: ignore
@@ -93,8 +94,7 @@ class PostgresMetadata(DBMAsyncJob):
         self.schemas_collection_interval = config.collect_schemas.collection_interval
         self.column_statistics_collection_interval = config.collect_column_statistics.collection_interval
 
-        # by default, send resources every 10 minutes
-        self.collection_interval = min(
+        self.collection_interval = collection_interval_gcd(
             self.pg_extensions_collection_interval,
             self.pg_settings_collection_interval,
             self.schemas_collection_interval,

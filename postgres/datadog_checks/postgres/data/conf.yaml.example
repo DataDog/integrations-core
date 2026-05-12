@@ -676,10 +676,10 @@ instances:
         #
         # enabled: false
 
-        ## @param collection_interval - number - optional - default: 14400
+        ## @param collection_interval - number - optional - default: 3600
         ## Set the column statistics collection interval (in seconds).
         #
-        # collection_interval: 14400
+        # collection_interval: 3600
 
         ## @param max_tables - number - optional - default: 500
         ## Maximum number of tables to collect column statistics for.

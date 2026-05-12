@@ -83,7 +83,7 @@ PAYLOAD_MAX_COLUMNS = 5_000
 
 class PostgresColumnStatisticsCollectorConfig:
     def __init__(self):
-        self.collection_interval = 14400
+        self.collection_interval = 3600
         self.max_tables = 500
         self.max_query_duration = 60
         self.include_databases: list[str] = []

@@ -244,6 +244,22 @@ def test_trim_set_stmts(query, expected_trimmed_query):
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
+    'intervals, expected',
+    [
+        pytest.param((600, 600, 600, 3600), 600, id='all-multiples-of-min'),
+        pytest.param((600, 600, 600, 4500), 300, id='min-not-equal-to-gcd'),
+        pytest.param((600,), 600, id='single-interval'),
+        pytest.param((600, 0, 3600), 600, id='zero-does-not-constrain-gcd'),
+        pytest.param((600.0, 3600.0), 600, id='float-inputs-cast-to-int'),
+        pytest.param((900, 1500), 300, id='gcd-smaller-than-any-input'),
+    ],
+)
+def test_collection_interval_gcd(intervals, expected):
+    assert util.collection_interval_gcd(*intervals) == expected
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
     'exclude_hostname, expected_hostname',
     [
         (False, 'resolved.hostname'),

@@ -1081,8 +1081,8 @@ files:
             Set the column statistics collection interval (in seconds).
           value:
             type: number
-            example: 14400
-            display_default: 14400
+            example: 3600
+            display_default: 3600
         - name: max_tables
           description: |
             Maximum number of tables to collect column statistics for.

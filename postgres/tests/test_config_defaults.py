@@ -117,7 +117,7 @@ EXPECTED_DEFAULTS = {
     'collect_column_statistics': {
         'enabled': False,
         'max_tables': 500,
-        'collection_interval': 14400,
+        'collection_interval': 3600,
         'max_query_duration': 60,
         'include_databases': [],
         'exclude_databases': [],

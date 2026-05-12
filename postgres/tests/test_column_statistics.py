@@ -310,7 +310,7 @@ def test_collect_column_statistics_default_config(integration_check, pg_instance
     run_one_check(check)
     collector = check.metadata_samples._column_statistics_collector
     # Verify defaults
-    assert collector._config.collection_interval == 14400
+    assert collector._config.collection_interval == 3600
     assert collector._config.max_tables == 500
     assert collector._config.include_databases == []
     assert collector._config.exclude_databases == []
