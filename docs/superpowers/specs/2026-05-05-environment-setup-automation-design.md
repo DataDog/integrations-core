@@ -1,9 +1,9 @@
 # Environment Setup Automation Design
 
 **Date:** 2026-05-05  
-**Last revised:** 2026-05-07  
+**Last revised:** 2026-05-12  
 **Status:** Draft  
-**Scope:** `ddev lab` — agentic framework for provisioning, seeding, and load-testing Datadog integration environments on remote EC2 infrastructure
+**Scope:** `ddev lab` — agentic framework for provisioning, seeding, and load-testing Datadog integration environments on remote cloud infrastructure (AWS and GCP)
 
 ---
 
@@ -19,7 +19,7 @@ Setting up environments for Datadog integrations is one of the highest-friction 
 
 | Priority | Goal |
 |----------|------|
-| Primary | Provision a fully running integration environment on EC2 with a single command |
+| Primary | Provision a fully running integration environment on remote cloud infrastructure with a single command |
 | Primary | Seed the environment with realistic-looking data |
 | Primary | Generate continuous background load that exercises the integration's metric surface |
 | Primary | Include a configured Datadog Agent in every lab, ready to run the integration check |
@@ -45,25 +45,26 @@ The system has two distinct layers:
 │  (Does NOT require existing tests or compose files)              │
 │                                                                  │
 │  Produces complete tests/lab/ subtree:                           │
-│    lab.yaml                  ← manifest + narrative              │
+│    lab.yaml                  ← machine-readable manifest         │
+│    tests/lab/RESEARCH.md     ← human-readable narrative          │
 │    tests/lab/compose/        ← service topology (Docker)         │
 │    tests/lab/seed/           ← numbered, idempotent scripts      │
 │    tests/lab/load/           ← Locust or k6 script               │
 │    tests/lab/agent/          ← Datadog Agent integration config  │
 │    tests/lab/provision/      ← Ansible playbook (bare-metal only)│
-│    [starter main.tf]         ← handed to cloud-inventory repo    │
+│    [starter Pulumi program]  ← reviewed + merged to infra/       │
 └────────────────────────┬─────────────────────────────────────────┘
                          │  artifacts reviewed + committed
                          ▼
 ┌──────────────────────────────────────────────────────────────────┐
 │  Deterministic Execution Layer  (ddev lab CLI)                   │
 │                                                                  │
-│  create:   terraform apply → wait SSH → healthchecks →           │
+│  create:   pulumi up → wait SSH → healthchecks →                 │
 │            seed → load → start Agent → register                  │
 │                                                                  │
 │  stop:     stop load → docker compose down → update registry     │
 │                                                                  │
-│  destroy:  stop load → stop services → terraform destroy →       │
+│  destroy:  stop load → stop services → pulumi destroy →          │
 │            deregister                                            │
 └──────────────────────────────────────────────────────────────────┘
 ```
@@ -98,9 +99,10 @@ The agent writes a complete `tests/lab/` subtree under the integration directory
 
 ```
 <integration>/
-  lab.yaml                            ← manifest (see Section 4)
+  lab.yaml                            ← machine-readable manifest (see Section 4)
   tests/
     lab/
+      RESEARCH.md                     ← human-readable narrative (see below)
       compose/
         docker-compose.yml            ← service(s) + Datadog Agent as Docker services
       seed/
@@ -111,15 +113,26 @@ The agent writes a complete `tests/lab/` subtree under the integration directory
         locustfile.py                 ← or k6_script.js
       agent/
         conf.yaml                     ← Datadog Agent integration config (instances, logs)
-      provision/                      ← bare-metal runtimes only
+      healthcheck/
+        check_<service>.sh            ← custom healthcheck scripts (script type only)
+      provision/                      ← bare-metal and cluster runtimes only
         install_<service>.yml         ← Ansible playbook
+        teardown_<service>.yml
 ```
 
-Additionally, the agent produces a **starter `main.tf`** for the cloud-inventory repo (printed to stdout or saved to a staging path) that a cloud-infrastructure team member reviews and commits to `cloud-inventory/aws/agent-integrations-dev/labs/<integration>/`.
+Additionally, the agent produces a **starter Pulumi program** (`infra/labs/<integration>/`) that a team member reviews and merges alongside the integrations-core artifacts (see Section 7).
 
-### YAML comments as narrative
+### RESEARCH.md — human-readable narrative
 
-Every non-obvious decision in `lab.yaml` and the generated scripts carries a YAML or shell comment explaining what the agent found in the documentation and why it made each choice (e.g., why a specific instance type, why a particular partition count, what metrics a given seed script targets). The human reviewer reads the comments to audit the agent's reasoning without needing to repeat the research.
+`lab.yaml` is clean YAML with no inline comments. The agent's reasoning lives in `tests/lab/RESEARCH.md` instead. This file explains:
+
+- What this technology is and how it is typically deployed in production
+- Why specific choices were made — instance type, service topology, partition counts, network configuration
+- Which metrics each seed script targets (referenced from `metadata.csv`)
+- Operational gotchas identified in the vendor documentation
+- Links to the specific documentation pages and Docker Hub tags consulted
+
+The human reviewer reads `RESEARCH.md` to audit the agent's reasoning without needing to repeat the research. When the lab is updated for a new tech version, the agent rewrites the affected sections of `RESEARCH.md` alongside the affected artifacts.
 
 ### Re-generation
 
@@ -129,36 +142,20 @@ Every non-obvious decision in `lab.yaml` and the generated scripts carries a YAM
 
 ## 4. The `lab.yaml` Schema
 
-`lab.yaml` is the manifest. It declares infrastructure, healthchecks, execution order, and Agent configuration. The generated scripts it references are the actual implementation.
+`lab.yaml` is the machine-readable manifest. It declares infrastructure, healthchecks, execution order, and Agent configuration. All narrative explaining the choices lives in `RESEARCH.md`.
 
 ```yaml
-# lab.yaml — generated by `ddev lab research`, reviewed by a human before merging.
-# Comments in this file and in tests/lab/ explain every non-obvious decision.
-
 metadata:
   integration: kafka
   tech_version: "3.7"
   generated_at: "2026-05-05"
 
 infrastructure:
-  # All labs run on EC2 — keeps environments shareable and off developer machines.
-  # Terraform source lives in cloud-inventory; see Section 5.
-  terraform:
-    source: cloud-inventory/aws/agent-integrations-dev/labs/kafka
-    region: us-east-1
-    # t3.large: Kafka broker + ZooKeeper combined require ~4 GB RAM under load.
-    # Upgrade to r5.xlarge if broker heap exceeds 2 GB.
-    instance_type: t3.large
-
+  cloud: aws
   runtime:
-    # Docker Compose runs inside the EC2 instance.
-    # For licensed software that can't be containerized, use type: bare-metal.
     type: compose
     file: tests/lab/compose/docker-compose.yml
 
-# Each service in the topology gets its own healthcheck entry.
-# Healthchecks run FROM the EC2 instance (via SSH), so "localhost" is the instance.
-# Seeds and load only start after all healthchecks pass.
 healthchecks:
   - name: kafka-broker
     type: tcp
@@ -174,29 +171,19 @@ healthchecks:
     interval: 5s
 
 seed:
-  # Seed scripts run in numbered order over SSH after all healthchecks pass.
-  # Scripts must be idempotent — re-running ddev lab create must not fail.
   - type: script
     path: tests/lab/seed/01_create_topics.sh
-    # Creates 10 topics with 3 partitions each to exercise kafka.partition.* metrics.
   - type: script
     path: tests/lab/seed/02_produce_sample_events.py
-    # Produces 50k events across all topics to populate consumer group lag metrics.
 
 load:
-  # Continuous background load keeps metric values non-zero during Agent check runs.
-  driver: locust                           # locust | k6
+  driver: locust
   script: tests/lab/load/locustfile.py
-  # 20 RPS generates stable consumer lag without saturating a t3.large broker.
   target_rps: 20
 
 agent:
-  # Datadog Agent runs as a service in docker-compose.yml (compose runtime) or as
-  # a standalone Docker container on the EC2 instance (bare-metal runtime).
-  # The image tag is intentionally mutable — use `ddev lab upgrade` to update.
   image: datadog/agent:latest
   config: tests/lab/agent/conf.yaml
-  # API key fetched from Secrets Manager at runtime; never stored in this file.
   api_key_secret: agent-integrations-dev/datadog-api-key
 ```
 
@@ -204,15 +191,10 @@ agent:
 
 ```yaml
 infrastructure:
-  terraform:
-    source: cloud-inventory/aws/agent-integrations-dev/labs/oracle
-    region: us-east-1
-    instance_type: r5.xlarge             # Oracle minimum: 16 GB RAM
+  cloud: aws
   runtime:
     type: bare-metal
-    # Ansible installs Oracle from the license-gated S3 bucket.
     provisioner: tests/lab/provision/install_oracle.yml
-    # Teardown runs the teardown playbook to deregister Oracle before terraform destroy.
     teardown: tests/lab/provision/teardown_oracle.yml
 
 agent:
@@ -229,15 +211,21 @@ metadata:
   tech_version: "2.15"
 
 infrastructure:
-  terraform:
-    source: cloud-inventory/aws/agent-integrations-dev/labs/lustre
-    region: us-east-1
-    # Lustre requires a minimum 3-node cluster: MGS, MDS, and OSS.
-    # Instance sizing from Lustre hardware guide: r6i.xlarge for MDS/OSS under test load.
-    instance_type: r6i.xlarge
-
+  cloud: aws
   runtime:
-    type: bare-metal
+    type: cluster
+    nodes:
+      - role: mgs_mds
+        count: 1
+        instance_type: r6i.xlarge
+      - role: oss
+        count: 2
+        instance_type: r6i.xlarge
+      - role: client
+        count: 1
+        instance_type: t3.large
+    network:
+      lnet_port: 988
     provisioner: tests/lab/provision/install_lustre_cluster.yml
     teardown: tests/lab/provision/teardown_lustre_cluster.yml
 
@@ -263,13 +251,13 @@ healthchecks:
 
 ## 5. Healthcheck Mechanism
 
-### Stage 1 — EC2 SSH readiness
+### Stage 1 — SSH readiness
 
-Before any healthcheck from `lab.yaml` runs, the CLI polls for SSH availability on port 22. This catches instance boot failures, user-data script crashes, and AMI provisioning delays. Timeout is fixed at 5 minutes; if SSH isn't available by then, `ddev lab create` aborts and prints the EC2 console log for diagnosis.
+Before any healthcheck from `lab.yaml` runs, the CLI polls for SSH availability on port 22 of each provisioned instance. This catches instance boot failures, user-data script crashes, and provisioning delays. Timeout is fixed at 5 minutes per instance; if SSH isn't available by then, `ddev lab create` aborts and prints the cloud console log for diagnosis.
 
 ### Stage 2 — Service readiness
 
-Each entry in `healthchecks` is polled independently until it passes or times out. All entries must pass before seed scripts begin.
+Each entry in `healthchecks` is polled independently until it passes or times out. All entries must pass before seed scripts begin. For cluster runtimes, healthchecks run against their respective nodes using the IP map produced by Pulumi (see Section 7).
 
 Supported healthcheck types:
 
@@ -283,7 +271,7 @@ Healthcheck scripts live in `tests/lab/healthcheck/` and are part of the researc
 
 ### Failure behavior
 
-If any healthcheck times out, `ddev lab create` prints which check failed, shows the last N lines of the relevant service log (via SSH), and exits non-zero. The EC2 instance is left running for manual inspection. Running `ddev lab destroy <integration>` still works to clean up.
+If any healthcheck times out, `ddev lab create` prints which check failed, shows the last N lines of the relevant service log (via SSH), and exits non-zero. Instances are left running for manual inspection. `ddev lab destroy <integration>` still works to clean up.
 
 ---
 
@@ -302,11 +290,9 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-    # ... generated from vendor docs
 
   zookeeper:
     image: confluentinc/cp-zookeeper:3.7.0
-    # ...
 
   datadog-agent:
     image: ${DD_AGENT_IMAGE:-datadog/agent:latest}
@@ -322,82 +308,99 @@ services:
 
 The `DD_AGENT_IMAGE` environment variable defaults to `datadog/agent:latest`, allowing version overrides without editing the compose file.
 
-### Bare-metal runtime
+### Bare-metal and cluster runtimes
 
-The Agent runs as a Docker container on the EC2 instance alongside the bare-metal service. The Ansible provisioner installs Docker (if not present), pulls the Agent image, and starts it with the same volume mount pattern.
+The Agent runs as a Docker container on one of the EC2 instances (the client node for cluster runtimes). The Ansible provisioner installs Docker if not present, pulls the Agent image, and starts it with the same volume mount pattern.
 
 ### Updating the Agent
 
 ```bash
 ddev lab upgrade <integration> --agent 7.57.0
-# Pulls datadog/agent:7.57.0 on the EC2 instance, restarts the container, verifies the check runs.
+# Pulls datadog/agent:7.57.0 on the instance, restarts the container, verifies the check runs.
 
 ddev lab upgrade <integration> --integration 16.2.0
 # Updates the integration package inside the Agent container to the specified version.
 ```
 
-`ddev lab upgrade` does not reprovision the EC2 instance or re-seed data. It only restarts the Agent container with the new image or package.
+`ddev lab upgrade` does not reprovision instances or re-seed data. It only restarts the Agent container with the new image or package.
 
 ---
 
-## 7. Infrastructure — Terraform in cloud-inventory
+## 7. Infrastructure — Pulumi Automation API
 
-### Prerequisites
+### Why Pulumi
 
-The CLI requires both repos to be configured in ddev:
+The infrastructure provisioning layer must be multi-cloud (AWS today, GCP in future sprints) and must execute on demand — not auto-applied on merge. The [Pulumi Automation API](https://www.pulumi.com/docs/using-pulumi/automation-api/) satisfies both:
 
-```bash
-ddev config set repos.core /path/to/integrations-core
-ddev config set repos.cloud-inventory /path/to/cloud-inventory
-```
+- **Multi-cloud**: the same Python program targets AWS or GCP by selecting a provider; switching is a `cloud:` field in `lab.yaml`
+- **On-demand**: `ddev lab create` calls `pulumi.up()` directly via the Python SDK — no external CI/CD trigger, no separate repo with auto-apply
+- **In-repo**: Pulumi programs live in `ddev/src/ddev/cli/lab/infra/` (Python), eliminating the cloud-inventory dependency
+- **State in object storage**: stack state stored in S3 (`aws`) or GCS (`gcp`) under `agent-integrations-dev-lab-state/pulumi/<integration>/`
 
-`ddev lab` resolves Terraform source paths from `lab.yaml` relative to the `cloud-inventory` repo root.
-
-### Directory layout
+### Pulumi program structure
 
 ```
-cloud-inventory/
-  terraform-modules/
-    integration-lab-ec2/           # recipe: single-instance lab
-      main.tf
-      variables.tf
-      outputs.tf
-    integration-lab-ec2-cluster/   # recipe: multi-node lab (Kafka, Lustre, Cassandra)
-      main.tf
-      variables.tf
-      outputs.tf
-  aws/
-    agent-integrations-dev/
-      labs/
-        kafka/
-          main.tf                  # calls integration-lab-ec2-cluster
-          terraform.tfvars
-        oracle/
-          main.tf
-          terraform.tfvars
-        lustre/
-          main.tf
-          terraform.tfvars
+ddev/src/ddev/cli/lab/
+  infra/
+    __init__.py
+    base.py              ← abstract LabInfra class (provision, destroy, outputs)
+    aws.py               ← AWS provider implementation
+    gcp.py               ← GCP provider implementation (Phase 2+)
+    cluster.py           ← multi-node cluster logic (node roles, security groups, IP map)
 ```
 
-### What the recipe modules handle
+The research phase generates a starter Pulumi program and places it in `infra/labs/<integration>/` inside the same PR as the `tests/lab/` artifacts. A team member reviews it before merging — same review gate as any other generated artifact.
 
-- EC2 instance(s) + security group (SSH + service ports, ingress from team VPN CIDR only)
-- IAM instance profile for SSM access (fallback if SSH key is lost)
-- S3 bucket for seed artifacts, load scripts, and license files
-- CloudWatch log group for EC2 system logs
-- `team = agent-integrations` and `env = lab` tags for cost attribution
+### What the Pulumi program provisions
 
-### Integration-specific configs
+**Single-instance (compose and bare-metal runtimes):**
+- VM instance (EC2 or GCE) + security group (SSH + service ports, ingress from team VPN CIDR only)
+- IAM instance profile / service account for Secrets Manager access
+- Object storage bucket for seed artifacts and license files
+- Cost-attribution tags: `team = agent-integrations`, `env = lab`
 
-Each `labs/<integration>/main.tf` calls the appropriate recipe module and sets:
+**Cluster runtime (Lustre, Kafka, Cassandra):**
+- VPC + subnet shared by all nodes
+- Security group with `lnet_port` (or equivalent) open between all instances in the group
+- Instances launched per role (from `lab.yaml` nodes list)
+- Outputs a `{role → [ip, ...]}` map used by subsequent steps
 
-- Instance type and count from `lab.yaml`
-- AMI ID (Ubuntu 22.04 base, maintained by the platform team)
-- Service-specific ports for the security group
-- License file S3 paths (bare-metal runtimes only)
+### Cluster provisioning flow (Lustre example)
 
-The research phase generates a starter `main.tf`. A cloud-infrastructure team member reviews and merges it into cloud-inventory separately from the integrations-core artifacts.
+Because LNET configuration requires each node to know the actual IP addresses of other nodes, provisioning follows a two-phase approach:
+
+```
+1. pulumi up  →  launch all nodes, emit {role → [ip, ...]} map
+2. Render Ansible inventory + vars from IP map
+3. ansible-playbook install_lustre_cluster.yml  (all nodes in parallel where possible)
+     Stage A: install kernel modules + lnet tools on all nodes
+     Stage B: configure lnet.conf with actual NIDs on all nodes
+     Stage C: start MGS → start MDS → start OSS → mount client
+4. Healthchecks run against per-role nodes
+5. Seed scripts run on client node
+6. Agent container starts on client node
+```
+
+The Ansible playbook receives the IP map via `--extra-vars`. Startup order (MGS before OSS before client mount) is encoded in the playbook's play sequence.
+
+### Registry entry
+
+```json
+{
+  "kafka": {
+    "owner": "david.kirov@datadoghq.com",
+    "cloud": "aws",
+    "instance_ids": ["i-0abc123"],
+    "instance_ips": {"primary": "10.0.1.42"},
+    "pulumi_stack": "agent-integrations/kafka",
+    "started_at": "2026-05-05T10:30:00Z",
+    "last_active_at": "2026-05-07T09:15:00Z",
+    "tech_version": "3.7",
+    "agent_version": "7.56.2",
+    "status": "running"
+  }
+}
+```
 
 ---
 
@@ -408,14 +411,14 @@ The research phase generates a starter `main.tf`. A cloud-infrastructure team me
 ```bash
 # Lab lifecycle
 ddev lab create <integration>              # provision → healthcheck → seed → load → Agent
-ddev lab stop <integration>                # stop load + services, leave EC2 running
+ddev lab stop <integration>                # stop load + services, leave instances running
 ddev lab start <integration>              # restart services + load on a stopped lab
-ddev lab destroy <integration>            # full teardown: services → terraform destroy → deregister
+ddev lab destroy <integration>            # full teardown: services → pulumi destroy → deregister
 ddev lab reload <integration>             # re-run seed scripts without reprovisioning
 
 # Visibility
 ddev lab list                              # all labs (all owners), with status
-ddev lab status <integration>             # EC2 state, service health, Agent check status
+ddev lab status <integration>             # instance state, service health, Agent check status
 ddev lab logs <integration> [service]     # tail logs from a service or the Agent
 ddev lab ssh <integration>                # open SSH session
 
@@ -432,32 +435,33 @@ ddev lab research --update <integration> --version <v>  # update for a new tech 
 
 ```
 1.  Read <integration>/lab.yaml
-2.  terraform apply in cloud-inventory/aws/agent-integrations-dev/labs/<integration>/
-3.  Poll port 22 until SSH is available (5 min max)
-4.  For bare-metal runtime: ansible-playbook tests/lab/provision/install_<service>.yml
+2.  pulumi up  (Pulumi Automation API, state in S3/GCS)
+3.  Poll port 22 on each instance until SSH is available (5 min max)
+4.  For bare-metal / cluster runtime: ansible-playbook install_<service>.yml
+    (cluster: with rendered IP map as extra-vars, plays run in role order)
 5.  For each healthcheck in parallel: poll until pass or timeout
-6.  For each seed script in order: ssh <ec2_ip> "bash -s" < tests/lab/seed/<script>
+6.  For each seed script in order: ssh <ip> "bash -s" < tests/lab/seed/<script>
 7.  Fetch DD_API_KEY from Secrets Manager
-8.  For bare-metal: docker run -d datadog/agent on EC2 with conf volume
+8.  For bare-metal / cluster: docker run -d datadog/agent on client node with conf volume
 9.  For compose: DD_API_KEY=<key> docker compose up -d (Agent service included)
-10. ssh <ec2_ip> "nohup <load driver> ..." to start background load
+10. ssh <ip> "nohup <load driver> ..." to start background load
 11. Write lab entry to shared registry (S3)
-12. Print: EC2 IP, SSH command, Agent container name, Datadog integration dashboard URL
+12. Print: instance IP(s), SSH command, Agent container name, Datadog dashboard URL
 ```
 
 ### `ddev lab destroy` flow
 
 ```
-1.  ssh <ec2_ip>: pkill -f locust (or k6)              ← stop load generator
-2.  For compose runtime: docker compose down --volumes  ← stop services + remove data
-3.  For bare-metal: ansible-playbook teardown_<service>.yml  ← deregister + clean up
-4.  terraform destroy in cloud-inventory/aws/.../labs/<integration>/
+1.  ssh <ip>: pkill -f locust (or k6)
+2.  For compose runtime: docker compose down --volumes
+3.  For bare-metal / cluster: ansible-playbook teardown_<service>.yml
+4.  pulumi destroy  (removes all cloud resources for the stack)
 5.  Remove integration entry from S3 registry
 ```
 
 ### `ddev lab stop` / `ddev lab start`
 
-`stop` halts services without destroying EC2. Useful for saving costs overnight:
+`stop` halts services without destroying instances. Useful for saving costs overnight:
 
 ```
 stop: ssh → stop load → docker compose stop (or systemd stop)
@@ -470,25 +474,7 @@ start: ssh → docker compose start (or systemd start)
 
 ### Shared lab registry
 
-Lives in S3 (`s3://agent-integrations-dev-lab-state/registry.json`), visible to the whole team:
-
-```json
-{
-  "kafka": {
-    "owner": "david.kirov@datadoghq.com",
-    "ec2_instance_id": "i-0abc123",
-    "ec2_ip": "10.0.1.42",
-    "terraform_workspace": "kafka",
-    "started_at": "2026-05-05T10:30:00Z",
-    "last_active_at": "2026-05-07T09:15:00Z",
-    "tech_version": "3.7",
-    "agent_version": "7.56.2",
-    "status": "running"
-  }
-}
-```
-
-Any team member can destroy a lab they don't own but is prompted to confirm. `ddev lab list` renders this as a table with status indicators.
+Lives in S3 (`s3://agent-integrations-dev-lab-state/registry.json`), visible to the whole team. `ddev lab list` renders it as a table with status indicators. Any team member can destroy a lab they don't own but is prompted to confirm.
 
 ---
 
@@ -501,19 +487,21 @@ Any team member can destroy a lab they don't own but is prompted to confirm. `dd
   lab.yaml
   tests/
     lab/
+      RESEARCH.md               ← human-readable: topology rationale, metric coverage,
+                                   operational gotchas, documentation sources
       compose/
-        docker-compose.yml        # service topology + Agent service
+        docker-compose.yml      ← service topology + Agent service
       seed/
-        01_<description>.sh       # numbered, idempotent, ordered
+        01_<description>.sh     ← numbered, idempotent, ordered
         02_<description>.py
         ...
       load/
-        locustfile.py             # or k6_script.js
+        locustfile.py           ← or k6_script.js
       agent/
-        conf.yaml                 # Datadog Agent integration config
+        conf.yaml               ← Datadog Agent integration config
       healthcheck/
-        check_<service>.sh        # custom healthcheck scripts (script type only)
-      provision/                  # bare-metal runtimes only
+        check_<service>.sh      ← custom healthcheck scripts (script type only)
+      provision/                ← bare-metal and cluster runtimes only
         install_<service>.yml
         teardown_<service>.yml
 ```
@@ -522,18 +510,18 @@ Any team member can destroy a lab they don't own but is prompted to confirm. `dd
 
 - Numbered prefix controls execution order
 - Must be idempotent (`CREATE TABLE IF NOT EXISTS`, `CREATE TOPIC IF NOT EXISTS`)
-- Target specific metrics from `metadata.csv` — comments name which metrics each script enables
-- Secrets (passwords, license keys) come from environment variables injected by the Terraform IAM instance profile, never hardcoded
+- `RESEARCH.md` documents which metrics from `metadata.csv` each script targets
+- Secrets (passwords, license keys) come from environment variables injected via IAM instance profile / service account, never hardcoded
 
 ### Load generator conventions
 
 - Locust is the default; k6 for protocols Locust doesn't support natively (e.g., raw Kafka protocol)
 - `target_rps` from `lab.yaml` sets the load level
-- Load daemon logs to `/var/log/ddev-lab-load.log` on the EC2 instance
+- Load daemon logs to `/var/log/ddev-lab-load.log` on the instance
 
 ### Agent config conventions
 
-`tests/lab/agent/conf.yaml` follows standard Datadog integration config format, pre-filled with connection details that match the compose file or bare-metal installation (localhost, standard ports, credentials from environment variables).
+`tests/lab/agent/conf.yaml` follows standard Datadog integration config format, pre-filled with connection details matching the compose file or bare-metal installation (localhost, standard ports, credentials from environment variables).
 
 ---
 
@@ -541,19 +529,19 @@ Any team member can destroy a lab they don't own but is prompted to confirm. `dd
 
 | Phase | Scope | Success criteria |
 |-------|-------|-----------------|
-| 1 | CLI skeleton: `create`, `stop`, `destroy`, `list`, `status` + shared registry + Kafka as reference (research artifacts hand-written) | Team member runs `ddev lab create kafka` and sees Agent metrics in Datadog |
-| 2 | `ddev lab research` command + research agent | Agent produces complete `tests/lab/` for Kafka from docs alone; diff against hand-written is minimal |
+| 1 | CLI skeleton: `create`, `stop`, `destroy`, `list`, `status` + shared registry + Kafka as reference (research artifacts hand-written, Pulumi program hand-written) | Team member runs `ddev lab create kafka` and sees Agent metrics in Datadog |
+| 2 | `ddev lab research` command + research agent | Agent produces complete `tests/lab/` + `RESEARCH.md` for Kafka from docs alone; diff against hand-written is minimal |
 | 3 | Research + runtime for Oracle and IBM MQ (bare-metal, Ansible provisioner) | `ddev lab create oracle` works end-to-end including teardown |
-| 4 | Lustre cluster support (multi-instance Terraform + cluster healthchecks) | `ddev lab create lustre` provisions 3-node cluster, Agent reports filesystem metrics |
-| 5 | `ddev lab upgrade`, cost controls (auto-stop after 7 days of inactivity) | Team can update Agent version without reprovisioning |
+| 4 | Lustre cluster support (cluster runtime, multi-node Pulumi + LNET Ansible provisioner) | `ddev lab create lustre` provisions 3+1 node cluster, Agent reports filesystem metrics |
+| 5 | GCP provider + `ddev lab upgrade` + cost controls (auto-stop after 7 days of inactivity) | `cloud: gcp` in `lab.yaml` works; team can update Agent version without reprovisioning |
 
 ---
 
 ## 11. Open Questions
 
-1. **Terraform state backend** — cloud-inventory uses its own remote state. Lab workspaces should use the same backend. Confirm with cloud-infrastructure team before Phase 1.
-2. **AMI maintenance** — who owns Ubuntu 22.04 base AMI rotation? Platform team or agent-integrations?
-3. **Datadog API key in the lab** — the API key for the Agent should emit to a dedicated org/environment (e.g., `agent-integrations-labs` in the sandbox org) to avoid polluting production metric streams. Confirm with the Datadog-internal infra team.
-4. **Lustre licensing** — Lustre is open source but the cluster topology for production-like testing requires specific kernel modules on the AMI. Confirm AMI requirements with whoever last set up a Lustre test environment.
-5. **Cost controls** — auto-stop after 7 days of inactivity via a Lambda in cloud-inventory or `ddev lab gc`?
+1. **Pulumi state backend** — S3 bucket `agent-integrations-dev-lab-state` needs to be created and access policy set. Who owns this in AWS? Confirm with cloud-infrastructure team before Phase 1.
+2. **AMI / base image maintenance** — who owns Ubuntu 22.04 base image rotation for EC2 (and equivalent for GCP)? Platform team or agent-integrations?
+3. **Datadog API key in the lab** — the Agent should emit to a dedicated org/environment (e.g., `agent-integrations-labs` in the sandbox org) to avoid polluting production metric streams. Confirm with Datadog-internal infra team.
+4. **Lustre kernel modules** — the `install_lustre_cluster.yml` playbook needs to install `lustre-server` and `lustre-client` kernel modules. These may require a specific kernel version pinned in the AMI. Confirm requirements with whoever last set up a Lustre test environment (see internal Confluence page for prior art).
+5. **Cost controls** — auto-stop after 7 days of inactivity via a scheduled Lambda or `ddev lab gc`? Where does the Lambda live if not in cloud-inventory?
 6. **CI integration** — `ddev lab create` callable from CI for long-running E2E suites? If yes, registry needs a `ci_run_id` field and auto-destroy on pipeline completion.
