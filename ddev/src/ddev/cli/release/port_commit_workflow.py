@@ -210,6 +210,8 @@ class CreatePullRequestStep(PortStep):
         self,
         app: Application,
         *,
+        owner: str,
+        repo: str,
         title: str,
         head: str,
         base: str,
@@ -219,6 +221,8 @@ class CreatePullRequestStep(PortStep):
         dry_run: bool = False,
     ) -> None:
         super().__init__(app, dry_run=dry_run)
+        self.owner = owner
+        self.repo = repo
         self.title = title
         self.head = head
         self.base = base
@@ -234,17 +238,36 @@ class CreatePullRequestStep(PortStep):
     def planned_commands(self) -> list[str]:
         label_part = f' --label {",".join(self.labels)}' if self.labels else ''
         draft_part = ' --draft' if self.draft else ''
-        return [f'POST /repos/.../pulls (head={self.head}, base={self.base}{draft_part}){label_part}']
+        endpoint = f'/repos/{self.owner}/{self.repo}/pulls'
+        return [f'POST {endpoint} (head={self.head}, base={self.base}{draft_part}){label_part}']
 
     def execute(self) -> None:
-        self.pr_url = self.app.github.create_pull_request(
-            title=self.title,
-            head=self.head,
-            base=self.base,
-            body=self.body,
-            draft=self.draft,
-            labels=self.labels or None,
-        )
+        import asyncio
+
+        self.pr_url = asyncio.run(self._create_pr())
+
+    async def _create_pr(self) -> str | None:
+        from ddev.utils.github_async import async_github_client
+
+        async with async_github_client(token=self.app.config.github.token) as client:
+            response = await client.create_pull_request(
+                owner=self.owner,
+                repo=self.repo,
+                title=self.title,
+                head=self.head,
+                base=self.base,
+                body=self.body,
+                draft=self.draft,
+            )
+            pr = response.data
+            if self.labels:
+                await client.add_labels_to_issue(
+                    owner=self.owner,
+                    repo=self.repo,
+                    issue_number=pr.number,
+                    labels=self.labels,
+                )
+            return pr.html_url
 
 
 def _resolve_in_toto_conflict(app: Application, path: str) -> None:
@@ -291,6 +314,18 @@ def build_pr_body(app: Application, *, sha: str, subject: str, target: str, orig
 
 def parse_labels(raw: str) -> list[str]:
     return [label.strip() for label in raw.split(',') if label.strip()]
+
+
+def resolve_owner_repo(app: Application) -> tuple[str, str]:
+    """Resolve (owner, repo) for the active repository.
+
+    Falls back to `DataDog/<full_name>` when `full_name` is unqualified.
+    """
+    full = app.repo.full_name
+    if '/' in full:
+        owner, repo = full.split('/', 1)
+        return owner, repo
+    return 'DataDog', full
 
 
 @dataclass(frozen=True)
@@ -415,8 +450,11 @@ def build_port_steps(app: Application, plan: PortPlan) -> tuple[list[PortStep], 
     ]
     pr_step: CreatePullRequestStep | None = None
     if plan.create_pr:
+        owner, repo = resolve_owner_repo(app)
         pr_step = CreatePullRequestStep(
             app,
+            owner=owner,
+            repo=repo,
             title=plan.pr_title,
             head=plan.new_branch,
             base=plan.target_branch,

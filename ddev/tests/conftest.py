@@ -24,6 +24,7 @@ from ddev.utils.platform import Platform
 
 from .helpers import APPLICATION, LOCAL_REPO_BRANCH, PLATFORM
 from .helpers.git import ClonedRepo
+from .helpers.github_async import fake_async_github  # noqa: F401
 from .helpers.runner import CliRunner
 
 # Rewrite assertions on the assertions helper module

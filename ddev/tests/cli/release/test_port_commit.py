@@ -6,6 +6,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock, call
 
 import pytest
+from pytest_mock import MockerFixture
 
 from ddev.cli.release.port_commit_workflow import (
     CherryPickStep,
@@ -19,10 +20,13 @@ from ddev.cli.release.port_commit_workflow import (
     split_commit_subject,
 )
 from ddev.utils.git import GitCommit
+from ddev.utils.github_async import GitHubResponse, PullRequest
+from tests.helpers.github_async import FakeAsyncGitHubClient
+from tests.helpers.runner import CliRunner
 
 
 @pytest.fixture
-def app_mock(mocker):
+def app_mock(mocker: MockerFixture) -> MagicMock:
     app = mocker.MagicMock()
     app.status.return_value.__enter__ = MagicMock(return_value=None)
     app.status.return_value.__exit__ = MagicMock(return_value=None)
@@ -212,10 +216,17 @@ def test_commit_step(app_mock, verify, expected_args):
     app_mock.repo.git.run.assert_called_once_with(*expected_args)
 
 
-def test_create_pull_request_step(app_mock):
-    app_mock.github.create_pull_request.return_value = 'https://github.com/x/pr/1'
+def test_create_pull_request_step(app_mock: MagicMock, fake_async_github: FakeAsyncGitHubClient) -> None:
+    app_mock.config.github.token = 'ghp_test'
+    fake_async_github.pull_request_response = GitHubResponse[PullRequest](
+        data=PullRequest(number=7, html_url='https://github.com/x/pr/1'),
+        headers={},
+    )
+
     step = CreatePullRequestStep(
         app_mock,
+        owner='DataDog',
+        repo='integrations-core',
         title='[Backport] Fix bug',
         head='alice/port-deadbeef00-to-7.62.x',
         base='7.62.x',
@@ -224,15 +235,56 @@ def test_create_pull_request_step(app_mock):
         draft=False,
     )
     step.execute()
-    app_mock.github.create_pull_request.assert_called_once_with(
+
+    fake_async_github.assert_called_once_with(
+        'create_pull_request',
+        owner='DataDog',
+        repo='integrations-core',
         title='[Backport] Fix bug',
         head='alice/port-deadbeef00-to-7.62.x',
         base='7.62.x',
         body='body',
         draft=False,
+    )
+    fake_async_github.assert_called_once_with(
+        'add_labels_to_issue',
+        owner='DataDog',
+        repo='integrations-core',
+        issue_number=7,
         labels=['qa/skip-qa'],
     )
     assert step.pr_url == 'https://github.com/x/pr/1'
+
+
+def test_create_pull_request_step_skips_label_call_when_no_labels(
+    app_mock: MagicMock, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    app_mock.config.github.token = 'ghp_test'
+
+    step = CreatePullRequestStep(
+        app_mock,
+        owner='DataDog',
+        repo='integrations-core',
+        title='[Backport] Fix',
+        head='alice/x',
+        base='master',
+        body='body',
+        labels=[],
+        draft=True,
+    )
+    step.execute()
+
+    fake_async_github.assert_called_once_with(
+        'create_pull_request',
+        owner='DataDog',
+        repo='integrations-core',
+        title='[Backport] Fix',
+        head='alice/x',
+        base='master',
+        body='body',
+        draft=True,
+    )
+    fake_async_github.assert_not_called('add_labels_to_issue')
 
 
 def _setup_command_mocks(mocker, *, commit_sha='deadbeef0011223344', subject='Fix bug (#100)', in_toto=''):
@@ -252,10 +304,11 @@ def _setup_command_mocks(mocker, *, commit_sha='deadbeef0011223344', subject='Fi
     )
 
 
-def test_command_happy_path(ddev, mocker):
+def test_command_happy_path(ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient) -> None:
     _setup_command_mocks(mocker)
-    pr_mock = mocker.patch(
-        'ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/x/pr/1'
+    fake_async_github.pull_request_response = GitHubResponse[PullRequest](
+        data=PullRequest(number=1, html_url='https://github.com/x/pr/1'),
+        headers={},
     )
     mocker.patch('click.confirm', return_value=True)
     mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
@@ -264,46 +317,54 @@ def test_command_happy_path(ddev, mocker):
 
     assert result.exit_code == 0, result.output
     assert 'Pull request created: https://github.com/x/pr/1' in result.output
-    pr_mock.assert_called_once()
-    _, kwargs = pr_mock.call_args
-    assert kwargs['draft'] is False
-    assert kwargs['labels'] == ['qa/skip-qa']
-    assert kwargs['head'] == 'alice/port-deadbeef00-to-master'
-    assert kwargs['base'] == 'master'
-    assert kwargs['title'] == '[Backport] Fix bug'
 
+    pr_call = fake_async_github.last_call('create_pull_request')
+    assert pr_call.kwargs['owner'] == 'DataDog'
+    assert pr_call.kwargs['repo'] == 'integrations-core'
+    assert pr_call.kwargs['title'] == '[Backport] Fix bug'
+    assert pr_call.kwargs['head'] == 'alice/port-deadbeef00-to-master'
+    assert pr_call.kwargs['base'] == 'master'
+    assert pr_call.kwargs['draft'] is False
+    assert '**Backported commit**: `deadbeef00`' in pr_call.kwargs['body']
+    assert '**Original PR**: #100' in pr_call.kwargs['body']
 
-def test_command_draft_flag(ddev, mocker):
-    _setup_command_mocks(mocker)
-    pr_mock = mocker.patch(
-        'ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/x/pr/2'
+    fake_async_github.assert_called_once_with(
+        'add_labels_to_issue',
+        owner='DataDog',
+        repo='integrations-core',
+        issue_number=1,
+        labels=['qa/skip-qa'],
     )
+
+
+def test_command_draft_flag(ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient) -> None:
+    _setup_command_mocks(mocker)
     mocker.patch('click.confirm', return_value=True)
     mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
 
     result = ddev('release', 'port-commit', '--draft', 'deadbeef0011223344')
 
     assert result.exit_code == 0, result.output
-    _, kwargs = pr_mock.call_args
-    assert kwargs['draft'] is True
+    assert fake_async_github.last_call('create_pull_request').kwargs['draft'] is True
 
 
-def test_command_no_pr(ddev, mocker):
+def test_command_no_pr(ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient) -> None:
     _setup_command_mocks(mocker)
-    pr_mock = mocker.patch('ddev.utils.github.GitHubManager.create_pull_request')
     mocker.patch('click.confirm', return_value=True)
     mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
 
     result = ddev('release', 'port-commit', '--no-pr', 'deadbeef0011223344')
 
     assert result.exit_code == 0, result.output
-    pr_mock.assert_not_called()
+    fake_async_github.assert_not_called('create_pull_request')
+    fake_async_github.assert_not_called('add_labels_to_issue')
 
 
-def test_command_dry_run_makes_no_mutating_calls(ddev, mocker):
+def test_command_dry_run_makes_no_mutating_calls(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
     _setup_command_mocks(mocker)
     run_mock = mocker.patch('ddev.utils.git.GitRepository.run')
-    pr_mock = mocker.patch('ddev.utils.github.GitHubManager.create_pull_request')
     mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
 
     result = ddev('release', 'port-commit', '--dry-run', 'deadbeef0011223344')
@@ -311,10 +372,10 @@ def test_command_dry_run_makes_no_mutating_calls(ddev, mocker):
     assert result.exit_code == 0, result.output
     assert '(dry-run)' in result.output
     run_mock.assert_not_called()
-    pr_mock.assert_not_called()
+    fake_async_github.assert_not_called('create_pull_request')
 
 
-def test_command_aborts_when_no_github_user(ddev, mocker):
+def test_command_aborts_when_no_github_user(ddev: CliRunner, mocker: MockerFixture) -> None:
     mocker.patch.dict('os.environ', {'DD_GITHUB_USER': '', 'GITHUB_USER': '', 'GITHUB_ACTOR': ''})
 
     result = ddev('release', 'port-commit', 'deadbeef0011223344')
@@ -323,9 +384,10 @@ def test_command_aborts_when_no_github_user(ddev, mocker):
     assert 'No GitHub user configured' in result.output
 
 
-def test_command_aborts_on_unconfirmed(ddev, mocker):
+def test_command_aborts_on_unconfirmed(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
     _setup_command_mocks(mocker)
-    mocker.patch('ddev.utils.github.GitHubManager.create_pull_request')
     mocker.patch('click.confirm', return_value=False)
     mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
 
@@ -333,13 +395,13 @@ def test_command_aborts_on_unconfirmed(ddev, mocker):
 
     assert result.exit_code == 1, result.output
     assert 'Did not get confirmation' in result.output
+    fake_async_github.assert_not_called('create_pull_request')
 
 
-def test_command_uses_head_when_no_commit_given(ddev, mocker):
+def test_command_uses_head_when_no_commit_given(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
     _setup_command_mocks(mocker)
-    pr_mock = mocker.patch(
-        'ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/x/pr/3'
-    )
     mocker.patch('click.confirm', return_value=True)
     mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
 
@@ -347,4 +409,4 @@ def test_command_uses_head_when_no_commit_given(ddev, mocker):
 
     assert result.exit_code == 0, result.output
     assert 'No commit specified' in result.output
-    pr_mock.assert_called_once()
+    assert len(fake_async_github.calls_to('create_pull_request')) == 1

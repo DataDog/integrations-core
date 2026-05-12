@@ -108,6 +108,19 @@ class IssueComment(BaseModel):
     html_url: str | None = None
 
 
+class PullRequest(BaseModel):
+    """A GitHub pull request (minimal fields, extend as needed).
+
+    Field reference:
+    https://docs.github.com/en/rest/pulls/pulls#get-a-pull-request
+    """
+
+    model_config = ConfigDict(extra="ignore")
+
+    number: int
+    html_url: str
+
+
 class PullRequestReviewComment(BaseModel):
     """An inline review comment on a pull request diff."""
 
@@ -334,6 +347,76 @@ class AsyncGitHubClient:
             json={"body": body},
         )
         return self._parse_response(response, IssueComment)
+
+    async def create_pull_request(
+        self,
+        owner: str,
+        repo: str,
+        title: str,
+        head: str,
+        base: str,
+        body: str = "",
+        draft: bool = False,
+        timeout: float | None = None,
+    ) -> GitHubResponse[PullRequest]:
+        """
+        Calls the GitHub API to create a pull request.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/pulls/pulls#create-a-pull-request
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            title: Pull request title.
+            head: Name of the branch containing the changes.
+            base: Name of the branch to merge into.
+            body: Pull request body.
+            draft: Whether to open the pull request as a draft.
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+
+        Returns:
+            GitHubResponse[PullRequest]: The validated pull request data and headers.
+        """
+        response = await self._request(
+            "POST",
+            f"/repos/{owner}/{repo}/pulls",
+            timeout=timeout,
+            json={"title": title, "head": head, "base": base, "body": body, "draft": draft},
+        )
+        return self._parse_response(response, PullRequest)
+
+    async def add_labels_to_issue(
+        self,
+        owner: str,
+        repo: str,
+        issue_number: int,
+        labels: list[str],
+        timeout: float | None = None,
+    ) -> GitHubResponse[None]:
+        """
+        Calls the GitHub API to add one or more labels to an issue or pull request.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/issues/labels#add-labels-to-an-issue
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            issue_number: Issue or pull request number.
+            labels: Labels to add. Existing labels on the issue are preserved.
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+
+        Returns:
+            GitHubResponse[None]: Empty response with headers.
+        """
+        response = await self._request(
+            "POST",
+            f"/repos/{owner}/{repo}/issues/{issue_number}/labels",
+            timeout=timeout,
+            json={"labels": labels},
+        )
+        return GitHubResponse[None].model_validate({"data": None, "headers": dict(response.headers)})
 
     async def create_pr_review_comment(
         self,

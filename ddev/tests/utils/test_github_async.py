@@ -16,6 +16,7 @@ from ddev.utils.github_async import (
     GitHubResponse,
     IssueComment,
     PaginationData,
+    PullRequest,
     PullRequestReviewComment,
     WorkflowRun,
     async_github_client,
@@ -409,6 +410,87 @@ async def test_create_pr_review_comment_http_error_raises() -> None:
     with pytest.raises(httpx.HTTPStatusError) as exc_info:
         await client.create_pr_review_comment("o", "r", 1, "body", "sha", "path")
     assert exc_info.value.response.status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# create_pull_request
+# ---------------------------------------------------------------------------
+
+
+def _pull_request_payload(number: int = 1) -> dict[str, Any]:
+    return {
+        "number": number,
+        "html_url": f"https://github.com/owner/repo/pull/{number}",
+    }
+
+
+@pytest.mark.asyncio
+async def test_create_pull_request_success() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "POST"
+        assert "/repos/owner/repo/pulls" in request.url.path
+        body = json.loads(request.content)
+        assert body == {
+            "title": "Fix bug",
+            "head": "alice/fix",
+            "base": "master",
+            "body": "Fix description",
+            "draft": False,
+        }
+        return _json_response(_pull_request_payload(number=42), status_code=201)
+
+    client = _make_client(httpx.MockTransport(handler))
+    result = await client.create_pull_request("owner", "repo", "Fix bug", "alice/fix", "master", "Fix description")
+    assert isinstance(result.data, PullRequest)
+    assert result.data.number == 42
+    assert result.data.html_url == "https://github.com/owner/repo/pull/42"
+
+
+@pytest.mark.asyncio
+async def test_create_pull_request_draft_true_forwarded() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        body = json.loads(request.content)
+        assert body["draft"] is True
+        return _json_response(_pull_request_payload(number=7), status_code=201)
+
+    client = _make_client(httpx.MockTransport(handler))
+    result = await client.create_pull_request("o", "r", "T", "h", "b", draft=True)
+    assert result.data.number == 7
+
+
+@pytest.mark.asyncio
+async def test_create_pull_request_http_error_raises() -> None:
+    client = _make_client(httpx.MockTransport(lambda r: httpx.Response(422)))
+    with pytest.raises(httpx.HTTPStatusError) as exc_info:
+        await client.create_pull_request("o", "r", "T", "h", "b")
+    assert exc_info.value.response.status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# add_labels_to_issue
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_add_labels_to_issue_success() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "POST"
+        assert "/repos/owner/repo/issues/3/labels" in request.url.path
+        body = json.loads(request.content)
+        assert body == {"labels": ["qa/skip-qa", "backport/7.62.x"]}
+        return _json_response([{"id": 1, "name": "qa/skip-qa"}, {"id": 2, "name": "backport/7.62.x"}], status_code=200)
+
+    client = _make_client(httpx.MockTransport(handler))
+    result = await client.add_labels_to_issue("owner", "repo", 3, ["qa/skip-qa", "backport/7.62.x"])
+    assert result.data is None
+
+
+@pytest.mark.asyncio
+async def test_add_labels_to_issue_http_error_raises() -> None:
+    client = _make_client(httpx.MockTransport(lambda r: httpx.Response(404)))
+    with pytest.raises(httpx.HTTPStatusError) as exc_info:
+        await client.add_labels_to_issue("o", "r", 1, ["bug"])
+    assert exc_info.value.response.status_code == 404
 
 
 # ---------------------------------------------------------------------------
