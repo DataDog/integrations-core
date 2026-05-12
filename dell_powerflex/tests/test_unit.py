@@ -107,6 +107,7 @@ def test_collect_system(dd_run_check, aggregator, instance, mock_http_get):
     system_tags = base_tags + ['system_id:1fcf40fc60c6520f', 'dell_type:system']
 
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=1, tags=base_tags)
+    aggregator.assert_metric('dell_powerflex.system.count', value=1, tags=system_tags)
 
     for metric in SYSTEM_MDM_CLUSTER_METRICS:
         aggregator.assert_metric(
@@ -151,6 +152,7 @@ def test_collect_volumes(dd_run_check, aggregator, instance, mock_http_get):
         'storage_pool_id:25155ba600000000',
         'dell_type:volume',
     ]
+    aggregator.assert_metric('dell_powerflex.volume.count', value=1, tags=volume_tags)
     for metric in VOLUME_STATS_SIMPLE_METRICS:
         aggregator.assert_metric(metric['name'], value=metric['value'], tags=volume_tags)
     assert_bwc_metrics(aggregator, VOLUME_STATS_BWC_METRICS, volume_tags)
@@ -209,6 +211,7 @@ def test_collect_storage_pools(dd_run_check, aggregator, instance, mock_http_get
         'protection_domain_id:68c139ee00000000',
         'dell_type:storage_pool',
     ]
+    aggregator.assert_metric('dell_powerflex.storage_pool.count', value=1, tags=pool_tags)
     for metric in STORAGE_POOL_STATS_SIMPLE_METRICS:
         aggregator.assert_metric(metric['name'], value=metric['value'], tags=pool_tags)
     assert_bwc_metrics(aggregator, STORAGE_POOL_STATS_BWC_METRICS, pool_tags)
@@ -237,6 +240,7 @@ def test_collect_protection_domains(dd_run_check, aggregator, instance, mock_htt
         'system_id:1fcf40fc60c6520f',
         'dell_type:protection_domain',
     ]
+    aggregator.assert_metric('dell_powerflex.protection_domain.count', value=1, tags=pd_tags)
     for metric in PROTECTION_DOMAIN_STATS_SIMPLE_METRICS:
         aggregator.assert_metric(metric['name'], value=metric['value'], tags=pd_tags)
     assert_bwc_metrics(aggregator, PROTECTION_DOMAIN_STATS_BWC_METRICS, pd_tags)
@@ -282,6 +286,7 @@ def test_collect_sds(dd_run_check, aggregator, instance, mock_http_get):
         'fault_set_id:faultset00000001',
         'dell_type:sds',
     ]
+    aggregator.assert_metric('dell_powerflex.sds.count', value=1, tags=sds3_tags)
     for metric in SDS_STATS_SIMPLE_METRICS:
         aggregator.assert_metric(metric['name'], value=metric['value'], tags=sds3_tags)
     assert_bwc_metrics(aggregator, SDS_STATS_BWC_METRICS, sds3_tags)
@@ -326,6 +331,7 @@ def test_collect_sdc(dd_run_check, aggregator, instance, mock_http_get):
         'peer_mdm_id:mdm00000001',
         'dell_type:sdc',
     ]
+    aggregator.assert_metric('dell_powerflex.sdc.count', value=1, tags=sdc1_tags)
     for metric in SDC_STATS_SIMPLE_METRICS:
         aggregator.assert_metric(metric['name'], value=metric['value'], tags=sdc1_tags)
     assert_bwc_metrics(aggregator, SDC_STATS_BWC_METRICS, sdc1_tags)
@@ -371,6 +377,7 @@ def test_collect_devices(dd_run_check, aggregator, instance, mock_http_get):
         'sds_id:d1c062b900000002',
         'dell_type:device',
     ]
+    aggregator.assert_metric('dell_powerflex.device.count', value=1, tags=dev1_tags)
     for metric in DEVICE_STATS_SIMPLE_METRICS:
         aggregator.assert_metric(metric['name'], value=metric['value'], tags=dev1_tags)
     assert_bwc_metrics(aggregator, DEVICE_STATS_BWC_METRICS, dev1_tags)
@@ -544,7 +551,8 @@ def test_collect_statistics_false_without_patterns(dd_run_check, aggregator, ins
         'fault_set_id:faultset00000001',
         'dell_type:sds',
     ]
-    # SDS resources are still collected (no include/exclude filtering)
+    # SDS resources are still collected
+    aggregator.assert_metric('dell_powerflex.sds.count', value=1, tags=sds3_tags)
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
     # But statistics are not collected
     aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', count=0, tags=sds3_tags)

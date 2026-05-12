@@ -92,6 +92,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         tags = self._base_tags + [f"system_id:{system.get('id', '')}", f"dell_type:{SYSTEM_RESOURCE_TYPE}"]
         if system.get('name'):
             tags = tags + [f"system_name:{system.get('name', '')}"]
+        self.gauge('system.count', 1, tags=tags)
         mdm_cluster = system.get('mdmCluster', {})
         for api_field, metric_suffix in SYSTEM_MDM_CLUSTER_SIMPLE_METRICS:
             self.gauge(metric_suffix, mdm_cluster.get(api_field), tags=tags)
@@ -130,6 +131,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         ]
         if volume.get('ancestorVolumeId'):
             tags = tags + [f"ancestor_volume_id:{volume.get('ancestorVolumeId', '')}"]
+        self.gauge('volume.count', 1, tags=tags)
         for sdc in volume.get('mappedSdcInfo') or []:
             mapping_tags = tags + [f"sdc_id:{sdc.get('sdcId', '')}"]
             self.gauge('volume.sdc_mapping', 1, tags=mapping_tags)
@@ -160,6 +162,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             f"protection_domain_id:{pool.get('protectionDomainId', '')}",
             f"dell_type:{STORAGE_POOL_RESOURCE_TYPE}",
         ]
+        self.gauge('storage_pool.count', 1, tags=tags)
         if should_collect_statistics(STORAGE_POOL_RESOURCE_TYPE, self._resource_filters):
             self._collect_storage_pool_statistics(pool.get('id', ''), tags)
 
@@ -187,6 +190,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             f"system_id:{pd.get('systemId', '')}",
             f"dell_type:{PROTECTION_DOMAIN_RESOURCE_TYPE}",
         ]
+        self.gauge('protection_domain.count', 1, tags=tags)
         if should_collect_statistics(PROTECTION_DOMAIN_RESOURCE_TYPE, self._resource_filters):
             self._collect_protection_domain_statistics(pd.get('id', ''), tags)
 
@@ -216,6 +220,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         ]
         if sds.get('faultSetId'):
             tags = tags + [f"fault_set_id:{sds.get('faultSetId', '')}"]
+        self.gauge('sds.count', 1, tags=tags)
         if should_collect_statistics(SDS_RESOURCE_TYPE, self._resource_filters):
             self._collect_sds_statistics(sds.get('id', ''), tags)
 
@@ -246,6 +251,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         ]
         if sdc.get('peerMdmId'):
             tags = tags + [f"peer_mdm_id:{sdc.get('peerMdmId', '')}"]
+        self.gauge('sdc.count', 1, tags=tags)
         if should_collect_statistics(SDC_RESOURCE_TYPE, self._resource_filters):
             self._collect_sdc_statistics(sdc.get('id', ''), tags)
 
@@ -275,6 +281,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             f"sds_id:{device.get('sdsId', '')}",
             f"dell_type:{DEVICE_RESOURCE_TYPE}",
         ]
+        self.gauge('device.count', 1, tags=tags)
         if should_collect_statistics(DEVICE_RESOURCE_TYPE, self._resource_filters):
             self._collect_device_statistics(device.get('id', ''), tags)
 

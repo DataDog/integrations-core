@@ -108,7 +108,7 @@ def should_collect_resource(
             logger.debug('Skipping %s %s: matched exclude pattern on %s', resource_type, value_str, rf.property_name)
             return False
 
-    includes = [rf for rf in relevant if rf.filter_type == 'include']
+    includes = [rf for rf in relevant if rf.filter_type == 'include' and rf.patterns]
     if not includes:
         return True
 
