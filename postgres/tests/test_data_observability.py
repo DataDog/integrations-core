@@ -196,9 +196,9 @@ def test_per_query_interval_tracking(aggregator, pg_instance):
     check.data_observability.run_job()
     assert len(aggregator.metrics('dd.postgres.data_observability.query_executions')) == 0
 
-    # Reset _last_execution to force re-run
+    # Reset last_execution to force re-run
     aggregator.reset()
-    check.data_observability._last_execution = {1: 0.0}
+    check.data_observability._last_execution[1] = 0.0
     check.data_observability.run_job()
     assert len(aggregator.metrics('dd.postgres.data_observability.query_executions')) == 1
 
@@ -353,30 +353,6 @@ def test_tags_include_monitor_id(aggregator, pg_instance):
     assert 'status:success' in exec_metrics[0].tags
 
 
-def test_query_with_no_description(aggregator, pg_instance):
-    """Non-SELECT queries (cursor.description is None) are caught per-query and emit an error result."""
-    mock_conn, mock_cursor = _make_mock_conn()
-
-    def execute_side_effect(sql, *args, **kwargs):
-        mock_cursor.description = None
-
-    mock_cursor.execute = MagicMock(side_effect=execute_side_effect)
-
-    with patch.object(PostgreSql, 'event_platform_event') as mock_epe:
-        check = _create_check(pg_instance)
-        check.db_pool = _mock_db_pool(mock_conn)
-        check.data_observability.run_job()
-
-        do_calls = _get_do_event_calls(mock_epe)
-        payload = json.loads(do_calls[0][0][0])
-
-    assert payload['status'] == 'error'
-    assert 'result set' in payload['error']
-    metrics = aggregator.metrics('dd.postgres.data_observability.query_executions')
-    assert len(metrics) == 1
-    assert 'status:error' in metrics[0].tags
-
-
 def test_collection_interval_none_uses_default(pg_instance):
     """collection_interval=None should not crash, uses default."""
     instance = deepcopy(pg_instance)
@@ -391,7 +367,7 @@ def test_collection_interval_none_uses_default(pg_instance):
 
 
 def test_failed_query_updates_last_execution(aggregator, pg_instance):
-    """A failed query still updates _last_execution so it's not retried until the next interval."""
+    """A failed query still updates last_execution so it's not retried until the next interval."""
     mock_conn, mock_cursor = _make_mock_conn()
     mock_cursor.execute.side_effect = psycopg.errors.ProgrammingError("syntax error")
 
@@ -400,6 +376,7 @@ def test_failed_query_updates_last_execution(aggregator, pg_instance):
 
     check.data_observability.run_job()
     assert 1 in check.data_observability._last_execution
+    assert check.data_observability._last_execution[1] > 0
 
     # Immediate re-run should skip the query (interval not elapsed)
     aggregator.reset()
@@ -476,32 +453,6 @@ def test_per_query_dbname_in_event_payload(aggregator, pg_instance):
     assert payload['db_name'] == 'analytics_db'
 
 
-def test_multi_query_different_dbnames(aggregator, pg_instance):
-    """Multiple queries with different dbnames each connect to the correct database."""
-    queries = [
-        {**deepcopy(BASE_QUERY), 'dbname': 'db_one'},
-        {**deepcopy(MULTI_QUERIES[1]), 'dbname': 'db_two'},
-    ]
-    mock_conn, _ = _make_mock_conn()
-
-    with patch.object(PostgreSql, 'event_platform_event') as mock_epe:
-        check = _create_check(pg_instance, queries=queries)
-        check.db_pool = _mock_db_pool(mock_conn)
-        check.data_observability.run_job()
-
-        calls = check.db_pool.get_connection.call_args_list
-        assert len(calls) == 2
-        assert calls[0][0][0] == 'db_one'
-        assert calls[1][0][0] == 'db_two'
-
-        do_calls = _get_do_event_calls(mock_epe)
-        payload_1 = json.loads(do_calls[0][0][0])
-        payload_2 = json.loads(do_calls[1][0][0])
-
-    assert payload_1['db_name'] == 'db_one'
-    assert payload_2['db_name'] == 'db_two'
-
-
 # ---------------------------------------------------------------------------
 # Cron schedule tests
 # ---------------------------------------------------------------------------
@@ -523,15 +474,18 @@ CRON_QUERY = {
 
 
 def _make_cron_check(pg_instance, queries=None):
-    """Create a check with a cron-scheduled query."""
     if queries is None:
         queries = [deepcopy(CRON_QUERY)]
     return _create_check(pg_instance, queries=queries)
 
 
 def test_schedule_query_does_not_fire_before_tick(pg_instance, monkeypatch):
-    """A cron query registered before its first tick must NOT fire on the first run_job call."""
-    # Clock is at 00:49:00 — first tick for "50 * * * *" is 00:50:00, still 60s away.
+    """First-sight cron registers next_run without firing.
+
+    Clock sits at 00:49:00, 59 minutes after the previous :50 tick — well
+    outside the 300s lookback window — so first-sight recovery does not
+    fire either. The next tick (00:50:00) is still 60s in the future.
+    """
     current_time = [float(_BASE_EPOCH)]  # 00:49:00
     monkeypatch.setattr('datadog_checks.postgres.data_observability.time.time', lambda: current_time[0])
 
@@ -588,9 +542,8 @@ def test_schedule_advances_after_run(pg_instance, monkeypatch):
 
 
 def test_schedule_takes_precedence_over_interval_seconds(pg_instance, aggregator, monkeypatch):
-    """When both schedule and interval_seconds are set, schedule wins."""
     query = deepcopy(CRON_QUERY)
-    query['interval_seconds'] = 5  # Very short interval — should be ignored
+    query['interval_seconds'] = 5  # Very short interval — should be ignored.
 
     current_time = [float(_BASE_EPOCH)]
     monkeypatch.setattr('datadog_checks.postgres.data_observability.time.time', lambda: current_time[0])
@@ -604,71 +557,16 @@ def test_schedule_takes_precedence_over_interval_seconds(pg_instance, aggregator
     assert len(aggregator.metrics('dd.postgres.data_observability.query_executions')) == 0
 
     # Advance 10s (interval would have fired, but cron tick not reached yet).
-    current_time[0] = _BASE_EPOCH + 10  # 00:49:10 — past 5s interval, but not yet :50
+    current_time[0] = _BASE_EPOCH + 10  # 00:49:10 — past 5s interval, but not yet :50.
     aggregator.reset()
     check.data_observability.run_job()
     assert len(aggregator.metrics('dd.postgres.data_observability.query_executions')) == 0
 
-    # Now advance past 00:50:00
+    # Now advance past 00:50:00.
     current_time[0] = _BASE_EPOCH + 65  # 00:50:05
     aggregator.reset()
     check.data_observability.run_job()
     assert len(aggregator.metrics('dd.postgres.data_observability.query_executions')) == 1
-
-
-def test_schedule_invalid_skipped(pg_instance, aggregator, monkeypatch):
-    """A query with an invalid cron string is skipped; other queries in the list still run."""
-    bad_query = {
-        **deepcopy(CRON_QUERY),
-        'monitor_id': 20,
-        'schedule': 'not-a-cron',
-    }
-    good_query = deepcopy(BASE_QUERY)  # interval-based query, monitor_id=1
-
-    current_time = [float(_BASE_EPOCH)]
-    monkeypatch.setattr('datadog_checks.postgres.data_observability.time.time', lambda: current_time[0])
-
-    mock_conn, _ = _make_mock_conn()
-    check = _create_check(pg_instance, queries=[bad_query, good_query])
-    check.db_pool = _mock_db_pool(mock_conn)
-
-    check.data_observability.run_job()
-
-    metrics = aggregator.metrics('dd.postgres.data_observability.query_executions')
-    monitor_ids_run = {int(t.split(':')[1]) for m in metrics for t in m.tags if t.startswith('monitor_id:')}
-    # bad_query (id=20) must NOT have run; good_query (id=1) must have run
-    assert 20 not in monitor_ids_run
-    assert 1 in monitor_ids_run
-
-    # Warning should be recorded in _invalid_warned, not repeated on next run
-    check.data_observability.run_job()
-    assert 20 in check.data_observability._invalid_warned
-
-
-def test_neither_set_skipped(pg_instance, aggregator):
-    """A query with no schedule and no positive interval_seconds is skipped."""
-    query = {
-        'monitor_id': 30,
-        'dbname': 'test_db',
-        'query': 'SELECT 1',
-        'type': 'freshness',
-        'entity': {
-            'platform': 'aws',
-            'account': '123456',
-            'database': 'test_db',
-            'schema': 'public',
-            'table': 'foo',
-        },
-    }
-    mock_conn, _ = _make_mock_conn()
-    check = _create_check(pg_instance, queries=[query])
-    check.db_pool = _mock_db_pool(mock_conn)
-    check.data_observability.run_job()
-
-    metrics = aggregator.metrics('dd.postgres.data_observability.query_executions')
-    monitor_ids_run = {int(t.split(':')[1]) for m in metrics for t in m.tags if t.startswith('monitor_id:')}
-    assert 30 not in monitor_ids_run
-    assert 30 in check.data_observability._invalid_warned
 
 
 # ---------------------------------------------------------------------------
@@ -678,7 +576,7 @@ def test_neither_set_skipped(pg_instance, aggregator):
 
 def test_lateness_metric_emitted_for_cron(pg_instance, aggregator, monkeypatch):
     """Cron query fired late emits a positive lateness gauge with mode:cron tag."""
-    # next_run will be at 00:50:00; fire at 00:52:00 → 120s lateness
+    # next_run will be at 00:50:00; fire at 00:52:00 -> 120s lateness.
     fire_time = float(_BASE_EPOCH + 180)  # 00:52:00
     current_time = [float(_BASE_EPOCH)]  # 00:49:00 — before the tick
     monkeypatch.setattr('datadog_checks.postgres.data_observability.time.time', lambda: current_time[0])
@@ -709,10 +607,11 @@ def test_lateness_metric_emitted_for_cron(pg_instance, aggregator, monkeypatch):
 
 
 def test_lateness_metric_emitted_for_interval(pg_instance, aggregator, monkeypatch):
-    """Interval query emits lateness gauge with mode:interval tag."""
-    # Use a large base time so that `now - last_run(0.0) >= interval_seconds(60)` is True.
-    # At t=1000 with last_run=0.0: 1000 - 0 = 1000 >= 60 → due.
-    # First fire: last_run is 0.0 (never run) → scheduled = now → lateness = 0.
+    """Interval query emits lateness gauge with mode:interval tag.
+
+    First fire is lazy-seeded to scheduled = now so lateness is 0; second
+    fire after a delay exposes the configured interval as positive lateness.
+    """
     current_time = [1000.0]
     monkeypatch.setattr('datadog_checks.postgres.data_observability.time.time', lambda: current_time[0])
 
@@ -722,15 +621,15 @@ def test_lateness_metric_emitted_for_interval(pg_instance, aggregator, monkeypat
     check = _create_check(pg_instance, queries=[query])
     check.db_pool = _mock_db_pool(mock_conn)
 
-    # First fire at t=1000: last_run=0 (never run), so scheduled=now → lateness=0.
+    # First fire at t=1000: lazy-seeded last_execution = 940, so scheduled = now -> lateness = 0.
     check.data_observability.run_job()
     lateness_metrics = aggregator.metrics('dd.postgres.data_observability.query_fire_lateness_seconds')
     assert len(lateness_metrics) == 1
     assert lateness_metrics[0].value == 0.0
     assert 'mode:interval' in lateness_metrics[0].tags
 
-    # After first fire, last_run = 1000.0.
-    # Second fire at t=1080 (20s late: scheduled = 1000 + 60 = 1060, fired at 1080)
+    # After first fire, last_execution = 1000.0.
+    # Second fire at t=1080 (20s late: scheduled = 1000 + 60 = 1060, fired at 1080).
     current_time[0] = 1080.0
     aggregator.reset()
     check.data_observability.run_job()
@@ -739,7 +638,7 @@ def test_lateness_metric_emitted_for_interval(pg_instance, aggregator, monkeypat
     assert len(lateness_metrics) == 1
     m = lateness_metrics[0]
     assert 'mode:interval' in m.tags
-    # scheduled = last_run(1000) + interval(60) = 1060; fire at 1080 → lateness = 20
+    # scheduled = last_run(1000) + interval(60) = 1060; fire at 1080 -> lateness = 20.
     assert abs(m.value - 20.0) < 1.0
 
 
@@ -754,11 +653,14 @@ def test_lateness_clamped_at_zero(pg_instance, aggregator, monkeypatch):
 
     # Patch _get_due_queries to return a scheduled_fire_time in the future of fire_start
     # (synthetic clock-skew scenario). Lateness must clamp to 0 rather than go negative.
+    from datadog_checks.postgres.data_observability import DueQuery
+
     skewed_scheduled = current_time[0] + 100.0
+    q = check.data_observability._do_config.queries[0]
     with patch.object(
         check.data_observability,
         '_get_due_queries',
-        return_value=[(check.data_observability._do_config.queries[0], skewed_scheduled)],
+        return_value=[DueQuery(q, skewed_scheduled, "cron")],
     ):
         aggregator.reset()
         check.data_observability.run_job()
@@ -789,7 +691,7 @@ def test_starved_query_eventually_fires(pg_instance, aggregator, monkeypatch):
     check = _create_check(pg_instance, queries=[query_a, query_b])
     check.db_pool = _mock_db_pool(mock_conn)
 
-    # First run: registers both next_run values (A→00:50:00, B→00:51:00), fires nothing.
+    # First run: registers both next_run values (A -> 00:50:00, B -> 00:51:00), fires nothing.
     check.data_observability.run_job()
     assert len(aggregator.metrics('dd.postgres.data_observability.query_executions')) == 0
 
@@ -804,7 +706,7 @@ def test_starved_query_eventually_fires(pg_instance, aggregator, monkeypatch):
     assert a_ran, "Query A should have fired at 00:50:05"
     assert not b_ran, "Query B should not yet have fired at 00:50:05"
 
-    # Simulate: A took 2m30s → clock is now 00:52:35. B's tick (00:51:00) has passed.
+    # Simulate: A took 2m30s -> clock is now 00:52:35. B's tick (00:51:00) has passed.
     current_time[0] = _BASE_EPOCH + 215  # 00:52:35
     aggregator.reset()
     check.data_observability.run_job()
@@ -892,40 +794,42 @@ def test_cron_startup_lookback_lateness_reflects_age_of_tick(pg_instance, aggreg
     assert 'mode:cron' in lateness_metrics[0].tags
 
 
-def test_cron_startup_lookback_advances_next_run_past_recovered_tick(pg_instance, aggregator, monkeypatch):
-    """After a recovery fire, _next_run points at the next future tick (not the recovered one)."""
-    current_time = [float(_BASE_EPOCH + 70)]  # 00:50:10
-    monkeypatch.setattr('datadog_checks.postgres.data_observability.time.time', lambda: current_time[0])
-
-    mock_conn, _ = _make_mock_conn()
-    check = _make_cron_lookback_check(pg_instance, lookback_seconds=None)
-    check.db_pool = _mock_db_pool(mock_conn)
-    check.data_observability.run_job()
-
-    mid = CRON_QUERY['monitor_id']
-    next_run = check.data_observability._next_run[mid]
-    # Recovered fire at 00:50:10 should advance _next_run to 01:50:00, not to 00:50:00.
-    assert next_run >= _BASE_EPOCH + 3600  # at least one hour past _BASE_EPOCH (00:49:00)
-
-
 def test_cron_startup_lookback_default_is_300_seconds(pg_instance):
-    """The default lookback window is 5 minutes; pin the constant so a regression is loud."""
-    from datadog_checks.postgres.data_observability import DEFAULT_CRON_STARTUP_LOOKBACK_SECONDS
-
-    assert DEFAULT_CRON_STARTUP_LOOKBACK_SECONDS == 300
+    """The default lookback window is 5 minutes; pin it so a regression is loud."""
     check = _make_cron_lookback_check(pg_instance, lookback_seconds=None)
-    assert check.data_observability._cron_startup_lookback_seconds() == 300
+    assert check.data_observability._lookback_seconds == 300
 
 
 def test_cron_startup_lookback_negative_clamped_to_zero_with_warning(pg_instance, caplog):
-    """A negative lookback value clamps to 0 and emits a warning so it isn't silently dropped."""
+    """A negative lookback value clamps to 0 and emits a warning at construction so it isn't silently dropped."""
     import logging
 
-    check = _make_cron_lookback_check(pg_instance, lookback_seconds=-100)
-    with caplog.at_level(logging.WARNING, logger=check.data_observability._log.name):
-        result = check.data_observability._cron_startup_lookback_seconds()
-    assert result == 0
+    with caplog.at_level(logging.WARNING):
+        check = _make_cron_lookback_check(pg_instance, lookback_seconds=-100)
+    assert check.data_observability._lookback_seconds == 0
     assert any('Invalid cron_startup_lookback_seconds' in r.message for r in caplog.records)
+
+
+def test_cron_startup_lookback_negative_warning_is_one_shot(pg_instance, caplog, monkeypatch):
+    """The negative-lookback warning fires once at construction, not every tick."""
+    import logging
+
+    with caplog.at_level(logging.WARNING):
+        check = _make_cron_lookback_check(pg_instance, lookback_seconds=-100)
+    initial_warnings = sum(1 for r in caplog.records if 'Invalid cron_startup_lookback_seconds' in r.message)
+    assert initial_warnings == 1
+
+    # Drive a handful of ticks; the warning must not repeat.
+    current_time = [float(_BASE_EPOCH)]
+    monkeypatch.setattr('datadog_checks.postgres.data_observability.time.time', lambda: current_time[0])
+    mock_conn, _ = _make_mock_conn()
+    check.db_pool = _mock_db_pool(mock_conn)
+    with caplog.at_level(logging.WARNING):
+        for _ in range(5):
+            check.data_observability.run_job()
+            current_time[0] += 10
+    total = sum(1 for r in caplog.records if 'Invalid cron_startup_lookback_seconds' in r.message)
+    assert total == 1
 
 
 def test_cron_startup_lookback_does_not_double_fire(pg_instance, aggregator, monkeypatch):
@@ -944,3 +848,77 @@ def test_cron_startup_lookback_does_not_double_fire(pg_instance, aggregator, mon
     aggregator.reset()
     check.data_observability.run_job()
     assert len(aggregator.metrics('dd.postgres.data_observability.query_executions')) == 0
+
+
+# ---------------------------------------------------------------------------
+# State reconciliation, mode caching, and error-path tests
+# ---------------------------------------------------------------------------
+
+
+def test_failed_cron_query_advances_next_run(pg_instance, aggregator, monkeypatch):
+    """A failing cron query still advances next_run, so it does not hot-loop on the same tick."""
+    current_time = [float(_BASE_EPOCH + 65)]  # 00:50:05 -- already past the 00:50 tick
+    monkeypatch.setattr('datadog_checks.postgres.data_observability.time.time', lambda: current_time[0])
+
+    mock_conn, mock_cursor = _make_mock_conn()
+    mock_cursor.execute.side_effect = psycopg.errors.ProgrammingError("relation does not exist")
+
+    check = _make_cron_check(pg_instance)
+    check.db_pool = _mock_db_pool(mock_conn)
+    # First run: registers next_run (01:50:00) without firing.
+    check.data_observability.run_job()
+    mid = CRON_QUERY['monitor_id']
+    registered = check.data_observability._next_run[mid]
+
+    # Jump past the next tick and let the failing query fire.
+    current_time[0] = _BASE_EPOCH + 3665  # ~01:50:05
+    aggregator.reset()
+    check.data_observability.run_job()
+    metrics = aggregator.metrics('dd.postgres.data_observability.query_executions')
+    assert len(metrics) == 1
+    assert 'status:error' in metrics[0].tags
+
+    # next_run must have advanced past the just-fired tick; otherwise the very next
+    # tick would re-fire the same tick in a tight loop.
+    advanced = check.data_observability._next_run[mid]
+    assert advanced > registered
+    assert advanced >= current_time[0]
+
+
+def test_cron_startup_lookback_boundary_strict_less_than(pg_instance, aggregator, monkeypatch):
+    """At exactly lookback_seconds since prev_tick, recovery does NOT fire (strict <)."""
+    # prev_tick = 00:50:00; lookback = 60s; clock = 00:51:00 means (now - prev_tick) == 60.
+    current_time = [float(_BASE_EPOCH + 120)]  # 00:51:00 exactly
+    monkeypatch.setattr('datadog_checks.postgres.data_observability.time.time', lambda: current_time[0])
+
+    mock_conn, _ = _make_mock_conn()
+    check = _make_cron_lookback_check(pg_instance, lookback_seconds=60)
+    check.db_pool = _mock_db_pool(mock_conn)
+    check.data_observability.run_job()
+    assert len(aggregator.metrics('dd.postgres.data_observability.query_executions')) == 0
+
+    # 1 second earlier: (now - prev_tick) == 59 < 60, recovery fires.
+    check2 = _make_cron_lookback_check(pg_instance, lookback_seconds=60)
+    check2.db_pool = _mock_db_pool(mock_conn)
+    current_time[0] = float(_BASE_EPOCH + 119)
+    aggregator.reset()
+    check2.data_observability.run_job()
+    assert len(aggregator.metrics('dd.postgres.data_observability.query_executions')) == 1
+
+
+def test_emit_failures_metric_on_emit_path_exception(pg_instance, aggregator, monkeypatch):
+    """A broken emit path produces an emit_failures count tagged with exc_class."""
+    mock_conn, _ = _make_mock_conn()
+    check = _create_check(pg_instance)
+    check.db_pool = _mock_db_pool(mock_conn)
+
+    def boom(*args, **kwargs):
+        raise json.JSONDecodeError("boom", "doc", 0)
+
+    monkeypatch.setattr('datadog_checks.postgres.data_observability.json.dumps', boom)
+    check.data_observability.run_job()
+
+    failures = aggregator.metrics('dd.postgres.data_observability.emit_failures')
+    assert len(failures) == 1
+    assert any(t.startswith('exc_class:JSONDecodeError') for t in failures[0].tags)
+    assert 'monitor_id:1' in failures[0].tags

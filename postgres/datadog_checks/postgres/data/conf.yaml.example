@@ -466,11 +466,12 @@ instances:
         # collection_interval: 10
 
         ## @param cron_startup_lookback_seconds - integer - optional - default: 300
-        ## Lookback window for cron-scheduled queries on check startup. If the
-        ## most recent scheduled tick was within this many seconds before the
-        ## check started, the query fires immediately on startup to recover
-        ## fires that may have been lost across a check restart.
-        ## Set to 0 to disable startup recovery.
+        ## Lookback window applied the first time the check sees a cron-scheduled
+        ## query. If that query's most recent scheduled tick falls within this
+        ## many seconds of "now", the query fires on the next collection cycle
+        ## (up to collection_interval seconds later) so fires that may have been
+        ## lost across a check restart or a Remote Configuration redelivery are
+        ## recovered. Set to 0 to disable startup recovery.
         #
         # cron_startup_lookback_seconds: 300
 

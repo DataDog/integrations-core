@@ -611,11 +611,12 @@ files:
         - name: cron_startup_lookback_seconds
           fleet_configurable: true
           description: |
-            Lookback window for cron-scheduled queries on check startup. If the
-            most recent scheduled tick was within this many seconds before the
-            check started, the query fires immediately on startup to recover
-            fires that may have been lost across a check restart.
-            Set to 0 to disable startup recovery.
+            Lookback window applied the first time the check sees a cron-scheduled
+            query. If that query's most recent scheduled tick falls within this
+            many seconds of "now", the query fires on the next collection cycle
+            (up to collection_interval seconds later) so fires that may have been
+            lost across a check restart or a Remote Configuration redelivery are
+            recovered. Set to 0 to disable startup recovery.
           value:
             type: integer
             example: 300
@@ -667,16 +668,15 @@ files:
                 type: string
               - name: interval_seconds
                 description: |
-                  How often (in seconds) to run this query. When both schedule and
-                  interval_seconds are present, schedule takes precedence and interval_seconds
-                  is ignored. If neither is set, the query is skipped at runtime with a warning.
+                  How often (in seconds) to run this query. Ignored when schedule is set
+                  (see schedule for the precedence rule).
                 type: integer
               - name: schedule
                 description: |
                   A standard 5-field cron expression (minute hour dom month dow) specifying
-                  when to run this query. When set, takes precedence over interval_seconds.
-                  If neither schedule nor interval_seconds is set, the query is skipped at
-                  runtime with a warning.
+                  when to run this query. When both schedule and interval_seconds are set,
+                  schedule wins and interval_seconds is ignored. If neither is set, the
+                  query is skipped at runtime with a warning.
                 type: string
               - name: entity
                 type: object

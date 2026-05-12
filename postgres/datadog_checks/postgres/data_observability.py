@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import time
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
 import psycopg
@@ -18,19 +19,27 @@ if TYPE_CHECKING:
 
 EVENT_TRACK_TYPE = 'do-query-results'
 
-# Cap the number of rows fetched per query to prevent unbounded memory usage.
 MAX_RESULT_ROWS = 10_000
 
-DEFAULT_CRON_STARTUP_LOOKBACK_SECONDS = 300
+# Must match the default in postgres/datadog_checks/postgres/config_models/dict_defaults.py.
+_DEFAULT_LOOKBACK_SECONDS = 300
+
+Mode = Literal["cron", "interval"]
+
+
+@dataclass(frozen=True)
+class DueQuery:
+    query: Query
+    scheduled_time: float
+    mode: Mode
 
 
 class PostgresDataObservability(DBMAsyncJob):
     def __init__(self, check: PostgreSql, config: InstanceConfig):
         self._check = check
         self._config = config
-        self._last_execution: dict[int, float] = {}
-        self._next_run: dict[int, float] = {}
-        self._invalid_warned: set[int] = set()
+        self._last_execution: dict[int, float] = {}  # interval mode: last fire timestamp
+        self._next_run: dict[int, float] = {}        # cron mode: next fire time
         collection_interval = config.data_observability.collection_interval or 10
         super(PostgresDataObservability, self).__init__(
             check,
@@ -42,6 +51,7 @@ class PostgresDataObservability(DBMAsyncJob):
             expected_db_exceptions=(psycopg.errors.DatabaseError,),
             job_name="data-observability",
         )
+        self._lookback_seconds = self._resolve_lookback()
 
     def _shutdown(self):
         self._check = None
@@ -50,32 +60,10 @@ class PostgresDataObservability(DBMAsyncJob):
     def _do_config(self):
         return self._config.data_observability
 
-    def _warn_invalid_once(self, monitor_id: int, reason: str) -> None:
-        if monitor_id not in self._invalid_warned:
-            self._invalid_warned.add(monitor_id)
-            self._log.warning("Skipping invalid DO query monitor_id=%d: %s", monitor_id, reason)
-
-    def _query_mode(self, q: Query) -> Literal["cron", "interval"] | None:
-        if q.schedule:
-            if not croniter.is_valid(q.schedule):
-                self._warn_invalid_once(q.monitor_id, f"invalid cron schedule: {q.schedule!r}")
-                return None
-            return "cron"
-        if q.interval_seconds and q.interval_seconds > 0:
-            return "interval"
-        self._warn_invalid_once(q.monitor_id, "neither schedule nor positive interval_seconds set")
-        return None
-
-    def _compute_next_run(self, schedule: str, base: float) -> float:
-        return croniter(schedule, base).get_next(float)
-
-    def _compute_prev_tick(self, schedule: str, base: float) -> float:
-        return croniter(schedule, base).get_prev(float)
-
-    def _cron_startup_lookback_seconds(self) -> int:
+    def _resolve_lookback(self) -> int:
         configured = self._do_config.cron_startup_lookback_seconds
         if configured is None:
-            return DEFAULT_CRON_STARTUP_LOOKBACK_SECONDS
+            return _DEFAULT_LOOKBACK_SECONDS
         if configured < 0:
             self._log.warning(
                 "Invalid cron_startup_lookback_seconds=%d: must be >= 0. Cron startup recovery is disabled.",
@@ -84,30 +72,27 @@ class PostgresDataObservability(DBMAsyncJob):
             return 0
         return configured
 
-    def _get_due_queries(self) -> list[tuple[Query, float]]:
-        queries = self._do_config.queries or ()
+    def _get_due_queries(self) -> list[DueQuery]:
         now = time.time()
-        lookback_seconds = self._cron_startup_lookback_seconds()
-        due: list[tuple[Query, float]] = []
-        for q in queries:
-            mode = self._query_mode(q)
-            if mode == "cron":
-                next_run = self._next_run.get(q.monitor_id)
-                if next_run is None:
-                    self._next_run[q.monitor_id] = self._compute_next_run(q.schedule, now)
-                    if lookback_seconds > 0:
-                        prev_tick = self._compute_prev_tick(q.schedule, now)
-                        if (now - prev_tick) < lookback_seconds:
-                            due.append((q, prev_tick))
+        due: list[DueQuery] = []
+        for q in self._do_config.queries or ():
+            if q.schedule:
+                cached = self._next_run.get(q.monitor_id)
+                if cached is None:
+                    it = croniter(q.schedule, now)
+                    prev_tick = it.get_prev(float)
+                    self._next_run[q.monitor_id] = it.get_next(float)
+                    # Startup recovery: catch up if the previous tick fell within the lookback window.
+                    if 0 < self._lookback_seconds and (now - prev_tick) < self._lookback_seconds:
+                        due.append(DueQuery(q, prev_tick, "cron"))
                     continue
-                if now >= next_run:
-                    due.append((q, next_run))
-            elif mode == "interval":
-                last_run = self._last_execution.get(q.monitor_id, 0.0)
-                if now - last_run >= q.interval_seconds:
-                    # First fire (no prior last_run): treat scheduled time as `now` → lateness = 0.
-                    scheduled = (last_run + q.interval_seconds) if last_run > 0 else now
-                    due.append((q, scheduled))
+                if now >= cached:
+                    due.append(DueQuery(q, cached, "cron"))
+            else:
+                # On first sight, backdate one interval so the first fire reports lateness = 0.
+                last = self._last_execution.setdefault(q.monitor_id, now - q.interval_seconds)
+                if now - last >= q.interval_seconds:
+                    due.append(DueQuery(q, last + q.interval_seconds, "interval"))
         return due
 
     def _build_base_tags(self) -> list[str]:
@@ -202,20 +187,21 @@ class PostgresDataObservability(DBMAsyncJob):
 
         base_tags = self._build_base_tags()
 
-        for q, scheduled_fire_time in due_queries:
+        for due in due_queries:
+            q = due.query
             tags = base_tags + [f'monitor_id:{q.monitor_id}']
 
             now_at_fire_start = time.time()
             with self._check.db_pool.get_connection(q.dbname) as conn:
                 result = self._execute_single_query(conn, q)
 
-            # Update scheduling state (last_execution and, for cron, next_run) before
-            # metric/event emission, so a serialization failure in the emit path
-            # cannot cause infinite re-execution of the same query.
+            # Advance scheduling state before emission so an emit-side error cannot
+            # leave the query stuck re-firing the same tick.
             now_at_fire_end = time.time()
-            self._last_execution[q.monitor_id] = now_at_fire_end
-            if q.schedule:
-                self._next_run[q.monitor_id] = self._compute_next_run(q.schedule, now_at_fire_end)
+            if due.mode == "cron":
+                self._next_run[q.monitor_id] = croniter(q.schedule, now_at_fire_end).get_next(float)
+            else:
+                self._last_execution[q.monitor_id] = now_at_fire_end
 
             try:
                 self._check.gauge(
@@ -233,12 +219,11 @@ class PostgresDataObservability(DBMAsyncJob):
                     raw=True,
                 )
 
-                mode_tag = 'mode:cron' if q.schedule else 'mode:interval'
-                lateness = max(0.0, now_at_fire_start - scheduled_fire_time)
+                lateness = max(0.0, now_at_fire_start - due.scheduled_time)
                 self._check.gauge(
                     'dd.postgres.data_observability.query_fire_lateness_seconds',
                     lateness,
-                    tags=tags + [mode_tag],
+                    tags=tags + [f'mode:{due.mode}'],
                     hostname=self._check.reported_hostname,
                     raw=True,
                 )
@@ -252,8 +237,15 @@ class PostgresDataObservability(DBMAsyncJob):
                     result['row_count'],
                 )
                 self._check.event_platform_event(raw_event, EVENT_TRACK_TYPE)
-            except Exception:
+            except Exception as e:
                 self._log.exception(
                     "Failed to emit metrics/event for monitor_id=%d",
                     q.monitor_id,
+                )
+                self._check.count(
+                    'dd.postgres.data_observability.emit_failures',
+                    1,
+                    tags=tags + [f'exc_class:{type(e).__name__}'],
+                    hostname=self._check.reported_hostname,
+                    raw=True,
                 )

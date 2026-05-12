@@ -174,13 +174,13 @@ class Query(BaseModel):
     entity: Entity
     interval_seconds: Optional[int] = Field(
         None,
-        description='How often (in seconds) to run this query. When both schedule and\ninterval_seconds are present, schedule takes precedence and interval_seconds\nis ignored. If neither is set, the query is skipped at runtime with a warning.\n',
+        description='How often (in seconds) to run this query. Ignored when schedule is set\n(see schedule for the precedence rule).\n',
     )
     monitor_id: int
     query: str
     schedule: Optional[str] = Field(
         None,
-        description='A standard 5-field cron expression (minute hour dom month dow) specifying\nwhen to run this query. When set, takes precedence over interval_seconds.\nIf neither schedule nor interval_seconds is set, the query is skipped at\nruntime with a warning.\n',
+        description='A standard 5-field cron expression (minute hour dom month dow) specifying\nwhen to run this query. When both schedule and interval_seconds are set,\nschedule wins and interval_seconds is ignored. If neither is set, the\nquery is skipped at runtime with a warning.\n',
     )
     type: Optional[str] = None
 
