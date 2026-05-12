@@ -1,6 +1,6 @@
-Expand the n8n metric coverage:
+Improve the n8n metric coverage:
 
-  - Fix several incorrect or missing metric mappings in the baseline coverage.
-  - Add the n8n 2.x metric families (workflow execution duration, audit lifecycle, auth, workflow statistics, expression engine, and process memory).
-  - Map n8n's dynamic event-bus surface so audit, AI node, user, package, variable, and workflow cancellation events are picked up when emitted.
-  - Document and exercise scraping the n8n worker process as a separate Datadog instance.
+  - Correct missing or incorrect metrics.
+  - Add metrics introduced in n8n 2.x (workflow execution duration, audit events, authentication, workflow and user statistics, expression engine, and process memory).
+  - Track n8n's dynamic events (workflow cancellations, audit activity, AI nodes, user and credential changes, package and variable changes).
+  - Add support for monitoring n8n worker processes alongside the main process.
