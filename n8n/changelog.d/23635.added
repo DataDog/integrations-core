@@ -1,8 +1,6 @@
-Overhaul the n8n metric coverage, verified live against n8n 1.118.1 and 2.19.5:
+Expand the n8n metric coverage:
 
   - Fix several incorrect or missing metric mappings in the baseline coverage.
   - Add the n8n 2.x metric families (workflow execution duration, audit lifecycle, auth, workflow statistics, expression engine, and process memory).
   - Map n8n's dynamic event-bus surface so audit, AI node, user, package, variable, and workflow cancellation events are picked up when emitted.
   - Document and exercise scraping the n8n worker process as a separate Datadog instance.
-  - Stop gating OpenMetrics scraping on the readiness endpoint so metrics keep flowing during degraded readiness.
-  - Fix the example ``openmetrics_endpoint`` URL in the sample configuration and document the ``raw_metric_prefix`` / ``N8N_METRICS_PREFIX`` requirement.
