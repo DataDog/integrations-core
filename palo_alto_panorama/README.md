@@ -22,7 +22,7 @@ Linux command:
   ```
 
 Windows command:
-  ```shell
+  ```powershell
   & "$env:ProgramFiles\Datadog\Datadog Agent\bin\agent.exe" integration install datadog-palo_alto_panorama==1.0.0
   ```
 
