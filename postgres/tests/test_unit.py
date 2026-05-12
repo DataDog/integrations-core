@@ -418,6 +418,7 @@ def test_check_gc_after_cancel(pg_instance):
     pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 10}
     pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 1}
     pg_instance['data_observability'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
+    pg_instance['collect_column_statistics'] = {'enabled': True, 'collection_interval': 60}
 
     check = PostgreSql('postgres', {}, [pg_instance])
     ref = weakref.ref(check)
