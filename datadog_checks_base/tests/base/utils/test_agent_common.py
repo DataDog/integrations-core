@@ -25,17 +25,36 @@ from datadog_checks.base.utils.agent.common import get_agent_embedded_path
         pytest.param('/opt/datadog-agent/run', (), '/opt/datadog-agent', id='no_parts'),
     ],
 )
-def test_get_agent_embedded_path(run_path, parts, expected_install):
-    with mock.patch(
-        'datadog_checks.base.utils.agent.common.datadog_agent.get_config',
-        return_value=run_path,
+def test_get_agent_embedded_path_posix(run_path, parts, expected_install):
+    with (
+        mock.patch('datadog_checks.base.utils.agent.common.os.name', 'posix'),
+        mock.patch(
+            'datadog_checks.base.utils.agent.common.datadog_agent.get_config',
+            return_value=run_path,
+        ),
     ):
         assert get_agent_embedded_path(*parts) == os.path.join(expected_install, 'embedded', *parts)
 
 
 def test_get_agent_embedded_path_missing_run_path_returns_none():
-    with mock.patch(
-        'datadog_checks.base.utils.agent.common.datadog_agent.get_config',
-        return_value='',
+    with (
+        mock.patch('datadog_checks.base.utils.agent.common.os.name', 'posix'),
+        mock.patch(
+            'datadog_checks.base.utils.agent.common.datadog_agent.get_config',
+            return_value='',
+        ),
     ):
         assert get_agent_embedded_path('sbin', 'gstatus') is None
+
+
+def test_get_agent_embedded_path_windows_uses_sys_executable():
+    """On Windows, derive from sys.executable and use the embedded3 directory."""
+    install_dir = r'C:\Program Files\Datadog\Datadog Agent'
+    sys_executable = os.path.join(install_dir, 'embedded3', 'python.exe')
+    with (
+        mock.patch('datadog_checks.base.utils.agent.common.os.name', 'nt'),
+        mock.patch('datadog_checks.base.utils.agent.common.sys.executable', sys_executable),
+    ):
+        assert get_agent_embedded_path('ssl', 'certs', 'cacert.pem') == os.path.join(
+            install_dir, 'embedded3', 'ssl', 'certs', 'cacert.pem'
+        )
