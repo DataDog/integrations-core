@@ -70,4 +70,4 @@ Need help? Contact [Datadog support][6].
 [3]: /reference-tables?order=desc&p=1&sort=updated_at&source=HUBSPOT_CONTENT_HUB
 [4]: /event/explorer?query=source%3Ahubspot_content_hub&from_ts=1767286800000&to_ts=1767294000000&live=true
 [5]: /event/explorer?query=source%3Ahubspot_content_hub%20status%3Aok&from_ts=1767286800000&to_ts=1767294000000&live=true
-[6]: https://app.hubspot.com/login
+[6]: https://docs.datadoghq.com/help/
