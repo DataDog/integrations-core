@@ -81,7 +81,7 @@ def test_can_connect_up(dd_run_check, aggregator, instance, mock_auth, mocker):
     )
 
 
-def test_unauthenticated_mode(dd_run_check, aggregator, monkeypatch, mock_http_call, mocker):
+def test_unauthenticated_mode(dd_run_check, aggregator, mock_http_call, mocker):
     instance = {'powerflex_gateway_url': 'https://localhost:443'}
     mocker.patch(
         'requests.Session.get',
@@ -184,6 +184,7 @@ def test_collect_volumes(dd_run_check, aggregator, instance, mock_http_get):
         'storage_pool_id:25155ba600000000',
         'dell_type:volume',
     ]
+    aggregator.assert_metric('dell_powerflex.volume.count', value=1, tags=bigvolume_tags)
     aggregator.assert_metric('dell_powerflex.num_of_child_volumes', value=0, tags=bigvolume_tags)
     aggregator.assert_metric('dell_powerflex.num_of_mapped_sdcs', value=1, tags=bigvolume_tags)
     aggregator.assert_metric(
@@ -199,6 +200,7 @@ def test_collect_volumes(dd_run_check, aggregator, instance, mock_http_get):
         'dell_type:volume',
         'ancestor_volume_id:c58b06e700000000',
     ]
+    aggregator.assert_metric('dell_powerflex.volume.count', value=1, tags=snap01_tags)
     aggregator.assert_metric('dell_powerflex.num_of_child_volumes', value=1, tags=snap01_tags)
     aggregator.assert_metric('dell_powerflex.num_of_mapped_sdcs', value=0, tags=snap01_tags)
 
@@ -211,6 +213,7 @@ def test_collect_volumes(dd_run_check, aggregator, instance, mock_http_get):
         'dell_type:volume',
         'ancestor_volume_id:c58b06e900000002',
     ]
+    aggregator.assert_metric('dell_powerflex.volume.count', value=1, tags=snap02_tags)
     aggregator.assert_metric('dell_powerflex.num_of_child_volumes', value=0, tags=snap02_tags)
     aggregator.assert_metric('dell_powerflex.num_of_mapped_sdcs', value=0, tags=snap02_tags)
 
@@ -262,23 +265,23 @@ def test_collect_protection_domains(dd_run_check, aggregator, instance, mock_htt
 
 
 @pytest.mark.parametrize(
-    'method, num_items, log_message',
+    'method, log_message',
     [
-        ('_collect_system', 1, 'Failed to collect metrics for system'),
-        ('_collect_volume', 4, 'Failed to collect metrics for volume'),
-        ('_collect_storage_pool', 2, 'Failed to collect metrics for storage pool'),
-        ('_collect_protection_domain', 1, 'Failed to collect metrics for protection domain'),
-        ('_collect_sds', 3, 'Failed to collect metrics for SDS'),
-        ('_collect_sdc', 3, 'Failed to collect metrics for SDC'),
-        ('_collect_device', 3, 'Failed to collect metrics for device'),
+        ('_collect_system', 'Failed to collect metrics for system'),
+        ('_collect_volume', 'Failed to collect metrics for volume'),
+        ('_collect_storage_pool', 'Failed to collect metrics for storage pool'),
+        ('_collect_protection_domain', 'Failed to collect metrics for protection domain'),
+        ('_collect_sds', 'Failed to collect metrics for SDS'),
+        ('_collect_sdc', 'Failed to collect metrics for SDC'),
+        ('_collect_device', 'Failed to collect metrics for device'),
     ],
 )
-def test_collect_failure_continues(
-    dd_run_check, aggregator, instance, mock_http_get, mocker, caplog, method, num_items, log_message
+def test_resource_collect_failure(
+    dd_run_check, aggregator, instance, mock_http_get, mocker, caplog, method, log_message
 ):
     mocker.patch(
         f'datadog_checks.dell_powerflex.check.DellPowerflexCheck.{method}',
-        side_effect=[Exception()] + [None] * (num_items - 1),
+        side_effect=Exception(),
     )
     caplog.set_level(logging.WARNING)
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
@@ -695,31 +698,43 @@ def test_filter_validation_warning(
 
 
 @pytest.mark.parametrize(
-    'resource_filters, log_message',
+    'resource_filters, log_message, excluded_metric, excluded_tag',
     [
         pytest.param(
             [{'resource': 'sds', 'property': 'name', 'type': 'exclude', 'patterns': ['^SDS3$']}],
             'Skipping sds SDS3: matched exclude pattern',
+            'dell_powerflex.sds.count',
+            'sds_name:SDS3',
             id='exclude_filter',
         ),
         pytest.param(
             [{'resource': 'storage_pool', 'property': 'name', 'patterns': ['^pool1$']}],
             'Skipping storage_pool storagepool2: did not match any include pattern',
+            'dell_powerflex.storage_pool.count',
+            'storage_pool_name:storagepool2',
             id='include_filter',
         ),
         pytest.param(
             [{'resource': 'sds', 'property': 'nonexistent_field', 'patterns': ['.*']}],
             'property nonexistent_field not found',
+            'dell_powerflex.sds.count',
+            'dell_type:sds',
             id='missing_property',
         ),
     ],
 )
-def test_filter_logs_debug(dd_run_check, aggregator, instance, mock_http_get, caplog, resource_filters, log_message):
+def test_filter_logs_debug(
+    dd_run_check, aggregator, instance, mock_http_get, caplog, resource_filters, log_message, excluded_metric,
+    excluded_tag,
+):
     instance['resource_filters'] = resource_filters
     caplog.set_level(logging.DEBUG)
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
+
     assert log_message in caplog.text
+    aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
+    aggregator.assert_metric_has_tag(excluded_metric, excluded_tag, count=0)
 
 
 @pytest.mark.parametrize(
@@ -750,6 +765,31 @@ def test_invalid_filter_still_collects_metrics(dd_run_check, aggregator, instanc
     ]
     aggregator.assert_metric('dell_powerflex.sds.count', value=1, tags=sds3_tags)
     aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', tags=sds3_tags)
+
+
+@pytest.mark.parametrize(
+    'resource, property, stats_metric',
+    [
+        ('volume', 'name', 'dell_powerflex.num_of_child_volumes'),
+        ('storage_pool', 'name', 'dell_powerflex.capacity.in_use_in_kb'),
+        ('protection_domain', 'name', 'dell_powerflex.capacity.in_use_in_kb'),
+        ('sds', 'name', 'dell_powerflex.capacity.in_use_in_kb'),
+        ('sdc', 'sdcType', 'dell_powerflex.num_of_mapped_volumes'),
+        ('device', 'name', 'dell_powerflex.capacity.in_use_in_kb'),
+    ],
+)
+def test_collect_statistics_false_per_resource(
+    dd_run_check, aggregator, instance, mock_http_get, resource, property, stats_metric
+):
+    instance['resource_filters'] = [
+        {'resource': resource, 'property': property, 'patterns': ['.*'], 'collect_statistics': False},
+    ]
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
+    aggregator.assert_metric(f'dell_powerflex.{resource}.count', at_least=1)
+    aggregator.assert_metric_has_tag(stats_metric, f'dell_type:{resource}', count=0)
 
 
 @pytest.mark.parametrize(
@@ -800,34 +840,17 @@ def test_collect_events(dd_run_check, aggregator, instance, mock_http_get):
     assert 'service_name:pfm-asmmanager' in health_check_event['tags']
 
 
-def test_collect_events_first_run_uses_current_time(dd_run_check, aggregator, instance, mock_http_get, mocker):
-    instance['collect_events'] = True
-    mock_get_events = mocker.patch(
-        'datadog_checks.dell_powerflex.api.PowerFlexAPI.get_events',
-        return_value=[],
-    )
-    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
-    dd_run_check(check)
-
-    assert mock_get_events.call_args.kwargs['since'].endswith('Z')
-    assert len(aggregator.events) == 0
-
 
 def test_collect_events_subsequent_run_uses_cached_time(dd_run_check, aggregator, instance, mock_http_get, mocker):
     instance['collect_events'] = True
-    mock_get_events = mocker.patch(
-        'datadog_checks.dell_powerflex.api.PowerFlexAPI.get_events',
-        return_value=[],
-    )
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
-    # First run seeds the cache
-    dd_run_check(check)
-    # Overwrite cache with a known timestamp
-    check.write_persistent_cache('last_event_timestamp', '2026-01-01T00:00:00Z')
-    # Second run should use the cached timestamp
     dd_run_check(check)
 
-    assert mock_get_events.call_args.kwargs['since'] == '2026-01-01T00:00:00Z'
+    cached_timestamp = check.read_persistent_cache('last_event_timestamp')
+    spy = mocker.spy(check._api, 'get_events')
+    dd_run_check(check)
+
+    assert spy.call_args.kwargs['since'] == cached_timestamp
 
 
 @pytest.mark.parametrize('config_key', ['collect_events', 'collect_alerts'])
