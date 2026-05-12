@@ -149,6 +149,11 @@ class Phase(AsyncProcessor[PhaseTrigger]):
             },
             "memory_path": str(self._checkpoint_manager.memory_path(self._phase_id)),
         }
+        reserved = set(checkpoint_payload) & set(outcome.extra_checkpoint)
+        if reserved:
+            raise ValueError(
+                f"Phase {self._phase_id!r}: extra_checkpoint cannot override reserved keys: {sorted(reserved)}"
+            )
         checkpoint_payload.update(outcome.extra_checkpoint)
 
         self._checkpoint_manager.write_phase_checkpoint(self._phase_id, checkpoint_payload)

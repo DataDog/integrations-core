@@ -5,6 +5,8 @@
 from datetime import UTC, datetime
 from unittest.mock import MagicMock
 
+import pytest
+
 from ddev.ai.phases.base import Phase, PhaseOutcome, _make_memory_resolver
 from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import PhaseConfig
@@ -224,6 +226,20 @@ async def test_process_message_writes_memory_and_checkpoint(flow_dir, message_qu
     assert checkpoint["count"] == 7
     assert checkpoint["started_at"]
     assert checkpoint["finished_at"]
+
+
+@pytest.mark.parametrize(
+    "reserved_key",
+    ["status", "started_at", "finished_at", "tokens", "memory_path"],
+)
+async def test_extra_checkpoint_cannot_override_reserved_keys(flow_dir, message_queue, reserved_key):
+    outcome = PhaseOutcome(memory_text="m", extra_checkpoint={reserved_key: "evil"})
+    phase, mgr = _make_stub_phase(flow_dir, message_queue, outcome=outcome)
+
+    with pytest.raises(ValueError, match=f"reserved keys.*{reserved_key}"):
+        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert mgr.read() == {}
 
 
 async def test_failed_phase_omits_memory_path(flow_dir, message_queue):
