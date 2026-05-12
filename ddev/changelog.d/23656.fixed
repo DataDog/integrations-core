@@ -1,0 +1,1 @@
+Derive `Repository.full_name` and a new `Repository.org` from the `origin` git remote so ddev works correctly when run from a worktree or a fork, instead of guessing from the working-directory basename.
