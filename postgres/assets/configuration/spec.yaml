@@ -1156,14 +1156,6 @@ files:
               type: string
             example:
               - "temp_.*"
-        - name: max_query_duration
-          fleet_configurable: true
-          description: |
-            Maximum duration of the column statistics query in seconds.
-          value:
-            type: number
-            example: 60
-            display_default: 60
     - name: aws
       display_priority: 0
       description: |

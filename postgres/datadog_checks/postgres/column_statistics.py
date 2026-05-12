@@ -82,13 +82,13 @@ ORDER BY schemaname, tablename
 
 
 PAYLOAD_MAX_COLUMNS = 5_000
+MAX_QUERY_DURATION_SECONDS = 60
 
 
 class PostgresColumnStatisticsCollectorConfig:
     def __init__(self):
         self.collection_interval = 3600
         self.max_tables = 500
-        self.max_query_duration = 60
         self.include_databases: list[str] = []
         self.exclude_databases: list[str] = []
         self.include_schemas: list[str] = []
@@ -107,7 +107,6 @@ class PostgresColumnStatisticsCollector:
         self._config = PostgresColumnStatisticsCollectorConfig()
         self._config.collection_interval = check._config.collect_column_statistics.collection_interval
         self._config.max_tables = check._config.collect_column_statistics.max_tables
-        self._config.max_query_duration = int(check._config.collect_column_statistics.max_query_duration)
         self._config.include_databases = list(check._config.collect_column_statistics.include_databases or [])
         self._config.exclude_databases = list(check._config.collect_column_statistics.exclude_databases or [])
         self._config.include_schemas = list(check._config.collect_column_statistics.include_schemas or [])
@@ -241,7 +240,7 @@ class PostgresColumnStatisticsCollector:
                     filters_sql, filter_params = self._build_filters()
                     query = COLUMN_STATISTICS_QUERY.format(filters=filters_sql)
                     filter_params.append(self._config.max_tables)
-                    cursor.execute("SET statement_timeout = %s", (self._config.max_query_duration * 1000,))
+                    cursor.execute("SET statement_timeout = %s", (MAX_QUERY_DURATION_SECONDS * 1000,))
                     try:
                         cursor.execute(query, filter_params)
 
