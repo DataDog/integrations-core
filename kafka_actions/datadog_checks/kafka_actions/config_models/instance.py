@@ -20,18 +20,6 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
-SECURE_FIELD_NAMES = frozenset(
-    [
-        'schema_registry_tls_ca_cert',
-        'schema_registry_tls_cert',
-        'schema_registry_tls_key',
-        'tls_ca_cert',
-        'tls_cert',
-        'tls_private_key',
-    ]
-)
-
-
 class CreateTopic(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -118,9 +106,14 @@ class ReadMessages(BaseModel):
         description='jq-style expression to filter messages (optional).\nFiltering happens AFTER deserialization.\nExamples: \'.value.price > 100\', \'.value.user.country == "US"\'\n',
         examples=['.value.status == "failed"'],
     )
+    key_compression: Optional[str] = Field(
+        None,
+        description='Compression codec to apply to the message key BEFORE format\ndeserialization. See value_compression for details.\n',
+        examples=['snappy'],
+    )
     key_format: Optional[str] = Field(
         'json',
-        description='Message key format.\n\nSupported formats:\n- string: Plain UTF-8 text (most common for keys)\n- json: JSON data (strict validation, fails if not valid JSON)\n- bson: BSON (Binary JSON) data\n- protobuf: Protocol Buffers\n- avro: Apache Avro\n',
+        description='Message key format. Same supported set as value_format\n(including msgpack / protobuf_msgpack via the\nkafka_deserializers plugin).\n',
         examples=['json'],
     )
     key_schema: Optional[str] = Field(None, description='Schema definition for protobuf/avro key')
@@ -154,9 +147,14 @@ class ReadMessages(BaseModel):
         examples=[1700000000000],
     )
     topic: str = Field(..., description='Topic to read messages from', examples=['orders'])
+    value_compression: Optional[str] = Field(
+        None,
+        description='Compression codec to apply to the message value BEFORE format\ndeserialization. Codecs are loaded from registered plugins under\nthe ``datadog_kafka_actions.compressions`` entry-point group; no\ncodecs ship in core. Common values when the ``kafka_deserializers``\nplugin is installed: ``gzip``, ``zlib``, ``snappy``, ``lz4``,\n``lz4_dd_hdr``, ``zstd``. Empty / unset = no decompression.\n',
+        examples=['gzip'],
+    )
     value_format: Optional[str] = Field(
         'json',
-        description='Message value format.\n\nSupported formats:\n- json: JSON data (strict validation, fails if not valid JSON)\n- bson: BSON (Binary JSON) data\n- string: Plain UTF-8 text (use for non-JSON text messages)\n- protobuf: Protocol Buffers\n- avro: Apache Avro\nNote: If any message fails deserialization, the read_messages action will stop immediately.\nEnsure the format matches the actual messages in your topic.\n',
+        description='Message value format.\n\nBuilt-in formats:\n- json: JSON data (strict validation, fails if not valid JSON)\n- bson: BSON (Binary JSON) data\n- string: Plain UTF-8 text (use for non-JSON text messages)\n- raw: Pass-through bytes (base64-encoded in output)\n- protobuf: Protocol Buffers (value_schema is the base64 FileDescriptorSet)\n- avro: Apache Avro (value_schema is the JSON schema)\n\nPlugin formats (require the kafka_deserializers wheel installed\nalongside this check; loaded via the\n``datadog_kafka_actions.formats`` entry-point group):\n- msgpack: MessagePack\n- protobuf_msgpack: Protobuf envelope whose bytes fields can\n  carry msgpack payloads. value_schema is a JSON wrapper of the\n  form {"schema": "<base64 FileDescriptorSet>",\n  "msgpack_fields": ["pkg.Msg.field"]}.\n\nNote: If any message fails deserialization, the read_messages action will stop immediately.\nEnsure the format matches the actual messages in your topic.\n',
         examples=['json'],
     )
     value_schema: Optional[str] = Field(None, description='Schema definition for protobuf/avro value')
@@ -301,11 +299,6 @@ class InstanceConfig(BaseModel):
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
             value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
-
-            if info.field_name in SECURE_FIELD_NAMES:
-                validation.security.check_field_trusted_provider(
-                    info.field_name, value, info.context.get('security_config')
-                )
         else:
             value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 

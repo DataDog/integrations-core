@@ -124,7 +124,7 @@ def _read_varint(data):
     raise ValueError("Incomplete varint")
 
 
-def _read_protobuf_message_indices(payload):
+def read_protobuf_message_indices(payload):
     array_len, bytes_read = _read_varint(payload)
     payload = payload[bytes_read:]
     indices = []
@@ -174,7 +174,7 @@ def _preload_well_known_types(pool):
         pool.Add(fd_proto)
 
 
-def _get_protobuf_message_class(schema_info, message_indices):
+def get_protobuf_message_class(schema_info, message_indices):
     from google.protobuf import message_factory
 
     pool, descriptor_set = schema_info
@@ -244,13 +244,13 @@ class ProtobufHandler(FormatHandler):
             raise ValueError("Protobuf schema is required")
         try:
             if uses_schema_registry:
-                message_indices, message = _read_protobuf_message_indices(message)
+                message_indices, message = read_protobuf_message_indices(message)
                 if not message_indices:
                     message_indices = [0]
             else:
                 message_indices = [0]
 
-            message_class = _get_protobuf_message_class(schema, message_indices)
+            message_class = get_protobuf_message_class(schema, message_indices)
             instance = message_class()
             consumed = instance.ParseFromString(message)
             if consumed != len(message):
