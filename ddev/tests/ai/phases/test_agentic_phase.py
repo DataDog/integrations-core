@@ -7,6 +7,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 from ddev.ai.phases.agentic_phase import AgenticPhase, render_memory_prompt, render_task_prompt
 from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
@@ -36,6 +37,7 @@ def _make_agent_phase(
     flow_variables=None,
     runtime_variables=None,
     context_compact_threshold_pct=80,
+    callbacks=None,
 ):
     monkeypatch.setattr("ddev.ai.phases.agentic_phase.AnthropicAgent", make_agent_factory(mock_agent))
     monkeypatch.setattr(ToolRegistry, "from_names", classmethod(_empty_registry_from_names))
@@ -60,7 +62,7 @@ def _make_agent_phase(
         flow_variables=flow_variables or {},
         config_dir=flow_dir,
         file_registry=FileRegistry(policy=FileAccessPolicy(write_root=flow_dir)),
-        callbacks=None,
+        callbacks=callbacks,
     )
     phase.queue = message_queue
     return phase, checkpoint_manager
@@ -518,6 +520,80 @@ async def test_successful_phase_writes_memory_path_into_checkpoint(flow_dir, mon
     assert memory_path.exists()
     assert memory_path.name == "p1_memory.md"
     assert memory_path.read_text() == "summary text"
+
+
+# ---------------------------------------------------------------------------
+# AgenticPhase._run_memory_step
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "checkpoint, expected_build_arg",
+    [
+        (None, None),
+        (CheckpointConfig(memory_prompt="anything"), "USER_ADDITIONS"),
+    ],
+    ids=["no_checkpoint", "with_checkpoint"],
+)
+async def test_run_memory_step_forwards_user_additions_to_build(
+    flow_dir, monkeypatch, message_queue, checkpoint, expected_build_arg
+):
+    mock_agent = MockAgent([make_response("ok", 0, 0)])
+    phase, mgr = _make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue, checkpoint=checkpoint)
+
+    monkeypatch.setattr("ddev.ai.phases.agentic_phase.render_memory_prompt", lambda *a, **kw: "USER_ADDITIONS")
+    build_calls: list = []
+    monkeypatch.setattr(
+        mgr, "build_memory_prompt", lambda user_additions: build_calls.append(user_additions) or "PROMPT"
+    )
+
+    await phase._run_memory_step(mock_agent, {})
+
+    assert build_calls == [expected_build_arg]
+
+
+async def test_run_memory_step_sends_built_prompt_with_no_tools(flow_dir, monkeypatch, message_queue):
+    captured: dict = {}
+
+    class CapturingAgent(MockAgent):
+        async def send(self, content, allowed_tools=None):
+            captured["content"] = content
+            captured["allowed_tools"] = allowed_tools
+            return await super().send(content, allowed_tools)
+
+    agent = CapturingAgent([make_response("ok", 0, 0)])
+    phase, mgr = _make_agent_phase(flow_dir, agent, monkeypatch, message_queue)
+    monkeypatch.setattr(mgr, "build_memory_prompt", lambda user_additions: "BUILT")
+
+    await phase._run_memory_step(agent, {})
+
+    assert captured == {"content": "BUILT", "allowed_tools": []}
+
+
+async def test_run_memory_step_returns_response_data_and_fires_callbacks(flow_dir, monkeypatch, message_queue):
+    events: list = []
+    cb_set = CallbackSet()
+
+    @cb_set.on_before_agent_send
+    async def _before(iteration):
+        events.append(("before", iteration))
+
+    @cb_set.on_agent_response
+    async def _response(response, iteration):
+        events.append(("response", iteration, response.text))
+
+    mock_agent = MockAgent([make_response("summary text", 7, 3)])
+    phase, _ = _make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue, callbacks=Callbacks([cb_set]))
+
+    result = await phase._run_memory_step(mock_agent, {})
+
+    assert result == ("summary text", 7, 3)
+    assert events == [("before", 1), ("response", 1, "summary text")]
+
+
+# ---------------------------------------------------------------------------
+# AgenticPhase.process_message — disk failure regression
+# ---------------------------------------------------------------------------
 
 
 async def test_write_memory_disk_failure_fails_phase(flow_dir, monkeypatch, message_queue):

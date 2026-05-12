@@ -88,9 +88,8 @@ class AgenticPhase(Phase):
             total_output += last_result.total_output_tokens
         return total_input, total_output
 
-    async def execute(self, context: dict[str, Any]) -> PhaseOutcome:
-        self.before_react()
-
+    def _build_agent_and_process(self, context: dict[str, Any]) -> tuple[AnthropicAgent, ReActProcess]:
+        """Build the agent and ReAct process used to drive task execution."""
         system_prompt = render_prompt(
             self._config_dir / "prompts" / f"{self._config.agent}.md",
             context,
@@ -121,11 +120,14 @@ class AgenticPhase(Phase):
             tool_registry=tool_registry,
             callbacks=self._callbacks,
         )
+        return agent, process
 
-        total_input, total_output = await self.run_tasks(process, context)
-
-        self.after_react()
-
+    async def _run_memory_step(
+        self,
+        agent: AnthropicAgent,
+        context: dict[str, Any],
+    ) -> tuple[str, int, int]:
+        """Run the final summary turn. Returns (memory_text, input_tokens, output_tokens)."""
         user_additions = None
         if self._config.checkpoint is not None:
             user_additions = render_memory_prompt(self._config.checkpoint, self._config_dir, context)
@@ -133,12 +135,22 @@ class AgenticPhase(Phase):
 
         await self._callbacks.fire_before_agent_send(1)
         response = await agent.send(memory_prompt, allowed_tools=[])
-        total_input += response.usage.input_tokens
-        total_output += response.usage.output_tokens
         await self._callbacks.fire_agent_response(response, 1)
+        return response.text, response.usage.input_tokens, response.usage.output_tokens
+
+    async def execute(self, context: dict[str, Any]) -> PhaseOutcome:
+        if self._config.agent is None:
+            raise FlowConfigError(f"Phase '{self._phase_id}': agent must be set before execute()")
+
+        self.before_react()
+        agent, process = self._build_agent_and_process(context)
+        total_input, total_output = await self.run_tasks(process, context)
+        self.after_react()
+
+        memory_text, mem_in, mem_out = await self._run_memory_step(agent, context)
 
         return PhaseOutcome(
-            memory_text=response.text,
-            total_input_tokens=total_input,
-            total_output_tokens=total_output,
+            memory_text=memory_text,
+            total_input_tokens=total_input + mem_in,
+            total_output_tokens=total_output + mem_out,
         )

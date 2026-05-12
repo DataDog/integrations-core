@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from ddev.ai.phases.agent_phase import AgentPhase
+from ddev.ai.phases.agentic_phase import AgenticPhase
 from ddev.ai.phases.base import Phase, PhaseRegistry
 from ddev.ai.phases.config import FlowConfigError
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
@@ -20,13 +20,11 @@ from ddev.event_bus.exceptions import FatalProcessingError
 # ---------------------------------------------------------------------------
 
 
-def test_discover_registers_phase_itself():
+def test_discover_registers_agentic_phase():
     registry = PhaseRegistry()
     _discover_and_register_phases(registry)
-    assert "Phase" in registry.known_names()
-    assert registry.get("Phase") is Phase
-    assert "AgentPhase" in registry.known_names()
-    assert registry.get("AgentPhase") is AgentPhase
+    assert "AgenticPhase" in registry.known_names()
+    assert registry.get("AgenticPhase") is AgenticPhase
 
 
 def test_discover_registers_custom_subclass(tmp_path, monkeypatch):
