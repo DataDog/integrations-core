@@ -39,7 +39,7 @@ class PostgresDataObservability(DBMAsyncJob):
         self._check = check
         self._config = config
         self._last_execution: dict[int, float] = {}  # interval mode: last fire timestamp
-        self._next_run: dict[int, float] = {}        # cron mode: next fire time
+        self._next_run: dict[int, float] = {}  # cron mode: next fire time
         collection_interval = config.data_observability.collection_interval or 10
         super(PostgresDataObservability, self).__init__(
             check,
