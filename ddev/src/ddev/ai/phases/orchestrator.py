@@ -21,12 +21,15 @@ from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
 
 def _discover_and_register_phases(
     registry: PhaseRegistry,
-    phases_dir: Path | None = None,
-    import_prefix: str = "ddev.ai.phases",
+    phases_dir: Path,
+    import_prefix: str,
 ) -> None:
-    """Import all non-private modules in phases_dir and register Phase subclasses."""
-    if phases_dir is None:
-        phases_dir = Path(__file__).parent
+    """Import every non-private *.py in phases_dir and register Phase subclasses.
+
+    Modules are imported by dotted path: ``{import_prefix}.{file_stem}``. The
+    caller is responsible for choosing the right pair (dir, prefix). Import
+    errors are fatal — a syntax error in any discovered module aborts startup.
+    """
     for py_file in phases_dir.glob("*.py"):
         if py_file.stem.startswith("_"):
             continue
@@ -75,7 +78,22 @@ class PhaseOrchestrator(EventBusOrchestrator):
         """Discover custom phases, parse flow.yaml, construct phases, submit PhaseTrigger."""
         config_dir = self._flow_yaml_path.parent
 
-        _discover_and_register_phases(self._phase_registry)
+        _discover_and_register_phases(
+            self._phase_registry,
+            Path(__file__).parent,
+            "ddev.ai.phases",
+        )
+
+        flow_phases_dir = config_dir / "phases"
+        if flow_phases_dir.is_dir():
+            ai_root = Path(__file__).parent.parent
+            rel = flow_phases_dir.relative_to(ai_root)
+            flow_import_prefix = "ddev.ai." + ".".join(rel.parts)
+            _discover_and_register_phases(
+                self._phase_registry,
+                flow_phases_dir,
+                flow_import_prefix,
+            )
 
         config = FlowConfig.from_yaml(self._flow_yaml_path, config_dir)
 
