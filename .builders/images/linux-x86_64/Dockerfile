@@ -49,7 +49,7 @@ RUN /opt/python/${PYTHON3_VERSION}/bin/python3 -m pip install --no-warn-script-l
  && /opt/python/${PYTHON3_VERSION}/bin/python3 -m virtualenv /py3
 
 # Rust toolchain (needed for cryptography)
-ENV RUST_VERSION="1.83.0"
+ENV RUST_VERSION="1.91.0"
 ENV RUSTC_SHA256="0b2f6c8f85a3d02fde2efc0ced4657869d73fccfce59defb4e8d29233116e6db"
 ARG RUSTUP_VERSION="1.26.0"
 ARG RUSTUP_SHA256="0b2f6c8f85a3d02fde2efc0ced4657869d73fccfce59defb4e8d29233116e6db"

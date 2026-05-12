@@ -73,7 +73,7 @@ RUN Get-RemoteFile `
     git config --global user.email 'agent-integrations-builder@datadoghq.com'
 
 # Install Rust
-ENV RUST_VERSION="1.83.0" `
+ENV RUST_VERSION="1.91.0" `
     RUSTUP_VERSION="1.26.0" `
     RUSTC_HASH="365d072ac4ef47f8774f4d2094108035e2291a0073702db25fa7797a30861fc9"
 RUN Get-RemoteFile `
