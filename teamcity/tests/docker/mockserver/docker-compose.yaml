@@ -1,6 +1,6 @@
 services:
   teamcity:
-    image: mockserver/mockserver:latest
+    image: mockserver/mockserver:5.15.0
     container_name: teamcity
     ports:
       - 8111:8111
