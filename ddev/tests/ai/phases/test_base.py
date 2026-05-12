@@ -200,6 +200,32 @@ def test_should_process_returns_false_after_already_executed(flow_dir, message_q
 # ---------------------------------------------------------------------------
 
 
+async def test_process_message_writes_memory_and_checkpoint(flow_dir, message_queue):
+    """End-to-end Phase contract: memory_text is persisted, extra_checkpoint merges,
+    token totals land in the checkpoint, and the success metadata is recorded.
+    """
+    outcome = PhaseOutcome(
+        memory_text="stub-memory-body",
+        total_input_tokens=123,
+        total_output_tokens=45,
+        extra_checkpoint={"custom_field": "custom_value", "count": 7},
+    )
+    phase, mgr = _make_stub_phase(flow_dir, message_queue, outcome=outcome)
+
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert mgr.memory_content("p1") == "stub-memory-body"
+
+    checkpoint = mgr.read()["p1"]
+    assert checkpoint["status"] == "success"
+    assert checkpoint["tokens"] == {"total_input": 123, "total_output": 45}
+    assert checkpoint["memory_path"] == str(mgr.memory_path("p1"))
+    assert checkpoint["custom_field"] == "custom_value"
+    assert checkpoint["count"] == 7
+    assert checkpoint["started_at"]
+    assert checkpoint["finished_at"]
+
+
 async def test_failed_phase_omits_memory_path(flow_dir, message_queue):
     phase, mgr = _make_stub_phase(flow_dir, message_queue)
 
