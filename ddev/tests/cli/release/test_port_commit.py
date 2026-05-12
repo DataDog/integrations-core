@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, call
 
 import pytest
 
-from ddev.cli.release.port_commit import (
+from ddev.cli.release.port_commit_workflow import (
     CherryPickStep,
     CommitStep,
     CreatePullRequestStep,
