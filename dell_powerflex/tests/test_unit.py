@@ -788,7 +788,6 @@ def test_filter_excludes_all_resources(dd_run_check, aggregator, instance, mock_
     aggregator.assert_metric(f'dell_powerflex.{resource}.count', count=0)
 
 
-
 def test_collect_events(dd_run_check, aggregator, instance, mock_http_get):
     instance['collect_events'] = True
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
@@ -815,7 +814,6 @@ def test_collect_events(dd_run_check, aggregator, instance, mock_http_get):
     assert 'category:AUDIT' in health_check_event['tags']
     assert 'domain:MANAGEMENT' in health_check_event['tags']
     assert 'service_name:pfm-asmmanager' in health_check_event['tags']
-
 
 
 def test_collect_events_subsequent_run_uses_cached_time(dd_run_check, aggregator, instance, mock_http_get, mocker):
