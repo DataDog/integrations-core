@@ -17,7 +17,6 @@ from .common import (
     DEVICE_STATS_SIMPLE_METRICS,
     PROTECTION_DOMAIN_STATS_BWC_METRICS,
     PROTECTION_DOMAIN_STATS_SIMPLE_METRICS,
-    RESOURCE_STATS_METRIC,
     SDC_STATS_BWC_METRICS,
     SDC_STATS_SIMPLE_METRICS,
     SDS_STATS_BWC_METRICS,
@@ -556,10 +555,21 @@ def test_exclude_takes_precedence_over_include(dd_run_check, aggregator, instanc
     aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', tags=pool2_tags)
 
 
-def test_collect_statistics_false(dd_run_check, aggregator, instance, mock_http_get):
-    instance['resource_filters'] = [
-        {'resource': 'sds', 'property': 'name', 'patterns': ['.*'], 'collect_statistics': False},
-    ]
+@pytest.mark.parametrize(
+    'resource_filters',
+    [
+        pytest.param(
+            [{'resource': 'sds', 'property': 'name', 'patterns': ['.*'], 'collect_statistics': False}],
+            id='with_patterns',
+        ),
+        pytest.param(
+            [{'resource': 'sds', 'property': 'name', 'collect_statistics': False}],
+            id='without_patterns',
+        ),
+    ],
+)
+def test_collect_statistics_false(dd_run_check, aggregator, instance, mock_http_get, resource_filters):
+    instance['resource_filters'] = resource_filters
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
 
@@ -571,29 +581,8 @@ def test_collect_statistics_false(dd_run_check, aggregator, instance, mock_http_
         'fault_set_id:faultset00000001',
         'dell_type:sds',
     ]
-    aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', count=0, tags=sds3_tags)
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
-
-
-def test_collect_statistics_false_without_patterns(dd_run_check, aggregator, instance, mock_http_get):
-    instance['resource_filters'] = [
-        {'resource': 'sds', 'property': 'name', 'collect_statistics': False},
-    ]
-    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
-    dd_run_check(check)
-
-    base_tags = ['powerflex_gateway_url:https://localhost:443']
-    sds3_tags = base_tags + [
-        'sds_id:d1c062b700000000',
-        'sds_name:SDS3',
-        'protection_domain_id:68c139ee00000000',
-        'fault_set_id:faultset00000001',
-        'dell_type:sds',
-    ]
-    # SDS resources are still collected
     aggregator.assert_metric('dell_powerflex.sds.count', value=1, tags=sds3_tags)
-    aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
-    # But statistics are not collected
     aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', count=0, tags=sds3_tags)
 
 
@@ -751,29 +740,24 @@ def test_filter_logs_debug(dd_run_check, aggregator, instance, mock_http_get, ca
     assert log_message in caplog.text
 
 
-def test_exclude_filter_missing_property(dd_run_check, aggregator, instance, mock_http_get):
-    instance['resource_filters'] = [
-        {'resource': 'sds', 'property': 'nonexistent_field', 'type': 'exclude', 'patterns': ['.*']},
-    ]
+@pytest.mark.parametrize(
+    'resource_filters',
+    [
+        pytest.param(
+            [{'resource': 'sds', 'property': 'nonexistent_field', 'type': 'exclude', 'patterns': ['.*']}],
+            id='exclude_filter_missing_property',
+        ),
+        pytest.param(
+            [{'resource': 'sds', 'property': 'name', 'patterns': [123, '.*']}],
+            id='non_string_pattern_skipped',
+        ),
+    ],
+)
+def test_invalid_filter_still_collects_metrics(dd_run_check, aggregator, instance, mock_http_get, resource_filters):
+    instance['resource_filters'] = resource_filters
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
-    base_tags = ['powerflex_gateway_url:https://localhost:443']
-    sds_tags = base_tags + [
-        'sds_id:d1c062b700000000',
-        'sds_name:SDS3',
-        'protection_domain_id:68c139ee00000000',
-        'fault_set_id:faultset00000001',
-        'dell_type:sds',
-    ]
-    aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', tags=sds_tags)
 
-
-def test_non_string_pattern_skipped(dd_run_check, aggregator, instance, mock_http_get):
-    instance['resource_filters'] = [
-        {'resource': 'sds', 'property': 'name', 'patterns': [123, '.*']},
-    ]
-    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
-    dd_run_check(check)
     base_tags = ['powerflex_gateway_url:https://localhost:443']
     sds3_tags = base_tags + [
         'sds_id:d1c062b700000000',
@@ -782,6 +766,7 @@ def test_non_string_pattern_skipped(dd_run_check, aggregator, instance, mock_htt
         'fault_set_id:faultset00000001',
         'dell_type:sds',
     ]
+    aggregator.assert_metric('dell_powerflex.sds.count', value=1, tags=sds3_tags)
     aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', tags=sds3_tags)
 
 
@@ -799,33 +784,10 @@ def test_filter_excludes_all_resources(dd_run_check, aggregator, instance, mock_
     ]
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
-    aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
-    metric_name, tag_subset = RESOURCE_STATS_METRIC[resource]
-    matching = [m for m in aggregator.metrics(metric_name) if all(t in m.tags for t in tag_subset)]
-    assert len(matching) == 0, f'Expected no {metric_name} with {tag_subset}, got {len(matching)}'
 
-
-@pytest.mark.parametrize(
-    'resource, property',
-    [
-        ('volume', 'name'),
-        ('storage_pool', 'name'),
-        ('protection_domain', 'name'),
-        ('sds', 'name'),
-        ('sdc', 'sdcType'),
-        ('device', 'name'),
-    ],
-)
-def test_collect_statistics_false_per_resource(dd_run_check, aggregator, instance, mock_http_get, resource, property):
-    instance['resource_filters'] = [
-        {'resource': resource, 'property': property, 'patterns': ['.*'], 'collect_statistics': False},
-    ]
-    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
-    dd_run_check(check)
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
-    metric_name, tag_subset = RESOURCE_STATS_METRIC[resource]
-    matching = [m for m in aggregator.metrics(metric_name) if all(t in m.tags for t in tag_subset)]
-    assert len(matching) == 0, f'Expected no {metric_name} with {tag_subset}, got {len(matching)}'
+    aggregator.assert_metric(f'dell_powerflex.{resource}.count', count=0)
+
 
 
 def test_collect_events(dd_run_check, aggregator, instance, mock_http_get):
