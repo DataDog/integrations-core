@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from ddev.ai.phases.agent_phase import AgentPhase, render_memory_prompt, render_task_prompt
+from ddev.ai.phases.agentic_phase import AgenticPhase, render_memory_prompt, render_task_prompt
 from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
 from ddev.ai.phases.messages import PhaseTrigger
@@ -37,7 +37,7 @@ def _make_agent_phase(
     runtime_variables=None,
     context_compact_threshold_pct=80,
 ):
-    monkeypatch.setattr("ddev.ai.phases.agent_phase.AnthropicAgent", make_agent_factory(mock_agent))
+    monkeypatch.setattr("ddev.ai.phases.agentic_phase.AnthropicAgent", make_agent_factory(mock_agent))
     monkeypatch.setattr(ToolRegistry, "from_names", classmethod(_empty_registry_from_names))
 
     config = PhaseConfig(
@@ -49,7 +49,7 @@ def _make_agent_phase(
     agent_config = AgentConfig(tools=agent_tools or [])
     checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
 
-    phase = AgentPhase(
+    phase = AgenticPhase(
         phase_id=phase_id,
         dependencies=dependencies or [],
         config=config,
@@ -125,35 +125,35 @@ def test_render_memory_prompt_raises_when_both_unset():
 
 
 # ---------------------------------------------------------------------------
-# AgentPhase.validate_config
+# AgenticPhase.validate_config
 # ---------------------------------------------------------------------------
 
 
-def test_agent_phase_validate_config_rejects_missing_agent():
+def test_agentic_phase_validate_config_rejects_missing_agent():
     config = PhaseConfig(tasks=[TaskConfig(name="t1", prompt="x")])
     with pytest.raises(FlowConfigError, match="requires 'agent'"):
-        AgentPhase.validate_config("p1", config, {})
+        AgenticPhase.validate_config("p1", config, {})
 
 
-def test_agent_phase_validate_config_rejects_unknown_agent():
+def test_agentic_phase_validate_config_rejects_unknown_agent():
     config = PhaseConfig(agent="ghost", tasks=[TaskConfig(name="t1", prompt="x")])
     with pytest.raises(FlowConfigError, match="unknown agent"):
-        AgentPhase.validate_config("p1", config, {"writer": AgentConfig()})
+        AgenticPhase.validate_config("p1", config, {"writer": AgentConfig()})
 
 
-def test_agent_phase_validate_config_rejects_empty_tasks():
+def test_agentic_phase_validate_config_rejects_empty_tasks():
     config = PhaseConfig(agent="writer")
     with pytest.raises(FlowConfigError, match="at least one task"):
-        AgentPhase.validate_config("p1", config, {"writer": AgentConfig()})
+        AgenticPhase.validate_config("p1", config, {"writer": AgentConfig()})
 
 
-def test_agent_phase_validate_config_accepts_valid():
+def test_agentic_phase_validate_config_accepts_valid():
     config = PhaseConfig(agent="writer", tasks=[TaskConfig(name="t1", prompt="x")])
-    AgentPhase.validate_config("p1", config, {"writer": AgentConfig()})
+    AgenticPhase.validate_config("p1", config, {"writer": AgentConfig()})
 
 
 # ---------------------------------------------------------------------------
-# AgentPhase.process_message — happy path
+# AgenticPhase.process_message — happy path
 # ---------------------------------------------------------------------------
 
 
@@ -207,7 +207,7 @@ async def test_happy_path_two_tasks(flow_dir, monkeypatch, message_queue):
 
 
 # ---------------------------------------------------------------------------
-# AgentPhase.process_message — memory step with checkpoint config
+# AgenticPhase.process_message — memory step with checkpoint config
 # ---------------------------------------------------------------------------
 
 
@@ -247,7 +247,7 @@ async def test_memory_step_without_checkpoint_config(flow_dir, monkeypatch, mess
 
 
 # ---------------------------------------------------------------------------
-# AgentPhase.process_message — context compaction between tasks
+# AgenticPhase.process_message — context compaction between tasks
 # ---------------------------------------------------------------------------
 
 
@@ -303,7 +303,7 @@ async def test_no_compact_when_below_threshold(flow_dir, monkeypatch, message_qu
 
 
 # ---------------------------------------------------------------------------
-# AgentPhase.process_message — template context
+# AgenticPhase.process_message — template context
 # ---------------------------------------------------------------------------
 
 
@@ -321,14 +321,14 @@ async def test_flow_variables_in_system_prompt(flow_dir, monkeypatch, message_qu
         captured_kwargs.update(kwargs)
         return original_factory(**kwargs)
 
-    monkeypatch.setattr("ddev.ai.phases.agent_phase.AnthropicAgent", capturing_factory)
+    monkeypatch.setattr("ddev.ai.phases.agentic_phase.AnthropicAgent", capturing_factory)
     monkeypatch.setattr(ToolRegistry, "from_names", classmethod(_empty_registry_from_names))
 
     config = PhaseConfig(
         agent="writer",
         tasks=[TaskConfig(name="t1", prompt="Do it.")],
     )
-    phase = AgentPhase(
+    phase = AgenticPhase(
         phase_id="p1",
         dependencies=[],
         config=config,
@@ -361,14 +361,14 @@ async def test_runtime_variables_override_flow_variables(flow_dir, monkeypatch, 
         captured_kwargs.update(kwargs)
         return original_factory(**kwargs)
 
-    monkeypatch.setattr("ddev.ai.phases.agent_phase.AnthropicAgent", capturing_factory)
+    monkeypatch.setattr("ddev.ai.phases.agentic_phase.AnthropicAgent", capturing_factory)
     monkeypatch.setattr(ToolRegistry, "from_names", classmethod(_empty_registry_from_names))
 
     config = PhaseConfig(
         agent="writer",
         tasks=[TaskConfig(name="t1", prompt="Do it.")],
     )
-    phase = AgentPhase(
+    phase = AgenticPhase(
         phase_id="p1",
         dependencies=[],
         config=config,
@@ -388,7 +388,7 @@ async def test_runtime_variables_override_flow_variables(flow_dir, monkeypatch, 
 
 
 # ---------------------------------------------------------------------------
-# AgentPhase.process_message — before_react / after_react errors
+# AgenticPhase.process_message — before_react / after_react errors
 # ---------------------------------------------------------------------------
 
 
@@ -422,7 +422,7 @@ async def test_after_react_raises_propagates(flow_dir, monkeypatch, message_queu
 
 
 # ---------------------------------------------------------------------------
-# AgentPhase.process_message — resolver integration with memory files
+# AgenticPhase.process_message — resolver integration with memory files
 # ---------------------------------------------------------------------------
 
 
@@ -437,14 +437,14 @@ async def test_task_prompt_resolves_memory_variable(flow_dir, monkeypatch, messa
     ]
     mock_agent = MockAgent(responses)
 
-    monkeypatch.setattr("ddev.ai.phases.agent_phase.AnthropicAgent", make_agent_factory(mock_agent))
+    monkeypatch.setattr("ddev.ai.phases.agentic_phase.AnthropicAgent", make_agent_factory(mock_agent))
     monkeypatch.setattr(ToolRegistry, "from_names", classmethod(_empty_registry_from_names))
 
     config = PhaseConfig(
         agent="writer",
         tasks=[TaskConfig(name="t1", prompt="Review: ${draft_memory}")],
     )
-    phase = AgentPhase(
+    phase = AgenticPhase(
         phase_id="review",
         dependencies=[],
         config=config,
@@ -464,7 +464,7 @@ async def test_task_prompt_resolves_memory_variable(flow_dir, monkeypatch, messa
 
 
 # ---------------------------------------------------------------------------
-# AgentPhase.process_message — memory step failure behaviour
+# AgenticPhase.process_message — memory step failure behaviour
 # ---------------------------------------------------------------------------
 
 
@@ -493,7 +493,7 @@ async def test_memory_template_error_fails_phase(flow_dir, monkeypatch, message_
     def raise_render_error(*args, **kwargs):
         raise ValueError("template error")
 
-    monkeypatch.setattr("ddev.ai.phases.agent_phase.render_memory_prompt", raise_render_error)
+    monkeypatch.setattr("ddev.ai.phases.agentic_phase.render_memory_prompt", raise_render_error)
 
     with pytest.raises(ValueError, match="template error"):
         await phase.process_message(PhaseTrigger(id="start", phase_id=None))

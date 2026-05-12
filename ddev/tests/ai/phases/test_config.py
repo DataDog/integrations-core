@@ -104,7 +104,7 @@ def test_agent_config_optional_fields():
 
 def test_phase_config_defaults():
     pc = PhaseConfig(agent="writer", tasks=[TaskConfig(name="t1", prompt="Do it.")])
-    assert pc.type == "AgentPhase"
+    assert pc.type == "AgenticPhase"
     assert pc.context_compact_threshold_pct == 80
     assert pc.checkpoint is None
 

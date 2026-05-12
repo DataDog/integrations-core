@@ -95,7 +95,7 @@ class AgentConfig(BaseModel):
 
 class PhaseConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    type: str = "AgentPhase"
+    type: str = "AgenticPhase"
     agent: str | None = None
     tasks: list[TaskConfig] = []
     context_compact_threshold_pct: int = 80

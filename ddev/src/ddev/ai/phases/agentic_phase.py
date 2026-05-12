@@ -41,7 +41,7 @@ def render_memory_prompt(
     return render_inline(checkpoint.memory_prompt, context)
 
 
-class AgentPhase(Phase):
+class AgenticPhase(Phase):
     """Phase that owns an LLM agent and drives one or more ReAct loops."""
 
     @classmethod
@@ -52,11 +52,11 @@ class AgentPhase(Phase):
         agents: dict[str, AgentConfig],
     ) -> None:
         if config.agent is None:
-            raise FlowConfigError(f"Phase {phase_id!r} (AgentPhase) requires 'agent'")
+            raise FlowConfigError(f"Phase {phase_id!r} (AgenticPhase) requires 'agent'")
         if config.agent not in agents:
             raise FlowConfigError(f"Phase {phase_id!r} references unknown agent: {config.agent!r}")
         if not config.tasks:
-            raise FlowConfigError(f"Phase {phase_id!r} (AgentPhase) must have at least one task")
+            raise FlowConfigError(f"Phase {phase_id!r} (AgenticPhase) must have at least one task")
 
     def before_react(self) -> None:
         """Called once before agent/tools are created. Override for phase-specific setup."""
