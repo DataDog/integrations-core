@@ -24,15 +24,22 @@ file_names = [
     "current",
 ]
 
-file_names1 = [
-    (utils.time_string_to_datetime_utc("20230401000000"), "20230401000000.20230401000001"),
+closed_files1 = [
+    (
+        utils.time_string_to_datetime_utc("20230401000000"),
+        utils.time_string_to_datetime_utc("20230401000001"),
+        "20230401000000.20230401000001",
+    ),
+]
+open_files1 = [
     (utils.time_string_to_datetime_utc("20230401000001"), "20230401000001.not_terminated"),
 ]
 log_cursor = {
     "record_time": "20230401000001",
-    "file_name": "20230401000001.not_terminated",
     "record_milli_sec": " + 244 msec",
     "is_file_collection_completed": False,
+    "last_completed_closed": [],
+    "last_completed_open": [],
 }
 
 
@@ -143,20 +150,28 @@ def test_convert_local_to_utc_timezone_timestamp_str():
 @patch("datadog_checks.mac_audit_logs.utils.get_utc_timestamp_minus_hours", return_value="20230401000000")
 def test_collect_relevant_files(mock_get_utc, mock_isfile, mock_listdir, mock_isdir, instance):
     check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
-    # Call the method
-    result = check.collect_relevant_files("20230401120000")
+    closed, still_open = check.collect_relevant_files("20230401120000")
 
-    # Define expected results - "current" should be skipped
-    expected = [
-        (utils.time_string_to_datetime_utc("20230401000000"), "20230401000000.20230401120000"),
-        (utils.time_string_to_datetime_utc("20230401120000"), "20230401120000.20230401123045"),
+    expected_closed = [
+        (
+            utils.time_string_to_datetime_utc("20230401000000"),
+            utils.time_string_to_datetime_utc("20230401120000"),
+            "20230401000000.20230401120000",
+        ),
+        (
+            utils.time_string_to_datetime_utc("20230401120000"),
+            utils.time_string_to_datetime_utc("20230401123045"),
+            "20230401120000.20230401123045",
+        ),
+    ]
+    expected_still_open = [
         (utils.time_string_to_datetime_utc("20230401123045"), "20230401123045.crash_recovery"),
         (utils.time_string_to_datetime_utc("20230401123047"), "20230401123047.crash_recovery"),
         (utils.time_string_to_datetime_utc("20230401123056"), "20230401123056.not_terminated"),
         (utils.time_string_to_datetime_utc("20230401123058"), "20230401123058.not_terminated"),
     ]
-    # Check if the result matches the expected output
-    assert result == expected
+    assert closed == expected_closed
+    assert still_open == expected_still_open
 
 
 @pytest.mark.unit
@@ -174,14 +189,17 @@ def test_collect_relevant_files_with_non_standard_entries(
     check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
     check.log = MagicMock()
 
-    # Call the method
-    result = check.collect_relevant_files("20230401120000")
+    closed, still_open = check.collect_relevant_files("20230401120000")
 
-    # Only the valid audit log file should be returned
-    expected = [
-        (utils.time_string_to_datetime_utc("20230401000000"), "20230401000000.20230401120000"),
+    expected_closed = [
+        (
+            utils.time_string_to_datetime_utc("20230401000000"),
+            utils.time_string_to_datetime_utc("20230401120000"),
+            "20230401000000.20230401120000",
+        ),
     ]
-    assert result == expected
+    assert closed == expected_closed
+    assert still_open == []
 
     # Verify debug logging for skipped entries
     debug_calls = check.log.debug.call_args_list
@@ -201,29 +219,93 @@ def test_collect_relevant_files_with_non_standard_entries(
 @patch("datadog_checks.mac_audit_logs.check.MacAuditLogsCheck.validate_configurations", return_value=None)
 @patch("datadog_checks.mac_audit_logs.check.MacAuditLogsCheck.get_log_cursor", return_value=log_cursor)
 @patch("datadog_checks.mac_audit_logs.utils.get_utc_timestamp_minus_hours", return_value="20230401000000")
-@patch("datadog_checks.mac_audit_logs.check.MacAuditLogsCheck.collect_relevant_files", return_value=file_names1)
+@patch(
+    "datadog_checks.mac_audit_logs.check.MacAuditLogsCheck.collect_relevant_files",
+    return_value=(closed_files1, open_files1),
+)
 @patch("datadog_checks.mac_audit_logs.check.MacAuditLogsCheck.collect_data_from_files", return_value=None)
 @patch("subprocess.run")
 def test_collect_relevant_files_for_failed_last_iteration(
-    mack_validate_config,
-    mock_get_cursor,
-    utc_timestamp_minus_hours,
-    mock_relevent_files,
-    mock_collect_data,
     mock_subprocess_run,
+    mock_collect_data,
+    mock_relevant_files,
+    utc_timestamp_minus_hours,
+    mock_get_cursor,
+    mock_validate_config,
     instance,
 ):
+    """When the previous cycle aborted partway through, the next cycle resumes from the file
+    containing the last emitted record and continues forward through later files."""
     mac_audit_logs_check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
-    # Call the method
     mock_subprocess_run.return_value = MagicMock(stdout='+0530\n')
     mac_audit_logs_check.log = MagicMock()
-    _ = mac_audit_logs_check.check(None)
-    expected_files = [
-        (utils.time_string_to_datetime_utc("20230401000001"), "20230401000001.not_terminated"),
-    ]
-    mac_audit_logs_check.log.debug.assert_called_with(
-        f"Found the same file as the last failed iteration, relevant files: {expected_files}"
-    )
+    mac_audit_logs_check.check(None)
+
+    call_args = mock_collect_data.call_args
+    narrowed_closed = call_args[0][0]
+    narrowed_open = call_args[0][1]
+    assert narrowed_closed == closed_files1
+    assert narrowed_open == open_files1
+
+
+_boundary_cursor = {
+    "record_time": "20230401020000",
+    "record_milli_sec": " + 100 msec",
+    "is_file_collection_completed": False,
+    "last_completed_closed": [],
+    "last_completed_open": [],
+}
+_boundary_closed = [
+    (
+        utils.time_string_to_datetime_utc("20230401010000"),
+        utils.time_string_to_datetime_utc("20230401020000"),
+        "20230401010000.20230401020000",
+    ),
+    (
+        utils.time_string_to_datetime_utc("20230401020000"),
+        utils.time_string_to_datetime_utc("20230401030000"),
+        "20230401020000.20230401030000",
+    ),
+    (
+        utils.time_string_to_datetime_utc("20230401030000"),
+        utils.time_string_to_datetime_utc("20230401040000"),
+        "20230401030000.20230401040000",
+    ),
+]
+
+
+@pytest.mark.unit
+@patch("datadog_checks.mac_audit_logs.check.MacAuditLogsCheck.validate_configurations", return_value=None)
+@patch("datadog_checks.mac_audit_logs.check.MacAuditLogsCheck.get_log_cursor", return_value=_boundary_cursor)
+@patch("datadog_checks.mac_audit_logs.utils.get_utc_timestamp_minus_hours", return_value="20230401000000")
+@patch(
+    "datadog_checks.mac_audit_logs.check.MacAuditLogsCheck.collect_relevant_files",
+    return_value=(_boundary_closed, []),
+)
+@patch("datadog_checks.mac_audit_logs.check.MacAuditLogsCheck.collect_data_from_files", return_value=None)
+@patch("subprocess.run")
+def test_resume_narrowing_picks_file_starting_at_cursor_record_time(
+    mock_subprocess_run,
+    mock_collect_data,
+    mock_relevant_files,
+    utc_timestamp_minus_hours,
+    mock_get_cursor,
+    mock_validate_config,
+    instance,
+):
+    """When the last emitted record's timestamp coincides exactly with the
+    start of a new audit file, resuming an aborted cycle reads forward from
+    that new file (and any files after it), not from the file whose end
+    matches the timestamp. Reading from the older file would re-process
+    records that were already emitted in the prior cycle.
+    """
+    mock_subprocess_run.return_value = MagicMock(stdout="+0000\n")
+    check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
+    check.log = MagicMock()
+    check.check(None)
+
+    narrowed_closed = mock_collect_data.call_args[0][0]
+    assert narrowed_closed == _boundary_closed[1:]
 
 
 @pytest.mark.unit
@@ -231,12 +313,14 @@ def test_collect_relevant_files_for_failed_last_iteration(
 def test_get_previous_iteration_log_cursor_when_cusror_is_none(utc_timestamp_minus_hours, instance):
     check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
 
-    last_record_time, last_record_milli_sec, last_collected_file_name = check.get_previous_iteration_log_cursor(None)
+    last_record_time, last_record_milli_sec, last_completed_closed, last_completed_open = (
+        check.get_previous_iteration_log_cursor(None)
+    )
 
-    # Check if the result matches the expected output
     assert last_record_time == "20230401000000"
     assert last_record_milli_sec is None
-    assert last_collected_file_name is None
+    assert last_completed_closed == []
+    assert last_completed_open == []
 
 
 @pytest.mark.unit
@@ -246,16 +330,17 @@ def test_get_previous_iteration_log_cursor_when_cusror_is_not_none(utc_timestamp
     previous_cursor = {
         "record_time": "20230401000000",
         "record_milli_sec": " + 430 msec",
-        "file_name": "20230401000000.20230401000015",
+        "last_completed_closed": ["20230401000000.20230401000015"],
+        "last_completed_open": ["20230401000015.not_terminated"],
     }
-    last_record_time, last_record_milli_sec, last_collected_file_name = check.get_previous_iteration_log_cursor(
-        previous_cursor
+    last_record_time, last_record_milli_sec, last_completed_closed, last_completed_open = (
+        check.get_previous_iteration_log_cursor(previous_cursor)
     )
 
-    # Check if the result matches the expected output
     assert last_record_time == "20230401000000"
     assert last_record_milli_sec == " + 430 msec"
-    assert last_collected_file_name == "20230401000000.20230401000015"
+    assert last_completed_closed == ["20230401000000.20230401000015"]
+    assert last_completed_open == ["20230401000015.not_terminated"]
 
 
 @pytest.mark.unit
@@ -329,167 +414,108 @@ def test_fetch_audit_logs_single_file(mock_popen, instance):
     assert error == ""
 
 
-@pytest.mark.unit
-@patch("os.path.exists", return_value=True)
-@patch("datadog_checks.mac_audit_logs.utils.get_utc_timestamp_minus_hours", return_value="20230401000000")
-def test_collect_data_from_files_batches_all_existing_files(mock_utc, mock_exists, instance):
-    """All existing files are batched into a single auditreduce call."""
+def _make_closed(start: str, end: str) -> tuple[datetime, datetime, str]:
+    return (
+        utils.time_string_to_datetime_utc(start),
+        utils.time_string_to_datetime_utc(end),
+        f"{start}.{end}",
+    )
+
+
+THREE_CLOSED_FILES = [
+    _make_closed("20230401000000", "20230401010000"),
+    _make_closed("20230401010000", "20230401020000"),
+    _make_closed("20230401020000", "20230401030000"),
+]
+
+
+def _path(check: MacAuditLogsCheck, file_name: str) -> str:
+    return os.path.join(check.audit_logs_dir_path, file_name)
+
+
+def _make_check_for_collection(instance: dict) -> MacAuditLogsCheck:
     check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
     check.fetch_audit_logs = MagicMock(return_value=(b"<record/>", b""))
     check.process_and_ingest_log_entries = MagicMock()
+    return check
 
-    relevant_files = [
-        (utils.time_string_to_datetime_utc("20230401000000"), "20230401000000.20230401010000"),
-        (utils.time_string_to_datetime_utc("20230401010000"), "20230401010000.20230401020000"),
-        (utils.time_string_to_datetime_utc("20230401020000"), "20230401020000.20230401030000"),
-    ]
-    last_record_time = "20230401000000"
 
-    check.collect_data_from_files(relevant_files, None, last_record_time, None, None, "+0000")
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "last_completed_closed,last_completed_open,last_record_time,expected_indices",
+    [
+        pytest.param([], [], "20230401000000", [0, 1, 2], id="batches_all_existing"),
+        pytest.param([THREE_CLOSED_FILES[0][2]], [], "20230401010000", [1, 2], id="skips_already_processed"),
+        pytest.param([], [], "20230401000000", [], id="no_valid_files"),
+        pytest.param([], ["20230401000000.not_terminated"], "20230401010000", [1, 2], id="skips_rotated_open"),
+        pytest.param([], [], "20230401000030", [0, 1, 2], id="always_uses_last_record_time"),
+    ],
+)
+@patch("datadog_checks.mac_audit_logs.utils.get_utc_timestamp_minus_hours", return_value="20230401000000")
+def test_collect_data_from_files(
+    mock_utc, last_completed_closed, last_completed_open, last_record_time, expected_indices, instance
+):
+    """Files surviving the skip checks are batched into one auditreduce call with
+    the cursor's last-record timestamp as the filter."""
+    check = _make_check_for_collection(instance)
+    exists_return = expected_indices != []
 
-    expected_paths = [os.path.join(check.audit_logs_dir_path, f) for _, f in relevant_files]
+    with patch("os.path.exists", return_value=exists_return):
+        check.collect_data_from_files(
+            THREE_CLOSED_FILES, [], last_completed_closed, last_completed_open, last_record_time, None, "+0000"
+        )
+
+    if not expected_indices:
+        check.fetch_audit_logs.assert_not_called()
+        return
+
+    expected_names = [THREE_CLOSED_FILES[i][2] for i in expected_indices]
+    expected_paths = [_path(check, name) for name in expected_names]
     check.fetch_audit_logs.assert_called_once_with(expected_paths, last_record_time)
-    call_args = check.process_and_ingest_log_entries.call_args[0]
-    assert call_args[1] == relevant_files[0][1], "cursor file_name should be the first file in the batch"
+    forwarded_completed_closed = check.process_and_ingest_log_entries.call_args[0][1]
+    assert forwarded_completed_closed == expected_names
 
 
 @pytest.mark.unit
 @patch("datadog_checks.mac_audit_logs.utils.get_utc_timestamp_minus_hours", return_value="20230401000000")
 def test_collect_data_from_files_excludes_missing_files(mock_utc, instance):
     """Files that no longer exist on disk are excluded from the auditreduce batch."""
-    check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
-    check.fetch_audit_logs = MagicMock(return_value=(b"<record/>", b""))
-    check.process_and_ingest_log_entries = MagicMock()
-
-    relevant_files = [
-        (utils.time_string_to_datetime_utc("20230401000000"), "20230401000000.20230401010000"),
-        (utils.time_string_to_datetime_utc("20230401010000"), "20230401010000.20230401020000"),
-        (utils.time_string_to_datetime_utc("20230401020000"), "20230401020000.20230401030000"),
-    ]
-    missing_file = os.path.join(check.audit_logs_dir_path, relevant_files[1][1])
+    check = _make_check_for_collection(instance)
+    missing_file = _path(check, THREE_CLOSED_FILES[1][2])
 
     with patch("os.path.exists", side_effect=lambda p: p != missing_file):
-        check.collect_data_from_files(relevant_files, None, "20230401000000", None, None, "+0000")
+        check.collect_data_from_files(THREE_CLOSED_FILES, [], [], [], "20230401000000", None, "+0000")
 
-    expected_paths = [
-        os.path.join(check.audit_logs_dir_path, relevant_files[0][1]),
-        os.path.join(check.audit_logs_dir_path, relevant_files[2][1]),
-    ]
+    expected_paths = [_path(check, THREE_CLOSED_FILES[0][2]), _path(check, THREE_CLOSED_FILES[2][2])]
     check.fetch_audit_logs.assert_called_once_with(expected_paths, "20230401000000")
 
 
 @pytest.mark.unit
-@patch("os.path.exists", return_value=True)
-@patch("datadog_checks.mac_audit_logs.utils.get_utc_timestamp_minus_hours", return_value="20230401000000")
-def test_collect_data_from_files_skips_already_processed_files(mock_utc, mock_exists, instance):
-    """Files fully processed in a previous iteration are excluded from the batch."""
-    check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
-    check.fetch_audit_logs = MagicMock(return_value=(b"<record/>", b""))
-    check.process_and_ingest_log_entries = MagicMock()
-
-    relevant_files = [
-        (utils.time_string_to_datetime_utc("20230401000000"), "20230401000000.20230401010000"),
-        (utils.time_string_to_datetime_utc("20230401010000"), "20230401010000.20230401020000"),
-        (utils.time_string_to_datetime_utc("20230401020000"), "20230401020000.20230401030000"),
-    ]
-    previous_cursor = {"is_file_collection_completed": True}
-    last_collected_file_name = relevant_files[0][1]
-    last_record_time = "20230401010000"
-
-    check.collect_data_from_files(
-        relevant_files, previous_cursor, last_record_time, last_collected_file_name, None, "+0000"
-    )
-
-    expected_paths = [
-        os.path.join(check.audit_logs_dir_path, relevant_files[1][1]),
-        os.path.join(check.audit_logs_dir_path, relevant_files[2][1]),
-    ]
-    check.fetch_audit_logs.assert_called_once_with(expected_paths, last_record_time)
-
-
-@pytest.mark.unit
-@patch("datadog_checks.mac_audit_logs.utils.get_utc_timestamp_minus_hours", return_value="20230401000000")
-def test_collect_data_from_files_no_valid_files(mock_utc, instance):
-    """No subprocess call when all files are filtered out."""
-    check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
-    check.fetch_audit_logs = MagicMock()
-
-    relevant_files = [
-        (utils.time_string_to_datetime_utc("20230401000000"), "20230401000000.20230401010000"),
-        (utils.time_string_to_datetime_utc("20230401010000"), "20230401010000.20230401020000"),
-    ]
-
-    with patch("os.path.exists", return_value=False):
-        check.collect_data_from_files(relevant_files, None, "20230401000000", None, None, "+0000")
-
-    check.fetch_audit_logs.assert_not_called()
-
-
-@pytest.mark.unit
-@patch("os.path.exists", return_value=True)
+@patch("os.path.isdir", return_value=True)
+@patch("os.path.isfile", return_value=True)
 @patch("datadog_checks.mac_audit_logs.utils.get_utc_timestamp_minus_hours", return_value="20230401030000")
-def test_collect_data_from_files_skips_files_outside_time_range(mock_utc, mock_exists, instance):
-    """Files whose end time is before the HOURS_OFFSET cutoff are excluded from the batch."""
+@patch(
+    "os.listdir",
+    return_value=[
+        "20230401000000.20230401010000",
+        "20230401010000.20230401020000",
+        "20230401030000.20230401040000",
+    ],
+)
+def test_collect_relevant_files_excludes_out_of_window(
+    _mock_listdir, _mock_get_utc, _mock_isfile, _mock_isdir, instance
+):
+    """Closed files whose end time is before the look-back cutoff are excluded."""
     check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
-    check.fetch_audit_logs = MagicMock(return_value=(b"<record/>", b""))
-    check.process_and_ingest_log_entries = MagicMock()
-
-    relevant_files = [
-        (utils.time_string_to_datetime_utc("20230401000000"), "20230401000000.20230401010000"),
-        (utils.time_string_to_datetime_utc("20230401010000"), "20230401010000.20230401020000"),
-        (utils.time_string_to_datetime_utc("20230401030000"), "20230401030000.20230401040000"),
+    closed, still_open = check.collect_relevant_files("20230401030000")
+    assert closed == [
+        (
+            utils.time_string_to_datetime_utc("20230401030000"),
+            utils.time_string_to_datetime_utc("20230401040000"),
+            "20230401030000.20230401040000",
+        ),
     ]
-
-    check.collect_data_from_files(relevant_files, None, "20230401000000", None, None, "+0000")
-
-    expected_paths = [os.path.join(check.audit_logs_dir_path, relevant_files[2][1])]
-    check.fetch_audit_logs.assert_called_once_with(expected_paths, "20230401000000")
-
-
-@pytest.mark.unit
-@patch("os.path.exists", return_value=True)
-@patch("datadog_checks.mac_audit_logs.utils.get_utc_timestamp_minus_hours", return_value="20230401000000")
-def test_collect_data_from_files_skips_rotated_not_terminated_file(mock_utc, mock_exists, instance):
-    """A not_terminated file that was completed and rotated into a named file is skipped."""
-    check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
-    check.fetch_audit_logs = MagicMock(return_value=(b"<record/>", b""))
-    check.process_and_ingest_log_entries = MagicMock()
-
-    relevant_files = [
-        (utils.time_string_to_datetime_utc("20230401000000"), "20230401000000.20230401010000"),
-        (utils.time_string_to_datetime_utc("20230401010000"), "20230401010000.20230401020000"),
-    ]
-    previous_cursor = {"is_file_collection_completed": True}
-    last_collected_file_name = "20230401000000.not_terminated"
-    last_record_time = "20230401010000"
-
-    check.collect_data_from_files(
-        relevant_files, previous_cursor, last_record_time, last_collected_file_name, None, "+0000"
-    )
-
-    expected_paths = [os.path.join(check.audit_logs_dir_path, relevant_files[1][1])]
-    check.fetch_audit_logs.assert_called_once_with(expected_paths, last_record_time)
-
-
-@pytest.mark.unit
-@patch("os.path.exists", return_value=True)
-@patch("datadog_checks.mac_audit_logs.utils.get_utc_timestamp_minus_hours", return_value="20230401000000")
-def test_collect_data_from_files_always_uses_last_record_time(mock_utc, mock_exists, instance):
-    """The time filter is always last_record_time (regression test for file_index bug)."""
-    check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
-    check.fetch_audit_logs = MagicMock(return_value=(b"<record/>", b""))
-    check.process_and_ingest_log_entries = MagicMock()
-
-    relevant_files = [
-        (utils.time_string_to_datetime_utc("20230401000000"), "20230401000000.20230401010000"),
-        (utils.time_string_to_datetime_utc("20230401010000"), "20230401010000.20230401020000"),
-        (utils.time_string_to_datetime_utc("20230401020000"), "20230401020000.20230401030000"),
-    ]
-    last_record_time = "20230401000030"
-
-    check.collect_data_from_files(relevant_files, None, last_record_time, None, None, "+0000")
-
-    assert check.fetch_audit_logs.call_args[0][1] == last_record_time
+    assert still_open == []
 
 
 @patch.object(MacAuditLogsCheck, 'send_log')
@@ -501,5 +527,83 @@ def test_process_and_ingest_log_entries_skipping_logs_milli_seconds(mock_send_lo
     )
     log_entries = logs.split("\n")
     check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
-    check.process_and_ingest_log_entries(log_entries, "20250605082138.20250605082142", "+0000", " + 278 msec")
-    assert mock_send_log.call_count == 2
+    check.process_and_ingest_log_entries(log_entries, ["20250605082138.20250605082142"], [], "+0000", " + 278 msec")
+    assert mock_send_log.call_count == 1
+
+
+LOG_TEMPLATE_RECORDS = (
+    "<record time=\"Thu Jun  5 13:51:38 2025\" msec=\" + 244 msec\" > /></record>\n"
+    "<record time=\"Thu Jun  5 13:51:39 2025\" msec=\" + 154 msec\" > /></record>"
+)
+DEFAULT_BATCH_CLOSED = ["20250605082138.20250605082142"]
+
+
+def _ingest(check: MacAuditLogsCheck, log_entries: list[str], resume_msec: str | None = None) -> None:
+    check.process_and_ingest_log_entries(log_entries, DEFAULT_BATCH_CLOSED, [], "+0000", resume_msec)
+
+
+# ---------------------------------------------------------------------------
+# Deduplication across emissions
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+@patch.object(MacAuditLogsCheck, "send_log")
+def test_each_unique_record_is_emitted_at_most_once_per_cycle(mock_send_log, instance):
+    """Within one cycle, every distinct record turns into at most one log entry."""
+    logs = (
+        "<record time=\"Thu Jun  5 13:51:38 2025\" msec=\" + 100 msec\" > /></record>\n"
+        "<record time=\"Thu Jun  5 13:51:39 2025\" msec=\" + 200 msec\" > /></record>\n"
+        "<record time=\"Thu Jun  5 13:51:40 2025\" msec=\" + 300 msec\" > /></record>"
+    )
+    check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
+
+    _ingest(check, logs.split("\n"))
+
+    messages = [call.args[0]["message"] for call in mock_send_log.call_args_list]
+    assert len(messages) == len(set(messages)) == 3
+
+
+@pytest.mark.unit
+@patch.object(MacAuditLogsCheck, "send_log")
+def test_records_after_the_resume_point_are_emitted(mock_send_log, instance):
+    """After the resume cursor's msec is matched, every subsequent record is emitted."""
+    logs = (
+        "<record time=\"Thu Jun  5 13:51:38 2025\" msec=\" + 100 msec\" > /></record>\n"
+        "<record time=\"Thu Jun  5 13:51:38 2025\" msec=\" + 200 msec\" > /></record>\n"
+        "<record time=\"Thu Jun  5 13:51:39 2025\" msec=\" + 300 msec\" > /></record>\n"
+        "<record time=\"Thu Jun  5 13:51:40 2025\" msec=\" + 400 msec\" > /></record>"
+    )
+    check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
+
+    _ingest(check, logs.split("\n"), resume_msec=" + 200 msec")
+
+    emitted_msecs = [
+        msec
+        for call in mock_send_log.call_args_list
+        for msec in [" + 100 msec", " + 200 msec", " + 300 msec", " + 400 msec"]
+        if msec in call.args[0]["message"]
+    ]
+    assert emitted_msecs == [" + 300 msec", " + 400 msec"]
+
+
+# ---------------------------------------------------------------------------
+# Cursor monotonicity
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+@patch.object(MacAuditLogsCheck, "send_log")
+def test_cursor_record_time_never_moves_backwards(mock_send_log, instance):
+    """Successive cursors emitted within one cycle have monotonically non-decreasing record_time."""
+    logs = (
+        "<record time=\"Thu Jun  5 13:51:38 2025\" msec=\" + 100 msec\" > /></record>\n"
+        "<record time=\"Thu Jun  5 13:51:39 2025\" msec=\" + 200 msec\" > /></record>\n"
+        "<record time=\"Thu Jun  5 13:51:40 2025\" msec=\" + 300 msec\" > /></record>"
+    )
+    check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
+
+    _ingest(check, logs.split("\n"))
+
+    record_times = [call.kwargs["cursor"]["record_time"] for call in mock_send_log.call_args_list]
+    assert record_times == sorted(record_times)
