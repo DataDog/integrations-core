@@ -1,1 +1,1 @@
-Retry agent check invocations on transient failures to address SNMP E2E flake from autodiscovery reload races
+Retry agent check invocations on transient failures to address SNMP E2E flake from autodiscovery reload races.
