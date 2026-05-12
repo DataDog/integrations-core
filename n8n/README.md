@@ -70,8 +70,6 @@ Most n8n counters are registered dynamically the first time their underlying eve
 
 These counters do not appear on the `/metrics` endpoint until the corresponding event has occurred. A healthy idle deployment will not produce data points for them until that activity fires. The complete list is in [`metadata.csv`][7].
 
-A few n8n event names contain hyphens (for example, `n8n.audit.external-secrets.*`, `n8n.audit.token-exchange.*`, `n8n.audit.role-mapping.*`, `n8n.audit.cluster.*`). n8n's own Prometheus exporter rejects metric names containing hyphens, so these events never register a counter on `/metrics` regardless of how the integration is configured. To capture them, collect n8n's event-bus log files instead. See the [Log collection](#log-collection) section.
-
 If a future n8n release exposes a new event-driven counter that is not yet covered by this integration, add it to the `extra_metrics` option in your instance configuration:
 
 ```yaml
