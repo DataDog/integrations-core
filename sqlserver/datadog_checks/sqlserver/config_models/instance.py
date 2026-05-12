@@ -174,6 +174,15 @@ class DbFragmentationMetrics(BaseModel):
     enabled_tempdb: Optional[bool] = Field(None, examples=[False])
 
 
+class DbMemoryMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[int] = Field(None, examples=[300])
+    enabled: Optional[bool] = Field(None, examples=[False])
+
+
 class DbStatsMetrics(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -290,6 +299,7 @@ class DatabaseMetrics(BaseModel):
     db_backup_metrics: Optional[DbBackupMetrics] = None
     db_files_metrics: Optional[DbFilesMetrics] = None
     db_fragmentation_metrics: Optional[DbFragmentationMetrics] = None
+    db_memory_metrics: Optional[DbMemoryMetrics] = None
     db_stats_metrics: Optional[DbStatsMetrics] = None
     fci_metrics: Optional[FciMetrics] = None
     file_stats_metrics: Optional[FileStatsMetrics] = None

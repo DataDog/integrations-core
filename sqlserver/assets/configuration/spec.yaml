@@ -257,6 +257,24 @@ files:
             - name: enabled
               type: boolean
               example: true
+        - name: db_memory_metrics
+          description: |
+            Configure collection of database memory metrics from sys.dm_os_buffer_descriptors.
+            These metrics provide buffer pool usage information per database.
+            Note: Querying sys.dm_os_buffer_descriptors can be resource intensive on large systems.
+            Set `db_memory_metrics.enabled` to true to enable collection of database memory metrics. Defaults to false.
+            Set `db_memory_metrics.collection_interval` to configure the collection interval in seconds. Defaults to 300.
+          value:
+            type: object
+            properties:
+            - name: enabled
+              type: boolean
+              example: false
+              display_default: false
+            - name: collection_interval
+              type: integer
+              example: 300
+              display_default: 300
         - name: db_fragmentation_metrics
           description: |
             Configure collection of database fragmentation metrics.

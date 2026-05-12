@@ -7,6 +7,7 @@ from .availability_replicas_metrics import SqlserverAvailabilityReplicasMetrics
 from .database_agent_metrics import SqlserverAgentMetrics
 from .database_backup_metrics import SqlserverDatabaseBackupMetrics
 from .database_files_metrics import SqlserverDatabaseFilesMetrics
+from .database_memory_metrics import SqlserverDatabaseMemoryMetrics
 from .database_replication_stats_metrics import SqlserverDatabaseReplicationStatsMetrics
 from .database_stats_metrics import SqlserverDatabaseStatsMetrics
 from .db_fragmentation_metrics import SqlserverDBFragmentationMetrics
@@ -19,6 +20,6 @@ from .os_tasks_metrics import SqlserverOsTasksMetrics
 from .primary_log_shipping_metrics import SqlserverPrimaryLogShippingMetrics
 from .secondary_log_shipping_metrics import SqlserverSecondaryLogShippingMetrics
 from .server_state_metrics import SqlserverServerStateMetrics
+from .table_size_metrics import SqlserverTableSizeMetrics
 from .tempdb_file_space_usage_metrics import SqlserverTempDBFileSpaceUsageMetrics
 from .xe_session_metrics import SQLServerXESessionMetrics
-from .table_size_metrics import SqlserverTableSizeMetrics
