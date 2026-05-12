@@ -16,6 +16,7 @@ from .client import ApplianceClient, OrchestratorClient
 from .config_models import ConfigMixin
 from .constants import MINUTE_STATS_INTERVAL, NDM_INTERFACE_RESOURCE_TAG
 from .metrics_store import MetricsStore
+from .minute_stats import MinuteStats, TunnelV2Stats
 from .models import Appliance, Appliances
 from .ndm_models import (
     DeviceMetadata,
@@ -26,7 +27,6 @@ from .ndm_models import (
     create_interface_metadata,
     create_tunnel_metadata,
 )
-from .parsers.minute_stats import MinuteStats, TunnelV2Stats
 
 _CPU_STATE_FIELDS = {
     'user': 'pUser',
@@ -213,7 +213,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
                 try:
                     content = client.get_minute_stats(f'st2-{ts}.tgz')
                     minute_stats = MinuteStats(content, app_ip, ts, self.log)
-                    minute_stats.record(store, base_tags, device_id, traffic_class_map)
+                    minute_stats.record(store, base_tags, device_id, traffic_class_map, overlay_map)
                 except Exception:
                     self.log.warning(
                         "Failed to process minute-stats archive st2-%d.tgz for appliance %s, skipping",
@@ -285,11 +285,10 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
                 f'interface_name:{ifname}',
                 f'{NDM_INTERFACE_RESOURCE_TAG}:{device_id}',
             ]
-            status_tags = iface_tags + [
-                f'admin_status:{_interface_status_label(iface.get("admin"))}',
-                f'oper_status:{_interface_status_label(iface.get("oper"))}',
-            ]
-            self.gauge('interface.status', 1, tags=status_tags)
+            for status_type, raw in (('admin', iface.get('admin')), ('oper', iface.get('oper'))):
+                if raw is None:
+                    continue
+                self.gauge('interface.status', 1 if raw else 0, tags=iface_tags + [f'status_type:{status_type}'])
             speed = _parse_speed(iface.get('speed'))
             if speed is not None:
                 self.gauge('interface.speed', speed, tags=iface_tags)
@@ -388,9 +387,3 @@ def _parse_speed(value: Any) -> float | None:
     if m:
         return float(m.group(1)) * _SPEED_MULTIPLIERS[m.group(2).lower()]
     return None
-
-
-def _interface_status_label(value: Any) -> str:
-    if value is None:
-        return 'unknown'
-    return 'up' if value else 'down'

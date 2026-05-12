@@ -28,7 +28,7 @@ hpe_aruba_edgeconnect.interface.drops.packets.tx.count,gauge,,packet,,Forward dr
 hpe_aruba_edgeconnect.interface.drops.packets.tx.max,gauge,,packet,,Peak forward drop packets transmitted on the interface,0,hpe_aruba_edgeconnect,interface drops packets tx max,,interface_name:wan0
 hpe_aruba_edgeconnect.interface.drops.packets.tx.rate,gauge,,packet,second,Forward drop packets transmitted per second on the interface,0,hpe_aruba_edgeconnect,interface drops packets tx rate,,interface_name:wan0
 hpe_aruba_edgeconnect.interface.speed,gauge,,bit,second,Configured speed of the interface in bits per second,0,hpe_aruba_edgeconnect,interface speed,,interface_name:wan0
-hpe_aruba_edgeconnect.interface.status,gauge,,,,"For each interface of each monitored EdgeConnect appliance, this metric reports always 1 with the admin_status and oper_status as tags, as a 'combined' status that can be used for monitors.",0,hpe_aruba_edgeconnect,interface status,,interface_name:wan0
+hpe_aruba_edgeconnect.interface.status,gauge,,,,"Administrative or operational status of the interface (1 = up, 0 = down).",0,hpe_aruba_edgeconnect,interface status,,interface_name:wan0
 hpe_aruba_edgeconnect.interface.utilization.rx.avg,gauge,,percent,,Average receive utilization percentage of the interface,0,hpe_aruba_edgeconnect,interface utilization rx avg,,interface_name:wan0
 hpe_aruba_edgeconnect.interface.utilization.rx.max,gauge,,percent,,Peak receive utilization percentage of the interface,0,hpe_aruba_edgeconnect,interface utilization rx max,,interface_name:wan0
 hpe_aruba_edgeconnect.interface.utilization.tx.avg,gauge,,percent,,Average transmit utilization percentage of the interface,0,hpe_aruba_edgeconnect,interface utilization tx avg,,interface_name:wan0
@@ -43,6 +43,7 @@ hpe_aruba_edgeconnect.qos.class.bandwidth.tx.max,gauge,,byte,,Peak transmit band
 hpe_aruba_edgeconnect.qos.class.bandwidth.tx.rate,gauge,,byte,second,Transmit rate for the DSCP class in bytes per second,0,hpe_aruba_edgeconnect,qos class bandwidth tx rate,,dscp:be side:wan
 hpe_aruba_edgeconnect.qos.class.drop.percentage,gauge,,percent,,Percentage of packets shaped that were dropped by QoS,0,hpe_aruba_edgeconnect,qos class drop percentage,,overlay_name:RealTime
 hpe_aruba_edgeconnect.qos.class.drops,gauge,,packet,,QoS or other dropped packets by the traffic shaper. Cumulative across recovered minutes after Agent restart backfill.,0,hpe_aruba_edgeconnect,qos class drops,,overlay_name:RealTime drop_type:qos
+hpe_aruba_edgeconnect.tunnel.availability,gauge,,percent,,Percentage of time the tunnel was up during the interval.,0,hpe_aruba_edgeconnect,tunnel availability,,tunnel_name:pass-through
 hpe_aruba_edgeconnect.tunnel.internet_breakout.bandwidth.rx.count,gauge,,byte,,Bytes received on the internet breakout tunnel. Cumulative across recovered minutes after Agent restart backfill.,0,hpe_aruba_edgeconnect,tunnel internet breakout bandwidth rx count,,interface_name:wan0
 hpe_aruba_edgeconnect.tunnel.internet_breakout.bandwidth.rx.max,gauge,,byte,,Maximum configured receive bandwidth on the internet breakout tunnel,0,hpe_aruba_edgeconnect,tunnel internet breakout bandwidth rx max,,interface_name:wan0
 hpe_aruba_edgeconnect.tunnel.internet_breakout.bandwidth.rx.rate,gauge,,byte,second,Receive rate on the internet breakout tunnel in bytes per second,0,hpe_aruba_edgeconnect,tunnel internet breakout bandwidth rx rate,,interface_name:wan0
@@ -57,7 +58,6 @@ hpe_aruba_edgeconnect.tunnel.latency.min,gauge,,millisecond,,Minimum latency on 
 hpe_aruba_edgeconnect.tunnel.loss,gauge,,percent,,Packet loss on the tunnel,0,hpe_aruba_edgeconnect,tunnel loss,,tunnel_name:pass-through fec:post
 hpe_aruba_edgeconnect.tunnel.qoe.mos,gauge,,,,Mean Opinion Score on the tunnel,0,hpe_aruba_edgeconnect,tunnel qoe mos,,tunnel_name:pass-through fec:post
 hpe_aruba_edgeconnect.tunnel.qoe.mos.min,gauge,,,,Minimum Mean Opinion Score on the tunnel,0,hpe_aruba_edgeconnect,tunnel qoe mos min,,tunnel_name:pass-through fec:post
-hpe_aruba_edgeconnect.tunnel.status,gauge,,second,,Seconds the tunnel was down in the interval. Cumulative across recovered minutes after Agent restart backfill.,0,hpe_aruba_edgeconnect,tunnel status,,tunnel_name:pass-through
 hpe_aruba_edgeconnect.tunnel.throughput.rx.bytes.count,gauge,,byte,,Bytes received on the tunnel. Cumulative across recovered minutes after Agent restart backfill.,0,hpe_aruba_edgeconnect,tunnel throughput rx bytes count,,tunnel_name:pass-through side:wan
 hpe_aruba_edgeconnect.tunnel.throughput.rx.bytes.max,gauge,,byte,,Peak bytes received on the tunnel,0,hpe_aruba_edgeconnect,tunnel throughput rx bytes max,,tunnel_name:pass-through side:wan
 hpe_aruba_edgeconnect.tunnel.throughput.rx.bytes.rate,gauge,,byte,second,Receive throughput rate on the tunnel in bytes per second,0,hpe_aruba_edgeconnect,tunnel throughput rx bytes rate,,tunnel_name:pass-through side:wan

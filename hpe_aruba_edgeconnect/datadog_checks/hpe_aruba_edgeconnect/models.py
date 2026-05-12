@@ -124,7 +124,7 @@ class Appliance:
             f'device_ip:{self.ip}',
             f'device_model:{self.model or "unknown"}',
             f'device_hostname:{self.host_name or "unknown"}',
-            f'softwareVersion:{self.software_version or "unknown"}',
+            f'software_version:{self.software_version or "unknown"}',
             'device_vendor:aruba',
             f'site_id:{site}',
             f'site_name:{site}',

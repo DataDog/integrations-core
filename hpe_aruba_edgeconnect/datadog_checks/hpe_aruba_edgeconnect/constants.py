@@ -6,6 +6,7 @@ from __future__ import annotations
 MINUTE_STATS_INTERVAL = 60
 
 # tunnel_availability_v2.txt column indices (0-based, no header)
+TUNNEL_AVAIL_COL_TUNNEL_ID = 1
 TUNNEL_AVAIL_COL_ALIAS = 2
 TUNNEL_AVAIL_COL_SECONDS_DOWN = 8
 TUNNEL_AVAIL_COL_COLOR = 13

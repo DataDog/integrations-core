@@ -16,7 +16,7 @@ EXPECTED_METRIC_COUNTS = {
     'device.memory.usage': 5,
     'device.disk.usage': 10,
     'device.hardware.ok': 1,
-    'interface.status': 1,
+    'interface.status': 2,
     'interface.speed': 1,
     'interface.bandwidth.tx.count': 3,
     'interface.bandwidth.rx.count': 3,
@@ -60,7 +60,7 @@ EXPECTED_METRIC_COUNTS = {
     'tunnel.jitter.max': 31,
     'tunnel.qoe.mos': 62,
     'tunnel.qoe.mos.min': 62,
-    'tunnel.status': 31,
+    'tunnel.availability': 31,
     'tunnel.internet_breakout.bandwidth.tx.count': 1,
     'tunnel.internet_breakout.bandwidth.rx.count': 1,
     'tunnel.internet_breakout.bandwidth.tx.rate': 1,
@@ -84,7 +84,6 @@ EXPECTED_METRIC_COUNTS = {
 
 
 EXPECTED_VALUES = [
-    # Device health (from orchestrator + non-archive endpoints).
     ('device.reachability', 1, []),
     ('device.uptime', 86400, []),
     ('device.cpu.usage', 30.0, ['cpu_state:user']),
@@ -100,56 +99,40 @@ EXPECTED_VALUES = [
     ('device.disk.usage', 4619060 * 1024, ['mount:/', 'disk_type:free']),
     ('device.disk.usage', 4328968 * 1024, ['mount:/var', 'disk_type:used']),
     ('device.disk.usage', 35553256 * 1024, ['mount:/var', 'disk_type:free']),
-    # The fake appliance returns no outstanding HW alarms.
     ('device.hardware.ok', 1, []),
-    # Interface status / speed (from /networkInterfaces).
-    ('interface.status', 1, ['interface_name:wan0', 'admin_status:up', 'oper_status:up']),
+    ('interface.status', 1, ['interface_name:wan0', 'status_type:admin']),
+    ('interface.status', 1, ['interface_name:wan0', 'status_type:oper']),
     ('interface.speed', 1000000000, ['interface_name:wan0']),
-    # Interface bandwidth: wan0 pass-through-unshaped (single-archive aggregation).
     ('interface.bandwidth.tx.count', 79920, ['interface_name:wan0', 'traffic_type:pass-through-unshaped']),
     ('interface.bandwidth.tx.rate', 1332.0, ['interface_name:wan0', 'traffic_type:pass-through-unshaped']),
     ('interface.bandwidth.rx.count', 41760, ['interface_name:wan0', 'traffic_type:pass-through-unshaped']),
-    # Interface peak: wan0 pass-through-unshaped.
     ('interface.bandwidth.tx.max', 1332, ['interface_name:wan0', 'traffic_type:pass-through-unshaped']),
     ('interface.bandwidth.rx.max', 696, ['interface_name:wan0', 'traffic_type:pass-through-unshaped']),
-    # Tunnel throughput: pass-through-unshaped wan (single-archive aggregation).
     ('tunnel.throughput.tx.bytes.count', 38796, ['tunnel_name:pass-through-unshaped', 'side:wan']),
     ('tunnel.throughput.tx.bytes.rate', 646.6, ['tunnel_name:pass-through-unshaped', 'side:wan']),
     ('tunnel.throughput.rx.bytes.count', 42456, ['tunnel_name:pass-through-unshaped', 'side:wan']),
-    # Tunnel latency: tunnel_12 → to_NewYorkSP01_MPLS1-MPLS1.
-    ('tunnel.latency', 1.39, ['tunnel_name:to_NewYorkSP01_MPLS1-MPLS1']),
-    ('tunnel.latency.min', 1.38, ['tunnel_name:to_NewYorkSP01_MPLS1-MPLS1']),
-    # Tunnel peak: pass-through-unshaped wan.
+    ('tunnel.latency', 1.39, ['tunnel_alias:to_NewYorkSP01_MPLS1-MPLS1']),
+    ('tunnel.latency.min', 1.38, ['tunnel_alias:to_NewYorkSP01_MPLS1-MPLS1']),
     ('tunnel.throughput.tx.bytes.max', 1272, ['tunnel_name:pass-through-unshaped', 'side:wan']),
     ('tunnel.throughput.rx.bytes.max', 1160, ['tunnel_name:pass-through-unshaped', 'side:wan']),
-    # Tunnel jitter: bondedTunnel_16 (single sample).
     ('tunnel.jitter', 600, ['tunnel_name:bondedTunnel_16']),
     ('tunnel.jitter.max', 6, ['tunnel_name:bondedTunnel_16']),
-    # Tunnel MOS: tunnel_12 (mos_postfec=4.0).
     ('tunnel.qoe.mos', 4.0, ['tunnel_name:tunnel_12', 'fec:post']),
     ('tunnel.qoe.mos.min', 4.0, ['tunnel_name:tunnel_12', 'fec:post']),
-    # Tunnel availability: pass-through-unshaped (seconds_down=0).
-    ('tunnel.status', 0, ['tunnel_name:pass-through-unshaped']),
-    # Internet breakout: wan0 (single-archive aggregation).
+    ('tunnel.availability', 100.0, ['tunnel_name:pass-through-unshaped']),
     ('tunnel.internet_breakout.bandwidth.tx.count', 38160, ['interface_name:wan0']),
     ('tunnel.internet_breakout.bandwidth.tx.rate', 636.0, ['interface_name:wan0']),
     ('tunnel.internet_breakout.bandwidth.rx.max', 100000, ['interface_name:wan0']),
-    # DSCP: be / pass-through-unshaped wan (single-archive aggregation).
     ('qos.class.bandwidth.tx.count', 38160, ['dscp:be', 'side:wan']),
     ('qos.class.bandwidth.tx.rate', 636.0, ['dscp:be', 'side:wan']),
-    # DSCP peak: be / pass-through-unshaped wan.
     ('qos.class.bandwidth.tx.max', 636, ['dscp:be', 'side:wan']),
-    # Shaper: traffic_class=2 maps to overlay BulkData via fake_orch.
     ('qos.class.drops', 0, ['overlay_name:BulkData', 'drop_type:qos']),
     ('qos.class.drop.percentage', 0, ['overlay_name:BulkData']),
-    # Probe: om_passThrough_9 (single-sample averages).
     ('circuit.sla.latency', 0, ['probe_name:om_passThrough_9']),
     ('circuit.sla.loss', 0, ['probe_name:om_passThrough_9']),
     ('circuit.sla.jitter', 60, ['probe_name:om_passThrough_9']),
-    # Nexthop: om_passThrough_6 admin=60, oper=0.
     ('nexthop.status', 60, ['probe_name:om_passThrough_6', 'status_type:admin']),
     ('nexthop.status', 0, ['probe_name:om_passThrough_6', 'status_type:oper']),
-    # Application latency: microsoft cnd from appperf_v2.txt (single-archive aggregation).
     ('application.latency', 5.0, ['application:microsoft', 'tunnel_name:bondedTunnel_16', 'latency_type:cnd']),
 ]
 

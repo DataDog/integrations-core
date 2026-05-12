@@ -10,7 +10,7 @@ import tarfile
 from collections.abc import Iterator
 from dataclasses import dataclass
 from io import BytesIO, StringIO
-from typing import TYPE_CHECKING, ClassVar, Protocol
+from typing import TYPE_CHECKING, ClassVar, Literal, Protocol
 
 from datadog_checks.hpe_aruba_edgeconnect.constants import (
     APPPERF_COL_APP_DELAY,
@@ -30,6 +30,7 @@ from datadog_checks.hpe_aruba_edgeconnect.constants import (
     TUNNEL_AVAIL_COL_ALIAS,
     TUNNEL_AVAIL_COL_COLOR,
     TUNNEL_AVAIL_COL_SECONDS_DOWN,
+    TUNNEL_AVAIL_COL_TUNNEL_ID,
     TUNNEL_TYPE_INTERNET_BREAKOUT,
     TUNNEL_V2_COL_ALIAS,
     TUNNEL_V2_COL_BYTES_LAN_RX,
@@ -73,7 +74,7 @@ class TunnelV2Stats:
     tunnel_id: str
     tunnel_alias: str
     overlay_id: str
-    is_sdwan: bool
+    is_sdwan: bool | Literal['unknown']
     bytes_wan_tx: float | None
     bytes_wan_rx: float | None
     bytes_lan_tx: float | None
@@ -110,14 +111,15 @@ class TunnelV2Stats:
             float(cols[TUNNEL_V2_COL_LOSS_PCT_POSTFEC]) / 100 if n > TUNNEL_V2_COL_LOSS_PCT_POSTFEC else None
         )
 
-    def record(self, store: MetricsStore, base_tags: list[str]) -> list[str]:
+    def record(self, store: MetricsStore, base_tags: list[str], overlay_map: dict[str, str] | None = None) -> list[str]:
         """Records tunnel metrics and returns the extra tags for cross-referencing."""
+        overlay_name = (overlay_map or {}).get(self.overlay_id, self.overlay_id)
         extra_tags = [
-            f'tunnel_id:{self.tunnel_id}',
-            f'overlay_id:{self.overlay_id}',
+            f'tunnel_alias:{self.tunnel_alias}',
+            f'overlay_name:{overlay_name}',
             f'is_sdwan:{str(self.is_sdwan)}',
         ]
-        base_tunnel_tags = base_tags + [f'tunnel_name:{self.tunnel_alias}'] + extra_tags
+        base_tunnel_tags = base_tags + [f'tunnel_name:{self.tunnel_id}'] + extra_tags
         for side, bytes_tx, bytes_rx, pkts_tx, pkts_rx in [
             ('wan', self.bytes_wan_tx, self.bytes_wan_rx, self.pkts_wan_tx, self.pkts_wan_rx),
             ('lan', self.bytes_lan_tx, self.bytes_lan_rx, self.pkts_lan_tx, self.pkts_lan_rx),
@@ -125,12 +127,16 @@ class TunnelV2Stats:
             tags = base_tunnel_tags + [f'side:{side}']
             store.record('tunnel.throughput.tx.bytes.count', bytes_tx, tags, AggType.SUM)
             store.record('tunnel.throughput.rx.bytes.count', bytes_rx, tags, AggType.SUM)
-            store.record('tunnel.throughput.tx.bytes.rate', bytes_tx / MINUTE_STATS_INTERVAL, tags, AggType.AVG)
-            store.record('tunnel.throughput.rx.bytes.rate', bytes_rx / MINUTE_STATS_INTERVAL, tags, AggType.AVG)
             store.record('tunnel.throughput.tx.packets.count', pkts_tx, tags, AggType.SUM)
             store.record('tunnel.throughput.rx.packets.count', pkts_rx, tags, AggType.SUM)
-            store.record('tunnel.throughput.tx.packets.rate', pkts_tx / MINUTE_STATS_INTERVAL, tags, AggType.AVG)
-            store.record('tunnel.throughput.rx.packets.rate', pkts_rx / MINUTE_STATS_INTERVAL, tags, AggType.AVG)
+            if bytes_tx is not None:
+                store.record('tunnel.throughput.tx.bytes.rate', bytes_tx / MINUTE_STATS_INTERVAL, tags, AggType.AVG)
+            if bytes_rx is not None:
+                store.record('tunnel.throughput.rx.bytes.rate', bytes_rx / MINUTE_STATS_INTERVAL, tags, AggType.AVG)
+            if pkts_tx is not None:
+                store.record('tunnel.throughput.tx.packets.rate', pkts_tx / MINUTE_STATS_INTERVAL, tags, AggType.AVG)
+            if pkts_rx is not None:
+                store.record('tunnel.throughput.rx.packets.rate', pkts_rx / MINUTE_STATS_INTERVAL, tags, AggType.AVG)
         store.record('tunnel.latency', self.latency, base_tunnel_tags, AggType.AVG)
         store.record('tunnel.latency.min', self.latency_min, base_tunnel_tags, AggType.MIN)
         store.record('tunnel.loss', self.loss_postfec, base_tunnel_tags + ['fec:post'], AggType.AVG)
@@ -250,6 +256,7 @@ class MosStats:
 
 @dataclass(init=False, slots=True)
 class TunnelAvailability:
+    tunnel_id: str
     alias: str
     seconds_down: float | None
     color: str
@@ -257,6 +264,7 @@ class TunnelAvailability:
 
     def __init__(self, cols: list[str]) -> None:
         n = len(cols)
+        self.tunnel_id = cols[TUNNEL_AVAIL_COL_TUNNEL_ID] if n > TUNNEL_AVAIL_COL_TUNNEL_ID else 'unknown'
         self.alias = cols[TUNNEL_AVAIL_COL_ALIAS] if n > TUNNEL_AVAIL_COL_ALIAS else 'unknown'
         self.seconds_down = float(cols[TUNNEL_AVAIL_COL_SECONDS_DOWN]) if n > TUNNEL_AVAIL_COL_SECONDS_DOWN else None
         self.color = cols[TUNNEL_AVAIL_COL_COLOR] if n > TUNNEL_AVAIL_COL_COLOR else 'unknown'
@@ -265,12 +273,15 @@ class TunnelAvailability:
 
     def record(self, store: MetricsStore, base_tags: list[str]) -> None:
         tags = base_tags + [
-            f'tunnel_name:{self.alias}',
+            f'tunnel_name:{self.tunnel_id}',
+            f'tunnel_alias:{self.alias}',
             f'tunnel_color:{self.color}',
         ]
         if self.peer is not None:
             tags.append(f'peer:{self.peer}')
-        store.record('tunnel.status', self.seconds_down, tags, AggType.SUM)
+        if self.seconds_down is not None:
+            uptime_pct = max(0.0, (MINUTE_STATS_INTERVAL - self.seconds_down) / MINUTE_STATS_INTERVAL * 100)
+            store.record('tunnel.availability', uptime_pct, tags, AggType.AVG)
 
     @classmethod
     def parse(cls, content: str, logger: CheckLoggingAdapter | None = None) -> Iterator[TunnelAvailability]:
@@ -314,8 +325,8 @@ class InterfaceStats:
             f'traffic_type:{self.traftype}',
             f'{NDM_INTERFACE_RESOURCE_TAG}:{device_id}',
         ]
-        bw_tx = self.bytes_tx / MINUTE_STATS_INTERVAL
-        bw_rx = self.bytes_rx / MINUTE_STATS_INTERVAL
+        bw_tx = self.bytes_tx / MINUTE_STATS_INTERVAL if self.bytes_tx is not None else None
+        bw_rx = self.bytes_rx / MINUTE_STATS_INTERVAL if self.bytes_rx is not None else None
         store.record('interface.bandwidth.tx.count', self.bytes_tx, tags, AggType.SUM)
         store.record('interface.bandwidth.rx.count', self.bytes_rx, tags, AggType.SUM)
         store.record('interface.bandwidth.tx.rate', bw_tx, tags, AggType.AVG)
@@ -324,17 +335,31 @@ class InterfaceStats:
         store.record('interface.drops.bytes.rx.count', self.fwdrops_bytes_rx, tags, AggType.SUM)
         store.record('interface.drops.packets.tx.count', self.fwdrops_pkts_tx, tags, AggType.SUM)
         store.record('interface.drops.packets.rx.count', self.fwdrops_pkts_rx, tags, AggType.SUM)
-        store.record('interface.drops.bytes.tx.rate', self.fwdrops_bytes_tx / MINUTE_STATS_INTERVAL, tags, AggType.AVG)
-        store.record('interface.drops.bytes.rx.rate', self.fwdrops_bytes_rx / MINUTE_STATS_INTERVAL, tags, AggType.AVG)
-        store.record('interface.drops.packets.tx.rate', self.fwdrops_pkts_tx / MINUTE_STATS_INTERVAL, tags, AggType.AVG)
-        store.record('interface.drops.packets.rx.rate', self.fwdrops_pkts_rx / MINUTE_STATS_INTERVAL, tags, AggType.AVG)
-        if self.max_bw_tx == 0 or self.max_bw_rx == 0:
+        if self.fwdrops_bytes_tx is not None:
+            store.record(
+                'interface.drops.bytes.tx.rate', self.fwdrops_bytes_tx / MINUTE_STATS_INTERVAL, tags, AggType.AVG
+            )
+        if self.fwdrops_bytes_rx is not None:
+            store.record(
+                'interface.drops.bytes.rx.rate', self.fwdrops_bytes_rx / MINUTE_STATS_INTERVAL, tags, AggType.AVG
+            )
+        if self.fwdrops_pkts_tx is not None:
+            store.record(
+                'interface.drops.packets.tx.rate', self.fwdrops_pkts_tx / MINUTE_STATS_INTERVAL, tags, AggType.AVG
+            )
+        if self.fwdrops_pkts_rx is not None:
+            store.record(
+                'interface.drops.packets.rx.rate', self.fwdrops_pkts_rx / MINUTE_STATS_INTERVAL, tags, AggType.AVG
+            )
+        if not self.max_bw_tx or not self.max_bw_rx:
             self._log.warning(
                 "Max bandwidth is not available for %s, skipping average utilization metrics", self.ifname
             )
         else:
-            store.record('interface.utilization.tx.avg', bw_tx / self.max_bw_tx * 100, tags, AggType.AVG)
-            store.record('interface.utilization.rx.avg', bw_rx / self.max_bw_rx * 100, tags, AggType.AVG)
+            if bw_tx is not None:
+                store.record('interface.utilization.tx.avg', bw_tx / self.max_bw_tx * 100, tags, AggType.AVG)
+            if bw_rx is not None:
+                store.record('interface.utilization.rx.avg', bw_rx / self.max_bw_rx * 100, tags, AggType.AVG)
 
     @classmethod
     def parse(cls, content: str, logger: CheckLoggingAdapter) -> Iterator[InterfaceStats]:
@@ -372,7 +397,13 @@ class InterfacePeakStats:
         self.traftype = v.strip() if (v := row.get('traftype')) is not None else "unknown"
         self._log = logger
 
-    def record(self, store: MetricsStore, base_tags: list[str], device_id: str, max_bw: tuple[float, float]) -> None:
+    def record(
+        self,
+        store: MetricsStore,
+        base_tags: list[str],
+        device_id: str,
+        max_bw: tuple[float | None, float | None],
+    ) -> None:
         tags = base_tags + [
             f'interface_name:{self.ifname}',
             f'traffic_type:{self.traftype}',
@@ -385,7 +416,7 @@ class InterfacePeakStats:
         store.record('interface.drops.bytes.tx.max', self.peak_fwdrops_bytes_tx, tags, AggType.MAX)
         store.record('interface.drops.bytes.rx.max', self.peak_fwdrops_bytes_rx, tags, AggType.MAX)
         max_bw_tx, max_bw_rx = max_bw
-        if max_bw_tx == 0 or max_bw_rx == 0:
+        if not max_bw_tx or not max_bw_rx:
             self._log.warning("Max bandwidth is not available for %s, skipping peak utilization metrics", self.ifname)
             return
         if self.peak_bytes_tx is not None:
@@ -577,6 +608,9 @@ class ProbeStats:
             yield cls(line.split(','))
 
 
+_SHAPER_DIRECTION_LABELS = {'0': 'outbound', '1': 'inbound'}
+
+
 @dataclass(init=False, slots=True)
 class ShaperStats:
     traffic_class: str
@@ -587,7 +621,8 @@ class ShaperStats:
 
     def __init__(self, row: dict[str, str]) -> None:
         self.traffic_class = v.strip() if (v := row.get('traffic_class')) is not None else "unknown"
-        self.direction = v.strip() if (v := row.get('direction')) is not None else "unknown"
+        raw_direction = v.strip() if (v := row.get('direction')) is not None else "unknown"
+        self.direction = _SHAPER_DIRECTION_LABELS.get(raw_direction, raw_direction)
         self.qos_drops = float(v) if (v := row.get('qos_drops')) is not None else None
         self.other_drops = float(v) if (v := row.get('other_drops')) is not None else None
         self.total_shaped_packets = float(v) if (v := row.get('shaped_packets')) is not None else None
@@ -766,9 +801,10 @@ class MinuteStats:
         base_tags: list[str],
         device_id: str,
         traffic_class_map: dict[str, str] | None = None,
+        overlay_map: dict[str, str] | None = None,
     ) -> None:
         self._record_interface_stats(store, base_tags, device_id)
-        self._record_tunnel_stats(store, base_tags)
+        self._record_tunnel_stats(store, base_tags, overlay_map or {})
         self._record_tunnel_availability_stats(store, base_tags)
         self._record_internet_breakout_stats(store, base_tags, device_id)
         self._record_probe_stats(store, base_tags)
@@ -777,24 +813,24 @@ class MinuteStats:
         self._record_dscp_stats(store, base_tags)
 
     def _record_interface_stats(self, store: MetricsStore, base_tags: list[str], device_id: str) -> None:
-        iface_max_bw: dict[str, tuple[float, float]] = {}
+        iface_max_bw: dict[str, tuple[float | None, float | None]] = {}
         for iface in self.interfaces:
             iface.record(store, base_tags, device_id)
             iface_max_bw[iface.ifname] = (iface.max_bw_tx, iface.max_bw_rx)
         for peak in self.interface_peaks:
-            peak.record(store, base_tags, device_id, iface_max_bw.get(peak.ifname, (0.0, 0.0)))
+            peak.record(store, base_tags, device_id, iface_max_bw.get(peak.ifname, (None, None)))
 
-    def _record_tunnel_stats(self, store: MetricsStore, base_tags: list[str]) -> None:
-        tunnel_tags_by_alias: dict[str, list[str]] = {}
+    def _record_tunnel_stats(self, store: MetricsStore, base_tags: list[str], overlay_map: dict[str, str]) -> None:
+        tunnel_tags_by_id: dict[str, list[str]] = {}
         for tun in self.tunnels:
-            tunnel_tags_by_alias[tun.tunnel_alias] = tun.record(store, base_tags)
+            tunnel_tags_by_id[tun.tunnel_id] = tun.record(store, base_tags, overlay_map)
         for peak in self.tunnel_peaks:
-            peak.record(store, base_tags, tunnel_tags_by_alias.get(peak.tunname, []))
+            peak.record(store, base_tags, tunnel_tags_by_id.get(peak.tunname, []))
         for jitter in self.jitter:
-            tags = base_tags + [f'tunnel_name:{jitter.tunnel}'] + tunnel_tags_by_alias.get(jitter.tunnel, [])
+            tags = base_tags + [f'tunnel_name:{jitter.tunnel}'] + tunnel_tags_by_id.get(jitter.tunnel, [])
             jitter.record(store, tags)
         for mos in self.mos:
-            tags = base_tags + [f'tunnel_name:{mos.tunnel}'] + tunnel_tags_by_alias.get(mos.tunnel, [])
+            tags = base_tags + [f'tunnel_name:{mos.tunnel}'] + tunnel_tags_by_id.get(mos.tunnel, [])
             mos.record(store, tags)
 
     def _record_tunnel_availability_stats(self, store: MetricsStore, base_tags: list[str]) -> None:

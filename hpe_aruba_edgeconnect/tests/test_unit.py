@@ -12,9 +12,7 @@ from datadog_checks.hpe_aruba_edgeconnect import HpeArubaEdgeconnectCheck
 from datadog_checks.hpe_aruba_edgeconnect.check import _parse_speed
 from datadog_checks.hpe_aruba_edgeconnect.client import ApplianceClient, OrchestratorClient
 from datadog_checks.hpe_aruba_edgeconnect.metrics_store import AggType, MetricsStore
-from datadog_checks.hpe_aruba_edgeconnect.models import Appliance, Appliances, _ip_matches_any
-from datadog_checks.hpe_aruba_edgeconnect.ndm_models import PAYLOAD_METADATA_BATCH_SIZE
-from datadog_checks.hpe_aruba_edgeconnect.parsers.minute_stats import (
+from datadog_checks.hpe_aruba_edgeconnect.minute_stats import (
     AppperfStats,
     DscpStats,
     InterfaceOverlayStats,
@@ -28,6 +26,8 @@ from datadog_checks.hpe_aruba_edgeconnect.parsers.minute_stats import (
     TunnelPeakStats,
     TunnelV2Stats,
 )
+from datadog_checks.hpe_aruba_edgeconnect.models import Appliance, Appliances, _ip_matches_any
+from datadog_checks.hpe_aruba_edgeconnect.ndm_models import PAYLOAD_METADATA_BATCH_SIZE
 
 pytestmark = pytest.mark.unit
 
@@ -38,6 +38,7 @@ TGZ_DATA = {p.name: p.read_bytes() for p in TGZ_FILES}
 CHECK_MODULE = 'datadog_checks.hpe_aruba_edgeconnect.check'
 NS = 'hpe_aruba_edgeconnect'
 DEVICE_ID = 'default:10.0.0.1'
+NDM_IFACE_RES = f'dd.internal.resource:ndm_interface:{DEVICE_ID}'
 BASE_TAGS = ['test:tag']
 
 APPLIANCE_PAYLOAD = [
@@ -131,17 +132,14 @@ EXPECTED_METRIC_COUNTS = {
     'device.memory.usage': 5,
     'device.disk.usage': 10,
     'device.hardware.ok': 1,
-    # Interface status/speed (from mock — 1 interface)
-    'interface.status': 1,
+    'interface.status': 2,
     'interface.speed': 1,
-    # Interface bandwidth (5 ifname × traffic-type combos across both fixtures)
     'interface.bandwidth.tx.count': 5,
     'interface.bandwidth.rx.count': 5,
     'interface.bandwidth.tx.rate': 5,
     'interface.bandwidth.rx.rate': 5,
     'interface.bandwidth.tx.max': 5,
     'interface.bandwidth.rx.max': 5,
-    # Interface drops (5 combos)
     'interface.drops.bytes.tx.count': 5,
     'interface.drops.bytes.rx.count': 5,
     'interface.drops.bytes.tx.rate': 5,
@@ -154,12 +152,10 @@ EXPECTED_METRIC_COUNTS = {
     'interface.drops.packets.rx.rate': 5,
     'interface.drops.packets.tx.max': 5,
     'interface.drops.packets.rx.max': 5,
-    # Interface utilization (5 ifname × traffic-type combos)
     'interface.utilization.tx.avg': 5,
     'interface.utilization.rx.avg': 5,
     'interface.utilization.tx.max': 5,
     'interface.utilization.rx.max': 5,
-    # Tunnel throughput (33 tunnels × 2 sides)
     'tunnel.throughput.tx.bytes.count': 66,
     'tunnel.throughput.rx.bytes.count': 66,
     'tunnel.throughput.tx.bytes.rate': 66,
@@ -172,37 +168,27 @@ EXPECTED_METRIC_COUNTS = {
     'tunnel.throughput.rx.bytes.max': 66,
     'tunnel.throughput.tx.packets.max': 66,
     'tunnel.throughput.rx.packets.max': 66,
-    # Tunnel latency (33 tunnels)
     'tunnel.latency': 33,
     'tunnel.latency.min': 33,
     'tunnel.latency.max': 33,
-    # Tunnel loss (33 tunnels × 2 FEC types)
     'tunnel.loss': 66,
-    # Tunnel jitter (31 tunnels in jitter.csv)
     'tunnel.jitter': 31,
     'tunnel.jitter.max': 31,
-    # Tunnel MOS (31 tunnels × 2 FEC types)
     'tunnel.qoe.mos': 62,
     'tunnel.qoe.mos.min': 62,
-    # Tunnel availability (31 entries)
-    'tunnel.status': 31,
-    # Internet breakout (2 overlay interfaces)
+    'tunnel.availability': 31,
     'tunnel.internet_breakout.bandwidth.tx.count': 2,
     'tunnel.internet_breakout.bandwidth.rx.count': 2,
     'tunnel.internet_breakout.bandwidth.tx.rate': 2,
     'tunnel.internet_breakout.bandwidth.rx.rate': 2,
     'tunnel.internet_breakout.bandwidth.tx.max': 2,
     'tunnel.internet_breakout.bandwidth.rx.max': 2,
-    # SLA probes (4 targets)
     'circuit.sla.latency': 4,
     'circuit.sla.loss': 4,
     'circuit.sla.jitter': 4,
-    # Nexthop status (4 targets × 2 status types)
     'nexthop.status': 8,
-    # QoS shaper (2 traffic classes × 2 directions × 2 drop types)
     'qos.class.drops': 8,
     'qos.class.drop.percentage': 4,
-    # DSCP bandwidth (2 DSCP classes × 2 sides × up to 2 traffic types)
     'qos.class.bandwidth.tx.count': 6,
     'qos.class.bandwidth.rx.count': 6,
     'qos.class.bandwidth.tx.rate': 6,
@@ -216,7 +202,7 @@ BASE_DEVICE_TAGS = [
     'device_ip:10.0.0.1',
     'device_model:EC-V',
     'device_hostname:SydneySP01',
-    'softwareVersion:9.3.1',
+    'software_version:9.3.1',
     'device_vendor:aruba',
     'site_id:SYD',
     'site_name:SYD',
@@ -225,7 +211,6 @@ BASE_DEVICE_TAGS = [
 ]
 
 EXPECTED_VALUES = [
-    # --- device health ---
     ('device.reachability', 1, []),
     ('device.uptime', 816745.152, []),
     ('device.cpu.usage', 30.0, ['cpu_state:user']),
@@ -242,51 +227,171 @@ EXPECTED_VALUES = [
     ('device.disk.usage', 4328968 * 1024, ['mount:/var', 'disk_type:used']),
     ('device.disk.usage', 35553256 * 1024, ['mount:/var', 'disk_type:free']),
     ('device.hardware.ok', 0, []),
-    # --- interface status / speed (from mock) ---
-    ('interface.status', 1, ['interface_name:wan0', 'admin_status:up', 'oper_status:up']),
-    ('interface.speed', 1000000000, ['interface_name:wan0']),
-    # --- interface bandwidth: wan0 pass-through-unshaped (aggregated across two minutes) ---
-    ('interface.bandwidth.tx.count', 158508, ['interface_name:wan0', 'traffic_type:pass-through-unshaped']),
-    ('interface.bandwidth.tx.rate', 1320.9, ['interface_name:wan0', 'traffic_type:pass-through-unshaped']),
-    ('interface.bandwidth.rx.count', 82824, ['interface_name:wan0', 'traffic_type:pass-through-unshaped']),
-    # --- interface peak: wan0 pass-through-unshaped ---
-    ('interface.bandwidth.tx.max', 1332, ['interface_name:wan0', 'traffic_type:pass-through-unshaped']),
-    ('interface.bandwidth.rx.max', 696, ['interface_name:wan0', 'traffic_type:pass-through-unshaped']),
-    # --- tunnel throughput: pass-through-unshaped wan (aggregated across two minutes) ---
-    ('tunnel.throughput.tx.bytes.count', 76320, ['tunnel_name:pass-through-unshaped', 'side:wan']),
-    ('tunnel.throughput.tx.bytes.rate', 636.0, ['tunnel_name:pass-through-unshaped', 'side:wan']),
-    ('tunnel.throughput.rx.bytes.count', 83984, ['tunnel_name:pass-through-unshaped', 'side:wan']),
-    # --- tunnel latency: tunnel_12 → to_NewYorkSP01_MPLS1-MPLS1 ---
-    ('tunnel.latency', 1.4, ['tunnel_name:to_NewYorkSP01_MPLS1-MPLS1']),
-    ('tunnel.latency.min', 1.38, ['tunnel_name:to_NewYorkSP01_MPLS1-MPLS1']),
-    # --- tunnel peak: pass-through-unshaped wan ---
-    ('tunnel.throughput.tx.bytes.max', 1272, ['tunnel_name:pass-through-unshaped', 'side:wan']),
-    ('tunnel.throughput.rx.bytes.max', 1160, ['tunnel_name:pass-through-unshaped', 'side:wan']),
-    # --- tunnel jitter: bondedTunnel_16 ---
-    ('tunnel.jitter', 350, ['tunnel_name:bondedTunnel_16']),
-    ('tunnel.jitter.max', 6, ['tunnel_name:bondedTunnel_16']),
-    # --- tunnel MOS: tunnel_12 (mos_postfec=4.0) ---
-    ('tunnel.qoe.mos', 4.0, ['tunnel_name:tunnel_12', 'fec:post']),
-    ('tunnel.qoe.mos.min', 4.0, ['tunnel_name:tunnel_12', 'fec:post']),
-    # --- tunnel availability: pass-through-unshaped (seconds_down=0) ---
-    ('tunnel.status', 0, ['tunnel_name:pass-through-unshaped']),
-    # --- internet breakout: wan0 (aggregated across two minutes) ---
-    ('tunnel.internet_breakout.bandwidth.tx.count', 76012, ['interface_name:wan0']),
-    ('tunnel.internet_breakout.bandwidth.tx.rate', 316.71666666666664, ['interface_name:wan0']),
-    ('tunnel.internet_breakout.bandwidth.rx.max', 100000, ['interface_name:wan0']),
-    # --- DSCP: be / pass-through-unshaped wan (aggregated across two minutes) ---
-    ('qos.class.bandwidth.tx.count', 75684, ['dscp:be', 'side:wan']),
-    ('qos.class.bandwidth.tx.rate', 630.7, ['dscp:be', 'side:wan']),
-    # --- DSCP peak: be / pass-through-unshaped wan ---
-    ('qos.class.bandwidth.tx.max', 636, ['dscp:be', 'side:wan']),
-    # --- shaper: traffic_class=2 -> overlay BulkData, qos_drops=0 ---
-    ('qos.class.drops', 0, ['overlay_name:BulkData', 'drop_type:qos']),
-    ('qos.class.drop.percentage', 0, ['overlay_name:BulkData']),
-    # --- probe: om_passThrough_9 (averaged across two minutes) ---
+    ('interface.status', 1, ['interface_name:wan0', 'status_type:admin', NDM_IFACE_RES]),
+    ('interface.status', 1, ['interface_name:wan0', 'status_type:oper', NDM_IFACE_RES]),
+    ('interface.speed', 1000000000, ['interface_name:wan0', NDM_IFACE_RES]),
+    (
+        'interface.bandwidth.tx.count',
+        158508,
+        ['interface_name:wan0', 'traffic_type:pass-through-unshaped', NDM_IFACE_RES],
+    ),
+    (
+        'interface.bandwidth.tx.rate',
+        1320.9,
+        ['interface_name:wan0', 'traffic_type:pass-through-unshaped', NDM_IFACE_RES],
+    ),
+    (
+        'interface.bandwidth.rx.count',
+        82824,
+        ['interface_name:wan0', 'traffic_type:pass-through-unshaped', NDM_IFACE_RES],
+    ),
+    (
+        'interface.bandwidth.tx.max',
+        1332,
+        ['interface_name:wan0', 'traffic_type:pass-through-unshaped', NDM_IFACE_RES],
+    ),
+    (
+        'interface.bandwidth.rx.max',
+        696,
+        ['interface_name:wan0', 'traffic_type:pass-through-unshaped', NDM_IFACE_RES],
+    ),
+    (
+        'tunnel.throughput.tx.bytes.count',
+        76320,
+        [
+            'tunnel_name:pass-through-unshaped',
+            'tunnel_alias:pass-through-unshaped',
+            'overlay_name:business',
+            'is_sdwan:True',
+            'side:wan',
+        ],
+    ),
+    (
+        'tunnel.throughput.tx.bytes.rate',
+        636.0,
+        [
+            'tunnel_name:pass-through-unshaped',
+            'tunnel_alias:pass-through-unshaped',
+            'overlay_name:business',
+            'is_sdwan:True',
+            'side:wan',
+        ],
+    ),
+    (
+        'tunnel.throughput.rx.bytes.count',
+        83984,
+        [
+            'tunnel_name:pass-through-unshaped',
+            'tunnel_alias:pass-through-unshaped',
+            'overlay_name:business',
+            'is_sdwan:True',
+            'side:wan',
+        ],
+    ),
+    (
+        'tunnel.latency',
+        1.4,
+        [
+            'tunnel_name:tunnel_12',
+            'tunnel_alias:to_NewYorkSP01_MPLS1-MPLS1',
+            'overlay_name:business',
+            'is_sdwan:False',
+        ],
+    ),
+    (
+        'tunnel.latency.min',
+        1.38,
+        [
+            'tunnel_name:tunnel_12',
+            'tunnel_alias:to_NewYorkSP01_MPLS1-MPLS1',
+            'overlay_name:business',
+            'is_sdwan:False',
+        ],
+    ),
+    (
+        'tunnel.throughput.tx.bytes.max',
+        1272,
+        [
+            'tunnel_name:pass-through-unshaped',
+            'tunnel_alias:pass-through-unshaped',
+            'overlay_name:business',
+            'is_sdwan:True',
+            'side:wan',
+        ],
+    ),
+    (
+        'tunnel.throughput.rx.bytes.max',
+        1160,
+        [
+            'tunnel_name:pass-through-unshaped',
+            'tunnel_alias:pass-through-unshaped',
+            'overlay_name:business',
+            'is_sdwan:True',
+            'side:wan',
+        ],
+    ),
+    (
+        'tunnel.jitter',
+        350,
+        [
+            'tunnel_name:bondedTunnel_16',
+            'tunnel_alias:to_NewYorkSP01_CriticalApps',
+            'overlay_name:2',
+            'is_sdwan:False',
+        ],
+    ),
+    (
+        'tunnel.jitter.max',
+        6,
+        [
+            'tunnel_name:bondedTunnel_16',
+            'tunnel_alias:to_NewYorkSP01_CriticalApps',
+            'overlay_name:2',
+            'is_sdwan:False',
+        ],
+    ),
+    (
+        'tunnel.qoe.mos',
+        4.0,
+        [
+            'tunnel_name:tunnel_12',
+            'tunnel_alias:to_NewYorkSP01_MPLS1-MPLS1',
+            'overlay_name:business',
+            'is_sdwan:False',
+            'fec:post',
+        ],
+    ),
+    (
+        'tunnel.qoe.mos.min',
+        4.0,
+        [
+            'tunnel_name:tunnel_12',
+            'tunnel_alias:to_NewYorkSP01_MPLS1-MPLS1',
+            'overlay_name:business',
+            'is_sdwan:False',
+            'fec:post',
+        ],
+    ),
+    (
+        'tunnel.availability',
+        100.0,
+        [
+            'tunnel_name:pass-through-unshaped',
+            'tunnel_alias:pass-through-unshaped',
+            'tunnel_color:unassigned',
+        ],
+    ),
+    ('tunnel.internet_breakout.bandwidth.tx.count', 76012, ['interface_name:wan0', NDM_IFACE_RES]),
+    ('tunnel.internet_breakout.bandwidth.tx.rate', 316.71666666666664, ['interface_name:wan0', NDM_IFACE_RES]),
+    ('tunnel.internet_breakout.bandwidth.rx.max', 100000, ['interface_name:wan0', NDM_IFACE_RES]),
+    ('qos.class.bandwidth.tx.count', 75684, ['dscp:be', 'traffic_type:pass-through-unshaped', 'side:wan']),
+    ('qos.class.bandwidth.tx.rate', 630.7, ['dscp:be', 'traffic_type:pass-through-unshaped', 'side:wan']),
+    ('qos.class.bandwidth.tx.max', 636, ['dscp:be', 'traffic_type:pass-through-unshaped', 'side:wan']),
+    ('qos.class.drops', 0, ['overlay_name:BulkData', 'drop_type:qos', 'direction:inbound']),
+    ('qos.class.drop.percentage', 0, ['overlay_name:BulkData', 'direction:inbound']),
     ('circuit.sla.latency', 0, ['probe_name:om_passThrough_9']),
     ('circuit.sla.loss', 0, ['probe_name:om_passThrough_9']),
     ('circuit.sla.jitter', 59.5, ['probe_name:om_passThrough_9']),
-    # --- nexthop: om_passThrough_6 admin=60, oper=0 ---
     ('nexthop.status', 60, ['probe_name:om_passThrough_6', 'status_type:admin']),
     ('nexthop.status', 0, ['probe_name:om_passThrough_6', 'status_type:oper']),
 ]

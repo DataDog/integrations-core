@@ -24,7 +24,9 @@ class MetricsStore:
     def __init__(self) -> None:
         self._metrics: dict[tuple[str, tuple[str, ...]], tuple[AggType, list[float]]] = {}
 
-    def record(self, name: str, value: float, tags: list[str], agg_type: AggType) -> None:
+    def record(self, name: str, value: float | None, tags: list[str], agg_type: AggType) -> None:
+        if value is None:
+            return
         key = (name, tuple(sorted(tags)))
         entry = self._metrics.get(key)
         if entry is None:

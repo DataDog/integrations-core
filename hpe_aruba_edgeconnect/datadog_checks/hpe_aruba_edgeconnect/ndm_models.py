@@ -10,13 +10,13 @@ from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from .parsers.minute_stats import parse_tunnel_alias
+from .minute_stats import parse_tunnel_alias
 
 if TYPE_CHECKING:
     from datadog_checks.base.log import CheckLoggingAdapter
 
+    from .minute_stats import TunnelV2Stats
     from .models import Appliance
-    from .parsers.minute_stats import TunnelV2Stats
 
 INTEGRATION = 'hpe_aruba_edgeconnect'
 VENDOR = 'aruba'
