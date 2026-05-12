@@ -83,7 +83,7 @@
       "code": "70400009",
       "name": "POSTGRES_INSTANCE_DIFFERENT_TIMELINE",
       "description": "Postgres instance postgres-ha-cmo1-m2c2-0 is not on same timeline as leader. postgres-ha-cmo1-m2c2-0 is on timeline undefined while leader is on timeline 4.",
-      "severity": "CRITICAL",
+      "severity": "MAJOR",
       "category": "SOFTWARE",
       "details": null,
       "domain": "MANAGEMENT",
@@ -109,7 +109,7 @@
       "code": "70020024",
       "name": "HEALTH_CHECK_FAILED",
       "description": "Health check failed: I/O error on GET request for \"https://thin-deployer.powerflex.svc:9433/asm/status\": Connection refused (Connection refused); nested exception is java.net.ConnectException: Connection refused (Connection refused).",
-      "severity": "CRITICAL",
+      "severity": "MINOR",
       "category": "AUDIT",
       "details": {
         "msgcode": "VXFM00801",

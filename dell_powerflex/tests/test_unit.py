@@ -143,7 +143,9 @@ def test_assert_all_metrics(dd_run_check, aggregator, instance, mock_http_get):
     ]
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_symmetric_inclusion=True)
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(), check_symmetric_inclusion=True, check_submission_type=True
+    )
 
 
 def test_device_statistics_disabled_by_default(dd_run_check, aggregator, instance, mock_http_get):
@@ -794,17 +796,21 @@ def test_collect_events(dd_run_check, aggregator, instance, mock_http_get):
     dd_run_check(check)
 
     events = aggregator.events
-    assert len(events) == 5
+    # Fixture has 3 CRITICAL + 1 MAJOR + 1 MINOR; filter keeps CRITICAL and MAJOR only
+    assert len(events) == 4
     for event in events:
         assert event['alert_type'] == 'error'
         assert event['event_type'] == 'dell_powerflex'
         assert event['source_type_name'] == 'dell_powerflex'
-        assert 'severity:CRITICAL' in event['tags']
         assert 'powerflex_gateway_url:https://localhost:443' in event['tags']
+
+    severities = {tag for e in events for tag in e['tags'] if tag.startswith('severity:')}
+    assert severities == {'severity:CRITICAL', 'severity:MAJOR'}
 
     titles = [e['msg_title'] for e in events]
     assert 'Health Check Failed' in titles
     assert 'Unknown Snmp Trap' in titles
+    assert 'Postgres Instance Different Timeline' in titles
 
     health_check_event = next(e for e in events if e['msg_title'] == 'Health Check Failed')
     assert (
@@ -814,6 +820,9 @@ def test_collect_events(dd_run_check, aggregator, instance, mock_http_get):
     assert 'category:AUDIT' in health_check_event['tags']
     assert 'domain:MANAGEMENT' in health_check_event['tags']
     assert 'service_name:pfm-asmmanager' in health_check_event['tags']
+
+    major_event = next(e for e in events if 'severity:MAJOR' in e['tags'])
+    assert major_event['msg_title'] == 'Postgres Instance Different Timeline'
 
 
 def test_collect_events_subsequent_run_uses_cached_time(dd_run_check, aggregator, instance, mock_http_get, mocker):
@@ -883,3 +892,33 @@ def test_collect_alerts(dd_run_check, aggregator, instance, mock_http_get):
     assert license_alert['alert_type'] == 'warning'
     assert 'PowerFlex is using a trial license' in license_alert['msg_text']
     assert 'severity:MINOR' in license_alert['tags']
+
+
+def test_user_configured_tags(dd_run_check, aggregator, instance, mock_http_get):
+    instance['tags'] = ['env:prod', 'cluster:powerflex-01']
+    instance['collect_events'] = True
+    instance['collect_alerts'] = True
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+
+    custom_tags = ['env:prod', 'cluster:powerflex-01']
+    base_tags = ['powerflex_gateway_url:https://localhost:443'] + custom_tags
+
+    # Verify metrics include user-configured tags
+    aggregator.assert_metric('dell_powerflex.api.can_connect', value=1, tags=base_tags)
+
+    system_tags = base_tags + ['system_id:1fcf40fc60c6520f', 'dell_type:system']
+    aggregator.assert_metric('dell_powerflex.system.count', value=1, tags=system_tags)
+
+    pool_tags = base_tags + [
+        'storage_pool_id:25155ba600000000',
+        'storage_pool_name:pool1',
+        'protection_domain_id:68c139ee00000000',
+        'dell_type:storage_pool',
+    ]
+    aggregator.assert_metric('dell_powerflex.storage_pool.count', value=1, tags=pool_tags)
+
+    # Verify events include user-configured tags
+    for event in aggregator.events:
+        for tag in custom_tags:
+            assert tag in event['tags'], f"Expected tag '{tag}' in event tags: {event['tags']}"
