@@ -577,7 +577,7 @@ def test_run_raises_runtime_error_when_phase_fails(tmp_path, file_access_policy)
     )
 
     class FailingPhase(Phase):
-        async def process_message(self, message: PhaseTrigger) -> None:
+        async def execute(self, context):
             raise RuntimeError("intentional failure")
 
     orchestrator = PhaseOrchestrator(

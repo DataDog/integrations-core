@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 
 from ddev.ai.phases.base import Phase, PhaseOutcome, _make_memory_resolver
 from ddev.ai.phases.checkpoint import CheckpointManager
-from ddev.ai.phases.config import AgentConfig, PhaseConfig
+from ddev.ai.phases.config import PhaseConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
@@ -38,8 +38,6 @@ def _make_stub_phase(
         phase_id=phase_id,
         dependencies=dependencies or [],
         config=PhaseConfig(),
-        agent_config=AgentConfig(),
-        anthropic_client=MagicMock(),
         checkpoint_manager=checkpoint_manager,
         runtime_variables={},
         flow_variables={},

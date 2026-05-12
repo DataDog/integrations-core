@@ -6,13 +6,15 @@ import importlib
 import inspect
 import logging
 from pathlib import Path
+from typing import Any
 
 import anthropic
 
 from ddev.ai.callbacks.callbacks import Callbacks
+from ddev.ai.phases.agentic_phase import AgenticPhase
 from ddev.ai.phases.base import Phase, PhaseRegistry
 from ddev.ai.phases.checkpoint import CheckpointManager
-from ddev.ai.phases.config import AgentConfig, FlowConfig, FlowConfigError
+from ddev.ai.phases.config import FlowConfig, FlowConfigError
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
@@ -94,24 +96,29 @@ class PhaseOrchestrator(EventBusOrchestrator):
         for entry in config.flow:
             phase_id = entry.phase
             phase_config = config.phases[phase_id]
-            agent_config = config.agents[phase_config.agent] if phase_config.agent is not None else AgentConfig()
             dependencies = dependency_map[phase_id]
 
             phase_cls = self._phase_registry.get(phase_config.type)
-            phase = phase_cls(
-                phase_id=phase_id,
-                dependencies=dependencies,
-                config=phase_config,
-                agent_config=agent_config,
-                anthropic_client=self._anthropic_client,
-                checkpoint_manager=checkpoint_manager,
-                runtime_variables=self._runtime_variables,
-                flow_variables=config.variables,
-                config_dir=config_dir,
-                file_registry=self._file_registry,
-                callbacks=self._callbacks,
-                logger=self._logger,
-            )
+            phase_kwargs: dict[str, Any] = {
+                "phase_id": phase_id,
+                "dependencies": dependencies,
+                "config": phase_config,
+                "checkpoint_manager": checkpoint_manager,
+                "runtime_variables": self._runtime_variables,
+                "flow_variables": config.variables,
+                "config_dir": config_dir,
+                "file_registry": self._file_registry,
+                "callbacks": self._callbacks,
+                "logger": self._logger,
+            }
+            if issubclass(phase_cls, AgenticPhase):
+                if phase_config.agent is not None:
+                    phase_kwargs["agent_config"] = config.agents[phase_config.agent]
+                    phase_kwargs["anthropic_client"] = self._anthropic_client
+                else:
+                    raise FlowConfigError(f"Phase '{phase_id}': agent must be set for AgenticPhase")
+
+            phase = phase_cls(**phase_kwargs)
 
             self.register_processor(phase, [PhaseTrigger])
 

@@ -3,13 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import logging
+from abc import abstractmethod
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
-
-import anthropic
 
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.checkpoint import CheckpointManager
@@ -68,8 +67,6 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         phase_id: str,
         dependencies: list[str],
         config: PhaseConfig,
-        agent_config: AgentConfig,
-        anthropic_client: anthropic.AsyncAnthropic,
         checkpoint_manager: CheckpointManager,
         runtime_variables: dict[str, str],
         flow_variables: dict[str, str],
@@ -83,8 +80,6 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         self._dependencies = set(dependencies)
         self._remaining_dependencies = set(dependencies)
         self._config = config
-        self._agent_config = agent_config
-        self._anthropic_client = anthropic_client
         self._checkpoint_manager = checkpoint_manager
         self._runtime_variables = runtime_variables
         self._flow_variables = flow_variables
@@ -124,8 +119,8 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         """Override to enforce per-subclass config invariants. Raise FlowConfigError on mismatch."""
         return None
 
-    async def execute(self, context: dict[str, Any]) -> PhaseOutcome:
-        raise NotImplementedError
+    @abstractmethod
+    async def execute(self, context: dict[str, Any]) -> PhaseOutcome: ...
 
     async def process_message(self, message: PhaseTrigger) -> None:
         """Immutable pipeline skeleton. Not intended to be overridden — implement execute() instead."""

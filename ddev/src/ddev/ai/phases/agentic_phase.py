@@ -2,15 +2,21 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import logging
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+import anthropic
+
 from ddev.ai.agent.anthropic_client import AnthropicAgent
+from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.base import Phase, PhaseOutcome
+from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
 from ddev.ai.phases.template import render_inline, render_prompt
 from ddev.ai.react.process import ReActProcess
+from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.registry import ToolRegistry
 
 
@@ -43,6 +49,36 @@ def render_memory_prompt(
 
 class AgenticPhase(Phase):
     """Phase that owns an LLM agent and drives one or more ReAct loops."""
+
+    def __init__(
+        self,
+        phase_id: str,
+        dependencies: list[str],
+        config: PhaseConfig,
+        agent_config: AgentConfig,
+        anthropic_client: anthropic.AsyncAnthropic,
+        checkpoint_manager: CheckpointManager,
+        runtime_variables: dict[str, str],
+        flow_variables: dict[str, str],
+        config_dir: Path,
+        file_registry: FileRegistry,
+        callbacks: Callbacks | None = None,
+        logger: logging.Logger | None = None,
+    ) -> None:
+        super().__init__(
+            phase_id=phase_id,
+            dependencies=dependencies,
+            config=config,
+            checkpoint_manager=checkpoint_manager,
+            runtime_variables=runtime_variables,
+            flow_variables=flow_variables,
+            config_dir=config_dir,
+            file_registry=file_registry,
+            callbacks=callbacks,
+            logger=logger,
+        )
+        self._agent_config = agent_config
+        self._anthropic_client = anthropic_client
 
     @classmethod
     def validate_config(
