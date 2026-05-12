@@ -59,6 +59,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             password=self.config.powerflex_password,
             client_id=self.config.powerflex_client_id or 'powerflexUI',
             logger=self.log,
+            min_collection_interval=self.config.min_collection_interval or 15,
         )
         self._resource_filters = parse_resource_filters(self.config.resource_filters, self.log)
 
@@ -70,14 +71,20 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             self.log.warning('Could not connect to PowerFlex Gateway, skipping metric collection: %s', e)
             self.gauge('api.can_connect', 0, tags=self._base_tags)
             return
-        self._collect_systems()
-        self._collect_volumes()
-        self._collect_storage_pools()
-        self._collect_protection_domains()
-        self._collect_sds_list()
-        self._collect_sdc_list()
-        self._collect_devices()
-        self._collect_events_and_alerts()
+        for collector in (
+            self._collect_systems,
+            self._collect_volumes,
+            self._collect_storage_pools,
+            self._collect_protection_domains,
+            self._collect_sds_list,
+            self._collect_sdc_list,
+            self._collect_devices,
+            self._collect_events_and_alerts,
+        ):
+            try:
+                collector()
+            except Exception as e:
+                self.log.warning('Failed during %s collection: %s', collector.__name__, e)
 
     def _collect_systems(self) -> None:
         systems = self._api.get_systems()

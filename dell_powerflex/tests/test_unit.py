@@ -99,6 +99,22 @@ def test_unauthenticated_mode(dd_run_check, aggregator, monkeypatch, mock_http_c
     aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', at_least=1)
 
 
+def test_token_refresh_uses_min_collection_interval(dd_run_check, instance, mock_http_get, mocker):
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+
+    dd_run_check(check)
+    spy = mocker.spy(check._api, '_authenticate')
+
+    # Token still valid — no re-auth
+    dd_run_check(check)
+    assert spy.call_count == 0
+
+    # Simulate token nearing expiry
+    mocker.patch('datadog_checks.dell_powerflex.api.time', return_value=check._api._token_expiry - 10)
+    dd_run_check(check)
+    assert spy.call_count == 1
+
+
 def test_collect_system(dd_run_check, aggregator, instance, mock_http_get):
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
@@ -270,6 +286,29 @@ def test_collect_failure_continues(
     dd_run_check(check)
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
     assert log_message in caplog.text
+
+
+def test_collector_failure_does_not_stop_next_collectors(
+    dd_run_check, aggregator, instance, mock_http_get, mocker, caplog
+):
+    mocker.patch(
+        'datadog_checks.dell_powerflex.api.PowerFlexAPI.get_sds_list',
+        side_effect=Exception('API error'),
+    )
+    caplog.set_level(logging.WARNING)
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+
+    assert 'Failed during _collect_sds_list collection' in caplog.text
+
+    base_tags = ['powerflex_gateway_url:https://localhost:443']
+    pool_tags = base_tags + [
+        'storage_pool_id:25155ba600000000',
+        'storage_pool_name:pool1',
+        'protection_domain_id:68c139ee00000000',
+        'dell_type:storage_pool',
+    ]
+    aggregator.assert_metric('dell_powerflex.storage_pool.count', value=1, tags=pool_tags)
 
 
 def test_collect_sds(dd_run_check, aggregator, instance, mock_http_get):
