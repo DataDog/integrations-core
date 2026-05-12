@@ -1,8 +1,8 @@
-Overhaul the n8n metric coverage and test harness, verified live against n8n 1.118.1 and 2.19.5:
+Overhaul the n8n metric coverage, verified live against n8n 1.118.1 and 2.19.5:
 
-  - Expand baseline metric coverage with the event-driven counters that were previously missing or mis-mapped (``audit.workflow.*``, ``queue.job.stalled``, ``queue.job.dequeued``, ``nodejs.active.requests``).
-  - Add the n8n 2.x metric families: workflow execution duration histogram, audit workflow lifecycle counters, embed and token exchange auth counters, workflow statistics (executions, users, workflows, credentials), VM-isolated expression engine metrics, and ``process.pss.bytes``. Each family is gated on the corresponding n8n env flag; see the README for the full matrix.
-  - Map the broader event-bus surface (around 70 dynamic counters) so audit, AI node, user, package, variable, runner, worker, and workflow cancellation events are picked up automatically when n8n emits them. The integration test environment cannot exercise these families end to end, so they are documented as rare-event metrics and excluded from the symmetric metadata assertion.
-  - Add worker-only families (``node.started``, ``node.finished``, ``queue.job.dequeued``, ``runner.task.requested``) and document scraping the n8n worker process as a separate Datadog instance.
-  - Stop gating OpenMetrics scraping on ``/healthz/readiness``: ``n8n.readiness.check`` is still submitted, but metrics keep flowing when readiness reports degraded so SRE-relevant signals (queue depth, process state) are not lost during incidents.
-  - Fix the ``openmetrics_endpoint`` example in ``conf.yaml.example`` / ``spec.yaml`` to use the actual ``/metrics`` URL (the host root would silently mismatch the scrape path) and document that ``raw_metric_prefix`` must be kept in sync with a customised ``N8N_METRICS_PREFIX``.
+  - Fix several incorrect or missing metric mappings in the baseline coverage.
+  - Add the n8n 2.x metric families (workflow execution duration, audit lifecycle, auth, workflow statistics, expression engine, and process memory).
+  - Map n8n's dynamic event-bus surface so audit, AI node, user, package, variable, and workflow cancellation events are picked up when emitted.
+  - Document and exercise scraping the n8n worker process as a separate Datadog instance.
+  - Stop gating OpenMetrics scraping on the readiness endpoint so metrics keep flowing during degraded readiness.
+  - Fix the example ``openmetrics_endpoint`` URL in the sample configuration and document the ``raw_metric_prefix`` / ``N8N_METRICS_PREFIX`` requirement.
