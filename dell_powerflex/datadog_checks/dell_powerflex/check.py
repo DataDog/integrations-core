@@ -57,9 +57,9 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             self.config.powerflex_gateway_url,
             username=self.config.powerflex_username,
             password=self.config.powerflex_password,
-            client_id=self.config.powerflex_client_id,
+            client_id=self.config.powerflex_client_id,  # type: ignore[arg-type]
             logger=self.log,
-            min_collection_interval=self.config.min_collection_interval,
+            min_collection_interval=self.config.min_collection_interval,  # type: ignore[arg-type]
         )
         self._resource_filters = parse_resource_filters(self.config.resource_filters, self.log)
 
