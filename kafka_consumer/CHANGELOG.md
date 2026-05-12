@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 7.2.1 / 2026-05-12
+
+***Fixed***:
+
+* Switch cluster monitoring's earliest-offset fetch to AdminClient.list_offsets(earliest), and isolate its failures so an earliest-offset error no longer drops topic.message_rate, partition.isr, topic.config.*, and other unrelated topic-metadata metrics. ([#23580](https://github.com/DataDog/integrations-core/pull/23580))
+
 ## 7.2.0 / 2026-04-15
 
 ***Added***:
