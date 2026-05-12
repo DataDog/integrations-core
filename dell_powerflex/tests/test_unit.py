@@ -447,27 +447,9 @@ def test_collect_devices(dd_run_check, aggregator, instance, mock_http_get):
     assert_bwc_metrics(aggregator, DEVICE_STATS_BWC_METRICS, dev3_tags)
 
 
-def test_collect_system_with_name(dd_run_check, aggregator, instance, mock_auth, mocker):
-    instances_response = [
-        {
-            'id': '1fcf40fc60c6520f',
-            'name': 'my-powerflex',
-            'mdmCluster': {
-                'goodNodesNum': 3,
-                'goodReplicasNum': 2,
-                'clusterState': 'ClusteredNormal',
-                'clusterMode': 'ThreeNodes',
-            },
-        }
-    ]
+def test_collect_system_with_name(dd_run_check, aggregator, instance, mock_http_get, mock_responses):
+    mock_responses('https://localhost:443/api/types/System/instances')[0]['name'] = 'my-powerflex'
 
-    def mock_get(url, *args, **kwargs):
-        resp = MagicMock()
-        resp.raise_for_status = MagicMock()
-        resp.json = MagicMock(return_value=instances_response if 'types/System/instances' in url else {})
-        return resp
-
-    mocker.patch('requests.Session.get', side_effect=mock_get)
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
 
@@ -827,9 +809,7 @@ def test_collect_events_first_run_uses_current_time(dd_run_check, aggregator, in
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
 
-    since_arg = mock_get_events.call_args[1].get('since') or mock_get_events.call_args[0][0]
-    assert since_arg is not None
-    assert since_arg.endswith('Z')
+    assert mock_get_events.call_args.kwargs['since'].endswith('Z')
     assert len(aggregator.events) == 0
 
 
@@ -847,8 +827,7 @@ def test_collect_events_subsequent_run_uses_cached_time(dd_run_check, aggregator
     # Second run should use the cached timestamp
     dd_run_check(check)
 
-    since_arg = mock_get_events.call_args[1].get('since') or mock_get_events.call_args[0][0]
-    assert since_arg == '2026-01-01T00:00:00Z'
+    assert mock_get_events.call_args.kwargs['since'] == '2026-01-01T00:00:00Z'
 
 
 @pytest.mark.parametrize('config_key', ['collect_events', 'collect_alerts'])
