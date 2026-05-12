@@ -307,8 +307,9 @@ def test_collect_column_statistics_default_config(integration_check, pg_instance
         'enabled': True,
     }
     check = integration_check(pg_instance)
-    run_one_check(check)
+    # Capture the collector before run_one_check — cancel() nulls it on shutdown.
     collector = check.metadata_samples._column_statistics_collector
+    run_one_check(check)
     # Verify defaults
     assert collector._config.collection_interval == 3600
     assert collector._config.max_tables == 500
