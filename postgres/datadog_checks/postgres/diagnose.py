@@ -32,6 +32,11 @@ from .version_utils import V9_6, VersionUtils
 RECOMMENDED_TRACK_ACTIVITY_QUERY_SIZE = 4096
 
 
+def run_diagnostics(check):
+    """Entry point for ``Diagnosis.register()``; creates a short-lived worker per invocation."""
+    PostgresDiagnose(check)._run()
+
+
 class PostgresDiagnose:
     """Explicit pre-flight diagnostics for `datadog-agent diagnose`."""
 
@@ -41,21 +46,6 @@ class PostgresDiagnose:
         # don't emit downstream-effect FAILs with nonsensical remediations (e.g. "CREATE EXTENSION"
         # when shared_preload_libraries is empty). Reset at the top of the first orchestrator.
         self._failed = set()
-
-    # -- registration ---------------------------------------------------------
-
-    def register(self):
-        """Register the diagnostic entry point with the check's Diagnosis object.
-
-        Idempotent: re-invoking `register` on the same Diagnosis object is a no-op.
-        ``Diagnosis.register`` extends an internal list, so without this guard a
-        repeated call would stack the entry point and produce N× the diagnostics.
-        """
-        d = self._check.diagnosis
-        if getattr(d, '_postgres_diagnostics_registered', False):
-            return
-        d._postgres_diagnostics_registered = True
-        d.register(self._run)
 
     # -- orchestrator ---------------------------------------------------------
 
