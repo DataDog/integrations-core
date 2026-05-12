@@ -122,7 +122,7 @@ class PostgresMetadata(DBMAsyncJob):
         self._collect_column_statistics_enabled = config.collect_column_statistics.enabled and config.dbm
         self._column_statistics_collector = (
             PostgresColumnStatisticsCollector(check, self._cancel_event)
-            if config.collect_column_statistics.enabled
+            if self._collect_column_statistics_enabled
             else None
         )
         self._compiled_patterns_cache = {}
@@ -292,5 +292,7 @@ class PostgresMetadata(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_column_statistics(self):
-        self._column_statistics_collector.collect_column_statistics(self._tags_no_db)
-        self._last_column_statistics_query_time = time.time()
+        try:
+            self._column_statistics_collector.collect_column_statistics(self._tags_no_db)
+        finally:
+            self._last_column_statistics_query_time = time.time()

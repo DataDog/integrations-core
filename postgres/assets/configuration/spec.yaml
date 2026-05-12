@@ -1162,6 +1162,7 @@ files:
             Maximum duration of the column statistics query in seconds.
           value:
             type: number
+            example: 60
             display_default: 60
     - name: aws
       display_priority: 0

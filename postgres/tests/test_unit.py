@@ -441,3 +441,24 @@ def test_check_gc_after_cancel(pg_instance):
             fail(f"Check still alive after cancel() + del -- pinned by: {referrers}")
     finally:
         gc.enable()
+
+
+def test_collect_column_statistics_updates_timestamp_on_failure(pg_instance):
+    pg_instance['dbm'] = True
+    pg_instance['collect_column_statistics'] = {'enabled': True, 'collection_interval': 60}
+
+    check = PostgreSql('postgres', {}, [pg_instance])
+    metadata = check.metadata_samples
+    metadata._tags_no_db = []
+
+    with mock.patch.object(
+        metadata._column_statistics_collector,
+        'collect_column_statistics',
+        side_effect=RuntimeError('boom'),
+    ):
+        before = metadata._last_column_statistics_query_time
+        with pytest.raises(RuntimeError):
+            metadata._collect_column_statistics()
+        after = metadata._last_column_statistics_query_time
+
+    assert after > before

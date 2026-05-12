@@ -737,7 +737,7 @@ instances:
         ## @param max_query_duration - number - optional - default: 60
         ## Maximum duration of the column statistics query in seconds.
         #
-        # max_query_duration: <MAX_QUERY_DURATION>
+        # max_query_duration: 60
 
     ## This block defines the configuration for AWS RDS and Aurora instances.
     ##

@@ -42,7 +42,7 @@ WITH tables AS (
       AND c.relkind = 'r'
       {filters}
     ORDER BY n.nspname, c.relname
-    LIMIT {max_tables}
+    LIMIT %s
 ),
 column_data AS (
     SELECT
@@ -239,11 +239,9 @@ class PostgresColumnStatisticsCollector:
             with self._check.db_pool.get_connection(db_name) as conn:
                 with conn.cursor(row_factory=dict_row) as cursor:
                     filters_sql, filter_params = self._build_filters()
-                    query = COLUMN_STATISTICS_QUERY.format(
-                        filters=filters_sql,
-                        max_tables=self._config.max_tables,
-                    )
-                    cursor.execute(f"SET statement_timeout = '{self._config.max_query_duration}s'")
+                    query = COLUMN_STATISTICS_QUERY.format(filters=filters_sql)
+                    filter_params.append(self._config.max_tables)
+                    cursor.execute("SET statement_timeout = %s", (self._config.max_query_duration * 1000,))
                     try:
                         cursor.execute(query, filter_params)
 
