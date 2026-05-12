@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import logging
 from pathlib import Path
 from textwrap import dedent
 from unittest.mock import MagicMock
@@ -32,14 +33,16 @@ def test_discover_registers_custom_subclass(tmp_path, monkeypatch):
     fake_dir = tmp_path / "fake_phases"
     fake_dir.mkdir()
     (fake_dir / "__init__.py").write_text("")
-    (fake_dir / "custom.py").write_text("from ddev.ai.phases.base import Phase\nclass CustomPhase(Phase):\n    pass\n")
+    (fake_dir / "custom.py").write_text(
+        "from ddev.ai.phases.agentic_phase import AgenticPhase\nclass CustomPhase(AgenticPhase):\n    pass\n"
+    )
     monkeypatch.syspath_prepend(str(tmp_path))
 
     registry = PhaseRegistry()
     _discover_and_register_phases(registry, phases_dir=fake_dir, import_prefix="fake_phases")
 
     assert "CustomPhase" in registry.known_names()
-    assert issubclass(registry.get("CustomPhase"), Phase)
+    assert issubclass(registry.get("CustomPhase"), AgenticPhase)
 
 
 def test_discover_ignores_module_without_phase_subclass(tmp_path, monkeypatch):
@@ -60,21 +63,33 @@ def test_discover_does_not_register_imported_phase_class(tmp_path, monkeypatch):
     fake_dir = tmp_path / "importer_pkg"
     fake_dir.mkdir()
     (fake_dir / "__init__.py").write_text("")
-    (fake_dir / "importer.py").write_text("from ddev.ai.phases.base import Phase\n")
+    (fake_dir / "importer.py").write_text("from ddev.ai.phases.agentic_phase import AgenticPhase\n")
     monkeypatch.syspath_prepend(str(tmp_path))
 
     registry = PhaseRegistry()
     _discover_and_register_phases(registry, phases_dir=fake_dir, import_prefix="importer_pkg")
 
-    assert "Phase" not in registry.known_names()
+    assert "AgenticPhase" not in registry.known_names()
 
 
-def test_discover_skips_underscore_prefixed_files():
-    """After discovery, only non-underscore files are imported.
-    __init__.py is underscore-prefixed and is skipped."""
+def test_discover_skips_underscore_prefixed_files(tmp_path, monkeypatch):
+    """Classes defined in underscore-prefixed files (e.g. _private.py) are never registered."""
+    fake_dir = tmp_path / "underscore_pkg"
+    fake_dir.mkdir()
+    (fake_dir / "__init__.py").write_text("")
+    (fake_dir / "_private.py").write_text(
+        "from ddev.ai.phases.agentic_phase import AgenticPhase\nclass PrivatePhase(AgenticPhase):\n    pass\n"
+    )
+    (fake_dir / "public.py").write_text(
+        "from ddev.ai.phases.agentic_phase import AgenticPhase\nclass PublicPhase(AgenticPhase):\n    pass\n"
+    )
+    monkeypatch.syspath_prepend(str(tmp_path))
+
     registry = PhaseRegistry()
-    _discover_and_register_phases(registry)
-    assert "Phase" in registry.known_names()
+    _discover_and_register_phases(registry, phases_dir=fake_dir, import_prefix="underscore_pkg")
+
+    assert "PrivatePhase" not in registry.known_names()
+    assert "PublicPhase" in registry.known_names()
 
 
 def test_discover_idempotent():
@@ -396,8 +411,6 @@ async def test_phase_in_flow_with_unknown_type_raises(tmp_path, file_access_poli
 
 async def test_orphan_phase_logs_warning(tmp_path, file_access_policy, caplog):
     """An orphan phase must emit a warning containing its phase id."""
-    import logging
-
     (tmp_path / "prompts").mkdir()
     (tmp_path / "prompts" / "writer.md").write_text("system prompt")
     (tmp_path / "flow.yaml").write_text(
@@ -515,8 +528,6 @@ async def test_on_finalize_no_failure_is_noop(tmp_path, file_access_policy):
 
 
 async def test_on_finalize_after_phase_failed_logs(tmp_path, file_access_policy, caplog):
-    import logging
-
     orchestrator = PhaseOrchestrator(
         flow_yaml_path=Path("/fake/flow.yaml"),
         checkpoint_path=Path("/fake/checkpoints.yaml"),
@@ -536,8 +547,6 @@ async def test_on_finalize_after_phase_failed_logs(tmp_path, file_access_policy,
 
 
 async def test_on_finalize_no_exception_no_log(tmp_path, file_access_policy, caplog):
-    import logging
-
     orchestrator = PhaseOrchestrator(
         flow_yaml_path=Path("/fake/flow.yaml"),
         checkpoint_path=Path("/fake/checkpoints.yaml"),

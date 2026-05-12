@@ -38,7 +38,7 @@ def _discover_and_register_phases(
         except Exception as e:
             raise FlowConfigError(f"Failed to import phase module '{py_file.stem}': {e}") from e
         for _, obj in inspect.getmembers(module, inspect.isclass):
-            if issubclass(obj, Phase) and obj.__module__ == module.__name__:
+            if issubclass(obj, Phase) and not inspect.isabstract(obj) and obj.__module__ == module.__name__:
                 registry.register(obj.__name__, obj)
 
 
