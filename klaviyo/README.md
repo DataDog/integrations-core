@@ -38,10 +38,10 @@ Klaviyo does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][3].
+Need help? Contact [Datadog support][4].
 
 [1]: https://www.klaviyo.com/
 [2]: /logs?query=source%3Aklaviyo%2A
 [3]: /logs/pipelines/indexes
-[3]: https://docs.datadoghq.com/help/
+[4]: https://docs.datadoghq.com/help/
 
