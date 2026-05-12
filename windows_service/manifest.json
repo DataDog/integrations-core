@@ -46,7 +46,7 @@
         "spec": "assets/configuration/spec.yaml"
       },
       "events": {
-        "creates_events": true
+        "creates_events": false
       },
       "metrics": {
         "prefix": "windows_service.",
