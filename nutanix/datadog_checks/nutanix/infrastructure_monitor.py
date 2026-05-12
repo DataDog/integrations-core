@@ -418,45 +418,55 @@ class InfrastructureMonitor:
             self.check.log.warning("[%s][%s] Host %s has no extId, skipping", self._pc_label, cluster_name, host_name)
             return
 
+        skip_host_metrics = False
         if not host_name:
-            self.check.log.warning("[%s][%s] Host %s has no hostName, skipping", self._pc_label, cluster_name, host_id)
-            return
+            self.check.log.warning(
+                "[%s][%s] Host %s has no hostName, skipping host metrics",
+                self._pc_label,
+                cluster_name,
+                host_id,
+            )
+            skip_host_metrics = True
 
         if not should_collect_resource("host", host, self.check.resource_filters, self.check.log):
             return
 
-        self.host_count += 1
-        self.host_names[host_id] = host_name
+        if not skip_host_metrics:
+            self.host_count += 1
+            self.host_names[host_id] = host_name
 
-        host_tags = cluster_tags + self._extract_host_tags(host)
-        self.check.gauge("host.count", 1, hostname=host_name, tags=host_tags)
-        self._report_host_status_metrics(host, host_name, host_tags)
-        self._set_external_tags_for_host(host_name, host_tags)
-        self._report_host_capacity_metrics(host, host_name, host_tags)
+            host_tags = cluster_tags + self._extract_host_tags(host)
+            self.check.gauge("host.count", 1, hostname=host_name, tags=host_tags)
+            self._report_host_status_metrics(host, host_name, host_tags)
+            self._set_external_tags_for_host(host_name, host_tags)
+            self._report_host_capacity_metrics(host, host_name, host_tags)
 
-        try:
-            stats = self._get_stats(f"api/clustermgmt/v4.0/stats/clusters/{cluster_id}/hosts/{host_id}")
-            if stats:
-                self._report_stats(
-                    f"[{self._pc_label}][{cluster_name}] Host {host_name}",
-                    stats,
-                    HOST_STATS_METRICS,
-                    host_tags,
-                    hostname=host_name,
-                    extra_tags_by_key=self._get_disk_status_storage_tags(host_id),
+            try:
+                stats = self._get_stats(f"api/clustermgmt/v4.0/stats/clusters/{cluster_id}/hosts/{host_id}")
+                if stats:
+                    self._report_stats(
+                        f"[{self._pc_label}][{cluster_name}] Host {host_name}",
+                        stats,
+                        HOST_STATS_METRICS,
+                        host_tags,
+                        hostname=host_name,
+                        extra_tags_by_key=self._get_disk_status_storage_tags(host_id),
+                    )
+            except Exception:
+                self.check.log.exception(
+                    "[%s][%s] Failed to fetch stats for host %s", self._pc_label, cluster_name, host_name
                 )
-        except Exception:
-            self.check.log.exception(
-                "[%s][%s] Failed to fetch stats for host %s", self._pc_label, cluster_name, host_name
-            )
 
+        host_label = host_name or host_id
         try:
             vms = self._get_vms_for_host(host_id)
         except Exception:
-            self.check.log.exception("[%s][%s] Failed to list VMs for host %s", self._pc_label, cluster_name, host_name)
+            self.check.log.exception(
+                "[%s][%s] Failed to list VMs for host %s", self._pc_label, cluster_name, host_label
+            )
             return
 
-        self.check.log.debug("[%s][%s] Host %s has %d VMs", self._pc_label, cluster_name, host_name, len(vms))
+        self.check.log.debug("[%s][%s] Host %s has %d VMs", self._pc_label, cluster_name, host_label, len(vms))
         for vm in vms:
             if self._process_vm(vm, cluster_vm_stats_dict, cluster_name):
                 self.vm_count += 1
