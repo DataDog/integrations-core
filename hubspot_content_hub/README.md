@@ -12,7 +12,7 @@ The integration includes dashboards that show and analyze both Activity Logs and
 
 ## Setup
 
-To integrate HubSpot with Datadog, the authenticated user must be an owner of the organization you want to fetch data from.
+To integrate HubSpot with Datadog, you must authenticate as an owner of the HubSpot organization that Datadog fetches data from.
 
 ### Metrics and Logs
 
@@ -28,10 +28,10 @@ Import company data from HubSpot as a Reference Table to enrich your Datadog log
 
 #### After Setup
 
-- Datadog automatically creates a single Companies Reference Table for an account with the format `hubspot_companies_hubspotaccountid`
-- Your [HubSpot Reference Tables][3] will be available after a few minutes. Datadog automatically starts syncing data once the table is created.
+- Datadog automatically creates one Companies Reference Table for each account, using the format `hubspot_companies_hubspotaccountid`.
+- Your [HubSpot Reference Tables][3] are available after a few minutes. Datadog automatically starts syncing data after the table is created.
 - Use [Event Management][4] to monitor your Reference Table's creation. You'll see progress events, success confirmations, and any errors that occur.
-- When ingestion succeeds, you'll see a [success event][5] for your Reference Table.
+- When ingestion succeeds, a [success event][5] appears for your Reference Table.
 
 #### For Existing Accounts
 

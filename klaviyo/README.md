@@ -8,14 +8,14 @@ Integrate Klaviyo with Datadog to gain insights into marketing campaign communic
 
 ## Setup
 
-The user who authenticates this integration must have access to the following Klaviyo Scopes:
+To authenticate this integration, you must have access to the following Klaviyo Scopes:
 
 - `accounts:read`
 - `events:read`
 - `flows:read`
 - `metrics:read`
 
-To add a new Klaviyo account, click the **Authorize** button and follow the instructions. Once you are redirected back to this page and the authentication is successful, your logs should be available within 5 minutes.
+To add a Klaviyo account, click **Authorize** and follow the instructions. After you are redirected back to this page and authentication succeeds, your logs should be available within 5 minutes.
 
 You can view your logs in the [Log Explorer][2]. Ensure you have a [Logs Index][3] set up for `source:klaviyo`.
 

@@ -8,13 +8,13 @@ Docusign integration provides real-time insights into Docusign activities, such 
 
 ## Setup
 
-To collect Docusign logs, click the **Authorize** button to authenticate using OAuth.
+To collect Docusign logs, click **Authorize** to authenticate using OAuth.
 
-In order to add a new Docusign account, you first have to make sure:
+To add a Docusign account, make sure that:
 
-- The account has **admin access permission** within your Docusign organization. Otherwise, we won't be able to collect log events for you.
-- The account **may not be an admin** of more than one organization on Docusign as explained [here][2].
-- **Docusign Monitor** feature is enabled. This integration is only available for accounts with the paid version of [Monitor][3].
+- The account has **admin access permission** within your Docusign organization. Otherwise, Datadog can't collect log events for you.
+- The account is **not an admin** of more than one Docusign organization, as explained in [How to get monitoring data][2].
+- The **Docusign Monitor** feature is enabled. This integration is only available for accounts with the paid version of [Monitor][3].
 
 ## Data Collected
 
