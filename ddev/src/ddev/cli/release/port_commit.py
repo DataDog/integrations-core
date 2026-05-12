@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import click
@@ -285,6 +286,142 @@ def parse_labels(raw: str) -> list[str]:
     return [label.strip() for label in raw.split(',') if label.strip()]
 
 
+@dataclass(frozen=True)
+class PortPlan:
+    """All values needed to execute the port workflow, resolved up front."""
+
+    full_sha: str
+    clean_subject: str
+    original_pr: str | None
+    target_branch: str
+    new_branch: str
+    pr_title: str
+    pr_body: str
+    labels: list[str]
+    draft: bool
+    create_pr: bool
+    verify: bool
+    dry_run: bool
+
+
+def resolve_port_plan(
+    app: Application,
+    *,
+    commit_hash: str | None,
+    target_branch: str,
+    branch_prefix: str,
+    branch_suffix: str | None,
+    pr_labels: str,
+    no_pr: bool,
+    draft: bool,
+    verify: bool,
+    dry_run: bool,
+) -> PortPlan:
+    """Validate inputs, resolve derived values, and confirm with the user. Aborts on failure."""
+    user = app.config.github.user
+    if not user:
+        app.abort(
+            'No GitHub user configured. Set `github.user` via `ddev config set github.user <name>` '
+            'or export DD_GITHUB_USER.'
+        )
+
+    if commit_hash is None:
+        head_commit = app.repo.git.latest_commit()
+        app.display_info(f'No commit specified. Current HEAD: `{head_commit.sha[:10]}` - {head_commit.subject}')
+        if not dry_run and not click.confirm('Use this commit?'):
+            app.abort('Did not get confirmation, aborting.')
+        commit_hash = head_commit.sha
+
+    try:
+        full_sha = app.repo.git.capture('rev-parse', '--verify', f'{commit_hash}^{{commit}}').strip()
+    except OSError:
+        app.abort(f'Commit `{commit_hash}` does not exist.')
+
+    log_entries = app.repo.git.log(['hash:%H', 'subject:%s'], n=1, source=full_sha)
+    if not log_entries:
+        app.abort(f'Could not read commit `{full_sha}`.')
+    clean_subject, original_pr = split_commit_subject(log_entries[0]['subject'])
+
+    in_toto_files = [
+        line
+        for line in app.repo.git.capture('diff-tree', '--no-commit-id', '--name-only', '-r', full_sha).splitlines()
+        if IN_TOTO_SUFFIX in line
+    ]
+    if in_toto_files:
+        listing = '\n  '.join(in_toto_files)
+        app.display_warning(
+            f'Commit touches {len(in_toto_files)} `.in-toto` file(s); they will be preserved '
+            f'from `{target_branch}`:\n  {listing}'
+        )
+
+    suffix = branch_suffix or f'to-{target_branch}'
+    plan = PortPlan(
+        full_sha=full_sha,
+        clean_subject=clean_subject,
+        original_pr=original_pr,
+        target_branch=target_branch,
+        new_branch=f'{user}/{branch_prefix}-{full_sha[:10]}-{suffix}',
+        pr_title=f'[Backport] {clean_subject}',
+        pr_body=build_pr_body(app, sha=full_sha, subject=clean_subject, target=target_branch, original_pr=original_pr),
+        labels=parse_labels(pr_labels),
+        draft=draft,
+        create_pr=not no_pr,
+        verify=verify,
+        dry_run=dry_run,
+    )
+
+    app.display_info(_format_plan_summary(plan))
+
+    if not dry_run and not click.confirm('Continue?'):
+        app.abort('Did not get confirmation, aborting.')
+
+    return plan
+
+
+def _format_plan_summary(plan: PortPlan) -> str:
+    original_pr_line = f'  Original PR: #{plan.original_pr}' if plan.original_pr else '  Original PR: (none)'
+    return '\n'.join(
+        [
+            'Configuration:',
+            f'  Target branch: {plan.target_branch}',
+            f'  Commit: {plan.full_sha[:10]} - {plan.clean_subject}',
+            original_pr_line,
+            f'  New branch: {plan.new_branch}',
+            f'  Create PR: {plan.create_pr} (draft={plan.draft})',
+            f'  PR labels: {", ".join(plan.labels) if plan.labels else "(none)"}',
+            f'  Verify commit: {plan.verify}',
+            f'  Dry run: {plan.dry_run}',
+        ]
+    )
+
+
+def build_port_steps(app: Application, plan: PortPlan) -> tuple[list[PortStep], CreatePullRequestStep | None]:
+    """Build the ordered list of steps for the workflow, plus the PR step reference (or None)."""
+    steps: list[PortStep] = [
+        FetchOriginStep(app, dry_run=plan.dry_run),
+        CheckoutTargetStep(app, target=plan.target_branch, dry_run=plan.dry_run),
+        CreatePortBranchStep(app, branch=plan.new_branch, dry_run=plan.dry_run),
+        CherryPickStep(app, sha=plan.full_sha, dry_run=plan.dry_run),
+        PreserveInTotoStep(app, dry_run=plan.dry_run),
+        CommitStep(app, subject=plan.clean_subject, verify=plan.verify, dry_run=plan.dry_run),
+        PushStep(app, branch=plan.new_branch, dry_run=plan.dry_run),
+    ]
+    pr_step: CreatePullRequestStep | None = None
+    if plan.create_pr:
+        pr_step = CreatePullRequestStep(
+            app,
+            title=plan.pr_title,
+            head=plan.new_branch,
+            base=plan.target_branch,
+            body=plan.pr_body,
+            labels=plan.labels,
+            draft=plan.draft,
+            dry_run=plan.dry_run,
+        )
+        steps.append(pr_step)
+    return steps, pr_step
+
+
 @click.command(name='port-commit', short_help='Backport a commit onto a target branch')
 @click.pass_obj
 @click.argument('commit_hash', required=False)
@@ -327,89 +464,19 @@ def port_commit(
     The GitHub user for the branch prefix is taken from `ddev config` (`github.user`) or the
     `DD_GITHUB_USER` / `GITHUB_USER` / `GITHUB_ACTOR` environment variables.
     """
-    user = app.config.github.user
-    if not user:
-        app.abort(
-            'No GitHub user configured. Set `github.user` via `ddev config set github.user <name>` '
-            'or export DD_GITHUB_USER.'
-        )
-
-    if commit_hash is None:
-        head_commit = app.repo.git.latest_commit()
-        app.display_info(f'No commit specified. Current HEAD: `{head_commit.sha[:10]}` - {head_commit.subject}')
-        if not dry_run and not click.confirm('Use this commit?'):
-            app.abort('Did not get confirmation, aborting.')
-        commit_hash = head_commit.sha
-
-    try:
-        full_sha = app.repo.git.capture('rev-parse', '--verify', f'{commit_hash}^{{commit}}').strip()
-    except OSError:
-        app.abort(f'Commit `{commit_hash}` does not exist.')
-
-    log_entries = app.repo.git.log(['hash:%H', 'subject:%s'], n=1, source=full_sha)
-    if not log_entries:
-        app.abort(f'Could not read commit `{full_sha}`.')
-    raw_subject = log_entries[0]['subject']
-    clean_subject, original_pr = split_commit_subject(raw_subject)
-
-    in_toto_files = [
-        line
-        for line in app.repo.git.capture('diff-tree', '--no-commit-id', '--name-only', '-r', full_sha).splitlines()
-        if IN_TOTO_SUFFIX in line
-    ]
-    if in_toto_files:
-        listing = '\n  '.join(in_toto_files)
-        app.display_warning(
-            f'Commit touches {len(in_toto_files)} `.in-toto` file(s); they will be preserved '
-            f'from `{target_branch}`:\n  {listing}'
-        )
-
-    suffix = branch_suffix or f'to-{target_branch}'
-    new_branch = f'{user}/{branch_prefix}-{full_sha[:10]}-{suffix}'
-    labels = parse_labels(pr_labels)
-
-    app.display_info(
-        '\n'.join(
-            [
-                'Configuration:',
-                f'  Target branch: {target_branch}',
-                f'  Commit: {full_sha[:10]} - {clean_subject}',
-                f'  Original PR: #{original_pr}' if original_pr else '  Original PR: (none)',
-                f'  New branch: {new_branch}',
-                f'  Create PR: {not no_pr} (draft={draft})',
-                f'  PR labels: {", ".join(labels) if labels else "(none)"}',
-                f'  Verify commit: {verify}',
-                f'  Dry run: {dry_run}',
-            ]
-        )
+    plan = resolve_port_plan(
+        app,
+        commit_hash=commit_hash,
+        target_branch=target_branch,
+        branch_prefix=branch_prefix,
+        branch_suffix=branch_suffix,
+        pr_labels=pr_labels,
+        no_pr=no_pr,
+        draft=draft,
+        verify=verify,
+        dry_run=dry_run,
     )
-
-    if not dry_run and not click.confirm('Continue?'):
-        app.abort('Did not get confirmation, aborting.')
-
-    steps: list[PortStep] = [
-        FetchOriginStep(app, dry_run=dry_run),
-        CheckoutTargetStep(app, target=target_branch, dry_run=dry_run),
-        CreatePortBranchStep(app, branch=new_branch, dry_run=dry_run),
-        CherryPickStep(app, sha=full_sha, dry_run=dry_run),
-        PreserveInTotoStep(app, dry_run=dry_run),
-        CommitStep(app, subject=clean_subject, verify=verify, dry_run=dry_run),
-        PushStep(app, branch=new_branch, dry_run=dry_run),
-    ]
-
-    pr_step: CreatePullRequestStep | None = None
-    if not no_pr:
-        pr_step = CreatePullRequestStep(
-            app,
-            title=f'[Backport] {clean_subject}',
-            head=new_branch,
-            base=target_branch,
-            body=build_pr_body(app, sha=full_sha, subject=clean_subject, target=target_branch, original_pr=original_pr),
-            labels=labels,
-            draft=draft,
-            dry_run=dry_run,
-        )
-        steps.append(pr_step)
+    steps, pr_step = build_port_steps(app, plan)
 
     try:
         for step in steps:
