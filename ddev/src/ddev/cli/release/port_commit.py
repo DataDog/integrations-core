@@ -75,6 +75,6 @@ def port_commit(
     except PortStepError as e:
         app.abort(str(e))
 
-    if pr_step is not None and pr_step.pr_url:
+    if pr_step is not None and not plan.dry_run:
         app.display_success(f'Pull request created: {pr_step.pr_url}')
     app.display_success('All done.')
