@@ -52,7 +52,10 @@ column_data AS (
             'name', s.attname,
             'avg_width', s.avg_width,
             'n_distinct', s.n_distinct,
-            'null_frac', s.null_frac
+            'null_frac', s.null_frac,
+            'inherited', s.inherited,
+            'correlation', s.correlation,
+            'most_common_freqs', s.most_common_freqs
         ) AS col,
         EXTRACT(EPOCH FROM (NOW() - st.last_analyze))::bigint AS last_analyze_age,
         EXTRACT(EPOCH FROM (NOW() - st.last_autoanalyze))::bigint AS last_autoanalyze_age,

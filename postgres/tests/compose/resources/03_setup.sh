@@ -65,9 +65,11 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" "$DBNAME" <<-'EOSQL'
     CREATE OR REPLACE FUNCTION datadog.column_statistics()
     RETURNS TABLE (
         schemaname name, tablename name, attname name,
-        n_distinct real, avg_width integer, null_frac real
+        n_distinct real, avg_width integer, null_frac real,
+        inherited boolean, correlation real, most_common_freqs real[]
     ) AS
-    $$ SELECT schemaname, tablename, attname, n_distinct, avg_width, null_frac FROM pg_stats; $$
+    $$ SELECT schemaname, tablename, attname, n_distinct, avg_width, null_frac,
+              inherited, correlation, most_common_freqs FROM pg_stats; $$
     LANGUAGE sql
     SECURITY DEFINER;
 
