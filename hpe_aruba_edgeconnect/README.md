@@ -97,7 +97,7 @@ The HPE Aruba EdgeConnect integration does not include any service checks.
 Need help? Contact [Datadog support][8].
 
 
-[1]: https://www.hpe.com/es/es/aruba-edgeconnect-sd-wan.html
+[1]: https://www.hpe.com/us/en/aruba-edgeconnect-sd-wan.html
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/containers/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/hpe_aruba_edgeconnect/datadog_checks/hpe_aruba_edgeconnect/data/conf.yaml.example

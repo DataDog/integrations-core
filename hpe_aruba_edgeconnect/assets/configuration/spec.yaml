@@ -107,4 +107,4 @@ files:
     - type: tcp
       port: 10514
       service: edgeconnect
-      source: aruba_edgeconnect
+      source: hpe_aruba_edgeconnect

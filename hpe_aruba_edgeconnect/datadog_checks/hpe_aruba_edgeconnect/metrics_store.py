@@ -34,11 +34,7 @@ class MetricsStore:
 
     def flush(self, check: AgentCheck) -> None:
         for (name, tags), (agg_type, values) in self._metrics.items():
-            try:
-                check.gauge(name, _aggregate(agg_type, values), tags=list(tags))
-            except Exception as e:
-                check.log.error("Error flushing metric %s with tags %s: %s", name, tags, e)
-                continue
+            check.gauge(name, _aggregate(agg_type, values), tags=list(tags))
 
 
 def _aggregate(agg_type: AggType, values: list[float]) -> float:

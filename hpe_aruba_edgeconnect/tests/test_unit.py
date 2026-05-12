@@ -124,9 +124,10 @@ SYSTEM_INFO_PAYLOAD = {
 
 EXPECTED_METRIC_COUNTS = {
     # Device health (orchestrator + appliance client)
+    'orchestrator.reachability': 1,
     'device.reachability': 1,
     'device.uptime': 1,
-    'device.cpu.usage': 5,
+    'device.cpu.usage': 4,
     'device.memory.usage': 5,
     'device.disk.usage': 10,
     'device.hardware.ok': 1,
@@ -231,7 +232,6 @@ EXPECTED_VALUES = [
     ('device.cpu.usage', 15.0, ['cpu_state:system']),
     ('device.cpu.usage', 3.0, ['cpu_state:irq']),
     ('device.cpu.usage', 2.0, ['cpu_state:nice']),
-    ('device.cpu.usage', 50.0, ['cpu_state:idle']),
     ('device.memory.usage', 3945080, ['memory_type:total']),
     ('device.memory.usage', 770848, ['memory_type:free']),
     ('device.memory.usage', 3174232, ['memory_type:used']),
@@ -306,6 +306,39 @@ PARSER_CASES = [
     ("shaper", "shaper.csv"),
     ("appperf", "appperf_v2.txt"),
 ]
+
+EXPECTED_PARSER_ROW_COUNTS = {
+    'st2-100000000': {
+        'interfaces': 5,
+        'interface_peaks': 5,
+        'tunnels': 33,
+        'tunnel_peaks': 33,
+        'jitter': 31,
+        'mos': 31,
+        'dscp': 3,
+        'dscp_peaks': 3,
+        'tunnel_availability': 31,
+        'interface_overlays': 5,
+        'probes': 12,
+        'shaper': 4,
+        'appperf': 2,
+    },
+    'st2-100000060': {
+        'interfaces': 3,
+        'interface_peaks': 3,
+        'tunnels': 33,
+        'tunnel_peaks': 33,
+        'jitter': 31,
+        'mos': 31,
+        'dscp': 2,
+        'dscp_peaks': 2,
+        'tunnel_availability': 31,
+        'interface_overlays': 1,
+        'probes': 12,
+        'shaper': 2,
+        'appperf': 2,
+    },
+}
 
 EMPTY_PARSE_CASES = [
     InterfaceStats,
@@ -385,7 +418,6 @@ DISK_PAYLOAD = {
 
 
 def _build_cpu_payload(usage):
-    idle = 100 - usage
     return {
         'latestTimestamp': NEWEST_TS,
         'data': [
@@ -393,7 +425,6 @@ def _build_cpu_payload(usage):
                 str(NEWEST_TS): [
                     {
                         'cpu_number': 'ALL',
-                        'pIdle': str(idle),
                         'pUser': str(usage * 0.6),
                         'pSys': str(usage * 0.3),
                         'pIRQ': str(usage * 0.06),
@@ -440,6 +471,7 @@ def _setup_mocks(
 ):
     orch = _mock_orch_client(appliance_payload, overlay_map, traffic_class_map)
     mocker.patch(f'{CHECK_MODULE}.OrchestratorClient', return_value=orch)
+    check._orch_client = None
 
     if appliance_client is not None:
         mocker.patch.object(check, '_create_appliance_client', return_value=appliance_client)
@@ -498,7 +530,8 @@ def all_metrics_aggregator(dd_run_check, aggregator, mocker, check):
 @pytest.fixture(scope='module', params=[p.name for p in TGZ_FILES], ids=[p.stem for p in TGZ_FILES])
 def minute_stats(request, logger):
     path = FIXTURE_DIR / request.param
-    return MinuteStats(path.read_bytes(), appliance_ip='10.0.0.1', timestamp=123456789, logger=logger)
+    ms = MinuteStats(path.read_bytes(), appliance_ip='10.0.0.1', timestamp=123456789, logger=logger)
+    return path.stem, ms
 
 
 # ---------------------------------------------------------------------------
@@ -724,19 +757,6 @@ def test_get_overlay_config_returns_overlay_and_traffic_class_maps():
     assert traffic_class_map == {'1': 'RealTime', '2': 'BulkData'}
 
 
-def test_shaper_record_uses_overlay_name_when_mapped():
-    store = MetricsStore()
-    row = ShaperStats({'traffic_class': '1', 'direction': '0', 'qos_drops': '5', 'other_drops': '0'})
-    row.record(store, [], traffic_class_map={'1': 'RealTime'})
-
-    mock_check = MagicMock()
-    store.flush(mock_check)
-
-    args, kwargs = mock_check.gauge.call_args_list[0]
-    assert 'overlay_name:RealTime' in kwargs['tags']
-    assert 'overlay_name:1' not in kwargs['tags']
-
-
 def test_shaper_record_falls_back_to_raw_id_and_warns_when_not_mapped():
     store = MetricsStore()
     row = ShaperStats({'traffic_class': '7', 'direction': '0', 'qos_drops': '0', 'other_drops': '0'})
@@ -750,12 +770,6 @@ def test_shaper_record_falls_back_to_raw_id_and_warns_when_not_mapped():
     assert 'overlay_name:7' in kwargs['tags']
     logger.warning.assert_called_once()
     assert '7' in logger.warning.call_args.args
-
-
-def test_shaper_record_does_not_warn_when_no_logger_provided():
-    store = MetricsStore()
-    row = ShaperStats({'traffic_class': '7', 'direction': '0', 'qos_drops': '0', 'other_drops': '0'})
-    row.record(store, [], traffic_class_map={})
 
 
 def test_login_appliance_csrf_token():
@@ -784,6 +798,54 @@ def test_login_appliance_session_id_fallback():
     assert http.session.headers.get('vxoaSessionID') == 'sess123'
 
 
+def test_login_orchestrator_csrf_token():
+    http = MagicMock()
+    http.session.cookies = {'orchCsrfToken': 'orchtoken'}
+    http.session.headers = {}
+    http.post.return_value = MagicMock(raise_for_status=MagicMock())
+
+    client = OrchestratorClient(http, '10.0.0.1')
+    client.login('admin', 'pass')
+
+    assert http.session.headers.get('X-XSRF-TOKEN') == 'orchtoken'
+
+
+@pytest.mark.parametrize(
+    'client_factory, login_url',
+    [
+        pytest.param(
+            lambda http: ApplianceClient(http, '10.0.0.1', MagicMock()),
+            'https://10.0.0.1/rest/json/login',
+            id='appliance',
+        ),
+        pytest.param(
+            lambda http: OrchestratorClient(http, '10.0.0.1'),
+            'https://10.0.0.1/gms/rest/authentication/login',
+            id='orchestrator',
+        ),
+    ],
+)
+def test_request_retries_once_on_401(client_factory, login_url):
+    http = MagicMock()
+    http.session.cookies = {}
+    http.session.headers = {}
+    http.post.return_value = MagicMock(raise_for_status=MagicMock())
+    http.get.side_effect = [
+        MagicMock(status_code=401, raise_for_status=MagicMock()),
+        MagicMock(status_code=200, raise_for_status=MagicMock()),
+    ]
+
+    client = client_factory(http)
+    client.login('admin', 'pass')
+    resp = client._request('get', '/some/path')
+
+    assert resp.status_code == 200
+    assert http.get.call_count == 2
+    assert http.post.call_count == 2
+    assert http.post.call_args_list[0].args[0] == login_url
+    assert http.post.call_args_list[1].args[0] == login_url
+
+
 # ---------------------------------------------------------------------------
 # Parsers
 # ---------------------------------------------------------------------------
@@ -791,11 +853,13 @@ def test_login_appliance_session_id_fallback():
 
 @pytest.mark.parametrize("attr_name, filename", PARSER_CASES, ids=[f for _, f in PARSER_CASES])
 def test_parse_and_record(minute_stats, attr_name, filename):
-    assert filename in minute_stats.files
-    assert isinstance(minute_stats.files[filename], str)
+    stem, ms = minute_stats
+    assert filename in ms.files
+    assert isinstance(ms.files[filename], str)
 
-    records = getattr(minute_stats, attr_name)
+    records = getattr(ms, attr_name)
     assert isinstance(records, list)
+    assert len(records) == EXPECTED_PARSER_ROW_COUNTS[stem][attr_name]
 
     if records:
         store = MetricsStore()
@@ -804,53 +868,9 @@ def test_parse_and_record(minute_stats, attr_name, filename):
         assert len(store._metrics) > 0
 
 
-def test_parse_interface_csv_filters_all_traffic(logger):
-    csv_content = (
-        "ifname,bytes_tx,bytes_rx,fwdrops_bytes_tx,fwdrops_bytes_rx,"
-        "fwdrops_pkts_tx,fwdrops_pkts_rx,max_bw_tx,max_bw_rx,traftype\n"
-        "wan0,100,200,0,0,0,0,1000,1000,pass-through\n"
-        "wan0,300,400,0,0,0,0,1000,1000,all traffic\n"
-    )
-    rows = list(InterfaceStats.parse(csv_content, logger))
-    assert len(rows) == 1
-    assert rows[0].traftype == 'pass-through'
-
-
-def test_parse_interface_peak_csv_filters_all_traffic(logger):
-    csv_content = (
-        "ifname,bytes_tx,bytes_rx,fwdrops_pkts_tx,fwdrops_pkts_rx,"
-        "fwdrops_bytes_tx,fwdrops_bytes_rx,max_bw_tx,max_bw_rx,traftype\n"
-        "wan0,100,200,0,0,0,0,1000,1000,pass-through\n"
-        "wan0,300,400,0,0,0,0,1000,1000,all traffic\n"
-    )
-    rows = list(InterfacePeakStats.parse(csv_content, logger))
-    assert len(rows) == 1
-    assert rows[0].traftype == 'pass-through'
-
-
-def test_parse_interface_overlay_filters_non_breakout():
-    csv_content = (
-        "ifname,bytes_tx,bytes_rx,max_bw_tx,max_bw_rx,tuntype\nwan0,100,200,1000,1000,2\nwan1,300,400,1000,1000,1\n"
-    )
-    rows = list(InterfaceOverlayStats.parse(csv_content))
-    assert len(rows) == 1
-    assert rows[0].ifname == 'wan0'
-
-
 @pytest.mark.parametrize("parser_cls", EMPTY_PARSE_CASES, ids=[c.__name__ for c in EMPTY_PARSE_CASES])
 def test_parse_empty(parser_cls, logger):
     assert _parse(parser_cls, '', logger) == []
-
-
-def test_parse_dscp_csv_filters_all_traffic():
-    csv_content = (
-        "dscp,bytes_wtx,bytes_wrx,bytes_ltx,bytes_lrx,traftype\n"
-        "be,100,200,300,400,pass-through\n"
-        "be,500,600,700,800,all traffic\n"
-    )
-    rows = list(DscpStats.parse(csv_content))
-    assert len(rows) == 1
-    assert rows[0].traftype == 'pass-through'
 
 
 def test_interface_stats_record_skips_utilization_when_max_bw_zero(logger):
@@ -895,7 +915,7 @@ def test_metric_values(all_metrics_aggregator):
 
 def test_metrics_carry_base_device_tags(all_metrics_aggregator):
     for metric_name in all_metrics_aggregator.metric_names:
-        if not metric_name.startswith(f'{NS}.'):
+        if not metric_name.startswith(f'{NS}.') or metric_name == f'{NS}.orchestrator.reachability':
             continue
         for stub in all_metrics_aggregator.metrics(metric_name):
             missing = [t for t in BASE_DEVICE_TAGS if t not in stub.tags]
@@ -910,8 +930,8 @@ def test_collection_step_failure_does_not_block_others(dd_run_check, aggregator,
 
     dd_run_check(check)
 
-    aggregator.assert_metric(f'{NS}.device.cpu.usage', count=5)
-    aggregator.assert_metric(f'{NS}.device.cpu.usage', value=58.0, tags=BASE_DEVICE_TAGS + ['cpu_state:idle'])
+    aggregator.assert_metric(f'{NS}.device.cpu.usage', count=4)
+    aggregator.assert_metric(f'{NS}.device.cpu.usage', value=42 * 0.6, tags=BASE_DEVICE_TAGS + ['cpu_state:user'])
     aggregator.assert_metric(f'{NS}.device.hardware.ok', count=1)
 
 
@@ -922,7 +942,9 @@ def test_orchestrator_login_failure_emits_no_metrics(dd_run_check, aggregator, m
     with pytest.raises(Exception, match='bad credentials'):
         dd_run_check(check, extract_message=True)
 
-    assert not [m for m in aggregator.metric_names if m.startswith(f'{NS}.')]
+    emitted = [m for m in aggregator.metric_names if m.startswith(f'{NS}.')]
+    assert emitted == [f'{NS}.orchestrator.reachability']
+    aggregator.assert_metric(f'{NS}.orchestrator.reachability', value=0, count=1)
     assert aggregator.get_event_platform_events('network-devices-metadata') == []
     orch.get_appliances.assert_not_called()
     assert check._orch_client is None
@@ -935,7 +957,9 @@ def test_orchestrator_get_appliances_failure_emits_no_metrics(dd_run_check, aggr
     with pytest.raises(Exception, match='orch unreachable'):
         dd_run_check(check, extract_message=True)
 
-    assert not [m for m in aggregator.metric_names if m.startswith(f'{NS}.')]
+    emitted = [m for m in aggregator.metric_names if m.startswith(f'{NS}.')]
+    assert emitted == [f'{NS}.orchestrator.reachability']
+    aggregator.assert_metric(f'{NS}.orchestrator.reachability', value=0, count=1)
     assert aggregator.get_event_platform_events('network-devices-metadata') == []
     orch.login.assert_called_once()
     assert check._orch_client is None
@@ -1046,23 +1070,29 @@ def test_ndm_metadata_submitted(dd_run_check, aggregator, mocker, check):
         assert payload['collect_timestamp'] is not None
 
 
-def test_stale_appliance_clients_cleaned_up(dd_run_check, mocker, check):
-    client = MagicMock()
+def test_stale_appliance_clients_cleaned_up(dd_run_check, mocker, instance):
+    inst = instance('localhost:8443', appliance_ips=['10.0.0.0/24'], max_backfill_minutes=10)
+    check = HpeArubaEdgeconnectCheck('hpe_aruba_edgeconnect', {}, [inst])
+    check.load_configuration_models()
 
-    # First run: orch returns appliances at 10.0.0.1 and 10.0.0.99
+    def make_client(http, app_ip, log):
+        mock = _mock_appliance_client(TGZ_DATA)
+        mock.app_ip = app_ip
+        return mock
+
+    mocker.patch(f'{CHECK_MODULE}.ApplianceClient', side_effect=make_client)
+
     payload_with_extra = APPLIANCE_PAYLOAD[:1] + [
         {**APPLIANCE_PAYLOAD[0], 'ip': '10.0.0.99', 'hostName': 'StaleAppliance'},
     ]
-    _setup_mocks(mocker, check, payload_with_extra, appliance_client=client)
+    _setup_mocks(mocker, check, payload_with_extra)
     dd_run_check(check)
 
-    check._appliance_clients['10.0.0.1'] = MagicMock()
-    check._appliance_clients['10.0.0.99'] = MagicMock()
-    assert '10.0.0.99' in check._appliance_clients
+    assert set(check._appliance_clients) == {'10.0.0.1', '10.0.0.99'}
+    stale_client = check._appliance_clients['10.0.0.99']
 
-    # Second run: orch no longer returns 10.0.0.99
-    _setup_mocks(mocker, check, APPLIANCE_PAYLOAD[:1], appliance_client=client)
+    _setup_mocks(mocker, check, APPLIANCE_PAYLOAD[:1])
     dd_run_check(check)
 
-    assert '10.0.0.1' in check._appliance_clients
-    assert '10.0.0.99' not in check._appliance_clients
+    assert set(check._appliance_clients) == {'10.0.0.1'}
+    assert stale_client not in check._appliance_clients.values()

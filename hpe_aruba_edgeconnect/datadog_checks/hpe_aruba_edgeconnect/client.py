@@ -13,12 +13,12 @@ if TYPE_CHECKING:
     from datadog_checks.base.log import CheckLoggingAdapter
 
 
-class OrchestratorClient:
-    """HTTP client for the HPE Aruba EdgeConnect orchestrator API."""
+class _BaseClient:
+    """Shared HTTP client with transparent 401 re-login."""
 
-    def __init__(self, http: RequestsWrapper, orch_ip: str) -> None:
+    def __init__(self, http: RequestsWrapper, base_url: str) -> None:
         self._http = http
-        self._base_url = f'https://{orch_ip}'
+        self._base_url = base_url
         self._creds: tuple[str, str] | None = None
 
     def login(self, username: str, password: str) -> None:
@@ -26,14 +26,7 @@ class OrchestratorClient:
         self._creds = (username, password)
 
     def _do_login(self, username: str, password: str) -> None:
-        resp = self._http.post(
-            f'{self._base_url}/gms/rest/authentication/login',
-            json={'user': username, 'password': password},
-        )
-        resp.raise_for_status()
-        csrf_token = self._http.session.cookies.get('orchCsrfToken')
-        if csrf_token:
-            self._http.session.headers.update({'X-XSRF-TOKEN': csrf_token})
+        raise NotImplementedError
 
     def _request(self, method: str, path: str, *, raise_on_error: bool = True, **kwargs: Any) -> Response:
         """Issue an HTTP request, transparently re-logging in once on 401 (expired session)."""
@@ -47,9 +40,25 @@ class OrchestratorClient:
             resp.raise_for_status()
         return resp
 
-    def get_appliances(self) -> list[dict[str, Any]]:
-        resp = self._http.get(f'{self._base_url}/gms/rest/appliance')
+
+class OrchestratorClient(_BaseClient):
+    """HTTP client for the HPE Aruba EdgeConnect orchestrator API."""
+
+    def __init__(self, http: RequestsWrapper, orch_ip: str) -> None:
+        super().__init__(http, f'https://{orch_ip}')
+
+    def _do_login(self, username: str, password: str) -> None:
+        resp = self._http.post(
+            f'{self._base_url}/gms/rest/authentication/login',
+            json={'user': username, 'password': password},
+        )
         resp.raise_for_status()
+        csrf_token = self._http.session.cookies.get('orchCsrfToken')
+        if csrf_token:
+            self._http.session.headers.update({'X-XSRF-TOKEN': csrf_token})
+
+    def get_appliances(self) -> list[dict[str, Any]]:
+        resp = self._request('get', '/gms/rest/appliance')
         return resp.json()
 
     def get_overlay_config(self) -> tuple[dict[str, str], dict[str, str]]:
@@ -73,23 +82,17 @@ class OrchestratorClient:
         return overlay_map, traffic_class_map
 
 
-class ApplianceClient:
+class ApplianceClient(_BaseClient):
     """HTTP client for an individual EdgeConnect appliance."""
 
     def __init__(self, http: RequestsWrapper, app_ip: str, logger: CheckLoggingAdapter) -> None:
-        self._http = http
-        self._base_url = f'https://{app_ip}'
+        super().__init__(http, f'https://{app_ip}')
         self._app_ip = app_ip
         self._log = logger
-        self._creds: tuple[str, str] | None = None
 
     @property
     def app_ip(self) -> str:
         return self._app_ip
-
-    def login(self, username: str, password: str) -> None:
-        self._do_login(username, password)
-        self._creds = (username, password)
 
     def _do_login(self, username: str, password: str) -> None:
         resp = self._http.post(
@@ -104,18 +107,6 @@ class ApplianceClient:
             session_id = self._http.session.cookies.get('vxoaSessionID')
             if session_id:
                 self._http.session.headers.update({'vxoaSessionID': session_id})
-
-    def _request(self, method: str, path: str, *, raise_on_error: bool = True, **kwargs: Any) -> Response:
-        """Issue an HTTP request, transparently re-logging in once on 401 (expired session)."""
-        url = f'{self._base_url}{path}'
-        send = getattr(self._http, method)
-        resp = send(url, **kwargs)
-        if resp.status_code == 401 and self._creds is not None:
-            self._do_login(*self._creds)
-            resp = send(url, **kwargs)
-        if raise_on_error:
-            resp.raise_for_status()
-        return resp
 
     def get_newest_timestamp(self) -> int:
         resp = self._request('get', '/rest/json/stats/minuteRange')

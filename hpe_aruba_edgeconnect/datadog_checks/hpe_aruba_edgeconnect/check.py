@@ -33,7 +33,6 @@ _CPU_STATE_FIELDS = {
     'system': 'pSys',
     'irq': 'pIRQ',
     'nice': 'pNice',
-    'idle': 'pIdle',
 }
 
 
@@ -60,18 +59,30 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         return client
 
     def check(self, _: Any) -> None:
+        orch_tags = [f'orch_ip:{self.config.orch_ip}']
         try:
             orch_client = self._get_orch_client()
             appliances = self._collect_appliances_from_orch(orch_client)
         except Exception:
+            self.gauge('orchestrator.reachability', 0, tags=orch_tags)
             self._orch_client = None
             raise
+        self.gauge('orchestrator.reachability', 1, tags=orch_tags)
         current_ips = {ap.ip for ap in appliances}
         stale_ips = set(self._appliance_clients) - current_ips
         for ip in stale_ips:
             del self._appliance_clients[ip]
         with ThreadPoolExecutor(max_workers=self.config.max_concurrency) as pool:
-            futs = {pool.submit(self._collect_appliance, ap): ap for ap in appliances}
+            futs = {
+                pool.submit(
+                    self._collect_appliance,
+                    ap,
+                    self._peer_lookup,
+                    self._overlay_map,
+                    self._traffic_class_map,
+                ): ap
+                for ap in appliances
+            }
             for f in as_completed(futs):
                 ap = futs[f]
                 try:
@@ -177,7 +188,13 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
             )
         return timestamps
 
-    def _collect_appliance(self, appliance: Appliance) -> None:
+    def _collect_appliance(
+        self,
+        appliance: Appliance,
+        peer_lookup: dict[str, tuple[str, str]],
+        overlay_map: dict[str, str],
+        traffic_class_map: dict[str, str],
+    ) -> None:
         app_ip = appliance.ip
         self.log.debug("Starting collection for appliance %s", app_ip)
         client = self._create_appliance_client(app_ip, appliance.username, appliance.password)
@@ -196,7 +213,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
                 try:
                     content = client.get_minute_stats(f'st2-{ts}.tgz')
                     minute_stats = MinuteStats(content, app_ip, ts, self.log)
-                    minute_stats.record(store, base_tags, device_id, self._traffic_class_map)
+                    minute_stats.record(store, base_tags, device_id, traffic_class_map)
                 except Exception:
                     self.log.warning(
                         "Failed to process minute-stats archive st2-%d.tgz for appliance %s, skipping",
@@ -233,8 +250,8 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
                                 app_ip,
                                 appliance.site,
                                 namespace,
-                                self._peer_lookup,
-                                self._overlay_map,
+                                peer_lookup,
+                                overlay_map,
                                 self.log,
                             )
                             for t in latest_tunnel_stats
@@ -306,17 +323,10 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         mem_data = client.get_memory_stats()
         if not isinstance(mem_data, dict):
             return
-        memory_fields = {
-            'total': 'total',
-            'free': 'free',
-            'used': 'used',
-            'buffers': 'buffers',
-            'cached': 'cached',
-        }
-        for field, tag_value in memory_fields.items():
+        for field in ('total', 'free', 'used', 'buffers', 'cached'):
             value = mem_data.get(field)
             if value is not None:
-                self.gauge('device.memory.usage', value, tags=base_tags + [f'memory_type:{tag_value}'])
+                self.gauge('device.memory.usage', value, tags=base_tags + [f'memory_type:{field}'])
 
     def _collect_disk_stats(self, client: ApplianceClient, base_tags: list[str]) -> None:
         disk_data = client.get_disk_usage()

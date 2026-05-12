@@ -9,9 +9,10 @@ NS = 'hpe_aruba_edgeconnect'
 
 
 EXPECTED_METRIC_COUNTS = {
+    'orchestrator.reachability': 1,
     'device.reachability': 3,
     'device.uptime': 1,
-    'device.cpu.usage': 5,
+    'device.cpu.usage': 4,
     'device.memory.usage': 5,
     'device.disk.usage': 10,
     'device.hardware.ok': 1,
@@ -90,7 +91,6 @@ EXPECTED_VALUES = [
     ('device.cpu.usage', 15.0, ['cpu_state:system']),
     ('device.cpu.usage', 3.0, ['cpu_state:irq']),
     ('device.cpu.usage', 2.0, ['cpu_state:nice']),
-    ('device.cpu.usage', 50.0, ['cpu_state:idle']),
     ('device.memory.usage', 3945080, ['memory_type:total']),
     ('device.memory.usage', 770848, ['memory_type:free']),
     ('device.memory.usage', 3174232, ['memory_type:used']),
