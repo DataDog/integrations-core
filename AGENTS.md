@@ -56,6 +56,10 @@ If a single argument is present in the function, `str | bytes` is preferred.
 - Small, focused functions with descriptive names are better than repeated code blocks
 - Reusable helpers improve maintainability and reduce the need for comments
 
+### Module Constants
+
+- Do not prefix uppercase module constants with a leading underscore (for example `_GIT_REMOTE_PATTERNS`). Module-private constants are fine; just name them without the underscore (`GIT_REMOTE_PATTERNS`). This is a style choice for consistency, not a scoping rule.
+
 ## Configuration Models
 
 **Applicable to:** `**/config_models/*.py`, `*/assets/configuration/spec.yaml`
@@ -127,34 +131,47 @@ Format code with `ddev test -fs <INTEGRATION>`. For example, for the pgbouncer i
 
 ## Changelog Management
 
-Changelog entries are required for all Python changes in `datadog_checks` subdirectories. Changelog entries are not required for changes in tests or assets.
+Changelog entries are required for any change to a file that is shipped with the Agent. This includes Python sources under `datadog_checks/`, `pyproject.toml`, and the integration's `conf.yaml.example`. Changes limited to tests, fixtures, or developer-only assets do not need a changelog entry.
 
-**IMPORTANT:** Changelog files MUST be created using the `ddev release changelog new` command. Do not create or edit changelog files manually.
+**IMPORTANT:** Always open the pull request first and only then add the changelog entry. The entry filename embeds the PR number; creating the file before the PR exists almost always results in the wrong number and a broken entry.
 
-Changelog files are named `<PR_NUMBER>.<TYPE>` and placed in the integration's `changelog.d/` directory.
+**IMPORTANT:** Do not use `ddev release changelog new` to create entries. That command resolves the repository from the active `ddev` configuration, which may not match the worktree or branch you are working in, and it can silently target the wrong repo or write to the wrong location. Create the file by hand instead.
 
-### Version Bumping Behavior
+### How to create an entry
 
-- `fixed` - Bug fixes. Bumps the **patch** version (e.g., 1.0.0 → 1.0.1)
-- `added` - New features. Bumps the **minor** version (e.g., 1.0.0 → 1.1.0)
-- `changed` - Breaking changes or significant modifications. Bumps the **major** version (e.g., 1.0.0 → 2.0.0)
+1. Open the PR and note the PR number (e.g. `23655`).
+2. Pick the entry type from the valid list below.
+3. Create the file at `<INTEGRATION>/changelog.d/<PR_NUMBER>.<TYPE>` (for example `ddev/changelog.d/23655.changed`).
+4. Write a single line describing the change. End the line with a period.
 
-### Command Format
+### Valid entry types
 
-`ddev release changelog new <TYPE> <INTEGRATION> -m "<MESSAGE>"`
+The valid types are defined in `ddev/src/ddev/release/constants.py` (`ENTRY_TYPES`):
+
+- `added` - New features. Bumps the **minor** version (e.g., 1.0.0 → 1.1.0).
+- `changed` - Breaking changes or significant modifications. Bumps the **major** version (e.g., 1.0.0 → 2.0.0).
+- `deprecated` - Marks functionality as deprecated. Bumps the **minor** version.
+- `removed` - Removes functionality. Bumps the **major** version.
+- `fixed` - Bug fixes. Bumps the **patch** version (e.g., 1.0.0 → 1.0.1).
+- `security` - Security-related fixes. Bumps the **minor** version.
 
 ### Examples
 
 ```shell
-# New feature
-ddev release changelog new added kafka_consumer -m "Bump OpenSSL in confluent-kafka to 3.4.1 on Windows."
+# New feature for kafka_consumer in PR #23700
+echo "Bump OpenSSL in confluent-kafka to 3.4.1 on Windows." > kafka_consumer/changelog.d/23700.added
 
-# Bug fix
-ddev release changelog new fixed sqlserver -m "Fix a bug where ``tempdb`` is wrongly excluded from database files metrics due to all instances inherited from ``SqlserverDatabaseMetricsBase`` share the same reference of auto-discovered databases."
-
-# Breaking change
-ddev release changelog new changed postgres -m "Update configuration options for connection pooling."
+# Bug fix for sqlserver in PR #23701
+echo "Fix a bug where ``tempdb`` is wrongly excluded from database files metrics." > sqlserver/changelog.d/23701.fixed
 ```
+
+## Pull Requests
+
+- Open PRs in draft mode unless explicitly asked otherwise; mark them ready for review once the work is complete and CI passes.
+- Always populate the PR body using the repository's template at `.github/PULL_REQUEST_TEMPLATE.md`. Read the template first and fill in every section (`What does this PR do?`, `Motivation`, `Review checklist`). Do not omit, rename, or reorder the template sections, and do not add unrelated sections on top.
+- Keep PR titles short and descriptive in plain words. Do not use conventional-commit prefixes (`feat:`, `fix:`, `chore:`).
+- Add the `qa/skip-qa` label when the PR doesn't need to be tested during QA, and check the corresponding checkbox in the template.
+- Push the branch and open the PR before adding the changelog entry so the entry filename can reference the real PR number.
 
 ## Documentation
 
