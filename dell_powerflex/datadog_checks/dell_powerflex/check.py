@@ -51,9 +51,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         self.check_initializations.append(self._parse_config)
 
     def _parse_config(self) -> None:
-        self._base_tags = [f'powerflex_gateway_url:{self.config.powerflex_gateway_url}'] + list(
-            self.config.tags or ()
-        )
+        self._base_tags = [f'powerflex_gateway_url:{self.config.powerflex_gateway_url}'] + list(self.config.tags or ())
         self._api = PowerFlexAPI(
             self.http,
             self.config.powerflex_gateway_url,
