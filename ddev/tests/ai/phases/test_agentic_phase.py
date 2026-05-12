@@ -3,70 +3,15 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from pathlib import Path
-from unittest.mock import MagicMock
 
 import pytest
 
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 from ddev.ai.phases.agentic_phase import AgenticPhase, render_memory_prompt, render_task_prompt
-from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
 from ddev.ai.phases.messages import PhaseTrigger
-from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
-from ddev.ai.tools.fs.file_registry import FileRegistry
-from ddev.ai.tools.registry import ToolRegistry
 
-from .conftest import MockAgent, make_agent_factory, make_response, resolve_key
-
-
-def _empty_registry_from_names(cls, names, *, owner_id, file_registry):
-    return ToolRegistry([])
-
-
-def _make_agent_phase(
-    flow_dir,
-    mock_agent,
-    monkeypatch,
-    message_queue,
-    *,
-    phase_id="p1",
-    dependencies=None,
-    tasks=None,
-    checkpoint=None,
-    agent_tools=None,
-    flow_variables=None,
-    runtime_variables=None,
-    context_compact_threshold_pct=80,
-    callbacks=None,
-):
-    monkeypatch.setattr("ddev.ai.phases.agentic_phase.AnthropicAgent", make_agent_factory(mock_agent))
-    monkeypatch.setattr(ToolRegistry, "from_names", classmethod(_empty_registry_from_names))
-
-    config = PhaseConfig(
-        agent="writer",
-        tasks=tasks or [TaskConfig(name="t1", prompt="Do the work.")],
-        checkpoint=checkpoint,
-        context_compact_threshold_pct=context_compact_threshold_pct,
-    )
-    agent_config = AgentConfig(tools=agent_tools or [])
-    checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
-
-    phase = AgenticPhase(
-        phase_id=phase_id,
-        dependencies=dependencies or [],
-        config=config,
-        agent_config=agent_config,
-        anthropic_client=MagicMock(),
-        checkpoint_manager=checkpoint_manager,
-        runtime_variables=runtime_variables or {},
-        flow_variables=flow_variables or {},
-        config_dir=flow_dir,
-        file_registry=FileRegistry(policy=FileAccessPolicy(write_root=flow_dir)),
-        callbacks=callbacks,
-    )
-    phase.queue = message_queue
-    return phase, checkpoint_manager
-
+from .conftest import MockAgent, make_agent_phase, make_response, resolve_key
 
 # ---------------------------------------------------------------------------
 # render_task_prompt
@@ -165,7 +110,7 @@ async def test_happy_path_single_task(flow_dir, monkeypatch, message_queue):
         make_response("summary", 10, 5),  # memory step
     ]
     mock_agent = MockAgent(responses)
-    phase, mgr = _make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
+    phase, mgr = make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
@@ -189,7 +134,7 @@ async def test_happy_path_two_tasks(flow_dir, monkeypatch, message_queue):
         make_response("summary", 10, 5),
     ]
     mock_agent = MockAgent(responses)
-    phase, mgr = _make_agent_phase(
+    phase, mgr = make_agent_phase(
         flow_dir,
         mock_agent,
         monkeypatch,
@@ -219,7 +164,7 @@ async def test_memory_step_with_checkpoint_config(flow_dir, monkeypatch, message
         make_response("summary with files", 10, 5),
     ]
     mock_agent = MockAgent(responses)
-    phase, mgr = _make_agent_phase(
+    phase, mgr = make_agent_phase(
         flow_dir,
         mock_agent,
         monkeypatch,
@@ -240,7 +185,7 @@ async def test_memory_step_without_checkpoint_config(flow_dir, monkeypatch, mess
         make_response("summary", 10, 5),
     ]
     mock_agent = MockAgent(responses)
-    phase, mgr = _make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
+    phase, mgr = make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
@@ -260,7 +205,7 @@ async def test_compact_between_tasks_when_above_threshold(flow_dir, monkeypatch,
         make_response("summary", 10, 5),
     ]
     mock_agent = MockAgent(responses)
-    phase, mgr = _make_agent_phase(
+    phase, mgr = make_agent_phase(
         flow_dir,
         mock_agent,
         monkeypatch,
@@ -286,7 +231,7 @@ async def test_no_compact_when_below_threshold(flow_dir, monkeypatch, message_qu
         make_response("summary", 10, 5),
     ]
     mock_agent = MockAgent(responses)
-    phase, mgr = _make_agent_phase(
+    phase, mgr = make_agent_phase(
         flow_dir,
         mock_agent,
         monkeypatch,
@@ -311,78 +256,35 @@ async def test_no_compact_when_below_threshold(flow_dir, monkeypatch, message_qu
 
 async def test_flow_variables_in_system_prompt(flow_dir, monkeypatch, message_queue):
     (flow_dir / "prompts" / "writer.md").write_text("Project: ${project}")
-    responses = [
-        make_response("done", 100, 50),
-        make_response("summary", 10, 5),
-    ]
-    mock_agent = MockAgent(responses)
-    captured_kwargs = {}
-    original_factory = make_agent_factory(mock_agent)
-
-    def capturing_factory(**kwargs):
-        captured_kwargs.update(kwargs)
-        return original_factory(**kwargs)
-
-    monkeypatch.setattr("ddev.ai.phases.agentic_phase.AnthropicAgent", capturing_factory)
-    monkeypatch.setattr(ToolRegistry, "from_names", classmethod(_empty_registry_from_names))
-
-    config = PhaseConfig(
-        agent="writer",
-        tasks=[TaskConfig(name="t1", prompt="Do it.")],
-    )
-    phase = AgenticPhase(
-        phase_id="p1",
-        dependencies=[],
-        config=config,
-        agent_config=AgentConfig(),
-        anthropic_client=MagicMock(),
-        checkpoint_manager=CheckpointManager(flow_dir / "checkpoints.yaml"),
-        runtime_variables={},
+    mock_agent = MockAgent([make_response("done", 100, 50), make_response("summary", 10, 5)])
+    captured_kwargs: dict = {}
+    phase, _ = make_agent_phase(
+        flow_dir,
+        mock_agent,
+        monkeypatch,
+        message_queue,
         flow_variables={"project": "myproj"},
-        config_dir=flow_dir,
-        file_registry=FileRegistry(policy=FileAccessPolicy(write_root=flow_dir)),
+        captured_agent_kwargs=captured_kwargs,
     )
-    phase.queue = message_queue
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
-    assert "Project: myproj" == captured_kwargs["system_prompt"]
+    assert captured_kwargs["system_prompt"] == "Project: myproj"
 
 
 async def test_runtime_variables_override_flow_variables(flow_dir, monkeypatch, message_queue):
     (flow_dir / "prompts" / "writer.md").write_text("Project: ${project}")
-    responses = [
-        make_response("done", 100, 50),
-        make_response("summary", 10, 5),
-    ]
-    mock_agent = MockAgent(responses)
-    captured_kwargs = {}
-    original_factory = make_agent_factory(mock_agent)
-
-    def capturing_factory(**kwargs):
-        captured_kwargs.update(kwargs)
-        return original_factory(**kwargs)
-
-    monkeypatch.setattr("ddev.ai.phases.agentic_phase.AnthropicAgent", capturing_factory)
-    monkeypatch.setattr(ToolRegistry, "from_names", classmethod(_empty_registry_from_names))
-
-    config = PhaseConfig(
-        agent="writer",
-        tasks=[TaskConfig(name="t1", prompt="Do it.")],
-    )
-    phase = AgenticPhase(
-        phase_id="p1",
-        dependencies=[],
-        config=config,
-        agent_config=AgentConfig(),
-        anthropic_client=MagicMock(),
-        checkpoint_manager=CheckpointManager(flow_dir / "checkpoints.yaml"),
-        runtime_variables={"project": "runtime_override"},
+    mock_agent = MockAgent([make_response("done", 100, 50), make_response("summary", 10, 5)])
+    captured_kwargs: dict = {}
+    phase, _ = make_agent_phase(
+        flow_dir,
+        mock_agent,
+        monkeypatch,
+        message_queue,
         flow_variables={"project": "flow_default"},
-        config_dir=flow_dir,
-        file_registry=FileRegistry(policy=FileAccessPolicy(write_root=flow_dir)),
+        runtime_variables={"project": "runtime_override"},
+        captured_agent_kwargs=captured_kwargs,
     )
-    phase.queue = message_queue
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
@@ -396,7 +298,7 @@ async def test_runtime_variables_override_flow_variables(flow_dir, monkeypatch, 
 
 async def test_before_react_raises_propagates(flow_dir, monkeypatch, message_queue):
     mock_agent = MockAgent([])
-    phase, _ = _make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
+    phase, _ = make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
 
     def failing_hook():
         raise RuntimeError("setup failed")
@@ -412,7 +314,7 @@ async def test_after_react_raises_propagates(flow_dir, monkeypatch, message_queu
         make_response("done", 100, 50),
     ]
     mock_agent = MockAgent(responses)
-    phase, _ = _make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
+    phase, _ = make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
 
     def failing_hook():
         raise RuntimeError("teardown failed")
@@ -429,36 +331,17 @@ async def test_after_react_raises_propagates(flow_dir, monkeypatch, message_queu
 
 
 async def test_task_prompt_resolves_memory_variable(flow_dir, monkeypatch, message_queue):
-    mgr = CheckpointManager(flow_dir / "checkpoints.yaml")
-    mgr.write_phase_checkpoint("draft", {"status": "success"})
-    mgr.write_memory("draft", "Created file.py")
-
-    responses = [
-        make_response("done", 100, 50),
-        make_response("summary", 10, 5),
-    ]
-    mock_agent = MockAgent(responses)
-
-    monkeypatch.setattr("ddev.ai.phases.agentic_phase.AnthropicAgent", make_agent_factory(mock_agent))
-    monkeypatch.setattr(ToolRegistry, "from_names", classmethod(_empty_registry_from_names))
-
-    config = PhaseConfig(
-        agent="writer",
+    mock_agent = MockAgent([make_response("done", 100, 50), make_response("summary", 10, 5)])
+    phase, mgr = make_agent_phase(
+        flow_dir,
+        mock_agent,
+        monkeypatch,
+        message_queue,
+        phase_id="review",
         tasks=[TaskConfig(name="t1", prompt="Review: ${draft_memory}")],
     )
-    phase = AgenticPhase(
-        phase_id="review",
-        dependencies=[],
-        config=config,
-        agent_config=AgentConfig(),
-        anthropic_client=MagicMock(),
-        checkpoint_manager=mgr,
-        runtime_variables={},
-        flow_variables={},
-        config_dir=flow_dir,
-        file_registry=FileRegistry(policy=FileAccessPolicy(write_root=flow_dir)),
-    )
-    phase.queue = message_queue
+    mgr.write_phase_checkpoint("draft", {"status": "success"})
+    mgr.write_memory("draft", "Created file.py")
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
@@ -473,7 +356,7 @@ async def test_task_prompt_resolves_memory_variable(flow_dir, monkeypatch, messa
 async def test_memory_api_failure_fails_phase(flow_dir, monkeypatch, message_queue):
     responses = [make_response("task done", 100, 50)]
     mock_agent = MockAgent(responses)
-    phase, mgr = _make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
+    phase, mgr = make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
 
     with pytest.raises(IndexError):
         await phase.process_message(PhaseTrigger(id="start", phase_id=None))
@@ -484,7 +367,7 @@ async def test_memory_api_failure_fails_phase(flow_dir, monkeypatch, message_que
 async def test_memory_template_error_fails_phase(flow_dir, monkeypatch, message_queue):
     responses = [make_response("task done", 100, 50)]
     mock_agent = MockAgent(responses)
-    phase, mgr = _make_agent_phase(
+    phase, mgr = make_agent_phase(
         flow_dir,
         mock_agent,
         monkeypatch,
@@ -509,7 +392,7 @@ async def test_successful_phase_writes_memory_path_into_checkpoint(flow_dir, mon
         make_response("summary text", 10, 5),
     ]
     mock_agent = MockAgent(responses)
-    phase, mgr = _make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
+    phase, mgr = make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
@@ -539,7 +422,7 @@ async def test_run_memory_step_forwards_user_additions_to_build(
     flow_dir, monkeypatch, message_queue, checkpoint, expected_build_arg
 ):
     mock_agent = MockAgent([make_response("ok", 0, 0)])
-    phase, mgr = _make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue, checkpoint=checkpoint)
+    phase, mgr = make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue, checkpoint=checkpoint)
 
     monkeypatch.setattr("ddev.ai.phases.agentic_phase.render_memory_prompt", lambda *a, **kw: "USER_ADDITIONS")
     build_calls: list = []
@@ -562,7 +445,7 @@ async def test_run_memory_step_sends_built_prompt_with_no_tools(flow_dir, monkey
             return await super().send(content, allowed_tools)
 
     agent = CapturingAgent([make_response("ok", 0, 0)])
-    phase, mgr = _make_agent_phase(flow_dir, agent, monkeypatch, message_queue)
+    phase, mgr = make_agent_phase(flow_dir, agent, monkeypatch, message_queue)
     monkeypatch.setattr(mgr, "build_memory_prompt", lambda user_additions: "BUILT")
 
     await phase._run_memory_step(agent, {})
@@ -583,7 +466,7 @@ async def test_run_memory_step_returns_response_data_and_fires_callbacks(flow_di
         events.append(("response", iteration, response.text))
 
     mock_agent = MockAgent([make_response("summary text", 7, 3)])
-    phase, _ = _make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue, callbacks=Callbacks([cb_set]))
+    phase, _ = make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue, callbacks=Callbacks([cb_set]))
 
     result = await phase._run_memory_step(mock_agent, {})
 
@@ -602,7 +485,7 @@ async def test_write_memory_disk_failure_fails_phase(flow_dir, monkeypatch, mess
         make_response("summary text", 10, 5),
     ]
     mock_agent = MockAgent(responses)
-    phase, mgr = _make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
+    phase, mgr = make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
 
     def raise_permission_error(*args, **kwargs):
         raise PermissionError("disk is read-only")
