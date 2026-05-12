@@ -475,3 +475,138 @@ n8n_expression_pool_scaled_up_total 0
 # HELP n8n_expression_pool_scaled_to_zero_total Expression pool scaled to zero after inactivity.
 # TYPE n8n_expression_pool_scaled_to_zero_total counter
 n8n_expression_pool_scaled_to_zero_total 0
+# HELP n8n_ai_document_processed_total Total number of n8n.ai.document.processed events.
+# TYPE n8n_ai_document_processed_total counter
+n8n_ai_document_processed_total 0
+# HELP n8n_ai_embeddings_embedded_document_total Total number of n8n.ai.embeddings.embedded.document events.
+# TYPE n8n_ai_embeddings_embedded_document_total counter
+n8n_ai_embeddings_embedded_document_total 0
+# HELP n8n_ai_embeddings_embedded_query_total Total number of n8n.ai.embeddings.embedded.query events.
+# TYPE n8n_ai_embeddings_embedded_query_total counter
+n8n_ai_embeddings_embedded_query_total 0
+# HELP n8n_ai_llm_error_total Total number of n8n.ai.llm.error events.
+# TYPE n8n_ai_llm_error_total counter
+n8n_ai_llm_error_total 0
+# HELP n8n_ai_llm_generated_total Total number of n8n.ai.llm.generated events.
+# TYPE n8n_ai_llm_generated_total counter
+n8n_ai_llm_generated_total 0
+# HELP n8n_ai_memory_added_message_total Total number of n8n.ai.memory.added.message events.
+# TYPE n8n_ai_memory_added_message_total counter
+n8n_ai_memory_added_message_total 0
+# HELP n8n_ai_memory_get_messages_total Total number of n8n.ai.memory.get.messages events.
+# TYPE n8n_ai_memory_get_messages_total counter
+n8n_ai_memory_get_messages_total 0
+# HELP n8n_ai_output_parser_parsed_total Total number of n8n.ai.output.parser.parsed events.
+# TYPE n8n_ai_output_parser_parsed_total counter
+n8n_ai_output_parser_parsed_total 0
+# HELP n8n_ai_retriever_get_relevant_documents_total Total number of n8n.ai.retriever.get.relevant.documents events.
+# TYPE n8n_ai_retriever_get_relevant_documents_total counter
+n8n_ai_retriever_get_relevant_documents_total 0
+# HELP n8n_ai_text_splitter_split_total Total number of n8n.ai.text.splitter.split events.
+# TYPE n8n_ai_text_splitter_split_total counter
+n8n_ai_text_splitter_split_total 0
+# HELP n8n_ai_tool_called_total Total number of n8n.ai.tool.called events.
+# TYPE n8n_ai_tool_called_total counter
+n8n_ai_tool_called_total 0
+# HELP n8n_ai_vector_store_populated_total Total number of n8n.ai.vector.store.populated events.
+# TYPE n8n_ai_vector_store_populated_total counter
+n8n_ai_vector_store_populated_total 0
+# HELP n8n_ai_vector_store_searched_total Total number of n8n.ai.vector.store.searched events.
+# TYPE n8n_ai_vector_store_searched_total counter
+n8n_ai_vector_store_searched_total 0
+# HELP n8n_ai_vector_store_updated_total Total number of n8n.ai.vector.store.updated events.
+# TYPE n8n_ai_vector_store_updated_total counter
+n8n_ai_vector_store_updated_total 0
+# HELP n8n_audit_execution_data_reveal_failure_total Total number of n8n.audit.execution.data.reveal.failure events.
+# TYPE n8n_audit_execution_data_reveal_failure_total counter
+n8n_audit_execution_data_reveal_failure_total 0
+# HELP n8n_audit_execution_data_revealed_total Total number of n8n.audit.execution.data.revealed events.
+# TYPE n8n_audit_execution_data_revealed_total counter
+n8n_audit_execution_data_revealed_total 0
+# HELP n8n_audit_package_deleted_total Total number of n8n.audit.package.deleted events.
+# TYPE n8n_audit_package_deleted_total counter
+n8n_audit_package_deleted_total 0
+# HELP n8n_audit_package_installed_total Total number of n8n.audit.package.installed events.
+# TYPE n8n_audit_package_installed_total counter
+n8n_audit_package_installed_total 0
+# HELP n8n_audit_package_updated_total Total number of n8n.audit.package.updated events.
+# TYPE n8n_audit_package_updated_total counter
+n8n_audit_package_updated_total 0
+# HELP n8n_audit_user_api_created_total Total number of n8n.audit.user.api.created events.
+# TYPE n8n_audit_user_api_created_total counter
+n8n_audit_user_api_created_total 0
+# HELP n8n_audit_user_api_deleted_total Total number of n8n.audit.user.api.deleted events.
+# TYPE n8n_audit_user_api_deleted_total counter
+n8n_audit_user_api_deleted_total 0
+# HELP n8n_audit_user_credentials_created_total Total number of n8n.audit.user.credentials.created events.
+# TYPE n8n_audit_user_credentials_created_total counter
+n8n_audit_user_credentials_created_total 0
+# HELP n8n_audit_user_credentials_deleted_total Total number of n8n.audit.user.credentials.deleted events.
+# TYPE n8n_audit_user_credentials_deleted_total counter
+n8n_audit_user_credentials_deleted_total 0
+# HELP n8n_audit_user_credentials_shared_total Total number of n8n.audit.user.credentials.shared events.
+# TYPE n8n_audit_user_credentials_shared_total counter
+n8n_audit_user_credentials_shared_total 0
+# HELP n8n_audit_user_credentials_updated_total Total number of n8n.audit.user.credentials.updated events.
+# TYPE n8n_audit_user_credentials_updated_total counter
+n8n_audit_user_credentials_updated_total 0
+# HELP n8n_audit_user_deleted_total Total number of n8n.audit.user.deleted events.
+# TYPE n8n_audit_user_deleted_total counter
+n8n_audit_user_deleted_total 0
+# HELP n8n_audit_user_email_failed_total Total number of n8n.audit.user.email.failed events.
+# TYPE n8n_audit_user_email_failed_total counter
+n8n_audit_user_email_failed_total 0
+# HELP n8n_audit_user_execution_deleted_total Total number of n8n.audit.user.execution.deleted events.
+# TYPE n8n_audit_user_execution_deleted_total counter
+n8n_audit_user_execution_deleted_total 0
+# HELP n8n_audit_user_invitation_accepted_total Total number of n8n.audit.user.invitation.accepted events.
+# TYPE n8n_audit_user_invitation_accepted_total counter
+n8n_audit_user_invitation_accepted_total 0
+# HELP n8n_audit_user_invited_total Total number of n8n.audit.user.invited events.
+# TYPE n8n_audit_user_invited_total counter
+n8n_audit_user_invited_total 0
+# HELP n8n_audit_user_login_failed_total Total number of n8n.audit.user.login.failed events.
+# TYPE n8n_audit_user_login_failed_total counter
+n8n_audit_user_login_failed_total 0
+# HELP n8n_audit_user_login_success_total Total number of n8n.audit.user.login.success events.
+# TYPE n8n_audit_user_login_success_total counter
+n8n_audit_user_login_success_total 0
+# HELP n8n_audit_user_mfa_disabled_total Total number of n8n.audit.user.mfa.disabled events.
+# TYPE n8n_audit_user_mfa_disabled_total counter
+n8n_audit_user_mfa_disabled_total 0
+# HELP n8n_audit_user_mfa_enabled_total Total number of n8n.audit.user.mfa.enabled events.
+# TYPE n8n_audit_user_mfa_enabled_total counter
+n8n_audit_user_mfa_enabled_total 0
+# HELP n8n_audit_user_reinvited_total Total number of n8n.audit.user.reinvited events.
+# TYPE n8n_audit_user_reinvited_total counter
+n8n_audit_user_reinvited_total 0
+# HELP n8n_audit_user_reset_total Total number of n8n.audit.user.reset events.
+# TYPE n8n_audit_user_reset_total counter
+n8n_audit_user_reset_total 0
+# HELP n8n_audit_user_reset_requested_total Total number of n8n.audit.user.reset.requested events.
+# TYPE n8n_audit_user_reset_requested_total counter
+n8n_audit_user_reset_requested_total 0
+# HELP n8n_audit_user_signedup_total Total number of n8n.audit.user.signedup events.
+# TYPE n8n_audit_user_signedup_total counter
+n8n_audit_user_signedup_total 0
+# HELP n8n_audit_user_updated_total Total number of n8n.audit.user.updated events.
+# TYPE n8n_audit_user_updated_total counter
+n8n_audit_user_updated_total 0
+# HELP n8n_audit_variable_created_total Total number of n8n.audit.variable.created events.
+# TYPE n8n_audit_variable_created_total counter
+n8n_audit_variable_created_total 0
+# HELP n8n_audit_variable_deleted_total Total number of n8n.audit.variable.deleted events.
+# TYPE n8n_audit_variable_deleted_total counter
+n8n_audit_variable_deleted_total 0
+# HELP n8n_audit_variable_updated_total Total number of n8n.audit.variable.updated events.
+# TYPE n8n_audit_variable_updated_total counter
+n8n_audit_variable_updated_total 0
+# HELP n8n_execution_throttled_total Total number of n8n.execution.throttled events.
+# TYPE n8n_execution_throttled_total counter
+n8n_execution_throttled_total 0
+# HELP n8n_runner_response_received_total Total number of n8n.runner.response.received events.
+# TYPE n8n_runner_response_received_total counter
+n8n_runner_response_received_total 0
+# HELP n8n_workflow_cancelled_total Total number of n8n.workflow.cancelled events.
+# TYPE n8n_workflow_cancelled_total counter
+n8n_workflow_cancelled_total 0

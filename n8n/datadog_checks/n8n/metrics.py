@@ -19,8 +19,65 @@
 # metrics" section). The `workflow_statistics_*` and SSO/embed token-exchange
 # families require additional flags (`N8N_METRICS_INCLUDE_WORKFLOW_STATISTICS`,
 # token-exchange counters always register but only emit on auth events).
+# Event-bus events whose generated counter name contains a hyphen are silently rejected
+# by n8n's own ``prom-client.validateMetricName`` check (see ``prometheus-metrics.service.ts``).
+# These events are emitted on the bus and reach n8n's event-log file but never register a
+# Prometheus counter on /metrics, so they are intentionally absent from ``METRIC_MAP``:
+#   audit.2fa-enforcement.{enabled,disabled}
+#   audit.cluster.{hostid-clash,split-brain,version-mismatch}.{detected,resolved}
+#   audit.cluster.{instance-joined,instance-left}
+#   audit.external-secrets.connection.{created,deleted,reloaded,tested,updated}
+#   audit.external-secrets.provider.{reloaded,settings.saved}
+#   audit.personal-{publishing,sharing}-restricted.{enabled,disabled}
+#   audit.role-mapping.rule.{created,updated,deleted}
+#   audit.role-mapping.{roles-resolved,rules.bulk-deleted}
+#   audit.token-exchange.{succeeded,failed,identity-linked,user-provisioned,role-updated,embed-login,embed-login-failed}
+#   execution.started-during-bootup
+# To collect these signals, tail n8n's event-log files via the ``logs`` block instead of /metrics.
 METRIC_MAP = {
     'active_workflow_count': 'active.workflow.count',
+    'ai_document_processed': 'ai.document.processed',
+    'ai_embeddings_embedded_document': 'ai.embeddings.embedded.document',
+    'ai_embeddings_embedded_query': 'ai.embeddings.embedded.query',
+    'ai_llm_error': 'ai.llm.error',
+    'ai_llm_generated': 'ai.llm.generated',
+    'ai_memory_added_message': 'ai.memory.added.message',
+    'ai_memory_get_messages': 'ai.memory.get.messages',
+    'ai_output_parser_parsed': 'ai.output.parser.parsed',
+    'ai_retriever_get_relevant_documents': 'ai.retriever.get.relevant.documents',
+    'ai_text_splitter_split': 'ai.text.splitter.split',
+    'ai_tool_called': 'ai.tool.called',
+    'ai_vector_store_populated': 'ai.vector.store.populated',
+    'ai_vector_store_searched': 'ai.vector.store.searched',
+    'ai_vector_store_updated': 'ai.vector.store.updated',
+    'audit_execution_data_reveal_failure': 'audit.execution.data.reveal_failure',
+    'audit_execution_data_revealed': 'audit.execution.data.revealed',
+    'audit_package_deleted': 'audit.package.deleted',
+    'audit_package_installed': 'audit.package.installed',
+    'audit_package_updated': 'audit.package.updated',
+    'audit_user_api_created': 'audit.user.api.created',
+    'audit_user_api_deleted': 'audit.user.api.deleted',
+    'audit_user_credentials_created': 'audit.user.credentials.created',
+    'audit_user_credentials_deleted': 'audit.user.credentials.deleted',
+    'audit_user_credentials_shared': 'audit.user.credentials.shared',
+    'audit_user_credentials_updated': 'audit.user.credentials.updated',
+    'audit_user_deleted': 'audit.user.deleted',
+    'audit_user_email_failed': 'audit.user.email.failed',
+    'audit_user_execution_deleted': 'audit.user.execution.deleted',
+    'audit_user_invitation_accepted': 'audit.user.invitation.accepted',
+    'audit_user_invited': 'audit.user.invited',
+    'audit_user_login_failed': 'audit.user.login.failed',
+    'audit_user_login_success': 'audit.user.login.success',
+    'audit_user_mfa_disabled': 'audit.user.mfa.disabled',
+    'audit_user_mfa_enabled': 'audit.user.mfa.enabled',
+    'audit_user_reinvited': 'audit.user.reinvited',
+    'audit_user_reset': 'audit.user.reset',
+    'audit_user_reset_requested': 'audit.user.reset.requested',
+    'audit_user_signedup': 'audit.user.signedup',
+    'audit_user_updated': 'audit.user.updated',
+    'audit_variable_created': 'audit.variable.created',
+    'audit_variable_deleted': 'audit.variable.deleted',
+    'audit_variable_updated': 'audit.variable.updated',
     'audit_workflow_activated': 'audit.workflow.activated',  # n8n 2.x+
     'audit_workflow_archived': 'audit.workflow.archived',
     'audit_workflow_created': 'audit.workflow.created',
@@ -39,9 +96,7 @@ METRIC_MAP = {
     'embed_login_failures': 'embed.login.failures',  # n8n 2.x+
     'embed_login_requests': 'embed.login.requests',  # n8n 2.x+
     'enabled_users': 'enabled.users',  # n8n 2.x+, requires N8N_METRICS_INCLUDE_WORKFLOW_STATISTICS
-    # n8n 2.x VM-isolated expression engine. Requires N8N_EXPRESSION_ENGINE=vm and
-    # N8N_EXPRESSION_ENGINE_OBSERVABILITY_ENABLED=true; emitted by
-    # `@n8n/expression-runtime`'s ExpressionEvaluator + IdleScalingPool.
+    'execution_throttled': 'execution.throttled',
     'expression_code_cache_eviction': 'expression.code.cache.eviction',
     'expression_code_cache_hit': 'expression.code.cache.hit',
     'expression_code_cache_miss': 'expression.code.cache.miss',
@@ -53,10 +108,7 @@ METRIC_MAP = {
     'expression_pool_scaled_up': 'expression.pool.scaled.up',
     'http_request_duration_seconds': 'http.request.duration.seconds',
     'instance_role_leader': 'instance.role.leader',
-    'last_activity': {
-        'name': 'last.activity',
-        'type': 'time_elapsed',
-    },
+    'last_activity': {'name': 'last.activity', 'type': 'time_elapsed'},
     'manual_executions': 'manual.executions',  # n8n 2.x+, requires N8N_METRICS_INCLUDE_WORKFLOW_STATISTICS
     'node_finished': 'node.finished',
     'node_started': 'node.started',
@@ -90,10 +142,7 @@ METRIC_MAP = {
     'process_open_fds': 'process.open.fds',
     'process_pss_bytes': 'process.pss.bytes',  # n8n 2.x+
     'process_resident_memory_bytes': 'process.resident.memory.bytes',
-    'process_start_time_seconds': {
-        'name': 'process.uptime.seconds',
-        'type': 'time_elapsed',
-    },
+    'process_start_time_seconds': {'name': 'process.uptime.seconds', 'type': 'time_elapsed'},
     'process_virtual_memory_bytes': 'process.virtual.memory.bytes',
     'production_executions': 'production.executions',  # n8n 2.x+, requires N8N_METRICS_INCLUDE_WORKFLOW_STATISTICS
     'production_root_executions': 'production.root.executions',  # n8n 2.x+, requires flag
@@ -102,6 +151,7 @@ METRIC_MAP = {
     'queue_job_enqueued': 'queue.job.enqueued',
     'queue_job_failed': 'queue.job.failed',
     'queue_job_stalled': 'queue.job.stalled',
+    'runner_response_received': 'runner.response.received',
     'runner_task_requested': 'runner.task.requested',
     'scaling_mode_queue_jobs_active': 'scaling.mode.queue.jobs.active',
     'scaling_mode_queue_jobs_completed': 'scaling.mode.queue.jobs.completed',
@@ -113,6 +163,7 @@ METRIC_MAP = {
     'token_exchange_requests': 'token.exchange.requests',  # n8n 2.x+
     'users': 'users.total',  # n8n 2.x+, requires N8N_METRICS_INCLUDE_WORKFLOW_STATISTICS
     'version_info': {'type': 'metadata', 'label': 'version', 'name': 'version'},
+    'workflow_cancelled': 'workflow.cancelled',
     'workflow_execution_duration_seconds': 'workflow.execution.duration.seconds',  # n8n 2.x+
     'workflow_failed': 'workflow.failed',
     'workflow_started': 'workflow.started',

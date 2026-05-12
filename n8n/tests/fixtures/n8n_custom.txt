@@ -475,3 +475,138 @@ test_expression_pool_scaled_up_total 0
 # HELP test_expression_pool_scaled_to_zero_total Expression pool scaled to zero after inactivity.
 # TYPE test_expression_pool_scaled_to_zero_total counter
 test_expression_pool_scaled_to_zero_total 0
+# HELP test_ai_document_processed_total Total number of test.ai.document.processed events.
+# TYPE test_ai_document_processed_total counter
+test_ai_document_processed_total 0
+# HELP test_ai_embeddings_embedded_document_total Total number of test.ai.embeddings.embedded.document events.
+# TYPE test_ai_embeddings_embedded_document_total counter
+test_ai_embeddings_embedded_document_total 0
+# HELP test_ai_embeddings_embedded_query_total Total number of test.ai.embeddings.embedded.query events.
+# TYPE test_ai_embeddings_embedded_query_total counter
+test_ai_embeddings_embedded_query_total 0
+# HELP test_ai_llm_error_total Total number of test.ai.llm.error events.
+# TYPE test_ai_llm_error_total counter
+test_ai_llm_error_total 0
+# HELP test_ai_llm_generated_total Total number of test.ai.llm.generated events.
+# TYPE test_ai_llm_generated_total counter
+test_ai_llm_generated_total 0
+# HELP test_ai_memory_added_message_total Total number of test.ai.memory.added.message events.
+# TYPE test_ai_memory_added_message_total counter
+test_ai_memory_added_message_total 0
+# HELP test_ai_memory_get_messages_total Total number of test.ai.memory.get.messages events.
+# TYPE test_ai_memory_get_messages_total counter
+test_ai_memory_get_messages_total 0
+# HELP test_ai_output_parser_parsed_total Total number of test.ai.output.parser.parsed events.
+# TYPE test_ai_output_parser_parsed_total counter
+test_ai_output_parser_parsed_total 0
+# HELP test_ai_retriever_get_relevant_documents_total Total number of test.ai.retriever.get.relevant.documents events.
+# TYPE test_ai_retriever_get_relevant_documents_total counter
+test_ai_retriever_get_relevant_documents_total 0
+# HELP test_ai_text_splitter_split_total Total number of test.ai.text.splitter.split events.
+# TYPE test_ai_text_splitter_split_total counter
+test_ai_text_splitter_split_total 0
+# HELP test_ai_tool_called_total Total number of test.ai.tool.called events.
+# TYPE test_ai_tool_called_total counter
+test_ai_tool_called_total 0
+# HELP test_ai_vector_store_populated_total Total number of test.ai.vector.store.populated events.
+# TYPE test_ai_vector_store_populated_total counter
+test_ai_vector_store_populated_total 0
+# HELP test_ai_vector_store_searched_total Total number of test.ai.vector.store.searched events.
+# TYPE test_ai_vector_store_searched_total counter
+test_ai_vector_store_searched_total 0
+# HELP test_ai_vector_store_updated_total Total number of test.ai.vector.store.updated events.
+# TYPE test_ai_vector_store_updated_total counter
+test_ai_vector_store_updated_total 0
+# HELP test_audit_execution_data_reveal_failure_total Total number of test.audit.execution.data.reveal.failure events.
+# TYPE test_audit_execution_data_reveal_failure_total counter
+test_audit_execution_data_reveal_failure_total 0
+# HELP test_audit_execution_data_revealed_total Total number of test.audit.execution.data.revealed events.
+# TYPE test_audit_execution_data_revealed_total counter
+test_audit_execution_data_revealed_total 0
+# HELP test_audit_package_deleted_total Total number of test.audit.package.deleted events.
+# TYPE test_audit_package_deleted_total counter
+test_audit_package_deleted_total 0
+# HELP test_audit_package_installed_total Total number of test.audit.package.installed events.
+# TYPE test_audit_package_installed_total counter
+test_audit_package_installed_total 0
+# HELP test_audit_package_updated_total Total number of test.audit.package.updated events.
+# TYPE test_audit_package_updated_total counter
+test_audit_package_updated_total 0
+# HELP test_audit_user_api_created_total Total number of test.audit.user.api.created events.
+# TYPE test_audit_user_api_created_total counter
+test_audit_user_api_created_total 0
+# HELP test_audit_user_api_deleted_total Total number of test.audit.user.api.deleted events.
+# TYPE test_audit_user_api_deleted_total counter
+test_audit_user_api_deleted_total 0
+# HELP test_audit_user_credentials_created_total Total number of test.audit.user.credentials.created events.
+# TYPE test_audit_user_credentials_created_total counter
+test_audit_user_credentials_created_total 0
+# HELP test_audit_user_credentials_deleted_total Total number of test.audit.user.credentials.deleted events.
+# TYPE test_audit_user_credentials_deleted_total counter
+test_audit_user_credentials_deleted_total 0
+# HELP test_audit_user_credentials_shared_total Total number of test.audit.user.credentials.shared events.
+# TYPE test_audit_user_credentials_shared_total counter
+test_audit_user_credentials_shared_total 0
+# HELP test_audit_user_credentials_updated_total Total number of test.audit.user.credentials.updated events.
+# TYPE test_audit_user_credentials_updated_total counter
+test_audit_user_credentials_updated_total 0
+# HELP test_audit_user_deleted_total Total number of test.audit.user.deleted events.
+# TYPE test_audit_user_deleted_total counter
+test_audit_user_deleted_total 0
+# HELP test_audit_user_email_failed_total Total number of test.audit.user.email.failed events.
+# TYPE test_audit_user_email_failed_total counter
+test_audit_user_email_failed_total 0
+# HELP test_audit_user_execution_deleted_total Total number of test.audit.user.execution.deleted events.
+# TYPE test_audit_user_execution_deleted_total counter
+test_audit_user_execution_deleted_total 0
+# HELP test_audit_user_invitation_accepted_total Total number of test.audit.user.invitation.accepted events.
+# TYPE test_audit_user_invitation_accepted_total counter
+test_audit_user_invitation_accepted_total 0
+# HELP test_audit_user_invited_total Total number of test.audit.user.invited events.
+# TYPE test_audit_user_invited_total counter
+test_audit_user_invited_total 0
+# HELP test_audit_user_login_failed_total Total number of test.audit.user.login.failed events.
+# TYPE test_audit_user_login_failed_total counter
+test_audit_user_login_failed_total 0
+# HELP test_audit_user_login_success_total Total number of test.audit.user.login.success events.
+# TYPE test_audit_user_login_success_total counter
+test_audit_user_login_success_total 0
+# HELP test_audit_user_mfa_disabled_total Total number of test.audit.user.mfa.disabled events.
+# TYPE test_audit_user_mfa_disabled_total counter
+test_audit_user_mfa_disabled_total 0
+# HELP test_audit_user_mfa_enabled_total Total number of test.audit.user.mfa.enabled events.
+# TYPE test_audit_user_mfa_enabled_total counter
+test_audit_user_mfa_enabled_total 0
+# HELP test_audit_user_reinvited_total Total number of test.audit.user.reinvited events.
+# TYPE test_audit_user_reinvited_total counter
+test_audit_user_reinvited_total 0
+# HELP test_audit_user_reset_total Total number of test.audit.user.reset events.
+# TYPE test_audit_user_reset_total counter
+test_audit_user_reset_total 0
+# HELP test_audit_user_reset_requested_total Total number of test.audit.user.reset.requested events.
+# TYPE test_audit_user_reset_requested_total counter
+test_audit_user_reset_requested_total 0
+# HELP test_audit_user_signedup_total Total number of test.audit.user.signedup events.
+# TYPE test_audit_user_signedup_total counter
+test_audit_user_signedup_total 0
+# HELP test_audit_user_updated_total Total number of test.audit.user.updated events.
+# TYPE test_audit_user_updated_total counter
+test_audit_user_updated_total 0
+# HELP test_audit_variable_created_total Total number of test.audit.variable.created events.
+# TYPE test_audit_variable_created_total counter
+test_audit_variable_created_total 0
+# HELP test_audit_variable_deleted_total Total number of test.audit.variable.deleted events.
+# TYPE test_audit_variable_deleted_total counter
+test_audit_variable_deleted_total 0
+# HELP test_audit_variable_updated_total Total number of test.audit.variable.updated events.
+# TYPE test_audit_variable_updated_total counter
+test_audit_variable_updated_total 0
+# HELP test_execution_throttled_total Total number of test.execution.throttled events.
+# TYPE test_execution_throttled_total counter
+test_execution_throttled_total 0
+# HELP test_runner_response_received_total Total number of test.runner.response.received events.
+# TYPE test_runner_response_received_total counter
+test_runner_response_received_total 0
+# HELP test_workflow_cancelled_total Total number of test.workflow.cancelled events.
+# TYPE test_workflow_cancelled_total counter
+test_workflow_cancelled_total 0

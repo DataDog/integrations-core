@@ -61,7 +61,27 @@ instances:
 
 #### Event-driven counters
 
-Some n8n counters are registered dynamically the first time the corresponding event fires. For example, `n8n.workflow.started.count`, `n8n.workflow.success.count`, `n8n.workflow.failed.count`, audit workflow lifecycle counters, and the queue and node event counters do not appear until the corresponding workflow or queue event has occurred. This is expected behavior and is not a sign of a misconfigured integration.
+Most n8n counters are registered dynamically the first time their underlying event fires. The integration ships mappings for around 70 of these event-bus counters, including:
+
+- Workflow lifecycle: `n8n.workflow.started.count`, `n8n.workflow.success.count`, `n8n.workflow.failed.count`, `n8n.workflow.cancelled.count`
+- Audit (workflow, user, credentials, package, variable, execution data): `n8n.audit.workflow.executed.count`, `n8n.audit.user.login.success.count`, `n8n.audit.user.credentials.created.count`, and similar
+- AI nodes: `n8n.ai.tool.called.count`, `n8n.ai.llm.generated.count`, `n8n.ai.vector.store.searched.count`, and similar
+- Runner, queue, and node lifecycle: `n8n.runner.task.requested.count`, `n8n.queue.job.completed.count`, `n8n.node.started.count`, `n8n.node.finished.count`
+
+These counters do not appear on the `/metrics` endpoint until the corresponding event has occurred. A healthy idle deployment will not produce data points for them until that activity fires. The complete list is in [`metadata.csv`][7].
+
+A few n8n event names contain hyphens (for example, `n8n.audit.external-secrets.*`, `n8n.audit.token-exchange.*`, `n8n.audit.role-mapping.*`, `n8n.audit.cluster.*`). n8n's own Prometheus exporter rejects metric names containing hyphens, so these events never register a counter on `/metrics` regardless of how the integration is configured. To capture them, collect n8n's event-bus log files instead. See the [Log collection](#log-collection) section.
+
+If a future n8n release exposes a new event-driven counter that is not yet covered by this integration, add it to the `extra_metrics` option in your instance configuration:
+
+```yaml
+instances:
+  - openmetrics_endpoint: http://n8n:5678/metrics
+    extra_metrics:
+      - some_new_n8n_event_total: some.new.n8n.event
+```
+
+The left-hand side is the Prometheus counter name as n8n exposes it (keep the `_total` suffix). The right-hand side is the dotted Datadog metric name to submit it as.
 
 #### Queue mode and workers
 
