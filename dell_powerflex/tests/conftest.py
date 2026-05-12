@@ -38,6 +38,9 @@ LAB_INSTANCE = {
     'powerflex_password': POWERFLEX_PASSWORD,
     'collect_events': True,
     'collect_alerts': True,
+    'resource_filters': [
+        {'resource': 'device', 'property': 'name', 'patterns': ['.*'], 'collect_statistics': True},
+    ],
 }
 
 

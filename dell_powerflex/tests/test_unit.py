@@ -466,10 +466,11 @@ def test_collect_system_with_name(dd_run_check, aggregator, instance, mock_http_
     aggregator.assert_metric('dell_powerflex.mdm_cluster.good_replicas', value=2, tags=system_tags)
 
 
-def test_include_filter_by_name(dd_run_check, aggregator, instance, mock_http_get):
+def test_include_filter_by_name(dd_run_check, aggregator, instance, mock_http_get, caplog):
     instance['resource_filters'] = [
         {'resource': 'storage_pool', 'property': 'name', 'patterns': ['^pool1$']},
     ]
+    caplog.set_level(logging.DEBUG)
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
 
@@ -488,12 +489,14 @@ def test_include_filter_by_name(dd_run_check, aggregator, instance, mock_http_ge
     ]
     aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', count=1, tags=pool1_tags)
     aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', count=0, tags=pool2_tags)
+    assert 'Skipping storage_pool storagepool2: did not match any include pattern' in caplog.text
 
 
-def test_exclude_filter_by_name(dd_run_check, aggregator, instance, mock_http_get):
+def test_exclude_filter_by_name(dd_run_check, aggregator, instance, mock_http_get, caplog):
     instance['resource_filters'] = [
         {'resource': 'sds', 'property': 'name', 'type': 'exclude', 'patterns': ['^SDS3$']},
     ]
+    caplog.set_level(logging.DEBUG)
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
 
@@ -513,6 +516,7 @@ def test_exclude_filter_by_name(dd_run_check, aggregator, instance, mock_http_ge
     ]
     aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', count=0, tags=sds3_tags)
     aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', count=1, tags=sds2_tags)
+    assert 'Skipping sds SDS3: matched exclude pattern' in caplog.text
 
 
 def test_exclude_takes_precedence_over_include(dd_run_check, aggregator, instance, mock_http_get):
@@ -697,44 +701,17 @@ def test_filter_validation_warning(
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
 
 
-@pytest.mark.parametrize(
-    'resource_filters, log_message, excluded_metric, excluded_tag',
-    [
-        pytest.param(
-            [{'resource': 'sds', 'property': 'name', 'type': 'exclude', 'patterns': ['^SDS3$']}],
-            'Skipping sds SDS3: matched exclude pattern',
-            'dell_powerflex.sds.count',
-            'sds_name:SDS3',
-            id='exclude_filter',
-        ),
-        pytest.param(
-            [{'resource': 'storage_pool', 'property': 'name', 'patterns': ['^pool1$']}],
-            'Skipping storage_pool storagepool2: did not match any include pattern',
-            'dell_powerflex.storage_pool.count',
-            'storage_pool_name:storagepool2',
-            id='include_filter',
-        ),
-        pytest.param(
-            [{'resource': 'sds', 'property': 'nonexistent_field', 'patterns': ['.*']}],
-            'property nonexistent_field not found',
-            'dell_powerflex.sds.count',
-            'dell_type:sds',
-            id='missing_property',
-        ),
-    ],
-)
-def test_filter_logs_debug(
-    dd_run_check, aggregator, instance, mock_http_get, caplog, resource_filters, log_message, excluded_metric,
-    excluded_tag,
-):
-    instance['resource_filters'] = resource_filters
+def test_include_filter_missing_property(dd_run_check, aggregator, instance, mock_http_get, caplog):
+    instance['resource_filters'] = [
+        {'resource': 'sds', 'property': 'nonexistent_field', 'patterns': ['.*']},
+    ]
     caplog.set_level(logging.DEBUG)
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
 
-    assert log_message in caplog.text
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
-    aggregator.assert_metric_has_tag(excluded_metric, excluded_tag, count=0)
+    aggregator.assert_metric('dell_powerflex.sds.count', count=0)
+    assert 'property nonexistent_field not found' in caplog.text
 
 
 @pytest.mark.parametrize(
