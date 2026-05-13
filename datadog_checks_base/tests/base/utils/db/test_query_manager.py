@@ -616,6 +616,52 @@ class TestTransformerCompilation:
         ):
             query_manager.compile_queries()
 
+    @pytest.mark.parametrize(
+        'expression, match',
+        [
+            pytest.param('f"total: {disk.total}"', r'contains unsupported syntax `JoinedStr`', id='f-string'),
+            pytest.param('sum(x for x in values)', r'contains unsupported syntax `GeneratorExp`', id='generator-expr'),
+            pytest.param('[x * 2 for x in values]', r'contains unsupported syntax `ListComp`', id='list-comp'),
+            pytest.param('{k: v for k, v in items}', r'contains unsupported syntax `DictComp`', id='dict-comp'),
+            pytest.param('(n := disk.total + disk.used)', r'contains unsupported syntax `NamedExpr`', id='walrus'),
+            pytest.param('lambda x: x + 1', r'contains unsupported syntax `Lambda`', id='lambda'),
+            pytest.param('result.__class__', r'accesses reserved attribute `__class__`', id='dunder-attr'),
+        ],
+    )
+    def test_expression_invalid_syntax(self, expression, match):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [{'name': 'result', 'type': 'expression', 'expression': expression, 'verbose': True}],
+                'tags': ['test:bar'],
+            }
+        )
+        with pytest.raises(ValueError, match=match):
+            query_manager.compile_queries()
+
+    @pytest.mark.parametrize(
+        'expression',
+        [
+            pytest.param('disk.total - disk.used', id='arithmetic'),
+            pytest.param('min(a, b)', id='function-call'),
+            pytest.param('tags[0]', id='subscript'),
+            pytest.param('a if condition else b', id='ternary'),
+        ],
+    )
+    def test_expression_valid_syntax(self, expression):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [{'name': 'result', 'type': 'expression', 'expression': expression, 'verbose': True}],
+                'tags': ['test:bar'],
+            }
+        )
+        query_manager.compile_queries()
+
     @pytest.mark.parametrize('expression', ['import os', 'raise Exception', 'foo = 5'])
     def test_expression_compile_error(self, expression):
         query_manager = create_query_manager(

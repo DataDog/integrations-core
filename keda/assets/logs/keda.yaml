@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: keda
 metric_id: keda
 backend_only: false

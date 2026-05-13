@@ -12,32 +12,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   run:
     name: Run Validations
     uses: ./.github/workflows/run-validations.yml
     with:
       repo: core
-
-      # Validations
-      agent-reqs: true
-      ci: true
-      codeowners: true
-      config: true
-      dep: true
-      http: true
-      imports: true
-      integration-style: true
-      jmx-metrics: true
-      labeler: true
-      legacy-signature: true
-      license-headers: true
-      licenses: true
-      metadata: true
-      models: true
-      openmetrics: true
-      package: true
-      readmes: true
-      saved-views: true
-      version: true
     secrets: inherit

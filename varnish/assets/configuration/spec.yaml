@@ -19,6 +19,7 @@ files:
               (%%host%%, %%port%%) allows for targeting the proper container via service discovery.
             value:
               type: string
+              require_trusted_provider: true
               example: /usr/bin/varnishstat
           - name: metrics_filter
             description: |
@@ -57,6 +58,7 @@ files:
             fleet_configurable: true
             value:
               type: string
+              require_trusted_provider: true
               example: /usr/bin/varnishadm
               display_default: null
           - name: secretfile
@@ -64,6 +66,7 @@ files:
             fleet_configurable: true
             value:
               type: string
+              require_trusted_provider: true
               example: /etc/varnish/secret
           - name: daemon_host
             description: |

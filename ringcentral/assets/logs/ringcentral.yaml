@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: ringcentral
 metric_id: ringcentral
 backend_only: false

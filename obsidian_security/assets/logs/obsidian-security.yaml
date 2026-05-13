@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: obsidian-security
 metric_id: obsidian-security
 backend_only: false

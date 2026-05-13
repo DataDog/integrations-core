@@ -162,7 +162,7 @@ SELECT db.oid::text                  AS id,
 FROM   pg_catalog.pg_database db
        JOIN pg_roles a
          ON datdba = a.oid
-        WHERE datname NOT LIKE 'template%'
+        WHERE datname NOT LIKE 'template%%'
 """
 
 
@@ -201,23 +201,28 @@ class PostgresSchemaCollector(SchemaCollector):
         return "pg_databases"
 
     def _get_databases(self):
+        query = DATABASE_INFORMATION_QUERY
+        params: list[str] = []
+
+        for exclude_regex in self._config.exclude_databases:
+            query += " AND datname !~ %s"
+            params.append(exclude_regex)
+
+        if self._config.include_databases:
+            or_clause = " OR ".join(["datname ~ %s"] * len(self._config.include_databases))
+            query += f" AND ({or_clause})"
+            params.extend(self._config.include_databases)
+
+        # Autodiscovery trumps exclude and include
+        autodiscovery_databases = self._check.autodiscovery.get_items() if self._check.autodiscovery else []
+        if autodiscovery_databases:
+            in_clause = ", ".join(["%s"] * len(autodiscovery_databases))
+            query += f" AND datname IN ({in_clause})"
+            params.extend(autodiscovery_databases)
+
         with self._check._get_main_db() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
-                query = DATABASE_INFORMATION_QUERY
-                for exclude_regex in self._config.exclude_databases:
-                    query += " AND datname !~ '{}'".format(exclude_regex)
-                if self._config.include_databases:
-                    query += f" AND ({
-                        ' OR '.join(f"datname ~ '{include_regex}'" for include_regex in self._config.include_databases)
-                    })"
-
-                # Autodiscovery trumps exclude and include
-                if self._check.autodiscovery:
-                    autodiscovery_databases = self._check.autodiscovery.get_items()
-                    if autodiscovery_databases:
-                        query += " AND datname IN ({})".format(", ".join(f"'{db}'" for db in autodiscovery_databases))
-
-                cursor.execute(query)
+                cursor.execute(query, params)
                 return [dict(row) for row in cursor.fetchall()]
 
     @contextlib.contextmanager

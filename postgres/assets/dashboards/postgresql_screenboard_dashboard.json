@@ -1612,7 +1612,7 @@
               "title_align": "left",
               "type": "log_stream",
               "indexes": [],
-              "query": "source:postgresql hostname:$host.value",
+              "query": "source:postgresql (host:$host.value OR hostname:$host.value)",
               "sort": {
                 "column": "time",
                 "order": "desc"

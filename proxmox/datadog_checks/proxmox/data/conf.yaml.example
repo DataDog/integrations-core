@@ -50,31 +50,15 @@ instances:
     #
   - proxmox_server: http://localhost:8006/api2/json
 
+    ## @param tls_verify - boolean - optional - default: true
+    ## Instructs the check to validate the TLS certificate of services.
+    #
+    # tls_verify: true
+
     ## @param collect_tasks - boolean - optional - default: false
     ## Whether or not to collect Proxmox tasks as events.
     #
     # collect_tasks: true
-
-    ## @param collected_task_types - list of strings - optional - default: ['qmstart', 'qmstop', 'qmshutdown', 'qmreboot', 'qmigrate', 'qmsuspend', 'vzstart', 'vzshutdown', 'vzsuspend', 'startall', 'stopall', 'suspendall', 'aptupdate']
-    ## Which Proxmox task types to collect.
-    ##
-    ## When `collect_tasks` is enabled, the integration will collect
-    ## the following task types by default:
-    ##   - qmstart
-    ##   - qhstop
-    ##   - qmshutdown
-    ##   - qmreboot
-    ##   - qmigrate
-    ##   - qmsuspend
-    ##   - vzstart
-    ##   - vzshutdown
-    ##   - vzsuspend
-    ##   - startall
-    ##   - stopall
-    ##   - suspendall
-    ##   - aptupdate
-    #
-    # collected_task_types: []
 
     ## @param headers - mapping - optional
     ## Headers to use for every request. An Authorization header including the Proxmox API token is required
@@ -123,13 +107,16 @@ instances:
     #     <OPTION_1>: <VALUE_1>
     #     <OPTION_2>: <VALUE_2>
 
-    ## @param empty_default_hostname - boolean - optional - default: true
-    ## The Proxmox integration is a check where metrics are usually unrelated to the host on which the Agent
-    ## runs. Setting this parameter to "true" prevents the Agent from attaching the hostname (and the host
-    ## tags) to the metrics. It is especially important to leave this parameter set to "true" when you are running the
-    ## Agent inside a Proxmox VM or Node, because in this scenario the host tags are unrelated to other metrics.
+    ## @param log_requests - boolean - optional - default: false
+    ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
     #
-    # empty_default_hostname: true
+    # log_requests: false
+
+    ## @param tls_ignore_warning - boolean - optional - default: false
+    ## If `tls_verify` is disabled, security warnings are logged by the check.
+    ## Disable those by setting `tls_ignore_warning` to true.
+    #
+    # tls_ignore_warning: false
 
     ## @param resource_filters - list of mappings - optional
     ## Each filter in the list is composed of three parameters.
@@ -154,6 +141,35 @@ instances:
     #     type: include
     #     patterns:
     #     - thiscontainer
+
+    ## @param empty_default_hostname - boolean - optional - default: true
+    ## The Proxmox integration is a check where metrics are usually unrelated to the host on which the Agent
+    ## runs. Setting this parameter to "true" prevents the Agent from attaching the hostname (and the host
+    ## tags) to the metrics. It is especially important to leave this parameter set to "true" when you are running the
+    ## Agent inside a Proxmox VM or Node, because in this scenario the host tags are unrelated to other metrics.
+    #
+    # empty_default_hostname: true
+
+    ## @param collected_task_types - list of strings - optional - default: ['qmstart', 'qmstop', 'qmshutdown', 'qmreboot', 'qmigrate', 'qmsuspend', 'vzstart', 'vzshutdown', 'vzsuspend', 'startall', 'stopall', 'suspendall', 'aptupdate']
+    ## Which Proxmox task types to collect.
+    ##
+    ## When `collect_tasks` is enabled, the integration will collect
+    ## the following task types by default:
+    ##   - qmstart
+    ##   - qhstop
+    ##   - qmshutdown
+    ##   - qmreboot
+    ##   - qmigrate
+    ##   - qmsuspend
+    ##   - vzstart
+    ##   - vzshutdown
+    ##   - vzsuspend
+    ##   - startall
+    ##   - stopall
+    ##   - suspendall
+    ##   - aptupdate
+    #
+    # collected_task_types: []
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -354,21 +370,10 @@ instances:
     #
     # aws_service: <AWS_SERVICE>
 
-    ## @param tls_verify - boolean - optional - default: true
-    ## Instructs the check to validate the TLS certificate of services.
-    #
-    # tls_verify: true
-
     ## @param tls_use_host_header - boolean - optional - default: false
     ## If a `Host` header is set, this enables its use for SNI (matching against the TLS certificate CN or SAN).
     #
     # tls_use_host_header: false
-
-    ## @param tls_ignore_warning - boolean - optional - default: false
-    ## If `tls_verify` is disabled, security warnings are logged by the check.
-    ## Disable those by setting `tls_ignore_warning` to true.
-    #
-    # tls_ignore_warning: false
 
     ## @param tls_cert - string - optional
     ## The path to a single file in PEM format containing a certificate as well as any
@@ -443,11 +448,6 @@ instances:
     ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
     #
     # request_size: 16
-
-    ## @param log_requests - boolean - optional - default: false
-    ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
-    #
-    # log_requests: false
 
     ## @param persist_connections - boolean - optional - default: false
     ## Whether or not to persist cookies and use connection pooling for improved performance.

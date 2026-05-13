@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: ossec-security
 metric_id: ossec-security
 backend_only: false

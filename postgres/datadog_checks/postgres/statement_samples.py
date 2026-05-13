@@ -152,8 +152,6 @@ class PostgresStatementSamples(DBMAsyncJob):
         if not config.query_samples.enabled:
             collection_interval = config.query_activity.collection_interval
 
-        self.db_pool = check.db_pool
-
         super(PostgresStatementSamples, self).__init__(
             check,
             rate_limit=1 / collection_interval,
@@ -221,6 +219,15 @@ class PostgresStatementSamples(DBMAsyncJob):
         # Keep track of last time we sent an activity event
         self._time_since_last_activity_event = 0
         self._pg_stat_activity_cols = None
+
+    def _shutdown(self):
+        self._check = None
+        self._explain_parameterized_queries = None
+        self._collection_strategy_cache = None
+        self._explain_errors_cache = None
+        self._explained_statements_ratelimiter = None
+        self._seen_samples_ratelimiter = None
+        self._raw_statement_text_cache = None
 
     def _dbtags(self, db, *extra_tags):
         """
@@ -646,7 +653,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _get_db_explain_setup_state(self, dbname):
         # type: (str) -> Tuple[Optional[DBExplainError], Optional[Exception]]
         try:
-            self.db_pool.get_connection(dbname)
+            self._check.db_pool.get_connection(dbname)
         except psycopg.OperationalError as e:
             self._log.warning(
                 "cannot collect execution plans due to failed DB connection to dbname=%s: %s", dbname, repr(e)
@@ -712,7 +719,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         start_time = time.time()
         if self._cancel_event.is_set():
             raise Exception("Job loop cancelled. Aborting query.")
-        with self.db_pool.get_connection(dbname) as conn:
+        with self._check.db_pool.get_connection(dbname) as conn:
             # When sending potentially non-ascii data, e.g. UTF8, we need to force
             # the client encoding to UTF-8 to match Python string encoding
             if conn.info.encoding.lower() in ["ascii", "sqlascii", "sql_ascii"]:
@@ -725,9 +732,8 @@ class PostgresStatementSamples(DBMAsyncJob):
                     "Running query on dbname=%s: %s(%s)", dbname, self._explain_function, obfuscated_statement
                 )
                 cursor.execute(
-                    """SELECT {explain_function}($stmt${statement}$stmt$)""".format(
-                        explain_function=self._explain_function, statement=statement
-                    ),
+                    "SELECT {}(%s)".format(self._explain_function),
+                    (statement,),
                     ignore_query_metric=True,
                 )
                 result = cursor.fetchone()

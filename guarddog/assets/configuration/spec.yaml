@@ -16,6 +16,7 @@ files:
       description: "Absolute path to the GuardDog file."
       value:
         type: string
+        require_trusted_provider: true
         example: <ABSOLUTE_PATH_OF_GUARDDOG>
     - template: init_config/default
   - template: instances
@@ -38,6 +39,7 @@ files:
       description: "Absolute path to the dependency file you want to monitor."
       value:
         type: string
+        require_trusted_provider: true
         example: <DEPENDENCY_FILE_PATH>
 
     - template: instances/default

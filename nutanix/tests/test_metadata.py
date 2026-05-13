@@ -61,9 +61,12 @@ def test_version_metadata(dd_run_check, mock_instance, mock_http_get, datadog_ag
         ('pc.2024.3', '2024', '3'),
     ],
 )
-def test_version_metadata_formats(mock_instance, datadog_agent, version, expected_major, expected_minor):
+def test_version_metadata_formats(
+    dd_run_check, mock_instance, mock_http_get, datadog_agent, version, expected_major, expected_minor
+):
     check = NutanixCheck('nutanix', {}, [mock_instance])
     check.check_id = 'test:123'
+    dd_run_check(check)
 
     pc_cluster = {'config': {'buildInfo': {'version': version}, 'clusterFunction': ['PRISM_CENTRAL']}}
     check.infrastructure_monitor._collect_pc_version_metadata(pc_cluster)
