@@ -4,4 +4,4 @@
 
 ## 1.0.0 / 2026-05-13
 
-No significant changes.
+* Initial Release ([#23110](https://github.com/DataDog/integrations-core/pull/23110))
