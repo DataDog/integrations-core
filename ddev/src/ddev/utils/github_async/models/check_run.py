@@ -16,6 +16,6 @@ class CheckRun(BaseModel):
     id: int
     name: str
     status: str
-    conclusion: str | None
-    html_url: str | None
-    head_sha: str
+    conclusion: str | None = None
+    html_url: str | None = None
+    head_sha: str | None = None
