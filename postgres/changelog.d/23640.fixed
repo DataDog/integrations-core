@@ -1,0 +1,1 @@
+Close dangling connections and break reference cycles on check cancel to reduce memory retention when checks are restarted or rescheduled
