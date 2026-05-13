@@ -67,6 +67,32 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def find_integrations_with_e2e(repo_root: Path) -> list[str]:
+    """Return sorted list of integration names that have a test_e2e.py file."""
+    return sorted(
+        path.parts[-3]
+        for path in repo_root.glob("*/tests/test_e2e.py")
+    )
+
+
+def parse_ddev_env_show(output: str) -> list[str]:
+    """Extract environment names from `ddev env show` table output."""
+    envs = []
+    for line in output.splitlines():
+        m = re.match(r"[│┤]\s+(\S+)\s+[│┤]", line)
+        if m and m.group(1) != "Name":
+            envs.append(m.group(1))
+    return envs
+
+
+def select_environment(envs: list[str]) -> str | None:
+    """Return the last environment with a numeric version suffix, or the last overall."""
+    if not envs:
+        return None
+    version_envs = [e for e in envs if re.search(r"-\d+\.\d+$", e)]
+    return version_envs[-1] if version_envs else envs[-1]
+
+
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Analyze isMainProcessForService against real E2E environments"
