@@ -19,6 +19,8 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import click
+from rich.panel import Panel
+from rich.text import Text
 
 from ddev.utils.fs import Path
 from ddev.utils.git import GitRepository
@@ -61,7 +63,7 @@ class PortStep:
                 self.app.display_info(f'  (dry-run) {cmd}')
             return
 
-        self.app.display_info(f'{self.describe()}...')
+        self.app.output(Text(f'{self.describe()}...'), stderr=True)
         try:
             self.execute()
         except PortStepError:
@@ -69,7 +71,8 @@ class PortStep:
         except OSError as e:
             raise PortStepError(str(e)) from e
 
-        self.app.display_success(f'{self.describe()}: done.')
+        self.app.output(Text(f'{self.describe()}: done.', style='cyan'), stderr=True)
+        self.app.output('', stderr=True)
 
 
 class FetchOriginStep(PortStep):
@@ -370,8 +373,11 @@ def split_commit_subject(subject: str) -> tuple[str, str | None]:
     return PR_NUMBER_SUFFIX_PATTERN.sub('', subject), match.group(1)
 
 
-def build_pr_body(app: Application, *, sha: str, subject: str, target: str, original_pr: str | None) -> str:
-    info_lines = [f'**Backported commit**: `{sha[:10]}` - {subject}']
+def build_pr_body(
+    app: Application, *, sha: str, subject: str, target: str, original_pr: str | None, owner: str, repo: str
+) -> str:
+    commit_link = f'[`{sha[:10]}`](https://github.com/{owner}/{repo}/commit/{sha})'
+    info_lines = [f'**Backported commit**: {commit_link} - {subject}']
     if original_pr:
         info_lines.append(f'**Original PR**: #{original_pr}')
     info_lines.append(f'**Target branch**: `{target}`')
@@ -488,6 +494,7 @@ def resolve_port_plan(
 
     suffix = branch_suffix or f'to-{target_branch}'
     new_branch = f'{user}/{branch_prefix}-{full_sha[:10]}-{suffix}'.lower()
+    owner, repo = resolve_owner_repo(app)
     plan = PortPlan(
         full_sha=full_sha,
         clean_subject=clean_subject,
@@ -496,7 +503,15 @@ def resolve_port_plan(
         new_branch=new_branch,
         worktree_path=_worktree_path_for(app, new_branch),
         pr_title=f'[Backport] {clean_subject}',
-        pr_body=build_pr_body(app, sha=full_sha, subject=clean_subject, target=target_branch, original_pr=original_pr),
+        pr_body=build_pr_body(
+            app,
+            sha=full_sha,
+            subject=clean_subject,
+            target=target_branch,
+            original_pr=original_pr,
+            owner=owner,
+            repo=repo,
+        ),
         labels=parse_labels(pr_labels),
         draft=draft,
         create_pr=not no_pr,
@@ -504,7 +519,7 @@ def resolve_port_plan(
         dry_run=dry_run,
     )
 
-    app.display_info(_format_plan_summary(plan))
+    app.output(_format_plan_summary(plan), stderr=True)
 
     if not dry_run and not click.confirm('Continue?'):
         app.abort('Did not get confirmation, aborting.')
@@ -512,22 +527,47 @@ def resolve_port_plan(
     return plan
 
 
-def _format_plan_summary(plan: PortPlan) -> str:
-    original_pr_line = f'  Original PR: #{plan.original_pr}' if plan.original_pr else '  Original PR: (none)'
-    return '\n'.join(
-        [
-            'Configuration:',
-            f'  Target branch: {plan.target_branch}',
-            f'  Commit: {plan.full_sha[:10]} - {plan.clean_subject}',
-            original_pr_line,
-            f'  New branch: {plan.new_branch}',
-            f'  Worktree path: {plan.worktree_path}',
-            f'  Create PR: {plan.create_pr} (draft={plan.draft})',
-            f'  PR labels: {", ".join(plan.labels) if plan.labels else "(none)"}',
-            f'  Verify commit: {plan.verify}',
-            f'  Dry run: {plan.dry_run}',
-        ]
-    )
+def display_completion_summary(app: Application, plan: PortPlan, *, pr_url: str | None) -> None:
+    """Print a panel summarising the port outcome."""
+    text = Text()
+    rows: list[tuple[str, str]] = [
+        ('Commit', f'{plan.full_sha[:10]} - {plan.clean_subject}'),
+        ('Target', plan.target_branch),
+        ('Branch', plan.new_branch),
+    ]
+    if pr_url is not None:
+        rows.append(('Pull request', pr_url))
+
+    label_width = max(len(label) for label, _ in rows)
+    for i, (label, value) in enumerate(rows):
+        if i:
+            text.append('\n')
+        text.append(f'{label}:'.ljust(label_width + 2), style='bold')
+        text.append(value)
+
+    app.output(Panel(text, title='Backport completed', title_align='left', border_style='cyan'), stderr=True)
+
+
+def _format_plan_summary(plan: PortPlan) -> Text:
+    text = Text()
+    text.append('Configuration:', style='bold')
+
+    rows: list[tuple[str, str]] = [
+        ('Target branch', plan.target_branch),
+        ('Commit', f'{plan.full_sha[:10]} - {plan.clean_subject}'),
+        ('Original PR', f'#{plan.original_pr}' if plan.original_pr else '(none)'),
+        ('New branch', plan.new_branch),
+        ('Worktree path', str(plan.worktree_path)),
+        ('Create PR', f'{plan.create_pr} (draft={plan.draft})'),
+        ('PR labels', ', '.join(plan.labels) if plan.labels else '(none)'),
+        ('Verify commit', str(plan.verify)),
+        ('Dry run', str(plan.dry_run)),
+    ]
+    for label, value in rows:
+        text.append('\n  ')
+        text.append(f'{label}:', style='bold')
+        text.append(f' {value}')
+    return text
 
 
 @dataclass(frozen=True)

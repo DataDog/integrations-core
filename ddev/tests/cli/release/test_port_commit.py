@@ -74,9 +74,20 @@ def test_build_pr_body_uses_template(app_mock, tmp_path):
     template_file.write_text('### What does this PR do?\n\n<!-- describe -->\n\n### Motivation\n')
     app_mock.repo.path = tmp_path
 
-    body = build_pr_body(app_mock, sha='abcdef1234567890', subject='Fix bug', target='7.62.x', original_pr='12345')
+    body = build_pr_body(
+        app_mock,
+        sha='abcdef1234567890',
+        subject='Fix bug',
+        target='7.62.x',
+        original_pr='12345',
+        owner='DataDog',
+        repo='integrations-core',
+    )
 
-    assert '**Backported commit**: `abcdef1234`' in body
+    assert (
+        '**Backported commit**: [`abcdef1234`](https://github.com/DataDog/integrations-core/commit/abcdef1234567890)'
+        in body
+    )
     assert '**Original PR**: #12345' in body
     assert '**Target branch**: `7.62.x`' in body
     assert '### Motivation' in body
@@ -85,10 +96,21 @@ def test_build_pr_body_uses_template(app_mock, tmp_path):
 def test_build_pr_body_without_template(app_mock, tmp_path):
     app_mock.repo.path = tmp_path
 
-    body = build_pr_body(app_mock, sha='abcdef1234567890', subject='Fix bug', target='master', original_pr=None)
+    body = build_pr_body(
+        app_mock,
+        sha='abcdef1234567890',
+        subject='Fix bug',
+        target='master',
+        original_pr=None,
+        owner='DataDog',
+        repo='integrations-core',
+    )
 
     assert '### What does this PR do?' in body
-    assert '**Backported commit**: `abcdef1234`' in body
+    assert (
+        '**Backported commit**: [`abcdef1234`](https://github.com/DataDog/integrations-core/commit/abcdef1234567890)'
+        in body
+    )
     assert 'Original PR' not in body
 
 
@@ -125,9 +147,9 @@ def test_port_step_executes_and_emits_success(app_mock):
     step.run()
     assert step.executed is True
     app_mock.status.assert_not_called()
-    info_calls = [c.args[0] for c in app_mock.display_info.call_args_list]
-    assert any('Doing the thing' in line for line in info_calls)
-    app_mock.display_success.assert_called_once()
+    output_text = ' '.join(str(c.args[0]) for c in app_mock.output.call_args_list)
+    assert 'Doing the thing...' in output_text
+    assert 'Doing the thing: done.' in output_text
 
 
 def test_port_step_wraps_oserror_as_port_step_error(app_mock):
@@ -371,7 +393,8 @@ def test_command_happy_path(ddev: CliRunner, mocker: MockerFixture, fake_async_g
     result = ddev('release', 'port-commit', '1234567890abcdef00')
 
     assert result.exit_code == 0, result.output
-    assert 'Pull request created: https://github.com/x/pr/1' in result.output
+    assert 'Backport completed' in result.output
+    assert 'https://github.com/x/pr/1' in result.output
 
     pr_call = fake_async_github.last_call('create_pull_request')
     assert pr_call.kwargs['owner'] == 'DataDog'
@@ -380,7 +403,10 @@ def test_command_happy_path(ddev: CliRunner, mocker: MockerFixture, fake_async_g
     assert pr_call.kwargs['head'] == 'alice/port-1234567890-to-master'
     assert pr_call.kwargs['base'] == 'master'
     assert pr_call.kwargs['draft'] is False
-    assert '**Backported commit**: `1234567890`' in pr_call.kwargs['body']
+    assert (
+        '**Backported commit**: [`1234567890`](https://github.com/DataDog/integrations-core/commit/1234567890abcdef00)'
+        in pr_call.kwargs['body']
+    )
     assert '**Original PR**: #100' in pr_call.kwargs['body']
 
     fake_async_github.assert_called_once_with(

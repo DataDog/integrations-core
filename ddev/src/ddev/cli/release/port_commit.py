@@ -53,7 +53,12 @@ def port_commit(
     The GitHub user for the branch prefix is taken from `ddev config` (`github.user`) or the
     `DD_GITHUB_USER` / `GITHUB_USER` / `GITHUB_ACTOR` environment variables.
     """
-    from ddev.cli.release.port_commit_workflow import PortStepError, build_port_steps, resolve_port_plan
+    from ddev.cli.release.port_commit_workflow import (
+        PortStepError,
+        build_port_steps,
+        display_completion_summary,
+        resolve_port_plan,
+    )
 
     plan = resolve_port_plan(
         app,
@@ -94,6 +99,9 @@ def port_commit(
         app.display_warning(f'Could not remove worktree at `{plan.worktree_path}`: {e}')
         app.display_warning(f'Run `git worktree remove --force {plan.worktree_path}` to clean it up manually.')
 
-    if bundle.pr_step is not None and not plan.dry_run:
-        app.display_success(f'Pull request created: {bundle.pr_step.pr_url}')
-    app.display_success('All done.')
+    if plan.dry_run:
+        app.display_success('Dry run complete.')
+        return
+
+    pr_url = bundle.pr_step.pr_url if bundle.pr_step is not None else None
+    display_completion_summary(app, plan, pr_url=pr_url)
