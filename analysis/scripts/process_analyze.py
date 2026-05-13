@@ -212,6 +212,21 @@ def get_pids_in_container(container_name_or_id: str) -> list[int]:
     return pids
 
 
+def is_main_process(pid: int, processes: dict[int, Process]) -> bool:
+    """Python equivalent of the Go isMainProcessForService function.
+
+    Returns True if this process should be treated as the main (root) process
+    for its service — i.e., it should get its own integration instance.
+    """
+    p = processes[pid]
+    if p.ppid in (0, 1):
+        return True
+    parent = processes.get(p.ppid)
+    if parent is None or not parent.has_service_data:
+        return True
+    return parent.generated_name != p.generated_name
+
+
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Analyze isMainProcessForService against real E2E environments"

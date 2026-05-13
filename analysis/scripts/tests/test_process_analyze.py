@@ -209,3 +209,56 @@ def test_get_pids_in_container(tmp_path):
         with patch.object(pa, "_proc_root", tmp_path):
             pids = pa.get_pids_in_container("abc123")
     assert sorted(pids) == [100, 102]
+
+
+from process_analyze import is_main_process
+
+
+def _procs(*args: tuple) -> dict[int, "Process"]:
+    """Build a pid→Process dict from (pid, ppid, name, has_service) tuples."""
+    from process_analyze import Process
+    return {
+        pid: Process(pid=pid, ppid=ppid, comm=name, cmdline=name,
+                     generated_name=name if has_svc else None,
+                     has_service_data=has_svc)
+        for pid, ppid, name, has_svc in args
+    }
+
+
+def test_main_process_ppid_zero():
+    procs = _procs((5, 0, "nginx", True))
+    assert is_main_process(5, procs) is True
+
+
+def test_main_process_ppid_one():
+    procs = _procs((5, 1, "nginx", True))
+    assert is_main_process(5, procs) is True
+
+
+def test_main_process_parent_not_in_store():
+    procs = _procs((5, 99, "nginx", True))  # parent 99 not in dict
+    assert is_main_process(5, procs) is True
+
+
+def test_main_process_parent_has_no_service():
+    procs = _procs(
+        (1, 0, "sh", False),   # parent: no service
+        (5, 1, "nginx", True),  # child
+    )
+    assert is_main_process(5, procs) is True
+
+
+def test_main_process_parent_same_name_is_not_main():
+    procs = _procs(
+        (100, 0, "nginx", True),  # master: ppid=0 → main
+        (5, 100, "nginx", True),  # worker: ppid=100 (master), same name → not main
+    )
+    assert is_main_process(5, procs) is False
+
+
+def test_main_process_parent_different_name_is_main():
+    procs = _procs(
+        (1, 0, "supervisord", True),
+        (5, 1, "nginx", True),  # parent is supervisord, different name → main
+    )
+    assert is_main_process(5, procs) is True
