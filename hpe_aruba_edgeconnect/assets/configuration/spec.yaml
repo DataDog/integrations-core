@@ -22,8 +22,9 @@ files:
         default: default
     - name: appliance_ips
       description: |
-        HPE Aruba EdgeConnect appliance targets. CIDR entries match any appliance IP within the block. Use `include` to specify which appliances to poll and 
-        `exclude` to skip individual appliances. `exclude` takes precedence over `include`.
+        HPE Aruba EdgeConnect appliance targets. CIDR entries match any appliance IP within the block. 
+        Use `include` to specify which appliances to poll and `exclude` to skip individual appliances. 
+        `exclude` takes precedence over `include`.
       value:
         type: object
         properties:
