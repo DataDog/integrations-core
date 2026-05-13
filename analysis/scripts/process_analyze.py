@@ -312,7 +312,7 @@ def collect_integration(
     before = get_current_container_ids()
     try:
         start = subprocess.run(
-            ["ddev", "--no-interactive", "env", "start", "--dev", integration, env],
+            ["ddev", "--no-interactive", "env", "start", integration, env],
             capture_output=True, text=True, timeout=300,
         )
     except subprocess.TimeoutExpired:
