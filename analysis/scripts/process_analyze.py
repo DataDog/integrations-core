@@ -111,6 +111,71 @@ def uses_caddy(integration: str, repo_root: Path) -> tuple[bool, str]:
     return False, ""
 
 
+def read_proc_status(pid: int) -> dict[str, str]:
+    """Read /proc/<pid>/status and return key→value pairs."""
+    result: dict[str, str] = {}
+    try:
+        for line in Path(f"/proc/{pid}/status").read_text().splitlines():
+            if ":" in line:
+                key, _, value = line.partition(":")
+                result[key.strip()] = value.strip()
+    except (OSError, PermissionError):
+        pass
+    return result
+
+
+def read_proc_cmdline(pid: int) -> str:
+    """Read /proc/<pid>/cmdline, replacing null bytes with spaces."""
+    try:
+        raw = Path(f"/proc/{pid}/cmdline").read_bytes()
+        return raw.replace(b"\x00", b" ").decode("utf-8", errors="replace").strip()
+    except (OSError, PermissionError):
+        return ""
+
+
+def run_disco(disco_path: str, pid: int) -> dict:
+    """Run disco --pid <pid> and return parsed JSON. Returns empty response on any error."""
+    try:
+        result = subprocess.run(
+            [disco_path, "--pid", str(pid)],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        return json.loads(result.stdout)
+    except (subprocess.TimeoutExpired, json.JSONDecodeError, FileNotFoundError, OSError):
+        return {"services": [], "injected_pids": [], "gpu_pids": []}
+
+
+def collect_process(pid: int, disco_path: str) -> Process | None:
+    """Collect all data for a single PID. Returns None if the process has vanished."""
+    status = read_proc_status(pid)
+    if not status:
+        return None
+    ppid = int(status.get("PPid", 0))
+    comm = status.get("Name", "")
+    cmdline = read_proc_cmdline(pid)
+    disco_result = run_disco(disco_path, pid)
+    services = disco_result.get("services", [])
+    if services:
+        return Process(
+            pid=pid,
+            ppid=ppid,
+            comm=comm,
+            cmdline=cmdline,
+            generated_name=services[0].get("generated_name"),
+            has_service_data=True,
+        )
+    return Process(
+        pid=pid,
+        ppid=ppid,
+        comm=comm,
+        cmdline=cmdline,
+        generated_name=None,
+        has_service_data=False,
+    )
+
+
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Analyze isMainProcessForService against real E2E environments"

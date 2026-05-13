@@ -1,5 +1,7 @@
+import json
 import sys
 from pathlib import Path
+from unittest.mock import patch, MagicMock
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -94,3 +96,77 @@ def test_uses_caddy_ignores_real_service(tmp_path):
 def test_uses_caddy_no_tests_dir(tmp_path):
     found, _ = uses_caddy("nonexistent", tmp_path)
     assert found is False
+
+
+from process_analyze import read_proc_status, read_proc_cmdline, run_disco, collect_process
+
+
+def test_read_proc_status():
+    import os, process_analyze as pa
+    status = pa.read_proc_status(os.getpid())
+    assert "Name" in status
+    assert "PPid" in status
+
+
+def test_read_proc_status_nonexistent_pid():
+    import process_analyze as pa
+    assert pa.read_proc_status(99999999) == {}
+
+
+def test_read_proc_cmdline_null_separated():
+    # Read current process cmdline — will have null separators or already decoded
+    import process_analyze as pa
+    import os
+    cmdline = pa.read_proc_cmdline(os.getpid())
+    assert len(cmdline) > 0
+
+
+def test_run_disco_parses_json():
+    fake_output = json.dumps({
+        "services": [{"pid": 42, "generated_name": "nginx", "generated_name_source": "command_line",
+                      "additional_generated_names": [], "tcp_ports": [80]}],
+        "injected_pids": [],
+        "gpu_pids": [],
+    })
+    with patch("subprocess.run") as mock_run:
+        mock_run.return_value = MagicMock(stdout=fake_output, returncode=0)
+        import process_analyze as pa
+        result = pa.run_disco("/fake/disco", 42)
+    assert result["services"][0]["generated_name"] == "nginx"
+
+
+def test_run_disco_returns_empty_on_failure():
+    with patch("subprocess.run", side_effect=FileNotFoundError):
+        import process_analyze as pa
+        result = pa.run_disco("/nonexistent/disco", 42)
+    assert result == {"services": [], "injected_pids": [], "gpu_pids": []}
+
+
+def test_collect_process_with_service():
+    fake_disco = json.dumps({
+        "services": [{"pid": 42, "generated_name": "nginx", "generated_name_source": "cmd",
+                      "additional_generated_names": [], "tcp_ports": []}],
+        "injected_pids": [],
+        "gpu_pids": [],
+    })
+    import os, process_analyze as pa
+    pid = os.getpid()
+    with patch("subprocess.run") as mock_run:
+        mock_run.return_value = MagicMock(stdout=fake_disco, returncode=0)
+        proc = pa.collect_process(pid, "/fake/disco")
+    assert proc is not None
+    assert proc.has_service_data is True
+    assert proc.generated_name == "nginx"
+    assert proc.pid == pid
+
+
+def test_collect_process_without_service():
+    fake_disco = json.dumps({"services": [], "injected_pids": [], "gpu_pids": []})
+    import os, process_analyze as pa
+    pid = os.getpid()
+    with patch("subprocess.run") as mock_run:
+        mock_run.return_value = MagicMock(stdout=fake_disco, returncode=0)
+        proc = pa.collect_process(pid, "/fake/disco")
+    assert proc is not None
+    assert proc.has_service_data is False
+    assert proc.generated_name is None
