@@ -657,3 +657,41 @@ def test_config(test_case, extra_config, expected_http_kwargs):
                 assert check.http.get_header(h_key) == h_value
         else:
             assert check.http.options[key] == value
+
+
+def test_health_checks_cache_defaults():
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
+    assert consul_check.health_checks.maxsize == 5000
+    assert consul_check.health_checks.ttl == 3600
+
+
+def test_health_checks_cache_configurable():
+    config = dict(consul_mocks.MOCK_CONFIG)
+    config['health_checks_cache_size'] = 10
+    config['health_checks_cache_ttl'] = 60
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [config])
+    assert consul_check.health_checks.maxsize == 10
+    assert consul_check.health_checks.ttl == 60
+
+
+def test_health_checks_cache_configurable_via_init_config():
+    init_config = {'health_checks_cache_size': 42, 'health_checks_cache_ttl': 7}
+    consul_check = ConsulCheck(common.CHECK_NAME, init_config, [consul_mocks.MOCK_CONFIG])
+    assert consul_check.health_checks.maxsize == 42
+    assert consul_check.health_checks.ttl == 7
+
+
+def test_health_checks_cache_eviction_re_emits_failure_event(aggregator):
+    config = dict(consul_mocks.MOCK_CONFIG_DISABLE_SERVICE_TAG)
+    config['collect_health_checks'] = True
+    config['health_checks_cache_size'] = 1
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [config])
+    my_mocks = consul_mocks._get_consul_mocks()
+    my_mocks['consul_request'] = consul_mocks.mock_get_health_check
+    consul_mocks.mock_check(consul_check, my_mocks)
+
+    consul_check.check(None)
+    consul_check.check(None)
+
+    failure_events = [e for e in aggregator.events if e['event_type'] == 'consul.check_failed']
+    assert len(failure_events) == 2

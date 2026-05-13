@@ -202,6 +202,7 @@ VALID_UNIT_NAMES = {
     'volt',
     'millivolt',
     'deciwatt',
+    'decibel-milliwatt',
     'decidegree celsius',
     'span',
     'exception',
