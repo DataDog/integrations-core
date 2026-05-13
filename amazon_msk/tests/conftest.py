@@ -25,14 +25,14 @@ def dd_environment():
         yield common.INSTANCE, common.E2E_METADATA
 
 
-def mock_requests_get(url, *args, **kwargs):
+def route_metrics_fixture(url, *args, **kwargs):
     exporter_type = 'jmx' if urlparse(url).port == common.JMX_PORT else 'node'
     return MockHTTPResponse(file_path=common.get_metrics_fixture_path(exporter_type))
 
 
 @pytest.fixture
 def mock_data(mock_openmetrics_http):
-    mock_openmetrics_http.get.side_effect = mock_requests_get
+    mock_openmetrics_http.get.side_effect = route_metrics_fixture
     yield
 
 
