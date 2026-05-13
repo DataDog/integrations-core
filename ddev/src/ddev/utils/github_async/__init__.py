@@ -28,9 +28,9 @@ if TYPE_CHECKING:
     from .client import DEFAULT_BASE_URL as DEFAULT_BASE_URL
     from .client import GITHUB_API_VERSION as GITHUB_API_VERSION
     from .client import AsyncGitHubClient as AsyncGitHubClient
+    from .client import GitHubResponse as GitHubResponse
+    from .client import PaginationData as PaginationData
     from .client import async_github_client as async_github_client
-    from .pagination import PaginationData as PaginationData
-    from .response import GitHubResponse as GitHubResponse
 
 # Map of exported name -> submodule (relative to this package) that defines it.
 _MODULE_BY_NAME: dict[str, str] = {
@@ -38,8 +38,8 @@ _MODULE_BY_NAME: dict[str, str] = {
     'async_github_client': 'client',
     'GITHUB_API_VERSION': 'client',
     'DEFAULT_BASE_URL': 'client',
-    'GitHubResponse': 'response',
-    'PaginationData': 'pagination',
+    'GitHubResponse': 'client',
+    'PaginationData': 'client',
 }
 
 

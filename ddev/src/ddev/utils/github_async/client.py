@@ -5,12 +5,14 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import Any, Literal
+from dataclasses import dataclass
+from typing import Any, Literal, Self
 
 import httpx
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 from .models import (
     ArtifactsList,
@@ -19,11 +21,50 @@ from .models import (
     PullRequestReviewComment,
     WorkflowRun,
 )
-from .pagination import PaginationData
-from .response import GitHubResponse
 
 GITHUB_API_VERSION = "2022-11-28"
 DEFAULT_BASE_URL = "https://api.github.com"
+
+_LINK_RE = re.compile(r'<([^>]+)>;\s*rel="([^"]+)"')
+
+
+# ---------------------------------------------------------------------------
+# Pagination + response wrappers
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class PaginationData:
+    """Parsed pagination links from a GitHub API Link header."""
+
+    first: str | None = None
+    prev: str | None = None
+    next: str | None = None
+    last: str | None = None
+
+    @classmethod
+    def from_header(cls, header: str | None) -> Self:
+        """Parse a Link header value and return a PaginationData instance."""
+        if not header:
+            return cls()
+        links: dict[str, str] = {}
+        for url, rel in _LINK_RE.findall(header):
+            links[rel] = url
+        return cls(
+            first=links.get("first"),
+            prev=links.get("prev"),
+            next=links.get("next"),
+            last=links.get("last"),
+        )
+
+
+class GitHubResponse[T](BaseModel):
+    """Generic wrapper for a GitHub API response."""
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    data: T = Field(...)
+    headers: dict[str, str] = Field(default_factory=dict)
 
 
 class AsyncGitHubClient:
