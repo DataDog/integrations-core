@@ -20,7 +20,8 @@ from ddev.cli.release.port_commit_workflow import (
     split_commit_subject,
 )
 from ddev.utils.git import GitCommit
-from ddev.utils.github_async import GitHubResponse, PullRequest
+from ddev.utils.github_async import GitHubResponse
+from ddev.utils.github_async.models import PullRequest
 from tests.helpers.github_async import FakeAsyncGitHubClient
 from tests.helpers.runner import CliRunner
 

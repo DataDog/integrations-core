@@ -11,18 +11,20 @@ import pytest
 
 from ddev.utils.github_async import (
     GITHUB_API_VERSION,
-    ArtifactsList,
     AsyncGitHubClient,
     GitHubResponse,
+    PaginationData,
+    async_github_client,
+)
+from ddev.utils.github_async.models import (
+    ArtifactsList,
     GitHubUser,
     IssueComment,
     Label,
-    PaginationData,
     PullRequest,
     PullRequestRef,
     PullRequestReviewComment,
     WorkflowRun,
-    async_github_client,
 )
 
 # ---------------------------------------------------------------------------
@@ -591,6 +593,48 @@ async def test_add_labels_to_issue_http_error_raises() -> None:
     with pytest.raises(httpx.HTTPStatusError) as exc_info:
         await client.add_labels_to_issue("o", "r", 1, ["bug"])
     assert exc_info.value.response.status_code == 404
+
+
+# ---------------------------------------------------------------------------
+# Lazy-loading guarantees for the `models` subpackage
+# ---------------------------------------------------------------------------
+
+
+def test_models_subpackage_loads_only_requested_submodule() -> None:
+    """Importing one model must not eagerly load every other model submodule.
+
+    Runs each scenario in a clean subprocess so the import effect is observable
+    (the parent test process has already loaded everything for other tests).
+    """
+    import subprocess
+    import sys
+    import textwrap
+
+    script = textwrap.dedent(
+        """
+        import sys
+        from ddev.utils.github_async.models import PullRequest  # noqa: F401
+
+        prefix = 'ddev.utils.github_async.models.'
+        loaded = sorted(name[len(prefix):] for name in sys.modules if name.startswith(prefix))
+        print(','.join(loaded))
+        """
+    )
+    result = subprocess.run([sys.executable, '-c', script], capture_output=True, text=True, check=True)
+    loaded = set(result.stdout.strip().split(','))
+
+    # `pull_request` and its two type dependencies (`user`, `label`) must load.
+    assert {'pull_request', 'user', 'label'} <= loaded
+    # Unrelated model submodules must stay unloaded.
+    assert 'workflow' not in loaded
+    assert 'comment' not in loaded
+
+
+def test_models_subpackage_unknown_attribute_raises_attribute_error() -> None:
+    import ddev.utils.github_async.models as models
+
+    with pytest.raises(AttributeError, match='no attribute'):
+        models.NotARealModel  # noqa: B018
 
 
 # ---------------------------------------------------------------------------

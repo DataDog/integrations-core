@@ -1,225 +1,29 @@
-"""Async GitHub API client for triggering and monitoring GitHub Actions workflows"""
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+"""Async HTTP client for the GitHub REST API."""
 
-import re
+from __future__ import annotations
+
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from dataclasses import dataclass
-from typing import Any, Literal, Self
+from typing import Any, Literal
 
 import httpx
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel
+
+from .models import (
+    ArtifactsList,
+    IssueComment,
+    PullRequest,
+    PullRequestReviewComment,
+    WorkflowRun,
+)
+from .pagination import PaginationData
+from .response import GitHubResponse
 
 GITHUB_API_VERSION = "2022-11-28"
 DEFAULT_BASE_URL = "https://api.github.com"
-
-_LINK_RE = re.compile(r'<([^>]+)>;\s*rel="([^"]+)"')
-
-
-# ---------------------------------------------------------------------------
-# Pagination
-# ---------------------------------------------------------------------------
-
-
-@dataclass
-class PaginationData:
-    """Parsed pagination links from a GitHub API Link header."""
-
-    first: str | None = None
-    prev: str | None = None
-    next: str | None = None
-    last: str | None = None
-
-    @classmethod
-    def from_header(cls, header: str | None) -> Self:
-        """Parse a Link header value and return a PaginationData instance."""
-        if not header:
-            return cls()
-        links: dict[str, str] = {}
-        for url, rel in _LINK_RE.findall(header):
-            links[rel] = url
-        return cls(
-            first=links.get("first"),
-            prev=links.get("prev"),
-            next=links.get("next"),
-            last=links.get("last"),
-        )
-
-
-# ---------------------------------------------------------------------------
-# Response and domain models
-# ---------------------------------------------------------------------------
-
-
-class GitHubResponse[T](BaseModel):
-    """Generic wrapper for a GitHub API response."""
-
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
-    data: T = Field(...)
-    headers: dict[str, str] = Field(default_factory=dict)
-
-
-class WorkflowRun(BaseModel):
-    """A GitHub Actions workflow run."""
-
-    model_config = ConfigDict(extra="ignore")
-
-    id: int
-    name: str | None = None
-    status: str
-    conclusion: str | None = None
-    html_url: str | None = None
-    created_at: str | None = None
-    updated_at: str | None = None
-
-
-class Artifact(BaseModel):
-    """A GitHub Actions artifact."""
-
-    model_config = ConfigDict(extra="ignore")
-
-    id: int
-    name: str
-    size_in_bytes: int | None = None
-    url: str | None = None
-    archive_download_url: str | None = None
-    expired: bool
-
-
-class ArtifactsList(BaseModel):
-    """A list of artifacts with a total count."""
-
-    model_config = ConfigDict(extra="ignore")
-
-    total_count: int
-    artifacts: list[Artifact]
-
-
-class IssueComment(BaseModel):
-    """A GitHub issue (or PR) comment."""
-
-    model_config = ConfigDict(extra="ignore")
-
-    id: int
-    body: str
-    user: dict[str, Any] | None = None
-    created_at: str | None = None
-    updated_at: str | None = None
-    html_url: str | None = None
-
-
-class GitHubUser(BaseModel):
-    """A GitHub user as returned by the REST API.
-
-    Field reference:
-    https://docs.github.com/en/rest/users/users#get-a-user
-    """
-
-    model_config = ConfigDict(extra="ignore")
-
-    id: int
-    login: str
-    html_url: str | None = None
-    type: str | None = None  # 'User', 'Bot', 'Organization', etc.
-
-
-class Label(BaseModel):
-    """A label attached to an issue or pull request.
-
-    Field reference:
-    https://docs.github.com/en/rest/issues/labels#get-a-label
-    """
-
-    model_config = ConfigDict(extra="ignore")
-
-    id: int
-    name: str
-    color: str | None = None
-    description: str | None = None
-
-
-class PullRequestRef(BaseModel):
-    """A head or base branch reference on a pull request.
-
-    Field reference (within the `pull-request` object):
-    https://docs.github.com/en/rest/pulls/pulls#get-a-pull-request
-    """
-
-    model_config = ConfigDict(extra="ignore")
-
-    ref: str
-    sha: str
-    label: str | None = None  # e.g. 'octocat:new-topic'
-
-
-class PullRequest(BaseModel):
-    """A GitHub pull request.
-
-    Field reference:
-    https://docs.github.com/en/rest/pulls/pulls#get-a-pull-request
-    """
-
-    model_config = ConfigDict(extra="ignore")
-
-    # Identifiers
-    id: int | None = None
-    number: int
-    node_id: str | None = None
-
-    # URLs
-    url: str | None = None
-    html_url: str
-    diff_url: str | None = None
-    patch_url: str | None = None
-
-    # State
-    state: str | None = None  # 'open' or 'closed'
-    draft: bool = False
-    merged: bool | None = None
-    locked: bool = False
-    merge_commit_sha: str | None = None
-
-    # Content
-    title: str | None = None
-    body: str | None = None
-
-    # People
-    user: GitHubUser | None = None
-    assignees: list[GitHubUser] = Field(default_factory=list)
-    requested_reviewers: list[GitHubUser] = Field(default_factory=list)
-
-    # Labels
-    labels: list[Label] = Field(default_factory=list)
-
-    # Timestamps (ISO 8601 strings; not parsed into datetime to keep the model lightweight)
-    created_at: str | None = None
-    updated_at: str | None = None
-    closed_at: str | None = None
-    merged_at: str | None = None
-
-    # Branch references
-    head: PullRequestRef | None = None
-    base: PullRequestRef | None = None
-
-
-class PullRequestReviewComment(BaseModel):
-    """An inline review comment on a pull request diff."""
-
-    model_config = ConfigDict(extra="ignore")
-
-    id: int
-    body: str
-    path: str
-    commit_id: str
-    html_url: str | None = None
-    created_at: str | None = None
-    updated_at: str | None = None
-    user: dict[str, Any] | None = None
-
-
-# ---------------------------------------------------------------------------
-# Client
-# ---------------------------------------------------------------------------
 
 
 class AsyncGitHubClient:
@@ -522,18 +326,22 @@ class AsyncGitHubClient:
             owner: Repository owner (user or organisation).
             repo: Repository name.
             pull_number: Pull request number.
-            body: Markdown body text of the review comment.
+            body: Markdown body text of the comment.
             commit_id: SHA of the commit to comment on.
-            path: Relative path of the file to comment on.
-            position: Line index in the diff (deprecated but still supported by the API).
-            line: Line number in the file to comment on (used with `side`).
-            side: Side of the diff to comment on — ``"LEFT"`` or ``"RIGHT"``.
+            path: Path of the file to comment on.
+            position: Line index in the diff (mutually exclusive with line/side).
+            line: Line number in the file (newer style, paired with side).
+            side: 'LEFT' or 'RIGHT' (newer style, paired with line).
             timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
 
         Returns:
-            GitHubResponse[PullRequestReviewComment]: The validated review comment data and headers.
+            GitHubResponse[PullRequestReviewComment]: The validated comment data and headers.
         """
-        payload: dict[str, Any] = {"body": body, "commit_id": commit_id, "path": path}
+        payload: dict[str, Any] = {
+            "body": body,
+            "commit_id": commit_id,
+            "path": path,
+        }
         if position is not None:
             payload["position"] = position
         if line is not None:
@@ -550,7 +358,7 @@ class AsyncGitHubClient:
 
 
 # ---------------------------------------------------------------------------
-# Context manager helper
+# Async context manager
 # ---------------------------------------------------------------------------
 
 

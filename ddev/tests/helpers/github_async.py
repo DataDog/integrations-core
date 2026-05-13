@@ -26,7 +26,8 @@ from typing import Any
 import pytest
 from pytest_mock import MockerFixture
 
-from ddev.utils.github_async import GitHubResponse, PullRequest
+from ddev.utils.github_async import GitHubResponse
+from ddev.utils.github_async.models import PullRequest
 
 
 @dataclass
