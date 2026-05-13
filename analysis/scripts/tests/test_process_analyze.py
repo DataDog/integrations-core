@@ -14,6 +14,7 @@ from process_analyze import (
     find_integrations_with_e2e,
     parse_ddev_env_show,
     select_environment,
+    collect_integration,
 )
 
 
@@ -327,11 +328,7 @@ def test_load_skipped_missing_file(tmp_path):
     assert skipped == []
 
 
-from process_analyze import collect_integration
-
-
 def test_collect_integration_skips_caddy(tmp_path):
-    from process_analyze import SkipEntry
     # Create a fake integration with caddy compose
     tests_dir = tmp_path / "mycheck" / "tests" / "docker"
     tests_dir.mkdir(parents=True)
