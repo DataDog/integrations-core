@@ -170,3 +170,42 @@ def test_collect_process_without_service():
     assert proc is not None
     assert proc.has_service_data is False
     assert proc.generated_name is None
+
+
+from process_analyze import get_current_container_ids, get_pids_in_container
+
+
+def test_get_current_container_ids_empty():
+    with patch("subprocess.run") as mock_run:
+        mock_run.return_value = MagicMock(stdout="", returncode=0)
+        import process_analyze as pa
+        ids = pa.get_current_container_ids()
+    assert ids == set()
+
+
+def test_get_current_container_ids_parses_ids():
+    with patch("subprocess.run") as mock_run:
+        mock_run.return_value = MagicMock(stdout="abc123\ndef456\n", returncode=0)
+        import process_analyze as pa
+        ids = pa.get_current_container_ids()
+    assert ids == {"abc123", "def456"}
+
+
+def test_get_pids_in_container(tmp_path):
+    # Build fake /proc structure with two PIDs in the container
+    container_id = "a" * 64
+    for pid, in_container in [(100, True), (101, False), (102, True)]:
+        proc_dir = tmp_path / str(pid)
+        proc_dir.mkdir()
+        if in_container:
+            cgroup = f"0::/system.slice/docker-{container_id}.scope\n"
+        else:
+            cgroup = "0::/system.slice/other.scope\n"
+        (proc_dir / "cgroup").write_text(cgroup)
+
+    import process_analyze as pa
+    with patch("subprocess.run") as mock_run:
+        mock_run.return_value = MagicMock(stdout=container_id + "\n", returncode=0)
+        with patch.object(pa, "_proc_root", tmp_path):
+            pids = pa.get_pids_in_container("abc123")
+    assert sorted(pids) == [100, 102]

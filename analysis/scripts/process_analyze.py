@@ -176,6 +176,42 @@ def collect_process(pid: int, disco_path: str) -> Process | None:
     )
 
 
+_proc_root = Path("/proc")
+
+
+def get_current_container_ids() -> set[str]:
+    """Return the set of short container IDs currently running."""
+    result = subprocess.run(
+        ["docker", "ps", "--format", "{{.ID}}"],
+        capture_output=True,
+        text=True,
+    )
+    return set(result.stdout.split())
+
+
+def get_pids_in_container(container_name_or_id: str) -> list[int]:
+    """Return all host PIDs whose cgroup references the given container."""
+    result = subprocess.run(
+        ["docker", "inspect", "--format", "{{.Id}}", container_name_or_id],
+        capture_output=True,
+        text=True,
+    )
+    full_id = result.stdout.strip()
+    if not full_id:
+        return []
+    pids: list[int] = []
+    for entry in _proc_root.iterdir():
+        if not entry.name.isdigit():
+            continue
+        try:
+            cgroup = (entry / "cgroup").read_text()
+        except (OSError, PermissionError):
+            continue
+        if full_id in cgroup or full_id[:12] in cgroup:
+            pids.append(int(entry.name))
+    return pids
+
+
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Analyze isMainProcessForService against real E2E environments"
