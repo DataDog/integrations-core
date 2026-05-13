@@ -425,8 +425,109 @@ def cmd_collect(args: argparse.Namespace) -> None:
         print(status, flush=True)
 
 
+def analyze_data(data: CollectedData) -> IntegrationResult:
+    """Apply is_main_process to all service processes and compute verdicts."""
+    by_pid = {p.pid: p for p in data.processes}
+    service_procs = [p for p in data.processes if p.has_service_data]
+
+    by_name: dict[str, list[Process]] = {}
+    for p in service_procs:
+        by_name.setdefault(p.generated_name or "", []).append(p)
+
+    verdicts: list[ServiceVerdict] = []
+    for name, procs in by_name.items():
+        main_pids = [p.pid for p in procs if is_main_process(p.pid, by_pid)]
+        skipped_pids = [p.pid for p in procs if not is_main_process(p.pid, by_pid)]
+        n = len(main_pids)
+        verdict = "PASS" if n == 1 else f"WARN (N={n})"
+        verdicts.append(ServiceVerdict(
+            generated_name=name,
+            main_pids=main_pids,
+            skipped_pids=skipped_pids,
+            verdict=verdict,
+        ))
+
+    return IntegrationResult(
+        integration=data.integration,
+        environment=data.environment,
+        services=verdicts,
+    )
+
+
+def format_results_table(
+    results: list[IntegrationResult], skipped: list[SkipEntry]
+) -> str:
+    """Format analysis results as a human-readable table."""
+    lines: list[str] = []
+    col = (28, 18, 20, 20, 16)
+    header = (
+        f"{'Integration':<{col[0]}}"
+        f"{'Environment':<{col[1]}}"
+        f"{'Service':<{col[2]}}"
+        f"{'Main PIDs':<{col[3]}}"
+        f"{'Verdict':<{col[4]}}"
+    )
+    lines.append(header)
+    lines.append("-" * sum(col))
+
+    for r in results:
+        if not r.services:
+            lines.append(
+                f"{r.integration:<{col[0]}}{r.environment:<{col[1]}}"
+                f"{'(no services detected)':<{col[2]}}"
+                f"{'[]':<{col[3]}}{'N/A':<{col[4]}}"
+            )
+            continue
+        for svc in r.services:
+            lines.append(
+                f"{r.integration:<{col[0]}}{r.environment:<{col[1]}}"
+                f"{svc.generated_name:<{col[2]}}"
+                f"{str(svc.main_pids):<{col[3]}}"
+                f"{svc.verdict:<{col[4]}}"
+            )
+
+    if skipped:
+        lines.append("")
+        lines.append(f"Skipped ({len(skipped)}):")
+        for s in skipped:
+            lines.append(f"  {s.integration:<40} — {s.reason}")
+
+    return "\n".join(lines)
+
+
 def cmd_analyze(args: argparse.Namespace) -> None:
-    raise NotImplementedError
+    data_dir = Path(args.data_dir)
+    results_dir = Path(args.results_dir)
+    results_dir.mkdir(parents=True, exist_ok=True)
+
+    data_files = sorted(f for f in data_dir.glob("*.json") if f.name != "skipped.json")
+    if args.integration:
+        data_files = [f for f in data_files if f.stem.startswith(args.integration + "__")]
+
+    results: list[IntegrationResult] = []
+    for path in data_files:
+        data = load_data(path)
+        results.append(analyze_data(data))
+
+    skipped = load_skipped(data_dir)
+    if args.integration:
+        skipped = [s for s in skipped if s.integration == args.integration]
+
+    print(format_results_table(results, skipped))
+
+    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H-%M-%S")
+    output_path = results_dir / f"analysis_{timestamp}.json"
+    with open(output_path, "w") as f:
+        json.dump(
+            {
+                "analyzed_at": now_iso(),
+                "results": [dataclasses.asdict(r) for r in results],
+                "skipped": [dataclasses.asdict(s) for s in skipped],
+            },
+            f,
+            indent=2,
+        )
+    print(f"\nResults saved to {output_path}")
 
 
 if __name__ == "__main__":

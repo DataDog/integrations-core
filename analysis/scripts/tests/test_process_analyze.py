@@ -15,6 +15,8 @@ from process_analyze import (
     parse_ddev_env_show,
     select_environment,
     collect_integration,
+    analyze_data,
+    format_results_table,
 )
 
 
@@ -361,3 +363,87 @@ def test_collect_integration_skips_on_env_start_failure(tmp_path):
     assert result == "skipped"
     skipped = load_skipped(data_dir)
     assert skipped[0].reason == "env start failed"
+
+
+def _nginx_data() -> "CollectedData":
+    from process_analyze import CollectedData, Process
+    return CollectedData(
+        integration="nginx",
+        environment="py3.13-1.27",
+        collected_at="2026-05-13T10:00:00+00:00",
+        processes=[
+            Process(100, 0, "nginx", "nginx: master", "nginx", True),
+            Process(101, 100, "nginx", "nginx: worker", "nginx", True),
+            Process(102, 100, "nginx", "nginx: worker", "nginx", True),
+            Process(103, 0, "sh", "/bin/sh", None, False),
+        ],
+        disco_raw={},
+    )
+
+
+def test_analyze_data_nginx_pass():
+    data = _nginx_data()
+    result = analyze_data(data)
+    assert result.integration == "nginx"
+    assert len(result.services) == 1
+    svc = result.services[0]
+    assert svc.generated_name == "nginx"
+    assert svc.main_pids == [100]
+    assert sorted(svc.skipped_pids) == [101, 102]
+    assert svc.verdict == "PASS"
+
+
+def test_analyze_data_warn_too_many():
+    from process_analyze import CollectedData, Process
+    # All three processes are roots (ppid=0) with same name → 3 mains
+    data = CollectedData(
+        integration="bad",
+        environment="py3.13-1.0",
+        collected_at="2026-05-13T10:00:00+00:00",
+        processes=[
+            Process(1, 0, "myapp", "myapp", "myapp", True),
+            Process(2, 0, "myapp", "myapp", "myapp", True),
+            Process(3, 0, "myapp", "myapp", "myapp", True),
+        ],
+        disco_raw={},
+    )
+    result = analyze_data(data)
+    assert result.services[0].verdict == "WARN (N=3)"
+
+
+def test_analyze_data_spawned_by_different_service():
+    from process_analyze import CollectedData, Process
+    # nginx spawned by supervisord — parent has a different GeneratedName, so nginx is main
+    data = CollectedData(
+        integration="test",
+        environment="py3.13-1.0",
+        collected_at="2026-05-13T10:00:00+00:00",
+        processes=[
+            Process(1, 0, "supervisord", "supervisord", "supervisord", True),
+            Process(2, 1, "nginx", "nginx: master", "nginx", True),
+            Process(3, 2, "nginx", "nginx: worker", "nginx", True),
+        ],
+        disco_raw={},
+    )
+    result = analyze_data(data)
+    nginx = next(s for s in result.services if s.generated_name == "nginx")
+    assert nginx.verdict == "PASS"
+    assert nginx.main_pids == [2]
+    assert nginx.skipped_pids == [3]
+
+
+def test_format_results_table_contains_integration():
+    from process_analyze import IntegrationResult, ServiceVerdict
+    results = [
+        IntegrationResult(
+            integration="nginx",
+            environment="py3.13-1.27",
+            services=[ServiceVerdict("nginx", [1], [2, 3], "PASS")],
+        )
+    ]
+    skipped = [SkipEntry("vault", "env start failed", "2026-05-13T10:00:00+00:00", "exit 1")]
+    table = format_results_table(results, skipped)
+    assert "nginx" in table
+    assert "PASS" in table
+    assert "vault" in table
+    assert "env start failed" in table
