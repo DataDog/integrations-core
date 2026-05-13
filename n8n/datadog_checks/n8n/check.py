@@ -44,7 +44,7 @@ class N8nCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             self.gauge('readiness.check', 0, tags=tags + ['status_code:none'])
             return
 
-        is_ready = response.status_code == 200
+        is_ready = 200 <= response.status_code < 300
         self.gauge(
             'readiness.check',
             1 if is_ready else 0,

@@ -56,8 +56,11 @@ def initialized_check(instance: dict[str, Any]) -> N8nCheck:
 @pytest.mark.parametrize(
     'status_code, expected_value',
     [
-        pytest.param(200, 1, id='ready'),
-        pytest.param(503, 0, id='not_ready'),
+        pytest.param(200, 1, id='ready_200'),
+        pytest.param(204, 1, id='ready_204'),
+        pytest.param(299, 1, id='ready_299_edge'),
+        pytest.param(300, 0, id='not_ready_3xx'),
+        pytest.param(503, 0, id='not_ready_503'),
     ],
 )
 def test_readiness_check(
