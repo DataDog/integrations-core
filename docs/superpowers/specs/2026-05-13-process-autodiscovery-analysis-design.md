@@ -72,22 +72,29 @@ python analysis/scripts/process_analyze.py collect nginx \
 1. Run `ddev env show <integration>` to list available environments; pick the
    last standard version environment (e.g. `py3.13-1.27` over `py3.13-vts`).
    The `--env` flag overrides this selection.
-2. `ddev env start --dev <integration> <env>`
-3. Identify Docker containers started for this integration using
+2. **Pre-flight: detect fake caddy environments.** Locate the integration's
+   docker-compose file(s) and check whether any service uses an image matching
+   `caddy:*`. If so, record the integration as skipped with reason
+   `"fake caddy server"` and stop — do not start the environment.
+3. `ddev env start --dev <integration> <env>`. If this fails, record the
+   integration as skipped with reason `"env start failed: <error>"` and stop.
+4. Identify Docker containers started for this integration using
    `docker ps --format json` filtered by container name prefix (ddev names
    containers `<integration>_<service>_<n>`).
-4. For each container, find all host-namespace PIDs that belong to it by
+5. For each container, find all host-namespace PIDs that belong to it by
    scanning `/proc/<pid>/cgroup` for the container's ID.
-5. Run `disco` on the host: it reads `/proc` and outputs detected services with
+6. Run `disco` on the host: it reads `/proc` and outputs detected services with
    their PIDs and `generated_name` values.
-6. For each container PID:
+7. For each container PID:
    - Read `/proc/<pid>/status` → `ppid`, `comm`
    - Read `/proc/<pid>/cmdline` → full command line
    - Look up whether `disco` detected a service for this PID
-7. Save collected data to `analysis/process_autodiscovery/data/<integration>__<env>.json`.
-8. `ddev env stop <integration> <env>`
+8. Save collected data to `analysis/process_autodiscovery/data/<integration>__<env>.json`.
+9. `ddev env stop <integration> <env>`
 
-Integrations where `ddev env start` fails are skipped with a warning.
+All skipped integrations are written to
+`analysis/process_autodiscovery/data/skipped.json` for manual inspection (see
+[Skipped integrations](#skipped-integrations) below).
 
 ### `analyze` — algorithm application
 
@@ -123,11 +130,15 @@ python analysis/scripts/process_analyze.py analyze \
 **Example table output:**
 
 ```
-Integration   Environment     Service    Main PIDs         Verdict
-nginx         py3.13-1.27     nginx      [12345]           PASS
-apache        py3.13-1.23     apache2    [11, 12, 13]      WARN (3 mains)
-gunicorn      py3.13-2.0      python     []                WARN (0 mains)
-redis         py3.13-7.2      redis      [5678]            PASS
+Integration              Environment     Service    Main PIDs         Verdict
+nginx                    py3.13-1.27     nginx      [12345]           PASS
+apache                   py3.13-1.23     apache2    [11, 12, 13]      WARN (3 mains)
+gunicorn                 py3.13-2.0      python     []                WARN (0 mains)
+redis                    py3.13-7.2      redis      [5678]            PASS
+
+Skipped (2):
+  kubernetes_cluster_autoscaler  — fake caddy server
+  vault                          — env start failed: exit code 1
 ```
 
 ## Data format
@@ -191,6 +202,39 @@ def is_main_process(pid: int, processes: dict[int, Process]) -> bool:
 The `processes` dict covers only the processes from the saved JSON for a given
 environment. This mirrors the workloadmeta store that the Go function queries.
 
+## Skipped integrations
+
+`analysis/process_autodiscovery/data/skipped.json` accumulates entries across
+all `collect` runs. Each run appends (or updates) entries for integrations that
+were skipped:
+
+```json
+[
+  {
+    "integration": "kubernetes_cluster_autoscaler",
+    "reason": "fake caddy server",
+    "skipped_at": "2026-05-13T10:01:00Z",
+    "details": "image caddy:2.7 found in tests/docker/docker-compose.yaml"
+  },
+  {
+    "integration": "vault",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T10:05:00Z",
+    "details": "ddev env start exited with code 1: ..."
+  }
+]
+```
+
+The `analyze` command reads `skipped.json` and includes the skipped list in both
+the terminal output and the results JSON.
+
+Two skip reasons:
+
+| Reason | Description |
+|--------|-------------|
+| `fake caddy server` | docker-compose uses a `caddy:*` image — no real service runs |
+| `env start failed` | `ddev env start` exited non-zero |
+
 ## File layout
 
 ```
@@ -199,6 +243,7 @@ analysis/
     process_analyze.py        ← single CLI tool
   process_autodiscovery/
     data/                     ← raw collected JSON (one file per integration/env)
+      skipped.json            ← integrations that were skipped, for manual inspection
     results/                  ← analysis output JSON files
 ```
 
