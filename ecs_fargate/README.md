@@ -46,7 +46,7 @@ The instructions below show you how to configure the task using the [Amazon Web 
 ##### Web UI Task Definition
 
 <!-- partial
-{{< site-region region="us,us3,us5,eu,ap1,gov,gov2" >}}
+{{< site-region region="us,us3,us5,eu,ap1,gov" >}}
 
 1. Log in to your [AWS Web Console][4] and navigate to the ECS section.
 2. Click on **Task Definitions** in the left menu, then click the **Create new Task Definition** button or choose an existing Fargate task definition.
@@ -79,7 +79,7 @@ partial -->
 
 1. Download [datadog-agent-ecs-fargate.json][42]. **Note**: If you are using Internet Explorer, this may download as a gzip file, which contains the JSON file mentioned below.
 <!-- partial
-{{< site-region region="us,us3,us5,eu,ap1,gov,gov2" >}}
+{{< site-region region="us,us3,us5,eu,ap1,gov" >}}
 2. Update the JSON with a `TASK_NAME`, your [Datadog API Key][41], and the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}). **Note**: The environment variable `ECS_FARGATE` is already set to `"true"`.
 
 [41]: /organization-settings/api-keys
@@ -113,7 +113,7 @@ aws ecs register-task-definition --cli-input-json file://<PATH_TO_FILE>/datadog-
 You can use [AWS CloudFormation][6] templating to configure your Fargate containers. Use the `AWS::ECS::TaskDefinition` resource within your CloudFormation template to set the Amazon ECS task and specify `FARGATE` as the required launch type for that task.
 
 <!-- partial
-{{< site-region region="us,us3,us5,eu,ap1,gov,gov2" >}}
+{{< site-region region="us,us3,us5,eu,ap1,gov" >}}
 Update this CloudFormation template below with your [Datadog API Key][41]. As well as include the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}) environment variable if necessary, as this defaults to `datadoghq.com` if you don't set it.
 
 [41]: /organization-settings/api-keys
@@ -152,7 +152,7 @@ For more information on CloudFormation templating and syntax, see the [AWS Cloud
 You can use the [Datadog CDK Constructs][72] to configure your ECS Fargate task definition. Use the `DatadogECSFargate` construct to instrument your containers for desired Datadog features. This is supported in TypeScript, JavaScript, Python, and Go.
 
 <!-- partial
-{{< site-region region="us,us3,us5,eu,ap1,gov,gov2" >}}
+{{< site-region region="us,us3,us5,eu,ap1,gov" >}}
 Update this construct definition below with your [Datadog API Key][41]. In addition, include the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}) property if necessary, as this defaults to `datadoghq.com` if you don't set it.
 
 [41]: https://app.datadoghq.com/organization-settings/api-keys
@@ -192,7 +192,7 @@ For more information on the `DatadogECSFargate` construct instrumentation and sy
 You can use the [Datadog ECS Fargate Terraform module][71] to configure your containers for Datadog. This Terraform module wraps the [`aws_ecs_task_definition`][68] resource and automatically instruments your task definition for Datadog. Pass your input arguments into the Datadog ECS Fargate Terraform module in a similiar manner as to the `aws_ecs_task_definition`. Make sure to include your task `family` and `container_definitions`.
 
 <!-- partial
-{{< site-region region="us,us3,us5,eu,ap1,gov,gov2" >}}
+{{< site-region region="us,us3,us5,eu,ap1,gov" >}}
 Update this Terraform module below with your [Datadog API Key][41]. As well as include the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}) environment variable if necessary, as this defaults to `datadoghq.com` if you don't set it.
 
 [41]: https://app.datadoghq.com/organization-settings/api-keys
@@ -589,7 +589,7 @@ partial -->
 {{< /site-region >}}
 partial -->
 <!-- partial
-{{< site-region region="gov,gov2" >}}
+{{< site-region region="gov" >}}
   ```json
   {
     "logConfiguration": {
@@ -750,7 +750,7 @@ partial -->
 {{< /site-region >}}
 partial -->
 <!-- partial
-{{< site-region region="gov,gov2" >}}
+{{< site-region region="gov" >}}
   ```json
   {
     "logConfiguration": {
@@ -783,7 +783,7 @@ To provide your Datadog API key as a secret, see [Using secrets](#using-secrets)
 {{% /collapse-content %}}
 
 <!-- partial
-{{< site-region region="us,us3,us5,eu,ap1,gov,gov2" >}}
+{{< site-region region="us,us3,us5,eu,ap1,gov" >}}
 **Note**: Set your `apikey` as well as the `Host` relative to your respective site `http-intake.logs.`{{< region-param key="dd_site" code="true" >}}. The full list of available parameters is described in the [Datadog Fluent Bit documentation][24].
 
 [24]: https://docs.datadoghq.com/integrations/fluentbit/#configuration-parameters
@@ -971,7 +971,7 @@ Resources:
 {{< /site-region >}}
 partial -->
 <!-- partial
-{{< site-region region="gov,gov2" >}}
+{{< site-region region="gov" >}}
 ```yaml
 Resources:
   ECSTaskDefinition:
@@ -1091,7 +1091,7 @@ Monitor Fargate logs by using the `awslogs` log driver and a Lambda function to 
 ### Trace collection
 
 <!-- partial
-{{< site-region region="us,us3,us5,eu,ap1,gov,gov2" >}}
+{{< site-region region="us,us3,us5,eu,ap1,gov" >}}
 1. Follow the [instructions above](#installation) to add the Datadog Agent container to your task or job definition with the additional environment variable `DD_APM_ENABLED` set to `true`. Set the `DD_SITE` variable to {{< region-param key="dd_site" code="true" >}}. It defaults to `datadoghq.com` if you don't set it.
 {{< /site-region >}}
 partial -->
