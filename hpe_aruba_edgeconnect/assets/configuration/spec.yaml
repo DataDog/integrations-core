@@ -106,5 +106,5 @@ files:
     example:
     - type: tcp
       port: 10514
-      service: edgeconnect
+      service: hpe_aruba_edgeconnect
       source: hpe_aruba_edgeconnect
