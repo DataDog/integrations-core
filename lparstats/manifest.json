@@ -14,7 +14,8 @@
     "media": [],
     "classifier_tags": [
       "Category::OS & System",
-      "Offering::Integration"
+      "Offering::Integration",
+      "Supported OS::AIX"
     ]
   },
   "author": {
