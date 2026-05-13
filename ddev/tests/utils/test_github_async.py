@@ -756,7 +756,7 @@ async def test_download_artifact_token_not_leaked_to_redirect_target(monkeypatch
             kwargs["transport"] = httpx.MockTransport(signed_handler)
         return real_async_client(*args, **kwargs)
 
-    monkeypatch.setattr("ddev.utils.github_async.httpx.AsyncClient", fake_async_client)
+    monkeypatch.setattr("ddev.utils.github_async.client.httpx.AsyncClient", fake_async_client)
 
     client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
     await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
@@ -800,7 +800,7 @@ async def test_download_artifact_zip_slip_rejected(monkeypatch, tmp_path) -> Non
             kwargs["transport"] = httpx.MockTransport(signed_handler)
         return real_async_client(*args, **kwargs)
 
-    monkeypatch.setattr("ddev.utils.github_async.httpx.AsyncClient", fake_async_client)
+    monkeypatch.setattr("ddev.utils.github_async.client.httpx.AsyncClient", fake_async_client)
 
     client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
     dest = tmp_path / "out"

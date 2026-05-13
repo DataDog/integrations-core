@@ -14,7 +14,8 @@ import httpx
 
 from ddev.cli.ci.tests.messages import BatchFinished, TestBatch
 from ddev.event_bus.orchestrator import AsyncProcessor
-from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse, WorkflowRun
+from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
+from ddev.utils.github_async.models import WorkflowRun
 
 
 def _conclusion_to_status(conclusion: str | None) -> Literal["success", "failure", "skipped"]:

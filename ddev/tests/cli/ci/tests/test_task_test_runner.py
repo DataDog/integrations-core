@@ -17,11 +17,11 @@ import pytest
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, TestBatch
 from ddev.cli.ci.tests.task_test_runner import TaskTestRunner, _conclusion_to_status
 from ddev.event_bus.orchestrator import BaseMessage
-from ddev.utils.github_async import (
+from ddev.utils.github_async import GitHubResponse
+from ddev.utils.github_async.models import (
     Artifact,
     ArtifactsList,
     CheckRun,
-    GitHubResponse,
     WorkflowDispatchResult,
     WorkflowRun,
 )

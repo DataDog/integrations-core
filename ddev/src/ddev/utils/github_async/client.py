@@ -19,10 +19,12 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from .models import (
     ArtifactsList,
+    CheckRun,
     IssueComment,
     Label,
     PullRequest,
     PullRequestReviewComment,
+    WorkflowDispatchResult,
     WorkflowRun,
 )
 

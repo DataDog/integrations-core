@@ -22,6 +22,14 @@ class WorkflowRun(BaseModel):
     updated_at: str | None = None
 
 
+class WorkflowDispatchResult(BaseModel):
+    """Response payload from a successful workflow dispatch."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    workflow_run_id: int
+
+
 class Artifact(BaseModel):
     """A GitHub Actions artifact."""
 
