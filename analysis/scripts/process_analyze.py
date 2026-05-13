@@ -133,11 +133,12 @@ def read_proc_cmdline(pid: int) -> str:
         return ""
 
 
-def run_disco(disco_path: str, pid: int) -> dict:
+def run_disco(disco_path: str, pid: int, use_sudo: bool = False) -> dict:
     """Run disco --pid <pid> and return parsed JSON. Returns empty response on any error."""
+    cmd = (["sudo"] if use_sudo else []) + [disco_path, "--pid", str(pid)]
     try:
         result = subprocess.run(
-            [disco_path, "--pid", str(pid)],
+            cmd,
             capture_output=True,
             text=True,
             timeout=10,
@@ -147,7 +148,7 @@ def run_disco(disco_path: str, pid: int) -> dict:
         return {"services": [], "injected_pids": [], "gpu_pids": []}
 
 
-def collect_process(pid: int, disco_path: str) -> Process | None:
+def collect_process(pid: int, disco_path: str, use_sudo: bool = False) -> Process | None:
     """Collect all data for a single PID. Returns None if the process has vanished."""
     status = read_proc_status(pid)
     if not status:
@@ -155,7 +156,7 @@ def collect_process(pid: int, disco_path: str) -> Process | None:
     ppid = int(status.get("PPid", 0))
     comm = status.get("Name", "")
     cmdline = read_proc_cmdline(pid)
-    disco_result = run_disco(disco_path, pid)
+    disco_result = run_disco(disco_path, pid, use_sudo=use_sudo)
     services = disco_result.get("services", [])
     if services:
         return Process(
@@ -277,6 +278,7 @@ def collect_integration(
     disco_path: str,
     data_dir: Path,
     repo_root: Path,
+    use_sudo: bool = False,
 ) -> str:
     """Collect process data for one integration. Returns 'ok' or 'skipped'."""
     # 1. Select environment
@@ -346,7 +348,7 @@ def collect_integration(
         # 6. Collect process data
         processes: list[Process] = []
         for pid in all_pids:
-            proc = collect_process(pid, disco_path)
+            proc = collect_process(pid, disco_path, use_sudo=use_sudo)
             if proc is not None:
                 processes.append(proc)
 
@@ -380,6 +382,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     collect_p.add_argument("--all", action="store_true", help="Collect all integrations")
     collect_p.add_argument("--env", help="Override environment selection")
     collect_p.add_argument("--disco", default=str(DISCO_PATH), help="Path to disco binary")
+    collect_p.add_argument("--sudo", action="store_true", help="Run disco with sudo (needed to read container network namespaces)")
     collect_p.add_argument("--data-dir", default=str(DEFAULT_DATA_DIR), help="Output directory")
     collect_p.add_argument("--repo-root", default=str(REPO_ROOT), help="Repository root")
 
@@ -423,6 +426,7 @@ def cmd_collect(args: argparse.Namespace) -> None:
                 disco_path=args.disco,
                 data_dir=data_dir,
                 repo_root=repo_root,
+                use_sudo=args.sudo,
             )
         except Exception as exc:
             record_skip(data_dir, SkipEntry(
