@@ -9,8 +9,8 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Collect compliance audit logs from Anthropic Console for security monitoring and SIEM use cases.",
-    "title": "Anthropic Compliance Logs",
+    "description": "Collect compliance logs from Anthropic for security monitoring and SIEM use cases.",
+    "title": "Anthropic Compliance",
     "media": [],
     "classifier_tags": [
       "Category::AI/ML",
@@ -27,7 +27,7 @@
     "integration": {
       "auto_install": false,
       "source_type_id": 78505088,
-      "source_type_name": "Anthropic Compliance Logs",
+      "source_type_name": "Anthropic Compliance",
       "events": {
         "creates_events": false
       },

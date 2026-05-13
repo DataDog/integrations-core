@@ -1,8 +1,8 @@
-# Anthropic Compliance Logs
+# Anthropic Compliance
 
 ## Overview
 
-Datadog's Anthropic Compliance Logs integration ingests audit activity events from Anthropic's [Compliance API][1]. With this integration, security and compliance teams can:
+Datadog's Anthropic Compliance integration ingests audit activity logs from Anthropic's [Compliance API][1]. With this integration, security and compliance teams can:
 
 - **Monitor SSO sign-ins and authentication events** across your organization
 - **Track API key lifecycle** (creation, deletion, scope updates) for Admin, Platform, and Scoped API keys
@@ -34,22 +34,21 @@ The Compliance API is available to Anthropic Enterprise plan customers with the 
 
 ### 3. Configure the Datadog integration
 
-1. In Datadog, go to [**Integrations -> Anthropic Compliance Logs**](https://app.datadoghq.com/integrations?integrationId=anthropic-compliance-logs).
+1. In Datadog, go to [**Integrations -> Anthropic Compliance**](https://app.datadoghq.com/integrations?integrationId=anthropic-compliance-logs).
 2. In the configuration panel, paste your **Admin API Key**.
-3. Toggle **Enable Compliance Logs** to ON.
-4. Click **Save Configuration**.
+3. Click **Save Configuration**.
 
 ### 4. Validate
 
 1. Wait up to 5 minutes for the first crawl.
 2. Open [Log Explorer][3] and filter on `source:anthropic service:anthropic.compliance`.
-3. Confirm events appear with `evt.name` values such as `claude_chat_viewed`, `admin_api_key_created`, or `user_signed_in_sso`.
+3. Confirm logs appear with `evt.name` values such as `claude_chat_viewed`, `admin_api_key_created`, or `user_signed_in_sso`.
 
 ## Data Collected
 
 ### Logs
 
-The integration collects audit activity events from `GET /v1/compliance/activities`. Each event includes:
+The integration collects audit activity logs from `GET /v1/compliance/activities`. Each log includes:
 
 - A timestamp (`created_at`) with microsecond precision
 - An actor (user, API key, SCIM, or system) with email, user ID, IP address, and User-Agent when applicable
@@ -60,15 +59,15 @@ Logs are tagged `source:anthropic service:anthropic.compliance` and processed by
 
 ### Metrics
 
-Anthropic Compliance Logs does not include any metrics.
+Anthropic Compliance does not include any metrics.
 
 ### Service Checks
 
-Anthropic Compliance Logs does not include any service checks.
+Anthropic Compliance does not include any service checks.
 
 ### Events
 
-Anthropic Compliance Logs does not include any events.
+Anthropic Compliance does not include any events.
 
 ## Troubleshooting
 
