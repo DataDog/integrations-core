@@ -52,6 +52,8 @@ class PostgresDataObservability(DBMAsyncJob):
             job_name="data-observability",
         )
         self._lookback_seconds = self._resolve_lookback()
+        # Filter bad queries on check construction.
+        self._queries = self._filter_valid_queries(self._do_config.queries or ())
 
     def _shutdown(self):
         self._check = None
@@ -72,10 +74,30 @@ class PostgresDataObservability(DBMAsyncJob):
             return 0
         return configured
 
+    def _filter_valid_queries(self, queries) -> tuple[Query, ...]:
+        valid = []
+        for q in queries:
+            if q.schedule:
+                if not croniter.is_valid(q.schedule):
+                    self._log.warning(
+                        "Skipping DO query monitor_id=%d: invalid cron schedule %r",
+                        q.monitor_id,
+                        q.schedule,
+                    )
+                    continue
+            elif not (q.interval_seconds and q.interval_seconds > 0):
+                self._log.warning(
+                    "Skipping DO query monitor_id=%d: neither schedule nor positive interval_seconds set",
+                    q.monitor_id,
+                )
+                continue
+            valid.append(q)
+        return tuple(valid)
+
     def _get_due_queries(self) -> list[DueQuery]:
         now = time.time()
         due: list[DueQuery] = []
-        for q in self._do_config.queries or ():
+        for q in self._queries:
             if q.schedule:
                 cached = self._next_run.get(q.monitor_id)
                 if cached is None:

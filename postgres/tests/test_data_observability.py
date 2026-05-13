@@ -407,6 +407,31 @@ def test_error_event_payload(aggregator, pg_instance):
     assert 'duration_s' in payload
 
 
+def test_query_with_no_description(aggregator, pg_instance):
+    """Non-SELECT queries (cursor.description is None) trigger the inner-raised ProgrammingError path
+    and surface 'result set' in the error payload."""
+    mock_conn, mock_cursor = _make_mock_conn()
+
+    def execute_side_effect(sql, *args, **kwargs):
+        mock_cursor.description = None
+
+    mock_cursor.execute = MagicMock(side_effect=execute_side_effect)
+
+    with patch.object(PostgreSql, 'event_platform_event') as mock_epe:
+        check = _create_check(pg_instance)
+        check.db_pool = _mock_db_pool(mock_conn)
+        check.data_observability.run_job()
+
+        do_calls = _get_do_event_calls(mock_epe)
+        payload = json.loads(do_calls[0][0][0])
+
+    assert payload['status'] == 'error'
+    assert 'result set' in payload['error']
+    metrics = aggregator.metrics('dd.postgres.data_observability.query_executions')
+    assert len(metrics) == 1
+    assert 'status:error' in metrics[0].tags
+
+
 def test_fetchmany_called_with_max_rows(pg_instance):
     """fetchmany is called with MAX_RESULT_ROWS to cap memory usage."""
     from datadog_checks.postgres.data_observability import MAX_RESULT_ROWS
@@ -451,6 +476,32 @@ def test_per_query_dbname_in_event_payload(aggregator, pg_instance):
         payload = json.loads(do_calls[0][0][0])
 
     assert payload['db_name'] == 'analytics_db'
+
+
+def test_multi_query_different_dbnames(aggregator, pg_instance):
+    """Each query in a multi-query batch routes its own dbname to get_connection and its payload."""
+    queries = [
+        {**deepcopy(BASE_QUERY), 'dbname': 'db_one'},
+        {**deepcopy(MULTI_QUERIES[1]), 'dbname': 'db_two'},
+    ]
+    mock_conn, _ = _make_mock_conn()
+
+    with patch.object(PostgreSql, 'event_platform_event') as mock_epe:
+        check = _create_check(pg_instance, queries=queries)
+        check.db_pool = _mock_db_pool(mock_conn)
+        check.data_observability.run_job()
+
+        calls = check.db_pool.get_connection.call_args_list
+        assert len(calls) == 2
+        assert calls[0][0][0] == 'db_one'
+        assert calls[1][0][0] == 'db_two'
+
+        do_calls = _get_do_event_calls(mock_epe)
+        payload_1 = json.loads(do_calls[0][0][0])
+        payload_2 = json.loads(do_calls[1][0][0])
+
+    assert payload_1['db_name'] == 'db_one'
+    assert payload_2['db_name'] == 'db_two'
 
 
 # ---------------------------------------------------------------------------
@@ -567,6 +618,53 @@ def test_schedule_takes_precedence_over_interval_seconds(pg_instance, aggregator
     aggregator.reset()
     check.data_observability.run_job()
     assert len(aggregator.metrics('dd.postgres.data_observability.query_executions')) == 1
+
+
+def test_invalid_cron_schedule_filtered_at_init(pg_instance, aggregator, caplog):
+    """A query with an unparseable cron string is dropped at construction; siblings still run."""
+    import logging
+
+    bad = {**deepcopy(CRON_QUERY), 'monitor_id': 20, 'schedule': 'not-a-cron'}
+    good = deepcopy(BASE_QUERY)  # interval-based, monitor_id=1
+
+    mock_conn, _ = _make_mock_conn()
+    with caplog.at_level(logging.WARNING):
+        check = _create_check(pg_instance, queries=[bad, good])
+    assert {q.monitor_id for q in check.data_observability._queries} == {1}
+    assert any('invalid cron schedule' in r.message and "'not-a-cron'" in r.message for r in caplog.records)
+
+    check.db_pool = _mock_db_pool(mock_conn)
+    check.data_observability.run_job()
+    monitor_ids_run = {
+        int(t.split(':')[1])
+        for m in aggregator.metrics('dd.postgres.data_observability.query_executions')
+        for t in m.tags
+        if t.startswith('monitor_id:')
+    }
+    assert monitor_ids_run == {1}
+
+
+def test_query_without_schedule_or_positive_interval_filtered_at_init(pg_instance, caplog):
+    """A query with neither schedule nor a positive interval_seconds is dropped at construction."""
+    import logging
+
+    query = {
+        'monitor_id': 30,
+        'dbname': 'test_db',
+        'query': 'SELECT 1',
+        'type': 'freshness',
+        'entity': {
+            'platform': 'aws',
+            'account': '123456',
+            'database': 'test_db',
+            'schema': 'public',
+            'table': 'foo',
+        },
+    }
+    with caplog.at_level(logging.WARNING):
+        check = _create_check(pg_instance, queries=[query])
+    assert check.data_observability._queries == ()
+    assert any('neither schedule nor positive interval_seconds' in r.message for r in caplog.records)
 
 
 # ---------------------------------------------------------------------------
