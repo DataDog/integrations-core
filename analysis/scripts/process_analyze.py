@@ -250,8 +250,11 @@ def record_skip(data_dir: Path, entry: SkipEntry) -> None:
     path = data_dir / "skipped.json"
     entries: list[dict] = []
     if path.exists():
-        with open(path) as f:
-            entries = json.load(f)
+        try:
+            with open(path) as f:
+                entries = json.load(f)
+        except (json.JSONDecodeError, ValueError):
+            entries = []
     new_entry = dataclasses.asdict(entry)
     for i, e in enumerate(entries):
         if e["integration"] == entry.integration:
