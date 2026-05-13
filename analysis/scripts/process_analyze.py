@@ -93,6 +93,24 @@ def select_environment(envs: list[str]) -> str | None:
     return version_envs[-1] if version_envs else envs[-1]
 
 
+def uses_caddy(integration: str, repo_root: Path) -> tuple[bool, str]:
+    """Return (True, detail) if any YAML under tests/ uses a caddy image."""
+    tests_dir = repo_root / integration / "tests"
+    if not tests_dir.exists():
+        return False, ""
+    for ext in ("yaml", "yml"):
+        for path in tests_dir.rglob(f"*.{ext}"):
+            try:
+                content = path.read_text(errors="replace")
+            except OSError:
+                continue
+            m = re.search(r"image:\s*(caddy:\S+)", content)
+            if m:
+                rel = path.relative_to(repo_root)
+                return True, f"image {m.group(1)} found in {rel}"
+    return False, ""
+
+
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Analyze isMainProcessForService against real E2E environments"

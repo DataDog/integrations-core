@@ -65,3 +65,32 @@ def test_find_integrations_with_e2e(tmp_path):
 
     result = find_integrations_with_e2e(tmp_path)
     assert result == ["nginx", "redis"]
+
+
+from process_analyze import uses_caddy
+
+
+def test_uses_caddy_detects_caddy_image(tmp_path):
+    nginx_tests = tmp_path / "nginx" / "tests" / "docker"
+    nginx_tests.mkdir(parents=True)
+    (nginx_tests / "docker-compose.yaml").write_text(
+        "services:\n  app:\n    image: caddy:2.7\n"
+    )
+    found, detail = uses_caddy("nginx", tmp_path)
+    assert found is True
+    assert "caddy:2.7" in detail
+
+
+def test_uses_caddy_ignores_real_service(tmp_path):
+    apache_tests = tmp_path / "apache" / "tests" / "compose"
+    apache_tests.mkdir(parents=True)
+    (apache_tests / "apache.yaml").write_text(
+        "services:\n  apache:\n    image: httpd:2.4\n"
+    )
+    found, _ = uses_caddy("apache", tmp_path)
+    assert found is False
+
+
+def test_uses_caddy_no_tests_dir(tmp_path):
+    found, _ = uses_caddy("nonexistent", tmp_path)
+    assert found is False
