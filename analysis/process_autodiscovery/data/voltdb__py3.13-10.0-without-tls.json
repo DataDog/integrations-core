@@ -1,0 +1,128 @@
+{
+  "integration": "voltdb",
+  "environment": "py3.13-10.0-without-tls",
+  "collected_at": "2026-05-13T17:21:08.109846+00:00",
+  "processes": [
+    {
+      "pid": 2031215,
+      "ppid": 2031150,
+      "comm": "java",
+      "cmdline": "/usr/bin/java -Xmx2048m -Xms2048m -XX:+AlwaysPreTouch -server -Djava.awt.headless=true -Djavax.security.auth.useSubjectCredsOnly=false -Dsun.net.inetaddr.ttl=300 -Dsun.net.inetaddr.negative.ttl=3600 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled -XX:+UseTLAB -XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly -XX:+UseCondCardMark -Dsun.rmi.dgc.server.gcInterval=9223372036854775807 -Dsun.rmi.dgc.client.gcInterval=9223372036854775807 -XX:CMSWaitDuration=120000 -XX:CMSMaxAbortablePrecleanTime=120000 -XX:+ExplicitGCInvokesConcurrent -XX:+CMSScavengeBeforeRemark -XX:+CMSClassUnloadingEnabled -XX:+PerfDisableSharedMem -Dlog4j.configuration=file:///opt/voltdb/voltdb/log4j.xml -Djava.library.path=default -classpath /opt/voltdb/voltdb/voltdb-10.0.jar:/opt/voltdb/lib/jaxb-api-2.3.0.jar:/opt/voltdb/lib/commons-compiler-2.7.6.jar:/opt/voltdb/lib/protobuf-java-3.4.0.jar:/opt/voltdb/lib/avro-1.9.0.jar:/opt/voltdb/lib/jetty-servlet-9.4.15.v20190215.jar:/opt/voltdb/lib/avatica-core-1.12.0.jar:/opt/voltdb/lib/jline-2.10.jar:/opt/voltdb/lib/cron-java8-1.5.jar:/opt/voltdb/lib/kafka-avro-serializer-3.0.0.jar:/opt/voltdb/lib/calcite-server-1.17.0.jar:/opt/voltdb/lib/jackson-annotations-2.9.10.jar:/opt/voltdb/lib/jackson-dataformat-cbor-2.9.10.jar:/opt/voltdb/lib/slf4j-api-1.6.2.jar:/opt/voltdb/lib/netty-tcnative-boringssl-static-2.0.27.Final.jar:/opt/voltdb/lib/commons-logging-1.1.3.jar:/opt/voltdb/lib/snmp4j-2.5.2.jar:/opt/voltdb/lib/guava-26.0-jre.jar:/opt/voltdb/lib/netty-all-4.1.43.Final.jar:/opt/voltdb/lib/calcite-server-1.17.0-sources.jar:/opt/voltdb/lib/lz4-java-1.6.0.jar:/opt/voltdb/lib/log4j-1.2.16.jar:/opt/voltdb/lib/calcite-linq4j-1.17.0.jar:/opt/voltdb/lib/javax.activation-api-1.2.0.jar:/opt/voltdb/lib/owner-1.0.10.jar:/opt/voltdb/lib/snappy-java-1.1.7.3.jar:/opt/voltdb/lib/calcite-core-1.17.0-sources.jar:/opt/voltdb/lib/jetty-security-9.4.15.v20190215.jar:/opt/voltdb/lib/httpclient-4.3.6.jar:/opt/voltdb/lib/jna.jar:/opt/voltdb/lib/jetty-util-9.4.15.v20190215.jar:/opt/voltdb/lib/jsch-0.1.51.jar:/opt/voltdb/lib/calcite-linq4j-1.17.0-sources.jar:/opt/voltdb/lib/istack-commons-runtime-3.0.8.jar:/opt/voltdb/lib/metrics-core-2.2.0.jar:/opt/voltdb/lib/tomcat-juli-7.0.96.jar:/opt/voltdb/lib/jaxb-runtime-2.3.0.1.jar:/opt/voltdb/lib/kafka-schema-registry-client-5.3.2.jar:/opt/voltdb/lib/commons-lang3-3.8.1.jar:/opt/voltdb/lib/jetty-http-9.4.15.v20190215.jar:/opt/voltdb/lib/owner-java8-1.0.10.jar:/opt/voltdb/lib/janino-2.7.6.jar:/opt/voltdb/lib/avatica-core-1.12.0-sources.jar:/opt/voltdb/lib/vmetrics.jar:/opt/voltdb/lib/httpcore-4.3.3.jar:/opt/voltdb/lib/jetty-continuation-9.4.15.v20190215.jar:/opt/voltdb/lib/jetty-io-9.4.15.v20190215.jar:/opt/voltdb/lib/javax.annotation-api-1.3.2.jar:/opt/voltdb/lib/httpasyncclient-4.0.2.jar:/opt/voltdb/lib/calcite-core-1.17.0.jar:/opt/voltdb/lib/servlet-api-3.1.jar:/opt/voltdb/lib/felix-framework-5.6.12.jar:/opt/voltdb/lib/jetty-server-9.4.15.v20190215.jar:/opt/voltdb/lib/jackson-core-2.9.10.jar:/opt/voltdb/lib/commons-codec-1.6.jar:/opt/voltdb/lib/slf4j-log4j12-1.6.2.jar:/opt/voltdb/lib/jaxb-core-2.3.0.1.jar:/opt/voltdb/lib/jackson-databind-2.9.10.1.jar:/opt/voltdb/lib/zstd-jni-1.4.4-2.jar:/opt/voltdb/lib/httpcore-nio-4.3.2.jar:/opt/voltdb/lib/kafka-clients-2.3.0.jar:/opt/voltdb/lib/super-csv-2.1.0.jar:/opt/voltdb/lib/tomcat-jdbc-7.0.96.jar org.voltdb.VoltDB probe placementgroup 0 voltdbroot /var/voltdb/ mesh voltdb0,voltdb1,voltdb2 hostcount 3",
+      "generated_name": "org.voltdb.VoltDB",
+      "has_service_data": true
+    },
+    {
+      "pid": 2031212,
+      "ppid": 2031135,
+      "comm": "java",
+      "cmdline": "/usr/bin/java -Xmx2048m -Xms2048m -XX:+AlwaysPreTouch -server -Djava.awt.headless=true -Djavax.security.auth.useSubjectCredsOnly=false -Dsun.net.inetaddr.ttl=300 -Dsun.net.inetaddr.negative.ttl=3600 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled -XX:+UseTLAB -XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly -XX:+UseCondCardMark -Dsun.rmi.dgc.server.gcInterval=9223372036854775807 -Dsun.rmi.dgc.client.gcInterval=9223372036854775807 -XX:CMSWaitDuration=120000 -XX:CMSMaxAbortablePrecleanTime=120000 -XX:+ExplicitGCInvokesConcurrent -XX:+CMSScavengeBeforeRemark -XX:+CMSClassUnloadingEnabled -XX:+PerfDisableSharedMem -Dlog4j.configuration=file:///opt/voltdb/voltdb/log4j.xml -Djava.library.path=default -classpath /opt/voltdb/voltdb/voltdb-10.0.jar:/opt/voltdb/lib/jaxb-api-2.3.0.jar:/opt/voltdb/lib/commons-compiler-2.7.6.jar:/opt/voltdb/lib/protobuf-java-3.4.0.jar:/opt/voltdb/lib/avro-1.9.0.jar:/opt/voltdb/lib/jetty-servlet-9.4.15.v20190215.jar:/opt/voltdb/lib/avatica-core-1.12.0.jar:/opt/voltdb/lib/jline-2.10.jar:/opt/voltdb/lib/cron-java8-1.5.jar:/opt/voltdb/lib/kafka-avro-serializer-3.0.0.jar:/opt/voltdb/lib/calcite-server-1.17.0.jar:/opt/voltdb/lib/jackson-annotations-2.9.10.jar:/opt/voltdb/lib/jackson-dataformat-cbor-2.9.10.jar:/opt/voltdb/lib/slf4j-api-1.6.2.jar:/opt/voltdb/lib/netty-tcnative-boringssl-static-2.0.27.Final.jar:/opt/voltdb/lib/commons-logging-1.1.3.jar:/opt/voltdb/lib/snmp4j-2.5.2.jar:/opt/voltdb/lib/guava-26.0-jre.jar:/opt/voltdb/lib/netty-all-4.1.43.Final.jar:/opt/voltdb/lib/calcite-server-1.17.0-sources.jar:/opt/voltdb/lib/lz4-java-1.6.0.jar:/opt/voltdb/lib/log4j-1.2.16.jar:/opt/voltdb/lib/calcite-linq4j-1.17.0.jar:/opt/voltdb/lib/javax.activation-api-1.2.0.jar:/opt/voltdb/lib/owner-1.0.10.jar:/opt/voltdb/lib/snappy-java-1.1.7.3.jar:/opt/voltdb/lib/calcite-core-1.17.0-sources.jar:/opt/voltdb/lib/jetty-security-9.4.15.v20190215.jar:/opt/voltdb/lib/httpclient-4.3.6.jar:/opt/voltdb/lib/jna.jar:/opt/voltdb/lib/jetty-util-9.4.15.v20190215.jar:/opt/voltdb/lib/jsch-0.1.51.jar:/opt/voltdb/lib/calcite-linq4j-1.17.0-sources.jar:/opt/voltdb/lib/istack-commons-runtime-3.0.8.jar:/opt/voltdb/lib/metrics-core-2.2.0.jar:/opt/voltdb/lib/tomcat-juli-7.0.96.jar:/opt/voltdb/lib/jaxb-runtime-2.3.0.1.jar:/opt/voltdb/lib/kafka-schema-registry-client-5.3.2.jar:/opt/voltdb/lib/commons-lang3-3.8.1.jar:/opt/voltdb/lib/jetty-http-9.4.15.v20190215.jar:/opt/voltdb/lib/owner-java8-1.0.10.jar:/opt/voltdb/lib/janino-2.7.6.jar:/opt/voltdb/lib/avatica-core-1.12.0-sources.jar:/opt/voltdb/lib/vmetrics.jar:/opt/voltdb/lib/httpcore-4.3.3.jar:/opt/voltdb/lib/jetty-continuation-9.4.15.v20190215.jar:/opt/voltdb/lib/jetty-io-9.4.15.v20190215.jar:/opt/voltdb/lib/javax.annotation-api-1.3.2.jar:/opt/voltdb/lib/httpasyncclient-4.0.2.jar:/opt/voltdb/lib/calcite-core-1.17.0.jar:/opt/voltdb/lib/servlet-api-3.1.jar:/opt/voltdb/lib/felix-framework-5.6.12.jar:/opt/voltdb/lib/jetty-server-9.4.15.v20190215.jar:/opt/voltdb/lib/jackson-core-2.9.10.jar:/opt/voltdb/lib/commons-codec-1.6.jar:/opt/voltdb/lib/slf4j-log4j12-1.6.2.jar:/opt/voltdb/lib/jaxb-core-2.3.0.1.jar:/opt/voltdb/lib/jackson-databind-2.9.10.1.jar:/opt/voltdb/lib/zstd-jni-1.4.4-2.jar:/opt/voltdb/lib/httpcore-nio-4.3.2.jar:/opt/voltdb/lib/kafka-clients-2.3.0.jar:/opt/voltdb/lib/super-csv-2.1.0.jar:/opt/voltdb/lib/tomcat-jdbc-7.0.96.jar org.voltdb.VoltDB probe placementgroup 0 voltdbroot /var/voltdb/ mesh voltdb0,voltdb1,voltdb2 hostcount 3",
+      "generated_name": "org.voltdb.VoltDB",
+      "has_service_data": true
+    },
+    {
+      "pid": 2031214,
+      "ppid": 2031148,
+      "comm": "java",
+      "cmdline": "/usr/bin/java -Xmx2048m -Xms2048m -XX:+AlwaysPreTouch -server -Djava.awt.headless=true -Djavax.security.auth.useSubjectCredsOnly=false -Dsun.net.inetaddr.ttl=300 -Dsun.net.inetaddr.negative.ttl=3600 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled -XX:+UseTLAB -XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly -XX:+UseCondCardMark -Dsun.rmi.dgc.server.gcInterval=9223372036854775807 -Dsun.rmi.dgc.client.gcInterval=9223372036854775807 -XX:CMSWaitDuration=120000 -XX:CMSMaxAbortablePrecleanTime=120000 -XX:+ExplicitGCInvokesConcurrent -XX:+CMSScavengeBeforeRemark -XX:+CMSClassUnloadingEnabled -XX:+PerfDisableSharedMem -Dlog4j.configuration=file:///opt/voltdb/voltdb/log4j.xml -Djava.library.path=default -classpath /opt/voltdb/voltdb/voltdb-10.0.jar:/opt/voltdb/lib/jaxb-api-2.3.0.jar:/opt/voltdb/lib/commons-compiler-2.7.6.jar:/opt/voltdb/lib/protobuf-java-3.4.0.jar:/opt/voltdb/lib/avro-1.9.0.jar:/opt/voltdb/lib/jetty-servlet-9.4.15.v20190215.jar:/opt/voltdb/lib/avatica-core-1.12.0.jar:/opt/voltdb/lib/jline-2.10.jar:/opt/voltdb/lib/cron-java8-1.5.jar:/opt/voltdb/lib/kafka-avro-serializer-3.0.0.jar:/opt/voltdb/lib/calcite-server-1.17.0.jar:/opt/voltdb/lib/jackson-annotations-2.9.10.jar:/opt/voltdb/lib/jackson-dataformat-cbor-2.9.10.jar:/opt/voltdb/lib/slf4j-api-1.6.2.jar:/opt/voltdb/lib/netty-tcnative-boringssl-static-2.0.27.Final.jar:/opt/voltdb/lib/commons-logging-1.1.3.jar:/opt/voltdb/lib/snmp4j-2.5.2.jar:/opt/voltdb/lib/guava-26.0-jre.jar:/opt/voltdb/lib/netty-all-4.1.43.Final.jar:/opt/voltdb/lib/calcite-server-1.17.0-sources.jar:/opt/voltdb/lib/lz4-java-1.6.0.jar:/opt/voltdb/lib/log4j-1.2.16.jar:/opt/voltdb/lib/calcite-linq4j-1.17.0.jar:/opt/voltdb/lib/javax.activation-api-1.2.0.jar:/opt/voltdb/lib/owner-1.0.10.jar:/opt/voltdb/lib/snappy-java-1.1.7.3.jar:/opt/voltdb/lib/calcite-core-1.17.0-sources.jar:/opt/voltdb/lib/jetty-security-9.4.15.v20190215.jar:/opt/voltdb/lib/httpclient-4.3.6.jar:/opt/voltdb/lib/jna.jar:/opt/voltdb/lib/jetty-util-9.4.15.v20190215.jar:/opt/voltdb/lib/jsch-0.1.51.jar:/opt/voltdb/lib/calcite-linq4j-1.17.0-sources.jar:/opt/voltdb/lib/istack-commons-runtime-3.0.8.jar:/opt/voltdb/lib/metrics-core-2.2.0.jar:/opt/voltdb/lib/tomcat-juli-7.0.96.jar:/opt/voltdb/lib/jaxb-runtime-2.3.0.1.jar:/opt/voltdb/lib/kafka-schema-registry-client-5.3.2.jar:/opt/voltdb/lib/commons-lang3-3.8.1.jar:/opt/voltdb/lib/jetty-http-9.4.15.v20190215.jar:/opt/voltdb/lib/owner-java8-1.0.10.jar:/opt/voltdb/lib/janino-2.7.6.jar:/opt/voltdb/lib/avatica-core-1.12.0-sources.jar:/opt/voltdb/lib/vmetrics.jar:/opt/voltdb/lib/httpcore-4.3.3.jar:/opt/voltdb/lib/jetty-continuation-9.4.15.v20190215.jar:/opt/voltdb/lib/jetty-io-9.4.15.v20190215.jar:/opt/voltdb/lib/javax.annotation-api-1.3.2.jar:/opt/voltdb/lib/httpasyncclient-4.0.2.jar:/opt/voltdb/lib/calcite-core-1.17.0.jar:/opt/voltdb/lib/servlet-api-3.1.jar:/opt/voltdb/lib/felix-framework-5.6.12.jar:/opt/voltdb/lib/jetty-server-9.4.15.v20190215.jar:/opt/voltdb/lib/jackson-core-2.9.10.jar:/opt/voltdb/lib/commons-codec-1.6.jar:/opt/voltdb/lib/slf4j-log4j12-1.6.2.jar:/opt/voltdb/lib/jaxb-core-2.3.0.1.jar:/opt/voltdb/lib/jackson-databind-2.9.10.1.jar:/opt/voltdb/lib/zstd-jni-1.4.4-2.jar:/opt/voltdb/lib/httpcore-nio-4.3.2.jar:/opt/voltdb/lib/kafka-clients-2.3.0.jar:/opt/voltdb/lib/super-csv-2.1.0.jar:/opt/voltdb/lib/tomcat-jdbc-7.0.96.jar org.voltdb.VoltDB probe placementgroup 0 voltdbroot /var/voltdb/ mesh voltdb0,voltdb1,voltdb2 hostcount 3",
+      "generated_name": "org.voltdb.VoltDB",
+      "has_service_data": true
+    },
+    {
+      "pid": 2033007,
+      "ppid": 2032984,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2033043,
+      "ppid": 2033007,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2033431,
+      "ppid": 2033007,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2033432,
+      "ppid": 2033007,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2033434,
+      "ppid": 2033007,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2033435,
+      "ppid": 2033007,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2033436,
+      "ppid": 2033007,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2033438,
+      "ppid": 2033007,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2033441,
+      "ppid": 2033432,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 2033442,
+      "ppid": 2033434,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 2033443,
+      "ppid": 2033435,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 2033445,
+      "ppid": 2033436,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

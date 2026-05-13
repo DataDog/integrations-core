@@ -1,0 +1,320 @@
+{
+  "integration": "prefect",
+  "environment": "py3.13-3.6.17",
+  "collected_at": "2026-05-13T15:42:38.416124+00:00",
+  "processes": [
+    {
+      "pid": 1606322,
+      "ppid": 1606299,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1606362,
+      "ppid": 1606322,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1606751,
+      "ppid": 1606322,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1606752,
+      "ppid": 1606322,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1606753,
+      "ppid": 1606322,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1606755,
+      "ppid": 1606322,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1606756,
+      "ppid": 1606322,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1606757,
+      "ppid": 1606322,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1606759,
+      "ppid": 1606752,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 1606760,
+      "ppid": 1606753,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1606763,
+      "ppid": 1606756,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1606765,
+      "ppid": 1606755,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 1600642,
+      "ppid": 1600589,
+      "comm": "redis-server",
+      "cmdline": "redis-server *:6379",
+      "generated_name": "redis-server",
+      "has_service_data": true
+    },
+    {
+      "pid": 1600643,
+      "ppid": 1600595,
+      "comm": "postgres",
+      "cmdline": "postgres",
+      "generated_name": "postgres",
+      "has_service_data": true
+    },
+    {
+      "pid": 1600785,
+      "ppid": 1600643,
+      "comm": "postgres",
+      "cmdline": "postgres: checkpointer",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1600786,
+      "ppid": 1600643,
+      "comm": "postgres",
+      "cmdline": "postgres: background writer",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1600787,
+      "ppid": 1600643,
+      "comm": "postgres",
+      "cmdline": "postgres: walwriter",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1600788,
+      "ppid": 1600643,
+      "comm": "postgres",
+      "cmdline": "postgres: autovacuum launcher",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1600789,
+      "ppid": 1600643,
+      "comm": "postgres",
+      "cmdline": "postgres: stats collector",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1600790,
+      "ppid": 1600643,
+      "comm": "postgres",
+      "cmdline": "postgres: logical replication launcher",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1602710,
+      "ppid": 1600643,
+      "comm": "postgres",
+      "cmdline": "postgres: prefect prefect 172.17.131.5(57214) idle",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1602711,
+      "ppid": 1600643,
+      "comm": "postgres",
+      "cmdline": "postgres: prefect prefect 172.17.131.5(57220) idle",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1602734,
+      "ppid": 1600643,
+      "comm": "postgres",
+      "cmdline": "postgres: prefect prefect 172.17.131.5(57222) idle",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1602735,
+      "ppid": 1600643,
+      "comm": "postgres",
+      "cmdline": "postgres: prefect prefect 172.17.131.5(57230) idle",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1602744,
+      "ppid": 1600643,
+      "comm": "postgres",
+      "cmdline": "postgres: prefect prefect 172.17.131.5(57246) idle",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1602753,
+      "ppid": 1600643,
+      "comm": "postgres",
+      "cmdline": "postgres: prefect prefect 172.17.131.5(57248) idle",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1605663,
+      "ppid": 1600643,
+      "comm": "postgres",
+      "cmdline": "postgres: prefect prefect 172.17.131.4(50876) idle",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1606088,
+      "ppid": 1600643,
+      "comm": "postgres",
+      "cmdline": "postgres: prefect prefect 172.17.131.4(42376) idle",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1606090,
+      "ppid": 1600643,
+      "comm": "postgres",
+      "cmdline": "postgres: prefect prefect 172.17.131.4(42392) idle",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1606180,
+      "ppid": 1600643,
+      "comm": "postgres",
+      "cmdline": "postgres: prefect prefect 172.17.131.4(42402) idle",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1606192,
+      "ppid": 1600643,
+      "comm": "postgres",
+      "cmdline": "postgres: prefect prefect 172.17.131.4(42422) idle",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1602269,
+      "ppid": 1602221,
+      "comm": "tini",
+      "cmdline": "/usr/bin/tini -g -- /opt/prefect/entrypoint.sh prefect server services start",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1602314,
+      "ppid": 1602269,
+      "comm": "prefect",
+      "cmdline": "/usr/local/bin/python /usr/local/bin/prefect server services start",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1601037,
+      "ppid": 1601013,
+      "comm": "tini",
+      "cmdline": "/usr/bin/tini -g -- /opt/prefect/entrypoint.sh prefect server start --no-services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1601108,
+      "ppid": 1601037,
+      "comm": "prefect",
+      "cmdline": "/usr/local/bin/python /usr/local/bin/prefect server start --no-services",
+      "generated_name": "prefect",
+      "has_service_data": true
+    },
+    {
+      "pid": 1602270,
+      "ppid": 1602222,
+      "comm": "tini",
+      "cmdline": "/usr/bin/tini -g -- /opt/prefect/entrypoint.sh sh -c prefect worker start --pool local-pool --with-healthcheck 2>&1 | tee -a /var/log/prefect/dd_log_1",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1602323,
+      "ppid": 1602270,
+      "comm": "sh",
+      "cmdline": "sh -c prefect worker start --pool local-pool --with-healthcheck 2>&1 | tee -a /var/log/prefect/dd_log_1",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1602324,
+      "ppid": 1602323,
+      "comm": "prefect",
+      "cmdline": "/usr/local/bin/python /usr/local/bin/prefect worker start --pool local-pool --with-healthcheck",
+      "generated_name": "prefect",
+      "has_service_data": true
+    },
+    {
+      "pid": 1602325,
+      "ppid": 1602323,
+      "comm": "tee",
+      "cmdline": "tee -a /var/log/prefect/dd_log_1",
+      "generated_name": "tee",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

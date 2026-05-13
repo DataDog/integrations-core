@@ -1,0 +1,128 @@
+{
+  "integration": "etcd",
+  "environment": "py3.13-v3.5.9",
+  "collected_at": "2026-05-13T13:40:48.665869+00:00",
+  "processes": [
+    {
+      "pid": 1064415,
+      "ppid": 1064338,
+      "comm": "etcd",
+      "cmdline": "/usr/local/bin/etcd -name etcd2 --data-dir /etcd_data -advertise-client-urls http://etcd2:2379 -listen-client-urls http://0.0.0.0:2379 -initial-advertise-peer-urls http://etcd2:2380 -listen-peer-urls http://0.0.0.0:2380 -initial-cluster etcd0=http://etcd0:2380,etcd1=http://etcd1:2380,etcd2=http://etcd2:2380",
+      "generated_name": "etcd",
+      "has_service_data": true
+    },
+    {
+      "pid": 1064422,
+      "ppid": 1064353,
+      "comm": "etcd",
+      "cmdline": "/usr/local/bin/etcd -name etcd0 --data-dir /etcd_data -advertise-client-urls http://etcd0:2379 -listen-client-urls http://0.0.0.0:2379 -initial-advertise-peer-urls http://etcd0:2380 -listen-peer-urls http://0.0.0.0:2380 -initial-cluster etcd0=http://etcd0:2380,etcd1=http://etcd1:2380,etcd2=http://etcd2:2380",
+      "generated_name": "etcd",
+      "has_service_data": true
+    },
+    {
+      "pid": 1064816,
+      "ppid": 1064793,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1064857,
+      "ppid": 1064816,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1065256,
+      "ppid": 1064816,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1065257,
+      "ppid": 1064816,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1065259,
+      "ppid": 1064816,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1065260,
+      "ppid": 1064816,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1065261,
+      "ppid": 1064816,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1065262,
+      "ppid": 1064816,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1065265,
+      "ppid": 1065257,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 1065267,
+      "ppid": 1065259,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1065268,
+      "ppid": 1065260,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 1065269,
+      "ppid": 1065261,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1064417,
+      "ppid": 1064352,
+      "comm": "etcd",
+      "cmdline": "/usr/local/bin/etcd -name etcd1 --data-dir /etcd_data -advertise-client-urls http://etcd1:2379 -listen-client-urls http://0.0.0.0:2379 -initial-advertise-peer-urls http://etcd1:2380 -listen-peer-urls http://0.0.0.0:2380 -initial-cluster etcd0=http://etcd0:2380,etcd1=http://etcd1:2380,etcd2=http://etcd2:2380",
+      "generated_name": "etcd",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

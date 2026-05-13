@@ -1,0 +1,152 @@
+{
+  "integration": "consul",
+  "environment": "py3.13-1.9",
+  "collected_at": "2026-05-13T13:26:57.265618+00:00",
+  "processes": [
+    {
+      "pid": 1008454,
+      "ppid": 1008431,
+      "comm": "docker-entrypoi",
+      "cmdline": "/usr/bin/dumb-init /bin/sh /usr/local/bin/docker-entrypoint.sh agent -dev -bootstrap -bind=0.0.0.0 -client=0.0.0.0 -node=node-consul-leader",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1008513,
+      "ppid": 1008454,
+      "comm": "consul",
+      "cmdline": "consul agent -data-dir=/consul/data -config-dir=/consul/config -dev -bootstrap -bind=0.0.0.0 -client=0.0.0.0 -node=node-consul-leader",
+      "generated_name": "consul",
+      "has_service_data": true
+    },
+    {
+      "pid": 1008568,
+      "ppid": 1008541,
+      "comm": "docker-entrypoi",
+      "cmdline": "/usr/bin/dumb-init /bin/sh /usr/local/bin/docker-entrypoint.sh /bin/sh -c sleep 5 && consul agent -dev -join=consul-leader -bind=0.0.0.0 -node=node-consul-follower-1",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1008594,
+      "ppid": 1008568,
+      "comm": "consul",
+      "cmdline": "consul agent -dev -join=consul-leader -bind=0.0.0.0 -node=node-consul-follower-1",
+      "generated_name": "consul",
+      "has_service_data": true
+    },
+    {
+      "pid": 1009081,
+      "ppid": 1009058,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1009120,
+      "ppid": 1009081,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1009507,
+      "ppid": 1009081,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1009508,
+      "ppid": 1009081,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1009509,
+      "ppid": 1009081,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1009510,
+      "ppid": 1009081,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1009512,
+      "ppid": 1009081,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1009513,
+      "ppid": 1009081,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1009516,
+      "ppid": 1009509,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1009517,
+      "ppid": 1009508,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 1009518,
+      "ppid": 1009510,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 1009520,
+      "ppid": 1009512,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1008646,
+      "ppid": 1008622,
+      "comm": "docker-entrypoi",
+      "cmdline": "/usr/bin/dumb-init /bin/sh /usr/local/bin/docker-entrypoint.sh /bin/sh -c sleep 5 && consul agent -dev -join=consul-leader -bind=0.0.0.0 -node=node-consul-follower-2",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1008674,
+      "ppid": 1008646,
+      "comm": "consul",
+      "cmdline": "consul agent -dev -join=consul-leader -bind=0.0.0.0 -node=node-consul-follower-2",
+      "generated_name": "consul",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

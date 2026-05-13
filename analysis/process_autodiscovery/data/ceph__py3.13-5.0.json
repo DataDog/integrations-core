@@ -1,0 +1,208 @@
+{
+  "integration": "ceph",
+  "environment": "py3.13-5.0",
+  "collected_at": "2026-05-13T13:15:19.985457+00:00",
+  "processes": [
+    {
+      "pid": 934073,
+      "ppid": 934050,
+      "comm": "entrypoint.sh",
+      "cmdline": "/bin/bash /opt/ceph-container/bin/entrypoint.sh demo",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 934292,
+      "ppid": 934073,
+      "comm": "ceph-mon",
+      "cmdline": "/usr/bin/ceph-mon --cluster ceph --setuser ceph --setgroup ceph --default-log-to-stderr=true --err-to-stderr=true --default-log-to-file=false -i 7e30220a514e --mon-data /var/lib/ceph/mon/ceph-7e30220a514e --public-addr 172.17.131.2",
+      "generated_name": "ceph-mon",
+      "has_service_data": true
+    },
+    {
+      "pid": 934376,
+      "ppid": 934073,
+      "comm": "ceph-mgr",
+      "cmdline": "ceph-mgr --cluster ceph --setuser ceph --setgroup ceph --default-log-to-stderr=true --err-to-stderr=true --default-log-to-file=false -i 7e30220a514e",
+      "generated_name": "ceph-mgr",
+      "has_service_data": true
+    },
+    {
+      "pid": 934637,
+      "ppid": 934073,
+      "comm": "ceph-osd",
+      "cmdline": "ceph-osd --cluster ceph --setuser ceph --setgroup ceph --default-log-to-stderr=true --err-to-stderr=true --default-log-to-file=false -i 0",
+      "generated_name": "ceph-osd",
+      "has_service_data": true
+    },
+    {
+      "pid": 935265,
+      "ppid": 934073,
+      "comm": "ceph-mds",
+      "cmdline": "ceph-mds --cluster ceph --setuser ceph --setgroup ceph --default-log-to-stderr=true --err-to-stderr=true --default-log-to-file=false -i demo",
+      "generated_name": "ceph-mds",
+      "has_service_data": true
+    },
+    {
+      "pid": 935316,
+      "ppid": 934073,
+      "comm": "radosgw",
+      "cmdline": "radosgw --cluster ceph --setuser ceph --setgroup ceph --default-log-to-stderr=true --err-to-stderr=true --default-log-to-file=false -n client.rgw.7e30220a514e -k /var/lib/ceph/radosgw/ceph-rgw.7e30220a514e/keyring",
+      "generated_name": "radosgw",
+      "has_service_data": true
+    },
+    {
+      "pid": 936947,
+      "ppid": 934073,
+      "comm": "python3",
+      "cmdline": "python3 app.py",
+      "generated_name": "sree",
+      "has_service_data": true
+    },
+    {
+      "pid": 941719,
+      "ppid": 934073,
+      "comm": "dbus-daemon",
+      "cmdline": "dbus-daemon --system",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 941722,
+      "ppid": 934073,
+      "comm": "rpcbind",
+      "cmdline": "rpcbind",
+      "generated_name": "rpcbind",
+      "has_service_data": true
+    },
+    {
+      "pid": 941724,
+      "ppid": 934073,
+      "comm": "rpc.statd",
+      "cmdline": "rpc.statd -L",
+      "generated_name": "rpc",
+      "has_service_data": true
+    },
+    {
+      "pid": 941727,
+      "ppid": 934073,
+      "comm": "ganesha.nfsd",
+      "cmdline": "ganesha.nfsd  -L STDOUT",
+      "generated_name": "ganesha",
+      "has_service_data": true
+    },
+    {
+      "pid": 941751,
+      "ppid": 934073,
+      "comm": "rbd-mirror",
+      "cmdline": "rbd-mirror --cluster ceph --setuser ceph --setgroup ceph --default-log-to-stderr=true --err-to-stderr=true --default-log-to-file=false",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 942274,
+      "ppid": 934073,
+      "comm": "ceph",
+      "cmdline": "/usr/libexec/platform-python -s /usr/bin/ceph --cluster ceph -w",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 949364,
+      "ppid": 949341,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 949404,
+      "ppid": 949364,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 949794,
+      "ppid": 949364,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 949795,
+      "ppid": 949364,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 949796,
+      "ppid": 949364,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 949798,
+      "ppid": 949364,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 949799,
+      "ppid": 949364,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 949800,
+      "ppid": 949364,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 949803,
+      "ppid": 949795,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 949804,
+      "ppid": 949796,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 949807,
+      "ppid": 949799,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 949808,
+      "ppid": 949798,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

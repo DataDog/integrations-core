@@ -1,0 +1,144 @@
+{
+  "integration": "ibm_was",
+  "environment": "py3.13-9",
+  "collected_at": "2026-05-13T14:11:45.875272+00:00",
+  "processes": [
+    {
+      "pid": 1195490,
+      "ppid": 1195464,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1195534,
+      "ppid": 1195490,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1195937,
+      "ppid": 1195490,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1195938,
+      "ppid": 1195490,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1195940,
+      "ppid": 1195490,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1195941,
+      "ppid": 1195490,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1195942,
+      "ppid": 1195490,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1195944,
+      "ppid": 1195490,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1195946,
+      "ppid": 1195938,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 1195947,
+      "ppid": 1195940,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1195948,
+      "ppid": 1195941,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 1195950,
+      "ppid": 1195942,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1184241,
+      "ppid": 1184218,
+      "comm": "start_server.sh",
+      "cmdline": "/bin/bash /work/start_server.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1185947,
+      "ppid": 1184241,
+      "comm": "logViewer.sh",
+      "cmdline": "/bin/sh /opt/IBM/WebSphere/AppServer/bin/logViewer.sh -monitor 1 -resumable -resume -format json",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1185948,
+      "ppid": 1184241,
+      "comm": "grep",
+      "cmdline": "grep --line-buffered ^{",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1185984,
+      "ppid": 1185947,
+      "comm": "java",
+      "cmdline": "/opt/IBM/WebSphere/AppServer/java/8.0/bin/java -Dcom.ibm.CORBA.ConfigURL=file:/opt/IBM/WebSphere/AppServer/profiles/AppSrv01/properties/sas.client.props -Dwas.install.root=/opt/IBM/WebSphere/AppServer -Duser.install.root=/opt/IBM/WebSphere/AppServer/profiles/AppSrv01 -Dlog.repository.root=/opt/IBM/WebSphere/AppServer/profiles/AppSrv01/logs -Dws.ext.dirs=/opt/IBM/WebSphere/AppServer/java/8.0/lib:/opt/IBM/WebSphere/AppServer/classes:/opt/IBM/WebSphere/AppServer/lib:/opt/IBM/WebSphere/AppServer/installedChannels:/opt/IBM/WebSphere/AppServer/lib/ext:/opt/IBM/WebSphere/AppServer/web/help:/opt/IBM/WebSphere/AppServer/deploytool/itp/plugins/com.ibm.etools.ejbdeploy/runtime -Djava.endorsed.dirs=/opt/IBM/WebSphere/AppServer/endorsed_apis:/opt/IBM/WebSphere/AppServer/java/8.0/jre/lib/endorsed -Djava.ext.dirs=/opt/IBM/WebSphere/AppServer/javaext:/opt/IBM/WebSphere/AppServer/java/8.0/lib/ext:/opt/IBM/WebSphere/AppServer/java/8.0/jre/lib/ext -Xmx64M -Djava.util.logging.manager=com.ibm.ws.bootstrap.WsLogManager -Djava.util.logging.configureByServer=true -Dlogviewer.custom.header=/opt/IBM/WebSphere/AppServer/properties/WsHeader -Dlogviewer.custom.levels=/opt/IBM/WebSphere/AppServer/properties/WsLevels.properties -classpath /opt/IBM/WebSphere/AppServer/profiles/AppSrv01/properties:/opt/IBM/WebSphere/AppServer/properties:/opt/IBM/WebSphere/AppServer/lib/startup.jar:/opt/IBM/WebSphere/AppServer/lib/bootstrap.jar:/opt/IBM/WebSphere/AppServer/java/8.0/lib/tools.jar:/opt/IBM/WebSphere/AppServer/lib/lmproxy.jar:/opt/IBM/WebSphere/AppServer/lib/urlprotocols.jar com.ibm.ws.bootstrap.WSLauncher com.ibm.ws.logging.hpel.viewer.LogViewer -monitor 1 -resumable -resume -format json",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1189677,
+      "ppid": 1184241,
+      "comm": "java",
+      "cmdline": "/opt/IBM/WebSphere/AppServer/java/8.0/bin/java -Dosgi.install.area=/opt/IBM/WebSphere/AppServer -Dwas.status.socket=38285 -Dosgi.configuration.area=/opt/IBM/WebSphere/AppServer/profiles/AppSrv01/servers/server1/configuration -Djava.awt.headless=true -Dosgi.framework.extensions=com.ibm.cds,com.ibm.ws.eclipse.adaptors -Xshareclasses:name=webspherev9_8.0_64_%g,nonFatal -Dcom.ibm.xtq.processor.overrideSecureProcessing=true -Xcheck:dump -Djava.security.properties=/opt/IBM/WebSphere/AppServer/properties/java.security -Djava.security.policy=/opt/IBM/WebSphere/AppServer/properties/java.policy -Dcom.ibm.CORBA.ORBPropertyFilePath=/opt/IBM/WebSphere/AppServer/properties -Xbootclasspath/p:/opt/IBM/WebSphere/AppServer/java/8.0/jre/lib/ibmorb.jar -classpath /opt/IBM/WebSphere/AppServer/profiles/AppSrv01/properties:/opt/IBM/WebSphere/AppServer/properties:/opt/IBM/WebSphere/AppServer/lib/startup.jar:/opt/IBM/WebSphere/AppServer/lib/bootstrap.jar:/opt/IBM/WebSphere/AppServer/lib/lmproxy.jar:/opt/IBM/WebSphere/AppServer/lib/urlprotocols.jar:/opt/IBM/WebSphere/AppServer/deploytool/itp/batchboot.jar:/opt/IBM/WebSphere/AppServer/deploytool/itp/batch2.jar:/opt/IBM/WebSphere/AppServer/java/8.0/lib/tools.jar -Dibm.websphere.internalClassAccessMode=allow -verbose:gc -Xverbosegclog:/opt/IBM/WebSphere/AppServer/profiles/AppSrv01/logs/server1/verbosegc.%seq.log,10,7000 -Xms50m -Xmx4096m -Xcompressedrefs -Xscmaxaot12M -Xscmx90M -Dws.ext.dirs=/opt/IBM/WebSphere/AppServer/java/8.0/lib:/opt/IBM/WebSphere/AppServer/profiles/AppSrv01/classes:/opt/IBM/WebSphere/AppServer/classes:/opt/IBM/WebSphere/AppServer/lib:/opt/IBM/WebSphere/AppServer/installedChannels:/opt/IBM/WebSphere/AppServer/lib/ext:/opt/IBM/WebSphere/AppServer/web/help:/opt/IBM/WebSphere/AppServer/deploytool/itp/plugins/com.ibm.etools.ejbdeploy/runtime -Dderby.system.home=/opt/IBM/WebSphere/AppServer/derby -Dcom.ibm.itp.location=/opt/IBM/WebSphere/AppServer/bin -Djava.util.logging.configureByServer=true -Duser.install.root=/opt/IBM/WebSphere/AppServer/profiles/AppSrv01 -Djava.ext.dirs=/opt/IBM/WebSphere/AppServer/tivoli/tam:/opt/IBM/WebSphere/AppServer/javaext:/opt/IBM/WebSphere/AppServer/java/8.0/jre/lib/ext -Djavax.management.builder.initial=com.ibm.ws.management.PlatformMBeanServerBuilder -Dpython.cachedir=/opt/IBM/WebSphere/AppServer/profiles/AppSrv01/temp/cachedir -Dwas.install.root=/opt/IBM/WebSphere/AppServer -Djava.util.logging.manager=com.ibm.ws.bootstrap.WsLogManager -Dserver.root=/opt/IBM/WebSphere/AppServer/profiles/AppSrv01 -Dcom.ibm.security.jgss.debug=off -Dcom.ibm.security.krb5.Krb5Debug=off -DKC_HOME=/opt/IBM/WebSphere/AppServer/systemApps/isclite.ear/isclite.war/help -Djava.util.prefs.userRoot=/home/was/ -Xnoloa -Djava.library.path=/opt/IBM/WebSphere/AppServer/lib/native/linux/x86_64/:/opt/IBM/WebSphere/AppServer/java/8.0/jre/lib/amd64/compressedrefs:/opt/IBM/WebSphere/AppServer/java/8.0/jre/lib/amd64:/opt/IBM/WebSphere/AppServer/bin:/opt/IBM/WebSphere/AppServer/nulldllsdir:/usr/lib64:/usr/lib: -Djava.endorsed.dirs=/opt/IBM/WebSphere/AppServer/endorsed_apis:/opt/IBM/WebSphere/AppServer/java/8.0/jre/lib/endorsed -Djava.security.auth.login.config=/opt/IBM/WebSphere/AppServer/profiles/AppSrv01/properties/wsjaas.conf -Djava.security.policy=/opt/IBM/WebSphere/AppServer/profiles/AppSrv01/properties/server.policy com.ibm.wsspi.bootstrap.WSPreLauncher -nosplash -application com.ibm.ws.bootstrap.WSLauncher com.ibm.ws.runtime.WsServer /opt/IBM/WebSphere/AppServer/profiles/AppSrv01/config DefaultCell01 DefaultNode01 server1",
+      "generated_name": "com.ibm.wsspi.bootstrap.WSPreLauncher",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

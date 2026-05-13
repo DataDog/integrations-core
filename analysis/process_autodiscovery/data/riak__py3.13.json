@@ -1,0 +1,176 @@
+{
+  "integration": "riak",
+  "environment": "py3.13",
+  "collected_at": "2026-05-13T15:50:06.685576+00:00",
+  "processes": [
+    {
+      "pid": 1647176,
+      "ppid": 1647153,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1647238,
+      "ppid": 1647176,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1647628,
+      "ppid": 1647176,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1647629,
+      "ppid": 1647176,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1647630,
+      "ppid": 1647176,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1647631,
+      "ppid": 1647176,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1647633,
+      "ppid": 1647176,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1647634,
+      "ppid": 1647176,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1647636,
+      "ppid": 1647629,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 1647637,
+      "ppid": 1647630,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1647638,
+      "ppid": 1647633,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1647641,
+      "ppid": 1647631,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 1643399,
+      "ppid": 1643371,
+      "comm": "sh",
+      "cmdline": "/bin/sh -c $RIAK_HOME/riak-cluster.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1643452,
+      "ppid": 1643399,
+      "comm": "riak-cluster.sh",
+      "cmdline": "/bin/bash /usr/lib/riak/riak-cluster.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1643579,
+      "ppid": 1643399,
+      "comm": "epmd",
+      "cmdline": "/usr/lib/riak/erts-5.10.3/bin/epmd -daemon",
+      "generated_name": "epmd",
+      "has_service_data": true
+    },
+    {
+      "pid": 1643589,
+      "ppid": 1643399,
+      "comm": "run_erl",
+      "cmdline": "/usr/lib/riak/erts-5.10.3/bin/run_erl -daemon /tmp/riak// /var/log/riak exec /usr/sbin/riak console",
+      "generated_name": "run_erl",
+      "has_service_data": true
+    },
+    {
+      "pid": 1643592,
+      "ppid": 1643589,
+      "comm": "beam.smp",
+      "cmdline": "/usr/lib/riak/erts-5.10.3/bin/beam.smp -scl false -sfwi 500 -P 256000 -e 256000 -Q 65536 -A 64 -K true -W w -zdbbl 32768 -- -root /usr/lib/riak -progname riak -- -home /var/lib/riak -- -boot /usr/lib/riak/releases/2.2.0/riak -config /etc/riak/app.config -setcookie riak -name riak@172.17.131.2 -smp enable -vm_args /var/lib/riak/generated.configs/vm.2026.05.13.15.49.42.args -pa /usr/lib/riak/lib/basho-patches -- console",
+      "generated_name": "riak",
+      "has_service_data": true
+    },
+    {
+      "pid": 1643961,
+      "ppid": 1643592,
+      "comm": "sh",
+      "cmdline": "sh -s disksup",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1643963,
+      "ppid": 1643592,
+      "comm": "memsup",
+      "cmdline": "/usr/lib/riak/lib/os_mon-2.2.13/priv/bin/memsup",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1643964,
+      "ppid": 1643592,
+      "comm": "cpu_sup",
+      "cmdline": "/usr/lib/riak/lib/os_mon-2.2.13/priv/bin/cpu_sup",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1645670,
+      "ppid": 1643452,
+      "comm": "tail",
+      "cmdline": "tail -n 1024 -f /var/log/riak/console.log",
+      "generated_name": "tail",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

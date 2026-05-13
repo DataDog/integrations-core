@@ -1,0 +1,552 @@
+{
+  "integration": "airflow",
+  "environment": "py3.13-2.11",
+  "collected_at": "2026-05-13T13:05:15.620501+00:00",
+  "processes": [
+    {
+      "pid": 899092,
+      "ppid": 899069,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 899129,
+      "ppid": 899092,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 899517,
+      "ppid": 899092,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 899518,
+      "ppid": 899092,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 899520,
+      "ppid": 899092,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 899521,
+      "ppid": 899092,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 899522,
+      "ppid": 899092,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 899523,
+      "ppid": 899092,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 899525,
+      "ppid": 899520,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 899528,
+      "ppid": 899521,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 899529,
+      "ppid": 899518,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 899530,
+      "ppid": 899522,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 893871,
+      "ppid": 893826,
+      "comm": "postgres",
+      "cmdline": "postgres",
+      "generated_name": "postgres",
+      "has_service_data": true
+    },
+    {
+      "pid": 894081,
+      "ppid": 893871,
+      "comm": "postgres",
+      "cmdline": "postgres: checkpointer",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 894082,
+      "ppid": 893871,
+      "comm": "postgres",
+      "cmdline": "postgres: background writer",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 894083,
+      "ppid": 893871,
+      "comm": "postgres",
+      "cmdline": "postgres: walwriter",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 894084,
+      "ppid": 893871,
+      "comm": "postgres",
+      "cmdline": "postgres: autovacuum launcher",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 894085,
+      "ppid": 893871,
+      "comm": "postgres",
+      "cmdline": "postgres: stats collector",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 894086,
+      "ppid": 893871,
+      "comm": "postgres",
+      "cmdline": "postgres: logical replication launcher",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897672,
+      "ppid": 893871,
+      "comm": "postgres",
+      "cmdline": "postgres: airflow airflow 172.17.132.3(36084) idle",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897869,
+      "ppid": 893871,
+      "comm": "postgres",
+      "cmdline": "postgres: airflow airflow 172.17.132.3(36102) idle",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897870,
+      "ppid": 893871,
+      "comm": "postgres",
+      "cmdline": "postgres: airflow airflow 172.17.132.3(36106) idle",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897931,
+      "ppid": 893871,
+      "comm": "postgres",
+      "cmdline": "postgres: airflow airflow 172.17.132.3(36124) idle",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 899001,
+      "ppid": 893871,
+      "comm": "postgres",
+      "cmdline": "postgres: airflow airflow 172.17.132.3(42180) idle",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 893872,
+      "ppid": 893824,
+      "comm": "airflow",
+      "cmdline": "/home/airflow/.local/bin/python /home/airflow/.local/bin/airflow webserver",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897529,
+      "ppid": 893872,
+      "comm": "/home/airflow/.",
+      "cmdline": "/home/airflow/.local/bin/python /home/airflow/.local/bin/airflow scheduler",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897684,
+      "ppid": 893872,
+      "comm": "gunicorn: maste",
+      "cmdline": "gunicorn: master [airflow-webserver]",
+      "generated_name": "airflow-webserver",
+      "has_service_data": true
+    },
+    {
+      "pid": 897709,
+      "ppid": 897529,
+      "comm": "gunicorn: maste",
+      "cmdline": "gunicorn: master [gunicorn]",
+      "generated_name": "gunicorn",
+      "has_service_data": true
+    },
+    {
+      "pid": 897710,
+      "ppid": 897709,
+      "comm": "gunicorn: worke",
+      "cmdline": "gunicorn: worker [gunicorn]",
+      "generated_name": "gunicorn",
+      "has_service_data": true
+    },
+    {
+      "pid": 897711,
+      "ppid": 897529,
+      "comm": "airflow executo",
+      "cmdline": "airflow executor -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897719,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897722,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897726,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897731,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897734,
+      "ppid": 897709,
+      "comm": "gunicorn: worke",
+      "cmdline": "gunicorn: worker [gunicorn]",
+      "generated_name": "gunicorn",
+      "has_service_data": true
+    },
+    {
+      "pid": 897738,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897745,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897751,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897755,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897760,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897765,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897770,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897775,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897778,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897787,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897790,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897796,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897801,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897805,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897809,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897813,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897817,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897821,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897825,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897829,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897833,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897837,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897841,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897845,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897849,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897853,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897857,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897861,
+      "ppid": 897529,
+      "comm": "airflow worker",
+      "cmdline": "airflow worker -- LocalExecutor",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 897866,
+      "ppid": 897529,
+      "comm": "airflow schedul",
+      "cmdline": "airflow scheduler -- DagFileProcessorManager",
+      "generated_name": "airflow",
+      "has_service_data": true
+    },
+    {
+      "pid": 898999,
+      "ppid": 897684,
+      "comm": "[ready] gunicor",
+      "cmdline": "[ready] gunicorn: worker [airflow-webserver]",
+      "generated_name": "airflow-webserver",
+      "has_service_data": true
+    },
+    {
+      "pid": 899000,
+      "ppid": 897684,
+      "comm": "[ready] gunicor",
+      "cmdline": "[ready] gunicorn: worker [airflow-webserver]",
+      "generated_name": "airflow-webserver",
+      "has_service_data": true
+    },
+    {
+      "pid": 899002,
+      "ppid": 897684,
+      "comm": "[ready] gunicor",
+      "cmdline": "[ready] gunicorn: worker [airflow-webserver]",
+      "generated_name": "airflow-webserver",
+      "has_service_data": true
+    },
+    {
+      "pid": 899003,
+      "ppid": 897684,
+      "comm": "[ready] gunicor",
+      "cmdline": "[ready] gunicorn: worker [airflow-webserver]",
+      "generated_name": "airflow-webserver",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

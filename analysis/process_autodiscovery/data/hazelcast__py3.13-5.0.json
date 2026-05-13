@@ -1,0 +1,136 @@
+{
+  "integration": "hazelcast",
+  "environment": "py3.13-5.0",
+  "collected_at": "2026-05-13T14:00:30.580408+00:00",
+  "processes": [
+    {
+      "pid": 1143915,
+      "ppid": 1143849,
+      "comm": "java",
+      "cmdline": "/usr/bin/java -cp /opt/hazelcast/*:/opt/hazelcast/lib:/opt/hazelcast/lib/*:/opt/hazelcast/bin/user-lib:/opt/hazelcast/bin/user-lib/* --add-modules java.se --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.management/sun.management=ALL-UNNAMED --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED -Dhazelcast.logging.type=log4j2 -Dlog4j.configurationFile=file:/opt/hazelcast/config/log4j2.properties -Dhazelcast.config=/opt/hazelcast/config/hazelcast-docker.xml -Djet.custom.lib.dir=/opt/hazelcast/custom-lib -Djava.net.preferIPv4Stack=true -XX:MaxRAMPercentage=80.0 -XX:MaxGCPauseMillis=5 -Dhazelcast.config=/tmp/hazelcast.xml -Dhazelcast.jmx=true -Dhazelcast.metrics.enabled=true -Dhazelcast.metrics.jmx.enabled=true -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=1099 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.rmi.port=1099 -Djava.rmi.server.hostname=localhost com.hazelcast.commandline.HazelcastServerCommandLine start",
+      "generated_name": "com.hazelcast.commandline.HazelcastServerCommandLine",
+      "has_service_data": true
+    },
+    {
+      "pid": 1146183,
+      "ppid": 1146158,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1146221,
+      "ppid": 1146183,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1146635,
+      "ppid": 1146183,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1146636,
+      "ppid": 1146183,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1146637,
+      "ppid": 1146183,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1146639,
+      "ppid": 1146183,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1146641,
+      "ppid": 1146183,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1146642,
+      "ppid": 1146183,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1146646,
+      "ppid": 1146636,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 1146647,
+      "ppid": 1146639,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 1146648,
+      "ppid": 1146641,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1146649,
+      "ppid": 1146637,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1143917,
+      "ppid": 1143847,
+      "comm": "java",
+      "cmdline": "/usr/bin/java -cp /opt/hazelcast/*:/opt/hazelcast/lib:/opt/hazelcast/lib/*:/opt/hazelcast/bin/user-lib:/opt/hazelcast/bin/user-lib/* --add-modules java.se --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.management/sun.management=ALL-UNNAMED --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED -Dhazelcast.logging.type=log4j2 -Dlog4j.configurationFile=file:/opt/hazelcast/config/log4j2.properties -Dhazelcast.config=/opt/hazelcast/config/hazelcast-docker.xml -Djet.custom.lib.dir=/opt/hazelcast/custom-lib -Djava.net.preferIPv4Stack=true -XX:MaxRAMPercentage=80.0 -XX:MaxGCPauseMillis=5 -Dhazelcast.config=/tmp/hazelcast.xml -Dhazelcast.jmx=true -Dhazelcast.metrics.enabled=true -Dhazelcast.metrics.jmx.enabled=true -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=1100 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.rmi.port=1100 -Djava.rmi.server.hostname=localhost com.hazelcast.commandline.HazelcastServerCommandLine start",
+      "generated_name": "com.hazelcast.commandline.HazelcastServerCommandLine",
+      "has_service_data": true
+    },
+    {
+      "pid": 1143914,
+      "ppid": 1143835,
+      "comm": "java",
+      "cmdline": "/usr/bin/java -cp /opt/hazelcast/*:/tmp/log4j2/*:/opt/hazelcast/lib:/opt/hazelcast/lib/*:/opt/hazelcast/bin/user-lib:/opt/hazelcast/bin/user-lib/* --add-modules java.se --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.management/sun.management=ALL-UNNAMED --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED -Dhazelcast.logging.type=log4j2 -Dlog4j.configurationFile=file:/opt/hazelcast/config/log4j2.properties -Dhazelcast.config=/opt/hazelcast/config/hazelcast-docker.xml -Djet.custom.lib.dir=/opt/hazelcast/custom-lib -Djava.net.preferIPv4Stack=true -XX:MaxRAMPercentage=80.0 -XX:MaxGCPauseMillis=5 -Dhazelcast.jmx=true -Dhazelcast.metrics.enabled=true -Dhazelcast.metrics.jmx.enabled=true -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=1098 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.rmi.port=1098 -Djava.rmi.server.hostname=localhost -Dhazelcast.logging.type=log4j2 -Dlog4j.configurationFile=/tmp/log4j2.properties com.hazelcast.commandline.HazelcastServerCommandLine start",
+      "generated_name": "com.hazelcast.commandline.HazelcastServerCommandLine",
+      "has_service_data": true
+    },
+    {
+      "pid": 1144227,
+      "ppid": 1144151,
+      "comm": "java",
+      "cmdline": "java -server -Dloader.path=/opt/hazelcast/management-center/bin/user-lib/* --add-opens java.base/java.lang=ALL-UNNAMED -Dhazelcast.mc.home=/data -Djava.net.preferIPv4Stack=true -Dhazelcast.metrics.enabled=true -Dhazelcast.metrics.jmx.enabled=true -Dhazelcast.metrics.mc.enabled=true -Dhazelcast.client.metrics.enabled=true -Dhazelcast.client.metrics.jmx.enabled=true -Dhazelcast.diagnostics.enabled=true -Dhazelcast.mc.rest.enabled=true -Dhazelcast.mc.healthCheck.enable=true -Dhazelcast.mc.jmx.enabled=true -Dhazelcast.mc.jmx.port=9999 -Dhazelcast.mc.jmx.rmi.port=9999 -Dhazelcast.mc.jmx.host=localhost -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Djava.rmi.server.hostname=localhost -XX:+UseContainerSupport -XX:MaxRAMPercentage=80 -cp /opt/hazelcast/management-center/bin/../hazelcast-management-center-5.3.3.jar org.springframework.boot.loader.PropertiesLauncher",
+      "generated_name": "org.springframework.boot.loader.PropertiesLauncher",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

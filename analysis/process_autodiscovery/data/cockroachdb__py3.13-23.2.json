@@ -1,0 +1,128 @@
+{
+  "integration": "cockroachdb",
+  "environment": "py3.13-23.2",
+  "collected_at": "2026-05-13T13:22:44.015826+00:00",
+  "processes": [
+    {
+      "pid": 990270,
+      "ppid": 990247,
+      "comm": "cockroach.sh",
+      "cmdline": "/bin/bash /cockroach/cockroach.sh start-single-node --insecure --store=attrs=ssd,path=/var/lib/cockroach/",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 990487,
+      "ppid": 990270,
+      "comm": "cockroach",
+      "cmdline": "/cockroach/cockroach start-single-node --listening-url-file=server_fifo --pid-file=server_pid --advertise-addr=127.0.0.1:26257 --certs-dir=certs --log=file-defaults: {dir: ./cockroach-data/logs} --insecure --store=attrs=ssd,path=/var/lib/cockroach/",
+      "generated_name": "cockroach",
+      "has_service_data": true
+    },
+    {
+      "pid": 991327,
+      "ppid": 990270,
+      "comm": "cockroach",
+      "cmdline": "/cockroach/cockroach sql --url=postgresql://root@127.0.0.1:26257/defaultdb?sslmode=disable --certs-dir=certs",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 990739,
+      "ppid": 990716,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 990776,
+      "ppid": 990739,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 991181,
+      "ppid": 990739,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 991182,
+      "ppid": 990739,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 991184,
+      "ppid": 990739,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 991185,
+      "ppid": 990739,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 991186,
+      "ppid": 990739,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 991188,
+      "ppid": 990739,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 991190,
+      "ppid": 991182,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 991191,
+      "ppid": 991184,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 991197,
+      "ppid": 991186,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 991199,
+      "ppid": 991185,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

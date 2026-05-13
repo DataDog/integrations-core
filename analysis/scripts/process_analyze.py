@@ -383,6 +383,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     collect_p = sub.add_parser("collect", help="Collect process data from environments")
     collect_p.add_argument("integration", nargs="?", help="Single integration to collect")
     collect_p.add_argument("--all", action="store_true", help="Collect all integrations")
+    collect_p.add_argument("--skip-existing", action="store_true", help="Skip integrations that already have a data file")
     collect_p.add_argument("--env", help="Override environment selection")
     collect_p.add_argument("--disco", default=str(DISCO_PATH), help="Path to disco binary")
     collect_p.add_argument("--sudo", action="store_true", help="Run disco with sudo (needed to read container network namespaces)")
@@ -421,6 +422,11 @@ def cmd_collect(args: argparse.Namespace) -> None:
         raise SystemExit(1)
 
     for integration in integrations:
+        if args.skip_existing:
+            existing = list(data_dir.glob(f"{integration}__*.json"))
+            if existing:
+                print(f"[{integration}] already collected, skipping", flush=True)
+                continue
         print(f"[{integration}] ", end="", flush=True)
         try:
             status = collect_integration(

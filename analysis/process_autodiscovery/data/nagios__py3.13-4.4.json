@@ -1,0 +1,232 @@
+{
+  "integration": "nagios",
+  "environment": "py3.13-4.4",
+  "collected_at": "2026-05-13T15:29:50.680969+00:00",
+  "processes": [
+    {
+      "pid": 1521611,
+      "ppid": 1521589,
+      "comm": "start_nagios",
+      "cmdline": "/bin/bash /usr/local/bin/start_nagios",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1521644,
+      "ppid": 1521611,
+      "comm": "runsvdir",
+      "cmdline": "runsvdir -P /etc/service",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1521645,
+      "ppid": 1521644,
+      "comm": "runsv",
+      "cmdline": "runsv rsyslog",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1521646,
+      "ppid": 1521644,
+      "comm": "runsv",
+      "cmdline": "runsv apache",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1521647,
+      "ppid": 1521644,
+      "comm": "runsv",
+      "cmdline": "runsv nagios",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1521648,
+      "ppid": 1521644,
+      "comm": "runsv",
+      "cmdline": "runsv postfix",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1521649,
+      "ppid": 1521644,
+      "comm": "runsv",
+      "cmdline": "runsv nsca",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1521650,
+      "ppid": 1521645,
+      "comm": "rsyslogd",
+      "cmdline": "rsyslogd -n -f /etc/rsyslog.conf",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1521651,
+      "ppid": 1521646,
+      "comm": "apache2",
+      "cmdline": "/usr/sbin/apache2 -D NO_DETACH",
+      "generated_name": "apache2",
+      "has_service_data": true
+    },
+    {
+      "pid": 1521654,
+      "ppid": 1521648,
+      "comm": "master",
+      "cmdline": "/usr/lib/postfix/sbin/master -d -c /etc/postfix",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1521656,
+      "ppid": 1521649,
+      "comm": "nsca",
+      "cmdline": "/opt/nagios/bin/nsca -f -c /opt/nagios/etc/nsca.cfg --single",
+      "generated_name": "nsca",
+      "has_service_data": true
+    },
+    {
+      "pid": 1521690,
+      "ppid": 1521651,
+      "comm": "apache2",
+      "cmdline": "/usr/sbin/apache2 -D NO_DETACH",
+      "generated_name": "apache2",
+      "has_service_data": true
+    },
+    {
+      "pid": 1521695,
+      "ppid": 1521651,
+      "comm": "apache2",
+      "cmdline": "/usr/sbin/apache2 -D NO_DETACH",
+      "generated_name": "apache2",
+      "has_service_data": true
+    },
+    {
+      "pid": 1521696,
+      "ppid": 1521651,
+      "comm": "apache2",
+      "cmdline": "/usr/sbin/apache2 -D NO_DETACH",
+      "generated_name": "apache2",
+      "has_service_data": true
+    },
+    {
+      "pid": 1521697,
+      "ppid": 1521651,
+      "comm": "apache2",
+      "cmdline": "/usr/sbin/apache2 -D NO_DETACH",
+      "generated_name": "apache2",
+      "has_service_data": true
+    },
+    {
+      "pid": 1521698,
+      "ppid": 1521651,
+      "comm": "apache2",
+      "cmdline": "/usr/sbin/apache2 -D NO_DETACH",
+      "generated_name": "apache2",
+      "has_service_data": true
+    },
+    {
+      "pid": 1521820,
+      "ppid": 1521797,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1521859,
+      "ppid": 1521820,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1522246,
+      "ppid": 1521820,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1522248,
+      "ppid": 1521820,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1522249,
+      "ppid": 1521820,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1522250,
+      "ppid": 1521820,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1522251,
+      "ppid": 1521820,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1522253,
+      "ppid": 1521820,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1522255,
+      "ppid": 1522248,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 1522256,
+      "ppid": 1522251,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1522258,
+      "ppid": 1522249,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1522259,
+      "ppid": 1522250,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

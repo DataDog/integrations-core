@@ -1,0 +1,128 @@
+{
+  "integration": "marathon",
+  "environment": "py3.13",
+  "collected_at": "2026-05-13T15:20:42.036493+00:00",
+  "processes": [
+    {
+      "pid": 1483317,
+      "ppid": 1483294,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1483357,
+      "ppid": 1483317,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1483747,
+      "ppid": 1483317,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1483748,
+      "ppid": 1483317,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1483749,
+      "ppid": 1483317,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1483750,
+      "ppid": 1483317,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1483752,
+      "ppid": 1483317,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1483754,
+      "ppid": 1483317,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1483757,
+      "ppid": 1483749,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1483759,
+      "ppid": 1483752,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1483761,
+      "ppid": 1483750,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 1483763,
+      "ppid": 1483748,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 1482368,
+      "ppid": 1482271,
+      "comm": "mesos-master",
+      "cmdline": "mesos-master --registry=in_memory",
+      "generated_name": "mesos-master",
+      "has_service_data": true
+    },
+    {
+      "pid": 1482351,
+      "ppid": 1482252,
+      "comm": "java",
+      "cmdline": "java -jar ./bin/../target/marathon-assembly-1.3.0.jar --zk zk://zookeeper:2181/marathon --master zk://zookeeper:2181/mesos --hostname 127.0.0.1",
+      "generated_name": "marathon-assembly-1.3.0",
+      "has_service_data": true
+    },
+    {
+      "pid": 1482359,
+      "ppid": 1482270,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/java-1.8-openjdk/jre/bin/java -Dzookeeper.log.dir=/logs -Dzookeeper.root.logger=INFO,CONSOLE -cp /zookeeper-3.4.13/bin/../build/classes:/zookeeper-3.4.13/bin/../build/lib/*.jar:/zookeeper-3.4.13/bin/../lib/slf4j-log4j12-1.7.25.jar:/zookeeper-3.4.13/bin/../lib/slf4j-api-1.7.25.jar:/zookeeper-3.4.13/bin/../lib/netty-3.10.6.Final.jar:/zookeeper-3.4.13/bin/../lib/log4j-1.2.17.jar:/zookeeper-3.4.13/bin/../lib/jline-0.9.94.jar:/zookeeper-3.4.13/bin/../lib/audience-annotations-0.5.0.jar:/zookeeper-3.4.13/bin/../zookeeper-3.4.13.jar:/zookeeper-3.4.13/bin/../src/java/lib/*.jar:/conf: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.local.only=false org.apache.zookeeper.server.quorum.QuorumPeerMain /conf/zoo.cfg",
+      "generated_name": "zookeeper",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

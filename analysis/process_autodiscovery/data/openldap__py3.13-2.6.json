@@ -1,0 +1,112 @@
+{
+  "integration": "openldap",
+  "environment": "py3.13-2.6",
+  "collected_at": "2026-05-13T15:35:02.899474+00:00",
+  "processes": [
+    {
+      "pid": 1558856,
+      "ppid": 1558829,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1558895,
+      "ppid": 1558856,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1559284,
+      "ppid": 1558856,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1559285,
+      "ppid": 1558856,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1559286,
+      "ppid": 1558856,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1559288,
+      "ppid": 1558856,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1559289,
+      "ppid": 1558856,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1559290,
+      "ppid": 1558856,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1559292,
+      "ppid": 1559285,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 1559293,
+      "ppid": 1559289,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1559294,
+      "ppid": 1559286,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1559296,
+      "ppid": 1559288,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 1558325,
+      "ppid": 1558301,
+      "comm": "slapd",
+      "cmdline": "/opt/bitnami/openldap/sbin/slapd -h ldap://:1389/ ldaps://:1636/ ldapi:/// -F /opt/bitnami/openldap/etc/slapd.d -d 256 -h ldap://:1389/ ldaps://:1636/ ldapi://%2Fvar%2Frun%2Fslapd%2Fldapi",
+      "generated_name": "slapd",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

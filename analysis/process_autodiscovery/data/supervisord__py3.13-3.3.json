@@ -1,0 +1,160 @@
+{
+  "integration": "supervisord",
+  "environment": "py3.13-3.3",
+  "collected_at": "2026-05-13T16:17:45.850144+00:00",
+  "processes": [
+    {
+      "pid": 1805726,
+      "ppid": 1805695,
+      "comm": "supervisord",
+      "cmdline": "/usr/local/bin/python /usr/local/bin/supervisord -c /supervisord.conf",
+      "generated_name": "supervisord",
+      "has_service_data": true
+    },
+    {
+      "pid": 1805899,
+      "ppid": 1805726,
+      "comm": "sh",
+      "cmdline": "/bin/sh /program_0.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1805900,
+      "ppid": 1805726,
+      "comm": "sh",
+      "cmdline": "/bin/sh /program_1.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1805901,
+      "ppid": 1805726,
+      "comm": "sh",
+      "cmdline": "/bin/sh /program_2.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1805902,
+      "ppid": 1805899,
+      "comm": "sleep",
+      "cmdline": "sleep 10",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1805903,
+      "ppid": 1805900,
+      "comm": "sleep",
+      "cmdline": "sleep 20",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1805904,
+      "ppid": 1805901,
+      "comm": "sleep",
+      "cmdline": "sleep 30",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1806160,
+      "ppid": 1806117,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1806224,
+      "ppid": 1806160,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1806611,
+      "ppid": 1806160,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1806613,
+      "ppid": 1806160,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1806614,
+      "ppid": 1806160,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1806616,
+      "ppid": 1806160,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1806617,
+      "ppid": 1806160,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1806618,
+      "ppid": 1806160,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1806620,
+      "ppid": 1806613,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 1806621,
+      "ppid": 1806614,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1806623,
+      "ppid": 1806617,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1806624,
+      "ppid": 1806616,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

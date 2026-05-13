@@ -1,0 +1,128 @@
+{
+  "integration": "redisdb",
+  "environment": "py3.13-8.0",
+  "collected_at": "2026-05-13T15:48:17.773474+00:00",
+  "processes": [
+    {
+      "pid": 1634767,
+      "ppid": 1634721,
+      "comm": "redis-server",
+      "cmdline": "redis-server *:6380",
+      "generated_name": "redis-server",
+      "has_service_data": true
+    },
+    {
+      "pid": 1634604,
+      "ppid": 1634553,
+      "comm": "redis-server",
+      "cmdline": "redis-server *:6381",
+      "generated_name": "redis-server",
+      "has_service_data": true
+    },
+    {
+      "pid": 1635207,
+      "ppid": 1635184,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1635246,
+      "ppid": 1635207,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1635635,
+      "ppid": 1635207,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1635636,
+      "ppid": 1635207,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1635637,
+      "ppid": 1635207,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1635639,
+      "ppid": 1635207,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1635640,
+      "ppid": 1635207,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1635643,
+      "ppid": 1635636,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 1635644,
+      "ppid": 1635640,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1635646,
+      "ppid": 1635637,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1635647,
+      "ppid": 1635639,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 1635648,
+      "ppid": 1635207,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1634603,
+      "ppid": 1634550,
+      "comm": "redis-server",
+      "cmdline": "redis-server *:6382",
+      "generated_name": "redis-server",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

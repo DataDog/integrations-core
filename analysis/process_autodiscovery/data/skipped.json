@@ -1,0 +1,350 @@
+[
+  {
+    "integration": "amazon_msk",
+    "reason": "fake caddy server",
+    "skipped_at": "2026-05-13T16:29:56.987217+00:00",
+    "details": "image caddy:2.1.1-alpine found in amazon_msk/tests/docker/docker-compose.yaml"
+  },
+  {
+    "integration": "appgate_sdp",
+    "reason": "fake caddy server",
+    "skipped_at": "2026-05-13T16:30:00.196279+00:00",
+    "details": "image caddy:2.7 found in appgate_sdp/tests/docker/docker-compose.yaml"
+  },
+  {
+    "integration": "argo_rollouts",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T16:30:06.154764+00:00",
+    "details": "exit code 1: Environment `py3.13-1.6.6` for integration `argo_rollouts` is already running\n"
+  },
+  {
+    "integration": "argo_workflows",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T16:30:12.084725+00:00",
+    "details": "exit code 1: Environment `py3.13` for integration `argo_workflows` is already running\n"
+  },
+  {
+    "integration": "argocd",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T16:30:18.040329+00:00",
+    "details": "exit code 1: Environment `py3.13-2.4.7` for integration `argocd` is already running\n"
+  },
+  {
+    "integration": "aws_neuron",
+    "reason": "fake caddy server",
+    "skipped_at": "2026-05-13T16:30:21.150908+00:00",
+    "details": "image caddy:2.7 found in aws_neuron/tests/docker/docker-compose.yaml"
+  },
+  {
+    "integration": "azure_iot_edge",
+    "reason": "no environments found",
+    "skipped_at": "2026-05-13T16:30:24.227906+00:00",
+    "details": "ddev env show returned no environments"
+  },
+  {
+    "integration": "cacti",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T16:30:31.860427+00:00",
+    "details": "exit code 1: Checking dependencies\nSyncing dependencies\n  error: subprocess-exited-with-error\n  \n  \u00d7 python setup.py egg_info did not run successfully.\n  \u2502 exit code: 1\n  \u2570\u2500> [5 lines of output]\n      /tmp/tmp_python_rrdtoolpu8elx1n/test_rrdtool.c:2:10: fatal error: rrd.h: No such file or directory\n          2 | #include <rrd.h>\n            |          ^~~~~~~\n      compilation terminated.\n      Error: Unable to compile the binary module. Do you have the rrdtool header and libraries installed?\n      [end of o"
+  },
+  {
+    "integration": "calico",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T16:34:55.434586+00:00",
+    "details": "exit code 1: Creating cluster \"cluster-calico-py3.13\" ...\n \u2022 Ensuring node image (kindest/node:v1.35.0) \ud83d\uddbc  ...\n \u2713 Ensuring node image (kindest/node:v1.35.0) \ud83d\uddbc\n \u2022 Preparing nodes \ud83d\udce6   ...\n \u2713 Preparing nodes \ud83d\udce6 \n \u2022 Writing configuration \ud83d\udcdc  ...\n \u2713 Writing configuration \ud83d\udcdc\n \u2022 Starting control-plane \ud83d\udd79\ufe0f  ...\n \u2713 Starting control-plane \ud83d\udd79\ufe0f\n \u2022 Installing StorageClass \ud83d\udcbe  ...\n \u2713 Installing StorageClass \ud83d\udcbe\nSet kubectl context to \"kind-cluster-calico-py3.13\"\nYou can now use your cluster with:\n\nkubectl cluster-info --context k"
+  },
+  {
+    "integration": "cert_manager",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T16:39:58.646685+00:00",
+    "details": "ddev env start timed out after 300s"
+  },
+  {
+    "integration": "cilium",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T16:40:04.700166+00:00",
+    "details": "exit code 1: Environment `py3.13-1.9` for integration `cilium` is already running\n"
+  },
+  {
+    "integration": "cloudera",
+    "reason": "fake caddy server",
+    "skipped_at": "2026-05-13T16:40:07.807434+00:00",
+    "details": "image caddy:2.6.2-alpine found in cloudera/tests/docker/docker-compose.yaml"
+  },
+  {
+    "integration": "coredns",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T16:41:18.717122+00:00",
+    "details": "exit code 1:  coredns Pulling \n 1c1a3890553a Pulling fs layer \n d92bdee79785 Pulling fs layer \n d92bdee79785 Downloading [==================================================>]  122.2kB/122.2kB\n d92bdee79785 Download complete \n d92bdee79785 Pull complete \n 1c1a3890553a Downloading [===================>                               ]  5.243MB/13.45MB\n 1c1a3890553a Download complete \n 1c1a3890553a Extracting 1 s\n 1c1a3890553a Extracting 1 s\n 1c1a3890553a Extracting 1 s\n 1c1a3890553a Pull complete \n coredns Pull"
+  },
+  {
+    "integration": "dcgm",
+    "reason": "fake caddy server",
+    "skipped_at": "2026-05-13T16:41:21.818878+00:00",
+    "details": "image caddy:2.7 found in dcgm/tests/docker/docker-compose.yaml"
+  },
+  {
+    "integration": "disk",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T16:41:28.186203+00:00",
+    "details": "exit code 1: Checking dependencies\nSyncing dependencies\nTraceback (most recent call last):\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/home/bits/.local/share/hatch/env/virtual/datadog-disk/U7jH-jH8/py3.13/lib/python3.13/site-packages/pip/__main__.py\", line 29, in <module>\n    from pip._internal.cli.main import main as _main\n  File \"/home/bits/.local/share/hatch/env/virtual/datadog-disk/U7jH-jH8/py3.13/lib/python3.13/site-packages/pip/_inte"
+  },
+  {
+    "integration": "envoy",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T16:44:31.289277+00:00",
+    "details": "exit code 1:  front-envoy Pulling \n front-envoy Pulled \ntarget service1: failed to solve: mount callback failed on /var/lib/docker/containerd/daemon/tmpmounts/containerd-mount3211405202: mount callback failed on /var/lib/docker/containerd/daemon/tmpmounts/containerd-mount616327520: failed to open writer: ref moby/1/x1q9jzsfksvl0q5lxle56ng0v locked for 31.860875891s (since 2026-05-13 16:41:36.931493108 +0000 UTC m=+4930058.961883812): unavailable\n\ntarget service2: failed to solve: mount callback failed on /va"
+  },
+  {
+    "integration": "exchange_server",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T16:44:37.503633+00:00",
+    "details": "exit code 1: Environment `py3.13` is incompatible: unsupported platform\n"
+  },
+  {
+    "integration": "fluxcd",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T16:44:43.566972+00:00",
+    "details": "exit code 1: Environment `py3.13` for integration `fluxcd` is already running\n"
+  },
+  {
+    "integration": "fly_io",
+    "reason": "fake caddy server",
+    "skipped_at": "2026-05-13T16:44:46.742447+00:00",
+    "details": "image caddy:2.7 found in fly_io/tests/docker/docker-compose.yaml"
+  },
+  {
+    "integration": "gitlab",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T16:49:50.068286+00:00",
+    "details": "ddev env start timed out after 300s"
+  },
+  {
+    "integration": "gitlab_runner",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T16:54:53.511949+00:00",
+    "details": "ddev env start timed out after 300s"
+  },
+  {
+    "integration": "hugging_face_tgi",
+    "reason": "fake caddy server",
+    "skipped_at": "2026-05-13T16:54:56.668393+00:00",
+    "details": "image caddy:2.7 found in hugging_face_tgi/tests/docker/docker-compose.yaml"
+  },
+  {
+    "integration": "ibm_ace",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T16:55:17.104955+00:00",
+    "details": "exit code 1: Checking dependencies\nSyncing dependencies\n  error: subprocess-exited-with-error\n  \n  \u00d7 Building wheel for pymqi (pyproject.toml) did not run successfully.\n  \u2502 exit code: 1\n  \u2570\u2500> [34 lines of output]\n      /tmp/pip-build-env-auqfzhr7/overlay/lib/python3.13/site-packages/setuptools/dist.py:765: SetuptoolsDeprecationWarning: License classifiers are deprecated.\n      !!\n      \n              ********************************************************************************\n              Please conside"
+  },
+  {
+    "integration": "iis",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T16:55:23.392321+00:00",
+    "details": "exit code 1: Environment `py3.13` is incompatible: unsupported platform\n"
+  },
+  {
+    "integration": "istio",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T16:55:29.422805+00:00",
+    "details": "exit code 1: Environment `py3.13-1.13` for integration `istio` is already running\n"
+  },
+  {
+    "integration": "karpenter",
+    "reason": "fake caddy server",
+    "skipped_at": "2026-05-13T16:55:32.562028+00:00",
+    "details": "image caddy:2.7 found in karpenter/tests/docker/docker-compose.yaml"
+  },
+  {
+    "integration": "keda",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T16:55:38.538864+00:00",
+    "details": "exit code 1: Environment `py3.13-2.16.0` for integration `keda` is already running\n"
+  },
+  {
+    "integration": "kubeflow",
+    "reason": "fake caddy server",
+    "skipped_at": "2026-05-13T16:55:41.604569+00:00",
+    "details": "image caddy:2.7 found in kubeflow/tests/docker/docker-compose.yaml"
+  },
+  {
+    "integration": "kubernetes_cluster_autoscaler",
+    "reason": "fake caddy server",
+    "skipped_at": "2026-05-13T16:55:44.674406+00:00",
+    "details": "image caddy:2.7 found in kubernetes_cluster_autoscaler/tests/docker/docker-compose.yaml"
+  },
+  {
+    "integration": "kubevirt_api",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T16:55:50.591391+00:00",
+    "details": "exit code 1: Environment `py3.13` for integration `kubevirt_api` is already running\n"
+  },
+  {
+    "integration": "kubevirt_controller",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T17:00:53.798319+00:00",
+    "details": "ddev env start timed out after 300s"
+  },
+  {
+    "integration": "kubevirt_handler",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T17:00:59.823797+00:00",
+    "details": "exit code 1: Environment `py3.13` for integration `kubevirt_handler` is already running\n"
+  },
+  {
+    "integration": "kuma",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T17:01:05.840301+00:00",
+    "details": "exit code 1: Environment `py3.13-2.10.6` for integration `kuma` is already running\n"
+  },
+  {
+    "integration": "kyverno",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T17:01:11.948798+00:00",
+    "details": "exit code 1: Environment `py3.13` for integration `kyverno` is already running\n"
+  },
+  {
+    "integration": "nvidia_nim",
+    "reason": "fake caddy server",
+    "skipped_at": "2026-05-13T17:03:13.341380+00:00",
+    "details": "image caddy:2.7 found in nvidia_nim/tests/docker/docker-compose.yaml"
+  },
+  {
+    "integration": "nvidia_triton",
+    "reason": "fake caddy server",
+    "skipped_at": "2026-05-13T17:03:16.489696+00:00",
+    "details": "image caddy:2.7 found in nvidia_triton/tests/docker/docker-compose.yaml"
+  },
+  {
+    "integration": "octopus_deploy",
+    "reason": "fake caddy server",
+    "skipped_at": "2026-05-13T17:03:19.640951+00:00",
+    "details": "image caddy:2.7 found in octopus_deploy/tests/docker/docker-compose.yaml"
+  },
+  {
+    "integration": "openstack_controller",
+    "reason": "fake caddy server",
+    "skipped_at": "2026-05-13T17:03:22.828400+00:00",
+    "details": "image caddy:2.6.2-alpine found in openstack_controller/tests/docker/docker-compose.yaml"
+  },
+  {
+    "integration": "pdh_check",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T17:03:29.056211+00:00",
+    "details": "exit code 1: Environment `py3.13` is incompatible: unsupported platform\n"
+  },
+  {
+    "integration": "ray",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T17:03:35.133445+00:00",
+    "details": "exit code 1: Environment `py3.13-2.8` for integration `ray` is already running\n"
+  },
+  {
+    "integration": "sap_hana",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T17:08:38.502547+00:00",
+    "details": "ddev env start timed out after 300s"
+  },
+  {
+    "integration": "silk",
+    "reason": "fake caddy server",
+    "skipped_at": "2026-05-13T17:08:41.803274+00:00",
+    "details": "image caddy:2.6.2-alpine found in silk/tests/docker/docker-compose.yaml"
+  },
+  {
+    "integration": "sqlserver",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T17:14:12.938206+00:00",
+    "details": "exit code 1: Environment `py3.13-windows-odbc-2025-single` is incompatible: unsupported platform\n"
+  },
+  {
+    "integration": "strimzi",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T17:14:18.965474+00:00",
+    "details": "exit code 1: Environment `py3.13-0.34` for integration `strimzi` is already running\n"
+  },
+  {
+    "integration": "supabase",
+    "reason": "fake caddy server",
+    "skipped_at": "2026-05-13T17:14:22.120171+00:00",
+    "details": "image caddy:2 found in supabase/tests/docker/docker-compose.yaml"
+  },
+  {
+    "integration": "tekton",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T17:15:09.582866+00:00",
+    "details": "exit code 1: Environment `py3.13` for integration `tekton` is already running\n"
+  },
+  {
+    "integration": "teleport",
+    "reason": "fake caddy server",
+    "skipped_at": "2026-05-13T17:15:12.735945+00:00",
+    "details": "image caddy:2.6.2-alpine found in teleport/tests/docker/caddy/docker-compose.yaml"
+  },
+  {
+    "integration": "temporal",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T17:15:22.593815+00:00",
+    "details": "exit code 1:  temporal-admin-tools Pulling \n elasticsearch Pulling \n postgresql Pulling \n temporal-ui Pulling \n temporal Pulling \nerror from registry: You have reached your unauthenticated pull rate limit. https://www.docker.com/increase-rate-limit\n"
+  },
+  {
+    "integration": "tls",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T17:16:30.021513+00:00",
+    "details": "exit code 1: Creating environment: py3.13\nInstalling project in development mode\nRunning post-installation commands\nChecking dependencies\nSyncing dependencies\n nginx-tls1-2 Pulling \n starttls-mysql Pulling \n starttls-postgres Pulling \n nginx-tls1-3 Pulling \n nginx-main Pulling \n starttls-mysql Error error from registry: You have reached your unauthenticated pull rate limit. https://www.docker.com/increase-rate-limit\n nginx-tls1-2  Interrupted\n starttls-postgres  Interrupted\n nginx-main  Interrupted\n nginx-tl"
+  },
+  {
+    "integration": "tomcat",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T17:16:48.503262+00:00",
+    "details": "exit code 1: Creating environment: py3.13-10.1-embedded\nInstalling project in development mode\nRunning post-installation commands\nChecking dependencies\nDockerfile:1\n\n--------------------\n\n   1 | >>> FROM python:3.11\n\n   2 |     RUN pip install requests\n\n   3 |     COPY client.py /tmp\n\n--------------------\n\ntarget client: failed to solve: python:3.11: failed to resolve source metadata for docker.io/library/python:3.11: failed to copy: httpReadSeeker: failed open: unexpected status from GET request to https://"
+  },
+  {
+    "integration": "traffic_server",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T17:19:18.531844+00:00",
+    "details": "exit code 1: Creating environment: py3.13\nInstalling project in development mode\nRunning post-installation commands\nChecking dependencies\n trafficserver Pulling \nerror from registry: You have reached your unauthenticated pull rate limit. https://www.docker.com/increase-rate-limit\n"
+  },
+  {
+    "integration": "varnish",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T17:19:35.615971+00:00",
+    "details": "exit code 1: Creating environment: py3.13-6.5\nInstalling project in development mode\nRunning post-installation commands\nChecking dependencies\n varnish Pulling \n varnish Error error from registry: You have reached your unauthenticated pull rate limit. https://www.docker.com/increase-rate-limit\nError response from daemon: error from registry: You have reached your unauthenticated pull rate limit. https://www.docker.com/increase-rate-limit\n"
+  },
+  {
+    "integration": "vault",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T17:19:54.266343+00:00",
+    "details": "exit code 1: Creating environment: py3.13-1.9.0-noauth\nInstalling project in development mode\nRunning post-installation commands\nChecking dependencies\n consul Pulling \n vault-replica Pulling \n consul-worker Pulling \n vault-leader Pulling \n consul Error error from registry: You have reached your unauthenticated pull rate limit. https://www.docker.com/increase-rate-limit\n vault-replica  Interrupted\n vault-leader  Interrupted\n consul-worker  Interrupted\nError response from daemon: error from registry: You have "
+  },
+  {
+    "integration": "velero",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T17:20:12.918797+00:00",
+    "details": "exit code 1: Creating environment: py3.13\nInstalling project in development mode\nRunning post-installation commands\nChecking dependencies\n#0 building with \"default\" instance using docker driver\n\n#1 [internal] load build definition from kubectl.Dockerfile\n#1 transferring dockerfile: 387B done\n#1 DONE 0.0s\n\n#2 [internal] load metadata for docker.io/library/debian:bullseye-slim\n#2 ERROR: failed to copy: httpReadSeeker: failed open: unexpected status from GET request to https://registry-1.docker.io/v2/library/de"
+  },
+  {
+    "integration": "vllm",
+    "reason": "fake caddy server",
+    "skipped_at": "2026-05-13T17:20:16.102524+00:00",
+    "details": "image caddy:2.7 found in vllm/tests/docker/docker-compose.yaml"
+  },
+  {
+    "integration": "weaviate",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T17:26:44.126558+00:00",
+    "details": "ddev env start timed out after 300s"
+  },
+  {
+    "integration": "windows_performance_counters",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T17:26:50.434292+00:00",
+    "details": "exit code 1: Environment `py3.13` is incompatible: unsupported platform\n"
+  },
+  {
+    "integration": "zk",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-13T17:27:08.664310+00:00",
+    "details": "exit code 1: Creating environment: py3.13-3.6.2-false\nInstalling project in development mode\nRunning post-installation commands\nChecking dependencies\n zk Pulling \nerror from registry: You have reached your unauthenticated pull rate limit. https://www.docker.com/increase-rate-limit\n"
+  }
+]

@@ -1,0 +1,408 @@
+{
+  "integration": "traefik_mesh",
+  "environment": "py3.13",
+  "collected_at": "2026-05-13T17:18:54.689383+00:00",
+  "processes": [
+    {
+      "pid": 2022167,
+      "ppid": 2022145,
+      "comm": "systemd",
+      "cmdline": "/sbin/init",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2022314,
+      "ppid": 2022167,
+      "comm": "systemd-journal",
+      "cmdline": "/lib/systemd/systemd-journald",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2022329,
+      "ppid": 2022167,
+      "comm": "containerd",
+      "cmdline": "/usr/local/bin/containerd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2022804,
+      "ppid": 2022167,
+      "comm": "containerd-shim",
+      "cmdline": "/usr/local/bin/containerd-shim-runc-v2 -namespace k8s.io -id 76a6721eaccc8503e64c33729c522ad27e4018915b766028135a735e29acfa51 -address /run/containerd/containerd.sock",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2022825,
+      "ppid": 2022167,
+      "comm": "containerd-shim",
+      "cmdline": "/usr/local/bin/containerd-shim-runc-v2 -namespace k8s.io -id 4cadf0679b9e0d0ebfd7dc697fe0916b8a1ab45a68985697c76df867ec184043 -address /run/containerd/containerd.sock",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2022856,
+      "ppid": 2022167,
+      "comm": "containerd-shim",
+      "cmdline": "/usr/local/bin/containerd-shim-runc-v2 -namespace k8s.io -id e02d209df0bdeba260925393f1c6890c193bbfdeeaff3bf87f3ea76bbf24e25a -address /run/containerd/containerd.sock",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2022868,
+      "ppid": 2022167,
+      "comm": "containerd-shim",
+      "cmdline": "/usr/local/bin/containerd-shim-runc-v2 -namespace k8s.io -id 4e3e1732e1e9f886a85d942c4191336f6a7cce4b192416e28941ebb948c12348 -address /run/containerd/containerd.sock",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2022923,
+      "ppid": 2022804,
+      "comm": "pause",
+      "cmdline": "/pause",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2022932,
+      "ppid": 2022825,
+      "comm": "pause",
+      "cmdline": "/pause",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2022934,
+      "ppid": 2022868,
+      "comm": "pause",
+      "cmdline": "/pause",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2022946,
+      "ppid": 2022856,
+      "comm": "pause",
+      "cmdline": "/pause",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2023052,
+      "ppid": 2022856,
+      "comm": "kube-scheduler",
+      "cmdline": "kube-scheduler --authentication-kubeconfig=/etc/kubernetes/scheduler.conf --authorization-kubeconfig=/etc/kubernetes/scheduler.conf --bind-address=127.0.0.1 --kubeconfig=/etc/kubernetes/scheduler.conf --leader-elect=true",
+      "generated_name": "kube-scheduler",
+      "has_service_data": true
+    },
+    {
+      "pid": 2023080,
+      "ppid": 2022825,
+      "comm": "kube-controller",
+      "cmdline": "kube-controller-manager --allocate-node-cidrs=true --authentication-kubeconfig=/etc/kubernetes/controller-manager.conf --authorization-kubeconfig=/etc/kubernetes/controller-manager.conf --bind-address=127.0.0.1 --client-ca-file=/etc/kubernetes/pki/ca.crt --cluster-cidr=10.244.0.0/16 --cluster-name=cluster-traefik-mesh-py3.13 --cluster-signing-cert-file=/etc/kubernetes/pki/ca.crt --cluster-signing-key-file=/etc/kubernetes/pki/ca.key --controllers=*,bootstrapsigner,tokencleaner --enable-hostpath-provisioner=true --kubeconfig=/etc/kubernetes/controller-manager.conf --leader-elect=true --requestheader-client-ca-file=/etc/kubernetes/pki/front-proxy-ca.crt --root-ca-file=/etc/kubernetes/pki/ca.crt --service-account-private-key-file=/etc/kubernetes/pki/sa.key --service-cluster-ip-range=10.96.0.0/16 --use-service-account-credentials=true",
+      "generated_name": "kube-controller-manager",
+      "has_service_data": true
+    },
+    {
+      "pid": 2023129,
+      "ppid": 2022804,
+      "comm": "kube-apiserver",
+      "cmdline": "kube-apiserver --advertise-address=172.17.129.5 --allow-privileged=true --authorization-mode=Node,RBAC --client-ca-file=/etc/kubernetes/pki/ca.crt --enable-admission-plugins=NodeRestriction --enable-bootstrap-token-auth=true --etcd-cafile=/etc/kubernetes/pki/etcd/ca.crt --etcd-certfile=/etc/kubernetes/pki/apiserver-etcd-client.crt --etcd-keyfile=/etc/kubernetes/pki/apiserver-etcd-client.key --etcd-servers=https://127.0.0.1:2379 --kubelet-client-certificate=/etc/kubernetes/pki/apiserver-kubelet-client.crt --kubelet-client-key=/etc/kubernetes/pki/apiserver-kubelet-client.key --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname --proxy-client-cert-file=/etc/kubernetes/pki/front-proxy-client.crt --proxy-client-key-file=/etc/kubernetes/pki/front-proxy-client.key --requestheader-allowed-names=front-proxy-client --requestheader-client-ca-file=/etc/kubernetes/pki/front-proxy-ca.crt --requestheader-extra-headers-prefix=X-Remote-Extra- --requestheader-group-headers=X-Remote-Group --requestheader-username-headers=X-Remote-User --runtime-config= --secure-port=6443 --service-account-issuer=https://kubernetes.default.svc.cluster.local --service-account-key-file=/etc/kubernetes/pki/sa.pub --service-account-signing-key-file=/etc/kubernetes/pki/sa.key --service-cluster-ip-range=10.96.0.0/16 --tls-cert-file=/etc/kubernetes/pki/apiserver.crt --tls-private-key-file=/etc/kubernetes/pki/apiserver.key",
+      "generated_name": "kube-apiserver",
+      "has_service_data": true
+    },
+    {
+      "pid": 2023175,
+      "ppid": 2022868,
+      "comm": "etcd",
+      "cmdline": "etcd --advertise-client-urls=https://172.17.129.5:2379 --cert-file=/etc/kubernetes/pki/etcd/server.crt --client-cert-auth=true --data-dir=/var/lib/etcd --feature-gates=InitialCorruptCheck=true --initial-advertise-peer-urls=https://172.17.129.5:2380 --initial-cluster=cluster-traefik-mesh-py3.13-control-plane=https://172.17.129.5:2380 --key-file=/etc/kubernetes/pki/etcd/server.key --listen-client-urls=https://127.0.0.1:2379,https://172.17.129.5:2379 --listen-metrics-urls=http://127.0.0.1:2381 --listen-peer-urls=https://172.17.129.5:2380 --name=cluster-traefik-mesh-py3.13-control-plane --peer-cert-file=/etc/kubernetes/pki/etcd/peer.crt --peer-client-cert-auth=true --peer-key-file=/etc/kubernetes/pki/etcd/peer.key --peer-trusted-ca-file=/etc/kubernetes/pki/etcd/ca.crt --snapshot-count=10000 --trusted-ca-file=/etc/kubernetes/pki/etcd/ca.crt --watch-progress-notify-interval=5s",
+      "generated_name": "etcd",
+      "has_service_data": true
+    },
+    {
+      "pid": 2023284,
+      "ppid": 2022167,
+      "comm": "kubelet",
+      "cmdline": "/usr/bin/kubelet --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf --config=/var/lib/kubelet/config.yaml --node-ip=172.17.129.5 --node-labels= --provider-id=kind://docker/cluster-traefik-mesh-py3.13/cluster-traefik-mesh-py3.13-control-plane --runtime-cgroups=/system.slice/containerd.service",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2024165,
+      "ppid": 2022167,
+      "comm": "containerd-shim",
+      "cmdline": "/usr/local/bin/containerd-shim-runc-v2 -namespace k8s.io -id aecdcd09fa0c5ab4bc4038f24556dc2f496f0ec045ca9065e3c2ab11ed2e8e06 -address /run/containerd/containerd.sock",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2024197,
+      "ppid": 2022167,
+      "comm": "containerd-shim",
+      "cmdline": "/usr/local/bin/containerd-shim-runc-v2 -namespace k8s.io -id 812b7978c9f535f530e5825089cfd1e4249e194ba402267bd748f207d5e0422b -address /run/containerd/containerd.sock",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2024219,
+      "ppid": 2024165,
+      "comm": "pause",
+      "cmdline": "/pause",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2024226,
+      "ppid": 2024197,
+      "comm": "pause",
+      "cmdline": "/pause",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2024265,
+      "ppid": 2024197,
+      "comm": "kube-proxy",
+      "cmdline": "/usr/local/bin/kube-proxy --config=/var/lib/kube-proxy/config.conf --hostname-override=cluster-traefik-mesh-py3.13-control-plane",
+      "generated_name": "kube-proxy",
+      "has_service_data": true
+    },
+    {
+      "pid": 2024455,
+      "ppid": 2024165,
+      "comm": "kindnetd",
+      "cmdline": "/bin/kindnetd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2024731,
+      "ppid": 2022167,
+      "comm": "containerd-shim",
+      "cmdline": "/usr/local/bin/containerd-shim-runc-v2 -namespace k8s.io -id 00c3421bb7b6cfc509fe885da0accb85ff7123dcd9679a13a13d43f1013b3f9b -address /run/containerd/containerd.sock",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2024754,
+      "ppid": 2024731,
+      "comm": "pause",
+      "cmdline": "/pause",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2024961,
+      "ppid": 2022167,
+      "comm": "containerd-shim",
+      "cmdline": "/usr/local/bin/containerd-shim-runc-v2 -namespace k8s.io -id 1f8f4fe80edcb033fc9848f399eb2d44e762938d929b4da60e2cbaf77870a06b -address /run/containerd/containerd.sock",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2024977,
+      "ppid": 2022167,
+      "comm": "containerd-shim",
+      "cmdline": "/usr/local/bin/containerd-shim-runc-v2 -namespace k8s.io -id 3129fc4871250c33078f46f75fcfc676b70ccedb0d835781933390a7e6666338 -address /run/containerd/containerd.sock",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2024998,
+      "ppid": 2022167,
+      "comm": "containerd-shim",
+      "cmdline": "/usr/local/bin/containerd-shim-runc-v2 -namespace k8s.io -id e78e0d397973057ff2f511d29e44ba7257065f747e9777bf0516f741a004dd47 -address /run/containerd/containerd.sock",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2025060,
+      "ppid": 2022167,
+      "comm": "containerd-shim",
+      "cmdline": "/usr/local/bin/containerd-shim-runc-v2 -namespace k8s.io -id ce8906dcc8f4427fa0053b892ad319468c3945b8fb4e2eed4dc0108dd930b035 -address /run/containerd/containerd.sock",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2025065,
+      "ppid": 2022167,
+      "comm": "containerd-shim",
+      "cmdline": "/usr/local/bin/containerd-shim-runc-v2 -namespace k8s.io -id 8cb807338e31da1701b48826849301b9bb4cb0245d401bb468d7aa8051c29a59 -address /run/containerd/containerd.sock",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2025093,
+      "ppid": 2022167,
+      "comm": "containerd-shim",
+      "cmdline": "/usr/local/bin/containerd-shim-runc-v2 -namespace k8s.io -id 733413fde36183d40a1e8e4588fd0de0cd9681decb890a2cfe35ae598cb56961 -address /run/containerd/containerd.sock",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2025099,
+      "ppid": 2024961,
+      "comm": "pause",
+      "cmdline": "/pause",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2025133,
+      "ppid": 2024977,
+      "comm": "pause",
+      "cmdline": "/pause",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2025154,
+      "ppid": 2024998,
+      "comm": "pause",
+      "cmdline": "/pause",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2025167,
+      "ppid": 2025093,
+      "comm": "pause",
+      "cmdline": "/pause",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2025179,
+      "ppid": 2025060,
+      "comm": "pause",
+      "cmdline": "/pause",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2025195,
+      "ppid": 2025065,
+      "comm": "pause",
+      "cmdline": "/pause",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2025293,
+      "ppid": 2024961,
+      "comm": "coredns",
+      "cmdline": "/coredns -conf /etc/coredns/Corefile",
+      "generated_name": "coredns",
+      "has_service_data": true
+    },
+    {
+      "pid": 2025300,
+      "ppid": 2024998,
+      "comm": "coredns",
+      "cmdline": "/coredns -conf /etc/coredns/Corefile",
+      "generated_name": "coredns",
+      "has_service_data": true
+    },
+    {
+      "pid": 2025459,
+      "ppid": 2025060,
+      "comm": "local-path-prov",
+      "cmdline": "local-path-provisioner --debug start --helper-image docker.io/kindest/local-path-helper:v20251211-v0.29.0-alpha-100-g82a92c5d --config /etc/config/config.json",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2026780,
+      "ppid": 2026757,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2026817,
+      "ppid": 2026780,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2027204,
+      "ppid": 2026780,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2027205,
+      "ppid": 2026780,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2027207,
+      "ppid": 2026780,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2027208,
+      "ppid": 2026780,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2027209,
+      "ppid": 2026780,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2027211,
+      "ppid": 2026780,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2027215,
+      "ppid": 2027207,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 2027216,
+      "ppid": 2027208,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 2027217,
+      "ppid": 2027209,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

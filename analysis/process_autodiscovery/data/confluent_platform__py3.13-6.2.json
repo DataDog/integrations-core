@@ -1,0 +1,176 @@
+{
+  "integration": "confluent_platform",
+  "environment": "py3.13-6.2",
+  "collected_at": "2026-05-13T13:26:27.618204+00:00",
+  "processes": [
+    {
+      "pid": 998801,
+      "ppid": 998752,
+      "comm": "tail",
+      "cmdline": "/usr/bin/coreutils --coreutils-prog-shebang=tail /usr/bin/tail -f /dev/null",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 998403,
+      "ppid": 998334,
+      "comm": "java",
+      "cmdline": "java -Xms256M -Xmx2G -server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -XX:MaxInlineLevel=15 -Djava.awt.headless=true -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=31008 -Dcom.sun.management.jmxremote.port=31008 -Dcom.sun.management.jmxremote.port=31008 -Dkafka.logs.dir=/var/log/kafka -Dlog4j.configuration=file:/etc/kafka/connect-log4j.properties -cp /etc/kafka-connect/jars/*:::/usr/share/java/confluent-security/connect/*:/usr/share/java/kafka/*:/usr/share/java/confluent-common/*:/usr/share/java/kafka-serde-tools/*:/usr/share/java/monitoring-interceptors/*:/usr/bin/../ce-broker-plugins/build/libs/*:/usr/bin/../ce-broker-plugins/build/dependant-libs/*:/usr/bin/../ce-auth-providers/build/libs/*:/usr/bin/../ce-auth-providers/build/dependant-libs/*:/usr/bin/../ce-rest-server/build/libs/*:/usr/bin/../ce-rest-server/build/dependant-libs/*:/usr/bin/../ce-audit/build/libs/*:/usr/bin/../ce-audit/build/dependant-libs/*:/usr/bin/../share/java/kafka/*:/usr/bin/../share/java/confluent-metadata-service/*:/usr/bin/../share/java/rest-utils/*:/usr/bin/../share/java/confluent-common/*:/usr/bin/../share/java/ce-kafka-http-server/*:/usr/bin/../share/java/ce-kafka-rest-servlet/*:/usr/bin/../share/java/ce-kafka-rest-extensions/*:/usr/bin/../share/java/kafka-rest-lib/*:/usr/bin/../share/java/confluent-security/kafka-rest/*:/usr/bin/../share/java/confluent-security/schema-validator/*:/usr/bin/../support-metrics-client/build/dependant-libs-2.13.5/*:/usr/bin/../support-metrics-client/build/libs/*:/usr/bin/../share/java/confluent-telemetry/*:/usr/share/java/support-metrics-client/* org.apache.kafka.connect.cli.ConnectDistributed /etc/kafka-connect/kafka-connect.properties",
+      "generated_name": "kafka",
+      "has_service_data": true
+    },
+    {
+      "pid": 997998,
+      "ppid": 997975,
+      "comm": "java",
+      "cmdline": "java -Xmx512M -Xms512M -server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -XX:MaxInlineLevel=15 -Djava.awt.headless=true -Xlog:gc*:file=/var/log/kafka/zookeeper-gc.log:time,tags:filecount=10,filesize=100M -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=31000 -Dcom.sun.management.jmxremote.port=31000 -Dcom.sun.management.jmxremote.port=31000 -Dkafka.logs.dir=/var/log/kafka -Dlog4j.configuration=file:/etc/kafka/log4j.properties -cp /usr/bin/../share/java/kafka/*:/usr/bin/../share/java/confluent-telemetry/* org.apache.zookeeper.server.quorum.QuorumPeerMain /etc/kafka/zookeeper.properties",
+      "generated_name": "zookeeper",
+      "has_service_data": true
+    },
+    {
+      "pid": 998402,
+      "ppid": 998320,
+      "comm": "java",
+      "cmdline": "java -Xms256M -Xmx2G -server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -XX:MaxInlineLevel=15 -Djava.awt.headless=true -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=31002 -Dcom.sun.management.jmxremote.port=31002 -Dcom.sun.management.jmxremote.port=31002 -Dkafka.logs.dir=/var/log/kafka -Dlog4j.configuration=file:/etc/kafka/connect-log4j.properties -cp /usr/share/java/monitoring-interceptors/monitoring-interceptors-5.4.0.jar:/usr/share/java/confluent-security/connect/*:/usr/share/java/kafka/*:/usr/share/java/confluent-common/*:/usr/share/java/kafka-serde-tools/*:/usr/share/java/monitoring-interceptors/*:/usr/bin/../ce-broker-plugins/build/libs/*:/usr/bin/../ce-broker-plugins/build/dependant-libs/*:/usr/bin/../ce-auth-providers/build/libs/*:/usr/bin/../ce-auth-providers/build/dependant-libs/*:/usr/bin/../ce-rest-server/build/libs/*:/usr/bin/../ce-rest-server/build/dependant-libs/*:/usr/bin/../ce-audit/build/libs/*:/usr/bin/../ce-audit/build/dependant-libs/*:/usr/bin/../share/java/kafka/*:/usr/bin/../share/java/confluent-metadata-service/*:/usr/bin/../share/java/rest-utils/*:/usr/bin/../share/java/confluent-common/*:/usr/bin/../share/java/ce-kafka-http-server/*:/usr/bin/../share/java/ce-kafka-rest-servlet/*:/usr/bin/../share/java/ce-kafka-rest-extensions/*:/usr/bin/../share/java/kafka-rest-lib/*:/usr/bin/../share/java/confluent-security/kafka-rest/*:/usr/bin/../share/java/confluent-security/schema-validator/*:/usr/bin/../support-metrics-client/build/dependant-libs-2.13.5/*:/usr/bin/../support-metrics-client/build/libs/*:/usr/bin/../share/java/confluent-telemetry/*:/usr/share/java/support-metrics-client/* org.apache.kafka.connect.cli.ConnectDistributed /etc/kafka-connect/kafka-connect.properties",
+      "generated_name": "kafka",
+      "has_service_data": true
+    },
+    {
+      "pid": 1005572,
+      "ppid": 1005549,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1005609,
+      "ppid": 1005572,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1005997,
+      "ppid": 1005572,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1005998,
+      "ppid": 1005572,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1006000,
+      "ppid": 1005572,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1006001,
+      "ppid": 1005572,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1006002,
+      "ppid": 1005572,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1006003,
+      "ppid": 1005572,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1006006,
+      "ppid": 1005998,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 1006007,
+      "ppid": 1006002,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1006008,
+      "ppid": 1006001,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 1006009,
+      "ppid": 1006000,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 998103,
+      "ppid": 998080,
+      "comm": "java",
+      "cmdline": "java -Xmx1G -Xms1G -server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -XX:MaxInlineLevel=15 -Djava.awt.headless=true -Xlog:gc*:file=/var/log/kafka/kafkaServer-gc.log:time,tags:filecount=10,filesize=100M -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=31001 -Dcom.sun.management.jmxremote.port=31001 -Dcom.sun.management.jmxremote.port=31001 -Dkafka.logs.dir=/var/log/kafka -Dlog4j.configuration=file:/etc/kafka/log4j.properties -cp /usr/bin/../ce-broker-plugins/build/libs/*:/usr/bin/../ce-broker-plugins/build/dependant-libs/*:/usr/bin/../ce-auth-providers/build/libs/*:/usr/bin/../ce-auth-providers/build/dependant-libs/*:/usr/bin/../ce-rest-server/build/libs/*:/usr/bin/../ce-rest-server/build/dependant-libs/*:/usr/bin/../ce-audit/build/libs/*:/usr/bin/../ce-audit/build/dependant-libs/*:/usr/bin/../share/java/kafka/*:/usr/bin/../share/java/confluent-metadata-service/*:/usr/bin/../share/java/rest-utils/*:/usr/bin/../share/java/confluent-common/*:/usr/bin/../share/java/ce-kafka-http-server/*:/usr/bin/../share/java/ce-kafka-rest-servlet/*:/usr/bin/../share/java/ce-kafka-rest-extensions/*:/usr/bin/../share/java/kafka-rest-lib/*:/usr/bin/../share/java/confluent-security/kafka-rest/*:/usr/bin/../share/java/confluent-security/schema-validator/*:/usr/bin/../support-metrics-client/build/dependant-libs-2.13.5/*:/usr/bin/../support-metrics-client/build/libs/*:/usr/bin/../share/java/confluent-telemetry/*:/usr/share/java/support-metrics-client/* kafka.Kafka /etc/kafka/kafka.properties",
+      "generated_name": "kafka.Kafka",
+      "has_service_data": true
+    },
+    {
+      "pid": 998802,
+      "ppid": 998760,
+      "comm": "java",
+      "cmdline": "java -cp /usr/share/java/acl/*:/usr/share/java/confluent-control-center/*:/usr/share/java/monitoring-interceptors/*:/usr/share/java/rest-utils/*:/usr/share/java/confluent-telemetry/*:/usr/share/java/confluent-common/*: -Xmx6g -server -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -XX:+CMSScavengeBeforeRemark -XX:+DisableExplicitGC -Djava.awt.headless=true -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dconfluent.controlcenter.log.dir=/tmp/control-center-logs -Dlog4j.configuration=file:/etc/confluent-control-center/log4j.properties io.confluent.controlcenter.ControlCenter /etc/confluent-control-center/control-center.properties",
+      "generated_name": "io.confluent.controlcenter.ControlCenter",
+      "has_service_data": true
+    },
+    {
+      "pid": 998216,
+      "ppid": 998184,
+      "comm": "java",
+      "cmdline": "java -Xmx512M -server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -Djava.awt.headless=true -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=31007 -Dcom.sun.management.jmxremote.port=31007 -Dcom.sun.management.jmxremote.port=31007 -Dschema-registry.log.dir=/usr/bin/../logs -Dlog4j.configuration=file:/etc/schema-registry/log4j.properties -cp :/usr/bin/../package-schema-registry/target/kafka-schema-registry-package-*-development/share/java/schema-registry/*:/usr/bin/../share/java/confluent-security/schema-registry/*:/usr/bin/../share/java/confluent-common/*:/usr/bin/../share/java/confluent-telemetry/*:/usr/bin/../share/java/rest-utils/*:/usr/bin/../share/java/schema-registry/* io.confluent.kafka.schemaregistry.rest.SchemaRegistryMain /etc/schema-registry/schema-registry.properties",
+      "generated_name": "io.confluent.kafka.schemaregistry.rest.SchemaRegistryMain",
+      "has_service_data": true
+    },
+    {
+      "pid": 998663,
+      "ppid": 998621,
+      "comm": "java",
+      "cmdline": "java -cp /usr/share/java/confluent-security/ksql/*:/usr/share/java/confluent-telemetry/*:/usr/share/java/confluent-common/*:/usr/share/java/ksqldb-server/* -Xmx3g -server -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -XX:+CMSScavengeBeforeRemark -XX:+ExplicitGCInvokesConcurrent -XX:NewRatio=1 -Djava.awt.headless=true -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.rmi.port=31004 -Dcom.sun.management.jmxremote.port=31004 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Djava.rmi.server.hostname=localhost -Djava.rmi.server.hostname=172.17.131.8 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=31004 -Dcom.sun.management.jmxremote.port=31004 -Dcom.sun.management.jmxremote.port=31004 -Dksql.log.dir=/usr/logs -Dlog4j.configuration=file:/etc/ksql/log4j-rolling.properties -Dksql.server.install.dir=/usr -Xlog:gc*:file=/usr/logs/ksql-server-gc.log:time,tags:filecount=10,filesize=102400 io.confluent.ksql.rest.server.KsqlServerMain /etc/ksqldb-server/ksqldb-server.properties",
+      "generated_name": "io.confluent.ksql.rest.server.KsqlServerMain",
+      "has_service_data": true
+    },
+    {
+      "pid": 998404,
+      "ppid": 998326,
+      "comm": "java",
+      "cmdline": "java -Xmx256M -server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -Djava.awt.headless=true -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.rmi.port=31006 -Dcom.sun.management.jmxremote.port=31006 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Djava.rmi.server.hostname=localhost -Dlog4j.configuration=file:/etc/kafka-rest/log4j.properties -cp :/usr/bin/../kafka-rest/target/kafka-rest-*-development/share/java/kafka-rest/*:/usr/bin/../share/java/confluent-security/kafka-rest/*:/usr/bin/../share/java/confluent-common/*:/usr/bin/../share/java/confluent-telemetry/*:/usr/bin/../share/java/rest-utils/*:/usr/bin/../share/java/kafka-rest-bin/*:/usr/bin/../share/java/kafka-rest-lib/*:/usr/bin/../share/java/monitoring-interceptors/* io.confluent.kafkarest.KafkaRestMain /etc/kafka-rest/kafka-rest.properties",
+      "generated_name": "io.confluent.kafkarest.KafkaRestMain",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

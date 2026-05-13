@@ -1,0 +1,176 @@
+{
+  "integration": "squid",
+  "environment": "py3.13-5.6",
+  "collected_at": "2026-05-13T16:11:29.069286+00:00",
+  "processes": [
+    {
+      "pid": 1769318,
+      "ppid": 1769295,
+      "comm": "entrypoint.sh",
+      "cmdline": "/bin/bash /usr/local/bin/entrypoint.sh -f /etc/squid/squid.conf -NYC",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1769416,
+      "ppid": 1769318,
+      "comm": "tail",
+      "cmdline": "tail -F /var/log/squid/access.log",
+      "generated_name": "tail",
+      "has_service_data": true
+    },
+    {
+      "pid": 1769417,
+      "ppid": 1769318,
+      "comm": "tail",
+      "cmdline": "tail -F /var/log/squid/error.log",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1769418,
+      "ppid": 1769318,
+      "comm": "tail",
+      "cmdline": "tail -F /var/log/squid/store.log",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1769419,
+      "ppid": 1769318,
+      "comm": "tail",
+      "cmdline": "tail -F /var/log/squid/cache.log",
+      "generated_name": "tail",
+      "has_service_data": true
+    },
+    {
+      "pid": 1769421,
+      "ppid": 1769318,
+      "comm": "squid",
+      "cmdline": "/usr/sbin/squid -f /etc/squid/squid.conf -NYC",
+      "generated_name": "squid",
+      "has_service_data": true
+    },
+    {
+      "pid": 1769422,
+      "ppid": 1769421,
+      "comm": "log_file_daemon",
+      "cmdline": "(logfile-daemon) /var/log/squid/access.log",
+      "generated_name": "logfile-daemon",
+      "has_service_data": true
+    },
+    {
+      "pid": 1769423,
+      "ppid": 1769421,
+      "comm": "unlinkd",
+      "cmdline": "(unlinkd)",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1769425,
+      "ppid": 1769421,
+      "comm": "pinger",
+      "cmdline": "(pinger)",
+      "generated_name": "pinger",
+      "has_service_data": true
+    },
+    {
+      "pid": 1769545,
+      "ppid": 1769511,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1769591,
+      "ppid": 1769545,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1769979,
+      "ppid": 1769545,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1769980,
+      "ppid": 1769545,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1769982,
+      "ppid": 1769545,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1769983,
+      "ppid": 1769545,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1769984,
+      "ppid": 1769545,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1769986,
+      "ppid": 1769545,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1769988,
+      "ppid": 1769980,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 1769990,
+      "ppid": 1769983,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 1769991,
+      "ppid": 1769982,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1769992,
+      "ppid": 1769984,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

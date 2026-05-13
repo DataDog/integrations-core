@@ -1,0 +1,184 @@
+{
+  "integration": "singlestore",
+  "environment": "py3.13",
+  "collected_at": "2026-05-13T16:02:54.694810+00:00",
+  "processes": [
+    {
+      "pid": 1729675,
+      "ppid": 1729653,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1729717,
+      "ppid": 1729675,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1730104,
+      "ppid": 1729675,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1730105,
+      "ppid": 1729675,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1730106,
+      "ppid": 1729675,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1730108,
+      "ppid": 1729675,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1730109,
+      "ppid": 1729675,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1730110,
+      "ppid": 1729675,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1730113,
+      "ppid": 1730106,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1730114,
+      "ppid": 1730105,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 1730115,
+      "ppid": 1730108,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 1730116,
+      "ppid": 1730109,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1727840,
+      "ppid": 1727817,
+      "comm": "start.sh",
+      "cmdline": "/bin/bash /scripts/start.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1728059,
+      "ppid": 1727840,
+      "comm": "memsqld_safe",
+      "cmdline": "/server/singlestoredb-server-8.9.19-2247f30d74/memsqld_safe --defaults-file /data/master/memsql.cnf --user 999 --auto-restart StagedEnable",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1728060,
+      "ppid": 1727840,
+      "comm": "memsqld_safe",
+      "cmdline": "/server/singlestoredb-server-8.9.19-2247f30d74/memsqld_safe --defaults-file /data/leaf/memsql.cnf --user 999 --auto-restart StagedEnable",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1728074,
+      "ppid": 1728059,
+      "comm": "memsqld",
+      "cmdline": "/server/singlestoredb-server-8.9.19-2247f30d74/memsqld --defaults-file /data/master/memsql.cnf --user 999",
+      "generated_name": "memsqld",
+      "has_service_data": true
+    },
+    {
+      "pid": 1728078,
+      "ppid": 1728060,
+      "comm": "memsqld",
+      "cmdline": "/server/singlestoredb-server-8.9.19-2247f30d74/memsqld --defaults-file /data/leaf/memsql.cnf --user 999",
+      "generated_name": "memsqld",
+      "has_service_data": true
+    },
+    {
+      "pid": 1728152,
+      "ppid": 1728078,
+      "comm": "memsqld",
+      "cmdline": "/server/singlestoredb-server-8.9.19-2247f30d74/memsqld --defaults-file /data/leaf/memsql.cnf --user 999",
+      "generated_name": "memsqld",
+      "has_service_data": true
+    },
+    {
+      "pid": 1728153,
+      "ppid": 1728074,
+      "comm": "memsqld",
+      "cmdline": "/server/singlestoredb-server-8.9.19-2247f30d74/memsqld --defaults-file /data/master/memsql.cnf --user 999",
+      "generated_name": "memsqld",
+      "has_service_data": true
+    },
+    {
+      "pid": 1728314,
+      "ppid": 1728153,
+      "comm": "websocket_proxy",
+      "cmdline": "/server/singlestoredb-server-8.9.19-2247f30d74/websocket_proxy/websocket_proxy --read-conf-from-stdin",
+      "generated_name": "websocket_proxy",
+      "has_service_data": true
+    },
+    {
+      "pid": 1729255,
+      "ppid": 1727840,
+      "comm": "singlestoredb-s",
+      "cmdline": "singlestoredb-studio --port 8080",
+      "generated_name": "singlestoredb-studio",
+      "has_service_data": true
+    },
+    {
+      "pid": 1729256,
+      "ppid": 1727840,
+      "comm": "tail",
+      "cmdline": "/usr/bin/coreutils --coreutils-prog-shebang=tail /usr/bin/tail --pid 49 --pid 50 -F /logs/master/tracelogs/memsql.log /logs/leaf/tracelogs/memsql.log /var/lib/singlestoredb-studio/studio.log",
+      "generated_name": "coreutils",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

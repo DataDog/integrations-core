@@ -1,0 +1,120 @@
+{
+  "integration": "proxysql",
+  "environment": "py3.13-2.0",
+  "collected_at": "2026-05-13T15:44:06.928590+00:00",
+  "processes": [
+    {
+      "pid": 1613386,
+      "ppid": 1613352,
+      "comm": "proxysql",
+      "cmdline": "proxysql -f -D /var/lib/proxysql",
+      "generated_name": "proxysql",
+      "has_service_data": true
+    },
+    {
+      "pid": 1613286,
+      "ppid": 1613263,
+      "comm": "mysqld",
+      "cmdline": "mysqld",
+      "generated_name": "mysqld",
+      "has_service_data": true
+    },
+    {
+      "pid": 1614366,
+      "ppid": 1614332,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1614419,
+      "ppid": 1614366,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1614837,
+      "ppid": 1614366,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1614838,
+      "ppid": 1614366,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1614839,
+      "ppid": 1614366,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1614840,
+      "ppid": 1614366,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1614842,
+      "ppid": 1614366,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1614843,
+      "ppid": 1614366,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1614846,
+      "ppid": 1614839,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1614847,
+      "ppid": 1614838,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 1614848,
+      "ppid": 1614840,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 1614850,
+      "ppid": 1614842,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

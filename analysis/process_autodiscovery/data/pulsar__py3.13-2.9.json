@@ -1,0 +1,112 @@
+{
+  "integration": "pulsar",
+  "environment": "py3.13-2.9",
+  "collected_at": "2026-05-13T15:45:26.704534+00:00",
+  "processes": [
+    {
+      "pid": 1620922,
+      "ppid": 1620880,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1620965,
+      "ppid": 1620922,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1621373,
+      "ppid": 1620922,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1621374,
+      "ppid": 1620922,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1621376,
+      "ppid": 1620922,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1621377,
+      "ppid": 1620922,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1621378,
+      "ppid": 1620922,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1621379,
+      "ppid": 1620922,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1621381,
+      "ppid": 1621374,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 1621382,
+      "ppid": 1621376,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1621385,
+      "ppid": 1621378,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1621388,
+      "ppid": 1621377,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 1618778,
+      "ppid": 1618756,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/java-11-openjdk-amd64/bin/java -Dlog4j.shutdownHookEnabled=false -cp /pulsar/conf:::/pulsar/lib/*: -Dlog4j.configurationFile=log4j2.yaml -Djute.maxbuffer=10485760 -Djava.net.preferIPv4Stack=true -Dio.netty.tryReflectionSetAccessible=true -Dpulsar.allocator.exit_on_oom=true -Dio.netty.recycler.maxCapacity.default=1000 -Dio.netty.recycler.linkCapacity=1024 -Xms2g -Xmx2g -XX:MaxDirectMemorySize=4g -XX:+UseG1GC -XX:MaxGCPauseMillis=10 -XX:+ParallelRefProcEnabled -XX:+UnlockExperimentalVMOptions -XX:+DoEscapeAnalysis -XX:ParallelGCThreads=32 -XX:ConcGCThreads=32 -XX:G1NewSizePercent=50 -XX:+DisableExplicitGC -XX:-ResizePLAB -Dpulsar.log.appender=RoutingAppender -Dpulsar.log.dir=/pulsar/logs -Dpulsar.log.level=info -Dpulsar.log.root.level=info -Dpulsar.routing.appender.default=Console -Dlog4j2.is.webapp=false -Dpulsar.functions.process.container.log.dir=/pulsar/logs -Dpulsar.functions.java.instance.jar=/pulsar/instances/java-instance.jar -Dpulsar.functions.python.instance.file=/pulsar/instances/python-instance/python_instance_main.py -Dpulsar.functions.extra.dependencies.dir=/pulsar/instances/deps -Dpulsar.functions.instance.classpath=/pulsar/conf:::/pulsar/lib/*: -Dpulsar.functions.log.conf=/pulsar/conf/functions_log4j2.xml -Dzookeeper.4lw.commands.whitelist=* -Dzookeeper.snapshot.trust.empty=true -Dpulsar.log.file=pulsar-standalone.log org.apache.pulsar.PulsarStandaloneStarter --config /pulsar/conf/standalone.conf",
+      "generated_name": "pulsar",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

@@ -1,0 +1,208 @@
+{
+  "integration": "spark",
+  "environment": "py3.13-3.0",
+  "collected_at": "2026-05-13T16:10:41.943584+00:00",
+  "processes": [
+    {
+      "pid": 1760201,
+      "ppid": 1760153,
+      "comm": "python",
+      "cmdline": "python /script.py",
+      "generated_name": "script",
+      "has_service_data": true
+    },
+    {
+      "pid": 1760585,
+      "ppid": 1760530,
+      "comm": "bash",
+      "cmdline": "/bin/bash /template.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1760688,
+      "ppid": 1760585,
+      "comm": "sh",
+      "cmdline": "sh /submit.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1760692,
+      "ppid": 1760688,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/java-1.8-openjdk/jre/bin/java -cp /spark/conf/:/spark/jars/* -Xmx1g org.apache.spark.deploy.SparkSubmit --master spark://spark-master:7077 /app/app2.py",
+      "generated_name": "spark",
+      "has_service_data": true
+    },
+    {
+      "pid": 1761121,
+      "ppid": 1760692,
+      "comm": "python3",
+      "cmdline": "python3 /app/app2.py",
+      "generated_name": "app",
+      "has_service_data": true
+    },
+    {
+      "pid": 1760395,
+      "ppid": 1760368,
+      "comm": "bash",
+      "cmdline": "/bin/bash /worker.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1760484,
+      "ppid": 1760395,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/java-1.8-openjdk/jre/bin/java -cp ///conf:/spark/jars/* -Xmx1g org.apache.spark.deploy.worker.Worker --webui-port 8081 spark://spark-master:7077",
+      "generated_name": "spark",
+      "has_service_data": true
+    },
+    {
+      "pid": 1761357,
+      "ppid": 1760484,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/java-1.8-openjdk/jre/bin/java -cp ///conf:/spark/jars/* -Xmx1024M -Dspark.ui.port=4050 -Dspark.driver.port=33261 org.apache.spark.executor.CoarseGrainedExecutorBackend --driver-url spark://CoarseGrainedScheduler@spark-app-2:33261 --executor-id 0 --hostname 172.17.131.5 --cores 1 --app-id app-20260513161027-0000 --worker-url spark://Worker@172.17.131.5:35461",
+      "generated_name": "spark",
+      "has_service_data": true
+    },
+    {
+      "pid": 1762358,
+      "ppid": 1762333,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1762415,
+      "ppid": 1762358,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1762886,
+      "ppid": 1762358,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1762888,
+      "ppid": 1762358,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1762891,
+      "ppid": 1762358,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1762894,
+      "ppid": 1762358,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1762895,
+      "ppid": 1762358,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1762897,
+      "ppid": 1762358,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1762900,
+      "ppid": 1762891,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1762903,
+      "ppid": 1762894,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 1762904,
+      "ppid": 1762895,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1760584,
+      "ppid": 1760535,
+      "comm": "bash",
+      "cmdline": "/bin/bash /template.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1760749,
+      "ppid": 1760584,
+      "comm": "sh",
+      "cmdline": "sh /submit.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1760753,
+      "ppid": 1760749,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/java-1.8-openjdk/jre/bin/java -cp /spark/conf/:/spark/jars/* -Xmx1g org.apache.spark.deploy.SparkSubmit --master spark://spark-master:7077 /app/app.py",
+      "generated_name": "spark",
+      "has_service_data": true
+    },
+    {
+      "pid": 1761116,
+      "ppid": 1760753,
+      "comm": "python3",
+      "cmdline": "python3 /app/app.py",
+      "generated_name": "app",
+      "has_service_data": true
+    },
+    {
+      "pid": 1760203,
+      "ppid": 1760157,
+      "comm": "bash",
+      "cmdline": "/bin/bash /master.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1760341,
+      "ppid": 1760203,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/java-1.8-openjdk/jre/bin/java -cp ///conf:/spark/jars/* -Xmx1g org.apache.spark.deploy.master.Master --ip spark-master --port 7077 --webui-port 8080",
+      "generated_name": "spark",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

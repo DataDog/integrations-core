@@ -1,0 +1,184 @@
+{
+  "integration": "glusterfs",
+  "environment": "py3.13-7.1",
+  "collected_at": "2026-05-13T13:58:03.911255+00:00",
+  "processes": [
+    {
+      "pid": 1125670,
+      "ppid": 1125636,
+      "comm": "systemd",
+      "cmdline": "/usr/sbin/init",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1125738,
+      "ppid": 1125670,
+      "comm": "glusterd",
+      "cmdline": "/usr/sbin/glusterd -p /var/run/glusterd.pid --log-level INFO",
+      "generated_name": "glusterd",
+      "has_service_data": true
+    },
+    {
+      "pid": 1126292,
+      "ppid": 1125670,
+      "comm": "glusterfsd",
+      "cmdline": "/usr/sbin/glusterfsd -s gluster-node-2 --volfile-id gv0.gluster-node-2.export-test -p /var/run/gluster/vols/gv0/gluster-node-2-export-test.pid -S /var/run/gluster/e2c6cf6565f229a7.socket --brick-name /export-test -l /var/log/glusterfs/bricks/export-test.log --xlator-option *-posix.glusterd-uuid=68dbbb20-2346-433e-8bfa-4cfd744aafb7 --process-name brick --brick-port 49152 --xlator-option gv0-server.listen-port=49152",
+      "generated_name": "glusterfsd",
+      "has_service_data": true
+    },
+    {
+      "pid": 1126312,
+      "ppid": 1125670,
+      "comm": "glusterfs",
+      "cmdline": "",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1126313,
+      "ppid": 1125670,
+      "comm": "glusterfs",
+      "cmdline": "/usr/sbin/glusterfs -s localhost --volfile-id shd/gv0 -p /var/run/gluster/shd/gv0/gv0-shd.pid -l /var/log/glusterfs/glustershd.log -S /var/run/gluster/d2985f74e0a84409.socket --xlator-option *replicate*.node-uuid=68dbbb20-2346-433e-8bfa-4cfd744aafb7 --process-name glustershd --client-pid=-6",
+      "generated_name": "glusterfs",
+      "has_service_data": true
+    },
+    {
+      "pid": 1133555,
+      "ppid": 1133532,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1133597,
+      "ppid": 1133555,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1133985,
+      "ppid": 1133555,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1133986,
+      "ppid": 1133555,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1133988,
+      "ppid": 1133555,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1133989,
+      "ppid": 1133555,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1133990,
+      "ppid": 1133555,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1133991,
+      "ppid": 1133555,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1133994,
+      "ppid": 1133986,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 1133995,
+      "ppid": 1133988,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1133997,
+      "ppid": 1133989,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 1133998,
+      "ppid": 1133990,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1125592,
+      "ppid": 1125569,
+      "comm": "systemd",
+      "cmdline": "/usr/sbin/init",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1125830,
+      "ppid": 1125592,
+      "comm": "glusterd",
+      "cmdline": "/usr/sbin/glusterd -p /var/run/glusterd.pid --log-level INFO",
+      "generated_name": "glusterd",
+      "has_service_data": true
+    },
+    {
+      "pid": 1126187,
+      "ppid": 1125592,
+      "comm": "glusterfsd",
+      "cmdline": "/usr/sbin/glusterfsd -s gluster-node-1 --volfile-id gv0.gluster-node-1.export-test -p /var/run/gluster/vols/gv0/gluster-node-1-export-test.pid -S /var/run/gluster/e509e870a06ca676.socket --brick-name /export-test -l /var/log/glusterfs/bricks/export-test.log --xlator-option *-posix.glusterd-uuid=000b4a23-f89a-4889-bcf0-728616e79f30 --process-name brick --brick-port 49152 --xlator-option gv0-server.listen-port=49152",
+      "generated_name": "glusterfsd",
+      "has_service_data": true
+    },
+    {
+      "pid": 1126207,
+      "ppid": 1125592,
+      "comm": "glusterfs",
+      "cmdline": "",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1126208,
+      "ppid": 1125592,
+      "comm": "glusterfs",
+      "cmdline": "/usr/sbin/glusterfs -s localhost --volfile-id shd/gv0 -p /var/run/gluster/shd/gv0/gv0-shd.pid -l /var/log/glusterfs/glustershd.log -S /var/run/gluster/a843767c00c91eed.socket --xlator-option *replicate*.node-uuid=000b4a23-f89a-4889-bcf0-728616e79f30 --process-name glustershd --client-pid=-6",
+      "generated_name": "glusterfs",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

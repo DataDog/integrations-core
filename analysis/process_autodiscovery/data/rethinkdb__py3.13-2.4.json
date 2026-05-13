@@ -1,0 +1,168 @@
+{
+  "integration": "rethinkdb",
+  "environment": "py3.13-2.4",
+  "collected_at": "2026-05-13T15:48:53.789447+00:00",
+  "processes": [
+    {
+      "pid": 1638299,
+      "ppid": 1638275,
+      "comm": "rethinkdb",
+      "cmdline": "rethinkdb --bind all --server-name server0 --server-tag us --log-file /var/log/rethinkdb.log",
+      "generated_name": "rethinkdb",
+      "has_service_data": true
+    },
+    {
+      "pid": 1638420,
+      "ppid": 1638299,
+      "comm": "rethinkdb",
+      "cmdline": "rethinkdb --bind all --server-name server0 --server-tag us --log-file /var/log/rethinkdb.log",
+      "generated_name": "rethinkdb",
+      "has_service_data": true
+    },
+    {
+      "pid": 1638600,
+      "ppid": 1638459,
+      "comm": "rethinkdb",
+      "cmdline": "rethinkdb --join rethinkdb-server0:29015 --bind all --server-name server2 --server-tag eu",
+      "generated_name": "rethinkdb",
+      "has_service_data": true
+    },
+    {
+      "pid": 1638744,
+      "ppid": 1638600,
+      "comm": "rethinkdb",
+      "cmdline": "rethinkdb --join rethinkdb-server0:29015 --bind all --server-name server2 --server-tag eu",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1639216,
+      "ppid": 1639193,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1639256,
+      "ppid": 1639216,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1639680,
+      "ppid": 1639216,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1639681,
+      "ppid": 1639216,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1639683,
+      "ppid": 1639216,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1639684,
+      "ppid": 1639216,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1639685,
+      "ppid": 1639216,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1639686,
+      "ppid": 1639216,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1639689,
+      "ppid": 1639681,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 1639691,
+      "ppid": 1639684,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 1639692,
+      "ppid": 1639683,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1639693,
+      "ppid": 1639685,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1638605,
+      "ppid": 1638487,
+      "comm": "rethinkdb",
+      "cmdline": "rethinkdb proxy --join rethinkdb-server0:29015 --bind all",
+      "generated_name": "rethinkdb",
+      "has_service_data": true
+    },
+    {
+      "pid": 1638860,
+      "ppid": 1638605,
+      "comm": "rethinkdb",
+      "cmdline": "rethinkdb proxy --join rethinkdb-server0:29015 --bind all",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1638602,
+      "ppid": 1638517,
+      "comm": "rethinkdb",
+      "cmdline": "rethinkdb --join rethinkdb-server0:29015 --bind all --server-name server1 --server-tag us --server-tag primary --http-tls-key /opt/server.key --http-tls-cert /opt/server.pem --driver-tls-key /opt/server.key --driver-tls-cert /opt/server.pem",
+      "generated_name": "rethinkdb",
+      "has_service_data": true
+    },
+    {
+      "pid": 1638901,
+      "ppid": 1638602,
+      "comm": "rethinkdb",
+      "cmdline": "rethinkdb --join rethinkdb-server0:29015 --bind all --server-name server1 --server-tag us --server-tag primary --http-tls-key /opt/server.key --http-tls-cert /opt/server.pem --driver-tls-key /opt/server.key --driver-tls-cert /opt/server.pem",
+      "generated_name": null,
+      "has_service_data": false
+    }
+  ],
+  "disco_raw": {}
+}

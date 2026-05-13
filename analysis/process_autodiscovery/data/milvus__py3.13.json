@@ -1,0 +1,120 @@
+{
+  "integration": "milvus",
+  "environment": "py3.13",
+  "collected_at": "2026-05-13T17:03:04.080839+00:00",
+  "processes": [
+    {
+      "pid": 1974160,
+      "ppid": 1974133,
+      "comm": "tini",
+      "cmdline": "/tini -- milvus run standalone",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1974254,
+      "ppid": 1974160,
+      "comm": "milvus",
+      "cmdline": "milvus run standalone",
+      "generated_name": "milvus",
+      "has_service_data": true
+    },
+    {
+      "pid": 1977099,
+      "ppid": 1977075,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1977138,
+      "ppid": 1977099,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1977529,
+      "ppid": 1977099,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1977530,
+      "ppid": 1977099,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1977532,
+      "ppid": 1977099,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1977533,
+      "ppid": 1977099,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1977534,
+      "ppid": 1977099,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1977536,
+      "ppid": 1977099,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1977539,
+      "ppid": 1977530,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 1977540,
+      "ppid": 1977532,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1977542,
+      "ppid": 1977534,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1977543,
+      "ppid": 1977533,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

@@ -1,0 +1,136 @@
+{
+  "integration": "hdfs_datanode",
+  "environment": "py3.13",
+  "collected_at": "2026-05-13T14:02:38.954217+00:00",
+  "processes": [
+    {
+      "pid": 1152006,
+      "ppid": 1151952,
+      "comm": "run.sh",
+      "cmdline": "/bin/bash /run.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1152354,
+      "ppid": 1152006,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Dproc_datanode -Djava.net.preferIPv4Stack=true -Dhadoop.security.logger=ERROR,RFAS -Dyarn.log.dir=/opt/hadoop-3.1.3/logs -Dyarn.log.file=hadoop.log -Dyarn.home.dir=/opt/hadoop-3.1.3 -Dyarn.root.logger=INFO,console -Djava.library.path=/opt/hadoop-3.1.3/lib/native -Dhadoop.log.dir=/opt/hadoop-3.1.3/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop-3.1.3 -Dhadoop.id.str=root -Dhadoop.root.logger=INFO,console -Dhadoop.policy.file=hadoop-policy.xml org.apache.hadoop.hdfs.server.datanode.DataNode",
+      "generated_name": "hadoop",
+      "has_service_data": true
+    },
+    {
+      "pid": 1154595,
+      "ppid": 1154572,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1154637,
+      "ppid": 1154595,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1155027,
+      "ppid": 1154595,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1155028,
+      "ppid": 1154595,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1155030,
+      "ppid": 1154595,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1155031,
+      "ppid": 1154595,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1155032,
+      "ppid": 1154595,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1155034,
+      "ppid": 1154595,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1155037,
+      "ppid": 1155031,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 1155038,
+      "ppid": 1155028,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 1155040,
+      "ppid": 1155030,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1155041,
+      "ppid": 1155032,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1151873,
+      "ppid": 1151850,
+      "comm": "run.sh",
+      "cmdline": "/bin/bash /run.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1152553,
+      "ppid": 1151873,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Dproc_namenode -Djava.net.preferIPv4Stack=true -Dhdfs.audit.logger=INFO,NullAppender -Dhadoop.security.logger=INFO,RFAS -Dyarn.log.dir=/opt/hadoop-3.1.3/logs -Dyarn.log.file=hadoop.log -Dyarn.home.dir=/opt/hadoop-3.1.3 -Dyarn.root.logger=INFO,console -Djava.library.path=/opt/hadoop-3.1.3/lib/native -Dhadoop.log.dir=/opt/hadoop-3.1.3/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop-3.1.3 -Dhadoop.id.str=root -Dhadoop.root.logger=INFO,console -Dhadoop.policy.file=hadoop-policy.xml org.apache.hadoop.hdfs.server.namenode.NameNode",
+      "generated_name": "hadoop",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

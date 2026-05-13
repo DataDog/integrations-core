@@ -1,0 +1,216 @@
+{
+  "integration": "boundary",
+  "environment": "py3.13-0.8",
+  "collected_at": "2026-05-13T13:06:57.990986+00:00",
+  "processes": [
+    {
+      "pid": 906054,
+      "ppid": 906031,
+      "comm": "postgres",
+      "cmdline": "postgres",
+      "generated_name": "postgres",
+      "has_service_data": true
+    },
+    {
+      "pid": 906245,
+      "ppid": 906054,
+      "comm": "postgres",
+      "cmdline": "postgres: checkpointer",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 906246,
+      "ppid": 906054,
+      "comm": "postgres",
+      "cmdline": "postgres: background writer",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 906247,
+      "ppid": 906054,
+      "comm": "postgres",
+      "cmdline": "postgres: walwriter",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 906248,
+      "ppid": 906054,
+      "comm": "postgres",
+      "cmdline": "postgres: autovacuum launcher",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 906249,
+      "ppid": 906054,
+      "comm": "postgres",
+      "cmdline": "postgres: stats collector",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 906250,
+      "ppid": 906054,
+      "comm": "postgres",
+      "cmdline": "postgres: logical replication launcher",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 906844,
+      "ppid": 906054,
+      "comm": "postgres",
+      "cmdline": "postgres: postgres boundary 172.17.131.3(49610) idle",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 907028,
+      "ppid": 906054,
+      "comm": "postgres",
+      "cmdline": "postgres: postgres boundary 172.17.131.3(42068) idle",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 907036,
+      "ppid": 906054,
+      "comm": "postgres",
+      "cmdline": "postgres: postgres boundary 172.17.131.3(42130) idle",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 906672,
+      "ppid": 906647,
+      "comm": "docker-entrypoi",
+      "cmdline": "/usr/bin/dumb-init /bin/sh /usr/local/bin/docker-entrypoint.sh server -config /boundary/boundary.hcl",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 906801,
+      "ppid": 906672,
+      "comm": "boundary",
+      "cmdline": "boundary server -config /boundary/boundary.hcl",
+      "generated_name": "boundary",
+      "has_service_data": true
+    },
+    {
+      "pid": 906896,
+      "ppid": 906801,
+      "comm": "boundary-plugin",
+      "cmdline": "/tmp/3399589605/boundary-plugin-host-aws.gz",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 906983,
+      "ppid": 906801,
+      "comm": "boundary-plugin",
+      "cmdline": "/tmp/579639650/boundary-plugin-host-azure.gz",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 907219,
+      "ppid": 907191,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 907259,
+      "ppid": 907219,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 907646,
+      "ppid": 907219,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 907647,
+      "ppid": 907219,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 907649,
+      "ppid": 907219,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 907650,
+      "ppid": 907219,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 907651,
+      "ppid": 907219,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 907653,
+      "ppid": 907219,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 907655,
+      "ppid": 907649,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 907656,
+      "ppid": 907647,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 907658,
+      "ppid": 907650,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 907659,
+      "ppid": 907651,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

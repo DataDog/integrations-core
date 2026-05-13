@@ -1,0 +1,144 @@
+{
+  "integration": "nfsstat",
+  "environment": "py3.13",
+  "collected_at": "2026-05-13T15:31:48.055069+00:00",
+  "processes": [
+    {
+      "pid": 1529922,
+      "ppid": 1529888,
+      "comm": "sh",
+      "cmdline": "sh -c ./setup.sh && tail -f /dev/null",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1534965,
+      "ppid": 1529922,
+      "comm": "tail",
+      "cmdline": "tail -f /dev/null",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1542504,
+      "ppid": 1542479,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1542559,
+      "ppid": 1542504,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1542954,
+      "ppid": 1542504,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1542955,
+      "ppid": 1542504,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1542957,
+      "ppid": 1542504,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1542958,
+      "ppid": 1542504,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1542959,
+      "ppid": 1542504,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1542961,
+      "ppid": 1542504,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1542963,
+      "ppid": 1542957,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1542964,
+      "ppid": 1542955,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 1542965,
+      "ppid": 1542958,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 1542967,
+      "ppid": 1542959,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1529843,
+      "ppid": 1529820,
+      "comm": "nfsd.sh",
+      "cmdline": "/bin/bash /usr/bin/nfsd.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1529878,
+      "ppid": 1529843,
+      "comm": "rpcbind",
+      "cmdline": "/sbin/rpcbind -w",
+      "generated_name": "rpcbind",
+      "has_service_data": true
+    },
+    {
+      "pid": 1530293,
+      "ppid": 1529843,
+      "comm": "rpc.mountd",
+      "cmdline": "/usr/sbin/rpc.mountd --debug all --no-udp --no-nfs-version 2 --no-nfs-version 3",
+      "generated_name": null,
+      "has_service_data": false
+    }
+  ],
+  "disco_raw": {}
+}

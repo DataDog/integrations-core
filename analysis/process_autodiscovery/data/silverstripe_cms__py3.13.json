@@ -1,0 +1,184 @@
+{
+  "integration": "silverstripe_cms",
+  "environment": "py3.13",
+  "collected_at": "2026-05-13T17:10:31.434851+00:00",
+  "processes": [
+    {
+      "pid": 1997268,
+      "ppid": 1997242,
+      "comm": "docker-entrypoi",
+      "cmdline": "/bin/bash /usr/local/bin/docker-entrypoint.sh /bin/sh -c apachectl -D FOREGROUND",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1997436,
+      "ppid": 1997268,
+      "comm": "mysqld_safe",
+      "cmdline": "/bin/sh /usr/bin/mysqld_safe",
+      "generated_name": "sh",
+      "has_service_data": true
+    },
+    {
+      "pid": 1997608,
+      "ppid": 1997436,
+      "comm": "mysqld",
+      "cmdline": "/usr/sbin/mysqld --basedir=/usr --datadir=/var/lib/mysql --plugin-dir=/usr/lib/mysql/plugin --log-error=/var/log/mysql/error.log --pid-file=vitkyrka.pid",
+      "generated_name": "mysqld",
+      "has_service_data": true
+    },
+    {
+      "pid": 1998298,
+      "ppid": 1997268,
+      "comm": "apache2ctl",
+      "cmdline": "/bin/sh /usr/sbin/apache2ctl -D FOREGROUND",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1998300,
+      "ppid": 1998298,
+      "comm": "apache2",
+      "cmdline": "/usr/sbin/apache2 -D FOREGROUND",
+      "generated_name": "apache2",
+      "has_service_data": true
+    },
+    {
+      "pid": 1998340,
+      "ppid": 1998300,
+      "comm": "apache2",
+      "cmdline": "/usr/sbin/apache2 -D FOREGROUND",
+      "generated_name": "apache2",
+      "has_service_data": true
+    },
+    {
+      "pid": 1998341,
+      "ppid": 1998300,
+      "comm": "apache2",
+      "cmdline": "/usr/sbin/apache2 -D FOREGROUND",
+      "generated_name": "apache2",
+      "has_service_data": true
+    },
+    {
+      "pid": 1998342,
+      "ppid": 1998300,
+      "comm": "apache2",
+      "cmdline": "/usr/sbin/apache2 -D FOREGROUND",
+      "generated_name": "apache2",
+      "has_service_data": true
+    },
+    {
+      "pid": 1998343,
+      "ppid": 1998300,
+      "comm": "apache2",
+      "cmdline": "/usr/sbin/apache2 -D FOREGROUND",
+      "generated_name": "apache2",
+      "has_service_data": true
+    },
+    {
+      "pid": 1998344,
+      "ppid": 1998300,
+      "comm": "apache2",
+      "cmdline": "/usr/sbin/apache2 -D FOREGROUND",
+      "generated_name": "apache2",
+      "has_service_data": true
+    },
+    {
+      "pid": 2002446,
+      "ppid": 2002423,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2002486,
+      "ppid": 2002446,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2002872,
+      "ppid": 2002446,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2002873,
+      "ppid": 2002446,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2002875,
+      "ppid": 2002446,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2002876,
+      "ppid": 2002446,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2002878,
+      "ppid": 2002446,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2002879,
+      "ppid": 2002446,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2002880,
+      "ppid": 2002873,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 2002882,
+      "ppid": 2002875,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 2002884,
+      "ppid": 2002876,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 2002885,
+      "ppid": 2002878,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

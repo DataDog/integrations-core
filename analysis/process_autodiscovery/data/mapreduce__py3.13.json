@@ -1,0 +1,256 @@
+{
+  "integration": "mapreduce",
+  "environment": "py3.13",
+  "collected_at": "2026-05-13T15:19:33.944843+00:00",
+  "processes": [
+    {
+      "pid": 1469550,
+      "ppid": 1469417,
+      "comm": "run.sh",
+      "cmdline": "/bin/bash /run.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1473125,
+      "ppid": 1469550,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Dproc_nodemanager -Djava.net.preferIPv4Stack=true -Dyarn.log.dir=/opt/hadoop-3.2.1/logs -Dyarn.log.file=hadoop.log -Dyarn.home.dir=/opt/hadoop-3.2.1 -Dyarn.root.logger=INFO,console -Djava.library.path=/opt/hadoop-3.2.1/lib/native -Dhadoop.log.dir=/opt/hadoop-3.2.1/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop-3.2.1 -Dhadoop.id.str=root -Dhadoop.root.logger=INFO,console -Dhadoop.policy.file=hadoop-policy.xml -Dhadoop.security.logger=INFO,NullAppender org.apache.hadoop.yarn.server.nodemanager.NodeManager",
+      "generated_name": "hadoop",
+      "has_service_data": true
+    },
+    {
+      "pid": 1474726,
+      "ppid": 1473125,
+      "comm": "bash",
+      "cmdline": "bash /tmp/hadoop-root/nm-local-dir/usercache/root/appcache/application_1778685545898_0001/container_1778685545898_0001_01_000001/default_container_executor.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1474728,
+      "ppid": 1474726,
+      "comm": "bash",
+      "cmdline": "/bin/bash -c /usr/lib/jvm/java-8-openjdk-amd64//bin/java -Djava.io.tmpdir=/tmp/hadoop-root/nm-local-dir/usercache/root/appcache/application_1778685545898_0001/container_1778685545898_0001_01_000001/tmp -Dlog4j.configuration=container-log4j.properties -Dyarn.app.container.log.dir=/opt/hadoop-3.2.1/logs/userlogs/application_1778685545898_0001/container_1778685545898_0001_01_000001 -Dyarn.app.container.log.filesize=0 -Dhadoop.root.logger=INFO,CLA -Dhadoop.root.logfile=syslog  -Xmx1024m org.apache.hadoop.mapreduce.v2.app.MRAppMaster 1>/opt/hadoop-3.2.1/logs/userlogs/application_1778685545898_0001/container_1778685545898_0001_01_000001/stdout 2>/opt/hadoop-3.2.1/logs/userlogs/application_1778685545898_0001/container_1778685545898_0001_01_000001/stderr",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1474741,
+      "ppid": 1474728,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Djava.io.tmpdir=/tmp/hadoop-root/nm-local-dir/usercache/root/appcache/application_1778685545898_0001/container_1778685545898_0001_01_000001/tmp -Dlog4j.configuration=container-log4j.properties -Dyarn.app.container.log.dir=/opt/hadoop-3.2.1/logs/userlogs/application_1778685545898_0001/container_1778685545898_0001_01_000001 -Dyarn.app.container.log.filesize=0 -Dhadoop.root.logger=INFO,CLA -Dhadoop.root.logfile=syslog -Xmx1024m org.apache.hadoop.mapreduce.v2.app.MRAppMaster",
+      "generated_name": "hadoop",
+      "has_service_data": true
+    },
+    {
+      "pid": 1475724,
+      "ppid": 1473125,
+      "comm": "bash",
+      "cmdline": "bash /tmp/hadoop-root/nm-local-dir/usercache/root/appcache/application_1778685545898_0001/container_1778685545898_0001_01_000004/default_container_executor.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1475727,
+      "ppid": 1475724,
+      "comm": "bash",
+      "cmdline": "/bin/bash -c /usr/lib/jvm/java-8-openjdk-amd64//bin/java -Djava.net.preferIPv4Stack=true -Dhadoop.metrics.log.level=WARN  -Xmx3072m -Djava.io.tmpdir=/tmp/hadoop-root/nm-local-dir/usercache/root/appcache/application_1778685545898_0001/container_1778685545898_0001_01_000004/tmp -Dlog4j.configuration=container-log4j.properties -Dyarn.app.container.log.dir=/opt/hadoop-3.2.1/logs/userlogs/application_1778685545898_0001/container_1778685545898_0001_01_000004 -Dyarn.app.container.log.filesize=0 -Dhadoop.root.logger=INFO,CLA -Dhadoop.root.logfile=syslog org.apache.hadoop.mapred.YarnChild 172.17.133.2 45569 attempt_1778685545898_0001_m_000002_0 4 1>/opt/hadoop-3.2.1/logs/userlogs/application_1778685545898_0001/container_1778685545898_0001_01_000004/stdout 2>/opt/hadoop-3.2.1/logs/userlogs/application_1778685545898_0001/container_1778685545898_0001_01_000004/stderr",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1475738,
+      "ppid": 1475727,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Djava.net.preferIPv4Stack=true -Dhadoop.metrics.log.level=WARN -Xmx3072m -Djava.io.tmpdir=/tmp/hadoop-root/nm-local-dir/usercache/root/appcache/application_1778685545898_0001/container_1778685545898_0001_01_000004/tmp -Dlog4j.configuration=container-log4j.properties -Dyarn.app.container.log.dir=/opt/hadoop-3.2.1/logs/userlogs/application_1778685545898_0001/container_1778685545898_0001_01_000004 -Dyarn.app.container.log.filesize=0 -Dhadoop.root.logger=INFO,CLA -Dhadoop.root.logfile=syslog org.apache.hadoop.mapred.YarnChild 172.17.133.2 45569 attempt_1778685545898_0001_m_000002_0 4",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1469561,
+      "ppid": 1469438,
+      "comm": "run.sh",
+      "cmdline": "/bin/bash /run.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1473214,
+      "ppid": 1469561,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Dproc_historyserver -Djava.net.preferIPv4Stack=true -Dyarn.log.dir=/opt/hadoop-3.2.1/logs -Dyarn.log.file=hadoop.log -Dyarn.home.dir=/opt/hadoop-3.2.1 -Dyarn.root.logger=INFO,console -Djava.library.path=/opt/hadoop-3.2.1/lib/native -Dhadoop.log.dir=/opt/hadoop-3.2.1/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop-3.2.1 -Dhadoop.id.str=root -Dhadoop.root.logger=INFO,console -Dhadoop.policy.file=hadoop-policy.xml -Dhadoop.security.logger=INFO,NullAppender org.apache.hadoop.yarn.server.applicationhistoryservice.ApplicationHistoryServer",
+      "generated_name": "hadoop",
+      "has_service_data": true
+    },
+    {
+      "pid": 1475921,
+      "ppid": 1475888,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1475964,
+      "ppid": 1475921,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1476364,
+      "ppid": 1475921,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1476365,
+      "ppid": 1475921,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1476367,
+      "ppid": 1475921,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1476368,
+      "ppid": 1475921,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1476369,
+      "ppid": 1475921,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1476371,
+      "ppid": 1475921,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1476375,
+      "ppid": 1476367,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1476376,
+      "ppid": 1476368,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 1476377,
+      "ppid": 1476369,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1469560,
+      "ppid": 1469421,
+      "comm": "run.sh",
+      "cmdline": "/bin/bash /run.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1472692,
+      "ppid": 1469560,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Dproc_resourcemanager -Djava.net.preferIPv4Stack=true -Dservice.libdir=/opt/hadoop-3.2.1/share/hadoop/yarn,/opt/hadoop-3.2.1/share/hadoop/yarn/lib,/opt/hadoop-3.2.1/share/hadoop/hdfs,/opt/hadoop-3.2.1/share/hadoop/hdfs/lib,/opt/hadoop-3.2.1/share/hadoop/common,/opt/hadoop-3.2.1/share/hadoop/common/lib -Dyarn.log.dir=/opt/hadoop-3.2.1/logs -Dyarn.log.file=hadoop.log -Dyarn.home.dir=/opt/hadoop-3.2.1 -Dyarn.root.logger=INFO,console -Djava.library.path=/opt/hadoop-3.2.1/lib/native -Dhadoop.log.dir=/opt/hadoop-3.2.1/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop-3.2.1 -Dhadoop.id.str=root -Dhadoop.root.logger=INFO,console -Dhadoop.policy.file=hadoop-policy.xml -Dhadoop.security.logger=INFO,NullAppender org.apache.hadoop.yarn.server.resourcemanager.ResourceManager",
+      "generated_name": "hadoop",
+      "has_service_data": true
+    },
+    {
+      "pid": 1469575,
+      "ppid": 1469446,
+      "comm": "run.sh",
+      "cmdline": "/bin/bash /run.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1472240,
+      "ppid": 1469575,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Dproc_datanode -Djava.net.preferIPv4Stack=true -Dhadoop.security.logger=ERROR,RFAS -Dyarn.log.dir=/opt/hadoop-3.2.1/logs -Dyarn.log.file=hadoop.log -Dyarn.home.dir=/opt/hadoop-3.2.1 -Dyarn.root.logger=INFO,console -Djava.library.path=/opt/hadoop-3.2.1/lib/native -Dhadoop.log.dir=/opt/hadoop-3.2.1/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop-3.2.1 -Dhadoop.id.str=root -Dhadoop.root.logger=INFO,console -Dhadoop.policy.file=hadoop-policy.xml org.apache.hadoop.hdfs.server.datanode.DataNode",
+      "generated_name": "hadoop",
+      "has_service_data": true
+    },
+    {
+      "pid": 1469567,
+      "ppid": 1469458,
+      "comm": "run.sh",
+      "cmdline": "/bin/bash /run.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1472058,
+      "ppid": 1469567,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Dproc_namenode -Djava.net.preferIPv4Stack=true -Dhdfs.audit.logger=INFO,NullAppender -Dhadoop.security.logger=INFO,RFAS -Dyarn.log.dir=/opt/hadoop-3.2.1/logs -Dyarn.log.file=hadoop.log -Dyarn.home.dir=/opt/hadoop-3.2.1 -Dyarn.root.logger=INFO,console -Djava.library.path=/opt/hadoop-3.2.1/lib/native -Dhadoop.log.dir=/opt/hadoop-3.2.1/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop-3.2.1 -Dhadoop.id.str=root -Dhadoop.root.logger=INFO,console -Dhadoop.policy.file=hadoop-policy.xml org.apache.hadoop.hdfs.server.namenode.NameNode",
+      "generated_name": "hadoop",
+      "has_service_data": true
+    },
+    {
+      "pid": 1472810,
+      "ppid": 1469567,
+      "comm": "bash",
+      "cmdline": "bash -c hadoop fs -mkdir -p input ; hdfs dfs -put -f $(find /etc/hadoop/ -type f) input && hadoop jar opt/hadoop-3.2.1/share/hadoop/mapreduce/hadoop-mapreduce-examples-3.2.1.jar grep input output228585 'dfs[a-z.]+' &",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1474313,
+      "ppid": 1472810,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Dproc_jar -Djava.net.preferIPv4Stack=true -Dyarn.log.dir=/opt/hadoop-3.2.1/logs -Dyarn.log.file=hadoop.log -Dyarn.home.dir=/opt/hadoop-3.2.1 -Dyarn.root.logger=INFO,console -Djava.library.path=/opt/hadoop-3.2.1/lib/native -Dhadoop.log.dir=/opt/hadoop-3.2.1/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop-3.2.1 -Dhadoop.id.str=root -Dhadoop.root.logger=INFO,console -Dhadoop.policy.file=hadoop-policy.xml -Dhadoop.security.logger=INFO,NullAppender org.apache.hadoop.util.RunJar opt/hadoop-3.2.1/share/hadoop/mapreduce/hadoop-mapreduce-examples-3.2.1.jar grep input output228585 dfs[a-z.]+",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1475463,
+      "ppid": 1469567,
+      "comm": "bash",
+      "cmdline": "bash -c hadoop fs -mkdir -p input ; hdfs dfs -put -f $(find /etc/hadoop/ -type f) input && hadoop jar opt/hadoop-3.2.1/share/hadoop/mapreduce/hadoop-mapreduce-examples-3.2.1.jar grep input output724414 'dfs[a-z.]+' &",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1475466,
+      "ppid": 1475463,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Dproc_dfs -Djava.net.preferIPv4Stack=true -Dyarn.log.dir=/opt/hadoop-3.2.1/logs -Dyarn.log.file=hadoop.log -Dyarn.home.dir=/opt/hadoop-3.2.1 -Dyarn.root.logger=INFO,console -Djava.library.path=/opt/hadoop-3.2.1/lib/native -Dhadoop.log.dir=/opt/hadoop-3.2.1/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop-3.2.1 -Dhadoop.id.str=root -Dhadoop.root.logger=INFO,console -Dhadoop.policy.file=hadoop-policy.xml -Dhadoop.security.logger=INFO,NullAppender org.apache.hadoop.fs.FsShell -put -f /etc/hadoop/kms-env.sh /etc/hadoop/hdfs-site.xml /etc/hadoop/hadoop-metrics2.properties /etc/hadoop/core-site.xml /etc/hadoop/kms-acls.xml /etc/hadoop/configuration.xsl /etc/hadoop/hadoop-policy.xml /etc/hadoop/yarn-env.cmd /etc/hadoop/log4j.properties /etc/hadoop/hadoop-env.sh /etc/hadoop/container-executor.cfg /etc/hadoop/shellprofile.d/example.sh /etc/hadoop/user_ec_policies.xml.template /etc/hadoop/kms-log4j.properties /etc/hadoop/yarn-env.sh /etc/hadoop/yarn-site.xml /etc/hadoop/mapred-site.xml /etc/hadoop/httpfs-env.sh /etc/hadoop/ssl-server.xml.example /etc/hadoop/ssl-client.xml.example /etc/hadoop/workers /etc/hadoop/hadoop-user-functions.sh.example /etc/hadoop/capacity-scheduler.xml /etc/hadoop/kms-site.xml /etc/hadoop/mapred-queues.xml.template /etc/hadoop/yarnservice-log4j.properties /etc/hadoop/httpfs-signature.secret /etc/hadoop/hadoop-env.cmd /etc/hadoop/mapred-env.sh /etc/hadoop/mapred-env.cmd /etc/hadoop/httpfs-site.xml /etc/hadoop/httpfs-log4j.properties input",
+      "generated_name": null,
+      "has_service_data": false
+    }
+  ],
+  "disco_raw": {}
+}

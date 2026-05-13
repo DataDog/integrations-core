@@ -1,0 +1,264 @@
+{
+  "integration": "php_fpm",
+  "environment": "py3.13",
+  "collected_at": "2026-05-13T15:36:22.155886+00:00",
+  "processes": [
+    {
+      "pid": 1565550,
+      "ppid": 1565527,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1565623,
+      "ppid": 1565550,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1566010,
+      "ppid": 1565550,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1566011,
+      "ppid": 1565550,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1566012,
+      "ppid": 1565550,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1566014,
+      "ppid": 1565550,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1566015,
+      "ppid": 1565550,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1566016,
+      "ppid": 1565550,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1566018,
+      "ppid": 1566011,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 1566021,
+      "ppid": 1566014,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 1566022,
+      "ppid": 1566012,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1566023,
+      "ppid": 1566015,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1565153,
+      "ppid": 1565130,
+      "comm": "php-fpm",
+      "cmdline": "php-fpm: master process (/usr/local/etc/php-fpm.conf)",
+      "generated_name": "php-fpm",
+      "has_service_data": true
+    },
+    {
+      "pid": 1565235,
+      "ppid": 1565153,
+      "comm": "php-fpm",
+      "cmdline": "php-fpm: pool www",
+      "generated_name": "php-fpm",
+      "has_service_data": true
+    },
+    {
+      "pid": 1565236,
+      "ppid": 1565153,
+      "comm": "php-fpm",
+      "cmdline": "php-fpm: pool www",
+      "generated_name": "php-fpm",
+      "has_service_data": true
+    },
+    {
+      "pid": 1565255,
+      "ppid": 1565229,
+      "comm": "nginx",
+      "cmdline": "nginx: master process nginx -g daemon off;",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 1565322,
+      "ppid": 1565255,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 1565323,
+      "ppid": 1565255,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 1565324,
+      "ppid": 1565255,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 1565325,
+      "ppid": 1565255,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 1565326,
+      "ppid": 1565255,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 1565327,
+      "ppid": 1565255,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 1565328,
+      "ppid": 1565255,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 1565329,
+      "ppid": 1565255,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 1565330,
+      "ppid": 1565255,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 1565331,
+      "ppid": 1565255,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 1565332,
+      "ppid": 1565255,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 1565333,
+      "ppid": 1565255,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 1565334,
+      "ppid": 1565255,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 1565335,
+      "ppid": 1565255,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 1565336,
+      "ppid": 1565255,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 1565337,
+      "ppid": 1565255,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

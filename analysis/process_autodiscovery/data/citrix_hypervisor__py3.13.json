@@ -1,0 +1,152 @@
+{
+  "integration": "citrix_hypervisor",
+  "environment": "py3.13",
+  "collected_at": "2026-05-13T13:21:10.197148+00:00",
+  "processes": [
+    {
+      "pid": 973540,
+      "ppid": 973517,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 973578,
+      "ppid": 973540,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 973965,
+      "ppid": 973540,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 973966,
+      "ppid": 973540,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 973967,
+      "ppid": 973540,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 973969,
+      "ppid": 973540,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 973970,
+      "ppid": 973540,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 973971,
+      "ppid": 973540,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 973974,
+      "ppid": 973966,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 973975,
+      "ppid": 973967,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 973977,
+      "ppid": 973969,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 973978,
+      "ppid": 973970,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 973094,
+      "ppid": 972963,
+      "comm": "python",
+      "cmdline": "python server.py run -h 0.0.0.0",
+      "generated_name": "app",
+      "has_service_data": true
+    },
+    {
+      "pid": 973170,
+      "ppid": 973040,
+      "comm": "python",
+      "cmdline": "python server.py run -h 0.0.0.0",
+      "generated_name": "app",
+      "has_service_data": true
+    },
+    {
+      "pid": 973153,
+      "ppid": 973008,
+      "comm": "python",
+      "cmdline": "python server.py run -h 0.0.0.0",
+      "generated_name": "app",
+      "has_service_data": true
+    },
+    {
+      "pid": 973157,
+      "ppid": 973029,
+      "comm": "python",
+      "cmdline": "python server.py run -h 0.0.0.0",
+      "generated_name": "app",
+      "has_service_data": true
+    },
+    {
+      "pid": 973151,
+      "ppid": 973032,
+      "comm": "python",
+      "cmdline": "python server.py run -h 0.0.0.0",
+      "generated_name": "app",
+      "has_service_data": true
+    },
+    {
+      "pid": 973098,
+      "ppid": 972980,
+      "comm": "python",
+      "cmdline": "python server.py run -h 0.0.0.0",
+      "generated_name": "app",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

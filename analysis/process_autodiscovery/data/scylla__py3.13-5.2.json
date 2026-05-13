@@ -1,0 +1,184 @@
+{
+  "integration": "scylla",
+  "environment": "py3.13-5.2",
+  "collected_at": "2026-05-13T15:56:55.599024+00:00",
+  "processes": [
+    {
+      "pid": 1678553,
+      "ppid": 1678513,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1678613,
+      "ppid": 1678553,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1679009,
+      "ppid": 1678553,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1679010,
+      "ppid": 1678553,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1679011,
+      "ppid": 1678553,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1679013,
+      "ppid": 1678553,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1679014,
+      "ppid": 1678553,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1679015,
+      "ppid": 1678553,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1679018,
+      "ppid": 1679011,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1679019,
+      "ppid": 1679010,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 1679021,
+      "ppid": 1679013,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 1679022,
+      "ppid": 1679014,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1674215,
+      "ppid": 1674192,
+      "comm": "ld.so",
+      "cmdline": "/opt/scylladb/python3/bin/python3 /opt/scylladb/python3/bin/../libexec/python3.11.bin -s /docker-entrypoint.py",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1674368,
+      "ppid": 1674215,
+      "comm": "supervisord",
+      "cmdline": "/usr/bin/python3 /usr/bin/supervisord -c /etc/supervisord.conf",
+      "generated_name": "supervisord",
+      "has_service_data": true
+    },
+    {
+      "pid": 1674467,
+      "ppid": 1674368,
+      "comm": "rsyslogd",
+      "cmdline": "rsyslogd -n",
+      "generated_name": "rsyslogd",
+      "has_service_data": true
+    },
+    {
+      "pid": 1674468,
+      "ppid": 1674368,
+      "comm": "scylla",
+      "cmdline": "/usr/bin/scylla --log-to-syslog 0 --log-to-stdout 1 --default-log-level info --network-stack posix --developer-mode=1 --overprovisioned --listen-address 172.17.132.2 --rpc-address 172.17.132.2 --seed-provider-parameters seeds=172.17.132.2 --alternator-address 172.17.132.2 --blocked-reactor-notify-ms 999999999",
+      "generated_name": "scylla",
+      "has_service_data": true
+    },
+    {
+      "pid": 1674469,
+      "ppid": 1674368,
+      "comm": "scylla-housekee",
+      "cmdline": "/bin/bash /scylla-housekeeping-service.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1674470,
+      "ppid": 1674368,
+      "comm": "scylla-jmx",
+      "cmdline": "/opt/scylladb/jmx/symlinks/scylla-jmx -Xmx256m -XX:+UseSerialGC -XX:+HeapDumpOnOutOfMemoryError -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.host=localhost -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=7199 -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote.rmi.port=7199 -Djavax.management.builder.initial=com.scylladb.jmx.utils.APIBuilder -jar /opt/scylladb/jmx/scylla-jmx-1.0.jar",
+      "generated_name": "scylla-jmx-1.0",
+      "has_service_data": true
+    },
+    {
+      "pid": 1674472,
+      "ppid": 1674368,
+      "comm": "node_exporter",
+      "cmdline": "/opt/scylladb/node_exporter/node_exporter --collector.interrupts",
+      "generated_name": "node_exporter",
+      "has_service_data": true
+    },
+    {
+      "pid": 1674476,
+      "ppid": 1674368,
+      "comm": "sshd-service.sh",
+      "cmdline": "/bin/bash /sshd-service.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1674488,
+      "ppid": 1674476,
+      "comm": "sshd",
+      "cmdline": "sshd: /usr/sbin/sshd -D [listener] 0 of 10-100 startups",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1675091,
+      "ppid": 1674469,
+      "comm": "sleep",
+      "cmdline": "sleep 1d",
+      "generated_name": null,
+      "has_service_data": false
+    }
+  ],
+  "disco_raw": {}
+}

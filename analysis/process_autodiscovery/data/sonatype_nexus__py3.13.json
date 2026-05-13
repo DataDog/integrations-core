@@ -1,0 +1,112 @@
+{
+  "integration": "sonatype_nexus",
+  "environment": "py3.13",
+  "collected_at": "2026-05-13T17:14:00.603010+00:00",
+  "processes": [
+    {
+      "pid": 2013655,
+      "ppid": 2013632,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2013693,
+      "ppid": 2013655,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2014080,
+      "ppid": 2013655,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2014081,
+      "ppid": 2013655,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2014083,
+      "ppid": 2013655,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2014084,
+      "ppid": 2013655,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2014085,
+      "ppid": 2013655,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2014087,
+      "ppid": 2013655,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2014090,
+      "ppid": 2014083,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 2014091,
+      "ppid": 2014081,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 2014092,
+      "ppid": 2014084,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 2014093,
+      "ppid": 2014085,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 2012671,
+      "ppid": 2012648,
+      "comm": "java",
+      "cmdline": "/usr/bin/java -Xms2703m -Xmx2703m -XX:MaxDirectMemorySize=2703m -XX:+UnlockDiagnosticVMOptions -XX:+LogVMOutput -XX:LogFile=/opt/sonatype/nexus/../sonatype-work/nexus3/log/jvm.log -XX:-OmitStackTraceInFastThrow --add-reads=java.xml=java.logging --add-opens java.base/java.security=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.naming/javax.naming.spi=ALL-UNNAMED --add-opens java.rmi/sun.rmi.transport.tcp=ALL-UNNAMED --add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED --add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED --add-exports=java.base/sun.net.www.protocol.jar=ALL-UNNAMED --add-exports=jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED --add-exports=jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED --add-exports java.security.sasl/com.sun.security.sasl=ALL-UNNAMED --add-exports=java.base/sun.security.x509=ALL-UNNAMED --add-exports=java.base/sun.security.rsa=ALL-UNNAMED --add-exports=java.base/sun.security.pkcs=ALL-UNNAMED -Dkaraf.instances=/opt/sonatype/nexus/instances -Dkaraf.home=/opt/sonatype/nexus -Dkaraf.base=/opt/sonatype/nexus -Dkaraf.data=/opt/sonatype/nexus/../sonatype-work/nexus3 -Dkaraf.etc=/opt/sonatype/nexus/etc/karaf -Dkaraf.log=/opt/sonatype/nexus/../sonatype-work/nexus3/log -Djava.io.tmpdir=/opt/sonatype/nexus/../sonatype-work/nexus3/tmp -Djava.util.logging.config.file=/opt/sonatype/nexus/etc/java.util.logging.properties -Xms2703m -Xmx2703m -XX:MaxDirectMemorySize=2703m -Djava.util.prefs.userRoot=/nexus-data/javaprefs -classpath /opt/sonatype/nexus/bin/sonatype-nexus-repository-3.79.0-09.jar:/opt/sonatype/nexus/../sonatype-work/nexus3/etc org.springframework.boot.loader.launch.PropertiesLauncher",
+      "generated_name": "org.springframework.boot.loader.launch.PropertiesLauncher",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

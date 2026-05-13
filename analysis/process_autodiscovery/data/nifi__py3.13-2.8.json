@@ -1,0 +1,136 @@
+{
+  "integration": "nifi",
+  "environment": "py3.13-2.8",
+  "collected_at": "2026-05-13T15:34:14.043716+00:00",
+  "processes": [
+    {
+      "pid": 1554421,
+      "ppid": 1554398,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1554477,
+      "ppid": 1554421,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1554878,
+      "ppid": 1554421,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1554879,
+      "ppid": 1554421,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1554881,
+      "ppid": 1554421,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1554882,
+      "ppid": 1554421,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1554883,
+      "ppid": 1554421,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1554885,
+      "ppid": 1554421,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1554887,
+      "ppid": 1554879,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 1554889,
+      "ppid": 1554881,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1554890,
+      "ppid": 1554882,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 1554891,
+      "ppid": 1554883,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1552060,
+      "ppid": 1552035,
+      "comm": "start.sh",
+      "cmdline": "/bin/sh -e ../scripts/start.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1552228,
+      "ppid": 1552060,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/jdk-21.0.10-bellsoft-x86_64/bin/java --class-path /opt/nifi/nifi-current/lib/nifi-api-2.6.0.jar:/opt/nifi/nifi-current/lib/nifi-framework-api-2.8.0.jar:/opt/nifi/nifi-current/lib/nifi-python-framework-api-2.8.0.jar:/opt/nifi/nifi-current/lib/nifi-stateless-api-2.8.0.jar:/opt/nifi/nifi-current/lib/nifi-properties-2.8.0.jar:/opt/nifi/nifi-current/lib/nifi-nar-utils-2.8.0.jar:/opt/nifi/nifi-current/lib/jcl-over-slf4j-2.0.17.jar:/opt/nifi/nifi-current/lib/nifi-per-process-group-logging-2.8.0.jar:/opt/nifi/nifi-current/lib/log4j-over-slf4j-2.0.17.jar:/opt/nifi/nifi-current/lib/nifi-runtime-2.8.0.jar:/opt/nifi/nifi-current/lib/nifi-property-utils-2.8.0.jar:/opt/nifi/nifi-current/lib/logback-classic-1.5.28.jar:/opt/nifi/nifi-current/lib/jul-to-slf4j-2.0.17.jar:/opt/nifi/nifi-current/lib/slf4j-api-2.0.17.jar:/opt/nifi/nifi-current/lib/logback-core-1.5.28.jar:/opt/nifi/nifi-current/lib/nifi-server-api-2.8.0.jar:/opt/nifi/nifi-current/conf -Dorg.apache.nifi.bootstrap.config.log.dir=/opt/nifi/nifi-current/logs -Dnifi.properties.file.path=/opt/nifi/nifi-current/conf/nifi.properties -Dorg.apache.nifi.management.server.address=127.0.0.1:52020 -Xms1g -Xmx1g -Dsun.net.http.allowRestrictedHeaders=true -Djava.protocol.handler.pkgs=sun.net.www.protocol -Dcurator-log-only-first-connection-issue-as-error-level=true -Djava.awt.headless=true -Djavax.security.auth.useSubjectCredsOnly=true org.apache.nifi.NiFi",
+      "generated_name": "nifi",
+      "has_service_data": true
+    },
+    {
+      "pid": 1552229,
+      "ppid": 1552060,
+      "comm": "tail",
+      "cmdline": "tail -F --pid=79 /opt/nifi/nifi-current/logs/nifi-app.log",
+      "generated_name": "tail",
+      "has_service_data": true
+    },
+    {
+      "pid": 1553767,
+      "ppid": 1552228,
+      "comm": "python3",
+      "cmdline": "python3 -S /opt/nifi/nifi-current/./python/framework/Controller.py",
+      "generated_name": "framework",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

@@ -1,0 +1,264 @@
+{
+  "integration": "celery",
+  "environment": "py3.13",
+  "collected_at": "2026-05-13T13:12:05.480252+00:00",
+  "processes": [
+    {
+      "pid": 930715,
+      "ppid": 930646,
+      "comm": "celery",
+      "cmdline": "/usr/local/bin/python3.12 /usr/local/bin/celery -A tasks worker --loglevel=DEBUG",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 930880,
+      "ppid": 930715,
+      "comm": "celery",
+      "cmdline": "/usr/local/bin/python3.12 /usr/local/bin/celery -A tasks worker --loglevel=DEBUG",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 930886,
+      "ppid": 930715,
+      "comm": "celery",
+      "cmdline": "/usr/local/bin/python3.12 /usr/local/bin/celery -A tasks worker --loglevel=DEBUG",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 930896,
+      "ppid": 930715,
+      "comm": "celery",
+      "cmdline": "/usr/local/bin/python3.12 /usr/local/bin/celery -A tasks worker --loglevel=DEBUG",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 930897,
+      "ppid": 930715,
+      "comm": "celery",
+      "cmdline": "/usr/local/bin/python3.12 /usr/local/bin/celery -A tasks worker --loglevel=DEBUG",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 930898,
+      "ppid": 930715,
+      "comm": "celery",
+      "cmdline": "/usr/local/bin/python3.12 /usr/local/bin/celery -A tasks worker --loglevel=DEBUG",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 930917,
+      "ppid": 930715,
+      "comm": "celery",
+      "cmdline": "/usr/local/bin/python3.12 /usr/local/bin/celery -A tasks worker --loglevel=DEBUG",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 930931,
+      "ppid": 930715,
+      "comm": "celery",
+      "cmdline": "/usr/local/bin/python3.12 /usr/local/bin/celery -A tasks worker --loglevel=DEBUG",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 930936,
+      "ppid": 930715,
+      "comm": "celery",
+      "cmdline": "/usr/local/bin/python3.12 /usr/local/bin/celery -A tasks worker --loglevel=DEBUG",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 930938,
+      "ppid": 930715,
+      "comm": "celery",
+      "cmdline": "/usr/local/bin/python3.12 /usr/local/bin/celery -A tasks worker --loglevel=DEBUG",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 930939,
+      "ppid": 930715,
+      "comm": "celery",
+      "cmdline": "/usr/local/bin/python3.12 /usr/local/bin/celery -A tasks worker --loglevel=DEBUG",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 930940,
+      "ppid": 930715,
+      "comm": "celery",
+      "cmdline": "/usr/local/bin/python3.12 /usr/local/bin/celery -A tasks worker --loglevel=DEBUG",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 930941,
+      "ppid": 930715,
+      "comm": "celery",
+      "cmdline": "/usr/local/bin/python3.12 /usr/local/bin/celery -A tasks worker --loglevel=DEBUG",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 930942,
+      "ppid": 930715,
+      "comm": "celery",
+      "cmdline": "/usr/local/bin/python3.12 /usr/local/bin/celery -A tasks worker --loglevel=DEBUG",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 930943,
+      "ppid": 930715,
+      "comm": "celery",
+      "cmdline": "/usr/local/bin/python3.12 /usr/local/bin/celery -A tasks worker --loglevel=DEBUG",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 930944,
+      "ppid": 930715,
+      "comm": "celery",
+      "cmdline": "/usr/local/bin/python3.12 /usr/local/bin/celery -A tasks worker --loglevel=DEBUG",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 930945,
+      "ppid": 930715,
+      "comm": "celery",
+      "cmdline": "/usr/local/bin/python3.12 /usr/local/bin/celery -A tasks worker --loglevel=DEBUG",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 931061,
+      "ppid": 931038,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 931098,
+      "ppid": 931061,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 931485,
+      "ppid": 931061,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 931486,
+      "ppid": 931061,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 931488,
+      "ppid": 931061,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 931489,
+      "ppid": 931061,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 931490,
+      "ppid": 931061,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 931492,
+      "ppid": 931061,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 931494,
+      "ppid": 931486,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 931496,
+      "ppid": 931488,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 931497,
+      "ppid": 931489,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 931498,
+      "ppid": 931490,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 930714,
+      "ppid": 930627,
+      "comm": "python",
+      "cmdline": "python producer.py",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 930716,
+      "ppid": 930649,
+      "comm": "celery",
+      "cmdline": "/usr/local/bin/python3.12 /usr/local/bin/celery --broker=redis://:devops-best-friend@redis-standalone:6379/0 flower --port=5555",
+      "generated_name": "celery",
+      "has_service_data": true
+    },
+    {
+      "pid": 930547,
+      "ppid": 930523,
+      "comm": "redis-server",
+      "cmdline": "redis-server 0.0.0.0:6379",
+      "generated_name": "redis-server",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

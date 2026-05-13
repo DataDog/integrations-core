@@ -1,0 +1,176 @@
+{
+  "integration": "rabbitmq",
+  "environment": "py3.13-4.0-openmetrics",
+  "collected_at": "2026-05-13T15:47:36.564336+00:00",
+  "processes": [
+    {
+      "pid": 1631523,
+      "ppid": 1631500,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1631560,
+      "ppid": 1631523,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1631971,
+      "ppid": 1631523,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1631972,
+      "ppid": 1631523,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1631974,
+      "ppid": 1631523,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1631975,
+      "ppid": 1631523,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1631976,
+      "ppid": 1631523,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1631978,
+      "ppid": 1631523,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1631980,
+      "ppid": 1631974,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1631981,
+      "ppid": 1631972,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 1631983,
+      "ppid": 1631975,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 1631984,
+      "ppid": 1631976,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1629798,
+      "ppid": 1629775,
+      "comm": "beam.smp",
+      "cmdline": "/opt/erlang/lib/erlang/erts-15.2.7.8/bin/beam.smp -W w -MBas ageffcbf -MHas ageffcbf -MBlmbcs 512 -MHlmbcs 512 -MMmcs 30 -pc unicode -P 1048576 -t 5000000 -stbt db -zdbbl 128000 -sbwt none -sbwtdcpu none -sbwtdio none -- -root /opt/erlang/lib/erlang -bindir /opt/erlang/lib/erlang/erts-15.2.7.8/bin -progname erl -- -home /var/lib/rabbitmq -- -pa  -noshell -noinput -s rabbit boot -boot start_sasl -syslog logger [] -syslog syslog_error_logger false -kernel prevent_overlapping_partitions false --",
+      "generated_name": "rabbitmq",
+      "has_service_data": true
+    },
+    {
+      "pid": 1629934,
+      "ppid": 1629798,
+      "comm": "erl_child_setup",
+      "cmdline": "erl_child_setup 1024",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1629998,
+      "ppid": 1629934,
+      "comm": "sh",
+      "cmdline": "sh -s disksup",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1630000,
+      "ppid": 1629934,
+      "comm": "memsup",
+      "cmdline": "/opt/erlang/lib/erlang/lib/os_mon-2.10.1/priv/bin/memsup",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1630001,
+      "ppid": 1629934,
+      "comm": "cpu_sup",
+      "cmdline": "/opt/erlang/lib/erlang/lib/os_mon-2.10.1/priv/bin/cpu_sup",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1630102,
+      "ppid": 1629934,
+      "comm": "inet_gethost",
+      "cmdline": "/opt/erlang/lib/erlang/erts-15.2.7.8/bin/inet_gethost 4",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1630103,
+      "ppid": 1630102,
+      "comm": "inet_gethost",
+      "cmdline": "/opt/erlang/lib/erlang/erts-15.2.7.8/bin/inet_gethost 4",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1630113,
+      "ppid": 1629798,
+      "comm": "epmd",
+      "cmdline": "/opt/erlang/lib/erlang/erts-15.2.7.8/bin/epmd -daemon",
+      "generated_name": "epmd",
+      "has_service_data": true
+    },
+    {
+      "pid": 1630541,
+      "ppid": 1629934,
+      "comm": "sh",
+      "cmdline": "/bin/sh -s rabbit_disk_monitor",
+      "generated_name": null,
+      "has_service_data": false
+    }
+  ],
+  "disco_raw": {}
+}

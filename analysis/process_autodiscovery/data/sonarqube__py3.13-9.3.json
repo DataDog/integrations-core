@@ -1,0 +1,136 @@
+{
+  "integration": "sonarqube",
+  "environment": "py3.13-9.3",
+  "collected_at": "2026-05-13T17:12:31.686582+00:00",
+  "processes": [
+    {
+      "pid": 2009482,
+      "ppid": 2009459,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2009519,
+      "ppid": 2009482,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2009927,
+      "ppid": 2009482,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2009928,
+      "ppid": 2009482,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2009930,
+      "ppid": 2009482,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2009931,
+      "ppid": 2009482,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2009932,
+      "ppid": 2009482,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2009934,
+      "ppid": 2009482,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 2009936,
+      "ppid": 2009928,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 2009937,
+      "ppid": 2009930,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 2009938,
+      "ppid": 2009932,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 2009940,
+      "ppid": 2009931,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 2004401,
+      "ppid": 2004378,
+      "comm": "java",
+      "cmdline": "java -jar lib/sonar-application-9.3.0.51899.jar -Dsonar.log.console=true -Dsonar.ce.javaOpts= -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port=10444 -Dcom.sun.management.jmxremote.rmi.port=10444 -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost  -Dsonar.web.javaAdditionalOpts=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port=10443 -Dcom.sun.management.jmxremote.rmi.port=10443 -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost",
+      "generated_name": "sonar-application-9.3.0.51899",
+      "has_service_data": true
+    },
+    {
+      "pid": 2004555,
+      "ppid": 2004401,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/java-11-openjdk/bin/java -XX:+UseG1GC -Djava.io.tmpdir=/opt/sonarqube/temp -XX:ErrorFile=../logs/es_hs_err_pid%p.log -Des.networkaddress.cache.ttl=60 -Des.networkaddress.cache.negative.ttl=10 -XX:+AlwaysPreTouch -Xss1m -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djna.nosys=true -Djna.tmpdir=/opt/sonarqube/temp -XX:-OmitStackTraceInFastThrow -Dio.netty.noUnsafe=true -Dio.netty.noKeySetOptimization=true -Dio.netty.recycler.maxCapacityPerThread=0 -Dio.netty.allocator.numDirectArenas=0 -Dlog4j.shutdownHookEnabled=false -Dlog4j2.disable.jmx=true -Dlog4j2.formatMsgNoLookups=true -Djava.locale.providers=COMPAT -Dcom.redhat.fips=false -Xmx512m -Xms512m -XX:MaxDirectMemorySize=256m -XX:+HeapDumpOnOutOfMemoryError -Des.path.home=/opt/sonarqube/elasticsearch -Des.path.conf=/opt/sonarqube/temp/conf/es -Des.distribution.flavor=default -Des.distribution.type=tar -Des.bundled_jdk=false -cp /opt/sonarqube/elasticsearch/lib/* org.elasticsearch.bootstrap.Elasticsearch",
+      "generated_name": "org.elasticsearch.bootstrap.Elasticsearch",
+      "has_service_data": true
+    },
+    {
+      "pid": 2005061,
+      "ppid": 2004401,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/java-11-openjdk/bin/java -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/opt/sonarqube/temp -XX:-OmitStackTraceInFastThrow --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.rmi/sun.rmi.transport=ALL-UNNAMED --add-exports=java.base/jdk.internal.ref=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.management/sun.management=ALL-UNNAMED --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED -Dcom.redhat.fips=false -Xmx512m -Xms128m -XX:+HeapDumpOnOutOfMemoryError -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port=10443 -Dcom.sun.management.jmxremote.rmi.port=10443 -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost -Dhttp.nonProxyHosts=localhost|127.*|[::1] -cp ./lib/sonar-application-9.3.0.51899.jar:/opt/sonarqube/lib/jdbc/h2/h2-1.4.199.jar org.sonar.server.app.WebServer /opt/sonarqube/temp/sq-process17969181405896595496properties",
+      "generated_name": "org.sonar.server.app.WebServer",
+      "has_service_data": true
+    },
+    {
+      "pid": 2006653,
+      "ppid": 2004401,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/java-11-openjdk/bin/java -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/opt/sonarqube/temp -XX:-OmitStackTraceInFastThrow --add-opens=java.base/java.util=ALL-UNNAMED --add-exports=java.base/jdk.internal.ref=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.management/sun.management=ALL-UNNAMED --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED -Dcom.redhat.fips=false -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port=10444 -Dcom.sun.management.jmxremote.rmi.port=10444 -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost -Dhttp.nonProxyHosts=localhost|127.*|[::1] -cp ./lib/sonar-application-9.3.0.51899.jar:/opt/sonarqube/lib/jdbc/h2/h2-1.4.199.jar org.sonar.ce.app.CeServer /opt/sonarqube/temp/sq-process10088979591750972271properties",
+      "generated_name": "org.sonar.ce.app.CeServer",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

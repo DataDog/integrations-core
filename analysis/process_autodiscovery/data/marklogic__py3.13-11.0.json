@@ -1,0 +1,144 @@
+{
+  "integration": "marklogic",
+  "environment": "py3.13-11.0",
+  "collected_at": "2026-05-13T15:23:09.250451+00:00",
+  "processes": [
+    {
+      "pid": 1489916,
+      "ppid": 1489879,
+      "comm": "tini",
+      "cmdline": "/tini -- /usr/local/bin/start-marklogic.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1490032,
+      "ppid": 1489916,
+      "comm": "start-marklogic",
+      "cmdline": "/bin/bash /usr/local/bin/start-marklogic.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1492856,
+      "ppid": 1489916,
+      "comm": "MarkLogic",
+      "cmdline": "/opt/MarkLogic/bin/MarkLogic",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1492857,
+      "ppid": 1492856,
+      "comm": "MarkLogic",
+      "cmdline": "/opt/MarkLogic/bin/MarkLogic",
+      "generated_name": "MarkLogic",
+      "has_service_data": true
+    },
+    {
+      "pid": 1493570,
+      "ppid": 1490032,
+      "comm": "tail",
+      "cmdline": "tail -f /dev/null",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1493888,
+      "ppid": 1493865,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1493930,
+      "ppid": 1493888,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1494329,
+      "ppid": 1493888,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1494330,
+      "ppid": 1493888,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1494331,
+      "ppid": 1493888,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1494332,
+      "ppid": 1493888,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1494333,
+      "ppid": 1493888,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1494335,
+      "ppid": 1493888,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1494337,
+      "ppid": 1494330,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 1494338,
+      "ppid": 1494331,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1494341,
+      "ppid": 1494333,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1494342,
+      "ppid": 1494332,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

@@ -1,0 +1,400 @@
+{
+  "integration": "postgres",
+  "environment": "py3.13-18.0-C",
+  "collected_at": "2026-05-13T15:39:56.930374+00:00",
+  "processes": [
+    {
+      "pid": 1581344,
+      "ppid": 1581254,
+      "comm": "postgres",
+      "cmdline": "postgres -c config_file=/etc/postgresql/postgresql.conf",
+      "generated_name": "postgres",
+      "has_service_data": true
+    },
+    {
+      "pid": 1583972,
+      "ppid": 1581344,
+      "comm": "postgres",
+      "cmdline": "postgres: replica2: io worker 0",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1583973,
+      "ppid": 1581344,
+      "comm": "postgres",
+      "cmdline": "postgres: replica2: io worker 1",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1583974,
+      "ppid": 1581344,
+      "comm": "postgres",
+      "cmdline": "postgres: replica2: io worker 2",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1583975,
+      "ppid": 1581344,
+      "comm": "postgres",
+      "cmdline": "postgres: replica2: checkpointer",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1583976,
+      "ppid": 1581344,
+      "comm": "postgres",
+      "cmdline": "postgres: replica2: background writer",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1583977,
+      "ppid": 1581344,
+      "comm": "postgres",
+      "cmdline": "postgres: replica2: startup recovering 00000001000000000000000A",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1583978,
+      "ppid": 1581344,
+      "comm": "postgres",
+      "cmdline": "postgres: replica2: walreceiver streaming 0/A10C250",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1581343,
+      "ppid": 1581231,
+      "comm": "postgres",
+      "cmdline": "postgres -c config_file=/etc/postgresql/postgresql.conf -c hba_file=/etc/postgresql/pg_hba.conf",
+      "generated_name": "postgres",
+      "has_service_data": true
+    },
+    {
+      "pid": 1582921,
+      "ppid": 1581343,
+      "comm": "postgres",
+      "cmdline": "postgres: primary: io worker 0",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1582923,
+      "ppid": 1581343,
+      "comm": "postgres",
+      "cmdline": "postgres: primary: io worker 1",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1582925,
+      "ppid": 1581343,
+      "comm": "postgres",
+      "cmdline": "postgres: primary: io worker 2",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1582926,
+      "ppid": 1581343,
+      "comm": "postgres",
+      "cmdline": "postgres: primary: checkpointer",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1582927,
+      "ppid": 1581343,
+      "comm": "postgres",
+      "cmdline": "postgres: primary: background writer",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1582929,
+      "ppid": 1581343,
+      "comm": "postgres",
+      "cmdline": "postgres: primary: walwriter",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1582930,
+      "ppid": 1581343,
+      "comm": "postgres",
+      "cmdline": "postgres: primary: autovacuum launcher",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1582931,
+      "ppid": 1581343,
+      "comm": "postgres",
+      "cmdline": "postgres: primary: logical replication launcher",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1583962,
+      "ppid": 1581343,
+      "comm": "postgres",
+      "cmdline": "postgres: primary: walsender replicator 172.17.131.4(57382) streaming 0/A10C250",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1583980,
+      "ppid": 1581343,
+      "comm": "postgres",
+      "cmdline": "postgres: primary: walsender replicator 172.17.131.5(53166) streaming 0/A10C250",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1583994,
+      "ppid": 1581343,
+      "comm": "postgres",
+      "cmdline": "postgres: primary: walsender dd_admin datadog_test 172.17.131.2(60446) START_REPLICATION",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1581332,
+      "ppid": 1581234,
+      "comm": "postgres",
+      "cmdline": "postgres -c config_file=/etc/postgresql/postgresql.conf",
+      "generated_name": "postgres",
+      "has_service_data": true
+    },
+    {
+      "pid": 1583982,
+      "ppid": 1581332,
+      "comm": "postgres",
+      "cmdline": "postgres: io worker 0",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1583983,
+      "ppid": 1581332,
+      "comm": "postgres",
+      "cmdline": "postgres: io worker 1",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1583984,
+      "ppid": 1581332,
+      "comm": "postgres",
+      "cmdline": "postgres: io worker 2",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1583985,
+      "ppid": 1581332,
+      "comm": "postgres",
+      "cmdline": "postgres: checkpointer",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1583986,
+      "ppid": 1581332,
+      "comm": "postgres",
+      "cmdline": "postgres: background writer",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1583988,
+      "ppid": 1581332,
+      "comm": "postgres",
+      "cmdline": "postgres: walwriter",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1583989,
+      "ppid": 1581332,
+      "comm": "postgres",
+      "cmdline": "postgres: autovacuum launcher",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1583990,
+      "ppid": 1581332,
+      "comm": "postgres",
+      "cmdline": "postgres: logical replication launcher",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1583992,
+      "ppid": 1581332,
+      "comm": "postgres",
+      "cmdline": "postgres: logical replication apply worker for subscription 16948",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1581342,
+      "ppid": 1581251,
+      "comm": "postgres",
+      "cmdline": "postgres -c config_file=/etc/postgresql/postgresql.conf",
+      "generated_name": "postgres",
+      "has_service_data": true
+    },
+    {
+      "pid": 1583953,
+      "ppid": 1581342,
+      "comm": "postgres",
+      "cmdline": "postgres: io worker 0",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1583954,
+      "ppid": 1581342,
+      "comm": "postgres",
+      "cmdline": "postgres: io worker 1",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1583955,
+      "ppid": 1581342,
+      "comm": "postgres",
+      "cmdline": "postgres: io worker 2",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1583956,
+      "ppid": 1581342,
+      "comm": "postgres",
+      "cmdline": "postgres: checkpointer",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1583957,
+      "ppid": 1581342,
+      "comm": "postgres",
+      "cmdline": "postgres: background writer",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1583958,
+      "ppid": 1581342,
+      "comm": "postgres",
+      "cmdline": "postgres: startup recovering 00000001000000000000000A",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1583959,
+      "ppid": 1581342,
+      "comm": "postgres",
+      "cmdline": "postgres: walreceiver streaming 0/A10C250",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1590033,
+      "ppid": 1590007,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1590113,
+      "ppid": 1590033,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1590501,
+      "ppid": 1590033,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1590502,
+      "ppid": 1590033,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1590503,
+      "ppid": 1590033,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1590505,
+      "ppid": 1590033,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1590506,
+      "ppid": 1590033,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1590507,
+      "ppid": 1590033,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 1590510,
+      "ppid": 1590506,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1590511,
+      "ppid": 1590503,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 1590515,
+      "ppid": 1590505,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}
