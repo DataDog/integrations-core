@@ -7,8 +7,8 @@ from urllib.parse import urlparse
 import mock
 import pytest
 
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.http import MockResponse
 
 from . import common
 
@@ -27,17 +27,13 @@ def dd_environment():
 
 def mock_requests_get(url, *args, **kwargs):
     exporter_type = 'jmx' if urlparse(url).port == common.JMX_PORT else 'node'
-    return MockResponse(file_path=common.get_metrics_fixture_path(exporter_type))
+    return MockHTTPResponse(file_path=common.get_metrics_fixture_path(exporter_type))
 
 
 @pytest.fixture
-def mock_data():
-    # Mock requests.get because it is used internally within boto3
-    with (
-        mock.patch('requests.get', side_effect=mock_requests_get, autospec=True),
-        mock.patch('requests.Session.get', side_effect=mock_requests_get),
-    ):
-        yield
+def mock_data(mock_openmetrics_http):
+    mock_openmetrics_http.get.side_effect = mock_requests_get
+    yield
 
 
 @pytest.fixture
