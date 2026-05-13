@@ -108,8 +108,52 @@ class IssueComment(BaseModel):
     html_url: str | None = None
 
 
+class GitHubUser(BaseModel):
+    """A GitHub user as returned by the REST API.
+
+    Field reference:
+    https://docs.github.com/en/rest/users/users#get-a-user
+    """
+
+    model_config = ConfigDict(extra="ignore")
+
+    id: int
+    login: str
+    html_url: str | None = None
+    type: str | None = None  # 'User', 'Bot', 'Organization', etc.
+
+
+class Label(BaseModel):
+    """A label attached to an issue or pull request.
+
+    Field reference:
+    https://docs.github.com/en/rest/issues/labels#get-a-label
+    """
+
+    model_config = ConfigDict(extra="ignore")
+
+    id: int
+    name: str
+    color: str | None = None
+    description: str | None = None
+
+
+class PullRequestRef(BaseModel):
+    """A head or base branch reference on a pull request.
+
+    Field reference (within the `pull-request` object):
+    https://docs.github.com/en/rest/pulls/pulls#get-a-pull-request
+    """
+
+    model_config = ConfigDict(extra="ignore")
+
+    ref: str
+    sha: str
+    label: str | None = None  # e.g. 'octocat:new-topic'
+
+
 class PullRequest(BaseModel):
-    """A GitHub pull request (minimal fields, extend as needed).
+    """A GitHub pull request.
 
     Field reference:
     https://docs.github.com/en/rest/pulls/pulls#get-a-pull-request
@@ -117,8 +161,45 @@ class PullRequest(BaseModel):
 
     model_config = ConfigDict(extra="ignore")
 
+    # Identifiers
+    id: int | None = None
     number: int
+    node_id: str | None = None
+
+    # URLs
+    url: str | None = None
     html_url: str
+    diff_url: str | None = None
+    patch_url: str | None = None
+
+    # State
+    state: str | None = None  # 'open' or 'closed'
+    draft: bool = False
+    merged: bool | None = None
+    locked: bool = False
+    merge_commit_sha: str | None = None
+
+    # Content
+    title: str | None = None
+    body: str | None = None
+
+    # People
+    user: GitHubUser | None = None
+    assignees: list[GitHubUser] = Field(default_factory=list)
+    requested_reviewers: list[GitHubUser] = Field(default_factory=list)
+
+    # Labels
+    labels: list[Label] = Field(default_factory=list)
+
+    # Timestamps (ISO 8601 strings; not parsed into datetime to keep the model lightweight)
+    created_at: str | None = None
+    updated_at: str | None = None
+    closed_at: str | None = None
+    merged_at: str | None = None
+
+    # Branch references
+    head: PullRequestRef | None = None
+    base: PullRequestRef | None = None
 
 
 class PullRequestReviewComment(BaseModel):

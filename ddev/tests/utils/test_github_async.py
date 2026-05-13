@@ -14,9 +14,12 @@ from ddev.utils.github_async import (
     ArtifactsList,
     AsyncGitHubClient,
     GitHubResponse,
+    GitHubUser,
     IssueComment,
+    Label,
     PaginationData,
     PullRequest,
+    PullRequestRef,
     PullRequestReviewComment,
     WorkflowRun,
     async_github_client,
@@ -424,6 +427,54 @@ def _pull_request_payload(number: int = 1) -> dict[str, Any]:
     }
 
 
+def _full_pull_request_payload(number: int = 42) -> dict[str, Any]:
+    """A richer PR payload exercising sub-models (user, labels, head/base)."""
+    return {
+        "id": 9000 + number,
+        "number": number,
+        "node_id": "PR_kwDOABCD123",
+        "url": f"https://api.github.com/repos/owner/repo/pulls/{number}",
+        "html_url": f"https://github.com/owner/repo/pull/{number}",
+        "diff_url": f"https://github.com/owner/repo/pull/{number}.diff",
+        "patch_url": f"https://github.com/owner/repo/pull/{number}.patch",
+        "state": "open",
+        "draft": True,
+        "merged": False,
+        "locked": False,
+        "merge_commit_sha": None,
+        "title": "Fix bug",
+        "body": "Backport",
+        "user": {
+            "id": 1,
+            "login": "octocat",
+            "html_url": "https://github.com/octocat",
+            "type": "User",
+        },
+        "assignees": [],
+        "requested_reviewers": [
+            {"id": 2, "login": "reviewer", "type": "User"},
+        ],
+        "labels": [
+            {"id": 100, "name": "qa/skip-qa", "color": "5319e7"},
+            {"id": 101, "name": "backport/7.62.x", "color": "5319e7"},
+        ],
+        "created_at": "2026-05-01T00:00:00Z",
+        "updated_at": "2026-05-02T00:00:00Z",
+        "closed_at": None,
+        "merged_at": None,
+        "head": {
+            "ref": "alice/fix",
+            "sha": "deadbeef0011223344",
+            "label": "alice:alice/fix",
+        },
+        "base": {
+            "ref": "master",
+            "sha": "cafebabe00",
+            "label": "owner:master",
+        },
+    }
+
+
 @pytest.mark.asyncio
 async def test_create_pull_request_success() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
@@ -464,6 +515,55 @@ async def test_create_pull_request_http_error_raises() -> None:
     with pytest.raises(httpx.HTTPStatusError) as exc_info:
         await client.create_pull_request("o", "r", "T", "h", "b")
     assert exc_info.value.response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_create_pull_request_parses_full_response() -> None:
+    """Exercises sub-models (GitHubUser, Label, PullRequestRef) end-to-end."""
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return _json_response(_full_pull_request_payload(number=42), status_code=201)
+
+    client = _make_client(httpx.MockTransport(handler))
+    result = await client.create_pull_request("owner", "repo", "Fix bug", "alice/fix", "master")
+
+    pr = result.data
+    assert pr.id == 9042
+    assert pr.number == 42
+    assert pr.state == "open"
+    assert pr.draft is True
+    assert pr.title == "Fix bug"
+
+    assert isinstance(pr.user, GitHubUser)
+    assert pr.user.login == "octocat"
+
+    assert [label.name for label in pr.labels] == ["qa/skip-qa", "backport/7.62.x"]
+    assert all(isinstance(label, Label) for label in pr.labels)
+
+    assert isinstance(pr.head, PullRequestRef)
+    assert pr.head.ref == "alice/fix"
+    assert pr.head.sha == "deadbeef0011223344"
+    assert isinstance(pr.base, PullRequestRef)
+    assert pr.base.ref == "master"
+
+    assert [r.login for r in pr.requested_reviewers] == ["reviewer"]
+    assert pr.created_at == "2026-05-01T00:00:00Z"
+
+
+@pytest.mark.asyncio
+async def test_create_pull_request_ignores_extra_fields() -> None:
+    """Unknown top-level fields in the response must not break parsing."""
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        payload = _full_pull_request_payload()
+        payload["mergeable_state"] = "clean"
+        payload["additions"] = 42
+        payload["unknown_future_field"] = {"nested": True}
+        return _json_response(payload, status_code=201)
+
+    client = _make_client(httpx.MockTransport(handler))
+    result = await client.create_pull_request("o", "r", "T", "h", "b")
+    assert result.data.number == 42
 
 
 # ---------------------------------------------------------------------------
