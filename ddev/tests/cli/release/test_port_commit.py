@@ -124,7 +124,9 @@ def test_port_step_executes_and_emits_success(app_mock):
     step = _RunnableStep(app_mock)
     step.run()
     assert step.executed is True
-    app_mock.status.assert_called_once_with('Doing the thing')
+    app_mock.status.assert_not_called()
+    info_calls = [c.args[0] for c in app_mock.display_info.call_args_list]
+    assert any('Doing the thing' in line for line in info_calls)
     app_mock.display_success.assert_called_once()
 
 
@@ -394,6 +396,27 @@ def test_command_happy_path(ddev: CliRunner, mocker: MockerFixture, fake_async_g
     assert ('fetch', 'origin') in git_calls
     assert any(args[:2] == ('worktree', 'add') for args in git_calls)
     assert any(args[:3] == ('worktree', 'remove', '--force') for args in git_calls)
+
+
+def test_command_lowercases_branch_name(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    run_mock = _setup_command_mocks(mocker)
+    fake_async_github.mock_response(
+        'create_pull_request',
+        PullRequest(number=1, html_url='https://github.com/x/pr/1'),
+    )
+    mocker.patch('click.confirm', return_value=True)
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'AAraKKe'})
+
+    result = ddev('release', 'port-commit', '1234567890abcdef00')
+
+    assert result.exit_code == 0, result.output
+    assert fake_async_github.last_call('create_pull_request').kwargs['head'] == 'aarakke/port-1234567890-to-master'
+
+    worktree_add = next(args for args in (c.args for c in run_mock.call_args_list) if args[:2] == ('worktree', 'add'))
+    assert 'aarakke/port-1234567890-to-master' in worktree_add
+    assert all('AAraKKe' not in str(part) for part in worktree_add)
 
 
 def test_command_draft_flag(ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient) -> None:

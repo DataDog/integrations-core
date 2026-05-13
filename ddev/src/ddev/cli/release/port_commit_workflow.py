@@ -61,13 +61,13 @@ class PortStep:
                 self.app.display_info(f'  (dry-run) {cmd}')
             return
 
-        with self.app.status(self.describe()):
-            try:
-                self.execute()
-            except PortStepError:
-                raise
-            except OSError as e:
-                raise PortStepError(str(e)) from e
+        self.app.display_info(f'{self.describe()}...')
+        try:
+            self.execute()
+        except PortStepError:
+            raise
+        except OSError as e:
+            raise PortStepError(str(e)) from e
 
         self.app.display_success(f'{self.describe()}: done.')
 
@@ -487,7 +487,7 @@ def resolve_port_plan(
         )
 
     suffix = branch_suffix or f'to-{target_branch}'
-    new_branch = f'{user}/{branch_prefix}-{full_sha[:10]}-{suffix}'
+    new_branch = f'{user}/{branch_prefix}-{full_sha[:10]}-{suffix}'.lower()
     plan = PortPlan(
         full_sha=full_sha,
         clean_subject=clean_subject,
