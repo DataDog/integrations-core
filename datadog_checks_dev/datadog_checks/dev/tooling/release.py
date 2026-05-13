@@ -126,7 +126,13 @@ def get_agent_requirement_line(check, version, app):
         else:
             platforms = sorted(m.get('supported_os', []))
 
+    if not platforms:
+        raise ManifestError(f"Can't parse the supported OS list for the check {check}: {platforms}")
+
     platforms = [p for p in platforms if p not in PLATFORMS_IGNORE]
+
+    if not platforms:
+        return None
 
     # all platforms
     # using sets to ignore possible sorting in the overrides, if any
