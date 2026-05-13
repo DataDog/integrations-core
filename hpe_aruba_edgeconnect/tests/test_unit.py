@@ -1,7 +1,9 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import io
 import json
+import tarfile
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -23,6 +25,7 @@ from datadog_checks.hpe_aruba_edgeconnect.minute_stats import (
     MosStats,
     ProbeStats,
     ShaperStats,
+    TunnelAvailability,
     TunnelPeakStats,
     TunnelV2Stats,
 )
@@ -32,9 +35,19 @@ from datadog_checks.hpe_aruba_edgeconnect.ndm_models import PAYLOAD_METADATA_BAT
 pytestmark = pytest.mark.unit
 
 FIXTURE_DIR = Path(__file__).parent / 'fixtures'
-TGZ_FILES = sorted(FIXTURE_DIR.glob('*.tgz'))
+
+
+def _pack_dir_to_tgz_bytes(directory: Path) -> bytes:
+    buf = io.BytesIO()
+    with tarfile.open(fileobj=buf, mode='w:gz') as tf:
+        tf.add(directory, arcname=directory.name)
+    return buf.getvalue()
+
+
+MINUTE_STATS_DIRS = sorted(p for p in FIXTURE_DIR.iterdir() if p.is_dir() and p.name.startswith('st2-'))
+TGZ_BYTES = [_pack_dir_to_tgz_bytes(d) for d in MINUTE_STATS_DIRS]
 NEWEST_TS = 100000060
-TGZ_DATA = {p.name: p.read_bytes() for p in TGZ_FILES}
+TGZ_DATA = {f'{d.name}.tgz': data for d, data in zip(MINUTE_STATS_DIRS, TGZ_BYTES)}
 CHECK_MODULE = 'datadog_checks.hpe_aruba_edgeconnect.check'
 NS = 'hpe_aruba_edgeconnect'
 DEVICE_ID = 'default:10.0.0.1'
@@ -156,27 +169,27 @@ EXPECTED_METRIC_COUNTS = {
     'interface.utilization.rx.avg': 5,
     'interface.utilization.tx.max': 5,
     'interface.utilization.rx.max': 5,
-    'tunnel.throughput.tx.bytes.count': 66,
-    'tunnel.throughput.rx.bytes.count': 66,
-    'tunnel.throughput.tx.bytes.rate': 66,
-    'tunnel.throughput.rx.bytes.rate': 66,
-    'tunnel.throughput.tx.packets.count': 66,
-    'tunnel.throughput.rx.packets.count': 66,
-    'tunnel.throughput.tx.packets.rate': 66,
-    'tunnel.throughput.rx.packets.rate': 66,
-    'tunnel.throughput.tx.bytes.max': 66,
-    'tunnel.throughput.rx.bytes.max': 66,
-    'tunnel.throughput.tx.packets.max': 66,
-    'tunnel.throughput.rx.packets.max': 66,
-    'tunnel.latency': 33,
-    'tunnel.latency.min': 33,
-    'tunnel.latency.max': 33,
-    'tunnel.loss': 66,
+    'tunnel.throughput.tx.bytes.count': 58,
+    'tunnel.throughput.rx.bytes.count': 58,
+    'tunnel.throughput.tx.bytes.rate': 58,
+    'tunnel.throughput.rx.bytes.rate': 58,
+    'tunnel.throughput.tx.packets.count': 58,
+    'tunnel.throughput.rx.packets.count': 58,
+    'tunnel.throughput.tx.packets.rate': 58,
+    'tunnel.throughput.rx.packets.rate': 58,
+    'tunnel.throughput.tx.bytes.max': 58,
+    'tunnel.throughput.rx.bytes.max': 58,
+    'tunnel.throughput.tx.packets.max': 58,
+    'tunnel.throughput.rx.packets.max': 58,
+    'tunnel.latency': 29,
+    'tunnel.latency.min': 29,
+    'tunnel.latency.max': 29,
+    'tunnel.loss': 58,
     'tunnel.jitter': 31,
     'tunnel.jitter.max': 31,
     'tunnel.qoe.mos': 62,
     'tunnel.qoe.mos.min': 62,
-    'tunnel.availability': 31,
+    'tunnel.availability': 29,
     'tunnel.internet_breakout.bandwidth.tx.count': 2,
     'tunnel.internet_breakout.bandwidth.rx.count': 2,
     'tunnel.internet_breakout.bandwidth.tx.rate': 2,
@@ -256,39 +269,6 @@ EXPECTED_VALUES = [
         ['interface_name:wan0', 'traffic_type:pass-through-unshaped', NDM_IFACE_RES],
     ),
     (
-        'tunnel.throughput.tx.bytes.count',
-        76320,
-        [
-            'tunnel_name:pass-through-unshaped',
-            'tunnel_alias:pass-through-unshaped',
-            'overlay_name:business',
-            'is_sdwan:True',
-            'side:wan',
-        ],
-    ),
-    (
-        'tunnel.throughput.tx.bytes.rate',
-        636.0,
-        [
-            'tunnel_name:pass-through-unshaped',
-            'tunnel_alias:pass-through-unshaped',
-            'overlay_name:business',
-            'is_sdwan:True',
-            'side:wan',
-        ],
-    ),
-    (
-        'tunnel.throughput.rx.bytes.count',
-        83984,
-        [
-            'tunnel_name:pass-through-unshaped',
-            'tunnel_alias:pass-through-unshaped',
-            'overlay_name:business',
-            'is_sdwan:True',
-            'side:wan',
-        ],
-    ),
-    (
         'tunnel.latency',
         1.4,
         [
@@ -306,28 +286,6 @@ EXPECTED_VALUES = [
             'tunnel_alias:to_NewYorkSP01_MPLS1-MPLS1',
             'overlay_name:business',
             'is_sdwan:False',
-        ],
-    ),
-    (
-        'tunnel.throughput.tx.bytes.max',
-        1272,
-        [
-            'tunnel_name:pass-through-unshaped',
-            'tunnel_alias:pass-through-unshaped',
-            'overlay_name:business',
-            'is_sdwan:True',
-            'side:wan',
-        ],
-    ),
-    (
-        'tunnel.throughput.rx.bytes.max',
-        1160,
-        [
-            'tunnel_name:pass-through-unshaped',
-            'tunnel_alias:pass-through-unshaped',
-            'overlay_name:business',
-            'is_sdwan:True',
-            'side:wan',
         ],
     ),
     (
@@ -372,15 +330,6 @@ EXPECTED_VALUES = [
             'fec:post',
         ],
     ),
-    (
-        'tunnel.availability',
-        100.0,
-        [
-            'tunnel_name:pass-through-unshaped',
-            'tunnel_alias:pass-through-unshaped',
-            'tunnel_color:unassigned',
-        ],
-    ),
     ('tunnel.internet_breakout.bandwidth.tx.count', 76012, ['interface_name:wan0', NDM_IFACE_RES]),
     ('tunnel.internet_breakout.bandwidth.tx.rate', 316.71666666666664, ['interface_name:wan0', NDM_IFACE_RES]),
     ('tunnel.internet_breakout.bandwidth.rx.max', 100000, ['interface_name:wan0', NDM_IFACE_RES]),
@@ -416,13 +365,13 @@ EXPECTED_PARSER_ROW_COUNTS = {
     'st2-100000000': {
         'interfaces': 5,
         'interface_peaks': 5,
-        'tunnels': 33,
-        'tunnel_peaks': 33,
+        'tunnels': 29,
+        'tunnel_peaks': 29,
         'jitter': 31,
         'mos': 31,
         'dscp': 3,
         'dscp_peaks': 3,
-        'tunnel_availability': 31,
+        'tunnel_availability': 29,
         'interface_overlays': 5,
         'probes': 12,
         'shaper': 4,
@@ -431,13 +380,13 @@ EXPECTED_PARSER_ROW_COUNTS = {
     'st2-100000060': {
         'interfaces': 3,
         'interface_peaks': 3,
-        'tunnels': 33,
-        'tunnel_peaks': 33,
+        'tunnels': 29,
+        'tunnel_peaks': 29,
         'jitter': 31,
         'mos': 31,
         'dscp': 2,
         'dscp_peaks': 2,
-        'tunnel_availability': 31,
+        'tunnel_availability': 29,
         'interface_overlays': 1,
         'probes': 12,
         'shaper': 2,
@@ -632,11 +581,15 @@ def all_metrics_aggregator(dd_run_check, aggregator, mocker, check):
     return aggregator
 
 
-@pytest.fixture(scope='module', params=[p.name for p in TGZ_FILES], ids=[p.stem for p in TGZ_FILES])
+@pytest.fixture(
+    scope='module',
+    params=list(zip(MINUTE_STATS_DIRS, TGZ_BYTES)),
+    ids=[d.name for d in MINUTE_STATS_DIRS],
+)
 def minute_stats(request, logger):
-    path = FIXTURE_DIR / request.param
-    ms = MinuteStats(path.read_bytes(), appliance_ip='10.0.0.1', timestamp=123456789, logger=logger)
-    return path.stem, ms
+    directory, data = request.param
+    ms = MinuteStats(data, appliance_ip='10.0.0.1', timestamp=123456789, logger=logger)
+    return directory.name, ms
 
 
 # ---------------------------------------------------------------------------
@@ -991,6 +944,74 @@ def test_interface_stats_record_skips_utilization_when_max_bw_zero(logger):
     assert not any(k[0].startswith('interface.utilization') for k in store._metrics)
 
 
+def test_interface_stats_parse_inherits_max_bw_from_all_traffic_row(logger):
+    csv_content = (
+        "ifname,bytes_tx,bytes_rx,fwdrops_bytes_tx,fwdrops_bytes_rx,"
+        "fwdrops_pkts_tx,fwdrops_pkts_rx,max_bw_tx,max_bw_rx,traftype\n"
+        "wan0,6000,3000,0,0,0,0,0,0,optimized traffic\n"
+        "wan0,4000,2000,0,0,0,0,0,0,pass-through\n"
+        "wan0,10000,5000,0,0,0,0,100000,200000,all traffic\n"
+    )
+    rows = list(InterfaceStats.parse(csv_content, logger))
+
+    assert [r.traftype for r in rows] == ['optimized traffic', 'pass-through']
+    assert all(r.max_bw_tx == 100000 and r.max_bw_rx == 200000 for r in rows)
+
+
+def test_interface_stats_parse_keeps_per_type_max_bw_when_all_traffic_row_is_zero(logger):
+    csv_content = (
+        "ifname,bytes_tx,bytes_rx,fwdrops_bytes_tx,fwdrops_bytes_rx,"
+        "fwdrops_pkts_tx,fwdrops_pkts_rx,max_bw_tx,max_bw_rx,traftype\n"
+        "lan0,698,328,0,0,0,0,100000,100000,pass-through\n"
+        "lan0,698,328,0,0,0,0,0,0,all traffic\n"
+    )
+    rows = list(InterfaceStats.parse(csv_content, logger))
+
+    assert len(rows) == 1
+    assert rows[0].max_bw_tx == 100000
+    assert rows[0].max_bw_rx == 100000
+
+
+def test_tunnel_v2_parse_filters_aggregate_rows(logger):
+    # Aggregate rows have alias (col 1) == overlay_id (col 2) and that string is one of
+    # the four traftype names from interface.csv. Real tunnels never satisfy that combination.
+    content = (
+        # Aggregate rows — should be filtered out
+        "unknown,all traffic,all traffic,0,1,uuid,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n"
+        "unknown,pass-through,pass-through,0,1,uuid,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n"
+        # Real tunnel whose alias happens to be one of the reserved strings but overlay differs — kept
+        "unknown,pass-through,Passthrough_MPLS1_wan1,0,1,uuid,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n"
+        # Plain real tunnel
+        "unknown,passThrough_1,Passthrough_Data_lan0,0,1,uuid,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n"
+    )
+    rows = list(TunnelV2Stats.parse(content, logger))
+    assert [r.tunnel_id for r in rows] == ['pass-through', 'passThrough_1']
+
+
+def test_tunnel_peak_parse_filters_aggregate_rows(logger):
+    content = (
+        "tunname,bytes_wtx,bytes_wrx,latency_s\n"
+        "all traffic,0,0,0\n"
+        "optimized traffic,0,0,0\n"
+        "pass-through,0,0,0\n"
+        "pass-through-unshaped,0,0,0\n"
+        "passThrough_1,100,200,5\n"
+    )
+    rows = list(TunnelPeakStats.parse(content, logger))
+    assert [r.tunname for r in rows] == ['passThrough_1']
+
+
+def test_tunnel_availability_parse_filters_aggregate_rows(logger):
+    # Same shape as tunnel_v2.txt aggregates: col[1] == col[2] and that string is a traftype name.
+    # 14 columns is enough to populate tunnel_id (1), alias (2), seconds_down (8), and color (13).
+    aggregate = "unknown,pass-through,pass-through,0,1,2,uuid,0,0,0,0,1,none,unassigned"
+    real_match = "unknown,bondedTunnel_14,to_NewYorkSP01_MPLS1-MPLS1,0,1,2,uuid,0,0,0,0,1,none,MPLS1"
+    real_collision = "unknown,pass-through,Passthrough_MPLS1_wan1,0,1,2,uuid,0,0,0,0,1,none,unassigned"
+    content = "\n".join([aggregate, real_match, real_collision])
+    rows = list(TunnelAvailability.parse(content, logger))
+    assert [r.tunnel_id for r in rows] == ['bondedTunnel_14', 'pass-through']
+
+
 # ---------------------------------------------------------------------------
 # Check integration
 # ---------------------------------------------------------------------------
@@ -1028,7 +1049,7 @@ def test_metrics_carry_base_device_tags(all_metrics_aggregator):
 
 
 def test_collection_step_failure_does_not_block_others(dd_run_check, aggregator, mocker, check):
-    tgz_bytes = TGZ_FILES[0].read_bytes()
+    tgz_bytes = TGZ_BYTES[0]
     client = _mock_appliance_client(tgz_bytes, cpu=42)
     client.get_network_interfaces.side_effect = Exception('network error')
     _setup_mocks(mocker, check, APPLIANCE_PAYLOAD, appliance_client=client)
@@ -1071,7 +1092,7 @@ def test_orchestrator_get_appliances_failure_emits_no_metrics(dd_run_check, aggr
 
 
 def test_up_to_date_appliance_skips_minute_stats_recording(dd_run_check, aggregator, mocker, check):
-    tgz_bytes = TGZ_FILES[0].read_bytes()
+    tgz_bytes = TGZ_BYTES[0]
     client = _mock_appliance_client(tgz_bytes)
     _setup_mocks(mocker, check, APPLIANCE_PAYLOAD, appliance_client=client, cached_timestamp=str(NEWEST_TS))
 
@@ -1081,7 +1102,7 @@ def test_up_to_date_appliance_skips_minute_stats_recording(dd_run_check, aggrega
 
 
 def test_ndm_metadata_submitted(dd_run_check, aggregator, mocker, check):
-    tgz_bytes = TGZ_FILES[0].read_bytes()
+    tgz_bytes = TGZ_BYTES[0]
 
     client = _mock_appliance_client(tgz_bytes)
     client.get_network_interfaces.return_value = {
@@ -1162,7 +1183,7 @@ def test_ndm_metadata_submitted(dd_run_check, aggregator, mocker, check):
     assert ny_peer['overlay_name'] == 'business'
 
     # Tunnels: alias that does not match the ``to_<peer>_<color>`` pattern
-    non_matching = by_alias['pass-through-unshaped']
+    non_matching = by_alias['Passthrough_Data_lan0']
     assert non_matching['dst_device_id'] == ''
     assert non_matching['dst_site_id'] == 'unknown'
     assert non_matching['tunnel_color'] == ''

@@ -11,6 +11,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 RUN mkdir -p /app/data
 COPY tests/fixtures/ /app/data/
+RUN cd /app/data && for d in */; do \
+        name="${d%/}"; \
+        tar -czf "${name}.tgz" -C /app/data "${name}" && rm -rf "${name}"; \
+    done
 
 RUN mkdir -p /app/certs \
     && openssl req -x509 -newkey rsa:2048 -nodes \

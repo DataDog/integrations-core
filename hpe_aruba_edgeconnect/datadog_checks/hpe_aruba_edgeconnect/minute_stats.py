@@ -58,6 +58,18 @@ if TYPE_CHECKING:
 _TUNNEL_ALIAS_RE = re.compile(r'^to_(.+)_(\w+-\w+)$')
 
 
+_TUNNEL_AGGREGATE_ALIASES = frozenset({'all traffic', 'optimized traffic', 'pass-through', 'pass-through-unshaped'})
+
+
+def _nonzero(raw: str | None) -> bool:
+    if raw is None:
+        return False
+    try:
+        return float(raw) != 0
+    except ValueError:
+        return False
+
+
 def parse_tunnel_alias(alias: str) -> tuple[str, str]:
     """Extract ``(peer_hostname, wan_labels)`` from a tunnel alias of the form ``to_<peer>_<color>``.
 
@@ -149,7 +161,10 @@ class TunnelV2Stats:
             line = line.strip()
             if not line:
                 continue
-            yield cls(line.split(','))
+            stat = cls(line.split(','))
+            if stat.tunnel_id in _TUNNEL_AGGREGATE_ALIASES and stat.tunnel_id == stat.tunnel_alias:
+                continue
+            yield stat
 
 
 @dataclass(init=False, slots=True)
@@ -201,6 +216,8 @@ class TunnelPeakStats:
     def parse(cls, content: str, logger: CheckLoggingAdapter | None = None) -> Iterator[TunnelPeakStats]:
         reader = csv.DictReader(StringIO(content))
         for row in reader:
+            if row.get('tunname', '').strip() in _TUNNEL_AGGREGATE_ALIASES:
+                continue
             yield cls(row)
 
 
@@ -289,7 +306,10 @@ class TunnelAvailability:
             line = line.strip()
             if not line:
                 continue
-            yield cls(line.split(','))
+            stat = cls(line.split(','))
+            if stat.tunnel_id in _TUNNEL_AGGREGATE_ALIASES and stat.tunnel_id == stat.alias:
+                continue
+            yield stat
 
 
 @dataclass(init=False, slots=True)
@@ -363,10 +383,24 @@ class InterfaceStats:
 
     @classmethod
     def parse(cls, content: str, logger: CheckLoggingAdapter) -> Iterator[InterfaceStats]:
-        reader = csv.DictReader(StringIO(content))
-        for row in reader:
+        rows = list(csv.DictReader(StringIO(content)))
+        # Some appliances only populate max_bw on the `all traffic` row; fall back to it when a
+        # per-type row has no max_bw of its own (missing or zero) so utilization stays computable.
+        fallback_max_bw: dict[str, tuple[str | None, str | None]] = {}
+        for row in rows:
+            if row.get('traftype', '').strip() != 'all traffic':
+                continue
+            ifname = row.get('ifname', '').strip()
+            if ifname:
+                fallback_max_bw[ifname] = (row.get('max_bw_tx'), row.get('max_bw_rx'))
+        for row in rows:
             if row.get('traftype', '').strip() == 'all traffic':
                 continue
+            fb_tx, fb_rx = fallback_max_bw.get(row.get('ifname', '').strip(), (None, None))
+            if not _nonzero(row.get('max_bw_tx')) and _nonzero(fb_tx):
+                row['max_bw_tx'] = fb_tx
+            if not _nonzero(row.get('max_bw_rx')) and _nonzero(fb_rx):
+                row['max_bw_rx'] = fb_rx
             yield cls(row, logger)
 
 

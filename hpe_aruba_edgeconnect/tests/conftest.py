@@ -22,6 +22,7 @@ def logger() -> logging.Logger:
 HERE = get_here()
 HOST = get_docker_hostname()
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
+EXCLUDED_APPLIANCE_IP = '10.0.0.3'
 
 
 @pytest.fixture(scope='session')
@@ -61,7 +62,11 @@ def dd_environment(instance, dd_save_state):
             urlopen(f'https://{orch_ip}/health', timeout=2, context=ctx)
             urlopen(f'https://{appliance_ip}/health', timeout=2, context=ctx)
 
-        inst = instance(orch_ip, connect_timeout=2)
+        inst = instance(
+            orch_ip,
+            connect_timeout=2,
+            appliance_ips={'exclude': [f'{EXCLUDED_APPLIANCE_IP}/32']},
+        )
         dd_save_state('e2e_instance', inst)
 
         with docker_run(

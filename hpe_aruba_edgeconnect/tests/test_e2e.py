@@ -5,12 +5,16 @@ import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 
+from .conftest import EXCLUDED_APPLIANCE_IP
+
 NS = 'hpe_aruba_edgeconnect'
+
+TUNNEL_AGGREGATE_ALIASES = ('all traffic', 'optimized traffic', 'pass-through', 'pass-through-unshaped')
 
 
 EXPECTED_METRIC_COUNTS = {
     'orchestrator.reachability': 1,
-    'device.reachability': 3,
+    'device.reachability': 2,
     'device.uptime': 1,
     'device.cpu.usage': 4,
     'device.memory.usage': 5,
@@ -40,27 +44,27 @@ EXPECTED_METRIC_COUNTS = {
     'interface.utilization.rx.avg': 3,
     'interface.utilization.tx.max': 3,
     'interface.utilization.rx.max': 3,
-    'tunnel.throughput.tx.bytes.count': 66,
-    'tunnel.throughput.rx.bytes.count': 66,
-    'tunnel.throughput.tx.bytes.rate': 66,
-    'tunnel.throughput.rx.bytes.rate': 66,
-    'tunnel.throughput.tx.packets.count': 66,
-    'tunnel.throughput.rx.packets.count': 66,
-    'tunnel.throughput.tx.packets.rate': 66,
-    'tunnel.throughput.rx.packets.rate': 66,
-    'tunnel.throughput.tx.bytes.max': 66,
-    'tunnel.throughput.rx.bytes.max': 66,
-    'tunnel.throughput.tx.packets.max': 66,
-    'tunnel.throughput.rx.packets.max': 66,
-    'tunnel.latency': 33,
-    'tunnel.latency.min': 33,
-    'tunnel.latency.max': 33,
-    'tunnel.loss': 66,
+    'tunnel.throughput.tx.bytes.count': 58,
+    'tunnel.throughput.rx.bytes.count': 58,
+    'tunnel.throughput.tx.bytes.rate': 58,
+    'tunnel.throughput.rx.bytes.rate': 58,
+    'tunnel.throughput.tx.packets.count': 58,
+    'tunnel.throughput.rx.packets.count': 58,
+    'tunnel.throughput.tx.packets.rate': 58,
+    'tunnel.throughput.rx.packets.rate': 58,
+    'tunnel.throughput.tx.bytes.max': 58,
+    'tunnel.throughput.rx.bytes.max': 58,
+    'tunnel.throughput.tx.packets.max': 58,
+    'tunnel.throughput.rx.packets.max': 58,
+    'tunnel.latency': 29,
+    'tunnel.latency.min': 29,
+    'tunnel.latency.max': 29,
+    'tunnel.loss': 58,
     'tunnel.jitter': 31,
     'tunnel.jitter.max': 31,
     'tunnel.qoe.mos': 62,
     'tunnel.qoe.mos.min': 62,
-    'tunnel.availability': 31,
+    'tunnel.availability': 29,
     'tunnel.internet_breakout.bandwidth.tx.count': 1,
     'tunnel.internet_breakout.bandwidth.rx.count': 1,
     'tunnel.internet_breakout.bandwidth.tx.rate': 1,
@@ -108,18 +112,12 @@ EXPECTED_VALUES = [
     ('interface.bandwidth.rx.count', 41760, ['interface_name:wan0', 'traffic_type:pass-through-unshaped']),
     ('interface.bandwidth.tx.max', 1332, ['interface_name:wan0', 'traffic_type:pass-through-unshaped']),
     ('interface.bandwidth.rx.max', 696, ['interface_name:wan0', 'traffic_type:pass-through-unshaped']),
-    ('tunnel.throughput.tx.bytes.count', 38796, ['tunnel_name:pass-through-unshaped', 'side:wan']),
-    ('tunnel.throughput.tx.bytes.rate', 646.6, ['tunnel_name:pass-through-unshaped', 'side:wan']),
-    ('tunnel.throughput.rx.bytes.count', 42456, ['tunnel_name:pass-through-unshaped', 'side:wan']),
     ('tunnel.latency', 1.39, ['tunnel_alias:to_NewYorkSP01_MPLS1-MPLS1']),
     ('tunnel.latency.min', 1.38, ['tunnel_alias:to_NewYorkSP01_MPLS1-MPLS1']),
-    ('tunnel.throughput.tx.bytes.max', 1272, ['tunnel_name:pass-through-unshaped', 'side:wan']),
-    ('tunnel.throughput.rx.bytes.max', 1160, ['tunnel_name:pass-through-unshaped', 'side:wan']),
     ('tunnel.jitter', 600, ['tunnel_name:bondedTunnel_16']),
     ('tunnel.jitter.max', 6, ['tunnel_name:bondedTunnel_16']),
     ('tunnel.qoe.mos', 4.0, ['tunnel_name:tunnel_12', 'fec:post']),
     ('tunnel.qoe.mos.min', 4.0, ['tunnel_name:tunnel_12', 'fec:post']),
-    ('tunnel.availability', 100.0, ['tunnel_name:pass-through-unshaped']),
     ('tunnel.internet_breakout.bandwidth.tx.count', 38160, ['interface_name:wan0']),
     ('tunnel.internet_breakout.bandwidth.tx.rate', 636.0, ['interface_name:wan0']),
     ('tunnel.internet_breakout.bandwidth.rx.max', 100000, ['interface_name:wan0']),
@@ -151,5 +149,9 @@ def test_e2e(dd_agent_check):
         aggregator.assert_metric(full_name, value=expected_value)
         if tag_subset:
             aggregator.assert_metric_has_tags(full_name, tag_subset)
+
+    # The excluded appliance must not produce a device.reachability metric.
+    for metric in aggregator.metrics(f'{NS}.device.reachability'):
+        assert f'device_ip:{EXCLUDED_APPLIANCE_IP}' not in metric.tags
 
     aggregator.assert_all_metrics_covered()
