@@ -87,6 +87,7 @@ def test_initialize_features_enabled_and_disabled(mock_check, minimal_instance):
             'query_samples': {'enabled': True},
             'collect_settings': {'enabled': True},
             'collect_schemas': {'enabled': True},
+            'collect_column_statistics': {'enabled': True},
             'query_activity': {'enabled': True},
             'query_metrics': {'enabled': True},
             'data_observability': {'enabled': True},
@@ -101,6 +102,7 @@ def test_initialize_features_enabled_and_disabled(mock_check, minimal_instance):
         FeatureKey.QUERY_SAMPLES,
         FeatureKey.COLLECT_SETTINGS,
         FeatureKey.COLLECT_SCHEMAS,
+        FeatureKey.COLLECT_COLUMN_STATISTICS,
         FeatureKey.QUERY_ACTIVITY,
         FeatureKey.QUERY_METRICS,
         FeatureKey.DATA_OBSERVABILITY,
@@ -118,6 +120,7 @@ def test_initialize_features_disabled_by_default(mock_check, minimal_instance):
     assert features[FeatureKey.QUERY_SAMPLES]['enabled'] is False
     assert features[FeatureKey.COLLECT_SETTINGS]['enabled'] is False
     assert features[FeatureKey.COLLECT_SCHEMAS]['enabled'] is False
+    assert features[FeatureKey.COLLECT_COLUMN_STATISTICS]['enabled'] is False
     assert features[FeatureKey.QUERY_ACTIVITY]['enabled'] is False
     assert features[FeatureKey.QUERY_METRICS]['enabled'] is False
 

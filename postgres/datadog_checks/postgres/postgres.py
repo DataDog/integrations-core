@@ -194,6 +194,9 @@ class PostgreSql(DatabaseCheck):
 
         self.diagnosis.register(functools.partial(run_diagnostics, self))
 
+    def database_monitoring_column_statistics(self, raw_event: str):
+        self.event_platform_event(raw_event, "dbm-column-statistics")
+
     def _submit_initialization_health_event(self):
         try:
             # Handle the config validation result after we've set tags so those tags are included in the health event
