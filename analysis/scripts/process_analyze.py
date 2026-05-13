@@ -227,6 +227,50 @@ def is_main_process(pid: int, processes: dict[int, Process]) -> bool:
     return parent.generated_name != p.generated_name
 
 
+def save_data(data: CollectedData, data_dir: Path) -> None:
+    """Save collected process data to a JSON file."""
+    data_dir.mkdir(parents=True, exist_ok=True)
+    path = data_dir / f"{data.integration}__{data.environment}.json"
+    with open(path, "w") as f:
+        json.dump(dataclasses.asdict(data), f, indent=2)
+
+
+def load_data(path: Path) -> CollectedData:
+    """Load a collected process data file."""
+    with open(path) as f:
+        d = json.load(f)
+    d["processes"] = [Process(**p) for p in d["processes"]]
+    return CollectedData(**d)
+
+
+def record_skip(data_dir: Path, entry: SkipEntry) -> None:
+    """Append or update a skip entry in skipped.json."""
+    data_dir.mkdir(parents=True, exist_ok=True)
+    path = data_dir / "skipped.json"
+    entries: list[dict] = []
+    if path.exists():
+        with open(path) as f:
+            entries = json.load(f)
+    new_entry = dataclasses.asdict(entry)
+    for i, e in enumerate(entries):
+        if e["integration"] == entry.integration:
+            entries[i] = new_entry
+            break
+    else:
+        entries.append(new_entry)
+    with open(path, "w") as f:
+        json.dump(entries, f, indent=2)
+
+
+def load_skipped(data_dir: Path) -> list[SkipEntry]:
+    """Load skip entries from skipped.json, or return empty list if absent."""
+    path = data_dir / "skipped.json"
+    if not path.exists():
+        return []
+    with open(path) as f:
+        return [SkipEntry(**e) for e in json.load(f)]
+
+
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Analyze isMainProcessForService against real E2E environments"

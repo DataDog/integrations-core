@@ -262,3 +262,66 @@ def test_main_process_parent_different_name_is_main():
         (5, 1, "nginx", True),  # parent is supervisord, different name → main
     )
     assert is_main_process(5, procs) is True
+
+
+from process_analyze import save_data, load_data, record_skip, load_skipped
+
+
+def _sample_data() -> "CollectedData":
+    from process_analyze import CollectedData, Process
+    return CollectedData(
+        integration="nginx",
+        environment="py3.13-1.27",
+        collected_at="2026-05-13T10:00:00+00:00",
+        processes=[
+            Process(pid=1, ppid=0, comm="nginx", cmdline="nginx: master",
+                    generated_name="nginx", has_service_data=True),
+            Process(pid=2, ppid=1, comm="nginx", cmdline="nginx: worker",
+                    generated_name="nginx", has_service_data=True),
+        ],
+        disco_raw={},
+    )
+
+
+def test_save_and_load_round_trip(tmp_path):
+    data = _sample_data()
+    save_data(data, tmp_path)
+    path = tmp_path / "nginx__py3.13-1.27.json"
+    assert path.exists()
+    loaded = load_data(path)
+    assert loaded.integration == "nginx"
+    assert len(loaded.processes) == 2
+    assert loaded.processes[0].comm == "nginx"
+    assert loaded.processes[0].has_service_data is True
+
+
+def test_record_skip_creates_file(tmp_path):
+    from process_analyze import SkipEntry
+    entry = SkipEntry(
+        integration="vault",
+        reason="env start failed",
+        skipped_at="2026-05-13T10:05:00+00:00",
+        details="exit code 1",
+    )
+    record_skip(tmp_path, entry)
+    path = tmp_path / "skipped.json"
+    assert path.exists()
+    skipped = load_skipped(tmp_path)
+    assert len(skipped) == 1
+    assert skipped[0].integration == "vault"
+
+
+def test_record_skip_upserts(tmp_path):
+    from process_analyze import SkipEntry
+    e1 = SkipEntry("vault", "env start failed", "2026-05-13T10:00:00+00:00", "first")
+    e2 = SkipEntry("vault", "env start failed", "2026-05-13T11:00:00+00:00", "updated")
+    record_skip(tmp_path, e1)
+    record_skip(tmp_path, e2)
+    skipped = load_skipped(tmp_path)
+    assert len(skipped) == 1
+    assert skipped[0].details == "updated"
+
+
+def test_load_skipped_missing_file(tmp_path):
+    skipped = load_skipped(tmp_path)
+    assert skipped == []
