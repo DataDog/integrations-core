@@ -86,7 +86,7 @@ class TunnelV2Stats:
     tunnel_id: str
     tunnel_alias: str
     overlay_id: str
-    is_sdwan: bool | Literal['unknown']
+    is_sdwan: Literal['true', 'false', 'unknown']
     bytes_wan_tx: float | None
     bytes_wan_rx: float | None
     bytes_lan_tx: float | None
@@ -105,7 +105,10 @@ class TunnelV2Stats:
         self.tunnel_id = cols[TUNNEL_V2_COL_TUNNEL_ID] if n > TUNNEL_V2_COL_TUNNEL_ID else 'unknown'
         self.tunnel_alias = cols[TUNNEL_V2_COL_ALIAS] if n > TUNNEL_V2_COL_ALIAS else 'unknown'
         self.overlay_id = cols[TUNNEL_V2_COL_OVERLAY_ID] if n > TUNNEL_V2_COL_OVERLAY_ID else 'unknown'
-        self.is_sdwan = cols[TUNNEL_V2_COL_IS_SDWAN] == '1' if n > TUNNEL_V2_COL_IS_SDWAN else 'unknown'
+        if n > TUNNEL_V2_COL_IS_SDWAN:
+            self.is_sdwan = 'true' if cols[TUNNEL_V2_COL_IS_SDWAN] == '1' else 'false'
+        else:
+            self.is_sdwan = 'unknown'
         self.bytes_wan_tx = float(cols[TUNNEL_V2_COL_BYTES_WAN_TX]) if n > TUNNEL_V2_COL_BYTES_WAN_TX else None
         self.bytes_wan_rx = float(cols[TUNNEL_V2_COL_BYTES_WAN_RX]) if n > TUNNEL_V2_COL_BYTES_WAN_RX else None
         self.bytes_lan_tx = float(cols[TUNNEL_V2_COL_BYTES_LAN_TX]) if n > TUNNEL_V2_COL_BYTES_LAN_TX else None
@@ -129,7 +132,7 @@ class TunnelV2Stats:
         extra_tags = [
             f'tunnel_alias:{self.tunnel_alias}',
             f'overlay_name:{overlay_name}',
-            f'is_sdwan:{str(self.is_sdwan)}',
+            f'is_sdwan:{self.is_sdwan}',
         ]
         base_tunnel_tags = base_tags + [f'tunnel_name:{self.tunnel_id}'] + extra_tags
         for side, bytes_tx, bytes_rx, pkts_tx, pkts_rx in [
@@ -224,13 +227,13 @@ class TunnelPeakStats:
 @dataclass(init=False, slots=True)
 class JitterStats:
     tunnel: str
-    jitter: float
-    peak_jitter: float
+    jitter: float | None
+    peak_jitter: float | None
 
     def __init__(self, row: dict[str, str]) -> None:
-        self.tunnel = row['tunnel'].strip()
-        self.jitter = float(row[' jitter'])
-        self.peak_jitter = float(row[' peak_jitter'])
+        self.tunnel = v.strip() if (v := row.get('tunnel')) is not None else "unknown"
+        self.jitter = float(v) if (v := row.get(' jitter') or row.get('jitter')) is not None else None
+        self.peak_jitter = float(v) if (v := row.get(' peak_jitter') or row.get('peak_jitter')) is not None else None
 
     def record(self, store: MetricsStore, tags: list[str]) -> None:
         store.record('tunnel.jitter', self.jitter, tags, AggType.AVG)
@@ -506,7 +509,7 @@ class InterfaceOverlayStats:
     def parse(cls, content: str, logger: CheckLoggingAdapter | None = None) -> Iterator[InterfaceOverlayStats]:
         reader = csv.DictReader(StringIO(content))
         for row in reader:
-            if int(row.get('tuntype', '0')) != TUNNEL_TYPE_INTERNET_BREAKOUT:
+            if int(row.get('tuntype') or '0') != TUNNEL_TYPE_INTERNET_BREAKOUT:
                 continue
             yield cls(row)
 
@@ -674,7 +677,7 @@ class ShaperStats:
         else:
             overlay_name = self.traffic_class
             if logger is not None:
-                logger.warning(
+                logger.debug(
                     "No overlay name mapping found for traffic class %s; falling back to raw id", self.traffic_class
                 )
         tags = base_tags + [
@@ -882,6 +885,10 @@ class MinuteStats:
     def _record_shaper_stats(
         self, store: MetricsStore, base_tags: list[str], traffic_class_map: dict[str, str]
     ) -> None:
+        if self.shaper and not traffic_class_map:
+            self._log.warning(
+                "No traffic class to overlay name mapping available; shaper metrics will be tagged with raw IDs"
+            )
         for row in self.shaper:
             row.record(store, base_tags, traffic_class_map, self._log)
 

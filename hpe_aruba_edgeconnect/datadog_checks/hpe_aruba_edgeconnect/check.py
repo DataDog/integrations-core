@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import re
+import threading
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
@@ -49,6 +50,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         self._traffic_class_map: dict[str, str] = {}
         self._appliance_clients: dict[str, ApplianceClient] = {}
         self._orch_client: OrchestratorClient | None = None
+        self._appliance_clients_lock = threading.Lock()
 
     def _get_orch_client(self) -> OrchestratorClient:
         if self._orch_client is not None:
@@ -62,12 +64,12 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         orch_tags = [f'orch_ip:{self.config.orch_ip}']
         try:
             orch_client = self._get_orch_client()
-            appliances = self._collect_appliances_from_orch(orch_client)
         except Exception:
             self.gauge('orchestrator.reachability', 0, tags=orch_tags)
             self._orch_client = None
             raise
         self.gauge('orchestrator.reachability', 1, tags=orch_tags)
+        appliances = self._collect_appliances_from_orch(orch_client)
         current_ips = {ap.ip for ap in appliances}
         stale_ips = set(self._appliance_clients) - current_ips
         for ip in stale_ips:
@@ -142,16 +144,17 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         return appliances
 
     def _create_appliance_client(self, app_ip: str, username: str, password: str) -> ApplianceClient:
-        cached = self._appliance_clients.get(app_ip)
-        if cached is not None:
-            return cached
-        http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
-        http.persist_connections = True
-        http.options['auth'] = None
-        client = ApplianceClient(http, app_ip, self.log)
-        client.login(username, password)
-        self._appliance_clients[app_ip] = client
-        return client
+        with self._appliance_clients_lock:
+            cached = self._appliance_clients.get(app_ip)
+            if cached is not None:
+                return cached
+            http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
+            http.persist_connections = True
+            http.options['auth'] = None
+            client = ApplianceClient(http, app_ip, self.log)
+            client.login(username, password)
+            self._appliance_clients[app_ip] = client
+            return client
 
     def _timestamps_to_fetch(self, app_ip: str, newest: int) -> list[int]:
         raw = self.read_persistent_cache(f'last_timestamp:{app_ip}')
@@ -221,7 +224,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
                         app_ip,
                         exc_info=True,
                     )
-                    continue
+                    break
                 last_successful_ts = ts
                 if minute_stats.tunnels:
                     latest_tunnel_stats = minute_stats.tunnels
@@ -325,7 +328,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         for field in ('total', 'free', 'used', 'buffers', 'cached'):
             value = mem_data.get(field)
             if value is not None:
-                self.gauge('device.memory.usage', value, tags=base_tags + [f'memory_type:{field}'])
+                self.gauge('device.memory.usage', value * 1024, tags=base_tags + [f'memory_type:{field}'])
 
     def _collect_disk_stats(self, client: ApplianceClient, base_tags: list[str]) -> None:
         disk_data = client.get_disk_usage()

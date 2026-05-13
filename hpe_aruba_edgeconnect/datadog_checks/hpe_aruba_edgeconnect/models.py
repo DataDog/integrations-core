@@ -119,17 +119,21 @@ class Appliances:
             appliance.password = default_password
             for cred in overrides or []:
                 cidr = cred.get('cidr')
+                username = cred.get('username')
+                password = cred.get('password')
+                if not cidr or not username or not password:
+                    continue
                 try:
                     if ipaddress.ip_address(appliance.ip) in ipaddress.ip_network(cidr, strict=False):
-                        appliance.username = cred.get('username')
-                        appliance.password = cred.get('password')
+                        appliance.username = username
+                        appliance.password = password
                         log.debug(
                             "Using CIDR-matched credentials for appliance %s (matched %s)",
                             appliance.ip,
                             cidr,
                         )
                         break
-                except ValueError:
+                except (ValueError, TypeError):
                     continue
             else:
                 log.debug("Using shared credentials for appliance %s", appliance.ip)

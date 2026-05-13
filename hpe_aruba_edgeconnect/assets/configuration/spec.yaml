@@ -9,10 +9,11 @@ files:
     options:
     - name: orch_ip
       required: true
-      description: Hostname or IP address (with optional port) of the HPE Aruba EdgeConnect Orchestrator.
+      description: Hostname or IP address of the HPE Aruba EdgeConnect Orchestrator.
       value:
         type: string
-        example: orchestrator.example.com
+        example: 10.0.0.1
+   
     - name: namespace
       description: Namespace to use for NDM device metadata. Defaults to "default".
       value:
@@ -21,9 +22,8 @@ files:
         default: default
     - name: appliance_ips
       description: |
-        HPE Aruba EdgeConnect appliance targets. Accepts IP addresses or CIDR blocks; CIDR entries
-        are expanded to individual IPs at runtime. Use include to whitelist and exclude to blacklist.
-        Exclude takes precedence over include.
+        HPE Aruba EdgeConnect appliance targets. CIDR entries match any appliance IP within the block. Use `include` to specify which appliances to poll and 
+        `exclude` to skip individual appliances. `exclude` takes precedence over `include`.
       value:
         type: object
         properties:

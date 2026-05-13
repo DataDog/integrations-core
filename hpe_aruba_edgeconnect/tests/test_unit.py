@@ -25,7 +25,6 @@ from datadog_checks.hpe_aruba_edgeconnect.minute_stats import (
     MosStats,
     ProbeStats,
     ShaperStats,
-    TunnelAvailability,
     TunnelPeakStats,
     TunnelV2Stats,
 )
@@ -230,11 +229,11 @@ EXPECTED_VALUES = [
     ('device.cpu.usage', 15.0, ['cpu_state:system']),
     ('device.cpu.usage', 3.0, ['cpu_state:irq']),
     ('device.cpu.usage', 2.0, ['cpu_state:nice']),
-    ('device.memory.usage', 3945080, ['memory_type:total']),
-    ('device.memory.usage', 770848, ['memory_type:free']),
-    ('device.memory.usage', 3174232, ['memory_type:used']),
-    ('device.memory.usage', 2516, ['memory_type:buffers']),
-    ('device.memory.usage', 729568, ['memory_type:cached']),
+    ('device.memory.usage', 3945080 * 1024, ['memory_type:total']),
+    ('device.memory.usage', 770848 * 1024, ['memory_type:free']),
+    ('device.memory.usage', 3174232 * 1024, ['memory_type:used']),
+    ('device.memory.usage', 2516 * 1024, ['memory_type:buffers']),
+    ('device.memory.usage', 729568 * 1024, ['memory_type:cached']),
     ('device.disk.usage', 1193348 * 1024, ['mount:/', 'disk_type:used']),
     ('device.disk.usage', 4619060 * 1024, ['mount:/', 'disk_type:free']),
     ('device.disk.usage', 4328968 * 1024, ['mount:/var', 'disk_type:used']),
@@ -275,7 +274,7 @@ EXPECTED_VALUES = [
             'tunnel_name:tunnel_12',
             'tunnel_alias:to_NewYorkSP01_MPLS1-MPLS1',
             'overlay_name:business',
-            'is_sdwan:False',
+            'is_sdwan:false',
         ],
     ),
     (
@@ -285,7 +284,7 @@ EXPECTED_VALUES = [
             'tunnel_name:tunnel_12',
             'tunnel_alias:to_NewYorkSP01_MPLS1-MPLS1',
             'overlay_name:business',
-            'is_sdwan:False',
+            'is_sdwan:false',
         ],
     ),
     (
@@ -295,7 +294,7 @@ EXPECTED_VALUES = [
             'tunnel_name:bondedTunnel_16',
             'tunnel_alias:to_NewYorkSP01_CriticalApps',
             'overlay_name:2',
-            'is_sdwan:False',
+            'is_sdwan:false',
         ],
     ),
     (
@@ -305,7 +304,7 @@ EXPECTED_VALUES = [
             'tunnel_name:bondedTunnel_16',
             'tunnel_alias:to_NewYorkSP01_CriticalApps',
             'overlay_name:2',
-            'is_sdwan:False',
+            'is_sdwan:false',
         ],
     ),
     (
@@ -315,7 +314,7 @@ EXPECTED_VALUES = [
             'tunnel_name:tunnel_12',
             'tunnel_alias:to_NewYorkSP01_MPLS1-MPLS1',
             'overlay_name:business',
-            'is_sdwan:False',
+            'is_sdwan:false',
             'fec:post',
         ],
     ),
@@ -326,7 +325,7 @@ EXPECTED_VALUES = [
             'tunnel_name:tunnel_12',
             'tunnel_alias:to_NewYorkSP01_MPLS1-MPLS1',
             'overlay_name:business',
-            'is_sdwan:False',
+            'is_sdwan:false',
             'fec:post',
         ],
     ),
@@ -815,19 +814,16 @@ def test_get_overlay_config_returns_overlay_and_traffic_class_maps():
     assert traffic_class_map == {'1': 'RealTime', '2': 'BulkData'}
 
 
-def test_shaper_record_falls_back_to_raw_id_and_warns_when_not_mapped():
+def test_shaper_record_falls_back_to_raw_id():
     store = MetricsStore()
     row = ShaperStats({'traffic_class': '7', 'direction': '0', 'qos_drops': '0', 'other_drops': '0'})
-    logger = MagicMock()
-    row.record(store, [], traffic_class_map={'1': 'RealTime'}, logger=logger)
+    row.record(store, [], traffic_class_map={'1': 'RealTime'})
 
     mock_check = MagicMock()
     store.flush(mock_check)
 
     args, kwargs = mock_check.gauge.call_args_list[0]
     assert 'overlay_name:7' in kwargs['tags']
-    logger.warning.assert_called_once()
-    assert '7' in logger.warning.call_args.args
 
 
 def test_login_appliance_csrf_token():
@@ -931,87 +927,6 @@ def test_parse_empty(parser_cls, logger):
     assert _parse(parser_cls, '', logger) == []
 
 
-def test_interface_stats_record_skips_utilization_when_max_bw_zero(logger):
-    csv_content = (
-        "ifname,bytes_tx,bytes_rx,fwdrops_bytes_tx,fwdrops_bytes_rx,"
-        "fwdrops_pkts_tx,fwdrops_pkts_rx,max_bw_tx,max_bw_rx,traftype\n"
-        "wan0,6000,3000,0,0,0,0,0,0,pass-through\n"
-    )
-    rows = list(InterfaceStats.parse(csv_content, logger))
-    store = MetricsStore()
-    rows[0].record(store, ['base:tag'], 'default:10.0.0.1')
-
-    assert not any(k[0].startswith('interface.utilization') for k in store._metrics)
-
-
-def test_interface_stats_parse_inherits_max_bw_from_all_traffic_row(logger):
-    csv_content = (
-        "ifname,bytes_tx,bytes_rx,fwdrops_bytes_tx,fwdrops_bytes_rx,"
-        "fwdrops_pkts_tx,fwdrops_pkts_rx,max_bw_tx,max_bw_rx,traftype\n"
-        "wan0,6000,3000,0,0,0,0,0,0,optimized traffic\n"
-        "wan0,4000,2000,0,0,0,0,0,0,pass-through\n"
-        "wan0,10000,5000,0,0,0,0,100000,200000,all traffic\n"
-    )
-    rows = list(InterfaceStats.parse(csv_content, logger))
-
-    assert [r.traftype for r in rows] == ['optimized traffic', 'pass-through']
-    assert all(r.max_bw_tx == 100000 and r.max_bw_rx == 200000 for r in rows)
-
-
-def test_interface_stats_parse_keeps_per_type_max_bw_when_all_traffic_row_is_zero(logger):
-    csv_content = (
-        "ifname,bytes_tx,bytes_rx,fwdrops_bytes_tx,fwdrops_bytes_rx,"
-        "fwdrops_pkts_tx,fwdrops_pkts_rx,max_bw_tx,max_bw_rx,traftype\n"
-        "lan0,698,328,0,0,0,0,100000,100000,pass-through\n"
-        "lan0,698,328,0,0,0,0,0,0,all traffic\n"
-    )
-    rows = list(InterfaceStats.parse(csv_content, logger))
-
-    assert len(rows) == 1
-    assert rows[0].max_bw_tx == 100000
-    assert rows[0].max_bw_rx == 100000
-
-
-def test_tunnel_v2_parse_filters_aggregate_rows(logger):
-    # Aggregate rows have alias (col 1) == overlay_id (col 2) and that string is one of
-    # the four traftype names from interface.csv. Real tunnels never satisfy that combination.
-    content = (
-        # Aggregate rows — should be filtered out
-        "unknown,all traffic,all traffic,0,1,uuid,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n"
-        "unknown,pass-through,pass-through,0,1,uuid,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n"
-        # Real tunnel whose alias happens to be one of the reserved strings but overlay differs — kept
-        "unknown,pass-through,Passthrough_MPLS1_wan1,0,1,uuid,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n"
-        # Plain real tunnel
-        "unknown,passThrough_1,Passthrough_Data_lan0,0,1,uuid,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n"
-    )
-    rows = list(TunnelV2Stats.parse(content, logger))
-    assert [r.tunnel_id for r in rows] == ['pass-through', 'passThrough_1']
-
-
-def test_tunnel_peak_parse_filters_aggregate_rows(logger):
-    content = (
-        "tunname,bytes_wtx,bytes_wrx,latency_s\n"
-        "all traffic,0,0,0\n"
-        "optimized traffic,0,0,0\n"
-        "pass-through,0,0,0\n"
-        "pass-through-unshaped,0,0,0\n"
-        "passThrough_1,100,200,5\n"
-    )
-    rows = list(TunnelPeakStats.parse(content, logger))
-    assert [r.tunname for r in rows] == ['passThrough_1']
-
-
-def test_tunnel_availability_parse_filters_aggregate_rows(logger):
-    # Same shape as tunnel_v2.txt aggregates: col[1] == col[2] and that string is a traftype name.
-    # 14 columns is enough to populate tunnel_id (1), alias (2), seconds_down (8), and color (13).
-    aggregate = "unknown,pass-through,pass-through,0,1,2,uuid,0,0,0,0,1,none,unassigned"
-    real_match = "unknown,bondedTunnel_14,to_NewYorkSP01_MPLS1-MPLS1,0,1,2,uuid,0,0,0,0,1,none,MPLS1"
-    real_collision = "unknown,pass-through,Passthrough_MPLS1_wan1,0,1,2,uuid,0,0,0,0,1,none,unassigned"
-    content = "\n".join([aggregate, real_match, real_collision])
-    rows = list(TunnelAvailability.parse(content, logger))
-    assert [r.tunnel_id for r in rows] == ['bondedTunnel_14', 'pass-through']
-
-
 # ---------------------------------------------------------------------------
 # Check integration
 # ---------------------------------------------------------------------------
@@ -1076,21 +991,6 @@ def test_orchestrator_login_failure_emits_no_metrics(dd_run_check, aggregator, m
     assert check._orch_client is None
 
 
-def test_orchestrator_get_appliances_failure_emits_no_metrics(dd_run_check, aggregator, mocker, check):
-    orch = _setup_mocks(mocker, check, APPLIANCE_PAYLOAD)
-    orch.get_appliances.side_effect = Exception('orch unreachable')
-
-    with pytest.raises(Exception, match='orch unreachable'):
-        dd_run_check(check, extract_message=True)
-
-    emitted = [m for m in aggregator.metric_names if m.startswith(f'{NS}.')]
-    assert emitted == [f'{NS}.orchestrator.reachability']
-    aggregator.assert_metric(f'{NS}.orchestrator.reachability', value=0, count=1)
-    assert aggregator.get_event_platform_events('network-devices-metadata') == []
-    orch.login.assert_called_once()
-    assert check._orch_client is None
-
-
 def test_up_to_date_appliance_skips_minute_stats_recording(dd_run_check, aggregator, mocker, check):
     tgz_bytes = TGZ_BYTES[0]
     client = _mock_appliance_client(tgz_bytes)
@@ -1109,6 +1009,7 @@ def test_ndm_metadata_submitted(dd_run_check, aggregator, mocker, check):
         'ifInfo': [
             {'ifname': 'wan0', 'mac': 'aa:bb:cc:dd:ee:ff', 'admin': True, 'oper': True, 'speed': '1000Mb/s (auto)'},
             {'ifname': 'wan0:v100', 'admin': False, 'oper': None},
+            {'ifname': 'lan0', 'admin': None, 'oper': False},
         ]
     }
 
@@ -1149,7 +1050,7 @@ def test_ndm_metadata_submitted(dd_run_check, aggregator, mocker, check):
     assert 'device_id:default:10.0.0.1' in device['tags']
 
     # Interfaces: VLAN parsing + admin/oper status conversion
-    assert len(interfaces) == 2
+    assert len(interfaces) == 3
     by_name = {i['raw_id']: i for i in interfaces}
 
     wan0 = by_name['wan0']
@@ -1163,7 +1064,11 @@ def test_ndm_metadata_submitted(dd_run_check, aggregator, mocker, check):
     vlan_iface = by_name['wan0:v100']
     assert vlan_iface['vlan'] == 100
     assert vlan_iface['admin_status'] == 2
-    assert vlan_iface['oper_status'] == 2
+    assert vlan_iface['oper_status'] == 4
+
+    lan0 = by_name['lan0']
+    assert 'admin_status' not in lan0
+    assert lan0['oper_status'] == 2
 
     # Tunnels: matching alias with peer in lookup
     by_alias = {t['path_name']: t for t in tunnels}

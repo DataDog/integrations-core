@@ -26,10 +26,9 @@ PAYLOAD_METADATA_BATCH_SIZE = 100
 STATUS_REACHABLE = 1
 STATUS_UNREACHABLE = 2
 
-ADMIN_STATUS_UP = 1
-ADMIN_STATUS_DOWN = 2
-OPER_STATUS_UP = 1
-OPER_STATUS_DOWN = 2
+STATUS_UP = 1
+STATUS_DOWN = 2
+OPER_STATUS_UNKNOWN = 4
 
 _VLAN_RE = re.compile(r':v(\d+)$')
 
@@ -81,7 +80,7 @@ class InterfaceMetadata(BaseModel):
     id_tags: list[str]
     name: str
     mac_address: str
-    admin_status: int
+    admin_status: int | None = None
     oper_status: int
     vlan: int | None = None
 
@@ -158,8 +157,8 @@ def create_interface_metadata(appliance_ip: str, iface: dict[str, Any], namespac
         id_tags=[f'interface:{ifname}'],
         name=ifname,
         mac_address=iface.get('mac', ''),
-        admin_status=_bool_to_status(iface.get('admin'), ADMIN_STATUS_UP, ADMIN_STATUS_DOWN),
-        oper_status=_bool_to_status(iface.get('oper'), OPER_STATUS_UP, OPER_STATUS_DOWN),
+        admin_status=_bool_to_status(iface.get('admin'), STATUS_UP, STATUS_DOWN),
+        oper_status=_bool_to_status(iface.get('oper'), STATUS_UP, STATUS_DOWN, unknown=OPER_STATUS_UNKNOWN),
         vlan=_parse_vlan(ifname),
     )
 
@@ -216,9 +215,9 @@ def batch_payloads(
         yield payload
 
 
-def _bool_to_status(value: bool | None, up: int, down: int) -> int:
+def _bool_to_status(value: bool | None, up: int, down: int, unknown: int | None = None) -> int | None:
     if value is None:
-        return down
+        return unknown
     return up if value else down
 
 

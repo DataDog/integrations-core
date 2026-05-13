@@ -21,7 +21,7 @@ The integration collects metrics across multiple layers of the EdgeConnect SD-WA
   Provides administrative and operational status, configured speed, RX/TX bandwidth and rate, peak and average utilization, and forward-drop counters per interface.
 
 - **SD-WAN tunnels:**  
-  Reports per-tunnel latency , jitter, packet loss (pre- and post-FEC), Mean Opinion Score (MOS) for voice-quality tracking, downtime during the interval, and bidirectional throughput in both bits and packets per second. Allows detection of path degradation and SLA violations across the overlay.
+  Reports per-tunnel latency, jitter, packet loss (pre- and post-FEC), Mean Opinion Score (MOS) for voice-quality tracking, downtime during the interval, and bidirectional throughput in both bits and packets per second. Allows detection of path degradation and SLA violations across the overlay.
 
 - **Internet breakout tunnels:**  
   Monitors RX/TX bandwidth, peak rates, and configured maximum throughput on local-internet breakout tunnels to observe direct-to-cloud traffic.
