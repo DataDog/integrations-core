@@ -677,3 +677,36 @@ def test_cursor_record_time_never_moves_backwards(mock_send_log, instance):
 
     record_times = [call.kwargs["cursor"]["record_time"] for call in mock_send_log.call_args_list]
     assert record_times == sorted(record_times)
+
+
+@pytest.mark.unit
+@patch.object(MacAuditLogsCheck, "send_log")
+def test_only_final_cursor_in_batch_marks_files_completed(mock_send_log, instance):
+    """Only the cursor for the last record in a batch carries the completed-file lists.
+
+    If a cycle aborts after an intermediate record, the resumed cycle must still see the
+    in-flight files as candidates to process. Marking files completed on every emission
+    would let the next cycle skip files whose records had not all been ingested yet.
+    """
+    logs = (
+        "<record time=\"Thu Jun  5 13:51:38 2025\" msec=\" + 100 msec\" > /></record>\n"
+        "<record time=\"Thu Jun  5 13:51:39 2025\" msec=\" + 200 msec\" > /></record>\n"
+        "<record time=\"Thu Jun  5 13:51:40 2025\" msec=\" + 300 msec\" > /></record>"
+    )
+    completed_closed = ["20250605082138.20250605082142", "20250605082142.20250605082150"]
+    completed_open = ["20250605082150.not_terminated"]
+
+    check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
+    check.process_and_ingest_log_entries(logs.split("\n"), completed_closed, completed_open, "+0000", None)
+
+    cursors = [call.kwargs["cursor"] for call in mock_send_log.call_args_list]
+    assert len(cursors) == 3
+
+    for cursor in cursors[:-1]:
+        assert cursor["is_file_collection_completed"] is False
+        assert cursor["last_completed_closed"] == []
+        assert cursor["last_completed_open"] == []
+
+    assert cursors[-1]["is_file_collection_completed"] is True
+    assert cursors[-1]["last_completed_closed"] == completed_closed
+    assert cursors[-1]["last_completed_open"] == completed_open

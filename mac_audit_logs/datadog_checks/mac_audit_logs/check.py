@@ -189,8 +189,8 @@ class MacAuditLogsCheck(AgentCheck):
                     "record_time": utils.convert_local_to_utc_timezone_timestamp_str(time_value, timezone_offset),
                     "record_milli_sec": None if is_last_in_batch else milli_sec_value,
                     "is_file_collection_completed": is_last_in_batch,
-                    "last_completed_closed": completed_closed,
-                    "last_completed_open": completed_open,
+                    "last_completed_closed": completed_closed if is_last_in_batch else [],
+                    "last_completed_open": completed_open if is_last_in_batch else [],
                 }
 
                 data = {"timestamp": get_timestamp(datetime_aware), "message": log}
