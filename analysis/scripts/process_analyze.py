@@ -304,8 +304,125 @@ def main() -> None:
         cmd_analyze(args)
 
 
+def collect_integration(
+    integration: str,
+    env_override: str | None,
+    disco_path: str,
+    data_dir: Path,
+    repo_root: Path,
+) -> str:
+    """Collect process data for one integration. Returns 'ok', 'skipped', or 'error'."""
+    # 1. Select environment
+    if env_override:
+        env = env_override
+    else:
+        show = subprocess.run(
+            ["ddev", "env", "show", integration],
+            capture_output=True, text=True,
+        )
+        env = select_environment(parse_ddev_env_show(show.stdout))
+    if env is None:
+        record_skip(data_dir, SkipEntry(
+            integration=integration,
+            reason="no environments found",
+            skipped_at=now_iso(),
+            details="ddev env show returned no environments",
+        ))
+        return "skipped"
+
+    # 2. Fake caddy check
+    is_caddy, caddy_detail = uses_caddy(integration, repo_root)
+    if is_caddy:
+        record_skip(data_dir, SkipEntry(
+            integration=integration,
+            reason="fake caddy server",
+            skipped_at=now_iso(),
+            details=caddy_detail,
+        ))
+        return "skipped"
+
+    # 3. Start environment
+    before = get_current_container_ids()
+    try:
+        start = subprocess.run(
+            ["ddev", "--no-interactive", "env", "start", "--dev", integration, env],
+            capture_output=True, text=True, timeout=300,
+        )
+    except subprocess.TimeoutExpired:
+        record_skip(data_dir, SkipEntry(
+            integration=integration,
+            reason="env start failed",
+            skipped_at=now_iso(),
+            details="ddev env start timed out after 300s",
+        ))
+        return "skipped"
+
+    if start.returncode != 0:
+        record_skip(data_dir, SkipEntry(
+            integration=integration,
+            reason="env start failed",
+            skipped_at=now_iso(),
+            details=f"exit code {start.returncode}: {start.stderr[:500]}",
+        ))
+        return "skipped"
+
+    try:
+        # 4. Find new containers
+        new_ids = get_current_container_ids() - before
+
+        # 5. Collect PIDs from all containers
+        all_pids: list[int] = []
+        for cid in new_ids:
+            all_pids.extend(get_pids_in_container(cid))
+
+        # 6. Collect process data
+        processes: list[Process] = []
+        for pid in all_pids:
+            proc = collect_process(pid, disco_path)
+            if proc is not None:
+                processes.append(proc)
+
+        # 7. Save
+        data = CollectedData(
+            integration=integration,
+            environment=env,
+            collected_at=now_iso(),
+            processes=processes,
+            disco_raw={},
+        )
+        save_data(data, data_dir)
+        return "ok"
+
+    finally:
+        # 8. Stop environment regardless of success
+        subprocess.run(
+            ["ddev", "--no-interactive", "env", "stop", integration, env],
+            capture_output=True, timeout=120,
+        )
+
+
 def cmd_collect(args: argparse.Namespace) -> None:
-    raise NotImplementedError
+    repo_root = Path(args.repo_root)
+    data_dir = Path(args.data_dir)
+
+    if args.all:
+        integrations = find_integrations_with_e2e(repo_root)
+    elif args.integration:
+        integrations = [args.integration]
+    else:
+        print("Error: specify an integration name or --all", flush=True)
+        raise SystemExit(1)
+
+    for integration in integrations:
+        print(f"[{integration}] ", end="", flush=True)
+        status = collect_integration(
+            integration=integration,
+            env_override=args.env,
+            disco_path=args.disco,
+            data_dir=data_dir,
+            repo_root=repo_root,
+        )
+        print(status, flush=True)
 
 
 def cmd_analyze(args: argparse.Namespace) -> None:

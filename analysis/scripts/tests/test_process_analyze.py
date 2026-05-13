@@ -325,3 +325,42 @@ def test_record_skip_upserts(tmp_path):
 def test_load_skipped_missing_file(tmp_path):
     skipped = load_skipped(tmp_path)
     assert skipped == []
+
+
+from process_analyze import collect_integration
+
+
+def test_collect_integration_skips_caddy(tmp_path):
+    from process_analyze import SkipEntry
+    # Create a fake integration with caddy compose
+    tests_dir = tmp_path / "mycheck" / "tests" / "docker"
+    tests_dir.mkdir(parents=True)
+    (tests_dir / "docker-compose.yaml").write_text(
+        "services:\n  app:\n    image: caddy:2.7\n"
+    )
+
+    data_dir = tmp_path / "data"
+    # Pass env_override to skip the ddev env show subprocess call
+    result = collect_integration("mycheck", "py3.13-1.0", "/fake/disco", data_dir, tmp_path)
+    assert result == "skipped"
+    skipped = load_skipped(data_dir)
+    assert skipped[0].reason == "fake caddy server"
+
+
+def test_collect_integration_skips_on_env_start_failure(tmp_path):
+    (tmp_path / "mycheck" / "tests").mkdir(parents=True)
+    data_dir = tmp_path / "data"
+    with patch("subprocess.run") as mock_run:
+        # Calls in order:
+        #   1. ddev env show  (env selection)
+        #   2. docker ps      (get_current_container_ids, before snapshot)
+        #   3. ddev env start — fail
+        mock_run.side_effect = [
+            MagicMock(stdout="│ py3.13-1.0 │\n", returncode=0),
+            MagicMock(stdout="", returncode=0),
+            MagicMock(stdout="", stderr="docker error", returncode=1),
+        ]
+        result = collect_integration("mycheck", None, "/fake/disco", data_dir, tmp_path)
+    assert result == "skipped"
+    skipped = load_skipped(data_dir)
+    assert skipped[0].reason == "env start failed"
