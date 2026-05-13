@@ -244,6 +244,22 @@ def test_trim_set_stmts(query, expected_trimmed_query):
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
+    'intervals, expected',
+    [
+        pytest.param((600, 600, 600, 3600), 600, id='all-multiples-of-min'),
+        pytest.param((600, 600, 600, 4500), 300, id='min-not-equal-to-gcd'),
+        pytest.param((600,), 600, id='single-interval'),
+        pytest.param((600, 0, 3600), 600, id='zero-does-not-constrain-gcd'),
+        pytest.param((600.0, 3600.0), 600, id='float-inputs-cast-to-int'),
+        pytest.param((900, 1500), 300, id='gcd-smaller-than-any-input'),
+    ],
+)
+def test_collection_interval_gcd(intervals, expected):
+    assert util.collection_interval_gcd(*intervals) == expected
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
     'exclude_hostname, expected_hostname',
     [
         (False, 'resolved.hostname'),
@@ -402,6 +418,7 @@ def test_check_gc_after_cancel(pg_instance):
     pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 10}
     pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 1}
     pg_instance['data_observability'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
+    pg_instance['collect_column_statistics'] = {'enabled': True, 'collection_interval': 60}
 
     check = PostgreSql('postgres', {}, [pg_instance])
     ref = weakref.ref(check)
@@ -424,3 +441,24 @@ def test_check_gc_after_cancel(pg_instance):
             fail(f"Check still alive after cancel() + del -- pinned by: {referrers}")
     finally:
         gc.enable()
+
+
+def test_collect_column_statistics_updates_timestamp_on_failure(pg_instance):
+    pg_instance['dbm'] = True
+    pg_instance['collect_column_statistics'] = {'enabled': True, 'collection_interval': 60}
+
+    check = PostgreSql('postgres', {}, [pg_instance])
+    metadata = check.metadata_samples
+    metadata._tags_no_db = []
+
+    with mock.patch.object(
+        metadata._column_statistics_collector,
+        'collect_column_statistics',
+        side_effect=RuntimeError('boom'),
+    ):
+        before = metadata._last_column_statistics_query_time
+        with pytest.raises(RuntimeError):
+            metadata._collect_column_statistics()
+        after = metadata._last_column_statistics_query_time
+
+    assert after > before
