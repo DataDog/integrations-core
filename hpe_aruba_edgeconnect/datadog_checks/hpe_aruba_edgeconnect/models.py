@@ -15,8 +15,6 @@ log = logging.getLogger(__name__)
 
 
 class IpFilter(TypedDict):
-    """Filter selecting which appliance IPs to monitor (matches ``ApplianceIps`` config model)."""
-
     include: NotRequired[list[str] | None]
     exclude: NotRequired[list[str] | None]
 
@@ -29,71 +27,26 @@ class ApplianceCredentialOverride(TypedDict):
 
 @dataclass(init=False, slots=True)
 class Appliance:
-    """Represents an appliance record returned by the orchestrator API."""
-
-    # TODO remove the ones that are not used (commented out below)
-    # id: str
-    # uuid: str
-    # ne_pk: str
-    # appliance_id: int
     host_name: str
     ip: str
     serial: str
     model: str
-    # platform: str
     mode: str
     software_version: str
-    # hardware_revision: str
-    # system_bandwidth: int
     state: int
     site: str | None
-    # network_role: str
-    # group_id: str
-    # bypass: bool
-    # has_unsaved_changes: bool
-    # reboot_required: bool
-    # web_protocol: str
-    # web_protocol_type: int
-    # dynamic_uuid: str
-    # portal_object_id: str
-    # discovered_from: int
-    # reachability_channel: int
-    # preconfig_status: str | None
-    # suricata_version: str
-    # signature_family: str
     username: str
     password: str
 
     def __init__(self, data: dict[str, Any]) -> None:
-        # self.id = data.get('id', '')
-        # self.uuid = data.get('uuid', '')
-        # self.ne_pk = data.get('nePk', '')
-        # self.appliance_id = data.get('applianceId', 0)
         self.host_name = data.get('hostName', '')
         self.ip = data.get('ip', '')
         self.serial = data.get('serial', '')
         self.model = data.get('model', '')
-        # self.platform = data.get('platform', '')
         self.mode = data.get('mode', '')
         self.software_version = data.get('softwareVersion', '')
-        # self.hardware_revision = data.get('hardwareRevision', '')
-        # self.system_bandwidth = data.get('systemBandwidth', 0)
         self.state = data.get('state', 0)
         self.site = data.get('site')
-        # self.network_role = data.get('networkRole', '')
-        # self.group_id = data.get('groupId', '')
-        # self.bypass = data.get('bypass', False)
-        # self.has_unsaved_changes = data.get('hasUnsavedChanges', False)
-        # self.reboot_required = data.get('rebootRequired', False)
-        # self.web_protocol = data.get('webProtocol', '')
-        # self.web_protocol_type = data.get('webProtocolType', 0)
-        # self.dynamic_uuid = data.get('dynamicUuid', '')
-        # self.portal_object_id = data.get('portalObjectId', '')
-        # self.discovered_from = data.get('discoveredFrom', 0)
-        # self.reachability_channel = data.get('reachabilityChannel', 0)
-        # self.preconfig_status = data.get('preconfigStatus')
-        # self.suricata_version = data.get('suricataVersion', '')
-        # self.signature_family = data.get('signatureFamily', '')
         self.username = ''
         self.password = ''
 
