@@ -20,7 +20,6 @@ from ddev.cli.release.port_commit_workflow import (
     split_commit_subject,
 )
 from ddev.utils.git import GitCommit
-from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import PullRequest
 from tests.helpers.github_async import FakeAsyncGitHubClient
 from tests.helpers.runner import CliRunner
@@ -219,9 +218,9 @@ def test_commit_step(app_mock, verify, expected_args):
 
 def test_create_pull_request_step(app_mock: MagicMock, fake_async_github: FakeAsyncGitHubClient) -> None:
     app_mock.config.github.token = 'ghp_test'
-    fake_async_github.pull_request_response = GitHubResponse[PullRequest](
-        data=PullRequest(number=7, html_url='https://github.com/x/pr/1'),
-        headers={},
+    fake_async_github.mock_response(
+        'create_pull_request',
+        PullRequest(number=7, html_url='https://github.com/x/pr/1'),
     )
 
     step = CreatePullRequestStep(
@@ -307,9 +306,9 @@ def _setup_command_mocks(mocker, *, commit_sha='deadbeef0011223344', subject='Fi
 
 def test_command_happy_path(ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient) -> None:
     _setup_command_mocks(mocker)
-    fake_async_github.pull_request_response = GitHubResponse[PullRequest](
-        data=PullRequest(number=1, html_url='https://github.com/x/pr/1'),
-        headers={},
+    fake_async_github.mock_response(
+        'create_pull_request',
+        PullRequest(number=1, html_url='https://github.com/x/pr/1'),
     )
     mocker.patch('click.confirm', return_value=True)
     mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
