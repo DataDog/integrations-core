@@ -278,7 +278,7 @@ def collect_integration(
     data_dir: Path,
     repo_root: Path,
 ) -> str:
-    """Collect process data for one integration. Returns 'ok', 'skipped', or 'error'."""
+    """Collect process data for one integration. Returns 'ok' or 'skipped'."""
     # 1. Select environment
     if env_override:
         env = env_override
@@ -312,6 +312,7 @@ def collect_integration(
     before = get_current_container_ids()
     try:
         start = subprocess.run(
+            # --dev is omitted: the dev agent image may not be available
             ["ddev", "--no-interactive", "env", "start", integration, env],
             capture_output=True, text=True, timeout=300,
         )
@@ -415,13 +416,22 @@ def cmd_collect(args: argparse.Namespace) -> None:
 
     for integration in integrations:
         print(f"[{integration}] ", end="", flush=True)
-        status = collect_integration(
-            integration=integration,
-            env_override=args.env,
-            disco_path=args.disco,
-            data_dir=data_dir,
-            repo_root=repo_root,
-        )
+        try:
+            status = collect_integration(
+                integration=integration,
+                env_override=args.env,
+                disco_path=args.disco,
+                data_dir=data_dir,
+                repo_root=repo_root,
+            )
+        except Exception as exc:
+            record_skip(data_dir, SkipEntry(
+                integration=integration,
+                reason="unexpected error",
+                skipped_at=now_iso(),
+                details=str(exc)[:500],
+            ))
+            status = "error"
         print(status, flush=True)
 
 

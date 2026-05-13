@@ -245,8 +245,8 @@ def test_main_process_parent_not_in_store():
 
 def test_main_process_parent_has_no_service():
     procs = _procs(
-        (1, 0, "sh", False),   # parent: no service
-        (5, 1, "nginx", True),  # child
+        (50, 2, "sh", False),   # parent: no service data
+        (5, 50, "nginx", True), # child whose parent has no service → main
     )
     assert is_main_process(5, procs) is True
 
