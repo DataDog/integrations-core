@@ -1,0 +1,1 @@
+Route the legacy cAdvisor probe through the agent's internal HTTP client, which now applies configured proxy and ``extra_headers`` to the probe.

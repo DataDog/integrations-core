@@ -1,1 +1,0 @@
-Migrate cadvisor scraper to the internal HTTP client and migrate test fixtures to mock_openmetrics_http.
