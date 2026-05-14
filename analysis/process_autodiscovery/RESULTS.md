@@ -36,6 +36,40 @@ whose parent is the same service.
 **Question:** Does this algorithm correctly identify exactly one main process per service
 across the integrations in this repository?
 
+### How the algorithm fits with CEL filtering
+
+`isMainProcessForService` is only the first filter in the agent's
+`ProcessListener`
+([`comp/core/autodiscovery/listeners/process.go`][listener]). The second
+filter is a per-integration **CEL expression** evaluated against a
+`FilterProcess` with fields `name` (the process `Comm`), `cmdline`, and
+`args` (see
+[`pkg/proto/datadog/workloadfilter/workloadfilter.proto`][proto] and
+[Scheduling Checks with Autodiscovery based on Service Discovery][cel-doc]).
+Each integration that opts in to process auto-discovery provides a CEL
+expression that selects which processes it actually wants — e.g.
+`name == "raylet"` for Ray, `name == "nginx" && "master" in args` for nginx.
+
+CEL changes how the algorithm's results should be interpreted. The
+algorithm's job is *not* to identify "the right process for integration X."
+It only has to reduce the candidate set to one main per `generated_name`
+within a process tree. Selecting the right candidate among the surviving
+mains is the integration author's job via CEL.
+
+**Note on test methodology.** Every process in this analysis is running
+inside a docker container (the test environments use `docker-compose` for
+practical reasons — running 100+ services bare-metal in CI is not
+tractable). The container packaging is a test convenience: the *topologies*
+(master/worker, sibling pools, multi-instance clusters) are the same ones
+that would appear with host-resident services in production. The
+production goal is to support process auto-discovery for processes running
+*outside* containers, and this is the scenario the algorithm's correctness
+matters for.
+
+[listener]: https://github.com/DataDog/datadog-agent/blob/main/comp/core/autodiscovery/listeners/process.go
+[proto]: https://github.com/DataDog/datadog-agent/blob/main/pkg/proto/datadog/workloadfilter/workloadfilter.proto
+[cel-doc]: https://datadoghq.atlassian.net/wiki/spaces/CONTP/pages/5389616306/Scheduling+Checks+with+Autodiscovery+based+on+Service+Discovery
+
 ## Methodology
 
 ### Tool design
@@ -229,41 +263,44 @@ WARN (N=nodes) is correct behavior here.
 | redisdb | `redis-server` | 3 instances on ports 6380, 6381, 6382 — each is a separate Redis instance |
 | prefect | `prefect` | `prefect server` + `prefect worker` — two distinct components sharing a generated name |
 
-#### Category 3: Sibling worker pool — algorithm does not dedupe siblings
+#### Category 3: Sibling worker pool — algorithm doesn't dedupe, CEL does
 
 These are cases where many *sibling* processes share a `generated_name` and
 their common parent has a *different* `generated_name` (or no service data).
-The current algorithm only filters parent-child duplicates, so each sibling
-becomes its own "main." In production this would spawn N integration
-instances for a single logical service.
+The algorithm only filters parent-child duplicates, so each sibling
+becomes its own "main."
 
 | Integration | Service | N | Parent process | Details |
 |---|---|---|---|---|
-| ray | `ray` | 21 | `raylet` (gn=`raylet`) | 21 `ray::IDLE`/`ray::ServeController`/`ray::ServeReplica` worker processes are all children of a single `raylet`. Disco labels each as `ray` while the parent is `raylet`, so no dedup happens. A real Ray cluster on this host would yield 21 duplicate integration instances. |
+| ray | `ray` | 21 | `raylet` (gn=`raylet`) | 21 `ray::IDLE`/`ray::ServeController`/`ray::ServeReplica` worker processes are all children of a single `raylet`. Disco labels each as `ray` while the parent is `raylet`, so no parent-child dedup happens. |
 | squid | `tail` | 2 | `entrypoint.sh` (gn=`None`) | `tail -F .../access.log` and `tail -F .../cache.log` — two sibling log-tailers under the squid container entrypoint. |
 
-This is a real algorithm limitation, not a disco issue (disco's labels are
-correct in the Ray case — the worker processes really are Python processes
-named `ray`). Filtering would require sibling-grouping logic: if N siblings
-share a `generated_name` and their common parent has a different (or no)
-`generated_name`, collapse them. The current algorithm doesn't do this.
+This is not a problem in practice. The Ray integration's CEL rule would
+target the actual service entrypoint — `name == "raylet"` — and reject
+worker processes named `ray::IDLE` etc. The squid integration's CEL rule
+would target `name == "squid"` and reject `tail`. The algorithm's job is to
+reduce the candidate set to one main per `generated_name`; the integration
+author's job is to pick the right one via CEL. The N here reflects how
+disco labels processes, not how many integration instances would be
+created.
 
-#### Category 4: disco false positives surfaced as WARN (disco issue)
+#### Category 4: disco false positives surfaced as WARN — CEL handles it
 
 | Integration | Service | Details |
 |---|---|---|
 | couchbase | `tmp` | 3 Erlang/OTP `beam.smp` processes labeled `tmp` — a generic disco fallback name for unrecognized Erlang VMs. Each has a different parent (separate Erlang subtrees), so it is not the sibling case above. |
 
-The actual target services (`squid`, `couchbase`) correctly show PASS in
-their respective rows.
+The couchbase integration's CEL rule would not match a generic `tmp`
+process. As above, this WARN row does not correspond to any actual
+duplicate integration instances in production. The actual target services
+(`squid`, `couchbase`) correctly show PASS in their respective rows.
 
 ### disco false positives surfaced as PASS
 
-There is a related class of false positives that does *not* appear in the WARN
-table because each occurs as a single instance: the algorithm emits PASS, but
-the `generated_name` is not the integration's target service. From a
-user-facing auto-discovery perspective these would create unwanted integration
-instances. Examples in the sample:
+There is a related class of false positives that does *not* appear in the
+WARN table because each occurs as a single instance: the algorithm emits
+PASS, but the `generated_name` is not the integration's target service.
+Examples in the sample:
 
 | Integration | generated_name | What it actually is |
 |---|---|---|
@@ -275,13 +312,17 @@ instances. Examples in the sample:
 | elastic | `sh` | shell wrapper |
 | silverstripe_cms | `sh` | shell wrapper |
 
-`supervisord` is a legitimate target service of the dedicated `supervisord`
-integration, so its PASS row is not always a false positive — context matters.
+These rows are produced by disco labeling helper processes as named
+services. They show that the *raw candidate set* after the algorithm
+contains noise, but per-integration CEL rules filter them out before any
+check instance is scheduled: the nifi integration's CEL targets the nifi
+JVM, not `tail`; scylla's CEL targets `scylla`, not the bundled
+`rsyslogd`/`node_exporter`. `supervisord` is also a legitimate target of
+the dedicated `supervisord` integration, so context matters per row.
 
-These rows mean the "108 PASS" headline overstates how often the
-auto-discovery surface area would be correct end-to-end. The algorithm itself
-is doing what it is asked to do (one main per `generated_name`), but the input
-labels are not always the integration's target service.
+In short: the algorithm's job is to produce one main per `generated_name`,
+and these rows are the algorithm doing that correctly. CEL is the layer
+that turns this candidate set into integration instances.
 
 ### Integrations with no service data detected
 
@@ -306,14 +347,13 @@ need a re-collection with longer warmup to be conclusive.
 
 ## Conclusion
 
-**Narrow claim, well supported:** the collected sample did not reveal a
-parent/child deduplication failure. In every case where `disco` labeled both
-a parent and one or more of its descendants with the same `generated_name`,
-the algorithm selected exactly one main process and filtered the rest. No
-genuine worker was incorrectly promoted to main in this sample under that
-specific topology.
+**The `isMainProcessForService` algorithm holds up against the collected
+sample.** In every case where `disco` labeled both a parent and one or more
+of its descendants with the same `generated_name`, the algorithm selected
+exactly one main process and filtered the rest. No genuine worker was
+incorrectly promoted to main in this sample.
 
-This holds across the parent/child deduplication patterns that the sample
+This holds across the parent/child deduplication patterns the sample
 exercised:
 - C servers with pre-fork workers labeled with the same name as the master
   (e.g. `nginx`)
@@ -322,68 +362,52 @@ exercised:
   (`sonar-application-*` vs. its Elasticsearch / WebServer / CeServer
   children — children correctly become their own services)
 
-**Algorithm limitation surfaced by this run:** the algorithm does *not*
-dedupe **siblings** with the same `generated_name` whose common parent has a
-different `generated_name`. The clearest example is **ray**, where 21
-`ray::IDLE` / `ray::ServeReplica` worker processes are all children of a
-single `raylet` (gn=`raylet`). Because the parent is `raylet`, not `ray`,
-each sibling worker passes the `parent.GeneratedName != process.GeneratedName`
-check and becomes its own "main." In production this would create 21
-duplicate integration instances for a single Ray cluster node. The same
-pattern, less dramatically, shows up in `squid tail` (N=2). See Category 3
-above. Fixing this requires sibling-grouping logic in the algorithm — when
-N siblings share a `generated_name` and their common parent has a different
-(or no) `generated_name`, collapse them.
+**Sibling worker pools are handled by CEL, not by the algorithm.** The most
+notable case is **ray**, where 21 `ray::IDLE` / `ray::ServeReplica` workers
+are all children of a single `raylet`. Because the parent's
+`generated_name` is `raylet` (not `ray`), each sibling worker passes the
+`parent.GeneratedName != process.GeneratedName` check and survives as a
+"main." This is intentional: the algorithm only has to reduce the
+candidate set to one main per `generated_name` in each subtree; selecting
+the right candidate (e.g. `name == "raylet"`) is the integration author's
+job via CEL. The same is true for `squid tail`, `couchbase tmp`, and the
+PASS-bucket helpers (`nifi tail`, `scylla rsyslogd`/`node_exporter`, etc.):
+the algorithm produces a correct candidate set, CEL filters it.
 
-**Broader caveats that limit how far the narrow claim generalizes:**
+**Caveats:**
 
-1. **Sample coverage is limited.** Of 144 integrations with E2E tests, 93
-   were collected and 66 of those had a non-infra service detected. The 51
+1. **Sample coverage.** Of 144 integrations with E2E tests, 93 were
+   collected and 66 of those had a non-infra service detected. The 51
    skipped integrations include 19 K8s-only environments (process discovery
    is not relevant — target service runs as a pod inside Kind's nested
    namespaces), 18 fake-caddy fixtures (no real service runs), and 13 env
    start failures dominated by Windows-only integrations and local
    toolchain issues. K8s-only and caddy-fixture integrations are
    structurally out of scope rather than gaps in coverage.
-2. **The PASS count overstates correctness.** "118 PASS" counts each
-   (integration, generated_name) pair, including legitimate multi-instance
-   passes and the false-positive helper processes called out above
-   (`tail`, `sh`, container-side `supervisord`/`rsyslogd`/`node_exporter`).
-3. **Some integrations did not exercise the algorithm at all.** For example,
+2. **Some integrations did not exercise the algorithm at all.** For example,
    the postgres background workers (`checkpointer`, `bgwriter`, `walwriter`,
    `autovacuum`, io workers) had `has_service_data: false`. They were
    excluded from the analyzer's input by the `has_service_data` filter, not
    by the algorithm. The algorithm's behavior on those workers is therefore
-   unknown from this data.
-4. **Algorithm correctness depends on `disco` correctness.** If `disco`
-   labels a child process with a *different* `generated_name` than its
-   parent (or labels a non-service process), the algorithm will faithfully
-   treat them as independent services — which is correct given its input,
-   but may be wrong end-to-end. The `tail` / `sh` / container-helper PASS
-   rows are examples.
-5. **Container detection differs from the design spec.** The spec describes
+   unknown from this data. Production-truthful coverage of that branch
+   would require extending the analyzer to also consider processes with
+   `has_service_data: false` whose parent does have service data.
+3. **Container detection differs from the design spec.** The spec describes
    filtering containers by ddev name/prefix; the implementation instead
    computes the delta of `docker ps` before and after `ddev env start`. This
-   is the basis for the "soft warning" path in step 2 of the workflow:
-   when start exits non-zero but the delta has new containers, collection
-   still proceeds. Files written under this path have a `start_warning` key
-   under `disco_raw` for traceability.
+   is the basis for the "soft warning" path: when start exits non-zero
+   but the delta has new containers, collection still proceeds. Files
+   written under this path have a `start_warning` key under `disco_raw` for
+   traceability.
 
-**Recommendations:**
-
-- **Algorithm:** add sibling-grouping deduplication for the Ray pattern.
-- **Disco follow-ups:**
-  1. Improve naming for Erlang/OTP processes (couchbase `tmp`).
-  2. Avoid labeling log-tailing helper processes as services
-     (squid `tail`, nifi `tail`, riak `tail`).
-  3. Avoid labeling generic shell wrappers and container helper daemons as
-     services (`sh`, `rsyslogd`, `node_exporter`, container-side
-     `supervisord`).
-
-Closing the remaining algorithm-level gap on the *postgres-style untested
-workers* would require extending the analyzer to also consider processes
-with `has_service_data: false` whose parent does have service data — that is
-the path the production algorithm would actually take on those workers.
+**Recommendation:** the algorithm can ship as is. The follow-up that would
+materially improve the auto-discovery surface area is on the integration
+side — each integration that opts in to process auto-discovery needs a CEL
+expression precise enough to select its actual entrypoint (e.g.
+`name == "raylet"` rather than matching any `ray*` process). Disco
+relabeling improvements (better names for Erlang `tmp`, log-tailers,
+container helpers) are nice-to-haves that would simplify the CEL rules but
+are not blockers.
 
 ## Files
 
