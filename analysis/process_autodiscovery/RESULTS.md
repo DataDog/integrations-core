@@ -509,15 +509,35 @@ distinct `generated_name` so the dedup check
 (`parent.GeneratedName != process.GeneratedName`) keeps them separate.
 
 **Note on the "multiple instances per host" config pattern.** Several
-integrations support a multi-instance `conf.yaml` (e.g. monitoring
-multiple Postgres databases from one agent). That style describes
-*multiple endpoints*, not multiple workers of one service, and each
-entry typically points at a different host:port. For process
-auto-discovery the mapping is straightforward: each process that
-matches the integration's CEL rule becomes one instance. Multiple
-Postgres processes on the same host (different `-D` data dirs) produce
-multiple instances — and the algorithm preserves them because they all
-have `ppid == 1` (or different parents), so the dedup never fires.
+integrations document configuring more than one integration instance
+against the same host. Inspecting `assets/configuration/spec.yaml` and
+`conf.yaml.example` for those that do, the multiplication is always
+along a different axis than processes:
+
+| Integration | What the multi-instance config configures | How the host's processes look |
+|---|---|---|
+| `sqlserver` | Spec says: "When setting up multiple instances for different **databases** on the same host these metrics will be duplicated unless this option [`instance_metrics.enabled`] is turned off." | One `sqlservr` process serves many databases; the user adds N entries to `instances:`, each with a different `database:`. |
+| `mongo` | Multiple instances each targeting a different mongo cluster/replica set. | Each instance points at a different remote `hosts:` — typically a different host, not the local one. |
+| `php_fpm` | Multiple pools on one master, each with its own status URL. | One `php-fpm: master process` forks workers (already dedup'd correctly); users add N entries to `instances:`, each with a different `ping_url`/`status_url`. |
+| `elastic` | Spec acknowledges users may run more than one ES node per machine. | Each ES node is its own JVM with `ppid == 1` (or a distinct parent); the algorithm already produces N mains. |
+| `openmetrics` / `prometheus` | Multiple `prometheus_url`s. | Different remote endpoints; not a parent/child question. |
+
+In every case the multi-instance count comes from *logical entities*
+inside the service (databases, pools, replica sets, scrape URLs), not
+from the worker processes the algorithm collapses. The
+auto-discovery template mechanism already handles this orthogonally:
+when a process matches the integration's CEL rule, every entry in the
+integration's `auto_conf.yaml` `instances:` list is instantiated for
+that match. Worker dedup and per-process instance multiplication
+operate on different axes.
+
+The contrived case where the two axes *would* collide — a service
+that forks workers, gives each worker its own metrics endpoint, and
+expects each to be monitored separately — does not appear in any
+multi-instance-documenting integration in the sample. If one shows up
+later the disco-side fix (distinct `generated_name` per worker)
+remains the recommended path; the dedup itself stays correct for
+every case actually present today.
 
 ### Existing manifest signatures don't translate to CEL verbatim
 
