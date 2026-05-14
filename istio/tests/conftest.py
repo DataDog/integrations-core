@@ -153,7 +153,7 @@ def dd_environment(dd_save_state):
                 }
                 dd_save_state("istio_instance", instance)
                 yield instance
-            elif VERSION == '1.13.3':
+            else:
                 istiod_host, istiod_port = stack.enter_context(
                     port_forward(kubeconfig, 'istio-system', ISTIOD_METRICS_PORT, 'deployment', 'istiod')
                 )
