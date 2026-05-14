@@ -6,7 +6,6 @@
   "description": "Alerts when no Anthropic compliance log events are received within a recent window, indicating the crawler is broken, the Compliance API toggle was disabled, or the Admin API key lost compliance scope.",
   "tags": [
     "integration:anthropic",
-    "service:anthropic-compliance-logs"
   ],
   "definition": {
     "id": 1,
