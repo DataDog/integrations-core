@@ -54,7 +54,7 @@ instances:
     ## @param appliance_credentials - list of mappings - optional
     ## Per-appliance credential overrides matched by CIDR. When an appliance IP falls within a listed
     ## CIDR block, the associated username and password are used instead of the main credentials.
-    ## Each entry must specify all three fields: cidr, username, and password.
+    ## Each entry must specify all three fields: `cidr`, `username`, and `password`.
     #
     # appliance_credentials:
     #   - cidr: 10.0.0.0/24
