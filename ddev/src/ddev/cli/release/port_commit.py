@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 @click.command(name='port-commit', short_help='Backport a commit onto a target branch')
 @click.pass_obj
-@click.argument('commit_hash', required=False, metavar='[COMMIT_OR_PR]')
+@click.argument('commit_hash', required=False, metavar='COMMIT_OR_PR')
 @click.option('-t', '--target-branch', default='master', show_default=True, help='Target branch to port to.')
 @click.option('-p', '--branch-prefix', default='port', show_default=True, help='Branch name prefix.')
 @click.option('-s', '--branch-suffix', default=None, help='Branch name suffix. Defaults to `to-<target-branch>`.')

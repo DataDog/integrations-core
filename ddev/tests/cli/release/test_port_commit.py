@@ -746,9 +746,12 @@ def test_command_fetches_commit_when_not_local(
     [
         pytest.param('PR-23703', id='PR-prefix'),
         pytest.param('pr-23703', id='PR-prefix-lowercase'),
-        pytest.param('https://github.com/DataDog/integrations-core/pull/23703', id='URL'),
+        pytest.param('PR-23703 ', id='PR-prefix-trailing-whitespace'),
+        pytest.param('https://github.com/DataDog/integrations-core/pull/23703', id='URL-https'),
+        pytest.param('http://github.com/DataDog/integrations-core/pull/23703', id='URL-http'),
         pytest.param('https://github.com/DataDog/integrations-core/pull/23703#discussion_r1', id='URL-with-fragment'),
         pytest.param('23703', id='pure-digit-auto-detect'),
+        pytest.param(' 23703 ', id='pure-digit-with-whitespace'),
     ],
 )
 def test_command_resolves_pr_input(
@@ -822,7 +825,8 @@ def test_command_aborts_when_pr_input_has_no_token(
     result = ddev('release', 'port-commit', '--no-pr', 'PR-23703')
 
     assert result.exit_code == 1, result.output
-    assert 'GitHub token required to look up PRs' in result.output
+    assert 'GitHub token required to resolve a PR reference' in result.output
+    assert '--no-pr does not skip this lookup' in result.output
     fake_async_github.assert_not_called('get_pull_request')
 
 
@@ -851,7 +855,7 @@ def test_command_falls_back_to_commit_on_pr_not_found(
     assert result.exit_code == 0, result.output
     assert fake_async_github.last_call('get_pull_request').kwargs['pull_number'] == int(short_input)
     git_calls = [c.args for c in run_mock.call_args_list]
-    # No SHA-targeted fetch (3 args) — commit was resolvable locally.
+    # No SHA-targeted fetch (3 args): commit was resolvable locally.
     assert not any(len(args) == 3 and args[:2] == ('fetch', 'origin') for args in git_calls)
 
 

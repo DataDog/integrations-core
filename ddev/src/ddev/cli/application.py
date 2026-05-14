@@ -108,7 +108,7 @@ class Application(Terminal):
             self.repo, user=self.config.github.user, token=self.config.github.token, status=self.status
         )
 
-    def abort(self, text='', code=1, **kwargs) -> NoReturn:
+    def abort(self, text: str = '', code: int = 1, **kwargs: Any) -> NoReturn:
         if text:
             self.display_error(text, **kwargs)
         self.__exit_func(code)
