@@ -68,13 +68,13 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
 
     def check(self, _: Any) -> None:
         try:
+            self._api.ensure_authenticated()
             self._api.get_version()
             self.gauge('api.can_connect', 1, tags=self._base_tags)
-        except (ConnectionError, HTTPError, InvalidURL, Timeout, JSONDecodeError) as e:
+        except (ConnectionError, HTTPError, InvalidURL, Timeout, JSONDecodeError, ValueError) as e:
             self.log.warning('Could not connect to PowerFlex Gateway, skipping metric collection: %s', e)
             self.gauge('api.can_connect', 0, tags=self._base_tags)
             return
-        self._api.ensure_authenticated()
         for collector in (
             self._collect_systems,
             self._collect_volumes,
@@ -401,6 +401,6 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
 
     def _collect_bwc_metrics(self, stats: dict, bwc_metrics: list[tuple[str, str]], tags: list[str]) -> None:
         for api_field, metric_suffix in bwc_metrics:
-            bwc = stats.get(api_field, {})
+            bwc = stats.get(api_field) or {}
             for bwc_field, bwc_suffix in BWC_SUB_FIELDS:
                 self.gauge(f'{metric_suffix}.{bwc_suffix}', bwc.get(bwc_field), tags=tags)

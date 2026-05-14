@@ -41,7 +41,7 @@ def assert_bwc_metrics(aggregator, bwc_metrics, tags, value=0):
 
 
 def test_can_connect_down(dd_run_check, aggregator, instance, mocker):
-    mocker.patch('requests.Session.get', side_effect=ConnectionError('connection refused'))
+    mocker.patch('requests.Session.post', side_effect=ConnectionError('connection refused'))
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
 
@@ -52,10 +52,8 @@ def test_can_connect_down(dd_run_check, aggregator, instance, mocker):
     )
 
 
-def test_auth_failure(dd_run_check, aggregator, instance, mocker, caplog):
-    response = MagicMock(status_code=401, reason='Unauthorized')
-    response.raise_for_status.side_effect = HTTPError(response=response)
-    mocker.patch('requests.Session.post', return_value=response)
+def test_version_failure(dd_run_check, aggregator, instance, mock_auth, mocker, caplog):
+    mocker.patch('requests.Session.get', side_effect=HTTPError(response=MagicMock(status_code=500)))
 
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     caplog.set_level(logging.WARNING)
