@@ -97,23 +97,9 @@ def setup_istio_ambient():
     )
     # Expose ztunnel's stats endpoint via a Service so the port-forward target name is stable
     # (the underlying DaemonSet's pod name has a random suffix that would break port-forward
-    # teardown name lookup in CI).
-    run_command(
-        [
-            "kubectl",
-            "expose",
-            "daemonset",
-            "ztunnel",
-            "-n",
-            "istio-system",
-            "--name",
-            ZTUNNEL_METRICS_SERVICE,
-            "--port",
-            str(ZTUNNEL_METRICS_PORT),
-            "--target-port",
-            str(ZTUNNEL_METRICS_PORT),
-        ]
-    )
+    # teardown name lookup in CI). kubectl expose does not support DaemonSets, so apply a
+    # Service manifest directly.
+    run_command(["kubectl", "apply", "-f", opj(HERE, 'kind', "ztunnel_service.yaml")])
     run_command(["kubectl", "label", "namespace", "default", "istio.io/dataplane-mode=ambient", "--overwrite"])
     run_command(["kubectl", "apply", "-f", opj(istio, "samples", "bookinfo", "platform", "kube", "bookinfo.yaml")])
     run_command(["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "-n", "default", "--timeout=300s"])
