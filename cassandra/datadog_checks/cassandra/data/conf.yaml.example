@@ -53,21 +53,21 @@ init_config:
 #
 instances:
 
+    ## @param cassandra_aliasing - boolean - required
+    ## Must be set to true to comply with CASSANDRA-4009.
+    ## Learn more: https://issues.apache.org/jira/browse/CASSANDRA-4009
+    #
+  - cassandra_aliasing: true
+
     ## @param host - string - required
     ## JMX hostname to connect to.
     #
-  - host: localhost
+    host: localhost
 
     ## @param port - integer - required
     ## JMX port to connect to.
     #
     port: 7199
-
-    ## @param cassandra_aliasing - boolean - required
-    ## Must be set to true to comply with CASSANDRA-4009.
-    ## Learn more: https://issues.apache.org/jira/browse/CASSANDRA-4009
-    #
-    cassandra_aliasing: true
 
     ## @param user - string - optional
     ## User to use when connecting to JMX.

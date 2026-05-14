@@ -11,3 +11,7 @@ provides:
     always_on: false
     data_type: events
     direction: inbound
+  - id: elastic-traces
+    always_on: false
+    data_type: traces
+    direction: inbound

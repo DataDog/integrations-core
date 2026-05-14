@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+from unittest import mock
 
 import pytest
 
@@ -55,7 +56,7 @@ def test_mongo_db_test(aggregator, check, instance_user, dd_run_check):
     check = check(instance_user)
     dd_run_check(check)
 
-    tags = [f'host:{common.HOST}', f'port:{common.PORT1}', 'db:test']
+    tags = [f'host:{common.HOST}', f'port:{common.PORT1}', 'db:test', f'database_instance:{check._resolved_hostname}']
     aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK, tags=tags)
 
     metric_names = aggregator.metric_names
@@ -244,3 +245,50 @@ def test_metadata(check, instance, datadog_agent, reported_database_hostname):
     datadog_agent.assert_metadata('test:123', version_metadata)
     datadog_agent.assert_metadata('test:123', {'resolved_hostname': check._resolved_hostname})
     datadog_agent.assert_metadata_count(len(version_metadata) + 4)
+
+
+@pytest.mark.parametrize(
+    'instance_propagate_agent_tags,init_config_propagate_agent_tags,should_propagate_agent_tags',
+    [
+        pytest.param(True, True, True, id="both true"),
+        pytest.param(True, False, True, id="instance config true prevails"),
+        pytest.param(False, True, False, id="instance config false prevails"),
+        pytest.param(False, False, False, id="both false"),
+        pytest.param(None, True, True, id="init_config true applies to all instances"),
+        pytest.param(None, False, False, id="init_config false applies to all instances"),
+        pytest.param(None, None, False, id="default to false"),
+        pytest.param(True, None, True, id="instance config true prevails, init_config is None"),
+        pytest.param(False, None, False, id="instance config false prevails, init_config is None"),
+    ],
+)
+def test_propagate_agent_tags(
+    aggregator,
+    dd_run_check,
+    instance_user,
+    instance_propagate_agent_tags,
+    init_config_propagate_agent_tags,
+    should_propagate_agent_tags,
+):
+    init_config = {}
+    if instance_propagate_agent_tags is not None:
+        instance_user['propagate_agent_tags'] = instance_propagate_agent_tags
+    if init_config_propagate_agent_tags is not None:
+        init_config['propagate_agent_tags'] = init_config_propagate_agent_tags
+
+    agent_tags = ['my-env:test-env', 'random:tag', 'bar:foo']
+
+    with mock.patch('datadog_checks.mongo.config.get_agent_host_tags', return_value=agent_tags):
+        check = MongoDb('mongo', init_config, [instance_user])
+        assert check._config._should_propagate_agent_tags(instance_user, init_config) == should_propagate_agent_tags
+        if should_propagate_agent_tags:
+            for tag in agent_tags:
+                assert tag in check._config.metric_tags
+                assert tag in check._config.service_check_tags
+            dd_run_check(check)
+            expected_tags = [
+                f'host:{common.HOST}',
+                f'port:{common.PORT1}',
+                'db:test',
+                f'database_instance:{check._resolved_hostname}',
+            ] + agent_tags
+            aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK, tags=expected_tags)

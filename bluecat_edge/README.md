@@ -1,5 +1,7 @@
 ## Overview
 
+#### The Bluecat Edge integration is currently in Preview.
+
 [BlueCat Edge][1] is an intelligent DNS resolver and caching layer that leverages existing DNS infrastructure to provide unprecedented visibility and control over DNS traffic.
 
 This integration ingests the DNS query logs.

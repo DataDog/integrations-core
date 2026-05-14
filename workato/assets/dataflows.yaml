@@ -1,0 +1,11 @@
+provides:
+  - id: workato-metrics
+    always_on: true
+    granular: false
+    data_type: metrics
+    direction: inbound
+  - id: workato-logs
+    always_on: true
+    granular: false
+    data_type: logs
+    direction: inbound

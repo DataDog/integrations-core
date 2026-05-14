@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: supabase-cloud
 metric_id: supabase-cloud
 backend_only: false

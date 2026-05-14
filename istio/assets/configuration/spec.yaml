@@ -150,7 +150,7 @@ files:
           type: string
       - name: tag_by_endpoint
         fleet_configurable: true
-        description: Wether to include an endpoint tag or not. This only applies if `use openmentrics` is enabled.
+        description: Whether to include an endpoint tag or not. This only applies if `use openmetrics` is enabled.
         enabled: true
         value:
           type: boolean

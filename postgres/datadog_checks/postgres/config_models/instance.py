@@ -20,6 +20,9 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+SECURE_FIELD_NAMES = frozenset(['ssl_cert', 'ssl_key', 'ssl_root_cert'])
+
+
 class ManagedAuthentication(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -44,9 +47,25 @@ class ManagedAuthentication1(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    client_id: Optional[str] = None
+    auth_type: Optional[str] = Field(
+        None,
+        description='The authentication method. Use `managed_identity` (default) or `workload_identity` for AKS.\n',
+        examples=['managed_identity'],
+    )
+    client_id: Optional[str] = Field(
+        None,
+        description='The client ID of the managed identity or application registration.\nRequired for `managed_identity` auth. Optional for `workload_identity`,\nwhere it defaults to the `AZURE_CLIENT_ID` environment variable.\n',
+    )
     enabled: Optional[bool] = Field(None, examples=[False])
-    identity_scope: Optional[str] = Field(None, examples=['https://ossrdbms-aad.database.windows.net/.default'])
+    identity_scope: Optional[str] = Field(
+        None,
+        description='The permission scope from where to access the identity token.\n',
+        examples=['https://ossrdbms-aad.database.windows.net/.default'],
+    )
+    tenant_id: Optional[str] = Field(
+        None,
+        description='The Azure AD tenant ID. Only used for `workload_identity` auth.\nDefaults to the `AZURE_TENANT_ID` environment variable.\n',
+    )
 
 
 class Azure(BaseModel):
@@ -57,6 +76,22 @@ class Azure(BaseModel):
     deployment_type: Optional[str] = None
     fully_qualified_domain_name: Optional[str] = None
     managed_authentication: Optional[ManagedAuthentication1] = None
+
+
+class CollectColumnStatistics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    exclude_databases: Optional[tuple[str, ...]] = None
+    exclude_schemas: Optional[tuple[str, ...]] = None
+    exclude_tables: Optional[tuple[str, ...]] = None
+    include_databases: Optional[tuple[str, ...]] = None
+    include_schemas: Optional[tuple[str, ...]] = None
+    include_tables: Optional[tuple[str, ...]] = None
+    max_tables: Optional[float] = None
 
 
 class CollectRawQueryStatement(BaseModel):
@@ -106,6 +141,53 @@ class CustomQuery(BaseModel):
     metric_prefix: Optional[str] = None
     query: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
+
+
+class CustomSqlSelectFields(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    entity_id: Optional[str] = None
+    metric_config_id: Optional[int] = None
+
+
+class Entity(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    account: str
+    database: str
+    platform: str
+    schema_: str = Field(..., alias='schema')
+    table: str
+
+
+class Query(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    custom_sql_select_fields: Optional[CustomSqlSelectFields] = None
+    dbname: str
+    entity: Entity
+    interval_seconds: int
+    monitor_id: int
+    query: str
+    type: Optional[str] = None
+
+
+class DataObservability(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    config_id: Optional[str] = None
+    enabled: Optional[bool] = None
+    queries: Optional[tuple[Query, ...]] = None
+    run_sync: Optional[bool] = None
 
 
 class DatabaseAutodiscovery(BaseModel):
@@ -249,6 +331,7 @@ class InstanceConfig(BaseModel):
     collect_bloat_metrics: Optional[bool] = None
     collect_buffercache_metrics: Optional[bool] = None
     collect_checksum_metrics: Optional[bool] = None
+    collect_column_statistics: Optional[CollectColumnStatistics] = None
     collect_count_metrics: Optional[bool] = None
     collect_database_size_metrics: Optional[bool] = None
     collect_default_database: Optional[bool] = None
@@ -260,6 +343,7 @@ class InstanceConfig(BaseModel):
     custom_metrics: Optional[tuple[MappingProxyType[str, Any], ...]] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
     data_directory: Optional[str] = None
+    data_observability: Optional[DataObservability] = None
     database_autodiscovery: Optional[DatabaseAutodiscovery] = None
     database_identifier: Optional[DatabaseIdentifier] = None
     database_instance_collection_interval: Optional[float] = None
@@ -318,6 +402,11 @@ class InstanceConfig(BaseModel):
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
             value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+
+            if info.field_name in SECURE_FIELD_NAMES:
+                validation.security.check_field_trusted_provider(
+                    info.field_name, value, info.context.get('security_config')
+                )
         else:
             value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 

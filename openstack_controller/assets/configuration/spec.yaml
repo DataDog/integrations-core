@@ -162,6 +162,7 @@ files:
           value:
             example: <PATH_TO_YAML_FILE>
             type: string
+            require_trusted_provider: true
         - name: openstack_cloud_name
           description: |
            Name of the cloud configuration to use.
@@ -296,7 +297,9 @@ files:
         - name: endpoint_interface
           fleet_configurable: true
           description: |
-           Indicates the visibility scope of the component's endpoints to use. The possible values are:
+           Indicates the visibility scope of the component's endpoints to use.
+
+           The possible values are:
              public: This endpoint is accessible from outside the cloud and typically denotes a public-facing URL or 
                  IP address.
              internal: This endpoint is typically used for communication between services within the cloud 

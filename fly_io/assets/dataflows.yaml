@@ -7,3 +7,7 @@ provides:
     always_on: false
     data_type: logs
     direction: inbound
+  - id: fly-io-traces
+    always_on: false
+    data_type: traces
+    direction: inbound

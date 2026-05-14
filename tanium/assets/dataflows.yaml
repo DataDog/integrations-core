@@ -1,0 +1,6 @@
+provides:
+  - id: tanium-logs
+    always_on: true
+    granular: true
+    data_type: logs
+    direction: inbound

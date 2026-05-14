@@ -60,16 +60,16 @@ instances:
 
 ### Cluster Monitoring (Preview)
 
-In addition to consumer lag metrics, this integration can collect comprehensive cluster metadata when `enable_cluster_monitoring` is enabled:
+When `enable_cluster_monitoring` is enabled, the integration collects cluster-wide metrics for [Data Streams Monitoring][18] in addition to consumer lag:
 
-- **Broker information**: Configuration and health metrics
-- **Topic and partition details**: Sizes, offsets, replication status
-- **Consumer group metadata**: Member details and group state
-- **Schema registry**: Schema information (if `schema_registry_url` is provided)
+- **Brokers**: Configuration and health metrics
+- **Topics and partitions**: Sizes, offsets, and replication status
+- **Consumer groups**: Member details and group state
+- **Schema registry**: Schema metadata (requires `schema_registry_url`)
 
-All cluster monitoring metrics are tagged with `kafka_cluster_id` for easy filtering.
+#### Batched collection
 
-**Note**: This feature is in Preview and may increase Agent resource consumption on large clusters. The integration caches configuration and schema events to reduce volume.
+Broker configurations, topic configurations, and schema registry version checks are collected in batches across multiple agent runs rather than all at once. This reduces load on large Kafka clusters but means that not all metrics are emitted in every check run. On a cluster with many brokers, topics, or schema subjects, the integration spreads the work over successive runs so that each run stays fast and does not overload the cluster.
 
 Example configuration:
 ```yaml
@@ -78,6 +78,21 @@ instances:
     enable_cluster_monitoring: true
     schema_registry_url: http://localhost:8081  # optional
 ```
+
+### Kafka ACL Permissions
+
+**Cluster** (`kafka-cluster`)
+- DESCRIBE
+- DESCRIBE_CONFIGS (cluster monitoring only)
+
+**Topic** (`*`)
+- DESCRIBE
+- DESCRIBE_CONFIGS (cluster monitoring only)
+- READ, WRITE ([Kafka messages][21] only)
+
+**Consumer group** (`*`)
+- DESCRIBE
+- READ
 
 ### Validation
 

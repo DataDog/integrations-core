@@ -1,0 +1,6 @@
+provides:
+  - id: blazemeter-metrics
+    always_on: true
+    granular: true
+    data_type: metrics
+    direction: inbound

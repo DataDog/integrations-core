@@ -1,0 +1,9 @@
+provides:
+  - id: podman-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: podman-events
+    always_on: true
+    data_type: events
+    direction: inbound

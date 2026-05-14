@@ -113,9 +113,21 @@ EXPECTED_DEFAULTS = {
         'run_sync': False,
         'ignored_settings_patterns': ['plpgsql%'],
     },
+    # === DBM: Column stats collection ===
+    'collect_column_statistics': {
+        'enabled': False,
+        'max_tables': 500,
+        'collection_interval': 3600,
+        'include_databases': [],
+        'exclude_databases': [],
+        'include_schemas': [],
+        'exclude_schemas': [],
+        'include_tables': [],
+        'exclude_tables': [],
+    },
     # === DBM: Schema collection ===
     'collect_schemas': {
-        'enabled': False,
+        'enabled': True,
         'max_tables': 300,
         'max_columns': 50,
         'collection_interval': 600,
@@ -179,6 +191,14 @@ EXPECTED_DEFAULTS = {
     # === DBM: Raw query statements ===
     'collect_raw_query_statement': {
         'enabled': False,
+    },
+    # === Data Observability ===
+    'data_observability': {
+        'enabled': False,
+        'collection_interval': 10,
+        'run_sync': False,
+        'config_id': None,
+        'queries': (),
     },
     # === Relations configuration ===
     'relations': [],

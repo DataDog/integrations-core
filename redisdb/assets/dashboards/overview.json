@@ -16,7 +16,7 @@
             "id": 8013519185925578,
             "definition": {
               "type": "note",
-              "content": "This dashboard shows latency information and slow query counts that summarize your Redis master's performance, as well as memory metrics to help you manage your Redis instance.\n\n##### [Official Datadog Redis documentation ↗](https://docs.datadoghq.com/integrations/redisdb/)",
+              "content": "This dashboard shows latency information and slow query counts that summarize your Redis master's performance, as well as memory metrics to help you manage your Redis instance.\n\n##### [Official Datadog Redis documentation \u2197](https://docs.datadoghq.com/integrations/redisdb/)",
               "background_color": "transparent",
               "font_size": "16",
               "text_align": "left",
@@ -37,7 +37,7 @@
             "id": 2021637053460700,
             "definition": {
               "type": "note",
-              "content": "**Our 3-part blog series**\n\n\n[How to monitor Redis performance metrics&nbsp;↗](https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics/)\n\n[Collecting Redis metrics&nbsp;↗](https://www.datadoghq.com/blog/how-to-collect-redis-metrics/)\n\n[Monitoring Redis with Datadog&nbsp;↗](https://www.datadoghq.com/blog/monitor-redis-using-datadog/)",
+              "content": "**Our 3-part blog series**\n\n\n[How to monitor Redis performance metrics&nbsp;\u2197](https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics/)\n\n[Collecting Redis metrics&nbsp;\u2197](https://www.datadoghq.com/blog/how-to-collect-redis-metrics/)\n\n[Monitoring Redis with Datadog&nbsp;\u2197](https://www.datadoghq.com/blog/monitor-redis-using-datadog/)",
               "background_color": "transparent",
               "font_size": "12",
               "text_align": "left",
@@ -102,13 +102,15 @@
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "avg:redis.stats.keyspace_hits{$scope,$host}",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
                       "query": "avg:redis.stats.keyspace_misses{$scope,$host}",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "formulas": [
@@ -157,7 +159,8 @@
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "sum:redis.clients.blocked{$scope,$host}",
-                      "aggregator": "max"
+                      "aggregator": "max",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -193,7 +196,8 @@
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "sum:redis.keys{$scope,$host}",
-                      "aggregator": "max"
+                      "aggregator": "max",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -234,7 +238,8 @@
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "sum:redis.rdb.changes_since_last{$scope,$host}",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -275,7 +280,8 @@
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "sum:redis.replication.master_link_down_since_seconds{$scope,$host}",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -296,7 +302,7 @@
             "id": 7896589211182748,
             "definition": {
               "type": "note",
-              "content": "This metric is only available when the connection between the primary and its replica has been lost. Ideally, this value should never exceed zero—the primary and the replica should be in constant communication to ensure the replica is not serving stale data.",
+              "content": "This metric is only available when the connection between the primary and its replica has been lost. Ideally, this value should never exceed zero\u2014the primary and the replica should be in constant communication to ensure the replica is not serving stale data.",
               "background_color": "white",
               "font_size": "12",
               "text_align": "left",
@@ -338,7 +344,11 @@
               "title": "Latency by Host",
               "show_legend": true,
               "legend_layout": "vertical",
-              "legend_columns": ["avg", "max", "value"],
+              "legend_columns": [
+                "avg",
+                "max",
+                "value"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -354,7 +364,8 @@
                     {
                       "query": "avg:redis.info.latency_ms{$scope,$host} by {host}",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -406,7 +417,12 @@
               "title": "Slowlog duration",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -426,7 +442,8 @@
                     {
                       "query": "sum:redis.slowlog.micros.95percentile{$scope,$host} by {name,command}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -465,7 +482,8 @@
                       "query": "sum:redis.slowlog.micros.count{$host,$scope} by {command,name}",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "response_format": "scalar",
@@ -507,7 +525,13 @@
               "title": "Average replication delay (offset)",
               "show_legend": false,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "time": {},
               "type": "timeseries",
               "requests": [
@@ -528,7 +552,8 @@
                     {
                       "query": "avg:redis.replication.delay{$host,$scope}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -563,7 +588,13 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -572,12 +603,14 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:redis.cpu.sys{$host,$scope}"
+                      "query": "avg:redis.cpu.sys{$host,$scope}",
+                      "semantic_mode": "combined"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "avg:redis.cpu.user{$host,$scope}"
+                      "query": "avg:redis.cpu.user{$host,$scope}",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "formulas": [
@@ -632,13 +665,15 @@
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "avg:redis.stats.keyspace_hits{$scope,$host}",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
                       "query": "avg:redis.stats.keyspace_misses{$scope,$host}",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "formulas": [
@@ -664,7 +699,13 @@
               "title": "Cache hit rate",
               "show_legend": false,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -680,12 +721,14 @@
                     {
                       "query": "avg:redis.stats.keyspace_hits{$scope,$host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:redis.stats.keyspace_misses{$scope,$host}",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -748,7 +791,13 @@
               "title": "Percent Used Memory by Host",
               "show_legend": true,
               "legend_layout": "vertical",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -764,12 +813,14 @@
                     {
                       "query": "avg:redis.mem.used{$scope,$host} by {host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "max:redis.mem.maxmemory{$scope,$host} by {host}",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -789,12 +840,12 @@
               },
               "markers": [
                 {
-                  "label": " Max memory reached ",
+                  "label": "\u00a0Max memory reached\u00a0",
                   "value": "y = 100",
                   "display_type": "error dashed"
                 },
                 {
-                  "label": " 80% memory usage ",
+                  "label": "\u00a080% memory usage\u00a0",
                   "value": "y = 80",
                   "display_type": "warning dashed"
                 }
@@ -811,7 +862,7 @@
             "id": 24,
             "definition": {
               "type": "note",
-              "content": "Memory usage is a crucial performance factor. If `used_memory > total available system memory`, the OS will begin swapping old/unused sections of memory and writing them to disk. Writing or reading from disk is up to 100,000 times slower than writing or reading from memory (0.1 µs for memory vs. 10 ms for disk).",
+              "content": "Memory usage is a crucial performance factor. If `used_memory > total available system memory`, the OS will begin swapping old/unused sections of memory and writing them to disk. Writing or reading from disk is up to 100,000 times slower than writing or reading from memory (0.1 \u00b5s for memory vs. 10 ms for disk).",
               "background_color": "pink",
               "font_size": "14",
               "text_align": "left",
@@ -834,7 +885,13 @@
               "title": "Evictions",
               "show_legend": false,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -850,7 +907,8 @@
                     {
                       "query": "sum:redis.keys.evicted{$scope,$host} by {host}",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -883,7 +941,13 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -892,7 +956,8 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:redis.mem.rss{$scope,$host}"
+                      "query": "sum:redis.mem.rss{$scope,$host}",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "formulas": [
@@ -942,7 +1007,8 @@
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "avg:redis.mem.fragmentation_ratio{$scope,$host}",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -964,7 +1030,13 @@
               "show_legend": false,
               "legend_size": "0",
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -979,7 +1051,8 @@
                     {
                       "query": "avg:redis.mem.fragmentation_ratio{$scope,$host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1038,7 +1111,11 @@
               "show_legend": true,
               "legend_size": "0",
               "legend_layout": "auto",
-              "legend_columns": ["max", "avg", "min"],
+              "legend_columns": [
+                "max",
+                "avg",
+                "min"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -1054,7 +1131,8 @@
                     {
                       "query": "sum:redis.net.clients{$scope,$host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1106,7 +1184,13 @@
               "title": "Blocked clients",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -1121,7 +1205,8 @@
                     {
                       "query": "sum:redis.clients.blocked{$scope,$host}",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1155,7 +1240,13 @@
               "show_legend": false,
               "legend_size": "0",
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -1170,7 +1261,8 @@
                     {
                       "query": "sum:redis.net.slaves{$scope,$host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1203,7 +1295,13 @@
               "title": "Rejected connections",
               "show_legend": false,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "time": {},
               "type": "timeseries",
               "requests": [
@@ -1219,7 +1317,8 @@
                     {
                       "query": "sum:redis.net.rejected{$scope,$host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1268,7 +1367,8 @@
                       "query": "sum:redis.net.commands{$scope,$host}",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "response_format": "scalar"
@@ -1315,7 +1415,13 @@
               "title": "Total keys",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -1331,7 +1437,8 @@
                     {
                       "query": "sum:redis.keys{$scope,$host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1371,7 +1478,8 @@
                       "name": "query1",
                       "data_source": "metrics",
                       "query": "sum:redis.keys{$scope,$host}",
-                      "aggregator": "last"
+                      "aggregator": "last",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "formulas": [
@@ -1424,7 +1532,13 @@
               "title": "Expired keys",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -1439,7 +1553,8 @@
                     {
                       "query": "sum:redis.keys.expired{$scope,$host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1479,7 +1594,8 @@
                       "name": "query1",
                       "data_source": "metrics",
                       "query": "sum:redis.expires{$scope,$host}",
-                      "aggregator": "last"
+                      "aggregator": "last",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "formulas": [
@@ -1536,7 +1652,8 @@
                       "query": "sum:redis.key.length{$scope, $host, $key} by {key}",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "response_format": "scalar"

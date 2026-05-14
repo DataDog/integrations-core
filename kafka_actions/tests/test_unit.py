@@ -111,6 +111,7 @@ class TestReadMessagesAction:
         event1 = message_events[0]
         assert event1['topic'] == 'test-topic'
         assert event1['offset'] == 100
+        assert event1['message_timestamp'] == 1732128000000
         assert event1['value']['id'] == 1
         assert event1['value']['status'] == 'active'
         assert event1['remote_config_id'] == 'test-read-messages-001'
@@ -419,6 +420,132 @@ class TestConsumeMessagesLatestOffset:
         assigned = {tp.partition: tp.offset for tp in consumer.assign.call_args[0][0]}
         assert assigned[0] == 90  # max(0, 100 - 10)
         assert assigned[1] == 190  # max(0, 200 - 10)
+
+
+class TestConsumeMessagesStartTimestamp:
+    """Test that start_timestamp resolves to per-partition offsets via offsets_for_times."""
+
+    def test_start_timestamp_resolves_offsets(self):
+        from unittest.mock import MagicMock
+
+        consumer = MagicMock()
+        consumer.poll.return_value = None
+
+        metadata = MagicMock()
+        metadata.topics = {'t': MagicMock(partitions={0: MagicMock(), 1: MagicMock()})}
+        consumer.list_topics.return_value = metadata
+
+        # offsets_for_times returns TopicPartitions with resolved offsets
+        resolved_tp0 = MagicMock(partition=0, offset=50)
+        resolved_tp1 = MagicMock(partition=1, offset=120)
+        consumer.offsets_for_times.return_value = [resolved_tp0, resolved_tp1]
+
+        import logging
+
+        from datadog_checks.kafka_actions.kafka_client import KafkaActionsClient
+
+        client = KafkaActionsClient({'kafka_connect_str': 'localhost:9092'}, logging.getLogger('test'))
+
+        with patch.object(client, 'get_consumer', return_value=consumer):
+            list(client.consume_messages(topic='t', start_timestamp=1700000000000, max_messages=10, timeout_ms=500))
+
+        consumer.offsets_for_times.assert_called_once()
+        call_args = consumer.offsets_for_times.call_args[0][0]
+        assert len(call_args) == 2
+        # Verify each TopicPartition was created with the timestamp
+        for tp in call_args:
+            assert tp.offset == 1700000000000
+
+        assigned = consumer.assign.call_args[0][0]
+        assert len(assigned) == 2
+
+    def test_start_timestamp_includes_partitions_at_end(self):
+        from unittest.mock import MagicMock
+
+        consumer = MagicMock()
+        consumer.poll.return_value = None
+
+        metadata = MagicMock()
+        metadata.topics = {'t': MagicMock(partitions={0: MagicMock(), 1: MagicMock()})}
+        consumer.list_topics.return_value = metadata
+
+        # Partition 0 has no messages at the timestamp (offset=-1 = OFFSET_END), partition 1 does
+        resolved_tp0 = MagicMock(partition=0, offset=-1)
+        resolved_tp1 = MagicMock(partition=1, offset=120)
+        consumer.offsets_for_times.return_value = [resolved_tp0, resolved_tp1]
+
+        import logging
+
+        from datadog_checks.kafka_actions.kafka_client import KafkaActionsClient
+
+        client = KafkaActionsClient({'kafka_connect_str': 'localhost:9092'}, logging.getLogger('test'))
+
+        with patch.object(client, 'get_consumer', return_value=consumer):
+            list(client.consume_messages(topic='t', start_timestamp=1700000000000, max_messages=10, timeout_ms=500))
+
+        # Both partitions should be assigned; partition 0 waits at end for new messages
+        assigned = consumer.assign.call_args[0][0]
+        assert len(assigned) == 2
+
+    def test_start_timestamp_overrides_start_offset(self, dd_run_check, aggregator):
+        """Test that start_timestamp is passed through from check config."""
+        messages = [
+            MockKafkaMessage(
+                key=b'key1',
+                value=json.dumps({"id": 1}).encode(),
+                offset=100,
+            ),
+        ]
+
+        instance = {
+            'remote_config_id': 'test-timestamp-001',
+            'kafka_connect_str': 'localhost:9092',
+            'read_messages': {
+                'cluster': 'test-cluster',
+                'topic': 'test-topic',
+                'start_offset': -1,
+                'start_timestamp': 1700000000000,
+                'n_messages_retrieved': 10,
+                'max_scanned_messages': 100,
+                'key_format': 'string',
+                'value_format': 'json',
+            },
+        }
+
+        check = KafkaActionsCheck('kafka_actions', {}, [instance])
+        with (
+            patch.object(check.kafka_client, 'consume_messages', return_value=messages) as mock_consume,
+            patch.object(check.kafka_client, 'get_cluster_id', return_value='test-cluster'),
+        ):
+            dd_run_check(check)
+
+            mock_consume.assert_called_once()
+            call_kwargs = mock_consume.call_args[1]
+            assert call_kwargs['start_timestamp'] == 1700000000000
+
+
+class TestConsumeMessagesEarlyReturn:
+    """Test that consume_messages returns early on None poll or partition EOF."""
+
+    def test_none_poll_breaks_immediately(self):
+        from unittest.mock import MagicMock
+
+        consumer = MagicMock()
+        metadata = MagicMock()
+        metadata.topics = {'t': MagicMock(partitions={0: MagicMock()})}
+        consumer.list_topics.return_value = metadata
+        consumer.poll.side_effect = [MockKafkaMessage(key=b'k', value=b'v', partition=0, offset=0), None]
+
+        import logging
+
+        from datadog_checks.kafka_actions.kafka_client import KafkaActionsClient
+
+        client = KafkaActionsClient({'kafka_connect_str': 'localhost:9092'}, logging.getLogger('test'))
+        with patch.object(client, 'get_consumer', return_value=consumer):
+            result = list(client.consume_messages(topic='t', start_offset=0, max_messages=1000, timeout_ms=30000))
+
+        assert len(result) == 1
+        assert consumer.poll.call_count == 2
 
 
 if __name__ == '__main__':

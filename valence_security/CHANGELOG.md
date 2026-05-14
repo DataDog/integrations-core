@@ -1,6 +1,6 @@
 # CHANGELOG - Valence Security
 
-## 1.0.0 / 2025-12-31
+## 1.0.0 / 2026-04-09
 
 ***Added***:
 

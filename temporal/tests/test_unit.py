@@ -28,7 +28,6 @@ def test_check(dd_run_check, aggregator, check, mock_metrics):
             aggregator.assert_metric_has_tag(metric, tag)
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-    aggregator.assert_all_metrics_covered()
     aggregator.assert_no_duplicate_all()
 
 

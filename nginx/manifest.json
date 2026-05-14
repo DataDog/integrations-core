@@ -75,7 +75,11 @@
     "monitors": {
       "Upstream peers are failing": "assets/monitors/upstream_peer_fails.json",
       "Upstream 4xx errors are high": "assets/monitors/4xx.json",
-      "Upstream 5xx errors are high": "assets/monitors/5xx.json"
+      "Upstream 5xx errors are high": "assets/monitors/5xx.json",
+      "Connection drop rate is high": "assets/monitors/conn_dropped.json",
+      "Upstream response latency is high": "assets/monitors/upstream_latency.json",
+      "Worker processes are crashing": "assets/monitors/worker_crashes.json",
+      "Upstream active health check failures": "assets/monitors/upstream_health_check_failures.json"
     },
     "saved_views": {
       "4xx_errors": "assets/saved_views/4xx_errors.json",

@@ -4,7 +4,6 @@
 import click
 from datadog_checks.dev.tooling.commands.validate.agent_reqs import agent_reqs
 from datadog_checks.dev.tooling.commands.validate.agent_signature import legacy_signature
-from datadog_checks.dev.tooling.commands.validate.all_validations import all
 from datadog_checks.dev.tooling.commands.validate.codeowners import codeowners
 from datadog_checks.dev.tooling.commands.validate.config import config
 from datadog_checks.dev.tooling.commands.validate.dashboards import dashboards
@@ -12,7 +11,6 @@ from datadog_checks.dev.tooling.commands.validate.dep import dep
 from datadog_checks.dev.tooling.commands.validate.eula import eula
 from datadog_checks.dev.tooling.commands.validate.imports import imports
 from datadog_checks.dev.tooling.commands.validate.integration_style import integration_style
-from datadog_checks.dev.tooling.commands.validate.jmx_metrics import jmx_metrics
 from datadog_checks.dev.tooling.commands.validate.license_headers import license_headers
 from datadog_checks.dev.tooling.commands.validate.models import models
 from datadog_checks.dev.tooling.commands.validate.package import package
@@ -21,8 +19,10 @@ from datadog_checks.dev.tooling.commands.validate.saved_views import saved_views
 from datadog_checks.dev.tooling.commands.validate.service_checks import service_checks
 from datadog_checks.dev.tooling.commands.validate.typos import typos
 
+from ddev.cli.validate.all import all
 from ddev.cli.validate.ci import ci
 from ddev.cli.validate.http import http
+from ddev.cli.validate.jmx_metrics import jmx_metrics
 from ddev.cli.validate.labeler import labeler
 from ddev.cli.validate.licenses import licenses
 from ddev.cli.validate.metadata import metadata

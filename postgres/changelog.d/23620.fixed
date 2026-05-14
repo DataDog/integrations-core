@@ -1,0 +1,1 @@
+Qualify the diagnose category with the instance host so multiple instances are distinguishable in `datadog-agent diagnose` output.

@@ -7,10 +7,12 @@ from urllib.parse import urljoin
 from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.n8n.metrics import METRIC_MAP, RENAME_LABELS_MAP
 
+from .config_models import ConfigMixin
+
 DEFAULT_READY_ENDPOINT = '/healthz/readiness'
 
 
-class N8nCheck(OpenMetricsBaseCheckV2):
+class N8nCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = 'n8n'
     DEFAULT_METRIC_LIMIT = 0
 
@@ -28,6 +30,7 @@ class N8nCheck(OpenMetricsBaseCheckV2):
         return {
             'metrics': [METRIC_MAP],
             'rename_labels': RENAME_LABELS_MAP,
+            'raw_metric_prefix': 'n8n_',
         }
 
     def _check_n8n_readiness(self):
