@@ -14,6 +14,7 @@ removed; on failure it is left in place for the user to inspect or finish manual
 
 from __future__ import annotations
 
+import contextlib
 import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -353,10 +354,8 @@ def _resolve_commit_or_fetch(app: Application, commit_hash: str) -> str:
     often narrowed in this repo to avoid pulling thousands of branches).
     """
     git = app.repo.git
-    try:
+    with contextlib.suppress(OSError):
         return git.capture('rev-parse', '--verify', f'{commit_hash}^{{commit}}').strip()
-    except OSError:
-        pass
 
     if HEX_PATTERN.fullmatch(commit_hash) and not FULL_SHA_PATTERN.fullmatch(commit_hash):
         app.abort(
@@ -367,17 +366,14 @@ def _resolve_commit_or_fetch(app: Application, commit_hash: str) -> str:
         raise AssertionError('unreachable')
 
     app.display_info(f'Commit `{commit_hash}` not found locally; fetching from origin.')
-    fetch_failed = False
-    try:
+    fetched = False
+    with contextlib.suppress(OSError):
         git.run('fetch', 'origin', commit_hash)
-    except OSError:
-        fetch_failed = True
+        fetched = True
 
-    if not fetch_failed:
-        try:
+    if fetched:
+        with contextlib.suppress(OSError):
             return git.capture('rev-parse', '--verify', f'{commit_hash}^{{commit}}').strip()
-        except OSError:
-            pass
 
     app.abort(f'Commit `{commit_hash}` does not exist locally or on origin.')
     raise AssertionError('unreachable')
