@@ -5,7 +5,7 @@
   "title": "Compliance log ingestion has stopped",
   "description": "Alerts when no Anthropic compliance log events are received within a recent window, indicating the crawler is broken, the Compliance API toggle was disabled, or the Admin API key lost compliance scope.",
   "tags": [
-    "integration:anthropic",
+    "integration:anthropic"
   ],
   "definition": {
     "id": 1,
