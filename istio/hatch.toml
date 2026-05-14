@@ -33,10 +33,7 @@ matrix.version.env-vars = [
   { key = "ISTIO_VERSION", value = "1.13.3", if = ["1.13"] },
   { key = "ISTIO_VERSION", value = "1.24.3", if = ["1.24"] },
 ]
-matrix.mode.env-vars = [
-  { key = "ISTIO_MODE", value = "sidecar", if = ["sidecar"] },
-  { key = "ISTIO_MODE", value = "ambient", if = ["ambient"] },
-]
+matrix.mode.env-vars = "ISTIO_MODE"
 
 [envs.default.env-vars]
 DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
