@@ -744,6 +744,43 @@
       ]
     },
     {
+      "integration": "hive",
+      "expression": "process.name == 'java' && process.args.exists(a, a == '-Dproc_metastore' || a == '-Dproc_hiveserver2')",
+      "source": "manual",
+      "notes": "Apache Hive runs HiveServer2 (SQL query engine) and the Metastore (catalog) as separate JVMs. Disco labels both as the generic 'hadoop' generated_name; the integration's conf.yaml.example documents 'HiveServer2 or Hive Metastore JMX host' as the target, so users configure one instance per role. Disambiguate via the -Dproc_<role> JVM arg. Excludes HDFS NameNode/DataNode in the same env \u2014 those belong to hdfs_namenode/hdfs_datanode integrations.",
+      "mains": 4,
+      "post_cel": 2,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 4094655,
+          "name": "java",
+          "generated_name": "hadoop",
+          "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Xmx256m -Djava.net.preferIPv4Stack=true -Dhadoop.log.dir=/opt/hadoop-2.7.4/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop-2.7.4 -Dhadoop.id.str=root -Dhadoop.root.logger=INFO,console -Djava.library.path=/opt/hadoop-2.7.4/lib/native -Dhadoop.policy.file=hadoop-policy.xml -Djava.net.preferIPv4Stack=true -Xmx512m -Dproc_metastore -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.port=8808 -Dcom.sun.management.jmxremote.rmi.port=8808 -Djava.rmi.server.hostname=localhost -Dlog4j.configurationFile=hive-log4j2.properties -Djava.util.logging.config.file=/opt/hive/conf/parquet-logging.properties -Dhadoop.security.logger=INFO,NullAppender org.apache.hadoop.util.RunJar /opt/hive/lib/hive-metastore-2.3.2.jar org.apache.hadoop.hive.metastore.HiveMetaStore --verbose"
+        },
+        {
+          "pid": 4097127,
+          "name": "java",
+          "generated_name": "hadoop",
+          "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Xmx256m -Djava.net.preferIPv4Stack=true -Dhadoop.log.dir=/opt/hadoop-2.7.4/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop-2.7.4 -Dhadoop.id.str=root -Dhadoop.root.logger=INFO,console -Djava.library.path=/opt/hadoop-2.7.4/lib/native -Dhadoop.policy.file=hadoop-policy.xml -Djava.net.preferIPv4Stack=true -Xmx512m -Dproc_hiveserver2 -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.port=8809 -Dcom.sun.management.jmxremote.rmi.port=8809 -Djava.rmi.server.hostname=localhost -Dlog4j.configurationFile=hive-log4j2.properties -Djava.util.logging.config.file=/opt/hive/conf/parquet-logging.properties -Djline.terminal=jline.UnsupportedTerminal -Dhadoop.security.logger=INFO,NullAppender org.apache.hadoop.util.RunJar /opt/hive/lib/hive-service-2.3.2.jar org.apache.hive.service.server.HiveServer2 --hiveconf hive.server2.enable.doAs=false"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 4092376,
+          "name": "java",
+          "generated_name": "hadoop",
+          "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Dproc_namenode -Xmx1000m -Djava.net.preferIPv4Stack=true -Dhadoop.log.dir=/opt/hadoop-2.7.4/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop-2.7.4 -Dhadoop.id.str=root -Dhadoop.root.logger=INFO,console -Djava.library.path=/opt/hadoop-2.7.4/lib/native -Dhadoop.policy.file=hadoop-policy.xml -Djava.net.preferIPv4Stack=true -Dhadoop.security.logger=INFO,RFAS -Dhdfs.audit.logger=INFO,NullAppender -Dhadoop.security.logger=INFO,NullAppender org.apache.hadoop.hdfs.server.namenode.NameNode"
+        },
+        {
+          "pid": 4092931,
+          "name": "java",
+          "generated_name": "hadoop",
+          "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Dproc_datanode -Xmx1000m -Djava.net.preferIPv4Stack=true -Dhadoop.log.dir=/opt/hadoop-2.7.4/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop-2.7.4 -Dhadoop.id.str=root -Dhadoop.root.logger=INFO,console -Djava.library.path=/opt/hadoop-2.7.4/lib/native -Dhadoop.policy.file=hadoop-policy.xml -Djava.net.preferIPv4Stack=true -server -Dhadoop.security.logger=ERROR,RFAS -Dhadoop.security.logger=INFO,NullAppender org.apache.hadoop.hdfs.server.datanode.DataNode"
+        }
+      ]
+    },
+    {
       "integration": "hivemq",
       "expression": "process.name == 'java' && process.args.exists(a, a.endsWith('hivemq.jar') || a == 'com.hivemq.HiveMQServer')",
       "source": "manual",
@@ -1755,19 +1792,13 @@
     },
     {
       "integration": "sonarqube",
-      "expression": "process.name == 'java' && process.args.exists(a, a == 'org.sonar.server.app.WebServer' || a == 'org.sonar.ce.app.CeServer' || a.endsWith('sonar-application-9.3.0.51899.jar'))",
+      "expression": "process.name == 'java' && process.args.exists(a, a == 'org.sonar.server.app.WebServer' || a == 'org.sonar.ce.app.CeServer')",
       "source": "manual",
-      "notes": "SonarQube launches sonar-application (the wrapper) plus separate JVMs for WebServer and CeServer; elasticsearch in the same container is matched by the elastic rule but distinguished here by not appearing in this list.",
+      "notes": "SonarQube's launcher (sonar-application) forks three child JVMs with distinct generated_names: WebServer, CeServer, and embedded Elasticsearch. The manifest's process_signatures target WebServer + CeServer specifically \u2014 those are the JMX-exposing components the integration monitors. The launcher and the embedded ES are not targets of this integration. Expected post-CEL: 2 instances per SonarQube deployment, matching the manifest signature.",
       "mains": 4,
-      "post_cel": 3,
+      "post_cel": 2,
       "error": null,
       "survivor_detail": [
-        {
-          "pid": 2004401,
-          "name": "java",
-          "generated_name": "sonar-application-9.3.0.51899",
-          "cmdline": "java -jar lib/sonar-application-9.3.0.51899.jar -Dsonar.log.console=true -Dsonar.ce.javaOpts= -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port=10444 -Dcom.sun.management.jmxremote.rmi.port=10444 -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost  -Dsonar.web.javaAdditionalOpts=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port=10443 -Dcom.sun.management.jmxremote.rmi.port=10443 -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost"
-        },
         {
           "pid": 2005061,
           "name": "java",
@@ -1782,6 +1813,12 @@
         }
       ],
       "dropped_detail": [
+        {
+          "pid": 2004401,
+          "name": "java",
+          "generated_name": "sonar-application-9.3.0.51899",
+          "cmdline": "java -jar lib/sonar-application-9.3.0.51899.jar -Dsonar.log.console=true -Dsonar.ce.javaOpts= -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port=10444 -Dcom.sun.management.jmxremote.rmi.port=10444 -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost  -Dsonar.web.javaAdditionalOpts=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port=10443 -Dcom.sun.management.jmxremote.rmi.port=10443 -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost"
+        },
         {
           "pid": 2004555,
           "name": "java",

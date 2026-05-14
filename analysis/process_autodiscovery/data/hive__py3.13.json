@@ -1,0 +1,168 @@
+{
+  "integration": "hive",
+  "environment": "py3.13",
+  "collected_at": "2026-05-14T11:32:48.496689+00:00",
+  "processes": [
+    {
+      "pid": 4091174,
+      "ppid": 4091095,
+      "comm": "startup.sh",
+      "cmdline": "/bin/bash /opt/startup.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 4094655,
+      "ppid": 4091174,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Xmx256m -Djava.net.preferIPv4Stack=true -Dhadoop.log.dir=/opt/hadoop-2.7.4/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop-2.7.4 -Dhadoop.id.str=root -Dhadoop.root.logger=INFO,console -Djava.library.path=/opt/hadoop-2.7.4/lib/native -Dhadoop.policy.file=hadoop-policy.xml -Djava.net.preferIPv4Stack=true -Xmx512m -Dproc_metastore -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.port=8808 -Dcom.sun.management.jmxremote.rmi.port=8808 -Djava.rmi.server.hostname=localhost -Dlog4j.configurationFile=hive-log4j2.properties -Djava.util.logging.config.file=/opt/hive/conf/parquet-logging.properties -Dhadoop.security.logger=INFO,NullAppender org.apache.hadoop.util.RunJar /opt/hive/lib/hive-metastore-2.3.2.jar org.apache.hadoop.hive.metastore.HiveMetaStore --verbose",
+      "generated_name": "hadoop",
+      "has_service_data": true
+    },
+    {
+      "pid": 4097127,
+      "ppid": 4091174,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Xmx256m -Djava.net.preferIPv4Stack=true -Dhadoop.log.dir=/opt/hadoop-2.7.4/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop-2.7.4 -Dhadoop.id.str=root -Dhadoop.root.logger=INFO,console -Djava.library.path=/opt/hadoop-2.7.4/lib/native -Dhadoop.policy.file=hadoop-policy.xml -Djava.net.preferIPv4Stack=true -Xmx512m -Dproc_hiveserver2 -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.port=8809 -Dcom.sun.management.jmxremote.rmi.port=8809 -Djava.rmi.server.hostname=localhost -Dlog4j.configurationFile=hive-log4j2.properties -Djava.util.logging.config.file=/opt/hive/conf/parquet-logging.properties -Djline.terminal=jline.UnsupportedTerminal -Dhadoop.security.logger=INFO,NullAppender org.apache.hadoop.util.RunJar /opt/hive/lib/hive-service-2.3.2.jar org.apache.hive.service.server.HiveServer2 --hiveconf hive.server2.enable.doAs=false",
+      "generated_name": "hadoop",
+      "has_service_data": true
+    },
+    {
+      "pid": 4097128,
+      "ppid": 4091174,
+      "comm": "sleep",
+      "cmdline": "sleep 1000",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 4091173,
+      "ppid": 4091101,
+      "comm": "run.sh",
+      "cmdline": "/bin/bash /run.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 4092376,
+      "ppid": 4091173,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Dproc_namenode -Xmx1000m -Djava.net.preferIPv4Stack=true -Dhadoop.log.dir=/opt/hadoop-2.7.4/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop-2.7.4 -Dhadoop.id.str=root -Dhadoop.root.logger=INFO,console -Djava.library.path=/opt/hadoop-2.7.4/lib/native -Dhadoop.policy.file=hadoop-policy.xml -Djava.net.preferIPv4Stack=true -Dhadoop.security.logger=INFO,RFAS -Dhdfs.audit.logger=INFO,NullAppender -Dhadoop.security.logger=INFO,NullAppender org.apache.hadoop.hdfs.server.namenode.NameNode",
+      "generated_name": "hadoop",
+      "has_service_data": true
+    },
+    {
+      "pid": 4091172,
+      "ppid": 4091103,
+      "comm": "run.sh",
+      "cmdline": "/bin/bash /run.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 4092931,
+      "ppid": 4091172,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Dproc_datanode -Xmx1000m -Djava.net.preferIPv4Stack=true -Dhadoop.log.dir=/opt/hadoop-2.7.4/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop-2.7.4 -Dhadoop.id.str=root -Dhadoop.root.logger=INFO,console -Djava.library.path=/opt/hadoop-2.7.4/lib/native -Dhadoop.policy.file=hadoop-policy.xml -Djava.net.preferIPv4Stack=true -server -Dhadoop.security.logger=ERROR,RFAS -Dhadoop.security.logger=INFO,NullAppender org.apache.hadoop.hdfs.server.datanode.DataNode",
+      "generated_name": "hadoop",
+      "has_service_data": true
+    },
+    {
+      "pid": 4097472,
+      "ppid": 4097438,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 4097516,
+      "ppid": 4097472,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 4097925,
+      "ppid": 4097472,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 4097927,
+      "ppid": 4097472,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 4097928,
+      "ppid": 4097472,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 4097929,
+      "ppid": 4097472,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 4097931,
+      "ppid": 4097472,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 4097932,
+      "ppid": 4097472,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 4097934,
+      "ppid": 4097929,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 4097935,
+      "ppid": 4097931,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 4097937,
+      "ppid": 4097928,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 4097940,
+      "ppid": 4097927,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

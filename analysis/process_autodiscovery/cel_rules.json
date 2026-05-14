@@ -87,6 +87,11 @@
     "expression": "process.name == 'java' && 'org.apache.hadoop.hdfs.server.namenode.NameNode' in process.args",
     "source": "manual"
   },
+  "hive": {
+    "expression": "process.name == 'java' && process.args.exists(a, a == '-Dproc_metastore' || a == '-Dproc_hiveserver2')",
+    "source": "manual",
+    "notes": "Apache Hive runs HiveServer2 (SQL query engine) and the Metastore (catalog) as separate JVMs. Disco labels both as the generic 'hadoop' generated_name; the integration's conf.yaml.example documents 'HiveServer2 or Hive Metastore JMX host' as the target, so users configure one instance per role. Disambiguate via the -Dproc_<role> JVM arg. Excludes HDFS NameNode/DataNode in the same env — those belong to hdfs_namenode/hdfs_datanode integrations."
+  },
   "hivemq": {
     "expression": "process.name == 'java' && process.args.exists(a, a.endsWith('hivemq.jar') || a == 'com.hivemq.HiveMQServer')",
     "source": "manual"
@@ -214,9 +219,9 @@
     "source": "manual"
   },
   "sonarqube": {
-    "expression": "process.name == 'java' && process.args.exists(a, a == 'org.sonar.server.app.WebServer' || a == 'org.sonar.ce.app.CeServer' || a.endsWith('sonar-application-9.3.0.51899.jar'))",
+    "expression": "process.name == 'java' && process.args.exists(a, a == 'org.sonar.server.app.WebServer' || a == 'org.sonar.ce.app.CeServer')",
     "source": "manual",
-    "notes": "SonarQube launches sonar-application (the wrapper) plus separate JVMs for WebServer and CeServer; elasticsearch in the same container is matched by the elastic rule but distinguished here by not appearing in this list."
+    "notes": "SonarQube's launcher (sonar-application) forks three child JVMs with distinct generated_names: WebServer, CeServer, and embedded Elasticsearch. The manifest's process_signatures target WebServer + CeServer specifically — those are the JMX-exposing components the integration monitors. The launcher and the embedded ES are not targets of this integration. Expected post-CEL: 2 instances per SonarQube deployment, matching the manifest signature."
   },
   "sonatype_nexus": {
     "expression": "process.name == 'java' && process.args.exists(a, a.contains('/opt/sonatype/nexus') || a.startsWith('-Dnexus.home') || a == 'org.sonatype.nexus.karaf.NexusMain')",

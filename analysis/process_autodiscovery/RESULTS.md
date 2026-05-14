@@ -510,34 +510,51 @@ distinct `generated_name` so the dedup check
 
 **Note on the "multiple instances per host" config pattern.** Several
 integrations document configuring more than one integration instance
-against the same host. Inspecting `assets/configuration/spec.yaml` and
-`conf.yaml.example` for those that do, the multiplication is always
-along a different axis than processes:
+against the same host. Two distinct families show up.
 
-| Integration | What the multi-instance config configures | How the host's processes look |
+*Family 1 — one process, multiple logical endpoints.* The user
+configures N entries in `instances:` against a single host process,
+each pointing at a different database / pool / replica set / URL:
+
+| Integration | Multi-instance config | Process topology |
 |---|---|---|
-| `sqlserver` | Spec says: "When setting up multiple instances for different **databases** on the same host these metrics will be duplicated unless this option [`instance_metrics.enabled`] is turned off." | One `sqlservr` process serves many databases; the user adds N entries to `instances:`, each with a different `database:`. |
-| `mongo` | Multiple instances each targeting a different mongo cluster/replica set. | Each instance points at a different remote `hosts:` — typically a different host, not the local one. |
-| `php_fpm` | Multiple pools on one master, each with its own status URL. | One `php-fpm: master process` forks workers (already dedup'd correctly); users add N entries to `instances:`, each with a different `ping_url`/`status_url`. |
-| `elastic` | Spec acknowledges users may run more than one ES node per machine. | Each ES node is its own JVM with `ppid == 1` (or a distinct parent); the algorithm already produces N mains. |
-| `openmetrics` / `prometheus` | Multiple `prometheus_url`s. | Different remote endpoints; not a parent/child question. |
+| `sqlserver` | "When setting up multiple instances for different **databases** on the same host these metrics will be duplicated unless this option [`instance_metrics.enabled`] is turned off." | One `sqlservr` serving many databases. |
+| `mongo` | Multiple instances each targeting a different mongo cluster/replica set. | Different remote `hosts:` — typically not local. |
+| `php_fpm` | Multiple pools on one master, each with its own status URL. | One `php-fpm: master process` forks workers (already dedup'd correctly). |
+| `openmetrics` / `prometheus` | Multiple `prometheus_url`s. | Different remote endpoints. |
+| `elastic` | "If each machine only runs a single Elasticsearch node per cluster…" | Each ES node has `ppid == 1`; algorithm already gives N mains. |
 
-In every case the multi-instance count comes from *logical entities*
-inside the service (databases, pools, replica sets, scrape URLs), not
-from the worker processes the algorithm collapses. The
-auto-discovery template mechanism already handles this orthogonally:
-when a process matches the integration's CEL rule, every entry in the
-integration's `auto_conf.yaml` `instances:` list is instantiated for
-that match. Worker dedup and per-process instance multiplication
-operate on different axes.
+For Family 1 the multiplication is along a different axis than processes
+(logical entities inside the service vs. worker processes the algorithm
+collapses). Autodiscovery handles the two orthogonally: when a process
+matches the integration's CEL rule, every entry in the integration's
+`auto_conf.yaml` `instances:` list is instantiated for that match.
 
-The contrived case where the two axes *would* collide — a service
-that forks workers, gives each worker its own metrics endpoint, and
-expects each to be monitored separately — does not appear in any
-multi-instance-documenting integration in the sample. If one shows up
-later the disco-side fix (distinct `generated_name` per worker)
-remains the recommended path; the dedup itself stays correct for
-every case actually present today.
+*Family 2 — one logical deployment, multiple JVMs each monitored as a
+distinct instance.* The integration explicitly targets several JVMs
+that together make up one logical service:
+
+| Integration | Multi-instance shape | Topology in collected data |
+|---|---|---|
+| `sonarqube` | Manifest signatures: `java org.sonar.server.app.WebServer` and `java org.sonar.ce.app.CeServer` — 2 instances per SonarQube install. | One `sonar-application` launcher JVM forks three child JVMs: WebServer, CeServer, and embedded Elasticsearch. All three have *different* `generated_name`s from each other and from the launcher. The dedup never fires; CEL selects WebServer + CeServer → 2 survivors. |
+| `hive` | `conf.yaml.example` documents "HiveServer2 or Hive Metastore JMX host" — typically 2 instances. | Disco labels both HiveServer2 and Metastore JVMs with the *same* generated_name (`hadoop`). They share a name but not a parent — each is forked from its own `run.sh`/`startup.sh` shell with no service data — so the algorithm still produces independent mains. CEL disambiguates via `-Dproc_metastore` / `-Dproc_hiveserver2` JVM args → 2 survivors. |
+| `hazelcast` | One instance per cluster node. | Each node is its own JVM in its own container, each with a distinct parent. Algorithm gives N mains directly; no dedup interaction. Test fixture has a 3-node cluster → 3 survivors. |
+| `torchserve` | Single `process_signatures: ["torchserve"]`; single OpenMetrics endpoint at `:8082/metrics`. | One frontend process; backend Python workers per model are managed by the frontend and not separately monitored. (Collection failed in this run on a port conflict — see manifest and integration docs.) |
+
+For Family 2 the dedup is again irrelevant: the multi-instance shape
+either comes from JVMs with distinct `generated_name`s (SonarQube), or
+from sibling JVMs whose common parent has no service data (Hive), or
+from independent processes in separate containers (Hazelcast).
+
+In every multi-instance-documenting integration surveyed, the
+parent/child dedup either doesn't fire (because parent and child have
+different `generated_name`s) or fires correctly (because workers
+aggregate into the master). The contrived case where the dedup would
+collide with a multi-instance expectation — a service that forks
+workers, gives each worker its own metrics endpoint, and expects each
+to be monitored separately — does not appear in any integration in
+the sample. If one shows up later the disco-side fix (distinct
+`generated_name` per worker) remains the recommended path.
 
 ### Existing manifest signatures don't translate to CEL verbatim
 

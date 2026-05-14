@@ -304,5 +304,11 @@
     "reason": "env start failed",
     "skipped_at": "2026-05-13T17:26:50.434292+00:00",
     "details": "exit code 1: Environment `py3.13` is incompatible: unsupported platform\n"
+  },
+  {
+    "integration": "torchserve",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-14T11:35:45.549057+00:00",
+    "details": "exit code 1:  Container torchserve  Creating\n Container torchserve  Created\n Container torchserve  Starting\nError response from daemon: failed to set up container networking: driver failed programming external connectivity on endpoint torchserve (9ce180d76756921d5d531fecb8bb8f81844c3b2cb056068151543eb89c65c999): Bind for 0.0.0.0:8081 failed: port is already allocated\n"
   }
 ]
