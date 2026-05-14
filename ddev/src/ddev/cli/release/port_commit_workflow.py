@@ -417,6 +417,7 @@ def _resolve_pr_to_commit(app: Application, pr_number: int, *, dry_run: bool) ->
         )
 
     owner, repo = resolve_owner_repo(app)
+    app.display_info(f'Resolving PR #{pr_number} via GitHub...')
     try:
         pr = asyncio.run(_fetch_pr(app.config.github.token, owner, repo, pr_number))
     except httpx.HTTPStatusError as exc:

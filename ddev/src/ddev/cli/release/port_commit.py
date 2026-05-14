@@ -56,12 +56,18 @@ def port_commit(
     The GitHub user for the branch prefix is taken from `ddev config` (`github.user`) or the
     `DD_GITHUB_USER` / `GITHUB_USER` / `GITHUB_ACTOR` environment variables.
     """
+    import logging
+
     from ddev.cli.release.port_commit_workflow import (
         PortStepError,
         build_port_steps,
         display_completion_summary,
         resolve_port_plan,
     )
+
+    # httpx logs every request at INFO and clutters the workflow output. The PR-resolution and
+    # PR-creation steps already print their own status lines; the underlying HTTP traffic is noise.
+    logging.getLogger('httpx').setLevel(logging.WARNING)
 
     plan = resolve_port_plan(
         app,
