@@ -82,6 +82,7 @@ class InstanceConfig(BaseModel):
     kerberos_keytab: Optional[str] = None
     kerberos_principal: Optional[str] = None
     log_requests: Optional[bool] = None
+    max_workers: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     ntlm_domain: Optional[str] = None

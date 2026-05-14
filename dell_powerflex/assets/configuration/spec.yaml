@@ -42,6 +42,14 @@ files:
       value:
         type: boolean
         example: false
+    - name: max_workers
+      description: |
+        Maximum number of threads used to fetch per-resource statistics in parallel.
+        Increase this value for large environments with many resources.
+      value:
+        type: integer
+        example: 4
+        default: 4
     - name: resource_filters
       description: |
         Filter resources by property regex patterns and control statistics

@@ -43,6 +43,12 @@ instances:
     #
     # collect_alerts: false
 
+    ## @param max_workers - integer - optional - default: 4
+    ## Maximum number of threads used to fetch per-resource statistics in parallel.
+    ## Increase this value for large environments with many resources.
+    #
+    # max_workers: 4
+
     ## @param resource_filters - list of mappings - optional
     ## Filter resources by property regex patterns and control statistics
     ## collection per resource type. Exclude takes precedence over include.

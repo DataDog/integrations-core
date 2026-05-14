@@ -894,6 +894,47 @@ def test_collect_alerts(dd_run_check, aggregator, instance, mock_http_get):
     assert 'severity:MINOR' in license_alert['tags']
 
 
+def test_statistics_failure_does_not_block_other_resources(dd_run_check, aggregator, instance, mock_http_get, mocker, caplog):
+    sds2_stats = {'capacityInUseInKb': 350208, 'unusedCapacityInKb': 103406592, 'numOfDevices': 1}
+
+    def selective_fail(sds_id):
+        if sds_id == 'd1c062b700000000':
+            raise Exception('stats API error')
+        return sds2_stats
+
+    mocker.patch(
+        'datadog_checks.dell_powerflex.api.PowerFlexAPI.get_sds_statistics',
+        side_effect=selective_fail,
+    )
+    caplog.set_level(logging.WARNING)
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+
+    assert 'Failed to collect statistics for d1c062b700000000' in caplog.text
+
+    base_tags = ['powerflex_gateway_url:https://localhost:443']
+    # SDS3 (d1c062b700000000) inventory metric should exist but stats should be missing
+    sds3_tags = base_tags + [
+        'sds_id:d1c062b700000000',
+        'sds_name:SDS3',
+        'protection_domain_id:68c139ee00000000',
+        'fault_set_id:faultset00000001',
+        'dell_type:sds',
+    ]
+    aggregator.assert_metric('dell_powerflex.sds.count', value=1, tags=sds3_tags)
+    aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', count=0, tags=sds3_tags)
+
+    # SDS2 (d1c062b800000001) stats should still be collected
+    sds2_tags = base_tags + [
+        'sds_id:d1c062b800000001',
+        'sds_name:SDS2',
+        'protection_domain_id:68c139ee00000000',
+        'dell_type:sds',
+    ]
+    aggregator.assert_metric('dell_powerflex.sds.count', value=1, tags=sds2_tags)
+    aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', value=350208, tags=sds2_tags)
+
+
 def test_user_configured_tags(dd_run_check, aggregator, instance, mock_http_get):
     instance['tags'] = ['env:prod', 'cluster:powerflex-01']
     instance['collect_events'] = True
