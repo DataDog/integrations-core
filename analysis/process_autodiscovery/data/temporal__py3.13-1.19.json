@@ -1,0 +1,90 @@
+{
+  "integration": "temporal",
+  "environment": "py3.13-1.19",
+  "collected_at": "2026-05-14T09:02:50.420148+00:00",
+  "processes": [
+    {
+      "pid": 3365121,
+      "ppid": 3365061,
+      "comm": "tini",
+      "cmdline": "/bin/tini -- /usr/local/bin/docker-entrypoint.sh eswrapper",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3365184,
+      "ppid": 3365121,
+      "comm": "java",
+      "cmdline": "/usr/share/elasticsearch/jdk/bin/java -Xshare:auto -Des.networkaddress.cache.ttl=60 -Des.networkaddress.cache.negative.ttl=10 -XX:+AlwaysPreTouch -Xss1m -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djna.nosys=true -XX:-OmitStackTraceInFastThrow -XX:+ShowCodeDetailsInExceptionMessages -Dio.netty.noUnsafe=true -Dio.netty.noKeySetOptimization=true -Dio.netty.recycler.maxCapacityPerThread=0 -Dio.netty.allocator.numDirectArenas=0 -Dlog4j.shutdownHookEnabled=false -Dlog4j2.disable.jmx=true -Dlog4j2.formatMsgNoLookups=true -Djava.locale.providers=SPI,COMPAT --add-opens=java.base/java.io=ALL-UNNAMED -XX:+UseG1GC -Djava.io.tmpdir=/tmp/elasticsearch-9252539593393909658 -XX:+HeapDumpOnOutOfMemoryError -XX:+ExitOnOutOfMemoryError -XX:HeapDumpPath=data -XX:ErrorFile=logs/hs_err_pid%p.log -Xlog:gc*,gc+age=trace,safepoint:file=logs/gc.log:utctime,pid,tags:filecount=32,filesize=64m -Des.cgroups.hierarchy.override=/ -Xms256m -Xmx256m -XX:MaxDirectMemorySize=134217728 -XX:G1HeapRegionSize=4m -XX:InitiatingHeapOccupancyPercent=30 -XX:G1ReservePercent=15 -Des.path.home=/usr/share/elasticsearch -Des.path.conf=/usr/share/elasticsearch/config -Des.distribution.flavor=default -Des.distribution.type=docker -Des.bundled_jdk=true -cp /usr/share/elasticsearch/lib/* org.elasticsearch.bootstrap.Elasticsearch -Expack.security.enabled=false -Ecluster.routing.allocation.disk.threshold_enabled=true -Ecluster.routing.allocation.disk.watermark.flood_stage=128mb -Ecluster.routing.allocation.disk.watermark.high=256mb -Ediscovery.type=single-node -Ecluster.routing.allocation.disk.watermark.low=512mb",
+      "generated_name": "org.elasticsearch.bootstrap.Elasticsearch",
+      "has_service_data": true
+    },
+    {
+      "pid": 3365648,
+      "ppid": 3365184,
+      "comm": "controller",
+      "cmdline": "/usr/share/elasticsearch/modules/x-pack-ml/platform/linux-x86_64/bin/controller",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3365120,
+      "ppid": 3365058,
+      "comm": "postgres",
+      "cmdline": "postgres",
+      "generated_name": "postgres",
+      "has_service_data": true
+    },
+    {
+      "pid": 3365566,
+      "ppid": 3365120,
+      "comm": "postgres",
+      "cmdline": "postgres: checkpointer",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3365567,
+      "ppid": 3365120,
+      "comm": "postgres",
+      "cmdline": "postgres: background writer",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3365568,
+      "ppid": 3365120,
+      "comm": "postgres",
+      "cmdline": "postgres: walwriter",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3365569,
+      "ppid": 3365120,
+      "comm": "postgres",
+      "cmdline": "postgres: autovacuum launcher",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3365573,
+      "ppid": 3365120,
+      "comm": "postgres",
+      "cmdline": "postgres: stats collector",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3365576,
+      "ppid": 3365120,
+      "comm": "postgres",
+      "cmdline": "postgres: logical replication launcher",
+      "generated_name": null,
+      "has_service_data": false
+    }
+  ],
+  "disco_raw": {
+    "start_warning": "exit code 1:  Container temporal-postgresql  Creating\n Container temporal-elasticsearch  Creating\n Container temporal-elasticsearch  Created\n Container temporal-postgresql  Created\n Container temporal  Creating\n Container temporal  Created\n Container temporal-admin-tools  Creating\n Container temporal-python-worker  Creating\n Container temporal-ui  Creating\n Container temporal-admin-tools  Created\n Container temporal-ui  Created\n Container temporal-python-worker  Created\n Container temporal-postgresql  Starti"
+  }
+}

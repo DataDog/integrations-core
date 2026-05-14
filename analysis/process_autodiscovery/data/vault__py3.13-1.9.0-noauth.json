@@ -1,0 +1,74 @@
+{
+  "integration": "vault",
+  "environment": "py3.13-1.9.0-noauth",
+  "collected_at": "2026-05-14T09:04:00.094615+00:00",
+  "processes": [
+    {
+      "pid": 3372743,
+      "ppid": 3372689,
+      "comm": "vault",
+      "cmdline": "vault server -config=/vault/config -dev-root-token-id= -dev-listen-address=0.0.0.0:8200",
+      "generated_name": "vault",
+      "has_service_data": true
+    },
+    {
+      "pid": 3372947,
+      "ppid": 3372918,
+      "comm": "docker-entrypoi",
+      "cmdline": "/usr/bin/dumb-init /bin/sh /usr/local/bin/docker-entrypoint.sh server",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3373014,
+      "ppid": 3372947,
+      "comm": "vault",
+      "cmdline": "vault server -config=/vault/config -dev-root-token-id= -dev-listen-address=0.0.0.0:8200",
+      "generated_name": "vault",
+      "has_service_data": true
+    },
+    {
+      "pid": 3372575,
+      "ppid": 3372527,
+      "comm": "python",
+      "cmdline": "python /home/run/main.py",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3372741,
+      "ppid": 3372687,
+      "comm": "docker-entrypoi",
+      "cmdline": "/usr/bin/dumb-init /bin/sh /usr/local/bin/docker-entrypoint.sh agent -server -join consul -config-file=/consul/config/config.json",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3372846,
+      "ppid": 3372741,
+      "comm": "consul",
+      "cmdline": "consul agent -data-dir=/consul/data -config-dir=/consul/config -server -join consul -config-file=/consul/config/config.json",
+      "generated_name": "consul",
+      "has_service_data": true
+    },
+    {
+      "pid": 3372576,
+      "ppid": 3372530,
+      "comm": "docker-entrypoi",
+      "cmdline": "/usr/bin/dumb-init /bin/sh /usr/local/bin/docker-entrypoint.sh agent -server -bind 0.0.0.0 -client 0.0.0.0 -bootstrap-expect 1 -config-file=/consul/config/config.json",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3372648,
+      "ppid": 3372576,
+      "comm": "consul",
+      "cmdline": "consul agent -data-dir=/consul/data -config-dir=/consul/config -server -bind 0.0.0.0 -client 0.0.0.0 -bootstrap-expect 1 -config-file=/consul/config/config.json",
+      "generated_name": "consul",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {
+    "start_warning": "exit code 1: time=\"2026-05-14T09:03:23Z\" level=warning msg=\"Found orphan containers ([ray-call-apis ray-echo-task ray-worker-2 ray-worker-3 ray-worker-1 ray-head]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up.\"\n Container vault-provider  Creating\n Container docker-consul-1  Creating\n Container vault-provider  Created\n Container docker-consul-1  Created\n Container vault-leader  Creating\n Container docker-c"
+  }
+}

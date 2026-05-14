@@ -1,0 +1,120 @@
+{
+  "integration": "varnish",
+  "environment": "py3.13-6.5",
+  "collected_at": "2026-05-14T08:46:36.599261+00:00",
+  "processes": [
+    {
+      "pid": 3249621,
+      "ppid": 3249594,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3249678,
+      "ppid": 3249621,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3250064,
+      "ppid": 3249621,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3250065,
+      "ppid": 3249621,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3250067,
+      "ppid": 3249621,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3250068,
+      "ppid": 3249621,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3250069,
+      "ppid": 3249621,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3250071,
+      "ppid": 3249621,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3250072,
+      "ppid": 3250065,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 3250074,
+      "ppid": 3250067,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 3250076,
+      "ppid": 3250068,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 3250078,
+      "ppid": 3250069,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 3241066,
+      "ppid": 3241035,
+      "comm": "varnishd",
+      "cmdline": "varnishd -F -f /etc/varnish/default.vcl -a http=:80,HTTP -a proxy=:8443,PROXY -p feature=+http2 -s malloc,100M",
+      "generated_name": "varnishd",
+      "has_service_data": true
+    },
+    {
+      "pid": 3241173,
+      "ppid": 3241066,
+      "comm": "cache-main",
+      "cmdline": "varnishd -F -f /etc/varnish/default.vcl -a http=:80,HTTP -a proxy=:8443,PROXY -p feature=+http2 -s malloc,100M",
+      "generated_name": "varnishd",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

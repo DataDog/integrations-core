@@ -1,0 +1,18 @@
+{
+  "integration": "tomcat",
+  "environment": "py3.13-10.1-embedded",
+  "collected_at": "2026-05-14T09:03:03.346976+00:00",
+  "processes": [
+    {
+      "pid": 3370039,
+      "ppid": 3369991,
+      "comm": "python",
+      "cmdline": "python /tmp/client.py",
+      "generated_name": null,
+      "has_service_data": false
+    }
+  ],
+  "disco_raw": {
+    "start_warning": "exit code 1:  embedded-client  Built\n embedded-tomcat  Built\n Container embedded-tomcat-1  Creating\n Container embedded-client-1  Creating\n Container embedded-client-1  Created\n Container embedded-tomcat-1  Created\n Container embedded-tomcat-1  Starting\n Container embedded-client-1  Starting\n Container embedded-client-1  Started\nError response from daemon: failed to set up container networking: driver failed programming external connectivity on endpoint embedded-tomcat-1 (4eb919a1f4aac289992513fd781562d86abc"
+  }
+}

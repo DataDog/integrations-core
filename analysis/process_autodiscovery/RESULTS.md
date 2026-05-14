@@ -1,6 +1,6 @@
 # Process Auto-Discovery Algorithm Analysis
 
-**Date:** 2026-05-13  
+**Date:** 2026-05-14 (revised after re-collection)  
 **Branch:** vitkyrka/process-analyze  
 **Tool:** `analysis/scripts/process_analyze.py`
 
@@ -43,15 +43,26 @@ across the integrations in this repository?
 `analysis/scripts/process_analyze.py` has two decoupled modes:
 
 **`collect`** — for each integration with a `test_e2e.py` file:
-1. Pre-flight: skip if the integration uses a fake caddy server (static fixture serving)
-2. `ddev env start <integration> <env>` (latest versioned environment)
+1. Pre-flight skips:
+   - **Fake caddy server** — integrations whose docker-compose only serves
+     static fixtures via `caddy:*` images. No real service runs.
+   - **Kubernetes-only environment** — integrations whose tests use the
+     `datadog_checks.dev.kind` helper. The target service runs as a
+     Kubernetes pod inside a Kind cluster's nested namespaces, and is not
+     visible to host-level process discovery. Process auto-discovery is not
+     relevant for these integrations.
+2. `ddev env start <integration> <env>` (latest versioned environment). If
+   the env was left up from a prior run, stop it first and retry once. If
+   the start exits non-zero but new containers appeared on the host, treat
+   it as a soft warning and proceed with collection — the target service is
+   often live even when a sibling container's healthcheck failed.
 3. Identify Docker container PIDs on the host by scanning `/proc/*/cgroup`
 4. For each PID, run `sudo disco --pid <pid>` to obtain the USM `GeneratedName`
 5. Read `/proc/<pid>/status` and `/proc/<pid>/cmdline` for process tree data
 6. Save to `data/<integration>__<env>.json`
 7. `ddev env stop`
 
-Failed environments and fake-caddy integrations are recorded in `data/skipped.json`.
+Failed environments and pre-flight skips are recorded in `data/skipped.json`.
 
 **`analyze`** — loads saved JSON files and applies a Python translation of
 `isMainProcessForService` to every service process. Produces a verdict per service:
@@ -68,14 +79,14 @@ returns `GeneratedName` values matching what the agent would compute in producti
 ### Scope
 
 - **144** integrations have `test_e2e.py` files in this repository
-- **86** were successfully collected
-- **58** were skipped (see breakdown below)
+- **93** were successfully collected
+- **51** were skipped (see breakdown below)
 
-Of the 86 collected, only **60** had at least one non-infra service detected by
-`disco`. The remaining 26 produced process trees in which the only services
-labeled by `disco` were Datadog Agent components (`agent`, `system-probe`,
-`security-agent`, `privateactionrunner`). The effective target-service sample
-is therefore 60 integrations, not 86 or 144.
+Of the 93 collected, only **66** had at least one non-infra service detected
+by `disco`. The remaining 27 produced process trees in which the only
+services labeled by `disco` were Datadog Agent components (`agent`,
+`system-probe`, `security-agent`, `privateactionrunner`). The effective
+target-service sample is therefore 66 integrations.
 
 ## Results
 
@@ -83,32 +94,42 @@ is therefore 60 integrations, not 86 or 144.
 
 | Category | Count |
 |---|---|
-| Integrations collected | 86 |
+| Integrations collected | 93 |
+| Skipped — kubernetes-only environment (target service runs as a pod) | 19 |
 | Skipped — fake caddy server | 18 |
-| Skipped — env start failed | 39 |
+| Skipped — env start failed | 13 |
 | Skipped — no environments found | 1 |
 
-The 39 "env start failed" skips are not a clean "K8s / Windows / cloud-only"
-slice. They break down (by inspecting `details` in `data/skipped.json`) as:
+The 13 "env start failed" skips break down (by inspecting `details` in
+`data/skipped.json`) as:
 
 | Sub-reason | Count |
 |---|---|
-| Environment already running (operational) | 14 |
-| Docker pull / registry rate-limit / build copy errors (operational) | 10 |
-| `ddev env start` timed out after 300 s (operational) | 6 |
 | Unsupported platform (Windows-only integrations) | 5 |
-| Dependency build failure (missing native headers, local toolchain) | 3 |
-| Kind / Kubernetes cluster setup failed | 1 |
+| `ddev env start` timed out after 300 s (operational) | 3 |
+| Dependency build failure (missing native headers, local toolchain) | 2 |
+| Docker pull / containerd mount lock | 1 |
+| Other (mid-pull failure, env-specific tracebacks) | 2 |
 
-Most of these are environmental, not architectural — the same integrations
-might collect cleanly on a different machine or with a warmed Docker cache.
-This makes the skipped set non-random, so it should not be used to generalize
-about the population of unsampled integrations.
+An earlier run had 39 entries in this bucket; most were re-collected in this
+revision. The remaining 13 are dominated by Windows-only integrations and
+local toolchain issues that re-runs will not fix on this host. The skipped
+set is therefore still non-random — but the operational noise from
+already-running envs and transient Docker Hub pull failures has been removed.
 
 Integrations skipped due to fake caddy are those where the test environment
 serves static fixture files via Caddy instead of running the real service
 (e.g., `kubernetes_cluster_autoscaler`, `silk`, `appgate_sdp`). These are not
 meaningful for process tree analysis.
+
+Integrations skipped due to "kubernetes-only environment" are detected by
+the presence of `datadog_checks.dev.kind` imports in their test code. Their
+target service runs as a Kubernetes pod inside a Kind cluster's nested
+network/PID namespaces — `disco` running on the host cannot reach into those
+namespaces, so process auto-discovery is not relevant for these integrations
+(`argo_*`, `cilium`, `fluxcd`, `istio`, `keda`, `kubevirt_*`, `kuma`,
+`kyverno`, `strimzi`, `tekton`, `traefik_mesh`, `velero`, `weaviate`,
+`cert_manager`, `calico`).
 
 ### Algorithm verdicts
 
@@ -131,9 +152,9 @@ cluster) correctly produce WARN — that is the expected outcome, not a failure.
 
 | Verdict | Count |
 |---|---|
-| **PASS** (1 main for that generated_name in this env) | 108 service/integration pairs |
-| **WARN (N>1)** | 25 service/integration pairs |
-| No non-infra service data (disco returned nothing useful) | 26 integrations |
+| **PASS** (1 main for that generated_name in this env) | 118 service/integration pairs |
+| **WARN (N>1)** | 28 service/integration pairs |
+| No non-infra service data (disco returned nothing useful) | 27 integrations |
 
 ### PASS cases — algorithm exercised successfully
 
@@ -171,7 +192,7 @@ master/worker C servers (`nginx`) and Python pre-fork pools (`gunicorn`).
 
 ### WARN cases — classified
 
-All 25 WARN cases fall into three categories:
+All 28 WARN cases fall into four categories:
 
 #### Category 1: Multi-node cluster test environments (expected, not a problem)
 
@@ -179,7 +200,7 @@ The test environments run multi-node clusters. Each node is an independent servi
 instance in a separate container and legitimately requires its own integration check.
 WARN (N=nodes) is correct behavior here.
 
-| Integration | Service | Nodes | Notes |
+| Integration | Service | N | Notes |
 |---|---|---|---|
 | cassandra_nodetool | `cassandra` | 2 | 2-node cluster |
 | clickhouse | `clickhouse-server` | 6 | 6-shard cluster |
@@ -194,11 +215,12 @@ WARN (N=nodes) is correct behavior here.
 | mapreduce | `hadoop` | 6 | 6-node cluster |
 | rethinkdb | `rethinkdb` | 4 | 4-node cluster |
 | spark | `spark`, `app` | 4, 2 | master + workers; each worker independent |
-| traefik_mesh | `coredns` | 2 | 2 CoreDNS instances |
 | voltdb | `org.voltdb.VoltDB` | 3 | 3-node cluster |
 | singlestore | `memsqld` | 2 | aggregator + leaf node |
 | citrix_hypervisor | `app` | 6 | 6 mock XenServer API endpoints |
 | postgres | `postgres` | 4 | 4 independent DB instances in separate containers |
+| vault | `vault`, `consul` | 2, 2 | vault leader + replica, consul leader + worker |
+| tls | `nginx` | 3 | `nginx-tls1-2`, `nginx-tls1-3`, `nginx-main` — three TLS configurations |
 
 #### Category 2: Multiple independent instances on different ports (expected, not a problem)
 
@@ -207,14 +229,33 @@ WARN (N=nodes) is correct behavior here.
 | redisdb | `redis-server` | 3 instances on ports 6380, 6381, 6382 — each is a separate Redis instance |
 | prefect | `prefect` | `prefect server` + `prefect worker` — two distinct components sharing a generated name |
 
-#### Category 3: disco false positives surfaced as WARN (disco issue, not algorithm issue)
+#### Category 3: Sibling worker pool — algorithm does not dedupe siblings
+
+These are cases where many *sibling* processes share a `generated_name` and
+their common parent has a *different* `generated_name` (or no service data).
+The current algorithm only filters parent-child duplicates, so each sibling
+becomes its own "main." In production this would spawn N integration
+instances for a single logical service.
+
+| Integration | Service | N | Parent process | Details |
+|---|---|---|---|---|
+| ray | `ray` | 21 | `raylet` (gn=`raylet`) | 21 `ray::IDLE`/`ray::ServeController`/`ray::ServeReplica` worker processes are all children of a single `raylet`. Disco labels each as `ray` while the parent is `raylet`, so no dedup happens. A real Ray cluster on this host would yield 21 duplicate integration instances. |
+| squid | `tail` | 2 | `entrypoint.sh` (gn=`None`) | `tail -F .../access.log` and `tail -F .../cache.log` — two sibling log-tailers under the squid container entrypoint. |
+
+This is a real algorithm limitation, not a disco issue (disco's labels are
+correct in the Ray case — the worker processes really are Python processes
+named `ray`). Filtering would require sibling-grouping logic: if N siblings
+share a `generated_name` and their common parent has a different (or no)
+`generated_name`, collapse them. The current algorithm doesn't do this.
+
+#### Category 4: disco false positives surfaced as WARN (disco issue)
 
 | Integration | Service | Details |
 |---|---|---|
-| squid | `tail` | `tail -F /var/log/squid/access.log` and `tail -F /var/log/squid/cache.log` detected as services. These are log-tailing helper processes, not real services. |
-| couchbase | `tmp` | 3 Erlang/OTP beam processes labeled `tmp` — a generic disco name for unrecognized Erlang processes. |
+| couchbase | `tmp` | 3 Erlang/OTP `beam.smp` processes labeled `tmp` — a generic disco fallback name for unrecognized Erlang VMs. Each has a different parent (separate Erlang subtrees), so it is not the sibling case above. |
 
-In both cases the actual target service (`squid`, `couchbase`) correctly shows PASS.
+The actual target services (`squid`, `couchbase`) correctly show PASS in
+their respective rows.
 
 ### disco false positives surfaced as PASS
 
@@ -244,43 +285,67 @@ labels are not always the integration's target service.
 
 ### Integrations with no service data detected
 
-26 integrations produced process trees but disco detected no services. These are mostly:
+27 integrations produced process trees but `disco` detected no non-infra
+services. These are mostly:
 
-- **Kubernetes integrations** where the actual service runs inside a Kind cluster
-  with nested network namespaces that disco cannot reach from the host
+- **Kubernetes integrations** that don't use the ddev kind helper (so the
+  pre-flight skip didn't catch them) but where the actual service still
+  runs inside a Kubernetes-style container disco cannot reach
   (`kube_*`, `kubernetes_state`, `nginx_ingress_controller`, etc.)
 - **Agent-only integrations** where no external service runs
-  (`dns_check`, `tcp_check`, `ssh_check`, `system_core`, `system_swap`, `network`)
+  (`dns_check`, `tcp_check`, `ssh_check`, `system_core`, `system_swap`,
+  `network`)
 - **Services where disco cannot yet identify the process**
   (`postfix`, `vsphere/vcsim`, `proxmox`, `teradata`, `lustre`)
+- **Build/healthcheck races** — e.g. `tomcat` was collected after the
+  start-warning fast path, but the JVM container was still in `Created`
+  state at probe time, so only an unrelated single process was captured.
 
-These integrations are not relevant for process auto-discovery since either
-the service does not run as a host process or disco cannot detect it yet.
+These integrations are not relevant for process auto-discovery, or would
+need a re-collection with longer warmup to be conclusive.
 
 ## Conclusion
 
 **Narrow claim, well supported:** the collected sample did not reveal a
-parent/child deduplication failure. In every case where `disco` labeled both a
-parent and one or more of its descendants with the same `generated_name`, the
-algorithm selected exactly one main process and filtered the rest. No genuine
-worker was incorrectly promoted to main in this sample.
+parent/child deduplication failure. In every case where `disco` labeled both
+a parent and one or more of its descendants with the same `generated_name`,
+the algorithm selected exactly one main process and filtered the rest. No
+genuine worker was incorrectly promoted to main in this sample under that
+specific topology.
 
-This holds across the deduplication patterns that the sample did exercise:
+This holds across the parent/child deduplication patterns that the sample
+exercised:
 - C servers with pre-fork workers labeled with the same name as the master
   (e.g. `nginx`)
 - Python pre-fork pools (`gunicorn`)
 - JVM services with forked child JVMs that get distinct names
-  (`sonar-application-*` vs. its Elasticsearch / WebServer / CeServer children
-  — children correctly become their own services)
+  (`sonar-application-*` vs. its Elasticsearch / WebServer / CeServer
+  children — children correctly become their own services)
 
-**Broader caveats that limit how far this generalizes:**
+**Algorithm limitation surfaced by this run:** the algorithm does *not*
+dedupe **siblings** with the same `generated_name` whose common parent has a
+different `generated_name`. The clearest example is **ray**, where 21
+`ray::IDLE` / `ray::ServeReplica` worker processes are all children of a
+single `raylet` (gn=`raylet`). Because the parent is `raylet`, not `ray`,
+each sibling worker passes the `parent.GeneratedName != process.GeneratedName`
+check and becomes its own "main." In production this would create 21
+duplicate integration instances for a single Ray cluster node. The same
+pattern, less dramatically, shows up in `squid tail` (N=2). See Category 3
+above. Fixing this requires sibling-grouping logic in the algorithm — when
+N siblings share a `generated_name` and their common parent has a different
+(or no) `generated_name`, collapse them.
 
-1. **Sample coverage is limited.** Of 144 integrations with E2E tests, only 86
-   were collected and only 60 of those had a non-infra service detected. The
-   58 skipped integrations include 14 already-running envs, 10 docker
-   pull/registry issues, 6 timeouts, and other operational failures — that
-   skip set is non-random, so the unsampled population may behave differently.
-2. **The PASS count overstates correctness.** "108 PASS" counts each
+**Broader caveats that limit how far the narrow claim generalizes:**
+
+1. **Sample coverage is limited.** Of 144 integrations with E2E tests, 93
+   were collected and 66 of those had a non-infra service detected. The 51
+   skipped integrations include 19 K8s-only environments (process discovery
+   is not relevant — target service runs as a pod inside Kind's nested
+   namespaces), 18 fake-caddy fixtures (no real service runs), and 13 env
+   start failures dominated by Windows-only integrations and local
+   toolchain issues. K8s-only and caddy-fixture integrations are
+   structurally out of scope rather than gaps in coverage.
+2. **The PASS count overstates correctness.** "118 PASS" counts each
    (integration, generated_name) pair, including legitimate multi-instance
    passes and the false-positive helper processes called out above
    (`tail`, `sh`, container-side `supervisord`/`rsyslogd`/`node_exporter`).
@@ -299,33 +364,34 @@ This holds across the deduplication patterns that the sample did exercise:
 5. **Container detection differs from the design spec.** The spec describes
    filtering containers by ddev name/prefix; the implementation instead
    computes the delta of `docker ps` before and after `ddev env start`. This
-   is why "Environment already running" rows in `skipped.json` produce no
-   collected data — the delta is empty.
+   is the basis for the "soft warning" path in step 2 of the workflow:
+   when start exits non-zero but the delta has new containers, collection
+   still proceeds. Files written under this path have a `start_warning` key
+   under `disco_raw` for traceability.
 
-**Recommendation:** the data supports the narrow claim that no
-parent/child deduplication failure was observed in the cases the algorithm was
-actually exercised on. The disco-side follow-ups remain:
-1. Improve naming for Erlang/OTP processes (couchbase `tmp`)
-2. Avoid labeling log-tailing helper processes as services (squid `tail`,
-   nifi `tail`, riak `tail`)
-3. Avoid labeling generic shell wrappers and container helper daemons as
-   services (`sh`, `rsyslogd`, `node_exporter`, container-side
-   `supervisord`)
-4. Extend disco to reach processes inside nested Kubernetes network namespaces
+**Recommendations:**
 
-Closing the remaining algorithm-level gap would require either (a) collecting
-data for the currently skipped integrations on a clean machine, or (b)
-extending the analyzer to also consider processes with `has_service_data:
-false` whose parent does have service data — that is the path the production
-algorithm would actually take on those workers.
+- **Algorithm:** add sibling-grouping deduplication for the Ray pattern.
+- **Disco follow-ups:**
+  1. Improve naming for Erlang/OTP processes (couchbase `tmp`).
+  2. Avoid labeling log-tailing helper processes as services
+     (squid `tail`, nifi `tail`, riak `tail`).
+  3. Avoid labeling generic shell wrappers and container helper daemons as
+     services (`sh`, `rsyslogd`, `node_exporter`, container-side
+     `supervisord`).
+
+Closing the remaining algorithm-level gap on the *postgres-style untested
+workers* would require extending the analyzer to also consider processes
+with `has_service_data: false` whose parent does have service data — that is
+the path the production algorithm would actually take on those workers.
 
 ## Files
 
 | File | Description |
 |---|---|
 | `analysis/scripts/process_analyze.py` | Collection and analysis tool |
-| `analysis/process_autodiscovery/data/*.json` | Raw collected process data (86 files) |
+| `analysis/process_autodiscovery/data/*.json` | Raw collected process data (93 files) |
 | `analysis/process_autodiscovery/data/skipped.json` | Skipped integration log |
-| `analysis/process_autodiscovery/results/analysis_2026-05-13T17-29-06.json` | Final analysis output |
+| `analysis/process_autodiscovery/results/analysis_2026-05-14T09-13-28.json` | Final analysis output (revised) |
 | `docs/superpowers/specs/2026-05-13-process-autodiscovery-analysis-design.md` | Design spec |
 | `docs/superpowers/plans/2026-05-13-process-autodiscovery-analysis.md` | Implementation plan |

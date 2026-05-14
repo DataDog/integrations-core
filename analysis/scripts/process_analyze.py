@@ -111,6 +111,34 @@ def uses_caddy(integration: str, repo_root: Path) -> tuple[bool, str]:
     return False, ""
 
 
+KIND_HELPER_PATTERN = re.compile(
+    r"(?:from\s+datadog_checks\.dev\.kind|"
+    r"datadog_checks\.dev\.kind\s+import|"
+    r"\bkind_run\(|\bsetup_kind\(|\bkind_load_image\()"
+)
+
+
+def uses_kind(integration: str, repo_root: Path) -> tuple[bool, str]:
+    """Return (True, detail) if any Python file under tests/ uses the
+    `datadog_checks.dev.kind` helper, indicating the integration's target
+    service only runs as a Kubernetes pod and is not visible to host-level
+    process discovery.
+    """
+    tests_dir = repo_root / integration / "tests"
+    if not tests_dir.exists():
+        return False, ""
+    for path in tests_dir.rglob("*.py"):
+        try:
+            content = path.read_text(errors="replace")
+        except OSError:
+            continue
+        m = KIND_HELPER_PATTERN.search(content)
+        if m:
+            rel = path.relative_to(repo_root)
+            return True, f"uses datadog_checks.dev.kind in {rel}"
+    return False, ""
+
+
 def read_proc_status(pid: int) -> dict[str, str]:
     """Read /proc/<pid>/status and return key→value pairs."""
     result: dict[str, str] = {}
@@ -275,6 +303,23 @@ def load_skipped(data_dir: Path) -> list[SkipEntry]:
         return [SkipEntry(**e) for e in json.load(f)]
 
 
+def remove_skip(data_dir: Path, integration: str) -> None:
+    """Remove any existing skip entry for the integration, if present."""
+    path = data_dir / "skipped.json"
+    if not path.exists():
+        return
+    try:
+        with open(path) as f:
+            entries = json.load(f)
+    except (json.JSONDecodeError, ValueError):
+        return
+    filtered = [e for e in entries if e.get("integration") != integration]
+    if len(filtered) == len(entries):
+        return
+    with open(path, "w") as f:
+        json.dump(filtered, f, indent=2)
+
+
 def collect_integration(
     integration: str,
     env_override: str | None,
@@ -302,7 +347,7 @@ def collect_integration(
         ))
         return "skipped"
 
-    # 2. Fake caddy check
+    # 2a. Fake caddy check
     is_caddy, caddy_detail = uses_caddy(integration, repo_root)
     if is_caddy:
         record_skip(data_dir, SkipEntry(
@@ -313,14 +358,33 @@ def collect_integration(
         ))
         return "skipped"
 
-    # 3. Start environment
-    before = get_current_container_ids()
-    try:
-        start = subprocess.run(
+    # 2b. Kubernetes-only environment check. If the integration's tests rely
+    # on the ddev kind helper, the target service runs inside a Kind cluster's
+    # nested namespaces and is not visible to host-level process discovery.
+    # Process auto-discovery is not relevant for these integrations.
+    is_kind, kind_detail = uses_kind(integration, repo_root)
+    if is_kind:
+        record_skip(data_dir, SkipEntry(
+            integration=integration,
+            reason="kubernetes-only environment",
+            skipped_at=now_iso(),
+            details=kind_detail,
+        ))
+        return "skipped"
+
+    # 3. Start environment. If a previous run left the environment up,
+    # `ddev env start` fails with "already running" — stop it and retry once
+    # so the docker-ps delta has new containers to inspect.
+    def _start() -> subprocess.CompletedProcess:
+        return subprocess.run(
             # --dev is omitted: the dev agent image may not be available
             ["ddev", "--no-interactive", "env", "start", integration, env],
             capture_output=True, text=True, timeout=300,
         )
+
+    before = get_current_container_ids()
+    try:
+        start = _start()
     except subprocess.TimeoutExpired:
         record_skip(data_dir, SkipEntry(
             integration=integration,
@@ -330,7 +394,30 @@ def collect_integration(
         ))
         return "skipped"
 
-    if start.returncode != 0:
+    if start.returncode != 0 and "already running" in start.stderr:
+        subprocess.run(
+            ["ddev", "--no-interactive", "env", "stop", integration, env],
+            capture_output=True, timeout=120,
+        )
+        before = get_current_container_ids()
+        try:
+            start = _start()
+        except subprocess.TimeoutExpired:
+            record_skip(data_dir, SkipEntry(
+                integration=integration,
+                reason="env start failed",
+                skipped_at=now_iso(),
+                details="ddev env start timed out after 300s (retry after stop)",
+            ))
+            return "skipped"
+
+    # `ddev env start` may exit non-zero even when most containers came up —
+    # e.g. a single service's healthcheck fails, or `--wait` times out, while
+    # the target service is already running and has live processes. Treat the
+    # start as a soft warning when new containers appeared in the docker-ps
+    # delta; only skip when the start failed AND no new containers exist.
+    new_ids = get_current_container_ids() - before
+    if start.returncode != 0 and not new_ids:
         record_skip(data_dir, SkipEntry(
             integration=integration,
             reason="env start failed",
@@ -338,12 +425,12 @@ def collect_integration(
             details=f"exit code {start.returncode}: {start.stderr[:500]}",
         ))
         return "skipped"
+    start_warning = None
+    if start.returncode != 0:
+        start_warning = f"exit code {start.returncode}: {start.stderr[:500]}"
 
     try:
-        # 4. Find new containers
-        new_ids = get_current_container_ids() - before
-
-        # 5. Collect PIDs from all containers
+        # 5. Collect PIDs from all new containers
         all_pids: list[int] = []
         for cid in new_ids:
             all_pids.extend(get_pids_in_container(cid))
@@ -356,15 +443,19 @@ def collect_integration(
                 processes.append(proc)
 
         # 7. Save
+        disco_raw: dict = {}
+        if start_warning is not None:
+            disco_raw["start_warning"] = start_warning
         data = CollectedData(
             integration=integration,
             environment=env,
             collected_at=now_iso(),
             processes=processes,
-            disco_raw={},
+            disco_raw=disco_raw,
         )
         save_data(data, data_dir)
-        return "ok"
+        remove_skip(data_dir, integration)
+        return "ok-with-warning" if start_warning else "ok"
 
     finally:
         # 8. Stop environment regardless of success

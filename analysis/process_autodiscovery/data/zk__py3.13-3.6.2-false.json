@@ -1,0 +1,112 @@
+{
+  "integration": "zk",
+  "environment": "py3.13-3.6.2-false",
+  "collected_at": "2026-05-14T09:08:23.151065+00:00",
+  "processes": [
+    {
+      "pid": 3399877,
+      "ppid": 3399854,
+      "comm": "java",
+      "cmdline": "/usr/local/openjdk-11/bin/java -Dzookeeper.log.dir=/logs -Dzookeeper.log.file=zookeeper--server-d5ddfb57071a.log -Dzookeeper.root.logger=INFO,CONSOLE -XX:+HeapDumpOnOutOfMemoryError -XX:OnOutOfMemoryError=kill -9 %p -cp /apache-zookeeper-3.6.2-bin/bin/../zookeeper-server/target/classes:/apache-zookeeper-3.6.2-bin/bin/../build/classes:/apache-zookeeper-3.6.2-bin/bin/../zookeeper-server/target/lib/*.jar:/apache-zookeeper-3.6.2-bin/bin/../build/lib/*.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/zookeeper-prometheus-metrics-3.6.2.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/zookeeper-jute-3.6.2.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/zookeeper-3.6.2.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/snappy-java-1.1.7.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/slf4j-log4j12-1.7.25.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/slf4j-api-1.7.25.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/simpleclient_servlet-0.6.0.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/simpleclient_hotspot-0.6.0.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/simpleclient_common-0.6.0.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/simpleclient-0.6.0.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/netty-transport-native-unix-common-4.1.50.Final.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/netty-transport-native-epoll-4.1.50.Final.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/netty-transport-4.1.50.Final.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/netty-resolver-4.1.50.Final.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/netty-handler-4.1.50.Final.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/netty-common-4.1.50.Final.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/netty-codec-4.1.50.Final.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/netty-buffer-4.1.50.Final.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/metrics-core-3.2.5.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/log4j-1.2.17.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/json-simple-1.1.1.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/jline-2.14.6.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/jetty-util-9.4.24.v20191120.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/jetty-servlet-9.4.24.v20191120.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/jetty-server-9.4.24.v20191120.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/jetty-security-9.4.24.v20191120.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/jetty-io-9.4.24.v20191120.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/jetty-http-9.4.24.v20191120.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/javax.servlet-api-3.1.0.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/jackson-databind-2.10.3.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/jackson-core-2.10.3.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/jackson-annotations-2.10.3.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/commons-lang-2.6.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/commons-cli-1.2.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/audience-annotations-0.5.0.jar:/apache-zookeeper-3.6.2-bin/bin/../zookeeper-*.jar:/apache-zookeeper-3.6.2-bin/bin/../zookeeper-server/src/main/resources/lib/*.jar:/conf: -Xmx1000m -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.local.only=false org.apache.zookeeper.server.quorum.QuorumPeerMain /conf/zoo.cfg",
+      "generated_name": "zookeeper",
+      "has_service_data": true
+    },
+    {
+      "pid": 3401554,
+      "ppid": 3401531,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3401594,
+      "ppid": 3401554,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3401995,
+      "ppid": 3401554,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3401996,
+      "ppid": 3401554,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3401998,
+      "ppid": 3401554,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3401999,
+      "ppid": 3401554,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3402000,
+      "ppid": 3401554,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3402002,
+      "ppid": 3401554,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3402005,
+      "ppid": 3401996,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 3402006,
+      "ppid": 3401998,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 3402007,
+      "ppid": 3401999,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 3402008,
+      "ppid": 3402000,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

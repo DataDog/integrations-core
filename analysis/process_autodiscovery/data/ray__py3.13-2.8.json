@@ -1,0 +1,266 @@
+{
+  "integration": "ray",
+  "environment": "py3.13-2.8",
+  "collected_at": "2026-05-14T08:58:54.764597+00:00",
+  "processes": [
+    {
+      "pid": 3339454,
+      "ppid": 3339379,
+      "comm": "ray",
+      "cmdline": "/home/ray/anaconda3/bin/python /home/ray/anaconda3/bin/ray start --address=ray-head:6379 --num-cpus=2 --metrics-export-port=8080 --block",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3339455,
+      "ppid": 3339391,
+      "comm": "ray",
+      "cmdline": "/home/ray/anaconda3/bin/python /home/ray/anaconda3/bin/ray start --address=ray-head:6379 --num-cpus=2 --metrics-export-port=8080 --block",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3336876,
+      "ppid": 3336853,
+      "comm": "sleep",
+      "cmdline": "sleep infinity",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3337159,
+      "ppid": 3336876,
+      "comm": "gcs_server",
+      "cmdline": "/home/ray/anaconda3/lib/python3.8/site-packages/ray/core/src/ray/gcs/gcs_server --log_dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7/logs --config_list=eyJvYmplY3Rfc3BpbGxpbmdfY29uZmlnIjogIntcInR5cGVcIjogXCJmaWxlc3lzdGVtXCIsIFwicGFyYW1zXCI6IHtcImRpcmVjdG9yeV9wYXRoXCI6IFwiL3RtcC9yYXkvc2Vzc2lvbl8yMDI2LTA1LTE0XzAxLTU4LTM2Xzk2MDQzOF83XCJ9fSIsICJpc19leHRlcm5hbF9zdG9yYWdlX3R5cGVfZnMiOiB0cnVlfQ== --gcs_server_port=6379 --metrics-agent-port=63400 --node-ip-address=172.17.132.2 --session-name=session_2026-05-14_01-58-36_960438_7",
+      "generated_name": "gcs_server",
+      "has_service_data": true
+    },
+    {
+      "pid": 3337274,
+      "ppid": 3336876,
+      "comm": "python",
+      "cmdline": "/home/ray/anaconda3/bin/python -u /home/ray/anaconda3/lib/python3.8/site-packages/ray/autoscaler/_private/monitor.py --logs-dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7/logs --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --gcs-address=172.17.132.2:6379 --logging-filename= --logging-format=%(asctime)s\t%(levelname)s (monitor) %(filename)s:%(lineno)s -- %(message)s --monitor-ip=172.17.132.2",
+      "generated_name": "ray.autoscaler._private.monitor",
+      "has_service_data": true
+    },
+    {
+      "pid": 3337275,
+      "ppid": 3336876,
+      "comm": "python",
+      "cmdline": "/home/ray/anaconda3/bin/python -m ray.util.client.server --address=172.17.132.2:6379 --host=0.0.0.0 --port=10001 --mode=proxy --runtime-env-agent-address=http://172.17.132.2:48742",
+      "generated_name": "ray.util.client.server",
+      "has_service_data": true
+    },
+    {
+      "pid": 3337276,
+      "ppid": 3336876,
+      "comm": "python",
+      "cmdline": "/home/ray/anaconda3/bin/python /home/ray/anaconda3/lib/python3.8/site-packages/ray/dashboard/dashboard.py --host=0.0.0.0 --port=8265 --port-retries=0 --temp-dir=/tmp/ray --log-dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7/logs --session-dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7 --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --gcs-address=172.17.132.2:6379 --node-ip-address=172.17.132.2 --logging-filename= --logging-format=%(asctime)s\t%(levelname)s (dashboard) %(filename)s:%(lineno)s -- %(message)s",
+      "generated_name": "ray.dashboard.dashboard",
+      "has_service_data": true
+    },
+    {
+      "pid": 3337407,
+      "ppid": 3336876,
+      "comm": "raylet",
+      "cmdline": "/home/ray/anaconda3/lib/python3.8/site-packages/ray/core/src/ray/raylet/raylet --raylet_socket_name=/tmp/ray/session_2026-05-14_01-58-36_960438_7/sockets/raylet --store_socket_name=/tmp/ray/session_2026-05-14_01-58-36_960438_7/sockets/plasma_store --object_manager_port=0 --min_worker_port=10002 --max_worker_port=19999 --node_manager_port=0 --node_ip_address=172.17.132.2 --maximum_startup_concurrency=16 --static_resource_list=node:172.17.132.2,1.0,node:__internal_head__,1.0,CPU,16,memory,49734974874,object_store_memory,10000000000 --python_worker_command=/home/ray/anaconda3/bin/python /home/ray/anaconda3/lib/python3.8/site-packages/ray/_private/workers/setup_worker.py /home/ray/anaconda3/lib/python3.8/site-packages/ray/_private/workers/default_worker.py --node-ip-address=172.17.132.2 --node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER --object-store-name=/tmp/ray/session_2026-05-14_01-58-36_960438_7/sockets/plasma_store --raylet-name=/tmp/ray/session_2026-05-14_01-58-36_960438_7/sockets/raylet --redis-address=None --temp-dir=/tmp/ray --metrics-agent-port=63400 --runtime-env-agent-port=48742 --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --runtime-env-agent-port=48742 --gcs-address=172.17.132.2:6379 --session-name=session_2026-05-14_01-58-36_960438_7 --temp-dir=/tmp/ray --webui=172.17.132.2:8265 --cluster-id=428b5f51fd142248612758f1bfa4dda9394183c7a12129ee873acadf RAY_WORKER_DYNAMIC_OPTION_PLACEHOLDER --java_worker_command= --cpp_worker_command=/home/ray/anaconda3/bin/python /home/ray/anaconda3/lib/python3.8/site-packages/ray/_private/workers/setup_worker.py /home/ray/anaconda3/lib/python3.8/site-packages/ray/cpp/default_worker --ray_plasma_store_socket_name=/tmp/ray/session_2026-05-14_01-58-36_960438_7/sockets/plasma_store --ray_raylet_socket_name=/tmp/ray/session_2026-05-14_01-58-36_960438_7/sockets/raylet --ray_node_manager_port=RAY_NODE_MANAGER_PORT_PLACEHOLDER --ray_address=172.17.132.2:6379 --ray_redis_password= --ray_session_dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7 --ray_logs_dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7/logs --ray_node_ip_address=172.17.132.2 RAY_WORKER_DYNAMIC_OPTION_PLACEHOLDER --native_library_path=/home/ray/anaconda3/lib/python3.8/site-packages/ray/cpp/lib --temp_dir=/tmp/ray --session_dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7 --log_dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7/logs --resource_dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7/runtime_resources --metrics-agent-port=63400 --metrics_export_port=8080 --runtime_env_agent_port=48742 --object_store_memory=10000000000 --plasma_directory=/tmp --ray-debugger-external=0 --gcs-address=172.17.132.2:6379 --session-name=session_2026-05-14_01-58-36_960438_7 --labels= --cluster-id=428b5f51fd142248612758f1bfa4dda9394183c7a12129ee873acadf --head --num_prestart_python_workers=16 --dashboard_agent_command=/home/ray/anaconda3/bin/python -u /home/ray/anaconda3/lib/python3.8/site-packages/ray/dashboard/agent.py --node-ip-address=172.17.132.2 --metrics-export-port=8080 --dashboard-agent-port=63400 --listen-port=52365 --node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER --object-store-name=/tmp/ray/session_2026-05-14_01-58-36_960438_7/sockets/plasma_store --raylet-name=/tmp/ray/session_2026-05-14_01-58-36_960438_7/sockets/raylet --temp-dir=/tmp/ray --session-dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7 --log-dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7/logs --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --session-name=session_2026-05-14_01-58-36_960438_7 --gcs-address=172.17.132.2:6379 --logging-filename= \"--logging-format=%(asctime)s\t%(levelname)s (dashboard_agent) %(filename)s:%(lineno)s -- %(message)s\" --runtime_env_agent_command=/home/ray/anaconda3/bin/python -u /home/ray/anaconda3/lib/python3.8/site-packages/ray/_private/runtime_env/agent/main.py --node-ip-address=172.17.132.2 --runtime-env-agent-port=48742 --gcs-address=172.17.132.2:6379 --runtime-env-dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7/runtime_resources --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --log-dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7/logs --temp-dir=/tmp/ray",
+      "generated_name": "raylet",
+      "has_service_data": true
+    },
+    {
+      "pid": 3337408,
+      "ppid": 3336876,
+      "comm": "python",
+      "cmdline": "/home/ray/anaconda3/bin/python -u /home/ray/anaconda3/lib/python3.8/site-packages/ray/_private/log_monitor.py --session-dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7 --logs-dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7/logs --gcs-address=172.17.132.2:6379 --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --logging-filename= --logging-format=%(asctime)s\t%(levelname)s (log_monitor) %(filename)s:%(lineno)s -- %(message)s",
+      "generated_name": "ray._private.log_monitor",
+      "has_service_data": true
+    },
+    {
+      "pid": 3337548,
+      "ppid": 3337407,
+      "comm": "python",
+      "cmdline": "/home/ray/anaconda3/bin/python -u /home/ray/anaconda3/lib/python3.8/site-packages/ray/dashboard/agent.py --node-ip-address=172.17.132.2 --metrics-export-port=8080 --dashboard-agent-port=63400 --listen-port=52365 --node-manager-port=34347 --object-store-name=/tmp/ray/session_2026-05-14_01-58-36_960438_7/sockets/plasma_store --raylet-name=/tmp/ray/session_2026-05-14_01-58-36_960438_7/sockets/raylet --temp-dir=/tmp/ray --session-dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7 --log-dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7/logs --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --session-name=session_2026-05-14_01-58-36_960438_7 --gcs-address=172.17.132.2:6379 --logging-filename= --logging-format=%(asctime)s\t%(levelname)s (dashboard_agent) %(filename)s:%(lineno)s -- %(message)s --agent-id 424238335",
+      "generated_name": "ray.dashboard.agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 3337550,
+      "ppid": 3337407,
+      "comm": "python",
+      "cmdline": "/home/ray/anaconda3/bin/python -u /home/ray/anaconda3/lib/python3.8/site-packages/ray/_private/runtime_env/agent/main.py --node-ip-address=172.17.132.2 --runtime-env-agent-port=48742 --gcs-address=172.17.132.2:6379 --runtime-env-dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7/runtime_resources --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --log-dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7/logs --temp-dir=/tmp/ray",
+      "generated_name": "ray._private.runtime_env.agent.main",
+      "has_service_data": true
+    },
+    {
+      "pid": 3337810,
+      "ppid": 3337407,
+      "comm": "ray::IDLE",
+      "cmdline": "ray::IDLE",
+      "generated_name": "ray",
+      "has_service_data": true
+    },
+    {
+      "pid": 3337812,
+      "ppid": 3337407,
+      "comm": "ray::IDLE",
+      "cmdline": "ray::IDLE",
+      "generated_name": "ray",
+      "has_service_data": true
+    },
+    {
+      "pid": 3337813,
+      "ppid": 3337407,
+      "comm": "ray::IDLE",
+      "cmdline": "ray::IDLE",
+      "generated_name": "ray",
+      "has_service_data": true
+    },
+    {
+      "pid": 3337814,
+      "ppid": 3337407,
+      "comm": "ray::IDLE",
+      "cmdline": "ray::IDLE",
+      "generated_name": "ray",
+      "has_service_data": true
+    },
+    {
+      "pid": 3337815,
+      "ppid": 3337407,
+      "comm": "ray::IDLE",
+      "cmdline": "ray::IDLE",
+      "generated_name": "ray",
+      "has_service_data": true
+    },
+    {
+      "pid": 3337816,
+      "ppid": 3337407,
+      "comm": "ray::IDLE",
+      "cmdline": "ray::IDLE",
+      "generated_name": "ray",
+      "has_service_data": true
+    },
+    {
+      "pid": 3337817,
+      "ppid": 3337407,
+      "comm": "ray::IDLE",
+      "cmdline": "ray::IDLE",
+      "generated_name": "ray",
+      "has_service_data": true
+    },
+    {
+      "pid": 3337818,
+      "ppid": 3337407,
+      "comm": "ray::IDLE",
+      "cmdline": "ray::IDLE",
+      "generated_name": "ray",
+      "has_service_data": true
+    },
+    {
+      "pid": 3337819,
+      "ppid": 3337407,
+      "comm": "ray::IDLE",
+      "cmdline": "ray::IDLE",
+      "generated_name": "ray",
+      "has_service_data": true
+    },
+    {
+      "pid": 3337820,
+      "ppid": 3337407,
+      "comm": "ray::IDLE",
+      "cmdline": "ray::IDLE",
+      "generated_name": "ray",
+      "has_service_data": true
+    },
+    {
+      "pid": 3337821,
+      "ppid": 3337407,
+      "comm": "ray::IDLE",
+      "cmdline": "ray::IDLE",
+      "generated_name": "ray",
+      "has_service_data": true
+    },
+    {
+      "pid": 3337822,
+      "ppid": 3337407,
+      "comm": "ray::IDLE",
+      "cmdline": "ray::IDLE",
+      "generated_name": "ray",
+      "has_service_data": true
+    },
+    {
+      "pid": 3337823,
+      "ppid": 3337407,
+      "comm": "ray::IDLE",
+      "cmdline": "ray::IDLE",
+      "generated_name": "ray",
+      "has_service_data": true
+    },
+    {
+      "pid": 3337824,
+      "ppid": 3337407,
+      "comm": "ray::IDLE",
+      "cmdline": "ray::IDLE",
+      "generated_name": "ray",
+      "has_service_data": true
+    },
+    {
+      "pid": 3337825,
+      "ppid": 3337407,
+      "comm": "ray::IDLE",
+      "cmdline": "ray::IDLE",
+      "generated_name": "ray",
+      "has_service_data": true
+    },
+    {
+      "pid": 3338326,
+      "ppid": 3337407,
+      "comm": "ray::ServeContr",
+      "cmdline": "ray::ServeController",
+      "generated_name": "ray",
+      "has_service_data": true
+    },
+    {
+      "pid": 3338560,
+      "ppid": 3337407,
+      "comm": "ray::ProxyActor",
+      "cmdline": "ray::ProxyActor",
+      "generated_name": "ray",
+      "has_service_data": true
+    },
+    {
+      "pid": 3338728,
+      "ppid": 3337407,
+      "comm": "ray::ServeRepli",
+      "cmdline": "ray::ServeReplica:add:Add",
+      "generated_name": "ray",
+      "has_service_data": true
+    },
+    {
+      "pid": 3338729,
+      "ppid": 3337407,
+      "comm": "ray::ServeRepli",
+      "cmdline": "ray::ServeReplica:add:Add",
+      "generated_name": "ray",
+      "has_service_data": true
+    },
+    {
+      "pid": 3339187,
+      "ppid": 3337407,
+      "comm": "ray::ServeRepli",
+      "cmdline": "ray::ServeReplica:hello:Hello",
+      "generated_name": "ray",
+      "has_service_data": true
+    },
+    {
+      "pid": 3339188,
+      "ppid": 3337407,
+      "comm": "ray::ServeRepli",
+      "cmdline": "ray::ServeReplica:hello:Hello",
+      "generated_name": "ray",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {
+    "start_warning": "exit code 1:  Container ray-head  Creating\n Container ray-head  Created\n Container ray-worker-3  Creating\n Container ray-worker-1  Creating\n Container ray-worker-2  Creating\n Container ray-worker-1  Created\n Container ray-worker-2  Created\n Container ray-worker-3  Created\n Container ray-call-apis  Creating\n Container ray-echo-task  Creating\n Container ray-echo-task  Created\n Container ray-call-apis  Created\n Container ray-head  Starting\n Container ray-head  Started\n Container ray-head  Waiting\n Container ray"
+  }
+}

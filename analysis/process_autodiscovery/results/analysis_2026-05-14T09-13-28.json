@@ -1,5 +1,5 @@
 {
-  "analyzed_at": "2026-05-13T17:29:06.670430+00:00",
+  "analyzed_at": "2026-05-14T09:13:28.409595+00:00",
   "results": [
     {
       "integration": "airflow",
@@ -3309,6 +3309,104 @@
       ]
     },
     {
+      "integration": "ray",
+      "environment": "py3.13-2.8",
+      "services": [
+        {
+          "generated_name": "gcs_server",
+          "main_pids": [
+            3337159
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "ray.autoscaler._private.monitor",
+          "main_pids": [
+            3337274
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "ray.util.client.server",
+          "main_pids": [
+            3337275
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "ray.dashboard.dashboard",
+          "main_pids": [
+            3337276
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "raylet",
+          "main_pids": [
+            3337407
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "ray._private.log_monitor",
+          "main_pids": [
+            3337408
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "ray.dashboard.agent",
+          "main_pids": [
+            3337548
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "ray._private.runtime_env.agent.main",
+          "main_pids": [
+            3337550
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "ray",
+          "main_pids": [
+            3337810,
+            3337812,
+            3337813,
+            3337814,
+            3337815,
+            3337816,
+            3337817,
+            3337818,
+            3337819,
+            3337820,
+            3337821,
+            3337822,
+            3337823,
+            3337824,
+            3337825,
+            3338326,
+            3338560,
+            3338728,
+            3338729,
+            3339187,
+            3339188
+          ],
+          "skipped_pids": [],
+          "verdict": "WARN (N=21)"
+        }
+      ]
+    },
+    {
       "integration": "redisdb",
       "environment": "py3.13-8.0",
       "services": [
@@ -4189,6 +4287,28 @@
       ]
     },
     {
+      "integration": "temporal",
+      "environment": "py3.13-1.19",
+      "services": [
+        {
+          "generated_name": "org.elasticsearch.bootstrap.Elasticsearch",
+          "main_pids": [
+            3365184
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "postgres",
+          "main_pids": [
+            3365120
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
       "integration": "teradata",
       "environment": "py3.13",
       "services": [
@@ -4227,62 +4347,80 @@
       ]
     },
     {
-      "integration": "traefik_mesh",
+      "integration": "tls",
       "environment": "py3.13",
       "services": [
         {
-          "generated_name": "kube-scheduler",
+          "generated_name": "nginx",
           "main_pids": [
-            2023052
+            3226671,
+            3226690,
+            3226666
+          ],
+          "skipped_pids": [
+            3227057,
+            3227059,
+            3227060,
+            3227061,
+            3227063,
+            3227064,
+            3227066,
+            3227067,
+            3227068,
+            3227069,
+            3227070,
+            3227071,
+            3227072,
+            3227073,
+            3227074,
+            3227076,
+            3226911,
+            3226912,
+            3226914,
+            3226916,
+            3226918,
+            3226919,
+            3226920,
+            3226921,
+            3226922,
+            3226924,
+            3226925,
+            3226927,
+            3226928,
+            3226929,
+            3226930,
+            3226933,
+            3227010,
+            3227011,
+            3227012,
+            3227013,
+            3227016,
+            3227020,
+            3227021,
+            3227023,
+            3227026,
+            3227027,
+            3227028,
+            3227029,
+            3227030,
+            3227032,
+            3227033,
+            3227034
+          ],
+          "verdict": "WARN (N=3)"
+        },
+        {
+          "generated_name": "mysqld",
+          "main_pids": [
+            3226702
           ],
           "skipped_pids": [],
           "verdict": "PASS"
         },
         {
-          "generated_name": "kube-controller-manager",
+          "generated_name": "postgres",
           "main_pids": [
-            2023080
-          ],
-          "skipped_pids": [],
-          "verdict": "PASS"
-        },
-        {
-          "generated_name": "kube-apiserver",
-          "main_pids": [
-            2023129
-          ],
-          "skipped_pids": [],
-          "verdict": "PASS"
-        },
-        {
-          "generated_name": "etcd",
-          "main_pids": [
-            2023175
-          ],
-          "skipped_pids": [],
-          "verdict": "PASS"
-        },
-        {
-          "generated_name": "kube-proxy",
-          "main_pids": [
-            2024265
-          ],
-          "skipped_pids": [],
-          "verdict": "PASS"
-        },
-        {
-          "generated_name": "coredns",
-          "main_pids": [
-            2025293,
-            2025300
-          ],
-          "skipped_pids": [],
-          "verdict": "WARN (N=2)"
-        },
-        {
-          "generated_name": "agent",
-          "main_pids": [
-            2027215
+            3226688
           ],
           "skipped_pids": [],
           "verdict": "PASS"
@@ -4290,7 +4428,15 @@
         {
           "generated_name": "system-probe",
           "main_pids": [
-            2027216
+            3229954
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            3229955
           ],
           "skipped_pids": [],
           "verdict": "PASS"
@@ -4298,10 +4444,133 @@
         {
           "generated_name": "security-agent",
           "main_pids": [
-            2027217
+            3229956
           ],
           "skipped_pids": [],
           "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "tomcat",
+      "environment": "py3.13-10.1-embedded",
+      "services": []
+    },
+    {
+      "integration": "traffic_server",
+      "environment": "py3.13",
+      "services": [
+        {
+          "generated_name": "traffic_server",
+          "main_pids": [
+            3397441
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            3398141
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            3398142
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            3398145
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            3398150
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "varnish",
+      "environment": "py3.13-6.5",
+      "services": [
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            3250072
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            3250074
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            3250076
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            3250078
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "varnishd",
+          "main_pids": [
+            3241066
+          ],
+          "skipped_pids": [
+            3241173
+          ],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "vault",
+      "environment": "py3.13-1.9.0-noauth",
+      "services": [
+        {
+          "generated_name": "vault",
+          "main_pids": [
+            3372743,
+            3373014
+          ],
+          "skipped_pids": [],
+          "verdict": "WARN (N=2)"
+        },
+        {
+          "generated_name": "consul",
+          "main_pids": [
+            3372846,
+            3372648
+          ],
+          "skipped_pids": [],
+          "verdict": "WARN (N=2)"
         }
       ]
     },
@@ -4390,6 +4659,52 @@
           "verdict": "PASS"
         }
       ]
+    },
+    {
+      "integration": "zk",
+      "environment": "py3.13-3.6.2-false",
+      "services": [
+        {
+          "generated_name": "zookeeper",
+          "main_pids": [
+            3399877
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            3402005
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            3402006
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            3402007
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            3402008
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
     }
   ],
   "skipped": [
@@ -4407,21 +4722,21 @@
     },
     {
       "integration": "argo_rollouts",
-      "reason": "env start failed",
+      "reason": "kubernetes-only environment",
       "skipped_at": "2026-05-13T16:30:06.154764+00:00",
-      "details": "exit code 1: Environment `py3.13-1.6.6` for integration `argo_rollouts` is already running\n"
+      "details": "uses datadog_checks.dev.kind in argo_rollouts/tests/conftest.py"
     },
     {
       "integration": "argo_workflows",
-      "reason": "env start failed",
+      "reason": "kubernetes-only environment",
       "skipped_at": "2026-05-13T16:30:12.084725+00:00",
-      "details": "exit code 1: Environment `py3.13` for integration `argo_workflows` is already running\n"
+      "details": "uses datadog_checks.dev.kind in argo_workflows/tests/conftest.py"
     },
     {
       "integration": "argocd",
-      "reason": "env start failed",
+      "reason": "kubernetes-only environment",
       "skipped_at": "2026-05-13T16:30:18.040329+00:00",
-      "details": "exit code 1: Environment `py3.13-2.4.7` for integration `argocd` is already running\n"
+      "details": "uses datadog_checks.dev.kind in argocd/tests/conftest.py"
     },
     {
       "integration": "aws_neuron",
@@ -4443,21 +4758,21 @@
     },
     {
       "integration": "calico",
-      "reason": "env start failed",
+      "reason": "kubernetes-only environment",
       "skipped_at": "2026-05-13T16:34:55.434586+00:00",
-      "details": "exit code 1: Creating cluster \"cluster-calico-py3.13\" ...\n \u2022 Ensuring node image (kindest/node:v1.35.0) \ud83d\uddbc  ...\n \u2713 Ensuring node image (kindest/node:v1.35.0) \ud83d\uddbc\n \u2022 Preparing nodes \ud83d\udce6   ...\n \u2713 Preparing nodes \ud83d\udce6 \n \u2022 Writing configuration \ud83d\udcdc  ...\n \u2713 Writing configuration \ud83d\udcdc\n \u2022 Starting control-plane \ud83d\udd79\ufe0f  ...\n \u2713 Starting control-plane \ud83d\udd79\ufe0f\n \u2022 Installing StorageClass \ud83d\udcbe  ...\n \u2713 Installing StorageClass \ud83d\udcbe\nSet kubectl context to \"kind-cluster-calico-py3.13\"\nYou can now use your cluster with:\n\nkubectl cluster-info --context k"
+      "details": "uses datadog_checks.dev.kind in calico/tests/conftest.py"
     },
     {
       "integration": "cert_manager",
-      "reason": "env start failed",
+      "reason": "kubernetes-only environment",
       "skipped_at": "2026-05-13T16:39:58.646685+00:00",
-      "details": "ddev env start timed out after 300s"
+      "details": "uses datadog_checks.dev.kind in cert_manager/tests/conftest.py"
     },
     {
       "integration": "cilium",
-      "reason": "env start failed",
+      "reason": "kubernetes-only environment",
       "skipped_at": "2026-05-13T16:40:04.700166+00:00",
-      "details": "exit code 1: Environment `py3.13-1.9` for integration `cilium` is already running\n"
+      "details": "uses datadog_checks.dev.kind in cilium/tests/conftest.py"
     },
     {
       "integration": "cloudera",
@@ -4486,8 +4801,8 @@
     {
       "integration": "envoy",
       "reason": "env start failed",
-      "skipped_at": "2026-05-13T16:44:31.289277+00:00",
-      "details": "exit code 1:  front-envoy Pulling \n front-envoy Pulled \ntarget service1: failed to solve: mount callback failed on /var/lib/docker/containerd/daemon/tmpmounts/containerd-mount3211405202: mount callback failed on /var/lib/docker/containerd/daemon/tmpmounts/containerd-mount616327520: failed to open writer: ref moby/1/x1q9jzsfksvl0q5lxle56ng0v locked for 31.860875891s (since 2026-05-13 16:41:36.931493108 +0000 UTC m=+4930058.961883812): unavailable\n\ntarget service2: failed to solve: mount callback failed on /va"
+      "skipped_at": "2026-05-14T09:13:10.322601+00:00",
+      "details": "exit code 1: target service2: failed to solve: mount callback failed on /var/lib/docker/containerd/daemon/tmpmounts/containerd-mount2656774656: mount callback failed on /var/lib/docker/containerd/daemon/tmpmounts/containerd-mount1787980892: failed to open writer: ref moby/1/mz8ja5dsg0r8e3qd6wvuri7nt locked for 28.595825503s (since 2026-05-14 09:10:06.046682014 +0000 UTC m=+4989368.077072723): unavailable\n\ntarget service1: failed to solve: mount callback failed on /var/lib/docker/containerd/daemon/tmpmounts/c"
     },
     {
       "integration": "exchange_server",
@@ -4497,9 +4812,9 @@
     },
     {
       "integration": "fluxcd",
-      "reason": "env start failed",
+      "reason": "kubernetes-only environment",
       "skipped_at": "2026-05-13T16:44:43.566972+00:00",
-      "details": "exit code 1: Environment `py3.13` for integration `fluxcd` is already running\n"
+      "details": "uses datadog_checks.dev.kind in fluxcd/tests/conftest.py"
     },
     {
       "integration": "fly_io",
@@ -4539,9 +4854,9 @@
     },
     {
       "integration": "istio",
-      "reason": "env start failed",
+      "reason": "kubernetes-only environment",
       "skipped_at": "2026-05-13T16:55:29.422805+00:00",
-      "details": "exit code 1: Environment `py3.13-1.13` for integration `istio` is already running\n"
+      "details": "uses datadog_checks.dev.kind in istio/tests/conftest.py"
     },
     {
       "integration": "karpenter",
@@ -4551,9 +4866,9 @@
     },
     {
       "integration": "keda",
-      "reason": "env start failed",
+      "reason": "kubernetes-only environment",
       "skipped_at": "2026-05-13T16:55:38.538864+00:00",
-      "details": "exit code 1: Environment `py3.13-2.16.0` for integration `keda` is already running\n"
+      "details": "uses datadog_checks.dev.kind in keda/tests/conftest.py"
     },
     {
       "integration": "kubeflow",
@@ -4569,33 +4884,33 @@
     },
     {
       "integration": "kubevirt_api",
-      "reason": "env start failed",
+      "reason": "kubernetes-only environment",
       "skipped_at": "2026-05-13T16:55:50.591391+00:00",
-      "details": "exit code 1: Environment `py3.13` for integration `kubevirt_api` is already running\n"
+      "details": "uses datadog_checks.dev.kind in kubevirt_api/tests/conftest.py"
     },
     {
       "integration": "kubevirt_controller",
-      "reason": "env start failed",
+      "reason": "kubernetes-only environment",
       "skipped_at": "2026-05-13T17:00:53.798319+00:00",
-      "details": "ddev env start timed out after 300s"
+      "details": "uses datadog_checks.dev.kind in kubevirt_controller/tests/conftest.py"
     },
     {
       "integration": "kubevirt_handler",
-      "reason": "env start failed",
+      "reason": "kubernetes-only environment",
       "skipped_at": "2026-05-13T17:00:59.823797+00:00",
-      "details": "exit code 1: Environment `py3.13` for integration `kubevirt_handler` is already running\n"
+      "details": "uses datadog_checks.dev.kind in kubevirt_handler/tests/conftest.py"
     },
     {
       "integration": "kuma",
-      "reason": "env start failed",
+      "reason": "kubernetes-only environment",
       "skipped_at": "2026-05-13T17:01:05.840301+00:00",
-      "details": "exit code 1: Environment `py3.13-2.10.6` for integration `kuma` is already running\n"
+      "details": "uses datadog_checks.dev.kind in kuma/tests/conftest.py"
     },
     {
       "integration": "kyverno",
-      "reason": "env start failed",
+      "reason": "kubernetes-only environment",
       "skipped_at": "2026-05-13T17:01:11.948798+00:00",
-      "details": "exit code 1: Environment `py3.13` for integration `kyverno` is already running\n"
+      "details": "uses datadog_checks.dev.kind in kyverno/tests/conftest.py"
     },
     {
       "integration": "nvidia_nim",
@@ -4628,12 +4943,6 @@
       "details": "exit code 1: Environment `py3.13` is incompatible: unsupported platform\n"
     },
     {
-      "integration": "ray",
-      "reason": "env start failed",
-      "skipped_at": "2026-05-13T17:03:35.133445+00:00",
-      "details": "exit code 1: Environment `py3.13-2.8` for integration `ray` is already running\n"
-    },
-    {
       "integration": "sap_hana",
       "reason": "env start failed",
       "skipped_at": "2026-05-13T17:08:38.502547+00:00",
@@ -4653,9 +4962,9 @@
     },
     {
       "integration": "strimzi",
-      "reason": "env start failed",
+      "reason": "kubernetes-only environment",
       "skipped_at": "2026-05-13T17:14:18.965474+00:00",
-      "details": "exit code 1: Environment `py3.13-0.34` for integration `strimzi` is already running\n"
+      "details": "uses datadog_checks.dev.kind in strimzi/tests/conftest.py"
     },
     {
       "integration": "supabase",
@@ -4665,9 +4974,9 @@
     },
     {
       "integration": "tekton",
-      "reason": "env start failed",
+      "reason": "kubernetes-only environment",
       "skipped_at": "2026-05-13T17:15:09.582866+00:00",
-      "details": "exit code 1: Environment `py3.13` for integration `tekton` is already running\n"
+      "details": "uses datadog_checks.dev.kind in tekton/tests/conftest.py"
     },
     {
       "integration": "teleport",
@@ -4676,46 +4985,16 @@
       "details": "image caddy:2.6.2-alpine found in teleport/tests/docker/caddy/docker-compose.yaml"
     },
     {
-      "integration": "temporal",
-      "reason": "env start failed",
-      "skipped_at": "2026-05-13T17:15:22.593815+00:00",
-      "details": "exit code 1:  temporal-admin-tools Pulling \n elasticsearch Pulling \n postgresql Pulling \n temporal-ui Pulling \n temporal Pulling \nerror from registry: You have reached your unauthenticated pull rate limit. https://www.docker.com/increase-rate-limit\n"
-    },
-    {
-      "integration": "tls",
-      "reason": "env start failed",
-      "skipped_at": "2026-05-13T17:16:30.021513+00:00",
-      "details": "exit code 1: Creating environment: py3.13\nInstalling project in development mode\nRunning post-installation commands\nChecking dependencies\nSyncing dependencies\n nginx-tls1-2 Pulling \n starttls-mysql Pulling \n starttls-postgres Pulling \n nginx-tls1-3 Pulling \n nginx-main Pulling \n starttls-mysql Error error from registry: You have reached your unauthenticated pull rate limit. https://www.docker.com/increase-rate-limit\n nginx-tls1-2  Interrupted\n starttls-postgres  Interrupted\n nginx-main  Interrupted\n nginx-tl"
-    },
-    {
-      "integration": "tomcat",
-      "reason": "env start failed",
-      "skipped_at": "2026-05-13T17:16:48.503262+00:00",
-      "details": "exit code 1: Creating environment: py3.13-10.1-embedded\nInstalling project in development mode\nRunning post-installation commands\nChecking dependencies\nDockerfile:1\n\n--------------------\n\n   1 | >>> FROM python:3.11\n\n   2 |     RUN pip install requests\n\n   3 |     COPY client.py /tmp\n\n--------------------\n\ntarget client: failed to solve: python:3.11: failed to resolve source metadata for docker.io/library/python:3.11: failed to copy: httpReadSeeker: failed open: unexpected status from GET request to https://"
-    },
-    {
-      "integration": "traffic_server",
-      "reason": "env start failed",
-      "skipped_at": "2026-05-13T17:19:18.531844+00:00",
-      "details": "exit code 1: Creating environment: py3.13\nInstalling project in development mode\nRunning post-installation commands\nChecking dependencies\n trafficserver Pulling \nerror from registry: You have reached your unauthenticated pull rate limit. https://www.docker.com/increase-rate-limit\n"
-    },
-    {
-      "integration": "varnish",
-      "reason": "env start failed",
-      "skipped_at": "2026-05-13T17:19:35.615971+00:00",
-      "details": "exit code 1: Creating environment: py3.13-6.5\nInstalling project in development mode\nRunning post-installation commands\nChecking dependencies\n varnish Pulling \n varnish Error error from registry: You have reached your unauthenticated pull rate limit. https://www.docker.com/increase-rate-limit\nError response from daemon: error from registry: You have reached your unauthenticated pull rate limit. https://www.docker.com/increase-rate-limit\n"
-    },
-    {
-      "integration": "vault",
-      "reason": "env start failed",
-      "skipped_at": "2026-05-13T17:19:54.266343+00:00",
-      "details": "exit code 1: Creating environment: py3.13-1.9.0-noauth\nInstalling project in development mode\nRunning post-installation commands\nChecking dependencies\n consul Pulling \n vault-replica Pulling \n consul-worker Pulling \n vault-leader Pulling \n consul Error error from registry: You have reached your unauthenticated pull rate limit. https://www.docker.com/increase-rate-limit\n vault-replica  Interrupted\n vault-leader  Interrupted\n consul-worker  Interrupted\nError response from daemon: error from registry: You have "
+      "integration": "traefik_mesh",
+      "reason": "kubernetes-only environment",
+      "skipped_at": "2026-05-14T08:35:16.804522+00:00",
+      "details": "uses datadog_checks.dev.kind in traefik_mesh/tests/conftest.py"
     },
     {
       "integration": "velero",
-      "reason": "env start failed",
-      "skipped_at": "2026-05-13T17:20:12.918797+00:00",
-      "details": "exit code 1: Creating environment: py3.13\nInstalling project in development mode\nRunning post-installation commands\nChecking dependencies\n#0 building with \"default\" instance using docker driver\n\n#1 [internal] load build definition from kubectl.Dockerfile\n#1 transferring dockerfile: 387B done\n#1 DONE 0.0s\n\n#2 [internal] load metadata for docker.io/library/debian:bullseye-slim\n#2 ERROR: failed to copy: httpReadSeeker: failed open: unexpected status from GET request to https://registry-1.docker.io/v2/library/de"
+      "reason": "kubernetes-only environment",
+      "skipped_at": "2026-05-14T08:48:07.637751+00:00",
+      "details": "uses datadog_checks.dev.kind in velero/tests/conftest.py"
     },
     {
       "integration": "vllm",
@@ -4725,21 +5004,15 @@
     },
     {
       "integration": "weaviate",
-      "reason": "env start failed",
+      "reason": "kubernetes-only environment",
       "skipped_at": "2026-05-13T17:26:44.126558+00:00",
-      "details": "ddev env start timed out after 300s"
+      "details": "uses datadog_checks.dev.kind in weaviate/tests/conftest.py"
     },
     {
       "integration": "windows_performance_counters",
       "reason": "env start failed",
       "skipped_at": "2026-05-13T17:26:50.434292+00:00",
       "details": "exit code 1: Environment `py3.13` is incompatible: unsupported platform\n"
-    },
-    {
-      "integration": "zk",
-      "reason": "env start failed",
-      "skipped_at": "2026-05-13T17:27:08.664310+00:00",
-      "details": "exit code 1: Creating environment: py3.13-3.6.2-false\nInstalling project in development mode\nRunning post-installation commands\nChecking dependencies\n zk Pulling \nerror from registry: You have reached your unauthenticated pull rate limit. https://www.docker.com/increase-rate-limit\n"
     }
   ]
 }
