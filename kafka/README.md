@@ -2,6 +2,8 @@
 
 ![Kafka Dashboard][1]
 
+*Already collecting Kafka metrics with the Agent? **[Data Streams Monitoring for Kafka][26]** layers end-to-end lag, throughput, and message lineage across your producers and consumers.*
+
 ## Overview
 
 View Kafka broker metrics and logs for a 360-view of the health and performance of your Kafka clusters in real time.
@@ -186,3 +188,4 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 [23]: https://www.datadoghq.com/knowledge-center/apache-kafka/
 [24]: https://docs.datadoghq.com/data_streams/
 [25]: /data-streams
+[26]: https://docs.datadoghq.com/data_streams/kafka?utm_source=docs&utm_medium=callout&utm_campaign=DocsCTA-DSMKafka-IntegrationsKafka
