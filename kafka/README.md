@@ -2,7 +2,7 @@
 
 ![Kafka Dashboard][1]
 
-*Already collecting Kafka metrics with the Agent? **[Data Streams Monitoring for Kafka][26]** layers end-to-end lag, throughput, and message lineage across your producers and consumers.*
+**Already collecting Kafka metrics with the Agent?** Pair them with [Data Streams Monitoring for Kafka][26] to track end-to-end producer/consumer lag, throughput, and message lineage.
 
 ## Overview
 
