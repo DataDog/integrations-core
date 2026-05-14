@@ -1,6 +1,6 @@
 {
-  "name": "Anthropic API Key Lifecycle",
   "description": "Anthropic compliance events for API key creation, deletion, updates, and rotation across platform_api_key, admin_api_key, and scoped_api_key variants.",
+  "name": "Anthropic API Key Lifecycle",
   "type": "logs",
   "page": "stream",
   "query": "source:anthropic service:anthropic.compliance @evt.name:(*api_key_created OR *api_key_deleted OR *api_key_updated OR *api_key_rotated)",
