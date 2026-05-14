@@ -761,6 +761,13 @@ def test_parse_speed(value, expected):
             'good',
             id='invalid_cidr_skipped',
         ),
+        pytest.param(
+            '192.168.1.5',
+            [{'cidr': '192.168.1.0/24', 'username': 'cidr_user', 'password': ''}],
+            'cidr_user',
+            '',
+            id='empty_password_is_valid',
+        ),
     ],
 )
 def test_resolve_credentials(ip, overrides, expected_username, expected_password):

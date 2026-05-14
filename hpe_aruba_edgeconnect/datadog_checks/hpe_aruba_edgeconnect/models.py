@@ -121,7 +121,7 @@ class Appliances:
                 cidr = cred.get('cidr')
                 username = cred.get('username')
                 password = cred.get('password')
-                if not cidr or not username or not password:
+                if not cidr or username is None or password is None:
                     continue
                 try:
                     if ipaddress.ip_address(appliance.ip) in ipaddress.ip_network(cidr, strict=False):
