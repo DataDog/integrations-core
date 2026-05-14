@@ -1,6 +1,5 @@
 {
   "name": "Anthropic Auth Events",
-  "description": "Anthropic compliance authentication events: SSO, Google, Apple, and generic sign-in/sign-out activity. Useful for tracking session activity and identifying unusual authentication patterns.",
   "type": "logs",
   "page": "stream",
   "query": "source:anthropic service:anthropic.compliance @evt.name:(user_signed_in_sso OR user_signed_in_google OR user_signed_in_apple OR user_signed_out OR user_signed_in_*)",

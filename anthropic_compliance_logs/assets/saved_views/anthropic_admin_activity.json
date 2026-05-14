@@ -1,6 +1,5 @@
 {
   "name": "Anthropic Admin Activity",
-  "description": "Anthropic compliance events performed by admin API key actors. Use this view to audit privileged programmatic activity.",
   "type": "logs",
   "page": "stream",
   "query": "source:anthropic service:anthropic.compliance @actor.type:admin_api_key_actor",

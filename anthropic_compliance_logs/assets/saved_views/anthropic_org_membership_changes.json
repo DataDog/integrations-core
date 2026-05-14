@@ -1,5 +1,4 @@
 {
-  "description": "Anthropic compliance events for organization membership changes: invites sent/accepted/revoked, role changes, and user removals.",
   "name": "Anthropic Org Membership Changes",
   "type": "logs",
   "page": "stream",

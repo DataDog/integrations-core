@@ -1,6 +1,5 @@
 {
   "name": "All Anthropic Compliance Logs",
-  "description": "All Anthropic compliance logs scoped to source:anthropic and service:anthropic.compliance, sorted by most recent.",
   "type": "logs",
   "page": "stream",
   "query": "source:anthropic service:anthropic.compliance",
