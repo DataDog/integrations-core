@@ -35,6 +35,7 @@ def test_e2e_profile_ubiquiti_unifi(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -42,9 +43,9 @@ def test_e2e_profile_ubiquiti_unifi(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         [
             'ubiquiti_unifi_radio_index:11',
@@ -60,22 +61,22 @@ def test_e2e_profile_ubiquiti_unifi(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.ubiquiti.unifiRadioCuSelfRx', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.ubiquiti.unifiRadioCuSelfRx', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.ubiquiti.unifiRadioCuSelfTx', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.ubiquiti.unifiRadioCuSelfTx', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.ubiquiti.unifiRadioCuTotal', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.ubiquiti.unifiRadioCuTotal', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.ubiquiti.unifiRadioOtherBss', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.ubiquiti.unifiRadioOtherBss', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.ubiquiti.unifiRadioRxPackets', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.ubiquiti.unifiRadioRxPackets', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.ubiquiti.unifiRadioTxPackets', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.ubiquiti.unifiRadioTxPackets', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
 
     # --- TEST METADATA ---
@@ -92,7 +93,7 @@ def test_e2e_profile_ubiquiti_unifi(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

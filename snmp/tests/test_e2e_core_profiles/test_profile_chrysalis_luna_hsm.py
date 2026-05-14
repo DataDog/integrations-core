@@ -36,6 +36,7 @@ def test_e2e_profile_chrysalis_luna_hsm(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_tcp(aggregator, common_tags)
@@ -44,14 +45,14 @@ def test_e2e_profile_chrysalis_luna_hsm(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.hsmCriticalEvents', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.hsmNonCriticalEvents', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.hsmOperationErrors', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.hsmOperationRequests', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ntlsConnectedClients', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ntlsFailedClientConnections', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ntlsLinks', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ntlsSuccessfulClientConnections', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.hsmCriticalEvents', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.hsmNonCriticalEvents', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.hsmOperationErrors', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.hsmOperationRequests', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ntlsConnectedClients', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ntlsFailedClientConnections', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ntlsLinks', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ntlsSuccessfulClientConnections', metric_type=aggregator.GAUGE, tags=metric_tags)
 
     # --- TEST METADATA ---
     device = {
@@ -67,7 +68,7 @@ def test_e2e_profile_chrysalis_luna_hsm(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

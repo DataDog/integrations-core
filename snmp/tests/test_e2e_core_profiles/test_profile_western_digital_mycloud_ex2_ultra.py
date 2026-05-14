@@ -42,6 +42,7 @@ def test_e2e_profile_western_digital_mycloud_ex2_ultra(dd_agent_check):
         'wdmycloudex2_ftp_server:disable',
         'wdmycloudex2_net_type:active_directory',
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_host_resources_base(aggregator, common_tags)
@@ -50,10 +51,10 @@ def test_e2e_profile_western_digital_mycloud_ex2_ultra(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         [
             'wdmycloudex2_volume_fs_type:acted quaintly',
@@ -81,7 +82,7 @@ def test_e2e_profile_western_digital_mycloud_ex2_ultra(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.wdmycloudex2Volume', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.wdmycloudex2Volume', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -114,7 +115,7 @@ def test_e2e_profile_western_digital_mycloud_ex2_ultra(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.wdmycloudex2Disk', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.wdmycloudex2Disk', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -147,7 +148,7 @@ def test_e2e_profile_western_digital_mycloud_ex2_ultra(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.wdmycloudex2UPS', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.wdmycloudex2UPS', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -163,7 +164,7 @@ def test_e2e_profile_western_digital_mycloud_ex2_ultra(dd_agent_check):
         'device_type': 'storage',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

@@ -32,6 +32,7 @@ def test_e2e_profile__cisco_ipsec_flow_monitor(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
 
@@ -48,13 +49,13 @@ def test_e2e_profile__cisco_ipsec_flow_monitor(dd_agent_check):
         ['peer_local_value:driving', 'peer_remote_value:oxen', 'phase_1_tunnel_index:8', 'tunnel_status:active'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.cikeTunInDropPkts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cikeTunInOctets', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cikeTunInPkts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cikeTunLifeTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cikeTunOutDropPkts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cikeTunOutOctets', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cikeTunOutPkts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cikeTunInDropPkts', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.cikeTunInOctets', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.cikeTunInPkts', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.cikeTunLifeTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.cikeTunOutDropPkts', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.cikeTunOutOctets', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.cikeTunOutPkts', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -75,21 +76,21 @@ def test_e2e_profile__cisco_ipsec_flow_monitor(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.cipSecTunHcInOctets', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cipSecTunHcOutOctets', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cipSecTunInAuthFails', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cipSecTunHcInOctets', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.cipSecTunHcOutOctets', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.cipSecTunInAuthFails', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.cipSecTunInDecryptFails', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cipSecTunInDecryptFails', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.cipSecTunInOctets', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cipSecTunInPkts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cipSecTunLifeTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cipSecTunOutAuthFails', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cipSecTunInOctets', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.cipSecTunInPkts', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.cipSecTunLifeTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.cipSecTunOutAuthFails', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.cipSecTunOutEncryptFails', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cipSecTunOutEncryptFails', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.cipSecTunOutOctets', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cipSecTunOutPkts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cipSecTunOutOctets', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.cipSecTunOutPkts', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -104,7 +105,7 @@ def test_e2e_profile__cisco_ipsec_flow_monitor(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

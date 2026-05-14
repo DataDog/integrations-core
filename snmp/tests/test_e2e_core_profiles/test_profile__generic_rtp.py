@@ -32,6 +32,7 @@ def test_e2e_profile__generic_rtp(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
 
@@ -47,29 +48,29 @@ def test_e2e_profile__generic_rtp(dd_agent_check):
         ['rtpSessionIndex:15', 'rtpSessionLocAddr:forward their their acted Jaded', 'rtpSessionRemAddr:acted their'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.rtpSessionByes', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.rtpSessionByes', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.rtpSessionReceiverJoins', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.rtpSessionReceiverJoins', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.rtpSessionSenderJoins', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.rtpSessionSenderJoins', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['rtpSenderSSRC:42843', 'rtpSessionIndex:9'],
         ['rtpSenderSSRC:56224', 'rtpSessionIndex:26'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.rtpSenderOctets', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.rtpSenderPackets', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.rtpSenderOctets', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.rtpSenderPackets', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['rtpRcvrSRCSSRC:4008', 'rtpRcvrSSRC:728', 'rtpSessionIndex:14'],
         ['rtpRcvrSRCSSRC:50583', 'rtpRcvrSSRC:48690', 'rtpSessionIndex:21'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.rtpRcvrJitter', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.rtpRcvrLostPackets', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.rtpRcvrOctets', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.rtpRcvrPackets', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.rtpRcvrJitter', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.rtpRcvrLostPackets', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.rtpRcvrOctets', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.rtpRcvrPackets', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -84,7 +85,7 @@ def test_e2e_profile__generic_rtp(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

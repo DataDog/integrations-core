@@ -34,6 +34,7 @@ def test_e2e_profile__generic_bgp4(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
 
@@ -45,41 +46,41 @@ def test_e2e_profile__generic_bgp4(dd_agent_check):
         ['admin_status:start', 'neighbor:72.128.247.81', 'peer_state:active', 'remote_as:27'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.bgpPeerAdminStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.bgpPeerAdminStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.bgpPeerConnectRetryInterval', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.bgpPeerConnectRetryInterval', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.bgpPeerFsmEstablishedTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.bgpPeerFsmEstablishedTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.bgpPeerFsmEstablishedTransitions', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.bgpPeerFsmEstablishedTransitions', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.bgpPeerHoldTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.bgpPeerHoldTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.bgpPeerHoldTimeConfigured', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric(
-            'snmp.bgpPeerInTotalMessages', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric('snmp.bgpPeerInUpdates', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.bgpPeerKeepAlive', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric(
-            'snmp.bgpPeerKeepAliveConfigured', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.bgpPeerHoldTimeConfigured', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.bgpPeerMinASOriginationInterval', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.bgpPeerInTotalMessages', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
+        )
+        aggregator.assert_metric('snmp.bgpPeerInUpdates', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.bgpPeerKeepAlive', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.bgpPeerKeepAliveConfigured', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.bgpPeerNegotiatedVersion', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.bgpPeerMinASOriginationInterval', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.bgpPeerOutTotalMessages', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.bgpPeerNegotiatedVersion', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.bgpPeerOutUpdates', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.bgpPeerRemoteAs', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.bgpPeerState', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.peerConnectionByState', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.bgpPeerOutTotalMessages', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
+        )
+        aggregator.assert_metric('snmp.bgpPeerOutUpdates', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.bgpPeerRemoteAs', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.bgpPeerState', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.peerConnectionByState', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -94,7 +95,7 @@ def test_e2e_profile__generic_bgp4(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

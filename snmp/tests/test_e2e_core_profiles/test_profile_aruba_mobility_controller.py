@@ -35,6 +35,7 @@ def test_e2e_profile_aruba_mobility_controller(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     # Examples:
@@ -60,7 +61,7 @@ def test_e2e_profile_aruba_mobility_controller(dd_agent_check):
         'device_type': 'wlc',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

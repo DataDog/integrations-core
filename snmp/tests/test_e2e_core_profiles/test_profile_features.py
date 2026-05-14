@@ -31,6 +31,7 @@ def test_e2e_features(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
 
@@ -44,7 +45,7 @@ def test_e2e_features(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ifInErrors', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ifInErrors', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -59,7 +60,7 @@ def test_e2e_features(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

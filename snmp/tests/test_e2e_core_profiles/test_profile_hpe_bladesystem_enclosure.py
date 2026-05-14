@@ -36,6 +36,7 @@ def test_e2e_profile_hpe_bladesystem_enclosure(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -60,7 +61,7 @@ def test_e2e_profile_hpe_bladesystem_enclosure(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cpqRackCommonEnclosureTempCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cpqRackCommonEnclosureTempCurrent', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -87,7 +88,7 @@ def test_e2e_profile_hpe_bladesystem_enclosure(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cpqRackCommonEnclosureFan', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cpqRackCommonEnclosureFan', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -106,7 +107,7 @@ def test_e2e_profile_hpe_bladesystem_enclosure(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cpqRackCommonEnclosureFuse', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cpqRackCommonEnclosureFuse', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -135,7 +136,7 @@ def test_e2e_profile_hpe_bladesystem_enclosure(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cpqRackCommonEnclosureManager', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cpqRackCommonEnclosureManager', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -159,7 +160,7 @@ def test_e2e_profile_hpe_bladesystem_enclosure(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.cpqRackPowerEnclosure', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cpqRackPowerEnclosure', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -195,10 +196,10 @@ def test_e2e_profile_hpe_bladesystem_enclosure(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cpqRackServerBladeFaultMajor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cpqRackServerBladeFaultMajor', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cpqRackServerBladeFaultMinor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cpqRackServerBladeFaultMinor', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -217,7 +218,7 @@ def test_e2e_profile_hpe_bladesystem_enclosure(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cpqRackServerTempSensorCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cpqRackServerTempSensorCurrent', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -250,13 +251,13 @@ def test_e2e_profile_hpe_bladesystem_enclosure(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cpqRackPowerSupplyCurPwrOutput', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cpqRackPowerSupplyCurPwrOutput', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cpqRackPowerSupplyExhaustTemp', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cpqRackPowerSupplyExhaustTemp', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cpqRackPowerSupplyIntakeTemp', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cpqRackPowerSupplyIntakeTemp', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     # --- TEST METADATA ---
@@ -275,7 +276,7 @@ def test_e2e_profile_hpe_bladesystem_enclosure(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

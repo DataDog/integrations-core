@@ -34,19 +34,20 @@ def test_e2e_profile_avtech_roomalert3e(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.roomalert.3e.digital_sen1_1', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.roomalert.3e.digital_sen1_2', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.roomalert.3e.digital_sen2_1', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.roomalert.3e.digital_sen2_2', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.roomalert.3e.digital_sen2_3', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.roomalert.3e.digital_sen2_4', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.roomalert.3e.digital_sen2_5', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.roomalert.3e.digital_sen2_7', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.roomalert.3e.switch_sen1', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.roomalert.3e.digital_sen1_1', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.roomalert.3e.digital_sen1_2', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.roomalert.3e.digital_sen2_1', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.roomalert.3e.digital_sen2_2', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.roomalert.3e.digital_sen2_3', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.roomalert.3e.digital_sen2_4', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.roomalert.3e.digital_sen2_5', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.roomalert.3e.digital_sen2_7', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.roomalert.3e.switch_sen1', metric_type=aggregator.GAUGE, tags=metric_tags)
 
     # --- TEST METADATA ---
     device = {
@@ -62,7 +63,7 @@ def test_e2e_profile_avtech_roomalert3e(dd_agent_check):
         'device_type': 'sensor',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

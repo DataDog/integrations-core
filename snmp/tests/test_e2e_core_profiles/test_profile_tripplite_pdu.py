@@ -34,13 +34,14 @@ def test_e2e_profile_tripplite_pdu(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.tlpAlarmsPresent', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.tlpAlarmsPresent', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         [
             'tlp_device_location:Jaded forward driving zombies kept zombies their quaintly forward',
@@ -60,7 +61,7 @@ def test_e2e_profile_tripplite_pdu(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.tlpDevice', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.tlpDevice', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['tlp_device_ident_date_installed:kept oxen', 'tlp_device_ident_serial_num:Jaded zombies forward Jaded'],
@@ -70,7 +71,7 @@ def test_e2e_profile_tripplite_pdu(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.tlpDeviceIdent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.tlpDeviceIdent', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -86,16 +87,16 @@ def test_e2e_profile_tripplite_pdu(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.tlpPduDeviceOutputPowerTotal', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.tlpPduDeviceOutputPowerTotal', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.tlpPduDevicePhaseImbalance', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.tlpPduDevicePhaseImbalance', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.tlpPduDeviceTemperatureC', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.tlpPduDeviceTemperatureC', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.tlpPduDeviceTemperatureF', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.tlpPduDeviceTemperatureF', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -113,27 +114,27 @@ def test_e2e_profile_tripplite_pdu(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.tlpPduOutputCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.tlpPduOutputFrequency', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.tlpPduOutputSource', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.tlpPduOutputVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.tlpPduOutputCurrent', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.tlpPduOutputFrequency', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.tlpPduOutputSource', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.tlpPduOutputVoltage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['tlp_pdu_outlet_description:forward', 'tlp_pdu_outlet_name:acted Jaded but Jaded but acted forward'],
         ['tlp_pdu_outlet_description:their Jaded their acted forward forward', 'tlp_pdu_outlet_name:but zombies Jaded'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.tlpPduOutletCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.tlpPduOutletPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.tlpPduOutletState', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.tlpPduOutletVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.tlpPduOutletCurrent', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.tlpPduOutletPower', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.tlpPduOutletState', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.tlpPduOutletVoltage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['tlp_device_index:29320', 'tlp_pdu_breaker_index:60736', 'tlp_pdu_breaker_status:closed'],
         ['tlp_device_index:8829', 'tlp_pdu_breaker_index:52595', 'tlp_pdu_breaker_status:closed'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.tlpPduBreaker', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.tlpPduBreaker', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -154,7 +155,7 @@ def test_e2e_profile_tripplite_pdu(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.tlpAlarm', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.tlpAlarm', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -170,7 +171,7 @@ def test_e2e_profile_tripplite_pdu(dd_agent_check):
         'device_type': 'pdu',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

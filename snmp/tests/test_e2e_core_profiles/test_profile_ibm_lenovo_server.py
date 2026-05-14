@@ -40,6 +40,7 @@ def test_e2e_profile_ibm_lenovo_server(dd_agent_check):
         'ibm_imm_machine_level_product_name:Jaded acted their but acted kept driving Jaded Jaded',
         'ibm_imm_machine_level_serial_number:driving quaintly quaintly but driving',
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_host_resources_base(aggregator, common_tags)
@@ -54,21 +55,21 @@ def test_e2e_profile_ibm_lenovo_server(dd_agent_check):
         ['ibm_imm_temp_descr:quaintly acted kept', 'ibm_imm_temp_health_status:acted quaintly acted zombies'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ibm.imm.tempReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ibm.imm.tempReading', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['ibm_imm_volt_descr:kept Jaded quaintly kept their', 'ibm_imm_volt_health_status:quaintly Jaded zombies oxen'],
         ['ibm_imm_volt_descr:zombies acted their their', 'ibm_imm_volt_health_status:acted forward kept forward'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ibm.imm.voltReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ibm.imm.voltReading', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['ibm_imm_fan_descr:kept but quaintly acted Jaded', 'ibm_imm_fan_health_status:acted acted forward acted'],
         ['ibm_imm_fan_descr:their but quaintly oxen', 'ibm_imm_fan_health_status:kept'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ibm.imm.fanSpeed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ibm.imm.fanSpeed', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -82,7 +83,7 @@ def test_e2e_profile_ibm_lenovo_server(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.ibm.imm.systemHealthSummary', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.ibm.imm.systemHealthSummary', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -96,7 +97,7 @@ def test_e2e_profile_ibm_lenovo_server(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ibm.imm.systemCPUVpd', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ibm.imm.systemCPUVpd', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -110,7 +111,7 @@ def test_e2e_profile_ibm_lenovo_server(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.ibm.imm.systemMemoryVpd', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.ibm.imm.systemMemoryVpd', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -118,14 +119,14 @@ def test_e2e_profile_ibm_lenovo_server(dd_agent_check):
         ['ibm_imm_power_fru_name:forward', 'ibm_imm_power_health_status:Jaded'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ibm.imm.power', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ibm.imm.power', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['ibm_imm_disk_fru_name:acted Jaded', 'ibm_imm_disk_health_status:driving driving zombies Jaded'],
         ['ibm_imm_disk_fru_name:oxen', 'ibm_imm_disk_health_status:forward'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ibm.imm.disk', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ibm.imm.disk', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -141,7 +142,7 @@ def test_e2e_profile_ibm_lenovo_server(dd_agent_check):
         'device_type': 'server',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

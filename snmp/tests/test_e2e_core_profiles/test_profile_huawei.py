@@ -34,6 +34,7 @@ def test_e2e_profile_huawei(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + ['huawei_hw_entity_system_model:Jaded but Jaded']
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -59,10 +60,10 @@ def test_e2e_profile_huawei(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.huawei.hwEntityTemperature', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.huawei.hwEntityTemperature', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.huawei.hwEntityVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.huawei.hwEntityVoltage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -85,7 +86,7 @@ def test_e2e_profile_huawei(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.huawei.hwEntityFanSpeed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.huawei.hwEntityFanSpeed', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -94,13 +95,13 @@ def test_e2e_profile_huawei(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.huawei.hwSystemPowerRemainPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.huawei.hwSystemPowerRemainPower', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.huawei.hwSystemPowerTotalPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.huawei.hwSystemPowerTotalPower', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.huawei.hwSystemPowerUsedPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.huawei.hwSystemPowerUsedPower', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -151,13 +152,13 @@ def test_e2e_profile_huawei(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.huawei.hwOspfv2NbrDeadTimeLeft', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.huawei.hwOspfv2NbrDeadTimeLeft', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.huawei.hwOspfv2NbrPriority', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.huawei.hwOspfv2NbrPriority', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.huawei.hwOspfv2NbrUpTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.huawei.hwOspfv2NbrUpTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -165,7 +166,7 @@ def test_e2e_profile_huawei(dd_agent_check):
         ['cpu:8'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.huawei.hwAvgDuty1min', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.huawei.hwAvgDuty1min', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['mem:1'],
@@ -173,10 +174,10 @@ def test_e2e_profile_huawei(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.huawei.hwMemoryDevFree', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.huawei.hwMemoryDevFree', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.huawei.hwMemoryDevSize', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.huawei.hwMemoryDevSize', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
 
     # --- TEST METADATA ---
@@ -193,7 +194,7 @@ def test_e2e_profile_huawei(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

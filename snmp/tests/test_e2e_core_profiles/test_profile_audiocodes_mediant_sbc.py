@@ -35,6 +35,7 @@ def test_e2e_profile_audiocodes_mediant_sbc(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     # Examples:
@@ -43,10 +44,10 @@ def test_e2e_profile_audiocodes_mediant_sbc(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=metric_tags)
 
     # --- TEST METADATA ---
     device = {
@@ -62,7 +63,7 @@ def test_e2e_profile_audiocodes_mediant_sbc(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

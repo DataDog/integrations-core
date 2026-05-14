@@ -39,6 +39,7 @@ def test_e2e_profile_sinetica_eagle_i(dd_agent_check):
         'hawk_i2_inv_serial_num:Jaded',
         'hawk_i2_ip_temp_scale_flag:celsius',
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
 
@@ -50,7 +51,7 @@ def test_e2e_profile_sinetica_eagle_i(dd_agent_check):
         ['hawk_i2_ip_tha_locn:oxen', 'hawk_i2_ip_tha_name:forward driving'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.hawk.i2.ipTHAValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.hawk.i2.ipTHAValue', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -67,7 +68,7 @@ def test_e2e_profile_sinetica_eagle_i(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.hawk.i2.ipCont', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.hawk.i2.ipCont', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -86,7 +87,7 @@ def test_e2e_profile_sinetica_eagle_i(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.hawk.i2.op', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.hawk.i2.op', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['hawk_i2_pdu_name:oxen'],
@@ -94,13 +95,13 @@ def test_e2e_profile_sinetica_eagle_i(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.hawk.i2.pduRMSAmpsValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.hawk.i2.pduRMSAmpsValue', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.hawk.i2.pduRMSVoltsValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.hawk.i2.pduRMSVoltsValue', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.hawk.i2.pduTotalEnergyValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.hawk.i2.pduTotalEnergyValue', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     # --- TEST METADATA ---
@@ -117,7 +118,7 @@ def test_e2e_profile_sinetica_eagle_i(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

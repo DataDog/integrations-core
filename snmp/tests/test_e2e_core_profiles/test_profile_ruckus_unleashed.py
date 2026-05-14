@@ -39,6 +39,7 @@ def test_e2e_profile_ruckus_unleashed(dd_agent_check):
         'ruckus_unleashed_system_serial_number:acted but',
         'ruckus_unleashed_system_model:forward driving',
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -46,33 +47,33 @@ def test_e2e_profile_ruckus_unleashed(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ruckusUnleashedSystemStatsAllNumSta', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ruckusUnleashedSystemStatsNumAP', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ruckusUnleashedSystemStatsAllNumSta', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ruckusUnleashedSystemStatsNumAP', metric_type=aggregator.GAUGE, tags=metric_tags)
     aggregator.assert_metric(
-        'snmp.ruckusUnleashedSystemStatsNumRegisteredAP', metric_type=aggregator.GAUGE, tags=common_tags
+        'snmp.ruckusUnleashedSystemStatsNumRegisteredAP', metric_type=aggregator.GAUGE, tags=metric_tags
     )
     aggregator.assert_metric(
-        'snmp.ruckusUnleashedSystemStatsWLANTotalAssocFail', metric_type=aggregator.COUNT, tags=common_tags
+        'snmp.ruckusUnleashedSystemStatsWLANTotalAssocFail', metric_type=aggregator.COUNT, tags=metric_tags
     )
     aggregator.assert_metric(
-        'snmp.ruckusUnleashedSystemStatsWLANTotalRxBytes', metric_type=aggregator.COUNT, tags=common_tags
+        'snmp.ruckusUnleashedSystemStatsWLANTotalRxBytes', metric_type=aggregator.COUNT, tags=metric_tags
     )
     aggregator.assert_metric(
-        'snmp.ruckusUnleashedSystemStatsWLANTotalRxPkts', metric_type=aggregator.COUNT, tags=common_tags
+        'snmp.ruckusUnleashedSystemStatsWLANTotalRxPkts', metric_type=aggregator.COUNT, tags=metric_tags
     )
     aggregator.assert_metric(
-        'snmp.ruckusUnleashedSystemStatsWLANTotalTxBytes', metric_type=aggregator.COUNT, tags=common_tags
+        'snmp.ruckusUnleashedSystemStatsWLANTotalTxBytes', metric_type=aggregator.COUNT, tags=metric_tags
     )
     aggregator.assert_metric(
-        'snmp.ruckusUnleashedSystemStatsWLANTotalTxFail', metric_type=aggregator.COUNT, tags=common_tags
+        'snmp.ruckusUnleashedSystemStatsWLANTotalTxFail', metric_type=aggregator.COUNT, tags=metric_tags
     )
     aggregator.assert_metric(
-        'snmp.ruckusUnleashedSystemStatsWLANTotalTxPkts', metric_type=aggregator.COUNT, tags=common_tags
+        'snmp.ruckusUnleashedSystemStatsWLANTotalTxPkts', metric_type=aggregator.COUNT, tags=metric_tags
     )
     aggregator.assert_metric(
-        'snmp.ruckusUnleashedSystemStatsWLANTotalTxRetry', metric_type=aggregator.COUNT, tags=common_tags
+        'snmp.ruckusUnleashedSystemStatsWLANTotalTxRetry', metric_type=aggregator.COUNT, tags=metric_tags
     )
 
     # --- TEST METADATA ---
@@ -89,7 +90,7 @@ def test_e2e_profile_ruckus_unleashed(dd_agent_check):
         'device_type': 'wlc',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

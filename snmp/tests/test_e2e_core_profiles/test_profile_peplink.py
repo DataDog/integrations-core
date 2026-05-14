@@ -42,6 +42,7 @@ def test_e2e_profile_peplink(dd_agent_check):
         'peplink_device_model:driving acted their zombies but acted forward Jaded',
         'peplink_device_serial_number:their Jaded oxen but Jaded forward oxen driving',
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_host_resources_base(aggregator, common_tags)
@@ -50,11 +51,11 @@ def test_e2e_profile_peplink(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.peplink.deviceTemperatureCelsius', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.peplink.deviceTemperatureFahrenheit', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.peplink.deviceTemperatureCelsius', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.peplink.deviceTemperatureFahrenheit', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         ['device_psu_id:17', 'device_psu_status:error'],
         ['device_psu_id:20', 'device_psu_status:on'],
@@ -63,7 +64,7 @@ def test_e2e_profile_peplink(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.peplink.devicePSUPercentage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.peplink.devicePSUPercentage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -74,7 +75,7 @@ def test_e2e_profile_peplink(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.peplink.deviceFanSpeed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.peplink.deviceFanSpeed', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -97,7 +98,7 @@ def test_e2e_profile_peplink(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.peplink.devicePowerSource', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.peplink.devicePowerSource', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -106,13 +107,13 @@ def test_e2e_profile_peplink(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.peplink.linkDataTransferred', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.peplink.linkDataTransferred', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.peplink.linkThroughputIn', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.peplink.linkThroughputIn', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.peplink.linkThroughputOut', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.peplink.linkThroughputOut', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -121,13 +122,13 @@ def test_e2e_profile_peplink(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.peplink.wanUsageDataTransferred', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.peplink.wanUsageDataTransferred', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.peplink.wanUsageThroughputIn', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.peplink.wanUsageThroughputIn', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.peplink.wanUsageThroughputOut', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.peplink.wanUsageThroughputOut', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
 
     # --- TEST METADATA ---
@@ -144,7 +145,7 @@ def test_e2e_profile_peplink(dd_agent_check):
         'device_type': 'router',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

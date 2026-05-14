@@ -34,6 +34,7 @@ def test_e2e_profile_kyocera_printer(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + ['kcprt_general_model_name:kept but oxen Jaded', 'kcprt_serial_number:kept kept']
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
 
@@ -45,7 +46,7 @@ def test_e2e_profile_kyocera_printer(dd_agent_check):
         ['kcprt_alert_state_display:zombies kept but acted acted'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.kcprtAlertStateCode', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.kcprtAlertStateCode', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -61,10 +62,10 @@ def test_e2e_profile_kyocera_printer(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.kcprtMemoryDeviceTotalSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.kcprtMemoryDeviceTotalSize', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.kcprtMemoryDeviceUsedSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.kcprtMemoryDeviceUsedSize', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     # --- TEST METADATA ---
@@ -81,7 +82,7 @@ def test_e2e_profile_kyocera_printer(dd_agent_check):
         'device_type': 'printer',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

@@ -34,13 +34,14 @@ def test_e2e_profile_huawei_switches(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.huawei.hwStackReservedVlanId', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.huawei.hwStackReservedVlanId', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         [
             'huawei_hw_member_stack_device_type:zombies',
@@ -57,7 +58,7 @@ def test_e2e_profile_huawei_switches(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.huawei.hwMemberStackPriority', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.huawei.hwMemberStackPriority', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -65,7 +66,7 @@ def test_e2e_profile_huawei_switches(dd_agent_check):
         ['huawei_hw_stack_port_name:zombies their oxen their but forward', 'huawei_hw_stack_port_status:up'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.huawei.hwStackPort', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.huawei.hwStackPort', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -81,7 +82,7 @@ def test_e2e_profile_huawei_switches(dd_agent_check):
         'device_type': 'switch',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

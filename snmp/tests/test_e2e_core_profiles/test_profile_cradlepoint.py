@@ -35,6 +35,7 @@ def test_e2e_profile_cradlepoint(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -65,13 +66,13 @@ def test_e2e_profile_cradlepoint(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.cradlepoint.mdmCINR', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cradlepoint.mdmECIO', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cradlepoint.mdmRSRP', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cradlepoint.mdmRSRQ', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cradlepoint.mdmSINR', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cradlepoint.mdmCINR', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.cradlepoint.mdmECIO', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.cradlepoint.mdmRSRP', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.cradlepoint.mdmRSRQ', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.cradlepoint.mdmSINR', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.cradlepoint.mdmSignalStrength', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cradlepoint.mdmSignalStrength', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     # --- TEST METADATA ---
@@ -88,7 +89,7 @@ def test_e2e_profile_cradlepoint(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

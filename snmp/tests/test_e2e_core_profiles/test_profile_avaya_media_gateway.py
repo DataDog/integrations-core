@@ -42,6 +42,7 @@ def test_e2e_profile_avaya_media_gateway(dd_agent_check):
         'avaya_cmg_model_number:zombies acted',
         'avaya_cmg_serial_number:their',
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -51,14 +52,14 @@ def test_e2e_profile_avaya_media_gateway(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.avaya.cmgCurrent802Vlan', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.avaya.cmgH248LinkErrorCode', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.avaya.cmgLocalSig802Priority', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.avaya.cmgLocalSigDscp', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.avaya.cmgRemoteSig802Priority', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.avaya.cmgRemoteSigDscp', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.avaya.cmgCurrent802Vlan', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.avaya.cmgH248LinkErrorCode', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.avaya.cmgLocalSig802Priority', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.avaya.cmgLocalSigDscp', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.avaya.cmgRemoteSig802Priority', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.avaya.cmgRemoteSigDscp', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         [
             'avaya_av_ent_phy_ch_fru_fault:mulfunction',
@@ -68,7 +69,7 @@ def test_e2e_profile_avaya_media_gateway(dd_agent_check):
         ['avaya_av_ent_phy_ch_fru_fault:none', 'avaya_av_ent_phy_ch_fru_oper_stat:ok', 'avaya_ent_physical_index:21'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.avaya.avEntPhyChFru', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.avaya.avEntPhyChFru', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -110,13 +111,13 @@ def test_e2e_profile_avaya_media_gateway(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.avaya.cmgVoipAverageOccupancy', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.avaya.cmgVoipAverageOccupancy', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.avaya.cmgVoipChannelsInUse', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.avaya.cmgVoipChannelsInUse', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.avaya.cmgVoipTotalChannels', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.avaya.cmgVoipTotalChannels', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -153,10 +154,10 @@ def test_e2e_profile_avaya_media_gateway(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.avaya.cmgDSPCoreChannelsInUse', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.avaya.cmgDSPCoreChannelsInUse', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.avaya.cmgDSPCoreTotalChannels', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.avaya.cmgDSPCoreTotalChannels', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     # --- TEST METADATA ---
@@ -173,7 +174,7 @@ def test_e2e_profile_avaya_media_gateway(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

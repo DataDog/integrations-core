@@ -41,6 +41,7 @@ def test_e2e_profile_bluecat_server(dd_agent_check):
         'bcn_sys_id_os_release:OS v1.2.3',
         'bcn_sys_id_platform:BCN Platform X',
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     # Examples:
@@ -69,7 +70,7 @@ def test_e2e_profile_bluecat_server(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.bcnDhcpv4SubnetFreeAddresses', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.bcnDhcpv4SubnetFreeAddresses', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -88,7 +89,7 @@ def test_e2e_profile_bluecat_server(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.bcnDhcpv4PoolFreeAddresses', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.bcnDhcpv4PoolFreeAddresses', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     # --- TEST METADATA ---
@@ -105,7 +106,7 @@ def test_e2e_profile_bluecat_server(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

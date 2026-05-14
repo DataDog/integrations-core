@@ -41,6 +41,7 @@ def test_e2e_profile_infoblox_ipam(dd_agent_check):
         'ib_nios_version:zombies driving forward oxen but acted oxen',
         'ib_serial_number:driving but zombies kept kept',
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_host_resources_base(aggregator, common_tags)
@@ -50,40 +51,40 @@ def test_e2e_profile_infoblox_ipam(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ibDDNSUpdateFailure', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.ibDDNSUpdatePrerequisiteReject', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.ibDDNSUpdateReject', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.ibDDNSUpdateSuccess', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.ibDhcpDeferredQueueSize', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ibDnsQueryRate', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ibDDNSUpdateFailure', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.ibDDNSUpdatePrerequisiteReject', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.ibDDNSUpdateReject', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.ibDDNSUpdateSuccess', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.ibDhcpDeferredQueueSize', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ibDnsQueryRate', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         ['ib_bind_zone_name:acted'],
         ['ib_bind_zone_name:their'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ibBindZoneFailure', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ibBindZoneNxDomain', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ibBindZoneNxRRset', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ibBindZoneRecursion', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ibBindZoneReferral', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ibBindZoneSuccess', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ibBindZoneFailure', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.ibBindZoneNxDomain', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.ibBindZoneNxRRset', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.ibBindZoneRecursion', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.ibBindZoneReferral', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.ibBindZoneSuccess', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['ib_node_ip_address:Jaded', 'ib_node_replication_status:forward Jaded zombies forward forward'],
         ['ib_node_ip_address:driving', 'ib_node_replication_status:forward zombies'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ibNodeQueueFromMaster', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ibNodeQueueToMaster', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ibNodeQueueFromMaster', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.ibNodeQueueToMaster', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['ib_service_desc:forward oxen oxen', 'ib_service_name:lcd', 'ib_service_status:inactive'],
         ['ib_service_desc:kept zombies kept', 'ib_service_name:raid-disk8', 'ib_service_status:warning'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ibMemberServiceStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ibMemberServiceStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -99,7 +100,7 @@ def test_e2e_profile_infoblox_ipam(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

@@ -35,6 +35,7 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -42,58 +43,58 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.curConfigGslbVservers', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.curConfigLbVservers', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.curConfigVservers', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.curConfigGslbVservers', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.curConfigLbVservers', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.curConfigVservers', metric_type=aggregator.GAUGE, tags=metric_tags)
     aggregator.assert_metric(
-        'snmp.netscaler.haTimeofLastStateTransition', metric_type=aggregator.GAUGE, tags=common_tags
+        'snmp.netscaler.haTimeofLastStateTransition', metric_type=aggregator.GAUGE, tags=metric_tags
     )
-    aggregator.assert_metric('snmp.netscaler.haTotStateTransitions', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.httpErrIncompleteHeaders', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.httpErrIncompleteRequests', metric_type=aggregator.COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.netscaler.haTotStateTransitions', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.httpErrIncompleteHeaders', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.httpErrIncompleteRequests', metric_type=aggregator.COUNT, tags=metric_tags)
     aggregator.assert_metric(
-        'snmp.netscaler.httpErrIncompleteResponses', metric_type=aggregator.COUNT, tags=common_tags
+        'snmp.netscaler.httpErrIncompleteResponses', metric_type=aggregator.COUNT, tags=metric_tags
     )
-    aggregator.assert_metric('snmp.netscaler.httpErrServerBusy', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.httpTot10Requests', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.httpTot10Responses', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.httpTotGets', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.httpTotOthers', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.httpTotPosts', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.httpTotResponses', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.httpTotRxRequestBytes', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.httpTotRxResponseBytes', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.httpTotTxRequestBytes', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.httpTotTxResponseBytes', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.serverCount', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.sslCurSessions', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.sslSessionsPerSec', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.sslTotSessions', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.svcCount', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.svcTotalClients', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.svcTotalServers', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.svcgroupCount', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.svcgroupmemCount', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.syssvcCount', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.sysupsvcCount', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.sysupsvcitmCount', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.tcpCurClientConn', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.netscaler.httpErrServerBusy', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.httpTot10Requests', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.httpTot10Responses', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.httpTotGets', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.httpTotOthers', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.httpTotPosts', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.httpTotResponses', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.httpTotRxRequestBytes', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.httpTotRxResponseBytes', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.httpTotTxRequestBytes', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.httpTotTxResponseBytes', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.serverCount', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.sslCurSessions', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.sslSessionsPerSec', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.sslTotSessions', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.svcCount', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.svcTotalClients', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.svcTotalServers', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.svcgroupCount', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.svcgroupmemCount', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.syssvcCount', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.sysupsvcCount', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.sysupsvcitmCount', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.tcpCurClientConn', metric_type=aggregator.GAUGE, tags=metric_tags)
     aggregator.assert_metric(
-        'snmp.netscaler.tcpCurClientConnEstablished', metric_type=aggregator.GAUGE, tags=common_tags
+        'snmp.netscaler.tcpCurClientConnEstablished', metric_type=aggregator.GAUGE, tags=metric_tags
     )
     aggregator.assert_metric(
-        'snmp.netscaler.tcpCurServerConnEstablished', metric_type=aggregator.GAUGE, tags=common_tags
+        'snmp.netscaler.tcpCurServerConnEstablished', metric_type=aggregator.GAUGE, tags=metric_tags
     )
-    aggregator.assert_metric('snmp.netscaler.tcpErrAnyPortFail', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.tcpErrIpPortFail', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.tcpErrRetransmit', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.tcpTotRxPkts', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.tcpTotTxPkts', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.totSpilloverCount', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.vsvrBindCount', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.vsvrSvcGrpBindCount', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.netscaler.tcpErrAnyPortFail', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.tcpErrIpPortFail', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.tcpErrRetransmit', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.tcpTotRxPkts', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.tcpTotTxPkts', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.totSpilloverCount', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.vsvrBindCount', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.netscaler.vsvrSvcGrpBindCount', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         [
             'netscaler_vsvr_ip_address:210.102.241.146',
@@ -112,7 +113,7 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.netscaler.vsvrCurClntConnections', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.vsvrCurClntConnections', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -121,16 +122,16 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.netscaler.sysHealthDiskAvail', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.sysHealthDiskAvail', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.sysHealthDiskPerusage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.sysHealthDiskPerusage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.sysHealthDiskSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.sysHealthDiskSize', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.sysHealthDiskUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.sysHealthDiskUsed', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -139,25 +140,25 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.netscaler.ifRxAvgBandwidthUsage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.ifRxAvgBandwidthUsage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.ifThroughput', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.ifThroughput', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.ifTotRxBytes', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.netscaler.ifTotRxBytes', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.ifTotRxMbits', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.netscaler.ifTotRxMbits', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.ifTotTxBytes', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.netscaler.ifTotTxBytes', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.ifTotTxMbits', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.netscaler.ifTotTxMbits', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.ifTxAvgBandwidthUsage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.ifTxAvgBandwidthUsage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -174,10 +175,10 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.netscaler.servicePersistentHits', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.netscaler.servicePersistentHits', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.vsvrServiceHits', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.netscaler.vsvrServiceHits', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -185,7 +186,7 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
         ['netscaler_ns_cp_uname:kept forward their oxen forward'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.netscaler.nsCPUusage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.netscaler.nsCPUusage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['netscaler_lbvsvr_lb_method:source_ip_source_port', 'netscaler_lbvsvr_persistance_type:cookie_insert'],
@@ -193,13 +194,13 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.netscaler.lbvsvrActiveConn', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.lbvsvrActiveConn', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.lbvsvrAvgSvrTTFB', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.lbvsvrAvgSvrTTFB', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.lbvsvrPersistenceTimeOut', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.lbvsvrPersistenceTimeOut', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -218,7 +219,7 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.netscaler.serviceGroup', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.serviceGroup', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -227,7 +228,7 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.netscaler.sslDaysToExpire', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.sslDaysToExpire', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -236,53 +237,53 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.netscaler.vsvrCurServicesDown', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.vsvrCurServicesDown', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.vsvrCurServicesUp', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.vsvrCurServicesUp', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.vsvrCurSrvrConnections', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.vsvrCurSrvrConnections', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.netscaler.vsvrHealth', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.netscaler.vsvrHealth', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.netscaler.vsvrRequestRate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric(
-            'snmp.netscaler.vsvrRxBytesRate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.vsvrRequestRate', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.vsvrSoThreshold', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.vsvrRxBytesRate', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.vsvrSynfloodRate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.vsvrSoThreshold', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.vsvrTotSpillOvers', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.netscaler.vsvrSynfloodRate', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.vsvrTotalClients', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.netscaler.vsvrTotSpillOvers', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.vsvrTotalRequestBytes', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.netscaler.vsvrTotalClients', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.vsvrTotalRequests', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.netscaler.vsvrTotalRequestBytes', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.vsvrTotalResponseBytes', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.netscaler.vsvrTotalRequests', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.vsvrTotalResponses', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.netscaler.vsvrTotalResponseBytes', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.vsvrTotalServers', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.netscaler.vsvrTotalResponses', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.vsvrTotalServicesBound', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.vsvrTotalServers', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.vsvrTxBytesRate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.vsvrTotalServicesBound', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.netscaler.vsvrTxBytesRate', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -303,52 +304,52 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.netscaler.svcActiveConn', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.svcActiveConn', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.svcActiveTransactions', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.svcActiveTransactions', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.svcAvgSvrTTFB', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.svcAvgSvrTTFB', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.svcAvgTransactionTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.svcAvgTransactionTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.svcCurClntConnections', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.svcCurClntConnections', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.svcEstablishedConn', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.svcEstablishedConn', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.svcRequestRate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.svcRequestRate', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.svcRxBytesRate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.svcRxBytesRate', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.svcSurgeCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.svcSurgeCount', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.svcTotalPktsRecvd', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.netscaler.svcTotalPktsRecvd', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.svcTotalPktsSent', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.netscaler.svcTotalPktsSent', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.svcTotalRequestBytes', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.netscaler.svcTotalRequestBytes', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.svcTotalRequests', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.netscaler.svcTotalRequests', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.svcTotalResponseBytes', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.netscaler.svcTotalResponseBytes', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.svcTotalResponses', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.netscaler.svcTotalResponses', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.svcTxBytesRate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.svcTxBytesRate', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -364,7 +365,7 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.netscaler.server', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.netscaler.server', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -382,7 +383,7 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
         'device_type': 'load_balancer',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

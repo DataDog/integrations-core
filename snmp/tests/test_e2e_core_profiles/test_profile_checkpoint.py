@@ -40,6 +40,7 @@ def test_e2e_profile_checkpoint(dd_agent_check):
         'agent_host:' + common.get_agent_hostname(),
         'device_vendor:checkpoint',
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -52,21 +53,21 @@ def test_e2e_profile_checkpoint(dd_agent_check):
     assert_common_metrics(aggregator, common_tags)
 
     aggregator.assert_metric(
-        'snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + ['cpu:7097', 'cpu_core:7097']
+        'snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags + ['cpu:7097', 'cpu_core:7097']
     )
-    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.fwAccepted', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.fwDropped', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.fwNumConn', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.fwPeakNumConn', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.fwRejected', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.memActiveReal64', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memActiveVirtual64', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memFreeReal64', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memTotalReal64', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memTotalVirtual64', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.procNum', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.fwAccepted', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.fwDropped', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.fwNumConn', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.fwPeakNumConn', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.fwRejected', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.memActiveReal64', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memActiveVirtual64', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memFreeReal64', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memTotalReal64', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memTotalVirtual64', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.procNum', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         ['cpu_core:13039'],
         ['cpu_core:13761'],
@@ -80,10 +81,10 @@ def test_e2e_profile_checkpoint(dd_agent_check):
         ['cpu_core:7097'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.multiProcIdleTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.multiProcSystemTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.multiProcUsage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.multiProcUserTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.multiProcIdleTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.multiProcSystemTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.multiProcUsage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.multiProcUserTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['disk_index:0', 'disk_name:first'],
@@ -99,19 +100,19 @@ def test_e2e_profile_checkpoint(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.multiDiskFreeAvailableBytes', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.multiDiskFreeAvailableBytes', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.multiDiskFreeAvailablePercent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.multiDiskFreeAvailablePercent', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.multiDiskFreeTotalBytes', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.multiDiskFreeTotalBytes', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.multiDiskFreeTotalPercent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.multiDiskFreeTotalPercent', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.multiDiskSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.multiDiskUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.multiDiskSize', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.multiDiskUsed', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['sensor_index:0', 'sensor_name:first'],
@@ -126,8 +127,8 @@ def test_e2e_profile_checkpoint(dd_agent_check):
         ['sensor_index:9', 'sensor_name:tenth'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.fanSpeedSensorStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.fanSpeedSensorValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.fanSpeedSensorStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.fanSpeedSensorValue', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['fan_speed_sensor_status:false', 'sensor_index:0', 'sensor_name:first'],
@@ -142,7 +143,7 @@ def test_e2e_profile_checkpoint(dd_agent_check):
         ['fan_speed_sensor_status:true', 'sensor_index:7', 'sensor_name:eighth'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.fanSpeedSensor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.fanSpeedSensor', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['sensor_index:0', 'sensor_name:first'],
@@ -158,9 +159,9 @@ def test_e2e_profile_checkpoint(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.tempertureSensorStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.tempertureSensorStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.tempertureSensorValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.tempertureSensorValue', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {

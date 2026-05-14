@@ -51,6 +51,7 @@ def test_e2e_profile_mcafee_web_gateway(dd_agent_check):
         'mcafee_mwg_p_mfedat_version:forward',
         'mcafee_mwg_p_tsdb_version:oxen',
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -58,47 +59,47 @@ def test_e2e_profile_mcafee_web_gateway(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stBlockedByAntiMalware', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stBlockedByMediaFilter', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stBlockedByURLFilter', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stCategories', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stClientCount', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stConnectedSockets', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stConnectionsBlocked', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stConnectionsLegitimate', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stFtpBytesFromClient', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stFtpBytesFromServer', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stFtpBytesToClient', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stFtpBytesToServer', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stFtpTraffic', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stHttpBytesFromClient', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stHttpBytesFromServer', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stHttpBytesToClient', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stHttpBytesToServer', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stHttpRequests', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stHttpTraffic', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stHttpsBytesFromClient', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stHttpsBytesFromServer', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stHttpsBytesToClient', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stHttpsBytesToServer', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stHttpsRequests', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stHttpsTraffic', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stMalwareDetected', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stMimeType', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stResolveHostViaDNS', metric_type=aggregator.COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stBlockedByAntiMalware', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stBlockedByMediaFilter', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stBlockedByURLFilter', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stCategories', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stClientCount', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stConnectedSockets', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stConnectionsBlocked', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stConnectionsLegitimate', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stFtpBytesFromClient', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stFtpBytesFromServer', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stFtpBytesToClient', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stFtpBytesToServer', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stFtpTraffic', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stHttpBytesFromClient', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stHttpBytesFromServer', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stHttpBytesToClient', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stHttpBytesToServer', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stHttpRequests', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stHttpTraffic', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stHttpsBytesFromClient', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stHttpsBytesFromServer', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stHttpsBytesToClient', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stHttpsBytesToServer', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stHttpsRequests', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stHttpsTraffic', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stMalwareDetected', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stMimeType', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stResolveHostViaDNS', metric_type=aggregator.COUNT, tags=metric_tags)
     aggregator.assert_metric(
-        'snmp.mcafee.mwg.stTimeConsumedByRuleEngine', metric_type=aggregator.COUNT, tags=common_tags
+        'snmp.mcafee.mwg.stTimeConsumedByRuleEngine', metric_type=aggregator.COUNT, tags=metric_tags
     )
-    aggregator.assert_metric('snmp.mcafee.mwg.stTimeForTransaction', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.mcafee.mwg.stTimeForTransaction', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         ['mcafee_mwg_st_category_name:driving their forward'],
         ['mcafee_mwg_st_category_name:kept forward zombies their Jaded oxen'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.mcafee.mwg.stCategoryCount', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.mcafee.mwg.stCategoryCount', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
 
     # --- TEST METADATA ---
@@ -115,7 +116,7 @@ def test_e2e_profile_mcafee_web_gateway(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

@@ -40,6 +40,7 @@ def test_e2e_profile_tripplite_ups(dd_agent_check):
         'tl_ups_location:forward zombies oxen their driving acted Jaded zombies',
         'tl_ups_snmp_card_serial_num:Jaded kept zombies forward',
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_ups(aggregator, common_tags)
@@ -47,20 +48,20 @@ def test_e2e_profile_tripplite_ups(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.tlEnvHumidity', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.tlEnvTemperatureC', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.tlEnvTemperatureF', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.tlUpsAlarmsPresent', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.tlUpsBatteryAge', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.tlUpsExternalBatteryAge', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.tlUpsTemperature', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.tlUpsTemperatureF', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.tlEnvHumidity', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.tlEnvTemperatureC', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.tlEnvTemperatureF', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.tlUpsAlarmsPresent', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.tlUpsBatteryAge', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.tlUpsExternalBatteryAge', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.tlUpsTemperature', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.tlUpsTemperatureF', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         ['tl_ups_input_voltage_index:18', 'tl_ups_input_voltage_type:phase_to_phase'],
         ['tl_ups_input_voltage_index:2', 'tl_ups_input_voltage_type:phase_to_neutral'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.tlUpsInputVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.tlUpsInputVoltage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['tl_ups_output_circuit_status:closed', 'tl_ups_output_circuit_index:31'],
@@ -68,13 +69,13 @@ def test_e2e_profile_tripplite_ups(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.tlUpsOutputCircuitLoadCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.tlUpsOutputCircuitLoadCurrent', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.tlUpsOutputCircuitPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.tlUpsOutputCircuitPower', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.tlUpsOutputCircuitVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.tlUpsOutputCircuitVoltage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -86,7 +87,7 @@ def test_e2e_profile_tripplite_ups(dd_agent_check):
         ['tl_env_contact_config:normally_closed', 'tl_env_contact_name:forward', 'tl_env_contact_status:normal'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.tlEnvContact', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.tlEnvContact', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -101,7 +102,7 @@ def test_e2e_profile_tripplite_ups(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.tlUpsOutlet', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.tlUpsOutlet', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -117,7 +118,7 @@ def test_e2e_profile_tripplite_ups(dd_agent_check):
         'device_type': 'ups',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

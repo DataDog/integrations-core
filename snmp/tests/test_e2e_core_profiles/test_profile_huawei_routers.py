@@ -34,6 +34,7 @@ def test_e2e_profile_huawei_routers(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
 
@@ -56,37 +57,16 @@ def test_e2e_profile_huawei_routers(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.huawei.hwBgpPeerFsmEstablishedCounter', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.huawei.hwBgpPeerFsmEstablishedCounter', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.huawei.hwBgpPeerFsmEstablishedTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.huawei.hwBgpPeerFsmEstablishedTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.huawei.hwBgpPeerNegotiatedVersion', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.huawei.hwBgpPeerNegotiatedVersion', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.huawei.hwBgpPeerRemoteAs', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-
-    tag_rows = [
-        [
-            'huawei_hw_bgp_peer_remote_addr:190.114.96.169',
-            'huawei_hw_bgp_peer_vrf_name:acted acted but Jaded but driving their',
-        ],
-        [
-            'huawei_hw_bgp_peer_remote_addr:93.22.18.75',
-            'huawei_hw_bgp_peer_vrf_name:oxen quaintly their their their quaintly zombies',
-        ],
-    ]
-    for tag_row in tag_rows:
-        aggregator.assert_metric(
-            'snmp.huawei.hwBgpPeerPrefixActiveCounter', metric_type=aggregator.COUNT, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric(
-            'snmp.huawei.hwBgpPeerPrefixAdvCounter', metric_type=aggregator.COUNT, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric(
-            'snmp.huawei.hwBgpPeerPrefixRcvCounter', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.huawei.hwBgpPeerRemoteAs', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -101,40 +81,61 @@ def test_e2e_profile_huawei_routers(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.huawei.hwBgpPeerInKeepAliveMsgCounter', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.huawei.hwBgpPeerPrefixActiveCounter', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.huawei.hwBgpPeerInNotificationMsgCounter', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.huawei.hwBgpPeerPrefixAdvCounter', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.huawei.hwBgpPeerInOpenMsgCounter', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.huawei.hwBgpPeerPrefixRcvCounter', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
+        )
+
+    tag_rows = [
+        [
+            'huawei_hw_bgp_peer_remote_addr:190.114.96.169',
+            'huawei_hw_bgp_peer_vrf_name:acted acted but Jaded but driving their',
+        ],
+        [
+            'huawei_hw_bgp_peer_remote_addr:93.22.18.75',
+            'huawei_hw_bgp_peer_vrf_name:oxen quaintly their their their quaintly zombies',
+        ],
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric(
+            'snmp.huawei.hwBgpPeerInKeepAliveMsgCounter', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.huawei.hwBgpPeerInRouteFreshMsgCounter', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.huawei.hwBgpPeerInNotificationMsgCounter', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.huawei.hwBgpPeerInTotalMsgCounter', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.huawei.hwBgpPeerInOpenMsgCounter', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.huawei.hwBgpPeerInUpdateMsgCounter', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.huawei.hwBgpPeerInRouteFreshMsgCounter', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.huawei.hwBgpPeerOutKeepAliveMsgCounter', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.huawei.hwBgpPeerInTotalMsgCounter', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.huawei.hwBgpPeerOutNotificationMsgCounter', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.huawei.hwBgpPeerInUpdateMsgCounter', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.huawei.hwBgpPeerOutOpenMsgCounter', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.huawei.hwBgpPeerOutKeepAliveMsgCounter', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.huawei.hwBgpPeerOutRouteFreshMsgCounter', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.huawei.hwBgpPeerOutNotificationMsgCounter', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.huawei.hwBgpPeerOutTotalMsgCounter', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.huawei.hwBgpPeerOutOpenMsgCounter', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.huawei.hwBgpPeerOutUpdateMsgCounter', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.huawei.hwBgpPeerOutRouteFreshMsgCounter', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.huawei.hwBgpPeerOutTotalMsgCounter', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.huawei.hwBgpPeerOutUpdateMsgCounter', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -150,7 +151,7 @@ def test_e2e_profile_huawei_routers(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.huawei.hwDnsTtl', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.huawei.hwDnsTtl', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['huawei_hw_server_addr:90.96.69.163'],
@@ -158,7 +159,7 @@ def test_e2e_profile_huawei_routers(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.huawei.hwDnsServerAddr', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.huawei.hwDnsServerAddr', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -182,7 +183,7 @@ def test_e2e_profile_huawei_routers(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.huawei.hwFwNetEvents', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.huawei.hwFwNetEvents', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['huawei_hw_fw_connection_stat_description:acted forward'],
@@ -190,7 +191,7 @@ def test_e2e_profile_huawei_routers(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.huawei.hwFwConnectionStatCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.huawei.hwFwConnectionStatCount', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -205,7 +206,7 @@ def test_e2e_profile_huawei_routers(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.huawei.hwNatAddrPoolRefTimes', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.huawei.hwNatAddrPoolRefTimes', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -294,7 +295,7 @@ def test_e2e_profile_huawei_routers(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.huawei.hwNatSession', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.huawei.hwNatSession', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -310,7 +311,7 @@ def test_e2e_profile_huawei_routers(dd_agent_check):
         'device_type': 'router',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

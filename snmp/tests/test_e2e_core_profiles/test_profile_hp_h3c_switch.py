@@ -35,6 +35,7 @@ def test_e2e_profile_hp_h3c_switch(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -46,21 +47,21 @@ def test_e2e_profile_hp_h3c_switch(dd_agent_check):
         ['hh3c_process_id:27865', 'hh3c_process_name:kept their'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.hh3cProcessUtil5Min', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.hh3cProcessUtil5Min', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['cpu:11', 'hh3c_entity_ext_physical_index:11', 'ent_physical_name:name2'],
         ['cpu:2', 'hh3c_entity_ext_physical_index:2', 'ent_physical_name:name1'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['mem:11', 'hh3c_entity_ext_physical_index:11', 'ent_physical_name:name2'],
         ['mem:2', 'hh3c_entity_ext_physical_index:2', 'ent_physical_name:name1'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -76,7 +77,7 @@ def test_e2e_profile_hp_h3c_switch(dd_agent_check):
         'device_type': 'switch',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

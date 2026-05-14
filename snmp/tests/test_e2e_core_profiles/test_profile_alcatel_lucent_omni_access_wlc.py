@@ -39,6 +39,7 @@ def test_e2e_profile_alcatel_lucent_omni_access_wlc(dd_agent_check):
         'wlsx_switch_license_serial_number:quaintly oxen their',
         'wlsx_switch_role:standbymaster',
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -46,34 +47,34 @@ def test_e2e_profile_alcatel_lucent_omni_access_wlc(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.wlsxSwitchTotalNumAccessPoints', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.wlsxSwitchTotalNumAccessPoints', metric_type=aggregator.GAUGE, tags=metric_tags)
     aggregator.assert_metric(
-        'snmp.wlsxSwitchTotalNumStationsAssociated', metric_type=aggregator.GAUGE, tags=common_tags
+        'snmp.wlsxSwitchTotalNumStationsAssociated', metric_type=aggregator.GAUGE, tags=metric_tags
     )
     tag_rows = [
         ['sys_x_processor_descr:Jaded acted quaintly their forward Jaded forward oxen Jaded', 'cpu:4'],
         ['sys_x_processor_descr:zombies zombies their acted Jaded', "cpu:27"],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['sys_x_storage_name:acted oxen oxen their quaintly', 'sys_x_storage_type:flash_memory'],
         ['sys_x_storage_name:oxen', 'sys_x_storage_type:flash_memory'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.sysXStorageSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.sysXStorageUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.sysXStorageSize', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.sysXStorageUsed', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['mem:1'],
         ['mem:24'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -89,7 +90,7 @@ def test_e2e_profile_alcatel_lucent_omni_access_wlc(dd_agent_check):
         'device_type': 'wlc',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

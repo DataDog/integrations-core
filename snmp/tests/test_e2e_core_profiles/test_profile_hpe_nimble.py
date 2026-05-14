@@ -35,6 +35,7 @@ def test_e2e_profile_hpe_nimble(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -42,19 +43,19 @@ def test_e2e_profile_hpe_nimble(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.nimble.diskSnapBytesUsedHigh', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.nimble.diskSnapBytesUsedLow', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.nimble.diskVolBytesUsedHigh', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.nimble.diskVolBytesUsedLow', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.nimble.ioNonseqReadHits', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.nimble.ioReadBytes', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.nimble.ioReadTimeMicrosec', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.nimble.ioReads', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.nimble.ioSeqReadBytes', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.nimble.ioSeqWriteBytes', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.nimble.ioWriteBytes', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.nimble.ioWriteTimeMicrosec', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.nimble.ioWrites', metric_type=aggregator.COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.nimble.diskSnapBytesUsedHigh', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.nimble.diskSnapBytesUsedLow', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.nimble.diskVolBytesUsedHigh', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.nimble.diskVolBytesUsedLow', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.nimble.ioNonseqReadHits', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.nimble.ioReadBytes', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.nimble.ioReadTimeMicrosec', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.nimble.ioReads', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.nimble.ioSeqReadBytes', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.nimble.ioSeqWriteBytes', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.nimble.ioWriteBytes', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.nimble.ioWriteTimeMicrosec', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.nimble.ioWrites', metric_type=aggregator.COUNT, tags=metric_tags)
 
     tag_rows = [
         ['nimble_vol_name:acted their their forward but', 'nimble_vol_online:false'],
@@ -62,14 +63,14 @@ def test_e2e_profile_hpe_nimble(dd_agent_check):
     ]
 
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.nimble.volIoReads', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.nimble.volIoWrites', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.nimble.volReserveHigh', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.nimble.volReserveLow', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.nimble.volSizeHigh', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.nimble.volSizeLow', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.nimble.volUsageHigh', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.nimble.volUsageLow', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.nimble.volIoReads', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.nimble.volIoWrites', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.nimble.volReserveHigh', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.nimble.volReserveLow', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.nimble.volSizeHigh', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.nimble.volSizeLow', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.nimble.volUsageHigh', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.nimble.volUsageLow', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -85,7 +86,7 @@ def test_e2e_profile_hpe_nimble(dd_agent_check):
         'device_type': 'storage',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

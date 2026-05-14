@@ -42,6 +42,7 @@ def test_e2e_profile_apc_pdu(dd_agent_check):
         'powernet_r_pdu_ident_name:oxen',
         'powernet_r_pdu_ident_serial_number:Jaded kept',
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_tcp(aggregator, common_tags)
@@ -50,14 +51,14 @@ def test_e2e_profile_apc_pdu(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.powernet.rPDUPowerSupplyAlarm', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.powernet.rPDUPowerSupplyAlarm', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         ['powernet_r_pdu_load_status_index:0', 'powernet_r_pdu_load_status_load_state:phase_load_overload'],
         ['powernet_r_pdu_load_status_index:18', 'powernet_r_pdu_load_status_load_state:phase_load_overload'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.powernet.rPDULoadStatusLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.powernet.rPDULoadStatusLoad', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -74,7 +75,7 @@ def test_e2e_profile_apc_pdu(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.powernet.rPDUOutletStatusLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.powernet.rPDUOutletStatusLoad', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -92,7 +93,7 @@ def test_e2e_profile_apc_pdu(dd_agent_check):
 
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.powernet.rPDUStatusBank', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.powernet.rPDUStatusBank', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -110,7 +111,7 @@ def test_e2e_profile_apc_pdu(dd_agent_check):
 
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.powernet.rPDUStatusPhase', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.powernet.rPDUStatusPhase', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -128,7 +129,7 @@ def test_e2e_profile_apc_pdu(dd_agent_check):
 
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.powernet.rPDUStatusOutlet', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.powernet.rPDUStatusOutlet', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -150,13 +151,13 @@ def test_e2e_profile_apc_pdu(dd_agent_check):
         aggregator.assert_metric(
             'snmp.powernet.rPDU2SensorTempHumidityStatusRelativeHumidity',
             metric_type=aggregator.GAUGE,
-            tags=common_tags + tag_row,
+            tags=metric_tags + tag_row,
         )
         aggregator.assert_metric(
-            'snmp.powernet.rPDU2SensorTempHumidityStatusTempC', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.powernet.rPDU2SensorTempHumidityStatusTempC', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.powernet.rPDU2SensorTempHumidityStatusTempF', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.powernet.rPDU2SensorTempHumidityStatusTempF', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     # --- TEST METADATA ---
@@ -173,7 +174,7 @@ def test_e2e_profile_apc_pdu(dd_agent_check):
         'device_type': 'pdu',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

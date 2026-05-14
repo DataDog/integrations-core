@@ -35,6 +35,7 @@ def test_e2e_profile_cisco_firepower_asa(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -42,21 +43,21 @@ def test_e2e_profile_cisco_firepower_asa(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.crasMaxSessionsSupportable', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.crasMaxUsersSupportable', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.crasNumDeclinedSessions', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.crasNumSessions', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.crasNumSetupFailInsufResources', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.crasNumUsers', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.crasMaxSessionsSupportable', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.crasMaxUsersSupportable', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.crasNumDeclinedSessions', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.crasNumSessions', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.crasNumSetupFailInsufResources', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.crasNumUsers', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         ['cpu:34646'],
         ['cpu:7885'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -72,7 +73,7 @@ def test_e2e_profile_cisco_firepower_asa(dd_agent_check):
         'device_type': 'firewall',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

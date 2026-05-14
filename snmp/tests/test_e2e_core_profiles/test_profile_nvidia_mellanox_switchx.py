@@ -37,6 +37,7 @@ def test_e2e_profile_nvidia_mellanox_switchx(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
@@ -58,7 +59,7 @@ def test_e2e_profile_nvidia_mellanox_switchx(dd_agent_check):
         'device_type': 'switch',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

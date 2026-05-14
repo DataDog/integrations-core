@@ -39,6 +39,7 @@ def test_e2e_profile_sophos_xgs_firewall(dd_agent_check):
         'sfos_device_type:Jaded forward kept acted but quaintly but',
         'sfos_ips_version:forward but quaintly their',
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -46,19 +47,19 @@ def test_e2e_profile_sophos_xgs_firewall(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.sfosDiskCapacity', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.sfosDiskPercentUsage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.sfosFTPHits', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.sfosHTTPHits', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.sfosImapHits', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.sfosLiveUsersCount', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.sfosPOP3Hits', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.sfosSmtpHits', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.sfosSwapCapacity', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.sfosSwapPercentUsage', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.sfosDiskCapacity', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.sfosDiskPercentUsage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.sfosFTPHits', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.sfosHTTPHits', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.sfosImapHits', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.sfosLiveUsersCount', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.sfosPOP3Hits', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.sfosSmtpHits', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.sfosSwapCapacity', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.sfosSwapPercentUsage', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         [
             'sfos_ip_sec_vpn_conn_des:oxen but forward their',
@@ -79,9 +80,9 @@ def test_e2e_profile_sophos_xgs_firewall(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.sfosIPSecVpnActiveTunnel', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.sfosIPSecVpnActiveTunnel', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.sfosIPSecVpnTunnel', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.sfosIPSecVpnTunnel', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -97,7 +98,7 @@ def test_e2e_profile_sophos_xgs_firewall(dd_agent_check):
         'device_type': 'firewall',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

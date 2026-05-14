@@ -38,6 +38,7 @@ def test_e2e_profile_aruba_switch(dd_agent_check):
         'agent_host:' + common.get_agent_hostname(),
         'device_vendor:aruba',
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -53,25 +54,25 @@ def test_e2e_profile_aruba_switch(dd_agent_check):
         ['mem:29'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
-    aggregator.assert_metric('snmp.wlsxSysExtPacketLossPercent', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.wlsxSysExtPacketLossPercent', metric_type=aggregator.GAUGE, tags=metric_tags)
 
     tag_rows = [
         ['fan_index:27'],
         ['fan_index:31'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.sysExtFanStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.sysExtFanStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['fan_index:27', 'fan_status:inactive'],
         ['fan_index:31', 'fan_status:active'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.wlsxSysExtFan', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.wlsxSysExtFan', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['powersupply_index:22'],
@@ -79,7 +80,7 @@ def test_e2e_profile_aruba_switch(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.sysExtPowerSupplyStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.sysExtPowerSupplyStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -88,7 +89,7 @@ def test_e2e_profile_aruba_switch(dd_agent_check):
         ['processor_index:4'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.sysExtProcessorLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.sysExtProcessorLoad', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['memory_index:0'],
@@ -96,9 +97,9 @@ def test_e2e_profile_aruba_switch(dd_agent_check):
         ['memory_index:29'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.sysExtMemoryFree', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.sysExtMemorySize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.sysExtMemoryUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.sysExtMemoryFree', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.sysExtMemorySize', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.sysExtMemoryUsed', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -120,7 +121,7 @@ def test_e2e_profile_aruba_switch(dd_agent_check):
         'device_type': 'switch',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

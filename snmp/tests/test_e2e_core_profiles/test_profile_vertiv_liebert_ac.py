@@ -40,34 +40,35 @@ def test_e2e_profile_vertiv_liebert_ac(dd_agent_check):
         'forward acted quaintly quaintly zombies Jaded zombi',
         'lgp_agent_ident_serial_number:zombies zombies but Jaded quaintly quaintly driving forward oxen',
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.lgpEnvStatisticsComp1RunHr', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.lgpEnvStatisticsComp2RunHr', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.lgpEnvStatisticsFanRunHr', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.lgpEnvStatisticsHumRunHr', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.lgpEnvStatisticsReheat1RunHr', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.lgpEnvStatisticsReheat2RunHr', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.lgpEnvStatisticsReheat3RunHr', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.lgpEnvTemperatureSettingDegF', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.lgpEnvTemperatureToleranceDegF', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.lgpEnvStatisticsComp1RunHr', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.lgpEnvStatisticsComp2RunHr', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.lgpEnvStatisticsFanRunHr', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.lgpEnvStatisticsHumRunHr', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.lgpEnvStatisticsReheat1RunHr', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.lgpEnvStatisticsReheat2RunHr', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.lgpEnvStatisticsReheat3RunHr', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.lgpEnvTemperatureSettingDegF', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.lgpEnvTemperatureToleranceDegF', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         ['lgp_env_temperature_descr_deg_f:1.3.6.1.3.116.58.9.240.72'],
         ['lgp_env_temperature_descr_deg_f:1.3.6.1.3.192.78.129.243.49.153.77'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.lgpEnvHumidityMeasurementRel', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.lgpEnvHumidityMeasurementRel', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.lgpEnvTemperatureMeasurementDegC', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.lgpEnvTemperatureMeasurementDegC', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.lgpEnvTemperatureMeasurementDegF', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.lgpEnvTemperatureMeasurementDegF', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     # --- TEST METADATA ---
@@ -84,7 +85,7 @@ def test_e2e_profile_vertiv_liebert_ac(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

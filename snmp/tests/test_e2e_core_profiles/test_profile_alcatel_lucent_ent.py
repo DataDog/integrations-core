@@ -35,6 +35,7 @@ def test_e2e_profile_alcatel_lucent_ent(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -47,14 +48,14 @@ def test_e2e_profile_alcatel_lucent_ent(dd_agent_check):
         ['cpu:27', 'health_module_chassis_id:1'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['health_module_chassis_id:0', 'mem:21'],
         ['health_module_chassis_id:1', 'mem:27'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -98,7 +99,7 @@ def test_e2e_profile_alcatel_lucent_ent(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.alcatel.ent.chasEntPhysical', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.alcatel.ent.chasEntPhysical', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -119,7 +120,7 @@ def test_e2e_profile_alcatel_lucent_ent(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.alcatel.ent.chasEntTempCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.alcatel.ent.chasEntTempCurrent', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -127,7 +128,7 @@ def test_e2e_profile_alcatel_lucent_ent(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.alcatel.ent.alaChasEntPhysFanSpeed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.alcatel.ent.alaChasEntPhysFanSpeed', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -144,7 +145,7 @@ def test_e2e_profile_alcatel_lucent_ent(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.alcatel.ent.alaChasBpsPowerSupply', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.alcatel.ent.alaChasBpsPowerSupply', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     # --- TEST METADATA ---
@@ -161,7 +162,7 @@ def test_e2e_profile_alcatel_lucent_ent(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

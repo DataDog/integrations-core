@@ -34,6 +34,7 @@ def test_e2e_profile_eaton_epdu(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
 
@@ -46,7 +47,7 @@ def test_e2e_profile_eaton_epdu(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.eaton.epdu.inputFrequency', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.eaton.epdu.inputFrequency', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -55,7 +56,7 @@ def test_e2e_profile_eaton_epdu(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.eaton.epdu.inputVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.eaton.epdu.inputVoltage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -64,10 +65,10 @@ def test_e2e_profile_eaton_epdu(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.eaton.epdu.inputCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.eaton.epdu.inputCurrent', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.eaton.epdu.inputCurrentPercentLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.eaton.epdu.inputCurrentPercentLoad', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -75,8 +76,8 @@ def test_e2e_profile_eaton_epdu(dd_agent_check):
         ['eaton_epdu_input_description:oxen'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.eaton.epdu.inputVA', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.eaton.epdu.inputWatts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.eaton.epdu.inputVA', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.eaton.epdu.inputWatts', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -91,7 +92,7 @@ def test_e2e_profile_eaton_epdu(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.eaton.epdu.group', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.eaton.epdu.group', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -107,7 +108,7 @@ def test_e2e_profile_eaton_epdu(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.eaton.epdu.groupVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.eaton.epdu.groupVoltage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -124,10 +125,10 @@ def test_e2e_profile_eaton_epdu(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.eaton.epdu.groupCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.eaton.epdu.groupCurrent', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.eaton.epdu.groupCurrentPercentLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.eaton.epdu.groupCurrentPercentLoad', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -135,8 +136,8 @@ def test_e2e_profile_eaton_epdu(dd_agent_check):
         ['eaton_epdu_group_name:forward zombies acted', 'eaton_epdu_group_type:breaker2pole'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.eaton.epdu.groupVA', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.eaton.epdu.groupWatts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.eaton.epdu.groupVA', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.eaton.epdu.groupWatts', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -152,7 +153,7 @@ def test_e2e_profile_eaton_epdu(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.eaton.epdu.groupControl', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.eaton.epdu.groupControl', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -161,7 +162,7 @@ def test_e2e_profile_eaton_epdu(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.eaton.epdu.outletVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.eaton.epdu.outletVoltage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -170,10 +171,10 @@ def test_e2e_profile_eaton_epdu(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.eaton.epdu.outletCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.eaton.epdu.outletCurrent', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.eaton.epdu.outletCurrentPercentLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.eaton.epdu.outletCurrentPercentLoad', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -181,9 +182,9 @@ def test_e2e_profile_eaton_epdu(dd_agent_check):
         ['eaton_epdu_outlet_name:zombies but acted their'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.eaton.epdu.outletVA', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.eaton.epdu.outletVA', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.eaton.epdu.outletWatts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.eaton.epdu.outletWatts', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -200,7 +201,7 @@ def test_e2e_profile_eaton_epdu(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.eaton.epdu.temperatureValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.eaton.epdu.temperatureValue', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -217,7 +218,7 @@ def test_e2e_profile_eaton_epdu(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.eaton.epdu.humidityValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.eaton.epdu.humidityValue', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -233,7 +234,7 @@ def test_e2e_profile_eaton_epdu(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.eaton.epdu.contact', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.eaton.epdu.contact', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -249,7 +250,7 @@ def test_e2e_profile_eaton_epdu(dd_agent_check):
         'device_type': 'pdu',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

@@ -35,6 +35,7 @@ def test_e2e_profile_mikrotik_router(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -42,10 +43,10 @@ def test_e2e_profile_mikrotik_router(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.mtxrHlCpuTemperature', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.mtxrHlTemperature', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.mtxrHlVoltage', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.mtxrHlCpuTemperature', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.mtxrHlTemperature', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.mtxrHlVoltage', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         [
             'mtxr_optical_index:10',
@@ -68,18 +69,18 @@ def test_e2e_profile_mikrotik_router(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.mtxrOpticalRxPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.mtxrOpticalRxPower', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.mtxrOpticalSupplyVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.mtxrOpticalSupplyVoltage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.mtxrOpticalTemperature', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.mtxrOpticalTemperature', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.mtxrOpticalTxBiasCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.mtxrOpticalTxBiasCurrent', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.mtxrOpticalTxPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.mtxrOpticalWavelength', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.mtxrOpticalTxPower', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.mtxrOpticalWavelength', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -100,18 +101,18 @@ def test_e2e_profile_mikrotik_router(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.mtxrPOECurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.mtxrPOEPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.mtxrPOEVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.mtxrPOECurrent', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.mtxrPOEPower', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.mtxrPOEVoltage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['mem:24'],
         ['mem:27'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -127,7 +128,7 @@ def test_e2e_profile_mikrotik_router(dd_agent_check):
         'device_type': 'router',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

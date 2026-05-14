@@ -44,6 +44,7 @@ def test_e2e_profile_meraki_cloud_controller(dd_agent_check):
         'agent_host:' + common.get_agent_hostname(),
         'device_vendor:meraki',
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -51,12 +52,12 @@ def test_e2e_profile_meraki_cloud_controller(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    if_tags = ['interface:eth0', 'interface_index:11'] + common_tags
+    if_tags = ['interface:eth0', 'interface_index:11'] + metric_tags
     for metric in IF_COUNTS:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=if_tags, count=1)
 
     for metric in IF_SCALAR_GAUGE:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags)
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=metric_tags)
 
     for metric in IF_GAUGES:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags)
@@ -72,14 +73,14 @@ def test_e2e_profile_meraki_cloud_controller(dd_agent_check):
             'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags + ['speed_source:device']
         )
 
-    aggregator.assert_metric('snmp.sysUpTimeInstance', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', metric_type=aggregator.GAUGE, tags=metric_tags)
 
     tag_rows = [
         ['mac_address:02:02:00:66:f5:7f', 'network:L_NETWORK', 'product:MR16-HW', 'device_name:Gymnasium'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.devClientCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.devStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.devClientCount', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.devStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -91,16 +92,16 @@ def test_e2e_profile_meraki_cloud_controller(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.meraki.dev', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.meraki.dev', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['index:4', 'interface:wifi0', 'mac_address:02:02:00:66:f5:00'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.devInterfaceRecvBytes', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.devInterfaceRecvPkts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.devInterfaceSentBytes', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.devInterfaceSentPkts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.devInterfaceRecvBytes', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.devInterfaceRecvPkts', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.devInterfaceSentBytes', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.devInterfaceSentPkts', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -117,7 +118,7 @@ def test_e2e_profile_meraki_cloud_controller(dd_agent_check):
         'device_type': 'sd-wan',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

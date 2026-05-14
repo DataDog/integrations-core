@@ -46,6 +46,7 @@ def test_e2e_profile_aruba_clearpass(dd_agent_check):
         'cppm_nw_data_port_mac_address:00:1b:2c:4d:5e:7p',
         'cppm_system_num_cp_us:4',
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -62,13 +63,13 @@ def test_e2e_profile_aruba_clearpass(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cppmSystemDiskSpaceFree', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cppmSystemDiskSpaceFree', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cppmSystemDiskSpaceTotal', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cppmSystemDiskSpaceTotal', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.cppmSystemMemoryFree', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cppmSystemMemoryTotal', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cppmSystemMemoryFree', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.cppmSystemMemoryTotal', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['cppm_system_hostname:acted Jaded'],
@@ -77,14 +78,14 @@ def test_e2e_profile_aruba_clearpass(dd_agent_check):
         ['cppm_system_hostname:forward zombies zombies kept'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.radAuthRequestTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.radPolicyEvalTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.radServerCounterCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.radAuthRequestTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.radPolicyEvalTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.radServerCounterCount', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.radServerCounterFailure', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.radServerCounterFailure', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.radServerCounterSuccess', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.radServerCounterSuccess', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -94,10 +95,10 @@ def test_e2e_profile_aruba_clearpass(dd_agent_check):
         ['rad_auth_source_name:quaintly kept Jaded Jaded Jaded oxen quaintly oxen'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.radAuthCounterCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.radAuthCounterFailure', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.radAuthCounterSuccess', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.radAuthCounterTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.radAuthCounterCount', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.radAuthCounterFailure', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.radAuthCounterSuccess', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.radAuthCounterTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['cppm_system_hostname:acted Jaded'],
@@ -106,47 +107,47 @@ def test_e2e_profile_aruba_clearpass(dd_agent_check):
         ['cppm_system_hostname:forward zombies zombies kept'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.dailyFailedAuthCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.dailySuccessAuthCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.dailyTotalAuthCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.dailyFailedAuthCount', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.dailySuccessAuthCount', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.dailyTotalAuthCount', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.psAuditPolicyEvalCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.psAuditPolicyEvalCount', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.psAuditPolicyEvalTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.psAuthCounterFailure', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.psAuthCounterSuccess', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.psAuthCounterTotal', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.psAuditPolicyEvalTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.psAuthCounterFailure', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.psAuthCounterSuccess', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.psAuthCounterTotal', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.psEnforcementPolicyEvalCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric(
-            'snmp.psEnforcementPolicyEvalTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.psEnforcementPolicyEvalCount', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.psPosturePolicyEvalCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.psEnforcementPolicyEvalTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.psPosturePolicyEvalTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.psPosturePolicyEvalCount', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.psRestrictionPolicyEvalCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.psPosturePolicyEvalTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.psRestrictionPolicyEvalTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.psRestrictionPolicyEvalCount', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.psRolemappingPolicyEvalCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.psRestrictionPolicyEvalTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.psRolemappingPolicyEvalTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.psRolemappingPolicyEvalCount', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.psServicePolicyEvalCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.psRolemappingPolicyEvalTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.psServicePolicyEvalTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.psServicePolicyEvalCount', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.psSessionlogTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.psServicePolicyEvalTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
+        )
+        aggregator.assert_metric('snmp.psSessionlogTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['ps_autz_source_name:but kept'],
@@ -155,10 +156,10 @@ def test_e2e_profile_aruba_clearpass(dd_agent_check):
         ['ps_autz_source_name:their'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.psAutzCounterCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.psAutzCounterFailure', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.psAutzCounterSuccess', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.psAutzCounterTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.psAutzCounterCount', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.psAutzCounterFailure', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.psAutzCounterSuccess', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.psAutzCounterTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['cppm_system_hostname:acted Jaded'],
@@ -168,20 +169,20 @@ def test_e2e_profile_aruba_clearpass(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.tacAuthCounterAuthTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.tacAuthCounterAuthTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.tacAuthCounterCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.tacAuthCounterFailure', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.tacAuthCounterSuccess', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.tacAuthCounterTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.tacPolicyEvalTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.tacAuthCounterCount', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.tacAuthCounterFailure', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.tacAuthCounterSuccess', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.tacAuthCounterTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.tacPolicyEvalTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.tacServicePolicyEvalTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.tacServicePolicyEvalTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.tacAutzCounterCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.tacAutzCounterFailure', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.tacAutzCounterSuccess', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.tacAutzCounterTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.tacAutzCounterCount', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.tacAutzCounterFailure', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.tacAutzCounterSuccess', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.tacAutzCounterTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['nw_app_name:oxen Jaded Jaded forward oxen kept'],
@@ -190,13 +191,13 @@ def test_e2e_profile_aruba_clearpass(dd_agent_check):
         ['nw_app_name:their zombies driving but but'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.nwAppPort', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.nwTrafficTotal', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.nwAppPort', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.nwTrafficTotal', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
-    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
 
     # --- TEST METADATA ---
     device = {
@@ -212,7 +213,7 @@ def test_e2e_profile_aruba_clearpass(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

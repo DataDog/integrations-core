@@ -35,6 +35,7 @@ def test_e2e_profile_dlink_dgs_switch(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -47,16 +48,16 @@ def test_e2e_profile_dlink_dgs_switch(dd_agent_check):
         ['cpu:19563', 'dlink_entity_ext_cpu_util_cpu_id:19563', 'dlink_entity_ext_cpu_util_unit_id:14054'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['d_entity_ext_mem_util_type:dram', 'mem:16'],
         ['d_entity_ext_mem_util_type:dram', 'mem:20'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -74,7 +75,7 @@ def test_e2e_profile_dlink_dgs_switch(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.dlink.dEntityExtEnvTempCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.dlink.dEntityExtEnvTempCurrent', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -93,7 +94,7 @@ def test_e2e_profile_dlink_dgs_switch(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.dlink.dEntityExtEnvFan', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.dlink.dEntityExtEnvFan', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -112,10 +113,10 @@ def test_e2e_profile_dlink_dgs_switch(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.dlink.dEntityExtEnvPowerMaxPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.dlink.dEntityExtEnvPowerMaxPower', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.dlink.dEntityExtEnvPowerUsedPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.dlink.dEntityExtEnvPowerUsedPower', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -124,7 +125,7 @@ def test_e2e_profile_dlink_dgs_switch(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.dlink.dEntityExtEnvAirFlow', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.dlink.dEntityExtEnvAirFlow', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -132,7 +133,7 @@ def test_e2e_profile_dlink_dgs_switch(dd_agent_check):
         ['d_entity_ext_unit_index:28484', 'd_entity_ext_unit_status:ok'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.dlink.dEntityExtUnit', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.dlink.dEntityExtUnit', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -148,7 +149,7 @@ def test_e2e_profile_dlink_dgs_switch(dd_agent_check):
         'device_type': 'switch',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

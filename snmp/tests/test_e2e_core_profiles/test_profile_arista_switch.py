@@ -38,6 +38,7 @@ def test_e2e_profile_arista_switch(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_entity_sensor(aggregator, common_tags)
@@ -56,7 +57,7 @@ def test_e2e_profile_arista_switch(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.aristaIngressQueuePktsDropped', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.aristaIngressQueuePktsDropped', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -67,7 +68,7 @@ def test_e2e_profile_arista_switch(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.aristaEgressQueuePktsDropped', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.aristaEgressQueuePktsDropped', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
 
     tag = [
@@ -79,34 +80,34 @@ def test_e2e_profile_arista_switch(dd_agent_check):
         'arista_bgp4_v2_peer_remote_identifier:1.2.3.4',
         'arista_bgp4_v2_peer_state:established',
     ]
-    aggregator.assert_metric('snmp.aristaBgp4V2PeerLocalAs', metric_type=aggregator.GAUGE, tags=common_tags + tag)
-    aggregator.assert_metric('snmp.aristaBgp4V2PeerLocalPort', metric_type=aggregator.GAUGE, tags=common_tags + tag)
-    aggregator.assert_metric('snmp.aristaBgp4V2PeerRemoteAs', metric_type=aggregator.GAUGE, tags=common_tags + tag)
-    aggregator.assert_metric('snmp.aristaBgp4V2PeerRemotePort', metric_type=aggregator.GAUGE, tags=common_tags + tag)
+    aggregator.assert_metric('snmp.aristaBgp4V2PeerLocalAs', metric_type=aggregator.GAUGE, tags=metric_tags + tag)
+    aggregator.assert_metric('snmp.aristaBgp4V2PeerLocalPort', metric_type=aggregator.GAUGE, tags=metric_tags + tag)
+    aggregator.assert_metric('snmp.aristaBgp4V2PeerRemoteAs', metric_type=aggregator.GAUGE, tags=metric_tags + tag)
+    aggregator.assert_metric('snmp.aristaBgp4V2PeerRemotePort', metric_type=aggregator.GAUGE, tags=metric_tags + tag)
 
     aggregator.assert_metric(
         'snmp.aristaIfInOctetRate',
         metric_type=aggregator.GAUGE,
-        tags=common_tags + ['arista_if_rate_interval:764721249'],
+        tags=metric_tags + ['arista_if_rate_interval:764721249'],
     )
     aggregator.assert_metric(
-        'snmp.aristaIfInPktRate', metric_type=aggregator.GAUGE, tags=common_tags + ['arista_if_rate_interval:764721249']
+        'snmp.aristaIfInPktRate', metric_type=aggregator.GAUGE, tags=metric_tags + ['arista_if_rate_interval:764721249']
     )
     aggregator.assert_metric(
         'snmp.aristaIfOutOctetRate',
         metric_type=aggregator.GAUGE,
-        tags=common_tags + ['arista_if_rate_interval:764721249'],
+        tags=metric_tags + ['arista_if_rate_interval:764721249'],
     )
     aggregator.assert_metric(
         'snmp.aristaIfOutPktRate',
         metric_type=aggregator.GAUGE,
-        tags=common_tags + ['arista_if_rate_interval:764721249'],
+        tags=metric_tags + ['arista_if_rate_interval:764721249'],
     )
 
-    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
 
     # --- TEST METADATA ---
     device = {
@@ -122,7 +123,7 @@ def test_e2e_profile_arista_switch(dd_agent_check):
         'device_type': 'switch',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

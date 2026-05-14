@@ -35,6 +35,7 @@ def test_e2e_profile_silverpeak_edgeconnect(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -42,7 +43,7 @@ def test_e2e_profile_silverpeak_edgeconnect(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.silverpeak.mgmt.spsActiveAlarmCount', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.silverpeak.mgmt.spsActiveAlarmCount', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         [
             'silverpeak_mgmt_sps_active_alarm_acked:no',
@@ -69,7 +70,7 @@ def test_e2e_profile_silverpeak_edgeconnect(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.silverpeak.mgmt.spsActiveAlarm', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.silverpeak.mgmt.spsActiveAlarm', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     # --- TEST METADATA ---
@@ -89,7 +90,7 @@ def test_e2e_profile_silverpeak_edgeconnect(dd_agent_check):
         'device_type': 'sd-wan',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

@@ -196,6 +196,36 @@ RESOLVED_TABULAR_OBJECTS = [
 
 EXCLUDED_E2E_TAG_KEYS = ['agent_version']
 
+# Tag keys the SNMP corecheck used to attach to every per-device metric but, since
+# DataDog/datadog-agent#49822, ships only on the `network-devices-metadata`
+# event-platform payload when `collect_device_metadata` is enabled (the default).
+# The backend re-joins these onto metrics at ingest from the metadata, so E2E
+# tests that ran against the raw `agent check --json` aggregator state must
+# assert them against the metadata payload (see test_e2e_core_metadata.py)
+# rather than against per-metric tags.
+DEVICE_METADATA_TAG_KEYS = (
+    # Device identity (always emitted from the instance config)
+    'agent_host',
+    'device_id',
+    'device_ip',
+    'device_namespace',
+    'snmp_device',
+    # Profile-level globals derived from sysObjectID / sysName / sysDescr
+    'device_hostname',
+    'device_vendor',
+    'snmp_host',
+    'snmp_profile',
+    # Common profile metadata.device.fields
+    'firmware_version',
+    'model',
+    'os_name',
+    'os_version',
+    'product_name',
+    'serial_num',
+    'ups_name',
+    'version',
+)
+
 snmp_listener_only = pytest.mark.skipif(SNMP_LISTENER_ENV != 'true', reason='Agent snmp lister tests only')
 snmp_integration_only = pytest.mark.skipif(SNMP_LISTENER_ENV != 'false', reason='Normal tests')
 py3_plus_only = pytest.mark.skipif(sys.version_info[0] < 3, reason='Run test with Python 3+ only')
@@ -279,32 +309,56 @@ def create_check(instance):
     return SnmpCheck('snmp', {}, [instance])
 
 
+def filter_metric_tags(tags):
+    """Drop device-level tags now joined from the NDM metadata payload at ingest.
+
+    Tests pass the device-level `common_tags` list to both metric and metadata
+    assertions for historical reasons. With the new agent tagging model the
+    per-metric assertions must only check tags the agent still attaches to
+    metrics; use this helper to project a `common_tags` list into the subset
+    that is valid for `aggregator.assert_metric(tags=...)` calls.
+    """
+    if tags is None:
+        return None
+    return remove_tags(tags, DEVICE_METADATA_TAG_KEYS)
+
+
 def assert_common_metrics(aggregator, tags=None, is_e2e=False, loader=None):
     assert_common_check_run_metrics(aggregator, tags, is_e2e, loader=loader)
     assert_common_device_metrics(aggregator, tags, is_e2e, loader=loader)
 
 
 def assert_common_check_run_metrics(aggregator, tags=None, is_e2e=False, loader=None):
+    # When running against the core loader, the agent strips device-level tags
+    # from per-device metrics; assert only what the agent still emits.
     if is_e2e and loader == 'core':
-        aggregator.assert_metric('snmp.device.reachable', metric_type=aggregator.GAUGE, tags=tags, at_least=1, value=1)
+        metric_tags = filter_metric_tags(tags)
         aggregator.assert_metric(
-            'snmp.device.unreachable', metric_type=aggregator.GAUGE, tags=tags, at_least=1, value=0
+            'snmp.device.reachable', metric_type=aggregator.GAUGE, tags=metric_tags, at_least=1, value=1
         )
-        aggregator.assert_metric('snmp.interface.status', metric_type=aggregator.GAUGE, tags=tags, at_least=0, value=1)
+        aggregator.assert_metric(
+            'snmp.device.unreachable', metric_type=aggregator.GAUGE, tags=metric_tags, at_least=1, value=0
+        )
+        aggregator.assert_metric(
+            'snmp.interface.status', metric_type=aggregator.GAUGE, tags=metric_tags, at_least=0, value=1
+        )
 
     monotonic_type = aggregator.MONOTONIC_COUNT
     if is_e2e:
         monotonic_type = aggregator.COUNT
     loader = loader or 'python'
-    if tags is not None:
-        tags = tags + ['loader:' + loader]
-    aggregator.assert_metric('datadog.snmp.check_duration', metric_type=aggregator.GAUGE, tags=tags)
-    aggregator.assert_metric('datadog.snmp.check_interval', metric_type=monotonic_type, tags=tags)
-    aggregator.assert_metric('datadog.snmp.submitted_metrics', metric_type=aggregator.GAUGE, tags=tags)
+    telemetry_tags = tags
+    if loader == 'core':
+        telemetry_tags = filter_metric_tags(tags)
+    if telemetry_tags is not None:
+        telemetry_tags = telemetry_tags + ['loader:' + loader]
+    aggregator.assert_metric('datadog.snmp.check_duration', metric_type=aggregator.GAUGE, tags=telemetry_tags)
+    aggregator.assert_metric('datadog.snmp.check_interval', metric_type=monotonic_type, tags=telemetry_tags)
+    aggregator.assert_metric('datadog.snmp.submitted_metrics', metric_type=aggregator.GAUGE, tags=telemetry_tags)
     if loader == 'core':
         # request_type tag can be get, getbulk, or getnext
         aggregator.assert_metric_has_tag_prefix('datadog.snmp.requests', tag_prefix='request_type:get')
-        for tag in tags:
+        for tag in telemetry_tags:
             aggregator.assert_metric_has_tag('datadog.snmp.requests', tag)
 
 
@@ -312,10 +366,17 @@ def assert_common_device_metrics(
     aggregator, tags=None, is_e2e=False, count=None, devices_monitored_value=None, loader=None
 ):
     loader = loader or 'python'
-    if tags is not None:
-        tags = tags + ['loader:' + loader]
+    metric_tags = tags
+    if loader == 'core':
+        metric_tags = filter_metric_tags(tags)
+    if metric_tags is not None:
+        metric_tags = metric_tags + ['loader:' + loader]
     aggregator.assert_metric(
-        'snmp.devices_monitored', metric_type=aggregator.GAUGE, tags=tags, count=count, value=devices_monitored_value
+        'snmp.devices_monitored',
+        metric_type=aggregator.GAUGE,
+        tags=metric_tags,
+        count=count,
+        value=devices_monitored_value,
     )
 
 

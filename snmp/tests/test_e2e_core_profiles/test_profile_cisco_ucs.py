@@ -35,6 +35,7 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -73,7 +74,7 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.cucsComputeBoard', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cucsComputeBoard', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['cucs_compute_mb_power_stats_dn:forward their'],
@@ -81,13 +82,13 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cucsComputeMbPowerStatsConsumedPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cucsComputeMbPowerStatsConsumedPower', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cucsComputeMbPowerStatsInputCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cucsComputeMbPowerStatsInputCurrent', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cucsComputeMbPowerStatsInputVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cucsComputeMbPowerStatsInputVoltage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -95,9 +96,9 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
         ['mem:33619'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -143,10 +144,10 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cucsComputeRackUnitAvailableMemory', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cucsComputeRackUnitAvailableMemory', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cucsComputeRackUnitTotalMemory', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cucsComputeRackUnitTotalMemory', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -155,16 +156,16 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cucsComputeRackUnitMbTempStatsAmbientTemp', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cucsComputeRackUnitMbTempStatsAmbientTemp', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cucsComputeRackUnitMbTempStatsFrontTemp', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cucsComputeRackUnitMbTempStatsFrontTemp', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cucsComputeRackUnitMbTempStatsIoh1Temp', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cucsComputeRackUnitMbTempStatsIoh1Temp', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cucsComputeRackUnitMbTempStatsRearTemp', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cucsComputeRackUnitMbTempStatsRearTemp', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -206,7 +207,7 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.cucsEquipmentFan', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cucsEquipmentFan', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -255,7 +256,7 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.cucsEquipmentPsu', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cucsEquipmentPsu', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -285,7 +286,7 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cucsEquipmentHealthLed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cucsEquipmentHealthLed', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -332,7 +333,7 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cucsMemoryUnitCapacity', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cucsMemoryUnitCapacity', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -343,7 +344,7 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cucsMemoryUnitEnvStatsTemperature', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cucsMemoryUnitEnvStatsTemperature', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -354,7 +355,7 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cucsProcessorEnvStatsTemperature', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cucsProcessorEnvStatsTemperature', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -416,7 +417,7 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.cucsProcessorUnit', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cucsProcessorUnit', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -562,13 +563,13 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cucsStorageFlexFlashCardReadIOErrorCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cucsStorageFlexFlashCardReadIOErrorCount', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cucsStorageFlexFlashCardSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cucsStorageFlexFlashCardSize', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cucsStorageFlexFlashCardWriteIOErrorCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cucsStorageFlexFlashCardWriteIOErrorCount', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -765,7 +766,7 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cucsStorageFlexFlashController', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cucsStorageFlexFlashController', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -912,7 +913,7 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cucsStorageFlexFlashDriveSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cucsStorageFlexFlashDriveSize', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     # --- TEST METADATA ---
@@ -929,7 +930,7 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

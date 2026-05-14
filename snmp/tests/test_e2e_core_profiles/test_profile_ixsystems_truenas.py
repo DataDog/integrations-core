@@ -37,6 +37,7 @@ def test_e2e_profile_ixsystems_truenas(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_host_resources_base(aggregator, common_tags)
@@ -46,57 +47,57 @@ def test_e2e_profile_ixsystems_truenas(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.freenas.zfsArcC', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.freenas.zfsArcCacheHitRatio', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.freenas.zfsArcCacheMissRatio', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.freenas.zfsArcData', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.freenas.zfsArcHits', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.freenas.zfsArcMeta', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.freenas.zfsArcMissPercent', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.freenas.zfsArcMisses', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.freenas.zfsArcP', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.freenas.zfsArcSize', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.freenas.zfsL2ArcHits', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.freenas.zfsL2ArcMisses', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.freenas.zfsL2ArcRead', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.freenas.zfsL2ArcSize', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.freenas.zfsL2ArcWrite', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.freenas.zfsZilstatOps10sec', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.freenas.zfsZilstatOps1sec', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.freenas.zfsZilstatOps5sec', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.freenas.zfsArcC', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.freenas.zfsArcCacheHitRatio', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.freenas.zfsArcCacheMissRatio', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.freenas.zfsArcData', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.freenas.zfsArcHits', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.freenas.zfsArcMeta', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.freenas.zfsArcMissPercent', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.freenas.zfsArcMisses', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.freenas.zfsArcP', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.freenas.zfsArcSize', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.freenas.zfsL2ArcHits', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.freenas.zfsL2ArcMisses', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.freenas.zfsL2ArcRead', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.freenas.zfsL2ArcSize', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.freenas.zfsL2ArcWrite', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.freenas.zfsZilstatOps10sec', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.freenas.zfsZilstatOps1sec', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.freenas.zfsZilstatOps5sec', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         ['freenas_zpool_descr:Jaded Jaded'],
         ['freenas_zpool_descr:quaintly Jaded oxen kept forward their their quaintly but'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.freenas.zpoolAllocationUnits', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.freenas.zpoolAllocationUnits', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.freenas.zpoolAvailable', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.freenas.zpoolAvailable', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.freenas.zpoolHealth', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.freenas.zpoolHealth', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.freenas.zpoolReadBytes', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric(
-            'snmp.freenas.zpoolReadBytes1sec', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric('snmp.freenas.zpoolReadOps', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric(
-            'snmp.freenas.zpoolReadOps1sec', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric('snmp.freenas.zpoolSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.freenas.zpoolUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric(
-            'snmp.freenas.zpoolWriteBytes', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.freenas.zpoolReadBytes', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.freenas.zpoolWriteBytes1sec', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.freenas.zpoolReadBytes1sec', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.freenas.zpoolWriteOps', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.freenas.zpoolReadOps', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.freenas.zpoolWriteOps1sec', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.freenas.zpoolReadOps1sec', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
+        )
+        aggregator.assert_metric('snmp.freenas.zpoolSize', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.freenas.zpoolUsed', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.freenas.zpoolWriteBytes', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.freenas.zpoolWriteBytes1sec', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
+        )
+        aggregator.assert_metric('snmp.freenas.zpoolWriteOps', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.freenas.zpoolWriteOps1sec', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -105,13 +106,13 @@ def test_e2e_profile_ixsystems_truenas(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.freenas.datasetAllocationUnits', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.freenas.datasetAllocationUnits', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.freenas.datasetAvailable', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.freenas.datasetAvailable', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.freenas.datasetSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.freenas.datasetUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.freenas.datasetSize', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.freenas.datasetUsed', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['freenas_zvol_descr:zombies Jaded kept'],
@@ -119,14 +120,14 @@ def test_e2e_profile_ixsystems_truenas(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.freenas.zvolAllocationUnits', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.freenas.zvolAllocationUnits', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.freenas.zvolAvailable', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.freenas.zvolAvailable', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.freenas.zvolReferenced', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.freenas.zvolReferenced', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.freenas.zvolSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.freenas.zvolUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.freenas.zvolSize', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.freenas.zvolUsed', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -142,7 +143,7 @@ def test_e2e_profile_ixsystems_truenas(dd_agent_check):
         'device_type': 'storage',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

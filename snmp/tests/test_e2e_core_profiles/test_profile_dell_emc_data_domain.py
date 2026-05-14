@@ -35,6 +35,7 @@ def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -42,12 +43,12 @@ def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.hrCachedMemory', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.hrMemoryBuffers', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.datadomain.fileSystemVirtualSpace', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.hrCachedMemory', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.hrMemoryBuffers', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.datadomain.fileSystemVirtualSpace', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         ['datadomain_power_module_description:kept acted kept acted Jaded', 'datadomain_power_module_status:ok'],
         ['datadomain_power_module_description:oxen acted but Jaded zombies', 'datadomain_power_module_status:faulty'],
@@ -59,7 +60,7 @@ def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.datadomain.powerModule', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.powerModule', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -73,7 +74,7 @@ def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.datadomain.tempSensorCurrentValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.tempSensorCurrentValue', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -100,7 +101,7 @@ def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.datadomain.fanProperties', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.fanProperties', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -123,19 +124,19 @@ def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.datadomain.fileSystemPercentUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.fileSystemPercentUsed', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.fileSystemSpaceAvail', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.fileSystemSpaceAvail', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.fileSystemSpaceCleanable', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.fileSystemSpaceCleanable', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.fileSystemSpaceSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.fileSystemSpaceSize', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.fileSystemSpaceUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.fileSystemSpaceUsed', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -146,30 +147,30 @@ def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.datadomain.fileSystemCompressionEndTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.fileSystemCompressionEndTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.fileSystemCompressionStartTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.fileSystemCompressionStartTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
             'snmp.datadomain.fileSystemGlobalCompressionFactor',
             metric_type=aggregator.GAUGE,
-            tags=common_tags + tag_row,
+            tags=metric_tags + tag_row,
         )
         aggregator.assert_metric(
-            'snmp.datadomain.fileSystemLocalCompressionFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.fileSystemLocalCompressionFactor', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.fileSystemPostCompressionSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.fileSystemPostCompressionSize', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.fileSystemPreCompressionSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.fileSystemPreCompressionSize', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.fileSystemReductionPercent1', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.fileSystemReductionPercent1', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.fileSystemTotalCompressionFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.fileSystemTotalCompressionFactor', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -178,48 +179,48 @@ def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
         ['datadomain_system_stats_index:9'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.datadomain.cifsOpsPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.cifsOpsPerSecond', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.cpuMaxPercentageBusy', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.cpuMaxPercentageBusy', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.diskBusyPercentage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.diskBusyPercentage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.diskReadKBytesPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.diskReadKBytesPerSecond', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.diskWriteKBytesPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.diskWriteKBytesPerSecond', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.nfsIdlePercentage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.nfsIdlePercentage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.nfsOpsPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.nfsOpsPerSecond', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.nfsProcPercentage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.nfsProcPercentage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.nfsReceivePercentage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.nfsReceivePercentage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.nfsSendPercentage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.nfsSendPercentage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.nvramReadKBytesPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.nvramReadKBytesPerSecond', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.nvramWriteKBytesPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.nvramWriteKBytesPerSecond', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.replOutKBytesPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.replOutKBytesPerSecond', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.replInKBytesPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.replInKBytesPerSecond', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -266,7 +267,7 @@ def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.datadomain.diskProperties', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.diskProperties', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -276,15 +277,15 @@ def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
         ['datadomain_disk_perf_index:31', 'datadomain_disk_perf_state:available'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.datadomain.diskBusy', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.datadomain.diskBusy', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.datadomain.diskSectorsRead', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.diskSectorsRead', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.diskSectorsWritten', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.diskSectorsWritten', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.diskTotalKBytes', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.diskTotalKBytes', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     # --- TEST METADATA ---
@@ -301,7 +302,7 @@ def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

@@ -35,6 +35,7 @@ def test_e2e_profile_dell_sonicwall(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -42,14 +43,14 @@ def test_e2e_profile_dell_sonicwall(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.sonicCurrentConnCacheEntries', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.sonicDpiSslConnCountCur', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.sonicDpiSslConnCountHighWater', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.sonicDpiSslConnCountMax', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.sonicMaxConnCacheEntries', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.sonicNatTranslationCount', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.sonicCurrentConnCacheEntries', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.sonicDpiSslConnCountCur', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.sonicDpiSslConnCountHighWater', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.sonicDpiSslConnCountMax', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.sonicMaxConnCacheEntries', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.sonicNatTranslationCount', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         [
             'sonic_sa_stat_dst_addr_begin:235.185.120.197',
@@ -72,22 +73,22 @@ def test_e2e_profile_dell_sonicwall(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.sonicSAStatDecryptByteCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.sonicSAStatDecryptByteCount', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.sonicSAStatDecryptPktCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.sonicSAStatDecryptPktCount', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.sonicSAStatEncryptByteCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.sonicSAStatEncryptByteCount', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.sonicSAStatEncryptPktCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.sonicSAStatEncryptPktCount', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.sonicSAStatInFragPktCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.sonicSAStatInFragPktCount', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.sonicSAStatOutFragPktCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.sonicSAStatOutFragPktCount', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     # --- TEST METADATA ---
@@ -107,7 +108,7 @@ def test_e2e_profile_dell_sonicwall(dd_agent_check):
         'device_type': 'firewall',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

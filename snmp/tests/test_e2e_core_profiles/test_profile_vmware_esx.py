@@ -36,6 +36,7 @@ def test_e2e_profile_vmware_esx(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_host_resources_base(aggregator, common_tags)
@@ -51,14 +52,14 @@ def test_e2e_profile_vmware_esx(dd_agent_check):
         ['vmw_hba_device_name:zombies quaintly', 'vmw_hba_status:failed'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.vmwHostBusAdapter', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.vmwHostBusAdapter', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['vmw_hardware_status:normal', 'vmw_subsystem_type:raid_controller'],
         ['vmw_hardware_status:unknown', 'vmw_subsystem_type:raid_controller'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.vmwEnv', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.vmwEnv', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -74,7 +75,7 @@ def test_e2e_profile_vmware_esx(dd_agent_check):
         'device_type': 'server',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

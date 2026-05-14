@@ -34,6 +34,7 @@ def test_e2e_profile_hp_ilo(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST METRICS ---
 
@@ -99,34 +100,34 @@ def test_e2e_profile_hp_ilo(dd_agent_check):
     assert_common_metrics(aggregator, common_tags)
 
     for metric in status_gauges:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags)
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=metric_tags)
 
     for metric in cpqhlth_counts:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=common_tags, count=1)
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=metric_tags, count=1)
 
     for metric in cpqhlth_gauges:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags)
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=metric_tags)
 
     for metric in cpqsm2_gauges:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags)
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=metric_tags)
 
     for index in temperature_sensors:
-        tags = ['temperature_index:{}'.format(index)] + common_tags
+        tags = ['temperature_index:{}'.format(index)] + metric_tags
         aggregator.assert_metric('snmp.cpqHeTemperatureCelsius', metric_type=aggregator.GAUGE, tags=tags)
         aggregator.assert_metric('snmp.cpqHeTemperatureCondition', metric_type=aggregator.GAUGE, tags=tags)
 
     for index in batteries:
-        tags = ['battery_index:{}'.format(index)] + common_tags
+        tags = ['battery_index:{}'.format(index)] + metric_tags
         aggregator.assert_metric('snmp.cpqHeSysBatteryCondition', metric_type=aggregator.GAUGE, tags=tags)
         aggregator.assert_metric('snmp.cpqHeSysBatteryStatus', metric_type=aggregator.GAUGE, tags=tags)
 
     for location in card_locations:
-        tags = ['nic_stats_location:{}'.format(location)] + common_tags
+        tags = ['nic_stats_location:{}'.format(location)] + metric_tags
         for metric in network_card_counts:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags, count=1)
 
     for interface in interfaces:
-        tags = ['interface:{}'.format(interface)] + common_tags
+        tags = ['interface:{}'.format(interface)] + metric_tags
         for metric in phys_adapter_counts:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags)
         for metric in phys_adapter_gauges:
@@ -152,7 +153,7 @@ def test_e2e_profile_hp_ilo(dd_agent_check):
     ]
     drive_idx = [(0, 2), (0, 28), (8, 31), (9, 24), (9, 28), (10, 17), (11, 4), (12, 20), (18, 22), (23, 2)]
     for drive_cntrl_idx, drive_index in drive_idx:
-        tags = ['drive_cntrl_idx:{}'.format(drive_cntrl_idx), "drive_index:{}".format(drive_index)] + common_tags
+        tags = ['drive_cntrl_idx:{}'.format(drive_cntrl_idx), "drive_index:{}".format(drive_index)] + metric_tags
         for metric in drive_counts:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags, count=1)
         for metric in drive_gauges:

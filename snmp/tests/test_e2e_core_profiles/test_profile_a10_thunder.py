@@ -39,6 +39,7 @@ def test_e2e_profile_a10_thunder(dd_agent_check):
         'ax_sys_firmware_version:oxen their quaintly kept quaintly zombies',
         'ax_sys_serial_number:their zombies zombies acted kept their quaintly',
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -46,52 +47,52 @@ def test_e2e_profile_a10_thunder(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.axAppGlobalBufferConfigLimit', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.axAppGlobalBufferCurrentUsage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.axAppGlobalTotalCurrentConnections', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.axAppGlobalTotalL7Requests', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.axAppGlobalTotalNewConnections', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.axAppGlobalTotalNewIPNatConnections', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.axAppGlobalTotalNewL4Connections', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.axAppGlobalTotalNewL7Connections', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.axAppGlobalTotalSSLConnections', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.axConnReuseStatTotalActivePersist', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.axConnReuseStatTotalEstablished', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.axConnReuseStatTotalOpenPersist', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.axConnReuseStatTotalTerminated', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.axGlobalAppPacketDrop', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.axGlobalTotalAppPacketDrop', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.axGlobalTotalL4Session', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.axGlobalTotalThroughput', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.axPowerSupplyVoltageTotal', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.axSessionGlobalStatConnCount', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.axSessionGlobalStatConnFree', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.axSessionGlobalStatConnSMPAllocated', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.axSessionGlobalStatConnSMPFree', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.axSessionGlobalStatFreeCurrentConns', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.axAppGlobalBufferConfigLimit', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.axAppGlobalBufferCurrentUsage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.axAppGlobalTotalCurrentConnections', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.axAppGlobalTotalL7Requests', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.axAppGlobalTotalNewConnections', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.axAppGlobalTotalNewIPNatConnections', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.axAppGlobalTotalNewL4Connections', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.axAppGlobalTotalNewL7Connections', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.axAppGlobalTotalSSLConnections', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.axConnReuseStatTotalActivePersist', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.axConnReuseStatTotalEstablished', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.axConnReuseStatTotalOpenPersist', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.axConnReuseStatTotalTerminated', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.axGlobalAppPacketDrop', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.axGlobalTotalAppPacketDrop', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.axGlobalTotalL4Session', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.axGlobalTotalThroughput', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.axPowerSupplyVoltageTotal', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.axSessionGlobalStatConnCount', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.axSessionGlobalStatConnFree', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.axSessionGlobalStatConnSMPAllocated', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.axSessionGlobalStatConnSMPFree', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.axSessionGlobalStatFreeCurrentConns', metric_type=aggregator.GAUGE, tags=metric_tags)
     aggregator.assert_metric(
-        'snmp.axSessionGlobalStatNonTcpUdpIPSession', metric_type=aggregator.GAUGE, tags=common_tags
+        'snmp.axSessionGlobalStatNonTcpUdpIPSession', metric_type=aggregator.GAUGE, tags=metric_tags
     )
-    aggregator.assert_metric('snmp.axSessionGlobalStatOther', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.axSessionGlobalStatReverseNATTCP', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.axSessionGlobalStatReverseNATUDP', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.axSessionGlobalStatTCPEstablished', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.axSessionGlobalStatTCPHalfOpen', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.axSessionGlobalStatTCPSynHalfOpen', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.axSessionGlobalStatUDP', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.axSysDiskFreeSpace', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.axSysDiskTotalSpace', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.axSysHwPhySystemTemp', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.axSessionGlobalStatOther', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.axSessionGlobalStatReverseNATTCP', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.axSessionGlobalStatReverseNATUDP', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.axSessionGlobalStatTCPEstablished', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.axSessionGlobalStatTCPHalfOpen', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.axSessionGlobalStatTCPSynHalfOpen', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.axSessionGlobalStatUDP', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.axSysDiskFreeSpace', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.axSysDiskTotalSpace', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.axSysHwPhySystemTemp', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         ['ax_fan_name:driving Jaded oxen driving zombies oxen forward their', 'ax_fan_status:ok_med_high'],
         ['ax_fan_name:driving zombies', 'ax_fan_status:ok_med_high'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.axFanSpeed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.axFanSpeed', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['ax_power_supply_voltage_description:kept forward oxen forward', 'ax_power_supply_voltage_status:unknown'],
@@ -101,7 +102,7 @@ def test_e2e_profile_a10_thunder(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.axPowerSupplyVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.axPowerSupplyVoltage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['ax_power_supply_name:driving but but acted but', 'ax_power_supply_status:off'],
@@ -109,7 +110,7 @@ def test_e2e_profile_a10_thunder(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.axSysPowerSupplyStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.axSysPowerSupplyStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -118,10 +119,10 @@ def test_e2e_profile_a10_thunder(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.axAppGlobalAllowedCurrentValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.axAppGlobalAllowedCurrentValue', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.axAppGlobalAllowedMaxValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.axAppGlobalAllowedMaxValue', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -137,7 +138,7 @@ def test_e2e_profile_a10_thunder(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.axServer', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.axServer', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['ax_server_stat_name:oxen but oxen driving', 'ax_server_stat_server_status:up'],
@@ -148,10 +149,10 @@ def test_e2e_profile_a10_thunder(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.axServerStatServerCurConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.axServerStatServerCurConns', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.axServerStatServerTotalCurrL7Reqs', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.axServerStatServerTotalCurrL7Reqs', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -168,7 +169,7 @@ def test_e2e_profile_a10_thunder(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.axServiceGroup', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.axServiceGroup', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -185,7 +186,7 @@ def test_e2e_profile_a10_thunder(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.axVirtualServer', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.axVirtualServer', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -203,34 +204,34 @@ def test_e2e_profile_a10_thunder(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.axVirtualServerStatBytesIn', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.axVirtualServerStatBytesIn', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.axVirtualServerStatBytesOut', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.axVirtualServerStatBytesOut', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.axVirtualServerStatCurConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.axVirtualServerStatCurConns', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.axVirtualServerStatPersistConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.axVirtualServerStatPersistConns', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.axVirtualServerStatPktsIn', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.axVirtualServerStatPktsIn', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.axVirtualServerStatPktsOut', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.axVirtualServerStatPktsOut', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.axVirtualServerStatTotConns', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.axVirtualServerStatTotConns', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.axVirtualServerStatTotalCurrL7Reqs', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.axVirtualServerStatTotalCurrL7Reqs', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.axVirtualServerStatTotalL7Reqs', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.axVirtualServerStatTotalL7Reqs', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.axVirtualServerStatTotalSuccL7Reqs', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.axVirtualServerStatTotalSuccL7Reqs', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -252,7 +253,7 @@ def test_e2e_profile_a10_thunder(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.axVirtualServerPortStatCurConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.axVirtualServerPortStatCurConns', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     # --- TEST METADATA ---
@@ -270,7 +271,7 @@ def test_e2e_profile_a10_thunder(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

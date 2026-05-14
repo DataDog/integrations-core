@@ -35,6 +35,7 @@ def test_e2e_profile_fortinet_appliance(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -42,18 +43,18 @@ def test_e2e_profile_fortinet_appliance(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.fmHaClusterId', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.fmHaPeerNumber', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.fmLogRate', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.fmRaidDiskNumber', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.fmRaidSize', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.fmSysCpuUsageExcludedNice', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.fmSysDiskCapacity', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.fmSysDiskUsage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.fmHaClusterId', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.fmHaPeerNumber', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.fmLogRate', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.fmRaidDiskNumber', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.fmRaidSize', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.fmSysCpuUsageExcludedNice', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.fmSysDiskCapacity', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.fmSysDiskUsage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_row = [
         'fm_device_ent_adom:forward zombies',
         'fm_device_ent_config_state:in-sync',
@@ -70,11 +71,11 @@ def test_e2e_profile_fortinet_appliance(dd_agent_check):
         'fm_device_ent_support_state:expired',
     ]
 
-    aggregator.assert_metric('snmp.fmDevice', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+    aggregator.assert_metric('snmp.fmDevice', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [['fm_raid_disk_ent_state:ok'], ['fm_raid_disk_ent_state:spare']]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.fmRaidDiskEntSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.fmRaidDiskEntSize', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_row = [
         'fm_ha_peer_ent_enabled:disabled',
@@ -83,7 +84,7 @@ def test_e2e_profile_fortinet_appliance(dd_agent_check):
         'fm_ha_peer_ent_sn:Jaded',
         'fm_ha_peer_ent_state:down',
     ]
-    aggregator.assert_metric('snmp.fmHaPeer', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+    aggregator.assert_metric('snmp.fmHaPeer', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -99,7 +100,7 @@ def test_e2e_profile_fortinet_appliance(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

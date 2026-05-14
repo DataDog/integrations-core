@@ -35,6 +35,7 @@ def test_e2e_profile_netgear_readynas(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_ucd(aggregator, common_tags)
@@ -62,13 +63,13 @@ def test_e2e_profile_netgear_readynas(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.netgear.readynasos.ataError', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netgear.readynasos.ataError', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netgear.readynasos.diskCapacity', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netgear.readynasos.diskCapacity', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netgear.readynasos.diskTemperature', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netgear.readynasos.diskTemperature', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -77,10 +78,10 @@ def test_e2e_profile_netgear_readynas(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.netgear.readynasos.fanRPM', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netgear.readynasos.fanRPM', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netgear.readynasos.fanStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netgear.readynasos.fanStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -89,13 +90,13 @@ def test_e2e_profile_netgear_readynas(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.netgear.readynasos.temperatureMax', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netgear.readynasos.temperatureMax', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netgear.readynasos.temperatureMin', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netgear.readynasos.temperatureMin', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netgear.readynasos.temperatureValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netgear.readynasos.temperatureValue', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -107,16 +108,16 @@ def test_e2e_profile_netgear_readynas(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.netgear.readynasos.volumeRAIDLevel', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netgear.readynasos.volumeRAIDLevel', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netgear.readynasos.volumeFreeSpace', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netgear.readynasos.volumeFreeSpace', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netgear.readynasos.volumeSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netgear.readynasos.volumeSize', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netgear.readynasos.volumeRAIDLevel', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netgear.readynasos.volumeRAIDLevel', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -131,7 +132,7 @@ def test_e2e_profile_netgear_readynas(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.netgear.readynasos.psu', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netgear.readynasos.psu', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     # --- TEST METADATA ---
@@ -148,7 +149,7 @@ def test_e2e_profile_netgear_readynas(dd_agent_check):
         'device_type': 'storage',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

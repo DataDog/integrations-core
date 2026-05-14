@@ -34,23 +34,24 @@ def test_e2e_profile_brother_net_printer(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + ['br_info_serial_number:acted oxen quaintly Jaded oxen kept']
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.brJamPlace', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.brToner1Low', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.brToner2Low', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.brToner3Low', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.brToner4Low', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.brJamPlace', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.brToner1Low', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.brToner2Low', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.brToner3Low', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.brToner4Low', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         ['br_error_history_description:but Jaded driving'],
         ['br_error_history_description:kept'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.brErrorHistory', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.brErrorHistory', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -66,7 +67,7 @@ def test_e2e_profile_brother_net_printer(dd_agent_check):
         'device_type': 'printer',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

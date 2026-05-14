@@ -34,39 +34,40 @@ def test_e2e_profile__hp_compaq_health(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.cpqHeAsrCondition', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cpqHeAsrNetworkAccessStatus', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cpqHeAsrPost', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cpqHeAsrRebootCount', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.cpqHeAsrStatus', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cpqHeCorrMemLogCondition', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cpqHeCorrMemLogStatus', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cpqHeCorrMemTotalErrs', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.cpqHeCritLogCondition', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cpqHeFltTolPwrSupplyStatus', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cpqHePowerMeterCurrReading', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cpqHeSysUtilEisaBusMin', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cpqHeSysUtilLifeTime', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cpqHeThermalCondition', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cpqHeThermalCpuFanStatus', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cpqHeThermalSystemFanStatus', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cpqHeThermalTempStatus', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cpqHeAsrCondition', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cpqHeAsrNetworkAccessStatus', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cpqHeAsrPost', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cpqHeAsrRebootCount', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.cpqHeAsrStatus', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cpqHeCorrMemLogCondition', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cpqHeCorrMemLogStatus', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cpqHeCorrMemTotalErrs', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.cpqHeCritLogCondition', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cpqHeFltTolPwrSupplyStatus', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cpqHePowerMeterCurrReading', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cpqHeSysUtilEisaBusMin', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cpqHeSysUtilLifeTime', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cpqHeThermalCondition', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cpqHeThermalCpuFanStatus', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cpqHeThermalSystemFanStatus', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cpqHeThermalTempStatus', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         ['temperature_index:13'],
         ['temperature_index:23'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cpqHeTemperatureCelsius', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cpqHeTemperatureCelsius', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cpqHeTemperatureCondition', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cpqHeTemperatureCondition', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -75,9 +76,9 @@ def test_e2e_profile__hp_compaq_health(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cpqHeSysBatteryCondition', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cpqHeSysBatteryCondition', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.cpqHeSysBatteryStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cpqHeSysBatteryStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['mem_board_index:15'],
@@ -85,7 +86,7 @@ def test_e2e_profile__hp_compaq_health(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cpqHeResMem2ModuleCondition', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cpqHeResMem2ModuleCondition', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -94,7 +95,7 @@ def test_e2e_profile__hp_compaq_health(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cpqHeFltTolPowerSupplyStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cpqHeFltTolPowerSupplyStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -103,13 +104,13 @@ def test_e2e_profile__hp_compaq_health(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cpqHeFltTolPowerSupply', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cpqHeFltTolPowerSupply', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cpqHeFltTolPowerSupplyCapacityMaximum', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cpqHeFltTolPowerSupplyCapacityMaximum', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cpqHeFltTolPowerSupplyCapacityUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cpqHeFltTolPowerSupplyCapacityUsed', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     # --- TEST METADATA ---
@@ -125,7 +126,7 @@ def test_e2e_profile__hp_compaq_health(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

@@ -41,6 +41,7 @@ def test_e2e_profile_aruba_wireless_controller(dd_agent_check):
         'wlsx_sys_ext_hw_version:Jaded zombies',
         'wlsx_sys_ext_sw_version:Jaded but acted zombies kept forward driving acted acted',
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -48,21 +49,21 @@ def test_e2e_profile_aruba_wireless_controller(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.haActiveAPs', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.haStandbyAPs', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.haTotalAPs', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.wlsxNumOfUsers8021x', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.wlsxNumOfUsersCP', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.wlsxNumOfUsersMAC', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.wlsxNumOfUsersStateful8021x', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.wlsxNumOfUsersVPN', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.wlsxSysExtPacketLossPercent', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.haActiveAPs', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.haStandbyAPs', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.haTotalAPs', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.wlsxNumOfUsers8021x', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.wlsxNumOfUsersCP', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.wlsxNumOfUsersMAC', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.wlsxNumOfUsersStateful8021x', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.wlsxNumOfUsersVPN', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.wlsxSysExtPacketLossPercent', metric_type=aggregator.GAUGE, tags=metric_tags)
 
     tag_row = ['sys_x_storage_name:quaintly oxen their oxen quaintly driving but zombies', 'sys_x_storage_type:ram']
-    aggregator.assert_metric('snmp.sysXStorageSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-    aggregator.assert_metric('snmp.sysXStorageUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+    aggregator.assert_metric('snmp.sysXStorageSize', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+    aggregator.assert_metric('snmp.sysXStorageUsed', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_row = [
         'ap_current_channel:3',
@@ -71,64 +72,64 @@ def test_e2e_profile_aruba_wireless_controller(dd_agent_check):
         'ap_phy_type:dot11g',
         'ap_type:am',
     ]
-    aggregator.assert_metric('snmp.apChannelNoise', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-    aggregator.assert_metric('snmp.apSignalToNoiseRatio', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+    aggregator.assert_metric('snmp.apChannelNoise', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+    aggregator.assert_metric('snmp.apSignalToNoiseRatio', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     aggregator.assert_metric(
-        'snmp.apBSSBwRate', metric_type=aggregator.GAUGE, tags=common_tags + ['ap_stats_channel:4']
+        'snmp.apBSSBwRate', metric_type=aggregator.GAUGE, tags=metric_tags + ['ap_stats_channel:4']
     )
     aggregator.assert_metric(
-        'snmp.apBSSFrameFragmentationRate', metric_type=aggregator.GAUGE, tags=common_tags + ['ap_stats_channel:4']
+        'snmp.apBSSFrameFragmentationRate', metric_type=aggregator.GAUGE, tags=metric_tags + ['ap_stats_channel:4']
     )
     aggregator.assert_metric(
-        'snmp.apBSSFrameLowSpeedRate', metric_type=aggregator.GAUGE, tags=common_tags + ['ap_stats_channel:4']
+        'snmp.apBSSFrameLowSpeedRate', metric_type=aggregator.GAUGE, tags=metric_tags + ['ap_stats_channel:4']
     )
     aggregator.assert_metric(
-        'snmp.apBSSFrameNonUnicastRate', metric_type=aggregator.GAUGE, tags=common_tags + ['ap_stats_channel:4']
+        'snmp.apBSSFrameNonUnicastRate', metric_type=aggregator.GAUGE, tags=metric_tags + ['ap_stats_channel:4']
     )
     aggregator.assert_metric(
-        'snmp.apBSSFrameReceiveErrorRate', metric_type=aggregator.GAUGE, tags=common_tags + ['ap_stats_channel:4']
+        'snmp.apBSSFrameReceiveErrorRate', metric_type=aggregator.GAUGE, tags=metric_tags + ['ap_stats_channel:4']
     )
     aggregator.assert_metric(
-        'snmp.apBSSFrameRetryRate', metric_type=aggregator.GAUGE, tags=common_tags + ['ap_stats_channel:4']
+        'snmp.apBSSFrameRetryRate', metric_type=aggregator.GAUGE, tags=metric_tags + ['ap_stats_channel:4']
     )
     aggregator.assert_metric(
-        'snmp.apBSSRxBytes', metric_type=aggregator.COUNT, tags=common_tags + ['ap_stats_channel:4']
+        'snmp.apBSSRxBytes', metric_type=aggregator.COUNT, tags=metric_tags + ['ap_stats_channel:4']
     )
     aggregator.assert_metric(
-        'snmp.apBSSRxPackets', metric_type=aggregator.COUNT, tags=common_tags + ['ap_stats_channel:4']
+        'snmp.apBSSRxPackets', metric_type=aggregator.COUNT, tags=metric_tags + ['ap_stats_channel:4']
     )
     aggregator.assert_metric(
-        'snmp.apBSSTxBytes', metric_type=aggregator.COUNT, tags=common_tags + ['ap_stats_channel:4']
+        'snmp.apBSSTxBytes', metric_type=aggregator.COUNT, tags=metric_tags + ['ap_stats_channel:4']
     )
     aggregator.assert_metric(
-        'snmp.apBSSTxPackets', metric_type=aggregator.COUNT, tags=common_tags + ['ap_stats_channel:4']
+        'snmp.apBSSTxPackets', metric_type=aggregator.COUNT, tags=metric_tags + ['ap_stats_channel:4']
     )
     aggregator.assert_metric(
-        'snmp.apChannelBwRate', metric_type=aggregator.GAUGE, tags=common_tags + ['ap_stats_channel:4']
+        'snmp.apChannelBwRate', metric_type=aggregator.GAUGE, tags=metric_tags + ['ap_stats_channel:4']
     )
     aggregator.assert_metric(
-        'snmp.apChannelFrameFragmentationRate', metric_type=aggregator.GAUGE, tags=common_tags + ['ap_stats_channel:4']
+        'snmp.apChannelFrameFragmentationRate', metric_type=aggregator.GAUGE, tags=metric_tags + ['ap_stats_channel:4']
     )
     aggregator.assert_metric(
-        'snmp.apChannelFrameLowSpeedRate', metric_type=aggregator.GAUGE, tags=common_tags + ['ap_stats_channel:4']
+        'snmp.apChannelFrameLowSpeedRate', metric_type=aggregator.GAUGE, tags=metric_tags + ['ap_stats_channel:4']
     )
     aggregator.assert_metric(
-        'snmp.apChannelFrameNonUnicastRate', metric_type=aggregator.GAUGE, tags=common_tags + ['ap_stats_channel:4']
+        'snmp.apChannelFrameNonUnicastRate', metric_type=aggregator.GAUGE, tags=metric_tags + ['ap_stats_channel:4']
     )
     aggregator.assert_metric(
-        'snmp.apChannelFrameReceiveErrorRate', metric_type=aggregator.GAUGE, tags=common_tags + ['ap_stats_channel:4']
+        'snmp.apChannelFrameReceiveErrorRate', metric_type=aggregator.GAUGE, tags=metric_tags + ['ap_stats_channel:4']
     )
     aggregator.assert_metric(
-        'snmp.apChannelFrameRetryRate', metric_type=aggregator.GAUGE, tags=common_tags + ['ap_stats_channel:4']
+        'snmp.apChannelFrameRetryRate', metric_type=aggregator.GAUGE, tags=metric_tags + ['ap_stats_channel:4']
     )
 
     tags_row = [['ha_membership:MemberGroup1']]
     for tag_row in tags_row:
-        aggregator.assert_metric('snmp.haAPHbtTunnels', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.haActiveVapTunnels', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.haStandbyVapTunnels', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.haTotalVapTunnels', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.haAPHbtTunnels', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.haActiveVapTunnels', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.haStandbyVapTunnels', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.haTotalVapTunnels', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tags_row = [
         [
@@ -142,19 +143,19 @@ def test_e2e_profile_aruba_wireless_controller(dd_agent_check):
         ],
     ]
     for tag_row in tags_row:
-        aggregator.assert_metric('snmp.wlanStaRSSI', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.wlanStaTransmitRate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.wlanStaRSSI', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.wlanStaTransmitRate', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.wlanStaTransmitRateCode', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.wlanStaTransmitRateCode', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.wlanStaUpTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.wlanStaUpTime', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tags_row = [
         ['wlan_sta_channel_num:3'],
     ]
     for tag_row in tags_row:
-        aggregator.assert_metric('snmp.wlanStaRxBytes64', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.wlanStaTxBytes64', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.wlanStaRxBytes64', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.wlanStaTxBytes64', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -170,7 +171,7 @@ def test_e2e_profile_aruba_wireless_controller(dd_agent_check):
         'device_type': 'wlc',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

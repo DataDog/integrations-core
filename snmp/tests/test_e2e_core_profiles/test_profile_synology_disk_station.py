@@ -39,6 +39,7 @@ def test_e2e_profile_synology_disk_station(dd_agent_check):
         'synology_serial_number:kept',
         'synology_version:forward kept Jaded quaintly',
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -46,13 +47,13 @@ def test_e2e_profile_synology_disk_station(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.hrCachedMemory', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.hrMemoryBuffers', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.synology.gpuMemoryUtilization', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.synology.gpuUtilization', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.synology.system.temperature', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.hrCachedMemory', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.hrMemoryBuffers', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.synology.gpuMemoryUtilization', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.synology.gpuUtilization', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.synology.system.temperature', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         [
             'synology_disk_id:Jaded Jaded',
@@ -123,7 +124,7 @@ def test_e2e_profile_synology_disk_station(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.synology.diskTemperature', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.synology.diskTemperature', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -134,9 +135,9 @@ def test_e2e_profile_synology_disk_station(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.synology.raidFreeSize', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.synology.raidFreeSize', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.synology.raidTotalSize', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.synology.raidTotalSize', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -179,10 +180,10 @@ def test_e2e_profile_synology_disk_station(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.synology.diskSMARTAttrCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.synology.diskSMARTAttrCurrent', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.synology.diskSMARTAttrThreshold', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.synology.diskSMARTAttrThreshold', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -202,7 +203,7 @@ def test_e2e_profile_synology_disk_station(dd_agent_check):
         ['synology_service_name:their zombies'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.synology.serviceUsers', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.synology.serviceUsers', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['synology_storage_io_device:Jaded'],
@@ -211,18 +212,18 @@ def test_e2e_profile_synology_disk_station(dd_agent_check):
         ['synology_storage_io_device:their forward driving oxen Jaded but driving forward but'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.synology.storageIOLA', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.synology.storageIOLA', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.synology.storageIONReadX', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.synology.storageIONReadX', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.synology.storageIONWrittenX', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.synology.storageIONWrittenX', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.synology.storageIOReads', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.synology.storageIOReads', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.synology.storageIOWrites', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.synology.storageIOWrites', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -243,16 +244,16 @@ def test_e2e_profile_synology_disk_station(dd_agent_check):
         ['synology_space_io_device:zombies acted oxen but acted zombies'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.synology.spaceIOLA', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.synology.spaceIOLA', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.synology.spaceIONReadX', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.synology.spaceIONReadX', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.synology.spaceIONWrittenX', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.synology.spaceIONWrittenX', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.synology.spaceIOReads', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.synology.spaceIOReads', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.synology.spaceIOWrites', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.synology.spaceIOWrites', metric_type=aggregator.COUNT, tags=metric_tags + tag_row
         )
 
     # --- TEST METADATA ---
@@ -269,7 +270,7 @@ def test_e2e_profile_synology_disk_station(dd_agent_check):
         'device_type': 'storage',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

@@ -37,13 +37,14 @@ def test_e2e_profile_netgear_switch(dd_agent_check):
         'agent_inventory_machine_model:their quaintly but acted oxen oxen their Jaded acted',
         'agent_inventory_software_version:kept but their zombies quaintly but driving',
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags, value=10.3)
-    aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags, value=10.3)
+    aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=metric_tags)
 
     # --- TEST METADATA ---
     device = {
@@ -59,7 +60,7 @@ def test_e2e_profile_netgear_switch(dd_agent_check):
         'device_type': 'switch',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

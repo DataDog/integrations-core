@@ -42,6 +42,7 @@ def test_e2e_profile_juniper_pulse_secure(dd_agent_check):
         'juniper_ive_product_version:kept kept acted driving oxen quaintly quaintly',
         'juniper_ive_ive_max_concurrent_users_license_capacity:1000',
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_host_resources_base(aggregator, common_tags)
@@ -51,26 +52,26 @@ def test_e2e_profile_juniper_pulse_secure(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.juniper.ive.clusterConcurrentUsers', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.juniper.ive.diskFullPercent', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.juniper.ive.iveAppletHits', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.juniper.ive.iveConcurrentUsers', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.juniper.ive.iveFileHits', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.juniper.ive.iveNCHits', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.juniper.ive.iveSAMHits', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.juniper.ive.iveSSLConnections', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.juniper.ive.iveSwapUtil', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.juniper.ive.iveTemperature', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.juniper.ive.iveTotalHits', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.juniper.ive.iveVPNTunnels', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.juniper.ive.iveWebHits', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.juniper.ive.ivetermHits', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.juniper.ive.logFullPercent', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.juniper.ive.meetingHits', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.juniper.ive.signedInMailUsers', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.juniper.ive.signedInWebUsers', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.juniper.ive.clusterConcurrentUsers', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.juniper.ive.diskFullPercent', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.juniper.ive.iveAppletHits', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.juniper.ive.iveConcurrentUsers', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.juniper.ive.iveFileHits', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.juniper.ive.iveNCHits', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.juniper.ive.iveSAMHits', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.juniper.ive.iveSSLConnections', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.juniper.ive.iveSwapUtil', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.juniper.ive.iveTemperature', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.juniper.ive.iveTotalHits', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.juniper.ive.iveVPNTunnels', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.juniper.ive.iveWebHits', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.juniper.ive.ivetermHits', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.juniper.ive.logFullPercent', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.juniper.ive.meetingHits', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.juniper.ive.signedInMailUsers', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.juniper.ive.signedInWebUsers', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
 
     # --- TEST METADATA ---
     device = {
@@ -86,7 +87,7 @@ def test_e2e_profile_juniper_pulse_secure(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

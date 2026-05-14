@@ -34,62 +34,63 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.drsCMCCurrStatus', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.drsGlobalCurrStatus', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.drsGlobalSystemStatus', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.drsPowerCurrStatus', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.drsRedCurrStatus', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.drsCMCCurrStatus', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.drsGlobalCurrStatus', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.drsGlobalSystemStatus', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.drsPowerCurrStatus', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.drsRedCurrStatus', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         ['chassis_index:24'],
         ['chassis_index:27'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.systemStateAmperageStatusCombined', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.systemStateAmperageStatusCombined', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.systemStateChassisIntrusionStatusCombined', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.systemStateChassisIntrusionStatusCombined', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.systemStateChassisStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.systemStateChassisStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.systemStateCoolingDeviceStatusCombined', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.systemStateCoolingDeviceStatusCombined', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.systemStateCoolingUnitStatusCombined', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.systemStateCoolingUnitStatusCombined', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.systemStateCoolingUnitStatusRedundancy', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.systemStateCoolingUnitStatusRedundancy', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.systemStateMemoryDeviceStatusCombined', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.systemStateMemoryDeviceStatusCombined', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.systemStatePowerSupplyStatusCombined', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.systemStatePowerSupplyStatusCombined', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.systemStatePowerUnitStatusCombined', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.systemStatePowerUnitStatusCombined', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.systemStatePowerUnitStatusRedundancy', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.systemStatePowerUnitStatusRedundancy', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.systemStateProcessorDeviceStatusCombined', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.systemStateProcessorDeviceStatusCombined', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
             'snmp.systemStateTemperatureStatisticsStatusCombined',
             metric_type=aggregator.GAUGE,
-            tags=common_tags + tag_row,
+            tags=metric_tags + tag_row,
         )
         aggregator.assert_metric(
-            'snmp.systemStateTemperatureStatusCombined', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.systemStateTemperatureStatusCombined', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -127,7 +128,7 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.dell.systemState', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.dell.systemState', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['disk_name:acted oxen quaintly zombies zombies driving their forward'],
@@ -135,14 +136,14 @@ def test_e2e_profile__dell_rac(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.physicalDiskCapacityInMB', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.physicalDiskCapacityInMB', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.physicalDiskFreeSpaceInMB', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.physicalDiskFreeSpaceInMB', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.physicalDiskState', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.physicalDiskState', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.physicalDiskUsedSpaceInMB', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.physicalDiskUsedSpaceInMB', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -150,7 +151,7 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         ['disk_number:14', 'disk_state:ready', 'disk_name:acted oxen quaintly zombies zombies driving their forward'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.dell.physicalDisk', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.dell.physicalDisk', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -166,7 +167,7 @@ def test_e2e_profile__dell_rac(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.enclosurePowerSupplyState', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.enclosurePowerSupplyState', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -184,21 +185,21 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.enclosurePowerSupply', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.enclosurePowerSupply', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['battery_fqdd:kept Jaded driving', 'battery_name:acted'],
         ['battery_fqdd:kept zombies', 'battery_name:driving their forward acted'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.batteryState', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.batteryState', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['battery_fqdd:kept Jaded driving', 'battery_name:acted', 'battery_state:failed'],
         ['battery_fqdd:kept zombies', 'battery_name:driving their forward acted', 'battery_state:charging'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.dell.battery', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.dell.battery', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -216,7 +217,7 @@ def test_e2e_profile__dell_rac(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.controllerRollUpStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.controllerRollUpStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -236,28 +237,28 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.dell.controller', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.dell.controller', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['chassis_index:25', 'device_descr_name:driving their oxen forward'],
         ['chassis_index:30', 'device_descr_name:driving'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.pCIDeviceStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.pCIDeviceStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['chassis_index:25', 'device_descr_name:driving their oxen forward', 'device_status:non_critical'],
         ['chassis_index:30', 'device_descr_name:driving', 'device_status:non_recoverable'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.dell.pCIDevice', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.dell.pCIDevice', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['chassis_index:25', 'slot_name:zombies driving forward but Jaded acted kept acted'],
         ['chassis_index:27', 'slot_name:Jaded oxen their acted Jaded kept quaintly'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.systemSlotStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.systemSlotStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -268,14 +269,14 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         ['chassis_index:27', 'slot_name:Jaded oxen their acted Jaded kept quaintly', 'slot_status:non_recoverable'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.dell.systemSlot', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.dell.systemSlot', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['chassis_index:13', 'device_fqdd:quaintly', 'mac_addr:aaaaaa'],
         ['chassis_index:24', 'device_fqdd:oxen acted zombies but Jaded', 'mac_addr:aaaaaa'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.networkDeviceStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.networkDeviceStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -294,29 +295,29 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.dell.networkDevice', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.dell.networkDevice', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['chassis_index:28', 'system_bios_index:12'],
         ['chassis_index:29', 'system_bios_index:19'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.systemBIOSStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.systemBIOSStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['chassis_index:28', 'system_bios_index:12', 'system_bios_status:other'],
         ['chassis_index:29', 'system_bios_index:19', 'system_bios_status:non_recoverable'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.dell.systemBIOS', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.dell.systemBIOS', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['chassis_index:11', 'intrusion_index:5', 'intrusion_location_name:driving zombies Jaded zombies'],
         ['chassis_index:15', 'intrusion_index:12', 'intrusion_location_name:their driving quaintly'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.intrusionReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.intrusionStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.intrusionReading', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.intrusionStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -332,13 +333,13 @@ def test_e2e_profile__dell_rac(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.powerSupplyCurrentInputVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.powerSupplyCurrentInputVoltage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.powerSupplyMaximumInputVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.powerSupplyMaximumInputVoltage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.powerSupplyOutputWatts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.powerSupplyOutputWatts', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -346,8 +347,8 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         ['amperage_probe_index:16', 'chassis_index:3', 'probe_type:amperage_probe_type_is_1point5_volt'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.amperageProbeReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.amperageProbeStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.amperageProbeReading', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.amperageProbeStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -364,22 +365,22 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.dell.amperageProbe', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.dell.amperageProbe', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['chassis_index:26', 'power_usage_entity_name:zombies their', 'power_usage_index:8'],
         ['chassis_index:6', 'power_usage_entity_name:forward kept', 'power_usage_index:11'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.powerUsageStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.powerUsageStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['chassis_index:14', 'probe_type:voltage_probe_type_is_memory_status', 'voltage_probe_index:21'],
         ['chassis_index:29', 'probe_type:voltage_probe_type_is_1point5_volt', 'voltage_probe_index:25'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.voltageProbeReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.voltageProbeStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.voltageProbeReading', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.voltageProbeStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -396,15 +397,15 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.dell.voltageProbe', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.dell.voltageProbe', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['chassis_index:24', 'system_battery_index:29', 'system_battery_location_name:forward oxen Jaded zombies but'],
         ['chassis_index:3', 'system_battery_index:15', 'system_battery_location_name:zombies their but quaintly their'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.systemBatteryReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.systemBatteryStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.systemBatteryReading', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.systemBatteryStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['chassis_index:11', 'cooling_unit_index:4', 'cooling_unit_name:zombies'],
@@ -412,9 +413,9 @@ def test_e2e_profile__dell_rac(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.coolingUnitRedundancyStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.coolingUnitRedundancyStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.coolingUnitStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.coolingUnitStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -434,10 +435,10 @@ def test_e2e_profile__dell_rac(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.coolingDeviceDiscreteReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.coolingDeviceDiscreteReading', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.coolingDeviceReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.coolingDeviceStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.coolingDeviceReading', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.coolingDeviceStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -455,13 +456,13 @@ def test_e2e_profile__dell_rac(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.temperatureProbeDiscreteReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.temperatureProbeDiscreteReading', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.temperatureProbeReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.temperatureProbeReading', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.temperatureProbeStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.temperatureProbeStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -480,14 +481,14 @@ def test_e2e_profile__dell_rac(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.processorDeviceCurrentSpeed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.processorDeviceCurrentSpeed', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.processorDeviceMaximumSpeed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.processorDeviceMaximumSpeed', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.processorDeviceStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.processorDeviceStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.processorDeviceVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.processorDeviceVoltage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -500,10 +501,10 @@ def test_e2e_profile__dell_rac(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.processorDeviceStatusReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.processorDeviceStatusReading', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.processorDeviceStatusStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.processorDeviceStatusStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -511,21 +512,21 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         ['chassis_index:22', 'device_index:23', 'device_type:24'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.memoryDeviceStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.memoryDeviceStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['chassis_index:15', 'device_index:23', 'device_type:device_type_is_feprom', 'memory_device_status:unknown'],
         ['chassis_index:22', 'device_index:23', 'device_type:device_type_is_ddr3', 'memory_device_status:other'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.dell.memoryDevice', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.dell.memoryDevice', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['chassis_index:29', 'fru_fqdd:forward acted kept oxen', 'fru_index:20'],
         ['chassis_index:30', 'fru_fqdd:driving kept', 'fru_index:7'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.fruInformationStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.fruInformationStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -541,26 +542,26 @@ def test_e2e_profile__dell_rac(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.virtualDiskComponentStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.virtualDiskComponentStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.virtualDiskSizeInMB', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.virtualDiskState', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.virtualDiskSizeInMB', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.virtualDiskState', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.virtualDiskT10PIStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.virtualDiskT10PIStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
         ['chassis_index:1', 'drs_psu_index:3'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.drsAmpsReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.drsWattsReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.drsAmpsReading', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.drsWattsReading', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['chassis_index:1', 'drs_psu_index:3'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.drsKWhCumulative', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.drsKWhCumulative', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -575,7 +576,7 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

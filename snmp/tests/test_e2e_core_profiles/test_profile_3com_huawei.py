@@ -35,6 +35,7 @@ def test_e2e_profile_3com_huawei(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
@@ -42,12 +43,12 @@ def test_e2e_profile_3com_huawei(dd_agent_check):
 
     cpu_ids = [881, 882]
     for cpu in cpu_ids:
-        cpu_tags = common_tags + ['cpu:{}'.format(cpu)]
+        cpu_tags = metric_tags + ['cpu:{}'.format(cpu)]
         aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=cpu_tags)
 
     mem_ids = [991, 992]
     for mem in mem_ids:
-        mem_tags = common_tags + ['mem:{}'.format(mem)]
+        mem_tags = metric_tags + ['mem:{}'.format(mem)]
         aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=mem_tags)
         aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=mem_tags)
         aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=mem_tags)
@@ -59,7 +60,7 @@ def test_e2e_profile_3com_huawei(dd_agent_check):
         ["fan_num:14", "fan_status:unsupported"],
     ]
     for fan_tags in fan_row_tags:
-        aggregator.assert_metric('snmp.hwdevMFanStatus', metric_type=aggregator.GAUGE, tags=common_tags + fan_tags)
+        aggregator.assert_metric('snmp.hwdevMFanStatus', metric_type=aggregator.GAUGE, tags=metric_tags + fan_tags)
 
     fan_row_tags = [
         ["power_num:11", "power_status:active"],
@@ -68,7 +69,7 @@ def test_e2e_profile_3com_huawei(dd_agent_check):
         ["power_num:14", "power_status:unsupported"],
     ]
     for fan_tags in fan_row_tags:
-        aggregator.assert_metric('snmp.hwdevMPowerStatus', metric_type=aggregator.GAUGE, tags=common_tags + fan_tags)
+        aggregator.assert_metric('snmp.hwdevMPowerStatus', metric_type=aggregator.GAUGE, tags=metric_tags + fan_tags)
 
     # --- TEST METADATA ---
     device = {

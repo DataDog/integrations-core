@@ -35,6 +35,7 @@ def test_e2e_profile_cisco_firepower(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -47,7 +48,7 @@ def test_e2e_profile_cisco_firepower(dd_agent_check):
         ['cpu:7541'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['mem:11603'],
@@ -58,9 +59,9 @@ def test_e2e_profile_cisco_firepower(dd_agent_check):
         ['mem:47424'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['cfpr_sm_monitor_dn:Jaded oxen'],
@@ -72,10 +73,10 @@ def test_e2e_profile_cisco_firepower(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cfprSmMonitorDataDiskAvailable', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cfprSmMonitorDataDiskAvailable', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cfprSmMonitorDataDiskTotal', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cfprSmMonitorDataDiskTotal', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -88,7 +89,7 @@ def test_e2e_profile_cisco_firepower(dd_agent_check):
         ['cfpr_equipment_fan_dn:their but driving but', 'cfpr_equipment_fan_oper_state:operable'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.cfprEquipmentFan', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cfprEquipmentFan', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['cfpr_equipment_psu_dn:driving zombies their acted', 'cfpr_equipment_psu_power:ok'],
@@ -100,7 +101,7 @@ def test_e2e_profile_cisco_firepower(dd_agent_check):
         ['cfpr_equipment_psu_dn:zombies acted zombies', 'cfpr_equipment_psu_power:ok'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.cfprEquipmentPsu', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cfprEquipmentPsu', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -116,7 +117,7 @@ def test_e2e_profile_cisco_firepower(dd_agent_check):
         'device_type': 'firewall',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

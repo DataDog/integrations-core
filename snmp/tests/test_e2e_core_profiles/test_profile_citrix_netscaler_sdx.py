@@ -46,6 +46,7 @@ def test_e2e_profile_citrix_netscaler_sdx(dd_agent_check):
         'netscaler_sdx_system_xen_ip_address:their driving oxen driving',
         'netscaler_sdx_system_xen_ip_address_type:ipv4z',
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
 
@@ -64,7 +65,7 @@ def test_e2e_profile_citrix_netscaler_sdx(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.netscaler.sdx.hardwareResource', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.sdx.hardwareResource', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -79,7 +80,7 @@ def test_e2e_profile_citrix_netscaler_sdx(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.netscaler.sdx.softwareResource', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.sdx.softwareResource', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -95,9 +96,9 @@ def test_e2e_profile_citrix_netscaler_sdx(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.netscaler.sdx.srSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.netscaler.sdx.srSize', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.netscaler.sdx.srUtilized', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.sdx.srUtilized', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -114,22 +115,22 @@ def test_e2e_profile_citrix_netscaler_sdx(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.netscaler.sdx.interfaceRxBytes', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.sdx.interfaceRxBytes', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.sdx.interfaceRxErrors', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.sdx.interfaceRxErrors', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.sdx.interfaceRxPackets', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.sdx.interfaceRxPackets', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.sdx.interfaceTxBytes', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.sdx.interfaceTxBytes', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.sdx.interfaceTxErrors', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.sdx.interfaceTxErrors', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.sdx.interfaceTxPackets', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.sdx.interfaceTxPackets', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -146,7 +147,7 @@ def test_e2e_profile_citrix_netscaler_sdx(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.netscaler.sdx.hmCurrentValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.sdx.hmCurrentValue', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -162,8 +163,8 @@ def test_e2e_profile_citrix_netscaler_sdx(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -213,16 +214,16 @@ def test_e2e_profile_citrix_netscaler_sdx(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.netscaler.sdx.nsHttpReq', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.sdx.nsHttpReq', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.sdx.nsNsCPUUsage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.sdx.nsNsCPUUsage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.netscaler.sdx.nsNsMemoryUsage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.netscaler.sdx.nsNsMemoryUsage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.netscaler.sdx.nsNsRx', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.netscaler.sdx.nsNsTx', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.netscaler.sdx.nsNsRx', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.netscaler.sdx.nsNsTx', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -240,7 +241,7 @@ def test_e2e_profile_citrix_netscaler_sdx(dd_agent_check):
         'device_type': 'load_balancer',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

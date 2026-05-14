@@ -41,6 +41,7 @@ def test_e2e_profile_cisco_ironport_email(dd_agent_check):
         'ironport_http_ports:but Jaded oxen kept',
         'ironport_license_expiration:5',
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -48,55 +49,55 @@ def test_e2e_profile_cisco_ironport_email(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheBwidthSavingNow', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheBwidthSpentNow', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheBwidthTotalNow', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheClientAccepts', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheClientErrors', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheClientIdleConns', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheClientMaxConns', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheClientReqDenials', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheClientRequests', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheClientTotalConns', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheCltReplyErrPct', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheDeniedNow', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheDeniedRespTimeNow', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheDuration', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheErrRespTimeNow', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheErrsNow', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheHitRespTimeNow', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheHitsNow', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheMeanByteHitRatio', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheMeanHitRatio', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheMeanHitRespTime', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheMeanMissRespTime', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheMeanRespTime', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheMissRespTimeNow', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheMissesNow', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheServerCloseIdleConns', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheServerConnsThresh', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheServerErrors', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheServerIdleConns', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheServerLimitIdleConns', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheServerRequests', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheServerSockets', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheServerTotalConns', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheThruputNow', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheTotalBandwidthSaving', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheTotalHttpReqs', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.cacheTotalRespTimeNow', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.mailTransferThreads', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.oldestMessageAge', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.openFilesOrSockets', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.outstandingDNSRequests', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.pendingDNSRequests', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.perCentCPULoad', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.perCentDiskIOUtilization', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.perCentQueueUtilization', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.raidEvents', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.workQueueMessages', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheBwidthSavingNow', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheBwidthSpentNow', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheBwidthTotalNow', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheClientAccepts', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheClientErrors', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheClientIdleConns', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheClientMaxConns', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheClientReqDenials', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheClientRequests', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheClientTotalConns', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheCltReplyErrPct', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheDeniedNow', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheDeniedRespTimeNow', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheDuration', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheErrRespTimeNow', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheErrsNow', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheHitRespTimeNow', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheHitsNow', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheMeanByteHitRatio', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheMeanHitRatio', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheMeanHitRespTime', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheMeanMissRespTime', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheMeanRespTime', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheMissRespTimeNow', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheMissesNow', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheServerCloseIdleConns', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheServerConnsThresh', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheServerErrors', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheServerIdleConns', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheServerLimitIdleConns', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheServerRequests', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheServerSockets', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheServerTotalConns', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheThruputNow', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheTotalBandwidthSaving', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheTotalHttpReqs', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.cacheTotalRespTimeNow', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.mailTransferThreads', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.oldestMessageAge', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.openFilesOrSockets', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.outstandingDNSRequests', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.pendingDNSRequests', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.perCentCPULoad', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.perCentDiskIOUtilization', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.perCentQueueUtilization', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.raidEvents', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ironport.workQueueMessages', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         [
             'ironport_power_supply_name:kept',
@@ -110,7 +111,7 @@ def test_e2e_profile_cisco_ironport_email(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ironport.powerSupply', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ironport.powerSupply', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['ironport_temperature_name:kept'],
@@ -118,7 +119,7 @@ def test_e2e_profile_cisco_ironport_email(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.ironport.degreesCelsius', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.ironport.degreesCelsius', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -126,7 +127,7 @@ def test_e2e_profile_cisco_ironport_email(dd_agent_check):
         ['ironport_fan_name:zombies kept quaintly quaintly kept Jaded zombies but Jaded'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ironport.fanRPMs', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ironport.fanRPMs', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['ironport_key_description:their kept driving but kept driving kept oxen', 'ironport_key_is_perpetual:true'],
@@ -134,7 +135,7 @@ def test_e2e_profile_cisco_ironport_email(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.ironport.keySecondsUntilExpire', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.ironport.keySecondsUntilExpire', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -143,9 +144,9 @@ def test_e2e_profile_cisco_ironport_email(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.ironport.updateFailures', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.ironport.updateFailures', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.ironport.updates', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ironport.updates', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -160,7 +161,7 @@ def test_e2e_profile_cisco_ironport_email(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ironport.raid', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ironport.raid', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -176,7 +177,7 @@ def test_e2e_profile_cisco_ironport_email(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

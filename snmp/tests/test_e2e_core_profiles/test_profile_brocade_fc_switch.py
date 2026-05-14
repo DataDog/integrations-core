@@ -35,6 +35,7 @@ def test_e2e_profile_brocade_fc_switch(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -42,8 +43,8 @@ def test_e2e_profile_brocade_fc_switch(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         [
             'fc_fe_module_index:40140',
@@ -59,7 +60,7 @@ def test_e2e_profile_brocade_fc_switch(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.fcFxPortStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.fcFxPortStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -76,7 +77,7 @@ def test_e2e_profile_brocade_fc_switch(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.fcFxPortPhys', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.fcFxPortPhys', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         [
@@ -90,21 +91,21 @@ def test_e2e_profile_brocade_fc_switch(dd_agent_check):
         ['sw_fc_port_name:zombies kept driving zombies kept forward acted Jaded', 'sw_fc_port_specifier:driving acted'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.swFCPortC3Discards', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.swFCPortNoTxCredits', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.swFCPortRcTruncs', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.swFCPortRxBadEofs', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.swFCPortRxBadOs', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.swFCPortRxC2Frames', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.swFCPortRxC3Frames', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.swFCPortRxCrcs', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.swFCPortRxEncInFrs', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.swFCPortRxEncOutFrs', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.swFCPortRxFrames', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.swFCPortRxLCs', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.swFCPortRxTooLongs', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.swFCPortTooManyRdys', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.swFCPortTxFrames', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.swFCPortC3Discards', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.swFCPortNoTxCredits', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.swFCPortRcTruncs', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.swFCPortRxBadEofs', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.swFCPortRxBadOs', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.swFCPortRxC2Frames', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.swFCPortRxC3Frames', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.swFCPortRxCrcs', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.swFCPortRxEncInFrs', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.swFCPortRxEncOutFrs', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.swFCPortRxFrames', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.swFCPortRxLCs', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.swFCPortRxTooLongs', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.swFCPortTooManyRdys', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.swFCPortTxFrames', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -120,7 +121,7 @@ def test_e2e_profile_brocade_fc_switch(dd_agent_check):
         'device_type': 'switch',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

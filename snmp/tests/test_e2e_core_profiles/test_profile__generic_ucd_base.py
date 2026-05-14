@@ -34,29 +34,30 @@ def test_e2e_profile__generic_ucd_base(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.ucd.memAvailSwap', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ucd.memBuffer', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ucd.memCached', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ucd.memMinimumSwap', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ucd.memShared', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ucd.memTotalFree', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ucd.memTotalSwap', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ucd.ssCpuIdle', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ucd.ssCpuRawIdle', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.ucd.ssCpuRawInterrupt', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.ucd.ssCpuRawKernel', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.ucd.ssCpuRawNice', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.ucd.ssCpuRawSystem', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.ucd.ssCpuRawUser', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.ucd.ssCpuRawWait', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.ucd.ssCpuSystem', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ucd.ssCpuUser', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.ucd.memAvailSwap', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ucd.memBuffer', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ucd.memCached', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ucd.memMinimumSwap', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ucd.memShared', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ucd.memTotalFree', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ucd.memTotalSwap', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ucd.ssCpuIdle', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ucd.ssCpuRawIdle', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.ucd.ssCpuRawInterrupt', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.ucd.ssCpuRawKernel', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.ucd.ssCpuRawNice', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.ucd.ssCpuRawSystem', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.ucd.ssCpuRawUser', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.ucd.ssCpuRawWait', metric_type=aggregator.COUNT, tags=metric_tags)
+    aggregator.assert_metric('snmp.ucd.ssCpuSystem', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.ucd.ssCpuUser', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         [
             'ucd_dsk_device:driving driving but kept oxen oxen',
@@ -66,24 +67,24 @@ def test_e2e_profile__generic_ucd_base(dd_agent_check):
         ['ucd_dsk_device:kept Jaded', 'ucd_dsk_error_flag:no_error', 'ucd_dsk_path:quaintly oxen acted oxen'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ucd.dskAvail', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ucd.dskPercent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ucd.dskPercentNode', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ucd.dskTotal', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ucd.dskUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ucd.dskAvail', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.ucd.dskPercent', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.ucd.dskPercentNode', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.ucd.dskTotal', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.ucd.dskUsed', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['ucd_disk_io_device:forward'],
         ['ucd_disk_io_device:their zombies'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ucd.diskIOLA1', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ucd.diskIOLA15', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ucd.diskIOLA5', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ucd.diskIONReadX', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ucd.diskIONWrittenX', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ucd.diskIOReads', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ucd.diskIOWrites', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ucd.diskIOLA1', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.ucd.diskIOLA15', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.ucd.diskIOLA5', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.ucd.diskIONReadX', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.ucd.diskIONWrittenX', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.ucd.diskIOReads', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.ucd.diskIOWrites', metric_type=aggregator.COUNT, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -98,7 +99,7 @@ def test_e2e_profile__generic_ucd_base(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

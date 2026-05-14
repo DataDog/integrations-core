@@ -34,6 +34,7 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
 
@@ -63,7 +64,7 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.servertech.sentry4.st4UnitMonitor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.servertech.sentry4.st4UnitMonitor', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -114,29 +115,29 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.servertech.sentry4.st4InputCordActivePower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.servertech.sentry4.st4InputCordActivePower', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
             'snmp.servertech.sentry4.st4InputCordApparentPower',
             metric_type=aggregator.GAUGE,
-            tags=common_tags + tag_row,
+            tags=metric_tags + tag_row,
         )
         aggregator.assert_metric(
-            'snmp.servertech.sentry4.st4InputCordEnergy', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.servertech.sentry4.st4InputCordEnergy', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.servertech.sentry4.st4InputCordFrequency', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.servertech.sentry4.st4InputCordFrequency', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.servertech.sentry4.st4InputCordOutOfBalance', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.servertech.sentry4.st4InputCordOutOfBalance', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.servertech.sentry4.st4InputCordPowerFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.servertech.sentry4.st4InputCordPowerFactor', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
             'snmp.servertech.sentry4.st4InputCordPowerUtilized',
             metric_type=aggregator.GAUGE,
-            tags=common_tags + tag_row,
+            tags=metric_tags + tag_row,
         )
 
     tag_rows = [
@@ -159,10 +160,10 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.servertech.sentry4.st4LineCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.servertech.sentry4.st4LineCurrent', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.servertech.sentry4.st4LineCurrentUtilized', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.servertech.sentry4.st4LineCurrentUtilized', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -191,30 +192,30 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.servertech.sentry4.st4PhaseActivePower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.servertech.sentry4.st4PhaseActivePower', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.servertech.sentry4.st4PhaseApparentPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.servertech.sentry4.st4PhaseApparentPower', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.servertech.sentry4.st4PhaseCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.servertech.sentry4.st4PhaseCurrent', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
             'snmp.servertech.sentry4.st4PhaseCurrentCrestFactor',
             metric_type=aggregator.GAUGE,
-            tags=common_tags + tag_row,
+            tags=metric_tags + tag_row,
         )
         aggregator.assert_metric(
-            'snmp.servertech.sentry4.st4PhaseEnergy', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.servertech.sentry4.st4PhaseEnergy', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.servertech.sentry4.st4PhasePowerFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.servertech.sentry4.st4PhasePowerFactor', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.servertech.sentry4.st4PhaseVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.servertech.sentry4.st4PhaseVoltage', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.servertech.sentry4.st4PhaseVoltageDeviation', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.servertech.sentry4.st4PhaseVoltageDeviation', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -241,7 +242,7 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.servertech.sentry4.st4OcpMonitor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.servertech.sentry4.st4OcpMonitor', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -270,10 +271,10 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.servertech.sentry4.st4BranchCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.servertech.sentry4.st4BranchCurrent', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.servertech.sentry4.st4BranchCurrentUtilized', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.servertech.sentry4.st4BranchCurrentUtilized', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -306,7 +307,7 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.servertech.sentry4.st4OutletMonitor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.servertech.sentry4.st4OutletMonitor', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -327,7 +328,7 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.servertech.sentry4.st4TempSensorValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.servertech.sentry4.st4TempSensorValue', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -344,7 +345,7 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.servertech.sentry4.st4HumidSensorValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.servertech.sentry4.st4HumidSensorValue', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     # --- TEST METADATA ---
@@ -361,7 +362,7 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
         'device_type': 'pdu',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

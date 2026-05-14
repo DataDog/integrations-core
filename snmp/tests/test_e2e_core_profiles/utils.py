@@ -33,7 +33,18 @@ def assert_common_metrics(aggregator, common_tags):
     common.assert_common_metrics(aggregator, tags=common_tags, is_e2e=True, loader="core")
 
 
+def _metric_tags(common_tags):
+    """Strip device-level tags that the core loader no longer emits on metrics.
+
+    Profile assertion helpers receive the full device-level `common_tags` list
+    for backwards compatibility, but per-device metric assertions must use only
+    tags the agent still attaches (interface/row-level tags from profile YAMLs).
+    """
+    return common.filter_metric_tags(common_tags)
+
+
 def assert_extend_aruba_switch_cpu_memory(aggregator, common_tags):
+    common_tags = _metric_tags(common_tags)
     # fmt: off
     """Add the following to the snmprec
 1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.4|66|29
@@ -43,6 +54,7 @@ def assert_extend_aruba_switch_cpu_memory(aggregator, common_tags):
 
 
 def assert_extend_fortinet_fortigate_cpu_memory(aggregator, common_tags):
+    common_tags = _metric_tags(common_tags)
     # fmt: off
     """Add the following to the snmprec
 1.3.6.1.4.1.12356.101.4.1.3.0|66|10
@@ -52,6 +64,7 @@ def assert_extend_fortinet_fortigate_cpu_memory(aggregator, common_tags):
 
 
 def assert_extend_fortinet_fortigate_vpn_tunnel(aggregator, common_tags):
+    common_tags = _metric_tags(common_tags)
     # fmt: off
     """Add the following to the snmprec
 1.3.6.1.4.1.12356.101.12.2.2.1.2.2|4|ESMAO
@@ -64,6 +77,7 @@ def assert_extend_fortinet_fortigate_vpn_tunnel(aggregator, common_tags):
 
 
 def assert_extend_generic_if(aggregator, common_tags):
+    common_tags = _metric_tags(common_tags)
     # fmt: off
     """Add the following to the snmprec
 1.3.6.1.2.1.2.1.0|2|28
@@ -73,6 +87,7 @@ def assert_extend_generic_if(aggregator, common_tags):
 
 
 def assert_extend_generic_ip(aggregator, common_tags):
+    common_tags = _metric_tags(common_tags)
     # fmt: off
     """Add the following to the snmprec
 1.3.6.1.2.1.4.31.1.1.4.1|70|310637142
@@ -86,6 +101,7 @@ def assert_extend_generic_ip(aggregator, common_tags):
 
 
 def assert_extend_generic_tcp(aggregator, common_tags):
+    common_tags = _metric_tags(common_tags)
     # fmt: off
     """Add the following to the snmprec
 1.3.6.1.2.1.6.5.0|65|4698
@@ -95,6 +111,7 @@ def assert_extend_generic_tcp(aggregator, common_tags):
 
 
 def assert_extend_generic_udp(aggregator, common_tags):
+    common_tags = _metric_tags(common_tags)
     # fmt: off
     """Add the following to the snmprec
 1.3.6.1.2.1.7.8.0|70|6116206687099577350
@@ -104,6 +121,7 @@ def assert_extend_generic_udp(aggregator, common_tags):
 
 
 def assert_extend_generic_ospf(aggregator, common_tags):
+    common_tags = _metric_tags(common_tags)
     # fmt: off
     """Add the following to the snmprec
 1.3.6.1.2.1.14.10.1.6.192.29.116.26.0|2|8
@@ -118,6 +136,7 @@ def assert_extend_generic_ospf(aggregator, common_tags):
 
 
 def assert_extend_generic_bgp4(aggregator, common_tags):
+    common_tags = _metric_tags(common_tags)
     # fmt: off
     """Add the following to the snmprec
 1.3.6.1.2.1.15.3.1.3.244.12.239.177|2|2
@@ -137,6 +156,7 @@ def assert_extend_generic_bgp4(aggregator, common_tags):
 
 
 def assert_extend_cisco_cpu_memory(aggregator, common_tags):
+    common_tags = _metric_tags(common_tags)
     aggregator.assert_metric("snmp.memory.used", metric_type=aggregator.GAUGE, tags=common_tags + ["mem:18"])
     aggregator.assert_metric("snmp.ciscoMemoryPoolUsed", metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric("snmp.cpu.usage", metric_type=aggregator.GAUGE, tags=common_tags + ["cpu:712"])
@@ -148,6 +168,7 @@ def assert_extend_cisco_cpu_memory(aggregator, common_tags):
 
 
 def assert_extend_cisco_generic(aggregator, common_tags):
+    common_tags = _metric_tags(common_tags)
     # fmt: off
     """Add the following to the snmprec
 1.3.6.1.4.1.9.9.13.1.4.1.1.11|2|11
@@ -165,6 +186,7 @@ def assert_extend_cisco_generic(aggregator, common_tags):
 
 
 def assert_extend_generic_host_resources_base(aggregator, common_tags):
+    common_tags = _metric_tags(common_tags)
     # fmt: off
     """Add the following to the snmprec
 1.3.6.1.2.1.25.1.1.0|67|201526890
@@ -205,6 +227,7 @@ def assert_extend_generic_host_resources_base(aggregator, common_tags):
 
 
 def assert_extend_generic_host_resources_cpu_mem(aggregator, common_tags):
+    common_tags = _metric_tags(common_tags)
     cpu_rows = ['10', '21']
     for cpu_row in cpu_rows:
         aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + ['cpu:' + cpu_row])
@@ -223,6 +246,7 @@ def assert_extend_generic_host_resources_cpu_mem(aggregator, common_tags):
 
 
 def assert_extend_generic_host_resources(aggregator, common_tags):
+    common_tags = _metric_tags(common_tags)
     # fmt: off
     """Add the following to the snmprec
 1.3.6.1.2.1.25.1.1.0|67|201526890
@@ -247,6 +271,7 @@ def assert_extend_generic_host_resources(aggregator, common_tags):
 
 
 def assert_extend_generic_entity_sensor(aggregator, common_tags):
+    common_tags = _metric_tags(common_tags)
     # fmt: off
     """Add the following to the snmprec
 1.3.6.1.2.1.99.1.1.1.1.8|2|9
@@ -274,6 +299,7 @@ def assert_extend_generic_entity_sensor(aggregator, common_tags):
 
 
 def assert_extend_generic_ucd(aggregator, common_tags):
+    common_tags = _metric_tags(common_tags)
     # fmt:off
     """Add the following to the snmprec
 1.3.6.1.4.1.2021.4.3.0|2|1048572
@@ -283,6 +309,7 @@ def assert_extend_generic_ucd(aggregator, common_tags):
 
 
 def assert_extend_checkpoint_firewall_cpu_memory(aggregator, common_tags):
+    common_tags = _metric_tags(common_tags)
     # fmt:off
     """Add the following to the snmprec
 1.3.6.1.4.1.2620.1.6.7.4.3.0|70|15569114139837823111
@@ -292,6 +319,7 @@ def assert_extend_checkpoint_firewall_cpu_memory(aggregator, common_tags):
 
 
 def assert_extend_cisco(aggregator, common_tags):
+    common_tags = _metric_tags(common_tags)
     # fmt:off
     """Add the following to the snmprec
 1.3.6.1.4.1.9.9.109.1.1.1.1.12.712|66|353
@@ -302,6 +330,7 @@ def assert_extend_cisco(aggregator, common_tags):
 
 
 def assert_extend_generic_ups(aggregator, common_tags):
+    common_tags = _metric_tags(common_tags)
     # fmt: off
     """Add the following to the snmprec
 1.3.6.1.2.1.33.1.2.2.0|2|10
@@ -311,6 +340,7 @@ def assert_extend_generic_ups(aggregator, common_tags):
 
 
 def assert_extend_juniper_cos(aggregator, common_tags):
+    common_tags = _metric_tags(common_tags)
     # fmt: off
     """Add the following to the snmprec
 1.3.6.1.4.1.2636.3.15.9.1.2.170|4|jnxCosIfsetDescr value1
@@ -323,6 +353,7 @@ def assert_extend_juniper_cos(aggregator, common_tags):
 
 
 def assert_extend_juniper_dcu(aggregator, common_tags):
+    common_tags = _metric_tags(common_tags)
     # fmt: off
     """Add the following to the snmprec
 1.3.6.1.2.1.31.1.1.1.1.83|4|eth111
@@ -334,6 +365,7 @@ def assert_extend_juniper_dcu(aggregator, common_tags):
 
 
 def assert_extend_juniper_firewall(aggregator, common_tags):
+    common_tags = _metric_tags(common_tags)
     # fmt: off
     """Add the following to the snmprec
 1.3.6.1.4.1.2636.3.5.2.1.1.37.116.104.101.105.114.32.100.114.105.118.105.110.103.32.113.117.97.105.110.116.108.121.32.98.117.116.32.74.97.100.101.100.32.111.120.101.110.38.74.97.100.101.100.32.111.120.101.110.32.107.101.112.116.32.116.104.101.105.114.32.100.114.105.118.105.110.103.32.98.117.116.32.107.101.112.116.4|4|filter111
@@ -345,6 +377,7 @@ def assert_extend_juniper_firewall(aggregator, common_tags):
 
 
 def assert_extend_juniper_virtualchassis(aggregator, common_tags):
+    common_tags = _metric_tags(common_tags)
     # fmt: off
     """Add the following to the snmprec
 1.3.6.1.4.1.2636.3.40.1.4.1.2.1.2.11.43.74.97.100.101.100.32.102.111.114.119.97.114.100.32.98.117.116.32.111.120.101.110.32.113.117.97.105.110.116.108.121.32.116.104.101.105.114.32.116.104.101.105.114|4|port111
@@ -357,22 +390,14 @@ def assert_extend_juniper_virtualchassis(aggregator, common_tags):
 
 def assert_all_profile_metrics_and_tags_covered(profile, aggregator):
     metric_and_tags = collect_profile_metrics_and_tags(profile)
-    global_tags = set(
-        metric_and_tags["global_tags"]
-        + [
-            'device_namespace',
-            'snmp_device',
-            'agent_host',
-            'snmp_host',
-            'snmp_profile',
-            'device_id',
-            'device_ip',
-            'device_hostname',
-        ]
-    )
+    # Profile global metric_tags and device-identity tags ship on the NDM metadata
+    # payload now, not on per-device metrics (see common.DEVICE_METADATA_TAG_KEYS).
+    # Only per-row table tags remain on collected metric submissions.
+    excluded_tag_keys = ASSERT_ALL_PROFILE_EXCLUDED_TAGS | set(common.DEVICE_METADATA_TAG_KEYS)
+    global_tags = set(metric_and_tags["global_tags"]) - excluded_tag_keys
 
     for metric, metric_info in metric_and_tags["table_metrics"].items():
-        collected_metric_tag_keys = get_collected_metric_tag_keys(aggregator, metric) - ASSERT_ALL_PROFILE_EXCLUDED_TAGS
+        collected_metric_tag_keys = get_collected_metric_tag_keys(aggregator, metric) - excluded_tag_keys
         expected_metric_tag_keys = global_tags | set(metric_info.get('tags'))
         assert collected_metric_tag_keys == expected_metric_tag_keys, (
             "collected and profile metric tags differ for metric `{}`".format(metric)
@@ -380,7 +405,7 @@ def assert_all_profile_metrics_and_tags_covered(profile, aggregator):
     for metric in metric_and_tags["scalar_metrics"]:
         assert len(aggregator.metrics('snmp.' + metric)) > 0
         for collected_metric in aggregator.metrics('snmp.' + metric):
-            tag_keys = tags_to_tag_keys(collected_metric.tags) - ASSERT_ALL_PROFILE_EXCLUDED_TAGS
+            tag_keys = tags_to_tag_keys(collected_metric.tags) - excluded_tag_keys
             assert tag_keys == global_tags, "collected and profile metric tags differ for metric `{}`".format(metric)
 
 

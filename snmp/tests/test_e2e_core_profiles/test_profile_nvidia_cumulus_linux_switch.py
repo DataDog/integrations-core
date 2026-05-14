@@ -37,6 +37,7 @@ def test_e2e_profile_nvidia_cumulus_linux_switch(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -46,63 +47,63 @@ def test_e2e_profile_nvidia_cumulus_linux_switch(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.cumulus.egressAclCurrentCounters', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cumulus.egressAclCurrentEntries', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cumulus.egressAclCurrentMeters', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cumulus.egressAclCurrentSlices', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cumulus.egressAclMaxCounters', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cumulus.egressAclMaxEntries', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cumulus.egressAclMaxMeters', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cumulus.egressAclMaxSlices', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cumulus.ingressAclCurrentCounters', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cumulus.ingressAclCurrentEntries', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cumulus.ingressAclCurrentMeters', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cumulus.ingressAclCurrentSlices', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cumulus.ingressAclMaxCounters', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cumulus.ingressAclMaxEntries', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cumulus.ingressAclMaxMeters', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cumulus.ingressAclMaxSlices', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cumulus.l2MacTableCurrentEntries', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cumulus.l2MacTableMaxEntries', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cumulus.egressAclCurrentCounters', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cumulus.egressAclCurrentEntries', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cumulus.egressAclCurrentMeters', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cumulus.egressAclCurrentSlices', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cumulus.egressAclMaxCounters', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cumulus.egressAclMaxEntries', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cumulus.egressAclMaxMeters', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cumulus.egressAclMaxSlices', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cumulus.ingressAclCurrentCounters', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cumulus.ingressAclCurrentEntries', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cumulus.ingressAclCurrentMeters', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cumulus.ingressAclCurrentSlices', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cumulus.ingressAclMaxCounters', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cumulus.ingressAclMaxEntries', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cumulus.ingressAclMaxMeters', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cumulus.ingressAclMaxSlices', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cumulus.l2MacTableCurrentEntries', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cumulus.l2MacTableMaxEntries', metric_type=aggregator.GAUGE, tags=metric_tags)
     aggregator.assert_metric(
-        'snmp.cumulus.l3EcmpNextHopTableCurrentEntries', metric_type=aggregator.GAUGE, tags=common_tags
+        'snmp.cumulus.l3EcmpNextHopTableCurrentEntries', metric_type=aggregator.GAUGE, tags=metric_tags
     )
     aggregator.assert_metric(
-        'snmp.cumulus.l3EcmpNextHopTableMaxEntries', metric_type=aggregator.GAUGE, tags=common_tags
+        'snmp.cumulus.l3EcmpNextHopTableMaxEntries', metric_type=aggregator.GAUGE, tags=metric_tags
     )
-    aggregator.assert_metric('snmp.cumulus.l3HostTableCurrentEntries', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cumulus.l3HostTableMaxEntries', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cumulus.l3HostTableCurrentEntries', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cumulus.l3HostTableMaxEntries', metric_type=aggregator.GAUGE, tags=metric_tags)
     aggregator.assert_metric(
-        'snmp.cumulus.l3NextHopTableCurrentEntries', metric_type=aggregator.GAUGE, tags=common_tags
+        'snmp.cumulus.l3NextHopTableCurrentEntries', metric_type=aggregator.GAUGE, tags=metric_tags
     )
-    aggregator.assert_metric('snmp.cumulus.l3NextHopTableMaxEntries', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cumulus.l3NextHopTableMaxEntries', metric_type=aggregator.GAUGE, tags=metric_tags)
     aggregator.assert_metric(
-        'snmp.cumulus.l3RoutingTableCurrentEntries', metric_type=aggregator.GAUGE, tags=common_tags
+        'snmp.cumulus.l3RoutingTableCurrentEntries', metric_type=aggregator.GAUGE, tags=metric_tags
     )
-    aggregator.assert_metric('snmp.cumulus.l3RoutingTableMaxEntries', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cumulus.poeLastUpdateTime', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cumulus.poeTotalAvailablePower', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cumulus.poeTotalSystemPower', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cumulus.poeTotalUsedPower', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cumulus.l3RoutingTableMaxEntries', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cumulus.poeLastUpdateTime', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cumulus.poeTotalAvailablePower', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cumulus.poeTotalSystemPower', metric_type=aggregator.GAUGE, tags=metric_tags)
+    aggregator.assert_metric('snmp.cumulus.poeTotalUsedPower', metric_type=aggregator.GAUGE, tags=metric_tags)
     tag_rows = [
         ['cumulus_cl_port_name:their zombies'],
         ['cumulus_cl_port_name:zombies zombies acted oxen but oxen'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cumulus.clBufferOverflowDiscards', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clBufferOverflowDiscards', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cumulus.clEgressNonQDiscards', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clEgressNonQDiscards', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cumulus.clEgressQOverflowDiscards', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clEgressQOverflowDiscards', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cumulus.clL3AclDiscards', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clL3AclDiscards', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cumulus.clL3v4InDiscards', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clL3v4InDiscards', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -111,26 +112,26 @@ def test_e2e_profile_nvidia_cumulus_linux_switch(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cumulus.clIntInBcastPkts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clIntInBcastPkts', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cumulus.clIntInMcastPkts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clIntInMcastPkts', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.cumulus.clIntInOctets', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cumulus.clIntInOctets', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.cumulus.clIntInUcastPkts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric(
-            'snmp.cumulus.clIntOutBcastPkts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clIntInUcastPkts', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cumulus.clIntOutMcastPkts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clIntOutBcastPkts', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cumulus.clIntOutOctets', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clIntOutMcastPkts', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cumulus.clIntOutUcastPkts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clIntOutOctets', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cumulus.clIntOutUcastPkts', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -139,58 +140,58 @@ def test_e2e_profile_nvidia_cumulus_linux_switch(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cumulus.clIntInPausePkt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clIntInPausePkt', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cumulus.clIntInPfc0Pkt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clIntInPfc0Pkt', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cumulus.clIntInPfc1Pkt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clIntInPfc1Pkt', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cumulus.clIntInPfc2Pkt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clIntInPfc2Pkt', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cumulus.clIntInPfc3Pkt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clIntInPfc3Pkt', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cumulus.clIntInPfc4Pkt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clIntInPfc4Pkt', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cumulus.clIntInPfc5Pkt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clIntInPfc5Pkt', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cumulus.clIntInPfc6Pkt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clIntInPfc6Pkt', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cumulus.clIntInPfc7Pkt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clIntInPfc7Pkt', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cumulus.clIntOutPausePkt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clIntOutPausePkt', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cumulus.clIntOutPfc0Pkt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clIntOutPfc0Pkt', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cumulus.clIntOutPfc1Pkt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clIntOutPfc1Pkt', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cumulus.clIntOutPfc2Pkt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clIntOutPfc2Pkt', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cumulus.clIntOutPfc3Pkt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clIntOutPfc3Pkt', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cumulus.clIntOutPfc4Pkt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clIntOutPfc4Pkt', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cumulus.clIntOutPfc5Pkt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clIntOutPfc5Pkt', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cumulus.clIntOutPfc6Pkt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clIntOutPfc6Pkt', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cumulus.clIntOutPfc7Pkt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cumulus.clIntOutPfc7Pkt', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     # --- TEST METADATA ---
@@ -207,7 +208,7 @@ def test_e2e_profile_nvidia_cumulus_linux_switch(dd_agent_check):
         'device_type': 'switch',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

@@ -32,6 +32,7 @@ def test_e2e_profile__generic_sip(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
 
@@ -44,7 +45,7 @@ def test_e2e_profile__generic_sip(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.sipCommonCfgServiceOperStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.sipCommonCfgServiceOperStatus', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -53,19 +54,19 @@ def test_e2e_profile__generic_sip(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.sipCommonSummaryInRequests', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.sipCommonSummaryInRequests', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.sipCommonSummaryInResponses', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.sipCommonSummaryInResponses', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.sipCommonSummaryOutRequests', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.sipCommonSummaryOutRequests', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.sipCommonSummaryOutResponses', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.sipCommonSummaryOutResponses', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.sipCommonSummaryTotalTransactions', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.sipCommonSummaryTotalTransactions', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -74,10 +75,10 @@ def test_e2e_profile__generic_sip(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.sipCommonStatusCodeIns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.sipCommonStatusCodeIns', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.sipCommonStatusCodeOuts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.sipCommonStatusCodeOuts', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     tag_rows = [
@@ -86,7 +87,7 @@ def test_e2e_profile__generic_sip(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.sipCommonTransCurrentactions', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.sipCommonTransCurrentactions', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
 
     # --- TEST METADATA ---
@@ -102,7 +103,7 @@ def test_e2e_profile__generic_sip(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

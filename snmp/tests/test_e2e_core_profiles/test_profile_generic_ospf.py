@@ -34,6 +34,7 @@ def test_e2e_profile_generic_ospf(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ]
+    metric_tags = common.filter_metric_tags(common_tags)
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
@@ -43,56 +44,56 @@ def test_e2e_profile_generic_ospf(dd_agent_check):
         ['neighbor_id:197.51.68.111', 'neighbor_ip:14.178.122.218', 'neighbor_state:attempt'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ospfNbr', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ospfNbrEvents', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ospfNbrLsRetransQLen', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ospfNbrState', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ospfNbr', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.ospfNbrEvents', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.ospfNbrLsRetransQLen', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.ospfNbrState', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['neighbor_id:178.106.85.220', 'neighbor_ip:67.70.58.60', 'neighbor_state:exchange'],
         ['neighbor_id:32.2.154.12', 'neighbor_ip:18.41.36.26', 'neighbor_state:exchange'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ospfVirtNbr', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ospfVirtNbrEvents', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ospfVirtNbr', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.ospfVirtNbrEvents', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.ospfVirtNbrLsRetransQLen', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.ospfVirtNbrLsRetransQLen', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.ospfVirtNbrState', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ospfVirtNbrState', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['if_state:backup_designated_router', 'neighbor_id:197.51.68.111', 'ospf_ip_addr:153.137.11.77'],
         ['if_state:point_to_point', 'neighbor_id:133.138.249.246', 'ospf_ip_addr:185.206.44.173'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ospfIfLsaCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ospfIfRetransInterval', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ospfIfState', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ospfIfLsaCount', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.ospfIfRetransInterval', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
+        aggregator.assert_metric('snmp.ospfIfState', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['if_state:backup_designated_router', 'neighbor_id:197.51.68.111', 'ospf_ip_addr:153.137.11.77'],
         ['if_state:point_to_point', 'neighbor_id:133.138.249.246', 'ospf_ip_addr:185.206.44.173'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ospfIf', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ospfIf', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['if_state:point_to_point', 'neighbor_id:178.106.85.220'],
         ['if_state:point_to_point', 'neighbor_id:32.2.154.12'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ospfVirtIfLsaCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ospfVirtIfLsaCount', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.ospfVirtIfRetransInterval', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.ospfVirtIfRetransInterval', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row
         )
-        aggregator.assert_metric('snmp.ospfVirtIfState', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ospfVirtIfState', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     tag_rows = [
         ['if_state:point_to_point', 'neighbor_id:178.106.85.220'],
         ['if_state:point_to_point', 'neighbor_id:32.2.154.12'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ospfVirtIf', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ospfVirtIf', metric_type=aggregator.GAUGE, tags=metric_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -107,7 +108,7 @@ def test_e2e_profile_generic_ospf(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = common_tags
+    device['tags'] = metric_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
