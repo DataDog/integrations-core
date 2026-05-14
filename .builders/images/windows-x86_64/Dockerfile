@@ -150,8 +150,8 @@ RUN Get-RemoteFile `
       -Hash 'd95663fbbf3a80f81a9d98d895266bdcb74ba274bcc04ef6d76630a72dee016f'; `
     7z x postgresql-$Env:PG_VERSION.tar.bz2 -r -y && `
     7z x postgresql-$Env:PG_VERSION.tar -oC:\postgresql_src
-RUN $Env:INCLUDE = "C:\Program Files\OpenSSL\include;$Env:INCLUDE"; `
-    $Env:LIB = "C:\Program Files\OpenSSL\lib;$Env:LIB"; `
+RUN $Env:INCLUDE = 'C:\Program Files\OpenSSL\include;' + $Env:INCLUDE; `
+    $Env:LIB = 'C:\Program Files\OpenSSL\lib;' + $Env:LIB; `
     $pgSrc = "C:\postgresql_src\postgresql-$Env:PG_VERSION"; `
     RunOnVSConsole -Command "meson setup C:\pgbuild $pgSrc --prefix=C:\postgresql -Dssl=openssl -Dgssapi=disabled -Dreadline=disabled -Dicu=disabled -Dnls=disabled -Dlz4=disabled -Dzstd=disabled -Dlibxml=disabled -Dlibxslt=disabled -Dllvm=disabled" && `
     RunOnVSConsole -Command 'ninja -C C:\pgbuild' && `
