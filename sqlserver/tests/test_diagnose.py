@@ -362,6 +362,42 @@ def test_azure_sql_database_view_database_state_failure(instance_minimal_default
     assert "permission denied" in row['rawerror']
 
 
+def test_only_custom_queries_skips_baseline_probes(instance_minimal_defaults):
+    check = _check(instance_minimal_defaults, _happy_responses(), only_custom_queries=True)
+
+    diagnoses = _get_diagnoses(check)
+
+    assert not _by_name(diagnoses, SQLServerConfigurationError.performance_counters_not_readable.value)
+    assert not _by_name(diagnoses, SQLServerConfigurationError.missing_view_server_state.value)
+    assert not _by_name(diagnoses, SQLServerConfigurationError.missing_msdb_select.value)
+    _assert_result(diagnoses, SQLServerConfigurationError.connection_failure, Diagnosis.DIAGNOSIS_SUCCESS)
+    _assert_result(diagnoses, SQLServerConfigurationError.sqlserver_version_unsupported, Diagnosis.DIAGNOSIS_SUCCESS)
+
+
+def test_only_custom_queries_still_probes_dbm_baseline(instance_minimal_defaults):
+    check = _check(instance_minimal_defaults, _happy_responses(), only_custom_queries=True, dbm=True)
+
+    diagnoses = _get_diagnoses(check)
+
+    assert not _by_name(diagnoses, SQLServerConfigurationError.performance_counters_not_readable.value)
+    _assert_result(diagnoses, SQLServerConfigurationError.missing_view_server_state, Diagnosis.DIAGNOSIS_SUCCESS)
+    _assert_result(diagnoses, SQLServerConfigurationError.missing_connect_any_database, Diagnosis.DIAGNOSIS_SUCCESS)
+    _assert_result(diagnoses, SQLServerConfigurationError.missing_view_any_definition, Diagnosis.DIAGNOSIS_SUCCESS)
+
+
+def test_only_custom_queries_skips_database_metric_msdb_probes(instance_minimal_defaults):
+    check = _check(
+        instance_minimal_defaults,
+        _happy_responses(),
+        only_custom_queries=True,
+        database_metrics={'db_backup_metrics': {'enabled': True}},
+    )
+
+    diagnoses = _get_diagnoses(check)
+
+    assert not _by_name(diagnoses, SQLServerConfigurationError.missing_msdb_select.value)
+
+
 def test_get_diagnoses_returns_json(instance_minimal_defaults):
     check = _check(instance_minimal_defaults, _happy_responses())
 

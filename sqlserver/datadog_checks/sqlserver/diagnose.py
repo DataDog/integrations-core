@@ -116,8 +116,10 @@ class SqlserverDiagnose:
                 with self._check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
                     self._diagnose_connection()
                     self._diagnose_version(cursor)
-                    self._diagnose_performance_counters(cursor)
-                    self._diagnose_view_server_state(cursor)
+                    if self._needs_performance_counters():
+                        self._diagnose_performance_counters(cursor)
+                    if self._needs_view_server_state():
+                        self._diagnose_view_server_state(cursor)
                     if self._needs_connect_any_database():
                         self._diagnose_connect_any_database(cursor)
                     if self._needs_view_any_definition():
@@ -291,6 +293,13 @@ class SqlserverDiagnose:
             category=CATEGORY_SQLSERVER,
         )
 
+    def _needs_performance_counters(self) -> bool:
+        return not self._check._config.only_custom_queries
+
+    def _needs_view_server_state(self) -> bool:
+        config = self._check._config
+        return not config.only_custom_queries or config.dbm_enabled
+
     def _needs_connect_any_database(self) -> bool:
         return not self._is_azure_sql_database() and (
             self._check._config.dbm_enabled or self._check._config.autodiscovery
@@ -299,45 +308,52 @@ class SqlserverDiagnose:
     def _needs_view_any_definition(self) -> bool:
         config = self._check._config
         database_metrics = config.database_metrics_config
-        return not self._is_azure_sql_database() and (
-            config.dbm_enabled
-            or database_metrics["ao_metrics"]["enabled"]
-            or database_metrics["master_files_metrics"]["enabled"]
-        )
+        if self._is_azure_sql_database():
+            return False
+        if config.dbm_enabled:
+            return True
+        if config.only_custom_queries:
+            return False
+        return database_metrics["ao_metrics"]["enabled"] or database_metrics["master_files_metrics"]["enabled"]
 
     def _needs_msdb_select(self) -> bool:
         if self._is_azure_sql_database():
             return False
+        if self._agent_jobs_enabled():
+            return True
 
         config = self._check._config
+        if config.only_custom_queries:
+            return False
+
         database_metrics = config.database_metrics_config
         return (
             database_metrics["db_backup_metrics"]["enabled"]
             or database_metrics["primary_log_shipping_metrics"]["enabled"]
             or database_metrics["secondary_log_shipping_metrics"]["enabled"]
-            or self._agent_jobs_enabled()
         )
 
     def _msdb_probe_queries(self) -> list[tuple[str, str]]:
         config = self._check._config
         database_metrics = config.database_metrics_config
         probes = []
-        if database_metrics["db_backup_metrics"]["enabled"]:
-            probes.append(("msdb.dbo.backupset", "SELECT TOP 1 1 FROM msdb.dbo.backupset"))
-        if database_metrics["primary_log_shipping_metrics"]["enabled"]:
-            probes.append(
-                (
-                    "msdb.dbo.log_shipping_monitor_primary",
-                    "SELECT TOP 1 1 FROM msdb.dbo.log_shipping_monitor_primary",
+        if not config.only_custom_queries:
+            if database_metrics["db_backup_metrics"]["enabled"]:
+                probes.append(("msdb.dbo.backupset", "SELECT TOP 1 1 FROM msdb.dbo.backupset"))
+            if database_metrics["primary_log_shipping_metrics"]["enabled"]:
+                probes.append(
+                    (
+                        "msdb.dbo.log_shipping_monitor_primary",
+                        "SELECT TOP 1 1 FROM msdb.dbo.log_shipping_monitor_primary",
+                    )
                 )
-            )
-        if database_metrics["secondary_log_shipping_metrics"]["enabled"]:
-            probes.append(
-                (
-                    "msdb.dbo.log_shipping_monitor_secondary",
-                    "SELECT TOP 1 1 FROM msdb.dbo.log_shipping_monitor_secondary",
+            if database_metrics["secondary_log_shipping_metrics"]["enabled"]:
+                probes.append(
+                    (
+                        "msdb.dbo.log_shipping_monitor_secondary",
+                        "SELECT TOP 1 1 FROM msdb.dbo.log_shipping_monitor_secondary",
+                    )
                 )
-            )
         if self._agent_jobs_enabled():
             probes.extend(
                 [
