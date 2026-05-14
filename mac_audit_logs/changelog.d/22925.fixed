@@ -1,0 +1,1 @@
+Batch audit log files into a single auditreduce invocation so the check keeps up with frequent file rotation.
