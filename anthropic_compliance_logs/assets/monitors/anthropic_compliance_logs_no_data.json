@@ -21,7 +21,7 @@
     ],
     "options": {
       "thresholds": {
-        "critical": 1,
+        "critical": 1
       },
       "enable_logs_sample": true,
       "notify_audit": false,
