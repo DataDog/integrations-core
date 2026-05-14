@@ -211,7 +211,7 @@ This will display detailed information about any errors or issues with tracing.
 **Notes**:
 
 <!-- partial
-{{% site-region region="us3,us5,eu,gov,ap1" %}}
+{{% site-region region="us3,us5,eu,gov,gov2,ap1" %}}
 - Non-US1 customers must set `DD_SITE` on the application command to the correct Datadog site parameter as specified in the table in the <a href="https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site">Datadog Site</a> page (for example, `datadoghq.eu` for EU1 customers).{{% /site-region %}}
 partial -->
 
@@ -453,7 +453,7 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 **Notes**:
 
 <!-- partial
-{{% site-region region="us3,us5,eu,gov,ap1" %}}
+{{% site-region region="us3,us5,eu,gov,gov2,ap1" %}}
 - Non-US1 customers must set `DD_SITE` on the application command to the correct Datadog site parameter as specified in the table in the <a href="https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site">Datadog Site</a> page (for example, `datadoghq.eu` for EU1 customers).{{% /site-region %}}
 partial -->
 

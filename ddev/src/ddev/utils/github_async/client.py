@@ -1,4 +1,9 @@
-"""Async GitHub API client for triggering and monitoring GitHub Actions workflows"""
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+"""Async HTTP client for the GitHub REST API."""
+
+from __future__ import annotations
 
 import re
 from collections.abc import AsyncIterator
@@ -9,6 +14,15 @@ from typing import Any, Literal, Self
 import httpx
 from pydantic import BaseModel, ConfigDict, Field
 
+from .models import (
+    ArtifactsList,
+    IssueComment,
+    Label,
+    PullRequest,
+    PullRequestReviewComment,
+    WorkflowRun,
+)
+
 GITHUB_API_VERSION = "2022-11-28"
 DEFAULT_BASE_URL = "https://api.github.com"
 
@@ -16,7 +30,7 @@ _LINK_RE = re.compile(r'<([^>]+)>;\s*rel="([^"]+)"')
 
 
 # ---------------------------------------------------------------------------
-# Pagination
+# Pagination + response wrappers
 # ---------------------------------------------------------------------------
 
 
@@ -45,11 +59,6 @@ class PaginationData:
         )
 
 
-# ---------------------------------------------------------------------------
-# Response and domain models
-# ---------------------------------------------------------------------------
-
-
 class GitHubResponse[T](BaseModel):
     """Generic wrapper for a GitHub API response."""
 
@@ -57,75 +66,6 @@ class GitHubResponse[T](BaseModel):
 
     data: T = Field(...)
     headers: dict[str, str] = Field(default_factory=dict)
-
-
-class WorkflowRun(BaseModel):
-    """A GitHub Actions workflow run."""
-
-    model_config = ConfigDict(extra="ignore")
-
-    id: int
-    name: str | None = None
-    status: str
-    conclusion: str | None = None
-    html_url: str | None = None
-    created_at: str | None = None
-    updated_at: str | None = None
-
-
-class Artifact(BaseModel):
-    """A GitHub Actions artifact."""
-
-    model_config = ConfigDict(extra="ignore")
-
-    id: int
-    name: str
-    size_in_bytes: int | None = None
-    url: str | None = None
-    archive_download_url: str | None = None
-    expired: bool
-
-
-class ArtifactsList(BaseModel):
-    """A list of artifacts with a total count."""
-
-    model_config = ConfigDict(extra="ignore")
-
-    total_count: int
-    artifacts: list[Artifact]
-
-
-class IssueComment(BaseModel):
-    """A GitHub issue (or PR) comment."""
-
-    model_config = ConfigDict(extra="ignore")
-
-    id: int
-    body: str
-    user: dict[str, Any] | None = None
-    created_at: str | None = None
-    updated_at: str | None = None
-    html_url: str | None = None
-
-
-class PullRequestReviewComment(BaseModel):
-    """An inline review comment on a pull request diff."""
-
-    model_config = ConfigDict(extra="ignore")
-
-    id: int
-    body: str
-    path: str
-    commit_id: str
-    html_url: str | None = None
-    created_at: str | None = None
-    updated_at: str | None = None
-    user: dict[str, Any] | None = None
-
-
-# ---------------------------------------------------------------------------
-# Client
-# ---------------------------------------------------------------------------
 
 
 class AsyncGitHubClient:
@@ -335,6 +275,103 @@ class AsyncGitHubClient:
         )
         return self._parse_response(response, IssueComment)
 
+    async def get_pull_request(
+        self,
+        owner: str,
+        repo: str,
+        pull_number: int,
+        timeout: float | None = None,
+    ) -> GitHubResponse[PullRequest]:
+        """
+        Calls the GitHub API to get a single pull request.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/pulls/pulls#get-a-pull-request
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            pull_number: Pull request number.
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+
+        Returns:
+            GitHubResponse[PullRequest]: The validated pull request data and headers.
+        """
+        response = await self._request("GET", f"/repos/{owner}/{repo}/pulls/{pull_number}", timeout=timeout)
+        return self._parse_response(response, PullRequest)
+
+    async def create_pull_request(
+        self,
+        owner: str,
+        repo: str,
+        title: str,
+        head: str,
+        base: str,
+        body: str = "",
+        draft: bool = False,
+        timeout: float | None = None,
+    ) -> GitHubResponse[PullRequest]:
+        """
+        Calls the GitHub API to create a pull request.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/pulls/pulls#create-a-pull-request
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            title: Pull request title.
+            head: Name of the branch containing the changes.
+            base: Name of the branch to merge into.
+            body: Pull request body.
+            draft: Whether to open the pull request as a draft.
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+
+        Returns:
+            GitHubResponse[PullRequest]: The validated pull request data and headers.
+        """
+        response = await self._request(
+            "POST",
+            f"/repos/{owner}/{repo}/pulls",
+            timeout=timeout,
+            json={"title": title, "head": head, "base": base, "body": body, "draft": draft},
+        )
+        return self._parse_response(response, PullRequest)
+
+    async def add_labels_to_issue(
+        self,
+        owner: str,
+        repo: str,
+        issue_number: int,
+        labels: list[str],
+        timeout: float | None = None,
+    ) -> GitHubResponse[list[Label]]:
+        """
+        Calls the GitHub API to add one or more labels to an issue or pull request.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/issues/labels#add-labels-to-an-issue
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            issue_number: Issue or pull request number.
+            labels: Labels to add. Existing labels on the issue are preserved.
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+
+        Returns:
+            GitHubResponse[list[Label]]: The full label list resulting from the operation (preserves
+            any pre-existing labels alongside the newly added ones).
+        """
+        response = await self._request(
+            "POST",
+            f"/repos/{owner}/{repo}/issues/{issue_number}/labels",
+            timeout=timeout,
+            json={"labels": labels},
+        )
+        labels_out = [Label.model_validate(item) for item in response.json()]
+        return GitHubResponse[list[Label]].model_validate({"data": labels_out, "headers": dict(response.headers)})
+
     async def create_pr_review_comment(
         self,
         owner: str,
@@ -358,18 +395,22 @@ class AsyncGitHubClient:
             owner: Repository owner (user or organisation).
             repo: Repository name.
             pull_number: Pull request number.
-            body: Markdown body text of the review comment.
+            body: Markdown body text of the comment.
             commit_id: SHA of the commit to comment on.
-            path: Relative path of the file to comment on.
-            position: Line index in the diff (deprecated but still supported by the API).
-            line: Line number in the file to comment on (used with `side`).
-            side: Side of the diff to comment on — ``"LEFT"`` or ``"RIGHT"``.
+            path: Path of the file to comment on.
+            position: Line index in the diff (mutually exclusive with line/side).
+            line: Line number in the file (newer style, paired with side).
+            side: 'LEFT' or 'RIGHT' (newer style, paired with line).
             timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
 
         Returns:
-            GitHubResponse[PullRequestReviewComment]: The validated review comment data and headers.
+            GitHubResponse[PullRequestReviewComment]: The validated comment data and headers.
         """
-        payload: dict[str, Any] = {"body": body, "commit_id": commit_id, "path": path}
+        payload: dict[str, Any] = {
+            "body": body,
+            "commit_id": commit_id,
+            "path": path,
+        }
         if position is not None:
             payload["position"] = position
         if line is not None:
@@ -386,7 +427,7 @@ class AsyncGitHubClient:
 
 
 # ---------------------------------------------------------------------------
-# Context manager helper
+# Async context manager
 # ---------------------------------------------------------------------------
 
 
