@@ -363,7 +363,6 @@ def _resolve_commit_or_fetch(app: Application, commit_hash: str) -> str:
             'Pass the full 40-character SHA so it can be fetched from origin '
             '(GitHub does not support SHA-targeted fetches for abbreviated SHAs).'
         )
-        raise AssertionError('unreachable')
 
     app.display_info(f'Commit `{commit_hash}` not found locally; fetching from origin.')
     fetched = False
@@ -376,7 +375,6 @@ def _resolve_commit_or_fetch(app: Application, commit_hash: str) -> str:
             return git.capture('rev-parse', '--verify', f'{commit_hash}^{{commit}}').strip()
 
     app.abort(f'Commit `{commit_hash}` does not exist locally or on origin.')
-    raise AssertionError('unreachable')
 
 
 def _path_exists_in_head(git: GitRepository, path: str) -> bool:

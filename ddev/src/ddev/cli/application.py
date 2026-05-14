@@ -6,7 +6,7 @@ from __future__ import annotations
 import logging
 import os
 from functools import cached_property
-from typing import cast
+from typing import NoReturn, cast
 
 from ddev.cli.terminal import Terminal
 from ddev.config.constants import AppEnvVars, ConfigEnvVars, VerbosityLevels
@@ -105,10 +105,11 @@ class Application(Terminal):
             self.repo, user=self.config.github.user, token=self.config.github.token, status=self.status
         )
 
-    def abort(self, text='', code=1, **kwargs):
+    def abort(self, text='', code=1, **kwargs) -> NoReturn:
         if text:
             self.display_error(text, **kwargs)
         self.__exit_func(code)
+        raise SystemExit(code)
 
     # TODO: remove everything below when the old CLI is gone
     def initialize_old_cli(self):
