@@ -127,18 +127,19 @@ RUN Get-RemoteFile `
     Add-ToPath -Append "C:\nasm\nasm-$Env:NASM_VERSION" && `
     Remove-Item "nasm-$Env:NASM_VERSION-win64.zip"
 
-ENV OPENSSL_VERSION="3.6.2"
-RUN Get-RemoteFile `
-      -Uri https://www.openssl.org/source/openssl-$Env:OPENSSL_VERSION.tar.gz `
-      -Path openssl-$Env:OPENSSL_VERSION.tar.gz `
-      -Hash 'aaf51a1fe064384f811daeaeb4ec4dce7340ec8bd893027eee676af31e83a04f'; `
-    7z x openssl-$Env:OPENSSL_VERSION.tar.gz -r -y && `
-    7z x openssl-$Env:OPENSSL_VERSION.tar -oC:\openssl_3 && `
-    cd C:\openssl_3\openssl-$Env:OPENSSL_VERSION && `
-    RunOnVSConsole -Command `
-    'C:\perl\perl\bin\perl.exe Configure && `
-    nmake && `
-    nmake install_sw'
+# TEMPORARY: Skip OpenSSL build to iterate on meson/PG build faster. Revert before merging.
+# ENV OPENSSL_VERSION="3.6.2"
+# RUN Get-RemoteFile `
+#       -Uri https://www.openssl.org/source/openssl-$Env:OPENSSL_VERSION.tar.gz `
+#       -Path openssl-$Env:OPENSSL_VERSION.tar.gz `
+#       -Hash 'aaf51a1fe064384f811daeaeb4ec4dce7340ec8bd893027eee676af31e83a04f'; `
+#     7z x openssl-$Env:OPENSSL_VERSION.tar.gz -r -y && `
+#     7z x openssl-$Env:OPENSSL_VERSION.tar -oC:\openssl_3 && `
+#     cd C:\openssl_3\openssl-$Env:OPENSSL_VERSION && `
+#     RunOnVSConsole -Command `
+#     'C:\perl\perl\bin\perl.exe Configure && `
+#     nmake && `
+#     nmake install_sw'
 # Meson + Ninja for building PostgreSQL 18+ on Windows
 RUN python -m pip install --no-warn-script-location meson ninja && `
     Add-ToPath -Append 'C:\Program Files\Python313\Scripts'
@@ -150,10 +151,8 @@ RUN Get-RemoteFile `
       -Hash 'd95663fbbf3a80f81a9d98d895266bdcb74ba274bcc04ef6d76630a72dee016f'; `
     7z x postgresql-$Env:PG_VERSION.tar.bz2 -r -y && `
     7z x postgresql-$Env:PG_VERSION.tar -oC:\postgresql_src
-RUN $Env:INCLUDE = 'C:\Program Files\OpenSSL\include;' + $Env:INCLUDE; `
-    $Env:LIB = 'C:\Program Files\OpenSSL\lib;' + $Env:LIB; `
-    $pgSrc = "C:\postgresql_src\postgresql-$Env:PG_VERSION"; `
-    RunOnVSConsole -Command "meson setup C:\pgbuild $pgSrc --prefix=C:\postgresql -Dssl=openssl -Dgssapi=disabled -Dreadline=disabled -Dicu=disabled -Dnls=disabled -Dlz4=disabled -Dzstd=disabled -Dlibxml=disabled -Dlibxslt=disabled -Dllvm=disabled" && `
+RUN $pgSrc = "C:\postgresql_src\postgresql-$Env:PG_VERSION"; `
+    RunOnVSConsole -Command "meson setup C:\pgbuild $pgSrc --prefix=C:\postgresql -Dgssapi=disabled -Dreadline=disabled -Dicu=disabled -Dnls=disabled -Dlz4=disabled -Dzstd=disabled -Dlibxml=disabled -Dlibxslt=disabled -Dllvm=disabled" && `
     RunOnVSConsole -Command 'ninja -C C:\pgbuild' && `
     RunOnVSConsole -Command 'ninja -C C:\pgbuild install' && `
     Add-ToPath -Append "C:\postgresql\bin"
