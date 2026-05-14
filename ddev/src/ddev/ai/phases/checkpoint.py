@@ -40,12 +40,17 @@ class CheckpointManager:
         checkpoints = self.read()
         checkpoints[phase_id] = data
         self._ensure_dir()
-        self._path.write_text(yaml.dump(checkpoints, default_flow_style=False), encoding="utf-8")
+        self._path.write_text(yaml.dump(checkpoints, default_flow_style=False, sort_keys=False), encoding="utf-8")
 
     def build_memory_prompt(self, user_additions: str | None) -> str:
         """Build the memory prompt to send to the agent at the end of a phase."""
         base_prompt = "Write a brief summary of what you accomplished in this phase."
         return f"{user_additions}\n\n{base_prompt}" if user_additions else base_prompt
+
+    @property
+    def memory_dir(self) -> Path:
+        """Directory where memory files and per-phase sidecar artifacts are written."""
+        return self._path.parent
 
     def memory_path(self, phase_id: str) -> Path:
         """Return the resolved path to a phase's memory file."""
