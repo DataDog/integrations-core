@@ -113,6 +113,18 @@ EXPECTED_DEFAULTS = {
         'run_sync': False,
         'ignored_settings_patterns': ['plpgsql%'],
     },
+    # === DBM: Column stats collection ===
+    'collect_column_statistics': {
+        'enabled': False,
+        'max_tables': 500,
+        'collection_interval': 3600,
+        'include_databases': [],
+        'exclude_databases': [],
+        'include_schemas': [],
+        'exclude_schemas': [],
+        'include_tables': [],
+        'exclude_tables': [],
+    },
     # === DBM: Schema collection ===
     'collect_schemas': {
         'enabled': True,
