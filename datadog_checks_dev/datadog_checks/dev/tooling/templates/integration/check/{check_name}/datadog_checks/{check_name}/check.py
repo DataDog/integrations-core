@@ -1,7 +1,7 @@
 {license_header}
-from typing import Any  # noqa: F401
 
-from datadog_checks.base import AgentCheck  # noqa: F401
+from datadog_checks.base import AgentCheck
+from datadog_checks.base.types import InitConfigType, InstanceType
 
 # from datadog_checks.base.utils.db import QueryManager
 # from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
@@ -9,12 +9,11 @@ from datadog_checks.base import AgentCheck  # noqa: F401
 
 
 class {check_class}(AgentCheck):
-
     # This will be the prefix of every metric the integration sends
     __NAMESPACE__ = '{check_name}'
 
-    def __init__(self, name, init_config, instances):
-        super({check_class}, self).__init__(name, init_config, instances)
+    def __init__(self, name: str, init_config: InitConfigType, instances: list[InstanceType]) -> None:
+        super().__init__(name, init_config, instances)
 
         # Use self.instance to read the check configuration
         # self.url = self.instance.get("url")
@@ -32,8 +31,7 @@ class {check_class}(AgentCheck):
         # self._query_manager = QueryManager(self, self.execute_query, queries=[sample_query])
         # self.check_initializations.append(self._query_manager.compile_queries)
 
-    def check(self, _):
-        # type: (Any) -> None
+    def check(self, _: InstanceType) -> None:
         # The following are useful bits of code to help new users get started.
 
         # Perform HTTP Requests with our HTTP wrapper.
@@ -43,13 +41,13 @@ class {check_class}(AgentCheck):
         #     response.raise_for_status()
         #     response_json = response.json()
 
-        # except (HTTPError, InvalidURL, ConnectionError, Timeout) as e:
+        # except (HTTPError, InvalidURL, ConnectionError, Timeout):
         #     self.log.debug("Could not connect", exc_info=True)
 
-        # except JSONDecodeError as e:
+        # except JSONDecodeError:
         #    self.log.debug("Could not parse JSON", exc_info=True)
 
-        # except ValueError as e:
+        # except ValueError:
         #    self.log.debug("Unexpected value", exc_info=True)
 
         # This is how you submit metrics
@@ -60,7 +58,7 @@ class {check_class}(AgentCheck):
         # Perform database queries using the Query Manager
         # self._query_manager.execute()
 
-        # This is how you use the persistent cache. This cache file based and persists across agent restarts.
+        # This is how you use the persistent cache. This cache is file based and persists across agent restarts.
         # If you need an in-memory cache that is persisted across runs
         # You can define a dictionary in the __init__ method.
         # self.write_persistent_cache("key", "value")
