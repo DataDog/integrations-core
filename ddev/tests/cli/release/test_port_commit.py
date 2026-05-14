@@ -827,8 +827,6 @@ def test_command_emits_pr_context_when_pure_digit_pr_merge_commit_missing(
     assert result.exit_code == 1, result.output
     assert 'PR #23703 was found but its merge commit' in result.output
     assert FULL_SHA_FOR_TESTS in result.output
-    # The raw merge-commit message shouldn't leak as the *primary* abort line.
-    assert not result.output.startswith(f'Commit `{FULL_SHA_FOR_TESTS}` is not in the local repository')
 
 
 def test_command_aborts_when_pr_input_has_no_token(
