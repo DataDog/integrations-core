@@ -3,20 +3,23 @@
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.types import InitConfigType, InstanceType
 
+from .config_models import ConfigMixin
+
 # from datadog_checks.base.utils.db import QueryManager
 # from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 # from json import JSONDecodeError
 
 
-class {check_class}(AgentCheck):
+class {check_class}(AgentCheck, ConfigMixin):
     # This will be the prefix of every metric the integration sends
     __NAMESPACE__ = '{check_name}'
 
     def __init__(self, name: str, init_config: InitConfigType, instances: list[InstanceType]) -> None:
         super().__init__(name, init_config, instances)
 
-        # Use self.instance to read the check configuration
-        # self.url = self.instance.get("url")
+        # Read validated, typed configuration from self.config (and self.shared_config).
+        # Fields must be declared in spec.yaml and the models regenerated with `ddev validate models`.
+        # self.url = self.config.url
 
         # If the check is going to perform SQL queries you should define a query manager here.
         # More info at
