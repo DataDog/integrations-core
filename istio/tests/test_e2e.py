@@ -1,13 +1,16 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import os
 import platform
 
 import pytest
 
 from datadog_checks.istio import Istio
 
-from .common import ISTIOD_METRICS, ISTIOD_V2_METRICS
+from .common import ISTIOD_METRICS, ISTIOD_V2_METRICS, V2_WAYPOINT_METRICS, V2_ZTUNNEL_METRICS
+
+ISTIO_MODE = os.environ.get("ISTIO_MODE", "sidecar")
 
 INTERMITTENT_METRICS = [
     'istio.citadel.server.cert_chain_expiry_timestamp',
@@ -33,6 +36,7 @@ INTERMITTENT_METRICS = [
 ]
 
 
+@pytest.mark.skipif(ISTIO_MODE != "sidecar", reason="Sidecar-mode e2e: skipped on ambient envs")
 def test_e2e_openmetrics_v1(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
 
@@ -47,6 +51,7 @@ def test_e2e_openmetrics_v1(dd_agent_check):
 
 
 @pytest.mark.skipif(platform.python_version() < "3", reason='OpenMetrics V2 is only available with Python 3')
+@pytest.mark.skipif(ISTIO_MODE != "sidecar", reason="Sidecar-mode e2e: skipped on ambient envs")
 def test_e2e_openmetrics_v2(dd_agent_check, instance_openmetrics_v2):
     aggregator = dd_agent_check(instance_openmetrics_v2, rate=True)
 
@@ -58,3 +63,22 @@ def test_e2e_openmetrics_v2(dd_agent_check, instance_openmetrics_v2):
             aggregator.assert_metric(metric, at_least=0)
         else:
             aggregator.assert_metric(metric)
+
+
+@pytest.mark.skipif(ISTIO_MODE != "ambient", reason="Ambient-mode e2e: only runs on ambient envs")
+def test_e2e_ambient(dd_agent_check, instance_openmetrics_v2):
+    aggregator = dd_agent_check(instance_openmetrics_v2, rate=True)
+
+    aggregator.assert_service_check('istio.openmetrics.health', Istio.OK)
+
+    for metric in V2_ZTUNNEL_METRICS:
+        aggregator.assert_metric(metric)
+
+    for metric in V2_WAYPOINT_METRICS:
+        aggregator.assert_metric(metric, at_least=0)
+
+    for metric in ISTIOD_V2_METRICS:
+        if metric in INTERMITTENT_METRICS:
+            aggregator.assert_metric(metric, at_least=0)
+        else:
+            aggregator.assert_metric(metric, at_least=0)

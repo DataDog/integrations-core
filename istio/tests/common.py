@@ -409,17 +409,16 @@ MOCK_TEST_METRICS = [
     'istio.galley.istio.authentication.meshpolicies',
 ]
 
-# Ambient mode (ztunnel) - default namespace istio.ztunnel (OpenMetrics submits counters as .count)
+# Ambient mode (ztunnel) - default namespace istio.ztunnel (OpenMetrics submits counters as .count).
+# Counters require the OpenMetrics parser: ztunnel emits the modern `# TYPE foo counter` +
+# `foo_total{} N` convention, which the legacy Prometheus parser cannot reconcile.
+# Only metrics ztunnel actually emits when serving TCP traffic are asserted here.
+# DNS metrics in ZTUNNEL_METRICS require on-demand DNS interception, which is opt-in.
 V2_ZTUNNEL_METRICS = [
     'istio.ztunnel.tcp.connections_opened.count',
     'istio.ztunnel.tcp.connections_closed.count',
     'istio.ztunnel.tcp.send_bytes.count',
     'istio.ztunnel.tcp.received_bytes.count',
-    'istio.ztunnel.dns.requests.count',
-    'istio.ztunnel.dns.upstream_requests.count',
-    'istio.ztunnel.dns.upstream_failures.count',
-    'istio.ztunnel.connection.opens.count',
-    'istio.ztunnel.connection.closes.count',
 ]
 
 # Ambient mode (waypoint) - default namespace istio.waypoint

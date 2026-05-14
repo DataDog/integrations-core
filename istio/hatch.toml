@@ -7,11 +7,14 @@ dependencies = [
 
 [[envs.default.matrix]]
 python = ["3.13"]
-version = ["1.13"]
+version = ["1.13", "1.24-ambient"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
   { key = "ISTIO_VERSION", value = "1.13.3", if = ["1.13"] },
+  { key = "ISTIO_MODE", value = "sidecar", if = ["1.13"] },
+  { key = "ISTIO_VERSION", value = "1.24.3", if = ["1.24-ambient"] },
+  { key = "ISTIO_MODE", value = "ambient", if = ["1.24-ambient"] },
 ]
 
 [envs.default.env-vars]
