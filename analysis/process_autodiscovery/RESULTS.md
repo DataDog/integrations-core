@@ -333,18 +333,59 @@ that turns this candidate set into integration instances.
 
 ### Integrations with no service data detected
 
-26 integrations produced process trees but `disco` detected no non-infra
-services. These are mostly:
+26 integrations produced process trees but `disco` labeled only Datadog
+Agent components (no target service). Inspecting each test setup shows
+this is almost entirely about the *test environment*, not about disco
+failing to recognize a service that was present.
 
-- **Kubernetes integrations** that don't use the ddev kind helper (so the
-  pre-flight skip didn't catch them) but where the actual service still
-  runs inside a Kubernetes-style container disco cannot reach
-  (`kube_*`, `kubernetes_state`, `nginx_ingress_controller`, etc.)
-- **Agent-only integrations** where no external service runs
-  (`dns_check`, `tcp_check`, `ssh_check`, `system_core`, `system_swap`,
-  `network`)
-- **Services where disco cannot yet identify the process**
-  (`postfix`, `vsphere/vcsim`, `proxmox`, `teradata`, `lustre`)
+**A. No external service to discover (11).** The check operates on
+files, `/proc` entries, or network probes — there is no daemon for
+process auto-discovery to find, in test or in production.
+
+| Integration | Why |
+|---|---|
+| `directory` | walks a filesystem path |
+| `dns_check` | sends DNS queries to a configured server |
+| `duckdb` | embeds the DuckDB engine in-process |
+| `lustre` | parses `/proc/fs/lustre/*` |
+| `network` | parses `/proc/net/*` |
+| `postfix` | reads mail queue files on disk |
+| `ssh_check` | probes SSH (active probe, not a daemon to discover) |
+| `system_core` | parses `/proc/stat` |
+| `system_swap` | parses `/proc/meminfo` and friends |
+| `tcp_check` | probes a TCP port |
+| `mapr` | uses the MapR client library; no daemon on the same host |
+
+**B. Test exercises the "no backend present" failure path (14).** The
+e2e test config points at a localhost endpoint that no test container
+provides, and the assertion is that the check reports `CRITICAL` or
+`UNKNOWN`. In production the integration would be aimed at a running
+endpoint, but the test environment intentionally does not bring one
+up — so there is no service process to collect.
+
+Test-fixture style is one of:
+- Python `MockResponse` / mocked HTTP API (e.g. `ecs_fargate`,
+  `proxmox`, `vsphere`).
+- Config pointing at `https://localhost:443/metrics` (or similar)
+  with no listener (`kube_apiserver_metrics`,
+  `kube_controller_manager`, `kube_dns`, `kube_metrics_server`,
+  `kube_proxy`, `kube_scheduler`, `kubernetes_state`,
+  `nginx_ingress_controller` — these don't use the
+  `datadog_checks.dev.kind` helper so they aren't covered by the
+  Kubernetes-only pre-flight; they just point at a nonexistent local
+  Prometheus endpoint).
+- Specialized hardware/cloud systems with no usable local mock
+  (`ibm_i`, `teradata`, `openstack`).
+
+For process auto-discovery purposes these integrations cannot be
+evaluated from this sample — but the gap is in the test fixture, not
+in the agent's discovery pipeline.
+
+**C. Container startup race not fully covered (1).**
+
+| Integration | Detail |
+|---|---|
+| `arangodb` | The arangodb container's entrypoint runs `arango-init-database` first and only then exec's `arangod`. `wait_for_containers_started` returns once the container's docker state leaves `Created`/`restarting`, but the application is still in its init phase at that moment. The collector captures `entrypoint.sh` and `arango-init-database` but not the eventual `arangod` process. Extending the collector to wait for application readiness (rather than just docker container state) would close this gap. Documented rather than fixed here. |
 
 The collector waits for new containers to leave `Created`/`restarting`
 state before sampling PIDs (`wait_for_containers_started` in
