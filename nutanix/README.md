@@ -63,6 +63,10 @@ Use the `collect_events`, `collect_alerts`, `collect_tasks`, and `collect_audits
 
 **Note**: By default, only parent tasks are collected. Set `collect_subtasks: true` to include subtasks.
 
+**Alert lifecycle.** Alerts are reconciled against Prism Central's unresolved-alerts API on every check cycle. The integration emits a creation event when an alert first appears, a transition event when it is acknowledged or reopened, and a resolution event when it is resolved or deleted. While an alert is open, a heartbeat event is re-emitted each cycle so event-based monitors stay firing. All events for the same alert share `aggregation_key=nutanix-alert-<extId>`, which collapses them into a single entry in the Events Explorer.
+
+**Agent restart.** The integration is stateless across restarts. On startup it fetches all currently-unresolved alerts and re-emits a creation event for each; `aggregation_key` collapses these duplicates with any prior creation events. State changes (acknowledgement, reopening) that happen during agent downtime are not retroactively emitted as transition events. The next check cycle picks up the current state and proceeds normally.
+
 ### Service Checks
 
 The integration does not emit any service checks.

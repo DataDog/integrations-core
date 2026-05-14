@@ -37,7 +37,6 @@ class ActivityMonitor:
         # In-memory caches: id -> raw item (reset each check run)
         self.events: dict[str, dict] = {}
         self.audits: dict[str, dict] = {}
-        self.alerts: dict[str, dict] = {}
         self.tasks: dict[str, dict] = {}
         # Entity counters
         self.events_count = 0
@@ -52,7 +51,6 @@ class ActivityMonitor:
         """Reset in-memory caches and counters for a new collection run."""
         self.events = {}
         self.audits = {}
-        self.alerts = {}
         self.tasks = {}
         self.events_count = 0
         self.tasks_count = 0
@@ -270,21 +268,20 @@ class ActivityMonitor:
             "$orderBy": "lastUpdatedTime asc",
         }
         alerts = self.check._get_paginated_request_data("api/monitoring/v4.0/serviceability/alerts", params=params)
-        # Client-side safety net in case a server silently ignores $filter.
-        return [a for a in alerts if not a.get("isResolved")]
+        # Safety net: warn loudly if the server returns resolved alerts despite our $filter.
+        filtered = [a for a in alerts if not a.get("isResolved")]
+        if len(filtered) != len(alerts):
+            self.check.log.warning(
+                "[%s] Server returned %d resolved alerts under $filter=isResolved eq false; verify Prism Central API.",
+                self._pc_label,
+                len(alerts) - len(filtered),
+            )
+        return filtered
 
     def _get_alert(self, alert_ext_id: str) -> dict | None:
-        """Get an alert by ID, from cache or fetched from the API."""
-        if alert := self.alerts.get(alert_ext_id):
-            return alert
-
-        self.check.log.debug("[%s] Alert %s not in cache, fetching from API", self._pc_label, alert_ext_id)
+        """Fetch an alert detail from Prism Central; called once per resolution, no caching needed."""
         try:
-            alert = self.check._get_request_data(f"api/monitoring/v4.0/serviceability/alerts/{alert_ext_id}")
-            if alert:
-                self.alerts[alert_ext_id] = alert
-                self.check.log.debug("[%s] Fetched alert %s: %s", self._pc_label, alert_ext_id, alert.get("title", ""))
-            return alert
+            return self.check._get_request_data(f"api/monitoring/v4.0/serviceability/alerts/{alert_ext_id}")
         except Exception as e:
             self.check.log.debug("[%s] Failed to fetch alert %s: %s", self._pc_label, alert_ext_id, e)
             return None
@@ -540,6 +537,7 @@ class ActivityMonitor:
             prefix = "Alert reopened"
             msg_text = "Alert is no longer acknowledged"
             event_alert_type = _SEVERITY_TO_ALERT_TYPE.get(alert.get("severity"), "info")
+            # Nutanix has no dedicated "reopenedTime" field; lastUpdatedTime is the closest signal.
             timestamp_field = alert.get("lastUpdatedTime")
 
         self.check.event(
