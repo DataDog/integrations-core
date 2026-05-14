@@ -894,7 +894,9 @@ def test_collect_alerts(dd_run_check, aggregator, instance, mock_http_get):
     assert 'severity:MINOR' in license_alert['tags']
 
 
-def test_statistics_failure_does_not_block_other_resources(dd_run_check, aggregator, instance, mock_http_get, mocker, caplog):
+def test_statistics_failure_does_not_block_other_resources(
+    dd_run_check, aggregator, instance, mock_http_get, mocker, caplog
+):
     sds2_stats = {'capacityInUseInKb': 350208, 'unusedCapacityInKb': 103406592, 'numOfDevices': 1}
 
     def selective_fail(sds_id):

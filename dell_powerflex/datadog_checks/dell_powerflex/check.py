@@ -41,6 +41,7 @@ from .constants import (
 )
 from .resource_filters import ResourceFilter, parse_resource_filters, should_collect_resource, should_collect_statistics
 
+
 class DellPowerflexCheck(AgentCheck, ConfigMixin):
     __NAMESPACE__ = 'dell_powerflex'
 
@@ -96,7 +97,9 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         bwc_metrics: list[tuple[str, str]],
     ) -> None:
         with ThreadPoolExecutor(max_workers=self.config.max_workers) as executor:
-            future_to_resource = {executor.submit(stats_api, resource_id): (resource_id, tags) for resource_id, tags in work}
+            future_to_resource = {
+                executor.submit(stats_api, resource_id): (resource_id, tags) for resource_id, tags in work
+            }
             for future in as_completed(future_to_resource):
                 resource_id, tags = future_to_resource[future]
                 try:
