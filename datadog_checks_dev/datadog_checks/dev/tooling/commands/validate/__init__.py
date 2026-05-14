@@ -7,6 +7,7 @@ from ..console import CONTEXT_SETTINGS
 from .agent_reqs import agent_reqs
 from .agent_signature import legacy_signature
 from .codeowners import codeowners
+from .config import config
 from .dashboards import dashboards
 from .dep import dep
 from .eula import eula
@@ -24,6 +25,7 @@ from .typos import typos
 ALL_COMMANDS = (
     agent_reqs,
     codeowners,
+    config,
     dashboards,
     dep,
     eula,
