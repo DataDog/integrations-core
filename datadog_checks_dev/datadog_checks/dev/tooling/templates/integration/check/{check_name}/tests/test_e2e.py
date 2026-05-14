@@ -20,8 +20,6 @@ def test_e2e(dd_agent_check: Any, instance: InstanceType) -> None:
     aggregator.assert_all_metrics_covered()
 
     # Other useful assertions to consider for end-to-end coverage:
-    # from datadog_checks.base.constants import ServiceCheck
-    # aggregator.assert_service_check('{check_name}.can_connect', ServiceCheck.OK)
     # aggregator.assert_metric('{check_name}.<metric>', value=1.23, count=1, tags=['foo:bar'])
     # aggregator.assert_metric_has_tag('{check_name}.<metric>', 'env:prod')
     # aggregator.assert_metric_has_tag_prefix('{check_name}.<metric>', 'host:')
