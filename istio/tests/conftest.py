@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import contextlib
 import os
 import platform
 import time
@@ -119,6 +120,26 @@ def setup_istio_ambient():
     os.remove("istio.tar.gz")
 
 
+@contextlib.contextmanager
+def safe_port_forward(*args, **kwargs):
+    """Wrap port_forward so the teardown's KillProcess does not fail if the kubectl.pid file
+    is missing.
+
+    In CI, ``ddev env test`` runs the dd_environment fixture's setup and teardown in
+    different pytest invocations, and the per-port-forward TempDir env vars do not survive
+    that transition. KillProcess then opens a freshly mkdtemp'd path and raises
+    FileNotFoundError. The kubectl port-forward process dies on its own once the kind
+    cluster is deleted, so swallowing the missing-pid-file error is safe.
+    """
+    cm = port_forward(*args, **kwargs)
+    result = cm.__enter__()
+    try:
+        yield result
+    finally:
+        with contextlib.suppress(FileNotFoundError):
+            cm.__exit__(None, None, None)
+
+
 def _get_first_ztunnel_pod(kubeconfig):
     env = os.environ.copy()
     env['KUBECONFIG'] = kubeconfig
@@ -148,13 +169,13 @@ def dd_environment(dd_save_state):
             if MODE == "ambient":
                 ztunnel_pod = _get_first_ztunnel_pod(kubeconfig)
                 ztunnel_host, ztunnel_port = stack.enter_context(
-                    port_forward(kubeconfig, 'istio-system', 15020, 'pod', ztunnel_pod)
+                    safe_port_forward(kubeconfig, 'istio-system', 15020, 'pod', ztunnel_pod)
                 )
                 waypoint_host, waypoint_port = stack.enter_context(
-                    port_forward(kubeconfig, 'default', 15090, 'deployment', 'waypoint')
+                    safe_port_forward(kubeconfig, 'default', 15090, 'deployment', 'waypoint')
                 )
                 istiod_host, istiod_port = stack.enter_context(
-                    port_forward(kubeconfig, 'istio-system', 15014, 'deployment', 'istiod')
+                    safe_port_forward(kubeconfig, 'istio-system', 15014, 'deployment', 'istiod')
                 )
                 instance = {
                     "istio_mode": "ambient",
@@ -167,7 +188,7 @@ def dd_environment(dd_save_state):
                 yield instance
             elif VERSION == '1.13.3':
                 istiod_host, istiod_port = stack.enter_context(
-                    port_forward(kubeconfig, 'istio-system', 15014, 'deployment', 'istiod')
+                    safe_port_forward(kubeconfig, 'istio-system', 15014, 'deployment', 'istiod')
                 )
                 istiod_endpoint = 'http://{}:{}/metrics'.format(istiod_host, istiod_port)
                 instance = {'istiod_endpoint': istiod_endpoint, 'use_openmetrics': 'false'}
