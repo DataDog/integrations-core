@@ -1,18 +1,120 @@
 {
   "integration": "tomcat",
   "environment": "py3.13-10.1-embedded",
-  "collected_at": "2026-05-14T09:03:03.346976+00:00",
+  "collected_at": "2026-05-14T10:18:24.239325+00:00",
   "processes": [
     {
-      "pid": 3370039,
-      "ppid": 3369991,
+      "pid": 3774305,
+      "ppid": 3774282,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3774346,
+      "ppid": 3774305,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3774739,
+      "ppid": 3774305,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3774740,
+      "ppid": 3774305,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3774742,
+      "ppid": 3774305,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3774743,
+      "ppid": 3774305,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3774744,
+      "ppid": 3774305,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3774745,
+      "ppid": 3774305,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3774748,
+      "ppid": 3774742,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3774749,
+      "ppid": 3774740,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3774750,
+      "ppid": 3774743,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 3774752,
+      "ppid": 3774744,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 3773709,
+      "ppid": 3773663,
+      "comm": "java",
+      "cmdline": "/opt/java/openjdk/bin/java -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.port=9012 -Dcom.sun.management.jmxremote.rmi.port=9012 -Dcom.sun.management.jmxremote.local.only=false -Djava.rmi.server.hostname=localhost -Dtomcat.util.buf.StringCache.byte.enabled=true -Dtomcat.util.buf.StringCache.char.enabled=true -Dtomcat.util.buf.StringCache.trainThreshold=100 -classpath /tmp/app/target/etc:/tmp/app/target/repo/org/apache/tomcat/embed/tomcat-embed-core/10.1.17/tomcat-embed-core-10.1.17.jar:/tmp/app/target/repo/org/apache/tomcat/tomcat-annotations-api/10.1.17/tomcat-annotations-api-10.1.17.jar:/tmp/app/target/repo/org/apache/tomcat/embed/tomcat-embed-jasper/10.1.17/tomcat-embed-jasper-10.1.17.jar:/tmp/app/target/repo/org/apache/tomcat/embed/tomcat-embed-el/10.1.17/tomcat-embed-el-10.1.17.jar:/tmp/app/target/repo/org/eclipse/jdt/ecj/3.33.0/ecj-3.33.0.jar:/tmp/app/target/repo/org/apache/tomcat/tomcat-jasper/10.1.17/tomcat-jasper-10.1.17.jar:/tmp/app/target/repo/org/apache/tomcat/tomcat-servlet-api/10.1.17/tomcat-servlet-api-10.1.17.jar:/tmp/app/target/repo/org/apache/tomcat/tomcat-juli/10.1.17/tomcat-juli-10.1.17.jar:/tmp/app/target/repo/org/apache/tomcat/tomcat-el-api/10.1.17/tomcat-el-api-10.1.17.jar:/tmp/app/target/repo/org/apache/tomcat/tomcat-api/10.1.17/tomcat-api-10.1.17.jar:/tmp/app/target/repo/org/apache/tomcat/tomcat-util-scan/10.1.17/tomcat-util-scan-10.1.17.jar:/tmp/app/target/repo/org/apache/tomcat/tomcat-util/10.1.17/tomcat-util-10.1.17.jar:/tmp/app/target/repo/org/apache/tomcat/tomcat-jasper-el/10.1.17/tomcat-jasper-el-10.1.17.jar:/tmp/app/target/repo/org/apache/tomcat/tomcat-jsp-api/10.1.17/tomcat-jsp-api-10.1.17.jar:/tmp/app/target/repo/com/ai/sample/embeddedTomcatSample/1.0-SNAPSHOT/embeddedTomcatSample-1.0-SNAPSHOT.jar -Dapp.name=webapp -Dapp.pid=1 -Dapp.repo=/tmp/app/target/repo -Dapp.home=/tmp/app/target -Dbasedir=/tmp/app/target launch.Main",
+      "generated_name": "launch.Main",
+      "has_service_data": true
+    },
+    {
+      "pid": 3773710,
+      "ppid": 3773660,
       "comm": "python",
       "cmdline": "python /tmp/client.py",
       "generated_name": null,
       "has_service_data": false
     }
   ],
-  "disco_raw": {
-    "start_warning": "exit code 1:  embedded-client  Built\n embedded-tomcat  Built\n Container embedded-tomcat-1  Creating\n Container embedded-client-1  Creating\n Container embedded-client-1  Created\n Container embedded-tomcat-1  Created\n Container embedded-tomcat-1  Starting\n Container embedded-client-1  Starting\n Container embedded-client-1  Started\nError response from daemon: failed to set up container networking: driver failed programming external connectivity on endpoint embedded-tomcat-1 (4eb919a1f4aac289992513fd781562d86abc"
-  }
+  "disco_raw": {}
 }

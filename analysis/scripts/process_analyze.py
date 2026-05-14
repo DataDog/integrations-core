@@ -9,6 +9,7 @@ import dataclasses
 import json
 import re
 import subprocess
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -218,6 +219,45 @@ def get_current_container_ids() -> set[str]:
     return set(result.stdout.split())
 
 
+def get_all_container_ids_with_state() -> dict[str, str]:
+    """Return a {short_id: state} map for all containers (incl. Created/Exited)."""
+    result = subprocess.run(
+        ["docker", "ps", "-a", "--format", "{{.ID}}\t{{.State}}"],
+        capture_output=True,
+        text=True,
+    )
+    out: dict[str, str] = {}
+    for line in result.stdout.splitlines():
+        parts = line.split("\t", 1)
+        if len(parts) == 2:
+            out[parts[0]] = parts[1]
+    return out
+
+
+def wait_for_containers_started(
+    started_before_all: set[str], poll_interval: float = 3.0, max_wait: float = 120.0
+) -> set[str]:
+    """After `ddev env start`, poll until newly-created containers either run
+    or settle. Return the set of containers that ended up running.
+
+    Some integrations' compose stacks bring services up sequentially. If we
+    sample `docker ps` the instant `ddev env start` returns, containers still
+    in `Created` state are invisible (`docker ps` without `-a` skips them) and
+    their processes get missed. Poll the full `docker ps -a` view, watch any
+    container that came up during this run, and wait until none remain in
+    `created` or `restarting` state — bounded by `max_wait`.
+    """
+    deadline = time.monotonic() + max_wait
+    while True:
+        states = get_all_container_ids_with_state()
+        new_all = set(states) - started_before_all
+        transitioning = {cid for cid in new_all if states.get(cid) in ("created", "restarting")}
+        running = {cid for cid in new_all if states.get(cid) == "running"}
+        if not transitioning or time.monotonic() > deadline:
+            return running
+        time.sleep(poll_interval)
+
+
 def get_pids_in_container(container_name_or_id: str) -> list[int]:
     """Return all host PIDs whose cgroup references the given container."""
     result = subprocess.run(
@@ -382,7 +422,7 @@ def collect_integration(
             capture_output=True, text=True, timeout=300,
         )
 
-    before = get_current_container_ids()
+    before_all = set(get_all_container_ids_with_state())
     try:
         start = _start()
     except subprocess.TimeoutExpired:
@@ -399,7 +439,7 @@ def collect_integration(
             ["ddev", "--no-interactive", "env", "stop", integration, env],
             capture_output=True, timeout=120,
         )
-        before = get_current_container_ids()
+        before_all = set(get_all_container_ids_with_state())
         try:
             start = _start()
         except subprocess.TimeoutExpired:
@@ -416,7 +456,11 @@ def collect_integration(
     # the target service is already running and has live processes. Treat the
     # start as a soft warning when new containers appeared in the docker-ps
     # delta; only skip when the start failed AND no new containers exist.
-    new_ids = get_current_container_ids() - before
+    # Wait first for any new containers stuck in `created`/`restarting` to
+    # settle — sequential compose stacks (tomcat, temporal) can leave the
+    # target service still in `Created` state at the moment `ddev env start`
+    # returns, which would otherwise hide it from the docker-ps delta.
+    new_ids = wait_for_containers_started(before_all)
     if start.returncode != 0 and not new_ids:
         record_skip(data_dir, SkipEntry(
             integration=integration,

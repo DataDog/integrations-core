@@ -1,0 +1,2171 @@
+{
+  "results": [
+    {
+      "integration": "airflow",
+      "expression": "process.name == 'airflow schedul' || (process.name == 'gunicorn: maste' && process.cmdline.contains('airflow'))",
+      "source": "manual",
+      "notes": "Airflow scheduler renames argv[0] to 'airflow scheduler ...'; gunicorn does similar. Both target the same airflow check.",
+      "mains": 4,
+      "post_cel": 2,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 897684,
+          "name": "gunicorn: maste",
+          "generated_name": "airflow-webserver",
+          "cmdline": "gunicorn: master [airflow-webserver]"
+        },
+        {
+          "pid": 897866,
+          "name": "airflow schedul",
+          "generated_name": "airflow",
+          "cmdline": "airflow scheduler -- DagFileProcessorManager"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 893871,
+          "name": "postgres",
+          "generated_name": "postgres",
+          "cmdline": "postgres"
+        },
+        {
+          "pid": 897709,
+          "name": "gunicorn: maste",
+          "generated_name": "gunicorn",
+          "cmdline": "gunicorn: master [gunicorn]"
+        }
+      ]
+    },
+    {
+      "integration": "boundary",
+      "expression": "process.name == 'boundary'",
+      "source": "manual",
+      "notes": "",
+      "mains": 2,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 906801,
+          "name": "boundary",
+          "generated_name": "boundary",
+          "cmdline": "boundary server -config /boundary/boundary.hcl"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 906054,
+          "name": "postgres",
+          "generated_name": "postgres",
+          "cmdline": "postgres"
+        }
+      ]
+    },
+    {
+      "integration": "cassandra_nodetool",
+      "expression": "process.name == 'java' && 'org.apache.cassandra.service.CassandraDaemon' in process.args",
+      "source": "manual",
+      "notes": "Cassandra JVM main class.",
+      "mains": 2,
+      "post_cel": 2,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 914105,
+          "name": "java",
+          "generated_name": "cassandra",
+          "cmdline": "/opt/java/openjdk/bin/java -ea -da:net.openhft... -XX:+UseThreadPriorities -XX:+HeapDumpOnOutOfMemoryError -Xss256k -XX:+AlwaysPreTouch -XX:+UseTLAB -XX:+ResizeTLAB -XX:+UseNUMA -XX:+PerfDisableSharedMem -Djava.net.preferIPv4Stack=true -Dchronicle.analytics.disable=true -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxTenuringThreshold=2 -XX:G1HeapRegionSize=16m -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=50 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:MaxGCPauseMillis=300 -XX:InitiatingHeapOccupancyPercent=70 -Djdk.attach.allowAttachSelf=true --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-exports java.management.rmi/com.sun.jmx.remote.internal.rmi=ALL-UNNAMED --add-exports java.management/com.sun.jmx.remote.security=ALL-UNNAMED --add-exports java.rmi/sun.rmi.registry=ALL-UNNAMED --add-exports java.rmi/sun.rmi.server=ALL-UNNAMED --add-exports java.sql/java.sql=ALL-UNNAMED --add-exports java.base/java.lang.ref=ALL-UNNAMED --add-exports jdk.unsupported/sun.misc=ALL-UNNAMED --add-opens java.base/java.lang.module=ALL-UNNAMED --add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/jdk.internal.reflect=ALL-UNNAMED --add-opens java.base/jdk.internal.math=ALL-UNNAMED --add-opens java.base/jdk.internal.module=ALL-UNNAMED --add-opens java.base/jdk.internal.util.jar=ALL-UNNAMED --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED -Dio.netty.tryReflectionSetAccessible=true -Dio.netty.allocator.useCacheForAllThreads=true -Dio.netty.allocator.maxOrder=11 -Xlog:gc=info,heap*=trace,age*=debug,safepoint=info,promotion*=trace:file=/opt/cassandra/logs/gc.log:time,uptime,pid,tid,level:filecount=10,filesize=10485760 -Xms31744M -Xmx31744M -XX:MaxDirectMemorySize=15872M -XX:ParallelGCThreads=16 -XX:ConcGCThreads=16 -XX:CompileCommandFile=/etc/cassandra/hotspot_compiler -javaagent:/opt/cassandra/lib/jamm-0.4.0.jar -XX:HeapDumpPath=/opt/cassandra/logs/cassandra-1778677724-pid1.hprof -Dcassandra.jmx.local.port=7199 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.password.file=/etc/cassandra/jmxremote.password -Djava.library.path=/opt/cassandra/lib/sigar-bin -Dcassandra.skip_schema_check=true -Dcassandra.libjemalloc=/usr/local/lib/libjemalloc.so -XX:OnOutOfMemoryError=kill -9 %p -Dlogback.configurationFile=logback.xml -Dcassandra.logdir=/opt/cassandra/logs -Dcassandra.storagedir=/opt/cassandra/data -Dcassandra-foreground=yes -cp /etc/cassandra:/opt/cassandra/lib/HdrHistogram-2.1.12.jar:/opt/cassandra/lib/ST4-4.0.8.jar:/opt/cassandra/lib/affinity-3.23.3.jar:/opt/cassandra/lib/agrona-1.17.1.jar:/opt/cassandra/lib/airline-0.8.jar:/opt/cassandra/lib/antlr-runtime-3.5.2.jar:/opt/cassandra/lib/apache-cassandra-5.0.8.jar:/opt/cassandra/lib/asm-9.4.jar:/opt/cassandra/lib/big-math-2.3.0.jar:/opt/cassandra/lib/caffeine-3.1.8.jar:/opt/cassandra/lib/cassandra-driver-core-3.12.1-shaded.jar:/opt/cassandra/lib/chronicle-bytes-2.23.33.jar:/opt/cassandra/lib/chronicle-core-2.23.36.jar:/opt/cassandra/lib/chronicle-queue-5.23.37.jar:/opt/cassandra/lib/chronicle-threads-2.23.25.jar:/opt/cassandra/lib/chronicle-wire-2.23.39.jar:/opt/cassandra/lib/commons-cli-1.5.0.jar:/opt/cassandra/lib/commons-lang3-3.18.0.jar:/opt/cassandra/lib/commons-math3-3.2.jar:/opt/cassandra/lib/concurrent-trees-2.4.0.jar:/opt/cassandra/lib/ecj-3.33.0.jar:/opt/cassandra/lib/failureaccess-1.0.1.jar:/opt/cassandra/lib/guava-32.0.1-jre.jar:/opt/cassandra/lib/high-scale-lib-1.0.6.jar:/opt/cassandra/lib/hppc-0.8.1.jar:/opt/cassandra/lib/ipaddress-5.3.3.jar:/opt/cassandra/lib/j2objc-annotations-1.3.jar:/opt/cassandra/lib/jackson-annotations-2.19.2.jar:/opt/cassandra/lib/jackson-core-2.19.2.jar:/opt/cassandra/lib/jackson-databind-2.19.2.jar:/opt/cassandra/lib/jackson-datatype-jsr310-2.19.2.jar:/opt/cassandra/lib/jamm-0.4.0.jar:/opt/cassandra/lib/javax.inject-1.jar:/opt/cassandra/lib/jbcrypt-0.4.jar:/opt/cassandra/lib/jcl-over-slf4j-2.0.17.jar:/opt/cassandra/lib/jcommander-1.30.jar:/opt/cassandra/lib/jctools-core-3.1.0.jar:/opt/cassandra/lib/jffi-1.3.11-native.jar:/opt/cassandra/lib/jffi-1.3.11.jar:/opt/cassandra/lib/jna-5.13.0.jar:/opt/cassandra/lib/jna-platform-5.13.0.jar:/opt/cassandra/lib/jnr-a64asm-1.0.0.jar:/opt/cassandra/lib/jnr-constants-0.10.4.jar:/opt/cassandra/lib/jnr-ffi-2.2.13.jar:/opt/cassandra/lib/jnr-x86asm-1.0.2.jar:/opt/cassandra/lib/jsr305-2.0.2.jar:/opt/cassandra/lib/jvector-1.0.2.jar:/opt/cassandra/lib/jvm-attach-api-1.5.jar:/opt/cassandra/lib/log4j-over-slf4j-2.0.17.jar:/opt/cassandra/lib/logback-classic-1.5.18.jar:/opt/cassandra/lib/logback-core-1.5.18.jar:/opt/cassandra/lib/lucene-analysis-common-9.7.0.jar:/opt/cassandra/lib/lucene-core-9.7.0.jar:/opt/cassandra/lib/lz4-java-1.10.1.jar:/opt/cassandra/lib/metrics-core-4.2.28.jar:/opt/cassandra/lib/metrics-jvm-4.2.19.jar:/opt/cassandra/lib/metrics-logback-4.2.19.jar:/opt/cassandra/lib/mxdump-0.14.jar:/opt/cassandra/lib/netty-all-4.1.130.Final.jar:/opt/cassandra/lib/netty-buffer-4.1.130.Final.jar:/opt/cassandra/lib/netty-codec-4.1.130.Final.jar:/opt/cassandra/lib/netty-common-4.1.130.Final.jar:/opt/cassandra/lib/netty-handler-4.1.130.Final.jar:/opt/cassandra/lib/netty-handler-proxy-4.1.130.Final.jar:/opt/cassandra/lib/netty-handler-ssl-ocsp-4.1.130.Final.jar:/opt/cassandra/lib/netty-resolver-4.1.130.Final.jar:/opt/cassandra/lib/netty-tcnative-boringssl-static-2.0.70.Final-linux-aarch_64.jar:/opt/cassandra/lib/netty-tcnative-boringssl-static-2.0.70.Final-linux-x86_64.jar:/opt/cassandra/lib/netty-tcnative-boringssl-static-2.0.70.Final-osx-aarch_64.jar:/opt/cassandra/lib/netty-tcnative-boringssl-static-2.0.70.Final-osx-x86_64.jar:/opt/cassandra/lib/netty-tcnative-boringssl-static-2.0.70.Final.jar:/opt/cassandra/lib/netty-tcnative-classes-2.0.70.Final.jar:/opt/cassandra/lib/netty-transport-4.1.130.Final.jar:/opt/cassandra/lib/netty-transport-classes-epoll-4.1.130.Final.jar:/opt/cassandra/lib/netty-transport-classes-kqueue-4.1.130.Final.jar:/opt/cassandra/lib/netty-transport-native-epoll-4.1.130.Final-linux-aarch_64.jar:/opt/cassandra/lib/netty-transport-native-epoll-4.1.130.Final-linux-x86_64.jar:/opt/cassandra/lib/netty-transport-native-epoll-4.1.130.Final.jar:/opt/cassandra/lib/netty-transport-native-unix-common-4.1.130.Final.jar:/opt/cassandra/lib/ohc-core-0.5.1.jar:/opt/cassandra/lib/ohc-core-j8-0.5.1.jar:/opt/cassandra/lib/posix-2.24ea4.jar:/opt/cassandra/lib/psjava-0.1.19.jar:/opt/cassandra/lib/semver4j-3.1.0.jar:/opt/cassandra/lib/sigar-1.6.4.jar:/opt/cassandra/lib/sjk-cli-0.14.jar:/opt/cassandra/lib/sjk-core-0.14.jar:/opt/cassandra/lib/sjk-json-0.14.jar:/opt/cassandra/lib/sjk-stacktrace-0.14.jar:/opt/cassandra/lib/slf4j-api-2.0.17.jar:/opt/cassandra/lib/snakeyaml-2.1.jar:/opt/cassandra/lib/snappy-java-1.1.10.4.jar:/opt/cassandra/lib/stream-2.5.2.jar:/opt/cassandra/lib/zstd-jni-1.5.7-2.jar:/opt/cassandra/lib/jsr223/*/*.jar::/opt/cassandra/lib/x86_64/AmazonCorrettoCryptoProvider-2.2.0-linux-x86_64.jar org.apache.cassandra.service.CassandraDaemon"
+        },
+        {
+          "pid": 910619,
+          "name": "java",
+          "generated_name": "cassandra",
+          "cmdline": "/opt/java/openjdk/bin/java -ea -da:net.openhft... -XX:+UseThreadPriorities -XX:+HeapDumpOnOutOfMemoryError -Xss256k -XX:+AlwaysPreTouch -XX:+UseTLAB -XX:+ResizeTLAB -XX:+UseNUMA -XX:+PerfDisableSharedMem -Djava.net.preferIPv4Stack=true -Dchronicle.analytics.disable=true -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxTenuringThreshold=2 -XX:G1HeapRegionSize=16m -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=50 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:MaxGCPauseMillis=300 -XX:InitiatingHeapOccupancyPercent=70 -Djdk.attach.allowAttachSelf=true --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-exports java.management.rmi/com.sun.jmx.remote.internal.rmi=ALL-UNNAMED --add-exports java.management/com.sun.jmx.remote.security=ALL-UNNAMED --add-exports java.rmi/sun.rmi.registry=ALL-UNNAMED --add-exports java.rmi/sun.rmi.server=ALL-UNNAMED --add-exports java.sql/java.sql=ALL-UNNAMED --add-exports java.base/java.lang.ref=ALL-UNNAMED --add-exports jdk.unsupported/sun.misc=ALL-UNNAMED --add-opens java.base/java.lang.module=ALL-UNNAMED --add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/jdk.internal.reflect=ALL-UNNAMED --add-opens java.base/jdk.internal.math=ALL-UNNAMED --add-opens java.base/jdk.internal.module=ALL-UNNAMED --add-opens java.base/jdk.internal.util.jar=ALL-UNNAMED --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED -Dio.netty.tryReflectionSetAccessible=true -Dio.netty.allocator.useCacheForAllThreads=true -Dio.netty.allocator.maxOrder=11 -Xlog:gc=info,heap*=trace,age*=debug,safepoint=info,promotion*=trace:file=/opt/cassandra/logs/gc.log:time,uptime,pid,tid,level:filecount=10,filesize=10485760 -Xms31744M -Xmx31744M -XX:MaxDirectMemorySize=15872M -XX:ParallelGCThreads=16 -XX:ConcGCThreads=16 -XX:CompileCommandFile=/etc/cassandra/hotspot_compiler -javaagent:/opt/cassandra/lib/jamm-0.4.0.jar -XX:HeapDumpPath=/opt/cassandra/logs/cassandra-1778677658-pid1.hprof -Dcassandra.jmx.remote.port=7199 -Dcom.sun.management.jmxremote.rmi.port=7199 -Dcom.sun.management.jmxremote.authenticate=true -Dcom.sun.management.jmxremote.password.file=/etc/cassandra/jmxremote.password -Djava.library.path=/opt/cassandra/lib/sigar-bin -Dcom.sun.management.jmxremote.port=7199 -Dcom.sun.management.jmxremote.rmi.port=7199 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=true -Dcom.sun.management.jmxremote.password.file=/etc/cassandra/jmxremote.password -Djava.rmi.server.hostname=localhost -Dcassandra.libjemalloc=/usr/local/lib/libjemalloc.so -XX:OnOutOfMemoryError=kill -9 %p -Dlogback.configurationFile=logback.xml -Dcassandra.logdir=/opt/cassandra/logs -Dcassandra.storagedir=/opt/cassandra/data -Dcassandra-foreground=yes -cp /etc/cassandra:/opt/cassandra/lib/HdrHistogram-2.1.12.jar:/opt/cassandra/lib/ST4-4.0.8.jar:/opt/cassandra/lib/affinity-3.23.3.jar:/opt/cassandra/lib/agrona-1.17.1.jar:/opt/cassandra/lib/airline-0.8.jar:/opt/cassandra/lib/antlr-runtime-3.5.2.jar:/opt/cassandra/lib/apache-cassandra-5.0.8.jar:/opt/cassandra/lib/asm-9.4.jar:/opt/cassandra/lib/big-math-2.3.0.jar:/opt/cassandra/lib/caffeine-3.1.8.jar:/opt/cassandra/lib/cassandra-driver-core-3.12.1-shaded.jar:/opt/cassandra/lib/chronicle-bytes-2.23.33.jar:/opt/cassandra/lib/chronicle-core-2.23.36.jar:/opt/cassandra/lib/chronicle-queue-5.23.37.jar:/opt/cassandra/lib/chronicle-threads-2.23.25.jar:/opt/cassandra/lib/chronicle-wire-2.23.39.jar:/opt/cassandra/lib/commons-cli-1.5.0.jar:/opt/cassandra/lib/commons-lang3-3.18.0.jar:/opt/cassandra/lib/commons-math3-3.2.jar:/opt/cassandra/lib/concurrent-trees-2.4.0.jar:/opt/cassandra/lib/ecj-3.33.0.jar:/opt/cassandra/lib/failureaccess-1.0.1.jar:/opt/cassandra/lib/guava-32.0.1-jre.jar:/opt/cassandra/lib/high-scale-lib-1.0.6.jar:/opt/cassandra/lib/hppc-0.8.1.jar:/opt/cassandra/lib/ipaddress-5.3.3.jar:/opt/cassandra/lib/j2objc-annotations-1.3.jar:/opt/cassandra/lib/jackson-annotations-2.19.2.jar:/opt/cassandra/lib/jackson-core-2.19.2.jar:/opt/cassandra/lib/jackson-databind-2.19.2.jar:/opt/cassandra/lib/jackson-datatype-jsr310-2.19.2.jar:/opt/cassandra/lib/jamm-0.4.0.jar:/opt/cassandra/lib/javax.inject-1.jar:/opt/cassandra/lib/jbcrypt-0.4.jar:/opt/cassandra/lib/jcl-over-slf4j-2.0.17.jar:/opt/cassandra/lib/jcommander-1.30.jar:/opt/cassandra/lib/jctools-core-3.1.0.jar:/opt/cassandra/lib/jffi-1.3.11-native.jar:/opt/cassandra/lib/jffi-1.3.11.jar:/opt/cassandra/lib/jna-5.13.0.jar:/opt/cassandra/lib/jna-platform-5.13.0.jar:/opt/cassandra/lib/jnr-a64asm-1.0.0.jar:/opt/cassandra/lib/jnr-constants-0.10.4.jar:/opt/cassandra/lib/jnr-ffi-2.2.13.jar:/opt/cassandra/lib/jnr-x86asm-1.0.2.jar:/opt/cassandra/lib/jsr305-2.0.2.jar:/opt/cassandra/lib/jvector-1.0.2.jar:/opt/cassandra/lib/jvm-attach-api-1.5.jar:/opt/cassandra/lib/log4j-over-slf4j-2.0.17.jar:/opt/cassandra/lib/logback-classic-1.5.18.jar:/opt/cassandra/lib/logback-core-1.5.18.jar:/opt/cassandra/lib/lucene-analysis-common-9.7.0.jar:/opt/cassandra/lib/lucene-core-9.7.0.jar:/opt/cassandra/lib/lz4-java-1.10.1.jar:/opt/cassandra/lib/metrics-core-4.2.28.jar:/opt/cassandra/lib/metrics-jvm-4.2.19.jar:/opt/cassandra/lib/metrics-logback-4.2.19.jar:/opt/cassandra/lib/mxdump-0.14.jar:/opt/cassandra/lib/netty-all-4.1.130.Final.jar:/opt/cassandra/lib/netty-buffer-4.1.130.Final.jar:/opt/cassandra/lib/netty-codec-4.1.130.Final.jar:/opt/cassandra/lib/netty-common-4.1.130.Final.jar:/opt/cassandra/lib/netty-handler-4.1.130.Final.jar:/opt/cassandra/lib/netty-handler-proxy-4.1.130.Final.jar:/opt/cassandra/lib/netty-handler-ssl-ocsp-4.1.130.Final.jar:/opt/cassandra/lib/netty-resolver-4.1.130.Final.jar:/opt/cassandra/lib/netty-tcnative-boringssl-static-2.0.70.Final-linux-aarch_64.jar:/opt/cassandra/lib/netty-tcnative-boringssl-static-2.0.70.Final-linux-x86_64.jar:/opt/cassandra/lib/netty-tcnative-boringssl-static-2.0.70.Final-osx-aarch_64.jar:/opt/cassandra/lib/netty-tcnative-boringssl-static-2.0.70.Final-osx-x86_64.jar:/opt/cassandra/lib/netty-tcnative-boringssl-static-2.0.70.Final.jar:/opt/cassandra/lib/netty-tcnative-classes-2.0.70.Final.jar:/opt/cassandra/lib/netty-transport-4.1.130.Final.jar:/opt/cassandra/lib/netty-transport-classes-epoll-4.1.130.Final.jar:/opt/cassandra/lib/netty-transport-classes-kqueue-4.1.130.Final.jar:/opt/cassandra/lib/netty-transport-native-epoll-4.1.130.Final-linux-aarch_64.jar:/opt/cassandra/lib/netty-transport-native-epoll-4.1.130.Final-linux-x86_64.jar:/opt/cassandra/lib/netty-transport-native-epoll-4.1.130.Final.jar:/opt/cassandra/lib/netty-transport-native-unix-common-4.1.130.Final.jar:/opt/cassandra/lib/ohc-core-0.5.1.jar:/opt/cassandra/lib/ohc-core-j8-0.5.1.jar:/opt/cassandra/lib/posix-2.24ea4.jar:/opt/cassandra/lib/psjava-0.1.19.jar:/opt/cassandra/lib/semver4j-3.1.0.jar:/opt/cassandra/lib/sigar-1.6.4.jar:/opt/cassandra/lib/sjk-cli-0.14.jar:/opt/cassandra/lib/sjk-core-0.14.jar:/opt/cassandra/lib/sjk-json-0.14.jar:/opt/cassandra/lib/sjk-stacktrace-0.14.jar:/opt/cassandra/lib/slf4j-api-2.0.17.jar:/opt/cassandra/lib/snakeyaml-2.1.jar:/opt/cassandra/lib/snappy-java-1.1.10.4.jar:/opt/cassandra/lib/stream-2.5.2.jar:/opt/cassandra/lib/zstd-jni-1.5.7-2.jar:/opt/cassandra/lib/jsr223/*/*.jar::/opt/cassandra/lib/x86_64/AmazonCorrettoCryptoProvider-2.2.0-linux-x86_64.jar org.apache.cassandra.service.CassandraDaemon"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "celery",
+      "expression": "process.name == 'celery' || (process.name == 'python' && process.args.exists(a, a.endsWith('/celery')))",
+      "source": "manual",
+      "notes": "Celery workers either rename argv[0] to 'celery' or launch as python /path/to/celery.",
+      "mains": 2,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 930716,
+          "name": "celery",
+          "generated_name": "celery",
+          "cmdline": "/usr/local/bin/python3.12 /usr/local/bin/celery --broker=redis://:devops-best-friend@redis-standalone:6379/0 flower --port=5555"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 930547,
+          "name": "redis-server",
+          "generated_name": "redis-server",
+          "cmdline": "redis-server 0.0.0.0:6379"
+        }
+      ]
+    },
+    {
+      "integration": "ceph",
+      "expression": "process.name in ['ceph-mon', 'ceph-mgr', 'ceph-osd', 'ceph-mds', 'radosgw']",
+      "source": "manual",
+      "notes": "Ceph daemons are distinct binaries \u2014 match by name.",
+      "mains": 9,
+      "post_cel": 5,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 934292,
+          "name": "ceph-mon",
+          "generated_name": "ceph-mon",
+          "cmdline": "/usr/bin/ceph-mon --cluster ceph --setuser ceph --setgroup ceph --default-log-to-stderr=true --err-to-stderr=true --default-log-to-file=false -i 7e30220a514e --mon-data /var/lib/ceph/mon/ceph-7e30220a514e --public-addr 172.17.131.2"
+        },
+        {
+          "pid": 934376,
+          "name": "ceph-mgr",
+          "generated_name": "ceph-mgr",
+          "cmdline": "ceph-mgr --cluster ceph --setuser ceph --setgroup ceph --default-log-to-stderr=true --err-to-stderr=true --default-log-to-file=false -i 7e30220a514e"
+        },
+        {
+          "pid": 934637,
+          "name": "ceph-osd",
+          "generated_name": "ceph-osd",
+          "cmdline": "ceph-osd --cluster ceph --setuser ceph --setgroup ceph --default-log-to-stderr=true --err-to-stderr=true --default-log-to-file=false -i 0"
+        },
+        {
+          "pid": 935265,
+          "name": "ceph-mds",
+          "generated_name": "ceph-mds",
+          "cmdline": "ceph-mds --cluster ceph --setuser ceph --setgroup ceph --default-log-to-stderr=true --err-to-stderr=true --default-log-to-file=false -i demo"
+        },
+        {
+          "pid": 935316,
+          "name": "radosgw",
+          "generated_name": "radosgw",
+          "cmdline": "radosgw --cluster ceph --setuser ceph --setgroup ceph --default-log-to-stderr=true --err-to-stderr=true --default-log-to-file=false -n client.rgw.7e30220a514e -k /var/lib/ceph/radosgw/ceph-rgw.7e30220a514e/keyring"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 936947,
+          "name": "python3",
+          "generated_name": "sree",
+          "cmdline": "python3 app.py"
+        },
+        {
+          "pid": 941722,
+          "name": "rpcbind",
+          "generated_name": "rpcbind",
+          "cmdline": "rpcbind"
+        },
+        {
+          "pid": 941724,
+          "name": "rpc.statd",
+          "generated_name": "rpc",
+          "cmdline": "rpc.statd -L"
+        },
+        {
+          "pid": 941727,
+          "name": "ganesha.nfsd",
+          "generated_name": "ganesha",
+          "cmdline": "ganesha.nfsd  -L STDOUT"
+        }
+      ]
+    },
+    {
+      "integration": "citrix_hypervisor",
+      "expression": "process.name == 'python' && process.args.exists(a, a == 'server.py')",
+      "source": "manual",
+      "notes": "Test fixture is a python mock (`python server.py run -h 0.0.0.0`). Real Citrix Hypervisor would need a different rule against the actual XenServer toolstack.",
+      "mains": 6,
+      "post_cel": 6,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 973094,
+          "name": "python",
+          "generated_name": "app",
+          "cmdline": "python server.py run -h 0.0.0.0"
+        },
+        {
+          "pid": 973170,
+          "name": "python",
+          "generated_name": "app",
+          "cmdline": "python server.py run -h 0.0.0.0"
+        },
+        {
+          "pid": 973153,
+          "name": "python",
+          "generated_name": "app",
+          "cmdline": "python server.py run -h 0.0.0.0"
+        },
+        {
+          "pid": 973157,
+          "name": "python",
+          "generated_name": "app",
+          "cmdline": "python server.py run -h 0.0.0.0"
+        },
+        {
+          "pid": 973151,
+          "name": "python",
+          "generated_name": "app",
+          "cmdline": "python server.py run -h 0.0.0.0"
+        },
+        {
+          "pid": 973098,
+          "name": "python",
+          "generated_name": "app",
+          "cmdline": "python server.py run -h 0.0.0.0"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "clickhouse",
+      "expression": "process.name == 'clickhouse-serv'",
+      "source": "manual",
+      "notes": "comm is 15-char-truncated from 'clickhouse-server', which is unique enough on its own.",
+      "mains": 7,
+      "post_cel": 6,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 977220,
+          "name": "clickhouse-serv",
+          "generated_name": "clickhouse-server",
+          "cmdline": "clickhouse-server --config-file=/etc/clickhouse-server/config.xml"
+        },
+        {
+          "pid": 977290,
+          "name": "clickhouse-serv",
+          "generated_name": "clickhouse-server",
+          "cmdline": "clickhouse-server --config-file=/etc/clickhouse-server/config.xml"
+        },
+        {
+          "pid": 977307,
+          "name": "clickhouse-serv",
+          "generated_name": "clickhouse-server",
+          "cmdline": "clickhouse-server --config-file=/etc/clickhouse-server/config.xml"
+        },
+        {
+          "pid": 977275,
+          "name": "clickhouse-serv",
+          "generated_name": "clickhouse-server",
+          "cmdline": "clickhouse-server --config-file=/etc/clickhouse-server/config.xml"
+        },
+        {
+          "pid": 977306,
+          "name": "clickhouse-serv",
+          "generated_name": "clickhouse-server",
+          "cmdline": "clickhouse-server --config-file=/etc/clickhouse-server/config.xml"
+        },
+        {
+          "pid": 977247,
+          "name": "clickhouse-serv",
+          "generated_name": "clickhouse-server",
+          "cmdline": "clickhouse-server --config-file=/etc/clickhouse-server/config.xml"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 976757,
+          "name": "java",
+          "generated_name": "zookeeper",
+          "cmdline": "/usr/local/openjdk-11/bin/java -Dzookeeper.log.dir=/logs -Dzookeeper.log.file=zookeeper--server-clickhouse-zookeeper.log -Dzookeeper.root.logger=INFO,CONSOLE -XX:+HeapDumpOnOutOfMemoryError -XX:OnOutOfMemoryError=kill -9 %p -cp /apache-zookeeper-3.5.7-bin/bin/../zookeeper-server/target/classes:/apache-zookeeper-3.5.7-bin/bin/../build/classes:/apache-zookeeper-3.5.7-bin/bin/../zookeeper-server/target/lib/*.jar:/apache-zookeeper-3.5.7-bin/bin/../build/lib/*.jar:/apache-zookeeper-3.5.7-bin/bin/../lib/zookeeper-jute-3.5.7.jar:/apache-zookeeper-3.5.7-bin/bin/../lib/zookeeper-3.5.7.jar:/apache-zookeeper-3.5.7-bin/bin/../lib/slf4j-log4j12-1.7.25.jar:/apache-zookeeper-3.5.7-bin/bin/../lib/slf4j-api-1.7.25.jar:/apache-zookeeper-3.5.7-bin/bin/../lib/netty-transport-native-unix-common-4.1.45.Final.jar:/apache-zookeeper-3.5.7-bin/bin/../lib/netty-transport-native-epoll-4.1.45.Final.jar:/apache-zookeeper-3.5.7-bin/bin/../lib/netty-transport-4.1.45.Final.jar:/apache-zookeeper-3.5.7-bin/bin/../lib/netty-resolver-4.1.45.Final.jar:/apache-zookeeper-3.5.7-bin/bin/../lib/netty-handler-4.1.45.Final.jar:/apache-zookeeper-3.5.7-bin/bin/../lib/netty-common-4.1.45.Final.jar:/apache-zookeeper-3.5.7-bin/bin/../lib/netty-codec-4.1.45.Final.jar:/apache-zookeeper-3.5.7-bin/bin/../lib/netty-buffer-4.1.45.Final.jar:/apache-zookeeper-3.5.7-bin/bin/../lib/log4j-1.2.17.jar:/apache-zookeeper-3.5.7-bin/bin/../lib/json-simple-1.1.1.jar:/apache-zookeeper-3.5.7-bin/bin/../lib/jline-2.11.jar:/apache-zookeeper-3.5.7-bin/bin/../lib/jetty-util-9.4.24.v20191120.jar:/apache-zookeeper-3.5.7-bin/bin/../lib/jetty-servlet-9.4.24.v20191120.jar:/apache-zookeeper-3.5.7-bin/bin/../lib/jetty-server-9.4.24.v20191120.jar:/apache-zookeeper-3.5.7-bin/bin/../lib/jetty-security-9.4.24.v20191120.jar:/apache-zookeeper-3.5.7-bin/bin/../lib/jetty-io-9.4.24.v20191120.jar:/apache-zookeeper-3.5.7-bin/bin/../lib/jetty-http-9.4.24.v20191120.jar:/apache-zookeeper-3.5.7-bin/bin/../lib/javax.servlet-api-3.1.0.jar:/apache-zookeeper-3.5.7-bin/bin/../lib/jackson-databind-2.9.10.2.jar:/apache-zookeeper-3.5.7-bin/bin/../lib/jackson-core-2.9.10.jar:/apache-zookeeper-3.5.7-bin/bin/../lib/jackson-annotations-2.9.10.jar:/apache-zookeeper-3.5.7-bin/bin/../lib/commons-cli-1.2.jar:/apache-zookeeper-3.5.7-bin/bin/../lib/audience-annotations-0.5.0.jar:/apache-zookeeper-3.5.7-bin/bin/../zookeeper-*.jar:/apache-zookeeper-3.5.7-bin/bin/../zookeeper-server/src/main/resources/lib/*.jar:/conf: -Xmx1000m -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.local.only=false org.apache.zookeeper.server.quorum.QuorumPeerMain /conf/zoo.cfg"
+        }
+      ]
+    },
+    {
+      "integration": "cockroachdb",
+      "expression": "process.name == 'cockroach'",
+      "source": "manual",
+      "notes": "",
+      "mains": 1,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 990487,
+          "name": "cockroach",
+          "generated_name": "cockroach",
+          "cmdline": "/cockroach/cockroach start-single-node --listening-url-file=server_fifo --pid-file=server_pid --advertise-addr=127.0.0.1:26257 --certs-dir=certs --log=file-defaults: {dir: ./cockroach-data/logs} --insecure --store=attrs=ssd,path=/var/lib/cockroach/"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "confluent_platform",
+      "expression": "process.name == 'java' && process.args.exists(a, a == 'kafka.Kafka' || a == 'org.apache.zookeeper.server.quorum.QuorumPeerMain' || a.startsWith('io.confluent.'))",
+      "source": "manual",
+      "notes": "Confluent Platform: brokers (kafka.Kafka), zookeeper, schema registry, ksql, control center, kafka-rest.",
+      "mains": 8,
+      "post_cel": 6,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 997998,
+          "name": "java",
+          "generated_name": "zookeeper",
+          "cmdline": "java -Xmx512M -Xms512M -server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -XX:MaxInlineLevel=15 -Djava.awt.headless=true -Xlog:gc*:file=/var/log/kafka/zookeeper-gc.log:time,tags:filecount=10,filesize=100M -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=31000 -Dcom.sun.management.jmxremote.port=31000 -Dcom.sun.management.jmxremote.port=31000 -Dkafka.logs.dir=/var/log/kafka -Dlog4j.configuration=file:/etc/kafka/log4j.properties -cp /usr/bin/../share/java/kafka/*:/usr/bin/../share/java/confluent-telemetry/* org.apache.zookeeper.server.quorum.QuorumPeerMain /etc/kafka/zookeeper.properties"
+        },
+        {
+          "pid": 998103,
+          "name": "java",
+          "generated_name": "kafka.Kafka",
+          "cmdline": "java -Xmx1G -Xms1G -server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -XX:MaxInlineLevel=15 -Djava.awt.headless=true -Xlog:gc*:file=/var/log/kafka/kafkaServer-gc.log:time,tags:filecount=10,filesize=100M -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=31001 -Dcom.sun.management.jmxremote.port=31001 -Dcom.sun.management.jmxremote.port=31001 -Dkafka.logs.dir=/var/log/kafka -Dlog4j.configuration=file:/etc/kafka/log4j.properties -cp /usr/bin/../ce-broker-plugins/build/libs/*:/usr/bin/../ce-broker-plugins/build/dependant-libs/*:/usr/bin/../ce-auth-providers/build/libs/*:/usr/bin/../ce-auth-providers/build/dependant-libs/*:/usr/bin/../ce-rest-server/build/libs/*:/usr/bin/../ce-rest-server/build/dependant-libs/*:/usr/bin/../ce-audit/build/libs/*:/usr/bin/../ce-audit/build/dependant-libs/*:/usr/bin/../share/java/kafka/*:/usr/bin/../share/java/confluent-metadata-service/*:/usr/bin/../share/java/rest-utils/*:/usr/bin/../share/java/confluent-common/*:/usr/bin/../share/java/ce-kafka-http-server/*:/usr/bin/../share/java/ce-kafka-rest-servlet/*:/usr/bin/../share/java/ce-kafka-rest-extensions/*:/usr/bin/../share/java/kafka-rest-lib/*:/usr/bin/../share/java/confluent-security/kafka-rest/*:/usr/bin/../share/java/confluent-security/schema-validator/*:/usr/bin/../support-metrics-client/build/dependant-libs-2.13.5/*:/usr/bin/../support-metrics-client/build/libs/*:/usr/bin/../share/java/confluent-telemetry/*:/usr/share/java/support-metrics-client/* kafka.Kafka /etc/kafka/kafka.properties"
+        },
+        {
+          "pid": 998802,
+          "name": "java",
+          "generated_name": "io.confluent.controlcenter.ControlCenter",
+          "cmdline": "java -cp /usr/share/java/acl/*:/usr/share/java/confluent-control-center/*:/usr/share/java/monitoring-interceptors/*:/usr/share/java/rest-utils/*:/usr/share/java/confluent-telemetry/*:/usr/share/java/confluent-common/*: -Xmx6g -server -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -XX:+CMSScavengeBeforeRemark -XX:+DisableExplicitGC -Djava.awt.headless=true -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dconfluent.controlcenter.log.dir=/tmp/control-center-logs -Dlog4j.configuration=file:/etc/confluent-control-center/log4j.properties io.confluent.controlcenter.ControlCenter /etc/confluent-control-center/control-center.properties"
+        },
+        {
+          "pid": 998216,
+          "name": "java",
+          "generated_name": "io.confluent.kafka.schemaregistry.rest.SchemaRegistryMain",
+          "cmdline": "java -Xmx512M -server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -Djava.awt.headless=true -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=31007 -Dcom.sun.management.jmxremote.port=31007 -Dcom.sun.management.jmxremote.port=31007 -Dschema-registry.log.dir=/usr/bin/../logs -Dlog4j.configuration=file:/etc/schema-registry/log4j.properties -cp :/usr/bin/../package-schema-registry/target/kafka-schema-registry-package-*-development/share/java/schema-registry/*:/usr/bin/../share/java/confluent-security/schema-registry/*:/usr/bin/../share/java/confluent-common/*:/usr/bin/../share/java/confluent-telemetry/*:/usr/bin/../share/java/rest-utils/*:/usr/bin/../share/java/schema-registry/* io.confluent.kafka.schemaregistry.rest.SchemaRegistryMain /etc/schema-registry/schema-registry.properties"
+        },
+        {
+          "pid": 998663,
+          "name": "java",
+          "generated_name": "io.confluent.ksql.rest.server.KsqlServerMain",
+          "cmdline": "java -cp /usr/share/java/confluent-security/ksql/*:/usr/share/java/confluent-telemetry/*:/usr/share/java/confluent-common/*:/usr/share/java/ksqldb-server/* -Xmx3g -server -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -XX:+CMSScavengeBeforeRemark -XX:+ExplicitGCInvokesConcurrent -XX:NewRatio=1 -Djava.awt.headless=true -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.rmi.port=31004 -Dcom.sun.management.jmxremote.port=31004 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Djava.rmi.server.hostname=localhost -Djava.rmi.server.hostname=172.17.131.8 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=31004 -Dcom.sun.management.jmxremote.port=31004 -Dcom.sun.management.jmxremote.port=31004 -Dksql.log.dir=/usr/logs -Dlog4j.configuration=file:/etc/ksql/log4j-rolling.properties -Dksql.server.install.dir=/usr -Xlog:gc*:file=/usr/logs/ksql-server-gc.log:time,tags:filecount=10,filesize=102400 io.confluent.ksql.rest.server.KsqlServerMain /etc/ksqldb-server/ksqldb-server.properties"
+        },
+        {
+          "pid": 998404,
+          "name": "java",
+          "generated_name": "io.confluent.kafkarest.KafkaRestMain",
+          "cmdline": "java -Xmx256M -server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -Djava.awt.headless=true -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.rmi.port=31006 -Dcom.sun.management.jmxremote.port=31006 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Djava.rmi.server.hostname=localhost -Dlog4j.configuration=file:/etc/kafka-rest/log4j.properties -cp :/usr/bin/../kafka-rest/target/kafka-rest-*-development/share/java/kafka-rest/*:/usr/bin/../share/java/confluent-security/kafka-rest/*:/usr/bin/../share/java/confluent-common/*:/usr/bin/../share/java/confluent-telemetry/*:/usr/bin/../share/java/rest-utils/*:/usr/bin/../share/java/kafka-rest-bin/*:/usr/bin/../share/java/kafka-rest-lib/*:/usr/bin/../share/java/monitoring-interceptors/* io.confluent.kafkarest.KafkaRestMain /etc/kafka-rest/kafka-rest.properties"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 998403,
+          "name": "java",
+          "generated_name": "kafka",
+          "cmdline": "java -Xms256M -Xmx2G -server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -XX:MaxInlineLevel=15 -Djava.awt.headless=true -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=31008 -Dcom.sun.management.jmxremote.port=31008 -Dcom.sun.management.jmxremote.port=31008 -Dkafka.logs.dir=/var/log/kafka -Dlog4j.configuration=file:/etc/kafka/connect-log4j.properties -cp /etc/kafka-connect/jars/*:::/usr/share/java/confluent-security/connect/*:/usr/share/java/kafka/*:/usr/share/java/confluent-common/*:/usr/share/java/kafka-serde-tools/*:/usr/share/java/monitoring-interceptors/*:/usr/bin/../ce-broker-plugins/build/libs/*:/usr/bin/../ce-broker-plugins/build/dependant-libs/*:/usr/bin/../ce-auth-providers/build/libs/*:/usr/bin/../ce-auth-providers/build/dependant-libs/*:/usr/bin/../ce-rest-server/build/libs/*:/usr/bin/../ce-rest-server/build/dependant-libs/*:/usr/bin/../ce-audit/build/libs/*:/usr/bin/../ce-audit/build/dependant-libs/*:/usr/bin/../share/java/kafka/*:/usr/bin/../share/java/confluent-metadata-service/*:/usr/bin/../share/java/rest-utils/*:/usr/bin/../share/java/confluent-common/*:/usr/bin/../share/java/ce-kafka-http-server/*:/usr/bin/../share/java/ce-kafka-rest-servlet/*:/usr/bin/../share/java/ce-kafka-rest-extensions/*:/usr/bin/../share/java/kafka-rest-lib/*:/usr/bin/../share/java/confluent-security/kafka-rest/*:/usr/bin/../share/java/confluent-security/schema-validator/*:/usr/bin/../support-metrics-client/build/dependant-libs-2.13.5/*:/usr/bin/../support-metrics-client/build/libs/*:/usr/bin/../share/java/confluent-telemetry/*:/usr/share/java/support-metrics-client/* org.apache.kafka.connect.cli.ConnectDistributed /etc/kafka-connect/kafka-connect.properties"
+        },
+        {
+          "pid": 998402,
+          "name": "java",
+          "generated_name": "kafka",
+          "cmdline": "java -Xms256M -Xmx2G -server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -XX:MaxInlineLevel=15 -Djava.awt.headless=true -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=31002 -Dcom.sun.management.jmxremote.port=31002 -Dcom.sun.management.jmxremote.port=31002 -Dkafka.logs.dir=/var/log/kafka -Dlog4j.configuration=file:/etc/kafka/connect-log4j.properties -cp /usr/share/java/monitoring-interceptors/monitoring-interceptors-5.4.0.jar:/usr/share/java/confluent-security/connect/*:/usr/share/java/kafka/*:/usr/share/java/confluent-common/*:/usr/share/java/kafka-serde-tools/*:/usr/share/java/monitoring-interceptors/*:/usr/bin/../ce-broker-plugins/build/libs/*:/usr/bin/../ce-broker-plugins/build/dependant-libs/*:/usr/bin/../ce-auth-providers/build/libs/*:/usr/bin/../ce-auth-providers/build/dependant-libs/*:/usr/bin/../ce-rest-server/build/libs/*:/usr/bin/../ce-rest-server/build/dependant-libs/*:/usr/bin/../ce-audit/build/libs/*:/usr/bin/../ce-audit/build/dependant-libs/*:/usr/bin/../share/java/kafka/*:/usr/bin/../share/java/confluent-metadata-service/*:/usr/bin/../share/java/rest-utils/*:/usr/bin/../share/java/confluent-common/*:/usr/bin/../share/java/ce-kafka-http-server/*:/usr/bin/../share/java/ce-kafka-rest-servlet/*:/usr/bin/../share/java/ce-kafka-rest-extensions/*:/usr/bin/../share/java/kafka-rest-lib/*:/usr/bin/../share/java/confluent-security/kafka-rest/*:/usr/bin/../share/java/confluent-security/schema-validator/*:/usr/bin/../support-metrics-client/build/dependant-libs-2.13.5/*:/usr/bin/../support-metrics-client/build/libs/*:/usr/bin/../share/java/confluent-telemetry/*:/usr/share/java/support-metrics-client/* org.apache.kafka.connect.cli.ConnectDistributed /etc/kafka-connect/kafka-connect.properties"
+        }
+      ]
+    },
+    {
+      "integration": "consul",
+      "expression": "process.name == 'consul' && 'agent' in process.args",
+      "source": "manual",
+      "notes": "Consul agent \u2014 name + explicit subcommand to avoid matching other consul invocations.",
+      "mains": 3,
+      "post_cel": 3,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1008513,
+          "name": "consul",
+          "generated_name": "consul",
+          "cmdline": "consul agent -data-dir=/consul/data -config-dir=/consul/config -dev -bootstrap -bind=0.0.0.0 -client=0.0.0.0 -node=node-consul-leader"
+        },
+        {
+          "pid": 1008594,
+          "name": "consul",
+          "generated_name": "consul",
+          "cmdline": "consul agent -dev -join=consul-leader -bind=0.0.0.0 -node=node-consul-follower-1"
+        },
+        {
+          "pid": 1008674,
+          "name": "consul",
+          "generated_name": "consul",
+          "cmdline": "consul agent -dev -join=consul-leader -bind=0.0.0.0 -node=node-consul-follower-2"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "couchbase",
+      "expression": "process.name == 'beam.smp' && process.args.exists(a, a.startsWith('/opt/couchbase'))",
+      "source": "manual",
+      "notes": "Couchbase erlang VM. Targets all 3 beam.smp roles (babysitter, ns_server, ns_couchdb) that share the /opt/couchbase prefix in argv[0]; a tighter rule could pick a single role.",
+      "mains": 12,
+      "post_cel": 3,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1016943,
+          "name": "beam.smp",
+          "generated_name": "tmp",
+          "cmdline": "/opt/couchbase/lib/erlang/erts-13.2.2.3/bin/beam.smp -A 16 -sbwt none -- -root /opt/couchbase/lib/erlang -bindir /opt/couchbase/lib/erlang/erts-13.2.2.3/bin -progname erl -- -home /tmp -- -smp enable -kernel logger [{handler, default, undefined}] inetrc \"/opt/couchbase/etc/couchbase/hosts.cfg\" dist_config_file \"/opt/couchbase/var/lib/couchbase/config/dist_cfg\" prevent_overlapping_partitions false -hidden -name babysitter_of_ns_1@cb.local -proto_dist cb -epmd_module cb_epmd -no_epmd -ssl_dist_optfile /opt/couchbase/etc/couchbase/ssl_dist_opts -setcookie nocookie -- -kernel global_enable_tracing false -noshell -noinput -run ns_babysitter_bootstrap -- -couch_ini /opt/couchbase/etc/couchdb/default.ini /opt/couchbase/etc/couchdb/default.d/capi.ini /opt/couchbase/etc/couchdb/default.d/geocouch.ini /opt/couchbase/etc/couchdb/local.ini -ns_babysitter pidfile \"\" -ns_server config_path \"/opt/couchbase/etc/couchbase/static_config\""
+        },
+        {
+          "pid": 1017197,
+          "name": "beam.smp",
+          "generated_name": "tmp",
+          "cmdline": "/opt/couchbase/lib/erlang/erts-13.2.2.3/bin/beam.smp -A 16 -sbt u -P 327680 -K true -swt low -sbwt none -MMmcs 30 -e102400 -S 16:16 -- -root /opt/couchbase/lib/erlang -bindir /opt/couchbase/lib/erlang/erts-13.2.2.3/bin -progname erl -- -home /tmp -- -smp enable -setcookie nocookie -kernel logger [{handler, default, undefined}] -kernel prevent_overlapping_partitions false -user user_io -run child_erlang child_start ns_bootstrap -- -smp enable -kernel logger [{handler, default, undefined}] inetrc \"/opt/couchbase/etc/couchbase/hosts.cfg\" dist_config_file \"/opt/couchbase/var/lib/couchbase/config/dist_cfg\" prevent_overlapping_partitions false -proto_dist cb -epmd_module cb_epmd -no_epmd -ssl_dist_optfile /opt/couchbase/etc/couchbase/ssl_dist_opts -kernel global_enable_tracing false -couch_ini /opt/couchbase/etc/couchdb/default.ini /opt/couchbase/etc/couchdb/default.d/capi.ini /opt/couchbase/etc/couchdb/default.d/geocouch.ini /opt/couchbase/etc/couchdb/local.ini"
+        },
+        {
+          "pid": 1017817,
+          "name": "beam.smp",
+          "generated_name": "tmp",
+          "cmdline": "/opt/couchbase/lib/erlang/erts-13.2.2.3/bin/beam.smp -S 16:16 -P 327680 -K true -- -root /opt/couchbase/lib/erlang -bindir /opt/couchbase/lib/erlang/erts-13.2.2.3/bin -progname erl -- -home /tmp -- -pa /opt/couchbase/lib/erlang/lib/asn1-5.0.21/ebin /opt/couchbase/lib/erlang/lib/compiler-8.2.6.3/ebin /opt/couchbase/lib/erlang/lib/crypto-5.1.4.1/ebin /opt/couchbase/lib/erlang/lib/dialyzer-5.0.5/ebin /opt/couchbase/lib/erlang/lib/diameter-2.2.7/ebin /opt/couchbase/lib/erlang/lib/edoc-1.2/ebin /opt/couchbase/lib/erlang/lib/eldap-1.2.11/ebin /opt/couchbase/lib/erlang/lib/erl_docgen-1.4/ebin /opt/couchbase/lib/erlang/lib/erl_interface-5.3.2/ebin /opt/couchbase/lib/erlang/lib/erts-13.2.2.3/ebin /opt/couchbase/lib/erlang/lib/eunit-2.8.2/ebin /opt/couchbase/lib/erlang/lib/ftp-1.1.4/ebin /opt/couchbase/lib/erlang/lib/inets-8.3.1.2/ebin /opt/couchbase/lib/erlang/lib/mnesia-4.21.4.1/ebin /opt/couchbase/lib/erlang/lib/observer-2.14/ebin /opt/couchbase/lib/erlang/lib/os_mon-2.8.2/ebin /opt/couchbase/lib/erlang/lib/parsetools-2.4.1/ebin /opt/couchbase/lib/erlang/lib/public_key-1.13.3.1/ebin /opt/couchbase/lib/erlang/lib/reltool-0.9.1/ebin /opt/couchbase/lib/erlang/lib/runtime_tools-1.19/ebin /opt/couchbase/lib/erlang/lib/sasl-4.2/ebin /opt/couchbase/lib/erlang/lib/snmp-5.13.5/ebin /opt/couchbase/lib/erlang/lib/ssh-4.15.3/ebin /opt/couchbase/lib/erlang/lib/ssl-10.9.1.2/ebin /opt/couchbase/lib/erlang/lib/syntax_tools-3.0.1/ebin /opt/couchbase/lib/erlang/lib/tftp-1.0.4/ebin /opt/couchbase/lib/erlang/lib/tools-3.5.3/ebin /opt/couchbase/lib/erlang/lib/xmerl-1.3.31.1/ebin /opt/couchbase/lib/couchdb/plugins/gc-couchbase-1.0.0/ebin /opt/couchbase/lib/couchdb/plugins/vtree-0.1.0/ebin /opt/couchbase/lib/couchdb/plugins/wkb-1.2.0/ebin /opt/couchbase/lib/couchdb/erlang/lib/couch-1.2.0a-961ad59-git/ebin /opt/couchbase/lib/couchdb/erlang/lib/couch_audit-1.0.0/ebin /opt/couchbase/lib/couchdb/erlang/lib/couch_dcp-1.0.0/ebin /opt/couchbase/lib/couchdb/erlang/lib/couch_index_merger-1.0.0/ebin /opt/couchbase/lib/couchdb/erlang/lib/couch_set_view-1.0.0/ebin /opt/couchbase/lib/couchdb/erlang/lib/couch_view_parser-1.0/ebin /opt/couchbase/lib/couchdb/erlang/lib/ejson-0.1.0/ebin /opt/couchbase/lib/couchdb/erlang/lib/erlang-oauth/ebin /opt/couchbase/lib/couchdb/erlang/lib/etap/ebin /opt/couchbase/lib/couchdb/erlang/lib/lhttpc-1.3/ebin /opt/couchbase/lib/couchdb/erlang/lib/mapreduce-1.0/ebin /opt/couchbase/lib/couchdb/erlang/lib/mochiweb-1.4.1/ebin /opt/couchbase/lib/couchdb/erlang/lib/snappy-1.0.4/ebin /opt/couchbase/lib/ns_server/erlang/lib/ale/ebin /opt/couchbase/lib/ns_server/erlang/lib/chronicle/ebin /opt/couchbase/lib/ns_server/erlang/lib/enacl/ebin /opt/couchbase/lib/ns_server/erlang/lib/esaml/ebin /opt/couchbase/lib/ns_server/erlang/lib/gen_smtp/ebin /opt/couchbase/lib/ns_server/erlang/lib/iso8601/ebin /opt/couchbase/lib/ns_server/erlang/lib/ns_babysitter/ebin /opt/couchbase/lib/ns_server/erlang/lib/ns_couchdb/ebin /opt/couchbase/lib/ns_server/erlang/lib/ns_server/ebin /opt/couchbase/lib/erlang/lib/stdlib-4.3.1.2/ebin /opt/couchbase/lib/erlang/lib/kernel-8.5.4.2/ebin . -couch_ini /opt/couchbase/etc/couchdb/default.ini /opt/couchbase/etc/couchdb/default.d/capi.ini /opt/couchbase/etc/couchdb/default.d/geocouch.ini /opt/couchbase/etc/couchdb/local.ini -kernel logger [{handler, default, undefined}] -kernel prevent_overlapping_partitions false -kernel logger [{handler, default, undefined}] inetrc \"/opt/couchbase/etc/couchbase/hosts.cfg\" dist_config_file \"/opt/couchbase/var/lib/couchbase/config/dist_cfg\" prevent_overlapping_partitions false -kernel global_enable_tracing false -ssl_dist_optfile /opt/couchbase/etc/couchbase/ssl_dist_opts -name couchdb_ns_1@cb.local -smp enable -kernel logger [{handler, default, undefined}] -kernel prevent_overlapping_partitions false -nouser -hidden -proto_dist cb -epmd_module cb_epmd -no_epmd -setcookie nocookie -run child_erlang child_start ns_couchdb"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 1017715,
+          "name": "sigar_port",
+          "generated_name": "portsigar for ns_1@cb",
+          "cmdline": "portsigar for ns_1@cb.local --babysitter_pid 42 --logfile /opt/couchbase/var/lib/couchbase/logs/sigar_port.log --config /opt/couchbase/var/lib/couchbase/config/sigar_port.json"
+        },
+        {
+          "pid": 1018176,
+          "name": "prometheus",
+          "generated_name": "prometheus",
+          "cmdline": "/opt/couchbase/bin/prometheus --config.file /opt/couchbase/var/lib/couchbase/config/prometheus.yml --web.enable-admin-api --web.enable-lifecycle --storage.tsdb.retention.size 1024MB --storage.tsdb.retention.time 365d --web.listen-address 127.0.0.1:9123 --storage.tsdb.max-block-duration 25h --storage.tsdb.path /opt/couchbase/var/lib/couchbase/stats_data --log.level debug --query.max-samples 200000 --storage.tsdb.no-lockfile --query.lookback-delta 600s --web.config.file /opt/couchbase/var/lib/couchbase/config/prometheus_auth"
+        },
+        {
+          "pid": 1018208,
+          "name": "goxdcr",
+          "generated_name": "goxdcr",
+          "cmdline": "/opt/couchbase/bin/goxdcr -sourceKVAdminPort=8091 -xdcrRestPort=9998 -isEnterprise=true -ipv4=required -ipv6=optional -caFile=/opt/couchbase/var/lib/couchbase/config/certs/ca.pem -clientCertFile=/opt/couchbase/var/lib/couchbase/config/certs/client_chain.pem -clientKeyFile=/opt/couchbase/var/lib/couchbase/config/certs/client_pkey.pem"
+        },
+        {
+          "pid": 1018210,
+          "name": "memcached",
+          "generated_name": "memcached",
+          "cmdline": "/opt/couchbase/bin/memcached -C /opt/couchbase/var/lib/couchbase/config/memcached.json"
+        },
+        {
+          "pid": 1018468,
+          "name": "cbft",
+          "generated_name": "cbft",
+          "cmdline": "/opt/couchbase/bin/cbft -cfg=metakv -uuid=ae4c1d2a2eb61b4fcd196fe35f400219 -server=http://127.0.0.1:8091 -dataDir=/opt/couchbase/var/lib/couchbase/data/@fts -tags=feed,janitor,pindex,queryer,cbauth_service -auth=cbauth -extra=127.0.0.1:8091 -options=startCheckServer=skip,slowQueryLogTimeout=5s,defaultMaxPartitionsPerPIndex=1024,bleveMaxResultWindow=10000,failoverAssignAllPrimaries=false,deploymentModel=default,cbaudit=true,ftsMemoryQuota=262144000,maxReplicasAllowed=3,bucketTypesAllowed=membase:ephemeral,http2=true,,ipv4=required,ipv6=optional -bindHttp=127.0.0.1:8094,0.0.0.0:8094 -bindHttps=:18094 -tlsCertFile=/opt/couchbase/var/lib/couchbase/config/certs/chain.pem -tlsKeyFile=/opt/couchbase/var/lib/couchbase/config/certs/pkey.pem -tlsCAFile=/opt/couchbase/var/lib/couchbase/config/certs/ca.pem -clientCertFile=/opt/couchbase/var/lib/couchbase/config/certs/client_chain.pem -clientKeyFile=/opt/couchbase/var/lib/couchbase/config/certs/client_pkey.pem -bindGrpc=127.0.0.1:9130,0.0.0.0:9130 -bindGrpcSsl=127.0.0.1:19130,0.0.0.0:19130 -serverSslPort=18091"
+        },
+        {
+          "pid": 1018558,
+          "name": "indexer",
+          "generated_name": "indexer",
+          "cmdline": "/opt/couchbase/bin/indexer -adminPort=9100 -scanPort=9101 -httpPort=9102 -streamInitPort=9103 -streamCatchupPort=9104 -streamMaintPort=9105 --httpsPort=19102 --certFile=/opt/couchbase/var/lib/couchbase/config/certs/chain.pem --keyFile=/opt/couchbase/var/lib/couchbase/config/certs/pkey.pem --caFile=/opt/couchbase/var/lib/couchbase/config/certs/ca.pem --clientCertFile=/opt/couchbase/var/lib/couchbase/config/certs/client_chain.pem --clientKeyFile=/opt/couchbase/var/lib/couchbase/config/certs/client_pkey.pem -ipv4=required -ipv6=optional -cluster=127.0.0.1:8091 -storageDir=/opt/couchbase/var/lib/couchbase/data/@2i -diagDir=/opt/couchbase/var/lib/couchbase/crash -logDir=/opt/couchbase/var/lib/couchbase/logs -nodeUUID=ae4c1d2a2eb61b4fcd196fe35f400219 -isEnterprise=true --deploymentModel=default"
+        },
+        {
+          "pid": 1018592,
+          "name": "cbq-engine",
+          "generated_name": "cbq-engine",
+          "cmdline": "/opt/couchbase/bin/cbq-engine --datastore=http://127.0.0.1:8091 --http=:8093 --configstore=http://127.0.0.1:8091 --enterprise=true -uuid=ae4c1d2a2eb61b4fcd196fe35f400219 --deploymentModel=default --ipv4=required --ipv6=optional --https=:18093 --certfile=/opt/couchbase/var/lib/couchbase/config/certs/chain.pem --keyfile=/opt/couchbase/var/lib/couchbase/config/certs/pkey.pem --cafile=/opt/couchbase/var/lib/couchbase/config/certs/ca.pem --clientCertFile=/opt/couchbase/var/lib/couchbase/config/certs/client_chain.pem --clientKeyFile=/opt/couchbase/var/lib/couchbase/config/certs/client_pkey.pem"
+        },
+        {
+          "pid": 1018699,
+          "name": "projector",
+          "generated_name": "projector",
+          "cmdline": "/opt/couchbase/bin/projector --deploymentModel=default --httpsPort=9999 --certFile=/opt/couchbase/var/lib/couchbase/config/certs/chain.pem --keyFile=/opt/couchbase/var/lib/couchbase/config/certs/pkey.pem --caFile=/opt/couchbase/var/lib/couchbase/config/certs/ca.pem --clientCertFile=/opt/couchbase/var/lib/couchbase/config/certs/client_chain.pem --clientKeyFile=/opt/couchbase/var/lib/couchbase/config/certs/client_pkey.pem -ipv4=required -ipv6=optional -kvaddrs=127.0.0.1:11210 -adminport=:9999 -diagDir=/opt/couchbase/var/lib/couchbase/crash 127.0.0.1:8091"
+        },
+        {
+          "pid": 1016699,
+          "name": "sync_gateway",
+          "generated_name": "sync_gateway",
+          "cmdline": "sync_gateway --defaultLogFilePath=/var/log/sync_gateway -bootstrap.server couchbase://couchbase-standalone -bootstrap.use_tls_server=false -bootstrap.username Administrator -bootstrap.password password -api.admin_interface :4985 -api.metrics_interface :4986 -api.metrics_interface_authentication=false"
+        }
+      ]
+    },
+    {
+      "integration": "elastic",
+      "expression": "process.name == 'java' && process.args.exists(a, a == 'org.opensearch.bootstrap.OpenSearch' || a == 'org.elasticsearch.bootstrap.Elasticsearch')",
+      "source": "manual",
+      "notes": "Test fixture runs OpenSearch; production may run Elasticsearch \u2014 accept either main class.",
+      "mains": 3,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1041691,
+          "name": "java",
+          "generated_name": "org.opensearch.bootstrap.OpenSearch",
+          "cmdline": "/usr/share/opensearch/jdk/bin/java -Xshare:auto -Dopensearch.networkaddress.cache.ttl=60 -Dopensearch.networkaddress.cache.negative.ttl=10 -XX:+AlwaysPreTouch -Xss1m -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djna.nosys=true -XX:-OmitStackTraceInFastThrow -XX:+ShowCodeDetailsInExceptionMessages -Dio.netty.noUnsafe=true -Dio.netty.noKeySetOptimization=true -Dio.netty.recycler.maxCapacityPerThread=0 -Dio.netty.allocator.numDirectArenas=0 -Dlog4j.shutdownHookEnabled=false -Dlog4j2.disable.jmx=true -Djava.locale.providers=SPI,COMPAT -Xms1g -Xmx1g -XX:+UseG1GC -XX:G1ReservePercent=25 -XX:InitiatingHeapOccupancyPercent=30 -Djava.io.tmpdir=/tmp/opensearch-8053587983108232993 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=data -XX:ErrorFile=logs/hs_err_pid%p.log -Xlog:gc*,gc+age=trace,safepoint:file=logs/gc.log:utctime,pid,tags:filecount=32,filesize=64m -Dclk.tck=100 -Djdk.attach.allowAttachSelf=true -Djava.security.policy=/usr/share/opensearch/plugins/opensearch-performance-analyzer/pa_config/opensearch_security.policy -Dopensearch.cgroups.hierarchy.override=/ -Xms512m -Xmx512m -XX:MaxDirectMemorySize=268435456 -Dopensearch.path.home=/usr/share/opensearch -Dopensearch.path.conf=/usr/share/opensearch/config -Dopensearch.distribution.type=tar -Dopensearch.bundled_jdk=true -cp /usr/share/opensearch/lib/* org.opensearch.bootstrap.OpenSearch -Ecluster.name=test-cluster -Ediscovery.type=single-node -Enode.name=test-node -Epath.repo=[\"/usr/share/elasticsearch/data\"]"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 1041692,
+          "name": "performance-ana",
+          "generated_name": "sh",
+          "cmdline": "/bin/sh /usr/share/opensearch/bin/performance-analyzer-agent-cli"
+        },
+        {
+          "pid": 1041696,
+          "name": "java",
+          "generated_name": "org.opensearch.performanceanalyzer.PerformanceAnalyzerApp",
+          "cmdline": "/usr/share/opensearch/jdk/bin/java -Xshare:auto -Xms4m -Xmx64m -XX:+UseSerialGC -Dlog4j.configurationFile=/usr/share/opensearch/plugins/opensearch-performance-analyzer/pa_config/log4j2.xml -Xms64M -Xmx64M -XX:+UseSerialGC -XX:CICompilerCount=1 -XX:-TieredCompilation -XX:InitialCodeCacheSize=4096 -XX:InitialBootClassLoaderMetaspaceSize=30720 -XX:MaxRAM=400m -Dopensearch.path.home=/usr/share/opensearch -Dopensearch.path.conf=/usr/share/opensearch/config -Dopensearch.distribution.type=tar -cp /usr/share/opensearch/lib/*:/usr/share/opensearch/performance-analyzer-rca/lib/* org.opensearch.performanceanalyzer.PerformanceAnalyzerApp"
+        }
+      ]
+    },
+    {
+      "integration": "esxi",
+      "expression": "process.name == 'vcsim'",
+      "source": "manual",
+      "notes": "Test fixture uses VMware's vcsim simulator. Real ESXi would be queried over the API, not by host process.",
+      "mains": 1,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1061492,
+          "name": "vcsim",
+          "generated_name": "vcsim",
+          "cmdline": "/vcsim -api-version 7.0 -esx -l 0.0.0.0:8989"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "etcd",
+      "expression": "process.name == 'etcd'",
+      "source": "manual",
+      "notes": "",
+      "mains": 3,
+      "post_cel": 3,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1064415,
+          "name": "etcd",
+          "generated_name": "etcd",
+          "cmdline": "/usr/local/bin/etcd -name etcd2 --data-dir /etcd_data -advertise-client-urls http://etcd2:2379 -listen-client-urls http://0.0.0.0:2379 -initial-advertise-peer-urls http://etcd2:2380 -listen-peer-urls http://0.0.0.0:2380 -initial-cluster etcd0=http://etcd0:2380,etcd1=http://etcd1:2380,etcd2=http://etcd2:2380"
+        },
+        {
+          "pid": 1064422,
+          "name": "etcd",
+          "generated_name": "etcd",
+          "cmdline": "/usr/local/bin/etcd -name etcd0 --data-dir /etcd_data -advertise-client-urls http://etcd0:2379 -listen-client-urls http://0.0.0.0:2379 -initial-advertise-peer-urls http://etcd0:2380 -listen-peer-urls http://0.0.0.0:2380 -initial-cluster etcd0=http://etcd0:2380,etcd1=http://etcd1:2380,etcd2=http://etcd2:2380"
+        },
+        {
+          "pid": 1064417,
+          "name": "etcd",
+          "generated_name": "etcd",
+          "cmdline": "/usr/local/bin/etcd -name etcd1 --data-dir /etcd_data -advertise-client-urls http://etcd1:2379 -listen-client-urls http://0.0.0.0:2379 -initial-advertise-peer-urls http://etcd1:2380 -listen-peer-urls http://0.0.0.0:2380 -initial-cluster etcd0=http://etcd0:2380,etcd1=http://etcd1:2380,etcd2=http://etcd2:2380"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "falco",
+      "expression": "process.name in ['falco', 'falcoctl']",
+      "source": "manual",
+      "notes": "",
+      "mains": 1,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1067116,
+          "name": "falco",
+          "generated_name": "falco",
+          "cmdline": "/usr/bin/falco"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "glusterfs",
+      "expression": "process.name in ['glusterd', 'glusterfsd', 'glusterfs']",
+      "source": "manual",
+      "notes": "",
+      "mains": 6,
+      "post_cel": 6,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1125738,
+          "name": "glusterd",
+          "generated_name": "glusterd",
+          "cmdline": "/usr/sbin/glusterd -p /var/run/glusterd.pid --log-level INFO"
+        },
+        {
+          "pid": 1126292,
+          "name": "glusterfsd",
+          "generated_name": "glusterfsd",
+          "cmdline": "/usr/sbin/glusterfsd -s gluster-node-2 --volfile-id gv0.gluster-node-2.export-test -p /var/run/gluster/vols/gv0/gluster-node-2-export-test.pid -S /var/run/gluster/e2c6cf6565f229a7.socket --brick-name /export-test -l /var/log/glusterfs/bricks/export-test.log --xlator-option *-posix.glusterd-uuid=68dbbb20-2346-433e-8bfa-4cfd744aafb7 --process-name brick --brick-port 49152 --xlator-option gv0-server.listen-port=49152"
+        },
+        {
+          "pid": 1126313,
+          "name": "glusterfs",
+          "generated_name": "glusterfs",
+          "cmdline": "/usr/sbin/glusterfs -s localhost --volfile-id shd/gv0 -p /var/run/gluster/shd/gv0/gv0-shd.pid -l /var/log/glusterfs/glustershd.log -S /var/run/gluster/d2985f74e0a84409.socket --xlator-option *replicate*.node-uuid=68dbbb20-2346-433e-8bfa-4cfd744aafb7 --process-name glustershd --client-pid=-6"
+        },
+        {
+          "pid": 1125830,
+          "name": "glusterd",
+          "generated_name": "glusterd",
+          "cmdline": "/usr/sbin/glusterd -p /var/run/glusterd.pid --log-level INFO"
+        },
+        {
+          "pid": 1126187,
+          "name": "glusterfsd",
+          "generated_name": "glusterfsd",
+          "cmdline": "/usr/sbin/glusterfsd -s gluster-node-1 --volfile-id gv0.gluster-node-1.export-test -p /var/run/gluster/vols/gv0/gluster-node-1-export-test.pid -S /var/run/gluster/e509e870a06ca676.socket --brick-name /export-test -l /var/log/glusterfs/bricks/export-test.log --xlator-option *-posix.glusterd-uuid=000b4a23-f89a-4889-bcf0-728616e79f30 --process-name brick --brick-port 49152 --xlator-option gv0-server.listen-port=49152"
+        },
+        {
+          "pid": 1126208,
+          "name": "glusterfs",
+          "generated_name": "glusterfs",
+          "cmdline": "/usr/sbin/glusterfs -s localhost --volfile-id shd/gv0 -p /var/run/gluster/shd/gv0/gv0-shd.pid -l /var/log/glusterfs/glustershd.log -S /var/run/gluster/a843767c00c91eed.socket --xlator-option *replicate*.node-uuid=000b4a23-f89a-4889-bcf0-728616e79f30 --process-name glustershd --client-pid=-6"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "go_expvar",
+      "expression": "process.cmdline.contains('expvar')",
+      "source": "manual",
+      "notes": "go_expvar targets any Go binary publishing expvars; test fixture binary is named test_expvar.",
+      "mains": 1,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1137071,
+          "name": "test_expvar",
+          "generated_name": "test_expvar",
+          "cmdline": "/tmp/go-build051467985/command-line-arguments/_obj/exe/test_expvar"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "haproxy",
+      "expression": "process.name == 'haproxy'",
+      "source": "manual",
+      "notes": "",
+      "mains": 1,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1139898,
+          "name": "haproxy",
+          "generated_name": "haproxy",
+          "cmdline": "haproxy -W -db -f /usr/local/etc/haproxy/haproxy.cfg"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "hazelcast",
+      "expression": "process.name == 'java' && 'com.hazelcast.commandline.HazelcastServerCommandLine' in process.args",
+      "source": "manual",
+      "notes": "",
+      "mains": 4,
+      "post_cel": 3,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1143915,
+          "name": "java",
+          "generated_name": "com.hazelcast.commandline.HazelcastServerCommandLine",
+          "cmdline": "/usr/bin/java -cp /opt/hazelcast/*:/opt/hazelcast/lib:/opt/hazelcast/lib/*:/opt/hazelcast/bin/user-lib:/opt/hazelcast/bin/user-lib/* --add-modules java.se --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.management/sun.management=ALL-UNNAMED --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED -Dhazelcast.logging.type=log4j2 -Dlog4j.configurationFile=file:/opt/hazelcast/config/log4j2.properties -Dhazelcast.config=/opt/hazelcast/config/hazelcast-docker.xml -Djet.custom.lib.dir=/opt/hazelcast/custom-lib -Djava.net.preferIPv4Stack=true -XX:MaxRAMPercentage=80.0 -XX:MaxGCPauseMillis=5 -Dhazelcast.config=/tmp/hazelcast.xml -Dhazelcast.jmx=true -Dhazelcast.metrics.enabled=true -Dhazelcast.metrics.jmx.enabled=true -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=1099 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.rmi.port=1099 -Djava.rmi.server.hostname=localhost com.hazelcast.commandline.HazelcastServerCommandLine start"
+        },
+        {
+          "pid": 1143917,
+          "name": "java",
+          "generated_name": "com.hazelcast.commandline.HazelcastServerCommandLine",
+          "cmdline": "/usr/bin/java -cp /opt/hazelcast/*:/opt/hazelcast/lib:/opt/hazelcast/lib/*:/opt/hazelcast/bin/user-lib:/opt/hazelcast/bin/user-lib/* --add-modules java.se --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.management/sun.management=ALL-UNNAMED --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED -Dhazelcast.logging.type=log4j2 -Dlog4j.configurationFile=file:/opt/hazelcast/config/log4j2.properties -Dhazelcast.config=/opt/hazelcast/config/hazelcast-docker.xml -Djet.custom.lib.dir=/opt/hazelcast/custom-lib -Djava.net.preferIPv4Stack=true -XX:MaxRAMPercentage=80.0 -XX:MaxGCPauseMillis=5 -Dhazelcast.config=/tmp/hazelcast.xml -Dhazelcast.jmx=true -Dhazelcast.metrics.enabled=true -Dhazelcast.metrics.jmx.enabled=true -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=1100 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.rmi.port=1100 -Djava.rmi.server.hostname=localhost com.hazelcast.commandline.HazelcastServerCommandLine start"
+        },
+        {
+          "pid": 1143914,
+          "name": "java",
+          "generated_name": "com.hazelcast.commandline.HazelcastServerCommandLine",
+          "cmdline": "/usr/bin/java -cp /opt/hazelcast/*:/tmp/log4j2/*:/opt/hazelcast/lib:/opt/hazelcast/lib/*:/opt/hazelcast/bin/user-lib:/opt/hazelcast/bin/user-lib/* --add-modules java.se --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.management/sun.management=ALL-UNNAMED --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED -Dhazelcast.logging.type=log4j2 -Dlog4j.configurationFile=file:/opt/hazelcast/config/log4j2.properties -Dhazelcast.config=/opt/hazelcast/config/hazelcast-docker.xml -Djet.custom.lib.dir=/opt/hazelcast/custom-lib -Djava.net.preferIPv4Stack=true -XX:MaxRAMPercentage=80.0 -XX:MaxGCPauseMillis=5 -Dhazelcast.jmx=true -Dhazelcast.metrics.enabled=true -Dhazelcast.metrics.jmx.enabled=true -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=1098 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.rmi.port=1098 -Djava.rmi.server.hostname=localhost -Dhazelcast.logging.type=log4j2 -Dlog4j.configurationFile=/tmp/log4j2.properties com.hazelcast.commandline.HazelcastServerCommandLine start"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 1144227,
+          "name": "java",
+          "generated_name": "org.springframework.boot.loader.PropertiesLauncher",
+          "cmdline": "java -server -Dloader.path=/opt/hazelcast/management-center/bin/user-lib/* --add-opens java.base/java.lang=ALL-UNNAMED -Dhazelcast.mc.home=/data -Djava.net.preferIPv4Stack=true -Dhazelcast.metrics.enabled=true -Dhazelcast.metrics.jmx.enabled=true -Dhazelcast.metrics.mc.enabled=true -Dhazelcast.client.metrics.enabled=true -Dhazelcast.client.metrics.jmx.enabled=true -Dhazelcast.diagnostics.enabled=true -Dhazelcast.mc.rest.enabled=true -Dhazelcast.mc.healthCheck.enable=true -Dhazelcast.mc.jmx.enabled=true -Dhazelcast.mc.jmx.port=9999 -Dhazelcast.mc.jmx.rmi.port=9999 -Dhazelcast.mc.jmx.host=localhost -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Djava.rmi.server.hostname=localhost -XX:+UseContainerSupport -XX:MaxRAMPercentage=80 -cp /opt/hazelcast/management-center/bin/../hazelcast-management-center-5.3.3.jar org.springframework.boot.loader.PropertiesLauncher"
+        }
+      ]
+    },
+    {
+      "integration": "hdfs_datanode",
+      "expression": "process.name == 'java' && 'org.apache.hadoop.hdfs.server.datanode.DataNode' in process.args",
+      "source": "manual",
+      "notes": "",
+      "mains": 2,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1152354,
+          "name": "java",
+          "generated_name": "hadoop",
+          "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Dproc_datanode -Djava.net.preferIPv4Stack=true -Dhadoop.security.logger=ERROR,RFAS -Dyarn.log.dir=/opt/hadoop-3.1.3/logs -Dyarn.log.file=hadoop.log -Dyarn.home.dir=/opt/hadoop-3.1.3 -Dyarn.root.logger=INFO,console -Djava.library.path=/opt/hadoop-3.1.3/lib/native -Dhadoop.log.dir=/opt/hadoop-3.1.3/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop-3.1.3 -Dhadoop.id.str=root -Dhadoop.root.logger=INFO,console -Dhadoop.policy.file=hadoop-policy.xml org.apache.hadoop.hdfs.server.datanode.DataNode"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 1152553,
+          "name": "java",
+          "generated_name": "hadoop",
+          "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Dproc_namenode -Djava.net.preferIPv4Stack=true -Dhdfs.audit.logger=INFO,NullAppender -Dhadoop.security.logger=INFO,RFAS -Dyarn.log.dir=/opt/hadoop-3.1.3/logs -Dyarn.log.file=hadoop.log -Dyarn.home.dir=/opt/hadoop-3.1.3 -Dyarn.root.logger=INFO,console -Djava.library.path=/opt/hadoop-3.1.3/lib/native -Dhadoop.log.dir=/opt/hadoop-3.1.3/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop-3.1.3 -Dhadoop.id.str=root -Dhadoop.root.logger=INFO,console -Dhadoop.policy.file=hadoop-policy.xml org.apache.hadoop.hdfs.server.namenode.NameNode"
+        }
+      ]
+    },
+    {
+      "integration": "hdfs_namenode",
+      "expression": "process.name == 'java' && 'org.apache.hadoop.hdfs.server.namenode.NameNode' in process.args",
+      "source": "manual",
+      "notes": "",
+      "mains": 2,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1157745,
+          "name": "java",
+          "generated_name": "hadoop",
+          "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Dproc_namenode -Djava.net.preferIPv4Stack=true -Dhdfs.audit.logger=INFO,NullAppender -Dhadoop.security.logger=INFO,RFAS -Dyarn.log.dir=/opt/hadoop-3.1.3/logs -Dyarn.log.file=hadoop.log -Dyarn.home.dir=/opt/hadoop-3.1.3 -Dyarn.root.logger=INFO,console -Djava.library.path=/opt/hadoop-3.1.3/lib/native -Dhadoop.log.dir=/opt/hadoop-3.1.3/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop-3.1.3 -Dhadoop.id.str=root -Dhadoop.root.logger=INFO,console -Dhadoop.policy.file=hadoop-policy.xml org.apache.hadoop.hdfs.server.namenode.NameNode"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 1157509,
+          "name": "java",
+          "generated_name": "hadoop",
+          "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Dproc_datanode -Djava.net.preferIPv4Stack=true -Dhadoop.security.logger=ERROR,RFAS -Dyarn.log.dir=/opt/hadoop-3.1.3/logs -Dyarn.log.file=hadoop.log -Dyarn.home.dir=/opt/hadoop-3.1.3 -Dyarn.root.logger=INFO,console -Djava.library.path=/opt/hadoop-3.1.3/lib/native -Dhadoop.log.dir=/opt/hadoop-3.1.3/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop-3.1.3 -Dhadoop.id.str=root -Dhadoop.root.logger=INFO,console -Dhadoop.policy.file=hadoop-policy.xml org.apache.hadoop.hdfs.server.datanode.DataNode"
+        }
+      ]
+    },
+    {
+      "integration": "hivemq",
+      "expression": "process.name == 'java' && process.args.exists(a, a.endsWith('hivemq.jar') || a == 'com.hivemq.HiveMQServer')",
+      "source": "manual",
+      "notes": "",
+      "mains": 1,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1162494,
+          "name": "java",
+          "generated_name": "hivemq",
+          "cmdline": "java -Dhivemq.home=/opt/hivemq -XX:HeapDumpPath=\"/opt/hivemq/heap-dump.hprof\" -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=9010 -Dcom.sun.management.jmxremote.rmi.port=9010 -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost -Dhivemq.log.folder=/var/log -Djava.net.preferIPv4Stack=true -noverify --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED --add-exports java.base/jdk.internal.misc=ALL-UNNAMED -Djava.security.egd=file:/dev/./urandom -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9010 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -XX:+CrashOnOutOfMemoryError -XX:+HeapDumpOnOutOfMemoryError -jar /opt/hivemq/bin/hivemq.jar"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "hudi",
+      "expression": "process.name == 'java' && process.args.exists(a, a.startsWith('org.apache.spark.deploy.'))",
+      "source": "manual",
+      "notes": "Hudi test fixture runs as Spark \u2014 same predicate as the spark integration.",
+      "mains": 1,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1173100,
+          "name": "java",
+          "generated_name": "spark",
+          "cmdline": "/usr/local/openjdk-11/bin/java -cp /opt/spark/conf:/opt/spark/jars/* -Xmx1g org.apache.spark.deploy.SparkSubmit --conf spark.serializer=org.apache.spark.serializer.KryoSerializer --packages org.apache.hudi:hudi-spark3-bundle_2.12:0.10.0,org.apache.spark:spark-avro_2.12:3.2.4 /usr/src/app/target/scala-2.12/app_2.12-0.1.0-SNAPSHOT.jar"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "ibm_was",
+      "expression": "process.name == 'java' && process.args.exists(a, a == 'com.ibm.wsspi.bootstrap.WSPreLauncher' || a == 'com.ibm.ws.runtime.WsServer')",
+      "source": "manual",
+      "notes": "",
+      "mains": 1,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1189677,
+          "name": "java",
+          "generated_name": "com.ibm.wsspi.bootstrap.WSPreLauncher",
+          "cmdline": "/opt/IBM/WebSphere/AppServer/java/8.0/bin/java -Dosgi.install.area=/opt/IBM/WebSphere/AppServer -Dwas.status.socket=38285 -Dosgi.configuration.area=/opt/IBM/WebSphere/AppServer/profiles/AppSrv01/servers/server1/configuration -Djava.awt.headless=true -Dosgi.framework.extensions=com.ibm.cds,com.ibm.ws.eclipse.adaptors -Xshareclasses:name=webspherev9_8.0_64_%g,nonFatal -Dcom.ibm.xtq.processor.overrideSecureProcessing=true -Xcheck:dump -Djava.security.properties=/opt/IBM/WebSphere/AppServer/properties/java.security -Djava.security.policy=/opt/IBM/WebSphere/AppServer/properties/java.policy -Dcom.ibm.CORBA.ORBPropertyFilePath=/opt/IBM/WebSphere/AppServer/properties -Xbootclasspath/p:/opt/IBM/WebSphere/AppServer/java/8.0/jre/lib/ibmorb.jar -classpath /opt/IBM/WebSphere/AppServer/profiles/AppSrv01/properties:/opt/IBM/WebSphere/AppServer/properties:/opt/IBM/WebSphere/AppServer/lib/startup.jar:/opt/IBM/WebSphere/AppServer/lib/bootstrap.jar:/opt/IBM/WebSphere/AppServer/lib/lmproxy.jar:/opt/IBM/WebSphere/AppServer/lib/urlprotocols.jar:/opt/IBM/WebSphere/AppServer/deploytool/itp/batchboot.jar:/opt/IBM/WebSphere/AppServer/deploytool/itp/batch2.jar:/opt/IBM/WebSphere/AppServer/java/8.0/lib/tools.jar -Dibm.websphere.internalClassAccessMode=allow -verbose:gc -Xverbosegclog:/opt/IBM/WebSphere/AppServer/profiles/AppSrv01/logs/server1/verbosegc.%seq.log,10,7000 -Xms50m -Xmx4096m -Xcompressedrefs -Xscmaxaot12M -Xscmx90M -Dws.ext.dirs=/opt/IBM/WebSphere/AppServer/java/8.0/lib:/opt/IBM/WebSphere/AppServer/profiles/AppSrv01/classes:/opt/IBM/WebSphere/AppServer/classes:/opt/IBM/WebSphere/AppServer/lib:/opt/IBM/WebSphere/AppServer/installedChannels:/opt/IBM/WebSphere/AppServer/lib/ext:/opt/IBM/WebSphere/AppServer/web/help:/opt/IBM/WebSphere/AppServer/deploytool/itp/plugins/com.ibm.etools.ejbdeploy/runtime -Dderby.system.home=/opt/IBM/WebSphere/AppServer/derby -Dcom.ibm.itp.location=/opt/IBM/WebSphere/AppServer/bin -Djava.util.logging.configureByServer=true -Duser.install.root=/opt/IBM/WebSphere/AppServer/profiles/AppSrv01 -Djava.ext.dirs=/opt/IBM/WebSphere/AppServer/tivoli/tam:/opt/IBM/WebSphere/AppServer/javaext:/opt/IBM/WebSphere/AppServer/java/8.0/jre/lib/ext -Djavax.management.builder.initial=com.ibm.ws.management.PlatformMBeanServerBuilder -Dpython.cachedir=/opt/IBM/WebSphere/AppServer/profiles/AppSrv01/temp/cachedir -Dwas.install.root=/opt/IBM/WebSphere/AppServer -Djava.util.logging.manager=com.ibm.ws.bootstrap.WsLogManager -Dserver.root=/opt/IBM/WebSphere/AppServer/profiles/AppSrv01 -Dcom.ibm.security.jgss.debug=off -Dcom.ibm.security.krb5.Krb5Debug=off -DKC_HOME=/opt/IBM/WebSphere/AppServer/systemApps/isclite.ear/isclite.war/help -Djava.util.prefs.userRoot=/home/was/ -Xnoloa -Djava.library.path=/opt/IBM/WebSphere/AppServer/lib/native/linux/x86_64/:/opt/IBM/WebSphere/AppServer/java/8.0/jre/lib/amd64/compressedrefs:/opt/IBM/WebSphere/AppServer/java/8.0/jre/lib/amd64:/opt/IBM/WebSphere/AppServer/bin:/opt/IBM/WebSphere/AppServer/nulldllsdir:/usr/lib64:/usr/lib: -Djava.endorsed.dirs=/opt/IBM/WebSphere/AppServer/endorsed_apis:/opt/IBM/WebSphere/AppServer/java/8.0/jre/lib/endorsed -Djava.security.auth.login.config=/opt/IBM/WebSphere/AppServer/profiles/AppSrv01/properties/wsjaas.conf -Djava.security.policy=/opt/IBM/WebSphere/AppServer/profiles/AppSrv01/properties/server.policy com.ibm.wsspi.bootstrap.WSPreLauncher -nosplash -application com.ibm.ws.bootstrap.WSLauncher com.ibm.ws.runtime.WsServer /opt/IBM/WebSphere/AppServer/profiles/AppSrv01/config DefaultCell01 DefaultNode01 server1"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "kafka_actions",
+      "expression": "process.name == 'java' && 'kafka.Kafka' in process.args",
+      "source": "manual",
+      "notes": "Same target as kafka_consumer.",
+      "mains": 2,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1220297,
+          "name": "java",
+          "generated_name": "kafka.Kafka",
+          "cmdline": "java -Xmx1G -Xms1G -server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -XX:MaxInlineLevel=15 -Djava.awt.headless=true -Xlog:gc*:file=/var/log/kafka/kafkaServer-gc.log:time,tags:filecount=10,filesize=100M -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dkafka.logs.dir=/var/log/kafka -Dlog4j.configuration=file:/etc/kafka/log4j.properties -cp /usr/bin/../share/java/kafka/*:/usr/bin/../share/java/confluent-telemetry/* kafka.Kafka /etc/kafka/kafka.properties"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 1219631,
+          "name": "java",
+          "generated_name": "zookeeper",
+          "cmdline": "java -Xmx512M -Xms512M -server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -XX:MaxInlineLevel=15 -Djava.awt.headless=true -Xlog:gc*:file=/var/log/kafka/zookeeper-gc.log:time,tags:filecount=10,filesize=100M -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dkafka.logs.dir=/var/log/kafka -Dlog4j.configuration=file:/etc/kafka/log4j.properties -cp /usr/bin/../share/java/kafka/*:/usr/bin/../share/java/confluent-telemetry/* org.apache.zookeeper.server.quorum.QuorumPeerMain /etc/kafka/zookeeper.properties"
+        }
+      ]
+    },
+    {
+      "integration": "kafka_consumer",
+      "expression": "process.name == 'java' && 'kafka.Kafka' in process.args",
+      "source": "manual",
+      "notes": "",
+      "mains": 3,
+      "post_cel": 2,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1382628,
+          "name": "java",
+          "generated_name": "kafka.Kafka",
+          "cmdline": "java -Xmx1G -Xms1G -server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -XX:MaxInlineLevel=15 -Djava.awt.headless=true -Xlog:gc*:file=/var/log/kafka/kafkaServer-gc.log:time,tags:filecount=10,filesize=100M -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dkafka.logs.dir=/var/log/kafka -Dlog4j.configuration=file:/etc/kafka/log4j.properties -cp /usr/bin/../share/java/kafka/*:/usr/bin/../share/java/confluent-telemetry/* kafka.Kafka /etc/kafka/kafka.properties"
+        },
+        {
+          "pid": 1382626,
+          "name": "java",
+          "generated_name": "kafka.Kafka",
+          "cmdline": "java -Xmx1G -Xms1G -server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -XX:MaxInlineLevel=15 -Djava.awt.headless=true -Xlog:gc*:file=/var/log/kafka/kafkaServer-gc.log:time,tags:filecount=10,filesize=100M -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dkafka.logs.dir=/var/log/kafka -Dlog4j.configuration=file:/etc/kafka/log4j.properties -cp /usr/bin/../share/java/kafka/*:/usr/bin/../share/java/confluent-telemetry/* kafka.Kafka /etc/kafka/kafka.properties"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 1381706,
+          "name": "java",
+          "generated_name": "zookeeper",
+          "cmdline": "java -Xmx512M -Xms512M -server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -XX:MaxInlineLevel=15 -Djava.awt.headless=true -Xlog:gc*:file=/var/log/kafka/zookeeper-gc.log:time,tags:filecount=10,filesize=100M -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dkafka.logs.dir=/var/log/kafka -Dlog4j.configuration=file:/etc/kafka/log4j.properties -cp /usr/bin/../share/java/kafka/*:/usr/bin/../share/java/confluent-telemetry/* org.apache.zookeeper.server.quorum.QuorumPeerMain /etc/kafka/zookeeper.properties"
+        }
+      ]
+    },
+    {
+      "integration": "krakend",
+      "expression": "process.name == 'krakend'",
+      "source": "manual",
+      "notes": "",
+      "mains": 2,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1245036,
+          "name": "krakend",
+          "generated_name": "krakend",
+          "cmdline": "krakend run -d -c /etc/krakend/krakend.json"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 1244959,
+          "name": "python",
+          "generated_name": "uvicorn",
+          "cmdline": "python -m uvicorn api:app --host 0.0.0.0 --port 8000"
+        }
+      ]
+    },
+    {
+      "integration": "mapreduce",
+      "expression": "process.name == 'java' && process.args.exists(a, a.startsWith('org.apache.hadoop.'))",
+      "source": "manual",
+      "notes": "Matches NameNode, DataNode, ResourceManager, NodeManager, JobHistoryServer, etc.",
+      "mains": 6,
+      "post_cel": 6,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1473125,
+          "name": "java",
+          "generated_name": "hadoop",
+          "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Dproc_nodemanager -Djava.net.preferIPv4Stack=true -Dyarn.log.dir=/opt/hadoop-3.2.1/logs -Dyarn.log.file=hadoop.log -Dyarn.home.dir=/opt/hadoop-3.2.1 -Dyarn.root.logger=INFO,console -Djava.library.path=/opt/hadoop-3.2.1/lib/native -Dhadoop.log.dir=/opt/hadoop-3.2.1/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop-3.2.1 -Dhadoop.id.str=root -Dhadoop.root.logger=INFO,console -Dhadoop.policy.file=hadoop-policy.xml -Dhadoop.security.logger=INFO,NullAppender org.apache.hadoop.yarn.server.nodemanager.NodeManager"
+        },
+        {
+          "pid": 1474741,
+          "name": "java",
+          "generated_name": "hadoop",
+          "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Djava.io.tmpdir=/tmp/hadoop-root/nm-local-dir/usercache/root/appcache/application_1778685545898_0001/container_1778685545898_0001_01_000001/tmp -Dlog4j.configuration=container-log4j.properties -Dyarn.app.container.log.dir=/opt/hadoop-3.2.1/logs/userlogs/application_1778685545898_0001/container_1778685545898_0001_01_000001 -Dyarn.app.container.log.filesize=0 -Dhadoop.root.logger=INFO,CLA -Dhadoop.root.logfile=syslog -Xmx1024m org.apache.hadoop.mapreduce.v2.app.MRAppMaster"
+        },
+        {
+          "pid": 1473214,
+          "name": "java",
+          "generated_name": "hadoop",
+          "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Dproc_historyserver -Djava.net.preferIPv4Stack=true -Dyarn.log.dir=/opt/hadoop-3.2.1/logs -Dyarn.log.file=hadoop.log -Dyarn.home.dir=/opt/hadoop-3.2.1 -Dyarn.root.logger=INFO,console -Djava.library.path=/opt/hadoop-3.2.1/lib/native -Dhadoop.log.dir=/opt/hadoop-3.2.1/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop-3.2.1 -Dhadoop.id.str=root -Dhadoop.root.logger=INFO,console -Dhadoop.policy.file=hadoop-policy.xml -Dhadoop.security.logger=INFO,NullAppender org.apache.hadoop.yarn.server.applicationhistoryservice.ApplicationHistoryServer"
+        },
+        {
+          "pid": 1472692,
+          "name": "java",
+          "generated_name": "hadoop",
+          "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Dproc_resourcemanager -Djava.net.preferIPv4Stack=true -Dservice.libdir=/opt/hadoop-3.2.1/share/hadoop/yarn,/opt/hadoop-3.2.1/share/hadoop/yarn/lib,/opt/hadoop-3.2.1/share/hadoop/hdfs,/opt/hadoop-3.2.1/share/hadoop/hdfs/lib,/opt/hadoop-3.2.1/share/hadoop/common,/opt/hadoop-3.2.1/share/hadoop/common/lib -Dyarn.log.dir=/opt/hadoop-3.2.1/logs -Dyarn.log.file=hadoop.log -Dyarn.home.dir=/opt/hadoop-3.2.1 -Dyarn.root.logger=INFO,console -Djava.library.path=/opt/hadoop-3.2.1/lib/native -Dhadoop.log.dir=/opt/hadoop-3.2.1/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop-3.2.1 -Dhadoop.id.str=root -Dhadoop.root.logger=INFO,console -Dhadoop.policy.file=hadoop-policy.xml -Dhadoop.security.logger=INFO,NullAppender org.apache.hadoop.yarn.server.resourcemanager.ResourceManager"
+        },
+        {
+          "pid": 1472240,
+          "name": "java",
+          "generated_name": "hadoop",
+          "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Dproc_datanode -Djava.net.preferIPv4Stack=true -Dhadoop.security.logger=ERROR,RFAS -Dyarn.log.dir=/opt/hadoop-3.2.1/logs -Dyarn.log.file=hadoop.log -Dyarn.home.dir=/opt/hadoop-3.2.1 -Dyarn.root.logger=INFO,console -Djava.library.path=/opt/hadoop-3.2.1/lib/native -Dhadoop.log.dir=/opt/hadoop-3.2.1/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop-3.2.1 -Dhadoop.id.str=root -Dhadoop.root.logger=INFO,console -Dhadoop.policy.file=hadoop-policy.xml org.apache.hadoop.hdfs.server.datanode.DataNode"
+        },
+        {
+          "pid": 1472058,
+          "name": "java",
+          "generated_name": "hadoop",
+          "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64//bin/java -Dproc_namenode -Djava.net.preferIPv4Stack=true -Dhdfs.audit.logger=INFO,NullAppender -Dhadoop.security.logger=INFO,RFAS -Dyarn.log.dir=/opt/hadoop-3.2.1/logs -Dyarn.log.file=hadoop.log -Dyarn.home.dir=/opt/hadoop-3.2.1 -Dyarn.root.logger=INFO,console -Djava.library.path=/opt/hadoop-3.2.1/lib/native -Dhadoop.log.dir=/opt/hadoop-3.2.1/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop-3.2.1 -Dhadoop.id.str=root -Dhadoop.root.logger=INFO,console -Dhadoop.policy.file=hadoop-policy.xml org.apache.hadoop.hdfs.server.namenode.NameNode"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "marathon",
+      "expression": "process.name == 'mesos-master' || (process.name == 'java' && process.args.exists(a, a.contains('marathon-assembly')))",
+      "source": "manual",
+      "notes": "Test fixture launches marathon as 'java -jar marathon-assembly-1.3.0.jar' rather than via the documented mesosphere.marathon.Main class.",
+      "mains": 3,
+      "post_cel": 2,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1482368,
+          "name": "mesos-master",
+          "generated_name": "mesos-master",
+          "cmdline": "mesos-master --registry=in_memory"
+        },
+        {
+          "pid": 1482351,
+          "name": "java",
+          "generated_name": "marathon-assembly-1.3.0",
+          "cmdline": "java -jar ./bin/../target/marathon-assembly-1.3.0.jar --zk zk://zookeeper:2181/marathon --master zk://zookeeper:2181/mesos --hostname 127.0.0.1"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 1482359,
+          "name": "java",
+          "generated_name": "zookeeper",
+          "cmdline": "/usr/lib/jvm/java-1.8-openjdk/jre/bin/java -Dzookeeper.log.dir=/logs -Dzookeeper.root.logger=INFO,CONSOLE -cp /zookeeper-3.4.13/bin/../build/classes:/zookeeper-3.4.13/bin/../build/lib/*.jar:/zookeeper-3.4.13/bin/../lib/slf4j-log4j12-1.7.25.jar:/zookeeper-3.4.13/bin/../lib/slf4j-api-1.7.25.jar:/zookeeper-3.4.13/bin/../lib/netty-3.10.6.Final.jar:/zookeeper-3.4.13/bin/../lib/log4j-1.2.17.jar:/zookeeper-3.4.13/bin/../lib/jline-0.9.94.jar:/zookeeper-3.4.13/bin/../lib/audience-annotations-0.5.0.jar:/zookeeper-3.4.13/bin/../zookeeper-3.4.13.jar:/zookeeper-3.4.13/bin/../src/java/lib/*.jar:/conf: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.local.only=false org.apache.zookeeper.server.quorum.QuorumPeerMain /conf/zoo.cfg"
+        }
+      ]
+    },
+    {
+      "integration": "marklogic",
+      "expression": "process.name == 'MarkLogic'",
+      "source": "manual",
+      "notes": "",
+      "mains": 1,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1492857,
+          "name": "MarkLogic",
+          "generated_name": "MarkLogic",
+          "cmdline": "/opt/MarkLogic/bin/MarkLogic"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "milvus",
+      "expression": "process.name == 'milvus'",
+      "source": "manual",
+      "notes": "",
+      "mains": 1,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1974254,
+          "name": "milvus",
+          "generated_name": "milvus",
+          "cmdline": "milvus run standalone"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "mongo",
+      "expression": "process.name == 'mongod'",
+      "source": "manual",
+      "notes": "",
+      "mains": 1,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1509456,
+          "name": "mongod",
+          "generated_name": "mongod",
+          "cmdline": "mongod --port 27017 --bind_ip=0.0.0.0"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "n8n",
+      "expression": "process.args.exists(a, a.endsWith('/n8n'))",
+      "source": "manual",
+      "notes": "node /usr/local/bin/n8n \u2014 comm is unreliable (shows up as 'MainThread' here).",
+      "mains": 1,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1516673,
+          "name": "MainThread",
+          "generated_name": "node",
+          "cmdline": "node /usr/local/bin/n8n"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "nagios",
+      "expression": "process.name == 'nagios'",
+      "source": "manual",
+      "notes": "",
+      "mains": 2,
+      "post_cel": 0,
+      "error": null,
+      "survivor_detail": [],
+      "dropped_detail": [
+        {
+          "pid": 1521651,
+          "name": "apache2",
+          "generated_name": "apache2",
+          "cmdline": "/usr/sbin/apache2 -D NO_DETACH"
+        },
+        {
+          "pid": 1521656,
+          "name": "nsca",
+          "generated_name": "nsca",
+          "cmdline": "/opt/nagios/bin/nsca -f -c /opt/nagios/etc/nsca.cfg --single"
+        }
+      ]
+    },
+    {
+      "integration": "nfsstat",
+      "expression": "process.name == 'rpcbind'",
+      "source": "manual",
+      "notes": "nfsstat is a check against /proc/net/rpc, not a daemon. The test fixture provides rpcbind; this rule matches what's present, though the production integration probably doesn't rely on process discovery.",
+      "mains": 1,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1529878,
+          "name": "rpcbind",
+          "generated_name": "rpcbind",
+          "cmdline": "/sbin/rpcbind -w"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "nginx",
+      "expression": "process.name == 'nginx' && process.cmdline.contains('master process')",
+      "source": "manual",
+      "notes": "nginx rewrites argv[0] to include spaces ('nginx: master process nginx -g daemon off;'). The space-split args this script derives doesn't preserve that single argv element, so use cmdline.contains for the role marker.",
+      "mains": 1,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1544736,
+          "name": "nginx",
+          "generated_name": "nginx",
+          "cmdline": "nginx: master process nginx -g daemon off;"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "nifi",
+      "expression": "process.name == 'java' && 'org.apache.nifi.NiFi' in process.args",
+      "source": "manual",
+      "notes": "",
+      "mains": 3,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1552228,
+          "name": "java",
+          "generated_name": "nifi",
+          "cmdline": "/usr/lib/jvm/jdk-21.0.10-bellsoft-x86_64/bin/java --class-path /opt/nifi/nifi-current/lib/nifi-api-2.6.0.jar:/opt/nifi/nifi-current/lib/nifi-framework-api-2.8.0.jar:/opt/nifi/nifi-current/lib/nifi-python-framework-api-2.8.0.jar:/opt/nifi/nifi-current/lib/nifi-stateless-api-2.8.0.jar:/opt/nifi/nifi-current/lib/nifi-properties-2.8.0.jar:/opt/nifi/nifi-current/lib/nifi-nar-utils-2.8.0.jar:/opt/nifi/nifi-current/lib/jcl-over-slf4j-2.0.17.jar:/opt/nifi/nifi-current/lib/nifi-per-process-group-logging-2.8.0.jar:/opt/nifi/nifi-current/lib/log4j-over-slf4j-2.0.17.jar:/opt/nifi/nifi-current/lib/nifi-runtime-2.8.0.jar:/opt/nifi/nifi-current/lib/nifi-property-utils-2.8.0.jar:/opt/nifi/nifi-current/lib/logback-classic-1.5.28.jar:/opt/nifi/nifi-current/lib/jul-to-slf4j-2.0.17.jar:/opt/nifi/nifi-current/lib/slf4j-api-2.0.17.jar:/opt/nifi/nifi-current/lib/logback-core-1.5.28.jar:/opt/nifi/nifi-current/lib/nifi-server-api-2.8.0.jar:/opt/nifi/nifi-current/conf -Dorg.apache.nifi.bootstrap.config.log.dir=/opt/nifi/nifi-current/logs -Dnifi.properties.file.path=/opt/nifi/nifi-current/conf/nifi.properties -Dorg.apache.nifi.management.server.address=127.0.0.1:52020 -Xms1g -Xmx1g -Dsun.net.http.allowRestrictedHeaders=true -Djava.protocol.handler.pkgs=sun.net.www.protocol -Dcurator-log-only-first-connection-issue-as-error-level=true -Djava.awt.headless=true -Djavax.security.auth.useSubjectCredsOnly=true org.apache.nifi.NiFi"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 1552229,
+          "name": "tail",
+          "generated_name": "tail",
+          "cmdline": "tail -F --pid=79 /opt/nifi/nifi-current/logs/nifi-app.log"
+        },
+        {
+          "pid": 1553767,
+          "name": "python3",
+          "generated_name": "framework",
+          "cmdline": "python3 -S /opt/nifi/nifi-current/./python/framework/Controller.py"
+        }
+      ]
+    },
+    {
+      "integration": "openldap",
+      "expression": "process.name == 'slapd'",
+      "source": "manual",
+      "notes": "",
+      "mains": 1,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1558325,
+          "name": "slapd",
+          "generated_name": "slapd",
+          "cmdline": "/opt/bitnami/openldap/sbin/slapd -h ldap://:1389/ ldaps://:1636/ ldapi:/// -F /opt/bitnami/openldap/etc/slapd.d -d 256 -h ldap://:1389/ ldaps://:1636/ ldapi://%2Fvar%2Frun%2Fslapd%2Fldapi"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "php_fpm",
+      "expression": "process.name == 'php-fpm' || process.cmdline.contains('php-fpm: master process')",
+      "source": "manual",
+      "notes": "php-fpm rewrites argv[0] to 'php-fpm: master process ...' (same pattern as nginx).",
+      "mains": 2,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1565153,
+          "name": "php-fpm",
+          "generated_name": "php-fpm",
+          "cmdline": "php-fpm: master process (/usr/local/etc/php-fpm.conf)"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 1565255,
+          "name": "nginx",
+          "generated_name": "nginx",
+          "cmdline": "nginx: master process nginx -g daemon off;"
+        }
+      ]
+    },
+    {
+      "integration": "postgres",
+      "expression": "process.name == 'postgres' && (process.cmdline.contains('-D ') || process.cmdline.contains('-c config_file'))",
+      "source": "manual",
+      "notes": "PostgreSQL master is launched with -D <datadir> or -c config_file=. Background workers (checkpointer, walwriter, etc.) rewrite argv[0] to 'postgres: <role>' and don't carry these flags.",
+      "mains": 4,
+      "post_cel": 4,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1581344,
+          "name": "postgres",
+          "generated_name": "postgres",
+          "cmdline": "postgres -c config_file=/etc/postgresql/postgresql.conf"
+        },
+        {
+          "pid": 1581343,
+          "name": "postgres",
+          "generated_name": "postgres",
+          "cmdline": "postgres -c config_file=/etc/postgresql/postgresql.conf -c hba_file=/etc/postgresql/pg_hba.conf"
+        },
+        {
+          "pid": 1581332,
+          "name": "postgres",
+          "generated_name": "postgres",
+          "cmdline": "postgres -c config_file=/etc/postgresql/postgresql.conf"
+        },
+        {
+          "pid": 1581342,
+          "name": "postgres",
+          "generated_name": "postgres",
+          "cmdline": "postgres -c config_file=/etc/postgresql/postgresql.conf"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "powerdns_recursor",
+      "expression": "process.name == 'pdns_recursor'",
+      "source": "manual",
+      "notes": "",
+      "mains": 1,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1595199,
+          "name": "pdns_recursor",
+          "generated_name": "pdns_recursor",
+          "cmdline": "/usr/sbin/pdns_recursor --daemon=no"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "prefect",
+      "expression": "process.name == 'prefect' && process.args.exists(a, a == 'server' || a == 'worker')",
+      "source": "manual",
+      "notes": "'prefect server start' and 'prefect worker start' \u2014 target both.",
+      "mains": 5,
+      "post_cel": 2,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1601108,
+          "name": "prefect",
+          "generated_name": "prefect",
+          "cmdline": "/usr/local/bin/python /usr/local/bin/prefect server start --no-services"
+        },
+        {
+          "pid": 1602324,
+          "name": "prefect",
+          "generated_name": "prefect",
+          "cmdline": "/usr/local/bin/python /usr/local/bin/prefect worker start --pool local-pool --with-healthcheck"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 1600642,
+          "name": "redis-server",
+          "generated_name": "redis-server",
+          "cmdline": "redis-server *:6379"
+        },
+        {
+          "pid": 1600643,
+          "name": "postgres",
+          "generated_name": "postgres",
+          "cmdline": "postgres"
+        },
+        {
+          "pid": 1602325,
+          "name": "tee",
+          "generated_name": "tee",
+          "cmdline": "tee -a /var/log/prefect/dd_log_1"
+        }
+      ]
+    },
+    {
+      "integration": "proxysql",
+      "expression": "process.name == 'proxysql'",
+      "source": "manual",
+      "notes": "",
+      "mains": 2,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1613386,
+          "name": "proxysql",
+          "generated_name": "proxysql",
+          "cmdline": "proxysql -f -D /var/lib/proxysql"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 1613286,
+          "name": "mysqld",
+          "generated_name": "mysqld",
+          "cmdline": "mysqld"
+        }
+      ]
+    },
+    {
+      "integration": "pulsar",
+      "expression": "process.name == 'java' && 'org.apache.pulsar.PulsarStandaloneStarter' in process.args",
+      "source": "manual",
+      "notes": "",
+      "mains": 1,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1618778,
+          "name": "java",
+          "generated_name": "pulsar",
+          "cmdline": "/usr/lib/jvm/java-11-openjdk-amd64/bin/java -Dlog4j.shutdownHookEnabled=false -cp /pulsar/conf:::/pulsar/lib/*: -Dlog4j.configurationFile=log4j2.yaml -Djute.maxbuffer=10485760 -Djava.net.preferIPv4Stack=true -Dio.netty.tryReflectionSetAccessible=true -Dpulsar.allocator.exit_on_oom=true -Dio.netty.recycler.maxCapacity.default=1000 -Dio.netty.recycler.linkCapacity=1024 -Xms2g -Xmx2g -XX:MaxDirectMemorySize=4g -XX:+UseG1GC -XX:MaxGCPauseMillis=10 -XX:+ParallelRefProcEnabled -XX:+UnlockExperimentalVMOptions -XX:+DoEscapeAnalysis -XX:ParallelGCThreads=32 -XX:ConcGCThreads=32 -XX:G1NewSizePercent=50 -XX:+DisableExplicitGC -XX:-ResizePLAB -Dpulsar.log.appender=RoutingAppender -Dpulsar.log.dir=/pulsar/logs -Dpulsar.log.level=info -Dpulsar.log.root.level=info -Dpulsar.routing.appender.default=Console -Dlog4j2.is.webapp=false -Dpulsar.functions.process.container.log.dir=/pulsar/logs -Dpulsar.functions.java.instance.jar=/pulsar/instances/java-instance.jar -Dpulsar.functions.python.instance.file=/pulsar/instances/python-instance/python_instance_main.py -Dpulsar.functions.extra.dependencies.dir=/pulsar/instances/deps -Dpulsar.functions.instance.classpath=/pulsar/conf:::/pulsar/lib/*: -Dpulsar.functions.log.conf=/pulsar/conf/functions_log4j2.xml -Dzookeeper.4lw.commands.whitelist=* -Dzookeeper.snapshot.trust.empty=true -Dpulsar.log.file=pulsar-standalone.log org.apache.pulsar.PulsarStandaloneStarter --config /pulsar/conf/standalone.conf"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "quarkus",
+      "expression": "process.name == 'java' && process.args.exists(a, a.endsWith('quarkus-run.jar'))",
+      "source": "manual",
+      "notes": "",
+      "mains": 1,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1626338,
+          "name": "java",
+          "generated_name": "quarkus-run",
+          "cmdline": "java -Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager --enable-preview -jar /app/quarkus-run.jar"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "rabbitmq",
+      "expression": "process.name == 'beam.smp' && process.args.exists(a, a.contains('rabbit') || a.contains('/erlang/'))",
+      "source": "manual",
+      "notes": "rabbitmq runs as Erlang beam.smp. Distinguish from couchbase/riak beam.smp via the rabbit-specific path/cookie in args.",
+      "mains": 2,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1629798,
+          "name": "beam.smp",
+          "generated_name": "rabbitmq",
+          "cmdline": "/opt/erlang/lib/erlang/erts-15.2.7.8/bin/beam.smp -W w -MBas ageffcbf -MHas ageffcbf -MBlmbcs 512 -MHlmbcs 512 -MMmcs 30 -pc unicode -P 1048576 -t 5000000 -stbt db -zdbbl 128000 -sbwt none -sbwtdcpu none -sbwtdio none -- -root /opt/erlang/lib/erlang -bindir /opt/erlang/lib/erlang/erts-15.2.7.8/bin -progname erl -- -home /var/lib/rabbitmq -- -pa  -noshell -noinput -s rabbit boot -boot start_sasl -syslog logger [] -syslog syslog_error_logger false -kernel prevent_overlapping_partitions false --"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 1630113,
+          "name": "epmd",
+          "generated_name": "epmd",
+          "cmdline": "/opt/erlang/lib/erlang/erts-15.2.7.8/bin/epmd -daemon"
+        }
+      ]
+    },
+    {
+      "integration": "ray",
+      "expression": "process.name == 'raylet' || process.name == 'gcs_server' || (process.name == 'python' && 'ray.util.client.server' in process.args)",
+      "source": "manual",
+      "notes": "Match the native raylet and gcs_server binaries explicitly. The python client.server is launched as 'python -m ray.util.client.server ...', so check args without falling back to a 'raylet' substring (which would also match worker processes that reference the raylet socket path).",
+      "mains": 29,
+      "post_cel": 3,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 3337159,
+          "name": "gcs_server",
+          "generated_name": "gcs_server",
+          "cmdline": "/home/ray/anaconda3/lib/python3.8/site-packages/ray/core/src/ray/gcs/gcs_server --log_dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7/logs --config_list=eyJvYmplY3Rfc3BpbGxpbmdfY29uZmlnIjogIntcInR5cGVcIjogXCJmaWxlc3lzdGVtXCIsIFwicGFyYW1zXCI6IHtcImRpcmVjdG9yeV9wYXRoXCI6IFwiL3RtcC9yYXkvc2Vzc2lvbl8yMDI2LTA1LTE0XzAxLTU4LTM2Xzk2MDQzOF83XCJ9fSIsICJpc19leHRlcm5hbF9zdG9yYWdlX3R5cGVfZnMiOiB0cnVlfQ== --gcs_server_port=6379 --metrics-agent-port=63400 --node-ip-address=172.17.132.2 --session-name=session_2026-05-14_01-58-36_960438_7"
+        },
+        {
+          "pid": 3337275,
+          "name": "python",
+          "generated_name": "ray.util.client.server",
+          "cmdline": "/home/ray/anaconda3/bin/python -m ray.util.client.server --address=172.17.132.2:6379 --host=0.0.0.0 --port=10001 --mode=proxy --runtime-env-agent-address=http://172.17.132.2:48742"
+        },
+        {
+          "pid": 3337407,
+          "name": "raylet",
+          "generated_name": "raylet",
+          "cmdline": "/home/ray/anaconda3/lib/python3.8/site-packages/ray/core/src/ray/raylet/raylet --raylet_socket_name=/tmp/ray/session_2026-05-14_01-58-36_960438_7/sockets/raylet --store_socket_name=/tmp/ray/session_2026-05-14_01-58-36_960438_7/sockets/plasma_store --object_manager_port=0 --min_worker_port=10002 --max_worker_port=19999 --node_manager_port=0 --node_ip_address=172.17.132.2 --maximum_startup_concurrency=16 --static_resource_list=node:172.17.132.2,1.0,node:__internal_head__,1.0,CPU,16,memory,49734974874,object_store_memory,10000000000 --python_worker_command=/home/ray/anaconda3/bin/python /home/ray/anaconda3/lib/python3.8/site-packages/ray/_private/workers/setup_worker.py /home/ray/anaconda3/lib/python3.8/site-packages/ray/_private/workers/default_worker.py --node-ip-address=172.17.132.2 --node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER --object-store-name=/tmp/ray/session_2026-05-14_01-58-36_960438_7/sockets/plasma_store --raylet-name=/tmp/ray/session_2026-05-14_01-58-36_960438_7/sockets/raylet --redis-address=None --temp-dir=/tmp/ray --metrics-agent-port=63400 --runtime-env-agent-port=48742 --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --runtime-env-agent-port=48742 --gcs-address=172.17.132.2:6379 --session-name=session_2026-05-14_01-58-36_960438_7 --temp-dir=/tmp/ray --webui=172.17.132.2:8265 --cluster-id=428b5f51fd142248612758f1bfa4dda9394183c7a12129ee873acadf RAY_WORKER_DYNAMIC_OPTION_PLACEHOLDER --java_worker_command= --cpp_worker_command=/home/ray/anaconda3/bin/python /home/ray/anaconda3/lib/python3.8/site-packages/ray/_private/workers/setup_worker.py /home/ray/anaconda3/lib/python3.8/site-packages/ray/cpp/default_worker --ray_plasma_store_socket_name=/tmp/ray/session_2026-05-14_01-58-36_960438_7/sockets/plasma_store --ray_raylet_socket_name=/tmp/ray/session_2026-05-14_01-58-36_960438_7/sockets/raylet --ray_node_manager_port=RAY_NODE_MANAGER_PORT_PLACEHOLDER --ray_address=172.17.132.2:6379 --ray_redis_password= --ray_session_dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7 --ray_logs_dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7/logs --ray_node_ip_address=172.17.132.2 RAY_WORKER_DYNAMIC_OPTION_PLACEHOLDER --native_library_path=/home/ray/anaconda3/lib/python3.8/site-packages/ray/cpp/lib --temp_dir=/tmp/ray --session_dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7 --log_dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7/logs --resource_dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7/runtime_resources --metrics-agent-port=63400 --metrics_export_port=8080 --runtime_env_agent_port=48742 --object_store_memory=10000000000 --plasma_directory=/tmp --ray-debugger-external=0 --gcs-address=172.17.132.2:6379 --session-name=session_2026-05-14_01-58-36_960438_7 --labels= --cluster-id=428b5f51fd142248612758f1bfa4dda9394183c7a12129ee873acadf --head --num_prestart_python_workers=16 --dashboard_agent_command=/home/ray/anaconda3/bin/python -u /home/ray/anaconda3/lib/python3.8/site-packages/ray/dashboard/agent.py --node-ip-address=172.17.132.2 --metrics-export-port=8080 --dashboard-agent-port=63400 --listen-port=52365 --node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER --object-store-name=/tmp/ray/session_2026-05-14_01-58-36_960438_7/sockets/plasma_store --raylet-name=/tmp/ray/session_2026-05-14_01-58-36_960438_7/sockets/raylet --temp-dir=/tmp/ray --session-dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7 --log-dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7/logs --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --session-name=session_2026-05-14_01-58-36_960438_7 --gcs-address=172.17.132.2:6379 --logging-filename= \"--logging-format=%(asctime)s\t%(levelname)s (dashboard_agent) %(filename)s:%(lineno)s -- %(message)s\" --runtime_env_agent_command=/home/ray/anaconda3/bin/python -u /home/ray/anaconda3/lib/python3.8/site-packages/ray/_private/runtime_env/agent/main.py --node-ip-address=172.17.132.2 --runtime-env-agent-port=48742 --gcs-address=172.17.132.2:6379 --runtime-env-dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7/runtime_resources --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --log-dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7/logs --temp-dir=/tmp/ray"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 3337274,
+          "name": "python",
+          "generated_name": "ray.autoscaler._private.monitor",
+          "cmdline": "/home/ray/anaconda3/bin/python -u /home/ray/anaconda3/lib/python3.8/site-packages/ray/autoscaler/_private/monitor.py --logs-dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7/logs --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --gcs-address=172.17.132.2:6379 --logging-filename= --logging-format=%(asctime)s\t%(levelname)s (monitor) %(filename)s:%(lineno)s -- %(message)s --monitor-ip=172.17.132.2"
+        },
+        {
+          "pid": 3337276,
+          "name": "python",
+          "generated_name": "ray.dashboard.dashboard",
+          "cmdline": "/home/ray/anaconda3/bin/python /home/ray/anaconda3/lib/python3.8/site-packages/ray/dashboard/dashboard.py --host=0.0.0.0 --port=8265 --port-retries=0 --temp-dir=/tmp/ray --log-dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7/logs --session-dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7 --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --gcs-address=172.17.132.2:6379 --node-ip-address=172.17.132.2 --logging-filename= --logging-format=%(asctime)s\t%(levelname)s (dashboard) %(filename)s:%(lineno)s -- %(message)s"
+        },
+        {
+          "pid": 3337408,
+          "name": "python",
+          "generated_name": "ray._private.log_monitor",
+          "cmdline": "/home/ray/anaconda3/bin/python -u /home/ray/anaconda3/lib/python3.8/site-packages/ray/_private/log_monitor.py --session-dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7 --logs-dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7/logs --gcs-address=172.17.132.2:6379 --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --logging-filename= --logging-format=%(asctime)s\t%(levelname)s (log_monitor) %(filename)s:%(lineno)s -- %(message)s"
+        },
+        {
+          "pid": 3337548,
+          "name": "python",
+          "generated_name": "ray.dashboard.agent",
+          "cmdline": "/home/ray/anaconda3/bin/python -u /home/ray/anaconda3/lib/python3.8/site-packages/ray/dashboard/agent.py --node-ip-address=172.17.132.2 --metrics-export-port=8080 --dashboard-agent-port=63400 --listen-port=52365 --node-manager-port=34347 --object-store-name=/tmp/ray/session_2026-05-14_01-58-36_960438_7/sockets/plasma_store --raylet-name=/tmp/ray/session_2026-05-14_01-58-36_960438_7/sockets/raylet --temp-dir=/tmp/ray --session-dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7 --log-dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7/logs --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --session-name=session_2026-05-14_01-58-36_960438_7 --gcs-address=172.17.132.2:6379 --logging-filename= --logging-format=%(asctime)s\t%(levelname)s (dashboard_agent) %(filename)s:%(lineno)s -- %(message)s --agent-id 424238335"
+        },
+        {
+          "pid": 3337550,
+          "name": "python",
+          "generated_name": "ray._private.runtime_env.agent.main",
+          "cmdline": "/home/ray/anaconda3/bin/python -u /home/ray/anaconda3/lib/python3.8/site-packages/ray/_private/runtime_env/agent/main.py --node-ip-address=172.17.132.2 --runtime-env-agent-port=48742 --gcs-address=172.17.132.2:6379 --runtime-env-dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7/runtime_resources --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --log-dir=/tmp/ray/session_2026-05-14_01-58-36_960438_7/logs --temp-dir=/tmp/ray"
+        },
+        {
+          "pid": 3337810,
+          "name": "ray::IDLE",
+          "generated_name": "ray",
+          "cmdline": "ray::IDLE"
+        },
+        {
+          "pid": 3337812,
+          "name": "ray::IDLE",
+          "generated_name": "ray",
+          "cmdline": "ray::IDLE"
+        },
+        {
+          "pid": 3337813,
+          "name": "ray::IDLE",
+          "generated_name": "ray",
+          "cmdline": "ray::IDLE"
+        },
+        {
+          "pid": 3337814,
+          "name": "ray::IDLE",
+          "generated_name": "ray",
+          "cmdline": "ray::IDLE"
+        },
+        {
+          "pid": 3337815,
+          "name": "ray::IDLE",
+          "generated_name": "ray",
+          "cmdline": "ray::IDLE"
+        },
+        {
+          "pid": 3337816,
+          "name": "ray::IDLE",
+          "generated_name": "ray",
+          "cmdline": "ray::IDLE"
+        },
+        {
+          "pid": 3337817,
+          "name": "ray::IDLE",
+          "generated_name": "ray",
+          "cmdline": "ray::IDLE"
+        },
+        {
+          "pid": 3337818,
+          "name": "ray::IDLE",
+          "generated_name": "ray",
+          "cmdline": "ray::IDLE"
+        },
+        {
+          "pid": 3337819,
+          "name": "ray::IDLE",
+          "generated_name": "ray",
+          "cmdline": "ray::IDLE"
+        },
+        {
+          "pid": 3337820,
+          "name": "ray::IDLE",
+          "generated_name": "ray",
+          "cmdline": "ray::IDLE"
+        },
+        {
+          "pid": 3337821,
+          "name": "ray::IDLE",
+          "generated_name": "ray",
+          "cmdline": "ray::IDLE"
+        },
+        {
+          "pid": 3337822,
+          "name": "ray::IDLE",
+          "generated_name": "ray",
+          "cmdline": "ray::IDLE"
+        },
+        {
+          "pid": 3337823,
+          "name": "ray::IDLE",
+          "generated_name": "ray",
+          "cmdline": "ray::IDLE"
+        },
+        {
+          "pid": 3337824,
+          "name": "ray::IDLE",
+          "generated_name": "ray",
+          "cmdline": "ray::IDLE"
+        },
+        {
+          "pid": 3337825,
+          "name": "ray::IDLE",
+          "generated_name": "ray",
+          "cmdline": "ray::IDLE"
+        },
+        {
+          "pid": 3338326,
+          "name": "ray::ServeContr",
+          "generated_name": "ray",
+          "cmdline": "ray::ServeController"
+        },
+        {
+          "pid": 3338560,
+          "name": "ray::ProxyActor",
+          "generated_name": "ray",
+          "cmdline": "ray::ProxyActor"
+        },
+        {
+          "pid": 3338728,
+          "name": "ray::ServeRepli",
+          "generated_name": "ray",
+          "cmdline": "ray::ServeReplica:add:Add"
+        },
+        {
+          "pid": 3338729,
+          "name": "ray::ServeRepli",
+          "generated_name": "ray",
+          "cmdline": "ray::ServeReplica:add:Add"
+        },
+        {
+          "pid": 3339187,
+          "name": "ray::ServeRepli",
+          "generated_name": "ray",
+          "cmdline": "ray::ServeReplica:hello:Hello"
+        },
+        {
+          "pid": 3339188,
+          "name": "ray::ServeRepli",
+          "generated_name": "ray",
+          "cmdline": "ray::ServeReplica:hello:Hello"
+        }
+      ]
+    },
+    {
+      "integration": "redisdb",
+      "expression": "process.name == 'redis-server'",
+      "source": "manual",
+      "notes": "",
+      "mains": 3,
+      "post_cel": 3,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1634767,
+          "name": "redis-server",
+          "generated_name": "redis-server",
+          "cmdline": "redis-server *:6380"
+        },
+        {
+          "pid": 1634604,
+          "name": "redis-server",
+          "generated_name": "redis-server",
+          "cmdline": "redis-server *:6381"
+        },
+        {
+          "pid": 1634603,
+          "name": "redis-server",
+          "generated_name": "redis-server",
+          "cmdline": "redis-server *:6382"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "rethinkdb",
+      "expression": "process.name == 'rethinkdb'",
+      "source": "manual",
+      "notes": "",
+      "mains": 4,
+      "post_cel": 4,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1638299,
+          "name": "rethinkdb",
+          "generated_name": "rethinkdb",
+          "cmdline": "rethinkdb --bind all --server-name server0 --server-tag us --log-file /var/log/rethinkdb.log"
+        },
+        {
+          "pid": 1638600,
+          "name": "rethinkdb",
+          "generated_name": "rethinkdb",
+          "cmdline": "rethinkdb --join rethinkdb-server0:29015 --bind all --server-name server2 --server-tag eu"
+        },
+        {
+          "pid": 1638605,
+          "name": "rethinkdb",
+          "generated_name": "rethinkdb",
+          "cmdline": "rethinkdb proxy --join rethinkdb-server0:29015 --bind all"
+        },
+        {
+          "pid": 1638602,
+          "name": "rethinkdb",
+          "generated_name": "rethinkdb",
+          "cmdline": "rethinkdb --join rethinkdb-server0:29015 --bind all --server-name server1 --server-tag us --server-tag primary --http-tls-key /opt/server.key --http-tls-cert /opt/server.pem --driver-tls-key /opt/server.key --driver-tls-cert /opt/server.pem"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "riak",
+      "expression": "process.name == 'beam.smp' && process.args.exists(a, a.startsWith('/usr/lib/riak'))",
+      "source": "manual",
+      "notes": "Distinguish riak's beam.smp from couchbase/rabbitmq via the riak install path.",
+      "mains": 4,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1643592,
+          "name": "beam.smp",
+          "generated_name": "riak",
+          "cmdline": "/usr/lib/riak/erts-5.10.3/bin/beam.smp -scl false -sfwi 500 -P 256000 -e 256000 -Q 65536 -A 64 -K true -W w -zdbbl 32768 -- -root /usr/lib/riak -progname riak -- -home /var/lib/riak -- -boot /usr/lib/riak/releases/2.2.0/riak -config /etc/riak/app.config -setcookie riak -name riak@172.17.131.2 -smp enable -vm_args /var/lib/riak/generated.configs/vm.2026.05.13.15.49.42.args -pa /usr/lib/riak/lib/basho-patches -- console"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 1643579,
+          "name": "epmd",
+          "generated_name": "epmd",
+          "cmdline": "/usr/lib/riak/erts-5.10.3/bin/epmd -daemon"
+        },
+        {
+          "pid": 1643589,
+          "name": "run_erl",
+          "generated_name": "run_erl",
+          "cmdline": "/usr/lib/riak/erts-5.10.3/bin/run_erl -daemon /tmp/riak// /var/log/riak exec /usr/sbin/riak console"
+        },
+        {
+          "pid": 1645670,
+          "name": "tail",
+          "generated_name": "tail",
+          "cmdline": "tail -n 1024 -f /var/log/riak/console.log"
+        }
+      ]
+    },
+    {
+      "integration": "scylla",
+      "expression": "process.name == 'scylla'",
+      "source": "manual",
+      "notes": "",
+      "mains": 5,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1674468,
+          "name": "scylla",
+          "generated_name": "scylla",
+          "cmdline": "/usr/bin/scylla --log-to-syslog 0 --log-to-stdout 1 --default-log-level info --network-stack posix --developer-mode=1 --overprovisioned --listen-address 172.17.132.2 --rpc-address 172.17.132.2 --seed-provider-parameters seeds=172.17.132.2 --alternator-address 172.17.132.2 --blocked-reactor-notify-ms 999999999"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 1674368,
+          "name": "supervisord",
+          "generated_name": "supervisord",
+          "cmdline": "/usr/bin/python3 /usr/bin/supervisord -c /etc/supervisord.conf"
+        },
+        {
+          "pid": 1674467,
+          "name": "rsyslogd",
+          "generated_name": "rsyslogd",
+          "cmdline": "rsyslogd -n"
+        },
+        {
+          "pid": 1674470,
+          "name": "scylla-jmx",
+          "generated_name": "scylla-jmx-1.0",
+          "cmdline": "/opt/scylladb/jmx/symlinks/scylla-jmx -Xmx256m -XX:+UseSerialGC -XX:+HeapDumpOnOutOfMemoryError -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.host=localhost -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=7199 -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote.rmi.port=7199 -Djavax.management.builder.initial=com.scylladb.jmx.utils.APIBuilder -jar /opt/scylladb/jmx/scylla-jmx-1.0.jar"
+        },
+        {
+          "pid": 1674472,
+          "name": "node_exporter",
+          "generated_name": "node_exporter",
+          "cmdline": "/opt/scylladb/node_exporter/node_exporter --collector.interrupts"
+        }
+      ]
+    },
+    {
+      "integration": "silverstripe_cms",
+      "expression": "process.name == 'apache2'",
+      "source": "manual",
+      "notes": "",
+      "mains": 3,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1998300,
+          "name": "apache2",
+          "generated_name": "apache2",
+          "cmdline": "/usr/sbin/apache2 -D FOREGROUND"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 1997436,
+          "name": "mysqld_safe",
+          "generated_name": "sh",
+          "cmdline": "/bin/sh /usr/bin/mysqld_safe"
+        },
+        {
+          "pid": 1997608,
+          "name": "mysqld",
+          "generated_name": "mysqld",
+          "cmdline": "/usr/sbin/mysqld --basedir=/usr --datadir=/var/lib/mysql --plugin-dir=/usr/lib/mysql/plugin --log-error=/var/log/mysql/error.log --pid-file=vitkyrka.pid"
+        }
+      ]
+    },
+    {
+      "integration": "singlestore",
+      "expression": "process.name == 'memsqld'",
+      "source": "manual",
+      "notes": "",
+      "mains": 5,
+      "post_cel": 2,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1728074,
+          "name": "memsqld",
+          "generated_name": "memsqld",
+          "cmdline": "/server/singlestoredb-server-8.9.19-2247f30d74/memsqld --defaults-file /data/master/memsql.cnf --user 999"
+        },
+        {
+          "pid": 1728078,
+          "name": "memsqld",
+          "generated_name": "memsqld",
+          "cmdline": "/server/singlestoredb-server-8.9.19-2247f30d74/memsqld --defaults-file /data/leaf/memsql.cnf --user 999"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 1728314,
+          "name": "websocket_proxy",
+          "generated_name": "websocket_proxy",
+          "cmdline": "/server/singlestoredb-server-8.9.19-2247f30d74/websocket_proxy/websocket_proxy --read-conf-from-stdin"
+        },
+        {
+          "pid": 1729255,
+          "name": "singlestoredb-s",
+          "generated_name": "singlestoredb-studio",
+          "cmdline": "singlestoredb-studio --port 8080"
+        },
+        {
+          "pid": 1729256,
+          "name": "tail",
+          "generated_name": "coreutils",
+          "cmdline": "/usr/bin/coreutils --coreutils-prog-shebang=tail /usr/bin/tail --pid 49 --pid 50 -F /logs/master/tracelogs/memsql.log /logs/leaf/tracelogs/memsql.log /var/lib/singlestoredb-studio/studio.log"
+        }
+      ]
+    },
+    {
+      "integration": "sonarqube",
+      "expression": "process.name == 'java' && process.args.exists(a, a == 'org.sonar.server.app.WebServer' || a == 'org.sonar.ce.app.CeServer' || a.endsWith('sonar-application-9.3.0.51899.jar'))",
+      "source": "manual",
+      "notes": "SonarQube launches sonar-application (the wrapper) plus separate JVMs for WebServer and CeServer; elasticsearch in the same container is matched by the elastic rule but distinguished here by not appearing in this list.",
+      "mains": 4,
+      "post_cel": 3,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 2004401,
+          "name": "java",
+          "generated_name": "sonar-application-9.3.0.51899",
+          "cmdline": "java -jar lib/sonar-application-9.3.0.51899.jar -Dsonar.log.console=true -Dsonar.ce.javaOpts= -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port=10444 -Dcom.sun.management.jmxremote.rmi.port=10444 -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost  -Dsonar.web.javaAdditionalOpts=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port=10443 -Dcom.sun.management.jmxremote.rmi.port=10443 -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost"
+        },
+        {
+          "pid": 2005061,
+          "name": "java",
+          "generated_name": "org.sonar.server.app.WebServer",
+          "cmdline": "/usr/lib/jvm/java-11-openjdk/bin/java -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/opt/sonarqube/temp -XX:-OmitStackTraceInFastThrow --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.rmi/sun.rmi.transport=ALL-UNNAMED --add-exports=java.base/jdk.internal.ref=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.management/sun.management=ALL-UNNAMED --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED -Dcom.redhat.fips=false -Xmx512m -Xms128m -XX:+HeapDumpOnOutOfMemoryError -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port=10443 -Dcom.sun.management.jmxremote.rmi.port=10443 -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost -Dhttp.nonProxyHosts=localhost|127.*|[::1] -cp ./lib/sonar-application-9.3.0.51899.jar:/opt/sonarqube/lib/jdbc/h2/h2-1.4.199.jar org.sonar.server.app.WebServer /opt/sonarqube/temp/sq-process17969181405896595496properties"
+        },
+        {
+          "pid": 2006653,
+          "name": "java",
+          "generated_name": "org.sonar.ce.app.CeServer",
+          "cmdline": "/usr/lib/jvm/java-11-openjdk/bin/java -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/opt/sonarqube/temp -XX:-OmitStackTraceInFastThrow --add-opens=java.base/java.util=ALL-UNNAMED --add-exports=java.base/jdk.internal.ref=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.management/sun.management=ALL-UNNAMED --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED -Dcom.redhat.fips=false -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port=10444 -Dcom.sun.management.jmxremote.rmi.port=10444 -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost -Dhttp.nonProxyHosts=localhost|127.*|[::1] -cp ./lib/sonar-application-9.3.0.51899.jar:/opt/sonarqube/lib/jdbc/h2/h2-1.4.199.jar org.sonar.ce.app.CeServer /opt/sonarqube/temp/sq-process10088979591750972271properties"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 2004555,
+          "name": "java",
+          "generated_name": "org.elasticsearch.bootstrap.Elasticsearch",
+          "cmdline": "/usr/lib/jvm/java-11-openjdk/bin/java -XX:+UseG1GC -Djava.io.tmpdir=/opt/sonarqube/temp -XX:ErrorFile=../logs/es_hs_err_pid%p.log -Des.networkaddress.cache.ttl=60 -Des.networkaddress.cache.negative.ttl=10 -XX:+AlwaysPreTouch -Xss1m -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djna.nosys=true -Djna.tmpdir=/opt/sonarqube/temp -XX:-OmitStackTraceInFastThrow -Dio.netty.noUnsafe=true -Dio.netty.noKeySetOptimization=true -Dio.netty.recycler.maxCapacityPerThread=0 -Dio.netty.allocator.numDirectArenas=0 -Dlog4j.shutdownHookEnabled=false -Dlog4j2.disable.jmx=true -Dlog4j2.formatMsgNoLookups=true -Djava.locale.providers=COMPAT -Dcom.redhat.fips=false -Xmx512m -Xms512m -XX:MaxDirectMemorySize=256m -XX:+HeapDumpOnOutOfMemoryError -Des.path.home=/opt/sonarqube/elasticsearch -Des.path.conf=/opt/sonarqube/temp/conf/es -Des.distribution.flavor=default -Des.distribution.type=tar -Des.bundled_jdk=false -cp /opt/sonarqube/elasticsearch/lib/* org.elasticsearch.bootstrap.Elasticsearch"
+        }
+      ]
+    },
+    {
+      "integration": "sonatype_nexus",
+      "expression": "process.name == 'java' && process.args.exists(a, a.contains('/opt/sonatype/nexus') || a.startsWith('-Dnexus.home') || a == 'org.sonatype.nexus.karaf.NexusMain')",
+      "source": "manual",
+      "notes": "Sonatype Nexus runs via a Spring Boot launcher; identify by the install prefix in JVM args (LogFile, classpath) since the Nexus main class isn't directly in argv.",
+      "mains": 1,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 2012671,
+          "name": "java",
+          "generated_name": "org.springframework.boot.loader.launch.PropertiesLauncher",
+          "cmdline": "/usr/bin/java -Xms2703m -Xmx2703m -XX:MaxDirectMemorySize=2703m -XX:+UnlockDiagnosticVMOptions -XX:+LogVMOutput -XX:LogFile=/opt/sonatype/nexus/../sonatype-work/nexus3/log/jvm.log -XX:-OmitStackTraceInFastThrow --add-reads=java.xml=java.logging --add-opens java.base/java.security=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.naming/javax.naming.spi=ALL-UNNAMED --add-opens java.rmi/sun.rmi.transport.tcp=ALL-UNNAMED --add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED --add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED --add-exports=java.base/sun.net.www.protocol.jar=ALL-UNNAMED --add-exports=jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED --add-exports=jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED --add-exports java.security.sasl/com.sun.security.sasl=ALL-UNNAMED --add-exports=java.base/sun.security.x509=ALL-UNNAMED --add-exports=java.base/sun.security.rsa=ALL-UNNAMED --add-exports=java.base/sun.security.pkcs=ALL-UNNAMED -Dkaraf.instances=/opt/sonatype/nexus/instances -Dkaraf.home=/opt/sonatype/nexus -Dkaraf.base=/opt/sonatype/nexus -Dkaraf.data=/opt/sonatype/nexus/../sonatype-work/nexus3 -Dkaraf.etc=/opt/sonatype/nexus/etc/karaf -Dkaraf.log=/opt/sonatype/nexus/../sonatype-work/nexus3/log -Djava.io.tmpdir=/opt/sonatype/nexus/../sonatype-work/nexus3/tmp -Djava.util.logging.config.file=/opt/sonatype/nexus/etc/java.util.logging.properties -Xms2703m -Xmx2703m -XX:MaxDirectMemorySize=2703m -Djava.util.prefs.userRoot=/nexus-data/javaprefs -classpath /opt/sonatype/nexus/bin/sonatype-nexus-repository-3.79.0-09.jar:/opt/sonatype/nexus/../sonatype-work/nexus3/etc org.springframework.boot.loader.launch.PropertiesLauncher"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "spark",
+      "expression": "process.name == 'java' && process.args.exists(a, a.startsWith('org.apache.spark.deploy.'))",
+      "source": "manual",
+      "notes": "",
+      "mains": 7,
+      "post_cel": 4,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1760692,
+          "name": "java",
+          "generated_name": "spark",
+          "cmdline": "/usr/lib/jvm/java-1.8-openjdk/jre/bin/java -cp /spark/conf/:/spark/jars/* -Xmx1g org.apache.spark.deploy.SparkSubmit --master spark://spark-master:7077 /app/app2.py"
+        },
+        {
+          "pid": 1760484,
+          "name": "java",
+          "generated_name": "spark",
+          "cmdline": "/usr/lib/jvm/java-1.8-openjdk/jre/bin/java -cp ///conf:/spark/jars/* -Xmx1g org.apache.spark.deploy.worker.Worker --webui-port 8081 spark://spark-master:7077"
+        },
+        {
+          "pid": 1760753,
+          "name": "java",
+          "generated_name": "spark",
+          "cmdline": "/usr/lib/jvm/java-1.8-openjdk/jre/bin/java -cp /spark/conf/:/spark/jars/* -Xmx1g org.apache.spark.deploy.SparkSubmit --master spark://spark-master:7077 /app/app.py"
+        },
+        {
+          "pid": 1760341,
+          "name": "java",
+          "generated_name": "spark",
+          "cmdline": "/usr/lib/jvm/java-1.8-openjdk/jre/bin/java -cp ///conf:/spark/jars/* -Xmx1g org.apache.spark.deploy.master.Master --ip spark-master --port 7077 --webui-port 8080"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 1760201,
+          "name": "python",
+          "generated_name": "script",
+          "cmdline": "python /script.py"
+        },
+        {
+          "pid": 1761121,
+          "name": "python3",
+          "generated_name": "app",
+          "cmdline": "python3 /app/app2.py"
+        },
+        {
+          "pid": 1761116,
+          "name": "python3",
+          "generated_name": "app",
+          "cmdline": "python3 /app/app.py"
+        }
+      ]
+    },
+    {
+      "integration": "squid",
+      "expression": "process.name == 'squid'",
+      "source": "manual",
+      "notes": "",
+      "mains": 5,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1769421,
+          "name": "squid",
+          "generated_name": "squid",
+          "cmdline": "/usr/sbin/squid -f /etc/squid/squid.conf -NYC"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 1769416,
+          "name": "tail",
+          "generated_name": "tail",
+          "cmdline": "tail -F /var/log/squid/access.log"
+        },
+        {
+          "pid": 1769419,
+          "name": "tail",
+          "generated_name": "tail",
+          "cmdline": "tail -F /var/log/squid/cache.log"
+        },
+        {
+          "pid": 1769422,
+          "name": "log_file_daemon",
+          "generated_name": "logfile-daemon",
+          "cmdline": "(logfile-daemon) /var/log/squid/access.log"
+        },
+        {
+          "pid": 1769425,
+          "name": "pinger",
+          "generated_name": "pinger",
+          "cmdline": "(pinger)"
+        }
+      ]
+    },
+    {
+      "integration": "supervisord",
+      "expression": "process.name == 'supervisord'",
+      "source": "manual",
+      "notes": "",
+      "mains": 1,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 1805726,
+          "name": "supervisord",
+          "generated_name": "supervisord",
+          "cmdline": "/usr/local/bin/python /usr/local/bin/supervisord -c /supervisord.conf"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "teamcity",
+      "expression": "process.name == 'java' && process.args.exists(a, a.contains('teamcity'))",
+      "source": "manual",
+      "notes": "Test fixture runs a mock server, not real TeamCity \u2014 the actual cmdline is org.mockserver.cli.Main. This rule won't match in the fixture but represents what the real check would target.",
+      "mains": 1,
+      "post_cel": 0,
+      "error": null,
+      "survivor_detail": [],
+      "dropped_detail": [
+        {
+          "pid": 2015650,
+          "name": "java",
+          "generated_name": "org.mockserver.cli.Main",
+          "cmdline": "java -Dfile.encoding=UTF-8 -cp /mockserver-netty-jar-with-dependencies.jar:/libs/* -Dmockserver.propertyFile=/config/mockserver.properties org.mockserver.cli.Main -serverPort 8111"
+        }
+      ]
+    },
+    {
+      "integration": "temporal",
+      "expression": "process.name == 'temporal-server'",
+      "source": "manual",
+      "notes": "comm is exactly 'temporal-server' (15 chars, at the limit).",
+      "mains": 5,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 3778207,
+          "name": "temporal-server",
+          "generated_name": "temporal-server",
+          "cmdline": "temporal-server --env docker start --service=history --service=matching --service=frontend --service=worker"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 3779687,
+          "name": "python",
+          "generated_name": "run_worker",
+          "cmdline": "python /run_worker.py"
+        },
+        {
+          "pid": 3779693,
+          "name": "ui-server",
+          "generated_name": "ui-server",
+          "cmdline": "./ui-server --env docker start"
+        },
+        {
+          "pid": 3776201,
+          "name": "java",
+          "generated_name": "org.elasticsearch.bootstrap.Elasticsearch",
+          "cmdline": "/usr/share/elasticsearch/jdk/bin/java -Xshare:auto -Des.networkaddress.cache.ttl=60 -Des.networkaddress.cache.negative.ttl=10 -XX:+AlwaysPreTouch -Xss1m -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djna.nosys=true -XX:-OmitStackTraceInFastThrow -XX:+ShowCodeDetailsInExceptionMessages -Dio.netty.noUnsafe=true -Dio.netty.noKeySetOptimization=true -Dio.netty.recycler.maxCapacityPerThread=0 -Dio.netty.allocator.numDirectArenas=0 -Dlog4j.shutdownHookEnabled=false -Dlog4j2.disable.jmx=true -Dlog4j2.formatMsgNoLookups=true -Djava.locale.providers=SPI,COMPAT --add-opens=java.base/java.io=ALL-UNNAMED -XX:+UseG1GC -Djava.io.tmpdir=/tmp/elasticsearch-12789453497474544769 -XX:+HeapDumpOnOutOfMemoryError -XX:+ExitOnOutOfMemoryError -XX:HeapDumpPath=data -XX:ErrorFile=logs/hs_err_pid%p.log -Xlog:gc*,gc+age=trace,safepoint:file=logs/gc.log:utctime,pid,tags:filecount=32,filesize=64m -Des.cgroups.hierarchy.override=/ -Xms256m -Xmx256m -XX:MaxDirectMemorySize=134217728 -XX:G1HeapRegionSize=4m -XX:InitiatingHeapOccupancyPercent=30 -XX:G1ReservePercent=15 -Des.path.home=/usr/share/elasticsearch -Des.path.conf=/usr/share/elasticsearch/config -Des.distribution.flavor=default -Des.distribution.type=docker -Des.bundled_jdk=true -cp /usr/share/elasticsearch/lib/* org.elasticsearch.bootstrap.Elasticsearch -Expack.security.enabled=false -Ecluster.routing.allocation.disk.threshold_enabled=true -Ecluster.routing.allocation.disk.watermark.flood_stage=128mb -Ecluster.routing.allocation.disk.watermark.high=256mb -Ediscovery.type=single-node -Ecluster.routing.allocation.disk.watermark.low=512mb"
+        },
+        {
+          "pid": 3776141,
+          "name": "postgres",
+          "generated_name": "postgres",
+          "cmdline": "postgres"
+        }
+      ]
+    },
+    {
+      "integration": "tls",
+      "expression": "process.name == 'nginx' && process.cmdline.contains('master process')",
+      "source": "manual",
+      "notes": "tls test fixture serves TLS via nginx \u2014 same rule as nginx.",
+      "mains": 5,
+      "post_cel": 3,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 3226671,
+          "name": "nginx",
+          "generated_name": "nginx",
+          "cmdline": "nginx: master process nginx -g daemon off;"
+        },
+        {
+          "pid": 3226690,
+          "name": "nginx",
+          "generated_name": "nginx",
+          "cmdline": "nginx: master process nginx -g daemon off;"
+        },
+        {
+          "pid": 3226666,
+          "name": "nginx",
+          "generated_name": "nginx",
+          "cmdline": "nginx: master process nginx -g daemon off;"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 3226702,
+          "name": "mysqld",
+          "generated_name": "mysqld",
+          "cmdline": "mysqld --default-authentication-plugin=mysql_native_password --ssl-cert=/var/lib/certs/mysql.valid.mock.crt --ssl-key=/var/lib/certs/mysql.valid.mock.key"
+        },
+        {
+          "pid": 3226688,
+          "name": "postgres",
+          "generated_name": "postgres",
+          "cmdline": "postgres -c ssl=on -c ssl_cert_file=/var/lib/postgresql/certs/postgres.valid.mock.crt -c ssl_key_file=/var/lib/postgresql/certs/postgres.valid.mock.key"
+        }
+      ]
+    },
+    {
+      "integration": "tomcat",
+      "expression": "process.name == 'java' && process.args.exists(a, a.contains('tomcat-embed') || a == 'org.apache.catalina.startup.Bootstrap')",
+      "source": "manual",
+      "notes": "Embedded tomcat in the test fixture (classpath contains tomcat-embed-core-*.jar); standard tomcat uses the org.apache.catalina.startup.Bootstrap main class.",
+      "mains": 1,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 3773709,
+          "name": "java",
+          "generated_name": "launch.Main",
+          "cmdline": "/opt/java/openjdk/bin/java -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.port=9012 -Dcom.sun.management.jmxremote.rmi.port=9012 -Dcom.sun.management.jmxremote.local.only=false -Djava.rmi.server.hostname=localhost -Dtomcat.util.buf.StringCache.byte.enabled=true -Dtomcat.util.buf.StringCache.char.enabled=true -Dtomcat.util.buf.StringCache.trainThreshold=100 -classpath /tmp/app/target/etc:/tmp/app/target/repo/org/apache/tomcat/embed/tomcat-embed-core/10.1.17/tomcat-embed-core-10.1.17.jar:/tmp/app/target/repo/org/apache/tomcat/tomcat-annotations-api/10.1.17/tomcat-annotations-api-10.1.17.jar:/tmp/app/target/repo/org/apache/tomcat/embed/tomcat-embed-jasper/10.1.17/tomcat-embed-jasper-10.1.17.jar:/tmp/app/target/repo/org/apache/tomcat/embed/tomcat-embed-el/10.1.17/tomcat-embed-el-10.1.17.jar:/tmp/app/target/repo/org/eclipse/jdt/ecj/3.33.0/ecj-3.33.0.jar:/tmp/app/target/repo/org/apache/tomcat/tomcat-jasper/10.1.17/tomcat-jasper-10.1.17.jar:/tmp/app/target/repo/org/apache/tomcat/tomcat-servlet-api/10.1.17/tomcat-servlet-api-10.1.17.jar:/tmp/app/target/repo/org/apache/tomcat/tomcat-juli/10.1.17/tomcat-juli-10.1.17.jar:/tmp/app/target/repo/org/apache/tomcat/tomcat-el-api/10.1.17/tomcat-el-api-10.1.17.jar:/tmp/app/target/repo/org/apache/tomcat/tomcat-api/10.1.17/tomcat-api-10.1.17.jar:/tmp/app/target/repo/org/apache/tomcat/tomcat-util-scan/10.1.17/tomcat-util-scan-10.1.17.jar:/tmp/app/target/repo/org/apache/tomcat/tomcat-util/10.1.17/tomcat-util-10.1.17.jar:/tmp/app/target/repo/org/apache/tomcat/tomcat-jasper-el/10.1.17/tomcat-jasper-el-10.1.17.jar:/tmp/app/target/repo/org/apache/tomcat/tomcat-jsp-api/10.1.17/tomcat-jsp-api-10.1.17.jar:/tmp/app/target/repo/com/ai/sample/embeddedTomcatSample/1.0-SNAPSHOT/embeddedTomcatSample-1.0-SNAPSHOT.jar -Dapp.name=webapp -Dapp.pid=1 -Dapp.repo=/tmp/app/target/repo -Dapp.home=/tmp/app/target -Dbasedir=/tmp/app/target launch.Main"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "traffic_server",
+      "expression": "process.cmdline.contains('/bin/traffic_server') || process.cmdline.contains('/bin/traffic_manager') || process.cmdline.contains('/bin/traffic_cop')",
+      "source": "manual",
+      "notes": "Apache Traffic Server rewrites argv[0] to [TS_MAIN] / [TS_MANAGER]; comm doesn't match. The real binary appears as the second argv element after argv[0]. Use cmdline.contains on the binary path.",
+      "mains": 1,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 3397441,
+          "name": "[TS_MAIN]",
+          "generated_name": "traffic_server",
+          "cmdline": "/opt/trafficserver/bin/traffic_server"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "varnish",
+      "expression": "process.name == 'varnishd'",
+      "source": "manual",
+      "notes": "",
+      "mains": 1,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 3241066,
+          "name": "varnishd",
+          "generated_name": "varnishd",
+          "cmdline": "varnishd -F -f /etc/varnish/default.vcl -a http=:80,HTTP -a proxy=:8443,PROXY -p feature=+http2 -s malloc,100M"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "vault",
+      "expression": "process.name == 'vault' && 'server' in process.args",
+      "source": "manual",
+      "notes": "Vault server (distinguishes from `vault status`, `vault read`, etc. invocations).",
+      "mains": 4,
+      "post_cel": 2,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 3372743,
+          "name": "vault",
+          "generated_name": "vault",
+          "cmdline": "vault server -config=/vault/config -dev-root-token-id= -dev-listen-address=0.0.0.0:8200"
+        },
+        {
+          "pid": 3373014,
+          "name": "vault",
+          "generated_name": "vault",
+          "cmdline": "vault server -config=/vault/config -dev-root-token-id= -dev-listen-address=0.0.0.0:8200"
+        }
+      ],
+      "dropped_detail": [
+        {
+          "pid": 3372846,
+          "name": "consul",
+          "generated_name": "consul",
+          "cmdline": "consul agent -data-dir=/consul/data -config-dir=/consul/config -server -join consul -config-file=/consul/config/config.json"
+        },
+        {
+          "pid": 3372648,
+          "name": "consul",
+          "generated_name": "consul",
+          "cmdline": "consul agent -data-dir=/consul/data -config-dir=/consul/config -server -bind 0.0.0.0 -client 0.0.0.0 -bootstrap-expect 1 -config-file=/consul/config/config.json"
+        }
+      ]
+    },
+    {
+      "integration": "voltdb",
+      "expression": "process.name == 'java' && 'org.voltdb.VoltDB' in process.args",
+      "source": "manual",
+      "notes": "",
+      "mains": 3,
+      "post_cel": 3,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 2031215,
+          "name": "java",
+          "generated_name": "org.voltdb.VoltDB",
+          "cmdline": "/usr/bin/java -Xmx2048m -Xms2048m -XX:+AlwaysPreTouch -server -Djava.awt.headless=true -Djavax.security.auth.useSubjectCredsOnly=false -Dsun.net.inetaddr.ttl=300 -Dsun.net.inetaddr.negative.ttl=3600 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled -XX:+UseTLAB -XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly -XX:+UseCondCardMark -Dsun.rmi.dgc.server.gcInterval=9223372036854775807 -Dsun.rmi.dgc.client.gcInterval=9223372036854775807 -XX:CMSWaitDuration=120000 -XX:CMSMaxAbortablePrecleanTime=120000 -XX:+ExplicitGCInvokesConcurrent -XX:+CMSScavengeBeforeRemark -XX:+CMSClassUnloadingEnabled -XX:+PerfDisableSharedMem -Dlog4j.configuration=file:///opt/voltdb/voltdb/log4j.xml -Djava.library.path=default -classpath /opt/voltdb/voltdb/voltdb-10.0.jar:/opt/voltdb/lib/jaxb-api-2.3.0.jar:/opt/voltdb/lib/commons-compiler-2.7.6.jar:/opt/voltdb/lib/protobuf-java-3.4.0.jar:/opt/voltdb/lib/avro-1.9.0.jar:/opt/voltdb/lib/jetty-servlet-9.4.15.v20190215.jar:/opt/voltdb/lib/avatica-core-1.12.0.jar:/opt/voltdb/lib/jline-2.10.jar:/opt/voltdb/lib/cron-java8-1.5.jar:/opt/voltdb/lib/kafka-avro-serializer-3.0.0.jar:/opt/voltdb/lib/calcite-server-1.17.0.jar:/opt/voltdb/lib/jackson-annotations-2.9.10.jar:/opt/voltdb/lib/jackson-dataformat-cbor-2.9.10.jar:/opt/voltdb/lib/slf4j-api-1.6.2.jar:/opt/voltdb/lib/netty-tcnative-boringssl-static-2.0.27.Final.jar:/opt/voltdb/lib/commons-logging-1.1.3.jar:/opt/voltdb/lib/snmp4j-2.5.2.jar:/opt/voltdb/lib/guava-26.0-jre.jar:/opt/voltdb/lib/netty-all-4.1.43.Final.jar:/opt/voltdb/lib/calcite-server-1.17.0-sources.jar:/opt/voltdb/lib/lz4-java-1.6.0.jar:/opt/voltdb/lib/log4j-1.2.16.jar:/opt/voltdb/lib/calcite-linq4j-1.17.0.jar:/opt/voltdb/lib/javax.activation-api-1.2.0.jar:/opt/voltdb/lib/owner-1.0.10.jar:/opt/voltdb/lib/snappy-java-1.1.7.3.jar:/opt/voltdb/lib/calcite-core-1.17.0-sources.jar:/opt/voltdb/lib/jetty-security-9.4.15.v20190215.jar:/opt/voltdb/lib/httpclient-4.3.6.jar:/opt/voltdb/lib/jna.jar:/opt/voltdb/lib/jetty-util-9.4.15.v20190215.jar:/opt/voltdb/lib/jsch-0.1.51.jar:/opt/voltdb/lib/calcite-linq4j-1.17.0-sources.jar:/opt/voltdb/lib/istack-commons-runtime-3.0.8.jar:/opt/voltdb/lib/metrics-core-2.2.0.jar:/opt/voltdb/lib/tomcat-juli-7.0.96.jar:/opt/voltdb/lib/jaxb-runtime-2.3.0.1.jar:/opt/voltdb/lib/kafka-schema-registry-client-5.3.2.jar:/opt/voltdb/lib/commons-lang3-3.8.1.jar:/opt/voltdb/lib/jetty-http-9.4.15.v20190215.jar:/opt/voltdb/lib/owner-java8-1.0.10.jar:/opt/voltdb/lib/janino-2.7.6.jar:/opt/voltdb/lib/avatica-core-1.12.0-sources.jar:/opt/voltdb/lib/vmetrics.jar:/opt/voltdb/lib/httpcore-4.3.3.jar:/opt/voltdb/lib/jetty-continuation-9.4.15.v20190215.jar:/opt/voltdb/lib/jetty-io-9.4.15.v20190215.jar:/opt/voltdb/lib/javax.annotation-api-1.3.2.jar:/opt/voltdb/lib/httpasyncclient-4.0.2.jar:/opt/voltdb/lib/calcite-core-1.17.0.jar:/opt/voltdb/lib/servlet-api-3.1.jar:/opt/voltdb/lib/felix-framework-5.6.12.jar:/opt/voltdb/lib/jetty-server-9.4.15.v20190215.jar:/opt/voltdb/lib/jackson-core-2.9.10.jar:/opt/voltdb/lib/commons-codec-1.6.jar:/opt/voltdb/lib/slf4j-log4j12-1.6.2.jar:/opt/voltdb/lib/jaxb-core-2.3.0.1.jar:/opt/voltdb/lib/jackson-databind-2.9.10.1.jar:/opt/voltdb/lib/zstd-jni-1.4.4-2.jar:/opt/voltdb/lib/httpcore-nio-4.3.2.jar:/opt/voltdb/lib/kafka-clients-2.3.0.jar:/opt/voltdb/lib/super-csv-2.1.0.jar:/opt/voltdb/lib/tomcat-jdbc-7.0.96.jar org.voltdb.VoltDB probe placementgroup 0 voltdbroot /var/voltdb/ mesh voltdb0,voltdb1,voltdb2 hostcount 3"
+        },
+        {
+          "pid": 2031212,
+          "name": "java",
+          "generated_name": "org.voltdb.VoltDB",
+          "cmdline": "/usr/bin/java -Xmx2048m -Xms2048m -XX:+AlwaysPreTouch -server -Djava.awt.headless=true -Djavax.security.auth.useSubjectCredsOnly=false -Dsun.net.inetaddr.ttl=300 -Dsun.net.inetaddr.negative.ttl=3600 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled -XX:+UseTLAB -XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly -XX:+UseCondCardMark -Dsun.rmi.dgc.server.gcInterval=9223372036854775807 -Dsun.rmi.dgc.client.gcInterval=9223372036854775807 -XX:CMSWaitDuration=120000 -XX:CMSMaxAbortablePrecleanTime=120000 -XX:+ExplicitGCInvokesConcurrent -XX:+CMSScavengeBeforeRemark -XX:+CMSClassUnloadingEnabled -XX:+PerfDisableSharedMem -Dlog4j.configuration=file:///opt/voltdb/voltdb/log4j.xml -Djava.library.path=default -classpath /opt/voltdb/voltdb/voltdb-10.0.jar:/opt/voltdb/lib/jaxb-api-2.3.0.jar:/opt/voltdb/lib/commons-compiler-2.7.6.jar:/opt/voltdb/lib/protobuf-java-3.4.0.jar:/opt/voltdb/lib/avro-1.9.0.jar:/opt/voltdb/lib/jetty-servlet-9.4.15.v20190215.jar:/opt/voltdb/lib/avatica-core-1.12.0.jar:/opt/voltdb/lib/jline-2.10.jar:/opt/voltdb/lib/cron-java8-1.5.jar:/opt/voltdb/lib/kafka-avro-serializer-3.0.0.jar:/opt/voltdb/lib/calcite-server-1.17.0.jar:/opt/voltdb/lib/jackson-annotations-2.9.10.jar:/opt/voltdb/lib/jackson-dataformat-cbor-2.9.10.jar:/opt/voltdb/lib/slf4j-api-1.6.2.jar:/opt/voltdb/lib/netty-tcnative-boringssl-static-2.0.27.Final.jar:/opt/voltdb/lib/commons-logging-1.1.3.jar:/opt/voltdb/lib/snmp4j-2.5.2.jar:/opt/voltdb/lib/guava-26.0-jre.jar:/opt/voltdb/lib/netty-all-4.1.43.Final.jar:/opt/voltdb/lib/calcite-server-1.17.0-sources.jar:/opt/voltdb/lib/lz4-java-1.6.0.jar:/opt/voltdb/lib/log4j-1.2.16.jar:/opt/voltdb/lib/calcite-linq4j-1.17.0.jar:/opt/voltdb/lib/javax.activation-api-1.2.0.jar:/opt/voltdb/lib/owner-1.0.10.jar:/opt/voltdb/lib/snappy-java-1.1.7.3.jar:/opt/voltdb/lib/calcite-core-1.17.0-sources.jar:/opt/voltdb/lib/jetty-security-9.4.15.v20190215.jar:/opt/voltdb/lib/httpclient-4.3.6.jar:/opt/voltdb/lib/jna.jar:/opt/voltdb/lib/jetty-util-9.4.15.v20190215.jar:/opt/voltdb/lib/jsch-0.1.51.jar:/opt/voltdb/lib/calcite-linq4j-1.17.0-sources.jar:/opt/voltdb/lib/istack-commons-runtime-3.0.8.jar:/opt/voltdb/lib/metrics-core-2.2.0.jar:/opt/voltdb/lib/tomcat-juli-7.0.96.jar:/opt/voltdb/lib/jaxb-runtime-2.3.0.1.jar:/opt/voltdb/lib/kafka-schema-registry-client-5.3.2.jar:/opt/voltdb/lib/commons-lang3-3.8.1.jar:/opt/voltdb/lib/jetty-http-9.4.15.v20190215.jar:/opt/voltdb/lib/owner-java8-1.0.10.jar:/opt/voltdb/lib/janino-2.7.6.jar:/opt/voltdb/lib/avatica-core-1.12.0-sources.jar:/opt/voltdb/lib/vmetrics.jar:/opt/voltdb/lib/httpcore-4.3.3.jar:/opt/voltdb/lib/jetty-continuation-9.4.15.v20190215.jar:/opt/voltdb/lib/jetty-io-9.4.15.v20190215.jar:/opt/voltdb/lib/javax.annotation-api-1.3.2.jar:/opt/voltdb/lib/httpasyncclient-4.0.2.jar:/opt/voltdb/lib/calcite-core-1.17.0.jar:/opt/voltdb/lib/servlet-api-3.1.jar:/opt/voltdb/lib/felix-framework-5.6.12.jar:/opt/voltdb/lib/jetty-server-9.4.15.v20190215.jar:/opt/voltdb/lib/jackson-core-2.9.10.jar:/opt/voltdb/lib/commons-codec-1.6.jar:/opt/voltdb/lib/slf4j-log4j12-1.6.2.jar:/opt/voltdb/lib/jaxb-core-2.3.0.1.jar:/opt/voltdb/lib/jackson-databind-2.9.10.1.jar:/opt/voltdb/lib/zstd-jni-1.4.4-2.jar:/opt/voltdb/lib/httpcore-nio-4.3.2.jar:/opt/voltdb/lib/kafka-clients-2.3.0.jar:/opt/voltdb/lib/super-csv-2.1.0.jar:/opt/voltdb/lib/tomcat-jdbc-7.0.96.jar org.voltdb.VoltDB probe placementgroup 0 voltdbroot /var/voltdb/ mesh voltdb0,voltdb1,voltdb2 hostcount 3"
+        },
+        {
+          "pid": 2031214,
+          "name": "java",
+          "generated_name": "org.voltdb.VoltDB",
+          "cmdline": "/usr/bin/java -Xmx2048m -Xms2048m -XX:+AlwaysPreTouch -server -Djava.awt.headless=true -Djavax.security.auth.useSubjectCredsOnly=false -Dsun.net.inetaddr.ttl=300 -Dsun.net.inetaddr.negative.ttl=3600 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled -XX:+UseTLAB -XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly -XX:+UseCondCardMark -Dsun.rmi.dgc.server.gcInterval=9223372036854775807 -Dsun.rmi.dgc.client.gcInterval=9223372036854775807 -XX:CMSWaitDuration=120000 -XX:CMSMaxAbortablePrecleanTime=120000 -XX:+ExplicitGCInvokesConcurrent -XX:+CMSScavengeBeforeRemark -XX:+CMSClassUnloadingEnabled -XX:+PerfDisableSharedMem -Dlog4j.configuration=file:///opt/voltdb/voltdb/log4j.xml -Djava.library.path=default -classpath /opt/voltdb/voltdb/voltdb-10.0.jar:/opt/voltdb/lib/jaxb-api-2.3.0.jar:/opt/voltdb/lib/commons-compiler-2.7.6.jar:/opt/voltdb/lib/protobuf-java-3.4.0.jar:/opt/voltdb/lib/avro-1.9.0.jar:/opt/voltdb/lib/jetty-servlet-9.4.15.v20190215.jar:/opt/voltdb/lib/avatica-core-1.12.0.jar:/opt/voltdb/lib/jline-2.10.jar:/opt/voltdb/lib/cron-java8-1.5.jar:/opt/voltdb/lib/kafka-avro-serializer-3.0.0.jar:/opt/voltdb/lib/calcite-server-1.17.0.jar:/opt/voltdb/lib/jackson-annotations-2.9.10.jar:/opt/voltdb/lib/jackson-dataformat-cbor-2.9.10.jar:/opt/voltdb/lib/slf4j-api-1.6.2.jar:/opt/voltdb/lib/netty-tcnative-boringssl-static-2.0.27.Final.jar:/opt/voltdb/lib/commons-logging-1.1.3.jar:/opt/voltdb/lib/snmp4j-2.5.2.jar:/opt/voltdb/lib/guava-26.0-jre.jar:/opt/voltdb/lib/netty-all-4.1.43.Final.jar:/opt/voltdb/lib/calcite-server-1.17.0-sources.jar:/opt/voltdb/lib/lz4-java-1.6.0.jar:/opt/voltdb/lib/log4j-1.2.16.jar:/opt/voltdb/lib/calcite-linq4j-1.17.0.jar:/opt/voltdb/lib/javax.activation-api-1.2.0.jar:/opt/voltdb/lib/owner-1.0.10.jar:/opt/voltdb/lib/snappy-java-1.1.7.3.jar:/opt/voltdb/lib/calcite-core-1.17.0-sources.jar:/opt/voltdb/lib/jetty-security-9.4.15.v20190215.jar:/opt/voltdb/lib/httpclient-4.3.6.jar:/opt/voltdb/lib/jna.jar:/opt/voltdb/lib/jetty-util-9.4.15.v20190215.jar:/opt/voltdb/lib/jsch-0.1.51.jar:/opt/voltdb/lib/calcite-linq4j-1.17.0-sources.jar:/opt/voltdb/lib/istack-commons-runtime-3.0.8.jar:/opt/voltdb/lib/metrics-core-2.2.0.jar:/opt/voltdb/lib/tomcat-juli-7.0.96.jar:/opt/voltdb/lib/jaxb-runtime-2.3.0.1.jar:/opt/voltdb/lib/kafka-schema-registry-client-5.3.2.jar:/opt/voltdb/lib/commons-lang3-3.8.1.jar:/opt/voltdb/lib/jetty-http-9.4.15.v20190215.jar:/opt/voltdb/lib/owner-java8-1.0.10.jar:/opt/voltdb/lib/janino-2.7.6.jar:/opt/voltdb/lib/avatica-core-1.12.0-sources.jar:/opt/voltdb/lib/vmetrics.jar:/opt/voltdb/lib/httpcore-4.3.3.jar:/opt/voltdb/lib/jetty-continuation-9.4.15.v20190215.jar:/opt/voltdb/lib/jetty-io-9.4.15.v20190215.jar:/opt/voltdb/lib/javax.annotation-api-1.3.2.jar:/opt/voltdb/lib/httpasyncclient-4.0.2.jar:/opt/voltdb/lib/calcite-core-1.17.0.jar:/opt/voltdb/lib/servlet-api-3.1.jar:/opt/voltdb/lib/felix-framework-5.6.12.jar:/opt/voltdb/lib/jetty-server-9.4.15.v20190215.jar:/opt/voltdb/lib/jackson-core-2.9.10.jar:/opt/voltdb/lib/commons-codec-1.6.jar:/opt/voltdb/lib/slf4j-log4j12-1.6.2.jar:/opt/voltdb/lib/jaxb-core-2.3.0.1.jar:/opt/voltdb/lib/jackson-databind-2.9.10.1.jar:/opt/voltdb/lib/zstd-jni-1.4.4-2.jar:/opt/voltdb/lib/httpcore-nio-4.3.2.jar:/opt/voltdb/lib/kafka-clients-2.3.0.jar:/opt/voltdb/lib/super-csv-2.1.0.jar:/opt/voltdb/lib/tomcat-jdbc-7.0.96.jar org.voltdb.VoltDB probe placementgroup 0 voltdbroot /var/voltdb/ mesh voltdb0,voltdb1,voltdb2 hostcount 3"
+        }
+      ],
+      "dropped_detail": []
+    },
+    {
+      "integration": "zk",
+      "expression": "process.name == 'java' && 'org.apache.zookeeper.server.quorum.QuorumPeerMain' in process.args",
+      "source": "manual",
+      "notes": "",
+      "mains": 1,
+      "post_cel": 1,
+      "error": null,
+      "survivor_detail": [
+        {
+          "pid": 3399877,
+          "name": "java",
+          "generated_name": "zookeeper",
+          "cmdline": "/usr/local/openjdk-11/bin/java -Dzookeeper.log.dir=/logs -Dzookeeper.log.file=zookeeper--server-d5ddfb57071a.log -Dzookeeper.root.logger=INFO,CONSOLE -XX:+HeapDumpOnOutOfMemoryError -XX:OnOutOfMemoryError=kill -9 %p -cp /apache-zookeeper-3.6.2-bin/bin/../zookeeper-server/target/classes:/apache-zookeeper-3.6.2-bin/bin/../build/classes:/apache-zookeeper-3.6.2-bin/bin/../zookeeper-server/target/lib/*.jar:/apache-zookeeper-3.6.2-bin/bin/../build/lib/*.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/zookeeper-prometheus-metrics-3.6.2.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/zookeeper-jute-3.6.2.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/zookeeper-3.6.2.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/snappy-java-1.1.7.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/slf4j-log4j12-1.7.25.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/slf4j-api-1.7.25.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/simpleclient_servlet-0.6.0.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/simpleclient_hotspot-0.6.0.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/simpleclient_common-0.6.0.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/simpleclient-0.6.0.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/netty-transport-native-unix-common-4.1.50.Final.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/netty-transport-native-epoll-4.1.50.Final.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/netty-transport-4.1.50.Final.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/netty-resolver-4.1.50.Final.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/netty-handler-4.1.50.Final.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/netty-common-4.1.50.Final.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/netty-codec-4.1.50.Final.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/netty-buffer-4.1.50.Final.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/metrics-core-3.2.5.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/log4j-1.2.17.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/json-simple-1.1.1.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/jline-2.14.6.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/jetty-util-9.4.24.v20191120.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/jetty-servlet-9.4.24.v20191120.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/jetty-server-9.4.24.v20191120.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/jetty-security-9.4.24.v20191120.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/jetty-io-9.4.24.v20191120.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/jetty-http-9.4.24.v20191120.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/javax.servlet-api-3.1.0.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/jackson-databind-2.10.3.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/jackson-core-2.10.3.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/jackson-annotations-2.10.3.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/commons-lang-2.6.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/commons-cli-1.2.jar:/apache-zookeeper-3.6.2-bin/bin/../lib/audience-annotations-0.5.0.jar:/apache-zookeeper-3.6.2-bin/bin/../zookeeper-*.jar:/apache-zookeeper-3.6.2-bin/bin/../zookeeper-server/src/main/resources/lib/*.jar:/conf: -Xmx1000m -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.local.only=false org.apache.zookeeper.server.quorum.QuorumPeerMain /conf/zoo.cfg"
+        }
+      ],
+      "dropped_detail": []
+    }
+  ]
+}

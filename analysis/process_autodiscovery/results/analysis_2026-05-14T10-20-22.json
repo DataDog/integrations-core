@@ -1,5 +1,5 @@
 {
-  "analyzed_at": "2026-05-14T09:13:28.409595+00:00",
+  "analyzed_at": "2026-05-14T10:20:22.562956+00:00",
   "results": [
     {
       "integration": "airflow",
@@ -4291,9 +4291,65 @@
       "environment": "py3.13-1.19",
       "services": [
         {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            3780821
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            3780822
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            3780824
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            3780838
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "temporal-server",
+          "main_pids": [
+            3778207
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "run_worker",
+          "main_pids": [
+            3779687
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "ui-server",
+          "main_pids": [
+            3779693
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
           "generated_name": "org.elasticsearch.bootstrap.Elasticsearch",
           "main_pids": [
-            3365184
+            3776201
           ],
           "skipped_pids": [],
           "verdict": "PASS"
@@ -4301,7 +4357,7 @@
         {
           "generated_name": "postgres",
           "main_pids": [
-            3365120
+            3776141
           ],
           "skipped_pids": [],
           "verdict": "PASS"
@@ -4454,7 +4510,24 @@
     {
       "integration": "tomcat",
       "environment": "py3.13-10.1-embedded",
-      "services": []
+      "services": [
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            3774752
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "launch.Main",
+          "main_pids": [
+            3773709
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
     },
     {
       "integration": "traffic_server",
