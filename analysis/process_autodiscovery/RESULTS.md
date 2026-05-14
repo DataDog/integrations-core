@@ -71,6 +71,12 @@ returns `GeneratedName` values matching what the agent would compute in producti
 - **86** were successfully collected
 - **58** were skipped (see breakdown below)
 
+Of the 86 collected, only **60** had at least one non-infra service detected by
+`disco`. The remaining 26 produced process trees in which the only services
+labeled by `disco` were Datadog Agent components (`agent`, `system-probe`,
+`security-agent`, `privateactionrunner`). The effective target-service sample
+is therefore 60 integrations, not 86 or 144.
+
 ## Results
 
 ### Coverage
@@ -79,42 +85,89 @@ returns `GeneratedName` values matching what the agent would compute in producti
 |---|---|
 | Integrations collected | 86 |
 | Skipped — fake caddy server | 18 |
-| Skipped — env start failed (K8s, Windows, cloud-only) | 39 |
+| Skipped — env start failed | 39 |
 | Skipped — no environments found | 1 |
 
-Integrations skipped due to fake caddy are those where the test environment serves
-static fixture files via Caddy instead of running the real service (e.g.,
-`kubernetes_cluster_autoscaler`, `silk`, `appgate_sdp`). These are not meaningful
-for process tree analysis.
+The 39 "env start failed" skips are not a clean "K8s / Windows / cloud-only"
+slice. They break down (by inspecting `details` in `data/skipped.json`) as:
+
+| Sub-reason | Count |
+|---|---|
+| Environment already running (operational) | 14 |
+| Docker pull / registry rate-limit / build copy errors (operational) | 10 |
+| `ddev env start` timed out after 300 s (operational) | 6 |
+| Unsupported platform (Windows-only integrations) | 5 |
+| Dependency build failure (missing native headers, local toolchain) | 3 |
+| Kind / Kubernetes cluster setup failed | 1 |
+
+Most of these are environmental, not architectural — the same integrations
+might collect cleanly on a different machine or with a warmed Docker cache.
+This makes the skipped set non-random, so it should not be used to generalize
+about the population of unsampled integrations.
+
+Integrations skipped due to fake caddy are those where the test environment
+serves static fixture files via Caddy instead of running the real service
+(e.g., `kubernetes_cluster_autoscaler`, `silk`, `appgate_sdp`). These are not
+meaningful for process tree analysis.
 
 ### Algorithm verdicts
 
 Excluding the Datadog agent infra processes (`agent`, `system-probe`,
-`security-agent`, `privateactionrunner`) that are present in every environment:
+`security-agent`, `privateactionrunner`) that are present in every environment.
+
+The analyzer groups processes by `generated_name` within a single collected
+environment and runs `isMainProcessForService` against every process that has
+`has_service_data: true`. A verdict is emitted per (integration, generated_name)
+pair:
+
+- **PASS** = exactly one main process was selected for that `generated_name`
+  in this environment.
+- **WARN (N=k)** = k main processes were selected (k ≠ 1).
+
+PASS does *not* mean "exactly one main process per service in production." It
+means "within this single collected environment, the deduplication produced one
+main for this `generated_name`." Multiple legitimate instances (e.g., a 3-node
+cluster) correctly produce WARN — that is the expected outcome, not a failure.
 
 | Verdict | Count |
 |---|---|
-| **PASS** (1 main per service) | 108 service/integration pairs |
+| **PASS** (1 main for that generated_name in this env) | 108 service/integration pairs |
 | **WARN (N>1)** | 25 service/integration pairs |
-| No service data (disco returned nothing) | 26 integrations |
+| No non-infra service data (disco returned nothing useful) | 26 integrations |
 
-### PASS cases — algorithm works correctly
+### PASS cases — algorithm exercised successfully
 
-Representative examples showing master+worker filtering:
+Representative examples. Two distinct sub-classes are mixed in here:
+
+1. **Algorithm actively deduplicated** — `disco` labeled the workers with the
+   same `generated_name` as the master, and `isMainProcessForService`
+   correctly filtered them. Example: `nginx`, `airflow / gunicorn`.
+2. **Algorithm was not exercised** — `disco` labeled only one process per
+   `generated_name` (workers had `has_service_data: false`), so the analyzer
+   never had to deduplicate. The PASS verdict in this sub-class is consistent
+   with a working algorithm but does *not* constitute evidence that the
+   algorithm correctly handles workers in that integration. Example: `postgres`
+   — the checkpointer/walwriter/bgwriter workers had no service data and were
+   never passed to `is_main_process`.
 
 | Integration | Service | Outcome |
 |---|---|---|
-| nginx | `nginx` | 1 master, 1 worker filtered ✅ |
-| postgres | `postgres` | 1 master, workers (checkpointer, walwriter, autovacuum, bgwriter) filtered ✅ |
-| airflow | `gunicorn` | 1 master, all workers filtered ✅ |
-| haproxy | `haproxy` | 1 main ✅ |
-| rabbitmq | `rabbitmq` | 1 main ✅ |
-| scylla | `scylla` | 1 main ✅ |
+| nginx | `nginx` | 1 master + 1 worker, both labeled `nginx`, worker filtered by algorithm ✅ |
+| airflow | `gunicorn` | master + workers all labeled `gunicorn`, workers filtered by algorithm ✅ |
+| postgres | `postgres` | 1 master; background workers (checkpointer, walwriter, autovacuum, bgwriter) carried `has_service_data: false` and were not passed to the algorithm — algorithm not exercised |
+| haproxy | `haproxy` | 1 main (only one labeled process) |
+| rabbitmq | `rabbitmq` | 1 main |
+| scylla | `scylla` | 1 main (siblings under `supervisord` are separate generated names — see false-positive note below) |
 | sonarqube | `sonar-application-*` | 1 main; child JVMs (Elasticsearch, WebServer, CeServer) correctly separate ✅ |
-| pulsar | `pulsar` | 1 main ✅ |
+| pulsar | `pulsar` | 1 main |
 | nifi | `nifi` | 1 main, framework subprocess correctly separate ✅ |
 | ceph | `ceph-mon`, `ceph-mgr`, `ceph-osd`, `ceph-mds`, `radosgw` | Each daemon correctly 1 main ✅ |
 | confluent_platform | `zookeeper`, `kafka.Kafka`, `io.confluent.*` (5 services) | All correctly 1 main each ✅ |
+
+The cases where the algorithm was *actively* exercised (master and worker
+sharing a `generated_name`) are the ones that exercise the deduplication
+path. Among the integrations sampled, the clearest examples are
+master/worker C servers (`nginx`) and Python pre-fork pools (`gunicorn`).
 
 ### WARN cases — classified
 
@@ -154,7 +207,7 @@ WARN (N=nodes) is correct behavior here.
 | redisdb | `redis-server` | 3 instances on ports 6380, 6381, 6382 — each is a separate Redis instance |
 | prefect | `prefect` | `prefect server` + `prefect worker` — two distinct components sharing a generated name |
 
-#### Category 3: disco false positives (disco issue, not algorithm issue)
+#### Category 3: disco false positives surfaced as WARN (disco issue, not algorithm issue)
 
 | Integration | Service | Details |
 |---|---|---|
@@ -162,6 +215,32 @@ WARN (N=nodes) is correct behavior here.
 | couchbase | `tmp` | 3 Erlang/OTP beam processes labeled `tmp` — a generic disco name for unrecognized Erlang processes. |
 
 In both cases the actual target service (`squid`, `couchbase`) correctly shows PASS.
+
+### disco false positives surfaced as PASS
+
+There is a related class of false positives that does *not* appear in the WARN
+table because each occurs as a single instance: the algorithm emits PASS, but
+the `generated_name` is not the integration's target service. From a
+user-facing auto-discovery perspective these would create unwanted integration
+instances. Examples in the sample:
+
+| Integration | generated_name | What it actually is |
+|---|---|---|
+| nifi | `tail` | `tail -F --pid=79 /opt/nifi/nifi-current/logs/nifi-app.log` — log tailer |
+| riak | `tail` | log tailer |
+| scylla | `supervisord` | container init / process supervisor |
+| scylla | `rsyslogd` | container syslog daemon |
+| scylla | `node_exporter` | Prometheus node-exporter bundled in the Scylla image |
+| elastic | `sh` | shell wrapper |
+| silverstripe_cms | `sh` | shell wrapper |
+
+`supervisord` is a legitimate target service of the dedicated `supervisord`
+integration, so its PASS row is not always a false positive — context matters.
+
+These rows mean the "108 PASS" headline overstates how often the
+auto-discovery surface area would be correct end-to-end. The algorithm itself
+is doing what it is asked to do (one main per `generated_name`), but the input
+labels are not always the integration's target service.
 
 ### Integrations with no service data detected
 
@@ -180,27 +259,65 @@ the service does not run as a host process or disco cannot detect it yet.
 
 ## Conclusion
 
-**The `isMainProcessForService` algorithm is sound for production use.**
+**Narrow claim, well supported:** the collected sample did not reveal a
+parent/child deduplication failure. In every case where `disco` labeled both a
+parent and one or more of its descendants with the same `generated_name`, the
+algorithm selected exactly one main process and filtered the rest. No genuine
+worker was incorrectly promoted to main in this sample.
 
-Across 86 tested integrations and 108 unique service/integration pairs, the algorithm
-produced **zero false master selections** — no case was found where a genuine worker
-or sub-process was incorrectly promoted to main.
+This holds across the deduplication patterns that the sample did exercise:
+- C servers with pre-fork workers labeled with the same name as the master
+  (e.g. `nginx`)
+- Python pre-fork pools (`gunicorn`)
+- JVM services with forked child JVMs that get distinct names
+  (`sonar-application-*` vs. its Elasticsearch / WebServer / CeServer children
+  — children correctly become their own services)
 
-The master+worker deduplication logic works correctly for all tested patterns:
-- C services with pre-fork workers (nginx, haproxy, squid, php-fpm)
-- Database servers with background helper processes (postgres, redis single-instance)
-- JVM services with forked child JVMs (sonarqube, confluent components)
-- Python worker pools (gunicorn, celery)
-- Supervised services (scylla, supervisord-managed)
+**Broader caveats that limit how far this generalizes:**
 
-The WARN cases are either multi-node cluster test environments (where N instances
-are correct and expected) or minor disco naming issues (unrelated to the algorithm).
+1. **Sample coverage is limited.** Of 144 integrations with E2E tests, only 86
+   were collected and only 60 of those had a non-infra service detected. The
+   58 skipped integrations include 14 already-running envs, 10 docker
+   pull/registry issues, 6 timeouts, and other operational failures — that
+   skip set is non-random, so the unsampled population may behave differently.
+2. **The PASS count overstates correctness.** "108 PASS" counts each
+   (integration, generated_name) pair, including legitimate multi-instance
+   passes and the false-positive helper processes called out above
+   (`tail`, `sh`, container-side `supervisord`/`rsyslogd`/`node_exporter`).
+3. **Some integrations did not exercise the algorithm at all.** For example,
+   the postgres background workers (`checkpointer`, `bgwriter`, `walwriter`,
+   `autovacuum`, io workers) had `has_service_data: false`. They were
+   excluded from the analyzer's input by the `has_service_data` filter, not
+   by the algorithm. The algorithm's behavior on those workers is therefore
+   unknown from this data.
+4. **Algorithm correctness depends on `disco` correctness.** If `disco`
+   labels a child process with a *different* `generated_name` than its
+   parent (or labels a non-service process), the algorithm will faithfully
+   treat them as independent services — which is correct given its input,
+   but may be wrong end-to-end. The `tail` / `sh` / container-helper PASS
+   rows are examples.
+5. **Container detection differs from the design spec.** The spec describes
+   filtering containers by ddev name/prefix; the implementation instead
+   computes the delta of `docker ps` before and after `ddev env start`. This
+   is why "Environment already running" rows in `skipped.json` produce no
+   collected data — the delta is empty.
 
-**Recommendation:** The algorithm can be shipped as-is. The only follow-up items
-are disco-side:
+**Recommendation:** the data supports the narrow claim that no
+parent/child deduplication failure was observed in the cases the algorithm was
+actually exercised on. The disco-side follow-ups remain:
 1. Improve naming for Erlang/OTP processes (couchbase `tmp`)
-2. Avoid labeling log-tailing helper processes as services (squid `tail`)
-3. Extend disco to reach processes inside nested Kubernetes network namespaces
+2. Avoid labeling log-tailing helper processes as services (squid `tail`,
+   nifi `tail`, riak `tail`)
+3. Avoid labeling generic shell wrappers and container helper daemons as
+   services (`sh`, `rsyslogd`, `node_exporter`, container-side
+   `supervisord`)
+4. Extend disco to reach processes inside nested Kubernetes network namespaces
+
+Closing the remaining algorithm-level gap would require either (a) collecting
+data for the currently skipped integrations on a clean machine, or (b)
+extending the analyzer to also consider processes with `has_service_data:
+false` whose parent does have service data — that is the path the production
+algorithm would actually take on those workers.
 
 ## Files
 

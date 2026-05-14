@@ -78,10 +78,15 @@ python analysis/scripts/process_analyze.py collect nginx \
    `"fake caddy server"` and stop — do not start the environment.
 3. `ddev env start --dev <integration> <env>`. If this fails, record the
    integration as skipped with reason `"env start failed: <error>"` and stop.
-4. Identify Docker containers started for this integration using
-   `docker ps --format json` filtered by container name prefix (ddev names
-   containers `<integration>_<service>_<n>`).
-5. For each container, find all host-namespace PIDs that belong to it by
+4. Identify Docker containers started for this integration by snapshotting
+   `docker ps --format '{{.ID}}'` before step 3 and again after, and taking
+   the set difference. This avoids relying on ddev's container naming
+   convention but has two consequences: (a) if the environment is already
+   running before step 3, the delta is empty and no PIDs are collected; (b)
+   any unrelated containers that happen to start concurrently on the same
+   host will be picked up. Both are acceptable for an offline analysis run
+   on a quiescent machine.
+5. For each new container, find all host-namespace PIDs that belong to it by
    scanning `/proc/<pid>/cgroup` for the container's ID.
 6. Run `disco` on the host: it reads `/proc` and outputs detected services with
    their PIDs and `generated_name` values.
