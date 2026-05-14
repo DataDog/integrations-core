@@ -1,5 +1,4 @@
 {
-  "id": "anthropic-compliance-logs-overview",
   "title": "Anthropic Compliance Logs Overview",
   "description": "Security and compliance visibility into Anthropic Console activity: SSO sign-ins, admin API key lifecycle, organization changes, and Claude chat/project access.",
   "layout_type": "ordered",
@@ -88,7 +87,7 @@
                     {
                       "name": "query1",
                       "data_source": "logs",
-                      "search": {"query": "source:anthropic service:anthropic.compliance $org $actor_type $event_name"},
+                      "search": {"query": "source:anthropic-compliance-logs $actor_type $event_name"},
                       "indexes": ["*"],
                       "group_by": [],
                       "compute": {"aggregation": "count"},
@@ -117,7 +116,7 @@
                     {
                       "name": "query1",
                       "data_source": "logs",
-                      "search": {"query": "source:anthropic service:anthropic.compliance $org $actor_type $event_name"},
+                      "search": {"query": "source:anthropic-compliance-logs $org $actor_type $event_name"},
                       "indexes": ["*"],
                       "group_by": [],
                       "compute": {"aggregation": "cardinality", "metric": "@usr.email"},
@@ -146,7 +145,7 @@
                     {
                       "name": "query1",
                       "data_source": "logs",
-                      "search": {"query": "source:anthropic service:anthropic.compliance $org $actor_type $event_name"},
+                      "search": {"query": "source:anthropic-compliance-logs $org $actor_type $event_name"},
                       "indexes": ["*"],
                       "group_by": [],
                       "compute": {"aggregation": "cardinality", "metric": "@network.client.ip"},
@@ -178,7 +177,7 @@
                     {
                       "name": "query1",
                       "data_source": "logs",
-                      "search": {"query": "source:anthropic service:anthropic.compliance $org $actor_type $event_name"},
+                      "search": {"query": "source:anthropic-compliance-logs $org $actor_type $event_name"},
                       "indexes": ["*"],
                       "group_by": [
                         {
@@ -243,7 +242,7 @@
                     {
                       "name": "query1",
                       "data_source": "logs",
-                      "search": {"query": "source:anthropic service:anthropic.compliance @evt.name:(user_signed_in_sso OR user_signed_in_google OR user_signed_in_apple OR user_signed_in_password OR user_signed_out) $org $actor_type"},
+                      "search": {"query": "source:anthropic-compliance-logs @evt.name:(user_signed_in_sso OR user_signed_in_google OR user_signed_in_apple OR user_signed_in_password OR user_signed_out) $org $actor_type"},
                       "indexes": ["*"],
                       "group_by": [
                         {
@@ -278,7 +277,7 @@
                     {
                       "name": "query1",
                       "data_source": "logs",
-                      "search": {"query": "source:anthropic service:anthropic.compliance @evt.name:user_signed_in_* $org $actor_type"},
+                      "search": {"query": "source:anthropic-compliance-logs @evt.name:user_signed_in_* $org $actor_type"},
                       "indexes": ["*"],
                       "group_by": [
                         {
@@ -340,7 +339,7 @@
                     {
                       "name": "query1",
                       "data_source": "logs",
-                      "search": {"query": "source:anthropic service:anthropic.compliance $org $actor_type $event_name"},
+                      "search": {"query": "source:anthropic-compliance-logs $org $actor_type $event_name"},
                       "indexes": ["*"],
                       "group_by": [
                         {
@@ -374,7 +373,7 @@
                     {
                       "name": "query1",
                       "data_source": "logs",
-                      "search": {"query": "source:anthropic service:anthropic.compliance $org $event_name"},
+                      "search": {"query": "source:anthropic-compliance-logs $org $event_name"},
                       "indexes": ["*"],
                       "group_by": [
                         {
@@ -421,7 +420,7 @@
                     {
                       "name": "query1",
                       "data_source": "logs",
-                      "search": {"query": "source:anthropic service:anthropic.compliance @usr.email:* $org $actor_type $event_name"},
+                      "search": {"query": "source:anthropic-compliance-logs @usr.email:* $org $actor_type $event_name"},
                       "indexes": ["*"],
                       "group_by": [
                         {
@@ -455,7 +454,7 @@
                     {
                       "name": "query1",
                       "data_source": "logs",
-                      "search": {"query": "source:anthropic service:anthropic.compliance @network.client.ip:* $org $actor_type $event_name"},
+                      "search": {"query": "source:anthropic-compliance-logs @network.client.ip:* $org $actor_type $event_name"},
                       "indexes": ["*"],
                       "group_by": [
                         {
@@ -516,7 +515,7 @@
                     {
                       "name": "query1",
                       "data_source": "logs",
-                      "search": {"query": "source:anthropic service:anthropic.compliance @evt.name:(*api_key_created OR *api_key_deleted OR *api_key_updated) $org $actor_type"},
+                      "search": {"query": "source:anthropic-compliance-logs @evt.name:(*api_key_created OR *api_key_deleted OR *api_key_updated) $org $actor_type"},
                       "indexes": ["*"],
                       "group_by": [
                         {
@@ -550,7 +549,7 @@
                     {
                       "name": "query1",
                       "data_source": "logs",
-                      "search": {"query": "source:anthropic service:anthropic.compliance $org $actor_type $event_name"},
+                      "search": {"query": "source:anthropic-compliance-logs $org $actor_type $event_name"},
                       "indexes": ["*"],
                       "group_by": [
                         {
@@ -605,7 +604,7 @@
               "title_align": "left",
               "type": "log_stream",
               "indexes": ["*"],
-              "query": "source:anthropic service:anthropic.compliance (@actor.type:admin_api_key_actor OR @evt.name:admin_*) $org $event_name",
+              "query": "source:anthropic-compliance-logs (@actor.type:admin_api_key_actor OR @evt.name:admin_*) $org $event_name",
               "sort": {"column": "timestamp", "order": "desc"},
               "columns": ["host", "@evt.name", "@usr.email", "@network.client.ip"],
               "show_date_column": true,
@@ -621,7 +620,7 @@
               "title_align": "left",
               "type": "log_stream",
               "indexes": ["*"],
-              "query": "source:anthropic service:anthropic.compliance @evt.name:(*sso_* OR *saml_*) $org $actor_type",
+              "query": "source:anthropic-compliance-logs @evt.name:(*sso_* OR *saml_*) $org $actor_type",
               "sort": {"column": "timestamp", "order": "desc"},
               "columns": ["host", "@evt.name", "@usr.email", "@network.client.ip"],
               "show_date_column": true,
@@ -649,7 +648,7 @@
               "title_align": "left",
               "type": "log_stream",
               "indexes": ["*"],
-              "query": "source:anthropic service:anthropic.compliance $org $actor_type $event_name",
+              "query": "source:anthropic-compliance-logs $org $actor_type $event_name",
               "sort": {"column": "timestamp", "order": "desc"},
               "columns": ["host", "@evt.name", "@actor.type", "@usr.email", "@network.client.geoip.country.iso_code"],
               "show_date_column": true,
