@@ -9,18 +9,23 @@ from datadog_checks.base.types import InstanceType
 @pytest.fixture(scope='session')
 def dd_environment() -> Iterator[None]:
     # When the integration has a real test environment, wire it here.
-    # Typical Docker Compose setup:
+    # Typical Docker Compose setup (use find_free_port to avoid hardcoding ports):
     #
     # from pathlib import Path
     # from datadog_checks.dev import docker_run
     # from datadog_checks.dev.conditions import CheckEndpoints
+    # from datadog_checks.dev.docker import get_docker_hostname
+    # from datadog_checks.dev.utils import find_free_port
     #
+    # host = get_docker_hostname()
+    # port = find_free_port(host)
     # compose_file = Path(__file__).parent / "docker" / "docker-compose.yml"
     # with docker_run(
     #     compose_file=str(compose_file),
-    #     conditions=[CheckEndpoints("http://localhost:1234/health", attempts=60, wait=2)],
+    #     env_vars={{"PORT": str(port)}},
+    #     conditions=[CheckEndpoints(f"http://{{host}}:{{port}}/health", attempts=60, wait=2)],
     # ):
-    #     yield {{"instances": [{{"openmetrics_endpoint": "http://localhost:1234/metrics"}}]}}
+    #     yield {{"instances": [{{"openmetrics_endpoint": f"http://{{host}}:{{port}}/metrics"}}]}}
     yield
 
 
