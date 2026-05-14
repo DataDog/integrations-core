@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 1.1.2 / 2026-05-14
+
+***Fixed***:
+
+* Fix default raw metric prefix. ([#23598](https://github.com/DataDog/integrations-core/pull/23598))
+
 ## 1.1.1 / 2026-04-15
 
 ***Fixed***:
