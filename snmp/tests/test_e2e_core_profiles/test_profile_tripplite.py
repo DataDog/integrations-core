@@ -55,7 +55,7 @@ def test_e2e_profile_tripplite(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = metric_tags
+    device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

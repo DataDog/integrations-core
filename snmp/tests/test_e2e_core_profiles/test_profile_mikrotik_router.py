@@ -128,7 +128,7 @@ def test_e2e_profile_mikrotik_router(dd_agent_check):
         'device_type': 'router',
         'integration': 'snmp',
     }
-    device['tags'] = metric_tags
+    device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

@@ -64,7 +64,7 @@ def test_e2e_profile_avaya_aura_media_server(dd_agent_check):
         'device_type': 'server',
         'integration': 'snmp',
     }
-    device['tags'] = metric_tags
+    device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

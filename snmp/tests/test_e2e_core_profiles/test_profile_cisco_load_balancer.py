@@ -179,7 +179,7 @@ def test_e2e_profile_cisco_load_balancer(dd_agent_check):
         'device_type': 'load_balancer',
         'integration': 'snmp',
     }
-    device['tags'] = metric_tags
+    device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

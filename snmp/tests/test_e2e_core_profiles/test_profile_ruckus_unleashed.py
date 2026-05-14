@@ -90,7 +90,7 @@ def test_e2e_profile_ruckus_unleashed(dd_agent_check):
         'device_type': 'wlc',
         'integration': 'snmp',
     }
-    device['tags'] = metric_tags
+    device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

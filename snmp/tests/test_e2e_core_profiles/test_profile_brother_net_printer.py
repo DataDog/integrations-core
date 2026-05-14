@@ -67,7 +67,7 @@ def test_e2e_profile_brother_net_printer(dd_agent_check):
         'device_type': 'printer',
         'integration': 'snmp',
     }
-    device['tags'] = metric_tags
+    device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

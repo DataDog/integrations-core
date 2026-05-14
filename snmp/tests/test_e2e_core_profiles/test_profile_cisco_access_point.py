@@ -94,7 +94,7 @@ def test_e2e_profile_cisco_access_point(dd_agent_check):
         'device_type': 'access_point',
         'integration': 'snmp',
     }
-    device['tags'] = metric_tags
+    device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

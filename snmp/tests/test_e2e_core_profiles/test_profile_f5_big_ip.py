@@ -479,7 +479,7 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
         'device_type': 'load_balancer',
         'integration': 'snmp',
     }
-    device['tags'] = metric_tags
+    device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

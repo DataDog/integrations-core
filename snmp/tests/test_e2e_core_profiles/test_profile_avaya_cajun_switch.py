@@ -86,7 +86,7 @@ def test_e2e_profile_avaya_cajun_switch(dd_agent_check):
         'device_type': 'switch',
         'integration': 'snmp',
     }
-    device['tags'] = metric_tags
+    device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---

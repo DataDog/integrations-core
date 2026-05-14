@@ -116,7 +116,7 @@ def test_e2e_profile_mcafee_web_gateway(dd_agent_check):
         'device_type': 'other',
         'integration': 'snmp',
     }
-    device['tags'] = metric_tags
+    device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
