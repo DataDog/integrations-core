@@ -2,8 +2,8 @@
 	"version": 2,
 	"created_at": "2026-05-14T13:19:09.403+02:00",
 	"last_updated_at": "2026-05-14T13:19:09.403+02:00",
-	"title": "<REPLACE_WITH_TITLE>",
-	"description": "<REPLACE_WITH_DESCRIPTION>",
+	"title": "Nutanix alert is open in Prism Central",
+	"description": "Notifies when a Nutanix alert is open (unacknowledged and unresolved) in Prism Central, with one monitor case per alert via @aggregation_key. The monitor auto-recovers when the alert is acknowledged or resolved in Prism Central. Lifecycle events (created, acknowledged, reopened, resolved) appear in the Events Explorer under the same aggregation key.",
 	"definition": {
 		"id": 281752599,
 		"name": "{{#is_alert}}OPEN{{/is_alert}}{{#is_recovery}}RESOLVED{{/is_recovery}} [Nutanix {{ntnx_alert_severity.name}}]   [{{ntnx_alert_impact.name}}] [{{ntnx_originating_cluster_name.name}}] - {{ext_id.name}}",

@@ -221,9 +221,7 @@ class ActivityMonitor:
 
         count = 0
         for ext_id in new_ids:
-            alert = api_alerts[ext_id]
-            self._open_alerts[ext_id] = alert
-            self._process_alert(alert)
+            self._open_alerts[ext_id] = api_alerts[ext_id]
             count += 1
 
         for ext_id in gone_ids:
@@ -234,6 +232,7 @@ class ActivityMonitor:
             self._emit_resolution_event(self._get_alert(ext_id) or cached, cached_tags_alert=cached)
             count += 1
 
+        transitioned: set[str] = set()
         for ext_id in still_tracked:
             old_alert = self._open_alerts[ext_id]
             new_alert = api_alerts[ext_id]
@@ -242,10 +241,16 @@ class ActivityMonitor:
             if old_state != new_state:
                 self._submit_state_metric(old_alert, old_state, 0)
                 self._emit_transition_event(new_alert, old_state, new_state)
+                transitioned.add(ext_id)
                 count += 1
             self._open_alerts[ext_id] = new_alert
 
-        for alert in self._open_alerts.values():
+        # Heartbeat each tracked alert every cycle so event-based monitors don't auto-resolve
+        # when the rollup window lapses. Transition cycles skip the heartbeat because the
+        # transition event has already landed under the same aggregation_key.
+        for ext_id, alert in self._open_alerts.items():
+            if ext_id not in transitioned:
+                self._process_alert(alert)
             self._submit_state_metric(alert, self._alert_state(alert), 1)
 
         return count

@@ -29,32 +29,6 @@ def _fixture_alert(alert_type, **overrides):
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
-def test_alerts_no_duplicates_on_subsequent_runs(
-    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
-):
-    """Test that no alerts are collected when there are no new alerts since last collection."""
-    instance = mock_instance.copy()
-    instance["collect_alerts"] = True
-
-    # Datetime past all fixture alerts, so the cursor doesn't surface anything new on re-run
-    get_current_datetime.return_value = MOCK_ALERT_DATETIME_AFTER_ALL
-
-    check = NutanixCheck('nutanix', {}, [instance])
-    dd_run_check(check)
-
-    alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
-    assert len(alerts) > 0, "Expected alerts to be collected on first run"
-
-    aggregator.reset()
-
-    # Second run with the same fixture state: reconciliation diff is empty
-    dd_run_check(check)
-
-    alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
-    assert len(alerts) == 0, "Expected no alerts when there are no new alerts since last collection"
-
-
-@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
 def test_alerts_filtered_by_resource_filters_exclude_cluster(
     get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
 ):
@@ -493,10 +467,10 @@ def test_alerts_resolution_detected_on_subsequent_run(
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
-def test_alerts_still_open_no_duplicate_event(
+def test_alerts_still_open_emits_heartbeat_each_cycle(
     get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
 ):
-    """Two consecutive cycles with the same unresolved list emit no duplicate events."""
+    """Each cycle re-emits one heartbeat event per tracked alert so event-based monitors stay firing."""
     instance = mock_instance.copy()
     instance["collect_alerts"] = True
 
@@ -505,12 +479,19 @@ def test_alerts_still_open_no_duplicate_event(
     check = NutanixCheck('nutanix', {}, [instance])
 
     dd_run_check(check)
+    tracked_count = len(check.activity_monitor._open_alerts)
+    assert tracked_count > 0
     aggregator.reset()
 
     dd_run_check(check)
 
-    all_alert_events = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
-    assert len(all_alert_events) == 0, "Should not emit any event when no alert state has changed"
+    heartbeat_events = [
+        e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", []) and e["msg_title"].startswith("Alert:")
+    ]
+    assert len(heartbeat_events) == tracked_count, "Expected one heartbeat event per tracked alert each cycle"
+    for event in heartbeat_events:
+        assert event["aggregation_key"].startswith("nutanix-alert-")
+        assert any(t in event["tags"] for t in ("ntnx_alert_status:open", "ntnx_alert_status:acknowledged"))
 
 
 # --- nutanix.alert.open metric emission ---
@@ -1020,3 +1001,177 @@ def test_alert_resolution_with_no_metadata_when_alert_deleted(
         m for m in aggregator.metrics("nutanix.alert.resolved") if m.value == 1 and f"ext_id:{target_ext_id}" in m.tags
     ]
     assert len(resolved_metrics) == 1
+
+
+# --- Heartbeat skip-list + error-path coverage ---
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_heartbeat_skipped_on_acknowledgement_transition(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
+):
+    """A transitioning alert emits only the transition event - no heartbeat duplicates it."""
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+    target_ext_id = next(
+        ext_id for ext_id, a in check.activity_monitor._open_alerts.items() if not a.get("isAcknowledged")
+    )
+    cached = check.activity_monitor._open_alerts[target_ext_id]
+    aggregator.reset()
+
+    acked = {
+        **cached,
+        "isAcknowledged": True,
+        "acknowledgedByUsername": "tester",
+        "acknowledgedTime": "2026-03-04T01:00:00Z",
+    }
+    others = [a for a in check.activity_monitor._open_alerts.values() if a.get("extId") != target_ext_id]
+    mocker.patch.object(check.activity_monitor, '_list_alerts_unresolved', return_value=[*others, acked])
+
+    dd_run_check(check)
+
+    target_events = [e for e in aggregator.events if f"ext_id:{target_ext_id}" in e.get("tags", [])]
+    transitions = [e for e in target_events if e["msg_title"].startswith("Alert acknowledged:")]
+    heartbeats = [e for e in target_events if e["msg_title"].startswith("Alert:")]
+    assert len(transitions) == 1
+    assert heartbeats == [], "Transitioned alert must not emit a heartbeat this cycle"
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_heartbeat_skipped_on_resolution(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
+):
+    """A resolved alert emits only the resolution event - the heartbeat loop sees no entry to emit for."""
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+    target_ext_id = next(iter(check.activity_monitor._open_alerts))
+    aggregator.reset()
+
+    remaining = [a for a in check.activity_monitor._open_alerts.values() if a.get("extId") != target_ext_id]
+    mocker.patch.object(check.activity_monitor, '_list_alerts_unresolved', return_value=remaining)
+
+    dd_run_check(check)
+
+    target_events = [e for e in aggregator.events if f"ext_id:{target_ext_id}" in e.get("tags", [])]
+    resolved = [e for e in target_events if e["msg_title"].startswith("Alert Resolved:")]
+    heartbeats = [e for e in target_events if e["msg_title"].startswith("Alert:")]
+    assert len(resolved) == 1
+    assert heartbeats == [], "Resolved alert must not also emit a heartbeat"
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_heartbeat_does_not_emit_for_filter_excluded_alert(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
+):
+    """After a filter-add causes a spurious resolution, subsequent cycles emit nothing for the excluded alert."""
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+    target_ext_id = next(iter(check.activity_monitor._open_alerts))
+
+    original = check.activity_monitor._should_collect_activity_item
+    mocker.patch.object(
+        check.activity_monitor,
+        '_should_collect_activity_item',
+        side_effect=lambda item, kind: item.get("extId") != target_ext_id and original(item, kind),
+    )
+
+    dd_run_check(check)  # spurious resolution cycle
+    aggregator.reset()
+    dd_run_check(check)  # filter still active, target should be silent
+
+    target_events = [e for e in aggregator.events if f"ext_id:{target_ext_id}" in e.get("tags", [])]
+    assert target_events == [], "Filter-excluded alert must not emit any event after spurious resolution"
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_aggregation_key_consistent_across_lifecycle(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
+):
+    """Heartbeat, transition, and resolution events for one alert share aggregation_key=nutanix-alert-<ext_id>."""
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+    target_ext_id = next(
+        ext_id for ext_id, a in check.activity_monitor._open_alerts.items() if not a.get("isAcknowledged")
+    )
+    cached = check.activity_monitor._open_alerts[target_ext_id]
+    others = [a for a in check.activity_monitor._open_alerts.values() if a.get("extId") != target_ext_id]
+
+    acked = {
+        **cached,
+        "isAcknowledged": True,
+        "acknowledgedByUsername": "tester",
+        "acknowledgedTime": "2026-03-04T01:00:00Z",
+    }
+    mocker.patch.object(check.activity_monitor, '_list_alerts_unresolved', return_value=[*others, acked])
+    dd_run_check(check)
+
+    resolved = {
+        **acked,
+        "isResolved": True,
+        "resolvedByUsername": "tester",
+        "resolvedTime": "2026-03-04T02:00:00Z",
+        "isAutoResolved": False,
+    }
+    mocker.patch.object(check.activity_monitor, '_list_alerts_unresolved', return_value=others)
+    mocker.patch.object(check.activity_monitor, '_get_alert', return_value=resolved)
+    dd_run_check(check)
+
+    target_events = [e for e in aggregator.events if f"ext_id:{target_ext_id}" in e.get("tags", [])]
+    titles_seen = {e["msg_title"].split(":", 1)[0] for e in target_events}
+    assert {"Alert", "Alert acknowledged", "Alert Resolved"}.issubset(titles_seen), (
+        f"Expected all three event types for {target_ext_id}, got titles: {titles_seen}"
+    )
+    expected_key = f"nutanix-alert-{target_ext_id}"
+    for event in target_events:
+        assert event["aggregation_key"] == expected_key
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_api_failure_re_emits_cached_gauges_and_no_events(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
+):
+    """Transient API failure: cached gauges keep firing so monitors don't auto-resolve; no events emitted."""
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+    tracked = len(check.activity_monitor._open_alerts)
+    assert tracked > 0
+    aggregator.reset()
+
+    mocker.patch.object(
+        check.activity_monitor,
+        '_list_alerts_unresolved',
+        side_effect=RuntimeError("transient API failure"),
+    )
+
+    dd_run_check(check)
+
+    alert_events = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
+    assert alert_events == [], "No alert events should fire when the API fails"
+
+    state_ones = [
+        m
+        for name in ("nutanix.alert.open", "nutanix.alert.acknowledged")
+        for m in aggregator.metrics(name)
+        if m.value == 1
+    ]
+    assert len(state_ones) == tracked, "Cached gauges must keep emitting at value 1 during API failure"
