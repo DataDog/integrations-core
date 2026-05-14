@@ -345,17 +345,26 @@ class CreatePullRequestStep(PortStep):
                 )
 
 
-def _resolve_commit_or_fetch(app: Application, commit_hash: str) -> str:
+def _resolve_commit_or_fetch(app: Application, commit_hash: str, *, dry_run: bool) -> str:
     """Return the full SHA for `commit_hash`, fetching from origin when the commit is not local.
 
     Aborts the application with a user-facing message when the commit is neither available locally
     nor reachable on origin. Falling back to a SHA-targeted fetch lets the command port commits that
     live on remote branches the local repo does not track (the `remote.origin.fetch` refspec is
     often narrowed in this repo to avoid pulling thousands of branches).
+
+    When `dry_run` is true, the fetch fallback is skipped to preserve the dry-run contract: a
+    non-local commit aborts with a clear message rather than mutating local state.
     """
     git = app.repo.git
     with contextlib.suppress(OSError):
         return git.capture('rev-parse', '--verify', f'{commit_hash}^{{commit}}').strip()
+
+    if dry_run:
+        app.abort(
+            f'Commit `{commit_hash}` is not in the local repository. '
+            'Re-run without `--dry-run` to fetch it from origin, or pre-fetch the commit manually.'
+        )
 
     if HEX_PATTERN.fullmatch(commit_hash) and not FULL_SHA_PATTERN.fullmatch(commit_hash):
         app.abort(
@@ -505,7 +514,7 @@ def resolve_port_plan(
             app.abort('Did not get confirmation, aborting.')
         commit_hash = head_commit.sha
 
-    full_sha = _resolve_commit_or_fetch(app, commit_hash)
+    full_sha = _resolve_commit_or_fetch(app, commit_hash, dry_run=dry_run)
 
     log_entries = app.repo.git.log(['hash:%H', 'subject:%s'], n=1, source=full_sha)
     if not log_entries:

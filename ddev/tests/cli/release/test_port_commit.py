@@ -639,6 +639,23 @@ def test_command_aborts_when_fetch_fails(
     fake_async_github.assert_not_called('create_pull_request')
 
 
+def test_command_aborts_in_dry_run_when_commit_not_local(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    """Dry-run must not mutate local state, so don't fetch when the commit is missing."""
+    run_mock = mocker.patch('ddev.utils.git.GitRepository.run')
+    mocker.patch('ddev.utils.git.GitRepository.capture', side_effect=OSError('bad object'))
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', '--dry-run', FULL_SHA_FOR_TESTS)
+
+    assert result.exit_code == 1, result.output
+    assert 'is not in the local repository' in result.output
+    assert 'Re-run without `--dry-run`' in result.output
+    assert not any(c.args[:2] == ('fetch', 'origin') for c in run_mock.call_args_list)
+    fake_async_github.assert_not_called('create_pull_request')
+
+
 def test_command_aborts_on_abbreviated_sha_not_local(
     ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
 ) -> None:
