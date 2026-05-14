@@ -15,7 +15,7 @@ datadog-arctic-wolf-aurora-endpoint-security==1.0.0
 datadog-argo-rollouts==3.4.1
 datadog-argo-workflows==3.4.1
 datadog-argocd==4.5.0
-datadog-aspdotnet==4.6.0; sys_platform == 'win32'
+datadog-aspdotnet==4.7.0; sys_platform == 'win32'
 datadog-avi-vantage==6.4.1
 datadog-aws-neuron==3.4.1
 datadog-azure-iot-edge==6.5.0
