@@ -46,12 +46,15 @@ class ActivityMonitor:
 
         # extId -> last-seen alert dict; reconciled each cycle against the unresolved-alerts API.
         self._open_alerts: dict[str, dict] = {}
+        # Per-cycle dedup for _get_alert; reset each run so it doesn't grow unbounded.
+        self._alert_fetch_cache: dict[str, dict] = {}
 
     def reset_state(self) -> None:
         """Reset in-memory caches and counters for a new collection run."""
         self.events = {}
         self.audits = {}
         self.tasks = {}
+        self._alert_fetch_cache = {}
         self.events_count = 0
         self.tasks_count = 0
         self.audits_count = 0
@@ -203,10 +206,12 @@ class ActivityMonitor:
         try:
             alerts = self._list_alerts_unresolved()
         except Exception:
-            # On a transient API failure, keep emitting cached gauges so per-alert
-            # monitors don't auto-resolve while the underlying alert is still open.
-            for alert in self._open_alerts.values():
-                self._submit_state_metric(alert, self._alert_state(alert), 1)
+            self.check.log.warning(
+                "[%s] Failed to list unresolved alerts; re-emitting cached gauges for %d tracked alerts.",
+                self._pc_label,
+                len(self._open_alerts),
+            )
+            self._reemit_cached_gauges()
             raise
 
         alerts = [a for a in alerts if self._should_collect_activity_item(a, "alert")]
@@ -217,19 +222,45 @@ class ActivityMonitor:
         gone_ids = frozenset(self._open_alerts.keys() - api_alerts.keys())
         still_tracked = api_alerts.keys() & self._open_alerts.keys()
 
-        count = 0
+        count = self._track_new_alerts(new_ids, api_alerts)
+        count += self._emit_resolved_alerts(gone_ids)
+        transitioned = self._emit_alert_transitions(still_tracked, api_alerts)
+        count += len(transitioned)
+        self._emit_heartbeats_and_gauges(transitioned)
+        return count
+
+    def _reemit_cached_gauges(self) -> None:
+        """Keep per-alert monitors firing while the unresolved-alerts API is unavailable."""
+        for alert in self._open_alerts.values():
+            self._submit_state_metric(alert, self._alert_state(alert), 1)
+
+    def _track_new_alerts(self, new_ids: set[str], api_alerts: dict[str, dict]) -> int:
         for ext_id in new_ids:
             self._open_alerts[ext_id] = api_alerts[ext_id]
-            count += 1
+        return len(new_ids)
 
+    def _emit_resolved_alerts(self, gone_ids: frozenset[str]) -> int:
         for ext_id in gone_ids:
             cached = self._open_alerts.pop(ext_id)
-            # GET-by-id is required: cached only has the open-state alert, but the
-            # resolution event needs resolvedTime / resolvedByUsername / isAutoResolved
+            # GET-by-id is required: the cached payload only has the open-state alert, but
+            # the resolution event needs resolvedTime / resolvedByUsername / isAutoResolved
             # which only exist on the post-resolution payload.
-            self._emit_resolution_event(self._get_alert(ext_id) or cached, cached_tags_alert=cached)
-            count += 1
+            resolved = self._get_alert(ext_id)
+            if resolved is None:
+                # The alert is gone from the unresolved list AND the GET-by-id returned None:
+                # the alert was deleted in Prism Central, not resolved. We still emit a
+                # resolution event from cached metadata, but it carries no resolvedBy /
+                # resolvedTime / isAutoResolved, so operators will see a bare "Resolved".
+                self.check.log.info(
+                    "[%s] Alert %s no longer accessible from Prism Central (deleted); "
+                    "emitting resolution event from cached metadata.",
+                    self._pc_label,
+                    ext_id,
+                )
+            self._emit_resolution_event(resolved or cached, cached_tags_alert=cached)
+        return len(gone_ids)
 
+    def _emit_alert_transitions(self, still_tracked: set[str], api_alerts: dict[str, dict]) -> set[str]:
         transitioned: set[str] = set()
         for ext_id in still_tracked:
             old_alert = self._open_alerts[ext_id]
@@ -240,9 +271,10 @@ class ActivityMonitor:
                 self._submit_state_metric(old_alert, old_state, 0)
                 self._emit_transition_event(new_alert, old_state, new_state)
                 transitioned.add(ext_id)
-                count += 1
             self._open_alerts[ext_id] = new_alert
+        return transitioned
 
+    def _emit_heartbeats_and_gauges(self, transitioned: set[str]) -> None:
         # Heartbeat each tracked alert every cycle so event-based monitors don't auto-resolve
         # when the rollup window lapses. Transition cycles skip the heartbeat because the
         # transition event has already landed under the same aggregation_key.
@@ -250,8 +282,6 @@ class ActivityMonitor:
             if ext_id not in transitioned:
                 self._process_alert(alert)
             self._submit_state_metric(alert, self._alert_state(alert), 1)
-
-        return count
 
     def _list_activity(self, endpoint: str, time_field: str, start_time_str: str) -> list[dict]:
         """Fetch activity items from Prism Central."""
@@ -279,12 +309,17 @@ class ActivityMonitor:
         return filtered
 
     def _get_alert(self, alert_ext_id: str) -> dict | None:
-        """Fetch an alert detail from Prism Central; called once per resolution, no caching needed."""
+        """Fetch an alert detail by ID, deduplicated within a single check run."""
+        if cached := self._alert_fetch_cache.get(alert_ext_id):
+            return cached
         try:
-            return self.check._get_request_data(f"api/monitoring/v4.0/serviceability/alerts/{alert_ext_id}")
+            alert = self.check._get_request_data(f"api/monitoring/v4.0/serviceability/alerts/{alert_ext_id}")
         except Exception as e:
             self.check.log.debug("[%s] Failed to fetch alert %s: %s", self._pc_label, alert_ext_id, e)
             return None
+        if alert:
+            self._alert_fetch_cache[alert_ext_id] = alert
+        return alert
 
     def _process_event(self, event: dict) -> None:
         """Process and send a single event to Datadog."""
@@ -424,7 +459,7 @@ class ActivityMonitor:
         """Build the alert tag set; pass status only for events (metrics encode state in the name)."""
         tags = self.check.base_tags.copy()
         if ext_id := alert.get("extId"):
-            tags.append(f"ext_id:{ext_id}")
+            tags.append(f"ntnx_alert_ext_id:{ext_id}")
         if alert_type := alert.get("alertType"):
             tags.append(f"ntnx_alert_type:{alert_type}")
         if severity := alert.get("severity"):
@@ -481,7 +516,7 @@ class ActivityMonitor:
         )
 
     def _emit_resolution_event(self, alert: dict, cached_tags_alert: dict | None = None) -> None:
-        """Emit resolution event, close prev-state gauge, and emit nutanix.alert.resolved=1."""
+        """Emit resolution event, close prev-state gauge, and register a one-shot resolution count."""
         ext_id = alert.get("extId", "")
         title = alert.get("title", "Nutanix Alert")
         resolved_time = alert.get("resolvedTime")
@@ -518,7 +553,9 @@ class ActivityMonitor:
         )
 
         self.check.gauge(f"alert.{prev_state}", 0, tags=metric_tags)
-        self.check.gauge("alert.resolved", 1, tags=metric_tags)
+        # count, not gauge: alerts can transition resolved -> open with the same extId,
+        # and a gauge would stay at 1 indefinitely, falsely indicating "resolved" after reopen.
+        self.check.count("alert.resolved", 1, tags=metric_tags)
 
     def _emit_transition_event(self, alert: dict, old_state: str, new_state: str) -> None:
         """Emit an event when a tracked alert's state changes (open <-> acknowledged)."""

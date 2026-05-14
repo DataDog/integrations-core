@@ -526,7 +526,7 @@ def test_alert_open_metric_emitted_per_tracked_alert(
     assert len(ack_zeros) == 0
 
     for m in open_ones + ack_ones:
-        assert any(t.startswith("ext_id:") for t in m.tags)
+        assert any(t.startswith("ntnx_alert_ext_id:") for t in m.tags)
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
@@ -576,10 +576,12 @@ def test_alert_open_metric_zero_on_resolution(
     zero_metric_name = f"nutanix.alert.{prior_state}"
     zero_metrics = [m for m in aggregator.metrics(zero_metric_name) if m.value == 0]
     assert len(zero_metrics) == 1
-    assert f"ext_id:{target_ext_id}" in zero_metrics[0].tags
+    assert f"ntnx_alert_ext_id:{target_ext_id}" in zero_metrics[0].tags
 
     resolved_metrics = [
-        m for m in aggregator.metrics("nutanix.alert.resolved") if m.value == 1 and f"ext_id:{target_ext_id}" in m.tags
+        m
+        for m in aggregator.metrics("nutanix.alert.resolved")
+        if m.value == 1 and f"ntnx_alert_ext_id:{target_ext_id}" in m.tags
     ]
     assert len(resolved_metrics) == 1
 
@@ -587,7 +589,7 @@ def test_alert_open_metric_zero_on_resolution(
         m
         for name in ("nutanix.alert.open", "nutanix.alert.acknowledged")
         for m in aggregator.metrics(name)
-        if m.value == 1 and f"ext_id:{target_ext_id}" in m.tags
+        if m.value == 1 and f"ntnx_alert_ext_id:{target_ext_id}" in m.tags
     ]
     assert len(target_ones) == 0
 
@@ -659,19 +661,23 @@ def test_alert_state_transition_open_to_acknowledged(
     dd_run_check(check)
 
     open_zeros = [
-        m for m in aggregator.metrics("nutanix.alert.open") if m.value == 0 and f"ext_id:{target_ext_id}" in m.tags
+        m
+        for m in aggregator.metrics("nutanix.alert.open")
+        if m.value == 0 and f"ntnx_alert_ext_id:{target_ext_id}" in m.tags
     ]
     assert len(open_zeros) == 1
 
     ack_ones = [
         m
         for m in aggregator.metrics("nutanix.alert.acknowledged")
-        if m.value == 1 and f"ext_id:{target_ext_id}" in m.tags
+        if m.value == 1 and f"ntnx_alert_ext_id:{target_ext_id}" in m.tags
     ]
     assert len(ack_ones) >= 1
 
     open_ones = [
-        m for m in aggregator.metrics("nutanix.alert.open") if m.value == 1 and f"ext_id:{target_ext_id}" in m.tags
+        m
+        for m in aggregator.metrics("nutanix.alert.open")
+        if m.value == 1 and f"ntnx_alert_ext_id:{target_ext_id}" in m.tags
     ]
     assert len(open_ones) == 0
 
@@ -679,7 +685,8 @@ def test_alert_state_transition_open_to_acknowledged(
     transition_events = [
         e
         for e in aggregator.events
-        if f"ext_id:{target_ext_id}" in e.get("tags", []) and e["msg_title"].startswith("Alert acknowledged:")
+        if f"ntnx_alert_ext_id:{target_ext_id}" in e.get("tags", [])
+        and e["msg_title"].startswith("Alert acknowledged:")
     ]
     assert len(transition_events) == 1
     assert "Acknowledged by noueman" in transition_events[0]["msg_text"]
@@ -806,18 +813,22 @@ def test_alert_open_metric_zero_on_resolution_from_acknowledged_state(
     ack_zeros = [
         m
         for m in aggregator.metrics("nutanix.alert.acknowledged")
-        if m.value == 0 and f"ext_id:{target_ext_id}" in m.tags
+        if m.value == 0 and f"ntnx_alert_ext_id:{target_ext_id}" in m.tags
     ]
     assert len(ack_zeros) == 1
 
     # No :0 on nutanix.alert.open for this ext_id (it never was in that state on this run)
     open_zeros = [
-        m for m in aggregator.metrics("nutanix.alert.open") if m.value == 0 and f"ext_id:{target_ext_id}" in m.tags
+        m
+        for m in aggregator.metrics("nutanix.alert.open")
+        if m.value == 0 and f"ntnx_alert_ext_id:{target_ext_id}" in m.tags
     ]
     assert len(open_zeros) == 0
 
     resolved_metrics = [
-        m for m in aggregator.metrics("nutanix.alert.resolved") if m.value == 1 and f"ext_id:{target_ext_id}" in m.tags
+        m
+        for m in aggregator.metrics("nutanix.alert.resolved")
+        if m.value == 1 and f"ntnx_alert_ext_id:{target_ext_id}" in m.tags
     ]
     assert len(resolved_metrics) == 1
 
@@ -855,12 +866,14 @@ def test_alert_state_transition_acknowledged_to_open(
     ack_zeros = [
         m
         for m in aggregator.metrics("nutanix.alert.acknowledged")
-        if m.value == 0 and f"ext_id:{target_ext_id}" in m.tags
+        if m.value == 0 and f"ntnx_alert_ext_id:{target_ext_id}" in m.tags
     ]
     assert len(ack_zeros) == 1
 
     open_ones = [
-        m for m in aggregator.metrics("nutanix.alert.open") if m.value == 1 and f"ext_id:{target_ext_id}" in m.tags
+        m
+        for m in aggregator.metrics("nutanix.alert.open")
+        if m.value == 1 and f"ntnx_alert_ext_id:{target_ext_id}" in m.tags
     ]
     assert len(open_ones) >= 1
 
@@ -868,7 +881,7 @@ def test_alert_state_transition_acknowledged_to_open(
     ack_ones_target = [
         m
         for m in aggregator.metrics("nutanix.alert.acknowledged")
-        if m.value == 1 and f"ext_id:{target_ext_id}" in m.tags
+        if m.value == 1 and f"ntnx_alert_ext_id:{target_ext_id}" in m.tags
     ]
     assert len(ack_ones_target) == 0
 
@@ -876,7 +889,7 @@ def test_alert_state_transition_acknowledged_to_open(
     transition_events = [
         e
         for e in aggregator.events
-        if f"ext_id:{target_ext_id}" in e.get("tags", []) and e["msg_title"].startswith("Alert reopened:")
+        if f"ntnx_alert_ext_id:{target_ext_id}" in e.get("tags", []) and e["msg_title"].startswith("Alert reopened:")
     ]
     assert len(transition_events) == 1
     assert "ntnx_alert_status:open" in transition_events[0]["tags"]
@@ -917,13 +930,16 @@ def test_alert_filter_excludes_tracked_alert_emits_spurious_resolution(
     resolved_events = [
         e
         for e in aggregator.events
-        if "ntnx_alert_status:resolved" in e.get("tags", []) and f"ext_id:{target_ext_id}" in e.get("tags", [])
+        if "ntnx_alert_status:resolved" in e.get("tags", [])
+        and f"ntnx_alert_ext_id:{target_ext_id}" in e.get("tags", [])
     ]
     assert len(resolved_events) == 1
     assert target_ext_id not in check.activity_monitor._open_alerts
 
     resolved_metrics = [
-        m for m in aggregator.metrics("nutanix.alert.resolved") if m.value == 1 and f"ext_id:{target_ext_id}" in m.tags
+        m
+        for m in aggregator.metrics("nutanix.alert.resolved")
+        if m.value == 1 and f"ntnx_alert_ext_id:{target_ext_id}" in m.tags
     ]
     assert len(resolved_metrics) == 1
 
@@ -982,7 +998,8 @@ def test_alert_resolution_with_no_metadata_when_alert_deleted(
     resolution_events = [
         e
         for e in aggregator.events
-        if "ntnx_alert_status:resolved" in e.get("tags", []) and f"ext_id:{target_ext_id}" in e.get("tags", [])
+        if "ntnx_alert_status:resolved" in e.get("tags", [])
+        and f"ntnx_alert_ext_id:{target_ext_id}" in e.get("tags", [])
     ]
     assert len(resolution_events) == 1
     # No resolvedByUsername and isAutoResolved defaults to False on the cached alert,
@@ -993,12 +1010,14 @@ def test_alert_resolution_with_no_metadata_when_alert_deleted(
     zero_metrics = [
         m
         for m in aggregator.metrics(f"nutanix.alert.{prior_state}")
-        if m.value == 0 and f"ext_id:{target_ext_id}" in m.tags
+        if m.value == 0 and f"ntnx_alert_ext_id:{target_ext_id}" in m.tags
     ]
     assert len(zero_metrics) == 1
 
     resolved_metrics = [
-        m for m in aggregator.metrics("nutanix.alert.resolved") if m.value == 1 and f"ext_id:{target_ext_id}" in m.tags
+        m
+        for m in aggregator.metrics("nutanix.alert.resolved")
+        if m.value == 1 and f"ntnx_alert_ext_id:{target_ext_id}" in m.tags
     ]
     assert len(resolved_metrics) == 1
 
@@ -1034,7 +1053,7 @@ def test_heartbeat_skipped_on_acknowledgement_transition(
 
     dd_run_check(check)
 
-    target_events = [e for e in aggregator.events if f"ext_id:{target_ext_id}" in e.get("tags", [])]
+    target_events = [e for e in aggregator.events if f"ntnx_alert_ext_id:{target_ext_id}" in e.get("tags", [])]
     transitions = [e for e in target_events if e["msg_title"].startswith("Alert acknowledged:")]
     heartbeats = [e for e in target_events if e["msg_title"].startswith("Alert:")]
     assert len(transitions) == 1
@@ -1060,7 +1079,7 @@ def test_heartbeat_skipped_on_resolution(
 
     dd_run_check(check)
 
-    target_events = [e for e in aggregator.events if f"ext_id:{target_ext_id}" in e.get("tags", [])]
+    target_events = [e for e in aggregator.events if f"ntnx_alert_ext_id:{target_ext_id}" in e.get("tags", [])]
     resolved = [e for e in target_events if e["msg_title"].startswith("Alert Resolved:")]
     heartbeats = [e for e in target_events if e["msg_title"].startswith("Alert:")]
     assert len(resolved) == 1
@@ -1091,7 +1110,7 @@ def test_heartbeat_does_not_emit_for_filter_excluded_alert(
     aggregator.reset()
     dd_run_check(check)  # filter still active, target should be silent
 
-    target_events = [e for e in aggregator.events if f"ext_id:{target_ext_id}" in e.get("tags", [])]
+    target_events = [e for e in aggregator.events if f"ntnx_alert_ext_id:{target_ext_id}" in e.get("tags", [])]
     assert target_events == [], "Filter-excluded alert must not emit any event after spurious resolution"
 
 
@@ -1132,7 +1151,7 @@ def test_aggregation_key_consistent_across_lifecycle(
     mocker.patch.object(check.activity_monitor, '_get_alert', return_value=resolved)
     dd_run_check(check)
 
-    target_events = [e for e in aggregator.events if f"ext_id:{target_ext_id}" in e.get("tags", [])]
+    target_events = [e for e in aggregator.events if f"ntnx_alert_ext_id:{target_ext_id}" in e.get("tags", [])]
     titles_seen = {e["msg_title"].split(":", 1)[0] for e in target_events}
     assert {"Alert", "Alert acknowledged", "Alert Resolved"}.issubset(titles_seen), (
         f"Expected all three event types for {target_ext_id}, got titles: {titles_seen}"
@@ -1175,3 +1194,62 @@ def test_api_failure_re_emits_cached_gauges_and_no_events(
         if m.value == 1
     ]
     assert len(state_ones) == tracked, "Cached gauges must keep emitting at value 1 during API failure"
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_alert_can_reopen_after_resolution_with_same_ext_id(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
+):
+    """An alert resolved in one cycle and reappearing unresolved in a later cycle is re-tracked cleanly."""
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+    target_ext_id = next(iter(check.activity_monitor._open_alerts))
+    cached = check.activity_monitor._open_alerts[target_ext_id]
+    others = [a for a in check.activity_monitor._open_alerts.values() if a.get("extId") != target_ext_id]
+
+    # Cycle 2: target is gone (resolved).
+    resolved_payload = {
+        **cached,
+        "isResolved": True,
+        "resolvedByUsername": "tester",
+        "resolvedTime": "2026-03-04T01:00:00Z",
+        "isAutoResolved": False,
+    }
+    mocker.patch.object(check.activity_monitor, '_list_alerts_unresolved', return_value=others)
+    mocker.patch.object(check.activity_monitor, '_get_alert', return_value=resolved_payload)
+    dd_run_check(check)
+    assert target_ext_id not in check.activity_monitor._open_alerts
+
+    aggregator.reset()
+
+    # Cycle 3: target reappears in the unresolved list with the same extId (reopen).
+    reopened = {**cached, "isResolved": False, "isAcknowledged": False}
+    mocker.patch.object(check.activity_monitor, '_list_alerts_unresolved', return_value=[*others, reopened])
+    dd_run_check(check)
+
+    assert target_ext_id in check.activity_monitor._open_alerts
+
+    # Heartbeat fires for the reopened alert (treated as new).
+    target_events = [
+        e
+        for e in aggregator.events
+        if f"ntnx_alert_ext_id:{target_ext_id}" in e.get("tags", []) and e["msg_title"].startswith("Alert:")
+    ]
+    assert len(target_events) == 1
+    assert target_events[0]["aggregation_key"] == f"nutanix-alert-{target_ext_id}"
+
+    # Open gauge fires at 1; resolved count does NOT increment again this cycle.
+    open_ones = [
+        m
+        for m in aggregator.metrics("nutanix.alert.open")
+        if m.value == 1 and f"ntnx_alert_ext_id:{target_ext_id}" in m.tags
+    ]
+    assert len(open_ones) == 1
+    resolved_emits = [
+        m for m in aggregator.metrics("nutanix.alert.resolved") if f"ntnx_alert_ext_id:{target_ext_id}" in m.tags
+    ]
+    assert resolved_emits == [], "nutanix.alert.resolved must not re-fire on a reopen cycle"

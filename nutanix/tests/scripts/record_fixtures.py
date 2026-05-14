@@ -395,17 +395,12 @@ def record_audits() -> None:
 
 
 def record_alerts() -> None:
-    """Record alerts fixture."""
-    # Get alerts from last 24 hours
-    now = datetime.now(timezone.utc)
-    start_time = now - timedelta(hours=24)
-    start_time_str = start_time.isoformat().replace("+00:00", "Z")
-
-    print(f"\nRecording alerts (from {start_time_str})")
+    """Record alerts fixture (currently-unresolved snapshot, matching production query)."""
+    print("\nRecording unresolved alerts")
 
     params = {
-        "$filter": f"creationTime gt {start_time_str}",
-        "$orderBy": "creationTime asc",
+        "$filter": "isResolved eq false",
+        "$orderBy": "lastUpdatedTime asc",
     }
 
     try:

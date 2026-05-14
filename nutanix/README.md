@@ -63,9 +63,17 @@ Use the `collect_events`, `collect_alerts`, `collect_tasks`, and `collect_audits
 
 **Note**: By default, only parent tasks are collected. Set `collect_subtasks: true` to include subtasks.
 
-**Alert lifecycle.** Alerts are reconciled against Prism Central's unresolved-alerts API on every check cycle. The integration emits a creation event when an alert first appears, a transition event when it is acknowledged or reopened, and a resolution event when it is resolved or deleted. While an alert is open, a heartbeat event is re-emitted each cycle so event-based monitors stay firing. All events for the same alert share `aggregation_key=nutanix-alert-<extId>`, which collapses them into a single entry in the Events Explorer.
+**Alert lifecycle.** Alerts are reconciled against Prism Central's unresolved-alerts API on every check cycle. While an alert is open, a heartbeat event (`msg_title: Alert: ...`) is emitted each cycle so event-based monitors stay firing; the first occurrence acts as the creation event. Transition events are emitted when an alert is acknowledged or reopened, and a resolution event is emitted when it is resolved or deleted. All events for the same alert share `aggregation_key=nutanix-alert-<extId>`, which collapses them into a single entry in the Events Explorer.
 
-**Agent restart.** The integration is stateless across restarts. On startup it fetches all currently-unresolved alerts and re-emits a creation event for each; `aggregation_key` collapses these duplicates with any prior creation events. State changes (acknowledgement, reopening) that happen during agent downtime are not retroactively emitted as transition events. The next check cycle picks up the current state and proceeds normally.
+**Agent restart.** The integration is stateless across restarts. On startup it fetches all currently-unresolved alerts and re-emits a heartbeat event for each; `aggregation_key` collapses these duplicates with any prior events. State changes (acknowledgement, reopening) that happen during agent downtime are not retroactively emitted as transition events. The next check cycle picks up the current state and proceeds normally.
+
+**Building metric-based monitors for alerts.** The state of an alert is captured by `nutanix.alert.open` and `nutanix.alert.acknowledged` (gauges). `nutanix.alert.resolved` is a `count` of resolution transitions, not a state. Recommended patterns:
+
+- Active alerts: `avg:nutanix.alert.open{*}.default_zero() > 0` by `ntnx_alert_ext_id`.
+- Active or acknowledged: `avg:nutanix.alert.open{*} + avg:nutanix.alert.acknowledged{*}` with `default_zero` and threshold `> 0`, grouped by `ntnx_alert_ext_id`.
+- Resolution rate: `sum:nutanix.alert.resolved{*}.as_count()` for dashboards or backlog monitors.
+
+Because `nutanix.alert.resolved` is a count, do not subtract it from the open or acknowledged gauges; an alert can transition from resolved back to open with the same `ntnx_alert_ext_id`, and `.open` alone is the correct state signal.
 
 ### Service Checks
 

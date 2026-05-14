@@ -6,10 +6,10 @@
 	"description": "Notifies when a Nutanix alert is open (unacknowledged and unresolved) in Prism Central, with one monitor case per alert via @aggregation_key. The monitor auto-recovers when the alert is acknowledged or resolved in Prism Central. Lifecycle events (created, acknowledged, reopened, resolved) appear in the Events Explorer under the same aggregation key. Note: on agent restart, the integration re-broadcasts an open event for every still-unresolved alert; @aggregation_key collapses the duplicates per alert. State changes that happen during agent downtime are not retro-emitted as transition events.",
 	"definition": {
 		"id": 281752599,
-		"name": "{{#is_alert}}OPEN{{/is_alert}}{{#is_recovery}}RESOLVED{{/is_recovery}} [Nutanix {{ntnx_alert_severity.name}}] [{{ntnx_alert_impact.name}}] [{{ntnx_originating_cluster_name.name}}] - {{ext_id.name}}",
+		"name": "{{#is_alert}}OPEN{{/is_alert}}{{#is_recovery}}RESOLVED{{/is_recovery}} [Nutanix {{ntnx_alert_severity.name}}] [{{ntnx_alert_impact.name}}] [{{ntnx_originating_cluster_name.name}}] - {{ntnx_alert_ext_id.name}}",
 		"type": "event-v2 alert",
-		"query": "events(\"source:nutanix ntnx_type:alert ntnx_alert_status:open\").rollup(\"cardinality\", \"@aggregation_key\").by(\"@aggregation_key,ntnx_alert_severity,ntnx_alert_impact,ntnx_originating_cluster_name\").last(\"5m\") > 1",
-		"message": "{{#is_alert}}A Nutanix alert has been raised or escalated.{{/is_alert}}\n  {{#is_alert_recovery}}The underlying Nutanix alert has recovered.{{/is_alert_recovery}}\n\n  **Alert:** `{{@aggregation_key.name}}`\n  **Severity:** `{{ntnx_alert_severity.name}}`\n  **Impact:** `{{ntnx_alert_impact.name}}`\n  **Originating cluster:** `{{ntnx_originating_cluster_name.name}}`\n\n  **Transition observed at:** {{last_triggered_at}}",
+		"query": "events(\"source:nutanix ntnx_type:alert ntnx_alert_status:open\").rollup(\"cardinality\", \"@aggregation_key\").by(\"@aggregation_key,ntnx_alert_severity,ntnx_alert_impact,ntnx_originating_cluster_name\").last(\"5m\") > 0",
+		"message": "{{#is_alert}}A Nutanix alert has been raised or escalated.{{/is_alert}}\n  {{#is_recovery}}The underlying Nutanix alert has recovered.{{/is_recovery}}\n\n  **Alert:** `{{@aggregation_key.name}}`\n  **Severity:** `{{ntnx_alert_severity.name}}`\n  **Impact:** `{{ntnx_alert_impact.name}}`\n  **Originating cluster:** `{{ntnx_originating_cluster_name.name}}`\n\n  **Transition observed at:** {{last_triggered_at}}",
 		"tags": [],
 		"options": {
 			"thresholds": {
