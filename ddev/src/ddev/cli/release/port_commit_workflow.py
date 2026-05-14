@@ -34,6 +34,8 @@ PR_TEMPLATE_RELATIVE_PATH = '.github/PULL_REQUEST_TEMPLATE.md'
 PR_TEMPLATE_HEADING = '### What does this PR do?'
 IN_TOTO_SUFFIX = '.in-toto'
 WORKTREE_BASE = '.worktrees/port-commit'
+FULL_SHA_PATTERN = re.compile(r'^[0-9a-fA-F]{40}$')
+HEX_PATTERN = re.compile(r'^[0-9a-fA-F]+$')
 
 
 class PortStepError(Exception):
@@ -356,6 +358,14 @@ def _resolve_commit_or_fetch(app: Application, commit_hash: str) -> str:
     except OSError:
         pass
 
+    if HEX_PATTERN.fullmatch(commit_hash) and not FULL_SHA_PATTERN.fullmatch(commit_hash):
+        app.abort(
+            f'Commit `{commit_hash}` is not in the local repository. '
+            'Pass the full 40-character SHA so it can be fetched from origin '
+            '(GitHub does not support SHA-targeted fetches for abbreviated SHAs).'
+        )
+        raise AssertionError('unreachable')
+
     app.display_info(f'Commit `{commit_hash}` not found locally; fetching from origin.')
     fetch_failed = False
     try:
@@ -369,10 +379,7 @@ def _resolve_commit_or_fetch(app: Application, commit_hash: str) -> str:
         except OSError:
             pass
 
-    app.abort(
-        f'Commit `{commit_hash}` does not exist locally or on origin. '
-        'If you provided an abbreviated SHA, pass the full 40-character SHA.'
-    )
+    app.abort(f'Commit `{commit_hash}` does not exist locally or on origin.')
     raise AssertionError('unreachable')
 
 

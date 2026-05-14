@@ -601,19 +601,22 @@ def test_command_token_guard(
     fake_async_github.assert_not_called('create_pull_request')
 
 
-def test_command_aborts_when_commit_does_not_exist(
+FULL_SHA_FOR_TESTS = '1234567890abcdef001234567890abcdef00abcd'
+
+
+def test_command_aborts_when_commit_missing_after_fetch(
     ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
 ) -> None:
+    """Fetch succeeds but rev-parse still cannot resolve the commit (edge case)."""
     run_mock = mocker.patch('ddev.utils.git.GitRepository.run')
     mocker.patch('ddev.utils.git.GitRepository.capture', side_effect=OSError('bad object'))
     mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
 
-    result = ddev('release', 'port-commit', '1234567890abcdef00')
+    result = ddev('release', 'port-commit', FULL_SHA_FOR_TESTS)
 
     assert result.exit_code == 1, result.output
     assert 'does not exist locally or on origin' in result.output
-    assert 'full 40-character SHA' in result.output
-    assert ('fetch', 'origin', '1234567890abcdef00') in [c.args for c in run_mock.call_args_list]
+    assert ('fetch', 'origin', FULL_SHA_FOR_TESTS) in [c.args for c in run_mock.call_args_list]
     fake_async_github.assert_not_called('create_pull_request')
 
 
@@ -629,17 +632,33 @@ def test_command_aborts_when_fetch_fails(
     mocker.patch('ddev.utils.git.GitRepository.capture', side_effect=OSError('bad object'))
     mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
 
-    result = ddev('release', 'port-commit', '1234567890abcdef00')
+    result = ddev('release', 'port-commit', FULL_SHA_FOR_TESTS)
 
     assert result.exit_code == 1, result.output
     assert 'does not exist locally or on origin' in result.output
     fake_async_github.assert_not_called('create_pull_request')
 
 
+def test_command_aborts_on_abbreviated_sha_not_local(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    """Abbreviated SHAs cannot be fetched from origin, so abort early with a clear hint."""
+    run_mock = mocker.patch('ddev.utils.git.GitRepository.run')
+    mocker.patch('ddev.utils.git.GitRepository.capture', side_effect=OSError('bad object'))
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', '1234567890')
+
+    assert result.exit_code == 1, result.output
+    assert 'full 40-character SHA' in result.output
+    assert not any(c.args[:2] == ('fetch', 'origin') for c in run_mock.call_args_list)
+    fake_async_github.assert_not_called('create_pull_request')
+
+
 def test_command_fetches_commit_when_not_local(
     ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
 ) -> None:
-    commit_sha = '1234567890abcdef00'
+    commit_sha = FULL_SHA_FOR_TESTS
     subject = 'Fix bug (#100)'
     rev_parse_calls = {'count': 0}
 
@@ -678,7 +697,7 @@ def test_command_fetches_commit_when_not_local(
         owner='DataDog',
         repo='integrations-core',
         title='[Backport] Fix bug',
-        head='alice/port-1234567890-to-master',
+        head=f'alice/port-{commit_sha[:10]}-to-master',
         base='master',
         body=mocker.ANY,
         draft=False,
