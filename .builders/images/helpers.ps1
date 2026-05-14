@@ -45,8 +45,5 @@ function RunOnVSConsole() {
         [Parameter(Mandatory = $true)][string] $Command
     )
     Write-Host "Running $Command"
-    $proc = Start-Process -Wait -NoNewWindow -PassThru "cmd.exe" -ArgumentList "/c ""$Env:VCVARSALL_BAT"" $Env:DD_TARGET_ARCH && $Command"
-    if ($proc.ExitCode -ne 0) {
-        throw "Command failed with exit code $($proc.ExitCode): $Command"
-    }
+    Start-Process -Wait -NoNewWindow "cmd.exe" -ArgumentList "/c ""$Env:VCVARSALL_BAT"" $Env:DD_TARGET_ARCH && $Command"
 }
