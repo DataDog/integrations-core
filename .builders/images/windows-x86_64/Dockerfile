@@ -38,6 +38,9 @@ RUN curl -SL --output PowerShell-%POWERSHELL_VERSION%-win-x64.msi https://github
 COPY helpers.ps1 C:\helpers.ps1
 SHELL ["pwsh", "-Command", ". C:\\helpers.ps1;"]
 
+# TEMPORARY: Verify RunOnVSConsole exit code propagation. Remove after confirming failure.
+RUN RunOnVSConsole -Command 'cmd /c exit 1'
+
 # Enable long paths
 # https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=powershell#registry-setting-to-enable-long-paths
 RUN New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" `
