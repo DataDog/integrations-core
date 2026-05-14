@@ -455,6 +455,70 @@ empirically:
   rabbitmq/riak beam.smp by the `/opt/couchbase` install path in
   args).
 
+### Could dedup be detrimental? — looking for "per-worker should be N" cases
+
+The algorithm is built on a structural assumption: when a parent and
+child share a `generated_name`, the child is a worker that the master
+aggregates over, and only the master should become an integration
+instance. It is worth checking whether any integration in the sample
+violates this assumption — i.e. where the integration would *want*
+each worker as its own instance.
+
+The 12 cases in the data where the algorithm actually filtered children
+break down as:
+
+| Integration / Service | Kept | Dropped | Pattern |
+|---|---|---|---|
+| `airflow` / `airflow-webserver` (gunicorn) | 1 master | 4 workers | gunicorn master serves `/metrics`; workers aggregate into it |
+| `airflow` / `gunicorn` | 1 master | 2 workers | same |
+| `nagios` / `apache2` | 1 master | 5 workers | Apache prefork; mod_status on master aggregates |
+| `nginx` / `nginx` | 1 master | 1 worker | nginx master exposes stub_status; workers aggregate |
+| `php_fpm` / `php-fpm` | 1 master | 2 pool workers | master exposes `/status`; workers aggregate |
+| `php_fpm` / `nginx` | 1 master | 16 workers | nginx in front of php-fpm; same nginx pattern |
+| `rethinkdb` / `rethinkdb` | 4 cluster nodes | 1 fork-duplicate | the dropped pid has the same `--server-name` and cmdline as one of the kept; it's an internal re-exec, not a separate instance |
+| `silverstripe_cms` / `apache2` | 1 master | 5 workers | Apache prefork; same as nagios |
+| `singlestore` / `memsqld` | 2 (aggregator + leaf) | 2 fork-duplicates | the dropped pids duplicate the aggregator/leaf cmdlines exactly; supervisor/forked-daemon pair |
+| `spark` / `spark` | 4 daemons | 1 executor JVM | Spark executor forked from a worker; metrics are surfaced at the Spark UI/master, not per-executor |
+| `tls` / `nginx` | 3 masters | 48 workers | three independent nginx instances for three TLS configs; each filters its own workers |
+| `varnish` / `varnishd` | 1 manager | 1 `cache-main` child | Varnish's manager process supervises a `cache-main` child that actually handles caching; the integration uses `varnishstat` which reads shared memory by name and aggregates both |
+
+Every dropped row is one of three patterns:
+- **Pre-fork worker pool aggregated at the master** (nginx, apache,
+  php-fpm, gunicorn). The master exposes the metrics endpoint;
+  monitoring each worker would either produce duplicate counters or
+  partial visibility.
+- **Internal re-exec / supervisor pair** (varnish manager+cache-main,
+  rethinkdb server0+fork, singlestore master+aggregator duplicate).
+  The "child" is the same logical service from the integration's
+  perspective.
+- **Spark executor forked from worker**. Per-executor metrics are
+  surfaced via the Spark driver UI, not by attaching the Spark
+  integration to each executor process.
+
+In every case the dedup is structurally appropriate. No integration in
+the sample would lose useful coverage by it.
+
+**What a counterexample would look like.** If some service forked
+children that each exposed an independent metrics endpoint (a distinct
+port, a per-worker shared-memory key, a per-tenant socket) and the
+integration was designed to scrape each one, the algorithm would
+collapse them to a single instance and the integration would lose
+per-worker visibility. No such service appears in this sample. If one
+turns up later, the fix is on the disco side — give each worker a
+distinct `generated_name` so the dedup check
+(`parent.GeneratedName != process.GeneratedName`) keeps them separate.
+
+**Note on the "multiple instances per host" config pattern.** Several
+integrations support a multi-instance `conf.yaml` (e.g. monitoring
+multiple Postgres databases from one agent). That style describes
+*multiple endpoints*, not multiple workers of one service, and each
+entry typically points at a different host:port. For process
+auto-discovery the mapping is straightforward: each process that
+matches the integration's CEL rule becomes one instance. Multiple
+Postgres processes on the same host (different `-D` data dirs) produce
+multiple instances — and the algorithm preserves them because they all
+have `ppid == 1` (or different parents), so the dedup never fires.
+
 ### Existing manifest signatures don't translate to CEL verbatim
 
 Many integrations have `process_signatures` in their `manifest.json`
