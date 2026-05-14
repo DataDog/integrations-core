@@ -2,7 +2,6 @@
 
 from typing import Callable
 
-from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.types import InstanceType
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -10,7 +9,7 @@ from datadog_checks.{check_name} import {check_class}
 
 
 def test_check(
-    dd_run_check: Callable[[AgentCheck, bool], None],
+    dd_run_check: Callable[..., None],
     aggregator: AggregatorStub,
     instance: InstanceType,
 ) -> None:
