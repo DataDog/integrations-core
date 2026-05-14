@@ -1,0 +1,1 @@
+Fix silent drop of ztunnel counter metrics in Istio ambient mode.
