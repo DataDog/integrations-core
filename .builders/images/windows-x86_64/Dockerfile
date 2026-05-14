@@ -140,6 +140,15 @@ RUN Get-RemoteFile `
 #     'C:\perl\perl\bin\perl.exe Configure && `
 #     nmake && `
 #     nmake install_sw'
+# flex and bison are required for building PostgreSQL from source
+ENV WINFLEXBISON_VERSION="2.5.25"
+RUN Get-RemoteFile `
+      -Uri https://github.com/lexxmark/winflexbison/releases/download/v$Env:WINFLEXBISON_VERSION/win_flex_bison-$Env:WINFLEXBISON_VERSION.zip `
+      -Path win_flex_bison-$Env:WINFLEXBISON_VERSION.zip `
+      -Hash '8d324b62be33604b2c45ad1dd34ab93d722534448f55a16ca7292de32b6ac135'; `
+    7z x win_flex_bison-$Env:WINFLEXBISON_VERSION.zip -oC:\winflexbison && `
+    Remove-Item win_flex_bison-$Env:WINFLEXBISON_VERSION.zip && `
+    Add-ToPath -Append 'C:\winflexbison'
 # Meson + Ninja for building PostgreSQL 18+ on Windows
 RUN python -m pip install --no-warn-script-location meson ninja && `
     Add-ToPath -Append 'C:\Program Files\Python313\Scripts'
