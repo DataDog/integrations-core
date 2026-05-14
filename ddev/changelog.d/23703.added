@@ -1,0 +1,1 @@
+Accept a PR number, ``PR-<number>`` token, or GitHub PR URL as input to ``port-commit`` in addition to a commit SHA. Pure-digit inputs are tried as a PR first when a GitHub token is configured and fall back to commit resolution on 404.
