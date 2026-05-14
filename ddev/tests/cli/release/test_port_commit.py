@@ -221,7 +221,7 @@ def test_cherry_pick_only_in_toto_conflict_is_resolved(app_mock, git_mock):
     assert git_mock.run.call_args_list == [
         call('cherry-pick', '--no-commit', '1234567890'),
         call('checkout', '--ours', 'path/file.in-toto.link'),
-        call('add', 'path/file.in-toto.link'),
+        call('add', '--force', 'path/file.in-toto.link'),
     ]
 
 

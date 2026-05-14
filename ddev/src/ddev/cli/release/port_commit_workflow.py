@@ -528,7 +528,10 @@ def _resolve_in_toto_conflict(git: GitRepository, path: str) -> None:
         git.run('rm', '--force', path)
         return
     git.run('checkout', '--ours', path)
-    git.run('add', path)
+    # `.in-toto/` is gitignored in this repo, so `git add` refuses without `--force` even though
+    # the path is already tracked in HEAD. The force is safe: we only get here for paths that
+    # came out of `git diff --diff-filter=U`, i.e. files git itself flagged as needing resolution.
+    git.run('add', '--force', path)
 
 
 def _restore_path_from_head(git: GitRepository, path: str) -> None:
