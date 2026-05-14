@@ -1,0 +1,180 @@
+{
+  "_comment": "Per-integration CEL rules for process auto-discovery, evaluated by analysis/scripts/process_cel_eval.py. Format mirrors `CELSelector.Processes` in the agent's auto-discovery config (comp/core/autodiscovery/integration). Fields available in CEL: process.name (from /proc/<pid>/status Name, 15 char kernel limit), process.cmdline (joined cmdline), process.args (list). When an integration is omitted here the script falls back to manifest.json process_signatures, OR-joined as cmdline.contains(<sig>). Use this file to add rules for integrations whose manifest lacks signatures or whose signatures are insufficient/wrong.",
+
+  "squid": {
+    "expression": "process.cmdline.contains('squid -f')",
+    "source": "manual",
+    "notes": "Targets the squid daemon (cmdline 'squid -f /etc/squid/squid.conf'). The log-tailing helpers 'tail -F .../access.log' do not match."
+  },
+  "nifi": {
+    "expression": "process.cmdline.contains('org.apache.nifi.NiFi')",
+    "source": "manual",
+    "notes": "Targets the NiFi JVM. Disco labels helpers (tail) and the python framework subprocess as separate generated_names; those don't match."
+  },
+  "riak": {
+    "expression": "process.cmdline.contains('-progname riak')",
+    "source": "manual",
+    "notes": "Targets the Erlang beam.smp running Riak. The 'tail -n 1024 -f /var/log/riak/console.log' helper doesn't match."
+  },
+  "scylla": {
+    "expression": "process.cmdline.contains('/usr/bin/scylla')",
+    "source": "manual",
+    "notes": "Targets the scylla daemon. The container-side supervisord, rsyslogd and node_exporter don't match."
+  },
+  "silverstripe_cms": {
+    "expression": "process.cmdline.contains('apache2 -D FOREGROUND')",
+    "source": "manual",
+    "notes": "silverstripe_cms is an Apache/PHP CMS check; target the apache2 process."
+  },
+  "tls": {
+    "expression": "process.cmdline.contains('nginx: master process')",
+    "source": "manual",
+    "notes": "tls test fixture runs nginx, mysqld and postgres for TLS testing. The integration would target nginx."
+  },
+  "clickhouse": {
+    "expression": "process.cmdline.contains('clickhouse-server')",
+    "source": "manual",
+    "notes": "Targets clickhouse-server. Multi-node test env yields N>1 survivors."
+  },
+  "hazelcast": {
+    "expression": "process.cmdline.contains('com.hazelcast.commandline.HazelcastServerCommandLine')",
+    "source": "manual",
+    "notes": "Hazelcast JVM with explicit main class."
+  },
+  "kafka_consumer": {
+    "expression": "process.cmdline.contains('kafka.Kafka')",
+    "source": "manual",
+    "notes": "Kafka broker JVM main class. Excludes zookeeper JVM in same env."
+  },
+  "confluent_platform": {
+    "expression": "process.cmdline.contains('kafka.Kafka') || process.cmdline.contains('org.apache.zookeeper.server.quorum.QuorumPeerMain') || process.cmdline.contains('io.confluent.')",
+    "source": "manual",
+    "notes": "Confluent stack: kafka brokers + zookeeper + various io.confluent.* services."
+  },
+  "hdfs_namenode": {
+    "expression": "process.cmdline.contains('org.apache.hadoop.hdfs.server.namenode.NameNode')",
+    "source": "manual",
+    "notes": "HDFS NameNode JVM main class."
+  },
+  "hdfs_datanode": {
+    "expression": "process.cmdline.contains('org.apache.hadoop.hdfs.server.datanode.DataNode')",
+    "source": "manual",
+    "notes": "HDFS DataNode JVM main class."
+  },
+  "mapreduce": {
+    "expression": "process.cmdline.contains('org.apache.hadoop.mapreduce') || process.cmdline.contains('org.apache.hadoop.yarn')",
+    "source": "manual",
+    "notes": "MapReduce + YARN JVMs."
+  },
+  "cassandra_nodetool": {
+    "expression": "process.cmdline.contains('org.apache.cassandra.service.CassandraDaemon')",
+    "source": "manual",
+    "notes": "Cassandra JVM main class."
+  },
+  "openldap": {
+    "expression": "process.cmdline.contains('slapd')",
+    "source": "manual",
+    "notes": "OpenLDAP slapd daemon."
+  },
+  "prefect": {
+    "expression": "process.cmdline.contains('prefect server start') || process.cmdline.contains('prefect worker start')",
+    "source": "manual",
+    "notes": "Prefect server and worker components."
+  },
+  "proxysql": {
+    "expression": "process.cmdline.contains('proxysql')",
+    "source": "manual",
+    "notes": "ProxySQL daemon."
+  },
+  "krakend": {
+    "expression": "process.cmdline.contains('krakend run')",
+    "source": "manual",
+    "notes": "KrakenD API gateway."
+  },
+  "boundary": {
+    "expression": "process.cmdline.contains('boundary server')",
+    "source": "manual",
+    "notes": "HashiCorp Boundary controller/worker."
+  },
+  "hivemq": {
+    "expression": "process.cmdline.contains('com.hivemq.HiveMQServer')",
+    "source": "manual",
+    "notes": "HiveMQ MQTT broker JVM."
+  },
+  "ibm_was": {
+    "expression": "process.cmdline.contains('com.ibm.ws.runtime.WsServer')",
+    "source": "manual",
+    "notes": "IBM WebSphere application server."
+  },
+  "n8n": {
+    "expression": "process.cmdline.contains('node /usr/local/bin/n8n')",
+    "source": "manual",
+    "notes": "n8n Node.js workflow engine."
+  },
+  "sonatype_nexus": {
+    "expression": "process.cmdline.contains('-Dnexus.home') || process.cmdline.contains('org.sonatype.nexus.karaf.NexusMain')",
+    "source": "manual",
+    "notes": "Sonatype Nexus repository JVM."
+  },
+
+  "elastic": {
+    "expression": "process.cmdline.contains('org.opensearch.bootstrap.OpenSearch') || process.cmdline.contains('org.elasticsearch.bootstrap.Elasticsearch')",
+    "source": "manual",
+    "notes": "Manifest signature 'java org.elasticsearch...' does not match real cmdline (which is '/path/to/java ... org.elasticsearch...'). Match the main class only. Test fixture runs OpenSearch."
+  },
+  "pulsar": {
+    "expression": "process.cmdline.contains('org.apache.pulsar.PulsarStandaloneStarter') || process.cmdline.contains('org.apache.pulsar.broker.PulsarBrokerStarter')",
+    "source": "manual",
+    "notes": "Manifest signature 'java org.apache.pulsar...' assumes cmdline starts with 'java '. Real cmdline has the full java path."
+  },
+  "spark": {
+    "expression": "process.cmdline.contains('org.apache.spark.deploy.master.Master') || process.cmdline.contains('org.apache.spark.deploy.worker.Worker') || process.cmdline.contains('org.apache.spark.deploy.SparkSubmit')",
+    "source": "manual",
+    "notes": "Manifest signature 'java org.apache.spark...' has same issue as elastic/pulsar — drop the 'java ' prefix."
+  },
+  "sonarqube": {
+    "expression": "process.cmdline.contains('org.sonar.server.app.WebServer') || process.cmdline.contains('org.sonar.ce.app.CeServer') || process.cmdline.contains('sonar-application')",
+    "source": "manual",
+    "notes": "Same as elastic. Manifest signature 'java org.sonar...' won't match real cmdline."
+  },
+  "hivemq": {
+    "expression": "process.cmdline.contains('hivemq.jar') || process.cmdline.contains('com.hivemq.HiveMQServer')",
+    "source": "manual",
+    "notes": "HiveMQ JVM. Need to match path/jar since main class may not appear in cmdline."
+  },
+  "quarkus": {
+    "expression": "process.cmdline.contains('quarkus-run.jar')",
+    "source": "manual",
+    "notes": "Quarkus run jar. Real cmdline has '/path/to/java ... -jar quarkus-run.jar'; the 'java ' prefix in the manifest signature breaks matching."
+  },
+  "zk": {
+    "expression": "process.cmdline.contains('zookeeper.server.quorum.QuorumPeerMain') || process.cmdline.contains('zoo.cfg')",
+    "source": "manual",
+    "notes": "ZooKeeper. Match the main class or config file rather than the 'java ' prefix."
+  },
+  "teamcity": {
+    "expression": "process.cmdline.contains('teamcity') && process.cmdline.contains('java')",
+    "source": "manual",
+    "notes": "TeamCity JVM. Manifest signature 'teamcity-server.sh' assumes cmdline matches the launcher shell script, not the actual JVM cmdline."
+  },
+  "powerdns_recursor": {
+    "expression": "process.cmdline.contains('pdns_recursor')",
+    "source": "manual",
+    "notes": "PowerDNS recursor — the manifest signature targets pdns_server (authoritative server), not the recursor binary used by this integration."
+  },
+  "couchbase": {
+    "expression": "process.cmdline.contains('/opt/couchbase/lib/erlang')",
+    "source": "manual",
+    "notes": "Manifest signature 'beam.smp couchbase' does not appear literally in any cmdline. Match the couchbase erlang lib path. Couchbase runs 3 beam.smp roles (babysitter, ns_server, ns_couchdb); a precise rule would target the babysitter only."
+  },
+  "marathon": {
+    "expression": "process.cmdline.contains('mesosphere.marathon.Main')",
+    "source": "manual",
+    "notes": "Marathon JVM main class. Manifest signature 'start --master mesos marathon' doesn't appear in the actual cmdline."
+  },
+  "temporal": {
+    "expression": "process.cmdline.contains('temporal-server') || process.cmdline.contains('temporalio/server')",
+    "source": "manual",
+    "notes": "Temporal Go binary. The collected data for this integration unfortunately did not include the temporal-server process (sibling container healthcheck failure during collection)."
+  }
+}

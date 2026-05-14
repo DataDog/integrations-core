@@ -275,14 +275,16 @@ becomes its own "main."
 | ray | `ray` | 21 | `raylet` (gn=`raylet`) | 21 `ray::IDLE`/`ray::ServeController`/`ray::ServeReplica` worker processes are all children of a single `raylet`. Disco labels each as `ray` while the parent is `raylet`, so no parent-child dedup happens. |
 | squid | `tail` | 2 | `entrypoint.sh` (gn=`None`) | `tail -F .../access.log` and `tail -F .../cache.log` — two sibling log-tailers under the squid container entrypoint. |
 
-This is not a problem in practice. The Ray integration's CEL rule would
-target the actual service entrypoint — `name == "raylet"` — and reject
-worker processes named `ray::IDLE` etc. The squid integration's CEL rule
-would target `name == "squid"` and reject `tail`. The algorithm's job is to
-reduce the candidate set to one main per `generated_name`; the integration
-author's job is to pick the right one via CEL. The N here reflects how
-disco labels processes, not how many integration instances would be
-created.
+This is verified in [the CEL evaluation
+section](#cel-evaluation-against-the-collected-data): for `ray`, a CEL
+rule based on the manifest's existing `process_signatures` reduces 29
+mains to 4 survivors (the 21 `ray::IDLE` workers are correctly dropped),
+and a tighter rule like `process.name == 'raylet'` would reduce it
+further to 1. For `squid`, `cmdline.contains('squid -f')` reduces 5 mains
+to 1. The algorithm's job is to reduce the candidate set to one main per
+`generated_name`; the integration author's job is to pick the right one
+via CEL. The N here reflects how disco labels processes, not how many
+integration instances would be created.
 
 #### Category 4: disco false positives surfaced as WARN — CEL handles it
 
@@ -290,10 +292,12 @@ created.
 |---|---|---|
 | couchbase | `tmp` | 3 Erlang/OTP `beam.smp` processes labeled `tmp` — a generic disco fallback name for unrecognized Erlang VMs. Each has a different parent (separate Erlang subtrees), so it is not the sibling case above. |
 
-The couchbase integration's CEL rule would not match a generic `tmp`
-process. As above, this WARN row does not correspond to any actual
-duplicate integration instances in production. The actual target services
-(`squid`, `couchbase`) correctly show PASS in their respective rows.
+The couchbase integration's CEL rule (an OR over the
+`/opt/couchbase/lib/erlang` path in `cel_rules.json`) reduces couchbase's
+12 mains to 3 survivors, one per `beam.smp` role (babysitter, ns_server,
+ns_couchdb). The generic `tmp` candidates are filtered out. As above,
+this WARN row does not correspond to runaway duplicate integration
+instances in production.
 
 ### disco false positives surfaced as PASS
 
@@ -345,6 +349,80 @@ services. These are mostly:
 These integrations are not relevant for process auto-discovery, or would
 need a re-collection with longer warmup to be conclusive.
 
+## CEL evaluation against the collected data
+
+The discussion above asserted that per-integration CEL rules would filter
+the algorithm's candidate set down to the right processes. To verify
+rather than assert this, the analyzer was extended with a second-stage
+CEL evaluator (`analysis/scripts/process_cel_eval.py`, run via `uv` with
+the `cel-python` library) that applies real CEL expressions to the same
+collected data. Rules come from each integration's `manifest.json`
+`process_signatures` (OR-joined as `process.cmdline.contains(<sig>)`) or,
+when the manifest lacks usable signatures, from an explicit override file
+(`analysis/process_autodiscovery/cel_rules.json`).
+
+Across the 66 integrations with non-infra target services in the collected
+sample:
+
+| Result | Count | Meaning |
+|---|---|---|
+| Post-CEL == 1 | 33 | Algorithm + CEL produced exactly one integration instance — the happy case. |
+| Post-CEL ≥ 2 | 23 | Multiple instances survived. For multi-node test clusters (`consul`, `etcd`, `redisdb`, `postgres × 4`, …) this is the correct outcome. For `ceph` (9 → 3) it is one survivor per daemon role. A handful of rows are rule-too-broad — see below. |
+| Post-CEL == 0 | 4 | The rule did not match any candidate process. The integration would not be auto-discovered. |
+| No rule available | 6 | Integrations whose manifest has no `process_signatures` and where no explicit rule was written (`citrix_hypervisor`, `esxi`, `go_expvar`, `hudi`, `kafka_actions`, `nfsstat`). |
+
+### Sibling worker pool — verified
+
+The doc previously claimed CEL would handle Ray's 21-sibling case. The
+evaluation confirms this: ray's **29** candidate mains reduce to **4**
+after CEL — `gcs_server`, `raylet`, the `ray.util.client.server` Python
+module, and (unexpectedly) `ray.dashboard.agent`. The dashboard agent is
+included because its cmdline references the raylet socket path
+(`--raylet-name=/tmp/ray/.../sockets/...`), so the manifest's `raylet`
+substring rule matches more than just the raylet binary. This is a
+*rule-too-broad* finding rather than an algorithm issue: tightening the
+rule to e.g. `process.name == 'raylet'` would reduce it to one survivor.
+The 21 `ray::IDLE`/`ray::ServeReplica` worker processes are correctly
+dropped either way.
+
+Similarly, `squid`'s `tail` siblings are dropped by
+`cmdline.contains('squid -f')` (5 mains → 1 survivor). Couchbase reduces
+12 → 3 (one per `beam.smp` role) with the `/opt/couchbase/lib/erlang`
+rule.
+
+### Manifest signatures often do not match real cmdlines
+
+A side finding of this evaluation: many existing `process_signatures` in
+integration manifests are written as if the cmdline started with the
+binary name (e.g. `"java org.apache.spark.deploy..."`,
+`"java quarkus-run.jar"`). Real `/proc/<pid>/cmdline` always carries the
+absolute binary path, so `cmdline.contains("java org.elasticsearch...")`
+never matches. Integrations in the sample affected by this verbatim
+include `elastic` (opensearch fixture), `pulsar`, `spark`, `sonarqube`,
+`quarkus`, `zk`, `hivemq`, `marathon`, `temporal`, and `couchbase` (the
+literal `"beam.smp couchbase"` signature never appears in any cmdline).
+After rewriting those rules to match the main class or binary path alone
+(see `cel_rules.json`), the post-CEL counts come out correct.
+
+The `process_signatures` field is descriptive metadata today, not a
+runtime input. But the gap is worth flagging: integration authors moving
+to CEL-based process auto-discovery cannot reuse these strings verbatim
+— they need to validate against real `/proc/<pid>/cmdline` data, not
+against an idealized cmdline form. The `process_cel_eval.py` tool in
+this branch is suitable for that validation.
+
+### Rules that produced 0 survivors
+
+| Integration | Issue |
+|---|---|
+| `marathon` | Mesos Marathon is a Scala assembly jar; the `mesosphere.marathon.Main` class is not in the JVM cmdline. The collected `marathon-assembly-1.3.0` and `mesos-master` processes need different selectors. |
+| `sonatype_nexus` | The Java process runs `org.springframework.boot.loader.launch.PropertiesLauncher`; the Nexus main class is not in its cmdline. |
+| `teamcity` | The test fixture runs a `org.mockserver.cli.Main` stand-in rather than the real TeamCity server. |
+| `temporal` | Collection captured only the Elasticsearch and Postgres support containers — the `temporal-server` container's processes were not in the docker-ps delta when the collector ran. |
+
+None of these is an algorithm failure. They expose where the rule wording
+or the data collection itself fell short.
+
 ## Conclusion
 
 **The `isMainProcessForService` algorithm holds up against the collected
@@ -362,17 +440,30 @@ exercised:
   (`sonar-application-*` vs. its Elasticsearch / WebServer / CeServer
   children — children correctly become their own services)
 
-**Sibling worker pools are handled by CEL, not by the algorithm.** The most
-notable case is **ray**, where 21 `ray::IDLE` / `ray::ServeReplica` workers
-are all children of a single `raylet`. Because the parent's
-`generated_name` is `raylet` (not `ray`), each sibling worker passes the
-`parent.GeneratedName != process.GeneratedName` check and survives as a
-"main." This is intentional: the algorithm only has to reduce the
-candidate set to one main per `generated_name` in each subtree; selecting
-the right candidate (e.g. `name == "raylet"`) is the integration author's
-job via CEL. The same is true for `squid tail`, `couchbase tmp`, and the
-PASS-bucket helpers (`nifi tail`, `scylla rsyslogd`/`node_exporter`, etc.):
-the algorithm produces a correct candidate set, CEL filters it.
+**Sibling worker pools are handled by CEL, not by the algorithm — verified
+empirically.** The most notable case is **ray**, where 21
+`ray::IDLE`/`ray::ServeReplica` workers are all children of a single
+`raylet`. Because the parent's `generated_name` is `raylet` (not `ray`),
+each sibling worker survives the algorithm. Running the agent's CEL
+filter (derived from ray's existing `manifest.json` `process_signatures`)
+through `cel-python` against this data drops 29 candidates to 4 — the
+21 worker processes are removed. A tighter `process.name == 'raylet'`
+rule reduces that to 1. Same pattern for `squid tail` (5 → 1) and
+`couchbase tmp` (12 → 3). See [the CEL evaluation
+section](#cel-evaluation-against-the-collected-data) for the full table.
+
+**Side finding: existing manifest `process_signatures` often don't match
+real cmdlines.** Many integration manifests assume cmdlines start with
+the binary short name (e.g. `"java org.apache.spark.deploy..."`). Real
+`/proc/<pid>/cmdline` carries the absolute binary path, so these
+signatures match zero processes when used verbatim as CEL
+`cmdline.contains(...)` rules. Affected in the sample: `elastic`,
+`pulsar`, `spark`, `sonarqube`, `quarkus`, `zk`, `hivemq`, `marathon`,
+`couchbase`, `temporal`. This is descriptive metadata today and not a
+runtime input, but integration authors moving to CEL-based process
+auto-discovery will need to validate rules against real process
+data — the `process_cel_eval.py` tool added in this branch is
+designed for that.
 
 **Caveats:**
 
@@ -413,9 +504,11 @@ are not blockers.
 
 | File | Description |
 |---|---|
-| `analysis/scripts/process_analyze.py` | Collection and analysis tool |
+| `analysis/scripts/process_analyze.py` | Collection and algorithm-verdict analyzer |
+| `analysis/scripts/process_cel_eval.py` | CEL second-stage evaluator (run via `uv`, uses `cel-python`) |
 | `analysis/process_autodiscovery/data/*.json` | Raw collected process data (93 files) |
 | `analysis/process_autodiscovery/data/skipped.json` | Skipped integration log |
-| `analysis/process_autodiscovery/results/analysis_2026-05-14T09-13-28.json` | Final analysis output (revised) |
+| `analysis/process_autodiscovery/cel_rules.json` | Explicit per-integration CEL rules (fallback when manifest lacks signatures or signatures don't match real cmdlines) |
+| `analysis/process_autodiscovery/results/analysis_2026-05-14T09-13-28.json` | Final algorithm analysis output |
 | `docs/superpowers/specs/2026-05-13-process-autodiscovery-analysis-design.md` | Design spec |
 | `docs/superpowers/plans/2026-05-13-process-autodiscovery-analysis.md` | Implementation plan |
