@@ -1,0 +1,1 @@
+Fetch the requested commit from origin when running ``port-commit`` against a commit that is not in the local object database.
