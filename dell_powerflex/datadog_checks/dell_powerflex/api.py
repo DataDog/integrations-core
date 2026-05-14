@@ -31,7 +31,7 @@ class PowerFlexAPI:
         self._token: str | None = None
         self._token_expiry: float = 0.0
 
-    def _ensure_authenticated(self) -> None:
+    def ensure_authenticated(self) -> None:
         if not self._username:
             self._log.debug('No username configured, skipping authentication')
             return
@@ -59,7 +59,6 @@ class PowerFlexAPI:
         self._log.debug('Refreshed PowerFlex auth token, expires in %ds', expires_in)
 
     def _get(self, path: str) -> Any:
-        self._ensure_authenticated()
         response = self._http.get(f"{self._gateway_url}{path}")
         response.raise_for_status()
         return response.json()

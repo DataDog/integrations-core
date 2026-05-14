@@ -4,6 +4,7 @@
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
+from json import JSONDecodeError
 from typing import Any
 
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
@@ -69,11 +70,11 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         try:
             self._api.get_version()
             self.gauge('api.can_connect', 1, tags=self._base_tags)
-        except (ConnectionError, HTTPError, InvalidURL, Timeout) as e:
+        except (ConnectionError, HTTPError, InvalidURL, Timeout, JSONDecodeError) as e:
             self.log.warning('Could not connect to PowerFlex Gateway, skipping metric collection: %s', e)
             self.gauge('api.can_connect', 0, tags=self._base_tags)
             return
-        self._api._ensure_authenticated()
+        self._api.ensure_authenticated()
         for collector in (
             self._collect_systems,
             self._collect_volumes,
