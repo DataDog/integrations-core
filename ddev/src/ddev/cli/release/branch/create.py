@@ -18,7 +18,6 @@ if TYPE_CHECKING:
 BRANCH_NAME_PATTERN = r"^\d+\.\d+\.x$"
 BRANCH_NAME_REGEX = re.compile(BRANCH_NAME_PATTERN)
 GITHUB_LABEL_COLOR = '5319e7'
-DATADOG_AGENT_REPO_URL = 'https://github.com/DataDog/datadog-agent.git'
 
 
 @click.command
@@ -183,8 +182,7 @@ def ensure_build_agent_yaml_updated(app: Application, branch_name: str) -> bool:
 
     This function:
     1. Checks if the file still points to 'main' (needs update)
-    2. Checks if the agent branch exists in datadog-agent repository
-    3. Updates the file if both conditions are met
+    2. Updates the file to point to the release branch
 
     Args:
         branch_name: The release branch name (e.g., '7.45.x')
@@ -210,19 +208,6 @@ def ensure_build_agent_yaml_updated(app: Application, branch_name: str) -> bool:
         # Already updated to a release branch, nothing to do
         return False
 
-    # Check if the agent branch exists in datadog-agent repository using git ls-remote
-    app.display_waiting(f'Checking if branch `{branch_name}` exists in datadog-agent...')
-    ls_remote_output = app.repo.git.capture('ls-remote', '--heads', DATADOG_AGENT_REPO_URL, branch_name)
-    if not ls_remote_output.strip():
-        app.display_warning(
-            f"Agent branch `{branch_name}` does not exist yet in datadog-agent. "
-            f"Keeping build_agent.yaml pointing to 'main'. "
-            f"The `update-build-agent-yaml` workflow will create a PR to update the file "
-            f"once the agent branch is created."
-        )
-        return False
-
-    # Agent branch exists, update the file
     def replacement(match):
         return match.group(1) + branch_name
 

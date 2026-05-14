@@ -278,22 +278,36 @@ def test_final(ddev, git, latest_final_tag, expected_new_final_tag):
     _assert_tag_pushed(git, result, expected_new_final_tag)
 
 
-def test_build_agent_yaml_points_to_main_aborts(ddev, basic_git, mocker):
-    """
-    When build_agent.yaml still points to main, the command aborts with an actionable
-    message directing the user to the update-build-agent-yaml workflow.
-    """
+def test_build_agent_yaml_points_to_main_warns_and_continues(ddev, basic_git, mocker):
     basic_git.current_branch.return_value = '7.56.x'
+    basic_git.tags.return_value = []
     mocker.patch('ddev.cli.release.branch.tag._build_agent_yaml_points_to_main', return_value=True)
+    dispatch_workflow = mocker.patch('ddev.utils.github.GitHubManager.dispatch_workflow')
 
-    result = ddev('release', 'branch', 'tag')
+    result = ddev('release', 'branch', 'tag', '--final', '--skip-open-pr-check', input='y\n')
 
-    assert result.exit_code == 1, result.output
+    assert result.exit_code == 0, result.output
     assert '`.gitlab/build_agent.yaml` still points to `main`' in result.output
+    assert 'Triggered `update-build-agent-yaml.yml`' in result.output
+    assert 'Tagging will continue.' in result.output
+    dispatch_workflow.assert_called_once_with('update-build-agent-yaml.yml', 'master', {'branch': '7.56.x'})
+    basic_git.tag.assert_called_once_with('7.56.0', message='7.56.0')
+    basic_git.push.assert_called_once_with('7.56.0')
+
+
+def test_build_agent_yaml_workflow_dispatch_failure_warns_and_continues(ddev, basic_git, mocker):
+    basic_git.current_branch.return_value = '7.56.x'
+    basic_git.tags.return_value = []
+    mocker.patch('ddev.cli.release.branch.tag._build_agent_yaml_points_to_main', return_value=True)
+    mocker.patch('ddev.utils.github.GitHubManager.dispatch_workflow', side_effect=Exception('API error'))
+
+    result = ddev('release', 'branch', 'tag', '--final', '--skip-open-pr-check', input='y\n')
+
+    assert result.exit_code == 0, result.output
+    assert 'Warning: unable to trigger `update-build-agent-yaml.yml`: API error' in result.output
     assert 'gh workflow run update-build-agent-yaml.yml -f branch=7.56.x' in result.output
-    basic_git.run.assert_not_called()
-    basic_git.tag.assert_not_called()
-    basic_git.push.assert_not_called()
+    basic_git.tag.assert_called_once_with('7.56.0', message='7.56.0')
+    basic_git.push.assert_called_once_with('7.56.0')
 
 
 # TODO: test for adding RCs for a bugfix release

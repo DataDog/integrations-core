@@ -1,10 +1,19 @@
+from __future__ import annotations
+
 import logging
 import re
+from typing import TYPE_CHECKING
 
 import click
 from packaging.version import Version
 
 from .create import BRANCH_NAME_REGEX
+
+if TYPE_CHECKING:
+    from ddev.cli.application import Application
+
+UPDATE_BUILD_AGENT_YAML_WORKFLOW = 'update-build-agent-yaml.yml'
+UPDATE_BUILD_AGENT_YAML_WORKFLOW_REF = 'master'
 
 
 @click.command
@@ -37,12 +46,13 @@ def tag(app, final: bool, skip_open_pr_check: bool):
     click.echo(app.repo.git.fetch_tags())
 
     if _build_agent_yaml_points_to_main():
-        app.abort(
+        click.secho(
             "`.gitlab/build_agent.yaml` still points to `main`.\n"
-            "The agent branch may not exist yet in datadog-agent, or the update PR hasn't been merged.\n"
-            f"To trigger the workflow manually: gh workflow run update-build-agent-yaml.yml -f branch={branch_name}\n"
-            "Once the PR is merged, re-run this command."
+            "The update PR may not have been created or merged yet. Attempting to trigger the workflow now.\n"
+            "Tagging will continue.",
+            fg='yellow',
         )
+        _trigger_build_agent_yaml_update_workflow(app, branch_name)
 
     major_minor_version = branch_name.replace('.x', '')
     this_release_tags = sorted(
@@ -112,6 +122,26 @@ def _build_agent_yaml_points_to_main() -> bool:
 
     path = Path('.gitlab/build_agent.yaml')
     return path.exists() and bool(re.search(r'\s+branch:\s+main$', path.read_text(), re.MULTILINE))
+
+
+def _trigger_build_agent_yaml_update_workflow(app: Application, branch_name: str) -> None:
+    try:
+        app.github.dispatch_workflow(
+            UPDATE_BUILD_AGENT_YAML_WORKFLOW,
+            UPDATE_BUILD_AGENT_YAML_WORKFLOW_REF,
+            {'branch': branch_name},
+        )
+    except Exception as e:
+        click.secho(
+            f'Warning: unable to trigger `{UPDATE_BUILD_AGENT_YAML_WORKFLOW}`: {e}\n'
+            f'To trigger it manually: gh workflow run {UPDATE_BUILD_AGENT_YAML_WORKFLOW} -f branch={branch_name}',
+            fg='yellow',
+        )
+    else:
+        click.secho(
+            f'Triggered `{UPDATE_BUILD_AGENT_YAML_WORKFLOW}` to create the build_agent.yaml update PR if needed.',
+            fg='yellow',
+        )
 
 
 def _extract_patch_and_rc(version_tags):
