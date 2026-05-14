@@ -503,10 +503,7 @@ children that each exposed an independent metrics endpoint (a distinct
 port, a per-worker shared-memory key, a per-tenant socket) and the
 integration was designed to scrape each one, the algorithm would
 collapse them to a single instance and the integration would lose
-per-worker visibility. No such service appears in this sample. If one
-turns up later, the fix is on the disco side — give each worker a
-distinct `generated_name` so the dedup check
-(`parent.GeneratedName != process.GeneratedName`) keeps them separate.
+per-worker visibility. No such service appears in this sample.
 
 **Note on the "multiple instances per host" config pattern.** Several
 integrations document configuring more than one integration instance
@@ -553,8 +550,7 @@ aggregate into the master). The contrived case where the dedup would
 collide with a multi-instance expectation — a service that forks
 workers, gives each worker its own metrics endpoint, and expects each
 to be monitored separately — does not appear in any integration in
-the sample. If one shows up later the disco-side fix (distinct
-`generated_name` per worker) remains the recommended path.
+the sample.
 
 ### Existing manifest signatures don't translate to CEL verbatim
 
