@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 23.1.0 / 2026-05-14
+
+***Added***:
+
+* Add SQL Server 2025 to list of supported versions. ([#23395](https://github.com/DataDog/integrations-core/pull/23395))
+
+***Fixed***:
+
+* updates the FCI metric collection so that we can still report FCI metrics without needing a cluster name. ([#23264](https://github.com/DataDog/integrations-core/pull/23264))
+* Parameterize database query in SQL Server schema collection ([#23381](https://github.com/DataDog/integrations-core/pull/23381))
+* Harden SQL Server XML plan parsing ([#23382](https://github.com/DataDog/integrations-core/pull/23382))
+* Escape single quotes in SQL string literal interpolation for robustness against unusual database and object names. ([#23426](https://github.com/DataDog/integrations-core/pull/23426))
+* Fix Azure SQL Database and Azure SQL Managed Instance schema collection by using database compatibility level for schema query selection. ([#23533](https://github.com/DataDog/integrations-core/pull/23533))
+* Reuse the auxiliary SQL Server schema collection connection for legacy table detail queries. ([#23544](https://github.com/DataDog/integrations-core/pull/23544))
+* Report Always On secondary lag metrics on Azure SQL Managed Instance when ProductMajorVersion reports 12. ([#23558](https://github.com/DataDog/integrations-core/pull/23558))
+
 ## 23.0.1 / 2026-04-28
 
 ***Fixed***:
