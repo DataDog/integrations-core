@@ -6,7 +6,7 @@ from __future__ import annotations
 import logging
 import os
 from functools import cached_property
-from typing import NoReturn, cast
+from typing import TYPE_CHECKING, cast
 
 from ddev.cli.terminal import Terminal
 from ddev.config.constants import AppEnvVars, ConfigEnvVars, VerbosityLevels
@@ -15,6 +15,9 @@ from ddev.repo.core import Repository
 from ddev.utils.fs import Path
 from ddev.utils.github import GitHubManager
 from ddev.utils.platform import Platform
+
+if TYPE_CHECKING:
+    from typing import Any, Callable, NoReturn
 
 
 class AppLoggingHandler(logging.Handler):
@@ -35,7 +38,7 @@ class AppLoggingHandler(logging.Handler):
 
 
 class Application(Terminal):
-    def __init__(self, exit_func, *args, **kwargs):
+    def __init__(self, exit_func: Callable[[int], NoReturn], *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.platform = Platform(self.escaped_output)
         self.__exit_func = exit_func
@@ -49,7 +52,7 @@ class Application(Terminal):
         self.__github = cast(GitHubManager, None)
 
         # TODO: remove this when the old CLI is gone
-        self.__config = {}
+        self.__config: dict[str, Any] = {}
 
     @property
     def config(self) -> RootConfig:
@@ -109,7 +112,6 @@ class Application(Terminal):
         if text:
             self.display_error(text, **kwargs)
         self.__exit_func(code)
-        raise SystemExit(code)
 
     # TODO: remove everything below when the old CLI is gone
     def initialize_old_cli(self):
