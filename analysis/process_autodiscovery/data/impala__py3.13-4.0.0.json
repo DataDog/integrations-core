@@ -1,0 +1,136 @@
+{
+  "integration": "impala",
+  "environment": "py3.13-4.0.0",
+  "collected_at": "2026-05-14T13:00:13.100544+00:00",
+  "processes": [
+    {
+      "pid": 336744,
+      "ppid": 336700,
+      "comm": "main",
+      "cmdline": "/opt/impala/bin/catalogd -log_dir=/opt/impala/logs -abort_on_config_error=false -state_store_host=statestored -catalog_topic_mode=minimal -hms_event_polling_interval_s=0 -invalidate_tables_on_memory_pressure=true -use_resolved_hostname=true -v=1 -hms_event_polling_interval_s=1 -invalidate_tables_timeout_s=999999",
+      "generated_name": "catalogd",
+      "has_service_data": true
+    },
+    {
+      "pid": 336513,
+      "ppid": 336463,
+      "comm": "statestored",
+      "cmdline": "/opt/impala/bin/statestored -log_dir=/opt/impala/logs -use_resolved_hostname=true -v=1",
+      "generated_name": "statestored",
+      "has_service_data": true
+    },
+    {
+      "pid": 336912,
+      "ppid": 336858,
+      "comm": "impalad",
+      "cmdline": "/opt/impala/bin/impalad -log_dir=/opt/impala/logs -abort_on_config_error=false -state_store_host=statestored -catalog_service_host=catalogd -mem_limit_includes_jvm=true -use_local_catalog=true --rpc_use_loopback=true -use_resolved_hostname=true -v=1 -kudu_master_hosts=kudu-master-1:7051 -mt_dop_auto_fallback=true -default_query_options=mt_dop=4,default_file_format=parquet,default_transactional_type=insert_only -mem_limit=4gb",
+      "generated_name": "impalad",
+      "has_service_data": true
+    },
+    {
+      "pid": 336511,
+      "ppid": 336466,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java -Dproc_jar -Dproc_metastore -Dlog4j.configurationFile=hive-log4j2.properties -Djava.util.logging.config.file=/opt/hive/bin/../conf/parquet-logging.properties -Dyarn.log.dir=/opt/hadoop/logs -Dyarn.log.file=hadoop.log -Dyarn.home.dir=/opt/hadoop -Dyarn.root.logger=INFO,console -Djava.library.path=/opt/hadoop/lib/native -Xmx256m -Dhadoop.log.dir=/opt/hadoop/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop -Dhadoop.id.str=hive -Dhadoop.root.logger=INFO,console -Dhadoop.policy.file=hadoop-policy.xml -Dhadoop.security.logger=INFO,NullAppender org.apache.hadoop.util.RunJar /opt/hive/lib/hive-metastore-3.1.3000.7.2.9.0-146.jar org.apache.hadoop.hive.metastore.HiveMetaStore",
+      "generated_name": "hadoop",
+      "has_service_data": true
+    },
+    {
+      "pid": 339857,
+      "ppid": 339834,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 339894,
+      "ppid": 339857,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 340281,
+      "ppid": 339857,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 340282,
+      "ppid": 339857,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 340283,
+      "ppid": 339857,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 340285,
+      "ppid": 339857,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 340286,
+      "ppid": 339857,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 340287,
+      "ppid": 339857,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 340290,
+      "ppid": 340283,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 340291,
+      "ppid": 340282,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 340293,
+      "ppid": 340285,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 340294,
+      "ppid": 340286,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

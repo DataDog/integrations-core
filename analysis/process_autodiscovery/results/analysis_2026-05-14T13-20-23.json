@@ -1,6 +1,98 @@
 {
-  "analyzed_at": "2026-05-14T10:20:22.562956+00:00",
+  "analyzed_at": "2026-05-14T13:20:23.821454+00:00",
   "results": [
+    {
+      "integration": "activemq",
+      "environment": "py3.13-5.15.9-activemq.yaml",
+      "services": [
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            109611
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            109614
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            109615
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            109616
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "activemq",
+          "main_pids": [
+            108457
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "activemq_xml",
+      "environment": "py3.13-5.11.1",
+      "services": [
+        {
+          "generated_name": "activemq",
+          "main_pids": [
+            112778
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            113614
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            113616
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            113618
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            113619
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
     {
       "integration": "airflow",
       "environment": "py3.13-2.11",
@@ -80,29 +172,13 @@
       ]
     },
     {
-      "integration": "arangodb",
-      "environment": "py3.13-3.8",
+      "integration": "ambari",
+      "environment": "py3.13",
       "services": [
         {
           "generated_name": "privateactionrunner",
           "main_pids": [
-            902714
-          ],
-          "skipped_pids": [],
-          "verdict": "PASS"
-        },
-        {
-          "generated_name": "system-probe",
-          "main_pids": [
-            902716
-          ],
-          "skipped_pids": [],
-          "verdict": "PASS"
-        },
-        {
-          "generated_name": "security-agent",
-          "main_pids": [
-            902718
+            132382
           ],
           "skipped_pids": [],
           "verdict": "PASS"
@@ -110,7 +186,111 @@
         {
           "generated_name": "agent",
           "main_pids": [
-            902720
+            132383
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            132385
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            132386
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "apache",
+      "environment": "py3.13-2.4.27",
+      "services": [
+        {
+          "generated_name": "httpd",
+          "main_pids": [
+            135052
+          ],
+          "skipped_pids": [
+            135115,
+            135116,
+            135118
+          ],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            137128
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            137129
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            137130
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            137131
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "arangodb",
+      "environment": "py3.13-3.8",
+      "services": [
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            3846983
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            3846985
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            3846987
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            3846989
           ],
           "skipped_pids": [],
           "verdict": "PASS"
@@ -165,6 +345,52 @@
           "generated_name": "security-agent",
           "main_pids": [
             907659
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "cassandra",
+      "environment": "py3.13",
+      "services": [
+        {
+          "generated_name": "cassandra",
+          "main_pids": [
+            143794
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            144546
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            144547
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            144548
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            144550
           ],
           "skipped_pids": [],
           "verdict": "PASS"
@@ -376,6 +602,44 @@
           "generated_name": "system-probe",
           "main_pids": [
             949808
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "cisco_aci",
+      "environment": "py3.13",
+      "services": [
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            147960
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            147961
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            147963
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            147964
           ],
           "skipped_pids": [],
           "verdict": "PASS"
@@ -682,6 +946,56 @@
       ]
     },
     {
+      "integration": "couch",
+      "environment": "py3.13-3.1",
+      "services": [
+        {
+          "generated_name": "couchdb",
+          "main_pids": [
+            152120,
+            152188,
+            152387
+          ],
+          "skipped_pids": [],
+          "verdict": "WARN (N=3)"
+        },
+        {
+          "generated_name": "epmd",
+          "main_pids": [
+            152256,
+            152394,
+            152502
+          ],
+          "skipped_pids": [],
+          "verdict": "WARN (N=3)"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            154094
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            154096
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            154098
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
       "integration": "couchbase",
       "environment": "py3.13-7.6",
       "services": [
@@ -794,6 +1108,82 @@
       ]
     },
     {
+      "integration": "crio",
+      "environment": "py3.13",
+      "services": [
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            157687
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            157689
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            157690
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            157691
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "datadog_cluster_agent",
+      "environment": "py3.13",
+      "services": [
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            161282
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            161284
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            161285
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            161286
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
       "integration": "directory",
       "environment": "py3.13",
       "services": [
@@ -863,6 +1253,28 @@
           "generated_name": "security-agent",
           "main_pids": [
             1028102
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "druid",
+      "environment": "py3.13",
+      "services": [
+        {
+          "generated_name": "druid",
+          "main_pids": [
+            171112
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "zookeeper",
+          "main_pids": [
+            170946
           ],
           "skipped_pids": [],
           "verdict": "PASS"
@@ -1102,6 +1514,44 @@
       ]
     },
     {
+      "integration": "external_dns",
+      "environment": "py3.13",
+      "services": [
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            187675
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            187676
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            187678
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            187679
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
       "integration": "falco",
       "environment": "py3.13",
       "services": [
@@ -1141,6 +1591,98 @@
           "generated_name": "falco",
           "main_pids": [
             1067116
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "fluentd",
+      "environment": "py3.13-1.17",
+      "services": [
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            191863
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            191864
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            191866
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            191867
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "ruby",
+          "main_pids": [
+            191190
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "gearmand",
+      "environment": "py3.13-1.1",
+      "services": [
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            198999
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            199001
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            199002
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            199003
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "gearmand",
+          "main_pids": [
+            194439
           ],
           "skipped_pids": [],
           "verdict": "PASS"
@@ -1252,6 +1794,57 @@
           "generated_name": "security-agent",
           "main_pids": [
             1137624
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "gunicorn",
+      "environment": "py3.13-23",
+      "services": [
+        {
+          "generated_name": "dd-test-gunicorn",
+          "main_pids": [
+            203245
+          ],
+          "skipped_pids": [
+            203313,
+            203314,
+            203315,
+            203317
+          ],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            203988
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            203989
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            203991
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            203992
           ],
           "skipped_pids": [],
           "verdict": "PASS"
@@ -1455,6 +2048,55 @@
       ]
     },
     {
+      "integration": "hive",
+      "environment": "py3.13",
+      "services": [
+        {
+          "generated_name": "hadoop",
+          "main_pids": [
+            4094655,
+            4097127,
+            4092376,
+            4092931
+          ],
+          "skipped_pids": [],
+          "verdict": "WARN (N=4)"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            4097934
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            4097935
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            4097937
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            4097940
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
       "integration": "hivemq",
       "environment": "py3.13-4.3",
       "services": [
@@ -1501,6 +2143,38 @@
       ]
     },
     {
+      "integration": "http_check",
+      "environment": "py3.13",
+      "services": [
+        {
+          "generated_name": "httpbin",
+          "main_pids": [
+            294973
+          ],
+          "skipped_pids": [
+            295294
+          ],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "tinyproxy",
+          "main_pids": [
+            294975
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "redis-server",
+          "main_pids": [
+            294966
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
       "integration": "hudi",
       "environment": "py3.13",
       "services": [
@@ -1540,6 +2214,60 @@
           "generated_name": "security-agent",
           "main_pids": [
             1175438
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "ibm_db2",
+      "environment": "py3.13-11.1",
+      "services": [
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            324831
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            324832
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            324833
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            324835
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "db2sysc",
+          "main_pids": [
+            311254
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "tail",
+          "main_pids": [
+            311401
           ],
           "skipped_pids": [],
           "verdict": "PASS"
@@ -1624,6 +2352,222 @@
           "generated_name": "com.ibm.wsspi.bootstrap.WSPreLauncher",
           "main_pids": [
             1189677
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "ignite",
+      "environment": "py3.13-2.14",
+      "services": [
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            331246
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            331249
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            331250
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            331252
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "ignite",
+          "main_pids": [
+            328313
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "impala",
+      "environment": "py3.13-4.0.0",
+      "services": [
+        {
+          "generated_name": "catalogd",
+          "main_pids": [
+            336744
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "statestored",
+          "main_pids": [
+            336513
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "impalad",
+          "main_pids": [
+            336912
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "hadoop",
+          "main_pids": [
+            336511
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            340290
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            340291
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            340293
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            340294
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "jboss_wildfly",
+      "environment": "py3.13",
+      "services": [
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            345791
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            345793
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            345794
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            345795
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "jboss-modules",
+          "main_pids": [
+            344520
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "kafka",
+      "environment": "py3.13-3.7-kraft.yml",
+      "services": [
+        {
+          "generated_name": "kafka.Kafka",
+          "main_pids": [
+            350252
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            352011
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            352012
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            352013
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            352014
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "kafka",
+          "main_pids": [
+            351449
           ],
           "skipped_pids": [],
           "verdict": "PASS"
@@ -1736,6 +2680,77 @@
           ],
           "skipped_pids": [],
           "verdict": "WARN (N=2)"
+        }
+      ]
+    },
+    {
+      "integration": "kong",
+      "environment": "py3.13-3.0.0",
+      "services": [
+        {
+          "generated_name": "nginx",
+          "main_pids": [
+            361685
+          ],
+          "skipped_pids": [
+            363111,
+            363112,
+            363113,
+            363114,
+            363115,
+            363116,
+            363117,
+            363118,
+            363119,
+            363120,
+            363121,
+            363122,
+            363123,
+            363124,
+            363125,
+            363126
+          ],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "postgres",
+          "main_pids": [
+            354476
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            363719
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            363721
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            363722
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            363725
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
         }
       ]
     },
@@ -2060,6 +3075,136 @@
       ]
     },
     {
+      "integration": "kyototycoon",
+      "environment": "py3.13",
+      "services": [
+        {
+          "generated_name": "ktserver",
+          "main_pids": [
+            366842
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            367462
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            367464
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            367465
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            367466
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "lighttpd",
+      "environment": "py3.13-noauth",
+      "services": [
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            370415
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            370416
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            370417
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            370420
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "lighttpd",
+          "main_pids": [
+            369821
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "linux_proc_extras",
+      "environment": "py3.13",
+      "services": [
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            373411
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            373412
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            373413
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            373414
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
       "integration": "lustre",
       "environment": "py3.13",
       "services": [
@@ -2287,6 +3432,120 @@
       ]
     },
     {
+      "integration": "mcache",
+      "environment": "py3.13",
+      "services": [
+        {
+          "generated_name": "memcached",
+          "main_pids": [
+            375131
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            375851
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            375852
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            375854
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            375855
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "mesos_master",
+      "environment": "py3.13-1.7",
+      "services": [
+        {
+          "generated_name": "zookeeper",
+          "main_pids": [
+            380083
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "mesos-master",
+          "main_pids": [
+            380176
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            381247
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            381249
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            381250
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            381253
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "mesos_slave",
+      "environment": "py3.13-1.7",
+      "services": [
+        {
+          "generated_name": "zookeeper",
+          "main_pids": [
+            384206
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
       "integration": "milvus",
       "environment": "py3.13",
       "services": [
@@ -2375,6 +3634,62 @@
           ],
           "skipped_pids": [],
           "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "mysql",
+      "environment": "py3.13-percona-8.4",
+      "services": [
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            400531
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            400532
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            400533
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            400534
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "mysqld",
+          "main_pids": [
+            398795,
+            397391
+          ],
+          "skipped_pids": [],
+          "verdict": "WARN (N=2)"
+        },
+        {
+          "generated_name": "percona-telemetry-agent",
+          "main_pids": [
+            399688,
+            398451
+          ],
+          "skipped_pids": [],
+          "verdict": "WARN (N=2)"
         }
       ]
     },
@@ -2763,6 +4078,52 @@
       ]
     },
     {
+      "integration": "openmetrics",
+      "environment": "py3.13",
+      "services": [
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            404989
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            404990
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            404992
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            404994
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "prometheus",
+          "main_pids": [
+            403505
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
       "integration": "openstack",
       "environment": "py3.13",
       "services": [
@@ -2794,6 +4155,60 @@
           "generated_name": "system-probe",
           "main_pids": [
             1561961
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "pgbouncer",
+      "environment": "py3.13-1.23",
+      "services": [
+        {
+          "generated_name": "postgres",
+          "main_pids": [
+            408108
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "pgbouncer",
+          "main_pids": [
+            408217
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            412773
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            412774
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            412775
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            412777
           ],
           "skipped_pids": [],
           "verdict": "PASS"
@@ -3064,6 +4479,105 @@
           "generated_name": "tee",
           "main_pids": [
             1602325
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "presto",
+      "environment": "py3.13-346",
+      "services": [
+        {
+          "generated_name": "io.prestosql.server.PrestoServer",
+          "main_pids": [
+            418696,
+            418698
+          ],
+          "skipped_pids": [],
+          "verdict": "WARN (N=2)"
+        }
+      ]
+    },
+    {
+      "integration": "process",
+      "environment": "py3.13",
+      "services": [
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            429605
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            429606
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            429607
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            429609
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "prometheus",
+      "environment": "py3.13",
+      "services": [
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            433199
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            433200
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            433201
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            433203
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "prometheus",
+          "main_pids": [
+            431756
           ],
           "skipped_pids": [],
           "verdict": "PASS"
@@ -3796,6 +5310,52 @@
       ]
     },
     {
+      "integration": "solr",
+      "environment": "py3.13-9.3",
+      "services": [
+        {
+          "generated_name": "start",
+          "main_pids": [
+            436917
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            437853
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            437854
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            437855
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            437857
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
       "integration": "sonarqube",
       "environment": "py3.13-9.3",
       "services": [
@@ -4074,6 +5634,60 @@
           "generated_name": "security-agent",
           "main_pids": [
             1773382
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "statsd",
+      "environment": "py3.13-0.9",
+      "services": [
+        {
+          "generated_name": "statsd",
+          "main_pids": [
+            441450
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "tee",
+          "main_pids": [
+            441451
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            441997
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            441998
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            442000
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            442001
           ],
           "skipped_pids": [],
           "verdict": "PASS"
@@ -4576,6 +6190,107 @@
       ]
     },
     {
+      "integration": "twemproxy",
+      "environment": "py3.13-0.5.0",
+      "services": [
+        {
+          "generated_name": "etcd",
+          "main_pids": [
+            444332
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "redis-server",
+          "main_pids": [
+            444130,
+            444129
+          ],
+          "skipped_pids": [],
+          "verdict": "WARN (N=2)"
+        },
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            445099
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            445100
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            445102
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            445103
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "nutcracker",
+          "main_pids": [
+            444517
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "twistlock",
+      "environment": "py3.13",
+      "services": [
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            446899
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            446900
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            446901
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            446902
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
       "integration": "varnish",
       "environment": "py3.13-6.5",
       "services": [
@@ -4727,6 +6442,53 @@
           "generated_name": "security-agent",
           "main_pids": [
             2035123
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "integration": "yarn",
+      "environment": "py3.13",
+      "services": [
+        {
+          "generated_name": "hadoop",
+          "main_pids": [
+            450567,
+            450035
+          ],
+          "skipped_pids": [],
+          "verdict": "WARN (N=2)"
+        },
+        {
+          "generated_name": "agent",
+          "main_pids": [
+            451935
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "privateactionrunner",
+          "main_pids": [
+            451936
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "system-probe",
+          "main_pids": [
+            451938
+          ],
+          "skipped_pids": [],
+          "verdict": "PASS"
+        },
+        {
+          "generated_name": "security-agent",
+          "main_pids": [
+            451939
           ],
           "skipped_pids": [],
           "verdict": "PASS"
@@ -5085,6 +6847,66 @@
       "integration": "windows_performance_counters",
       "reason": "env start failed",
       "skipped_at": "2026-05-13T17:26:50.434292+00:00",
+      "details": "exit code 1: Environment `py3.13` is incompatible: unsupported platform\n"
+    },
+    {
+      "integration": "torchserve",
+      "reason": "env start failed",
+      "skipped_at": "2026-05-14T11:35:45.549057+00:00",
+      "details": "exit code 1:  Container torchserve  Creating\n Container torchserve  Created\n Container torchserve  Starting\nError response from daemon: failed to set up container networking: driver failed programming external connectivity on endpoint torchserve (9ce180d76756921d5d531fecb8bb8f81844c3b2cb056068151543eb89c65c999): Bind for 0.0.0.0:8081 failed: port is already allocated\n"
+    },
+    {
+      "integration": "aerospike",
+      "reason": "env start failed",
+      "skipped_at": "2026-05-14T12:48:46.116637+00:00",
+      "details": "exit code 1:  aerospike Pulling \n aerospike-prometheus-exporter Pulling \n a2ae51f1938d Pulling fs layer \n 97663c695206 Pulling fs layer \n c631d7a562d9 Pulling fs layer \n 0be7b93e1397 Pulling fs layer \n c6339b6d6c08 Pulling fs layer \n b9416393503d Pulling fs layer \n 59bf1c3509f3 Pulling fs layer \n 105212368573 Pulling fs layer \n 6f6a2a927a8f Pulling fs layer \n 0be7b93e1397 Download complete \n c631d7a562d9 Download complete \n 59bf1c3509f3 Download complete \n 6f6a2a927a8f Download complete \n 59bf1c3509f3 Extrac"
+    },
+    {
+      "integration": "avi_vantage",
+      "reason": "env start failed",
+      "skipped_at": "2026-05-14T12:49:09.820665+00:00",
+      "details": "exit code 1:  compose-avi  Built\n Network compose_default  Creating\n Network compose_default  Created\n Container compose-avi-1  Creating\n Container compose-avi-1  Created\n Container compose-avi-1  Starting\nError response from daemon: failed to set up container networking: driver failed programming external connectivity on endpoint compose-avi-1 (a9b3ad65ee2c902c965e551c53a70c546fb9addf2d9461ad1c1b7b867ff598a7): failed to bind host port for 0.0.0.0:5000:172.17.130.2:5000/tcp: address already in use\n Container"
+    },
+    {
+      "integration": "harbor",
+      "reason": "env start failed",
+      "skipped_at": "2026-05-14T12:51:27.741409+00:00",
+      "details": "exit code 1:  postgresql Pulling \n proxy Pulling \n core Pulling \n registry Pulling \n redis Pulling \n e9ed1433dc2b Pulling fs layer \n 4fc7e8c5dda0 Pulling fs layer \n d2675b3b85d0 Pulling fs layer \n 39070694482e Pulling fs layer \n cb53bde77d8e Pulling fs layer \n 201d9af39a4c Pulling fs layer \n a2385cb5e298 Pulling fs layer \n 460661a2617c Pulling fs layer \n 5cb13b7c687b Pulling fs layer \n cb6c9513a6b8 Pulling fs layer \n 4fc7e8c5dda0 Pulling fs layer \n 36088cf3b2c1 Pulling fs layer \n 7cde49ce44af Pulling fs laye"
+    },
+    {
+      "integration": "hyperv",
+      "reason": "env start failed",
+      "skipped_at": "2026-05-14T12:54:28.346775+00:00",
+      "details": "exit code 1: Environment `py3.13` is incompatible: unsupported platform\n"
+    },
+    {
+      "integration": "linkerd",
+      "reason": "kubernetes-only environment",
+      "skipped_at": "2026-05-14T13:03:59.536429+00:00",
+      "details": "uses datadog_checks.dev.kind in linkerd/tests/conftest.py"
+    },
+    {
+      "integration": "tokumx",
+      "reason": "env start failed",
+      "skipped_at": "2026-05-14T13:16:49.271844+00:00",
+      "details": "exit code 1: Environment `py2.7` is incompatible: cannot locate Python: 2.7\n"
+    },
+    {
+      "integration": "vertica",
+      "reason": "no environments found",
+      "skipped_at": "2026-05-14T13:17:46.766654+00:00",
+      "details": "ddev env show returned no environments"
+    },
+    {
+      "integration": "weblogic",
+      "reason": "env start failed",
+      "skipped_at": "2026-05-14T13:18:06.847159+00:00",
+      "details": "exit code 1: Creating environment: py3.13-14\nInstalling project in development mode\nRunning post-installation commands\nChecking dependencies\nDockerfile:15\n\n--------------------\n\n  13 |     ARG WEBLOGIC_VERSION\n\n  14 |     \n\n  15 | >>> FROM container-registry.oracle.com/middleware/weblogic:${WEBLOGIC_VERSION} as wls_base\n\n  16 |     \n\n  17 |     ARG APPLICATION_NAME=\"${APPLICATION_NAME:-sample}\"\n\n--------------------\n\ntarget weblogic-admin-server: failed to solve: failed to fetch anonymous token: unexpected s"
+    },
+    {
+      "integration": "windows_service",
+      "reason": "env start failed",
+      "skipped_at": "2026-05-14T13:18:13.488890+00:00",
       "details": "exit code 1: Environment `py3.13` is incompatible: unsupported platform\n"
     }
   ]

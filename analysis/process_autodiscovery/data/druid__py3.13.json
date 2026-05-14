@@ -1,0 +1,26 @@
+{
+  "integration": "druid",
+  "environment": "py3.13",
+  "collected_at": "2026-05-14T12:31:38.058412+00:00",
+  "processes": [
+    {
+      "pid": 171112,
+      "ppid": 171045,
+      "comm": "java",
+      "cmdline": "java -server -Xms512m -Xmx512m -XX:MaxDirectMemorySize=768m -XX:+ExitOnOutOfMemoryError -XX:+UseG1GC -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Djava.io.tmpdir=var/tmp -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager -cp /opt/druid_conf/broker:/opt/druid_conf/_common:/opt/druid_conf/_common/hadoop-xml:/opt/druid_conf/../_common:/opt/druid_conf/../_common/hadoop-xml:/usr/local/druid/bin/../lib/* org.apache.druid.cli.Main server broker",
+      "generated_name": "druid",
+      "has_service_data": true
+    },
+    {
+      "pid": 170946,
+      "ppid": 170924,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/java-1.8-openjdk/jre/bin/java -Dzookeeper.log.dir=. -Dzookeeper.root.logger=INFO,CONSOLE -cp /zookeeper-3.4.11/bin/../build/classes:/zookeeper-3.4.11/bin/../build/lib/*.jar:/zookeeper-3.4.11/bin/../lib/slf4j-log4j12-1.6.1.jar:/zookeeper-3.4.11/bin/../lib/slf4j-api-1.6.1.jar:/zookeeper-3.4.11/bin/../lib/netty-3.10.5.Final.jar:/zookeeper-3.4.11/bin/../lib/log4j-1.2.16.jar:/zookeeper-3.4.11/bin/../lib/jline-0.9.94.jar:/zookeeper-3.4.11/bin/../lib/audience-annotations-0.5.0.jar:/zookeeper-3.4.11/bin/../zookeeper-3.4.11.jar:/zookeeper-3.4.11/bin/../src/java/lib/*.jar:/conf: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.local.only=false org.apache.zookeeper.server.quorum.QuorumPeerMain /conf/zoo.cfg",
+      "generated_name": "zookeeper",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {
+    "start_warning": "exit code 1: Creating environment: py3.13\nInstalling project in development mode\nRunning post-installation commands\nChecking dependencies\n zookeeper Pulling \n druid-broker Pulling \n druid-coordinator Pulling \n b2f6dcf026a8 Pulling fs layer \n b6abafe80f63 Pulling fs layer \n 965243ad60a0 Pulling fs layer \n c730c460c883 Pulling fs layer \n e7c96db7181b Pulling fs layer \n b8864e3208bd Pulling fs layer \n f910a506b6cb Pulling fs layer \n fadedf649a46 Pulling fs layer \n e7c96db7181b Pulling fs layer \n 965243ad60a0 Pu"
+  }
+}

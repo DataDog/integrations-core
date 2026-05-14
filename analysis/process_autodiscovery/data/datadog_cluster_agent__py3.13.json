@@ -1,0 +1,104 @@
+{
+  "integration": "datadog_cluster_agent",
+  "environment": "py3.13",
+  "collected_at": "2026-05-14T12:28:52.961139+00:00",
+  "processes": [
+    {
+      "pid": 160827,
+      "ppid": 160805,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 160885,
+      "ppid": 160827,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 161273,
+      "ppid": 160827,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 161274,
+      "ppid": 160827,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 161276,
+      "ppid": 160827,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 161277,
+      "ppid": 160827,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 161278,
+      "ppid": 160827,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 161280,
+      "ppid": 160827,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 161282,
+      "ppid": 161274,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 161284,
+      "ppid": 161276,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 161285,
+      "ppid": 161277,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 161286,
+      "ppid": 161278,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

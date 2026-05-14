@@ -1,0 +1,112 @@
+{
+  "integration": "prometheus",
+  "environment": "py3.13",
+  "collected_at": "2026-05-14T13:14:57.084003+00:00",
+  "processes": [
+    {
+      "pid": 432748,
+      "ppid": 432700,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 432803,
+      "ppid": 432748,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 433190,
+      "ppid": 432748,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 433191,
+      "ppid": 432748,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 433193,
+      "ppid": 432748,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 433194,
+      "ppid": 432748,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 433195,
+      "ppid": 432748,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 433197,
+      "ppid": 432748,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 433199,
+      "ppid": 433191,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 433200,
+      "ppid": 433193,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 433201,
+      "ppid": 433194,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 433203,
+      "ppid": 433195,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 431756,
+      "ppid": 431733,
+      "comm": "prometheus",
+      "cmdline": "/bin/prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus",
+      "generated_name": "prometheus",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

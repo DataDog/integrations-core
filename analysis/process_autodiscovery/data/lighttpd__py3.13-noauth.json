@@ -1,0 +1,112 @@
+{
+  "integration": "lighttpd",
+  "environment": "py3.13-noauth",
+  "collected_at": "2026-05-14T13:03:51.128793+00:00",
+  "processes": [
+    {
+      "pid": 369980,
+      "ppid": 369955,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 370017,
+      "ppid": 369980,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 370406,
+      "ppid": 369980,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 370407,
+      "ppid": 369980,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 370408,
+      "ppid": 369980,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 370410,
+      "ppid": 369980,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 370411,
+      "ppid": 369980,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 370412,
+      "ppid": 369980,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 370415,
+      "ppid": 370407,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 370416,
+      "ppid": 370408,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 370417,
+      "ppid": 370410,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 370420,
+      "ppid": 370411,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 369821,
+      "ppid": 369798,
+      "comm": "lighttpd",
+      "cmdline": "lighttpd -D -f /etc/lighttpd/lighttpd.conf",
+      "generated_name": "lighttpd",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

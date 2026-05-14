@@ -1,0 +1,42 @@
+{
+  "integration": "http_check",
+  "environment": "py3.13",
+  "collected_at": "2026-05-14T12:54:18.516596+00:00",
+  "processes": [
+    {
+      "pid": 294973,
+      "ppid": 294890,
+      "comm": "gunicorn",
+      "cmdline": "/usr/bin/python3 /usr/local/bin/gunicorn -b 0.0.0.0:80 httpbin:app -k gevent",
+      "generated_name": "httpbin",
+      "has_service_data": true
+    },
+    {
+      "pid": 295294,
+      "ppid": 294973,
+      "comm": "gunicorn",
+      "cmdline": "/usr/bin/python3 /usr/local/bin/gunicorn -b 0.0.0.0:80 httpbin:app -k gevent",
+      "generated_name": "httpbin",
+      "has_service_data": true
+    },
+    {
+      "pid": 294975,
+      "ppid": 294875,
+      "comm": "tinyproxy",
+      "cmdline": "/usr/bin/tinyproxy -d",
+      "generated_name": "tinyproxy",
+      "has_service_data": true
+    },
+    {
+      "pid": 294966,
+      "ppid": 294857,
+      "comm": "redis-server",
+      "cmdline": "redis-server *:6379",
+      "generated_name": "redis-server",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {
+    "start_warning": "exit code 1:  nginx-main Pulling \n redis Pulling \n mockbin Pulling \n a36b2d884a89 Pulling fs layer \n 0373952b589d Pulling fs layer \n 7b82cd0ee527 Pulling fs layer \n 6b1eed27cade Pulling fs layer \n c46b5fa4d940 Pulling fs layer \n 473ede7ed136 Pulling fs layer \n 93ae3df89c92 Pulling fs layer \n c3fb1988805d Pulling fs layer \n 57fb71246055 Pulling fs layer \n 4f4fb700ef54 Pulling fs layer \n 66c3033571c5 Pulling fs layer \n 188c6fff82e6 Pulling fs layer \n 39932f0416f7 Pulling fs layer \n 0e422956e4a5 Pulling fs laye"
+  }
+}

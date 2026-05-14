@@ -1,0 +1,264 @@
+{
+  "integration": "couch",
+  "environment": "py3.13-3.1",
+  "collected_at": "2026-05-14T12:27:55.951017+00:00",
+  "processes": [
+    {
+      "pid": 151945,
+      "ppid": 151870,
+      "comm": "tini",
+      "cmdline": "tini -- /docker-entrypoint.sh /opt/couchdb/bin/couchdb",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 152120,
+      "ppid": 151945,
+      "comm": "beam.smp",
+      "cmdline": "/opt/couchdb/bin/../erts-9.3.3.14/bin/beam.smp -K true -A 16 -Bd -- -root /opt/couchdb/bin/.. -progname couchdb -- -home /opt/couchdb -- -boot /opt/couchdb/bin/../releases/3.1.0/couchdb -kernel inet_dist_listen_min 9100 -kernel inet_dist_listen_max 9100 -kernel error_logger silent -sasl sasl_error_logger false -noshell -noinput -name couchdb@couchdb-2.example.com -config /opt/couchdb/bin/../releases/3.1.0/sys.config",
+      "generated_name": "couchdb",
+      "has_service_data": true
+    },
+    {
+      "pid": 152256,
+      "ppid": 151945,
+      "comm": "epmd",
+      "cmdline": "/opt/couchdb/bin/../erts-9.3.3.14/bin/epmd -daemon",
+      "generated_name": "epmd",
+      "has_service_data": true
+    },
+    {
+      "pid": 152296,
+      "ppid": 152120,
+      "comm": "erl_child_setup",
+      "cmdline": "erl_child_setup 1024",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 152648,
+      "ppid": 152296,
+      "comm": "inet_gethost",
+      "cmdline": "inet_gethost 4",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 152649,
+      "ppid": 152648,
+      "comm": "inet_gethost",
+      "cmdline": "inet_gethost 4",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 153066,
+      "ppid": 152296,
+      "comm": "couchjs",
+      "cmdline": "./bin/couchjs ./share/server/main.js",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 151941,
+      "ppid": 151854,
+      "comm": "tini",
+      "cmdline": "tini -- /docker-entrypoint.sh /opt/couchdb/bin/couchdb",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 152188,
+      "ppid": 151941,
+      "comm": "beam.smp",
+      "cmdline": "/opt/couchdb/bin/../erts-9.3.3.14/bin/beam.smp -K true -A 16 -Bd -- -root /opt/couchdb/bin/.. -progname couchdb -- -home /opt/couchdb -- -boot /opt/couchdb/bin/../releases/3.1.0/couchdb -kernel inet_dist_listen_min 9100 -kernel inet_dist_listen_max 9100 -kernel error_logger silent -sasl sasl_error_logger false -noshell -noinput -name couchdb@couchdb-3.example.com -config /opt/couchdb/bin/../releases/3.1.0/sys.config",
+      "generated_name": "couchdb",
+      "has_service_data": true
+    },
+    {
+      "pid": 152394,
+      "ppid": 151941,
+      "comm": "epmd",
+      "cmdline": "/opt/couchdb/bin/../erts-9.3.3.14/bin/epmd -daemon",
+      "generated_name": "epmd",
+      "has_service_data": true
+    },
+    {
+      "pid": 152418,
+      "ppid": 152188,
+      "comm": "erl_child_setup",
+      "cmdline": "erl_child_setup 1024",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 152645,
+      "ppid": 152418,
+      "comm": "inet_gethost",
+      "cmdline": "inet_gethost 4",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 152646,
+      "ppid": 152645,
+      "comm": "inet_gethost",
+      "cmdline": "inet_gethost 4",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 153064,
+      "ppid": 152418,
+      "comm": "couchjs",
+      "cmdline": "./bin/couchjs ./share/server/main.js",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 151942,
+      "ppid": 151869,
+      "comm": "tini",
+      "cmdline": "tini -- /docker-entrypoint.sh /opt/couchdb/bin/couchdb",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 152387,
+      "ppid": 151942,
+      "comm": "beam.smp",
+      "cmdline": "/opt/couchdb/bin/../erts-9.3.3.14/bin/beam.smp -K true -A 16 -Bd -- -root /opt/couchdb/bin/.. -progname couchdb -- -home /opt/couchdb -- -boot /opt/couchdb/bin/../releases/3.1.0/couchdb -kernel inet_dist_listen_min 9100 -kernel inet_dist_listen_max 9100 -kernel error_logger silent -sasl sasl_error_logger false -noshell -noinput -name couchdb@couchdb-1.example.com -config /opt/couchdb/bin/../releases/3.1.0/sys.config",
+      "generated_name": "couchdb",
+      "has_service_data": true
+    },
+    {
+      "pid": 152502,
+      "ppid": 151942,
+      "comm": "epmd",
+      "cmdline": "/opt/couchdb/bin/../erts-9.3.3.14/bin/epmd -daemon",
+      "generated_name": "epmd",
+      "has_service_data": true
+    },
+    {
+      "pid": 152523,
+      "ppid": 152387,
+      "comm": "erl_child_setup",
+      "cmdline": "erl_child_setup 1024",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 152683,
+      "ppid": 152523,
+      "comm": "inet_gethost",
+      "cmdline": "inet_gethost 4",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 152686,
+      "ppid": 152683,
+      "comm": "inet_gethost",
+      "cmdline": "inet_gethost 4",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 153065,
+      "ppid": 152523,
+      "comm": "couchjs",
+      "cmdline": "./bin/couchjs ./share/server/main.js",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 153656,
+      "ppid": 153633,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 153694,
+      "ppid": 153656,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 154081,
+      "ppid": 153656,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 154082,
+      "ppid": 153656,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 154083,
+      "ppid": 153656,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 154085,
+      "ppid": 153656,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 154086,
+      "ppid": 153656,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 154087,
+      "ppid": 153656,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 154094,
+      "ppid": 154085,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 154096,
+      "ppid": 154083,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 154098,
+      "ppid": 154086,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

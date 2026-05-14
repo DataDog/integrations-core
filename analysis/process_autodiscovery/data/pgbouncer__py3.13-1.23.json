@@ -1,0 +1,168 @@
+{
+  "integration": "pgbouncer",
+  "environment": "py3.13-1.23",
+  "collected_at": "2026-05-14T13:10:47.509198+00:00",
+  "processes": [
+    {
+      "pid": 408108,
+      "ppid": 408086,
+      "comm": "postgres",
+      "cmdline": "postgres",
+      "generated_name": "postgres",
+      "has_service_data": true
+    },
+    {
+      "pid": 408442,
+      "ppid": 408108,
+      "comm": "postgres",
+      "cmdline": "postgres: checkpointer",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 408443,
+      "ppid": 408108,
+      "comm": "postgres",
+      "cmdline": "postgres: background writer",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 408445,
+      "ppid": 408108,
+      "comm": "postgres",
+      "cmdline": "postgres: walwriter",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 408446,
+      "ppid": 408108,
+      "comm": "postgres",
+      "cmdline": "postgres: autovacuum launcher",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 408447,
+      "ppid": 408108,
+      "comm": "postgres",
+      "cmdline": "postgres: logical replication launcher",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 408759,
+      "ppid": 408108,
+      "comm": "postgres",
+      "cmdline": "postgres: postgres datadog_test 172.17.130.3(54450) idle",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 408217,
+      "ppid": 408186,
+      "comm": "pgbouncer",
+      "cmdline": "/opt/bitnami/pgbouncer/bin/pgbouncer /opt/bitnami/pgbouncer/conf/pgbouncer.ini",
+      "generated_name": "pgbouncer",
+      "has_service_data": true
+    },
+    {
+      "pid": 412337,
+      "ppid": 412314,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 412378,
+      "ppid": 412337,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 412764,
+      "ppid": 412337,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 412765,
+      "ppid": 412337,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 412767,
+      "ppid": 412337,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 412768,
+      "ppid": 412337,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 412769,
+      "ppid": 412337,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 412771,
+      "ppid": 412337,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 412773,
+      "ppid": 412767,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 412774,
+      "ppid": 412765,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 412775,
+      "ppid": 412768,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 412777,
+      "ppid": 412769,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

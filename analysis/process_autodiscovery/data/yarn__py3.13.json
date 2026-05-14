@@ -1,0 +1,152 @@
+{
+  "integration": "yarn",
+  "environment": "py3.13",
+  "collected_at": "2026-05-14T13:19:45.208018+00:00",
+  "processes": [
+    {
+      "pid": 450513,
+      "ppid": 450479,
+      "comm": "dumb-init",
+      "cmdline": "/usr/local/bin/dumb-init -- /opt/starter.sh yarn nodemanager",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 450560,
+      "ppid": 450513,
+      "comm": "bash",
+      "cmdline": "bash /opt/starter.sh yarn nodemanager",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 450567,
+      "ppid": 450560,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/jre//bin/java -Dproc_nodemanager -Djava.net.preferIPv4Stack=true -Dyarn.log.dir=/var/log/hadoop -Dyarn.log.file=hadoop.log -Dyarn.home.dir=/opt/hadoop -Dyarn.root.logger=INFO,console -Djava.library.path=/opt/hadoop/lib/native -Dhadoop.log.dir=/var/log/hadoop -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop -Dhadoop.id.str=hadoop -Dhadoop.root.logger=INFO,console -Dhadoop.policy.file=hadoop-policy.xml -Dhadoop.security.logger=INFO,NullAppender org.apache.hadoop.yarn.server.nodemanager.NodeManager",
+      "generated_name": "hadoop",
+      "has_service_data": true
+    },
+    {
+      "pid": 449980,
+      "ppid": 449957,
+      "comm": "dumb-init",
+      "cmdline": "/usr/local/bin/dumb-init -- /opt/starter.sh yarn resourcemanager",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 450028,
+      "ppid": 449980,
+      "comm": "bash",
+      "cmdline": "bash /opt/starter.sh yarn resourcemanager",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 450035,
+      "ppid": 450028,
+      "comm": "java",
+      "cmdline": "/usr/lib/jvm/jre//bin/java -Dproc_resourcemanager -Djava.net.preferIPv4Stack=true -Dservice.libdir=/opt/hadoop/share/hadoop/yarn,/opt/hadoop/share/hadoop/yarn/lib,/opt/hadoop/share/hadoop/hdfs,/opt/hadoop/share/hadoop/hdfs/lib,/opt/hadoop/share/hadoop/common,/opt/hadoop/share/hadoop/common/lib -Dyarn.log.dir=/var/log/hadoop -Dyarn.log.file=hadoop.log -Dyarn.home.dir=/opt/hadoop -Dyarn.root.logger=INFO,console -Djava.library.path=/opt/hadoop/lib/native -Dhadoop.log.dir=/var/log/hadoop -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/opt/hadoop -Dhadoop.id.str=hadoop -Dhadoop.root.logger=INFO,console -Dhadoop.policy.file=hadoop-policy.xml -Dhadoop.security.logger=INFO,NullAppender org.apache.hadoop.yarn.server.resourcemanager.ResourceManager",
+      "generated_name": "hadoop",
+      "has_service_data": true
+    },
+    {
+      "pid": 451502,
+      "ppid": 451479,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 451539,
+      "ppid": 451502,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 451926,
+      "ppid": 451502,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 451927,
+      "ppid": 451502,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 451928,
+      "ppid": 451502,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 451930,
+      "ppid": 451502,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 451931,
+      "ppid": 451502,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 451932,
+      "ppid": 451502,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 451935,
+      "ppid": 451928,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 451936,
+      "ppid": 451927,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 451938,
+      "ppid": 451930,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 451939,
+      "ppid": 451931,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

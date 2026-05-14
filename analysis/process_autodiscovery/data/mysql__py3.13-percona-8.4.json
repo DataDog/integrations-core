@@ -1,0 +1,152 @@
+{
+  "integration": "mysql",
+  "environment": "py3.13-percona-8.4",
+  "collected_at": "2026-05-14T13:08:58.666348+00:00",
+  "processes": [
+    {
+      "pid": 400060,
+      "ppid": 400037,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 400097,
+      "ppid": 400060,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 400522,
+      "ppid": 400060,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 400523,
+      "ppid": 400060,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 400524,
+      "ppid": 400060,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 400526,
+      "ppid": 400060,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 400527,
+      "ppid": 400060,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 400528,
+      "ppid": 400060,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 400531,
+      "ppid": 400523,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 400532,
+      "ppid": 400526,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 400533,
+      "ppid": 400524,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 400534,
+      "ppid": 400527,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 398795,
+      "ppid": 398772,
+      "comm": "mysqld",
+      "cmdline": "mysqld",
+      "generated_name": "mysqld",
+      "has_service_data": true
+    },
+    {
+      "pid": 399656,
+      "ppid": 398795,
+      "comm": "telemetry-agent",
+      "cmdline": "/bin/bash /usr/bin/telemetry-agent-supervisor.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 399688,
+      "ppid": 399656,
+      "comm": "percona-telemet",
+      "cmdline": "/usr/bin/percona-telemetry-agent",
+      "generated_name": "percona-telemetry-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 397391,
+      "ppid": 397369,
+      "comm": "mysqld",
+      "cmdline": "mysqld",
+      "generated_name": "mysqld",
+      "has_service_data": true
+    },
+    {
+      "pid": 398227,
+      "ppid": 397391,
+      "comm": "telemetry-agent",
+      "cmdline": "/bin/bash /usr/bin/telemetry-agent-supervisor.sh",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 398451,
+      "ppid": 398227,
+      "comm": "percona-telemet",
+      "cmdline": "/usr/bin/percona-telemetry-agent",
+      "generated_name": "percona-telemetry-agent",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

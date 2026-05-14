@@ -115,15 +115,19 @@ returns `GeneratedName` values matching what the agent would compute in producti
 
 ### Scope
 
-- **144** integrations have `test_e2e.py` files in this repository
-- **93** were successfully collected
-- **51** were skipped (see breakdown below)
+- **192** integrations have e2e tests in this repository. The collector
+  picks them up by two conventions: a dedicated `tests/test_e2e.py`
+  file (newer integrations) or `@pytest.mark.e2e` markers inside other
+  test files like `tests/test_<integration>.py` (older integrations
+  including apache, mysql, cassandra, kafka, gunicorn, presto, etc.).
+- **132** were successfully collected
+- **60** were skipped (see breakdown below)
 
-Of the 93 collected, only **67** had at least one non-infra service detected
-by `disco`. The remaining 26 produced process trees in which the only
-services labeled by `disco` were Datadog Agent components (`agent`,
-`system-probe`, `security-agent`, `privateactionrunner`). The effective
-target-service sample is therefore 67 integrations.
+Of the 132 collected, **98** had at least one non-infra service
+detected by `disco`. The remaining 34 produced process trees in which
+the only services labeled by `disco` were Datadog Agent components
+(`agent`, `system-probe`, `security-agent`, `privateactionrunner`).
+The effective target-service sample is therefore 98 integrations.
 
 ## Results
 
@@ -131,21 +135,22 @@ target-service sample is therefore 67 integrations.
 
 | Category | Count |
 |---|---|
-| Integrations collected | 93 |
-| Skipped — kubernetes-only environment (target service runs as a pod) | 19 |
+| Integrations collected | 132 |
+| Skipped — kubernetes-only environment (target service runs as a pod) | 20 |
 | Skipped — fake caddy server | 18 |
-| Skipped — env start failed | 13 |
-| Skipped — no environments found | 1 |
+| Skipped — env start failed | 20 |
+| Skipped — no environments found | 2 |
 
-The 13 "env start failed" skips break down (by inspecting `details` in
+The 20 "env start failed" skips break down (by inspecting `details` in
 `data/skipped.json`) as:
 
 | Sub-reason | Count |
 |---|---|
-| Unsupported platform (Windows-only integrations) | 5 |
+| Unsupported platform (Windows-only integrations) | 7 |
 | `ddev env start` timed out after 300 s (operational) | 3 |
+| Docker pull / registry rate-limit / build failure | 5 |
 | Dependency build failure (missing native headers, local toolchain) | 2 |
-| Docker pull / containerd mount lock | 1 |
+| Incompatible Python (e.g. py2.7 required, unavailable) | 1 |
 | Other (mid-pull failure, env-specific tracebacks) | 2 |
 
 These are dominated by Windows-only integrations and local toolchain
@@ -188,9 +193,9 @@ cluster) correctly produce WARN — that is the expected outcome, not a failure.
 
 | Verdict | Count |
 |---|---|
-| **PASS** (1 main for that generated_name in this env) | 122 service/integration pairs |
-| **WARN (N>1)** | 28 service/integration pairs |
-| No non-infra service data (disco returned nothing useful) | 26 integrations |
+| **PASS** (1 main for that generated_name in this env) | 161 service/integration pairs |
+| **WARN (N>1)** | 36 service/integration pairs |
+| No non-infra service data (disco returned nothing useful) | 34 integrations |
 
 ### PASS cases — algorithm exercised successfully
 
@@ -432,14 +437,15 @@ check short-circuits before the args scan.
 
 ### Results
 
-Across the 67 integrations with non-infra target services in the
+Across the 98 integrations with non-infra target services in the
 collected sample:
 
 | Result | Count | Meaning |
 |---|---|---|
-| Post-CEL == 1 | 40 | Algorithm + CEL produced exactly one integration instance. |
-| Post-CEL ≥ 2 | 25 | Multiple instances survived. Every case is either a multi-node test cluster (`consul`, `etcd`, `redisdb`, `postgres × 4`, `clickhouse × 6`, …), a multi-component service (`ceph` 5 daemon roles, `confluent_platform`, `mapreduce`), or a legitimate aggregator/leaf pair (`vault`, `singlestore`, `prefect server` + `prefect worker`). |
-| Post-CEL == 0 | 2 | The rule did not match any candidate process — both are test-fixture artifacts: `nagios` (fixture runs `apache2` + `nsca`, not `nagios`) and `teamcity` (fixture runs `org.mockserver.cli.Main`). |
+| Post-CEL == 1 | 63 | Algorithm + CEL produced exactly one integration instance. |
+| Post-CEL ≥ 2 | 31 | Multiple instances survived. Every case is either a multi-node test cluster (`consul`, `etcd`, `redisdb`, `postgres × 4`, `clickhouse × 6`, `cassandra × 2`, `kafka × 2`, `presto × 2`, `yarn × 2`, …), a multi-component service (`ceph` 9 → 5 daemon roles, `confluent_platform`, `mapreduce`, `hive`, `sonarqube`, `impala`), an aggregator/leaf pair (`vault`, `singlestore`, `prefect server` + `prefect worker`), or a legitimately co-monitored daemon pair (`mysql + percona-telemetry-agent`). |
+| Post-CEL == 0 | 4 | The rule did not match any candidate process — all four are test-fixture artifacts: `http_check` (active HTTP probe, no host-process target), `mesos_slave` (the slave didn't appear in the fixture, only zookeeper), `nagios` (fixture runs `apache2` + `nsca`, not `nagios`), `teamcity` (fixture runs `org.mockserver.cli.Main`). |
+| No rule available | 0 | Every integration with non-infra target data has an explicit CEL rule in `cel_rules.json`. |
 
 The sibling worker pool case from the WARN classification verifies
 empirically:
@@ -464,19 +470,23 @@ instance. It is worth checking whether any integration in the sample
 violates this assumption — i.e. where the integration would *want*
 each worker as its own instance.
 
-The 12 cases in the data where the algorithm actually filtered children
-break down as:
+The 16 cases in the data where the algorithm actually filtered
+children break down as:
 
 | Integration / Service | Kept | Dropped | Pattern |
 |---|---|---|---|
 | `airflow` / `airflow-webserver` (gunicorn) | 1 master | 4 workers | gunicorn master serves `/metrics`; workers aggregate into it |
 | `airflow` / `gunicorn` | 1 master | 2 workers | same |
-| `nagios` / `apache2` | 1 master | 5 workers | Apache prefork; mod_status on master aggregates |
+| `apache` / `httpd` | 1 master | 3 workers | Apache prefork — canonical pre-fork worker pool case |
+| `gunicorn` / `dd-test-gunicorn` | 1 master | 4 workers | gunicorn standalone test fixture; same pattern as airflow above |
+| `http_check` / `httpbin` | 1 master | 1 worker | httpbin fixture runs as gunicorn — same pattern |
+| `kong` / `nginx` | 1 master | 16 workers | Kong is OpenResty/nginx; nginx pre-fork worker pool |
+| `nagios` / `apache2` | 1 master | 5 workers | Apache prefork |
 | `nginx` / `nginx` | 1 master | 1 worker | nginx master exposes stub_status; workers aggregate |
 | `php_fpm` / `php-fpm` | 1 master | 2 pool workers | master exposes `/status`; workers aggregate |
 | `php_fpm` / `nginx` | 1 master | 16 workers | nginx in front of php-fpm; same nginx pattern |
 | `rethinkdb` / `rethinkdb` | 4 cluster nodes | 1 fork-duplicate | the dropped pid has the same `--server-name` and cmdline as one of the kept; it's an internal re-exec, not a separate instance |
-| `silverstripe_cms` / `apache2` | 1 master | 5 workers | Apache prefork; same as nagios |
+| `silverstripe_cms` / `apache2` | 1 master | 5 workers | Apache prefork |
 | `singlestore` / `memsqld` | 2 (aggregator + leaf) | 2 fork-duplicates | the dropped pids duplicate the aggregator/leaf cmdlines exactly; supervisor/forked-daemon pair |
 | `spark` / `spark` | 4 daemons | 1 executor JVM | Spark executor forked from a worker; metrics are surfaced at the Spark UI/master, not per-executor |
 | `tls` / `nginx` | 3 masters | 48 workers | three independent nginx instances for three TLS configs; each filters its own workers |
@@ -616,13 +626,14 @@ data — `process_cel_eval.py` is designed for that.
 
 **Caveats:**
 
-1. **Sample coverage.** Of 144 integrations with E2E tests, 93 were
-   collected and 67 of those had a non-infra service detected. The 51
-   skipped integrations include 19 K8s-only environments (process discovery
-   is not relevant — target service runs as a pod inside Kind's nested
-   namespaces), 18 fake-caddy fixtures (no real service runs), and 13 env
-   start failures dominated by Windows-only integrations and local
-   toolchain issues. K8s-only and caddy-fixture integrations are
+1. **Sample coverage.** Of 192 integrations with e2e tests, 132 were
+   collected and 98 of those had a non-infra service detected. The 60
+   skipped integrations include 20 K8s-only environments (process
+   discovery is not relevant — target service runs as a pod inside
+   Kind's nested namespaces), 18 fake-caddy fixtures (no real service
+   runs), and 20 env-start failures dominated by Windows-only
+   integrations, docker pull / build issues, and local toolchain
+   incompatibilities. K8s-only and caddy-fixture integrations are
    structurally out of scope rather than gaps in coverage.
 2. **Some integrations did not exercise the algorithm at all.** For example,
    the postgres background workers (`checkpointer`, `bgwriter`, `walwriter`,
@@ -658,10 +669,10 @@ the rules but are not blockers.
 |---|---|
 | `analysis/scripts/process_analyze.py` | Collection and algorithm-verdict analyzer |
 | `analysis/scripts/process_cel_eval.py` | CEL second-stage evaluator (run via `uv`, uses `cel-python`) |
-| `analysis/process_autodiscovery/data/*.json` | Raw collected process data (93 files) |
+| `analysis/process_autodiscovery/data/*.json` | Raw collected process data (132 files) |
 | `analysis/process_autodiscovery/data/skipped.json` | Skipped integration log |
 | `analysis/process_autodiscovery/cel_rules.json` | Explicit per-integration CEL rules (fallback when manifest lacks signatures or signatures don't match real cmdlines) |
-| `analysis/process_autodiscovery/results/analysis_2026-05-14T10-20-22.json` | Final algorithm analysis output |
+| `analysis/process_autodiscovery/results/analysis_2026-05-14T13-20-23.json` | Final algorithm analysis output |
 | `analysis/process_autodiscovery/results/cel_eval_2026-05-14.json` | Final CEL evaluation output |
 | `docs/superpowers/specs/2026-05-13-process-autodiscovery-analysis-design.md` | Design spec |
 | `docs/superpowers/plans/2026-05-13-process-autodiscovery-analysis.md` | Implementation plan |

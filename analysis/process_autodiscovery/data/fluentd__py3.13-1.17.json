@@ -1,0 +1,128 @@
+{
+  "integration": "fluentd",
+  "environment": "py3.13-1.17",
+  "collected_at": "2026-05-14T12:32:41.385790+00:00",
+  "processes": [
+    {
+      "pid": 191430,
+      "ppid": 191407,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 191467,
+      "ppid": 191430,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 191854,
+      "ppid": 191430,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 191855,
+      "ppid": 191430,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 191856,
+      "ppid": 191430,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 191858,
+      "ppid": 191430,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 191859,
+      "ppid": 191430,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 191860,
+      "ppid": 191430,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 191863,
+      "ppid": 191855,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 191864,
+      "ppid": 191856,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 191866,
+      "ppid": 191858,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 191867,
+      "ppid": 191859,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 191045,
+      "ppid": 191022,
+      "comm": "tini",
+      "cmdline": "tini -- /bin/entrypoint.sh fluentd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 191094,
+      "ppid": 191045,
+      "comm": "fluentd",
+      "cmdline": "/usr/bin/ruby /usr/bin/fluentd --config /fluentd/etc/td-agent.conf --plugin /fluentd/plugins",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 191190,
+      "ppid": 191094,
+      "comm": "ruby",
+      "cmdline": "/usr/bin/ruby -Eascii-8bit:ascii-8bit /usr/bin/fluentd --config /fluentd/etc/td-agent.conf --plugin /fluentd/plugins --under-supervisor",
+      "generated_name": "ruby",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

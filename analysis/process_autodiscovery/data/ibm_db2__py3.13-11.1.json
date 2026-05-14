@@ -1,0 +1,184 @@
+{
+  "integration": "ibm_db2",
+  "environment": "py3.13-11.1",
+  "collected_at": "2026-05-14T12:57:27.800900+00:00",
+  "processes": [
+    {
+      "pid": 324396,
+      "ppid": 324373,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 324436,
+      "ppid": 324396,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 324822,
+      "ppid": 324396,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 324823,
+      "ppid": 324396,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 324825,
+      "ppid": 324396,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 324826,
+      "ppid": 324396,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 324827,
+      "ppid": 324396,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 324828,
+      "ppid": 324396,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 324831,
+      "ppid": 324823,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 324832,
+      "ppid": 324825,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 324833,
+      "ppid": 324826,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 324835,
+      "ppid": 324827,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 310420,
+      "ppid": 310397,
+      "comm": "entrypoint.sh",
+      "cmdline": "/bin/bash /entrypoint.sh start",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 311252,
+      "ppid": 310420,
+      "comm": "db2sysc",
+      "cmdline": "db2wdog",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 311254,
+      "ppid": 311252,
+      "comm": "db2sysc",
+      "cmdline": "db2sysc",
+      "generated_name": "db2sysc",
+      "has_service_data": true
+    },
+    {
+      "pid": 311259,
+      "ppid": 311252,
+      "comm": "db2sysc",
+      "cmdline": "db2ckpwd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 311260,
+      "ppid": 311252,
+      "comm": "db2sysc",
+      "cmdline": "db2ckpwd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 311261,
+      "ppid": 311252,
+      "comm": "db2sysc",
+      "cmdline": "db2ckpwd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 311263,
+      "ppid": 311252,
+      "comm": "db2vend",
+      "cmdline": "db2vend (PD Vendor Process - 1)",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 311399,
+      "ppid": 311252,
+      "comm": "db2fmp",
+      "cmdline": "db2acd  ,0,0,0,1,0,0,00000000,0,0,0,0000000000000000,0000000000000000,00000000,00000000,00000000,00000000,00000000,00000000,0004,00000303,00000000,00000000,00000000,00000000,00000000,00000000,00000000,0000000400000000,0000000000000000,0000000000000000,1,0,0,,,,,a80164,14,1e014,2,0,1,0000000000041fc0,0x240000000,0x240000000,1600000,2,2,11",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 311401,
+      "ppid": 310420,
+      "comm": "tail",
+      "cmdline": "tail -f /home/db2inst1/sqllib/db2dump/db2diag.log",
+      "generated_name": "tail",
+      "has_service_data": true
+    },
+    {
+      "pid": 311402,
+      "ppid": 310420,
+      "comm": "sleep",
+      "cmdline": "sleep 10000",
+      "generated_name": null,
+      "has_service_data": false
+    }
+  ],
+  "disco_raw": {}
+}

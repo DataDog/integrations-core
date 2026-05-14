@@ -1,0 +1,112 @@
+{
+  "integration": "ignite",
+  "environment": "py3.13-2.14",
+  "collected_at": "2026-05-14T12:58:36.395800+00:00",
+  "processes": [
+    {
+      "pid": 330806,
+      "ppid": 330783,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 330845,
+      "ppid": 330806,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 331238,
+      "ppid": 330806,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 331239,
+      "ppid": 330806,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 331241,
+      "ppid": 330806,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 331242,
+      "ppid": 330806,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 331243,
+      "ppid": 330806,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 331245,
+      "ppid": 330806,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 331246,
+      "ppid": 331239,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 331249,
+      "ppid": 331241,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 331250,
+      "ppid": 331242,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 331252,
+      "ppid": 331243,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 328313,
+      "ppid": 328290,
+      "comm": "java",
+      "cmdline": "/opt/java/openjdk/bin/java -XX:+AggressiveOpts -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=49112 -Dcom.sun.management.jmxremote.rmi.port=49112 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -DIGNITE_HOME=/opt/ignite/apache-ignite -cp /opt/ignite/apache-ignite/libs/*:/opt/ignite/apache-ignite/libs/ignite-control-utility/*:/opt/ignite/apache-ignite/libs/ignite-indexing/*:/opt/ignite/apache-ignite/libs/ignite-spring/*:/opt/ignite/apache-ignite/libs/licenses/* org.apache.ignite.startup.cmdline.CommandLineStartup file:///config.xml",
+      "generated_name": "ignite",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

@@ -68,12 +68,37 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+_E2E_MARKER_RE = re.compile(r"@pytest\.mark\.e2e\b")
+
+
 def find_integrations_with_e2e(repo_root: Path) -> list[str]:
-    """Return sorted list of integration names that have a test_e2e.py file."""
-    return sorted(
-        path.parts[-3]
-        for path in repo_root.glob("*/tests/test_e2e.py")
-    )
+    """Return sorted list of integration names that have e2e tests.
+
+    Two conventions exist in this repo:
+    1. New style: a dedicated `tests/test_e2e.py` file.
+    2. Older style: `@pytest.mark.e2e` markers inside `tests/test_<integration>.py`
+       (or another test file). The earlier predicate (test_e2e.py only) missed
+       ~48 integrations including apache, mysql, cassandra, gunicorn, kafka,
+       presto, etc.
+    """
+    integrations: set[str] = set()
+    for path in repo_root.glob("*/tests/test_e2e.py"):
+        integrations.add(path.parts[-3])
+    for tests_dir in repo_root.glob("*/tests"):
+        if not tests_dir.is_dir():
+            continue
+        integration = tests_dir.parts[-2]
+        if integration in integrations:
+            continue
+        for py in tests_dir.rglob("*.py"):
+            try:
+                text = py.read_text(errors="replace")
+            except OSError:
+                continue
+            if _E2E_MARKER_RE.search(text):
+                integrations.add(integration)
+                break
+    return sorted(integrations)
 
 
 def parse_ddev_env_show(output: str) -> list[str]:

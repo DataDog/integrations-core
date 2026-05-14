@@ -1,0 +1,128 @@
+{
+  "integration": "activemq",
+  "environment": "py3.13-5.15.9-activemq.yaml",
+  "collected_at": "2026-05-14T12:21:02.526595+00:00",
+  "processes": [
+    {
+      "pid": 109128,
+      "ppid": 109099,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 109187,
+      "ppid": 109128,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 109603,
+      "ppid": 109128,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 109604,
+      "ppid": 109128,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 109606,
+      "ppid": 109128,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 109607,
+      "ppid": 109128,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 109608,
+      "ppid": 109128,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 109610,
+      "ppid": 109128,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 109611,
+      "ppid": 109604,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 109614,
+      "ppid": 109606,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 109615,
+      "ppid": 109607,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 109616,
+      "ppid": 109608,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 108368,
+      "ppid": 108345,
+      "comm": "sh",
+      "cmdline": "/bin/sh -c bin/activemq console",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 108439,
+      "ppid": 108368,
+      "comm": "sh",
+      "cmdline": "sh -c \"/usr/local/openjdk-8/bin/java\" -Xms64M -Xmx1G -Djava.util.logging.config.file=logging.properties -Djava.security.auth.login.config=/opt/activemq/conf/login.config -Dcom.sun.management.jmxremote.port=1616 -Dcom.sun.management.jmxremote.rmi.port=1616 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote  -Djava.awt.headless=true -Djava.io.tmpdir=\"/opt/activemq/tmp\"                -Dactivemq.classpath=\"/opt/activemq/conf:/opt/activemq/../lib/:\"               -Dactivemq.home=\"/opt/activemq\"               -Dactivemq.base=\"/opt/activemq\"               -Dactivemq.conf=\"/opt/activemq/conf\"               -Dactivemq.data=\"/opt/activemq/data\"                              -jar \"/opt/activemq/bin/activemq.jar\" start  ;",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 108457,
+      "ppid": 108439,
+      "comm": "java",
+      "cmdline": "/usr/local/openjdk-8/bin/java -Xms64M -Xmx1G -Djava.util.logging.config.file=logging.properties -Djava.security.auth.login.config=/opt/activemq/conf/login.config -Dcom.sun.management.jmxremote.port=1616 -Dcom.sun.management.jmxremote.rmi.port=1616 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote -Djava.awt.headless=true -Djava.io.tmpdir=/opt/activemq/tmp -Dactivemq.classpath=/opt/activemq/conf:/opt/activemq/../lib/: -Dactivemq.home=/opt/activemq -Dactivemq.base=/opt/activemq -Dactivemq.conf=/opt/activemq/conf -Dactivemq.data=/opt/activemq/data -jar /opt/activemq/bin/activemq.jar start",
+      "generated_name": "activemq",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

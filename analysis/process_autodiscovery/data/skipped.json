@@ -310,5 +310,59 @@
     "reason": "env start failed",
     "skipped_at": "2026-05-14T11:35:45.549057+00:00",
     "details": "exit code 1:  Container torchserve  Creating\n Container torchserve  Created\n Container torchserve  Starting\nError response from daemon: failed to set up container networking: driver failed programming external connectivity on endpoint torchserve (9ce180d76756921d5d531fecb8bb8f81844c3b2cb056068151543eb89c65c999): Bind for 0.0.0.0:8081 failed: port is already allocated\n"
+  },
+  {
+    "integration": "aerospike",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-14T12:48:46.116637+00:00",
+    "details": "exit code 1:  aerospike Pulling \n aerospike-prometheus-exporter Pulling \n a2ae51f1938d Pulling fs layer \n 97663c695206 Pulling fs layer \n c631d7a562d9 Pulling fs layer \n 0be7b93e1397 Pulling fs layer \n c6339b6d6c08 Pulling fs layer \n b9416393503d Pulling fs layer \n 59bf1c3509f3 Pulling fs layer \n 105212368573 Pulling fs layer \n 6f6a2a927a8f Pulling fs layer \n 0be7b93e1397 Download complete \n c631d7a562d9 Download complete \n 59bf1c3509f3 Download complete \n 6f6a2a927a8f Download complete \n 59bf1c3509f3 Extrac"
+  },
+  {
+    "integration": "avi_vantage",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-14T12:49:09.820665+00:00",
+    "details": "exit code 1:  compose-avi  Built\n Network compose_default  Creating\n Network compose_default  Created\n Container compose-avi-1  Creating\n Container compose-avi-1  Created\n Container compose-avi-1  Starting\nError response from daemon: failed to set up container networking: driver failed programming external connectivity on endpoint compose-avi-1 (a9b3ad65ee2c902c965e551c53a70c546fb9addf2d9461ad1c1b7b867ff598a7): failed to bind host port for 0.0.0.0:5000:172.17.130.2:5000/tcp: address already in use\n Container"
+  },
+  {
+    "integration": "harbor",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-14T12:51:27.741409+00:00",
+    "details": "exit code 1:  postgresql Pulling \n proxy Pulling \n core Pulling \n registry Pulling \n redis Pulling \n e9ed1433dc2b Pulling fs layer \n 4fc7e8c5dda0 Pulling fs layer \n d2675b3b85d0 Pulling fs layer \n 39070694482e Pulling fs layer \n cb53bde77d8e Pulling fs layer \n 201d9af39a4c Pulling fs layer \n a2385cb5e298 Pulling fs layer \n 460661a2617c Pulling fs layer \n 5cb13b7c687b Pulling fs layer \n cb6c9513a6b8 Pulling fs layer \n 4fc7e8c5dda0 Pulling fs layer \n 36088cf3b2c1 Pulling fs layer \n 7cde49ce44af Pulling fs laye"
+  },
+  {
+    "integration": "hyperv",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-14T12:54:28.346775+00:00",
+    "details": "exit code 1: Environment `py3.13` is incompatible: unsupported platform\n"
+  },
+  {
+    "integration": "linkerd",
+    "reason": "kubernetes-only environment",
+    "skipped_at": "2026-05-14T13:03:59.536429+00:00",
+    "details": "uses datadog_checks.dev.kind in linkerd/tests/conftest.py"
+  },
+  {
+    "integration": "tokumx",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-14T13:16:49.271844+00:00",
+    "details": "exit code 1: Environment `py2.7` is incompatible: cannot locate Python: 2.7\n"
+  },
+  {
+    "integration": "vertica",
+    "reason": "no environments found",
+    "skipped_at": "2026-05-14T13:17:46.766654+00:00",
+    "details": "ddev env show returned no environments"
+  },
+  {
+    "integration": "weblogic",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-14T13:18:06.847159+00:00",
+    "details": "exit code 1: Creating environment: py3.13-14\nInstalling project in development mode\nRunning post-installation commands\nChecking dependencies\nDockerfile:15\n\n--------------------\n\n  13 |     ARG WEBLOGIC_VERSION\n\n  14 |     \n\n  15 | >>> FROM container-registry.oracle.com/middleware/weblogic:${WEBLOGIC_VERSION} as wls_base\n\n  16 |     \n\n  17 |     ARG APPLICATION_NAME=\"${APPLICATION_NAME:-sample}\"\n\n--------------------\n\ntarget weblogic-admin-server: failed to solve: failed to fetch anonymous token: unexpected s"
+  },
+  {
+    "integration": "windows_service",
+    "reason": "env start failed",
+    "skipped_at": "2026-05-14T13:18:13.488890+00:00",
+    "details": "exit code 1: Environment `py3.13` is incompatible: unsupported platform\n"
   }
 ]

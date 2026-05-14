@@ -306,5 +306,135 @@
   "zk": {
     "expression": "process.name == 'java' && 'org.apache.zookeeper.server.quorum.QuorumPeerMain' in process.args",
     "source": "manual"
+  },
+
+  "activemq": {
+    "expression": "process.name == 'java' && process.args.exists(a, a == 'org.apache.activemq.console.Main' || a.endsWith('activemq.jar'))",
+    "source": "manual"
+  },
+  "activemq_xml": {
+    "expression": "process.name == 'java' && process.args.exists(a, a == 'org.apache.activemq.console.Main' || a.endsWith('activemq.jar'))",
+    "source": "manual",
+    "notes": "Same target as activemq — the _xml variant scrapes a different endpoint format."
+  },
+  "apache": {
+    "expression": "process.name == 'httpd' || process.name == 'apache2'",
+    "source": "manual",
+    "notes": "Canonical pre-fork master/worker — algorithm correctly dedupes workers to the master."
+  },
+  "cassandra": {
+    "expression": "process.name == 'java' && 'org.apache.cassandra.service.CassandraDaemon' in process.args",
+    "source": "manual"
+  },
+  "couch": {
+    "expression": "process.name == 'beam.smp' && process.args.exists(a, a.startsWith('/opt/couchdb'))",
+    "source": "manual"
+  },
+  "druid": {
+    "expression": "process.name == 'java' && process.args.exists(a, a.contains('druid_conf') || a == 'org.apache.druid.cli.Main')",
+    "source": "manual"
+  },
+  "fluentd": {
+    "expression": "process.name == 'ruby' && process.args.exists(a, a.endsWith('/fluentd'))",
+    "source": "manual"
+  },
+  "gearmand": {
+    "expression": "process.name == 'gearmand'",
+    "source": "manual"
+  },
+  "gunicorn": {
+    "expression": "process.name == 'gunicorn: maste' && process.cmdline.contains('master')",
+    "source": "manual",
+    "notes": "gunicorn rewrites argv[0] to 'gunicorn: master [app-name]'; comm is 15-char-truncated to 'gunicorn: maste'. Algorithm correctly dedupes worker children."
+  },
+  "http_check": {
+    "expression": "false",
+    "source": "manual",
+    "notes": "http_check is an active HTTP probe; it does not target a specific host process. No CEL match is appropriate — the integration is configured via remote URLs."
+  },
+  "ibm_db2": {
+    "expression": "process.name == 'db2sysc'",
+    "source": "manual"
+  },
+  "ignite": {
+    "expression": "process.name == 'java' && process.args.exists(a, a.startsWith('org.apache.ignite.'))",
+    "source": "manual"
+  },
+  "impala": {
+    "expression": "process.name in ['impalad', 'statestored'] || (process.name == 'main' && process.args.exists(a, a.endsWith('/catalogd')))",
+    "source": "manual",
+    "notes": "Impala runs three components — impalad (comm='impalad'), statestored (comm='statestored'), and catalogd (comm='main', cmdline starts with /opt/impala/bin/catalogd). Manifest signatures list all three."
+  },
+  "jboss_wildfly": {
+    "expression": "process.name == 'java' && process.args.exists(a, a.endsWith('jboss-modules.jar'))",
+    "source": "manual"
+  },
+  "kafka": {
+    "expression": "process.name == 'java' && 'kafka.Kafka' in process.args",
+    "source": "manual"
+  },
+  "kong": {
+    "expression": "process.name == 'nginx' && process.cmdline.contains('/usr/local/kong')",
+    "source": "manual",
+    "notes": "Kong is OpenResty/nginx with the kong prefix in its cmdline. Use cmdline.contains because nginx rewrites argv[0]."
+  },
+  "kyototycoon": {
+    "expression": "process.name == 'ktserver'",
+    "source": "manual"
+  },
+  "lighttpd": {
+    "expression": "process.name == 'lighttpd'",
+    "source": "manual"
+  },
+  "mcache": {
+    "expression": "process.name == 'memcached'",
+    "source": "manual"
+  },
+  "mesos_master": {
+    "expression": "process.name == 'mesos-master'",
+    "source": "manual"
+  },
+  "mesos_slave": {
+    "expression": "process.name == 'mesos-slave'",
+    "source": "manual",
+    "notes": "Test fixture only captured zookeeper; mesos-slave itself didn't show up. The rule reflects what the integration would target in production."
+  },
+  "mysql": {
+    "expression": "process.name == 'mysqld' || process.name == 'mariadbd'",
+    "source": "manual"
+  },
+  "openmetrics": {
+    "expression": "process.name == 'prometheus'",
+    "source": "manual",
+    "notes": "openmetrics is a generic Prometheus scraper; in this test env it points at a real prometheus binary."
+  },
+  "pgbouncer": {
+    "expression": "process.name == 'pgbouncer'",
+    "source": "manual"
+  },
+  "presto": {
+    "expression": "process.name == 'presto-server' || (process.name == 'java' && 'io.prestosql.server.PrestoServer' in process.args)",
+    "source": "manual"
+  },
+  "prometheus": {
+    "expression": "process.name == 'prometheus'",
+    "source": "manual"
+  },
+  "solr": {
+    "expression": "process.name == 'java' && process.args.exists(a, a.endsWith('start.jar') || a == 'org.eclipse.jetty.start.Main')",
+    "source": "manual",
+    "notes": "Solr launches Jetty via start.jar."
+  },
+  "statsd": {
+    "expression": "process.name == 'node' && process.args.exists(a, a.endsWith('stats.js') || a.endsWith('config.js'))",
+    "source": "manual"
+  },
+  "twemproxy": {
+    "expression": "process.name == 'nutcracker'",
+    "source": "manual"
+  },
+  "yarn": {
+    "expression": "process.name == 'java' && process.args.exists(a, a == '-Dproc_resourcemanager' || a == '-Dproc_nodemanager' || a.startsWith('org.apache.hadoop.yarn.'))",
+    "source": "manual"
   }
 }

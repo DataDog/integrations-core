@@ -1,0 +1,296 @@
+{
+  "integration": "kong",
+  "environment": "py3.13-3.0.0",
+  "collected_at": "2026-05-14T13:02:54.817926+00:00",
+  "processes": [
+    {
+      "pid": 361685,
+      "ppid": 361640,
+      "comm": "nginx",
+      "cmdline": "nginx: master process /usr/local/openresty/nginx/sbin/nginx -p /usr/local/kong -c nginx.conf",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 363111,
+      "ppid": 361685,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 363112,
+      "ppid": 361685,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 363113,
+      "ppid": 361685,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 363114,
+      "ppid": 361685,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 363115,
+      "ppid": 361685,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 363116,
+      "ppid": 361685,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 363117,
+      "ppid": 361685,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 363118,
+      "ppid": 361685,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 363119,
+      "ppid": 361685,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 363120,
+      "ppid": 361685,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 363121,
+      "ppid": 361685,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 363122,
+      "ppid": 361685,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 363123,
+      "ppid": 361685,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 363124,
+      "ppid": 361685,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 363125,
+      "ppid": 361685,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 363126,
+      "ppid": 361685,
+      "comm": "nginx",
+      "cmdline": "nginx: worker process",
+      "generated_name": "nginx",
+      "has_service_data": true
+    },
+    {
+      "pid": 354476,
+      "ppid": 354453,
+      "comm": "postgres",
+      "cmdline": "postgres",
+      "generated_name": "postgres",
+      "has_service_data": true
+    },
+    {
+      "pid": 354850,
+      "ppid": 354476,
+      "comm": "postgres",
+      "cmdline": "postgres: checkpointer process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 354851,
+      "ppid": 354476,
+      "comm": "postgres",
+      "cmdline": "postgres: writer process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 354852,
+      "ppid": 354476,
+      "comm": "postgres",
+      "cmdline": "postgres: wal writer process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 354853,
+      "ppid": 354476,
+      "comm": "postgres",
+      "cmdline": "postgres: autovacuum launcher process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 354854,
+      "ppid": 354476,
+      "comm": "postgres",
+      "cmdline": "postgres: stats collector process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 363144,
+      "ppid": 354476,
+      "comm": "postgres",
+      "cmdline": "postgres: kong kong 172.17.130.3(39604) idle",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 363271,
+      "ppid": 363230,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 363324,
+      "ppid": 363271,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 363711,
+      "ppid": 363271,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 363712,
+      "ppid": 363271,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 363713,
+      "ppid": 363271,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 363715,
+      "ppid": 363271,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 363716,
+      "ppid": 363271,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 363717,
+      "ppid": 363271,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 363719,
+      "ppid": 363712,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 363721,
+      "ppid": 363715,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 363722,
+      "ppid": 363713,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 363725,
+      "ppid": 363716,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

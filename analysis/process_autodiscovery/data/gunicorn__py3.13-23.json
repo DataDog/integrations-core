@@ -1,0 +1,144 @@
+{
+  "integration": "gunicorn",
+  "environment": "py3.13-23",
+  "collected_at": "2026-05-14T12:34:59.659315+00:00",
+  "processes": [
+    {
+      "pid": 203245,
+      "ppid": 203222,
+      "comm": "gunicorn: maste",
+      "cmdline": "gunicorn: master [dd-test-gunicorn]",
+      "generated_name": "dd-test-gunicorn",
+      "has_service_data": true
+    },
+    {
+      "pid": 203313,
+      "ppid": 203245,
+      "comm": "gunicorn: worke",
+      "cmdline": "gunicorn: worker [dd-test-gunicorn]",
+      "generated_name": "dd-test-gunicorn",
+      "has_service_data": true
+    },
+    {
+      "pid": 203314,
+      "ppid": 203245,
+      "comm": "gunicorn: worke",
+      "cmdline": "gunicorn: worker [dd-test-gunicorn]",
+      "generated_name": "dd-test-gunicorn",
+      "has_service_data": true
+    },
+    {
+      "pid": 203315,
+      "ppid": 203245,
+      "comm": "gunicorn: worke",
+      "cmdline": "gunicorn: worker [dd-test-gunicorn]",
+      "generated_name": "dd-test-gunicorn",
+      "has_service_data": true
+    },
+    {
+      "pid": 203317,
+      "ppid": 203245,
+      "comm": "gunicorn: worke",
+      "cmdline": "gunicorn: worker [dd-test-gunicorn]",
+      "generated_name": "dd-test-gunicorn",
+      "has_service_data": true
+    },
+    {
+      "pid": 203555,
+      "ppid": 203531,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 203591,
+      "ppid": 203555,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 203979,
+      "ppid": 203555,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 203980,
+      "ppid": 203555,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 203982,
+      "ppid": 203555,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 203983,
+      "ppid": 203555,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 203984,
+      "ppid": 203555,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 203986,
+      "ppid": 203555,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 203988,
+      "ppid": 203982,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 203989,
+      "ppid": 203980,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 203991,
+      "ppid": 203983,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 203992,
+      "ppid": 203984,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

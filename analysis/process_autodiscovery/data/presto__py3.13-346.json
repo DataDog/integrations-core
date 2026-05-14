@@ -1,0 +1,26 @@
+{
+  "integration": "presto",
+  "environment": "py3.13-346",
+  "collected_at": "2026-05-14T13:13:58.729826+00:00",
+  "processes": [
+    {
+      "pid": 418696,
+      "ppid": 418630,
+      "comm": "presto-server",
+      "cmdline": "java -cp /usr/local/presto-server-346/lib/* -server -Xmx16G -XX:+UseG1GC -XX:G1HeapRegionSize=32M -XX:+UseGCOverheadLimit -XX:+ExplicitGCInvokesConcurrent -XX:+HeapDumpOnOutOfMemoryError -XX:OnOutOfMemoryError=kill -9 %p -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dnode.environment=development -Dconfig=/usr/local/presto-server-346/etc/config.properties -Dnode.data-dir=/var/presto/data -Dnode.id=coordinator io.prestosql.server.PrestoServer",
+      "generated_name": "io.prestosql.server.PrestoServer",
+      "has_service_data": true
+    },
+    {
+      "pid": 418698,
+      "ppid": 418632,
+      "comm": "presto-server",
+      "cmdline": "java -cp /usr/local/presto-server-346/lib/* -server -Xmx16G -XX:+UseG1GC -XX:G1HeapRegionSize=32M -XX:+UseGCOverheadLimit -XX:+ExplicitGCInvokesConcurrent -XX:+HeapDumpOnOutOfMemoryError -XX:OnOutOfMemoryError=kill -9 %p -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dnode.environment=development -Dconfig=/usr/local/presto-server-346/etc/config.properties -Dnode.data-dir=/var/presto/data -Dnode.id=worker2 io.prestosql.server.PrestoServer",
+      "generated_name": "io.prestosql.server.PrestoServer",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {
+    "start_warning": "exit code 1: Creating environment: py3.13-346\nInstalling project in development mode\nRunning post-installation commands\nChecking dependencies\nSyncing dependencies\n docker-coordinator  Built\n docker-worker1  Built\n docker-worker2  Built\n Network docker_default  Creating\n Network docker_default  Created\n Container presto_worker1  Creating\n Container presto_coordinator  Creating\n Container presto_worker2  Creating\n Container presto_worker2  Created\n Container presto_coordinator  Created\n Container presto_worker"
+  }
+}

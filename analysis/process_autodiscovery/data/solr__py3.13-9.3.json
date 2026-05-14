@@ -1,0 +1,120 @@
+{
+  "integration": "solr",
+  "environment": "py3.13-9.3",
+  "collected_at": "2026-05-14T13:15:43.359834+00:00",
+  "processes": [
+    {
+      "pid": 436838,
+      "ppid": 436815,
+      "comm": "tini",
+      "cmdline": "tini -- solr start -f",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 436917,
+      "ppid": 436838,
+      "comm": "java",
+      "cmdline": "/opt/java/openjdk/bin/java -server -Xms512m -Xmx512m -XX:+UseG1GC -XX:+PerfDisableSharedMem -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=250 -XX:+UseLargePages -XX:+AlwaysPreTouch -XX:+ExplicitGCInvokesConcurrent -Xlog:gc*:file=/var/solr/logs/solr_gc.log:time,uptime:filecount=9,filesize=20M -Dsolr.jetty.inetaccess.includes= -Dsolr.jetty.inetaccess.excludes= -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=18983 -Dcom.sun.management.jmxremote.rmi.port=18983 -Dsolr.log.dir=/var/solr/logs -Djetty.port=8983 -DSTOP.PORT=7983 -DSTOP.KEY=solrrocks -Duser.timezone=UTC -XX:-OmitStackTraceInFastThrow -XX:+CrashOnOutOfMemoryError -XX:ErrorFile=/var/solr/logs/jvm_crash_%p.log -Djetty.home=/opt/solr-9.3.0/server -Dsolr.solr.home=/var/solr/data -Dsolr.install.dir=/opt/solr-9.3.0 -Dsolr.install.symDir=/opt/solr -Dsolr.default.confdir=/opt/solr-9.3.0/server/solr/configsets/_default/conf -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager -Dlog4j.configurationFile=/var/solr/log4j2.xml -Djava.rmi.server.hostname=localhost -Dsolr.jetty.host=0.0.0.0 -Xss256k -XX:CompileCommand=exclude,com.github.benmanes.caffeine.cache.BoundedLocalCache::put -Djava.security.manager -Djava.security.policy=/opt/solr-9.3.0/server/etc/security.policy -Djava.security.properties=/opt/solr-9.3.0/server/etc/security.properties -Dsolr.internal.network.permission=* -DdisableAdminUI=false -jar start.jar --module=http --module=requestlog --module=gzip",
+      "generated_name": "start",
+      "has_service_data": true
+    },
+    {
+      "pid": 437420,
+      "ppid": 437397,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 437457,
+      "ppid": 437420,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 437844,
+      "ppid": 437420,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 437845,
+      "ppid": 437420,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 437847,
+      "ppid": 437420,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 437848,
+      "ppid": 437420,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 437849,
+      "ppid": 437420,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 437851,
+      "ppid": 437420,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 437853,
+      "ppid": 437845,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 437854,
+      "ppid": 437847,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 437855,
+      "ppid": 437848,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 437857,
+      "ppid": 437849,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}

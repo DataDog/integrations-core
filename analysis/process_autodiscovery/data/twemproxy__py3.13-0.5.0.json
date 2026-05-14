@@ -1,0 +1,144 @@
+{
+  "integration": "twemproxy",
+  "environment": "py3.13-0.5.0",
+  "collected_at": "2026-05-14T13:17:14.157286+00:00",
+  "processes": [
+    {
+      "pid": 444332,
+      "ppid": 444305,
+      "comm": "etcd",
+      "cmdline": "etcd -name etcd0 -advertise-client-urls http://0.0.0.0:2379,http://0.0.0.0:4001,http://etcd0:2379,http://etcd0:4001 -listen-client-urls http://0.0.0.0:2379,http://0.0.0.0:4001 -initial-advertise-peer-urls http://0.0.0.0:2380 -listen-peer-urls http://0.0.0.0:2380 -initial-cluster-token etcd-cluster-1 -initial-cluster etcd0=http://0.0.0.0:2380 -initial-cluster-state new",
+      "generated_name": "etcd",
+      "has_service_data": true
+    },
+    {
+      "pid": 444130,
+      "ppid": 444083,
+      "comm": "redis-server",
+      "cmdline": "redis-server *:6379",
+      "generated_name": "redis-server",
+      "has_service_data": true
+    },
+    {
+      "pid": 444629,
+      "ppid": 444606,
+      "comm": "s6-svscan",
+      "cmdline": "s6-svscan -t0 /var/run/s6/services",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 444703,
+      "ppid": 444629,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise s6-fdholderd",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 445090,
+      "ppid": 444629,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise trace",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 445091,
+      "ppid": 444629,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise privateactionrunner",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 445093,
+      "ppid": 444629,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise agent",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 445094,
+      "ppid": 444629,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise sysprobe",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 445095,
+      "ppid": 444629,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise security",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 445097,
+      "ppid": 444629,
+      "comm": "s6-supervise",
+      "cmdline": "s6-supervise process",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 445099,
+      "ppid": 445091,
+      "comm": "privateactionru",
+      "cmdline": "privateactionrunner run --cfgpath=/etc/datadog-agent/datadog.yaml",
+      "generated_name": "privateactionrunner",
+      "has_service_data": true
+    },
+    {
+      "pid": 445100,
+      "ppid": 445093,
+      "comm": "agent",
+      "cmdline": "agent run",
+      "generated_name": "agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 445102,
+      "ppid": 445094,
+      "comm": "system-probe",
+      "cmdline": "/opt/datadog-agent/embedded/bin/system-probe run --config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "system-probe",
+      "has_service_data": true
+    },
+    {
+      "pid": 445103,
+      "ppid": 445095,
+      "comm": "security-agent",
+      "cmdline": "security-agent start -c=/etc/datadog-agent/datadog.yaml --sysprobe-config=/etc/datadog-agent/system-probe.yaml",
+      "generated_name": "security-agent",
+      "has_service_data": true
+    },
+    {
+      "pid": 444129,
+      "ppid": 444080,
+      "comm": "redis-server",
+      "cmdline": "redis-server *:6379",
+      "generated_name": "redis-server",
+      "has_service_data": true
+    },
+    {
+      "pid": 444469,
+      "ppid": 444443,
+      "comm": "dumb-init",
+      "cmdline": "dumb-init --rewrite 15:2 -- entrypoint.sh nutcracker -c /etc/nutcracker.conf",
+      "generated_name": null,
+      "has_service_data": false
+    },
+    {
+      "pid": 444517,
+      "ppid": 444469,
+      "comm": "nutcracker",
+      "cmdline": "nutcracker -c /etc/nutcracker.conf",
+      "generated_name": "nutcracker",
+      "has_service_data": true
+    }
+  ],
+  "disco_raw": {}
+}
