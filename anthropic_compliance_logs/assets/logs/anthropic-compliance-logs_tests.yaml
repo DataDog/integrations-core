@@ -31,7 +31,6 @@ tests:
       id: "activity_01R1sBnxj7yvtdZnt8DsfpRL"
       organization_id: "org_01GuSHHxdWNCcTtk6Wr5arBM"
       organization_uuid: "80cb55fa-462c-4bc0-82d6-07ebb1a6f004"
-      type: "claude_chat_viewed"
     message: |-
       {
         "actor" : {
