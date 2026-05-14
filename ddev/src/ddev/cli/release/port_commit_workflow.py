@@ -459,15 +459,16 @@ async def _fetch_pr(token: str, owner: str, repo: str, pr_number: int) -> PullRe
 def _abort_if_merge_commit(app: Application, pr_number: int, full_sha: str) -> None:
     """Abort when `full_sha` is a merge commit (>= 2 parents), which can't be backported as a single commit."""
     try:
-        output = app.repo.git.capture('rev-list', '--parents', '-n1', full_sha).strip().split()
+        raw = app.repo.git.capture('rev-list', '--parents', '-n1', full_sha)
     except OSError as exc:
         app.abort(f'Could not inspect merge parents of `{full_sha}`: {exc}.')
-    parent_count = max(len(output) - 1, 0)
-    if parent_count >= 2:
-        app.abort(
-            f"PR #{pr_number} was not squash-merged, so there isn't a single commit to backport "
-            'the full PR. Run again with the specific commit you want to backport.'
-        )
+    else:
+        parent_count = max(len(raw.strip().split()) - 1, 0)
+        if parent_count >= 2:
+            app.abort(
+                f"PR #{pr_number} was not squash-merged, so there isn't a single commit to backport "
+                'the full PR. Run again with the specific commit you want to backport.'
+            )
 
 
 def _resolve_commit_or_fetch(app: Application, commit_hash: str, *, dry_run: bool) -> str:
