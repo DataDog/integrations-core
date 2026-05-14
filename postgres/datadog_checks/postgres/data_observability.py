@@ -21,8 +21,11 @@ EVENT_TRACK_TYPE = 'do-query-results'
 
 MAX_RESULT_ROWS = 10_000
 
-# Must match the default in postgres/datadog_checks/postgres/config_models/dict_defaults.py.
-_DEFAULT_LOOKBACK_SECONDS = 300
+# After an agent start, run cron-scheduled queries whose scheduled time of execution
+# fell within this many seconds in the past. Recovers missed runs across short check
+# restarts (deploys, crashes, Remote Configuration redeliveries). Set to 0 to skip
+# catch-up.
+CRON_STARTUP_LOOKBACK_SECONDS = 300
 
 Mode = Literal["cron", "interval"]
 
@@ -51,7 +54,6 @@ class PostgresDataObservability(DBMAsyncJob):
             expected_db_exceptions=(psycopg.errors.DatabaseError,),
             job_name="data-observability",
         )
-        self._lookback_seconds = self._resolve_lookback()
         # Filter bad queries on check construction.
         self._queries = self._filter_valid_queries(self._do_config.queries or ())
 
@@ -61,18 +63,6 @@ class PostgresDataObservability(DBMAsyncJob):
     @property
     def _do_config(self):
         return self._config.data_observability
-
-    def _resolve_lookback(self) -> int:
-        configured = self._do_config.cron_startup_lookback_seconds
-        if configured is None:
-            return _DEFAULT_LOOKBACK_SECONDS
-        if configured < 0:
-            self._log.warning(
-                "Invalid cron_startup_lookback_seconds=%d: must be >= 0. Cron startup recovery is disabled.",
-                configured,
-            )
-            return 0
-        return configured
 
     def _filter_valid_queries(self, queries) -> tuple[Query, ...]:
         valid = []
@@ -105,7 +95,7 @@ class PostgresDataObservability(DBMAsyncJob):
                     prev_tick = it.get_prev(float)
                     self._next_run[q.monitor_id] = it.get_next(float)
                     # Startup recovery: catch up if the previous tick fell within the lookback window.
-                    if 0 < self._lookback_seconds and (now - prev_tick) < self._lookback_seconds:
+                    if 0 < CRON_STARTUP_LOOKBACK_SECONDS and (now - prev_tick) < CRON_STARTUP_LOOKBACK_SECONDS:
                         due.append(DueQuery(q, prev_tick, "cron"))
                     continue
                 if now >= cached:

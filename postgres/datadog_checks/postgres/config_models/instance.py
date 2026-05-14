@@ -192,7 +192,6 @@ class DataObservability(BaseModel):
     )
     collection_interval: Optional[float] = None
     config_id: Optional[str] = None
-    cron_startup_lookback_seconds: Optional[int] = None
     enabled: Optional[bool] = None
     queries: Optional[tuple[Query, ...]] = None
     run_sync: Optional[bool] = None

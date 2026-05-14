@@ -152,7 +152,6 @@ def instance_data_observability():
     return instance.DataObservability(
         enabled=False,
         collection_interval=10,
-        cron_startup_lookback_seconds=300,
         run_sync=False,
         config_id=None,
         queries=(),

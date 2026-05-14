@@ -825,10 +825,14 @@ def test_starved_query_eventually_fires(pg_instance, aggregator, monkeypatch):
 # ---------------------------------------------------------------------------
 
 
-def _make_cron_lookback_check(pg_instance, lookback_seconds, queries=None):
+def _make_cron_lookback_check(pg_instance, queries=None, *, monkeypatch=None, window_seconds=None):
+    if window_seconds is not None:
+        assert monkeypatch is not None, "monkeypatch is required when overriding window_seconds"
+        monkeypatch.setattr(
+            'datadog_checks.postgres.data_observability.CRON_STARTUP_LOOKBACK_SECONDS',
+            window_seconds,
+        )
     instance = _make_do_instance(pg_instance, queries=queries or [deepcopy(CRON_QUERY)])
-    if lookback_seconds is not None:
-        instance['data_observability']['cron_startup_lookback_seconds'] = lookback_seconds
     return PostgreSql('postgres', {}, [instance])
 
 
@@ -839,7 +843,7 @@ def test_cron_startup_lookback_recovers_missed_fire(pg_instance, aggregator, mon
     monkeypatch.setattr('datadog_checks.postgres.data_observability.time.time', lambda: current_time[0])
 
     mock_conn, _ = _make_mock_conn()
-    check = _make_cron_lookback_check(pg_instance, lookback_seconds=None)  # default lookback
+    check = _make_cron_lookback_check(pg_instance)
     check.db_pool = _mock_db_pool(mock_conn)
     check.data_observability.run_job()
 
@@ -849,12 +853,12 @@ def test_cron_startup_lookback_recovers_missed_fire(pg_instance, aggregator, mon
 
 
 def test_cron_startup_lookback_disabled_skips_recovery(pg_instance, aggregator, monkeypatch):
-    """cron_startup_lookback_seconds=0 disables first-sight recovery."""
+    """CRON_STARTUP_LOOKBACK_SECONDS=0 disables first-sight recovery."""
     current_time = [float(_BASE_EPOCH + 70)]  # same scenario as recovery test
     monkeypatch.setattr('datadog_checks.postgres.data_observability.time.time', lambda: current_time[0])
 
     mock_conn, _ = _make_mock_conn()
-    check = _make_cron_lookback_check(pg_instance, lookback_seconds=0)
+    check = _make_cron_lookback_check(pg_instance, monkeypatch=monkeypatch, window_seconds=0)
     check.db_pool = _mock_db_pool(mock_conn)
     check.data_observability.run_job()
 
@@ -868,7 +872,7 @@ def test_cron_startup_lookback_outside_window_skips(pg_instance, aggregator, mon
     monkeypatch.setattr('datadog_checks.postgres.data_observability.time.time', lambda: current_time[0])
 
     mock_conn, _ = _make_mock_conn()
-    check = _make_cron_lookback_check(pg_instance, lookback_seconds=None)
+    check = _make_cron_lookback_check(pg_instance)
     check.db_pool = _mock_db_pool(mock_conn)
     check.data_observability.run_job()
 
@@ -882,7 +886,7 @@ def test_cron_startup_lookback_lateness_reflects_age_of_tick(pg_instance, aggreg
     monkeypatch.setattr('datadog_checks.postgres.data_observability.time.time', lambda: current_time[0])
 
     mock_conn, _ = _make_mock_conn()
-    check = _make_cron_lookback_check(pg_instance, lookback_seconds=None)
+    check = _make_cron_lookback_check(pg_instance)
     check.db_pool = _mock_db_pool(mock_conn)
     check.data_observability.run_job()
 
@@ -892,42 +896,11 @@ def test_cron_startup_lookback_lateness_reflects_age_of_tick(pg_instance, aggreg
     assert 'mode:cron' in lateness_metrics[0].tags
 
 
-def test_cron_startup_lookback_default_is_300_seconds(pg_instance):
-    """The default lookback window is 5 minutes; pin it so a regression is loud."""
-    check = _make_cron_lookback_check(pg_instance, lookback_seconds=None)
-    assert check.data_observability._lookback_seconds == 300
+def test_cron_startup_lookback_default_is_300_seconds():
+    """The startup lookback window is 5 minutes; pin it so a regression is loud."""
+    from datadog_checks.postgres.data_observability import CRON_STARTUP_LOOKBACK_SECONDS
 
-
-def test_cron_startup_lookback_negative_clamped_to_zero_with_warning(pg_instance, caplog):
-    """A negative lookback value clamps to 0 and emits a warning at construction so it isn't silently dropped."""
-    import logging
-
-    with caplog.at_level(logging.WARNING):
-        check = _make_cron_lookback_check(pg_instance, lookback_seconds=-100)
-    assert check.data_observability._lookback_seconds == 0
-    assert any('Invalid cron_startup_lookback_seconds' in r.message for r in caplog.records)
-
-
-def test_cron_startup_lookback_negative_warning_is_one_shot(pg_instance, caplog, monkeypatch):
-    """The negative-lookback warning fires once at construction, not every tick."""
-    import logging
-
-    with caplog.at_level(logging.WARNING):
-        check = _make_cron_lookback_check(pg_instance, lookback_seconds=-100)
-    initial_warnings = sum(1 for r in caplog.records if 'Invalid cron_startup_lookback_seconds' in r.message)
-    assert initial_warnings == 1
-
-    # Drive a handful of ticks; the warning must not repeat.
-    current_time = [float(_BASE_EPOCH)]
-    monkeypatch.setattr('datadog_checks.postgres.data_observability.time.time', lambda: current_time[0])
-    mock_conn, _ = _make_mock_conn()
-    check.db_pool = _mock_db_pool(mock_conn)
-    with caplog.at_level(logging.WARNING):
-        for _ in range(5):
-            check.data_observability.run_job()
-            current_time[0] += 10
-    total = sum(1 for r in caplog.records if 'Invalid cron_startup_lookback_seconds' in r.message)
-    assert total == 1
+    assert CRON_STARTUP_LOOKBACK_SECONDS == 300
 
 
 def test_cron_startup_lookback_does_not_double_fire(pg_instance, aggregator, monkeypatch):
@@ -936,7 +909,7 @@ def test_cron_startup_lookback_does_not_double_fire(pg_instance, aggregator, mon
     monkeypatch.setattr('datadog_checks.postgres.data_observability.time.time', lambda: current_time[0])
 
     mock_conn, _ = _make_mock_conn()
-    check = _make_cron_lookback_check(pg_instance, lookback_seconds=None)
+    check = _make_cron_lookback_check(pg_instance)
     check.db_pool = _mock_db_pool(mock_conn)
     check.data_observability.run_job()
     assert len(aggregator.metrics('dd.postgres.data_observability.query_executions')) == 1
@@ -984,19 +957,19 @@ def test_failed_cron_query_advances_next_run(pg_instance, aggregator, monkeypatc
 
 
 def test_cron_startup_lookback_boundary_strict_less_than(pg_instance, aggregator, monkeypatch):
-    """At exactly lookback_seconds since prev_tick, recovery does NOT fire (strict <)."""
-    # prev_tick = 00:50:00; lookback = 60s; clock = 00:51:00 means (now - prev_tick) == 60.
+    """At exactly the catch-up window since prev_tick, recovery does NOT fire (strict <)."""
+    # prev_tick = 00:50:00; window = 60s; clock = 00:51:00 means (now - prev_tick) == 60.
     current_time = [float(_BASE_EPOCH + 120)]  # 00:51:00 exactly
     monkeypatch.setattr('datadog_checks.postgres.data_observability.time.time', lambda: current_time[0])
 
     mock_conn, _ = _make_mock_conn()
-    check = _make_cron_lookback_check(pg_instance, lookback_seconds=60)
+    check = _make_cron_lookback_check(pg_instance, monkeypatch=monkeypatch, window_seconds=60)
     check.db_pool = _mock_db_pool(mock_conn)
     check.data_observability.run_job()
     assert len(aggregator.metrics('dd.postgres.data_observability.query_executions')) == 0
 
     # 1 second earlier: (now - prev_tick) == 59 < 60, recovery fires.
-    check2 = _make_cron_lookback_check(pg_instance, lookback_seconds=60)
+    check2 = _make_cron_lookback_check(pg_instance, monkeypatch=monkeypatch, window_seconds=60)
     check2.db_pool = _mock_db_pool(mock_conn)
     current_time[0] = float(_BASE_EPOCH + 119)
     aggregator.reset()
