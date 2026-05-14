@@ -13,8 +13,7 @@
 		"tags": [],
 		"options": {
 			"thresholds": {
-				"critical": 1,
-				"warning": 0
+				"critical": 0
 			},
 			"enable_logs_sample": false,
 			"notify_audit": false,
@@ -23,8 +22,6 @@
 			"new_group_delay": 60,
 			"renotify_interval": 0,
 			"escalation_message": "",
-			"notification_preset_name": "hide_query",
-			"groupby_simple_monitor": false,
 			"silenced": {}
 		},
 		"priority": null,
