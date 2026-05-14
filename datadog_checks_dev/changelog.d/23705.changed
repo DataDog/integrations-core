@@ -1,0 +1,1 @@
+Modernize the `ddev create -t check` scaffold template to use Python 3.13 idioms: inline type annotations, bare `super()`, and canonical `InitConfigType`/`InstanceType` aliases.
