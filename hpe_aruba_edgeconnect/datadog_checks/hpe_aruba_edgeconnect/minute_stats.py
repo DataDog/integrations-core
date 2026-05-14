@@ -128,12 +128,9 @@ class TunnelV2Stats:
 
     def record(self, store: MetricsStore, base_tags: list[str], overlay_map: dict[str, str] | None = None) -> list[str]:
         """Records tunnel metrics and returns the extra tags for cross-referencing."""
-        overlay_name = (overlay_map or {}).get(self.overlay_id, self.overlay_id)
-        extra_tags = [
-            f'tunnel_alias:{self.tunnel_alias}',
-            f'overlay_name:{overlay_name}',
-            f'is_sdwan:{self.is_sdwan}',
-        ]
+        extra_tags = [f'tunnel_alias:{self.tunnel_alias}', f'is_sdwan:{self.is_sdwan}']
+        if overlay_map:
+            extra_tags.append(f'overlay_name:{overlay_map.get(self.overlay_id, self.overlay_id)}')
         base_tunnel_tags = base_tags + [f'tunnel_name:{self.tunnel_id}'] + extra_tags
         for side, bytes_tx, bytes_rx, pkts_tx, pkts_rx in [
             ('wan', self.bytes_wan_tx, self.bytes_wan_rx, self.pkts_wan_tx, self.pkts_wan_rx),
@@ -184,7 +181,7 @@ class TunnelPeakStats:
     peak_latency: float | None
 
     def __init__(self, row: dict[str, str]) -> None:
-        self.tunname = row['tunname'].strip()
+        self.tunname = v.strip() if (v := row.get('tunname')) is not None else "unknown"
         self.peak_bytes_wan_tx = float(v) if (v := row.get('bytes_wtx')) is not None else None
         self.peak_bytes_wan_rx = float(v) if (v := row.get('bytes_wrx')) is not None else None
         self.peak_bytes_lan_tx = float(v) if (v := row.get('bytes_ltx')) is not None else None
@@ -255,7 +252,7 @@ class MosStats:
     min_mos_prefec: float | None
 
     def __init__(self, row: dict[str, str]) -> None:
-        self.tunnel = row['tunnel'].strip()
+        self.tunnel = v.strip() if (v := row.get('tunnel')) is not None else "unknown"
         self.mos_postfec = float(v) if (v := row.get(' mos_postfec')) is not None else None
         self.mos_prefec = float(v) if (v := row.get(' mos_prefec')) is not None else None
         self.min_mos_postfec = float(v) if (v := row.get(' min_mos_postfec')) is not None else None
@@ -671,19 +668,18 @@ class ShaperStats:
         traffic_class_map: dict[str, str] | None = None,
         logger: CheckLoggingAdapter | None = None,
     ) -> None:
-        traffic_class_map = traffic_class_map or {}
-        if self.traffic_class in traffic_class_map:
-            overlay_name = traffic_class_map[self.traffic_class]
-        else:
-            overlay_name = self.traffic_class
-            if logger is not None:
-                logger.debug(
-                    "No overlay name mapping found for traffic class %s; falling back to raw id", self.traffic_class
-                )
-        tags = base_tags + [
-            f'overlay_name:{overlay_name}',
-            f'direction:{self.direction}',
-        ]
+        tags = base_tags + [f'direction:{self.direction}']
+        if traffic_class_map:
+            if self.traffic_class in traffic_class_map:
+                overlay_name = traffic_class_map[self.traffic_class]
+            else:
+                overlay_name = self.traffic_class
+                if logger is not None:
+                    logger.debug(
+                        "No overlay name mapping found for traffic class %s; falling back to raw id",
+                        self.traffic_class,
+                    )
+            tags.append(f'overlay_name:{overlay_name}')
         store.record('qos.class.drops', self.qos_drops, tags + ['drop_type:qos'], AggType.SUM)
         store.record('qos.class.drops', self.other_drops, tags + ['drop_type:other'], AggType.SUM)
         if self.qos_drops is not None and self.total_shaped_packets is not None and self.total_shaped_packets > 0:
@@ -887,7 +883,8 @@ class MinuteStats:
     ) -> None:
         if self.shaper and not traffic_class_map:
             self._log.warning(
-                "No traffic class to overlay name mapping available; shaper metrics will be tagged with raw IDs"
+                "No traffic class to overlay name mapping available; shaper metrics will be emitted without "
+                "the overlay_name tag"
             )
         for row in self.shaper:
             row.record(store, base_tags, traffic_class_map, self._log)

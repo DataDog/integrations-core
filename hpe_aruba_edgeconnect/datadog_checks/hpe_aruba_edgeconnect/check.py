@@ -90,7 +90,8 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
                 try:
                     f.result()
                 except Exception:
-                    self._appliance_clients.pop(ap.ip, None)
+                    with self._appliance_clients_lock:
+                        self._appliance_clients.pop(ap.ip, None)
                     self.log.warning("Failed to collect from appliance %s", ap.ip, exc_info=True)
 
     def _submit_metadata(
@@ -137,24 +138,25 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
             self._overlay_map, self._traffic_class_map = client.get_overlay_config()
         except Exception:
             self.log.warning(
-                "Failed to fetch overlay config, overlay and traffic class names will use raw IDs", exc_info=True
+                "Failed to fetch overlay config; tunnel and shaper metrics will be emitted without the "
+                "overlay_name tag.",
+                exc_info=True,
             )
             self._overlay_map = {}
             self._traffic_class_map = {}
         return appliances
 
     def _create_appliance_client(self, app_ip: str, username: str, password: str) -> ApplianceClient:
+        cached = self._appliance_clients.get(app_ip)
+        if cached is not None:
+            return cached
+        http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
+        http.persist_connections = True
+        http.options['auth'] = None
+        client = ApplianceClient(http, app_ip, self.log)
+        client.login(username, password)
         with self._appliance_clients_lock:
-            cached = self._appliance_clients.get(app_ip)
-            if cached is not None:
-                return cached
-            http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
-            http.persist_connections = True
-            http.options['auth'] = None
-            client = ApplianceClient(http, app_ip, self.log)
-            client.login(username, password)
-            self._appliance_clients[app_ip] = client
-            return client
+            return self._appliance_clients.setdefault(app_ip, client)
 
     def _timestamps_to_fetch(self, app_ip: str, newest: int) -> list[int]:
         raw = self.read_persistent_cache(f'last_timestamp:{app_ip}')

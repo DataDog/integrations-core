@@ -16,6 +16,7 @@ from datadog_checks.hpe_aruba_edgeconnect.client import ApplianceClient, Orchest
 from datadog_checks.hpe_aruba_edgeconnect.metrics_store import AggType, MetricsStore
 from datadog_checks.hpe_aruba_edgeconnect.minute_stats import (
     AppperfStats,
+    DscpPeakStats,
     DscpStats,
     InterfaceOverlayStats,
     InterfacePeakStats,
@@ -25,6 +26,7 @@ from datadog_checks.hpe_aruba_edgeconnect.minute_stats import (
     MosStats,
     ProbeStats,
     ShaperStats,
+    TunnelAvailability,
     TunnelPeakStats,
     TunnelV2Stats,
 )
@@ -395,10 +397,15 @@ EXPECTED_PARSER_ROW_COUNTS = {
 
 EMPTY_PARSE_CASES = [
     InterfaceStats,
+    InterfacePeakStats,
     TunnelV2Stats,
+    TunnelPeakStats,
     JitterStats,
     MosStats,
     DscpStats,
+    DscpPeakStats,
+    TunnelAvailability,
+    InterfaceOverlayStats,
     ProbeStats,
     ShaperStats,
     AppperfStats,

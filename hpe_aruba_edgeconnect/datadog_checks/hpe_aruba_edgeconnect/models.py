@@ -6,7 +6,6 @@ from __future__ import annotations
 import ipaddress
 import logging
 from collections.abc import Iterator
-from dataclasses import dataclass
 from typing import Any, NotRequired, TypedDict
 
 from .constants import NDM_DEVICE_RESOURCE_TAG, NDM_DEVICE_USER_TAGS_RESOURCE_TAG
@@ -25,30 +24,31 @@ class ApplianceCredentialOverride(TypedDict):
     password: str
 
 
-@dataclass(init=False, slots=True)
 class Appliance:
-    host_name: str
-    ip: str
-    serial: str
-    model: str
-    mode: str
-    software_version: str
-    state: int
-    site: str | None
-    username: str
-    password: str
+    __slots__ = (
+        'host_name',
+        'ip',
+        'serial',
+        'model',
+        'mode',
+        'software_version',
+        'state',
+        'site',
+        'username',
+        'password',
+    )
 
     def __init__(self, data: dict[str, Any]) -> None:
-        self.host_name = data.get('hostName', '')
-        self.ip = data.get('ip', '')
-        self.serial = data.get('serial', '')
-        self.model = data.get('model', '')
-        self.mode = data.get('mode', '')
-        self.software_version = data.get('softwareVersion', '')
-        self.state = data.get('state', 0)
-        self.site = data.get('site')
-        self.username = ''
-        self.password = ''
+        self.host_name: str = data.get('hostName', '')
+        self.ip: str = data.get('ip', '')
+        self.serial: str = data.get('serial', '')
+        self.model: str = data.get('model', '')
+        self.mode: str = data.get('mode', '')
+        self.software_version: str = data.get('softwareVersion', '')
+        self.state: int = data.get('state', 0)
+        self.site: str | None = data.get('site')
+        self.username: str = ''
+        self.password: str = ''
 
     @property
     def is_reachable(self) -> bool:

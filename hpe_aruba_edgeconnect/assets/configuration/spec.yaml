@@ -13,7 +13,7 @@ files:
       value:
         type: string
         example: 10.0.0.1
-   
+
     - name: namespace
       description: Namespace to use for NDM device metadata. Defaults to "default".
       value:
@@ -22,8 +22,8 @@ files:
         default: default
     - name: appliance_ips
       description: |
-        HPE Aruba EdgeConnect appliance targets. CIDR entries match any appliance IP within the block. 
-        Use `include` to specify which appliances to poll and `exclude` to skip individual appliances. 
+        HPE Aruba EdgeConnect appliance targets. CIDR entries match any appliance IP within the block.
+        Use `include` to specify which appliances to poll and `exclude` to skip individual appliances.
         `exclude` takes precedence over `include`.
       value:
         type: object
@@ -93,11 +93,11 @@ files:
       overrides:
         username.required: true
         username.description: |
-          Username for the Orchestrator. If no appliance-specific credentials are provided, 
+          Username for the Orchestrator. If no appliance-specific credentials are provided,
           this username will be used as the default.
         password.required: true
         password.description: |
-          Password for the Orchestrator. If no appliance-specific credentials are provided, 
+          Password for the Orchestrator. If no appliance-specific credentials are provided,
           this password will be used as the default.
     - template: instances/default
       overrides:

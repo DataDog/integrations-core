@@ -92,7 +92,7 @@ class TunnelMetadata(BaseModel):
     dst_device_id: str
     src_site_id: str | None = None
     dst_site_id: str
-    overlay_name: str
+    overlay_name: str | None = None
     path_name: str
     tunnel_color: str
 
@@ -188,7 +188,7 @@ def create_tunnel_metadata(
         dst_device_id=f'{namespace}:{peer_ip}' if peer_ip else '',
         src_site_id=src_site or 'unknown',
         dst_site_id=peer_site or 'unknown',
-        overlay_name=overlay_map.get(tunnel.overlay_id, tunnel.overlay_id),
+        overlay_name=overlay_map.get(tunnel.overlay_id, tunnel.overlay_id) if overlay_map else None,
         path_name=tunnel.tunnel_alias,
         tunnel_color=wan_labels,
     )

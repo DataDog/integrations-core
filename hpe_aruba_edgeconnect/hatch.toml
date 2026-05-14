@@ -3,15 +3,8 @@
 [[envs.default.matrix]]
 python = ["3.13"]
 
-[[envs.default.matrix]]
-python = ["3.13"]
-setup = ["lab"]
+[envs.lab]
+python = "3.13"
 
-[envs.default.overrides]
-name."^py3\\.13$".e2e-env = { value = true }
-matrix.setup.env-vars = [
-  { key = "USE_EDGECONNECT_LAB", value = "True", if = ["lab"] },
-]
-
-[envs.default]
-e2e-env = false
+[envs.lab.env-vars]
+USE_EDGECONNECT_LAB = "True"
