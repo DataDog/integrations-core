@@ -402,22 +402,22 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Category UID
+    name: Category ID
     path: ocsf.category_uid
     source: log
   - groups:
       - OCSF
-    name: Category Name
+    name: Category
     path: ocsf.category_name
     source: log
   - groups:
       - OCSF
-    name: Class UID
+    name: Class ID
     path: ocsf.class_uid
     source: log
   - groups:
       - OCSF
-    name: Class Name
+    name: Class
     path: ocsf.class_name
     source: log
   - groups:
@@ -442,12 +442,12 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Source Endpoint IP
+    name: Source IP Address
     path: ocsf.src_endpoint.ip
     source: log
   - groups:
       - OCSF
-    name: Destination Endpoint IP
+    name: Destination IP Address
     path: ocsf.dst_endpoint.ip
     source: log
   - groups:
@@ -462,17 +462,17 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Product Vendor Name
+    name: Vendor Name
     path: ocsf.metadata.product.vendor_name
     source: log
   - groups:
       - OCSF
-    name: Finding Title
+    name: Finding Info Title
     path: ocsf.finding_info.title
     source: log
   - groups:
       - OCSF
-    name: Finding UID
+    name: Finding Info Unique ID
     path: ocsf.finding_info.uid
     source: log
   - groups:
@@ -482,7 +482,7 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: URL String
+    name: Request URL String
     path: ocsf.http_request.url.url_string
     source: log
   - groups:
@@ -507,7 +507,7 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Actor Session UID
+    name: Session Unique ID
     path: ocsf.actor.session.uid
     source: log
   - groups:
@@ -552,11 +552,6 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Connection Info Protocol Name
-    path: ocsf.connection_info.protocol_name
-    source: log
-  - groups:
-      - OCSF
     name: Connection Info Protocol Ver
     path: ocsf.connection_info.protocol_ver
     source: log
@@ -575,16 +570,20 @@ facets:
     name: Dst Endpoint Hostname
     path: ocsf.dst_endpoint.hostname
     source: log
-  - groups:
+  - facetType: range
+    groups:
       - OCSF
     name: Dst Endpoint Port
     path: ocsf.dst_endpoint.port
     source: log
-  - groups:
+    type: integer
+  - facetType: range
+    groups:
       - OCSF
-    name: Duration
+    name: Duration Milliseconds
     path: ocsf.duration
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Evidences
@@ -605,9 +604,10 @@ facets:
     name: File Type ID
     path: ocsf.file.type_id
     source: log
+    type: integer
   - groups:
       - OCSF
-    name: File UID
+    name: File Unique ID
     path: ocsf.file.uid
     source: log
   - groups:
@@ -642,17 +642,12 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: HTTP Request UID
-    path: ocsf.http_request.uid
-    source: log
-  - groups:
-      - OCSF
-    name: HTTP Request URL Hostname
+    name: Url Hostname
     path: ocsf.http_request.url.hostname
     source: log
   - groups:
       - OCSF
-    name: HTTP Request URL Path
+    name: Url Path
     path: ocsf.http_request.url.path
     source: log
   - groups:
@@ -662,13 +657,8 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: HTTP Request User Agent
+    name: HTTP User-Agent
     path: ocsf.http_request.user_agent
-    source: log
-  - groups:
-      - OCSF
-    name: HTTP Request Version
-    path: ocsf.http_request.version
     source: log
   - groups:
       - OCSF
@@ -677,18 +667,14 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: HTTP Response Code
+    name: Response Code
     path: ocsf.http_response.code
     source: log
+    type: integer
   - groups:
       - OCSF
     name: HTTP Response Message
     path: ocsf.http_response.message
-    source: log
-  - groups:
-      - OCSF
-    name: Is Alert
-    path: ocsf.is_alert
     source: log
   - groups:
       - OCSF
@@ -697,22 +683,12 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Metadata Correlation UID
-    path: ocsf.metadata.correlation_uid
-    source: log
-  - groups:
-      - OCSF
-    name: Metadata Log Provider
-    path: ocsf.metadata.log_provider
-    source: log
-  - groups:
-      - OCSF
     name: Metadata Original Time
     path: ocsf.metadata.original_time
     source: log
   - groups:
       - OCSF
-    name: Metadata UID
+    name: Metadata Event UID
     path: ocsf.metadata.uid
     source: log
   - groups:
@@ -722,34 +698,39 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Query Type
+    name: Query Resource Record Type
     path: ocsf.query.type
     source: log
   - groups:
       - OCSF
-    name: Rcode
+    name: Response Code
     path: ocsf.rcode
     source: log
   - groups:
       - OCSF
-    name: Rcode ID
+    name: Response Code ID
     path: ocsf.rcode_id
     source: log
-  - groups:
+    type: integer
+  - facetType: range
+    groups:
       - OCSF
     name: Src Endpoint Port
     path: ocsf.src_endpoint.port
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Status Detail
     path: ocsf.status_detail
     source: log
-  - groups:
+  - facetType: range
+    groups:
       - OCSF
-    name: Time
+    name: Event Time
     path: ocsf.time
     source: log
+    type: integer
   - groups:
       - OCSF
     name: TLS Cipher
@@ -1714,6 +1695,7 @@ pipeline:
           target: ocsf.time
           targetType: attribute
           preserveSource: false
+          overrideOnConflict: false
     - type: pipeline
       name: OCSF sub pipeline for class Detection Finding [2004] - Notice
       enabled: true
@@ -1766,6 +1748,7 @@ pipeline:
           target: ocsf.evidence.dst_endpoint.ip
           targetType: attribute
           preserveSource: true
+          overrideOnConflict: false
         - type: attribute-remapper
           name: Map `id.resp_p` to `ocsf.evidence.dst_endpoint.port`
           enabled: true
@@ -1775,6 +1758,7 @@ pipeline:
           target: ocsf.evidence.dst_endpoint.port
           targetType: attribute
           preserveSource: true
+          overrideOnConflict: false
         - type: array-processor
           name: Move ocsf.evidence into ocsf.evidences array
           enabled: true
@@ -3245,7 +3229,7 @@ pipeline:
               overrideOnConflict: true
               targetFormat: integer
             - type: schema-remapper
-              name: Map `query, rcode_name` to `ocsf.message`
+              name: Map `query`, `rcode_name` to `ocsf.message`
               sources:
                 - query
                 - rcode_name
@@ -3558,7 +3542,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `seen_bytes, total_bytes` to `ocsf.file.size`
+              name: Map `seen_bytes`, `total_bytes` to `ocsf.file.size`
               sources:
                 - seen_bytes
                 - total_bytes
