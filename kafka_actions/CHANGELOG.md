@@ -10,7 +10,7 @@
 
 ***Fixed***:
 
-* [kafka_actions] Remove unused MessageFilter class ([#23430](https://github.com/DataDog/integrations-core/pull/23430))
+* Remove unused MessageFilter class ([#23430](https://github.com/DataDog/integrations-core/pull/23430))
 * Preload protobuf well-known types (e.g. `google/protobuf/timestamp.proto`) into the descriptor pool so schemas that reference them deserialize correctly. ([#23431](https://github.com/DataDog/integrations-core/pull/23431))
 
 ## 2.6.0 / 2026-04-15

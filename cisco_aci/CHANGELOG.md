@@ -6,7 +6,7 @@
 
 ***Removed***:
 
-* [Cisco ACI] Remove tenant faults as events, faults are now only to send as logs ([#23350](https://github.com/DataDog/integrations-core/pull/23350))
+* Remove tenant faults as events, faults are now only to send as logs ([#23350](https://github.com/DataDog/integrations-core/pull/23350))
 
 ***Added***:
 
