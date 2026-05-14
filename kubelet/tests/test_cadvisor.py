@@ -6,9 +6,9 @@ import sys
 
 import mock
 import pytest
-import requests_mock
-from requests.exceptions import HTTPError
 
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.kubelet import KubeletCheck
 
 from .test_kubelet import EXPECTED_METRICS_COMMON, NODE_SPEC, mock_from_file
@@ -17,12 +17,6 @@ from .test_kubelet import EXPECTED_METRICS_COMMON, NODE_SPEC, mock_from_file
 pytestmark = pytest.mark.skipif(sys.platform == 'win32', reason='tests for linux only')
 
 EXPECTED_METRICS_CADVISOR = ['kubernetes.network_errors', 'kubernetes.diskio.io_service_bytes.stats.total']
-
-
-@pytest.fixture()
-def mock_request():
-    with requests_mock.Mocker() as m:
-        yield m
 
 
 @pytest.fixture
@@ -35,23 +29,24 @@ def tagger():
     return tagger
 
 
-def test_detect_cadvisor_nominal(mock_request):
-    mock_request.head('http://kubelet:4192/api/v1.3/subcontainers/', text='{}')
-    url = KubeletCheck.detect_cadvisor("http://kubelet:10250", 4192)
+def test_detect_cadvisor_nominal(mock_openmetrics_http):
+    mock_openmetrics_http.head.return_value = MockHTTPResponse(content='{}', status_code=200)
+    check = KubeletCheck('kubelet', {}, [{}])
+    url = check.detect_cadvisor("http://kubelet:10250", 4192)
     assert url == "http://kubelet:4192/api/v1.3/subcontainers/"
 
 
-def test_detect_cadvisor_404(mock_request):
-    mock_request.head('http://kubelet:4192/api/v1.3/subcontainers/', status_code=404)
-    with pytest.raises(HTTPError):
-        url = KubeletCheck.detect_cadvisor("http://kubelet:10250", 4192)
-        assert url == ""
+def test_detect_cadvisor_404(mock_openmetrics_http):
+    mock_openmetrics_http.head.return_value = MockHTTPResponse(status_code=404)
+    check = KubeletCheck('kubelet', {}, [{}])
+    with pytest.raises(HTTPStatusError):
+        check.detect_cadvisor("http://kubelet:10250", 4192)
 
 
 def test_detect_cadvisor_port_zero():
+    check = KubeletCheck('kubelet', {}, [{}])
     with pytest.raises(ValueError):
-        url = KubeletCheck.detect_cadvisor("http://kubelet:10250", 0)
-        assert url == ""
+        check.detect_cadvisor("http://kubelet:10250", 0)
 
 
 def test_kubelet_check_cadvisor(monkeypatch, aggregator, tagger):
