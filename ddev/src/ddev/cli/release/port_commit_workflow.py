@@ -342,6 +342,40 @@ class CreatePullRequestStep(PortStep):
                 )
 
 
+def _resolve_commit_or_fetch(app: Application, commit_hash: str) -> str:
+    """Return the full SHA for `commit_hash`, fetching from origin when the commit is not local.
+
+    Aborts the application with a user-facing message when the commit is neither available locally
+    nor reachable on origin. Falling back to a SHA-targeted fetch lets the command port commits that
+    live on remote branches the local repo does not track (the `remote.origin.fetch` refspec is
+    often narrowed in this repo to avoid pulling thousands of branches).
+    """
+    git = app.repo.git
+    try:
+        return git.capture('rev-parse', '--verify', f'{commit_hash}^{{commit}}').strip()
+    except OSError:
+        pass
+
+    app.display_info(f'Commit `{commit_hash}` not found locally; fetching from origin.')
+    fetch_failed = False
+    try:
+        git.run('fetch', 'origin', commit_hash)
+    except OSError:
+        fetch_failed = True
+
+    if not fetch_failed:
+        try:
+            return git.capture('rev-parse', '--verify', f'{commit_hash}^{{commit}}').strip()
+        except OSError:
+            pass
+
+    app.abort(
+        f'Commit `{commit_hash}` does not exist locally or on origin. '
+        'If you provided an abbreviated SHA, pass the full 40-character SHA.'
+    )
+    raise AssertionError('unreachable')
+
+
 def _path_exists_in_head(git: GitRepository, path: str) -> bool:
     try:
         git.capture('cat-file', '-e', f'HEAD:{path}')
@@ -470,10 +504,7 @@ def resolve_port_plan(
             app.abort('Did not get confirmation, aborting.')
         commit_hash = head_commit.sha
 
-    try:
-        full_sha = app.repo.git.capture('rev-parse', '--verify', f'{commit_hash}^{{commit}}').strip()
-    except OSError:
-        app.abort(f'Commit `{commit_hash}` does not exist.')
+    full_sha = _resolve_commit_or_fetch(app, commit_hash)
 
     log_entries = app.repo.git.log(['hash:%H', 'subject:%s'], n=1, source=full_sha)
     if not log_entries:

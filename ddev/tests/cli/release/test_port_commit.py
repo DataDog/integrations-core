@@ -604,15 +604,86 @@ def test_command_token_guard(
 def test_command_aborts_when_commit_does_not_exist(
     ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
 ) -> None:
-    mocker.patch('ddev.utils.git.GitRepository.run')
+    run_mock = mocker.patch('ddev.utils.git.GitRepository.run')
     mocker.patch('ddev.utils.git.GitRepository.capture', side_effect=OSError('bad object'))
     mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
 
     result = ddev('release', 'port-commit', '1234567890abcdef00')
 
     assert result.exit_code == 1, result.output
-    assert 'does not exist' in result.output
+    assert 'does not exist locally or on origin' in result.output
+    assert 'full 40-character SHA' in result.output
+    assert ('fetch', 'origin', '1234567890abcdef00') in [c.args for c in run_mock.call_args_list]
     fake_async_github.assert_not_called('create_pull_request')
+
+
+def test_command_aborts_when_fetch_fails(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    def run_side_effect(*args):
+        if args[:2] == ('fetch', 'origin'):
+            raise OSError("couldn't find remote ref")
+        return None
+
+    mocker.patch('ddev.utils.git.GitRepository.run', side_effect=run_side_effect)
+    mocker.patch('ddev.utils.git.GitRepository.capture', side_effect=OSError('bad object'))
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', '1234567890abcdef00')
+
+    assert result.exit_code == 1, result.output
+    assert 'does not exist locally or on origin' in result.output
+    fake_async_github.assert_not_called('create_pull_request')
+
+
+def test_command_fetches_commit_when_not_local(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    commit_sha = '1234567890abcdef00'
+    subject = 'Fix bug (#100)'
+    rev_parse_calls = {'count': 0}
+
+    def capture_side_effect(*args):
+        if args == ('rev-parse', '--verify', f'{commit_sha}^{{commit}}'):
+            rev_parse_calls['count'] += 1
+            if rev_parse_calls['count'] == 1:
+                raise OSError('bad object')
+            return commit_sha + '\n'
+        if args == ('diff-tree', '--no-commit-id', '--name-only', '-r', commit_sha):
+            return ''
+        return ''
+
+    run_mock = mocker.patch('ddev.utils.git.GitRepository.run')
+    mocker.patch('ddev.utils.git.GitRepository.capture', side_effect=capture_side_effect)
+    mocker.patch(
+        'ddev.utils.git.GitRepository.log',
+        return_value=[{'hash': commit_sha, 'subject': subject}],
+    )
+    fake_async_github.mock_response(
+        'create_pull_request',
+        PullRequest(number=1, html_url='https://github.com/x/pr/1'),
+    )
+    mocker.patch('click.confirm', return_value=True)
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', commit_sha)
+
+    assert result.exit_code == 0, result.output
+    assert 'not found locally; fetching from origin' in result.output
+    assert rev_parse_calls['count'] == 2
+    git_calls = [c.args for c in run_mock.call_args_list]
+    assert ('fetch', 'origin', commit_sha) in git_calls
+    fake_async_github.assert_called_once_with(
+        'create_pull_request',
+        owner='DataDog',
+        repo='integrations-core',
+        title='[Backport] Fix bug',
+        head='alice/port-1234567890-to-master',
+        base='master',
+        body=mocker.ANY,
+        draft=False,
+        timeout=None,
+    )
 
 
 def test_command_aborts_when_commit_log_is_empty(
