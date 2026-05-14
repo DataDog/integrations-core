@@ -7,6 +7,7 @@ from datetime import datetime
 from unittest import mock
 
 import pytest
+from requests.exceptions import HTTPError
 
 from datadog_checks.nutanix import NutanixCheck
 
@@ -896,15 +897,15 @@ def test_alert_state_transition_acknowledged_to_open(
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
-def test_alert_filter_excludes_tracked_alert_emits_spurious_resolution(
+def test_alert_filter_excludes_tracked_alert_drops_without_resolution(
     get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
 ):
-    """A tracked alert that becomes filter-excluded mid-life is currently treated as resolved.
+    """A tracked alert that becomes filter-excluded mid-life drops from tracking silently.
 
-    Documents existing behavior: when a resource_filter is added that excludes a
-    previously-tracked alert, reconciliation sees it disappear from api_alerts and
-    emits a resolution event + nutanix.alert.resolved=1 — even though Prism Central
-    still has the alert open. Operators changing filter rules should be aware.
+    Reconciliation distinguishes "absent from the unresolved-alerts API" (true resolution)
+    from "still unresolved but filter-excluded" (out of scope). The latter must not emit a
+    resolution event or increment nutanix.alert.resolved, since the alert is still open
+    in Prism Central.
     """
     instance = mock_instance.copy()
     instance["collect_alerts"] = True
@@ -917,7 +918,6 @@ def test_alert_filter_excludes_tracked_alert_emits_spurious_resolution(
 
     aggregator.reset()
 
-    # Simulate adding a filter that excludes the target ext_id mid-life
     original = check.activity_monitor._should_collect_activity_item
     mocker.patch.object(
         check.activity_monitor,
@@ -927,21 +927,57 @@ def test_alert_filter_excludes_tracked_alert_emits_spurious_resolution(
 
     dd_run_check(check)
 
+    assert target_ext_id not in check.activity_monitor._open_alerts, "Filter-excluded alert must stop being tracked"
     resolved_events = [
         e
         for e in aggregator.events
         if "ntnx_alert_status:resolved" in e.get("tags", [])
         and f"ntnx_alert_ext_id:{target_ext_id}" in e.get("tags", [])
     ]
-    assert len(resolved_events) == 1
-    assert target_ext_id not in check.activity_monitor._open_alerts
+    assert resolved_events == [], "Filter exclusion must not emit a resolution event"
+    resolved_metrics = [
+        m for m in aggregator.metrics("nutanix.alert.resolved") if f"ntnx_alert_ext_id:{target_ext_id}" in m.tags
+    ]
+    assert resolved_metrics == [], "Filter exclusion must not increment nutanix.alert.resolved"
 
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_resolution_event_still_fires_when_alert_truly_leaves_unresolved_api(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
+):
+    """Regression guard: an alert that is absent from the unresolved-alerts API (true resolution)
+    must still emit a resolution event and increment nutanix.alert.resolved, even after the
+    filter-exclusion fix changes how gone_ids is computed.
+    """
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    target_ext_id = next(iter(check.activity_monitor._open_alerts))
+    aggregator.reset()
+
+    remaining = [a for a in check.activity_monitor._open_alerts.values() if a.get("extId") != target_ext_id]
+    mocker.patch.object(check.activity_monitor, '_list_alerts_unresolved', return_value=remaining)
+
+    dd_run_check(check)
+
+    assert target_ext_id not in check.activity_monitor._open_alerts
+    resolved_events = [
+        e
+        for e in aggregator.events
+        if "ntnx_alert_status:resolved" in e.get("tags", [])
+        and f"ntnx_alert_ext_id:{target_ext_id}" in e.get("tags", [])
+    ]
+    assert len(resolved_events) == 1, "True resolution must still emit a resolution event"
     resolved_metrics = [
         m
         for m in aggregator.metrics("nutanix.alert.resolved")
         if m.value == 1 and f"ntnx_alert_ext_id:{target_ext_id}" in m.tags
     ]
-    assert len(resolved_metrics) == 1
+    assert len(resolved_metrics) == 1, "True resolution must still increment nutanix.alert.resolved"
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
@@ -1253,3 +1289,69 @@ def test_alert_can_reopen_after_resolution_with_same_ext_id(
         m for m in aggregator.metrics("nutanix.alert.resolved") if f"ntnx_alert_ext_id:{target_ext_id}" in m.tags
     ]
     assert resolved_emits == [], "nutanix.alert.resolved must not re-fire on a reopen cycle"
+
+
+def test_get_alert_returns_none_on_404(dd_run_check, mock_instance, mock_http_get, mocker):
+    """_get_alert returns None only when Prism Central confirms the alert no longer exists (404)."""
+    check = NutanixCheck('nutanix', {}, [mock_instance.copy()])
+    dd_run_check(check)
+
+    response = mocker.Mock()
+    response.status_code = 404
+    mocker.patch.object(check, '_get_request_data', side_effect=HTTPError(response=response))
+
+    assert check.activity_monitor._get_alert("missing-ext-id") is None
+
+
+@pytest.mark.parametrize("status_code", [500, 502, 503, 504])
+def test_get_alert_propagates_on_transient_http_error(dd_run_check, mock_instance, mock_http_get, mocker, status_code):
+    """Transient HTTP failures bubble out of _get_alert instead of being misclassified as 'deleted'."""
+    check = NutanixCheck('nutanix', {}, [mock_instance.copy()])
+    dd_run_check(check)
+
+    response = mocker.Mock()
+    response.status_code = status_code
+    mocker.patch.object(check, '_get_request_data', side_effect=HTTPError(response=response))
+
+    with pytest.raises(HTTPError):
+        check.activity_monitor._get_alert("any-ext-id")
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_transient_alert_get_failure_preserves_tracking(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
+):
+    """A transient per-id GET failure on a gone alert preserves tracking and emits no false resolution."""
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+    assert len(check.activity_monitor._open_alerts) > 0
+
+    target_ext_id = next(iter(check.activity_monitor._open_alerts))
+    aggregator.reset()
+
+    remaining = [a for a in check.activity_monitor._open_alerts.values() if a.get("extId") != target_ext_id]
+    mocker.patch.object(check.activity_monitor, '_list_alerts_unresolved', return_value=remaining)
+    response = mocker.Mock()
+    response.status_code = 503
+    mocker.patch.object(check.activity_monitor, '_get_alert', side_effect=HTTPError(response=response))
+
+    dd_run_check(check)
+
+    assert target_ext_id in check.activity_monitor._open_alerts, (
+        "Tracking must be preserved when the per-id GET fails transiently"
+    )
+    resolution_events = [
+        e
+        for e in aggregator.events
+        if "ntnx_alert_status:resolved" in e.get("tags", [])
+        and f"ntnx_alert_ext_id:{target_ext_id}" in e.get("tags", [])
+    ]
+    assert resolution_events == [], "No resolution event should fire when the per-id GET fails transiently"
+    resolved_metrics = [
+        m for m in aggregator.metrics("nutanix.alert.resolved") if f"ntnx_alert_ext_id:{target_ext_id}" in m.tags
+    ]
+    assert resolved_metrics == [], "No alert.resolved metric should fire when the per-id GET fails transiently"

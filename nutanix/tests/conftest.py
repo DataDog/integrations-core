@@ -8,6 +8,7 @@ import os
 from datetime import datetime
 
 import pytest
+from requests.exceptions import HTTPError
 
 from datadog_checks.dev import docker_run, get_docker_hostname, get_here
 from datadog_checks.dev.conditions import CheckEndpoints
@@ -272,7 +273,7 @@ def mock_http_get(mocker):
                 mock_resp.json = mocker.Mock(return_value={"data": alert_data})
             else:
                 mock_resp.status_code = 404
-                mock_resp.raise_for_status = mocker.Mock(side_effect=Exception("404 Not Found"))
+                mock_resp.raise_for_status = mocker.Mock(side_effect=HTTPError(response=mock_resp))
             return mock_resp
 
         if 'api/monitoring/v4.0/serviceability/alerts' in url:
@@ -304,7 +305,7 @@ def mock_http_get(mocker):
 
         print(f"[MOCK ERROR] No matching endpoint for URL: {url}")
         mock_resp.status_code = 404
-        mock_resp.raise_for_status = mocker.Mock(side_effect=Exception("404 Not Found"))
+        mock_resp.raise_for_status = mocker.Mock(side_effect=HTTPError(response=mock_resp))
         return mock_resp
 
     return mocker.patch('requests.Session.get', side_effect=mock_response)

@@ -214,20 +214,42 @@ class ActivityMonitor:
             self._reemit_cached_gauges()
             raise
 
+        # Capture all unresolved ids before applying resource_filters so we can distinguish
+        # alerts that truly left the unresolved set (deleted/resolved upstream) from alerts
+        # that are still open in Prism Central but no longer match the configured filters.
+        unfiltered_ids = frozenset(a.get("extId") for a in alerts if a.get("extId"))
+
         alerts = [a for a in alerts if self._should_collect_activity_item(a, "alert")]
         api_alerts = {a.get("extId"): a for a in alerts if a.get("extId")}
 
         # Pre-compute set diffs before mutating _open_alerts so loop ordering is safe.
         new_ids = api_alerts.keys() - self._open_alerts.keys()
-        gone_ids = frozenset(self._open_alerts.keys() - api_alerts.keys())
+        gone_ids = frozenset(self._open_alerts.keys() - unfiltered_ids)
+        filter_excluded_ids = frozenset(self._open_alerts.keys() - api_alerts.keys() - gone_ids)
         still_tracked = api_alerts.keys() & self._open_alerts.keys()
 
         count = self._track_new_alerts(new_ids, api_alerts)
         count += self._emit_resolved_alerts(gone_ids)
+        self._drop_filter_excluded(filter_excluded_ids)
         transitioned = self._emit_alert_transitions(still_tracked, api_alerts)
         count += len(transitioned)
         self._emit_heartbeats_and_gauges(transitioned)
         return count
+
+    def _drop_filter_excluded(self, filter_excluded_ids: frozenset[str]) -> None:
+        """Stop tracking alerts that are still open in Prism Central but no longer match
+        the configured resource_filters. No resolution event or metric is emitted: the
+        alert is not resolved, it's just no longer in scope for this integration. Per-alert
+        monitors auto-recover naturally once heartbeats stop landing.
+        """
+        for ext_id in filter_excluded_ids:
+            self._open_alerts.pop(ext_id, None)
+            self.check.log.info(
+                "[%s] Alert %s no longer matches resource_filters; dropping from tracking "
+                "without emitting a resolution event.",
+                self._pc_label,
+                ext_id,
+            )
 
     def _reemit_cached_gauges(self) -> None:
         """Keep per-alert monitors firing while the unresolved-alerts API is unavailable."""
@@ -240,14 +262,21 @@ class ActivityMonitor:
         return len(new_ids)
 
     def _emit_resolved_alerts(self, gone_ids: frozenset[str]) -> int:
+        emitted = 0
         for ext_id in gone_ids:
             cached = self._open_alerts.pop(ext_id)
             # GET-by-id is required: the cached payload only has the open-state alert, but
             # the resolution event needs resolvedTime / resolvedByUsername / isAutoResolved
             # which only exist on the post-resolution payload.
-            resolved = self._get_alert(ext_id)
+            try:
+                resolved = self._get_alert(ext_id)
+            except HTTPError:
+                # Transient HTTP failure (already logged in _get_alert). Restore tracking
+                # so we retry on the next cycle rather than misclassifying as deleted.
+                self._open_alerts[ext_id] = cached
+                continue
             if resolved is None:
-                # The alert is gone from the unresolved list AND the GET-by-id returned None:
+                # The alert is gone from the unresolved list AND the GET-by-id returned 404:
                 # the alert was deleted in Prism Central, not resolved. We still emit a
                 # resolution event from cached metadata, but it carries no resolvedBy /
                 # resolvedTime / isAutoResolved, so operators will see a bare "Resolved".
@@ -258,7 +287,8 @@ class ActivityMonitor:
                     ext_id,
                 )
             self._emit_resolution_event(resolved or cached, cached_tags_alert=cached)
-        return len(gone_ids)
+            emitted += 1
+        return emitted
 
     def _emit_alert_transitions(self, still_tracked: set[str], api_alerts: dict[str, dict]) -> set[str]:
         transitioned: set[str] = set()
@@ -309,14 +339,22 @@ class ActivityMonitor:
         return filtered
 
     def _get_alert(self, alert_ext_id: str) -> dict | None:
-        """Fetch an alert detail by ID, deduplicated within a single check run."""
+        """Fetch an alert detail by ID, deduplicated within a single check run.
+
+        Returns None only when Prism Central confirms the alert no longer exists (HTTP 404).
+        Transient failures (5xx, network, JSON decode) propagate so the caller does not
+        misclassify them as deletions and emit degraded resolution events.
+        """
         if cached := self._alert_fetch_cache.get(alert_ext_id):
             return cached
         try:
             alert = self.check._get_request_data(f"api/monitoring/v4.0/serviceability/alerts/{alert_ext_id}")
-        except Exception as e:
-            self.check.log.debug("[%s] Failed to fetch alert %s: %s", self._pc_label, alert_ext_id, e)
-            return None
+        except HTTPError as e:
+            if e.response is not None and e.response.status_code == 404:
+                self.check.log.debug("[%s] Alert %s not found (404).", self._pc_label, alert_ext_id)
+                return None
+            self.check.log.warning("[%s] Transient HTTP error fetching alert %s: %s", self._pc_label, alert_ext_id, e)
+            raise
         if alert:
             self._alert_fetch_cache[alert_ext_id] = alert
         return alert

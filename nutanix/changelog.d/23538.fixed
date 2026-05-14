@@ -1,0 +1,3 @@
+Propagate transient HTTP errors when fetching alert details so they are not silently misclassified as deletions, preserving tracking for the next retry.
+
+Stop emitting a spurious resolution event and ``nutanix.alert.resolved`` count when a tracked alert becomes filter-excluded mid-life; the alert is dropped from tracking silently since it is still open in Prism Central.
