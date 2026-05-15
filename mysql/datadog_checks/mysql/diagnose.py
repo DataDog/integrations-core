@@ -27,6 +27,8 @@ from typing import Any
 
 import pymysql
 
+from datadog_checks.base import is_affirmative
+
 from .util import DatabaseConfigurationError, connect_with_session_variables
 from .version_utils import parse_version
 
@@ -39,6 +41,10 @@ MIN_MYSQL_VERSION = (5, 6, 0)
 MIN_MARIADB_VERSION = (10, 5, 0)
 RECOMMENDED_DIGEST_LENGTH = 4096
 RECOMMENDED_SQL_TEXT_LENGTH = 4096
+DEFAULT_DBM_PROCEDURE_SCHEMA = "datadog"
+DEFAULT_EXPLAIN_PROCEDURE = "datadog.explain_statement"
+DEFAULT_ENABLE_CONSUMERS_PROCEDURE = "datadog.enable_events_statements_consumers"
+PROCESS_GRANT_PROBE_QUERY = "SHOW /*!50000 ENGINE*/ INNODB STATUS"
 
 # pymysql error codes we react to.
 ER_ACCESS_DENIED = 1045
@@ -112,23 +118,25 @@ DIAGNOSTIC_METADATA: dict[Any, dict[str, str]] = {
         "docs_url": SETUP_DOCS_URL,
     },
     MySqlDiagnoseCode.missing_datadog_schema: {
-        "description": "Verifies the `datadog` schema exists for DBM helper procedures.",
-        "remediation": "CREATE SCHEMA IF NOT EXISTS datadog; GRANT EXECUTE ON datadog.* TO datadog@'%';",
+        "description": "Verifies the configured DBM helper procedure schema exists.",
+        "remediation": (
+            "Create the schema containing the configured DBM helper procedures and grant EXECUTE on it to datadog@'%'."
+        ),
         "docs_url": SETUP_DOCS_URL,
     },
     MySqlDiagnoseCode.missing_execute_on_datadog: {
-        "description": "Verifies the datadog user has EXECUTE on procedures in the `datadog` schema.",
-        "remediation": "GRANT EXECUTE ON datadog.* TO datadog@'%';",
+        "description": "Verifies the datadog user has EXECUTE on the configured DBM helper procedures.",
+        "remediation": "GRANT EXECUTE on the schema containing the configured DBM helper procedures to datadog@'%';",
         "docs_url": SETUP_DOCS_URL,
     },
     MySqlDiagnoseCode.enable_events_statements_procedure_missing: {
         "description": (
-            "Verifies the optional `datadog.enable_events_statements_consumers` procedure exists "
-            "so the Agent can enable required consumers at runtime."
+            "Verifies the configured events-statements enable procedure exists so the Agent can enable "
+            "required consumers at runtime."
         ),
         "remediation": (
-            "Create `datadog.enable_events_statements_consumers` per the setup docs, or enable the "
-            "events_statements_* consumers manually in performance_schema.setup_consumers."
+            "Create the configured events-statements enable procedure per the setup docs, or enable "
+            "the events_statements_* consumers manually in performance_schema.setup_consumers."
         ),
         "docs_url": SETUP_DOCS_URL,
     },
@@ -152,7 +160,7 @@ DIAGNOSTIC_METADATA: dict[Any, dict[str, str]] = {
     DatabaseConfigurationError.events_statements_consumer_missing: {
         "description": (
             "Verifies at least one `events_statements_*` consumer is enabled in "
-            "performance_schema.setup_consumers, required for query metrics and samples."
+            "performance_schema.setup_consumers, required for query samples."
         ),
         "remediation": (
             "UPDATE performance_schema.setup_consumers SET enabled='YES' WHERE name LIKE 'events_statements_%'; "
@@ -173,9 +181,12 @@ DIAGNOSTIC_METADATA: dict[Any, dict[str, str]] = {
         "docs_url": TROUBLESHOOTING_DOCS_URL,
     },
     DatabaseConfigurationError.explain_plan_fq_procedure_missing: {
-        "description": "Verifies the `datadog.explain_statement` procedure exists for execution-plan collection.",
+        "description": (
+            "Verifies the configured fully qualified explain procedure exists for execution-plan collection."
+        ),
         "remediation": (
-            "Create `datadog.explain_statement` (and grant EXECUTE on it to the datadog user) per the setup docs."
+            "Create the configured fully qualified explain procedure and grant EXECUTE on it to the datadog user "
+            "per the setup docs."
         ),
         "docs_url": SETUP_DOCS_URL,
     },
@@ -240,16 +251,16 @@ class MySqlDiagnose:
     def _run_dbm_probes(self, db: Any) -> None:
         """Cluster-level DBM probes -- consumer state, instrument timing, helper objects."""
         config = self._check._config
-        query_samples_enabled = config.statement_samples_config.get("enabled", True)
-        query_metrics_enabled = config.statement_metrics_config.get("enabled", True)
-        query_activity_enabled = config.activity_config.get("enabled", True)
+        query_samples_enabled = is_affirmative(config.statement_samples_config.get("enabled", True))
+        query_metrics_enabled = is_affirmative(config.statement_metrics_config.get("enabled", True))
+        query_activity_enabled = is_affirmative(config.activity_config.get("enabled", True))
 
         # Don't pile failures on top of an OFF performance_schema -- every consumer/instrument
         # probe below would just point at a switch the user already needs to flip.
         if DatabaseConfigurationError.performance_schema_not_enabled.value in self._failed:
             return
 
-        if query_samples_enabled or query_metrics_enabled:
+        if query_samples_enabled:
             self._diagnose_events_statements_consumer(db)
             self._diagnose_statement_time_instrumentation(db)
         if query_activity_enabled:
@@ -259,10 +270,13 @@ class MySqlDiagnose:
         if query_samples_enabled and not self._is_mariadb and self._mysql_ge((5, 7, 0)):
             self._diagnose_sql_text_length(db)
         if query_samples_enabled:
-            datadog_schema_present = self._diagnose_datadog_schema(db)
-            if datadog_schema_present:
-                self._diagnose_explain_procedure(db)
-                self._diagnose_enable_consumers_procedure(db)
+            explain_procedure = self._explain_procedure_name()
+            enable_procedure = self._enable_consumers_procedure_name()
+            present_schemas = self._diagnose_dbm_procedure_schemas(db, [explain_procedure, enable_procedure])
+            if _procedure_schema(explain_procedure) in present_schemas:
+                self._diagnose_explain_procedure(db, explain_procedure)
+            if _procedure_schema(enable_procedure) in present_schemas:
+                self._diagnose_enable_consumers_procedure(db, enable_procedure)
 
     # -- gating helpers -------------------------------------------------------
 
@@ -279,7 +293,7 @@ class MySqlDiagnose:
         return bool(config.options.get("extra_performance_metrics"))
 
     def _needs_index_metrics_probes(self) -> bool:
-        return bool(self._check._config.index_config.get("enabled", False))
+        return is_affirmative(self._check._config.index_config.get("enabled", True))
 
     def _needs_schema_collection_probes(self) -> bool:
         return bool(self._check._config.schemas_config.get("enabled", False))
@@ -352,8 +366,8 @@ class MySqlDiagnose:
     def _diagnose_process_grant(self, db: Any) -> None:
         code = MySqlDiagnoseCode.missing_grant_process
         try:
-            _execute_read_probe(db, "SELECT 1 FROM information_schema.PROCESSLIST LIMIT 1")
-        except pymysql.err.OperationalError as e:
+            _execute_read_probe(db, PROCESS_GRANT_PROBE_QUERY)
+        except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             if _pymysql_errno(e) in (ER_SPECIFIC_ACCESS_DENIED, ER_TABLEACCESS_DENIED):
                 self._fail(
                     code,
@@ -469,7 +483,7 @@ class MySqlDiagnose:
             code,
             diagnosis=(
                 "No events_statements_* consumers are enabled in performance_schema.setup_consumers; "
-                "query metrics and samples cannot be collected."
+                "query samples cannot be collected."
             ),
         )
 
@@ -573,36 +587,40 @@ class MySqlDiagnose:
             remediation=build_remediation(code),
         )
 
-    def _diagnose_datadog_schema(self, db: Any) -> bool:
-        """Return True when the schema exists. Caller chains the procedure probes off this."""
+    def _diagnose_dbm_procedure_schemas(self, db: Any, procedures: list[str]) -> set[str]:
+        """Return the configured DBM helper schemas that exist."""
         code = MySqlDiagnoseCode.missing_datadog_schema
+        schemas = sorted({_procedure_schema(procedure) for procedure in procedures})
+        if not schemas:
+            return set()
+        placeholders = ", ".join(["%s"] * len(schemas))
         try:
             rows = _fetchall(
                 db,
-                "SELECT SCHEMA_NAME FROM information_schema.SCHEMATA WHERE SCHEMA_NAME='datadog'",
+                "SELECT SCHEMA_NAME FROM information_schema.SCHEMATA WHERE SCHEMA_NAME IN ({})".format(placeholders),
+                tuple(schemas),
             )
         except pymysql.err.OperationalError as e:
-            self._check.log.debug("datadog schema probe failed: %s", e)
-            return False
-        if rows:
+            self._check.log.debug("DBM helper schema probe failed: %s", e)
+            return set()
+        present = {row[0] for row in rows if row}
+        missing = sorted(set(schemas) - present)
+        if not missing:
             self._check.diagnosis.success(
                 name=code.value,
-                diagnosis="`datadog` schema exists.",
+                diagnosis="Configured DBM helper procedure schema(s) exist: {}.".format(", ".join(schemas)),
                 category=self._category,
             )
-            return True
+            return present
         self._fail(
             code,
-            diagnosis="`datadog` schema is missing; DBM helper procedures cannot be created or called.",
+            diagnosis="Configured DBM helper procedure schema(s) missing: {}.".format(", ".join(missing)),
         )
-        return False
+        return present
 
-    def _diagnose_explain_procedure(self, db: Any) -> None:
+    def _diagnose_explain_procedure(self, db: Any, explain_procedure: str) -> None:
         fq_code = DatabaseConfigurationError.explain_plan_fq_procedure_missing
         exec_code = MySqlDiagnoseCode.missing_execute_on_datadog
-        explain_procedure = self._check._config.statement_samples_config.get(
-            "fully_qualified_explain_procedure", "datadog.explain_statement"
-        )
         try:
             with closing(db.cursor()) as cursor:
                 cursor.execute("CALL {}(%s)".format(explain_procedure), ("SELECT 1",))
@@ -644,15 +662,12 @@ class MySqlDiagnose:
         )
         self._check.diagnosis.success(
             name=exec_code.value,
-            diagnosis="EXECUTE on datadog.* is granted.",
+            diagnosis="EXECUTE on {} is granted.".format(explain_procedure),
             category=self._category,
         )
 
-    def _diagnose_enable_consumers_procedure(self, db: Any) -> None:
+    def _diagnose_enable_consumers_procedure(self, db: Any, procedure: str) -> None:
         code = MySqlDiagnoseCode.enable_events_statements_procedure_missing
-        procedure = self._check._config.statement_samples_config.get(
-            "events_statements_enable_procedure", "datadog.enable_events_statements_consumers"
-        )
         try:
             rows = _fetchall(
                 db,
@@ -680,6 +695,16 @@ class MySqlDiagnose:
             category=self._category,
             description=meta["description"],
             remediation=build_remediation(code),
+        )
+
+    def _explain_procedure_name(self) -> str:
+        return self._check._config.statement_samples_config.get(
+            "fully_qualified_explain_procedure", DEFAULT_EXPLAIN_PROCEDURE
+        )
+
+    def _enable_consumers_procedure_name(self) -> str:
+        return self._check._config.statement_samples_config.get(
+            "events_statements_enable_procedure", DEFAULT_ENABLE_CONSUMERS_PROCEDURE
         )
 
     def _diagnose_innodb_index_stats_grant(self, db: Any) -> None:
@@ -887,4 +912,8 @@ def _split_procedure(name: str) -> tuple[str, str]:
     if "." in name:
         schema, proc = name.split(".", 1)
         return schema, proc
-    return "datadog", name
+    return DEFAULT_DBM_PROCEDURE_SCHEMA, name
+
+
+def _procedure_schema(name: str) -> str:
+    return _split_procedure(name)[0]

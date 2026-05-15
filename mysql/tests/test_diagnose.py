@@ -126,11 +126,12 @@ def _happy_responses(*, version="8.0.36", performance_schema_on=True, mariadb=Fa
         version = "{}-MariaDB".format(version)
     responses = [
         ("SELECT VERSION()", [(version, version_comment)]),
-        ("information_schema.PROCESSLIST", [(1,)]),
+        ("SHOW /*!50000 ENGINE*/ INNODB STATUS", [(1,)]),
         ("performance_schema.setup_consumers LIMIT 1", [(1,)]),
         (_variable("performance_schema"), [("performance_schema", "ON" if performance_schema_on else "OFF")]),
         ("SHOW REPLICA STATUS", []),
         ("SHOW SLAVE STATUS", []),
+        ("mysql.innodb_index_stats", [(1,)]),
     ]
     if dbm and performance_schema_on:
         responses += [
@@ -146,7 +147,7 @@ def _happy_responses(*, version="8.0.36", performance_schema_on=True, mariadb=Fa
                 _variable("performance_schema_max_sql_text_length"),
                 [("performance_schema_max_sql_text_length", "4096")],
             ),
-            ("SCHEMATA WHERE SCHEMA_NAME='datadog'", [("datadog",)]),
+            ("information_schema.SCHEMATA", [("datadog",)]),
             ("CALL datadog.explain_statement", [(1,)]),
             ("ROUTINE_TYPE='PROCEDURE'", [(1,)]),
         ]
@@ -262,7 +263,7 @@ def test_missing_process_grant():
     check = _make_check({"dbm": False})
     responses = _replace(
         _happy_responses(dbm=False),
-        "information_schema.PROCESSLIST",
+        "SHOW /*!50000 ENGINE*/ INNODB STATUS",
         _oerr(1227, "Access denied; you need (at least one of) the PROCESS privilege"),
     )
     with _patched_connect(responses):
@@ -365,7 +366,7 @@ def test_explain_procedure_execute_denied_fails_execute_grant():
 
 def test_datadog_schema_missing_skips_procedure_probes():
     check = _make_check({"dbm": True})
-    responses = _replace(_happy_responses(), "SCHEMATA WHERE SCHEMA_NAME='datadog'", [])
+    responses = _replace(_happy_responses(), "information_schema.SCHEMATA", [])
     with _patched_connect(responses):
         diagnoses = _diagnoses(check)
 
@@ -404,21 +405,32 @@ def test_sql_text_length_skipped_on_mariadb():
     assert not _by_name(diagnoses, MySqlDiagnoseCode.performance_schema_sql_text_too_small.value)
 
 
-def test_index_metrics_grant_probe_only_runs_when_enabled():
-    check = _make_check({"dbm": False, "index_metrics": {"enabled": True}})
-    responses = _happy_responses(dbm=False)
-    responses.append(("mysql.innodb_index_stats", [(1,)]))
-    with _patched_connect(responses):
+def test_index_metrics_grant_probe_runs_by_default():
+    check = _make_check({"dbm": False})
+    with _patched_connect(_happy_responses(dbm=False)):
         diagnoses = _diagnoses(check)
 
     row = _by_name(diagnoses, MySqlDiagnoseCode.missing_grant_innodb_index_stats.value)[0]
     assert row["result"] == Diagnosis.DIAGNOSIS_SUCCESS
 
 
+def test_index_metrics_grant_probe_skips_when_disabled():
+    check = _make_check({"dbm": False, "index_metrics": {"enabled": False}})
+    responses = [
+        (m, r)
+        for m, r in _happy_responses(dbm=False)
+        if (isinstance(m, str) and "mysql.innodb_index_stats" not in m) or callable(m)
+    ]
+    with _patched_connect(responses):
+        diagnoses = _diagnoses(check)
+
+    assert not _by_name(diagnoses, MySqlDiagnoseCode.missing_grant_innodb_index_stats.value)
+
+
 def test_index_metrics_grant_probe_fails_on_denied():
-    check = _make_check({"dbm": False, "index_metrics": {"enabled": True}})
+    check = _make_check({"dbm": False})
     responses = _happy_responses(dbm=False)
-    responses.append(("mysql.innodb_index_stats", _oerr(1142, "SELECT command denied")))
+    responses = _replace(responses, "mysql.innodb_index_stats", _oerr(1142, "SELECT command denied"))
     with _patched_connect(responses):
         diagnoses = _diagnoses(check)
 
@@ -428,19 +440,57 @@ def test_index_metrics_grant_probe_fails_on_denied():
 
 def test_query_samples_disabled_skips_explain_probe():
     check = _make_check({"dbm": True, "query_samples": {"enabled": False}})
-    # No CALL or ROUTINE_TYPE responses provided -- the test fails if they're queried.
+    # No sample-only responses provided -- the test fails if they're queried.
     responses = _happy_responses()
-    # strip the call/routines responses since they should never be triggered
     responses = [
         (m, r)
         for m, r in responses
         if (isinstance(m, str) and "CALL datadog.explain_statement" not in m and "ROUTINE_TYPE" not in m) or callable(m)
     ]
+    responses = [
+        (m, r)
+        for m, r in responses
+        if (
+            isinstance(m, str)
+            and "WHERE name LIKE 'events_statements_%'" not in m
+            and "WHERE name LIKE 'statement/%%' AND timed='YES'" not in m
+            and "information_schema.SCHEMATA" not in m
+        )
+        or callable(m)
+    ]
     with _patched_connect(responses):
         diagnoses = _diagnoses(check)
 
+    assert not _by_name(diagnoses, DatabaseConfigurationError.events_statements_consumer_missing.value)
+    assert not _by_name(diagnoses, DatabaseConfigurationError.events_statements_time_instrumentation_not_enabled.value)
     assert not _by_name(diagnoses, DatabaseConfigurationError.explain_plan_fq_procedure_missing.value)
     assert not _by_name(diagnoses, MySqlDiagnoseCode.missing_datadog_schema.value)
+
+
+def test_query_samples_honor_custom_procedure_schema():
+    check = _make_check(
+        {
+            "dbm": True,
+            "query_samples": {
+                "fully_qualified_explain_procedure": "monitoring.explain_statement",
+                "events_statements_enable_procedure": "monitoring.enable_events_statements_consumers",
+            },
+        }
+    )
+    responses = _happy_responses()
+    responses = _replace(responses, "information_schema.SCHEMATA", [("monitoring",)])
+    responses = _replace(responses, "CALL datadog.explain_statement", AssertionError("queried default explain proc"))
+    responses = _replace(responses, "ROUTINE_TYPE='PROCEDURE'", [(1,)])
+    responses += [("CALL monitoring.explain_statement", [(1,)])]
+
+    with _patched_connect(responses):
+        diagnoses = _diagnoses(check)
+
+    schema_row = _by_name(diagnoses, MySqlDiagnoseCode.missing_datadog_schema.value)[0]
+    assert schema_row["result"] == Diagnosis.DIAGNOSIS_SUCCESS
+    assert "monitoring" in schema_row["diagnosis"]
+    explain_row = _by_name(diagnoses, DatabaseConfigurationError.explain_plan_fq_procedure_missing.value)[0]
+    assert explain_row["result"] == Diagnosis.DIAGNOSIS_SUCCESS
 
 
 def test_schema_collection_warning_on_partial_select():
