@@ -124,9 +124,7 @@ class ReadMessages(BaseModel):
         examples=['snappy'],
     )
     key_format: Optional[str] = Field(
-        'json',
-        description='Message key format. Same supported set as value_format\n(including msgpack / protobuf_msgpack via the\nkafka_deserializers plugin).\n',
-        examples=['json'],
+        'json', description='Message key format. Same supported set as value_format.\n', examples=['json']
     )
     key_schema: Optional[str] = Field(None, description='Schema definition for protobuf/avro key')
     key_skip_bytes: Optional[int] = Field(
@@ -161,12 +159,12 @@ class ReadMessages(BaseModel):
     topic: str = Field(..., description='Topic to read messages from', examples=['orders'])
     value_compression: Optional[str] = Field(
         None,
-        description='Compression codec to apply to the message value BEFORE format\ndeserialization. Codecs are loaded from registered plugins under\nthe ``datadog_kafka_actions.compressions`` entry-point group; no\ncodecs ship in core. Common values when the ``kafka_deserializers``\nplugin is installed: ``gzip``, ``zlib``, ``snappy``, ``lz4``,\n``lz4_dd_hdr``, ``zstd``. Empty / unset = no decompression.\n',
+        description='Compression codec to apply to the message value BEFORE format\ndeserialization. Codecs are loaded from registered plugins on the\n``datadog_kafka_actions.compressions`` entry-point group; no\ncodecs ship in core. Empty / unset = no decompression.\n',
         examples=['gzip'],
     )
     value_format: Optional[str] = Field(
         'json',
-        description='Message value format.\n\nBuilt-in formats:\n- json: JSON data (strict validation, fails if not valid JSON)\n- bson: BSON (Binary JSON) data\n- string: Plain UTF-8 text (use for non-JSON text messages)\n- raw: Pass-through bytes (base64-encoded in output)\n- protobuf: Protocol Buffers (value_schema is the base64 FileDescriptorSet)\n- avro: Apache Avro (value_schema is the JSON schema)\n\nPlugin formats (require the kafka_deserializers wheel installed\nalongside this check; loaded via the\n``datadog_kafka_actions.formats`` entry-point group):\n- msgpack: MessagePack\n- protobuf_msgpack: Protobuf envelope whose bytes fields can\n  carry msgpack payloads. value_schema is a JSON wrapper of the\n  form {"schema": "<base64 FileDescriptorSet>",\n  "msgpack_fields": ["pkg.Msg.field"]}.\n\nNote: If any message fails deserialization, the read_messages action will stop immediately.\nEnsure the format matches the actual messages in your topic.\n',
+        description='Message value format.\n\nBuilt-in formats:\n- json: JSON data (strict validation, fails if not valid JSON)\n- bson: BSON (Binary JSON) data\n- string: Plain UTF-8 text (use for non-JSON text messages)\n- raw: Pass-through bytes (base64-encoded in output)\n- protobuf: Protocol Buffers (value_schema is the base64 FileDescriptorSet)\n- avro: Apache Avro (value_schema is the JSON schema)\n\nAdditional formats may be available if a plugin wheel registered on\nthe ``datadog_kafka_actions.formats`` entry-point group is installed\nalongside this check.\n\nNote: If any message fails deserialization, the read_messages action will stop immediately.\nEnsure the format matches the actual messages in your topic.\n',
         examples=['json'],
     )
     value_schema: Optional[str] = Field(None, description='Schema definition for protobuf/avro value')

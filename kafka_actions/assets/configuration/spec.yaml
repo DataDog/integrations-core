@@ -283,14 +283,9 @@ files:
             - protobuf: Protocol Buffers (value_schema is the base64 FileDescriptorSet)
             - avro: Apache Avro (value_schema is the JSON schema)
 
-            Plugin formats (require the kafka_deserializers wheel installed
-            alongside this check; loaded via the
-            ``datadog_kafka_actions.formats`` entry-point group):
-            - msgpack: MessagePack
-            - protobuf_msgpack: Protobuf envelope whose bytes fields can
-              carry msgpack payloads. value_schema is a JSON wrapper of the
-              form {"schema": "<base64 FileDescriptorSet>",
-              "msgpack_fields": ["pkg.Msg.field"]}.
+            Additional formats may be available if a plugin wheel registered on
+            the ``datadog_kafka_actions.formats`` entry-point group is installed
+            alongside this check.
 
             Note: If any message fails deserialization, the read_messages action will stop immediately.
             Ensure the format matches the actual messages in your topic.
@@ -318,9 +313,7 @@ files:
         - name: key_format
           type: string
           description: |
-            Message key format. Same supported set as value_format
-            (including msgpack / protobuf_msgpack via the
-            kafka_deserializers plugin).
+            Message key format. Same supported set as value_format.
           default: json
           example: json
         - name: key_schema
@@ -341,11 +334,9 @@ files:
           type: string
           description: |
             Compression codec to apply to the message value BEFORE format
-            deserialization. Codecs are loaded from registered plugins under
-            the ``datadog_kafka_actions.compressions`` entry-point group; no
-            codecs ship in core. Common values when the ``kafka_deserializers``
-            plugin is installed: ``gzip``, ``zlib``, ``snappy``, ``lz4``,
-            ``lz4_dd_hdr``, ``zstd``. Empty / unset = no decompression.
+            deserialization. Codecs are loaded from registered plugins on the
+            ``datadog_kafka_actions.compressions`` entry-point group; no
+            codecs ship in core. Empty / unset = no decompression.
           example: gzip
         - name: key_compression
           type: string
