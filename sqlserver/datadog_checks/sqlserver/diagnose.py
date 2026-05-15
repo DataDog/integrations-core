@@ -15,7 +15,8 @@ from typing import Any
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.sqlserver.connection_errors import SQLConnectionError
-from datadog_checks.sqlserver.const import ENGINE_EDITION_SQL_DATABASE, STATIC_INFO_ENGINE_EDITION
+from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION
+from datadog_checks.sqlserver.utils import is_azure_sql_database
 
 CATEGORY_SQLSERVER = "sqlserver"
 KEY_PREFIX = "sqlserver-diagnose-"
@@ -23,6 +24,7 @@ MIN_SUPPORTED_MAJOR_VERSION = 11
 SQLSERVER_2014_MAJOR_VERSION = 12
 
 SQLSERVER_SETUP_DOCS_URL = "https://docs.datadoghq.com/integrations/sql-server/?tab=host#setup"
+SQLSERVER_TROUBLESHOOTING_DOCS_URL = "https://docs.datadoghq.com/database_monitoring/setup_sql_server/troubleshooting/"
 SQLSERVER_DBM_GRANTS_DOCS_URL = (
     "https://docs.datadoghq.com/database_monitoring/setup_sql_server/selfhosted/"
     "?tab=sqlserver2014#grant-the-agent-access"
@@ -45,7 +47,7 @@ DIAGNOSTIC_METADATA = {
     SQLServerConfigurationError.connection_failure: {
         "description": "Verifies that the Agent can connect to the configured SQL Server database.",
         "remediation": "Review the SQL Server host, port, driver, authentication, and TLS settings.",
-        "docs_url": SQLSERVER_SETUP_DOCS_URL,
+        "docs_url": (SQLSERVER_SETUP_DOCS_URL, SQLSERVER_TROUBLESHOOTING_DOCS_URL),
     },
     SQLServerConfigurationError.sqlserver_version_unsupported: {
         "description": "Verifies that SQL Server is a supported version for the integration.",
@@ -86,7 +88,9 @@ DIAGNOSTIC_METADATA = {
 def build_remediation(code: SQLServerConfigurationError) -> str:
     """Return remediation text with the relevant Datadog docs URL."""
     metadata = DIAGNOSTIC_METADATA[code]
-    return "{} See {}.".format(metadata["remediation"], metadata["docs_url"])
+    docs_url = metadata["docs_url"]
+    docs_urls = docs_url if isinstance(docs_url, tuple) else (docs_url,)
+    return "{} See {}.".format(metadata["remediation"], " and ".join(docs_urls))
 
 
 def run_diagnostics(check: Any) -> None:
@@ -196,7 +200,7 @@ class SqlserverDiagnose:
 
     def _diagnose_view_server_state(self, cursor: Any) -> None:
         code = SQLServerConfigurationError.missing_view_server_state
-        azure = self._is_azure_sql_database()
+        azure = is_azure_sql_database(self._current_engine_edition())
         permission_label = "VIEW DATABASE STATE" if azure else "VIEW SERVER STATE"
         try:
             if azure:
@@ -302,14 +306,14 @@ class SqlserverDiagnose:
 
     def _needs_connect_any_database(self) -> bool:
         config = self._check._config
-        return not self._is_azure_sql_database() and (
+        return not is_azure_sql_database(self._current_engine_edition()) and (
             config.dbm_enabled or (self._collects_regular_metrics() and config.autodiscovery)
         )
 
     def _needs_view_any_definition(self) -> bool:
         config = self._check._config
         database_metrics = config.database_metrics_config
-        if self._is_azure_sql_database():
+        if is_azure_sql_database(self._current_engine_edition()):
             return False
         if config.dbm_enabled:
             return True
@@ -318,7 +322,7 @@ class SqlserverDiagnose:
         return database_metrics["ao_metrics"]["enabled"] or database_metrics["master_files_metrics"]["enabled"]
 
     def _needs_msdb_select(self) -> bool:
-        if self._is_azure_sql_database():
+        if is_azure_sql_database(self._current_engine_edition()):
             return False
         if self._agent_jobs_enabled():
             return True
@@ -375,9 +379,8 @@ class SqlserverDiagnose:
         config = self._check._config
         return config.dbm_enabled and is_affirmative(config.agent_jobs_config.get('enabled', False))
 
-    def _is_azure_sql_database(self) -> bool:
-        engine_edition = self._engine_edition or self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
-        return engine_edition == ENGINE_EDITION_SQL_DATABASE
+    def _current_engine_edition(self) -> int | None:
+        return self._engine_edition or self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
 
     def _detect_rds(self, cursor: Any) -> None:
         try:

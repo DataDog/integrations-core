@@ -10,7 +10,11 @@ from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.diagnose import Diagnosis
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection_errors import SQLConnectionError
-from datadog_checks.sqlserver.diagnose import SQLServerConfigurationError
+from datadog_checks.sqlserver.diagnose import (
+    SQLSERVER_SETUP_DOCS_URL,
+    SQLSERVER_TROUBLESHOOTING_DOCS_URL,
+    SQLServerConfigurationError,
+)
 
 from .common import CHECK_NAME
 
@@ -174,6 +178,8 @@ def test_connection_failure(instance_minimal_defaults):
     assert len(rows) == 1
     assert rows[0]['result'] == Diagnosis.DIAGNOSIS_FAIL
     assert "login failed for user" in rows[0]['diagnosis']
+    assert SQLSERVER_SETUP_DOCS_URL in rows[0]['remediation']
+    assert SQLSERVER_TROUBLESHOOTING_DOCS_URL in rows[0]['remediation']
 
 
 def test_connection_configuration_error(instance_minimal_defaults):
