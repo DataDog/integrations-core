@@ -16,12 +16,14 @@ from typing import Any
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.sqlserver.connection_errors import SQLConnectionError
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION
-from datadog_checks.sqlserver.utils import is_azure_sql_database
+from datadog_checks.sqlserver.utils import is_azure_database, is_azure_sql_database
 
 CATEGORY_SQLSERVER = "sqlserver"
 KEY_PREFIX = "sqlserver-diagnose-"
 MIN_SUPPORTED_MAJOR_VERSION = 11
 SQLSERVER_2014_MAJOR_VERSION = 12
+PER_DATABASE_PROBE_LIMIT = 50
+SYSTEM_DATABASES = ("master", "tempdb", "model", "msdb")
 
 SQLSERVER_SETUP_DOCS_URL = "https://docs.datadoghq.com/integrations/sql-server/?tab=host#setup"
 SQLSERVER_TROUBLESHOOTING_DOCS_URL = "https://docs.datadoghq.com/database_monitoring/setup_sql_server/troubleshooting/"
@@ -38,9 +40,12 @@ class SQLServerConfigurationError(Enum):
     sqlserver_version_unsupported = "sqlserver-version-unsupported"
     performance_counters_not_readable = "performance-counters-not-readable"
     missing_view_server_state = "missing-view-server-state"
+    missing_view_database_performance_state = "missing-view-database-performance-state"
     missing_connect_any_database = "missing-connect-any-database"
     missing_view_any_definition = "missing-view-any-definition"
     missing_msdb_select = "missing-msdb-select"
+    odbc_driver_not_installed = "odbc-driver-not-installed"
+    per_database_access = "per-database-access"
 
 
 DIAGNOSTIC_METADATA = {
@@ -67,6 +72,17 @@ DIAGNOSTIC_METADATA = {
         "remediation": "Grant VIEW SERVER STATE (or VIEW DATABASE STATE on Azure SQL Database) to the Datadog login.",
         "docs_url": SQLSERVER_SETUP_DOCS_URL,
     },
+    SQLServerConfigurationError.missing_view_database_performance_state: {
+        "description": (
+            "Verifies VIEW DATABASE PERFORMANCE STATE on Azure SQL Database / Managed Instance, required by "
+            "sys.dm_io_virtual_file_stats and the DBM query activity DMVs."
+        ),
+        "remediation": (
+            "Grant VIEW DATABASE PERFORMANCE STATE to the Datadog login on the current database "
+            "(Azure SQL Database / Managed Instance only)."
+        ),
+        "docs_url": SQLSERVER_DBM_GRANTS_DOCS_URL,
+    },
     SQLServerConfigurationError.missing_connect_any_database: {
         "description": "Verifies CONNECT ANY DATABASE when the check can fan out across databases.",
         "remediation": "Grant CONNECT ANY DATABASE to the Datadog login.",
@@ -81,6 +97,23 @@ DIAGNOSTIC_METADATA = {
         "description": "Verifies read access to enabled SQL Server features backed by msdb tables.",
         "remediation": "Create the Datadog user in msdb and grant SELECT on the required msdb tables.",
         "docs_url": SQLSERVER_SETUP_DOCS_URL,
+    },
+    SQLServerConfigurationError.odbc_driver_not_installed: {
+        "description": "Verifies that the configured ODBC driver is installed on the Agent host.",
+        "remediation": (
+            "Install the configured ODBC driver, or update the 'driver' setting to match an installed driver."
+        ),
+        "docs_url": SQLSERVER_SETUP_DOCS_URL,
+    },
+    SQLServerConfigurationError.per_database_access: {
+        "description": (
+            "Verifies the Datadog login can connect to each database that database autodiscovery would monitor."
+        ),
+        "remediation": (
+            "Grant the Datadog login access to the listed databases (CREATE USER ... FOR LOGIN; "
+            "GRANT VIEW DATABASE STATE) and confirm they are online."
+        ),
+        "docs_url": SQLSERVER_DBM_GRANTS_DOCS_URL,
     },
 }
 
@@ -115,6 +148,8 @@ class SqlserverDiagnose:
         self._engine_edition = None
         self._is_rds = None
 
+        self._diagnose_odbc_driver_installed()
+
         try:
             with self._check.connection.open_managed_default_connection(KEY_PREFIX):
                 with self._check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
@@ -124,6 +159,8 @@ class SqlserverDiagnose:
                         self._diagnose_performance_counters(cursor)
                     if self._needs_view_server_state():
                         self._diagnose_view_server_state(cursor)
+                    if self._needs_view_database_performance_state():
+                        self._diagnose_view_database_performance_state(cursor)
                     if self._needs_connect_any_database():
                         self._diagnose_connect_any_database(cursor)
                     if self._needs_view_any_definition():
@@ -131,6 +168,8 @@ class SqlserverDiagnose:
                     if self._needs_msdb_select():
                         self._detect_rds(cursor)
                         self._diagnose_msdb_select(cursor)
+                    if self._needs_per_database_access():
+                        self._diagnose_per_database_access(cursor)
         except (ConfigurationError, SQLConnectionError) as e:
             code = SQLServerConfigurationError.connection_failure
             self._fail(
@@ -145,6 +184,25 @@ class SqlserverDiagnose:
             name=code.value,
             diagnosis="Connected to {} as {}.".format(self._database_desc(), self._username_desc()),
             category=CATEGORY_SQLSERVER,
+        )
+
+    def _diagnose_odbc_driver_installed(self) -> None:
+        if self._resolved_connector() != "odbc":
+            return
+        configured = self._check.instance.get("driver")
+        if not configured:
+            return
+        installed = _list_pyodbc_drivers()
+        if installed is None:
+            return
+        if _normalize_driver_name(configured) in installed:
+            return
+        code = SQLServerConfigurationError.odbc_driver_not_installed
+        self._fail(
+            code,
+            diagnosis="Configured ODBC driver {!r} is not in the list of installed drivers: {}".format(
+                configured, installed
+            ),
         )
 
     def _diagnose_version(self, cursor: Any) -> None:
@@ -195,6 +253,37 @@ class SqlserverDiagnose:
         self._check.diagnosis.success(
             name=code.value,
             diagnosis="sys.dm_os_performance_counters is readable.",
+            category=CATEGORY_SQLSERVER,
+        )
+
+    def _diagnose_view_database_performance_state(self, cursor: Any) -> None:
+        code = SQLServerConfigurationError.missing_view_database_performance_state
+        try:
+            if not _has_database_permission(cursor, "VIEW DATABASE PERFORMANCE STATE"):
+                self._fail(
+                    code,
+                    diagnosis=(
+                        "The Datadog login does not have VIEW DATABASE PERFORMANCE STATE on the current database."
+                    ),
+                )
+                return
+            _execute_read_probe(
+                cursor,
+                "SELECT TOP 1 database_id FROM sys.dm_io_virtual_file_stats(DB_ID(), NULL)",
+            )
+        except Exception as e:
+            self._fail(
+                code,
+                diagnosis=(
+                    "Unable to validate VIEW DATABASE PERFORMANCE STATE with sys.dm_io_virtual_file_stats: {}".format(e)
+                ),
+                rawerror=str(e),
+            )
+            return
+
+        self._check.diagnosis.success(
+            name=code.value,
+            diagnosis="VIEW DATABASE PERFORMANCE STATE is granted and sys.dm_io_virtual_file_stats is readable.",
             category=CATEGORY_SQLSERVER,
         )
 
@@ -273,6 +362,68 @@ class SqlserverDiagnose:
             category=CATEGORY_SQLSERVER,
         )
 
+    def _diagnose_per_database_access(self, cursor: Any) -> None:
+        code = SQLServerConfigurationError.per_database_access
+        config = self._check._config
+        try:
+            cursor.execute(
+                "SELECT name FROM sys.databases "
+                "WHERE state = 0 AND database_id > 4 AND name NOT IN ('master', 'tempdb', 'model', 'msdb')"
+            )
+            rows = cursor.fetchall() or []
+        except Exception as e:
+            self._fail(
+                code,
+                diagnosis="Unable to enumerate online databases from sys.databases: {}".format(e),
+                rawerror=str(e),
+            )
+            return
+
+        candidates = [row[0] for row in rows if row and row[0] and _matches_autodiscovery(row[0], config)]
+        if not candidates:
+            self._check.diagnosis.success(
+                name=code.value,
+                diagnosis="No autodiscovered databases to probe.",
+                category=CATEGORY_SQLSERVER,
+            )
+            return
+
+        truncated = len(candidates) > PER_DATABASE_PROBE_LIMIT
+        sample = candidates[:PER_DATABASE_PROBE_LIMIT]
+        failures: list[str] = []
+        for name in sample:
+            try:
+                cursor.execute("USE {}".format(_quote_identifier(name)))
+                _execute_read_probe(cursor, "SELECT TOP 1 1")
+            except Exception as e:
+                failures.append("{}: {}".format(name, e))
+
+        if failures:
+            extra = (
+                " (probed first {} of {} autodiscovered databases)".format(len(sample), len(candidates))
+                if truncated
+                else ""
+            )
+            self._fail(
+                code,
+                diagnosis="Unable to access {} of {} probed databases{}: {}".format(
+                    len(failures), len(sample), extra, "; ".join(failures)
+                ),
+                rawerror="; ".join(failures),
+            )
+            return
+
+        diagnosis = "All {} probed autodiscovered databases are accessible.".format(len(sample))
+        if truncated:
+            diagnosis = "All {} of {} autodiscovered databases probed are accessible (limit reached).".format(
+                len(sample), len(candidates)
+            )
+        self._check.diagnosis.success(
+            name=code.value,
+            diagnosis=diagnosis,
+            category=CATEGORY_SQLSERVER,
+        )
+
     def _diagnose_msdb_select(self, cursor: Any) -> None:
         code = SQLServerConfigurationError.missing_msdb_select
         failures = []
@@ -302,6 +453,24 @@ class SqlserverDiagnose:
 
     def _needs_view_server_state(self) -> bool:
         config = self._check._config
+        return self._collects_regular_metrics() or config.dbm_enabled
+
+    def _needs_view_database_performance_state(self) -> bool:
+        if not is_azure_database(self._current_engine_edition()):
+            return False
+        config = self._check._config
+        if config.dbm_enabled:
+            return True
+        if not self._collects_regular_metrics():
+            return False
+        return config.database_metrics_config["file_stats_metrics"]["enabled"]
+
+    def _needs_per_database_access(self) -> bool:
+        config = self._check._config
+        if not config.autodiscovery:
+            return False
+        if is_azure_sql_database(self._current_engine_edition()):
+            return False
         return self._collects_regular_metrics() or config.dbm_enabled
 
     def _needs_connect_any_database(self) -> bool:
@@ -382,6 +551,14 @@ class SqlserverDiagnose:
     def _current_engine_edition(self) -> int | None:
         return self._engine_edition or self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
 
+    def _resolved_connector(self) -> str | None:
+        connection = getattr(self._check, "connection", None)
+        connector = getattr(connection, "connector", None)
+        if connector:
+            return str(connector).lower()
+        value = self._check.instance.get("connector")
+        return str(value).lower() if value else None
+
     def _detect_rds(self, cursor: Any) -> None:
         try:
             row = _fetchone(cursor, "SELECT name FROM sys.databases WHERE name = 'rdsadmin'")
@@ -408,6 +585,39 @@ class SqlserverDiagnose:
 
     def _username_desc(self) -> str:
         return self._check.instance.get('username') or "configured authentication"
+
+
+def _list_pyodbc_drivers() -> list[str] | None:
+    try:
+        import pyodbc
+
+        return list(pyodbc.drivers())
+    except Exception:
+        return None
+
+
+def _normalize_driver_name(driver: str) -> str:
+    name = driver.strip()
+    if name.startswith("{") and name.endswith("}"):
+        name = name[1:-1]
+    return name.strip()
+
+
+def _matches_autodiscovery(name: str, config: Any) -> bool:
+    if name in SYSTEM_DATABASES:
+        return False
+    include = getattr(config, "_include_patterns", None)
+    exclude = getattr(config, "_exclude_patterns", None)
+    if include is not None and not include.search(name):
+        return False
+    if exclude is not None and exclude.search(name):
+        return False
+    return True
+
+
+def _quote_identifier(name: str) -> str:
+    escaped = name.replace("]", "]]")
+    return "[{}]".format(escaped)
 
 
 def _has_server_permission(cursor: Any, permission: str) -> bool:

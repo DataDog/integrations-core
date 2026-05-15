@@ -10,6 +10,7 @@ from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.diagnose import Diagnosis
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection_errors import SQLConnectionError
+from datadog_checks.sqlserver.const import ENGINE_EDITION_AZURE_MANAGED_INSTANCE, ENGINE_EDITION_SQL_DATABASE
 from datadog_checks.sqlserver.diagnose import (
     SQLSERVER_SETUP_DOCS_URL,
     SQLSERVER_TROUBLESHOOTING_DOCS_URL,
@@ -110,9 +111,11 @@ def _happy_responses(
     major_version=16,
     engine_edition=2,
     view_database_state=True,
+    view_database_performance_state=True,
     connect_any_database=True,
     view_any_definition=True,
     is_rds=False,
+    autodiscovered_databases=(),
 ):
     return [
         ("SERVERPROPERTY('ProductMajorVersion')", [(major_version, engine_edition)]),
@@ -120,6 +123,8 @@ def _happy_responses(
         (_permission("VIEW SERVER STATE"), [(1,)]),
         (_permission("VIEW DATABASE STATE"), [(1 if view_database_state else 0,)]),
         ("sys.dm_exec_sessions", [(1,)]),
+        (_permission("VIEW DATABASE PERFORMANCE STATE"), [(1 if view_database_performance_state else 0,)]),
+        ("sys.dm_io_virtual_file_stats", [(1,)]),
         (_permission("CONNECT ANY DATABASE"), [(1 if connect_any_database else 0,)]),
         (_permission("VIEW ANY DEFINITION"), [(1 if view_any_definition else 0,)]),
         ("'rdsadmin'", [("rdsadmin",)] if is_rds else []),
@@ -128,6 +133,9 @@ def _happy_responses(
         ("msdb.dbo.sysjobhistory", []),
         ("msdb.dbo.sysjobactivity", []),
         ("msdb.dbo.syssessions", []),
+        ("database_id > 4", [(name,) for name in autodiscovered_databases]),
+        ("SELECT TOP 1 1", [(1,)]),
+        (lambda sql, params: sql.startswith("USE "), []),
     ]
 
 
@@ -453,3 +461,208 @@ def test_get_diagnoses_returns_json(instance_minimal_defaults):
     parsed = json.loads(check.get_diagnoses())
 
     assert any(d['name'] == SQLServerConfigurationError.connection_failure.value for d in parsed)
+
+
+def test_view_database_performance_state_skipped_on_non_azure(instance_minimal_defaults):
+    check = _check(instance_minimal_defaults, _happy_responses(), dbm=True)
+
+    diagnoses = _get_diagnoses(check)
+
+    assert not _by_name(diagnoses, SQLServerConfigurationError.missing_view_database_performance_state.value)
+
+
+def test_view_database_performance_state_success_on_azure_sql_database(instance_minimal_defaults):
+    check = _check(
+        instance_minimal_defaults,
+        _happy_responses(engine_edition=ENGINE_EDITION_SQL_DATABASE),
+        dbm=True,
+    )
+
+    diagnoses = _get_diagnoses(check)
+
+    _assert_result(
+        diagnoses,
+        SQLServerConfigurationError.missing_view_database_performance_state,
+        Diagnosis.DIAGNOSIS_SUCCESS,
+    )
+
+
+def test_view_database_performance_state_missing_permission_fails(instance_minimal_defaults):
+    check = _check(
+        instance_minimal_defaults,
+        _happy_responses(engine_edition=ENGINE_EDITION_AZURE_MANAGED_INSTANCE, view_database_performance_state=False),
+        dbm=True,
+    )
+
+    diagnoses = _get_diagnoses(check)
+
+    row = _by_name(diagnoses, SQLServerConfigurationError.missing_view_database_performance_state.value)[0]
+    assert row['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert "VIEW DATABASE PERFORMANCE STATE" in row['diagnosis']
+
+
+def test_view_database_performance_state_probe_failure(instance_minimal_defaults):
+    responses = _replace_response(
+        _happy_responses(engine_edition=ENGINE_EDITION_AZURE_MANAGED_INSTANCE),
+        "sys.dm_io_virtual_file_stats",
+        Exception("permission denied"),
+    )
+    check = _check(instance_minimal_defaults, responses, dbm=True)
+
+    diagnoses = _get_diagnoses(check)
+
+    row = _by_name(diagnoses, SQLServerConfigurationError.missing_view_database_performance_state.value)[0]
+    assert row['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert "sys.dm_io_virtual_file_stats" in row['diagnosis']
+    assert "permission denied" in row['rawerror']
+
+
+def test_view_database_performance_state_skipped_when_no_dependent_collection(instance_minimal_defaults):
+    check = _check(
+        instance_minimal_defaults,
+        _happy_responses(engine_edition=ENGINE_EDITION_SQL_DATABASE),
+        database_metrics={'file_stats_metrics': {'enabled': False}},
+    )
+
+    diagnoses = _get_diagnoses(check)
+
+    assert not _by_name(diagnoses, SQLServerConfigurationError.missing_view_database_performance_state.value)
+
+
+def test_odbc_driver_not_installed_fails(instance_minimal_defaults, monkeypatch):
+    from datadog_checks.sqlserver import diagnose as diagnose_module
+
+    monkeypatch.setattr(diagnose_module, "_list_pyodbc_drivers", lambda: ["FreeTDS"])
+    check = _check(
+        instance_minimal_defaults,
+        _happy_responses(),
+        connector='odbc',
+        driver='{ODBC Driver 18 for SQL Server}',
+    )
+
+    diagnoses = _get_diagnoses(check)
+
+    row = _by_name(diagnoses, SQLServerConfigurationError.odbc_driver_not_installed.value)[0]
+    assert row['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert "ODBC Driver 18 for SQL Server" in row['diagnosis']
+    assert "FreeTDS" in row['diagnosis']
+
+
+def test_odbc_driver_installed_does_not_fail(instance_minimal_defaults, monkeypatch):
+    from datadog_checks.sqlserver import diagnose as diagnose_module
+
+    monkeypatch.setattr(diagnose_module, "_list_pyodbc_drivers", lambda: ["ODBC Driver 18 for SQL Server"])
+    check = _check(
+        instance_minimal_defaults,
+        _happy_responses(),
+        connector='odbc',
+        driver='{ODBC Driver 18 for SQL Server}',
+    )
+
+    diagnoses = _get_diagnoses(check)
+
+    assert not _by_name(diagnoses, SQLServerConfigurationError.odbc_driver_not_installed.value)
+
+
+def test_odbc_driver_check_skipped_for_adodbapi(instance_minimal_defaults, monkeypatch):
+    from datadog_checks.sqlserver import diagnose as diagnose_module
+
+    monkeypatch.setattr(diagnose_module, "_list_pyodbc_drivers", lambda: [])
+    check = _check(
+        instance_minimal_defaults,
+        _happy_responses(),
+        connector='adodbapi',
+        adoprovider='MSOLEDBSQL19',
+    )
+
+    diagnoses = _get_diagnoses(check)
+
+    assert not _by_name(diagnoses, SQLServerConfigurationError.odbc_driver_not_installed.value)
+
+
+def test_odbc_driver_check_skipped_when_pyodbc_unavailable(instance_minimal_defaults, monkeypatch):
+    from datadog_checks.sqlserver import diagnose as diagnose_module
+
+    monkeypatch.setattr(diagnose_module, "_list_pyodbc_drivers", lambda: None)
+    check = _check(
+        instance_minimal_defaults,
+        _happy_responses(),
+        connector='odbc',
+        driver='{ODBC Driver 18 for SQL Server}',
+    )
+
+    diagnoses = _get_diagnoses(check)
+
+    assert not _by_name(diagnoses, SQLServerConfigurationError.odbc_driver_not_installed.value)
+
+
+def test_per_database_access_success(instance_minimal_defaults):
+    check = _check(
+        instance_minimal_defaults,
+        _happy_responses(autodiscovered_databases=("db_a", "db_b")),
+        database_autodiscovery=True,
+    )
+
+    diagnoses = _get_diagnoses(check)
+
+    row = _by_name(diagnoses, SQLServerConfigurationError.per_database_access.value)[0]
+    assert row['result'] == Diagnosis.DIAGNOSIS_SUCCESS
+    assert "2" in row['diagnosis']
+
+
+def test_per_database_access_reports_failed_database(instance_minimal_defaults):
+    def use_db_bad(sql, params):
+        return sql == "USE [db_bad]"
+
+    def use_db_ok(sql, params):
+        return sql == "USE [db_ok]"
+
+    responses = _happy_responses(autodiscovered_databases=("db_ok", "db_bad"))
+    responses.insert(0, (use_db_bad, Exception("USE failed for db_bad")))
+    responses.insert(1, (use_db_ok, []))
+
+    check = _check(instance_minimal_defaults, responses, database_autodiscovery=True)
+
+    diagnoses = _get_diagnoses(check)
+
+    row = _by_name(diagnoses, SQLServerConfigurationError.per_database_access.value)[0]
+    assert row['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert "db_bad" in row['diagnosis']
+    assert "USE failed for db_bad" in row['rawerror']
+
+
+def test_per_database_access_applies_autodiscovery_filters(instance_minimal_defaults):
+    check = _check(
+        instance_minimal_defaults,
+        _happy_responses(autodiscovered_databases=("included_db", "skipped_db")),
+        database_autodiscovery=True,
+        autodiscovery_include=['included.*'],
+        autodiscovery_exclude=['skipped.*'],
+    )
+
+    diagnoses = _get_diagnoses(check)
+
+    row = _by_name(diagnoses, SQLServerConfigurationError.per_database_access.value)[0]
+    assert row['result'] == Diagnosis.DIAGNOSIS_SUCCESS
+    assert "1" in row['diagnosis']
+
+
+def test_per_database_access_skipped_without_autodiscovery(instance_minimal_defaults):
+    check = _check(instance_minimal_defaults, _happy_responses())
+
+    diagnoses = _get_diagnoses(check)
+
+    assert not _by_name(diagnoses, SQLServerConfigurationError.per_database_access.value)
+
+
+def test_per_database_access_skipped_on_azure_sql_database(instance_minimal_defaults):
+    check = _check(
+        instance_minimal_defaults,
+        _happy_responses(engine_edition=ENGINE_EDITION_SQL_DATABASE),
+        database_autodiscovery=True,
+        dbm=True,
+    )
+
+    diagnoses = _get_diagnoses(check)
+
+    assert not _by_name(diagnoses, SQLServerConfigurationError.per_database_access.value)
