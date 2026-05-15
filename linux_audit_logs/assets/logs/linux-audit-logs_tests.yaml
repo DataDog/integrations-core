@@ -48,7 +48,9 @@ tests:
         device:
           hostname: "10.10.10.10"
           ip: "10.10.10.10"
+          name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
           type: "Unknown"
@@ -129,7 +131,9 @@ tests:
         device:
           hostname: "10.10.10.10"
           ip: "10.10.10.10"
+          name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
           type: "Unknown"
@@ -190,9 +194,13 @@ tests:
         class_name: "Base Event"
         class_uid: 0
         device:
+          name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
+          type: "Unknown"
+          type_id: 0
         metadata:
           event_code: "MAC_STATUS"
           uid: "1674"
@@ -200,6 +208,8 @@ tests:
           product:
             name: "Auditd"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -240,9 +250,13 @@ tests:
         class_name: "Base Event"
         class_uid: 0
         device:
+          name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
+          type: "Unknown"
+          type_id: 0
         metadata:
           event_code: "AVC"
           uid: "182"
@@ -250,6 +264,8 @@ tests:
           product:
             name: "Auditd"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -297,9 +313,13 @@ tests:
         class_name: "Base Event"
         class_uid: 0
         device:
+          name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
+          type: "Unknown"
+          type_id: 0
         metadata:
           event_code: "USER_SELINUX_ERR"
           uid: "198"
@@ -307,6 +327,8 @@ tests:
           product:
             name: "Auditd"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -354,9 +376,13 @@ tests:
         class_name: "Base Event"
         class_uid: 0
         device:
+          name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
+          type: "Unknown"
+          type_id: 0
         metadata:
           event_code: "USER_ROLE_CHANGE"
           uid: "2606"
@@ -364,6 +390,8 @@ tests:
           product:
             name: "Auditd"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -404,9 +432,13 @@ tests:
         class_name: "Base Event"
         class_uid: 0
         device:
+          name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
+          type: "Unknown"
+          type_id: 0
         metadata:
           event_code: "MAC_CONFIG_CHANGE"
           uid: "121"
@@ -414,6 +446,8 @@ tests:
           product:
             name: "Auditd"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -476,7 +510,9 @@ tests:
         device:
           hostname: "ub10-10-10-10"
           ip: "10.10.10.10"
+          name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
           type: "Unknown"
@@ -558,7 +594,9 @@ tests:
         device:
           hostname: "localhost"
           ip: "10.10.10.10"
+          name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
           type: "Unknown"
@@ -639,7 +677,9 @@ tests:
         device:
           hostname: "localhost"
           ip: "10.10.10.10"
+          name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
           type: "Unknown"
@@ -721,7 +761,9 @@ tests:
         device:
           hostname: "localhost"
           ip: "10.10.10.10"
+          name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
           type: "Unknown"
@@ -806,7 +848,9 @@ tests:
         device:
           hostname: "localhost"
           ip: "10.10.10.10"
+          name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
           type: "Unknown"
@@ -895,7 +939,9 @@ tests:
         device:
           hostname: "localhost"
           ip: "10.10.10.10"
+          name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
           type: "Unknown"
@@ -986,7 +1032,9 @@ tests:
         device:
           hostname: "localhost"
           ip: "10.10.10.10"
+          name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
           type: "Unknown"
@@ -1060,6 +1108,7 @@ tests:
         device:
           name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
           type: "Unknown"
@@ -1128,6 +1177,7 @@ tests:
         device:
           name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
           type: "Unknown"
@@ -1197,6 +1247,7 @@ tests:
         device:
           name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
           type: "Unknown"
@@ -1265,6 +1316,7 @@ tests:
         device:
           name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
           type: "Unknown"
@@ -1318,9 +1370,13 @@ tests:
         class_name: "Base Event"
         class_uid: 0
         device:
+          name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
+          type: "Unknown"
+          type_id: 0
         metadata:
           event_code: "DAEMON_CONFIG"
           uid: "946"
@@ -1328,6 +1384,8 @@ tests:
           product:
             name: "Auditd"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -1370,9 +1428,13 @@ tests:
         class_name: "Base Event"
         class_uid: 0
         device:
+          name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
+          type: "Unknown"
+          type_id: 0
         metadata:
           event_code: "DAEMON_ABORT"
           uid: "1849"
@@ -1380,6 +1442,8 @@ tests:
           product:
             name: "Auditd"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -1423,9 +1487,13 @@ tests:
         class_name: "Base Event"
         class_uid: 0
         device:
+          name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
+          type: "Unknown"
+          type_id: 0
         metadata:
           event_code: "MAC_POLICY_LOAD"
           uid: "235"
@@ -1433,6 +1501,8 @@ tests:
           product:
             name: "Auditd"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -1473,9 +1543,13 @@ tests:
         class_name: "Base Event"
         class_uid: 0
         device:
+          name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
+          type: "Unknown"
+          type_id: 0
         metadata:
           event_code: "CONFIG_CHANGE"
           uid: "2361"
@@ -1483,6 +1557,8 @@ tests:
           product:
             name: "Auditd"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -1528,6 +1604,7 @@ tests:
         device:
           name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
           type: "Unknown"
@@ -1612,6 +1689,7 @@ tests:
         device:
           name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
           type: "Unknown"
@@ -1709,9 +1787,13 @@ tests:
         class_name: "Network Activity"
         class_uid: 4001
         device:
+          name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
+          type: "Unknown"
+          type_id: 0
         dst_endpoint:
           name: "Unknown"
         metadata:
@@ -1767,9 +1849,13 @@ tests:
         class_name: "Network Activity"
         class_uid: 4001
         device:
+          name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
+          type: "Unknown"
+          type_id: 0
         dst_endpoint:
           ip: "1.2.3.4"
           port: 4444
@@ -1851,6 +1937,7 @@ tests:
         device:
           name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
           type: "Unknown"
@@ -1950,6 +2037,7 @@ tests:
         device:
           name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
           type: "Unknown"
@@ -2050,6 +2138,7 @@ tests:
         device:
           name: "Unknown"
           os:
+            name: "Linux"
             type: "Linux"
             type_id: 200
           type: "Unknown"
