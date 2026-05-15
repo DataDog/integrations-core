@@ -61,6 +61,33 @@ def test_custom_queries(aggregator, instance, dd_run_check):
     )
 
 
+@pytest.mark.skipif(
+    common.is_legacy(CLICKHOUSE_VERSION),
+    reason='`system.errors` is collected only via advanced queries, which legacy ClickHouse versions do not support',
+)
+def test_errors_raised_metric(aggregator, instance, dd_run_check):
+    from .conftest import get_clickhouse_client
+
+    client = get_clickhouse_client(
+        host=instance['server'],
+        port=instance['port'],
+        username=instance['username'],
+        password=instance['password'],
+    )
+    try:
+        client.query('SELECT something FROM system.tables')
+    except Exception:
+        pass
+
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric('clickhouse.errors.raised', at_least=1)
+    for sample in aggregator.metrics('clickhouse.errors.raised'):
+        tag_keys = {t.split(':', 1)[0] for t in sample.tags}
+        assert {'error_name', 'error_code', 'remote'}.issubset(tag_keys), sample.tags
+
+
 @pytest.mark.skipif(CLICKHOUSE_VERSION == 'latest', reason='Version `latest` is ever-changing, skipping')
 def test_version_metadata(instance, datadog_agent, dd_run_check):
     check = ClickhouseCheck('clickhouse', {}, [instance])

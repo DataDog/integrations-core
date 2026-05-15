@@ -608,9 +608,18 @@ def test_query_errors_data(aggregator, instance, dd_run_check):
 
     assert len(all_errors) > 0, "Expected at least one error record in payload"
 
-    details = all_errors[0]['query_details']
+    details = next(
+        (
+            e['query_details']
+            for e in all_errors
+            if 'nonexistent_table_query_error_test' in e['query_details'].get('exception', '')
+        ),
+        None,
+    )
+    assert details is not None, (
+        "Expected an error record for `nonexistent_table_query_error_test` in payload"
+    )
     assert details['query_signature'] is not None
-    assert 'nonexistent_table_query_error_test' in details['exception']
     assert 'UNKNOWN_TABLE' in details['exception']
     assert details['exception_code'] == 60
     assert 'stack_trace' in details
