@@ -8,6 +8,7 @@ import mock
 import pytest
 
 from datadog_checks.base.checks.kube_leader import ElectionRecordAnnotation
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.kube_scheduler import KubeSchedulerCheck
 
 instance = {'prometheus_url': 'http://localhost:10251/metrics', 'send_histograms_buckets': True}
@@ -18,17 +19,11 @@ NAMESPACE = 'kube_scheduler'
 
 
 @pytest.fixture()
-def mock_metrics():
+def mock_metrics(mock_openmetrics_http):
     f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics_1.13.3.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    ):
-        yield
+    mock_openmetrics_http.get.return_value = MockHTTPResponse(file_path=f_name, headers={'Content-Type': 'text/plain'})
+    with mock.patch('datadog_checks.kube_scheduler.kube_scheduler.RequestsWrapper'):
+        yield mock_openmetrics_http
 
 
 @pytest.fixture()

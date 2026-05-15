@@ -4,10 +4,9 @@
 
 import os
 
-import mock
 import pytest
-import requests_mock
 
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.kube_scheduler import KubeSchedulerCheck
 
 from .common import HERE
@@ -17,21 +16,13 @@ CHECK_NAME = 'kube_scheduler'
 
 
 @pytest.fixture()
-def mock_metrics():
+def mock_metrics(mock_openmetrics_http):
     f_name = os.path.join(HERE, 'fixtures', 'metrics_slis_1.27.3.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    ):
-        yield
+    mock_openmetrics_http.get.return_value = MockHTTPResponse(file_path=f_name, headers={'Content-Type': 'text/plain'})
+    yield mock_openmetrics_http
 
 
-def test_check_metrics_slis(aggregator, mock_metrics, mock_request, instance):
-    mock_request.get('http://localhost:10251/metrics/slis', status_code=200)
+def test_check_metrics_slis(aggregator, mock_metrics, instance):
     c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
@@ -49,8 +40,7 @@ def test_check_metrics_slis(aggregator, mock_metrics, mock_request, instance):
     aggregator.assert_all_metrics_covered()
 
 
-def test_check_metrics_slis_transform(aggregator, mock_metrics, mock_request, instance):
-    mock_request.get('http://localhost:10251/metrics/slis', status_code=200)
+def test_check_metrics_slis_transform(aggregator, mock_metrics, instance):
     c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
@@ -68,8 +58,7 @@ def test_check_metrics_slis_transform(aggregator, mock_metrics, mock_request, in
     )
 
 
-def test_check_metrics_slis_filter_by_type(aggregator, mock_metrics, mock_request, instance):
-    mock_request.get('http://localhost:10251/metrics/slis', status_code=200)
+def test_check_metrics_slis_filter_by_type(aggregator, mock_metrics, instance):
     c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
@@ -90,31 +79,19 @@ def test_check_metrics_slis_filter_by_type(aggregator, mock_metrics, mock_reques
     )
 
 
-@pytest.fixture()
-def mock_request():
-    with requests_mock.Mocker() as m:
-        yield m
+def test_detect_sli_endpoint(mock_openmetrics_http, instance):
+    mock_openmetrics_http.get.return_value = MockHTTPResponse(status_code=200)
+    c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
+    assert c._slis_available is True
 
 
-def test_detect_sli_endpoint(mock_metrics, instance):
-    with mock.patch('requests.Session.get') as mock_request:
-        mock_request.return_value.status_code = 200
-        c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
-        c.check(instance)
-        assert c._slis_available is True
+def test_detect_sli_endpoint_404(mock_openmetrics_http, instance):
+    mock_openmetrics_http.get.return_value = MockHTTPResponse(status_code=404)
+    c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
+    assert c._slis_available is False
 
 
-def test_detect_sli_endpoint_404(mock_metrics, instance):
-    with mock.patch('requests.Session.get') as mock_request:
-        mock_request.return_value.status_code = 404
-        c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
-        c.check(instance)
-        assert c._slis_available is False
-
-
-def test_detect_sli_endpoint_403(mock_metrics, instance):
-    with mock.patch('requests.Session.get') as mock_request:
-        mock_request.return_value.status_code = 403
-        c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
-        c.check(instance)
-        assert c._slis_available is False
+def test_detect_sli_endpoint_403(mock_openmetrics_http, instance):
+    mock_openmetrics_http.get.return_value = MockHTTPResponse(status_code=403)
+    c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
+    assert c._slis_available is False

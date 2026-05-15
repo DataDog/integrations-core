@@ -10,6 +10,7 @@ import requests
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.kube_leader import ElectionRecordAnnotation
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.kube_scheduler import KubeSchedulerCheck
 
 instance = {'prometheus_url': 'http://localhost:10251/metrics', 'send_histograms_buckets': True}
@@ -20,17 +21,11 @@ NAMESPACE = 'kube_scheduler'
 
 
 @pytest.fixture()
-def mock_metrics():
+def mock_metrics(mock_openmetrics_http):
     f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics_1.14.0.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    ):
-        yield
+    mock_openmetrics_http.get.return_value = MockHTTPResponse(file_path=f_name, headers={'Content-Type': 'text/plain'})
+    with mock.patch('datadog_checks.kube_scheduler.kube_scheduler.RequestsWrapper'):
+        yield mock_openmetrics_http
 
 
 @pytest.fixture()
@@ -104,27 +99,26 @@ def test_check_metrics_1_14(aggregator, mock_metrics, mock_leader):
     aggregator.assert_all_metrics_covered()
 
 
-def test_service_check_ok(monkeypatch):
+def test_service_check_ok(monkeypatch, mock_openmetrics_http):
     instance = {'prometheus_url': 'http://localhost:10251/metrics'}
-    instance_tags = []
+    mock_openmetrics_http.get.return_value = MockHTTPResponse(status_code=200)
 
     check = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
-
     monkeypatch.setattr(check, 'service_check', mock.Mock())
 
-    calls = [
-        mock.call('kube_scheduler.up', AgentCheck.OK, tags=instance_tags),
-        mock.call('kube_scheduler.up', AgentCheck.CRITICAL, tags=instance_tags, message='health check failed'),
-    ]
+    healthcheck_url = 'http://localhost:10251/healthz'
+    handler = mock.MagicMock()
+    check._http_handlers[healthcheck_url] = handler
 
     # successful health check
-    with mock.patch('requests.Session.get', return_value=mock.MagicMock(status_code=200)):
-        check._perform_service_check(instance)
+    check._perform_service_check(instance)
 
-    # failed health check
-    raise_error = mock.Mock()
-    raise_error.side_effect = requests.HTTPError('health check failed')
-    with mock.patch('requests.Session.get', return_value=mock.MagicMock(raise_for_status=raise_error)):
-        check._perform_service_check(instance)
+    # failed health check exercises the live requests.HTTPError path
+    handler.get.return_value.raise_for_status = mock.Mock(side_effect=requests.HTTPError('health check failed'))
+    check._perform_service_check(instance)
 
+    calls = [
+        mock.call('kube_scheduler.up', AgentCheck.OK, tags=[]),
+        mock.call('kube_scheduler.up', AgentCheck.CRITICAL, tags=[], message='health check failed'),
+    ]
     check.service_check.assert_has_calls(calls)
