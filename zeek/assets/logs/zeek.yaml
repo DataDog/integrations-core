@@ -1685,17 +1685,7 @@ pipeline:
             - "2023-12-12T05:52:32.763303Z"
           grok:
             supportRules: ""
-            matchRules: 'parse_ts %{date("yyyy-MM-dd''T''HH:mm:ss.SSSSSSZ"):_time_ms}'
-        - type: attribute-remapper
-          name: Map `_time_ms` to `ocsf.time`
-          enabled: true
-          sources:
-            - _time_ms
-          sourceType: attribute
-          target: ocsf.time
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
+            matchRules: 'parse_ts %{date("yyyy-MM-dd''T''HH:mm:ss.SSSSSSZ"):ocsf.time}'
     - type: pipeline
       name: OCSF sub pipeline for class Detection Finding [2004] - Notice
       enabled: true
@@ -1781,16 +1771,6 @@ pipeline:
               targets:
                 name: ocsf.activity_name
                 id: ocsf.activity_id
-            - type: schema-category-mapper
-              name: ocsf.category_uid
-              categories:
-                - filter:
-                    query: "*"
-                  name: Findings
-                  id: 2
-              targets:
-                name: ocsf.category_name
-                id: ocsf.category_uid
             - type: schema-remapper
               name: Map `ocsf.evidences` to `ocsf.evidences`
               sources:
@@ -1809,13 +1789,6 @@ pipeline:
               name: Map `uid` to `ocsf.finding_info.uid`
               sources:
                 - uid
-              target: ocsf.finding_info.uid
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `note` to `ocsf.finding_info.uid`
-              sources:
-                - note
               target: ocsf.finding_info.uid
               preserveSource: true
               overrideOnConflict: true
@@ -1889,8 +1862,8 @@ pipeline:
                   ocsf.severity: Other
                   ocsf.severity_id: "99"
                 sources:
-                  ocsf.severity_id:
-                    - severity.id
+                  ocsf.severity:
+                    - severity.name
             - type: schema-category-mapper
               name: ocsf.status_id
               categories:
@@ -1936,12 +1909,6 @@ pipeline:
           template: Corelight
           target: ocsf.metadata.log_provider
           replaceMissing: false
-        - type: string-builder-processor
-          name: Map alert.signature_id to ocsf.metadata.event_code
-          enabled: true
-          template: "%{alert.signature_id}"
-          target: ocsf.metadata.event_code
-          replaceMissing: true
         - type: string-builder-processor
           name: Set is_alert to boolean true
           enabled: true
@@ -2020,16 +1987,6 @@ pipeline:
                 name: ocsf.activity_name
                 id: ocsf.activity_id
             - type: schema-category-mapper
-              name: ocsf.category_uid
-              categories:
-                - filter:
-                    query: "*"
-                  name: Findings
-                  id: 2
-              targets:
-                name: ocsf.category_name
-                id: ocsf.category_uid
-            - type: schema-category-mapper
               name: ocsf.confidence_id
               categories:
                 - filter:
@@ -2087,13 +2044,6 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `ocsf.finding_info.uid` to `ocsf.finding_info.uid`
-              sources:
-                - ocsf.finding_info.uid
-              target: ocsf.finding_info.uid
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
               name: Map `uid` to `ocsf.finding_info.uid`
               sources:
                 - uid
@@ -2115,19 +2065,13 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `community_id` to `ocsf.metadata.correlation_uid`
+              name: Map `alert.signature_id` to `ocsf.metadata.event_code`
               sources:
-                - community_id
-              target: ocsf.metadata.correlation_uid
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
-              sources:
-                - ocsf.metadata.event_code
+                - alert.signature_id
               target: ocsf.metadata.event_code
               preserveSource: true
               overrideOnConflict: true
+              targetFormat: string
             - type: schema-remapper
               name: Map `ocsf.metadata.log_provider` to `ocsf.metadata.log_provider`
               sources:
@@ -2184,7 +2128,7 @@ pipeline:
                   ocsf.severity_id: "99"
                 sources:
                   ocsf.severity:
-                    - alert.severity
+                    - alert_severity
             - type: schema-remapper
               name: Map `alert.action` to `ocsf.status_detail`
               sources:
@@ -2225,13 +2169,13 @@ pipeline:
           name: Calculate total packets
           enabled: true
           expression: (orig_pkts + resp_pkts)
-          target: _total_packets
+          target: ocsf.traffic.packets
           isReplaceMissing: false
         - type: arithmetic-processor
           name: Convert duration to milliseconds
           enabled: true
           expression: duration * 1000
-          target: _duration_ms
+          target: ocsf.duration
           isReplaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 4001
@@ -2354,11 +2298,11 @@ pipeline:
               overrideOnConflict: true
               targetFormat: integer
             - type: schema-remapper
-              name: Map `_duration_ms` to `ocsf.duration`
+              name: Map `ocsf.duration` to `ocsf.duration`
               sources:
-                - _duration_ms
+                - ocsf.duration
               target: ocsf.duration
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               targetFormat: integer
             - type: schema-remapper
@@ -2480,11 +2424,11 @@ pipeline:
               overrideOnConflict: true
               targetFormat: integer
             - type: schema-remapper
-              name: Map `_total_packets` to `ocsf.traffic.packets`
+              name: Map `ocsf.traffic.packets` to `ocsf.traffic.packets`
               sources:
-                - _total_packets
+                - ocsf.traffic.packets
               target: ocsf.traffic.packets
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               targetFormat: integer
             - type: schema-remapper
@@ -2528,7 +2472,7 @@ pipeline:
           name: Set JA3 hash algorithm id
           enabled: true
           template: "1"
-          target: _ja3_algorithm_id
+          target: ocsf.tls.ja3_hash.algorithm_id
           replaceMissing: false
         - type: string-builder-processor
           name: Set JA3S hash algorithm name
@@ -2540,7 +2484,7 @@ pipeline:
           name: Set JA3S hash algorithm id
           enabled: true
           template: "1"
-          target: _ja3s_algorithm_id
+          target: ocsf.tls.ja3s_hash.algorithm_id
           replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 4001
@@ -2672,11 +2616,11 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `_ja3_algorithm_id` to `ocsf.tls.ja3_hash.algorithm_id`
+              name: Map `ocsf.tls.ja3_hash.algorithm_id` to `ocsf.tls.ja3_hash.algorithm_id`
               sources:
-                - _ja3_algorithm_id
+                - ocsf.tls.ja3_hash.algorithm_id
               target: ocsf.tls.ja3_hash.algorithm_id
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               targetFormat: integer
             - type: schema-remapper
@@ -2694,11 +2638,11 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `_ja3s_algorithm_id` to `ocsf.tls.ja3s_hash.algorithm_id`
+              name: Map `ocsf.tls.ja3s_hash.algorithm_id` to `ocsf.tls.ja3s_hash.algorithm_id`
               sources:
-                - _ja3s_algorithm_id
+                - ocsf.tls.ja3s_hash.algorithm_id
               target: ocsf.tls.ja3s_hash.algorithm_id
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               targetFormat: integer
             - type: schema-remapper
@@ -2737,12 +2681,6 @@ pipeline:
       filter:
         query: "@_path:weird_red"
       processors:
-        - type: string-builder-processor
-          name: Lowercase source for protocol
-          enabled: true
-          template: "%{source}"
-          target: _protocol_name
-          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 4001
           enabled: true
@@ -2768,9 +2706,9 @@ pipeline:
                 name: ocsf.connection_info.direction
                 id: ocsf.connection_info.direction_id
             - type: schema-remapper
-              name: Map `_protocol_name` to `ocsf.connection_info.protocol_name`
+              name: Map `source` to `ocsf.connection_info.protocol_name`
               sources:
-                - _protocol_name
+                - source
               target: ocsf.connection_info.protocol_name
               preserveSource: true
               overrideOnConflict: true
@@ -2949,13 +2887,6 @@ pipeline:
               targets:
                 name: ocsf.connection_info.direction
                 id: ocsf.connection_info.direction_id
-            - type: schema-remapper
-              name: Map `version` to `ocsf.connection_info.protocol_ver`
-              sources:
-                - version
-              target: ocsf.connection_info.protocol_ver
-              preserveSource: true
-              overrideOnConflict: true
             - type: schema-remapper
               name: Map `uid` to `ocsf.connection_info.uid`
               sources:
@@ -3155,7 +3086,7 @@ pipeline:
                   ocsf.status_id: "99"
                 sources:
                   ocsf.status:
-                    - http.status_code
+                    - status_msg
             - type: schema-remapper
               name: Map `ocsf.time` to `ocsf.time`
               sources:
@@ -3187,11 +3118,11 @@ pipeline:
               name: ocsf.activity_id
               categories:
                 - filter:
-                    query: "@dns.answer.name:*"
+                    query: "@rcode_name:*"
                   name: Response
                   id: 2
                 - filter:
-                    query: "-@dns.answer.name:*"
+                    query: "-@rcode_name:*"
                   name: Query
                   id: 1
               targets:
@@ -3201,13 +3132,9 @@ pipeline:
               name: ocsf.connection_info.direction_id
               categories:
                 - filter:
-                    query: "@dns.answer.name:*"
-                  name: Inbound
-                  id: 1
-                - filter:
-                    query: "-@dns.answer.name:*"
-                  name: Outbound
-                  id: 2
+                    query: "*"
+                  name: Unknown
+                  id: 0
               targets:
                 name: ocsf.connection_info.direction
                 id: ocsf.connection_info.direction_id
@@ -3277,8 +3204,9 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `query` to `ocsf.query.hostname`
+              name: Map `domain`, `query` to `ocsf.query.hostname`
               sources:
+                - domain
                 - query
               target: ocsf.query.hostname
               preserveSource: true
@@ -3288,13 +3216,6 @@ pipeline:
               sources:
                 - qtype_name
               target: ocsf.query.type
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `rcode_name` to `ocsf.rcode`
-              sources:
-                - rcode_name
-              target: ocsf.rcode
               preserveSource: true
               overrideOnConflict: true
             - type: schema-category-mapper
@@ -3380,20 +3301,9 @@ pipeline:
                     query: "@rcode:23"
                   name: BADCOOKIE
                   id: 23
-                - filter:
-                    query: "*"
-                  name: Other
-                  id: 99
               targets:
                 name: ocsf.rcode
                 id: ocsf.rcode_id
-              fallback:
-                values:
-                  ocsf.rcode: Other
-                  ocsf.rcode_id: "99"
-                sources:
-                  ocsf.rcode:
-                    - rcode
             - type: schema-category-mapper
               name: ocsf.severity_id
               categories:
@@ -3439,18 +3349,11 @@ pipeline:
                   id: 2
                 - filter:
                     query: "*"
-                  name: Other
-                  id: 99
+                  name: Unknown
+                  id: 0
               targets:
                 name: ocsf.status
                 id: ocsf.status_id
-              fallback:
-                values:
-                  ocsf.status: Other
-                  ocsf.status_id: "99"
-                sources:
-                  ocsf.status:
-                    - dns.flags.rcode
             - type: schema-remapper
               name: Map `ocsf.time` to `ocsf.time`
               sources:
@@ -3494,7 +3397,7 @@ pipeline:
             - '["10.104.10.60"]'
           grok:
             supportRules: ""
-            matchRules: 'g \[?"?%{ip:_tx_host}"?'
+            matchRules: 'g \[?"?%{ip:ocsf.src_endpoint.ip}"?'
         - type: grok-parser
           name: Extract first IP from rx_hosts
           enabled: true
@@ -3503,7 +3406,7 @@ pipeline:
             - '["10.104.10.65"]'
           grok:
             supportRules: ""
-            matchRules: 'g \[?"?%{ip:_rx_host}"?'
+            matchRules: 'g \[?"?%{ip:ocsf.dst_endpoint.ip}"?'
         - type: schema-processor
           name: Apply OCSF schema for 6006
           enabled: true
@@ -3520,7 +3423,7 @@ pipeline:
                   name: Download
                   id: 2
                 - filter:
-                    query: "-@is_orig:*"
+                    query: "*"
                   name: Unknown
                   id: 0
               targets:
@@ -3534,17 +3437,10 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `_rx_host` to `ocsf.dst_endpoint.ip`
+              name: Map `ocsf.dst_endpoint.ip` to `ocsf.dst_endpoint.ip`
               sources:
-                - _rx_host
+                - ocsf.dst_endpoint.ip
               target: ocsf.dst_endpoint.ip
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.file.hashes` to `ocsf.file.hashes`
-              sources:
-                - ocsf.file.hashes
-              target: ocsf.file.hashes
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
@@ -3619,9 +3515,9 @@ pipeline:
                 name: ocsf.severity
                 id: ocsf.severity_id
             - type: schema-remapper
-              name: Map `_tx_host` to `ocsf.src_endpoint.ip`
+              name: Map `ocsf.src_endpoint.ip` to `ocsf.src_endpoint.ip`
               sources:
-                - _tx_host
+                - ocsf.src_endpoint.ip
               target: ocsf.src_endpoint.ip
               preserveSource: true
               overrideOnConflict: true

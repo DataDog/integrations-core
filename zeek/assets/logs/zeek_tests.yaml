@@ -237,7 +237,6 @@ tests:
         status_id: 1
         connection_info:
           uid: CBQBvs1hob384mp2lb
-          protocol_ver: '1.1'
           direction_id: 0
           direction: Unknown
         class_uid: 4002
@@ -404,9 +403,9 @@ tests:
         status_id: 1
         connection_info:
           uid: CsOSdHqRMu62rNs31
-          direction_id: 1
           protocol_name: udp
-          direction: Inbound
+          direction_id: 0
+          direction: Unknown
         class_uid: 4003
         activity_id: 2
         time: 1702360352763
@@ -549,8 +548,8 @@ tests:
         message: time.missouri.edu
         connection_info:
           uid: CyArTY2KEgcygwMLi1
-          direction_id: 2
-          direction: Outbound
+          direction_id: 0
+          direction: Unknown
         class_uid: 4003
         activity_id: 1
         time: 1709786320085
@@ -559,6 +558,8 @@ tests:
           ip: 20.20.20.20
         severity_id: 1
         class_name: DNS Activity
+        status_id: 0
+        status: Unknown
       qtype_name: A
       query: time.missouri.edu
       id:
@@ -837,7 +838,6 @@ tests:
         status_id: 1
         connection_info:
           uid: CBQBvs1hob384mp2lb
-          protocol_ver: '1.1'
           direction_id: 0
           direction: Unknown
         class_uid: 4002
@@ -964,9 +964,9 @@ tests:
         status_id: 1
         connection_info:
           uid: CsOSdHqRMu62rNs31
-          direction_id: 1
           protocol_name: udp
-          direction: Inbound
+          direction_id: 0
+          direction: Unknown
         class_uid: 4003
         activity_id: 2
         time: 1702360352763
@@ -1205,25 +1205,29 @@ tests:
         resp_p: 53
       ts: '2026-05-11T16:11:53.944496Z'
       notice: false
-      _protocol_name: DNS
     service: weird_red
     message: <134>May 11 16:11:53 test-system {"_path":"weird_red","_system_name":"test-system","_write_ts":"2026-05-11T16:11:53.944496Z","ts":"2026-05-11T16:11:53.944496Z","uid":"CYThCC2DZNVcGgpiI2","id.orig_h":"10.250.182.4","id.orig_p":58438,"id.resp_h":"180.153.200.12","id.resp_p":53,"id.vlan":1600,"name":"DNS_truncated_quest_too_short","source":"DNS","notice":false,"peer":"worker-04"}
     tags:
       - source:LOGS_SOURCE
     timestamp: 1778515913944
  -
-  sample: "<134>May 11 19:11:03 test-system {\"_path\":\"notice\",\"_system_name\":\"test-system\",\"_write_ts\":\"2026-05-11T19:11:03.521194Z\",\"ts\":\"2026-05-11T19:11:03.521194Z\",\"note\":\"ATTACK::Discovery\",\"msg\":\"Detected activity from host 10.10.10.15, total attempts 9 within timeframe 5.0 mins\",\"src\":\"10.10.10.15\",\"peer_descr\":\"manager\",\"actions\":[\"Notice::ACTION_LOG\"],\"suppress_for\":3600, \"uid\":\"12345678901234567890\", \"severity\":{\"name\":\"High\",\"id\":4}}"
+  sample: "<134>May 11 19:11:03 test-system {\"_path\":\"notice\",\"_system_name\":\"test-system\",\"_write_ts\":\"2026-05-11T19:11:03.521194Z\",\"ts\":\"2026-05-11T19:11:03.521194Z\",\"note\":\"ATTACK::Discovery\",\"msg\":\"Detected activity from host 10.10.10.15, total attempts 9 within timeframe 5.0 mins\",\"id.orig_h\":\"10.10.10.15\",\"id.orig_p\":54321,\"id.resp_h\":\"192.168.1.1\",\"id.resp_p\":80,\"peer_descr\":\"manager\",\"actions\":[\"Notice::ACTION_LOG\"],\"suppress_for\":3600, \"uid\":\"12345678901234567890\", \"severity\":{\"name\":\"High\",\"id\":4}}"
   service: "corelight"
   result:
     custom:
       msg: Detected activity from host 10.10.10.15, total attempts 9 within timeframe 5.0 mins
       suppress_for: 3600
-      src: 10.10.10.15
       _write_ts: '2026-05-11T19:11:03.521194Z'
+      network:
+        client:
+          ip: 10.10.10.15
+          port: 54321
+        destination:
+          ip: 192.168.1.1
+          port: 80
       zeek:
         note: ATTACK::Discovery
       _path: notice
-      _is_alert_str: 'true'
       peer_descr: manager
       ocsf:
         activity_name: Create
@@ -1231,23 +1235,30 @@ tests:
           product:
             name: Zeek
             vendor_name: Corelight
-          event_code: ATTACK::Discovery
           version: 1.5.0
           uid: '12345678901234567890'
-        category_uid: 2
-        category_name: Findings
+          event_code: ATTACK::Discovery
         is_alert: true
         finding_info:
-          uid: ATTACK::Discovery
+          uid: '12345678901234567890'
           title: ATTACK::Discovery
         status_id: 1
-        class_uid: 2004
-        activity_id: 1
         time: 1778526663521
-        class_name: Detection Finding
         status: New
         severity: High
         severity_id: 4
+        evidences:
+          - src_endpoint:
+              ip: 10.10.10.15
+              port: 54321
+            dst_endpoint:
+              ip: 192.168.1.1
+              port: 80
+        category_uid: 2
+        category_name: Findings
+        class_uid: 2004
+        activity_id: 1
+        class_name: Detection Finding
       _system_name: test-system
       actions:
         - Notice::ACTION_LOG
@@ -1257,8 +1268,14 @@ tests:
       severity:
         name: High
         id: 4
+      _is_alert_str: 'true'
+      id:
+        orig_p: 54321
+        resp_h: 192.168.1.1
+        orig_h: 10.10.10.15
+        resp_p: 80
     service: notice
-    message: <134>May 11 19:11:03 test-system {"_path":"notice","_system_name":"test-system","_write_ts":"2026-05-11T19:11:03.521194Z","ts":"2026-05-11T19:11:03.521194Z","note":"ATTACK::Discovery","msg":"Detected activity from host 10.10.10.15, total attempts 9 within timeframe 5.0 mins","src":"10.10.10.15","peer_descr":"manager","actions":["Notice::ACTION_LOG"],"suppress_for":3600, "uid":"12345678901234567890", "severity":{"name":"High","id":4}}
+    message: <134>May 11 19:11:03 test-system {"_path":"notice","_system_name":"test-system","_write_ts":"2026-05-11T19:11:03.521194Z","ts":"2026-05-11T19:11:03.521194Z","note":"ATTACK::Discovery","msg":"Detected activity from host 10.10.10.15, total attempts 9 within timeframe 5.0 mins","id.orig_h":"10.10.10.15","id.orig_p":54321,"id.resp_h":"192.168.1.1","id.resp_p":80,"peer_descr":"manager","actions":["Notice::ACTION_LOG"],"suppress_for":3600, "uid":"12345678901234567890", "severity":{"name":"High","id":4}}
     tags:
       - source:LOGS_SOURCE
     timestamp: 1778526663521
@@ -1292,7 +1309,6 @@ tests:
             name: Suricata
             vendor_name: Corelight
           event_code: '2006380'
-          correlation_uid: 1:Y4yC2kKf1Cm0QUkA/aBLSDxepcY=
           log_provider: Corelight
           version: 1.5.0
         category_uid: 2
@@ -1380,8 +1396,6 @@ tests:
           version: 1.5.0
         category_uid: 6
         category_name: Application Activity
-        src_endpoint:
-          ip: 10.104.10.60
         actor:
           session:
             uid: CjTuQU17IDvaVa8Nq2
@@ -1395,11 +1409,13 @@ tests:
         class_uid: 6006
         activity_id: 2
         time: 1778527585875
-        dst_endpoint:
-          ip: 10.104.10.65
         severity_id: 1
         class_name: File Hosting Activity
         status: Success
+        src_endpoint:
+          ip: 10.104.10.60
+        dst_endpoint:
+          ip: 10.104.10.65
       fuid: FOPDsn3PdkiZsljcj2
       id:
         vlan: 1010
@@ -1428,13 +1444,11 @@ tests:
         - CjTuQU17IDvaGb8Nq2
       ts: '2026-05-11T19:26:25.875206Z'
       md5: 6e6ae0ed19f595687684faafae5499e13
-      _tx_hosts_str: 10.104.10.60
-      _rx_hosts_str: 10.104.10.65
-      _rx_host: 10.104.10.65
-      _tx_host: 10.104.10.60
       total_bytes: 253109
       seen_bytes: 253109
       missing_bytes: 0
+      _tx_hosts_str: 10.104.10.60
+      _rx_hosts_str: 10.104.10.65
     service: files
     message: <134>May 11 19:26:26 ndr-dub-stryker-DC-1 {"_path":"files","_system_name":"ndr-dub-stryker-DC-1","_write_ts":"2026-05-11T19:26:26.082433Z","ts":"2026-05-11T19:26:25.875206Z","uid":"CjTuQU17IDvaVa8Nq2","fuid":"FOPDsn3PdkiZsljcj2","tx_hosts":["10.104.10.60"],"rx_hosts":["10.104.10.65"],"conn_uids":["CjTuQU17IDvaGb8Nq2"],"source":"HTTP","depth":0,"analyzers":["SHA1","MD5","SHA256","DATA_EVENT"],"local_orig":true,"is_orig":false,"seen_bytes":253109,"total_bytes":253109,"missing_bytes":0,"overflow_bytes":0,"timedout":false,"duration":0.2072269916534424,"mime_type":"text/json","md5":"6e6ae0ed19f595687684faafae5499e13","sha1":"f6578daa6d398c91398888b91a96d4c0e099c79c","sha256":"a7d5f44561e9707b3faf6ca1cdec4823e6625dd1c3aba2b7395697d65b47dc8f","id.vlan":1010}
     tags:
