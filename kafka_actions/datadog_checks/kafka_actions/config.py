@@ -200,7 +200,7 @@ class KafkaActionsConfig:
 
         schema_registry_url = self.instance.get('schema_registry_url')
 
-        if value_format in ['protobuf', 'avro', 'protobuf_msgpack']:
+        if value_format in ['protobuf', 'avro']:
             if config.get('value_uses_schema_registry'):
                 if not schema_registry_url:
                     raise ConfigurationError(
@@ -213,7 +213,7 @@ class KafkaActionsConfig:
                     f"or 'value_schema' to be specified"
                 )
 
-        if key_format in ['protobuf', 'avro', 'protobuf_msgpack']:
+        if key_format in ['protobuf', 'avro']:
             if config.get('key_uses_schema_registry'):
                 if not schema_registry_url:
                     raise ConfigurationError(
