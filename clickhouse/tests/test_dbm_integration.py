@@ -616,9 +616,7 @@ def test_query_errors_data(aggregator, instance, dd_run_check):
         ),
         None,
     )
-    assert details is not None, (
-        "Expected an error record for `nonexistent_table_query_error_test` in payload"
-    )
+    assert details is not None, "Expected an error record for `nonexistent_table_query_error_test` in payload"
     assert details['query_signature'] is not None
     assert 'UNKNOWN_TABLE' in details['exception']
     assert details['exception_code'] == 60
