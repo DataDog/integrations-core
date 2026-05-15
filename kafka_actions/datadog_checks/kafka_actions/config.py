@@ -180,6 +180,7 @@ class KafkaActionsConfig:
 
         # Note: n_messages_retrieved and max_scanned_messages are validated in the Datadog backend
 
+        from .compression import list_codecs
         from .formats import list_handlers
 
         valid_formats = list_handlers()
@@ -192,6 +193,15 @@ class KafkaActionsConfig:
         key_format = config.get('key_format', 'json')
         if key_format not in valid_formats:
             raise ConfigurationError(f"Invalid key_format: {key_format}. Supported formats: {', '.join(valid_formats)}")
+
+        valid_codecs = list_codecs()
+        for field in ('value_compression', 'key_compression'):
+            codec = config.get(field)
+            if codec and codec not in valid_codecs:
+                supported = ', '.join(valid_codecs) if valid_codecs else '(no codec plugin installed)'
+                raise ConfigurationError(
+                    f"Invalid {field}: {codec}. Supported codecs: {supported}"
+                )
 
         start_timestamp = config.get('start_timestamp')
         if start_timestamp is not None:
