@@ -46,6 +46,7 @@ class SQLServerConfigurationError(Enum):
     missing_msdb_select = "missing-msdb-select"
     odbc_driver_not_installed = "odbc-driver-not-installed"
     per_database_access = "per-database-access"
+    missing_per_database_view_state = "missing-per-database-view-state"
 
 
 DIAGNOSTIC_METADATA = {
@@ -112,6 +113,16 @@ DIAGNOSTIC_METADATA = {
         "remediation": (
             "Grant the Datadog login access to the listed databases (CREATE USER ... FOR LOGIN; "
             "GRANT VIEW DATABASE STATE) and confirm they are online."
+        ),
+        "docs_url": SQLSERVER_DBM_GRANTS_DOCS_URL,
+    },
+    SQLServerConfigurationError.missing_per_database_view_state: {
+        "description": (
+            "Verifies VIEW DATABASE STATE on each autodiscovered database, required by the per-database "
+            "DBM DMV reads (sys.dm_exec_sessions, sys.dm_db_index_usage_stats, sys.dm_db_file_space_usage, ...)."
+        ),
+        "remediation": (
+            "Grant VIEW DATABASE STATE to the Datadog user on the listed databases."
         ),
         "docs_url": SQLSERVER_DBM_GRANTS_DOCS_URL,
     },
@@ -363,7 +374,8 @@ class SqlserverDiagnose:
         )
 
     def _diagnose_per_database_access(self, cursor: Any) -> None:
-        code = SQLServerConfigurationError.per_database_access
+        connect_code = SQLServerConfigurationError.per_database_access
+        view_state_code = SQLServerConfigurationError.missing_per_database_view_state
         config = self._check._config
         try:
             cursor.execute(
@@ -373,7 +385,7 @@ class SqlserverDiagnose:
             rows = cursor.fetchall() or []
         except Exception as e:
             self._fail(
-                code,
+                connect_code,
                 diagnosis="Unable to enumerate online databases from sys.databases: {}".format(e),
                 rawerror=str(e),
             )
@@ -382,7 +394,7 @@ class SqlserverDiagnose:
         candidates = [row[0] for row in rows if row and row[0] and _matches_autodiscovery(row[0], config)]
         if not candidates:
             self._check.diagnosis.success(
-                name=code.value,
+                name=connect_code.value,
                 diagnosis="No autodiscovered databases to probe.",
                 category=CATEGORY_SQLSERVER,
             )
@@ -390,14 +402,36 @@ class SqlserverDiagnose:
 
         truncated = len(candidates) > PER_DATABASE_PROBE_LIMIT
         sample = candidates[:PER_DATABASE_PROBE_LIMIT]
-        failures: list[str] = []
+        connect_failures: list[str] = []
+        view_state_failures: list[str] = []
+        accessible: list[str] = []
         for name in sample:
             try:
                 cursor.execute("USE {}".format(_quote_identifier(name)))
                 _execute_read_probe(cursor, "SELECT TOP 1 1")
             except Exception as e:
-                failures.append("{}: {}".format(name, e))
+                connect_failures.append("{}: {}".format(name, e))
+                continue
+            accessible.append(name)
+            try:
+                if not _has_database_permission(cursor, "VIEW DATABASE STATE"):
+                    view_state_failures.append(name)
+            except Exception as e:
+                view_state_failures.append("{}: {}".format(name, e))
 
+        self._emit_per_database_connect_result(
+            connect_code, connect_failures, sample, candidates, truncated
+        )
+        self._emit_per_database_view_state_result(view_state_code, view_state_failures, accessible)
+
+    def _emit_per_database_connect_result(
+        self,
+        code: SQLServerConfigurationError,
+        failures: list[str],
+        sample: list[str],
+        candidates: list[str],
+        truncated: bool,
+    ) -> None:
         if failures:
             extra = (
                 " (probed first {} of {} autodiscovered databases)".format(len(sample), len(candidates))
@@ -418,9 +452,30 @@ class SqlserverDiagnose:
             diagnosis = "All {} of {} autodiscovered databases probed are accessible (limit reached).".format(
                 len(sample), len(candidates)
             )
+        self._check.diagnosis.success(name=code.value, diagnosis=diagnosis, category=CATEGORY_SQLSERVER)
+
+    def _emit_per_database_view_state_result(
+        self,
+        code: SQLServerConfigurationError,
+        failures: list[str],
+        accessible: list[str],
+    ) -> None:
+        if not accessible:
+            return
+        if failures:
+            self._fail(
+                code,
+                diagnosis="VIEW DATABASE STATE missing on {} of {} accessible databases: {}".format(
+                    len(failures), len(accessible), ", ".join(failures)
+                ),
+                rawerror="; ".join(failures),
+            )
+            return
         self._check.diagnosis.success(
             name=code.value,
-            diagnosis=diagnosis,
+            diagnosis="VIEW DATABASE STATE is granted on all {} accessible autodiscovered databases.".format(
+                len(accessible)
+            ),
             category=CATEGORY_SQLSERVER,
         )
 

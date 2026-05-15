@@ -666,3 +666,67 @@ def test_per_database_access_skipped_on_azure_sql_database(instance_minimal_defa
     diagnoses = _get_diagnoses(check)
 
     assert not _by_name(diagnoses, SQLServerConfigurationError.per_database_access.value)
+
+
+def test_per_database_view_state_success(instance_minimal_defaults):
+    check = _check(
+        instance_minimal_defaults,
+        _happy_responses(autodiscovered_databases=("db_a", "db_b")),
+        database_autodiscovery=True,
+    )
+
+    diagnoses = _get_diagnoses(check)
+
+    row = _by_name(diagnoses, SQLServerConfigurationError.missing_per_database_view_state.value)[0]
+    assert row['result'] == Diagnosis.DIAGNOSIS_SUCCESS
+    assert "2" in row['diagnosis']
+
+
+def test_per_database_view_state_missing_on_all_accessible_dbs(instance_minimal_defaults):
+    check = _check(
+        instance_minimal_defaults,
+        _happy_responses(autodiscovered_databases=("db_a", "db_b"), view_database_state=False),
+        database_autodiscovery=True,
+    )
+
+    diagnoses = _get_diagnoses(check)
+
+    row = _by_name(diagnoses, SQLServerConfigurationError.missing_per_database_view_state.value)[0]
+    assert row['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert "db_a" in row['diagnosis']
+    assert "db_b" in row['diagnosis']
+    assert "VIEW DATABASE STATE" in row['diagnosis']
+
+
+def test_per_database_view_state_skipped_when_no_dbs_accessible(instance_minimal_defaults):
+    def use_any_db(sql, params):
+        return sql.startswith("USE [")
+
+    responses = _happy_responses(autodiscovered_databases=("db_a", "db_b"))
+    responses.insert(0, (use_any_db, Exception("login not authorized")))
+    check = _check(instance_minimal_defaults, responses, database_autodiscovery=True)
+
+    diagnoses = _get_diagnoses(check)
+
+    assert not _by_name(diagnoses, SQLServerConfigurationError.missing_per_database_view_state.value)
+
+
+def test_per_database_view_state_skipped_without_autodiscovery(instance_minimal_defaults):
+    check = _check(instance_minimal_defaults, _happy_responses())
+
+    diagnoses = _get_diagnoses(check)
+
+    assert not _by_name(diagnoses, SQLServerConfigurationError.missing_per_database_view_state.value)
+
+
+def test_per_database_view_state_skipped_on_azure_sql_database(instance_minimal_defaults):
+    check = _check(
+        instance_minimal_defaults,
+        _happy_responses(engine_edition=ENGINE_EDITION_SQL_DATABASE, autodiscovered_databases=("db_a",)),
+        database_autodiscovery=True,
+        dbm=True,
+    )
+
+    diagnoses = _get_diagnoses(check)
+
+    assert not _by_name(diagnoses, SQLServerConfigurationError.missing_per_database_view_state.value)
