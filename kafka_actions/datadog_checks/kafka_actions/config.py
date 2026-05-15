@@ -199,9 +199,7 @@ class KafkaActionsConfig:
             codec = config.get(field)
             if codec and codec not in valid_codecs:
                 supported = ', '.join(valid_codecs) if valid_codecs else '(no codec plugin installed)'
-                raise ConfigurationError(
-                    f"Invalid {field}: {codec}. Supported codecs: {supported}"
-                )
+                raise ConfigurationError(f"Invalid {field}: {codec}. Supported codecs: {supported}")
 
         start_timestamp = config.get('start_timestamp')
         if start_timestamp is not None:
