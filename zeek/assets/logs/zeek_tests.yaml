@@ -1247,7 +1247,7 @@ tests:
         class_name: Detection Finding
         status: New
         severity: High
-        severity_id: 99
+        severity_id: 4
       _system_name: test-system
       actions:
         - Notice::ACTION_LOG

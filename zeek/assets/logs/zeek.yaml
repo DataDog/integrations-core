@@ -1858,29 +1858,25 @@ pipeline:
               name: ocsf.severity_id
               categories:
                 - filter:
-                    query: "@severity.name:informational"
+                    query: "@severity.id:1"
                   name: Informational
                   id: 1
                 - filter:
-                    query: "@severity.name:low"
+                    query: "@severity.id:2"
                   name: Low
                   id: 2
                 - filter:
-                    query: "@severity.name:medium"
+                    query: "@severity.id:3"
                   name: Medium
                   id: 3
                 - filter:
-                    query: "@severity.name:high"
+                    query: "@severity.id:4"
                   name: High
                   id: 4
                 - filter:
-                    query: "@severity.name:critical"
+                    query: "@severity.id:5"
                   name: Critical
                   id: 5
-                - filter:
-                    query: "@severity.name:*"
-                  name: Other
-                  id: 99
               targets:
                 name: ocsf.severity
                 id: ocsf.severity_id
@@ -1889,8 +1885,8 @@ pipeline:
                   ocsf.severity: Other
                   ocsf.severity_id: "99"
                 sources:
-                  ocsf.severity:
-                    - severity.name
+                  ocsf.severity_id:
+                    - severity.id
             - type: schema-category-mapper
               name: ocsf.status_id
               categories:
