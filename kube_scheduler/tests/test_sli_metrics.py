@@ -2,14 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
-
 import pytest
 
 from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.kube_scheduler import KubeSchedulerCheck
 
-from .common import HERE
+from .common import make_mock_metrics
 
 # Constants
 CHECK_NAME = 'kube_scheduler'
@@ -17,9 +15,7 @@ CHECK_NAME = 'kube_scheduler'
 
 @pytest.fixture()
 def mock_metrics(mock_openmetrics_http):
-    f_name = os.path.join(HERE, 'fixtures', 'metrics_slis_1.27.3.txt')
-    mock_openmetrics_http.get.return_value = MockHTTPResponse(file_path=f_name, headers={'Content-Type': 'text/plain'})
-    yield mock_openmetrics_http
+    yield from make_mock_metrics(mock_openmetrics_http, 'metrics_slis_1.27.3.txt')
 
 
 def test_check_metrics_slis(aggregator, mock_metrics, instance):
