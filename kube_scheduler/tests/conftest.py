@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
+from unittest import mock
 
 import pytest
 
@@ -19,3 +20,9 @@ def dd_environment():
 @pytest.fixture
 def instance():
     return deepcopy(INSTANCE)
+
+
+@pytest.fixture(autouse=True)
+def patch_healthcheck_requests_wrapper():
+    with mock.patch('datadog_checks.kube_scheduler.kube_scheduler.RequestsWrapper'):
+        yield
