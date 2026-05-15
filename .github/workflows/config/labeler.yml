@@ -3,9 +3,12 @@ base_package:
   - any-glob-to-any-file: datadog_checks_base/**/*
 changelog/no-changelog:
 - changed-files:
-  - any-glob-to-any-file:
+  - any-glob-to-all-files:
     - requirements-agent-release.txt
     - '**/__about__.py'
+    - '**/CHANGELOG.md'
+    - '**/changelog.d/*'
+    - .in-toto/**
 ddev:
 - changed-files:
   - any-glob-to-any-file: ddev/**/*
