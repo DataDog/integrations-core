@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 @click.command(name='port-commit', short_help='Backport a commit onto a target branch')
 @click.pass_obj
-@click.argument('commit_hash', required=False)
+@click.argument('commit_hash', required=False, metavar='COMMIT_OR_PR')
 @click.option('-t', '--target-branch', default='master', show_default=True, help='Target branch to port to.')
 @click.option('-p', '--branch-prefix', default='port', show_default=True, help='Branch name prefix.')
 @click.option('-s', '--branch-suffix', default=None, help='Branch name suffix. Defaults to `to-<target-branch>`.')
@@ -43,22 +43,31 @@ def port_commit(
     """
     Backport a commit onto a target branch.
 
-    Cherry-picks COMMIT_HASH onto `--target-branch` (default `master`) on a new branch named
+    Cherry-picks COMMIT_OR_PR onto `--target-branch` (default `master`) on a new branch named
     `<github-user>/<prefix>-<sha[:10]>-<suffix>`, preserving `.in-toto` files from the target
     branch so package signatures stay intact. Pushes the branch and, unless `--no-pr` is set,
     opens a pull request titled `[Backport] <subject>` and labeled with `--pr-labels`.
 
-    If COMMIT_HASH is omitted, the current HEAD commit is used after confirmation.
+    COMMIT_OR_PR accepts: a full 40-character commit SHA, a PR number (e.g. `23703`), an
+    explicit `PR-<number>` token, or a GitHub PR URL. Pure-digit inputs are tried as a PR
+    first when a GitHub token is configured, and fall back to commit resolution on 404. If
+    omitted, the current HEAD commit is used after confirmation.
 
     The GitHub user for the branch prefix is taken from `ddev config` (`github.user`) or the
     `DD_GITHUB_USER` / `GITHUB_USER` / `GITHUB_ACTOR` environment variables.
     """
+    import logging
+
     from ddev.cli.release.port_commit_workflow import (
         PortStepError,
         build_port_steps,
         display_completion_summary,
         resolve_port_plan,
     )
+
+    # httpx logs every request at INFO and clutters the workflow output. The PR-resolution and
+    # PR-creation steps already print their own status lines; the underlying HTTP traffic is noise.
+    logging.getLogger('httpx').setLevel(logging.WARNING)
 
     plan = resolve_port_plan(
         app,

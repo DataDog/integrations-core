@@ -275,6 +275,31 @@ class AsyncGitHubClient:
         )
         return self._parse_response(response, IssueComment)
 
+    async def get_pull_request(
+        self,
+        owner: str,
+        repo: str,
+        pull_number: int,
+        timeout: float | None = None,
+    ) -> GitHubResponse[PullRequest]:
+        """
+        Calls the GitHub API to get a single pull request.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/pulls/pulls#get-a-pull-request
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            pull_number: Pull request number.
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+
+        Returns:
+            GitHubResponse[PullRequest]: The validated pull request data and headers.
+        """
+        response = await self._request("GET", f"/repos/{owner}/{repo}/pulls/{pull_number}", timeout=timeout)
+        return self._parse_response(response, PullRequest)
+
     async def create_pull_request(
         self,
         owner: str,
