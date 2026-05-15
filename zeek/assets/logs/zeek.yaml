@@ -1877,6 +1877,10 @@ pipeline:
                     query: "@severity.id:5"
                   name: Critical
                   id: 5
+                - filter:
+                    query: "*"
+                  name: Other
+                  id: 99
               targets:
                 name: ocsf.severity
                 id: ocsf.severity_id
@@ -2167,6 +2171,10 @@ pipeline:
                     query: "@alert.severity:3"
                   name: Low
                   id: 2
+                - filter:
+                    query: "*"
+                  name: Other
+                  id: 99
               targets:
                 name: ocsf.severity
                 id: ocsf.severity_id
@@ -2917,6 +2925,10 @@ pipeline:
                     query: "@http.method:TRACE"
                   name: Trace
                   id: 8
+                - filter:
+                    query: "*"
+                  name: Other
+                  id: 99
               targets:
                 name: ocsf.activity_name
                 id: ocsf.activity_id
@@ -3130,6 +3142,10 @@ pipeline:
                     query: "@http.status_code:[400 TO 599]"
                   name: Failure
                   id: 2
+                - filter:
+                    query: "*"
+                  name: Other
+                  id: 99
               targets:
                 name: ocsf.status
                 id: ocsf.status_id
@@ -3364,6 +3380,10 @@ pipeline:
                     query: "@rcode:23"
                   name: BADCOOKIE
                   id: 23
+                - filter:
+                    query: "*"
+                  name: Other
+                  id: 99
               targets:
                 name: ocsf.rcode
                 id: ocsf.rcode_id
@@ -3417,6 +3437,10 @@ pipeline:
                     query: "(@rcode:3 OR @dns.flags.rcode:NXDOMAIN OR @rejected:true)"
                   name: Failure
                   id: 2
+                - filter:
+                    query: "*"
+                  name: Other
+                  id: 99
               targets:
                 name: ocsf.status
                 id: ocsf.status_id
@@ -3612,9 +3636,20 @@ pipeline:
                     query: "@timedout:true"
                   name: Failure
                   id: 2
+                - filter:
+                    query: "@timedout:*"
+                  name: Other
+                  id: 99
               targets:
                 name: ocsf.status
                 id: ocsf.status_id
+              fallback:
+                values:
+                  ocsf.status: Other
+                  ocsf.status_id: 99
+                sources:
+                  ocsf.status:
+                    - timedout
             - type: schema-remapper
               name: Map `ocsf.time` to `ocsf.time`
               sources:
