@@ -287,7 +287,7 @@ class ClickhouseCheck(DatabaseCheck):
                     advanced_queries.SystemAsynchronousMetrics,
                 ]
             )
-            if self.version_ge('20.11'):
+            if self.version_ge('21.3'):
                 query_list.append(advanced_queries.SystemErrors)
 
         return query_list
