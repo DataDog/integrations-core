@@ -6,6 +6,7 @@ from contextlib import contextmanager
 
 import pytest
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.diagnose import Diagnosis
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection_errors import SQLConnectionError
@@ -173,6 +174,18 @@ def test_connection_failure(instance_minimal_defaults):
     assert len(rows) == 1
     assert rows[0]['result'] == Diagnosis.DIAGNOSIS_FAIL
     assert "login failed for user" in rows[0]['diagnosis']
+
+
+def test_connection_configuration_error(instance_minimal_defaults):
+    check = SQLServer(CHECK_NAME, {}, [instance_minimal_defaults])
+    check._connection = FakeConnection(open_error=ConfigurationError("invalid connection string"))
+
+    diagnoses = _get_diagnoses(check)
+
+    rows = _by_name(diagnoses, SQLServerConfigurationError.connection_failure.value)
+    assert len(rows) == 1
+    assert rows[0]['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert "invalid connection string" in rows[0]['diagnosis']
 
 
 def test_unsupported_version_fails(instance_minimal_defaults):
@@ -396,6 +409,36 @@ def test_only_custom_queries_skips_database_metric_msdb_probes(instance_minimal_
     diagnoses = _get_diagnoses(check)
 
     assert not _by_name(diagnoses, SQLServerConfigurationError.missing_msdb_select.value)
+
+
+def test_stored_procedure_skips_regular_metric_probes(instance_minimal_defaults):
+    check = _check(
+        instance_minimal_defaults,
+        _happy_responses(),
+        stored_procedure='pyStoredProc',
+        database_autodiscovery=True,
+    )
+
+    diagnoses = _get_diagnoses(check)
+
+    assert not _by_name(diagnoses, SQLServerConfigurationError.performance_counters_not_readable.value)
+    assert not _by_name(diagnoses, SQLServerConfigurationError.missing_view_server_state.value)
+    assert not _by_name(diagnoses, SQLServerConfigurationError.missing_connect_any_database.value)
+    assert not _by_name(diagnoses, SQLServerConfigurationError.missing_view_any_definition.value)
+    assert not _by_name(diagnoses, SQLServerConfigurationError.missing_msdb_select.value)
+    _assert_result(diagnoses, SQLServerConfigurationError.connection_failure, Diagnosis.DIAGNOSIS_SUCCESS)
+    _assert_result(diagnoses, SQLServerConfigurationError.sqlserver_version_unsupported, Diagnosis.DIAGNOSIS_SUCCESS)
+
+
+def test_stored_procedure_still_probes_dbm_diagnostics(instance_minimal_defaults):
+    check = _check(instance_minimal_defaults, _happy_responses(), stored_procedure='pyStoredProc', dbm=True)
+
+    diagnoses = _get_diagnoses(check)
+
+    assert not _by_name(diagnoses, SQLServerConfigurationError.performance_counters_not_readable.value)
+    _assert_result(diagnoses, SQLServerConfigurationError.missing_view_server_state, Diagnosis.DIAGNOSIS_SUCCESS)
+    _assert_result(diagnoses, SQLServerConfigurationError.missing_connect_any_database, Diagnosis.DIAGNOSIS_SUCCESS)
+    _assert_result(diagnoses, SQLServerConfigurationError.missing_view_any_definition, Diagnosis.DIAGNOSIS_SUCCESS)
 
 
 def test_get_diagnoses_returns_json(instance_minimal_defaults):

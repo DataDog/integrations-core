@@ -13,7 +13,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any
 
-from datadog_checks.base import is_affirmative
+from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.sqlserver.connection_errors import SQLConnectionError
 from datadog_checks.sqlserver.const import ENGINE_EDITION_SQL_DATABASE, STATIC_INFO_ENGINE_EDITION
 
@@ -127,7 +127,7 @@ class SqlserverDiagnose:
                     if self._needs_msdb_select():
                         self._detect_rds(cursor)
                         self._diagnose_msdb_select(cursor)
-        except SQLConnectionError as e:
+        except (ConfigurationError, SQLConnectionError) as e:
             code = SQLServerConfigurationError.connection_failure
             self._fail(
                 code,
@@ -294,15 +294,16 @@ class SqlserverDiagnose:
         )
 
     def _needs_performance_counters(self) -> bool:
-        return not self._check._config.only_custom_queries
+        return self._collects_regular_metrics()
 
     def _needs_view_server_state(self) -> bool:
         config = self._check._config
-        return not config.only_custom_queries or config.dbm_enabled
+        return self._collects_regular_metrics() or config.dbm_enabled
 
     def _needs_connect_any_database(self) -> bool:
+        config = self._check._config
         return not self._is_azure_sql_database() and (
-            self._check._config.dbm_enabled or self._check._config.autodiscovery
+            config.dbm_enabled or (self._collects_regular_metrics() and config.autodiscovery)
         )
 
     def _needs_view_any_definition(self) -> bool:
@@ -312,7 +313,7 @@ class SqlserverDiagnose:
             return False
         if config.dbm_enabled:
             return True
-        if config.only_custom_queries:
+        if not self._collects_regular_metrics():
             return False
         return database_metrics["ao_metrics"]["enabled"] or database_metrics["master_files_metrics"]["enabled"]
 
@@ -323,7 +324,7 @@ class SqlserverDiagnose:
             return True
 
         config = self._check._config
-        if config.only_custom_queries:
+        if not self._collects_regular_metrics():
             return False
 
         database_metrics = config.database_metrics_config
@@ -337,7 +338,7 @@ class SqlserverDiagnose:
         config = self._check._config
         database_metrics = config.database_metrics_config
         probes = []
-        if not config.only_custom_queries:
+        if self._collects_regular_metrics():
             if database_metrics["db_backup_metrics"]["enabled"]:
                 probes.append(("msdb.dbo.backupset", "SELECT TOP 1 1 FROM msdb.dbo.backupset"))
             if database_metrics["primary_log_shipping_metrics"]["enabled"]:
@@ -365,6 +366,10 @@ class SqlserverDiagnose:
             if not self._is_rds:
                 probes.append(("msdb.dbo.syssessions", "SELECT TOP 1 1 FROM msdb.dbo.syssessions"))
         return probes
+
+    def _collects_regular_metrics(self) -> bool:
+        config = self._check._config
+        return not config.only_custom_queries and not config.proc
 
     def _agent_jobs_enabled(self) -> bool:
         config = self._check._config
