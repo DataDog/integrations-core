@@ -18,7 +18,7 @@ def mock_metrics(mock_openmetrics_http):
     return make_mock_metrics(mock_openmetrics_http, 'metrics_slis_1.27.3.txt')
 
 
-def test_check_metrics_slis(aggregator, mock_metrics, instance):
+def test_check_metrics_slis(aggregator, mock_metrics, instance, mock_healthcheck_wrapper):
     c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
@@ -36,7 +36,7 @@ def test_check_metrics_slis(aggregator, mock_metrics, instance):
     aggregator.assert_all_metrics_covered()
 
 
-def test_check_metrics_slis_transform(aggregator, mock_metrics, instance):
+def test_check_metrics_slis_transform(aggregator, mock_metrics, instance, mock_healthcheck_wrapper):
     c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
@@ -54,7 +54,7 @@ def test_check_metrics_slis_transform(aggregator, mock_metrics, instance):
     )
 
 
-def test_check_metrics_slis_filter_by_type(aggregator, mock_metrics, instance):
+def test_check_metrics_slis_filter_by_type(aggregator, mock_metrics, instance, mock_healthcheck_wrapper):
     c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 

@@ -37,7 +37,7 @@ def mock_leader():
         yield
 
 
-def test_check_metrics_1_23(aggregator, mock_metrics, mock_leader):
+def test_check_metrics_1_23(aggregator, mock_metrics, mock_leader, mock_healthcheck_wrapper):
     c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
