@@ -9,7 +9,8 @@ Thin wrappers over the module-level helpers in
 
 from __future__ import annotations
 
-from ..message_deserializer import (
+from datadog_checks.kafka_actions.formats.base import FormatHandler
+from datadog_checks.kafka_actions.message_deserializer import (
     _build_avro_schema,
     _build_protobuf_schema,
     _build_protobuf_schema_from_registry,
@@ -20,7 +21,6 @@ from ..message_deserializer import (
     _deserialize_raw,
     _deserialize_string,
 )
-from .base import FormatHandler
 
 
 class JsonHandler(FormatHandler):
