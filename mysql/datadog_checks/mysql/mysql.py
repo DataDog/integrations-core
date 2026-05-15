@@ -5,6 +5,7 @@
 from __future__ import division
 
 import copy
+import functools
 import time
 import traceback
 from collections import defaultdict
@@ -59,6 +60,7 @@ from .const import (
     TABLE_VARS,
     VARIABLES_VARS,
 )
+from .diagnose import run_diagnostics
 from .global_variables import GlobalVariables
 from .index_metrics import MySqlIndexMetrics
 from .innodb_metrics import InnoDBMetrics
@@ -173,6 +175,8 @@ class MySql(DatabaseCheck):
         self._is_innodb_engine_enabled_cached = None
 
         self._submit_initialization_health_event()
+
+        self.diagnosis.register(functools.partial(run_diagnostics, self))
 
     def _submit_initialization_health_event(self):
         try:
