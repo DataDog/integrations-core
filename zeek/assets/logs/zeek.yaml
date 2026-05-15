@@ -3110,6 +3110,21 @@ pipeline:
       filter:
         query: "@_path:(dns OR dns_red)"
       processors:
+        - type: array-processor
+          name: Select first answer IP into ocsf.answer.rdata
+          enabled: true
+          operation:
+            source: answers
+            target: ocsf.answer.rdata
+            type: select
+        - type: array-processor
+          name: Append ocsf.answer into ocsf.answers array
+          enabled: true
+          operation:
+            source: ocsf.answer
+            target: ocsf.answers
+            preserveSource: false
+            type: append
         - type: schema-processor
           name: Apply OCSF schema for 4003
           enabled: true
@@ -3216,6 +3231,13 @@ pipeline:
               sources:
                 - qtype_name
               target: ocsf.query.type
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.answers` to `ocsf.answers`
+              sources:
+                - ocsf.answers
+              target: ocsf.answers
               preserveSource: true
               overrideOnConflict: true
             - type: schema-category-mapper
