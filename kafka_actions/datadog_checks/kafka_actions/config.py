@@ -186,16 +186,12 @@ class KafkaActionsConfig:
         value_format = config.get('value_format', 'json')
         if value_format not in valid_formats:
             raise ConfigurationError(
-                f"Invalid value_format: {value_format}. "
-                f"Supported formats: {', '.join(valid_formats)}"
+                f"Invalid value_format: {value_format}. Supported formats: {', '.join(valid_formats)}"
             )
 
         key_format = config.get('key_format', 'json')
         if key_format not in valid_formats:
-            raise ConfigurationError(
-                f"Invalid key_format: {key_format}. "
-                f"Supported formats: {', '.join(valid_formats)}"
-            )
+            raise ConfigurationError(f"Invalid key_format: {key_format}. Supported formats: {', '.join(valid_formats)}")
 
         start_timestamp = config.get('start_timestamp')
         if start_timestamp is not None:
