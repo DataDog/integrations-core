@@ -22,7 +22,7 @@ NAMESPACE = 'kube_scheduler'
 
 @pytest.fixture()
 def mock_metrics(mock_openmetrics_http):
-    yield from make_mock_metrics(mock_openmetrics_http, 'metrics_1.14.0.txt')
+    return make_mock_metrics(mock_openmetrics_http, 'metrics_1.14.0.txt')
 
 
 @pytest.fixture()
@@ -96,7 +96,15 @@ def test_check_metrics_1_14(aggregator, mock_metrics, mock_leader):
     aggregator.assert_all_metrics_covered()
 
 
-def test_service_check_ok(monkeypatch, mock_openmetrics_http):
+@pytest.mark.parametrize(
+    'side_effect, expected_status, expected_message',
+    [
+        (None, AgentCheck.OK, None),
+        (requests.HTTPError('health check failed'), AgentCheck.CRITICAL, 'health check failed'),
+    ],
+    ids=['ok', 'http_error'],
+)
+def test_service_check(monkeypatch, mock_openmetrics_http, side_effect, expected_status, expected_message):
     instance = {'prometheus_url': 'http://localhost:10251/metrics'}
     # mock_openmetrics_http satisfies detect_sli_endpoint during __init__
     # the service-check path under test is driven by the seeded _http_handlers below
@@ -107,17 +115,14 @@ def test_service_check_ok(monkeypatch, mock_openmetrics_http):
 
     healthcheck_url = 'http://localhost:10251/healthz'
     handler = mock.MagicMock()
+    if side_effect is not None:
+        handler.get.return_value.raise_for_status = mock.Mock(side_effect=side_effect)
     check._http_handlers[healthcheck_url] = handler
 
-    # successful health check
     check._perform_service_check(instance)
 
-    # failed health check exercises the live requests.HTTPError path
-    handler.get.return_value.raise_for_status = mock.Mock(side_effect=requests.HTTPError('health check failed'))
-    check._perform_service_check(instance)
-
-    calls = [
-        mock.call('kube_scheduler.up', AgentCheck.OK, tags=[]),
-        mock.call('kube_scheduler.up', AgentCheck.CRITICAL, tags=[], message='health check failed'),
-    ]
-    check.service_check.assert_has_calls(calls)
+    handler.get.assert_called_with(healthcheck_url)
+    if expected_message is None:
+        check.service_check.assert_called_with('kube_scheduler.up', expected_status, tags=[])
+    else:
+        check.service_check.assert_called_with('kube_scheduler.up', expected_status, tags=[], message=expected_message)

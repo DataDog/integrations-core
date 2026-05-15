@@ -15,7 +15,7 @@ CHECK_NAME = 'kube_scheduler'
 
 @pytest.fixture()
 def mock_metrics(mock_openmetrics_http):
-    yield from make_mock_metrics(mock_openmetrics_http, 'metrics_slis_1.27.3.txt')
+    return make_mock_metrics(mock_openmetrics_http, 'metrics_slis_1.27.3.txt')
 
 
 def test_check_metrics_slis(aggregator, mock_metrics, instance):
@@ -75,19 +75,12 @@ def test_check_metrics_slis_filter_by_type(aggregator, mock_metrics, instance):
     )
 
 
-def test_detect_sli_endpoint(mock_openmetrics_http, instance):
-    mock_openmetrics_http.get.return_value = MockHTTPResponse(status_code=200)
+@pytest.mark.parametrize(
+    'status_code, expected_available',
+    [(200, True), (404, False), (403, False)],
+    ids=['200_available', '404_unavailable', '403_unavailable'],
+)
+def test_detect_sli_endpoint(mock_openmetrics_http, instance, status_code, expected_available):
+    mock_openmetrics_http.get.return_value = MockHTTPResponse(status_code=status_code)
     c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
-    assert c._slis_available is True
-
-
-def test_detect_sli_endpoint_404(mock_openmetrics_http, instance):
-    mock_openmetrics_http.get.return_value = MockHTTPResponse(status_code=404)
-    c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
-    assert c._slis_available is False
-
-
-def test_detect_sli_endpoint_403(mock_openmetrics_http, instance):
-    mock_openmetrics_http.get.return_value = MockHTTPResponse(status_code=403)
-    c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
-    assert c._slis_available is False
+    assert c._slis_available is expected_available

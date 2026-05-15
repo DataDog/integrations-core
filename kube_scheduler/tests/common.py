@@ -12,4 +12,4 @@ HERE = get_here()
 def make_mock_metrics(mock_openmetrics_http, fixture_filename):
     f_name = os.path.join(HERE, 'fixtures', fixture_filename)
     mock_openmetrics_http.get.return_value = MockHTTPResponse(file_path=f_name, headers={'Content-Type': 'text/plain'})
-    yield mock_openmetrics_http
+    return mock_openmetrics_http

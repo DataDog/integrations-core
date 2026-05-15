@@ -16,7 +16,7 @@ CHECK_NAME = 'kube_scheduler'
 
 @pytest.fixture()
 def mock_metrics(mock_openmetrics_http):
-    yield from make_mock_metrics(mock_openmetrics_http, 'metrics_1.26.0.txt')
+    return make_mock_metrics(mock_openmetrics_http, 'metrics_1.26.0.txt')
 
 
 @pytest.fixture()
