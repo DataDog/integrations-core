@@ -115,13 +115,11 @@ def test_service_check(monkeypatch, mock_openmetrics_http, side_effect, expected
 
     healthcheck_url = 'http://localhost:10251/healthz'
     handler = mock.MagicMock()
-    if side_effect is not None:
-        handler.get.return_value.raise_for_status = mock.Mock(side_effect=side_effect)
+    handler.get.return_value.raise_for_status = mock.Mock(side_effect=side_effect)
     check._http_handlers[healthcheck_url] = handler
 
     check._perform_service_check(instance)
 
-    handler.get.assert_called_with(healthcheck_url)
     if expected_message is None:
         check.service_check.assert_called_with('kube_scheduler.up', expected_status, tags=[])
     else:

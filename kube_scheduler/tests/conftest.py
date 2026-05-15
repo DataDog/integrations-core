@@ -24,5 +24,6 @@ def instance():
 
 @pytest.fixture(autouse=True)
 def patch_healthcheck_requests_wrapper():
+    # _healthcheck_http_handler builds its own RequestsWrapper outside self.http
     with mock.patch('datadog_checks.kube_scheduler.kube_scheduler.RequestsWrapper'):
         yield
