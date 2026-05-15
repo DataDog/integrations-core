@@ -2501,6 +2501,10 @@ pipeline:
                     query: "@established:false"
                   name: Fail
                   id: 4
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
               targets:
                 name: ocsf.activity_name
                 id: ocsf.activity_id
