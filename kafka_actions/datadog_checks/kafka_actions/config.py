@@ -180,16 +180,21 @@ class KafkaActionsConfig:
 
         # Note: n_messages_retrieved and max_scanned_messages are validated in the Datadog backend
 
+        from .formats import list_handlers
+
+        valid_formats = list_handlers()
         value_format = config.get('value_format', 'json')
-        if value_format not in ['json', 'bson', 'string', 'protobuf', 'avro', 'raw']:
+        if value_format not in valid_formats:
             raise ConfigurationError(
-                f"Invalid value_format: {value_format}. Supported formats: json, bson, string, protobuf, avro, raw"
+                f"Invalid value_format: {value_format}. "
+                f"Supported formats: {', '.join(valid_formats)}"
             )
 
         key_format = config.get('key_format', 'json')
-        if key_format not in ['json', 'bson', 'string', 'protobuf', 'avro', 'raw']:
+        if key_format not in valid_formats:
             raise ConfigurationError(
-                f"Invalid key_format: {key_format}. Supported formats: json, bson, string, protobuf, avro, raw"
+                f"Invalid key_format: {key_format}. "
+                f"Supported formats: {', '.join(valid_formats)}"
             )
 
         start_timestamp = config.get('start_timestamp')
@@ -199,7 +204,7 @@ class KafkaActionsConfig:
 
         schema_registry_url = self.instance.get('schema_registry_url')
 
-        if value_format in ['protobuf', 'avro']:
+        if value_format in ['protobuf', 'avro', 'protobuf_msgpack']:
             if config.get('value_uses_schema_registry'):
                 if not schema_registry_url:
                     raise ConfigurationError(
@@ -212,7 +217,7 @@ class KafkaActionsConfig:
                     f"or 'value_schema' to be specified"
                 )
 
-        if key_format in ['protobuf', 'avro']:
+        if key_format in ['protobuf', 'avro', 'protobuf_msgpack']:
             if config.get('key_uses_schema_registry'):
                 if not schema_registry_url:
                     raise ConfigurationError(
