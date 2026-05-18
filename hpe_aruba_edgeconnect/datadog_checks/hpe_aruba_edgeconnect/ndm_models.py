@@ -101,7 +101,7 @@ class NetworkDevicesMetadata(BaseModel):
     model_config = ConfigDict(validate_assignment=True)
 
     integration: str = INTEGRATION
-    namespace: str | None = None
+    namespace: str
     devices: list[DeviceMetadata] = Field(default_factory=list)
     interfaces: list[InterfaceMetadata] = Field(default_factory=list)
     tunnels: list[TunnelMetadata] = Field(default_factory=list)
