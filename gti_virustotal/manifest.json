@@ -1,0 +1,50 @@
+{
+    "manifest_version": "2.0.0",
+    "app_uuid": "eb4af193-e43d-44b8-a6a8-5fea46e1752b",
+    "app_id": "gti-virustotal",
+    "owner": "saas-integrations",
+    "display_on_public_website": false,
+    "tile": {
+        "overview": "README.md#Overview",
+        "configuration": "README.md#Setup",
+        "support": "README.md#Support",
+        "changelog": "CHANGELOG.md",
+        "description": "Enriches your security logs with threat intelligence data from GTI VirusTotal.",
+        "title": "GTI VirusTotal",
+        "media": [
+            {
+                "caption": "GTI VirusTotal Threat Intelligence",
+                "image_url": "images/gti_virustotal_threat_intelligence_light.png",
+                "media_type": "image"
+            },
+            {
+                "caption": "GTI VirusTotal Threat Intelligence",
+                "image_url": "images/gti_virustotal_threat_intelligence_dark.png",
+                "media_type": "image"
+            }
+        ],
+        "classifier_tags": [
+            "Category::Security",
+            "Offering::Integration"
+        ]
+    },
+    "assets": {
+        "integration": {
+            "auto_install": false,
+            "source_type_id": 72539026,
+            "source_type_name": "GTI VirusTotal",
+            "events": {
+                "creates_events": false
+            }
+        },
+        "dashboards": {
+            "GTI VirusTotal Threat Intelligence": "assets/dashboards/gti_virustotal_threat_intelligence.json"
+        }
+    },
+    "author": {
+        "support_email": "help@datadoghq.com",
+        "name": "Datadog",
+        "homepage": "https://www.datadoghq.com",
+        "sales_email": "info@datadoghq.com"
+    }
+}
