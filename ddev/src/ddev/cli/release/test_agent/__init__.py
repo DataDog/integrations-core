@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import re
 from typing import TYPE_CHECKING
 
@@ -251,8 +252,6 @@ def _print_result(app: Application, *, linux_url: str, windows_url: str) -> None
 
 def _dispatch_both(app: Application, *, ref: str, inputs: dict[str, str]) -> tuple[str, str]:
     """Dispatch both workflows in parallel via the async GitHub client. Returns (linux_url, windows_url)."""
-    import asyncio
-
     token = app.config.github.token
     results = asyncio.run(_dispatch_both_async(token, REPO_OWNER, REPO_NAME, ref, inputs))
     return _extract_run_urls(results)
@@ -265,8 +264,6 @@ async def _dispatch_both_async(
     ref: str,
     inputs: dict[str, str],
 ) -> Sequence[DispatchOutcome]:
-    import asyncio
-
     from ddev.utils.github_async import async_github_client
 
     async with async_github_client(token=token) as client:
