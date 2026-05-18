@@ -1655,6 +1655,19 @@ def _extract_instances(args, kwargs):
     return None
 
 
+class _TrialErrorDowngrade(logging.Filter):
+    """Demote ERROR/CRITICAL records to DEBUG. Installed on a candidate
+    check's logger while its ``run()`` executes in trial-mode: failures
+    there are expected (the proxy will try the next candidate), and the
+    real error report is already suppressed on the Go side."""
+
+    def filter(self, record):
+        if record.levelno >= logging.ERROR:
+            record.levelno = logging.DEBUG
+            record.levelname = 'DEBUG'
+        return True
+
+
 class _TrialModeProxy(AgentCheck):
     """Proxy check that defers real work until trial-mode (config-discovery)
     resolves. ``AgentCheck.__new__`` builds an instance of this class when it
@@ -1706,7 +1719,12 @@ class _TrialModeProxy(AgentCheck):
             # metric submissions key off the same check_id as the proxy.
             inst.check_id = self.check_id
             inst.provider = self.provider
-            error_report = inst.run()
+            log_filter = _TrialErrorDowngrade()
+            inst.log.logger.addFilter(log_filter)
+            try:
+                error_report = inst.run()
+            finally:
+                inst.log.logger.removeFilter(log_filter)
             if not error_report:
                 self._winner = inst
                 return
