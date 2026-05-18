@@ -4,7 +4,7 @@
 
 ***Fixed***:
 
-* Improve error handling for elevated 500s and surface clearer 429 rate-limit errors
+* Improve error handling for elevated 500 errors and surface clearer 429 rate-limit errors
 
 ## 1.0.0 / 2024-06-17
 
