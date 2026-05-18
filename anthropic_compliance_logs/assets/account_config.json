@@ -12,7 +12,7 @@
   ],
   "dataflow_config": [
     {
-      "dataflow_id": "anthropic_compliance_logs",
+      "dataflow_id": "anthropic-compliance-logs",
       "additional_config_fields": []
     }
   ]
