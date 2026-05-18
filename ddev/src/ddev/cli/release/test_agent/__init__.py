@@ -5,13 +5,20 @@
 
 from __future__ import annotations
 
+import asyncio
 import re
 from typing import TYPE_CHECKING
 
 import click
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from ddev.cli.application import Application
+    from ddev.utils.github_async import GitHubResponse
+    from ddev.utils.github_async.models import WorkflowDispatchResult
+
+    DispatchOutcome = GitHubResponse[WorkflowDispatchResult] | BaseException
 
 BRANCH_PATTERN = r'^\d+\.\d+\.x$'
 TAG_PATTERN = r'^\d+\.\d+\.\d+(-rc\.\d+)?$'
@@ -23,6 +30,9 @@ WORKFLOW_FILES = [
     f'.github/workflows/{WORKFLOW_WINDOWS}',
 ]
 
+# Hard-coded: the two test workflows only live on DataDog/integrations-core. Forks have nothing
+# to dispatch even if the branch/tag exists, so deferring this to repo metadata would just hide
+# misconfiguration. If we ever ship the workflows elsewhere, plumb the owner through here.
 REPO_OWNER = 'DataDog'
 
 
@@ -69,7 +79,8 @@ def test_agent(app: Application, branch: str | None, tag: str | None, dry_run: b
     try:
         linux_url, windows_url = _dispatch_both(app, ref=ref, inputs=inputs)
     except RuntimeError as e:
-        app.abort(str(e))
+        cause = f' (caused by: {e.__cause__!r})' if e.__cause__ is not None else ''
+        app.abort(f'{e}{cause}')
     _print_result(app, ref=ref, linux_url=linux_url, windows_url=windows_url)
 
 
@@ -82,7 +93,7 @@ def _validate_input(app: Application, branch: str | None, tag: str | None) -> tu
         app.abort(f'Invalid branch: {branch!r}. Must match {BRANCH_PATTERN}.')
 
     if tag is not None:
-        normalized = tag.lstrip('v')
+        normalized = tag.removeprefix('v')
         if not re.match(TAG_PATTERN, normalized):
             app.abort(f'Invalid tag: {tag!r}. Must match {TAG_PATTERN}.')
         tag = normalized
@@ -188,13 +199,12 @@ def _print_result(app: Application, *, ref: str, linux_url: str, windows_url: st
 
 def _dispatch_both(app: Application, *, ref: str, inputs: dict[str, object]) -> tuple[str, str]:
     """Dispatch both workflows in parallel via the async GitHub client. Returns (linux_url, windows_url)."""
-    import asyncio
-
     owner = REPO_OWNER
     repo = app.repo.full_name
     token = app.config.github.token
 
-    return asyncio.run(_dispatch_both_async(token, owner, repo, ref, inputs))
+    results = asyncio.run(_dispatch_both_async(token, owner, repo, ref, inputs))
+    return _extract_run_urls(results)
 
 
 async def _dispatch_both_async(
@@ -203,13 +213,11 @@ async def _dispatch_both_async(
     repo: str,
     ref: str,
     inputs: dict[str, object],
-) -> tuple[str, str]:
-    import asyncio
-
+) -> Sequence[DispatchOutcome]:
     from ddev.utils.github_async import async_github_client
 
     async with async_github_client(token=token) as client:
-        results = await asyncio.gather(
+        return await asyncio.gather(
             client.create_workflow_dispatch(
                 owner=owner,
                 repo=repo,
@@ -229,25 +237,28 @@ async def _dispatch_both_async(
             return_exceptions=True,
         )
 
-    return _extract_run_urls(owner, repo, ref, results)
 
-
-def _extract_run_urls(owner: str, repo: str, ref: str, results: list[object]) -> tuple[str, str]:
+def _extract_run_urls(results: Sequence[DispatchOutcome]) -> tuple[str, str]:
     """Pull html_urls out of two gather results, raising on any exception with a partial-success hint."""
     linux_result, windows_result = results
+    linux_failed = isinstance(linux_result, BaseException)
+    windows_failed = isinstance(windows_result, BaseException)
 
-    def url_or_raise(result: object, sibling_url: str | None, label: str) -> str:
-        if isinstance(result, BaseException):
-            if sibling_url is not None:
-                raise RuntimeError(
-                    f'{label} dispatch failed: {result}. The other workflow was dispatched at {sibling_url}.'
-                ) from result
-            raise RuntimeError(f'{label} dispatch failed: {result}') from result
-        return result.data.html_url  # type: ignore[union-attr,attr-defined]
+    if linux_failed and windows_failed:
+        raise RuntimeError(
+            f'Both dispatches failed. Linux: {linux_result}. Windows: {windows_result}.'
+        ) from linux_result
 
-    linux_url_or_none = None if isinstance(linux_result, BaseException) else linux_result.data.html_url  # type: ignore[union-attr,attr-defined]
-    windows_url_or_none = None if isinstance(windows_result, BaseException) else windows_result.data.html_url  # type: ignore[union-attr,attr-defined]
+    if linux_failed:
+        assert not windows_failed
+        raise RuntimeError(
+            f'Linux dispatch failed: {linux_result}. The other workflow was dispatched at {windows_result.data.html_url}.'
+        ) from linux_result
 
-    linux_url = url_or_raise(linux_result, windows_url_or_none, 'Linux')
-    windows_url = url_or_raise(windows_result, linux_url_or_none, 'Windows')
-    return linux_url, windows_url
+    if windows_failed:
+        assert not linux_failed
+        raise RuntimeError(
+            f'Windows dispatch failed: {windows_result}. The other workflow was dispatched at {linux_result.data.html_url}.'
+        ) from windows_result
+
+    return linux_result.data.html_url, windows_result.data.html_url

@@ -5,17 +5,28 @@ from __future__ import annotations
 
 import httpx
 import pytest
+from pytest_mock import MockerFixture
+
+from tests.helpers.github_async import FakeAsyncGitHubClient
+from tests.helpers.runner import CliRunner
+
+EXPECTED_INPUTS = {
+    'test-py3': True,
+    'test-py2': False,
+    'agent-image': 'registry.datadoghq.com/agent:7.80.0-rc.3',
+    'agent-image-windows': 'registry.datadoghq.com/agent:7.80.0-rc.3-servercore',
+}
 
 
 @pytest.fixture(autouse=True)
-def _silence_git(mocker):
+def _silence_git(mocker: MockerFixture) -> None:
     """Default git mocks: ref exists on origin and both workflow files are present at the ref."""
     mocker.patch('ddev.utils.git.GitRepository.capture', return_value='abc123\trefs/heads/7.80.x\n')
     mocker.patch('ddev.utils.git.GitRepository.show_file', return_value='workflow yaml')
 
 
 @pytest.fixture(autouse=True)
-def _silence_registry(mocker):
+def _silence_registry(mocker: MockerFixture) -> None:
     """Default registry mocks: every manifest exists and there is one RC tag available."""
     mocker.patch('ddev.cli.release.test_agent.registry.manifest_exists', return_value=True)
     mocker.patch(
@@ -33,58 +44,39 @@ def _silence_registry(mocker):
         pytest.param(['--tag', '7.80'], 'Invalid tag', id='bad-tag'),
     ],
 )
-def test_input_validation(ddev, args, expected):
+def test_input_validation(ddev: CliRunner, args: list[str], expected: str) -> None:
     result = ddev('release', 'test-agent', *args)
     assert result.exit_code != 0, result.output
     assert expected in result.output
 
 
-def test_tag_with_leading_v_is_accepted(ddev, fake_async_github):
+def test_tag_with_leading_v_is_accepted(ddev: CliRunner, fake_async_github: FakeAsyncGitHubClient) -> None:
     result = ddev('release', 'test-agent', '--tag', 'v7.80.0-rc.1', '--yes')
     assert result.exit_code == 0, result.output
     call = fake_async_github.last_call('create_workflow_dispatch')
     assert call.kwargs['inputs']['agent-image'] == 'registry.datadoghq.com/agent:7.80.0-rc.1'
 
 
-def test_branch_resolves_latest_rc(ddev, fake_async_github):
+@pytest.mark.parametrize('workflow_id', ['test-agent.yml', 'test-agent-windows.yml'])
+def test_branch_resolves_latest_rc_dispatches_both(
+    ddev: CliRunner, fake_async_github: FakeAsyncGitHubClient, workflow_id: str
+) -> None:
     result = ddev('release', 'test-agent', '--branch', '7.80.x', '--yes')
 
     assert result.exit_code == 0, result.output
-    linux_call = fake_async_github.assert_called_with(
-        'create_workflow_dispatch',
-        owner='DataDog',
-        repo='integrations-core',
-        workflow_id='test-agent.yml',
-        ref='7.80.x',
-        inputs={
-            'test-py3': True,
-            'test-py2': False,
-            'agent-image': 'registry.datadoghq.com/agent:7.80.0-rc.3',
-            'agent-image-windows': 'registry.datadoghq.com/agent:7.80.0-rc.3-servercore',
-        },
-        timeout=None,
-        return_run_details=True,
-    )
-    assert linux_call is not None
-
     fake_async_github.assert_called_with(
         'create_workflow_dispatch',
         owner='DataDog',
         repo='integrations-core',
-        workflow_id='test-agent-windows.yml',
+        workflow_id=workflow_id,
         ref='7.80.x',
-        inputs={
-            'test-py3': True,
-            'test-py2': False,
-            'agent-image': 'registry.datadoghq.com/agent:7.80.0-rc.3',
-            'agent-image-windows': 'registry.datadoghq.com/agent:7.80.0-rc.3-servercore',
-        },
+        inputs=EXPECTED_INPUTS,
         timeout=None,
         return_run_details=True,
     )
 
 
-def test_dry_run_does_not_dispatch(ddev, fake_async_github):
+def test_dry_run_does_not_dispatch(ddev: CliRunner, fake_async_github: FakeAsyncGitHubClient) -> None:
     result = ddev('release', 'test-agent', '--branch', '7.80.x', '--dry-run')
 
     assert result.exit_code == 0, result.output
@@ -92,7 +84,9 @@ def test_dry_run_does_not_dispatch(ddev, fake_async_github):
     assert 'Dry run' in result.output
 
 
-def test_branch_with_no_rcs_aborts(ddev, mocker, fake_async_github):
+def test_branch_with_no_rcs_aborts(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
     mocker.patch('ddev.cli.release.test_agent.registry.list_agent_rc_tags', return_value=[])
 
     result = ddev('release', 'test-agent', '--branch', '7.99.x', '--yes')
@@ -102,7 +96,9 @@ def test_branch_with_no_rcs_aborts(ddev, mocker, fake_async_github):
     fake_async_github.assert_not_called('create_workflow_dispatch')
 
 
-def test_missing_image_aborts(ddev, mocker, fake_async_github):
+def test_missing_image_aborts(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
     mocker.patch('ddev.cli.release.test_agent.registry.manifest_exists', return_value=False)
 
     result = ddev('release', 'test-agent', '--tag', '9.99.0-rc.1', '--yes')
@@ -112,7 +108,9 @@ def test_missing_image_aborts(ddev, mocker, fake_async_github):
     fake_async_github.assert_not_called('create_workflow_dispatch')
 
 
-def test_missing_ref_aborts(ddev, mocker, fake_async_github):
+def test_missing_ref_aborts(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
     mocker.patch('ddev.utils.git.GitRepository.capture', return_value='')
 
     result = ddev('release', 'test-agent', '--branch', '7.80.x', '--yes')
@@ -122,7 +120,9 @@ def test_missing_ref_aborts(ddev, mocker, fake_async_github):
     fake_async_github.assert_not_called('create_workflow_dispatch')
 
 
-def test_missing_workflow_file_aborts(ddev, mocker, fake_async_github):
+def test_missing_workflow_file_aborts(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
     mocker.patch('ddev.utils.git.GitRepository.show_file', side_effect=OSError('not in tree'))
 
     result = ddev('release', 'test-agent', '--branch', '7.80.x', '--yes')
@@ -132,17 +132,47 @@ def test_missing_workflow_file_aborts(ddev, mocker, fake_async_github):
     fake_async_github.assert_not_called('create_workflow_dispatch')
 
 
-def test_partial_dispatch_failure_surfaces_sibling_url(ddev, mocker, fake_async_github):
-    """If the Windows dispatch raises after Linux succeeds, the Linux URL should be in the error message."""
+@pytest.mark.parametrize(
+    'failing_workflow, surviving_label',
+    [
+        pytest.param('test-agent-windows.yml', 'Windows', id='windows-fails'),
+        pytest.param('test-agent.yml', 'Linux', id='linux-fails'),
+    ],
+)
+def test_partial_dispatch_failure_surfaces_sibling_url(
+    ddev: CliRunner,
+    fake_async_github: FakeAsyncGitHubClient,
+    failing_workflow: str,
+    surviving_label: str,
+) -> None:
+    """When only one dispatch fails, the surviving side's URL must appear in the error message."""
     err = httpx.HTTPStatusError(
         'forbidden',
         request=httpx.Request('POST', 'https://api.github.com/'),
         response=httpx.Response(403),
     )
-    fake_async_github.mock_response('create_workflow_dispatch', err, workflow_id='test-agent-windows.yml')
+    fake_async_github.mock_response('create_workflow_dispatch', err, workflow_id=failing_workflow)
 
     result = ddev('release', 'test-agent', '--branch', '7.80.x', '--yes')
 
     assert result.exit_code != 0, result.output
-    assert 'Windows dispatch failed' in result.output
+    assert f'{surviving_label} dispatch failed' in result.output
     assert 'https://github.com/test/repo/actions/runs/1' in result.output
+
+
+def test_both_dispatches_fail_combine_messages(
+    ddev: CliRunner, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    err = httpx.HTTPStatusError(
+        'forbidden',
+        request=httpx.Request('POST', 'https://api.github.com/'),
+        response=httpx.Response(403),
+    )
+    fake_async_github.mock_response('create_workflow_dispatch', err)
+
+    result = ddev('release', 'test-agent', '--branch', '7.80.x', '--yes')
+
+    assert result.exit_code != 0, result.output
+    assert 'Both dispatches failed' in result.output
+    assert 'Linux' in result.output
+    assert 'Windows' in result.output

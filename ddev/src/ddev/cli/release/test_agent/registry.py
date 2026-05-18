@@ -22,7 +22,7 @@ AGENT_REPOSITORY = 'agent'
 # Multi-arch (manifest list) is the canonical type for the Agent image; OCI
 # index is accepted as a fallback because the registry may serve either depending
 # on which origin (GAR vs S3) responds.
-_MANIFEST_ACCEPT = ', '.join(
+MANIFEST_ACCEPT = ', '.join(
     [
         'application/vnd.docker.distribution.manifest.list.v2+json',
         'application/vnd.oci.image.index.v1+json',
@@ -31,20 +31,26 @@ _MANIFEST_ACCEPT = ', '.join(
     ]
 )
 
+# The Agent registry has accumulated tags since the 5.x series. Without an explicit
+# page size, the default page may not contain the current release cycle's RCs.
+TAGS_PAGE_SIZE = 10000
+
 
 def manifest_url(tag: str) -> str:
+    """URL of the multi-arch manifest for `registry.datadoghq.com/agent:<tag>`."""
     return f'https://{REGISTRY_HOST}/v2/{AGENT_REPOSITORY}/manifests/{tag}'
 
 
 def tags_list_url() -> str:
-    return f'https://{REGISTRY_HOST}/v2/{AGENT_REPOSITORY}/tags/list'
+    """URL of the tags-list endpoint for the Agent image, requesting one large page."""
+    return f'https://{REGISTRY_HOST}/v2/{AGENT_REPOSITORY}/tags/list?n={TAGS_PAGE_SIZE}'
 
 
 def manifest_exists(tag: str, *, timeout: float = 10.0) -> bool:
     """Return True if `registry.datadoghq.com/agent:<tag>` resolves to a manifest, False on 404."""
     response = httpx.head(
         manifest_url(tag),
-        headers={'Accept': _MANIFEST_ACCEPT},
+        headers={'Accept': MANIFEST_ACCEPT},
         follow_redirects=True,
         timeout=timeout,
     )
