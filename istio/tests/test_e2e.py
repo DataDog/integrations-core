@@ -11,7 +11,11 @@ from datadog_checks.istio import Istio
 from .common import ISTIOD_METRICS, ISTIOD_V2_METRICS, V2_WAYPOINT_METRICS, V2_ZTUNNEL_METRICS
 
 ISTIO_MODE = os.environ.get("ISTIO_MODE", "sidecar")
+ISTIO_VERSION = os.environ.get("ISTIO_VERSION", "")
 
+# Metrics that are only emitted when a specific condition occurs (validation failures,
+# listener conflicts, sidecar injection events, traffic, etc.). These should never be
+# strictly asserted because the e2e cluster does not always reproduce the condition.
 INTERMITTENT_METRICS = [
     'istio.citadel.server.cert_chain_expiry_timestamp',
     'istio.mesh.request.count',
@@ -20,9 +24,6 @@ INTERMITTENT_METRICS = [
     'istio.galley.validation.passed.count',
     'istio.galley.validation.failed',
     'istio.galley.validation.failed.count',
-    'istio.go.memstats.gc_cpu_fraction',
-    'istio.go.memstats.lookups_total',
-    'istio.go.memstats.lookups.count',
     'istio.pilot.rds_expired_nonce',
     'istio.galley.validation.config_update_error.count',
     'istio.galley.validation.config_update_error',
@@ -45,19 +46,36 @@ INTERMITTENT_METRICS = [
     "istio.sidecar_injection.skip.count",
 ]
 
+# Metrics that Istio 1.13's binary still emits but newer Go runtimes (and the matching
+# client_golang version shipped with Istio 1.24+) no longer expose. They are strictly
+# asserted on 1.13 to keep that environment's safety net intact, and skipped on later
+# versions where the binary no longer produces them at all.
+LEGACY_GO_METRICS = {
+    'istio.go.memstats.gc_cpu_fraction',
+    'istio.go.memstats.lookups_total',
+    'istio.go.memstats.lookups.count',
+}
+
+IS_LEGACY_ISTIO = ISTIO_VERSION.startswith("1.13")
+
+
+def _assert_istiod_metric(aggregator, metric):
+    if metric in LEGACY_GO_METRICS and not IS_LEGACY_ISTIO:
+        return
+    if metric in INTERMITTENT_METRICS:
+        aggregator.assert_metric(metric, at_least=0)
+    else:
+        aggregator.assert_metric(metric)
+
 
 @pytest.mark.skipif(ISTIO_MODE != "sidecar", reason="Sidecar-mode e2e: skipped on ambient envs")
 def test_e2e_openmetrics_v1(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
 
-    metrics = ISTIOD_METRICS
     aggregator.assert_service_check('istio.prometheus.health', Istio.OK)
 
-    for metric in metrics:
-        if metric in INTERMITTENT_METRICS:
-            aggregator.assert_metric(metric, at_least=0)
-        else:
-            aggregator.assert_metric(metric)
+    for metric in ISTIOD_METRICS:
+        _assert_istiod_metric(aggregator, metric)
 
 
 @pytest.mark.skipif(platform.python_version() < "3", reason='OpenMetrics V2 is only available with Python 3')
@@ -65,14 +83,10 @@ def test_e2e_openmetrics_v1(dd_agent_check):
 def test_e2e_openmetrics_v2(dd_agent_check, instance_openmetrics_v2):
     aggregator = dd_agent_check(instance_openmetrics_v2, rate=True)
 
-    metrics = ISTIOD_V2_METRICS
     aggregator.assert_service_check('istio.openmetrics.health', Istio.OK)
 
-    for metric in metrics:
-        if metric in INTERMITTENT_METRICS:
-            aggregator.assert_metric(metric, at_least=0)
-        else:
-            aggregator.assert_metric(metric)
+    for metric in ISTIOD_V2_METRICS:
+        _assert_istiod_metric(aggregator, metric)
 
 
 @pytest.mark.skipif(ISTIO_MODE != "ambient", reason="Ambient-mode e2e: only runs on ambient envs")
