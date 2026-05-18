@@ -8,11 +8,10 @@ import argparse
 import os
 import re
 import sys
-from pathlib import Path
 
 # 2nd party.
 from .download import DEFAULT_ROOT_LAYOUT_TYPE, REPOSITORY_URL_PREFIX, ROOT_LAYOUTS, TUFDownloader
-from .download_v2 import TUFPointerDownloader, V2_REPOSITORY_URL
+from .download_v2 import V2_REPOSITORY_URL, TUFPointerDownloader
 from .exceptions import NonCanonicalVersion, NonDatadogPackage
 
 # Private module functions.
@@ -97,8 +96,6 @@ def instantiate_downloader():
         '-v', '--verbose', action='count', default=0, help='Show verbose information about TUF and in-toto.'
     )
 
-
-
     args = parser.parse_args()
     repository_url_prefix = args.repository
     standard_distribution_name = args.standard_distribution_name
@@ -160,9 +157,8 @@ def download():
             _download_v2()
         except Exception as exc:
             import logging
-            logging.getLogger(__name__).info(
-                'v2 download failed (%s: %s), falling back to v1', type(exc).__name__, exc
-            )
+
+            logging.getLogger(__name__).info('v2 download failed (%s: %s), falling back to v1', type(exc).__name__, exc)
             tuf_downloader, standard_distribution_name, version, ignore_python_version = instantiate_downloader()
             run_downloader(tuf_downloader, standard_distribution_name, version, ignore_python_version)
 
@@ -176,12 +172,14 @@ def _download_v2():
         type=str,
         help='Standard distribution name of the desired Datadog check, e.g. datadog-postgres.',
     )
-    parser.add_argument('--repository', type=str, default=V2_REPOSITORY_URL, help='HTTPS base URL of the v2 TUF repository.')
+    parser.add_argument(
+        '--repository', type=str, default=V2_REPOSITORY_URL, help='HTTPS base URL of the v2 TUF repository.'
+    )
     parser.add_argument('--version', type=str, default=None, help='Version to download (default: latest stable).')
     parser.add_argument(
         '--unsafe-disable-verification',
         action='store_true',
-        help='Disable TUF verification and wheel digest checks.',
+        help='Disable TUF verification and wheel digest checks; requires --version and downloads /wheels directly.',
     )
     parser.add_argument('-v', '--verbose', action='count', default=0)
     parser.add_argument('--v2', action='store_true', default=True)  # consumed upstream; kept for completeness
@@ -207,8 +205,7 @@ def _download_v2():
         sys.stderr.write('WARNING: --type is not applicable with --v2 and will be ignored.\n')
     if args._ignore_python_version:
         sys.stderr.write(
-            'NOTE: --ignore-python-version is not applicable with --v2 '
-            '(wheel selection happens at publish time).\n'
+            'NOTE: --ignore-python-version is not applicable with --v2 (wheel selection happens at publish time).\n'
         )
 
     downloader = TUFPointerDownloader(

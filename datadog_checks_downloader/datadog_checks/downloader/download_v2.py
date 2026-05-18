@@ -7,11 +7,12 @@
 The v2 format stores a JSON pointer file as a TUF target at:
 
     targets/<project>/<version>.json   (versioned pointer)
+    targets/<project>/latest.json      (copy of latest stable version pointer)
 
 Target files are content-addressed on S3 (consistent-snapshot format):
-the actual file at ``targets/<project>/<version>.json`` is stored as
-``targets/<project>/{sha256}.{version}.json``.  The TUF Updater resolves
-the hash-prefixed path automatically via ``N.targets.json`` metadata.
+the actual file at ``targets/<project>/<name>.json`` is stored as
+``targets/<project>/{sha256}.{name}.json``.  The TUF Updater resolves
+the hash-prefixed path automatically via TUF metadata.
 
 Each pointer file contains:
 
@@ -34,12 +35,9 @@ import importlib.resources
 import json
 import logging
 import tempfile
-import urllib.error
 import urllib.request
 from pathlib import Path
 
-from packaging.version import InvalidVersion, Version
-from tuf.api.metadata import Metadata, Snapshot, Targets, Timestamp
 from tuf.ngclient import Updater
 from tuf.ngclient.config import UpdaterConfig
 
@@ -74,10 +72,7 @@ class TUFPointerDownloader:
         self._disable_verification = disable_verification
 
         if disable_verification:
-            logger.warning(
-                'Running with TUF verification disabled. '
-                'Integrity is protected only by TLS (HTTPS).'
-            )
+            logger.warning('Running with TUF verification disabled. Integrity is protected only by TLS (HTTPS).')
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -99,51 +94,17 @@ class TUFPointerDownloader:
         )
 
     @staticmethod
-    def _resolve_version(project: str, version: str | None, targets: Targets) -> str:
-        """Return the concrete version to fetch.
+    def _target_path(project: str, version: str | None) -> str:
+        name = version if version is not None else 'latest'
+        return f'{project}/{name}.json'
 
-        If *version* is given, return it as-is (TUF will raise if absent).
-        If None, scan *targets* for all ``<project>/<ver>.json`` entries and
-        return the highest stable PEP 440 version.
-        """
-        if version is not None:
-            return version
+    @staticmethod
+    def _wheel_filename(project: str, version: str) -> str:
+        distribution = project.replace('-', '_')
+        return f'{distribution}-{version}-py3-none-any.whl'
 
-        prefix = f"{project}/"
-        stable: list[Version] = []
-        for target_path in targets.targets:
-            if not (target_path.startswith(prefix) and target_path.endswith(".json")):
-                continue
-            stem = target_path[len(prefix): -len(".json")]
-            try:
-                v = Version(stem)
-            except InvalidVersion:
-                continue
-            if not v.is_prerelease:
-                stable.append(v)
-
-        if not stable:
-            raise TargetNotFoundError(f"No stable releases found for {project!r} in targets metadata")
-        return str(max(stable))
-
-    def _fetch_targets_unverified(self) -> Targets:
-        """Fetch targets metadata without verifying TUF signatures.
-
-        Walks timestamp → snapshot → targets to resolve the current versioned
-        targets file and returns the parsed Targets signed payload.
-        """
-        base = self._repository_url
-
-        with urllib.request.urlopen(f'{base}/metadata/timestamp.json') as r:
-            ts: Metadata[Timestamp] = Metadata[Timestamp].from_bytes(r.read())
-        snap_ver = ts.signed.snapshot_meta.version
-
-        with urllib.request.urlopen(f'{base}/metadata/{snap_ver}.snapshot.json') as r:
-            snap: Metadata[Snapshot] = Metadata[Snapshot].from_bytes(r.read())
-        tgt_ver = snap.signed.meta['targets.json'].version
-
-        with urllib.request.urlopen(f'{base}/metadata/{tgt_ver}.targets.json') as r:
-            return Metadata[Targets].from_bytes(r.read()).signed
+    def _direct_wheel_url(self, project: str, version: str) -> str:
+        return f'{self._repository_url}/wheels/{project}/{self._wheel_filename(project, version)}'
 
     # ------------------------------------------------------------------
     # Public API
@@ -152,9 +113,7 @@ class TUFPointerDownloader:
     def get_pointer(self, project: str, version: str | None = None) -> dict:
         """Return the pointer JSON for *project* at *version*.
 
-        Resolves *version* = None to the latest stable release by scanning
-        ``N.targets.json``.  The pointer file is fetched via its hash-prefixed
-        consistent-snapshot path.
+        Resolves *version* = None by fetching ``<project>/latest.json``.
         Raises ``TargetNotFoundError`` if the target is absent from the TUF repo.
         """
         with tempfile.TemporaryDirectory() as tmp:
@@ -163,42 +122,15 @@ class TUFPointerDownloader:
             metadata_dir.mkdir()
             target_dir.mkdir()
 
-            if self._disable_verification:
-                targets = self._fetch_targets_unverified()
-                resolved = self._resolve_version(project, version, targets)
-                target_path = f'{project}/{resolved}.json'
-
-                entry = targets.targets.get(target_path)
-                if entry is None:
-                    raise TargetNotFoundError(f'Target not found: {target_path}')
-
-                sha256 = entry.hashes.get('sha256', '')
-                url = f'{self._repository_url}/targets/{project}/{sha256}.{resolved}.json'
-                try:
-                    with urllib.request.urlopen(url) as resp:
-                        return json.loads(resp.read())
-                except urllib.error.HTTPError as exc:
-                    if exc.code == 404:
-                        raise TargetNotFoundError(f'Pointer not found: {url}') from exc
-                    raise
-
+            target_path = self._target_path(project, version)
             self._bootstrap_metadata_dir(metadata_dir)
             updater = self._make_updater(metadata_dir, target_dir)
             updater.refresh()
 
-            # Parse the downloaded N.targets.json to resolve version and
-            # enumerate the hash-prefixed path the Updater will fetch.
-            candidates = sorted(metadata_dir.glob('*.targets.json'))
-            if not candidates:
-                raise TargetNotFoundError(f'No targets metadata after refresh for {project!r}')
-            targets = Metadata[Targets].from_file(str(candidates[-1])).signed
-
-            resolved = self._resolve_version(project, version, targets)
-            target_path = f'{project}/{resolved}.json'
-
             target_info = updater.get_targetinfo(target_path)
             if target_info is None:
-                raise TargetNotFoundError(f'No TUF target for {project!r} version {resolved!r}')
+                label = version if version is not None else 'latest stable'
+                raise TargetNotFoundError(f'No TUF target for {project!r} version {label!r}')
 
             pointer_path = target_dir / target_path
             pointer_path.parent.mkdir(parents=True, exist_ok=True)
@@ -218,20 +150,28 @@ class TUFPointerDownloader:
         Raises ``DigestMismatch`` if the wheel digest or length does not match
         the pointer file.
         """
-        pointer = self.get_pointer(project, version)
-        # Use the caller-supplied repository URL for the wheel fetch so that
-        # --repository can point at a staging bucket and override the prod URL
-        # baked into the pointer file.  This allows pre-promotion validation
-        # against staging S3 without modifying pointer content.
-        wheel_url = self._repository_url + pointer['wheel_path']
-        wheel_filename = Path(pointer['wheel_path']).name
+        if self._disable_verification:
+            if version is None:
+                raise TargetNotFoundError('unsafe-disable-verification requires an explicit --version')
+            wheel_url = self._direct_wheel_url(project, version)
+            wheel_filename = self._wheel_filename(project, version)
+            pointer = None
+        else:
+            pointer = self.get_pointer(project, version)
+            # Use the caller-supplied repository URL for the wheel fetch so that
+            # --repository can point at a staging bucket and override the prod URL
+            # baked into the pointer file.  This allows pre-promotion validation
+            # against staging S3 without modifying pointer content.
+            wheel_url = self._repository_url + pointer['wheel_path']
+            wheel_filename = Path(pointer['wheel_path']).name
+
         dest = (dest_dir or Path(tempfile.mkdtemp())) / wheel_filename
 
         logger.info('Downloading wheel from %s', wheel_url)
         with urllib.request.urlopen(wheel_url) as resp:
             content = resp.read()
 
-        if not self._disable_verification:
+        if pointer is not None:
             actual_digest = hashlib.sha256(content).hexdigest()
             if actual_digest != pointer['digest']:
                 raise DigestMismatch(project, pointer['digest'], actual_digest)
