@@ -28,6 +28,15 @@ from datadog_checks.kafka_consumer.kafka_consumer import (
 pytestmark = [pytest.mark.unit]
 
 
+def _is_gcp_auth_available():
+    try:
+        import google.auth  # noqa: F401
+
+        return True
+    except ImportError:
+        return False
+
+
 def fake_consumer_offsets_for_times(partitions, offset=-1):
     """In our testing environment the offset is 80 for all partitions and topics."""
 
@@ -190,10 +199,30 @@ mock_client.consumer_get_cluster_id_and_list_topics.return_value = (
             id="valid AWS MSK IAM config",
         ),
         pytest.param(
+            {'sasl_oauth_token_provider': {'method': 'gcp_cloud_managed_kafka'}},
+            does_not_raise(),
+            mock_client,
+            id="valid GCP Cloud Managed Kafka config",
+            marks=pytest.mark.skipif(not _is_gcp_auth_available(), reason="google-auth not installed"),
+        ),
+        pytest.param(
+            {
+                'sasl_oauth_token_provider': {
+                    'method': 'gcp_cloud_managed_kafka',
+                    'gcp_credentials_file': '/path/to/sa.json',
+                }
+            },
+            does_not_raise(),
+            mock_client,
+            id="valid GCP Cloud Managed Kafka config with credentials file",
+            marks=pytest.mark.skipif(not _is_gcp_auth_available(), reason="google-auth not installed"),
+        ),
+        pytest.param(
             {'sasl_oauth_token_provider': {'method': 'invalid_method'}},
             pytest.raises(
                 Exception,
-                match="Invalid method 'invalid_method' for sasl_oauth_token_provider. Must be 'aws_msk_iam' or 'oidc'",
+                match="Invalid method 'invalid_method' for sasl_oauth_token_provider. "
+                "Must be 'aws_msk_iam', 'gcp_cloud_managed_kafka', or 'oidc'",
             ),
             None,
             id="invalid method",
@@ -1410,6 +1439,12 @@ def test_count_consumer_contexts(check, kafka_instance):
             id="AWS MSK IAM authentication",
         ),
         pytest.param(
+            {'method': 'gcp_cloud_managed_kafka'},
+            ['oauth_cb'],  # GCP Cloud Managed Kafka uses oauth_cb callback
+            id="GCP Cloud Managed Kafka authentication",
+            marks=pytest.mark.skipif(not _is_gcp_auth_available(), reason="google-auth not installed"),
+        ),
+        pytest.param(
             {'method': 'oidc', 'url': 'http://fake.url', 'client_id': 'test_id', 'client_secret': 'test_secret'},
             {
                 'sasl.oauthbearer.method': 'oidc',
@@ -1518,6 +1553,84 @@ def test_aws_msk_iam_region_handling(
                 # Should fail with clear error message about missing region
                 with pytest.raises(Exception, match="AWS region could not be determined"):
                     oauth_callback(None)
+
+
+@pytest.mark.skipif(not _is_gcp_auth_available(), reason="google-auth not installed")
+@pytest.mark.parametrize(
+    'oauth_config, use_credentials_file',
+    [
+        pytest.param(
+            {'method': 'gcp_cloud_managed_kafka'},
+            False,
+            id="GCP default credentials",
+        ),
+        pytest.param(
+            {'method': 'gcp_cloud_managed_kafka', 'gcp_credentials_file': '/path/to/sa.json'},
+            True,
+            id="GCP explicit credentials file",
+        ),
+    ],
+)
+def test_gcp_cloud_managed_kafka_token_handling(oauth_config, use_credentials_file, kafka_instance, check):
+    """Test that GCP Cloud Managed Kafka authentication properly generates tokens."""
+    kafka_instance.update(
+        {
+            'monitor_unlisted_consumer_groups': True,
+            'security_protocol': 'SASL_SSL',
+            'sasl_mechanism': 'OAUTHBEARER',
+            'sasl_oauth_token_provider': oauth_config,
+        }
+    )
+
+    kafka_consumer_check = check(kafka_instance)
+
+    auth_config = kafka_consumer_check.client._KafkaClient__get_authentication_config()
+    assert 'oauth_cb' in auth_config
+    oauth_callback = auth_config['oauth_cb']
+
+    import base64
+    import json
+    from datetime import datetime, timezone
+
+    mock_credentials = mock.Mock()
+    mock_credentials.token = 'fake_gcp_token'
+    mock_credentials.expiry = datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+    mock_credentials.service_account_email = 'sa@test.iam.gserviceaccount.com'
+
+    with mock.patch('datadog_checks.kafka_consumer.client.google.auth') as mock_google_auth:
+        mock_google_auth.default.return_value = (mock_credentials, 'test-project')
+        mock_google_auth.load_credentials_from_file.return_value = (mock_credentials, 'test-project')
+        mock_google_auth.transport.requests.Request.return_value = mock.Mock()
+
+        token, expiry = oauth_callback(None)
+
+        parts = token.split('.')
+        assert len(parts) == 3
+
+        def _b64decode(s):
+            return base64.urlsafe_b64decode(s + '=' * (-len(s) % 4))
+
+        header = json.loads(_b64decode(parts[0]))
+        claims = json.loads(_b64decode(parts[1]))
+        raw_token = _b64decode(parts[2]).decode()
+
+        assert header == {'typ': 'JWT', 'alg': 'GOOG_OAUTH2_TOKEN'}
+        assert claims['iss'] == 'Google'
+        assert claims['sub'] == 'sa@test.iam.gserviceaccount.com'
+        assert claims['exp'] == mock_credentials.expiry.timestamp()
+        assert raw_token == 'fake_gcp_token'
+        assert expiry == mock_credentials.expiry.timestamp()
+
+        if use_credentials_file:
+            mock_google_auth.load_credentials_from_file.assert_called_once_with(
+                '/path/to/sa.json', scopes=['https://www.googleapis.com/auth/cloud-platform']
+            )
+            mock_google_auth.default.assert_not_called()
+        else:
+            mock_google_auth.default.assert_called_once_with(scopes=['https://www.googleapis.com/auth/cloud-platform'])
+            mock_google_auth.load_credentials_from_file.assert_not_called()
+
+        mock_credentials.refresh.assert_called_once()
 
 
 def test_consumer_group_state_fetched_once_per_group(check, kafka_instance, dd_run_check, aggregator):
