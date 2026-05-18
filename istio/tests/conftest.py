@@ -171,6 +171,8 @@ def _ztunnel_has_traffic(metrics_text):
             if float(value) > 0:
                 return True
         except ValueError:
+            # Best-effort parse: malformed samples (or future OpenMetrics exemplar suffixes)
+            # are skipped. Worst case the loop hits the outer timeout instead of returning True.
             continue
     return False
 

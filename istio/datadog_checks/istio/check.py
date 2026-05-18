@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import ChainMap
 
-from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2
+from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2, is_affirmative
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 
 from .constants import ISTIOD_NAMESPACE
@@ -79,7 +79,7 @@ class IstioCheckV2(OpenMetricsBaseCheckV2):
         # parser for this sub-scraper unless the user explicitly opts out.
         ztunnel_namespace = istiod_namespace + ".ztunnel"
         if ztunnel_endpoint:
-            if self.instance.get("use_latest_spec") is False:
+            if not is_affirmative(self.instance.get("use_latest_spec", True)):
                 self.log.warning(
                     "`use_latest_spec: false` is set with `ztunnel_endpoint` configured. "
                     "ztunnel emits the modern OpenMetrics counter convention which the "
@@ -88,7 +88,10 @@ class IstioCheckV2(OpenMetricsBaseCheckV2):
                 )
             self.scraper_configs.append(
                 self._generate_config(
-                    ztunnel_endpoint, ZTUNNEL_METRICS, ztunnel_namespace, use_latest_spec_default=True
+                    ztunnel_endpoint,
+                    ZTUNNEL_METRICS,
+                    ztunnel_namespace,
+                    scraper_defaults={'use_latest_spec': True},
                 )
             )
 
@@ -101,20 +104,11 @@ class IstioCheckV2(OpenMetricsBaseCheckV2):
         if istiod_endpoint:
             self.scraper_configs.append(self._generate_config(istiod_endpoint, ISTIOD_METRICS, istiod_namespace))
 
-    def _generate_config(self, endpoint, metrics, namespace, use_latest_spec_default=False):
+    def _generate_config(self, endpoint, metrics, namespace, *, scraper_defaults=None):
         metrics = construct_metrics_config(metrics)
         metrics.append(ISTIOD_VERSION)
-        config = {
-            'openmetrics_endpoint': endpoint,
-            'metrics': metrics,
-            'namespace': namespace,
-        }
-        if use_latest_spec_default:
-            config['use_latest_spec'] = True
+        config = {**(scraper_defaults or {}), 'openmetrics_endpoint': endpoint, 'metrics': metrics}
         config.update(self.instance)
-        # `namespace` is set by the integration per sub-scraper and must always be restored.
-        # `use_latest_spec` is a user-facing knob; we set it as a default before `update`, so
-        # a user-supplied value still wins (callers warn when that hides a known issue).
         config['namespace'] = namespace
         return config
 

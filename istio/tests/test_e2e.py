@@ -61,10 +61,14 @@ AMBIENT_GA_VERSION = Version("1.24")
 
 
 def _is_legacy_istio(version: str) -> bool:
+    # Default to True on unparseable / unset versions: in CI the matrix always sets a valid
+    # ISTIO_VERSION, so this branch only fires on misconfigured local runs. Treating those
+    # as legacy means the strict assertions on LEGACY_GO_METRICS fail loudly rather than
+    # silently skipping three real checks.
     try:
         return Version(version) < AMBIENT_GA_VERSION
     except InvalidVersion:
-        return False
+        return True
 
 
 IS_LEGACY_ISTIO = _is_legacy_istio(ISTIO_VERSION)

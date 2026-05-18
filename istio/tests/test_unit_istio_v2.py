@@ -247,6 +247,10 @@ def test_ambient_ztunnel_metrics(aggregator, dd_run_check, mock_http_response):
     check = Istio(common.CHECK_NAME, {}, [common.MOCK_V2_AMBIENT_ZTUNNEL_INSTANCE])
     dd_run_check(check)
 
+    # The ztunnel sub-scraper must default to use_latest_spec=True so the OpenMetrics parser
+    # is used; without this default the parser reverts to legacy and counters silently drop.
+    assert check.scraper_configs[0]['use_latest_spec'] is True
+
     for metric in common.V2_ZTUNNEL_METRICS:
         aggregator.assert_metric(metric)
 
