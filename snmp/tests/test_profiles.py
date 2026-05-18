@@ -2939,6 +2939,21 @@ def test_cisco_catalyst(aggregator):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
+@pytest.mark.usefixtures("dd_environment")
+def test_cisco_catalyst_entity_serial_fallback(aggregator):
+    # Exercises the entPhysicalSerialNum fallback when chassisSerialNumberString is absent.
+    run_profile_check('cisco-catalyst-9k', 'cisco-catalyst')
+    common_tags = common.CHECK_TAGS + [
+        'snmp_host:catalyst-9k.example',
+        'device_hostname:catalyst-9k.example',
+        'snmp_profile:cisco-catalyst',
+        'device_vendor:cisco',
+    ]
+
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+    common.assert_common_metrics(aggregator, common_tags)
+
+
 @pytest.mark.parametrize("file", ["juniper-ex", "juniper-ex-variation"])
 @pytest.mark.usefixtures("dd_environment")
 def test_juniper_ex(aggregator, file):

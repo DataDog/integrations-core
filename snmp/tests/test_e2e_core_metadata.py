@@ -308,6 +308,51 @@ def test_e2e_core_metadata_cisco_catalyst(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
 
+def test_e2e_core_metadata_cisco_catalyst_entity_serial_fallback(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'cisco-catalyst-9k',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+    device_id = 'default:' + device_ip
+
+    device = {
+        'id': device_id,
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+        ],
+        'ip_address': device_ip,
+        'name': 'catalyst-9k.example',
+        'profile': 'cisco-catalyst',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.9.1.2804',
+        'tags': [
+            'agent_host:' + common.get_agent_hostname(),
+            'device_id:' + device_id,
+            'device_ip:' + device_ip,
+            'device_namespace:default',
+            'device_vendor:cisco',
+            'snmp_device:' + device_ip,
+            'snmp_host:catalyst-9k.example',
+            'device_hostname:catalyst-9k.example',
+            'snmp_profile:cisco-catalyst',
+        ],
+        'vendor': 'cisco',
+        'serial_number': 'FOCXXXXXXXX.1',
+        'device_type': 'switch',
+        'integration': 'snmp',
+    }
+    assert_device_metadata(aggregator, device)
+
+
 def test_e2e_core_metadata_hp_ilo4(dd_agent_check):
     config = common.generate_container_instance_config([])
     instance = config['instances'][0]
