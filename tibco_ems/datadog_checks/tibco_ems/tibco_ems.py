@@ -5,8 +5,7 @@ import re
 import subprocess
 from typing import Any  # noqa: F401
 
-from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.common import is_affirmative
+from datadog_checks.base import AgentCheck, is_affirmative
 
 
 from .constants import SHOW_METRIC_DATA, UNIT_PATTERN
