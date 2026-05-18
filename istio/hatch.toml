@@ -13,22 +13,24 @@ dependencies = [
 # `version` list; to add a new mode on an existing version, add the entry to the
 # right block (and extend conftest.setup_istio* accordingly).
 
-# Sidecar-mode envs.
+# Sidecar-mode envs. 1.13 stays for the legacy Go-runtime safety net; 1.24 is where
+# ambient GA'd; 1.29 is the current supported release.
 [[envs.default.matrix]]
 python = ["3.13"]
-version = ["1.13", "1.24"]
+version = ["1.13", "1.24", "1.29"]
 mode = ["sidecar"]
 
 # Ambient-mode envs. Requires Istio >= 1.24.
 [[envs.default.matrix]]
 python = ["3.13"]
-version = ["1.24"]
+version = ["1.24", "1.29"]
 mode = ["ambient"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
   { key = "ISTIO_VERSION", value = "1.13.3", if = ["1.13"] },
   { key = "ISTIO_VERSION", value = "1.24.3", if = ["1.24"] },
+  { key = "ISTIO_VERSION", value = "1.29.2", if = ["1.29"] },
 ]
 matrix.mode.env-vars = "ISTIO_MODE"
 

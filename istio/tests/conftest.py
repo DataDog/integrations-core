@@ -135,43 +135,28 @@ def _wait_for_ztunnel_traffic(timeout_seconds=300, interval_seconds=3):
     and start hitting the productpage service. A fixed sleep can either be too short on a slow
     CI agent (test fails with a misleading "metric not found") or too long on a fast one.
     Poll the actual readiness signal instead, bounded by the same 300s timeout used elsewhere
-    in this setup."""
+    in this setup. Ztunnel itself runs a minimal Rust binary with no shell or curl, so the
+    poll is issued from the traffic-gen pod (curlimages/curl) against the ztunnel-metrics
+    Service applied earlier in setup."""
     deadline = time.monotonic() + timeout_seconds
-    pod_name = ""
     while time.monotonic() < deadline:
-        if not pod_name:
-            result = run_command(
-                [
-                    "kubectl",
-                    "get",
-                    "pod",
-                    "-n",
-                    "istio-system",
-                    "-l",
-                    "app=ztunnel",
-                    "-o",
-                    "jsonpath={.items[0].metadata.name}",
-                ],
-                capture='stdout',
-            )
-            pod_name = result.stdout.strip()
-        if pod_name:
-            result = run_command(
-                [
-                    "kubectl",
-                    "exec",
-                    "-n",
-                    "istio-system",
-                    pod_name,
-                    "--",
-                    "curl",
-                    "-s",
-                    "localhost:15020/stats/prometheus",
-                ],
-                capture='stdout',
-            )
-            if _ztunnel_has_traffic(result.stdout):
-                return
+        result = run_command(
+            [
+                "kubectl",
+                "exec",
+                "-n",
+                "default",
+                "traffic-gen",
+                "--",
+                "curl",
+                "-sm",
+                "5",
+                "ztunnel-metrics.istio-system.svc:15020/stats/prometheus",
+            ],
+            capture=True,
+        )
+        if result.code == 0 and _ztunnel_has_traffic(result.stdout):
+            return
         time.sleep(interval_seconds)
     raise RuntimeError("ztunnel did not record TCP traffic within {}s".format(timeout_seconds))
 
