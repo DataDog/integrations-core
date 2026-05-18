@@ -39,6 +39,36 @@ def test_manifest_exists_raises_on_other_errors(mocker: MockerFixture, status: i
         manifest_exists('7.80.0-rc.1')
 
 
+@pytest.mark.parametrize(
+    'exc',
+    [
+        pytest.param(httpx.ConnectError('connection refused'), id='connect-error'),
+        pytest.param(httpx.ReadTimeout('read timed out'), id='read-timeout'),
+        pytest.param(httpx.ConnectTimeout('connect timed out'), id='connect-timeout'),
+    ],
+)
+def test_manifest_exists_propagates_network_errors(mocker: MockerFixture, exc: Exception) -> None:
+    mocker.patch('httpx.head', side_effect=exc)
+
+    with pytest.raises(type(exc)):
+        manifest_exists('7.80.0-rc.1')
+
+
+@pytest.mark.parametrize(
+    'exc',
+    [
+        pytest.param(httpx.ConnectError('connection refused'), id='connect-error'),
+        pytest.param(httpx.ReadTimeout('read timed out'), id='read-timeout'),
+        pytest.param(httpx.ConnectTimeout('connect timed out'), id='connect-timeout'),
+    ],
+)
+def test_list_agent_rc_tags_propagates_network_errors(mocker: MockerFixture, exc: Exception) -> None:
+    mocker.patch('httpx.get', side_effect=exc)
+
+    with pytest.raises(type(exc)):
+        list_agent_rc_tags(7, 80)
+
+
 def test_list_agent_rc_tags_filters_and_sorts(mocker: MockerFixture) -> None:
     payload = {
         'name': 'agent',

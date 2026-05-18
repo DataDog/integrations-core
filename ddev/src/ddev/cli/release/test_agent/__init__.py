@@ -54,6 +54,9 @@ def test_agent(app: Application, branch: str | None, tag: str | None, dry_run: b
     ref = branch or tag
     assert ref is not None
 
+    if not app.config.github.token:
+        app.abort('GitHub token required. Set `github.token` via `ddev config set github.token <token>`.')
+
     _verify_ref_exists(app, branch=branch, tag=tag)
     _verify_workflows_present_on_ref(app, ref)
 
@@ -81,9 +84,8 @@ def test_agent(app: Application, branch: str | None, tag: str | None, dry_run: b
     try:
         linux_url, windows_url = _dispatch_both(app, ref=ref, inputs=inputs)
     except RuntimeError as e:
-        cause = f' (caused by: {e.__cause__!r})' if e.__cause__ is not None else ''
-        app.abort(f'{e}{cause}')
-    _print_result(app, ref=ref, linux_url=linux_url, windows_url=windows_url)
+        app.abort(str(e))
+    _print_result(app, linux_url=linux_url, windows_url=windows_url)
 
 
 def _validate_input(app: Application, branch: str | None, tag: str | None) -> tuple[str | None, str | None]:
@@ -138,13 +140,18 @@ def _resolve_version(app: Application, *, branch: str | None, tag: str | None) -
         return tag
 
     assert branch is not None
+    import httpx
+
     from ddev.cli.release.test_agent.registry import list_agent_rc_tags
 
     major_str, minor_str, _ = branch.split('.')
     major, minor = int(major_str), int(minor_str)
 
     app.display_waiting(f'Looking up latest {major}.{minor}.0-rc.* in registry.datadoghq.com...')
-    tags = list_agent_rc_tags(major, minor)
+    try:
+        tags = list_agent_rc_tags(major, minor)
+    except httpx.HTTPError as e:
+        app.abort(f'Failed to query registry.datadoghq.com for tags: {e}')
     if not tags:
         app.abort(
             f'No `{major}.{minor}.0-rc.*` tags found in registry.datadoghq.com/agent. '
@@ -161,12 +168,18 @@ def _build_image_refs(version: str) -> tuple[str, str]:
 
 
 def _validate_images_exist(app: Application, linux_image: str, windows_image: str) -> None:
+    import httpx
+
     from ddev.cli.release.test_agent.registry import manifest_exists
 
     for image in (linux_image, windows_image):
         tag = image.rsplit(':', 1)[1]
         app.display_waiting(f'Checking `{image}`...')
-        if not manifest_exists(tag):
+        try:
+            exists = manifest_exists(tag)
+        except httpx.HTTPError as e:
+            app.abort(f'Failed to query registry.datadoghq.com for `{image}`: {e}')
+        if not exists:
             app.abort(
                 f'Image `{image}` not found in registry.datadoghq.com. Confirm the Agent release has been published.'
             )
@@ -189,13 +202,13 @@ def _print_plan(
         app.display_pair(key, value)
 
 
-def _print_result(app: Application, *, ref: str, linux_url: str, windows_url: str) -> None:
+def _print_result(app: Application, *, linux_url: str, windows_url: str) -> None:
     app.display_success('Workflows dispatched.')
     app.display_pair('Linux', linux_url)
     app.display_pair('Windows', windows_url)
 
 
-def _dispatch_both(app: Application, *, ref: str, inputs: dict[str, object]) -> tuple[str, str]:
+def _dispatch_both(app: Application, *, ref: str, inputs: dict[str, str]) -> tuple[str, str]:
     """Dispatch both workflows in parallel via the async GitHub client. Returns (linux_url, windows_url)."""
     owner = REPO_OWNER
     repo = app.repo.full_name
@@ -210,7 +223,7 @@ async def _dispatch_both_async(
     owner: str,
     repo: str,
     ref: str,
-    inputs: dict[str, object],
+    inputs: dict[str, str],
 ) -> Sequence[DispatchOutcome]:
     from ddev.utils.github_async import async_github_client
 
