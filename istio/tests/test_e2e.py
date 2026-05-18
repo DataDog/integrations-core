@@ -21,6 +21,8 @@ INTERMITTENT_METRICS = [
     'istio.galley.validation.failed',
     'istio.galley.validation.failed.count',
     'istio.go.memstats.gc_cpu_fraction',
+    'istio.go.memstats.lookups_total',
+    'istio.go.memstats.lookups.count',
     'istio.pilot.rds_expired_nonce',
     'istio.galley.validation.config_update_error.count',
     'istio.galley.validation.config_update_error',
