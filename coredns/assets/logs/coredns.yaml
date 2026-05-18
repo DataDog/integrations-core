@@ -114,12 +114,13 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Rcode ID
+    name: Response Code ID
     path: ocsf.rcode_id
     source: log
+    type: integer
   - groups:
       - OCSF
-    name: Rcode
+    name: Response Code
     path: ocsf.rcode
     source: log
   - groups:
@@ -129,17 +130,18 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Source Port
+    name: Src Endpoint Port
     path: ocsf.src_endpoint.port
     source: log
+    type: integer
   - groups:
       - OCSF
-    name: Query Hostname
+    name: DNS Query Hostname
     path: ocsf.query.hostname
     source: log
   - groups:
       - OCSF
-    name: Query Type
+    name: Query Resource Record Type
     path: ocsf.query.type
     source: log
   - groups:
