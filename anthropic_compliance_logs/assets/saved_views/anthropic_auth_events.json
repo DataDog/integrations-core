@@ -2,7 +2,7 @@
   "name": "Anthropic Auth Events",
   "type": "logs",
   "page": "stream",
-  "query": "source:anthropic service:anthropic.compliance @evt.name:(user_signed_in_sso OR user_signed_in_google OR user_signed_in_apple OR user_signed_out OR user_signed_in_*)",
+  "query": "source:anthropic-compliance-logs @evt.name:(user_signed_in_sso OR user_signed_in_google OR user_signed_in_apple OR user_signed_out OR user_signed_in_*)",
   "timerange": {
     "interval_ms": 86400000
   },

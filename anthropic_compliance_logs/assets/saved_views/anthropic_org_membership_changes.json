@@ -2,7 +2,7 @@
   "name": "Anthropic Org Membership Changes",
   "type": "logs",
   "page": "stream",
-  "query": "source:anthropic service:anthropic.compliance @evt.name:(org_user_invite_sent OR org_user_invite_accepted OR org_user_invite_revoked OR org_user_role_changed OR org_user_removed)",
+  "query": "source:anthropic-compliance-logs @evt.name:(org_user_invite_sent OR org_user_invite_accepted OR org_user_invite_revoked OR org_user_role_changed OR org_user_removed)",
   "timerange": {
     "interval_ms": 86400000
   },

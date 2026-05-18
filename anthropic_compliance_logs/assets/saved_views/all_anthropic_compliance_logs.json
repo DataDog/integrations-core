@@ -2,7 +2,7 @@
   "name": "All Anthropic Compliance Logs",
   "type": "logs",
   "page": "stream",
-  "query": "source:anthropic service:anthropic.compliance",
+  "query": "source:anthropic-compliance-logs",
   "timerange": {
     "interval_ms": 86400000
   },
@@ -12,7 +12,6 @@
     "core_host",
     "core_status",
     "log_evt.name",
-    "log_evt.outcome",
     "log_actor.type",
     "log_actor.id",
     "log_usr.email",

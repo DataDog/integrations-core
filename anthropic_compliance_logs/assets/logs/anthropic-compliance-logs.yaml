@@ -67,6 +67,16 @@ facets:
     path: network.client.ip
     source: log
   - groups:
+      - Event
+    name: Actor ID
+    path: actor.id
+    source: log
+  - groups:
+      - Event
+    name: Actor Type
+    path: actor.type
+    source: log
+  - groups:
       - User
     name: User Email
     path: usr.email

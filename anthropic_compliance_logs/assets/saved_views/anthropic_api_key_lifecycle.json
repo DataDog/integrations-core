@@ -2,7 +2,7 @@
   "name": "Anthropic API Key Lifecycle",
   "type": "logs",
   "page": "stream",
-  "query": "source:anthropic service:anthropic.compliance @evt.name:(*api_key_created OR *api_key_deleted OR *api_key_updated OR *api_key_rotated)",
+  "query": "source:anthropic-compliance-logs @evt.name:(*api_key_created OR *api_key_deleted OR *api_key_updated OR *api_key_rotated)",
   "timerange": {
     "interval_ms": 86400000
   },

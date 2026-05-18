@@ -5,7 +5,7 @@
   "reflow_type": "fixed",
   "is_read_only": false,
   "notify_list": [],
-  "tags": ["integration:anthropic"],
+  "tags": ["integration:anthropic-compliance-logs"],
   "template_variables": [
     {
       "name": "org",
@@ -50,7 +50,7 @@
           {
             "definition": {
               "type": "note",
-              "content": "## Anthropic Compliance Logs\n\nMonitor security-relevant activity from the Anthropic Console: SSO and password sign-ins, admin API key lifecycle, organization membership changes, SSO/SAML configuration updates, and Claude chat and project access events.\n\nAll widgets scope to `source:anthropic service:anthropic.compliance`. Use the template variables at the top of the dashboard to slice by organization, actor type, or event name.\n\n### Useful links\n- [Anthropic integration tile](https://app.datadoghq.com/integrations/anthropic)\n- [Anthropic Console compliance API](https://docs.anthropic.com/en/api/compliance-api)\n- [Datadog Cloud SIEM](https://app.datadoghq.com/security)",
+              "content": "## Anthropic Compliance Logs\n\nMonitor security-relevant activity from the Anthropic Console: SSO and password sign-ins, admin API key lifecycle, organization membership changes, SSO/SAML configuration updates, and Claude chat and project access events.\n\nAll widgets scope to `source:anthropic-compliance-logs`. Use the template variables at the top of the dashboard to slice by organization, actor type, or event name.\n\n### Useful links\n- [Anthropic Compliance Logs tile](https://app.datadoghq.com/integrations/anthropic-compliance-logs)\n- [Anthropic Console compliance API](https://docs.anthropic.com/en/api/compliance-api)\n- [Datadog Cloud SIEM](https://app.datadoghq.com/security)",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
@@ -87,7 +87,7 @@
                     {
                       "name": "query1",
                       "data_source": "logs",
-                      "search": {"query": "source:anthropic-compliance-logs $actor_type $event_name"},
+                      "search": {"query": "source:anthropic-compliance-logs $org $actor_type $event_name"},
                       "indexes": ["*"],
                       "group_by": [],
                       "compute": {"aggregation": "count"},

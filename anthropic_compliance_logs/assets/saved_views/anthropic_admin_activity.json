@@ -2,7 +2,7 @@
   "name": "Anthropic Admin Activity",
   "type": "logs",
   "page": "stream",
-  "query": "source:anthropic service:anthropic.compliance @actor.type:admin_api_key_actor",
+  "query": "source:anthropic-compliance-logs @actor.type:admin_api_key_actor",
   "timerange": {
     "interval_ms": 86400000
   },
