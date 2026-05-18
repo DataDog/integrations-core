@@ -36,22 +36,21 @@ def test_agent(app: Application, branch: str | None, tag: str | None, dry_run: b
     from ddev.cli.release.test_agent.dispatch import dispatch_both
     from ddev.cli.release.test_agent.images import build_image_refs, resolve_version, validate_images_exist
     from ddev.cli.release.test_agent.validation import (
+        Branch,
+        fetch_target,
         validate_input,
-        verify_ref_exists,
         verify_workflows_present_on_ref,
     )
 
-    branch, tag = validate_input(app, branch, tag)
-    ref = branch or tag
-    assert ref is not None
+    target = validate_input(app, branch, tag)
 
     if not app.config.github.token:
         app.abort('GitHub token required. Set `github.token` via `ddev config set github.token <token>`.')
 
-    verify_ref_exists(app, branch=branch, tag=tag)
-    verify_workflows_present_on_ref(app, branch=branch, tag=tag)
+    fetch_target(app, target)
+    verify_workflows_present_on_ref(app, target)
 
-    version = resolve_version(app, branch=branch, tag=tag)
+    version = resolve_version(app, target)
     validate_images_exist(app, version)
     linux_image, windows_image = build_image_refs(version)
 
@@ -66,7 +65,8 @@ def test_agent(app: Application, branch: str | None, tag: str | None, dry_run: b
         'agent-image': linux_image,
         'agent-image-windows': windows_image,
     }
-    _print_plan(app, ref=ref, version=version, branch=branch, inputs=inputs)
+    is_branch = isinstance(target, Branch)
+    _print_plan(app, ref=target.name, version=version, is_branch=is_branch, inputs=inputs)
 
     if dry_run:
         app.display_info('Dry run — no workflows dispatched.')
@@ -76,7 +76,7 @@ def test_agent(app: Application, branch: str | None, tag: str | None, dry_run: b
         app.abort('Aborted by user.')
 
     try:
-        linux_url, windows_url = dispatch_both(app.config.github.token, ref=ref, inputs=inputs)
+        linux_url, windows_url = dispatch_both(app.config.github.token, ref=target.name, inputs=inputs)
     except RuntimeError as e:
         app.abort(str(e))
     else:
@@ -88,7 +88,7 @@ def _print_plan(
     *,
     ref: str,
     version: str,
-    branch: str | None,
+    is_branch: bool,
     inputs: dict[str, str],
 ) -> None:
     """Render the resolved dispatch plan via the stderr-bound `display_info` channel.
@@ -102,7 +102,7 @@ def _print_plan(
     app.display_info('Dispatch plan')
     app.display_info(f'  Workflows: {WORKFLOW_LINUX}, {WORKFLOW_WINDOWS}')
     app.display_info(f'  Ref: {ref}')
-    if branch is not None:
+    if is_branch:
         app.display_info(f'  Resolved RC: {version}')
     for key, value in inputs.items():
         app.display_info(f'  {key}: {value}')

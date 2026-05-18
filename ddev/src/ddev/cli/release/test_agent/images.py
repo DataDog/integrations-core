@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 import httpx
 
 from ddev.cli.release.test_agent import registry
+from ddev.cli.release.test_agent.validation import Branch, ReleaseTarget
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -19,25 +20,24 @@ if TYPE_CHECKING:
 
 
 @contextlib.contextmanager
-def registry_errors(app: Application, target: str) -> Iterator[None]:
+def registry_errors(app: Application, scope: str) -> Iterator[None]:
     """Translate any `httpx.HTTPError` raised inside the block into a clean `app.abort` message.
 
-    `target` is interpolated into the abort text — e.g. `'tags'` for the tag listing or an
+    `scope` is interpolated into the abort text — e.g. `'tags'` for the tag listing or an
     image ref like `'registry.datadoghq.com/agent:7.80.0-rc.3'` for a manifest probe.
     """
     try:
         yield
     except httpx.HTTPError as e:
-        app.abort(f'Failed to query registry.datadoghq.com for {target}: {e}')
+        app.abort(f'Failed to query registry.datadoghq.com for {scope}: {e}')
 
 
-def resolve_version(app: Application, *, branch: str | None, tag: str | None) -> str:
+def resolve_version(app: Application, target: ReleaseTarget) -> str:
     """Pick the Agent image tag to test: the explicit tag, or the highest published RC for a branch."""
-    if tag is not None:
-        return tag
+    if not isinstance(target, Branch):
+        return target.name
 
-    assert branch is not None
-    major_str, minor_str, _ = branch.split('.')
+    major_str, minor_str, _ = target.name.split('.')
     major, minor = int(major_str), int(minor_str)
 
     app.display_waiting(f'Looking up latest {major}.{minor}.0-rc.* in registry.datadoghq.com...')

@@ -20,8 +20,8 @@ EXPECTED_INPUTS = {
 
 @pytest.fixture(autouse=True)
 def _silence_git(mocker: MockerFixture) -> None:
-    """Default git mocks: ref exists on origin and both workflow files are present at the ref."""
-    mocker.patch('ddev.utils.git.GitRepository.capture', return_value='abc123\trefs/heads/7.80.x\n')
+    """Default git mocks: `fetch_target` succeeds and `git show` returns workflow yaml."""
+    mocker.patch('ddev.utils.git.GitRepository.run', return_value=None)
     mocker.patch('ddev.utils.git.GitRepository.show_file', return_value='workflow yaml')
 
 
@@ -39,7 +39,7 @@ def _silence_registry(mocker: MockerFixture) -> None:
     'args, expected',
     [
         pytest.param([], 'Exactly one of --branch or --tag', id='neither'),
-        pytest.param(['--branch', '7.80.x', '--tag', '7.80.0'], 'Exactly one of --branch or --tag', id='both'),
+        pytest.param(['--branch', '7.80.x', '--tag', '7.80.0'], 'Cannot use --branch and --tag together', id='both'),
         pytest.param(['--branch', '7.80'], 'Invalid branch', id='bad-branch'),
         pytest.param(['--tag', '7.80'], 'Invalid tag', id='bad-tag'),
     ],
@@ -130,12 +130,57 @@ def test_missing_image_aborts(ddev: CliRunner, mocker: MockerFixture, fake_async
 
 
 def test_missing_ref_aborts(ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient) -> None:
-    mocker.patch('ddev.utils.git.GitRepository.capture', return_value='')
+    """When `git fetch` reports the ref does not exist on origin, surface a clean abort."""
+    mocker.patch(
+        'ddev.utils.git.GitRepository.run',
+        side_effect=OSError("fatal: couldn't find remote ref refs/heads/7.80.x"),
+    )
 
     result = ddev('release', 'test-agent', '--branch', '7.80.x', '--yes')
 
     assert result.exit_code != 0, result.output
-    assert 'not found on origin' in result.output
+    assert 'Branch `7.80.x` not found on origin' in result.output
+    fake_async_github.assert_not_called('create_workflow_dispatch')
+
+
+def test_fetch_target_is_called_with_branch_refspec(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    """The command must fetch the branch into `origin/<branch>` before reading workflow files."""
+    run_spy = mocker.patch('ddev.utils.git.GitRepository.run', return_value=None)
+
+    result = ddev('release', 'test-agent', '--branch', '7.80.x', '--yes')
+
+    assert result.exit_code == 0, result.output
+    run_spy.assert_any_call('fetch', '--quiet', '--depth=1', 'origin', 'refs/heads/7.80.x:refs/remotes/origin/7.80.x')
+
+
+def test_fetch_target_is_called_with_tag_refspec(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    """A `--tag` invocation must fetch into `refs/tags/<tag>` so `git show <tag>:path` works."""
+    run_spy = mocker.patch('ddev.utils.git.GitRepository.run', return_value=None)
+
+    result = ddev('release', 'test-agent', '--tag', '7.80.0-rc.1', '--yes')
+
+    assert result.exit_code == 0, result.output
+    run_spy.assert_any_call('fetch', '--quiet', '--depth=1', 'origin', 'refs/tags/7.80.0-rc.1:refs/tags/7.80.0-rc.1')
+
+
+def test_fetch_target_other_error_surfaces_original(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    """Anything other than 'remote ref not found' must surface as a generic fetch-failed abort."""
+    mocker.patch(
+        'ddev.utils.git.GitRepository.run',
+        side_effect=OSError('fatal: unable to access https://github.com/...: Could not resolve host'),
+    )
+
+    result = ddev('release', 'test-agent', '--branch', '7.80.x', '--yes')
+
+    assert result.exit_code != 0, result.output
+    assert 'Failed to fetch branch `7.80.x` from origin' in result.output
+    assert 'Could not resolve host' in result.output
     fake_async_github.assert_not_called('create_workflow_dispatch')
 
 
@@ -154,24 +199,7 @@ def test_missing_workflow_file_aborts(
 
     assert result.exit_code != 0, result.output
     assert 'missing required workflow file' in result.output
-    assert 'origin/7.80.x' in result.output
-    fake_async_github.assert_not_called('create_workflow_dispatch')
-
-
-def test_unfetched_branch_surfaces_fetch_hint(
-    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
-) -> None:
-    """When `origin/<branch>` isn't in the local clone, the abort should tell the user to fetch."""
-    mocker.patch(
-        'ddev.utils.git.GitRepository.show_file',
-        side_effect=OSError("fatal: invalid object name 'origin/7.80.x'"),
-    )
-
-    result = ddev('release', 'test-agent', '--branch', '7.80.x', '--yes')
-
-    assert result.exit_code != 0, result.output
-    assert 'not in your local clone' in result.output
-    assert 'git fetch origin 7.80.x' in result.output
+    assert '7.80.x' in result.output
     fake_async_github.assert_not_called('create_workflow_dispatch')
 
 
