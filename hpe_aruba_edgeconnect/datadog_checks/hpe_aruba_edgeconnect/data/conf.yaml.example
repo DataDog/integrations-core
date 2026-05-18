@@ -40,16 +40,16 @@ instances:
     #
     # max_concurrency: 50
 
-    ## @param max_backfill_minutes - integer - optional - default: 20
+    ## @param max_backfill_minutes - integer - optional - default: 5
     ## How many minutes of historical data to recover for each appliance after the Agent has been
     ## offline. If the Agent stops collecting for a while (for example, during a restart or an
     ## outage), this controls how far back in time it will look when it starts up again.
     ##
-    ## For example, with the default of 20, the Agent will collect at most the last 20 minutes
+    ## For example, with the default of 5, the Agent will collect at most the last 5 minutes
     ## of data per appliance after coming back online. Anything older than that is skipped, and
     ## collection resumes normally from the most recent point.
     #
-    # max_backfill_minutes: 20
+    # max_backfill_minutes: 5
 
     ## @param appliance_credentials - list of mappings - optional
     ## Per-appliance credential overrides matched by CIDR. When an appliance IP falls within a listed

@@ -45,7 +45,7 @@ def instance_log_requests():
 
 
 def instance_max_backfill_minutes():
-    return 20
+    return 5
 
 
 def instance_max_concurrency():
