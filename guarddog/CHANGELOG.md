@@ -6,7 +6,7 @@
 
 ***Fixed***:
 
-* Sanitize guarddog_path argument ([#23377](https://github.com/DataDog/integrations-core/pull/23377))
+* Sanitize guarddog_path argument. ([#23377](https://github.com/DataDog/integrations-core/pull/23377))
 
 ## 1.2.0 / 2026-04-01 / Agent 7.78.0
 

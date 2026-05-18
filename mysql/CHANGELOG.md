@@ -14,8 +14,8 @@
 
 * Re-order configuration fields based on real-world usage data. ([#23272](https://github.com/DataDog/integrations-core/pull/23272))
 * Use parameterized queries for table names in schema collection. ([#23366](https://github.com/DataDog/integrations-core/pull/23366))
-* Use parameterized queries for replication channel configuration to safely handle special characters in channel names ([#23581](https://github.com/DataDog/integrations-core/pull/23581))
-* Fix schema collection query failure when MySQL ANSI_QUOTES sql_mode is enabled ([#23593](https://github.com/DataDog/integrations-core/pull/23593))
+* Use parameterized queries for replication channel configuration to safely handle special characters in channel names. ([#23581](https://github.com/DataDog/integrations-core/pull/23581))
+* Fix schema collection query failure when MySQL ANSI_QUOTES sql_mode is enabled. ([#23593](https://github.com/DataDog/integrations-core/pull/23593))
 * Log a warning when a 1045 access denied error occurs with no SSL configuration, hinting that SSL may be required by the MySQL instance. ([#23607](https://github.com/DataDog/integrations-core/pull/23607))
 
 ## 15.16.1 / 2026-04-28

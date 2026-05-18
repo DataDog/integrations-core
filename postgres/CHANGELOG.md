@@ -17,11 +17,11 @@
 * Re-order configuration fields based on real-world usage data. ([#23273](https://github.com/DataDog/integrations-core/pull/23273))
 * Fix database name handling in schema collection query construction. ([#23389](https://github.com/DataDog/integrations-core/pull/23389))
 * Fix explain statement query construction when statement text contains dollar-quote delimiters. ([#23392](https://github.com/DataDog/integrations-core/pull/23392))
-* Fix connection leak and improve error handling during Postgres database connectivity diagnostics ([#23602](https://github.com/DataDog/integrations-core/pull/23602))
+* Fix connection leak and improve error handling during Postgres database connectivity diagnostics. ([#23602](https://github.com/DataDog/integrations-core/pull/23602))
 * Qualify the diagnose category with the instance host so multiple instances are distinguishable in `datadog-agent diagnose` output. ([#23620](https://github.com/DataDog/integrations-core/pull/23620))
-* Cleanup config field descriptions for Azure Cloud authentication mechanisms ([#23625](https://github.com/DataDog/integrations-core/pull/23625))
-* Close dangling connections and break reference cycles on check cancel to reduce memory retention when checks are restarted or rescheduled ([#23640](https://github.com/DataDog/integrations-core/pull/23640))
-* Eliminate reference cycle in diagnostic instrumentation ([#23647](https://github.com/DataDog/integrations-core/pull/23647))
+* Cleanup config field descriptions for Azure Cloud authentication mechanisms. ([#23625](https://github.com/DataDog/integrations-core/pull/23625))
+* Close dangling connections and break reference cycles on check cancel to reduce memory retention when checks are restarted or rescheduled. ([#23640](https://github.com/DataDog/integrations-core/pull/23640))
+* Eliminate reference cycle in diagnostic instrumentation. ([#23647](https://github.com/DataDog/integrations-core/pull/23647))
 
 ## 23.7.0 / 2026-04-15
 

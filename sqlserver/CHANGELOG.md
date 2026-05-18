@@ -10,9 +10,9 @@
 
 ***Fixed***:
 
-* updates the FCI metric collection so that we can still report FCI metrics without needing a cluster name. ([#23264](https://github.com/DataDog/integrations-core/pull/23264))
-* Parameterize database query in SQL Server schema collection ([#23381](https://github.com/DataDog/integrations-core/pull/23381))
-* Harden SQL Server XML plan parsing ([#23382](https://github.com/DataDog/integrations-core/pull/23382))
+* Updates the FCI metric collection so that Datadog can still report FCI metrics without needing a cluster name. ([#23264](https://github.com/DataDog/integrations-core/pull/23264))
+* Parameterize database query in SQL Server schema collection. ([#23381](https://github.com/DataDog/integrations-core/pull/23381))
+* Harden SQL Server XML plan parsing. ([#23382](https://github.com/DataDog/integrations-core/pull/23382))
 * Escape single quotes in SQL string literal interpolation for robustness against unusual database and object names. ([#23426](https://github.com/DataDog/integrations-core/pull/23426))
 * Fix Azure SQL Database and Azure SQL Managed Instance schema collection by using database compatibility level for schema query selection. ([#23533](https://github.com/DataDog/integrations-core/pull/23533))
 * Reuse the auxiliary SQL Server schema collection connection for legacy table detail queries. ([#23544](https://github.com/DataDog/integrations-core/pull/23544))
