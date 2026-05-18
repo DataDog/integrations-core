@@ -10,7 +10,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check: Any, instance: InstanceType) -> None:
-    aggregator = dd_agent_check(instance)
+    aggregator = dd_agent_check(instance, rate=True)
 
     # Assert every metric emitted is declared in metadata.csv with the correct type and unit,
     # and that every metric in metadata.csv was emitted at least once.

@@ -17,10 +17,6 @@ class {check_class}(AgentCheck, ConfigMixin):
     def __init__(self, name: str, init_config: InitConfigType, instances: list[InstanceType]) -> None:
         super().__init__(name, init_config, instances)
 
-        # Read validated, typed configuration from self.config (and self.shared_config).
-        # Fields must be declared in spec.yaml and the models regenerated with `ddev validate models`.
-        # self.url = self.config.url
-
         # If the check is going to perform SQL queries you should define a query manager here.
         # More info at
         # https://datadoghq.dev/integrations-core/base/databases/#datadog_checks.base.utils.db.core.QueryManager
@@ -37,10 +33,14 @@ class {check_class}(AgentCheck, ConfigMixin):
     def check(self, _: InstanceType) -> None:
         # The following are useful bits of code to help new users get started.
 
+        # Read validated, typed configuration from self.config (and self.shared_config).
+        # Fields must be declared in spec.yaml and the models regenerated with `ddev validate models`.
+        # url = self.config.url
+
         # Perform HTTP Requests with our HTTP wrapper.
         # More info at https://datadoghq.dev/integrations-core/base/http/
         # try:
-        #     response = self.http.get(self.url)
+        #     response = self.http.get(url)
         #     response.raise_for_status()
         #     response_json = response.json()
 
