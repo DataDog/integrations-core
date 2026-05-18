@@ -164,7 +164,7 @@ def test_base_tags(dd_run_check, instance):
     # assert the lenght of tags does not grow indefinitely
     assert len(check.tags) == 3
 
+
 def test_use_ssl_server_string(instance):
     check = TibcoEMSCheck('tibco_ems', {}, [{**instance, 'use_ssl': True}])
     assert 'ssl://localhost:7222' in check.cmd
-

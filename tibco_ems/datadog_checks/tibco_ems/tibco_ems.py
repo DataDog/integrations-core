@@ -7,7 +7,6 @@ from typing import Any  # noqa: F401
 
 from datadog_checks.base import AgentCheck, is_affirmative
 
-
 from .constants import SHOW_METRIC_DATA, UNIT_PATTERN
 
 DEFAULT_HOST = 'localhost'
