@@ -62,6 +62,96 @@ facets:
     name: DNSSEC
     path: dns.dnssec
     source: log
+  - groups:
+      - OCSF
+    name: Activity ID
+    path: ocsf.activity_id
+    source: log
+  - groups:
+      - OCSF
+    name: Activity Name
+    path: ocsf.activity_name
+    source: log
+  - groups:
+      - OCSF
+    name: Category ID
+    path: ocsf.category_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Category
+    path: ocsf.category_name
+    source: log
+  - groups:
+      - OCSF
+    name: Class ID
+    path: ocsf.class_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Class
+    path: ocsf.class_name
+    source: log
+  - groups:
+      - OCSF
+    name: Status ID
+    path: ocsf.status_id
+    source: log
+  - groups:
+      - OCSF
+    name: Status
+    path: ocsf.status
+    source: log
+  - groups:
+      - OCSF
+    name: Severity ID
+    path: ocsf.severity_id
+    source: log
+  - groups:
+      - OCSF
+    name: Severity
+    path: ocsf.severity
+    source: log
+  - groups:
+      - OCSF
+    name: Rcode ID
+    path: ocsf.rcode_id
+    source: log
+  - groups:
+      - OCSF
+    name: Rcode
+    path: ocsf.rcode
+    source: log
+  - groups:
+      - OCSF
+    name: Source IP Address
+    path: ocsf.src_endpoint.ip
+    source: log
+  - groups:
+      - OCSF
+    name: Source Port
+    path: ocsf.src_endpoint.port
+    source: log
+  - groups:
+      - OCSF
+    name: Query Hostname
+    path: ocsf.query.hostname
+    source: log
+  - groups:
+      - OCSF
+    name: Query Type
+    path: ocsf.query.type
+    source: log
+  - groups:
+      - OCSF
+    name: Query Class
+    path: ocsf.query.class
+    source: log
+  - groups:
+      - OCSF
+    name: Protocol Name
+    path: ocsf.connection_info.protocol_name
+    source: log
 pipeline:
   type: pipeline
   name: CoreDNS
@@ -90,3 +180,329 @@ pipeline:
       enabled: true
       sources:
         - level
+    - type: pipeline
+      name: OCSF sub pipeline for class DNS Activity [4003]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@dns.question.name:*"
+      processors:
+        - type: string-builder-processor
+          name: Add ocsf.metadata.product.name
+          enabled: true
+          template: CoreDNS
+          target: ocsf.metadata.product.name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add ocsf.metadata.product.vendor_name
+          enabled: true
+          template: CoreDNS
+          target: ocsf.metadata.product.vendor_name
+          replaceMissing: false
+        - type: arithmetic-processor
+          name: Convert `duration` (ns) to `ocsf.response_time` (ms)
+          enabled: true
+          expression: duration / 1000000
+          target: ocsf.response_time
+          replaceMissing: false
+        - type: schema-processor
+          name: Apply OCSF schema for 4003
+          enabled: true
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: DNS Activity
+            classUid: 4003
+            extensions: []
+            profiles: []
+          mappers:
+            - name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Traffic
+                  id: 6
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.connection_info.direction_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Inbound
+                  id: 1
+              targets:
+                name: ocsf.connection_info.direction
+                id: ocsf.connection_info.direction_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "@level:(INFO OR DEBUG)"
+                  name: Informational
+                  id: 1
+                - filter:
+                    query: "@level:(WARN OR WARNING)"
+                  name: Medium
+                  id: 3
+                - filter:
+                    query: "@level:ERROR"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@level:FATAL"
+                  name: Fatal
+                  id: 6
+                - filter:
+                    query: "*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+              fallback:
+                values:
+                  ocsf.severity: Other
+                  ocsf.severity_id: "99"
+                sources:
+                  ocsf.severity:
+                    - level
+              type: schema-category-mapper
+            - name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "@dns.flags.rcode:NOERROR"
+                  name: Success
+                  id: 1
+                - filter:
+                    query: "*"
+                  name: Failure
+                  id: 2
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.rcode_id
+              categories:
+                - filter:
+                    query: "@dns.flags.rcode:NOERROR"
+                  name: NoError
+                  id: 0
+                - filter:
+                    query: "@dns.flags.rcode:FORMERR"
+                  name: FormError
+                  id: 1
+                - filter:
+                    query: "@dns.flags.rcode:SERVFAIL"
+                  name: ServError
+                  id: 2
+                - filter:
+                    query: "@dns.flags.rcode:NXDOMAIN"
+                  name: NXDomain
+                  id: 3
+                - filter:
+                    query: "@dns.flags.rcode:(NOTIMP OR NOTIMPL)"
+                  name: NotImp
+                  id: 4
+                - filter:
+                    query: "@dns.flags.rcode:REFUSED"
+                  name: Refused
+                  id: 5
+                - filter:
+                    query: "@dns.flags.rcode:YXDOMAIN"
+                  name: YXDomain
+                  id: 6
+                - filter:
+                    query: "@dns.flags.rcode:YXRRSET"
+                  name: YXRRSet
+                  id: 7
+                - filter:
+                    query: "@dns.flags.rcode:NXRRSET"
+                  name: NXRRSet
+                  id: 8
+                - filter:
+                    query: "@dns.flags.rcode:NOTAUTH"
+                  name: NotAuth
+                  id: 9
+                - filter:
+                    query: "@dns.flags.rcode:NOTZONE"
+                  name: NotZone
+                  id: 10
+                - filter:
+                    query: "@dns.flags.rcode:(DSOTYPENI OR RCODE11)"
+                  name: DSOTYPENI
+                  id: 11
+                - filter:
+                    query: "@dns.flags.rcode:(BADSIG OR BADVERS)"
+                  name: BADSIG_VERS
+                  id: 16
+                - filter:
+                    query: "@dns.flags.rcode:BADKEY"
+                  name: BADKEY
+                  id: 17
+                - filter:
+                    query: "@dns.flags.rcode:BADTIME"
+                  name: BADTIME
+                  id: 18
+                - filter:
+                    query: "@dns.flags.rcode:BADMODE"
+                  name: BADMODE
+                  id: 19
+                - filter:
+                    query: "@dns.flags.rcode:BADNAME"
+                  name: BADNAME
+                  id: 20
+                - filter:
+                    query: "@dns.flags.rcode:BADALG"
+                  name: BADALG
+                  id: 21
+                - filter:
+                    query: "@dns.flags.rcode:BADTRUNC"
+                  name: BADTRUNC
+                  id: 22
+                - filter:
+                    query: "@dns.flags.rcode:BADCOOKIE"
+                  name: BADCOOKIE
+                  id: 23
+                - filter:
+                    query: "@dns.flags.rcode:(RCODE12 OR RCODE13 OR RCODE14 OR RCODE15)"
+                  name: Unassigned
+                  id: 24
+                - filter:
+                    query: "@dns.flags.rcode:RCODE65535"
+                  name: Reserved
+                  id: 25
+                - filter:
+                    query: "*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.rcode
+                id: ocsf.rcode_id
+              fallback:
+                values:
+                  ocsf.rcode: Other
+                  ocsf.rcode_id: "99"
+                sources:
+                  ocsf.rcode:
+                    - dns.flags.rcode
+              type: schema-category-mapper
+            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              sourceType: attribute
+              target: ocsf.metadata.product.name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              sourceType: attribute
+              target: ocsf.metadata.product.vendor_name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.response_time` to `ocsf.response_time`
+              sources:
+                - ocsf.response_time
+              sourceType: attribute
+              target: ocsf.response_time
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `level` to `ocsf.metadata.log_level`
+              sources:
+                - level
+              sourceType: attribute
+              target: ocsf.metadata.log_level
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `timestamp` to `ocsf.time`
+              sources:
+                - timestamp
+              sourceType: attribute
+              target: ocsf.time
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `network.client.ip` to `ocsf.src_endpoint.ip`
+              sources:
+                - network.client.ip
+              sourceType: attribute
+              target: ocsf.src_endpoint.ip
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `network.client.port` to `ocsf.src_endpoint.port`
+              sources:
+                - network.client.port
+              sourceType: attribute
+              target: ocsf.src_endpoint.port
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `dns.question.name` to `ocsf.query.hostname`
+              sources:
+                - dns.question.name
+              sourceType: attribute
+              target: ocsf.query.hostname
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `dns.question.type` to `ocsf.query.type`
+              sources:
+                - dns.question.type
+              sourceType: attribute
+              target: ocsf.query.type
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `dns.question.class` to `ocsf.query.class`
+              sources:
+                - dns.question.class
+              sourceType: attribute
+              target: ocsf.query.class
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `dns.protocol` to `ocsf.connection_info.protocol_name`
+              sources:
+                - dns.protocol
+              sourceType: attribute
+              target: ocsf.connection_info.protocol_name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `dns.flags.rcode` to `ocsf.status_code`
+              sources:
+                - dns.flags.rcode
+              sourceType: attribute
+              target: ocsf.status_code
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
