@@ -3114,13 +3114,21 @@ pipeline:
       filter:
         query: "@_path:(dns OR dns_red)"
       processors:
-        - type: array-processor
-          name: Select first answer IP into ocsf.answer.rdata
+        - type: string-builder-processor
+          name: Stringify answers
           enabled: true
-          operation:
-            source: answers
-            target: ocsf.answer.rdata
-            type: select
+          template: "%{answers}"
+          target: _answers_str
+          replaceMissing: false
+        - type: grok-parser
+          name: Extract first answer into ocsf.answer.rdata
+          enabled: true
+          source: _answers_str
+          samples:
+            - '["185.64.148.0"]'
+          grok:
+            supportRules: ""
+            matchRules: 'a \[?"?%{notSpace:ocsf.answer.rdata}"?'
         - type: array-processor
           name: Append ocsf.answer into ocsf.answers array
           enabled: true

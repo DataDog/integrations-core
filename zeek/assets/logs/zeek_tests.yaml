@@ -415,6 +415,8 @@ tests:
         severity_id: 1
         class_name: DNS Activity
         status: Success
+        answers:
+          - rdata: 185.64.148.0
       query: win2k16-1-159
       answers:
         - 185.64.148.0
@@ -426,6 +428,7 @@ tests:
         resp_h: 185.64.148.0
         orig_h: 185.64.148.0
         resp_p: 5355
+      _answers_str: 185.64.148.0
     message: |-
       {
         "AA" : false,
@@ -976,6 +979,8 @@ tests:
         severity_id: 1
         class_name: DNS Activity
         status: Success
+        answers:
+          - rdata: 185.64.148.0
       Z: 0
       ts: '2023-12-12T05:52:32.763303Z'
       query: win2k16-1-159
@@ -989,6 +994,7 @@ tests:
         resp_h: 185.64.148.0
         orig_h: 185.64.148.0
         resp_p: 5355
+      _answers_str: 185.64.148.0
     service: dns
     message: <134>Dec 12 05:52:50 machine-name {"_path":"dns","_write_ts":"2023-12-12T05:52:50.756358Z","ts":"2023-12-12T05:52:32.763303Z","uid":"CsOSdHqRMu62rNs31","id.orig_h":"185.64.148.0","id.orig_p":58013,"id.resp_h":"185.64.148.0","id.resp_p":5355,"proto":"udp","trans_id":38706,"rcode":0,"rcode_name":"NOERROR","query":"win2k16-1-159","answers":["185.64.148.0"],"TTLs":[30.0],"AA":false,"TC":false,"RD":false,"RA":false,"Z":0,"rejected":false}
     tags:
