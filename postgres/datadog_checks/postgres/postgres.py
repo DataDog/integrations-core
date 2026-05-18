@@ -484,6 +484,7 @@ class PostgreSql(DatabaseCheck):
         # TODO: move this lock into the base class
         with self._cancel_lock:
             if self._cancelled:
+                self.log.debug("run() skipped, check already cancelled")
                 return ''
             self._is_running = True
         try:
@@ -495,6 +496,7 @@ class PostgreSql(DatabaseCheck):
                 if self._cancelled:
                     needs_finalize = True
             if needs_finalize:
+                self.log.debug("Check cancel has been signaled, finalizing now that run() is complete")
                 self._finalize()
 
     def cancel(self):
@@ -511,6 +513,7 @@ class PostgreSql(DatabaseCheck):
         is in-flight). The Agent guarantees it will not call run() again after
         cancel().
         """
+        self.log.debug("Marking check as cancelled")
         self._cancel_async_jobs()
         needs_finalize = False
         with self._cancel_lock:
@@ -518,7 +521,10 @@ class PostgreSql(DatabaseCheck):
             if not self._is_running:
                 needs_finalize = True
         if needs_finalize:
+            self.log.debug("cancel() finalizing immediately, check is idle")
             self._finalize()
+        else:
+            self.log.debug("cancel() deferred finalize, check is still running")
 
     @property
     def _async_jobs(self):
@@ -539,6 +545,7 @@ class PostgreSql(DatabaseCheck):
 
     def _finalize(self):
         """Tear down check state. Must not run while check() is executing."""
+        self.log.debug("Finalizing check: closing connections and clearing state")
         for job in self._async_jobs:
             if job._job_loop_future:
                 job._job_loop_future.result()
@@ -553,6 +560,7 @@ class PostgreSql(DatabaseCheck):
         self.health = None
         self._close_db()
         self._close_db_pool()
+        self.log.debug("Check cleanup complete")
 
     def _clean_state(self):
         self.log.debug("Cleaning state")
