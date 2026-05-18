@@ -274,9 +274,6 @@ class HTTPCheck(AgentCheck):
             tags_list = list(tags)
             tags_list.append("url:{}".format(addr))
             tags_list.append("instance:{}".format(instance_name))
-            if r is not None:
-                http_status = r.status_code
-                tags_list.append("http_status_code:{}".format(http_status))
             self.gauge("http.ssl.days_left", days_left, tags=tags_list)
             self.gauge("http.ssl.seconds_left", seconds_left, tags=tags_list)
 

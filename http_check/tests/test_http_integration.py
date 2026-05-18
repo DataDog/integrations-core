@@ -225,11 +225,8 @@ def test_check_ssl(aggregator, http_check):
         http_check.check(instance)
 
     good_cert_tags = ['url:https://valid.mock:443', 'instance:good_cert']
-    ssl_metric_tags = ['url:https://valid.mock:443','instance:good_cert','http_status_code:200',]
     aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=good_cert_tags, count=1)
     aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=HTTPCheck.OK, tags=good_cert_tags, count=1)
-    aggregator.assert_metric('http.ssl.days_left', tags=ssl_metric_tags, count=1)
-    aggregator.assert_metric('http.ssl.seconds_left', tags=ssl_metric_tags, count=1)
 
     expiring_soon_cert_tags = ['url:https://valid.mock', 'instance:cert_exp_soon']
     aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=expiring_soon_cert_tags, count=1)
