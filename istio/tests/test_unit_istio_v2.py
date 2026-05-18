@@ -27,9 +27,7 @@ def test_istiod(aggregator, dd_run_check, mock_http_response):
     for metric in common.ISTIOD_V2_METRICS:
         aggregator.assert_metric(metric)
 
-    aggregator.assert_metric(
-        'istio.go.memstats.alloc_bytes', value=2.9097592e07, metric_type=aggregator.GAUGE
-    )
+    aggregator.assert_metric('istio.go.memstats.alloc_bytes', value=2.9097592e07, metric_type=aggregator.GAUGE)
     aggregator.assert_metric(
         'istio.go.memstats.alloc_bytes.count', value=1.123329752e09, metric_type=aggregator.MONOTONIC_COUNT
     )

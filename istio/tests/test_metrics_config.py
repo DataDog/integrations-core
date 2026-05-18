@@ -16,9 +16,7 @@ def test_pair_uses_native_dynamic_and_drops_total_entry():
         }
     )
 
-    assert metrics == [
-        {'go_memstats_alloc_bytes': {'name': 'go.memstats.alloc_bytes', 'type': 'native_dynamic'}}
-    ]
+    assert metrics == [{'go_memstats_alloc_bytes': {'name': 'go.memstats.alloc_bytes', 'type': 'native_dynamic'}}]
 
 
 def test_lone_total_is_stripped_and_has_no_explicit_type():
