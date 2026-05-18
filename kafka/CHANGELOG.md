@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.6.0 / 2026-05-14
+
+***Added***:
+
+* Add KRaft (Kafka Raft) metrics for Kafka clusters running without ZooKeeper. ([#23105](https://github.com/DataDog/integrations-core/pull/23105))
+
 ## 4.5.0 / 2026-04-15
 
 ***Added***:
