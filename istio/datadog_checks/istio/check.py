@@ -79,6 +79,13 @@ class IstioCheckV2(OpenMetricsBaseCheckV2):
         # parser for this sub-scraper unless the user explicitly opts out.
         ztunnel_namespace = istiod_namespace + ".ztunnel"
         if ztunnel_endpoint:
+            if self.instance.get("use_latest_spec") is False:
+                self.log.warning(
+                    "`use_latest_spec: false` is set with `ztunnel_endpoint` configured. "
+                    "ztunnel emits the modern OpenMetrics counter convention which the "
+                    "legacy parser silently drops, so every ztunnel counter metric will be "
+                    "missed. Remove `use_latest_spec: false` to restore ztunnel metrics."
+                )
             self.scraper_configs.append(
                 self._generate_config(
                     ztunnel_endpoint, ZTUNNEL_METRICS, ztunnel_namespace, use_latest_spec_default=True
@@ -105,7 +112,9 @@ class IstioCheckV2(OpenMetricsBaseCheckV2):
         if use_latest_spec_default:
             config['use_latest_spec'] = True
         config.update(self.instance)
-        # Restore per-scraper namespace so custom ztunnel/waypoint/mesh namespaces are not overwritten by instance
+        # `namespace` is set by the integration per sub-scraper and must always be restored.
+        # `use_latest_spec` is a user-facing knob; we set it as a default before `update`, so
+        # a user-supplied value still wins (callers warn when that hides a known issue).
         config['namespace'] = namespace
         return config
 

@@ -264,6 +264,18 @@ def test_ambient_ztunnel_legacy_parser_drops_counters(aggregator, dd_run_check, 
         aggregator.assert_metric(metric, count=0)
 
 
+def test_ambient_warns_when_user_opts_out_of_openmetrics_parser(caplog, dd_run_check, mock_http_response):
+    """Setting `use_latest_spec: false` with ambient + ztunnel reintroduces the silent-drop bug;
+    the integration must log a warning so the regression is not silent."""
+    mock_http_response(file_path=get_fixture_path('1.24', 'ztunnel.txt'))
+    instance = dict(common.MOCK_V2_AMBIENT_ZTUNNEL_INSTANCE, use_latest_spec=False)
+    check = Istio(common.CHECK_NAME, {}, [instance])
+    with caplog.at_level('WARNING'):
+        dd_run_check(check)
+    assert "use_latest_spec: false" in caplog.text
+    assert "ztunnel" in caplog.text
+
+
 def test_ambient_waypoint_metrics(aggregator, dd_run_check, mock_http_response):
     """Test waypoint proxy metrics collection in ambient mode with default namespace."""
     mock_http_response(file_path=get_fixture_path('1.5', 'waypoint.txt'))

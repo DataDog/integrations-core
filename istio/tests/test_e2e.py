@@ -113,7 +113,4 @@ def test_e2e_ambient(dd_agent_check, instance_openmetrics_v2):
         aggregator.assert_metric(metric, at_least=0)
 
     for metric in ISTIOD_V2_METRICS:
-        if metric in INTERMITTENT_METRICS:
-            aggregator.assert_metric(metric, at_least=0)
-        else:
-            aggregator.assert_metric(metric, at_least=0)
+        _assert_istiod_metric(aggregator, metric)

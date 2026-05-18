@@ -1,1 +1,1 @@
-Fix silent drop of ztunnel counter metrics in Istio ambient mode.
+Restore ztunnel TCP counter metrics in Istio ambient mode that have been silently dropped since 9.4.0.

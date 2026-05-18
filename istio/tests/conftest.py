@@ -36,7 +36,7 @@ def _istio_release_suffix():
     system = platform.system()
     machine = platform.machine().lower()
     if system == "Darwin":
-        return "osx-arm64" if machine in ("arm64", "aarch64") else "osx"
+        return "osx-arm64" if machine in ("arm64", "aarch64") else "osx-amd64"
     if machine in ("aarch64", "arm64"):
         return "linux-arm64"
     return "linux-amd64"
@@ -124,8 +124,70 @@ def setup_istio_ambient():
             "while true; do curl -s productpage:9080/productpage > /dev/null; sleep 1; done",
         ]
     )
-    time.sleep(15)
+    _wait_for_ztunnel_traffic()
     os.remove("istio.tar.gz")
+
+
+def _wait_for_ztunnel_traffic(timeout_seconds=300, interval_seconds=3):
+    """Block until ztunnel reports at least one TCP connection on its /stats/prometheus endpoint.
+
+    The traffic-generator pod takes a variable amount of time to pull its image, get scheduled,
+    and start hitting the productpage service. A fixed sleep can either be too short on a slow
+    CI agent (test fails with a misleading "metric not found") or too long on a fast one.
+    Poll the actual readiness signal instead, bounded by the same 300s timeout used elsewhere
+    in this setup."""
+    deadline = time.monotonic() + timeout_seconds
+    pod_name = ""
+    while time.monotonic() < deadline:
+        if not pod_name:
+            result = run_command(
+                [
+                    "kubectl",
+                    "get",
+                    "pod",
+                    "-n",
+                    "istio-system",
+                    "-l",
+                    "app=ztunnel",
+                    "-o",
+                    "jsonpath={.items[0].metadata.name}",
+                ],
+                capture='stdout',
+            )
+            pod_name = result.stdout.strip()
+        if pod_name:
+            result = run_command(
+                [
+                    "kubectl",
+                    "exec",
+                    "-n",
+                    "istio-system",
+                    pod_name,
+                    "--",
+                    "curl",
+                    "-s",
+                    "localhost:15020/stats/prometheus",
+                ],
+                capture='stdout',
+            )
+            if _ztunnel_has_traffic(result.stdout):
+                return
+        time.sleep(interval_seconds)
+    raise RuntimeError("ztunnel did not record TCP traffic within {}s".format(timeout_seconds))
+
+
+def _ztunnel_has_traffic(metrics_text):
+    """Return True if `istio_tcp_connections_opened_total` reports any non-zero sample."""
+    for line in metrics_text.splitlines():
+        if not line.startswith("istio_tcp_connections_opened_total"):
+            continue
+        value = line.rsplit(" ", 1)[-1]
+        try:
+            if float(value) > 0:
+                return True
+        except ValueError:
+            continue
+    return False
 
 
 @pytest.fixture(scope='session')
