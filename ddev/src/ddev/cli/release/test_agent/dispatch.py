@@ -8,6 +8,8 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING
 
+from ddev.cli.release.test_agent.validation import WORKFLOW_LINUX, WORKFLOW_WINDOWS
+
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
@@ -15,9 +17,6 @@ if TYPE_CHECKING:
     from ddev.utils.github_async.models import WorkflowDispatchResult
 
     DispatchOutcome = GitHubResponse[WorkflowDispatchResult] | BaseException
-
-WORKFLOW_LINUX = 'test-agent.yml'
-WORKFLOW_WINDOWS = 'test-agent-windows.yml'
 
 # Hard-coded: the two test workflows only live on DataDog/integrations-core. Forks and other
 # integrations repos (extras, marketplace) have nothing to dispatch even if the branch/tag exists,

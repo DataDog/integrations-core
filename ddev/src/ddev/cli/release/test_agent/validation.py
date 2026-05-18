@@ -17,13 +17,17 @@ import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from ddev.cli.release.test_agent.dispatch import WORKFLOW_LINUX, WORKFLOW_WINDOWS
-
 if TYPE_CHECKING:
     from ddev.cli.application import Application
 
 BRANCH_PATTERN = r'^\d+\.\d+\.x$'
 TAG_PATTERN = r'^\d+\.\d+\.\d+(-rc\.\d+)?$'
+
+# The two workflow filenames the command targets. Defined here (the layer that runs first)
+# rather than in `dispatch.py`, so the import graph flows validation -> dispatch and validation
+# does not pull in dispatch's async/HTTP machinery at module-load time.
+WORKFLOW_LINUX = 'test-agent.yml'
+WORKFLOW_WINDOWS = 'test-agent-windows.yml'
 
 WORKFLOW_FILES = [
     f'.github/workflows/{WORKFLOW_LINUX}',
@@ -116,7 +120,8 @@ def fetch_target(app: Application, target: ReleaseTarget) -> None:
         msg = str(e).lower()
         if any(fragment in msg for fragment in GIT_FETCH_MISSING_FRAGMENTS):
             app.abort(f'{kind.capitalize()} `{target.name}` not found on origin.')
-        app.abort(f'Failed to fetch {kind} `{target.name}` from origin: {e}')
+        else:
+            app.abort(f'Failed to fetch {kind} `{target.name}` from origin: {e}')
 
 
 def verify_workflows_present_on_ref(app: Application, target: ReleaseTarget) -> None:

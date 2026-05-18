@@ -97,7 +97,7 @@ def _print_plan(
     plan on the same channel means piping the command into a file leaves stdout clean and
     keeps the whole pre-dispatch narrative coherent on stderr.
     """
-    from ddev.cli.release.test_agent.dispatch import WORKFLOW_LINUX, WORKFLOW_WINDOWS
+    from ddev.cli.release.test_agent.validation import WORKFLOW_LINUX, WORKFLOW_WINDOWS
 
     app.display_info('Dispatch plan')
     app.display_info(f'  Workflows: {WORKFLOW_LINUX}, {WORKFLOW_WINDOWS}')
