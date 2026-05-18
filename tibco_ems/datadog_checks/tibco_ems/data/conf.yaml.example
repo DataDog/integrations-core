@@ -58,6 +58,12 @@ instances:
     #
     # tibemsadmin: <TIBEMSADMIN>
 
+    ## @param use_ssl - boolean - optional - default: false
+    ## Set to `true` to connect to the Tibco EMS server using SSL (`ssl://host:port`).
+    ## When `false`, the check uses `tcp://host:port`.
+    #
+    # use_ssl: false
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

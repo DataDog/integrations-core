@@ -63,4 +63,12 @@ files:
       value:
         type: string
         require_trusted_provider: true
+    - name: use_ssl
+      description: |
+        Set to `true` to connect to the Tibco EMS server using SSL (`ssl://host:port`).
+        When `false`, the check uses `tcp://host:port`.
+      value:
+        type: boolean
+        default: false
+        example: false
     - template: instances/default
