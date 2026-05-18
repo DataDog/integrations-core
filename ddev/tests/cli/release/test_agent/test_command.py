@@ -11,8 +11,8 @@ from tests.helpers.github_async import FakeAsyncGitHubClient
 from tests.helpers.runner import CliRunner
 
 EXPECTED_INPUTS = {
-    'test-py3': True,
-    'test-py2': False,
+    'test-py3': 'true',
+    'test-py2': 'false',
     'agent-image': 'registry.datadoghq.com/agent:7.80.0-rc.3',
     'agent-image-windows': 'registry.datadoghq.com/agent:7.80.0-rc.3-servercore',
 }
@@ -96,9 +96,7 @@ def test_branch_with_no_rcs_aborts(
     fake_async_github.assert_not_called('create_workflow_dispatch')
 
 
-def test_missing_image_aborts(
-    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
-) -> None:
+def test_missing_image_aborts(ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient) -> None:
     mocker.patch('ddev.cli.release.test_agent.registry.manifest_exists', return_value=False)
 
     result = ddev('release', 'test-agent', '--tag', '9.99.0-rc.1', '--yes')
@@ -108,9 +106,7 @@ def test_missing_image_aborts(
     fake_async_github.assert_not_called('create_workflow_dispatch')
 
 
-def test_missing_ref_aborts(
-    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
-) -> None:
+def test_missing_ref_aborts(ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient) -> None:
     mocker.patch('ddev.utils.git.GitRepository.capture', return_value='')
 
     result = ddev('release', 'test-agent', '--branch', '7.80.x', '--yes')
@@ -133,7 +129,7 @@ def test_missing_workflow_file_aborts(
 
 
 @pytest.mark.parametrize(
-    'failing_workflow, surviving_label',
+    'failing_workflow, failing_label',
     [
         pytest.param('test-agent-windows.yml', 'Windows', id='windows-fails'),
         pytest.param('test-agent.yml', 'Linux', id='linux-fails'),
@@ -143,7 +139,7 @@ def test_partial_dispatch_failure_surfaces_sibling_url(
     ddev: CliRunner,
     fake_async_github: FakeAsyncGitHubClient,
     failing_workflow: str,
-    surviving_label: str,
+    failing_label: str,
 ) -> None:
     """When only one dispatch fails, the surviving side's URL must appear in the error message."""
     err = httpx.HTTPStatusError(
@@ -156,13 +152,11 @@ def test_partial_dispatch_failure_surfaces_sibling_url(
     result = ddev('release', 'test-agent', '--branch', '7.80.x', '--yes')
 
     assert result.exit_code != 0, result.output
-    assert f'{surviving_label} dispatch failed' in result.output
+    assert f'{failing_label} dispatch failed' in result.output
     assert 'https://github.com/test/repo/actions/runs/1' in result.output
 
 
-def test_both_dispatches_fail_combine_messages(
-    ddev: CliRunner, fake_async_github: FakeAsyncGitHubClient
-) -> None:
+def test_both_dispatches_fail_combine_messages(ddev: CliRunner, fake_async_github: FakeAsyncGitHubClient) -> None:
     err = httpx.HTTPStatusError(
         'forbidden',
         request=httpx.Request('POST', 'https://api.github.com/'),

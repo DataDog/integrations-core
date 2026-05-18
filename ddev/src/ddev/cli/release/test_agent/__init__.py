@@ -61,13 +61,15 @@ def test_agent(app: Application, branch: str | None, tag: str | None, dry_run: b
     linux_image, windows_image = _build_image_refs(version)
     _validate_images_exist(app, linux_image, windows_image)
 
-    inputs = {
-        'test-py3': True,
-        'test-py2': False,
+    # GitHub's workflow_dispatch API expects every value in `inputs` to be a string, even for
+    # `type: boolean` workflow inputs — booleans are parsed from the lowercase string form.
+    inputs: dict[str, str] = {
+        'test-py3': 'true',
+        'test-py2': 'false',
         'agent-image': linux_image,
         'agent-image-windows': windows_image,
     }
-    _print_plan(app, ref=ref, version=version, branch=branch, linux_image=linux_image, windows_image=windows_image)
+    _print_plan(app, ref=ref, version=version, branch=branch, inputs=inputs)
 
     if dry_run:
         app.display_info('Dry run — no workflows dispatched.')
@@ -166,8 +168,7 @@ def _validate_images_exist(app: Application, linux_image: str, windows_image: st
         app.display_waiting(f'Checking `{image}`...')
         if not manifest_exists(tag):
             app.abort(
-                f'Image `{image}` not found in registry.datadoghq.com. '
-                'Confirm the Agent release has been published.'
+                f'Image `{image}` not found in registry.datadoghq.com. Confirm the Agent release has been published.'
             )
 
 
@@ -177,18 +178,15 @@ def _print_plan(
     ref: str,
     version: str,
     branch: str | None,
-    linux_image: str,
-    windows_image: str,
+    inputs: dict[str, str],
 ) -> None:
     app.display_header('Dispatch plan')
     app.display_pair('Workflows', f'{WORKFLOW_LINUX}, {WORKFLOW_WINDOWS}')
     app.display_pair('Ref', ref)
     if branch is not None:
         app.display_pair('Resolved RC', version)
-    app.display_pair('Linux image', linux_image)
-    app.display_pair('Windows image', windows_image)
-    app.display_pair('test-py3', 'true')
-    app.display_pair('test-py2', 'false')
+    for key, value in inputs.items():
+        app.display_pair(key, value)
 
 
 def _print_result(app: Application, *, ref: str, linux_url: str, windows_url: str) -> None:
@@ -241,24 +239,21 @@ async def _dispatch_both_async(
 def _extract_run_urls(results: Sequence[DispatchOutcome]) -> tuple[str, str]:
     """Pull html_urls out of two gather results, raising on any exception with a partial-success hint."""
     linux_result, windows_result = results
-    linux_failed = isinstance(linux_result, BaseException)
-    windows_failed = isinstance(windows_result, BaseException)
 
-    if linux_failed and windows_failed:
+    if isinstance(linux_result, BaseException):
+        if isinstance(windows_result, BaseException):
+            raise RuntimeError(
+                f'Both dispatches failed. Linux: {linux_result}. Windows: {windows_result}.'
+            ) from linux_result
+        sibling = windows_result.data.html_url
         raise RuntimeError(
-            f'Both dispatches failed. Linux: {linux_result}. Windows: {windows_result}.'
+            f'Linux dispatch failed: {linux_result}. The other workflow was dispatched at {sibling}.'
         ) from linux_result
 
-    if linux_failed:
-        assert not windows_failed
+    if isinstance(windows_result, BaseException):
+        sibling = linux_result.data.html_url
         raise RuntimeError(
-            f'Linux dispatch failed: {linux_result}. The other workflow was dispatched at {windows_result.data.html_url}.'
-        ) from linux_result
-
-    if windows_failed:
-        assert not linux_failed
-        raise RuntimeError(
-            f'Windows dispatch failed: {windows_result}. The other workflow was dispatched at {linux_result.data.html_url}.'
+            f'Windows dispatch failed: {windows_result}. The other workflow was dispatched at {sibling}.'
         ) from windows_result
 
     return linux_result.data.html_url, windows_result.data.html_url

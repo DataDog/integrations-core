@@ -210,7 +210,8 @@ class AsyncGitHubClient:
 
         Returns:
             When ``return_run_details=False`` (default): ``GitHubResponse[None]`` wrapping the 204.
-            When ``return_run_details=True``: ``GitHubResponse[WorkflowDispatchResult]`` with the new run's IDs and URLs.
+            When ``return_run_details=True``: ``GitHubResponse[WorkflowDispatchResult]`` with the new run's
+            IDs and URLs.
         """
         body: dict[str, Any] = {"ref": ref}
         if inputs is not None:
