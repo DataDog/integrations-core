@@ -64,6 +64,14 @@ class GitRepository:
     def current_branch(self) -> str:
         return self.capture('rev-parse', '--abbrev-ref', 'HEAD').strip()
 
+    def get_remote_url(self, remote: str = 'origin') -> str | None:
+        """Return the configured URL for `remote`, or None if it isn't set."""
+        try:
+            url = self.capture('remote', 'get-url', remote).strip()
+        except OSError:
+            return None
+        return url or None
+
     def latest_commit(self) -> GitCommit:
         sha, subject = self.capture('log', '-1', '--format=%H%n%s').splitlines()
         return GitCommit(sha, subject=subject)

@@ -123,7 +123,6 @@ jobs:
     needs: prepare
     if: needs.prepare.outputs.has_packages == 'true' && !inputs.dry-run
     runs-on: ubuntu-latest
-    environment: release
 
     strategy:
       matrix:

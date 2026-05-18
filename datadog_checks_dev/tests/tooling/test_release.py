@@ -64,6 +64,75 @@ def test_get_agent_requirement_line_with_overrides(overrides: dict[str, list[str
         assert res == expected_line
 
 
+def _tile_manifest(supported_os_values):
+    return {
+        'tile': {
+            'classifier_tags': [f'Supported OS::{v}' for v in supported_os_values],
+        }
+    }
+
+
+@pytest.mark.parametrize(
+    'classifier_supported_os, expected_line',
+    [
+        (['Linux', 'macOS', 'Windows', 'AIX'], 'datadog-foo==1.2.3'),
+        (['Linux', 'AIX'], "datadog-foo==1.2.3; sys_platform == 'linux2'"),
+        (['Linux', 'Windows', 'AIX'], "datadog-foo==1.2.3; sys_platform != 'darwin'"),
+        (['Linux', 'macOS', 'AIX'], "datadog-foo==1.2.3; sys_platform != 'win32'"),
+        (['macOS', 'Windows', 'AIX'], "datadog-foo==1.2.3; sys_platform != 'linux2'"),
+    ],
+    ids=['all_plus_aix', 'linux_plus_aix', 'no_macos_plus_aix', 'no_windows_plus_aix', 'no_linux_plus_aix'],
+)
+def test_get_agent_requirement_line_tile_manifest_with_aix(classifier_supported_os, expected_line):
+    with mock.patch('datadog_checks.dev.tooling.release.load_manifest') as load:
+        load.return_value = _tile_manifest(classifier_supported_os)
+        assert get_agent_requirement_line('foo', '1.2.3', mock.Mock()) == expected_line
+
+
+@pytest.mark.parametrize(
+    'supported_os, expected_line',
+    [
+        (['aix', 'linux', 'mac_os', 'windows'], 'datadog-foo==1.2.3'),
+        (['aix', 'linux'], "datadog-foo==1.2.3; sys_platform == 'linux2'"),
+        (['aix', 'linux', 'mac_os'], "datadog-foo==1.2.3; sys_platform != 'win32'"),
+    ],
+    ids=['all_plus_aix', 'linux_plus_aix', 'no_windows_plus_aix'],
+)
+def test_get_agent_requirement_line_supported_os_with_aix(supported_os, expected_line):
+    with mock.patch('datadog_checks.dev.tooling.release.load_manifest') as load:
+        load.return_value = {'supported_os': supported_os}
+        assert get_agent_requirement_line('foo', '1.2.3', mock.Mock()) == expected_line
+
+
+@pytest.mark.parametrize(
+    'manifest',
+    [
+        _tile_manifest(['AIX']),
+        {'supported_os': ['aix']},
+    ],
+    ids=['tile', 'supported_os'],
+)
+def test_get_agent_requirement_line_returns_none_when_only_ignored_platforms(manifest):
+    with mock.patch('datadog_checks.dev.tooling.release.load_manifest') as load:
+        load.return_value = manifest
+        assert get_agent_requirement_line('foo', '1.2.3', mock.Mock()) is None
+
+
+@pytest.mark.parametrize(
+    'manifest',
+    [
+        _tile_manifest([]),
+        {'supported_os': []},
+    ],
+    ids=['tile', 'supported_os'],
+)
+def test_get_agent_requirement_line_raises_when_no_supported_os(manifest):
+    with mock.patch('datadog_checks.dev.tooling.release.load_manifest') as load:
+        load.return_value = manifest
+        with pytest.raises(ManifestError):
+            get_agent_requirement_line('foo', '1.2.3', mock.Mock())
+
+
 def test_get_agent_requirement_line_with_overrides_no_manifest_no_override():
     with mock.patch('datadog_checks.dev.tooling.release.load_manifest') as load:
         load.return_value = {}

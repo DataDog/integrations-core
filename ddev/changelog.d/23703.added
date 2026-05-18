@@ -1,0 +1,1 @@
+Accept a PR number, ``PR-<number>`` token, or GitHub PR URL as input to ``port-commit``, and fetch the target commit from origin when it is not in the local object database.
