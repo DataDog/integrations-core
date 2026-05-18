@@ -311,7 +311,7 @@ tests:
       "rejected" : false,
       "query" : "win2k16-1-159",
       "_write_ts" : "2023-12-12T05:52:50.756358Z",
-      "answers" : [ "185.64.148.0" ],
+      "answers" : [ "185.64.148.0", "8.8.8.8" ],
       "trans_id" : 38706,
       "rcode" : 0,
       "_path" : "dns",
@@ -344,7 +344,8 @@ tests:
       dns:
         answer:
           name:
-            - "185.64.148.0"
+            - 185.64.148.0
+            - 8.8.8.8
         flags:
           rcode: "NOERROR"
         id: 38706
@@ -420,6 +421,7 @@ tests:
       query: win2k16-1-159
       answers:
         - 185.64.148.0
+        - 8.8.8.8
       trans_id: 38706
       rcode_name: NOERROR
       proto: udp
@@ -428,7 +430,6 @@ tests:
         resp_h: 185.64.148.0
         orig_h: 185.64.148.0
         resp_p: 5355
-      _answers_str: 185.64.148.0
     message: |-
       {
         "AA" : false,
@@ -436,7 +437,7 @@ tests:
         "rejected" : false,
         "query" : "win2k16-1-159",
         "_write_ts" : "2023-12-12T05:52:50.756358Z",
-        "answers" : [ "185.64.148.0" ],
+        "answers" : [ "185.64.148.0", "8.8.8.8" ],
         "trans_id" : 38706,
         "rcode" : 0,
         "_path" : "dns",
@@ -994,7 +995,6 @@ tests:
         resp_h: 185.64.148.0
         orig_h: 185.64.148.0
         resp_p: 5355
-      _answers_str: 185.64.148.0
     service: dns
     message: <134>Dec 12 05:52:50 machine-name {"_path":"dns","_write_ts":"2023-12-12T05:52:50.756358Z","ts":"2023-12-12T05:52:32.763303Z","uid":"CsOSdHqRMu62rNs31","id.orig_h":"185.64.148.0","id.orig_p":58013,"id.resp_h":"185.64.148.0","id.resp_p":5355,"proto":"udp","trans_id":38706,"rcode":0,"rcode_name":"NOERROR","query":"win2k16-1-159","answers":["185.64.148.0"],"TTLs":[30.0],"AA":false,"TC":false,"RD":false,"RA":false,"Z":0,"rejected":false}
     tags:
@@ -1274,7 +1274,6 @@ tests:
       severity:
         name: High
         id: 4
-      _is_alert_str: 'true'
       id:
         orig_p: 54321
         resp_h: 192.168.1.1
@@ -1295,7 +1294,6 @@ tests:
       _write_ts: '2026-05-11T17:59:59.359532Z'
       suri_id: SOHaIDWJ5dBe
       _path: suricata_corelight
-      _is_alert_str: 'true'
       tx_id: 0
       network:
         destination:
@@ -1411,6 +1409,16 @@ tests:
           mime_type: text/json
           type_id: 1
           name: FOPDsn3PdkiZsljcj2
+          hashes:
+            - algorithm_id: 1
+              value: 6e6ae0ed19f595687684faafae5499e13
+              algorithm: MD5
+            - algorithm_id: 2
+              value: f6578daa6d398c91398888b91a96d4c0e099c79c
+              algorithm: SHA-1
+            - algorithm_id: 3
+              value: a7d5f44561e9707b3faf6ca1cdec4823e6625dd1c3aba2b7395697d65b47dc8f
+              algorithm: SHA-256
         status_id: 1
         class_uid: 6006
         activity_id: 2
@@ -1453,8 +1461,6 @@ tests:
       total_bytes: 253109
       seen_bytes: 253109
       missing_bytes: 0
-      _tx_hosts_str: 10.104.10.60
-      _rx_hosts_str: 10.104.10.65
     service: files
     message: <134>May 11 19:26:26 ndr-dub-stryker-DC-1 {"_path":"files","_system_name":"ndr-dub-stryker-DC-1","_write_ts":"2026-05-11T19:26:26.082433Z","ts":"2026-05-11T19:26:25.875206Z","uid":"CjTuQU17IDvaVa8Nq2","fuid":"FOPDsn3PdkiZsljcj2","tx_hosts":["10.104.10.60"],"rx_hosts":["10.104.10.65"],"conn_uids":["CjTuQU17IDvaGb8Nq2"],"source":"HTTP","depth":0,"analyzers":["SHA1","MD5","SHA256","DATA_EVENT"],"local_orig":true,"is_orig":false,"seen_bytes":253109,"total_bytes":253109,"missing_bytes":0,"overflow_bytes":0,"timedout":false,"duration":0.2072269916534424,"mime_type":"text/json","md5":"6e6ae0ed19f595687684faafae5499e13","sha1":"f6578daa6d398c91398888b91a96d4c0e099c79c","sha256":"a7d5f44561e9707b3faf6ca1cdec4823e6625dd1c3aba2b7395697d65b47dc8f","id.vlan":1010}
     tags:

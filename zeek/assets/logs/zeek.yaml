@@ -1698,12 +1698,12 @@ pipeline:
           name: Set is_alert to boolean true
           enabled: true
           template: "true"
-          target: _is_alert_str
+          target: ocsf.is_alert
           replaceMissing: false
         - type: grok-parser
-          name: Convert _is_alert_str to boolean ocsf.is_alert
+          name: Convert ocsf.is_alert string to boolean
           enabled: true
-          source: _is_alert_str
+          source: ocsf.is_alert
           samples:
             - "true"
           grok:
@@ -1913,12 +1913,12 @@ pipeline:
           name: Set is_alert to boolean true
           enabled: true
           template: "true"
-          target: _is_alert_str
+          target: ocsf.is_alert
           replaceMissing: false
         - type: grok-parser
-          name: Convert _is_alert_str to boolean ocsf.is_alert
+          name: Convert ocsf.is_alert string to boolean
           enabled: true
-          source: _is_alert_str
+          source: ocsf.is_alert
           samples:
             - "true"
           grok:
@@ -2163,7 +2163,7 @@ pipeline:
           name: Calculate total bytes
           enabled: true
           expression: (orig_bytes + resp_bytes)
-          target: _total_bytes
+          target: ocsf.traffic.bytes
           isReplaceMissing: false
         - type: arithmetic-processor
           name: Calculate total packets
@@ -2392,11 +2392,11 @@ pipeline:
               overrideOnConflict: true
               targetFormat: integer
             - type: schema-remapper
-              name: Map `_total_bytes` to `ocsf.traffic.bytes`
+              name: Map `ocsf.traffic.bytes` to `ocsf.traffic.bytes`
               sources:
-                - _total_bytes
+                - ocsf.traffic.bytes
               target: ocsf.traffic.bytes
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               targetFormat: integer
             - type: schema-remapper
@@ -3115,20 +3115,21 @@ pipeline:
         query: "@_path:(dns OR dns_red)"
       processors:
         - type: string-builder-processor
-          name: Stringify answers
+          name: Stringify answers into ocsf.answer
           enabled: true
           template: "%{answers}"
-          target: _answers_str
+          target: ocsf.answer
           replaceMissing: false
         - type: grok-parser
           name: Extract first answer into ocsf.answer.rdata
           enabled: true
-          source: _answers_str
+          source: ocsf.answer
           samples:
-            - '["185.64.148.0"]'
+            - "185.64.148.0"
+            - "185.64.148.0,8.8.8.8"
           grok:
             supportRules: ""
-            matchRules: 'a \[?"?%{notSpace:ocsf.answer.rdata}"?'
+            matchRules: 'a %{data:ocsf.answer.rdata}(,%{data})?'
         - type: array-processor
           name: Append ocsf.answer into ocsf.answers array
           enabled: true
@@ -3412,35 +3413,154 @@ pipeline:
         query: "@_path:(files OR files_red)"
       processors:
         - type: string-builder-processor
-          name: Stringify tx_hosts
+          name: Stringify tx_hosts into ocsf.src_endpoint
           enabled: true
           template: "%{tx_hosts}"
-          target: _tx_hosts_str
+          target: ocsf.src_endpoint
           replaceMissing: false
         - type: string-builder-processor
-          name: Stringify rx_hosts
+          name: Stringify rx_hosts into ocsf.dst_endpoint
           enabled: true
           template: "%{rx_hosts}"
-          target: _rx_hosts_str
+          target: ocsf.dst_endpoint
           replaceMissing: false
         - type: grok-parser
           name: Extract first IP from tx_hosts
           enabled: true
-          source: _tx_hosts_str
+          source: ocsf.src_endpoint
           samples:
-            - '["10.104.10.60"]'
+            - "10.104.10.60"
+            - "10.104.10.60,10.104.10.61"
           grok:
             supportRules: ""
-            matchRules: 'g \[?"?%{ip:ocsf.src_endpoint.ip}"?'
+            matchRules: 'g %{ip:ocsf.src_endpoint.ip}(,%{data})?'
         - type: grok-parser
           name: Extract first IP from rx_hosts
           enabled: true
-          source: _rx_hosts_str
+          source: ocsf.dst_endpoint
           samples:
-            - '["10.104.10.65"]'
+            - "10.104.10.65"
+            - "10.104.10.65,10.104.10.66"
           grok:
             supportRules: ""
-            matchRules: 'g \[?"?%{ip:ocsf.dst_endpoint.ip}"?'
+            matchRules: 'g %{ip:ocsf.dst_endpoint.ip}(,%{data})?'
+        - type: string-builder-processor
+          name: Set MD5 algorithm name
+          enabled: true
+          template: MD5
+          target: tmp_md5.algorithm
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Set MD5 algorithm id
+          enabled: true
+          template: "1"
+          target: tmp_md5.algorithm_id
+          replaceMissing: false
+        - type: grok-parser
+          name: Coerce tmp_md5.algorithm_id to integer
+          enabled: true
+          source: tmp_md5.algorithm_id
+          samples:
+            - "1"
+          grok:
+            supportRules: ""
+            matchRules: "to_int %{integer:tmp_md5.algorithm_id}"
+        - type: attribute-remapper
+          name: Map `md5` to `tmp_md5.value`
+          enabled: true
+          sources:
+            - md5
+          sourceType: attribute
+          target: tmp_md5.value
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: array-processor
+          name: Append tmp_md5 to ocsf.file.hashes
+          enabled: true
+          operation:
+            source: tmp_md5
+            target: ocsf.file.hashes
+            preserveSource: false
+            type: append
+        - type: string-builder-processor
+          name: Set SHA1 algorithm name
+          enabled: true
+          template: SHA-1
+          target: tmp_sha1.algorithm
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Set SHA1 algorithm id
+          enabled: true
+          template: "2"
+          target: tmp_sha1.algorithm_id
+          replaceMissing: false
+        - type: grok-parser
+          name: Coerce tmp_sha1.algorithm_id to integer
+          enabled: true
+          source: tmp_sha1.algorithm_id
+          samples:
+            - "2"
+          grok:
+            supportRules: ""
+            matchRules: "to_int %{integer:tmp_sha1.algorithm_id}"
+        - type: attribute-remapper
+          name: Map `sha1` to `tmp_sha1.value`
+          enabled: true
+          sources:
+            - sha1
+          sourceType: attribute
+          target: tmp_sha1.value
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: array-processor
+          name: Append tmp_sha1 to ocsf.file.hashes
+          enabled: true
+          operation:
+            source: tmp_sha1
+            target: ocsf.file.hashes
+            preserveSource: false
+            type: append
+        - type: string-builder-processor
+          name: Set SHA256 algorithm name
+          enabled: true
+          template: SHA-256
+          target: tmp_sha256.algorithm
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Set SHA256 algorithm id
+          enabled: true
+          template: "3"
+          target: tmp_sha256.algorithm_id
+          replaceMissing: false
+        - type: grok-parser
+          name: Coerce tmp_sha256.algorithm_id to integer
+          enabled: true
+          source: tmp_sha256.algorithm_id
+          samples:
+            - "3"
+          grok:
+            supportRules: ""
+            matchRules: "to_int %{integer:tmp_sha256.algorithm_id}"
+        - type: attribute-remapper
+          name: Map `sha256` to `tmp_sha256.value`
+          enabled: true
+          sources:
+            - sha256
+          sourceType: attribute
+          target: tmp_sha256.value
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: array-processor
+          name: Append tmp_sha256 to ocsf.file.hashes
+          enabled: true
+          operation:
+            source: tmp_sha256
+            target: ocsf.file.hashes
+            preserveSource: false
+            type: append
         - type: schema-processor
           name: Apply OCSF schema for 6006
           enabled: true
@@ -3475,6 +3595,13 @@ pipeline:
               sources:
                 - ocsf.dst_endpoint.ip
               target: ocsf.dst_endpoint.ip
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.file.hashes` to `ocsf.file.hashes`
+              sources:
+                - ocsf.file.hashes
+              target: ocsf.file.hashes
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
