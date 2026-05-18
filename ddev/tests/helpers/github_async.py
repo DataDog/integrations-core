@@ -212,7 +212,7 @@ class FakeAsyncGitHubClient:
         repo: str,
         workflow_id: str | int,
         ref: str,
-        inputs: dict[str, Any] | None = None,
+        inputs: dict[str, str] | None = None,
         timeout: float | None = None,
         *,
         return_run_details: bool = False,
