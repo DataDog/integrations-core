@@ -5,6 +5,7 @@ import os
 import platform
 
 import pytest
+from packaging.version import InvalidVersion, Version
 
 from datadog_checks.istio import Istio
 
@@ -56,12 +57,14 @@ LEGACY_GO_METRICS = {
     'istio.go.memstats.lookups.count',
 }
 
+AMBIENT_GA_VERSION = Version("1.24")
+
+
 def _is_legacy_istio(version: str) -> bool:
     try:
-        parts = tuple(int(p) for p in version.split(".")[:2])
-    except ValueError:
+        return Version(version) < AMBIENT_GA_VERSION
+    except InvalidVersion:
         return False
-    return parts < (1, 24)
 
 
 IS_LEGACY_ISTIO = _is_legacy_istio(ISTIO_VERSION)
