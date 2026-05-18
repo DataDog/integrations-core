@@ -44,6 +44,10 @@ import httpx
 from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import Label, PullRequest, WorkflowDispatchResult
 
+# Stable URL baked into the default `create_workflow_dispatch` response. Exported so tests
+# that assert on the URL can reference the helper rather than duplicating the literal.
+DEFAULT_DISPATCH_HTML_URL = 'https://github.com/test/repo/actions/runs/1'
+
 
 @dataclass
 class RecordedRequest:
@@ -82,7 +86,7 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
             data=WorkflowDispatchResult(
                 workflow_run_id=1,
                 run_url='https://api.github.com/repos/test/repo/actions/runs/1',
-                html_url='https://github.com/test/repo/actions/runs/1',
+                html_url=DEFAULT_DISPATCH_HTML_URL,
             ),
             headers={},
         ),

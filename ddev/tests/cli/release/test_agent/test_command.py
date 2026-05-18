@@ -7,7 +7,7 @@ import httpx
 import pytest
 from pytest_mock import MockerFixture
 
-from tests.helpers.github_async import FakeAsyncGitHubClient
+from tests.helpers.github_async import DEFAULT_DISPATCH_HTML_URL, FakeAsyncGitHubClient
 from tests.helpers.runner import CliRunner
 
 EXPECTED_INPUTS = {
@@ -76,6 +76,29 @@ def test_branch_resolves_latest_rc_dispatches_both(
     )
 
 
+@pytest.mark.parametrize('workflow_id', ['test-agent.yml', 'test-agent-windows.yml'])
+def test_tag_dispatches_both(ddev: CliRunner, fake_async_github: FakeAsyncGitHubClient, workflow_id: str) -> None:
+    """A bare `--tag` (no `v` prefix, no `-rc` suffix) must drive the same dispatch shape as `--branch`."""
+    result = ddev('release', 'test-agent', '--tag', '7.80.0', '--yes')
+
+    assert result.exit_code == 0, result.output
+    fake_async_github.assert_called_with(
+        'create_workflow_dispatch',
+        owner='DataDog',
+        repo='integrations-core',
+        workflow_id=workflow_id,
+        ref='7.80.0',
+        inputs={
+            'test-py3': 'true',
+            'test-py2': 'false',
+            'agent-image': 'registry.datadoghq.com/agent:7.80.0',
+            'agent-image-windows': 'registry.datadoghq.com/agent:7.80.0-servercore',
+        },
+        timeout=None,
+        return_run_details=True,
+    )
+
+
 def test_dry_run_does_not_dispatch(ddev: CliRunner, fake_async_github: FakeAsyncGitHubClient) -> None:
     result = ddev('release', 'test-agent', '--branch', '7.80.x', '--dry-run')
 
@@ -119,12 +142,53 @@ def test_missing_ref_aborts(ddev: CliRunner, mocker: MockerFixture, fake_async_g
 def test_missing_workflow_file_aborts(
     ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
 ) -> None:
-    mocker.patch('ddev.utils.git.GitRepository.show_file', side_effect=OSError('not in tree'))
+    """A 'file exists on disk, but not in <ref>' git error reads as the workflow really being absent."""
+    mocker.patch(
+        'ddev.utils.git.GitRepository.show_file',
+        side_effect=OSError(
+            "fatal: path '.github/workflows/test-agent.yml' exists on disk, but not in 'origin/7.80.x'"
+        ),
+    )
 
     result = ddev('release', 'test-agent', '--branch', '7.80.x', '--yes')
 
     assert result.exit_code != 0, result.output
     assert 'missing required workflow file' in result.output
+    assert 'origin/7.80.x' in result.output
+    fake_async_github.assert_not_called('create_workflow_dispatch')
+
+
+def test_unfetched_branch_surfaces_fetch_hint(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    """When `origin/<branch>` isn't in the local clone, the abort should tell the user to fetch."""
+    mocker.patch(
+        'ddev.utils.git.GitRepository.show_file',
+        side_effect=OSError("fatal: invalid object name 'origin/7.80.x'"),
+    )
+
+    result = ddev('release', 'test-agent', '--branch', '7.80.x', '--yes')
+
+    assert result.exit_code != 0, result.output
+    assert 'not in your local clone' in result.output
+    assert 'git fetch origin 7.80.x' in result.output
+    fake_async_github.assert_not_called('create_workflow_dispatch')
+
+
+def test_unknown_git_failure_surfaces_original_error(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    """Anything we don't recognise from git must bubble up — never silently look like a missing workflow."""
+    mocker.patch(
+        'ddev.utils.git.GitRepository.show_file',
+        side_effect=OSError('fatal: index file corrupt'),
+    )
+
+    result = ddev('release', 'test-agent', '--branch', '7.80.x', '--yes')
+
+    assert result.exit_code != 0, result.output
+    assert 'Failed to read' in result.output
+    assert 'index file corrupt' in result.output
     fake_async_github.assert_not_called('create_workflow_dispatch')
 
 
@@ -153,10 +217,11 @@ def test_partial_dispatch_failure_surfaces_sibling_url(
 
     assert result.exit_code != 0, result.output
     assert f'{failing_label} dispatch failed' in result.output
-    assert 'https://github.com/test/repo/actions/runs/1' in result.output
+    assert DEFAULT_DISPATCH_HTML_URL in result.output
 
 
 def test_both_dispatches_fail_combine_messages(ddev: CliRunner, fake_async_github: FakeAsyncGitHubClient) -> None:
+    """Both-fail must announce itself explicitly and surface both error reprs, not just substrings."""
     err = httpx.HTTPStatusError(
         'forbidden',
         request=httpx.Request('POST', 'https://api.github.com/'),
@@ -168,8 +233,7 @@ def test_both_dispatches_fail_combine_messages(ddev: CliRunner, fake_async_githu
 
     assert result.exit_code != 0, result.output
     assert 'Both dispatches failed' in result.output
-    assert 'Linux' in result.output
-    assert 'Windows' in result.output
+    assert 'Linux:' in result.output
 
 
 def test_missing_github_token_aborts(ddev: CliRunner, mocker: MockerFixture, config_file) -> None:

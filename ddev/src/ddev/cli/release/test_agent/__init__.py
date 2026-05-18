@@ -5,12 +5,10 @@
 
 from __future__ import annotations
 
-import asyncio
 import re
 from typing import TYPE_CHECKING
 
 import click
-import httpx
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -38,6 +36,20 @@ WORKFLOW_FILES = [
 REPO_OWNER = 'DataDog'
 REPO_NAME = 'integrations-core'
 
+# git error fragments that mean "ref exists but file is not in that tree" — i.e. the workflow
+# really isn't on this branch/tag, as opposed to the ref itself being unreachable locally.
+GIT_FILE_MISSING_FRAGMENTS = (
+    'exists on disk',
+    'does not exist',
+    'no such path',
+)
+GIT_REF_MISSING_FRAGMENTS = (
+    'invalid object name',
+    'unknown revision',
+    'bad revision',
+    'ambiguous argument',
+)
+
 
 @click.command('test-agent', short_help='Dispatch the Agent test workflows against a branch or tag')
 @click.option('--branch', help='Release branch to test, e.g. `7.80.x`.')
@@ -61,14 +73,17 @@ def test_agent(app: Application, branch: str | None, tag: str | None, dry_run: b
         app.abort('GitHub token required. Set `github.token` via `ddev config set github.token <token>`.')
 
     _verify_ref_exists(app, branch=branch, tag=tag)
-    _verify_workflows_present_on_ref(app, ref)
+    _verify_workflows_present_on_ref(app, branch=branch, tag=tag)
 
     version = _resolve_version(app, branch=branch, tag=tag)
+    _validate_images_exist(app, version)
     linux_image, windows_image = _build_image_refs(version)
-    _validate_images_exist(app, linux_image, windows_image)
 
     # GitHub's workflow_dispatch API expects every value in `inputs` to be a string, even for
     # `type: boolean` workflow inputs — booleans are parsed from the lowercase string form.
+    # `test-py2='false'` is sent to both dispatches by design: this command is forward-looking
+    # and tests Python 3 only, even on Windows (where `test-agent-windows.yml` defaults
+    # `test-py2` to `true` for legacy reasons).
     inputs: dict[str, str] = {
         'test-py3': 'true',
         'test-py2': 'false',
@@ -88,7 +103,8 @@ def test_agent(app: Application, branch: str | None, tag: str | None, dry_run: b
         linux_url, windows_url = _dispatch_both(app, ref=ref, inputs=inputs)
     except RuntimeError as e:
         app.abort(str(e))
-    _print_result(app, linux_url=linux_url, windows_url=windows_url)
+    else:
+        _print_result(app, linux_url=linux_url, windows_url=windows_url)
 
 
 def _validate_input(app: Application, branch: str | None, tag: str | None) -> tuple[str | None, str | None]:
@@ -121,18 +137,39 @@ def _verify_ref_exists(app: Application, *, branch: str | None, tag: str | None)
         app.abort(f'{kind.capitalize()} `{value}` not found on origin.')
 
 
-def _verify_workflows_present_on_ref(app: Application, ref: str) -> None:
-    """Confirm both workflow files exist at the target ref."""
+def _verify_workflows_present_on_ref(app: Application, *, branch: str | None, tag: str | None) -> None:
+    """Confirm both workflow files exist at the target ref.
+
+    `git show <ref>:<path>` only resolves against local refs, so a branch the user has not yet
+    fetched will not be found under its bare name. For branches we read `origin/<branch>` to
+    consult the remote-tracking ref; for tags we use the tag name directly. Either way, the
+    git error text is inspected to distinguish "file missing from the tree" from "ref not
+    local" so the abort message points at the real problem.
+    """
+    if branch is not None:
+        local_ref = f'origin/{branch}'
+        fetch_hint = f'Run `git fetch origin {branch}` and try again.'
+    else:
+        assert tag is not None
+        local_ref = tag
+        fetch_hint = f'Run `git fetch origin tag {tag}` and try again.'
+
     missing: list[str] = []
     for path in WORKFLOW_FILES:
         try:
-            app.repo.git.show_file(path, ref)
-        except OSError:
-            missing.append(path)
+            app.repo.git.show_file(path, local_ref)
+        except OSError as e:
+            msg = str(e).lower()
+            if any(fragment in msg for fragment in GIT_FILE_MISSING_FRAGMENTS):
+                missing.append(path)
+            elif any(fragment in msg for fragment in GIT_REF_MISSING_FRAGMENTS):
+                app.abort(f'Ref `{local_ref}` is not in your local clone. {fetch_hint} (git error: {e})')
+            else:
+                app.abort(f'Failed to read `{path}` from `{local_ref}`: {e}')
 
     if missing:
         app.abort(
-            f'Ref `{ref}` is missing required workflow file(s): {", ".join(missing)}. '
+            f'Ref `{local_ref}` is missing required workflow file(s): {", ".join(missing)}. '
             'Pick a newer ref that includes both `test-agent.yml` and `test-agent-windows.yml`.'
         )
 
@@ -143,6 +180,8 @@ def _resolve_version(app: Application, *, branch: str | None, tag: str | None) -
         return tag
 
     assert branch is not None
+    import httpx
+
     from ddev.cli.release.test_agent.registry import list_agent_rc_tags
 
     major_str, minor_str, _ = branch.split('.')
@@ -168,11 +207,14 @@ def _build_image_refs(version: str) -> tuple[str, str]:
     return base, f'{base}-servercore'
 
 
-def _validate_images_exist(app: Application, linux_image: str, windows_image: str) -> None:
+def _validate_images_exist(app: Application, version: str) -> None:
+    """Check that both the Linux (`<version>`) and Windows (`<version>-servercore`) manifests are published."""
+    import httpx
+
     from ddev.cli.release.test_agent.registry import manifest_exists
 
-    for image in (linux_image, windows_image):
-        tag = image.rsplit(':', 1)[1]
+    for tag in (version, f'{version}-servercore'):
+        image = f'registry.datadoghq.com/agent:{tag}'
         app.display_waiting(f'Checking `{image}`...')
         try:
             exists = manifest_exists(tag)
@@ -209,6 +251,8 @@ def _print_result(app: Application, *, linux_url: str, windows_url: str) -> None
 
 def _dispatch_both(app: Application, *, ref: str, inputs: dict[str, str]) -> tuple[str, str]:
     """Dispatch both workflows in parallel via the async GitHub client. Returns (linux_url, windows_url)."""
+    import asyncio
+
     token = app.config.github.token
     results = asyncio.run(_dispatch_both_async(token, REPO_OWNER, REPO_NAME, ref, inputs))
     return _extract_run_urls(results)
@@ -221,6 +265,8 @@ async def _dispatch_both_async(
     ref: str,
     inputs: dict[str, str],
 ) -> Sequence[DispatchOutcome]:
+    import asyncio
+
     from ddev.utils.github_async import async_github_client
 
     async with async_github_client(token=token) as client:
@@ -251,9 +297,9 @@ def _extract_run_urls(results: Sequence[DispatchOutcome]) -> tuple[str, str]:
 
     if isinstance(linux_result, BaseException):
         if isinstance(windows_result, BaseException):
-            raise RuntimeError(
-                f'Both dispatches failed. Linux: {linux_result}. Windows: {windows_result}.'
-            ) from linux_result
+            error = RuntimeError(f'Both dispatches failed. Linux: {linux_result}.')
+            error.add_note(f'Windows: {windows_result!r}')
+            raise error from linux_result
         sibling = windows_result.data.html_url
         raise RuntimeError(
             f'Linux dispatch failed: {linux_result}. The other workflow was dispatched at {sibling}.'

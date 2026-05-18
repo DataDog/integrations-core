@@ -1,71 +1,34 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Docker Registry v2 helpers for the public Datadog Agent registry.
+"""Agent-specific wrappers around `ddev.utils.docker_registry`.
 
-`registry.datadoghq.com` exposes the standard Docker Registry v2 API and serves
-the Agent image (`agent`) anonymously, so no authentication is needed for read
-operations. See the Agent Delivery "Command Reference" runbook for the manual
-equivalent commands.
+The Datadog Agent image is served by `registry.datadoghq.com/agent`. This
+module fixes that repository name and exposes the only agent-specific
+operation we need today: filtering the published tag list down to the
+`MAJ.MIN.0-rc.N` RCs for a given release line.
 """
 
 from __future__ import annotations
 
 import re
 
-import httpx
 from packaging.version import InvalidVersion, Version
 
-REGISTRY_HOST = 'registry.datadoghq.com'
+from ddev.utils import docker_registry
+
 AGENT_REPOSITORY = 'agent'
-
-# Multi-arch (manifest list) is the canonical type for the Agent image; OCI
-# index is accepted as a fallback because the registry may serve either depending
-# on which origin (GAR vs S3) responds.
-MANIFEST_ACCEPT = ', '.join(
-    [
-        'application/vnd.docker.distribution.manifest.list.v2+json',
-        'application/vnd.oci.image.index.v1+json',
-        'application/vnd.docker.distribution.manifest.v2+json',
-        'application/vnd.oci.image.manifest.v1+json',
-    ]
-)
-
-# The Agent registry has accumulated tags since the 5.x series. Without an explicit
-# page size, the default page may not contain the current release cycle's RCs.
-TAGS_PAGE_SIZE = 10000
-
-
-def manifest_url(tag: str) -> str:
-    """URL of the multi-arch manifest for `registry.datadoghq.com/agent:<tag>`."""
-    return f'https://{REGISTRY_HOST}/v2/{AGENT_REPOSITORY}/manifests/{tag}'
-
-
-def tags_list_url() -> str:
-    """URL of the tags-list endpoint for the Agent image, requesting one large page."""
-    return f'https://{REGISTRY_HOST}/v2/{AGENT_REPOSITORY}/tags/list?n={TAGS_PAGE_SIZE}'
 
 
 def manifest_exists(tag: str, *, timeout: float = 10.0) -> bool:
     """Return True if `registry.datadoghq.com/agent:<tag>` resolves to a manifest, False on 404."""
-    response = httpx.head(
-        manifest_url(tag),
-        headers={'Accept': MANIFEST_ACCEPT},
-        follow_redirects=True,
-        timeout=timeout,
-    )
-    if response.status_code == 404:
-        return False
-    response.raise_for_status()
-    return True
+    return docker_registry.manifest_exists(AGENT_REPOSITORY, tag, timeout=timeout)
 
 
 def list_agent_rc_tags(major: int, minor: int, *, timeout: float = 10.0) -> list[str]:
     """Return all `<major>.<minor>.0-rc.N` tags published to the Agent registry, sorted ascending by version."""
-    response = httpx.get(tags_list_url(), timeout=timeout)
-    response.raise_for_status()
-    raw_tags = response.json().get('tags') or []
     pattern = re.compile(rf'^{major}\.{minor}\.0-rc\.\d+$')
+    raw_tags = docker_registry.list_tags(AGENT_REPOSITORY, timeout=timeout)
     matches: list[tuple[Version, str]] = []
     for tag in raw_tags:
         if not pattern.match(tag):

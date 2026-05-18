@@ -1,6 +1,12 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+"""Tests for the agent-specific wrapper around `ddev.utils.docker_registry`.
+
+The registry transport itself is covered by `tests/utils/test_docker_registry.py`.
+These tests focus on the RC filter and version sort layered on top.
+"""
+
 from __future__ import annotations
 
 import httpx
@@ -10,69 +16,17 @@ from pytest_mock import MockerFixture
 from ddev.cli.release.test_agent.registry import list_agent_rc_tags, manifest_exists
 
 
-def _response(status: int, json_body: object | None = None, method: str = 'HEAD') -> httpx.Response:
-    request = httpx.Request(method, 'https://registry.datadoghq.com/v2/agent/manifests/x')
-    kwargs: dict[str, object] = {'request': request}
-    if json_body is not None:
-        kwargs['json'] = json_body
-    return httpx.Response(status, **kwargs)
+def test_manifest_exists_delegates_to_utility(mocker: MockerFixture) -> None:
+    spy = mocker.patch('ddev.utils.docker_registry.manifest_exists', return_value=True)
 
-
-@pytest.mark.parametrize(
-    'status_code, expected',
-    [
-        pytest.param(200, True, id='exists'),
-        pytest.param(404, False, id='missing'),
-    ],
-)
-def test_manifest_exists_resolves_status(mocker: MockerFixture, status_code: int, expected: bool) -> None:
-    mocker.patch('httpx.head', return_value=_response(status_code))
-
-    assert manifest_exists('7.80.0-rc.1') is expected
-
-
-@pytest.mark.parametrize('status', [401, 403, 500, 503])
-def test_manifest_exists_raises_on_other_errors(mocker: MockerFixture, status: int) -> None:
-    mocker.patch('httpx.head', return_value=_response(status))
-
-    with pytest.raises(httpx.HTTPStatusError):
-        manifest_exists('7.80.0-rc.1')
-
-
-@pytest.mark.parametrize(
-    'exc',
-    [
-        pytest.param(httpx.ConnectError('connection refused'), id='connect-error'),
-        pytest.param(httpx.ReadTimeout('read timed out'), id='read-timeout'),
-        pytest.param(httpx.ConnectTimeout('connect timed out'), id='connect-timeout'),
-    ],
-)
-def test_manifest_exists_propagates_network_errors(mocker: MockerFixture, exc: Exception) -> None:
-    mocker.patch('httpx.head', side_effect=exc)
-
-    with pytest.raises(type(exc)):
-        manifest_exists('7.80.0-rc.1')
-
-
-@pytest.mark.parametrize(
-    'exc',
-    [
-        pytest.param(httpx.ConnectError('connection refused'), id='connect-error'),
-        pytest.param(httpx.ReadTimeout('read timed out'), id='read-timeout'),
-        pytest.param(httpx.ConnectTimeout('connect timed out'), id='connect-timeout'),
-    ],
-)
-def test_list_agent_rc_tags_propagates_network_errors(mocker: MockerFixture, exc: Exception) -> None:
-    mocker.patch('httpx.get', side_effect=exc)
-
-    with pytest.raises(type(exc)):
-        list_agent_rc_tags(7, 80)
+    assert manifest_exists('7.80.0-rc.1') is True
+    spy.assert_called_once_with('agent', '7.80.0-rc.1', timeout=10.0)
 
 
 def test_list_agent_rc_tags_filters_and_sorts(mocker: MockerFixture) -> None:
-    payload = {
-        'name': 'agent',
-        'tags': [
+    mocker.patch(
+        'ddev.utils.docker_registry.list_tags',
+        return_value=[
             '7.79.0-rc.1',
             '7.80.0-rc.10',
             '7.80.0-rc.2',
@@ -82,23 +36,33 @@ def test_list_agent_rc_tags_filters_and_sorts(mocker: MockerFixture) -> None:
             '7-rc',
             'latest',
         ],
-    }
-    mocker.patch('httpx.get', return_value=_response(200, json_body=payload, method='GET'))
+    )
 
-    result = list_agent_rc_tags(7, 80)
-
-    assert result == ['7.80.0-rc.1', '7.80.0-rc.2', '7.80.0-rc.10']
+    assert list_agent_rc_tags(7, 80) == ['7.80.0-rc.1', '7.80.0-rc.2', '7.80.0-rc.10']
 
 
 @pytest.mark.parametrize(
-    'payload',
+    'all_tags',
     [
-        pytest.param({'name': 'agent', 'tags': []}, id='empty-list'),
-        pytest.param({'name': 'agent', 'tags': None}, id='null-tags'),
-        pytest.param({'name': 'agent'}, id='missing-key'),
+        pytest.param([], id='empty-list'),
+        pytest.param(['7.79.0-rc.1', '7.81.0-rc.1', 'latest'], id='no-matching-minor'),
     ],
 )
-def test_list_agent_rc_tags_handles_missing_tags(mocker: MockerFixture, payload: dict[str, object]) -> None:
-    mocker.patch('httpx.get', return_value=_response(200, json_body=payload, method='GET'))
+def test_list_agent_rc_tags_returns_empty_when_no_match(mocker: MockerFixture, all_tags: list[str]) -> None:
+    mocker.patch('ddev.utils.docker_registry.list_tags', return_value=all_tags)
 
-    assert list_agent_rc_tags(7, 99) == []
+    assert list_agent_rc_tags(7, 80) == []
+
+
+@pytest.mark.parametrize(
+    'exc',
+    [
+        pytest.param(httpx.ConnectError('connection refused'), id='connect-error'),
+        pytest.param(httpx.ReadTimeout('read timed out'), id='read-timeout'),
+    ],
+)
+def test_list_agent_rc_tags_propagates_network_errors(mocker: MockerFixture, exc: Exception) -> None:
+    mocker.patch('ddev.utils.docker_registry.list_tags', side_effect=exc)
+
+    with pytest.raises(type(exc)):
+        list_agent_rc_tags(7, 80)
