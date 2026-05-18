@@ -1,1 +1,1 @@
-Fix Istio ambient mode metric collection: restore silently-dropped ztunnel counters (since 9.4.0), realign proxy management metrics with the names ztunnel actually emits, and register xDS message and message-bytes counters that were previously missing.
+Restore Istio ambient mode metric collection broken in 9.4.0: ztunnel counters are no longer silently dropped, proxy management metrics use the `workload_manager_*` names ztunnel actually emits, and the missing xDS message counters are now registered.
