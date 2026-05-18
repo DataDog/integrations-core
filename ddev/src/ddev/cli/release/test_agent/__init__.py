@@ -49,10 +49,14 @@ def test_agent(app: Application, branch: str | None, tag: str | None, dry_run: b
 
     fetch_target(app, target)
     verify_workflows_present_on_ref(app, target)
+    app.display_info('')
 
     version = resolve_version(app, target)
+    app.display_info('')
+
     validate_images_exist(app, version)
     linux_image, windows_image = build_image_refs(version)
+    app.display_info('')
 
     # GitHub's workflow_dispatch API expects every value in `inputs` to be a string, even for
     # `type: boolean` workflow inputs — booleans are parsed from the lowercase string form.
@@ -67,6 +71,7 @@ def test_agent(app: Application, branch: str | None, tag: str | None, dry_run: b
     }
     is_branch = isinstance(target, Branch)
     _print_plan(app, ref=target.name, version=version, is_branch=is_branch, inputs=inputs)
+    app.display_info('')
 
     if dry_run:
         app.display_info('Dry run — no workflows dispatched.')
@@ -80,6 +85,7 @@ def test_agent(app: Application, branch: str | None, tag: str | None, dry_run: b
     except RuntimeError as e:
         app.abort(str(e))
     else:
+        app.display_info('')
         _print_result(app, linux_url=linux_url, windows_url=windows_url)
 
 
@@ -109,6 +115,17 @@ def _print_plan(
 
 
 def _print_result(app: Application, *, linux_url: str, windows_url: str) -> None:
-    app.display_success('Workflows dispatched.')
-    app.display_pair('Linux', linux_url)
-    app.display_pair('Windows', windows_url)
+    """Render the two run URLs in a rich Panel, matching the look of `ddev release port-commit`."""
+    from rich.panel import Panel
+    from rich.text import Text
+
+    text = Text()
+    rows = [('Linux', linux_url), ('Windows', windows_url)]
+    label_width = max(len(label) for label, _ in rows)
+    for i, (label, value) in enumerate(rows):
+        if i:
+            text.append('\n')
+        text.append(f'{label}:'.ljust(label_width + 2), style='bold')
+        text.append(value)
+
+    app.output(Panel(text, title='Workflows dispatched', title_align='left', border_style='cyan'), stderr=True)
