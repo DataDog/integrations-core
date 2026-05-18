@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql
 
 from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollectorConfig
+from datadog_checks.postgres.filters import regex_exclude_clauses, regex_include_clause
 from datadog_checks.postgres.version_utils import V10, V11, VersionUtils
 
 
@@ -68,8 +69,8 @@ SELECT nsp.oid                 AS schema_id,
 FROM   pg_namespace nsp
        LEFT JOIN pg_roles r on nsp.nspowner = r.oid
 WHERE  nspname NOT IN ( 'information_schema', 'pg_catalog' )
-       AND nspname NOT LIKE 'pg_toast%'
-       AND nspname NOT LIKE 'pg_temp_%'
+       AND nspname NOT LIKE 'pg_toast%%'
+       AND nspname NOT LIKE 'pg_temp_%%'
 """
 
 COLUMNS_QUERY = """
@@ -204,14 +205,11 @@ class PostgresSchemaCollector(SchemaCollector):
         query = DATABASE_INFORMATION_QUERY
         params: list[str] = []
 
-        for exclude_regex in self._config.exclude_databases:
-            query += " AND datname !~ %s"
-            params.append(exclude_regex)
+        query += regex_exclude_clauses("datname", self._config.exclude_databases)
+        params.extend(self._config.exclude_databases)
 
-        if self._config.include_databases:
-            or_clause = " OR ".join(["datname ~ %s"] * len(self._config.include_databases))
-            query += f" AND ({or_clause})"
-            params.extend(self._config.include_databases)
+        query += regex_include_clause("datname", self._config.include_databases)
+        params.extend(self._config.include_databases)
 
         # Autodiscovery trumps exclude and include
         autodiscovery_databases = self._check.autodiscovery.get_items() if self._check.autodiscovery else []
@@ -229,41 +227,45 @@ class PostgresSchemaCollector(SchemaCollector):
     def _get_cursor(self, database_name):
         with self._check.db_pool.get_connection(database_name) as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
-                query = self.get_rows_query()
+                query, params = self.get_rows_query()
                 cursor.execute(f"SET statement_timeout = '{self._config.max_query_duration}s';")
-                cursor.execute(query)
+                cursor.execute(query, params)
                 yield cursor
 
     def _get_schemas_query(self):
         query = SCHEMA_QUERY
-        for exclude_regex in self._config.exclude_schemas:
-            query += " AND nspname !~ '{}'".format(exclude_regex)
-        if self._config.include_schemas:
-            query += f" AND ({
-                ' OR '.join(f"nspname ~ '{include_regex}'" for include_regex in self._config.include_schemas)
-            })"
+        params: list[str] = []
+
+        query += regex_exclude_clauses("nspname", self._config.exclude_schemas)
+        params.extend(self._config.exclude_schemas)
+
+        query += regex_include_clause("nspname", self._config.include_schemas)
+        params.extend(self._config.include_schemas)
+
         if self._check._config.ignore_schemas_owned_by:
             query += " AND nspowner :: regrole :: text not IN ({})".format(
                 ", ".join(f"'{owner}'" for owner in self._check._config.ignore_schemas_owned_by)
             )
-        return query
+        return query, params
 
     def _get_tables_query(self):
         if VersionUtils.parse_version(str(self._check.version)) < V10:
             query = PG_TABLES_QUERY_V9
         else:
             query = PG_TABLES_QUERY_V10_PLUS
-        for exclude_regex in self._config.exclude_tables:
-            query += " AND c.relname !~ '{}'".format(exclude_regex)
-        if self._config.include_tables:
-            query += f" AND ({
-                ' OR '.join(f"c.relname ~ '{include_regex}'" for include_regex in self._config.include_tables)
-            })"
-        return query
+        params: list[str] = []
+
+        query += regex_exclude_clauses("c.relname", self._config.exclude_tables)
+        params.extend(self._config.exclude_tables)
+
+        query += regex_include_clause("c.relname", self._config.include_tables)
+        params.extend(self._config.include_tables)
+
+        return query, params
 
     def get_rows_query(self):
-        schemas_query = self._get_schemas_query()
-        tables_query = self._get_tables_query()
+        schemas_query, schemas_params = self._get_schemas_query()
+        tables_query, tables_params = self._get_tables_query()
         columns_query = COLUMNS_QUERY
         indexes_query = PG_INDEXES_QUERY
         constraints_query = PG_CONSTRAINTS_QUERY
@@ -347,7 +349,7 @@ class PostgresSchemaCollector(SchemaCollector):
             ;
         """
 
-        return query
+        return query, schemas_params + tables_params
 
     def _get_next(self, cursor):
         return cursor.fetchone()

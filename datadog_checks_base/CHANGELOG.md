@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 37.37.0 / 2026-05-14
+
+***Added***:
+
+* Add a per-performance-object `include_total` option (default `false`) to the Windows perf-counter framework. When set to `true`, the `_Total` aggregate instance is collected instead of being excluded by default. ([#23530](https://github.com/DataDog/integrations-core/pull/23530))
+
 ## 37.36.0 / 2026-04-24
 
 ***Added***:
