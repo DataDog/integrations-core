@@ -124,7 +124,10 @@ def setup_istio_ambient():
             "while true; do curl -s productpage:9080/productpage > /dev/null; sleep 1; done",
         ]
     )
-    run_command(["kubectl", "wait", "pod", "traffic-gen", "-n", "default", "--for=condition=Ready", "--timeout=120s"])
+    run_command(
+        ["kubectl", "wait", "pod", "traffic-gen", "-n", "default", "--for=condition=Ready", "--timeout=120s"],
+        check=True,
+    )
     _wait_for_ztunnel_traffic()
     os.remove("istio.tar.gz")
 
@@ -139,32 +142,29 @@ def _wait_for_ztunnel_traffic(timeout_seconds=300, interval_seconds=3):
     in this setup. Ztunnel itself runs a minimal Rust binary with no shell or curl, so the
     poll is issued from the traffic-gen pod (curlimages/curl) against the ztunnel-metrics
     Service applied earlier in setup."""
+    metrics_url = "{service}.istio-system.svc:{port}/stats/prometheus".format(
+        service=ZTUNNEL_METRICS_SERVICE, port=ZTUNNEL_METRICS_PORT
+    )
     deadline = time.monotonic() + timeout_seconds
     last_stderr = ""
+    last_stdout = ""
     while time.monotonic() < deadline:
         result = run_command(
-            [
-                "kubectl",
-                "exec",
-                "-n",
-                "default",
-                "traffic-gen",
-                "--",
-                "curl",
-                "-sm",
-                "5",
-                "ztunnel-metrics.istio-system.svc:15020/stats/prometheus",
-            ],
+            ["kubectl", "exec", "-n", "default", "traffic-gen", "--", "curl", "-sm", "5", metrics_url],
             capture=True,
         )
         if result.code == 0 and _ztunnel_has_traffic(result.stdout):
             return
-        if result.code != 0 and result.stderr:
+        # curl -sm 5 exits 0 for HTTP 4xx/5xx (no -f), so capture stdout when traffic is missing
+        # but the request itself succeeded — otherwise the eventual timeout has no clue why.
+        if result.code == 0:
+            last_stdout = result.stdout.strip()[:200]
+        elif result.stderr:
             last_stderr = result.stderr.strip()
         time.sleep(interval_seconds)
     raise RuntimeError(
-        "ztunnel did not record TCP traffic within {}s (last exec stderr: {})".format(
-            timeout_seconds, last_stderr or "<none>"
+        "ztunnel did not record TCP traffic within {}s (last exec stderr: {}, last stdout excerpt: {})".format(
+            timeout_seconds, last_stderr or "<none>", last_stdout or "<none>"
         )
     )
 
