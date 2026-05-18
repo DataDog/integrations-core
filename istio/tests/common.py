@@ -412,10 +412,7 @@ MOCK_TEST_METRICS = [
 # Ambient mode (ztunnel) - default namespace istio.ztunnel (OpenMetrics submits counters as .count).
 # Counters require the OpenMetrics parser: ztunnel emits the modern `# TYPE foo counter` +
 # `foo_total{} N` convention, which the legacy Prometheus parser cannot reconcile.
-# Counter ztunnel metrics. These are the metrics the legacy Prometheus parser silently dropped
-# before this PR's fix — kept in their own list so the legacy-parser regression test can pin
-# the broken behavior on exactly the counter set without false-failing on gauges that the bug
-# does not affect.
+# Counters silently dropped by the legacy Prometheus parser before this PR's fix.
 V2_ZTUNNEL_COUNTER_METRICS = [
     'istio.ztunnel.tcp.connections_opened.count',
     'istio.ztunnel.tcp.connections_closed.count',
@@ -426,17 +423,12 @@ V2_ZTUNNEL_COUNTER_METRICS = [
     'istio.ztunnel.proxies_started.count',
 ]
 
-# Ztunnel gauges. Unaffected by the legacy-parser counter bug; tracked separately so the
-# happy-path test asserts the full set and the regression test asserts only counters.
+# Gauges, unaffected by the legacy-parser counter bug; split out so the regression test pins only counters.
 V2_ZTUNNEL_GAUGE_METRICS = [
     'istio.ztunnel.active_proxy_count',
     'istio.ztunnel.pending_proxy_count',
 ]
 
-# Metrics ztunnel actually emits in an ambient cluster with at least one enrolled workload
-# generating TCP traffic. DNS, connection.*, and xds.connection_terminations metrics in
-# ZTUNNEL_METRICS only fire on specific conditions (on-demand DNS interception, xds restarts)
-# and are not asserted here.
 V2_ZTUNNEL_METRICS = V2_ZTUNNEL_COUNTER_METRICS + V2_ZTUNNEL_GAUGE_METRICS
 
 # Ambient mode (waypoint) - default namespace istio.waypoint

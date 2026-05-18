@@ -241,15 +241,18 @@ def test_all_labels_submitted(aggregator, dd_run_check, mock_http_response):
 # --- Ambient mode (istio_mode: ambient) tests ---
 
 
-def test_ambient_ztunnel_metrics(aggregator, dd_run_check, mock_http_response):
+def test_ambient_ztunnel_metrics(aggregator, dd_run_check, mock_http_response, caplog):
     """Ztunnel metrics collection in ambient mode against a real ztunnel exposition."""
     mock_http_response(file_path=get_fixture_path('1.24', 'ztunnel.txt'))
     check = Istio(common.CHECK_NAME, {}, [common.MOCK_V2_AMBIENT_ZTUNNEL_INSTANCE])
-    dd_run_check(check)
+    with caplog.at_level('WARNING'):
+        dd_run_check(check)
 
     # The ztunnel sub-scraper must default to use_latest_spec=True so the OpenMetrics parser
     # is used; without this default the parser reverts to legacy and counters silently drop.
     assert check.scraper_configs[0]['use_latest_spec'] is True
+    # The opt-out warning must stay silent on the default path.
+    assert "use_latest_spec: false" not in caplog.text
 
     for metric in common.V2_ZTUNNEL_METRICS:
         aggregator.assert_metric(metric)

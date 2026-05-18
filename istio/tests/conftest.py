@@ -128,20 +128,13 @@ def setup_istio_ambient():
         ["kubectl", "wait", "pod", "traffic-gen", "-n", "default", "--for=condition=Ready", "--timeout=120s"],
         check=True,
     )
+    # ztunnel has no shell/curl; poll its /stats/prometheus from traffic-gen via the ztunnel-metrics Service.
     _wait_for_ztunnel_traffic()
     os.remove("istio.tar.gz")
 
 
 def _wait_for_ztunnel_traffic(timeout_seconds=300, interval_seconds=3):
-    """Block until ztunnel reports at least one TCP connection on its /stats/prometheus endpoint.
-
-    The traffic-generator pod takes a variable amount of time to pull its image, get scheduled,
-    and start hitting the productpage service. A fixed sleep can either be too short on a slow
-    CI agent (test fails with a misleading "metric not found") or too long on a fast one.
-    Poll the actual readiness signal instead, bounded by the same 300s timeout used elsewhere
-    in this setup. Ztunnel itself runs a minimal Rust binary with no shell or curl, so the
-    poll is issued from the traffic-gen pod (curlimages/curl) against the ztunnel-metrics
-    Service applied earlier in setup."""
+    """Block until ztunnel records at least one TCP connection."""
     metrics_url = "{service}.istio-system.svc:{port}/stats/prometheus".format(
         service=ZTUNNEL_METRICS_SERVICE, port=ZTUNNEL_METRICS_PORT
     )
