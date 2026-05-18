@@ -194,6 +194,7 @@ async def test_create_workflow_dispatch_success() -> None:
         assert "/actions/workflows/my-workflow.yml/dispatches" in request.url.path
         body = json.loads(request.content)
         assert body["ref"] == "main"
+        assert body["return_run_details"] is True
         assert "inputs" not in body
         return _json_response({"workflow_run_id": 999}, headers={"x-ratelimit-remaining": "59"})
 
@@ -209,6 +210,7 @@ async def test_create_workflow_dispatch_with_inputs() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         body = json.loads(request.content)
         assert body["inputs"] == {"env": "prod"}
+        assert body["return_run_details"] is True
         return _json_response({"workflow_run_id": 1})
 
     client = _make_client(httpx.MockTransport(handler))

@@ -184,7 +184,7 @@ class AsyncGitHubClient:
         Returns:
             GitHubResponse[WorkflowDispatchResult]: The dispatched run id and headers.
         """
-        body: dict[str, Any] = {"ref": ref}
+        body: dict[str, Any] = {"ref": ref, "return_run_details": True}
         if inputs is not None:
             body["inputs"] = inputs
         response = await self._request(
