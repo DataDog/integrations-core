@@ -2,12 +2,7 @@
 
 ![Kafka Dashboard][1]
 
-<div style="background:#f3edfa;border-left:4px solid #632ca6;padding:14px 18px;margin:24px 0;border-radius:4px;">
-  <p style="margin:0;line-height:1.5;">
-    <span style="display:inline-block;background:#632ca6;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:0.06em;text-transform:uppercase;margin-right:8px;vertical-align:middle;">New</span>
-    <strong>Kafka Monitoring</strong> tracks consumer lag, throughput, schemas, and adds message reading capabilities. <a href="https://docs.datadoghq.com/data_streams/kafka?utm_source=docs&utm_medium=callout&utm_campaign=DocsCTA-DSMKafka-IntegrationsKafka">Try Kafka Monitoring &rarr;</a>
-  </p>
-</div>
+**New:** [Kafka Monitoring][24] tracks consumer lag, throughput, schemas, and adds message reading capabilities.
 
 ## Overview
 
@@ -187,3 +182,4 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 [21]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
 [22]: https://raw.githubusercontent.com/DataDog/dd-agent/5.2.1/conf.d/kafka.yaml.example
 [23]: https://www.datadoghq.com/knowledge-center/apache-kafka/
+[24]: https://docs.datadoghq.com/data_streams/kafka?utm_source=docs&utm_medium=callout&utm_campaign=DocsCTA-DSMKafka-IntegrationsKafka
