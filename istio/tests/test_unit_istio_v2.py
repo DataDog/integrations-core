@@ -27,6 +27,13 @@ def test_istiod(aggregator, dd_run_check, mock_http_response):
     for metric in common.ISTIOD_V2_METRICS:
         aggregator.assert_metric(metric)
 
+    aggregator.assert_metric(
+        'istio.go.memstats.alloc_bytes', value=2.9097592e07, metric_type=aggregator.GAUGE
+    )
+    aggregator.assert_metric(
+        'istio.go.memstats.alloc_bytes.count', value=1.123329752e09, metric_type=aggregator.MONOTONIC_COUNT
+    )
+
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
     aggregator.assert_all_metrics_covered()
 
@@ -117,6 +124,15 @@ def test_istio_agent(aggregator, dd_run_check, mock_http_response):
 
     for metric in common.ISTIO_AGENT_METRICS:
         aggregator.assert_metric(metric)
+
+    aggregator.assert_metric(
+        'istio.mesh.agent.go.memstats.alloc_bytes', value=7.647864e06, metric_type=aggregator.GAUGE
+    )
+    aggregator.assert_metric(
+        'istio.mesh.agent.go.memstats.alloc_bytes.count',
+        value=2.260668e07,
+        metric_type=aggregator.MONOTONIC_COUNT,
+    )
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
