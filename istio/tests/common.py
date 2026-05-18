@@ -409,10 +409,8 @@ MOCK_TEST_METRICS = [
     'istio.galley.istio.authentication.meshpolicies',
 ]
 
-# Ambient mode (ztunnel) - default namespace istio.ztunnel (OpenMetrics submits counters as .count).
-# Counters require the OpenMetrics parser: ztunnel emits the modern `# TYPE foo counter` +
-# `foo_total{} N` convention, which the legacy Prometheus parser cannot reconcile.
-# Counters silently dropped by the legacy Prometheus parser before this PR's fix.
+# Ambient mode (ztunnel) - default namespace istio.ztunnel.
+# Ztunnel counters use `# TYPE foo counter` + `foo_total{} N`, which the legacy parser drops; require the v2 parser.
 V2_ZTUNNEL_COUNTER_METRICS = [
     'istio.ztunnel.tcp.connections_opened.count',
     'istio.ztunnel.tcp.connections_closed.count',

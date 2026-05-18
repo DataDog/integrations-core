@@ -72,11 +72,7 @@ class IstioCheckV2(OpenMetricsBaseCheckV2):
                 "`ztunnel_endpoint`, `waypoint_endpoint`, or `istiod_endpoint`."
             )
 
-        # Ztunnel provides L4 TCP metrics for ambient mesh.
-        # Ztunnel emits the modern OpenMetrics counter convention (TYPE declared with the base
-        # name, samples emitted with the `_total` suffix). The legacy Prometheus parser cannot
-        # reconcile that format and silently drops every counter, so force the OpenMetrics
-        # parser for this sub-scraper unless the user explicitly opts out.
+        # Ztunnel uses the modern OpenMetrics counter convention; force the v2 parser so counters are not dropped.
         ztunnel_namespace = istiod_namespace + ".ztunnel"
         if ztunnel_endpoint:
             if not is_affirmative(self.instance.get("use_latest_spec", True)):
