@@ -22,6 +22,7 @@ from datadog_checks.base.utils.db.utils import (
     tracked_query,
 )
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
+from datadog_checks.base.utils.diagnose import Diagnosis
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres.connection_pool import (
     AWSTokenProvider,
@@ -131,6 +132,8 @@ class PostgreSql(DatabaseCheck):
         self.is_aurora = None
         self.wal_level = None
         self._version_utils = VersionUtils()
+        self._last_automatic_diagnosis = 0
+        self._last_diagnosis_had_errors = False
 
         config, validation_result = build_config(self)
         self._config = config
@@ -1151,6 +1154,8 @@ class PostgreSql(DatabaseCheck):
         # Resend the initialization event. The submitter will debounce it
         self._submit_initialization_health_event()
 
+        should_run_diagnostics = False
+
         tags = copy.copy(self.tags)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         # Reset _non_internal_tags to prevent stale dynamic tags (e.g., replication_role) from accumulating
@@ -1223,7 +1228,7 @@ class PostgreSql(DatabaseCheck):
                 raw=True,
             )
 
-            self.health.diagnose()
+            should_run_diagnostics = True
 
             raise e
         else:
@@ -1235,6 +1240,24 @@ class PostgreSql(DatabaseCheck):
                 raw=True,
             )
         finally:
+            # Check each async job for if an error occurred during their most recent run
+            # TODO: Encapsulate this into DBMAsyncJob
+            for job in [self.statement_metrics, self.statement_samples, self.metadata_samples, self.data_observability]:
+                if hasattr(job, '_last_run_did_error') and job._last_run_did_error:
+                    should_run_diagnostics = True
+            # Only automatically run every 5 minutes at most
+            if self._last_automatic_diagnosis and time.time() - self._last_automatic_diagnosis < 5 * 60:
+                should_run_diagnostics = False
+            # If it's been more than 5 minutes since the last error diagnosis, run again to see if the error is resolved
+            if self._last_diagnosis_had_errors and time.time() - self._last_diagnosis_had_errors >= 5 * 60:
+                should_run_diagnostics = True
+            if should_run_diagnostics:
+                self._last_automatic_diagnosis = time.time()
+                run_diagnostics(self)
+                self._last_diagnosis_had_errors = any(
+                    diagnosis.result == Diagnosis.DIAGNOSIS_FAIL or diagnosis.result == Diagnosis.DIAGNOSIS_WARNING
+                    for diagnosis in self.diagnosis.diagnoses
+                )
             # Add the warnings saved during the execution of the check
             self._report_warnings()
 
