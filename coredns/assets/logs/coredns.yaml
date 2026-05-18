@@ -128,7 +128,8 @@ facets:
     name: Source IP Address
     path: ocsf.src_endpoint.ip
     source: log
-  - groups:
+  - facetType: range
+    groups:
       - OCSF
     name: Src Endpoint Port
     path: ocsf.src_endpoint.port
