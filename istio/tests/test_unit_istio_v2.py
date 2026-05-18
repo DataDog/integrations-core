@@ -259,14 +259,17 @@ def test_ambient_ztunnel_metrics(aggregator, dd_run_check, mock_http_response):
 def test_ambient_ztunnel_legacy_parser_drops_counters(aggregator, dd_run_check, mock_http_response):
     """Pin the broken behavior: with the legacy Prometheus parser (use_latest_spec=False),
     ztunnel counter metrics are silently dropped because the parser does not add `_total`
-    to a counter's allowed sample names when TYPE is declared with the base name."""
+    to a counter's allowed sample names when TYPE is declared with the base name. Gauges
+    are unaffected by the same bug and still collected."""
     mock_http_response(file_path=get_fixture_path('1.24', 'ztunnel.txt'))
     instance = dict(common.MOCK_V2_AMBIENT_ZTUNNEL_INSTANCE, use_latest_spec=False)
     check = Istio(common.CHECK_NAME, {}, [instance])
     dd_run_check(check)
 
-    for metric in common.V2_ZTUNNEL_METRICS:
+    for metric in common.V2_ZTUNNEL_COUNTER_METRICS:
         aggregator.assert_metric(metric, count=0)
+    for metric in common.V2_ZTUNNEL_GAUGE_METRICS:
+        aggregator.assert_metric(metric)
 
 
 def test_ambient_warns_when_user_opts_out_of_openmetrics_parser(caplog, dd_run_check, mock_http_response):
