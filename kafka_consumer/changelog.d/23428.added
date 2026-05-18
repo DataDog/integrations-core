@@ -1,0 +1,1 @@
+Add an `out_of_sync_broker_id` tag to the `kafka.partition.*` metrics (when `enable_cluster_monitoring` is true) identifying each assigned replica that is not in the partition's ISR. Use it to attribute under-replicated partitions to specific broker IDs.

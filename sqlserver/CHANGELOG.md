@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 23.0.1 / 2026-04-28
+
+***Fixed***:
+
+* Bump lxml to 6.1.0 to address CVE-2026-41066. ([#23418](https://github.com/DataDog/integrations-core/pull/23418))
+
 ## 23.0.0 / 2026-04-15
 
 ***Changed***:

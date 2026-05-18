@@ -1,0 +1,1 @@
+Add resource state tagging to filter dashboards on availability and health: `ntnx_maintenance_state` and `ntnx_connection_state` for hosts, `ntnx_power_state` for VMs, `ntnx_operation_mode` for clusters, and `ntnx_disk_status` for host storage metrics.

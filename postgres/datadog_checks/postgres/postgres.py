@@ -17,6 +17,7 @@ from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.core import QueryManager
 from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.utils import (
+    DBMAsyncJob,
     default_json_event_encoding,
     tracked_query,
 )
@@ -47,6 +48,7 @@ from datadog_checks.postgres.statements import PostgresStatementMetrics
 
 from .__about__ import __version__
 from .config import build_config, sanitize
+from .diagnose import run_diagnostics
 from .util import (
     ANALYZE_PROGRESS_METRICS,
     AWS_RDS_HOSTNAME_SUFFIX,
@@ -99,7 +101,7 @@ except ImportError:
 
 MAX_CUSTOM_RESULTS = 100
 
-PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s, %s)"
+PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s, %s, %s)"
 
 
 class PostgreSql(DatabaseCheck):
@@ -189,6 +191,11 @@ class PostgreSql(DatabaseCheck):
             maxsize=1,
             ttl=self._config.database_instance_collection_interval,
         )  # type: TTLCache
+
+        self.diagnosis.register(functools.partial(run_diagnostics, self))
+
+    def database_monitoring_column_statistics(self, raw_event: str):
+        self.event_platform_event(raw_event, "dbm-column-statistics")
 
     def _submit_initialization_health_event(self):
         try:
@@ -298,6 +305,15 @@ class PostgreSql(DatabaseCheck):
                 rows = cursor.fetchall()
                 return rows
 
+    def _close_db(self):
+        if self._db:
+            try:
+                self._db.close()
+            except Exception:
+                pass
+            finally:
+                self._db = None
+
     @contextlib.contextmanager
     def db(self):
         """
@@ -318,12 +334,7 @@ class PostgreSql(DatabaseCheck):
             self.log.warning(
                 "Connection to the database %s has been interrupted, closing connection", self._config.dbname
             )
-            try:
-                self._db.close()
-            except Exception:
-                pass
-            finally:
-                self._db = None
+            self._close_db()
             raise
         except Exception:
             self.log.exception("Unhandled exception while using database connection %s", self._config.dbname)
@@ -465,29 +476,38 @@ class PostgreSql(DatabaseCheck):
 
         return self._dynamic_queries
 
+    @staticmethod
+    def _cancel_async_job(job: DBMAsyncJob):
+        job.cancel()
+        if job._job_loop_future:
+            job._job_loop_future.result()
+            job._job_loop_future = None
+        job._shutdown()
+
     def cancel(self):
         """
         Cancels and sends cancel signal to all threads.
         """
         if self._config.dbm:
-            self.statement_samples.cancel()
-            self.statement_metrics.cancel()
-            self.metadata_samples.cancel()
-            if self.statement_metrics._job_loop_future:
-                self.statement_metrics._job_loop_future.result()
-            if self.statement_samples._job_loop_future:
-                self.statement_samples._job_loop_future.result()
-            if self.metadata_samples._job_loop_future:
-                self.metadata_samples._job_loop_future.result()
+            self._cancel_async_job(self.statement_metrics)
+            self._cancel_async_job(self.statement_samples)
+            self._cancel_async_job(self.metadata_samples)
         elif self._config.data_observability.enabled:
-            self.metadata_samples.cancel()
-            if self.metadata_samples._job_loop_future:
-                self.metadata_samples._job_loop_future.result()
+            self._cancel_async_job(self.metadata_samples)
         if self._config.data_observability.enabled:
-            self.data_observability.cancel()
-            if self.data_observability._job_loop_future:
-                self.data_observability._job_loop_future.result()
+            self._cancel_async_job(self.data_observability)
+        self._clean_state()
+        self._query_manager = None
+        self.health = None
+        self.check_initializations.clear()
+        # TODO: move diagnosis cleanup into AgentCheck.cancel() in the base class
+        self._diagnosis = None
+        self._close_db()
         self._close_db_pool()
+        # CheckLoggingAdapter holds self.check until check_id is resolved via
+        # process(), which only happens after the agent scheduler calls run().
+        # If cancel() is called before that, the back-reference is never cleared.
+        self.log.check = None
 
     def _clean_state(self):
         self.log.debug("Cleaning state")
@@ -976,8 +996,11 @@ class PostgreSql(DatabaseCheck):
                 role_arn=self._config.aws.managed_authentication.role_arn,
             )
         elif self._config.azure.managed_authentication.enabled:
+            auth_type = self._config.azure.managed_authentication.auth_type
             return AzureTokenProvider(
+                auth_type=auth_type,
                 client_id=self._config.azure.managed_authentication.client_id,
+                tenant_id=self._config.azure.managed_authentication.tenant_id,
                 identity_scope=self._config.azure.managed_authentication.identity_scope,
             )
         else:
@@ -1014,7 +1037,11 @@ class PostgreSql(DatabaseCheck):
             kwargs["token_provider"] = self.db_pool.token_provider
 
         conn = TokenAwareConnection.connect(**kwargs)
-        self.db_pool._configure_connection(conn)
+        try:
+            self.db_pool._configure_connection(conn)
+        except Exception:
+            conn.close()
+            raise
         return conn
 
     def _connect(self):
@@ -1033,7 +1060,12 @@ class PostgreSql(DatabaseCheck):
                 self.log.debug("Running query [%s]", PG_SETTINGS_QUERY)
                 cursor.execute(
                     PG_SETTINGS_QUERY,
-                    ("pg_stat_statements.max", "track_activity_query_size", "track_io_timing"),
+                    (
+                        "pg_stat_statements.max",
+                        "track_activity_query_size",
+                        "track_io_timing",
+                        "shared_preload_libraries",
+                    ),
                 )
                 rows = cursor.fetchall()
                 self.pg_settings.clear()
