@@ -229,9 +229,6 @@ pipeline:
               targets:
                 name: ocsf.activity_name
                 id: ocsf.activity_id
-              fallback:
-                values: {}
-                sources: {}
               type: schema-category-mapper
             - name: ocsf.connection_info.direction_id
               categories:
@@ -242,9 +239,6 @@ pipeline:
               targets:
                 name: ocsf.connection_info.direction
                 id: ocsf.connection_info.direction_id
-              fallback:
-                values: {}
-                sources: {}
               type: schema-category-mapper
             - name: ocsf.severity_id
               categories:
@@ -292,9 +286,6 @@ pipeline:
               targets:
                 name: ocsf.status
                 id: ocsf.status_id
-              fallback:
-                values: {}
-                sources: {}
               type: schema-category-mapper
             - name: ocsf.rcode_id
               categories:
