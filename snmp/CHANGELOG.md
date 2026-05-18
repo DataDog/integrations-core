@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 12.4.0 / 2026-05-14
+
+***Added***:
+
+* Add Cisco Catalyst CW9800H1 (OID 1.3.6.1.4.1.9.1.3324) to cisco-catalyst-wlc SNMP profile. ([#23551](https://github.com/DataDog/integrations-core/pull/23551))
+
 ## 12.3.2 / 2026-04-15
 
 ***Fixed***:
