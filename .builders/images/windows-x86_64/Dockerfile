@@ -159,9 +159,8 @@ RUN Get-RemoteFile `
       -Hash 'd95663fbbf3a80f81a9d98d895266bdcb74ba274bcc04ef6d76630a72dee016f'; `
     7z x postgresql-$Env:PG_VERSION.tar.bz2 -r -y && `
     7z x postgresql-$Env:PG_VERSION.tar -oC:\postgresql_src
-RUN $Env:INCLUDE = 'C:\Program Files\OpenSSL\include;' + $Env:INCLUDE; `
-    $Env:LIB = 'C:\Program Files\OpenSSL\lib;' + $Env:LIB; `
-    $mesonCmd = 'meson setup C:\pgbuild C:\postgresql_src\postgresql-' + $Env:PG_VERSION + ' --prefix=C:\postgresql -Dssl=openssl -Dgssapi=disabled -Dreadline=disabled -Dicu=disabled -Dnls=disabled -Dlz4=disabled -Dzstd=disabled -Dlibxml=disabled -Dlibxslt=disabled -Dllvm=disabled'; `
+RUN New-Item -ItemType Junction -Path C:\OpenSSL -Target 'C:\Program Files\OpenSSL'; `
+    $mesonCmd = 'meson setup C:\pgbuild C:\postgresql_src\postgresql-' + $Env:PG_VERSION + ' --prefix=C:\postgresql -Dssl=openssl -Dextra_include_dirs=C:\OpenSSL\include -Dextra_lib_dirs=C:\OpenSSL\lib -Dgssapi=disabled -Dreadline=disabled -Dicu=disabled -Dnls=disabled -Dlz4=disabled -Dzstd=disabled -Dlibxml=disabled -Dlibxslt=disabled -Dllvm=disabled'; `
     RunOnVSConsole -Command $mesonCmd && `
     RunOnVSConsole -Command 'ninja -C C:\pgbuild' && `
     RunOnVSConsole -Command 'ninja -C C:\pgbuild install' && `
