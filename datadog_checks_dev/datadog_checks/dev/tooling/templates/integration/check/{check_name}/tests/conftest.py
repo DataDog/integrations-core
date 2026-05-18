@@ -9,7 +9,7 @@ from datadog_checks.base.types import InstanceType
 @pytest.fixture(scope='session')
 def dd_environment() -> Iterator[None]:
     # When the integration has a real test environment, wire it here.
-    # Typical Docker Compose setup (use find_free_port to avoid hardcoding ports):
+    # Typical Docker Compose setup:
     #
     # from pathlib import Path
     # from datadog_checks.dev import docker_run
