@@ -56,7 +56,15 @@ LEGACY_GO_METRICS = {
     'istio.go.memstats.lookups.count',
 }
 
-IS_LEGACY_ISTIO = ISTIO_VERSION.startswith("1.13")
+def _is_legacy_istio(version: str) -> bool:
+    try:
+        parts = tuple(int(p) for p in version.split(".")[:2])
+    except ValueError:
+        return False
+    return parts < (1, 24)
+
+
+IS_LEGACY_ISTIO = _is_legacy_istio(ISTIO_VERSION)
 
 
 def _assert_istiod_metric(aggregator, metric):
