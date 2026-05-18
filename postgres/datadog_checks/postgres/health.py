@@ -67,19 +67,19 @@ class PostgresHealth(Health):
             **kwargs,
         )
 
-    def diagnose(self):
+    def submit_diagnoses(self):
         """
         Run the diagnostics for the Postgres check.
         """
-        self.check.diagnose.run()
         for diagnosis in self.check.diagnosis.diagnoses:
-            if diagnosis.result == Diagnosis.DIAGNOSIS_FAIL:
-                self.submit_health_event(
-                    name=diagnosis.name,
-                    status=HealthStatus.WARNING
-                    if diagnosis.result == Diagnosis.DIAGNOSIS_WARNING
-                    else HealthStatus.ERROR,
-                    data={
-                        "diagnosis": diagnosis,
-                    },
-                )
+            self.submit_health_event(
+                name=diagnosis.name,
+                status=HealthStatus.WARNING
+                if diagnosis.result == Diagnosis.DIAGNOSIS_WARNING
+                else HealthStatus.ERROR
+                if diagnosis.result == Diagnosis.DIAGNOSIS_FAIL
+                else HealthStatus.OK,
+                data={
+                    "diagnosis": diagnosis,
+                },
+            )

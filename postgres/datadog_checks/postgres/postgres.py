@@ -1258,6 +1258,7 @@ class PostgreSql(DatabaseCheck):
                     diagnosis.result == Diagnosis.DIAGNOSIS_FAIL or diagnosis.result == Diagnosis.DIAGNOSIS_WARNING
                     for diagnosis in self.diagnosis.diagnoses
                 )
+                self.health.submit_diagnoses()
             # Add the warnings saved during the execution of the check
             self._report_warnings()
 

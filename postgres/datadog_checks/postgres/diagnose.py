@@ -16,14 +16,7 @@ Caveats:
       health event instead.
 """
 
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
-
 import psycopg
-
-if TYPE_CHECKING:
-    from .postgres import PostgreSql
 
 from .util import (
     DIAGNOSTIC_METADATA,
@@ -47,7 +40,7 @@ def run_diagnostics(check):
 class PostgresDiagnose:
     """Explicit pre-flight diagnostics for `datadog-agent diagnose`."""
 
-    def __init__(self, check: PostgreSql):
+    def __init__(self, check):
         self._check = check
         # Codes that have FAIL'd in the current explicit run. Used for cascade skipping so we
         # don't emit downstream-effect FAILs with nonsensical remediations (e.g. "CREATE EXTENSION"
