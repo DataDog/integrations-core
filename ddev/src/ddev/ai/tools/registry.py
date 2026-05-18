@@ -70,6 +70,9 @@ TOOL_MANIFEST: dict[str, ToolSpec] = {
     "ddev_env_stop": ToolSpec("shell.ddev.env_stop", "DdevEnvStopTool"),
     "ddev_env_test": ToolSpec("shell.ddev.env_test", "DdevEnvTestTool"),
     "ddev_release_changelog": ToolSpec("shell.ddev.release_changelog", "DdevReleaseChangelogTool"),
+    "register_integration": ToolSpec(
+        "repo.register_integration", "RegisterIntegrationTool", factory=_file_policy_factory
+    ),
 }
 
 
