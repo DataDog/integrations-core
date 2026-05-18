@@ -13,6 +13,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.hpe_aruba_edgeconnect import HpeArubaEdgeconnectCheck
 from datadog_checks.hpe_aruba_edgeconnect.check import _parse_speed
 from datadog_checks.hpe_aruba_edgeconnect.client import ApplianceClient, OrchestratorClient
+from datadog_checks.hpe_aruba_edgeconnect.config_models.instance import ApplianceCredential, ApplianceIps
 from datadog_checks.hpe_aruba_edgeconnect.metrics_store import AggType, MetricsStore
 from datadog_checks.hpe_aruba_edgeconnect.minute_stats import (
     AppperfStats,
@@ -91,51 +92,61 @@ APPLIANCE_PAYLOAD = [
     },
 ]
 
-SYSTEM_INFO_PAYLOAD = {
-    'hostName': 'SanFranSP01',
-    'applianceid': 193645,
-    'model': 'EC-V 209005002001 Rev 102786',
-    'modelShort': 'EC-V',
-    'platform': 'VMware',
-    'status': 'Normal',
-    'uptime': 816745152,
-    'uptimeString': '9d 10h 52m 25s',
-    'datetime': '2026/05/08 07:53:33 Etc/UTC',
-    'timezone': 'Etc/UTC',
-    'gmtOffset': 0,
-    'release': 'ECOS 9.5.2.1_102786',
-    'releaseWithoutPrefix': '9.5.2.1_102786',
-    'serial': '00-00-00-02-F4-6D',
-    'uuid': '3dbcbf55-33e0-418f-b98c-3626f98cb0da',
-    'nepk': '',
-    'portalObjectId': '69f11f4fa66feceed31bde83',
-    'deploymentMode': 'router',
-    'inlineRouter': True,
-    'licenseRequired': False,
-    'isLicenseInstalled': False,
-    'licenseExpiryDate': '',
-    'licenseExpirationDaysLeft': 1.7976931348623157e308,
-    'hasUnsavedChanges': False,
-    'rebootRequired': False,
-    'biosVersion': '6.00',
-    'alarmSummary': {
-        'num_cleared': 0,
-        'num_critical': 0,
-        'num_equipment_outstanding': 0,
-        'num_major': 0,
-        'num_minor': 0,
-        'num_outstanding': 1,
-        'num_raise_ignore': 0,
-        'num_software_outstanding': 1,
-        'num_tca_outstanding': 0,
-        'num_traffic_class_outstanding': 0,
-        'num_tunnel_outstanding': 0,
-        'num_warning': 1,
-    },
-    'suricata': '6.0.10',
-    'ccStatus': False,
-    'sku': 'N/A',
-}
+APPLIANCE_BY_IP = {a['ip']: a for a in APPLIANCE_PAYLOAD}
+
+
+def _build_system_info(ip: str) -> dict:
+    """Build a system_info payload that matches the appliance in APPLIANCE_PAYLOAD for the given IP."""
+    appliance = APPLIANCE_BY_IP.get(ip, APPLIANCE_PAYLOAD[0])
+    version = appliance['softwareVersion']
+    return {
+        'hostName': appliance['hostName'],
+        'applianceid': 193645,
+        'model': f'{appliance["model"]} 209005002001 Rev 102786',
+        'modelShort': appliance['model'],
+        'platform': 'VMware',
+        'status': 'Normal',
+        'uptime': 816745152,
+        'uptimeString': '9d 10h 52m 25s',
+        'datetime': '2026/05/08 07:53:33 Etc/UTC',
+        'timezone': 'Etc/UTC',
+        'gmtOffset': 0,
+        'release': f'ECOS {version}_102786',
+        'releaseWithoutPrefix': f'{version}_102786',
+        'serial': appliance['serial'],
+        'uuid': '3dbcbf55-33e0-418f-b98c-3626f98cb0da',
+        'nepk': '',
+        'portalObjectId': '69f11f4fa66feceed31bde83',
+        'deploymentMode': appliance['mode'],
+        'inlineRouter': True,
+        'licenseRequired': False,
+        'isLicenseInstalled': False,
+        'licenseExpiryDate': '',
+        'licenseExpirationDaysLeft': 1.7976931348623157e308,
+        'hasUnsavedChanges': False,
+        'rebootRequired': False,
+        'biosVersion': '6.00',
+        'alarmSummary': {
+            'num_cleared': 0,
+            'num_critical': 0,
+            'num_equipment_outstanding': 0,
+            'num_major': 0,
+            'num_minor': 0,
+            'num_outstanding': 1,
+            'num_raise_ignore': 0,
+            'num_software_outstanding': 1,
+            'num_tca_outstanding': 0,
+            'num_traffic_class_outstanding': 0,
+            'num_tunnel_outstanding': 0,
+            'num_warning': 1,
+        },
+        'suricata': '6.0.10',
+        'ccStatus': False,
+        'sku': 'N/A',
+    }
+
+
+SYSTEM_INFO_PAYLOAD = _build_system_info('10.0.0.1')
 
 EXPECTED_METRIC_COUNTS = {
     # Device health (orchestrator + appliance client)
@@ -497,7 +508,14 @@ def _build_cpu_payload(usage):
 
 
 def _mock_appliance_client(
-    tgz_data, newest_timestamp=NEWEST_TS, cpu=50, mem=None, disk=None, alarms=None, system_info=None
+    tgz_data,
+    newest_timestamp=NEWEST_TS,
+    cpu=50,
+    mem=None,
+    disk=None,
+    alarms=None,
+    system_info=None,
+    app_ip='10.0.0.1',
 ):
     client = MagicMock()
     client.get_newest_timestamp.return_value = newest_timestamp
@@ -514,8 +532,8 @@ def _mock_appliance_client(
     client.get_alarms.return_value = (
         alarms if alarms is not None else {'outstanding': [{'type': 'HW'}, {'type': 'TUNNEL'}]}
     )
-    client.get_system_info.return_value = system_info if system_info is not None else SYSTEM_INFO_PAYLOAD
-    client.app_ip = '10.0.0.1'
+    client.get_system_info.return_value = system_info if system_info is not None else _build_system_info(app_ip)
+    client.app_ip = app_ip
     return client
 
 
@@ -685,7 +703,8 @@ def test_aggregation(agg_type, records, expected_value, expected_tags):
 )
 def test_appliances_filter(ips, filter_config, expected_ips):
     appliances = Appliances([_make_appliance(ip=ip) for ip in ips])
-    appliances.filter(filter_config)
+    ip_filter = ApplianceIps(**filter_config) if filter_config else None
+    appliances.filter(ip_filter)
     assert [a.ip for a in appliances] == expected_ips
 
 
@@ -773,7 +792,8 @@ def test_parse_speed(value, expected):
 def test_resolve_credentials(ip, overrides, expected_username, expected_password):
     a = _make_appliance(ip=ip)
     appliances = Appliances([a])
-    appliances.resolve_credentials('admin', 'default_pass', overrides)
+    creds = [ApplianceCredential(**o) for o in overrides] if overrides else None
+    appliances.resolve_credentials('admin', 'default_pass', creds)
 
     assert a.username == expected_username
     assert a.password == expected_password
@@ -1104,7 +1124,7 @@ def test_ndm_metadata_submitted(dd_run_check, aggregator, mocker, check):
     # Tunnels: alias that does not match the ``to_<peer>_<color>`` pattern
     non_matching = by_alias['Passthrough_Data_lan0']
     assert non_matching['dst_device_id'] == ''
-    assert non_matching['dst_site_id'] == 'unknown'
+    assert non_matching['dst_site_id'] == ''
     assert non_matching['tunnel_color'] == ''
 
     # Payload batching and namespace propagation
@@ -1121,9 +1141,7 @@ def test_stale_appliance_clients_cleaned_up(dd_run_check, mocker, instance):
     check.load_configuration_models()
 
     def make_client(http, app_ip, log):
-        mock = _mock_appliance_client(TGZ_DATA)
-        mock.app_ip = app_ip
-        return mock
+        return _mock_appliance_client(TGZ_DATA, app_ip=app_ip)
 
     mocker.patch(f'{CHECK_MODULE}.ApplianceClient', side_effect=make_client)
 

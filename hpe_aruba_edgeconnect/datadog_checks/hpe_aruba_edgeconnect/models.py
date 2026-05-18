@@ -5,23 +5,13 @@ from __future__ import annotations
 
 import ipaddress
 import logging
-from collections.abc import Iterator
-from typing import Any, NotRequired, TypedDict
+from collections.abc import Iterable, Iterator
+from typing import Any
 
+from .config_models.instance import ApplianceCredential, ApplianceIps
 from .constants import NDM_DEVICE_RESOURCE_TAG, NDM_DEVICE_USER_TAGS_RESOURCE_TAG
 
 log = logging.getLogger(__name__)
-
-
-class IpFilter(TypedDict):
-    include: NotRequired[list[str] | None]
-    exclude: NotRequired[list[str] | None]
-
-
-class ApplianceCredentialOverride(TypedDict):
-    cidr: str
-    username: str
-    password: str
 
 
 class Appliance:
@@ -98,39 +88,33 @@ class Appliances:
     def __len__(self) -> int:
         return len(self._appliances)
 
-    def filter(self, ip_filter: IpFilter | None) -> None:
+    def filter(self, ip_filter: ApplianceIps | None) -> None:
         if not ip_filter:
             return
-        include = ip_filter.get('include')
-        if include:
-            self._appliances = [a for a in self._appliances if _ip_matches_any(a.ip, include)]
-        exclude = ip_filter.get('exclude')
-        if exclude:
-            self._appliances = [a for a in self._appliances if not _ip_matches_any(a.ip, exclude)]
+        if ip_filter.include:
+            self._appliances = [a for a in self._appliances if _ip_matches_any(a.ip, ip_filter.include)]
+        if ip_filter.exclude:
+            self._appliances = [a for a in self._appliances if not _ip_matches_any(a.ip, ip_filter.exclude)]
 
     def resolve_credentials(
         self,
         default_username: str,
         default_password: str,
-        overrides: list[ApplianceCredentialOverride] | None = None,
+        overrides: Iterable[ApplianceCredential] | None = None,
     ) -> None:
+        overrides = list(overrides or [])
         for appliance in self._appliances:
             appliance.username = default_username
             appliance.password = default_password
-            for cred in overrides or []:
-                cidr = cred.get('cidr')
-                username = cred.get('username')
-                password = cred.get('password')
-                if not cidr or username is None or password is None:
-                    continue
+            for cred in overrides:
                 try:
-                    if ipaddress.ip_address(appliance.ip) in ipaddress.ip_network(cidr, strict=False):
-                        appliance.username = username
-                        appliance.password = password
+                    if ipaddress.ip_address(appliance.ip) in ipaddress.ip_network(cred.cidr, strict=False):
+                        appliance.username = cred.username
+                        appliance.password = cred.password
                         log.debug(
                             "Using CIDR-matched credentials for appliance %s (matched %s)",
                             appliance.ip,
-                            cidr,
+                            cred.cidr,
                         )
                         break
                 except (ValueError, TypeError):
@@ -139,7 +123,7 @@ class Appliances:
                 log.debug("Using shared credentials for appliance %s", appliance.ip)
 
 
-def _ip_matches_any(ip: str, patterns: list[str]) -> bool:
+def _ip_matches_any(ip: str, patterns: Iterable[str]) -> bool:
     try:
         addr = ipaddress.ip_address(ip)
     except ValueError:

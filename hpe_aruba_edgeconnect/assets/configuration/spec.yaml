@@ -56,14 +56,14 @@ files:
         offline. If the Agent stops collecting for a while (for example, during a restart or an
         outage), this controls how far back in time it will look when it starts up again.
 
-        For example, with the default of 20, the Agent will collect at most the last 20 minutes
+        For example, with the default of 5, the Agent will collect at most the last 5 minutes
         of data per appliance after coming back online. Anything older than that is skipped, and
         collection resumes normally from the most recent point.
       value:
         type: integer
         minimum: 1
-        default: 20
-        example: 20
+        default: 5
+        example: 5
     - name: appliance_credentials
       description: |
         Per-appliance credential overrides matched by CIDR. When an appliance IP falls within a listed

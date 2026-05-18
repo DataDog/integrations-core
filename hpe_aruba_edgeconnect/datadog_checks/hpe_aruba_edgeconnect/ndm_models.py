@@ -91,7 +91,7 @@ class TunnelMetadata(BaseModel):
     src_device_id: str
     dst_device_id: str
     src_site_id: str | None = None
-    dst_site_id: str
+    dst_site_id: str | None = None
     overlay_name: str | None = None
     path_name: str
     tunnel_color: str
@@ -166,7 +166,7 @@ def create_interface_metadata(appliance_ip: str, iface: dict[str, Any], namespac
 def create_tunnel_metadata(
     tunnel: TunnelV2Stats,
     appliance_ip: str,
-    src_site: str,
+    src_site: str | None,
     namespace: str,
     peer_lookup: dict[str, tuple[str, str]],
     overlay_map: dict[str, str],
@@ -186,8 +186,8 @@ def create_tunnel_metadata(
         tunnel_id=tunnel.tunnel_id,
         src_device_id=f'{namespace}:{appliance_ip}',
         dst_device_id=f'{namespace}:{peer_ip}' if peer_ip else '',
-        src_site_id=src_site or 'unknown',
-        dst_site_id=peer_site or 'unknown',
+        src_site_id=src_site,
+        dst_site_id=peer_site,
         overlay_name=overlay_map.get(tunnel.overlay_id, tunnel.overlay_id) if overlay_map else None,
         path_name=tunnel.tunnel_alias,
         tunnel_color=wan_labels,

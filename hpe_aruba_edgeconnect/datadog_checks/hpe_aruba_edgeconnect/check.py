@@ -101,7 +101,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
     ) -> None:
         if not items:
             return
-        for batch in batch_payloads(self.config.namespace, items, collect_timestamp):
+        for batch in batch_payloads(self.config.namespace or 'default', items, collect_timestamp):
             self.event_platform_event(
                 json.dumps(batch.model_dump(exclude_none=True)),
                 "network-devices-metadata",
@@ -116,19 +116,15 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         all_appliances = [Appliance(a) for a in raw_appliances]
         self._peer_lookup = {ap.host_name: (ap.ip, ap.site or 'unknown') for ap in all_appliances if ap.host_name}
         appliances = Appliances(all_appliances)
-        appliance_ips = self.config.appliance_ips.model_dump() if self.config.appliance_ips else None
-        appliances.filter(appliance_ips)
+        appliances.filter(self.config.appliance_ips)
         self.log.debug("Monitoring %d appliances after filtering", len(appliances))
-        appliance_credentials = (
-            [c.model_dump() for c in self.config.appliance_credentials] if self.config.appliance_credentials else None
-        )
         appliances.resolve_credentials(
             self.config.username,
             self.config.password,
-            appliance_credentials,
+            self.config.appliance_credentials,
         )
-        namespace = self.config.namespace
-        devices = []
+        namespace: str = self.config.namespace or 'default'
+        devices: list[DeviceMetadata | InterfaceMetadata | TunnelMetadata] = []
         for ap in appliances:
             tags = ap.tags(namespace)
             self.gauge('device.reachability', 1 if ap.is_reachable else 0, tags=tags)
@@ -165,12 +161,12 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         if last_ts is not None and newest == last_ts:
             return []
 
-        max_backfill = self.config.max_backfill_minutes
+        max_backfill = self.config.max_backfill_minutes or 5
         if last_ts is None:
             self.log.debug("First run for %s, collecting only the newest timestamp %d", app_ip, newest)
             return [newest]
 
-        timestamps = []
+        timestamps: list[int] = []
         ts = newest
         while ts > last_ts and len(timestamps) < max_backfill:
             timestamps.append(ts)
@@ -204,7 +200,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         self.log.debug("Starting collection for appliance %s", app_ip)
         client = self._create_appliance_client(app_ip, appliance.username, appliance.password)
 
-        namespace = self.config.namespace
+        namespace: str = self.config.namespace or 'default'
         base_tags = appliance.tags(namespace)
         device_id = appliance.device_id(namespace)
         newest = client.get_newest_timestamp()
@@ -265,7 +261,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
                     ),
                 )
             )
-        max_workers = min(len(collectors), self.config.max_concurrency)
+        max_workers = min(len(collectors), self.config.max_concurrency or len(collectors))
         with ThreadPoolExecutor(max_workers=max_workers) as pool:
             futs = {pool.submit(fn): name for name, fn in collectors}
             for f in as_completed(futs):
@@ -282,8 +278,8 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         collect_timestamp: int,
     ) -> None:
         data = client.get_network_interfaces()
-        namespace = self.config.namespace
-        interfaces = []
+        namespace: str = self.config.namespace or 'default'
+        interfaces: list[DeviceMetadata | InterfaceMetadata | TunnelMetadata] = []
         for iface in data.get('ifInfo', []):
             ifname = iface.get('ifname', 'unknown')
             iface_tags = base_tags + [
@@ -309,7 +305,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
             return
         latest_ts = cpu_data.get('latestTimestamp')
         bucket = next((b for b in buckets if str(latest_ts) in b), buckets[-1])
-        entries = next(iter(bucket.values()), [])
+        entries: list[Any] = next(iter(bucket.values()), [])
         aggregate = next((e for e in entries if str(e.get('cpu_number')).upper() == 'ALL'), None)
         if aggregate is None:
             self.log.warning("No aggregate CPU data found for appliance %s", client.app_ip)
