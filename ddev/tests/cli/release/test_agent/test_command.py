@@ -170,3 +170,46 @@ def test_both_dispatches_fail_combine_messages(ddev: CliRunner, fake_async_githu
     assert 'Both dispatches failed' in result.output
     assert 'Linux' in result.output
     assert 'Windows' in result.output
+
+
+def test_missing_github_token_aborts(ddev: CliRunner, mocker: MockerFixture, config_file) -> None:
+    """The empty-token guard must abort before any dispatch attempt."""
+    config_file.model.github.token = ''
+    config_file.save()
+
+    result = ddev('release', 'test-agent', '--branch', '7.80.x', '--yes')
+
+    assert result.exit_code != 0, result.output
+    assert 'GitHub token required' in result.output
+
+
+@pytest.mark.parametrize(
+    'mock_target, expected_message',
+    [
+        pytest.param(
+            'ddev.cli.release.test_agent.registry.list_agent_rc_tags',
+            'Failed to query registry.datadoghq.com for tags',
+            id='list_tags',
+        ),
+        pytest.param(
+            'ddev.cli.release.test_agent.registry.manifest_exists',
+            'Failed to query registry.datadoghq.com for',
+            id='manifest_exists',
+        ),
+    ],
+)
+def test_registry_http_error_aborts_cleanly(
+    ddev: CliRunner,
+    mocker: MockerFixture,
+    fake_async_github: FakeAsyncGitHubClient,
+    mock_target: str,
+    expected_message: str,
+) -> None:
+    """A transient httpx error from the registry must surface via app.abort, not a raw traceback."""
+    mocker.patch(mock_target, side_effect=httpx.ConnectError('connection refused'))
+
+    result = ddev('release', 'test-agent', '--branch', '7.80.x', '--yes')
+
+    assert result.exit_code != 0, result.output
+    assert expected_message in result.output
+    fake_async_github.assert_not_called('create_workflow_dispatch')

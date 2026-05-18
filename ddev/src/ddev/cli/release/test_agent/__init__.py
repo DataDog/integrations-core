@@ -10,6 +10,7 @@ import re
 from typing import TYPE_CHECKING
 
 import click
+import httpx
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -30,10 +31,12 @@ WORKFLOW_FILES = [
     f'.github/workflows/{WORKFLOW_WINDOWS}',
 ]
 
-# Hard-coded: the two test workflows only live on DataDog/integrations-core. Forks have nothing
-# to dispatch even if the branch/tag exists, so deferring this to repo metadata would just hide
-# misconfiguration. If we ever ship the workflows elsewhere, plumb the owner through here.
+# Hard-coded: the two test workflows only live on DataDog/integrations-core. Forks and other
+# integrations repos (extras, marketplace) have nothing to dispatch even if the branch/tag exists,
+# so deferring either component to repo metadata would just hide misconfiguration. If we ever
+# ship the workflows elsewhere, plumb the target through here.
 REPO_OWNER = 'DataDog'
+REPO_NAME = 'integrations-core'
 
 
 @click.command('test-agent', short_help='Dispatch the Agent test workflows against a branch or tag')
@@ -140,8 +143,6 @@ def _resolve_version(app: Application, *, branch: str | None, tag: str | None) -
         return tag
 
     assert branch is not None
-    import httpx
-
     from ddev.cli.release.test_agent.registry import list_agent_rc_tags
 
     major_str, minor_str, _ = branch.split('.')
@@ -168,8 +169,6 @@ def _build_image_refs(version: str) -> tuple[str, str]:
 
 
 def _validate_images_exist(app: Application, linux_image: str, windows_image: str) -> None:
-    import httpx
-
     from ddev.cli.release.test_agent.registry import manifest_exists
 
     for image in (linux_image, windows_image):
@@ -210,11 +209,8 @@ def _print_result(app: Application, *, linux_url: str, windows_url: str) -> None
 
 def _dispatch_both(app: Application, *, ref: str, inputs: dict[str, str]) -> tuple[str, str]:
     """Dispatch both workflows in parallel via the async GitHub client. Returns (linux_url, windows_url)."""
-    owner = REPO_OWNER
-    repo = app.repo.full_name
     token = app.config.github.token
-
-    results = asyncio.run(_dispatch_both_async(token, owner, repo, ref, inputs))
+    results = asyncio.run(_dispatch_both_async(token, REPO_OWNER, REPO_NAME, ref, inputs))
     return _extract_run_urls(results)
 
 
