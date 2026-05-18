@@ -42,7 +42,7 @@ from typing import Any
 import httpx
 
 from ddev.utils.github_async import GitHubResponse
-from ddev.utils.github_async.models import Label, PullRequest
+from ddev.utils.github_async.models import Label, PullRequest, WorkflowDispatchResult
 
 
 @dataclass
@@ -77,6 +77,14 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
             'Not Found',
             request=httpx.Request('GET', 'https://api.github.com/'),
             response=httpx.Response(404),
+        ),
+        'create_workflow_dispatch': lambda: GitHubResponse(
+            data=WorkflowDispatchResult(
+                workflow_run_id=1,
+                run_url='https://api.github.com/repos/test/repo/actions/runs/1',
+                html_url='https://github.com/test/repo/actions/runs/1',
+            ),
+            headers={},
         ),
     }
 
@@ -192,6 +200,28 @@ class FakeAsyncGitHubClient:
             issue_number=issue_number,
             labels=labels,
             timeout=timeout,
+        )
+
+    async def create_workflow_dispatch(
+        self,
+        owner: str,
+        repo: str,
+        workflow_id: str | int,
+        ref: str,
+        inputs: dict[str, Any] | None = None,
+        timeout: float | None = None,
+        *,
+        return_run_details: bool = False,
+    ) -> GitHubResponse[Any]:
+        return self._call(
+            'create_workflow_dispatch',
+            owner=owner,
+            repo=repo,
+            workflow_id=workflow_id,
+            ref=ref,
+            inputs=inputs,
+            timeout=timeout,
+            return_run_details=return_run_details,
         )
 
     async def aclose(self) -> None:

@@ -218,6 +218,34 @@ async def test_create_workflow_dispatch_http_error_raises() -> None:
     assert exc_info.value.response.status_code == 422
 
 
+async def test_create_workflow_dispatch_return_run_details_parses_response() -> None:
+    payload = {
+        "workflow_run_id": 987,
+        "run_url": "https://api.github.com/repos/o/r/actions/runs/987",
+        "html_url": "https://github.com/o/r/actions/runs/987",
+    }
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        body = json.loads(request.content)
+        assert body["return_run_details"] is True
+        return _json_response(payload)
+
+    client = _make_client(httpx.MockTransport(handler))
+    result = await client.create_workflow_dispatch("o", "r", "wf.yml", "main", return_run_details=True)
+    assert result.data.workflow_run_id == 987
+    assert result.data.html_url == "https://github.com/o/r/actions/runs/987"
+
+
+async def test_create_workflow_dispatch_omits_return_run_details_when_false() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        body = json.loads(request.content)
+        assert "return_run_details" not in body
+        return httpx.Response(204)
+
+    client = _make_client(httpx.MockTransport(handler))
+    await client.create_workflow_dispatch("o", "r", "wf.yml", "main")
+
+
 # ---------------------------------------------------------------------------
 # get_workflow_run
 # ---------------------------------------------------------------------------
