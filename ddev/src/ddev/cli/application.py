@@ -3,9 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import logging
 import os
 from functools import cached_property
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from ddev.cli.terminal import Terminal
 from ddev.config.constants import AppEnvVars, ConfigEnvVars, VerbosityLevels
@@ -15,9 +16,29 @@ from ddev.utils.fs import Path
 from ddev.utils.github import GitHubManager
 from ddev.utils.platform import Platform
 
+if TYPE_CHECKING:
+    from typing import Any, Callable, NoReturn
+
+
+class AppLoggingHandler(logging.Handler):
+    """Routes Python logging through the Application display methods."""
+
+    def __init__(self, app: Application):
+        super().__init__()
+        self._app = app
+
+    def emit(self, record: logging.LogRecord) -> None:
+        msg = self.format(record)
+        if record.levelno >= logging.ERROR:
+            self._app.display_error(msg)
+        elif record.levelno >= logging.WARNING:
+            self._app.display_warning(msg)
+        else:
+            self._app.display_info(msg)
+
 
 class Application(Terminal):
-    def __init__(self, exit_func, *args, **kwargs):
+    def __init__(self, exit_func: Callable[[int], NoReturn], *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.platform = Platform(self.escaped_output)
         self.__exit_func = exit_func
@@ -31,7 +52,7 @@ class Application(Terminal):
         self.__github = cast(GitHubManager, None)
 
         # TODO: remove this when the old CLI is gone
-        self.__config = {}
+        self.__config: dict[str, Any] = {}
 
     @property
     def config(self) -> RootConfig:
@@ -46,6 +67,14 @@ class Application(Terminal):
         from platformdirs import user_data_dir
 
         return Path(os.getenv(ConfigEnvVars.DATA) or user_data_dir('ddev', appauthor=False)).expand()
+
+    @cached_property
+    def logger(self) -> logging.Logger:
+        logger = logging.getLogger("ddev.app")
+        if not any(isinstance(h, AppLoggingHandler) for h in logger.handlers):
+            logger.addHandler(AppLoggingHandler(self))
+            logger.setLevel(logging.WARNING)
+        return logger
 
     @property
     def github(self) -> GitHubManager:
@@ -79,7 +108,7 @@ class Application(Terminal):
             self.repo, user=self.config.github.user, token=self.config.github.token, status=self.status
         )
 
-    def abort(self, text='', code=1, **kwargs):
+    def abort(self, text: str = '', code: int = 1, **kwargs: Any) -> NoReturn:
         if text:
             self.display_error(text, **kwargs)
         self.__exit_func(code)

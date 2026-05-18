@@ -2,7 +2,31 @@
 
 <!-- towncrier release notes start -->
 
-## 6.5.0 / 2026-04-01
+## 6.7.0 / 2026-05-14
+
+***Added***:
+
+* Add parts and merges monitoring (DBM): per-table gauges for parts, merges, mutations, and replication queue health, plus a per-cycle row-level event payload for the DBM Storage Health timeline view. ([#23361](https://github.com/DataDog/integrations-core/pull/23361))
+
+***Fixed***:
+
+* Fix SSL certificate verification being ignored when `verify: false` is set. The shared connection pool was created without TLS settings, causing `verify=False` to be silently ignored when clickhouse-connect skips its own TLS pool creation for a pre-supplied pool manager. ([#23450](https://github.com/DataDog/integrations-core/pull/23450))
+* Skip emitting empty storage_health payloads when every parts-and-merges collection is empty. ([#23553](https://github.com/DataDog/integrations-core/pull/23553))
+
+## 6.6.0 / 2026-04-15
+
+***Added***:
+
+* Update dependencies ([#22996](https://github.com/DataDog/integrations-core/pull/22996))
+* Add query error collection from system.query_log for DBM ([#23041](https://github.com/DataDog/integrations-core/pull/23041))
+* Add support for ClickHouse explain plans. ([#23286](https://github.com/DataDog/integrations-core/pull/23286))
+
+***Fixed***:
+
+* Bump `datadog-checks-base` to `>=37.34.1`. Notable changes:
+    - Reduce allocations in `StatementMetrics` by deferring dict construction and updating the previous-statements cache in place. ([#23075](https://github.com/DataDog/integrations-core/pull/23075)) ([#23282](https://github.com/DataDog/integrations-core/pull/23282))
+
+## 6.5.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:
 

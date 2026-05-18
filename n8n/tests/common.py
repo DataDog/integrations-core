@@ -18,7 +18,6 @@ def get_fixture_path(filename):
 OPENMETRICS_URL = f'http://{HOST}:{PORT}'
 INSTANCE = {
     'openmetrics_endpoint': f'{OPENMETRICS_URL}/metrics',
-    'raw_metric_prefix': 'n8n_',
 }
 
 E2E_METADATA = {

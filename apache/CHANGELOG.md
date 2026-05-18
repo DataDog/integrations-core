@@ -2,7 +2,23 @@
 
 <!-- towncrier release notes start -->
 
-## 7.4.0 / 2026-04-01
+## 7.5.0 / 2026-05-14
+
+***Added***:
+
+* Adding troubleshooting doc link for Apache integration ([#22968](https://github.com/DataDog/integrations-core/pull/22968))
+
+***Fixed***:
+
+* Re-order configuration fields by usage frequency. ([#23277](https://github.com/DataDog/integrations-core/pull/23277))
+
+## 7.4.1 / 2026-04-15
+
+***Fixed***:
+
+* Polish fleet-configurable spec descriptions. ([#22967](https://github.com/DataDog/integrations-core/pull/22967))
+
+## 7.4.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:
 

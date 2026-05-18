@@ -26,7 +26,6 @@ class CiscoACICheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(CiscoACICheck, self).__init__(name, init_config, instances)
         self.tenant_metrics = make_tenant_metrics()
-        self.last_events_ts = {}
         self.external_host_tags = {}
         self._api_cache = {}
         self.check_tags = ['cisco']

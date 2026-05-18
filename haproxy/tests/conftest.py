@@ -22,11 +22,11 @@ from .common import (
     ENDPOINT_PROMETHEUS,
     HAPROXY_LEGACY,
     HAPROXY_VERSION,
+    HAPROXY_VERSION_IS_LATEST,
     HAPROXY_VERSION_RAW,
     HERE,
     INSTANCE,
     INSTANCEV2,
-    requires_static_version,
 )
 from .legacy.common import (
     CHECK_CONFIG,
@@ -241,9 +241,10 @@ def haproxy_mock_enterprise_version_info():
         yield p
 
 
-@requires_static_version
 @pytest.fixture(scope="session")
 def version_metadata():
+    if HAPROXY_VERSION_IS_LATEST:
+        pytest.skip('Version `latest` is ever-changing, skipping')
     # some version has release info
     parts = HAPROXY_VERSION_RAW.split('-')
     if len(parts) > 1:

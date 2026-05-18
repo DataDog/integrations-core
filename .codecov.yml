@@ -54,6 +54,10 @@ coverage:
         target: 75
         flags:
         - apache
+      Apache_NiFi:
+        target: 75
+        flags:
+        - nifi
       Appgate_SDP:
         target: 75
         flags:
@@ -426,6 +430,10 @@ coverage:
         target: 75
         flags:
         - kyototycoon
+      LPARStats:
+        target: 75
+        flags:
+        - lparstats
       Lighttpd:
         target: 75
         flags:
@@ -1404,6 +1412,11 @@ flags:
     paths:
     - kyverno/datadog_checks/kyverno
     - kyverno/tests
+  lparstats:
+    carryforward: true
+    paths:
+    - lparstats/datadog_checks/lparstats
+    - lparstats/tests
   lighttpd:
     carryforward: true
     paths:
@@ -1514,6 +1527,11 @@ flags:
     paths:
     - nginx_ingress_controller/datadog_checks/nginx_ingress_controller
     - nginx_ingress_controller/tests
+  nifi:
+    carryforward: true
+    paths:
+    - nifi/datadog_checks/nifi
+    - nifi/tests
   nutanix:
     carryforward: true
     paths:

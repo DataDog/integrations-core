@@ -2,7 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 4.5.0 / 2026-04-01
+## 4.6.0 / 2026-05-14
+
+***Added***:
+
+* Add support for Temporal v1.29.2 metrics with unit of measurement suffixes and additional server metrics. ([#22379](https://github.com/DataDog/integrations-core/pull/22379))
+
+## 4.5.1 / 2026-04-15
+
+***Fixed***:
+
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+
+## 4.5.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:
 

@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 1.2.0 / 2026-04-01
+## 1.2.1 / 2026-05-14
+
+***Fixed***:
+
+* Sanitize guarddog_path argument. ([#23377](https://github.com/DataDog/integrations-core/pull/23377))
+
+## 1.2.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:
 
