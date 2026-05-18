@@ -1,0 +1,25 @@
+# n8n lab traffic configuration. Edit this file while the lab is running and
+# changes are picked up every `reload_interval` seconds.
+
+# Probability of hitting each webhook on every traffic tick. Independent draws —
+# multiple endpoints can fire on the same tick. Values can exceed 1.0 to issue
+# multiple invocations per tick (e.g. 2.5 = 2 calls + a 50% chance of a third).
+webhook_probabilities:
+  /webhook/lab/fast: 0.9      # bulk of the workflow_started counter and HTTP histogram
+  /webhook/lab/slow: 0.4      # Wait node spreads execution-duration buckets
+  /webhook/lab/fail: 0.15     # populates workflow_failed and node_finished{status="failed"}
+  /webhook/lab/flaky: 0.5     # mixed success/failure, ~30% fail rate
+  /webhook/lab/chain: 0.3     # 4 Set nodes => 4x node.started/finished events per call
+
+# Probability of hitting each REST API endpoint per tick. Used to drive the
+# http_request_duration_seconds histogram across status code labels.
+api_probabilities:
+  /healthz: 1.0
+  /healthz/readiness: 0.5
+  /rest/login: 0.2            # 401s — useful for status_code label coverage
+
+# How long to sleep between traffic ticks (seconds).
+tick_seconds: 1.0
+
+# Reload this file every N seconds (live config).
+reload_interval: 5
