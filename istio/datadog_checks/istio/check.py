@@ -108,6 +108,7 @@ class IstioCheckV2(OpenMetricsBaseCheckV2):
         metrics = construct_metrics_config(metrics)
         metrics.append(ISTIOD_VERSION)
         config = {**(scraper_defaults or {}), 'openmetrics_endpoint': endpoint, 'metrics': metrics}
+        # Instance keys override scraper_defaults; per-scraper namespace is restored on the next line.
         config.update(self.instance)
         config['namespace'] = namespace
         return config

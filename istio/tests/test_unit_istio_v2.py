@@ -253,6 +253,7 @@ def test_ambient_ztunnel_metrics(aggregator, dd_run_check, mock_http_response):
 
     for metric in common.V2_ZTUNNEL_METRICS:
         aggregator.assert_metric(metric)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_ambient_ztunnel_legacy_parser_drops_counters(aggregator, dd_run_check, mock_http_response):

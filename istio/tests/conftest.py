@@ -124,6 +124,7 @@ def setup_istio_ambient():
             "while true; do curl -s productpage:9080/productpage > /dev/null; sleep 1; done",
         ]
     )
+    run_command(["kubectl", "wait", "pod", "traffic-gen", "-n", "default", "--for=condition=Ready", "--timeout=120s"])
     _wait_for_ztunnel_traffic()
     os.remove("istio.tar.gz")
 
@@ -139,6 +140,7 @@ def _wait_for_ztunnel_traffic(timeout_seconds=300, interval_seconds=3):
     poll is issued from the traffic-gen pod (curlimages/curl) against the ztunnel-metrics
     Service applied earlier in setup."""
     deadline = time.monotonic() + timeout_seconds
+    last_stderr = ""
     while time.monotonic() < deadline:
         result = run_command(
             [
@@ -157,8 +159,14 @@ def _wait_for_ztunnel_traffic(timeout_seconds=300, interval_seconds=3):
         )
         if result.code == 0 and _ztunnel_has_traffic(result.stdout):
             return
+        if result.code != 0 and result.stderr:
+            last_stderr = result.stderr.strip()
         time.sleep(interval_seconds)
-    raise RuntimeError("ztunnel did not record TCP traffic within {}s".format(timeout_seconds))
+    raise RuntimeError(
+        "ztunnel did not record TCP traffic within {}s (last exec stderr: {})".format(
+            timeout_seconds, last_stderr or "<none>"
+        )
+    )
 
 
 def _ztunnel_has_traffic(metrics_text):
