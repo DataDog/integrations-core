@@ -3409,7 +3409,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: "@_path:files"
+        query: "@_path:(files OR files_red)"
       processors:
         - type: string-builder-processor
           name: Stringify tx_hosts
@@ -3485,8 +3485,9 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `fuid` to `ocsf.file.name`
+              name: Map `filename`, `fuid` to `ocsf.file.name`
               sources:
+                - filename
                 - fuid
               target: ocsf.file.name
               preserveSource: true
