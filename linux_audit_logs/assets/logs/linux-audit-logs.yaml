@@ -467,6 +467,18 @@ pipeline:
           template: Linux
           target: ocsf.metadata.product.vendor_name
           replaceMissing: false
+        - type: string-builder-processor
+          name: Set `ocsf.device.name` to Unknown
+          enabled: true
+          template: Unknown
+          target: ocsf.device.name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Set `ocsf.device.os.name` to Linux
+          enabled: true
+          template: Linux
+          target: ocsf.device.os.name
+          replaceMissing: false
         - type: arithmetic-processor
           name: Convert `timestamp` epoch to seconds
           enabled: true
@@ -490,7 +502,8 @@ pipeline:
             className: Base Event
             classUid: 0
             extensions: []
-            profiles: []
+            profiles:
+              - host
           mappers:
             - name: ocsf.activity_id
               categories:
@@ -597,6 +610,32 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
+            - name: ocsf.device.os.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Linux
+                  id: 200
+              targets:
+                name: ocsf.device.os.type
+                id: ocsf.device.os.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.device.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.device.type
+                id: ocsf.device.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
     - type: pipeline
       name: OCSF sub pipeline for class File System Activity [1001]
       enabled: true
@@ -846,6 +885,19 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
+            - name: ocsf.device.os.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Linux
+                  id: 200
+              targets:
+                name: ocsf.device.os.type
+                id: ocsf.device.os.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
     - type: pipeline
       name: OCSF sub pipeline for class File System Activity [1001] from SYSCALL
       enabled: true
@@ -1120,6 +1172,19 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
+            - name: ocsf.device.os.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Linux
+                  id: 200
+              targets:
+                name: ocsf.device.os.type
+                id: ocsf.device.os.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
     - type: pipeline
       name: OCSF sub pipeline for class Module Activity [1005]
       enabled: true
@@ -1355,6 +1420,19 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
+            - name: ocsf.device.os.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Linux
+                  id: 200
+              targets:
+                name: ocsf.device.os.type
+                id: ocsf.device.os.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
     - type: pipeline
       name: OCSF sub pipeline for class Account Change [3001]
       enabled: true
@@ -1609,6 +1687,19 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
+            - name: ocsf.device.os.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Linux
+                  id: 200
+              targets:
+                name: ocsf.device.os.type
+                id: ocsf.device.os.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
     - type: pipeline
       name: OCSF sub pipeline for class Authentication [3002]
       enabled: true
@@ -1873,6 +1964,19 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
+            - name: ocsf.device.os.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Linux
+                  id: 200
+              targets:
+                name: ocsf.device.os.type
+                id: ocsf.device.os.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
     - type: pipeline
       name: OCSF sub pipeline for role assign logs
       enabled: true
@@ -2167,6 +2271,19 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
+            - name: ocsf.device.os.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Linux
+                  id: 200
+              targets:
+                name: ocsf.device.os.type
+                id: ocsf.device.os.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
     - type: pipeline
       name: OCSF sub pipeline for class Group Management [3006]
       enabled: true
@@ -2416,6 +2533,19 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
+            - name: ocsf.device.os.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Linux
+                  id: 200
+              targets:
+                name: ocsf.device.os.type
+                id: ocsf.device.os.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
     - type: pipeline
       name: OCSF sub pipeline for class Device Config State Change [5019]
       enabled: true
@@ -2639,6 +2769,19 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
+            - name: ocsf.device.os.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Linux
+                  id: 200
+              targets:
+                name: ocsf.device.os.type
+                id: ocsf.device.os.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
     - type: pipeline
       name: OCSF sub pipeline for class Process Activity [1007] for EXECVE
       enabled: true
@@ -2827,6 +2970,19 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
+            - name: ocsf.device.os.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Linux
+                  id: 200
+              targets:
+                name: ocsf.device.os.type
+                id: ocsf.device.os.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
     - type: pipeline
       name: OCSF sub pipeline for class Process Activity [1007] from SYSCALL
       enabled: true
@@ -3061,6 +3217,19 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
+            - name: ocsf.device.os.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Linux
+                  id: 200
+              targets:
+                name: ocsf.device.os.type
+                id: ocsf.device.os.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
     - type: pipeline
       name: OCSF sub pipeline for class Network Activity [4001] from SOCKADDR
       enabled: true
@@ -3088,6 +3257,9 @@ pipeline:
             version: 1.5.0
             className: Network Activity
             classUid: 4001
+            extensions: []
+            profiles:
+              - host
           mappers:
             - name: ocsf.activity_id
               categories:
@@ -3187,6 +3359,32 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
+            - name: ocsf.device.os.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Linux
+                  id: 200
+              targets:
+                name: ocsf.device.os.type
+                id: ocsf.device.os.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.device.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.device.type
+                id: ocsf.device.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
     - type: pipeline
       name: OCSF sub pipeline for class Network Activity [4001] from Syscall
       enabled: true
@@ -3403,3 +3601,29 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
+            - name: ocsf.device.os.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Linux
+                  id: 200
+              targets:
+                name: ocsf.device.os.type
+                id: ocsf.device.os.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.device.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.device.type
+                id: ocsf.device.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper

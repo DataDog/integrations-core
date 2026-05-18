@@ -11,14 +11,20 @@ import pytest
 
 from ddev.utils.github_async import (
     GITHUB_API_VERSION,
-    ArtifactsList,
     AsyncGitHubClient,
     GitHubResponse,
-    IssueComment,
     PaginationData,
+    async_github_client,
+)
+from ddev.utils.github_async.models import (
+    ArtifactsList,
+    GitHubUser,
+    IssueComment,
+    Label,
+    PullRequest,
+    PullRequestRef,
     PullRequestReviewComment,
     WorkflowRun,
-    async_github_client,
 )
 
 # ---------------------------------------------------------------------------
@@ -140,7 +146,6 @@ def test_client_valid_token_builds_client() -> None:
     assert "Bearer ghp_test_token" in client._client.headers.get("authorization", "")  # must not raise
 
 
-@pytest.mark.asyncio
 async def test_client_request_headers() -> None:
     captured: httpx.Headers | None = None
 
@@ -163,13 +168,11 @@ async def test_client_request_headers() -> None:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.asyncio
 async def test_context_manager_yields_client() -> None:
     async with async_github_client(token=TOKEN) as client:
         assert not client._client.is_closed
 
 
-@pytest.mark.asyncio
 async def test_context_manager_closes_on_exit() -> None:
     async with async_github_client(token=TOKEN) as client:
         inner = client._client
@@ -182,7 +185,6 @@ async def test_context_manager_closes_on_exit() -> None:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.asyncio
 async def test_create_workflow_dispatch_success() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.method == "POST"
@@ -199,7 +201,6 @@ async def test_create_workflow_dispatch_success() -> None:
     assert result.headers.get("x-ratelimit-remaining") == "59"
 
 
-@pytest.mark.asyncio
 async def test_create_workflow_dispatch_with_inputs() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         body = json.loads(request.content)
@@ -210,7 +211,6 @@ async def test_create_workflow_dispatch_with_inputs() -> None:
     await client.create_workflow_dispatch("o", "r", 123, "main", inputs={"env": "prod"})
 
 
-@pytest.mark.asyncio
 async def test_create_workflow_dispatch_http_error_raises() -> None:
     client = _make_client(httpx.MockTransport(lambda r: httpx.Response(422)))
     with pytest.raises(httpx.HTTPStatusError) as exc_info:
@@ -223,7 +223,6 @@ async def test_create_workflow_dispatch_http_error_raises() -> None:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.asyncio
 async def test_get_workflow_run_success() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.method == "GET"
@@ -237,7 +236,6 @@ async def test_get_workflow_run_success() -> None:
     assert result.data.status == "completed"
 
 
-@pytest.mark.asyncio
 async def test_get_workflow_run_headers_forwarded() -> None:
     def handler(_: httpx.Request) -> httpx.Response:
         return _json_response(_workflow_run_payload(), headers={"x-ratelimit-remaining": "50"})
@@ -247,7 +245,6 @@ async def test_get_workflow_run_headers_forwarded() -> None:
     assert result.headers.get("x-ratelimit-remaining") == "50"
 
 
-@pytest.mark.asyncio
 async def test_get_workflow_run_http_error_raises() -> None:
     client = _make_client(httpx.MockTransport(lambda r: httpx.Response(404)))
     with pytest.raises(httpx.HTTPStatusError) as exc_info:
@@ -260,7 +257,6 @@ async def test_get_workflow_run_http_error_raises() -> None:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.asyncio
 async def test_list_workflow_run_artifacts_single_page() -> None:
     artifacts = [_artifact(1), _artifact(2)]
 
@@ -278,7 +274,6 @@ async def test_list_workflow_run_artifacts_single_page() -> None:
     assert len(pages[0].data.artifacts) == 2
 
 
-@pytest.mark.asyncio
 async def test_list_workflow_run_artifacts_two_pages() -> None:
     page1_artifacts = [_artifact(1)]
     page2_artifacts = [_artifact(2)]
@@ -305,7 +300,6 @@ async def test_list_workflow_run_artifacts_two_pages() -> None:
     assert pages[1].data.artifacts[0].id == 2
 
 
-@pytest.mark.asyncio
 async def test_list_workflow_run_artifacts_pagination_stops_when_no_next() -> None:
     def handler(_: httpx.Request) -> httpx.Response:
         return _json_response({"total_count": 1, "artifacts": [_artifact(1)]})
@@ -317,7 +311,6 @@ async def test_list_workflow_run_artifacts_pagination_stops_when_no_next() -> No
     assert count == 1
 
 
-@pytest.mark.asyncio
 async def test_list_workflow_run_artifacts_http_error_raises() -> None:
     client = _make_client(httpx.MockTransport(lambda r: httpx.Response(403)))
     with pytest.raises(httpx.HTTPStatusError) as exc_info:
@@ -326,7 +319,6 @@ async def test_list_workflow_run_artifacts_http_error_raises() -> None:
     assert exc_info.value.response.status_code == 403
 
 
-@pytest.mark.asyncio
 async def test_list_workflow_run_artifacts_per_page_forwarded() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.url.params["per_page"] == "100"
@@ -342,7 +334,6 @@ async def test_list_workflow_run_artifacts_per_page_forwarded() -> None:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.asyncio
 async def test_create_issue_comment_success() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.method == "POST"
@@ -355,9 +346,10 @@ async def test_create_issue_comment_success() -> None:
     result = await client.create_issue_comment("owner", "repo", 7, "LGTM")
     assert isinstance(result.data, IssueComment)
     assert result.data.body == "LGTM"
+    assert isinstance(result.data.user, GitHubUser)
+    assert result.data.user.login == "octocat"
 
 
-@pytest.mark.asyncio
 async def test_create_issue_comment_http_error_raises() -> None:
     client = _make_client(httpx.MockTransport(lambda r: httpx.Response(404)))
     with pytest.raises(httpx.HTTPStatusError) as exc_info:
@@ -370,7 +362,6 @@ async def test_create_issue_comment_http_error_raises() -> None:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.asyncio
 async def test_create_pr_review_comment_success_with_position() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert "/pulls/3/comments" in request.url.path
@@ -387,9 +378,10 @@ async def test_create_pr_review_comment_success_with_position() -> None:
     )
     assert isinstance(result.data, PullRequestReviewComment)
     assert result.data.commit_id == "abc123"
+    assert isinstance(result.data.user, GitHubUser)
+    assert result.data.user.login == "reviewer"
 
 
-@pytest.mark.asyncio
 async def test_create_pr_review_comment_success_with_line_and_side() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         body = json.loads(request.content)
@@ -403,7 +395,6 @@ async def test_create_pr_review_comment_success_with_line_and_side() -> None:
     assert isinstance(result.data, PullRequestReviewComment)
 
 
-@pytest.mark.asyncio
 async def test_create_pr_review_comment_http_error_raises() -> None:
     client = _make_client(httpx.MockTransport(lambda r: httpx.Response(422)))
     with pytest.raises(httpx.HTTPStatusError) as exc_info:
@@ -412,11 +403,227 @@ async def test_create_pr_review_comment_http_error_raises() -> None:
 
 
 # ---------------------------------------------------------------------------
+# create_pull_request
+# ---------------------------------------------------------------------------
+
+
+def _pull_request_payload(number: int = 1) -> dict[str, Any]:
+    return {
+        "number": number,
+        "html_url": f"https://github.com/owner/repo/pull/{number}",
+    }
+
+
+def _full_pull_request_payload(number: int = 42) -> dict[str, Any]:
+    """A richer PR payload exercising sub-models (user, labels, head/base)."""
+    return {
+        "id": 9000 + number,
+        "number": number,
+        "node_id": "PR_kwDOABCD123",
+        "url": f"https://api.github.com/repos/owner/repo/pulls/{number}",
+        "html_url": f"https://github.com/owner/repo/pull/{number}",
+        "diff_url": f"https://github.com/owner/repo/pull/{number}.diff",
+        "patch_url": f"https://github.com/owner/repo/pull/{number}.patch",
+        "state": "open",
+        "draft": True,
+        "merged": False,
+        "locked": False,
+        "merge_commit_sha": None,
+        "title": "Fix bug",
+        "body": "Backport",
+        "user": {
+            "id": 1,
+            "login": "octocat",
+            "html_url": "https://github.com/octocat",
+            "type": "User",
+        },
+        "assignees": [],
+        "requested_reviewers": [
+            {"id": 2, "login": "reviewer", "type": "User"},
+        ],
+        "labels": [
+            {"id": 100, "name": "qa/skip-qa", "color": "5319e7"},
+            {"id": 101, "name": "backport/7.62.x", "color": "5319e7"},
+        ],
+        "created_at": "2026-05-01T00:00:00Z",
+        "updated_at": "2026-05-02T00:00:00Z",
+        "closed_at": None,
+        "merged_at": None,
+        "head": {
+            "ref": "alice/fix",
+            "sha": "1234567890abcdef00",
+            "label": "alice:alice/fix",
+        },
+        "base": {
+            "ref": "master",
+            "sha": "cafebabe00",
+            "label": "owner:master",
+        },
+    }
+
+
+async def test_create_pull_request_success() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "POST"
+        assert "/repos/owner/repo/pulls" in request.url.path
+        body = json.loads(request.content)
+        assert body == {
+            "title": "Fix bug",
+            "head": "alice/fix",
+            "base": "master",
+            "body": "Fix description",
+            "draft": False,
+        }
+        return _json_response(_pull_request_payload(number=42), status_code=201)
+
+    client = _make_client(httpx.MockTransport(handler))
+    result = await client.create_pull_request("owner", "repo", "Fix bug", "alice/fix", "master", "Fix description")
+    assert isinstance(result.data, PullRequest)
+    assert result.data.number == 42
+    assert result.data.html_url == "https://github.com/owner/repo/pull/42"
+
+
+async def test_create_pull_request_draft_true_forwarded() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        body = json.loads(request.content)
+        assert body["draft"] is True
+        return _json_response(_pull_request_payload(number=7), status_code=201)
+
+    client = _make_client(httpx.MockTransport(handler))
+    result = await client.create_pull_request("o", "r", "T", "h", "b", draft=True)
+    assert result.data.number == 7
+
+
+async def test_create_pull_request_http_error_raises() -> None:
+    client = _make_client(httpx.MockTransport(lambda r: httpx.Response(422)))
+    with pytest.raises(httpx.HTTPStatusError) as exc_info:
+        await client.create_pull_request("o", "r", "T", "h", "b")
+    assert exc_info.value.response.status_code == 422
+
+
+async def test_create_pull_request_parses_full_response() -> None:
+    """Exercises sub-models (GitHubUser, Label, PullRequestRef) end-to-end."""
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return _json_response(_full_pull_request_payload(number=42), status_code=201)
+
+    client = _make_client(httpx.MockTransport(handler))
+    result = await client.create_pull_request("owner", "repo", "Fix bug", "alice/fix", "master")
+
+    pr = result.data
+    assert pr.id == 9042
+    assert pr.number == 42
+    assert pr.state == "open"
+    assert pr.draft is True
+    assert pr.title == "Fix bug"
+
+    assert isinstance(pr.user, GitHubUser)
+    assert pr.user.login == "octocat"
+
+    assert [label.name for label in pr.labels] == ["qa/skip-qa", "backport/7.62.x"]
+    assert all(isinstance(label, Label) for label in pr.labels)
+
+    assert isinstance(pr.head, PullRequestRef)
+    assert pr.head.ref == "alice/fix"
+    assert pr.head.sha == "1234567890abcdef00"
+    assert isinstance(pr.base, PullRequestRef)
+    assert pr.base.ref == "master"
+
+    assert [r.login for r in pr.requested_reviewers] == ["reviewer"]
+    assert pr.created_at == "2026-05-01T00:00:00Z"
+
+
+async def test_create_pull_request_ignores_extra_fields() -> None:
+    """Unknown top-level fields in the response must not break parsing."""
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        payload = _full_pull_request_payload()
+        payload["mergeable_state"] = "clean"
+        payload["additions"] = 42
+        payload["unknown_future_field"] = {"nested": True}
+        return _json_response(payload, status_code=201)
+
+    client = _make_client(httpx.MockTransport(handler))
+    result = await client.create_pull_request("o", "r", "T", "h", "b")
+    assert result.data.number == 42
+
+
+# ---------------------------------------------------------------------------
+# add_labels_to_issue
+# ---------------------------------------------------------------------------
+
+
+async def test_add_labels_to_issue_success() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "POST"
+        assert "/repos/owner/repo/issues/3/labels" in request.url.path
+        body = json.loads(request.content)
+        assert body == {"labels": ["qa/skip-qa", "backport/7.62.x"]}
+        return _json_response([{"id": 1, "name": "qa/skip-qa"}, {"id": 2, "name": "backport/7.62.x"}], status_code=200)
+
+    client = _make_client(httpx.MockTransport(handler))
+    result = await client.add_labels_to_issue("owner", "repo", 3, ["qa/skip-qa", "backport/7.62.x"])
+    assert [label.name for label in result.data] == ["qa/skip-qa", "backport/7.62.x"]
+    assert all(isinstance(label, Label) for label in result.data)
+
+
+async def test_add_labels_to_issue_http_error_raises() -> None:
+    client = _make_client(httpx.MockTransport(lambda r: httpx.Response(404)))
+    with pytest.raises(httpx.HTTPStatusError) as exc_info:
+        await client.add_labels_to_issue("o", "r", 1, ["bug"])
+    assert exc_info.value.response.status_code == 404
+
+
+# ---------------------------------------------------------------------------
+# Lazy-loading guarantees for the `models` subpackage
+# ---------------------------------------------------------------------------
+
+
+def test_models_subpackage_loads_only_requested_submodule() -> None:
+    """Importing one model must not eagerly load every other model submodule.
+
+    Runs each scenario in a clean subprocess so the import effect is observable
+    (the parent test process has already loaded everything for other tests).
+    """
+    import subprocess
+    import sys
+    import textwrap
+
+    script = textwrap.dedent(
+        """
+        import sys
+        from ddev.utils.github_async.models import PullRequest  # noqa: F401
+
+        assert 'ddev.utils.github_async.client' not in sys.modules, 'client module should not be loaded'
+        assert 'httpx' not in sys.modules, 'httpx should not be loaded when only models are imported'
+
+        prefix = 'ddev.utils.github_async.models.'
+        loaded = sorted(name[len(prefix):] for name in sys.modules if name.startswith(prefix))
+        print(','.join(loaded))
+        """
+    )
+    result = subprocess.run([sys.executable, '-c', script], capture_output=True, text=True, check=True)
+    loaded = set(result.stdout.strip().split(','))
+
+    # `pull_request` and its two type dependencies (`user`, `label`) must load.
+    assert {'pull_request', 'user', 'label'} <= loaded
+    # Unrelated model submodules must stay unloaded.
+    assert 'workflow' not in loaded
+    assert 'comment' not in loaded
+
+
+def test_models_subpackage_unknown_attribute_raises_attribute_error() -> None:
+    import ddev.utils.github_async.models as models
+
+    with pytest.raises(AttributeError, match='no attribute'):
+        models.NotARealModel  # noqa: B018
+
+
+# ---------------------------------------------------------------------------
 # Custom timeout per request
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.asyncio
 async def test_per_request_timeout_forwarded() -> None:
     """Ensure per-request timeout reaches the transport without raising."""
 
