@@ -6,13 +6,16 @@ import subprocess
 from typing import Any  # noqa: F401
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.common import is_affirmative
+
 
 from .constants import SHOW_METRIC_DATA, UNIT_PATTERN
 
 DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = 7222
 TO_BYTES = {'b': 1, 'kb': 1e3, 'mb': 1e6, 'gb': 1e9, 'tb': 1e12}
-CONNECTION_STRING = 'tcp://{}:{}'
+TCP_CONNECTION_STRING = 'tcp://{}:{}'
+SSL_CONNECTION_STRING = 'ssl://{}:{}'
 
 
 class TibcoEMSCheck(AgentCheck):
@@ -29,7 +32,11 @@ class TibcoEMSCheck(AgentCheck):
         username = self.instance.get('username')
         password = self.instance.get('password')
         script_path = self.instance.get('script_path')
-        server_string = CONNECTION_STRING.format(host, port)
+        use_ssl = is_affirmative(self.instance.get('use_ssl', False))
+        if not use_ssl:
+            server_string = TCP_CONNECTION_STRING.format(host, port)
+        else:
+            server_string = SSL_CONNECTION_STRING.format(host, port)
         self.tags = self.instance.get('tags', [])
 
         self.cmd = tibemsadmin_cmd + [
