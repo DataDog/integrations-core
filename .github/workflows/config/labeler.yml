@@ -101,6 +101,10 @@ integration/anthropic:
 - changed-files:
   - any-glob-to-any-file:
     - anthropic/**/*
+integration/anthropic_compliance_logs:
+- changed-files:
+  - any-glob-to-any-file:
+    - anthropic_compliance_logs/**/*
 integration/anthropic_usage_and_costs:
 - changed-files:
   - any-glob-to-any-file:
