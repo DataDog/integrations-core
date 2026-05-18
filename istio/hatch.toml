@@ -13,13 +13,10 @@ dependencies = [
 # `version` list; to add a new mode on an existing version, add the entry to the
 # right block (and extend conftest.setup_istio* accordingly).
 
-# Sidecar-mode envs. setup_istio currently uses the legacy IstioOperator manifest at
-# `tests/kind/demo_profile.yaml`, which only applies on Istio 1.13. Migrating to
-# `istioctl install --set profile=demo` is what would unlock adding 1.24+ entries
-# here.
+# Sidecar-mode envs.
 [[envs.default.matrix]]
 python = ["3.13"]
-version = ["1.13"]
+version = ["1.13", "1.24"]
 mode = ["sidecar"]
 
 # Ambient-mode envs. Requires Istio >= 1.24.

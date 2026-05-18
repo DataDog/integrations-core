@@ -60,10 +60,9 @@ def _download_istio():
 
 
 def setup_istio():
-    _download_istio()
-    istio = "istio-{}".format(VERSION)
-    run_command(["kubectl", "create", "ns", "istio-system"])
-    run_command(["kubectl", "apply", "-f", opj(HERE, 'kind', "demo_profile.yaml")])
+    istio = _download_istio()
+    istioctl = opj(istio, "bin", "istioctl")
+    run_command([istioctl, "install", "--set", "profile=demo", "--skip-confirmation"])
     run_command(
         ["kubectl", "wait", "deployments", "--all", "--for=condition=Available", "-n", "istio-system", "--timeout=300s"]
     )
