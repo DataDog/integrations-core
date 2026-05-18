@@ -609,6 +609,10 @@ integration/greenhouse:
 - changed-files:
   - any-glob-to-any-file:
     - greenhouse/**/*
+integration/gti_virustotal:
+- changed-files:
+  - any-glob-to-any-file:
+    - gti_virustotal/**/*
 integration/guarddog:
 - changed-files:
   - any-glob-to-any-file:

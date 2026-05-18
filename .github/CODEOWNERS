@@ -318,6 +318,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /greenhouse/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /greenhouse/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/gti_virustotal/                                                      @DataDog/saas-integrations
+/gti_virustotal/*.md                                                  @DataDog/saas-integrations @DataDog/documentation
+/gti_virustotal/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
+/gti_virustotal/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
 /iboss/                                                              @DataDog/saas-integrations @DataDog/agent-integrations
 /iboss/*.md                                                          @DataDog/saas-integrations @DataDog/agent-integrations @DataDog/documentation
 /iboss/manifest.json                                                 @DataDog/saas-integrations @DataDog/agent-integrations @DataDog/documentation

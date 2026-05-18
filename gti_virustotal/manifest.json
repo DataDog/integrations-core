@@ -1,0 +1,36 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "eb4af193-e43d-44b8-a6a8-5fea46e1752b",
+  "app_id": "gti-virustotal",
+  "owner": "saas-integrations",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "<FILL IN - A brief description of what this offering provides>",
+    "title": "GTI VirusTotal",
+    "media": [],
+    "classifier_tags": [
+      "Category::Metrics",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 72539026,
+      "source_type_name": "GTI VirusTotal",
+      "events": {
+        "creates_events": false
+      }
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
