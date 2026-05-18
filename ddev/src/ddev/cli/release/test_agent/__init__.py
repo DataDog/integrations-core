@@ -6,13 +6,14 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import re
 from typing import TYPE_CHECKING
 
 import click
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Iterator, Sequence
 
     from ddev.cli.application import Application
     from ddev.utils.github_async import GitHubResponse
@@ -101,7 +102,7 @@ def test_agent(app: Application, branch: str | None, tag: str | None, dry_run: b
         app.abort('Aborted by user.')
 
     try:
-        linux_url, windows_url = _dispatch_both(app, ref=ref, inputs=inputs)
+        linux_url, windows_url = _dispatch_both(app.config.github.token, ref=ref, inputs=inputs)
     except RuntimeError as e:
         app.abort(str(e))
     else:
@@ -175,24 +176,35 @@ def _verify_workflows_present_on_ref(app: Application, *, branch: str | None, ta
         )
 
 
+@contextlib.contextmanager
+def _registry_errors(app: Application, target: str) -> Iterator[None]:
+    """Translate any `httpx.HTTPError` raised inside the block into a clean `app.abort` message.
+
+    `target` is interpolated into the abort text — e.g. `'tags'` for the tag listing or an
+    image ref like `'registry.datadoghq.com/agent:7.80.0-rc.3'` for a manifest probe.
+    """
+    import httpx
+
+    try:
+        yield
+    except httpx.HTTPError as e:
+        app.abort(f'Failed to query registry.datadoghq.com for {target}: {e}')
+
+
 def _resolve_version(app: Application, *, branch: str | None, tag: str | None) -> str:
     """Pick the Agent image tag to test: the explicit tag, or the highest published RC for a branch."""
     if tag is not None:
         return tag
 
     assert branch is not None
-    import httpx
-
     from ddev.cli.release.test_agent.registry import list_agent_rc_tags
 
     major_str, minor_str, _ = branch.split('.')
     major, minor = int(major_str), int(minor_str)
 
     app.display_waiting(f'Looking up latest {major}.{minor}.0-rc.* in registry.datadoghq.com...')
-    try:
+    with _registry_errors(app, 'tags'):
         tags = list_agent_rc_tags(major, minor)
-    except httpx.HTTPError as e:
-        app.abort(f'Failed to query registry.datadoghq.com for tags: {e}')
     if not tags:
         app.abort(
             f'No `{major}.{minor}.0-rc.*` tags found in registry.datadoghq.com/agent. '
@@ -210,17 +222,13 @@ def _build_image_refs(version: str) -> tuple[str, str]:
 
 def _validate_images_exist(app: Application, version: str) -> None:
     """Check that both the Linux (`<version>`) and Windows (`<version>-servercore`) manifests are published."""
-    import httpx
-
     from ddev.cli.release.test_agent.registry import manifest_exists
 
     for tag in (version, f'{version}-servercore'):
         image = f'registry.datadoghq.com/agent:{tag}'
         app.display_waiting(f'Checking `{image}`...')
-        try:
+        with _registry_errors(app, f'`{image}`'):
             exists = manifest_exists(tag)
-        except httpx.HTTPError as e:
-            app.abort(f'Failed to query registry.datadoghq.com for `{image}`: {e}')
         if not exists:
             app.abort(
                 f'Image `{image}` not found in registry.datadoghq.com. Confirm the Agent release has been published.'
@@ -235,13 +243,19 @@ def _print_plan(
     branch: str | None,
     inputs: dict[str, str],
 ) -> None:
-    app.display_header('Dispatch plan')
-    app.display_pair('Workflows', f'{WORKFLOW_LINUX}, {WORKFLOW_WINDOWS}')
-    app.display_pair('Ref', ref)
+    """Render the resolved dispatch plan via the stderr-bound `display_info` channel.
+
+    All progress lines (`display_waiting`/`display_success`) default to stderr; keeping the
+    plan on the same channel means piping the command into a file leaves stdout clean and
+    keeps the whole pre-dispatch narrative coherent on stderr.
+    """
+    app.display_info('Dispatch plan')
+    app.display_info(f'  Workflows: {WORKFLOW_LINUX}, {WORKFLOW_WINDOWS}')
+    app.display_info(f'  Ref: {ref}')
     if branch is not None:
-        app.display_pair('Resolved RC', version)
+        app.display_info(f'  Resolved RC: {version}')
     for key, value in inputs.items():
-        app.display_pair(key, value)
+        app.display_info(f'  {key}: {value}')
 
 
 def _print_result(app: Application, *, linux_url: str, windows_url: str) -> None:
@@ -250,9 +264,8 @@ def _print_result(app: Application, *, linux_url: str, windows_url: str) -> None
     app.display_pair('Windows', windows_url)
 
 
-def _dispatch_both(app: Application, *, ref: str, inputs: dict[str, str]) -> tuple[str, str]:
+def _dispatch_both(token: str, *, ref: str, inputs: dict[str, str]) -> tuple[str, str]:
     """Dispatch both workflows in parallel via the async GitHub client. Returns (linux_url, windows_url)."""
-    token = app.config.github.token
     results = asyncio.run(_dispatch_both_async(token, REPO_OWNER, REPO_NAME, ref, inputs))
     return _extract_run_urls(results)
 
@@ -289,14 +302,23 @@ async def _dispatch_both_async(
 
 
 def _extract_run_urls(results: Sequence[DispatchOutcome]) -> tuple[str, str]:
-    """Pull html_urls out of two gather results, raising on any exception with a partial-success hint."""
+    """Pull html_urls out of two gather results, raising on any exception with a partial-success hint.
+
+    `asyncio.gather(return_exceptions=True)` captures `CancelledError`/`KeyboardInterrupt`
+    (`BaseException` subclasses, not `Exception`) into its result list. Re-raise those first
+    so flow-control exceptions propagate cleanly instead of being wrapped in `RuntimeError`.
+    """
     linux_result, windows_result = results
+
+    for result in (linux_result, windows_result):
+        if isinstance(result, BaseException) and not isinstance(result, Exception):
+            raise result
 
     if isinstance(linux_result, BaseException):
         if isinstance(windows_result, BaseException):
-            error = RuntimeError(f'Both dispatches failed. Linux: {linux_result}.')
-            error.add_note(f'Windows: {windows_result!r}')
-            raise error from linux_result
+            raise RuntimeError(
+                f'Both dispatches failed. Linux: {linux_result!r}. Windows: {windows_result!r}.'
+            ) from linux_result
         sibling = windows_result.data.html_url
         raise RuntimeError(
             f'Linux dispatch failed: {linux_result}. The other workflow was dispatched at {sibling}.'

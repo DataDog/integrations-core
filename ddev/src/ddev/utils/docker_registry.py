@@ -59,7 +59,12 @@ def list_tags(
     page_size: int = DEFAULT_PAGE_SIZE,
     timeout: float = 10.0,
 ) -> list[str]:
-    """Return every tag published for `repository`, following `Link: rel="next"` pagination."""
+    """Return every tag published for `repository`, following `Link: rel="next"` pagination.
+
+    Pagination is parsed via `httpx.Response.links`, which handles RFC 5988 quoting and
+    multi-link headers correctly. Relative URLs in the next link are resolved against
+    `host` (registries commonly return paths like `/v2/...?last=...`).
+    """
     url: str | None = f'https://{host}/v2/{repository}/tags/list?n={page_size}'
     tags: list[str] = []
     while url is not None:
@@ -67,21 +72,8 @@ def list_tags(
         response.raise_for_status()
         page = response.json().get('tags') or []
         tags.extend(page)
-        url = _next_link(response.headers.get('link'), host=host)
+        next_url = response.links.get('next', {}).get('url')
+        if next_url and next_url.startswith('/'):
+            next_url = f'https://{host}{next_url}'
+        url = next_url
     return tags
-
-
-def _next_link(link_header: str | None, *, host: str) -> str | None:
-    """Parse an RFC 5988 `Link` header and return the absolute URL of `rel="next"`, if present."""
-    if not link_header:
-        return None
-    for item in link_header.split(','):
-        parts = [p.strip() for p in item.split(';')]
-        if len(parts) < 2:
-            continue
-        target = parts[0].strip('<>')
-        if any(p.replace(' ', '').replace('"', '').replace("'", '') == 'rel=next' for p in parts[1:]):
-            if target.startswith('/'):
-                return f'https://{host}{target}'
-            return target
-    return None

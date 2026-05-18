@@ -221,7 +221,12 @@ def test_partial_dispatch_failure_surfaces_sibling_url(
 
 
 def test_both_dispatches_fail_combine_messages(ddev: CliRunner, fake_async_github: FakeAsyncGitHubClient) -> None:
-    """Both-fail must announce itself explicitly and surface both error reprs, not just substrings."""
+    """Both-fail must announce itself explicitly and surface both error reprs, not just substrings.
+
+    Asserting on `forbidden` appearing twice catches the previous regression where `add_note`
+    was used to attach the Windows error — `str(exc)` does not include notes, so the Windows
+    side was silently dropped from the abort message.
+    """
     err = httpx.HTTPStatusError(
         'forbidden',
         request=httpx.Request('POST', 'https://api.github.com/'),
@@ -234,6 +239,8 @@ def test_both_dispatches_fail_combine_messages(ddev: CliRunner, fake_async_githu
     assert result.exit_code != 0, result.output
     assert 'Both dispatches failed' in result.output
     assert 'Linux:' in result.output
+    assert 'Windows:' in result.output
+    assert result.output.count('forbidden') == 2
 
 
 def test_missing_github_token_aborts(ddev: CliRunner, mocker: MockerFixture, config_file) -> None:
