@@ -210,10 +210,28 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         if timestamps:
             store = MetricsStore()
             last_successful_ts: int | None = None
+            contents: dict[int, bytes] = {}
+            failed_ts: set[int] = set()
+            max_dl = min(len(timestamps), 5)
+            with ThreadPoolExecutor(max_workers=max_dl) as pool:
+                dl_futs = {pool.submit(client.get_minute_stats, f'st2-{ts}.tgz'): ts for ts in timestamps}
+                for fut in as_completed(dl_futs):
+                    ts = dl_futs[fut]
+                    try:
+                        contents[ts] = fut.result()
+                    except Exception:
+                        self.log.warning(
+                            "Failed to download minute-stats archive st2-%d.tgz for appliance %s, skipping",
+                            ts,
+                            app_ip,
+                            exc_info=True,
+                        )
+                        failed_ts.add(ts)
             for ts in reversed(timestamps):
+                if ts in failed_ts:
+                    break
                 try:
-                    content = client.get_minute_stats(f'st2-{ts}.tgz')
-                    minute_stats = MinuteStats(content, app_ip, ts, self.log)
+                    minute_stats = MinuteStats(contents[ts], app_ip, ts, self.log)
                     minute_stats.record(store, base_tags, device_id, traffic_class_map, overlay_map)
                 except Exception:
                     self.log.warning(
