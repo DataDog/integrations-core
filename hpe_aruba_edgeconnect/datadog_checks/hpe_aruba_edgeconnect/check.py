@@ -323,10 +323,18 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         mem_data = client.get_memory_stats()
         if not isinstance(mem_data, dict):
             return
-        for field in ('total', 'free', 'used', 'buffers', 'cached'):
-            value = mem_data.get(field)
-            if value is not None:
-                self.gauge('device.memory.usage', value * 1024, tags=base_tags + [f'memory_type:{field}'])
+        total_raw = mem_data.get('total')
+        used_raw = mem_data.get('used')
+        if total_raw is None or used_raw is None:
+            return
+        try:
+            total = float(total_raw)
+            used = float(used_raw)
+        except (TypeError, ValueError):
+            return
+        if total <= 0:
+            return
+        self.gauge('device.memory.usage', (used / total) * 100.0, tags=base_tags)
 
     def _collect_disk_stats(self, client: ApplianceClient, base_tags: list[str]) -> None:
         disk_data = client.get_disk_usage()
@@ -338,13 +346,15 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
             filesystem = entry.get('filesystem')
             if filesystem in (None, 'none', 'tmpfs'):
                 continue
+            used_percent = entry.get('usedpercent')
+            if used_percent is None:
+                continue
+            try:
+                value = float(used_percent)
+            except (TypeError, ValueError):
+                continue
             mount_tags = base_tags + [f'mount:{mount}', f'device:{filesystem}']
-            used_kb = entry.get('used')
-            available_kb = entry.get('available')
-            if used_kb is not None:
-                self.gauge('device.disk.usage', used_kb * 1024, tags=mount_tags + ['disk_type:used'])
-            if available_kb is not None:
-                self.gauge('device.disk.usage', available_kb * 1024, tags=mount_tags + ['disk_type:free'])
+            self.gauge('device.disk.usage', value, tags=mount_tags)
 
     def _collect_system_info(self, client: ApplianceClient, base_tags: list[str]) -> None:
         info = client.get_system_info()

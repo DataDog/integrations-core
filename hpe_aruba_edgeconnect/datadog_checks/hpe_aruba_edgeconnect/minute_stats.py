@@ -55,7 +55,8 @@ if TYPE_CHECKING:
     from datadog_checks.base.log import CheckLoggingAdapter
 
 
-_TUNNEL_ALIAS_RE = re.compile(r'^to_(.+)_(\w+-\w+)$')
+_TUNNEL_ALIAS_WITH_LABELS_RE = re.compile(r'^to_(.+)_(\w+-\w+)$')
+_TUNNEL_ALIAS_RE = re.compile(r'^to_(.+)_\w+$')
 
 
 _TUNNEL_AGGREGATE_ALIASES = frozenset({'all traffic', 'optimized traffic', 'pass-through', 'pass-through-unshaped'})
@@ -71,13 +72,12 @@ def _nonzero(raw: str | None) -> bool:
 
 
 def parse_tunnel_alias(alias: str) -> tuple[str, str]:
-    """Extract ``(peer_hostname, wan_labels)`` from a tunnel alias of the form ``to_<peer>_<color>``.
-
-    Returns ``('', '')`` when the alias does not match the expected pattern.
-    """
-    m = _TUNNEL_ALIAS_RE.match(alias)
+    m = _TUNNEL_ALIAS_WITH_LABELS_RE.match(alias)
     if m:
         return m.group(1), m.group(2)
+    m = _TUNNEL_ALIAS_RE.match(alias)
+    if m:
+        return m.group(1), ''
     return '', ''
 
 
