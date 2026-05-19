@@ -44,7 +44,7 @@ pyopenssl==26.0.0
 pysnmp-mibs==0.1.6
 pysnmp==7.1.22
 pysocks==1.7.1
-python-binary-memcached==0.31.4; sys_platform != 'win32'
+python-binary-memcached==0.31.4
 python-dateutil==2.9.0.post0
 python3-gearman==0.1.0; sys_platform != 'win32'
 pyvmomi==8.0.3.0.1

@@ -18,6 +18,7 @@
       "Category::Tracing",
       "Supported OS::Linux",
       "Supported OS::macOS",
+      "Supported OS::Windows",
       "Offering::Integration"
     ],
     "resources": [
