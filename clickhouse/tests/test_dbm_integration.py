@@ -494,7 +494,7 @@ def test_explain_plan_not_collected_for_insert(aggregator, instance, dd_run_chec
 
     # Run a SELECT alongside the INSERT so we can confirm the pipeline collected queries
     client.command("SELECT count() FROM system.tables")
-    client.command("INSERT INTO tableau VALUES (222)")
+    client.command("INSERT INTO test (id) VALUES (222)")
     client.command('SYSTEM FLUSH LOGS')
 
     dd_run_check(check)
@@ -608,9 +608,16 @@ def test_query_errors_data(aggregator, instance, dd_run_check):
 
     assert len(all_errors) > 0, "Expected at least one error record in payload"
 
-    details = all_errors[0]['query_details']
+    details = next(
+        (
+            e['query_details']
+            for e in all_errors
+            if 'nonexistent_table_query_error_test' in e['query_details'].get('exception', '')
+        ),
+        None,
+    )
+    assert details is not None, "Expected an error record for `nonexistent_table_query_error_test` in payload"
     assert details['query_signature'] is not None
-    assert 'nonexistent_table_query_error_test' in details['exception']
     assert 'UNKNOWN_TABLE' in details['exception']
     assert details['exception_code'] == 60
     assert 'stack_trace' in details
