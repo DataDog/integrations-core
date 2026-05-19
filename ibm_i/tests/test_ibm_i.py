@@ -317,5 +317,5 @@ def test_check_query_error(aggregator, instance):
         assert check._query_manager is not None
         assert check._query_manager.hostname == "host"
         check.check(instance)
-    aggregator.assert_service_check("ibm_i.can_connect", count=2, status=AgentCheck.CRITICAL)
+    aggregator.assert_service_check("ibm_i.can_connect", count=2, status=AgentCheck.OK)
     aggregator.assert_all_metrics_covered()

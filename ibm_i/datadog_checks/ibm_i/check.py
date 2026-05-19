@@ -47,10 +47,6 @@ class IbmICheck(AgentCheck, ConfigMixin):
             check_status = AgentCheck.CRITICAL
             hostname = self.config.hostname if self.config else None
 
-        # At least one query failed, set the service check as failing
-        if self._current_errors:
-            check_status = AgentCheck.CRITICAL
-
         if check_status is not None:
             self.service_check(
                 self.SERVICE_CHECK_NAME,
