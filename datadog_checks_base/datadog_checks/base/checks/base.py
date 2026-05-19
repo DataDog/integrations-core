@@ -174,6 +174,14 @@ class AgentCheck(object):
     # See https://github.com/DataDog/integrations-core/pull/2093 for more information.
     DEFAULT_METRIC_LIMIT = 0
 
+    # Class-level default that points at the module-level aggregator. All
+    # submission sites in this class call self._aggregator.submit_* so the
+    # trial-mode proxy can override this per-instance to redirect (and later
+    # discard or replay) submissions from candidate runs. Non-discovery code
+    # paths never touch it; behavior is identical to using the module-level
+    # aggregator directly.
+    _aggregator = aggregator
+
     # Allow tracing for classic integrations
     def __init_subclass__(cls, *args, **kwargs):
         try:
@@ -777,7 +785,7 @@ class AgentCheck(object):
         if hostname is None:
             hostname = ''
 
-        aggregator.submit_histogram_bucket(
+        self._aggregator.submit_histogram_bucket(
             self,
             self.check_id,
             self._format_namespace(name, raw),
@@ -795,28 +803,28 @@ class AgentCheck(object):
         if raw_event is None:
             return
 
-        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-samples")
+        self._aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-samples")
 
     def database_monitoring_query_metrics(self, raw_event):
         # type: (str) -> None
         if raw_event is None:
             return
 
-        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metrics")
+        self._aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metrics")
 
     def database_monitoring_query_activity(self, raw_event):
         # type: (str) -> None
         if raw_event is None:
             return
 
-        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-activity")
+        self._aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-activity")
 
     def database_monitoring_metadata(self, raw_event):
         # type: (str) -> None
         if raw_event is None:
             return
 
-        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metadata")
+        self._aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metadata")
 
     def event_platform_event(self, raw_event, event_track_type):
         # type: (str, str) -> None
@@ -830,7 +838,7 @@ class AgentCheck(object):
         """
         if raw_event is None:
             return
-        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), event_track_type)
+        self._aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), event_track_type)
 
     def should_send_metric(self, metric_name):
         return not self._metric_excluded(metric_name) and self._metric_included(metric_name)
@@ -885,7 +893,7 @@ class AgentCheck(object):
             self.warning(err_msg)
             return
 
-        aggregator.submit_metric(self, self.check_id, mtype, name, value, tags, hostname, flush_first_value)
+        self._aggregator.submit_metric(self, self.check_id, mtype, name, value, tags, hostname, flush_first_value)
 
     def gauge(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
         # type: (str, float, Sequence[str], str, str, bool) -> None
@@ -1106,7 +1114,7 @@ class AgentCheck(object):
 
         message = self.sanitize(message)
 
-        aggregator.submit_service_check(
+        self._aggregator.submit_service_check(
             self, self.check_id, self._format_namespace(name, raw), status, tags, hostname, message
         )
 
@@ -1522,7 +1530,7 @@ class AgentCheck(object):
         if self.__NAMESPACE__:
             event.setdefault('source_type_name', self.__NAMESPACE__)
 
-        aggregator.submit_event(self, self.check_id, event)
+        self._aggregator.submit_event(self, self.check_id, event)
 
     def _normalize_tags_type(self, tags, device_name=None, metric_name=None):
         # type: (Sequence[Union[None, str, bytes]], str, str) -> List[str]
@@ -1655,6 +1663,36 @@ class _TrialErrorDowngrade(logging.Filter):
         return True
 
 
+class _TrialAggregatorBuffer:
+    """Wraps the real aggregator: captures submit_* calls from a candidate
+    run so failed candidates can be discarded with no side effects. Constants
+    and any non-buffered helper passes through to the real aggregator.
+    """
+
+    _BUFFERED = (
+        "submit_metric",
+        "submit_service_check",
+        "submit_event",
+        "submit_event_platform_event",
+        "submit_histogram_bucket",
+    )
+
+    def __init__(self, real):
+        self._real = real
+        self.calls: list[tuple[str, tuple, dict]] = []
+        for name in self._BUFFERED:
+            setattr(self, name, self._capture(name))
+
+    def _capture(self, name):
+        def _fn(*a, _name=name, **kw):
+            self.calls.append((_name, a, kw))
+
+        return _fn
+
+    def __getattr__(self, name):
+        return getattr(self._real, name)
+
+
 class _TrialModeProxy(AgentCheck):
     """Probe candidate configs from generate_configs() and commit the first that runs cleanly.
 
@@ -1695,11 +1733,14 @@ class _TrialModeProxy(AgentCheck):
             inst.check_id = self.check_id
             inst.provider = self.provider
 
-            # Buffer service_check submissions so that failed candidates cannot
-            # emit CRITICAL service checks to the live aggregator. The instance
-            # attribute shadows AgentCheck.service_check; del restores it.
-            buffered_scs: list[tuple] = []
-            inst.service_check = lambda *a, _buf=buffered_scs, **kw: _buf.append((a, kw))
+            # Route all aggregator submissions through a per-instance buffer so
+            # failed candidates leave no trace. AgentCheck submission methods
+            # call self._aggregator.submit_*, so swapping this attribute
+            # captures everything (metrics, service checks, events, event
+            # platform events, histogram buckets) the candidate emits.
+            real_agg = inst._aggregator
+            buffer = _TrialAggregatorBuffer(real_agg)
+            inst._aggregator = buffer
 
             log_filter = _TrialErrorDowngrade()
             inst.log.logger.addFilter(log_filter)
@@ -1707,11 +1748,11 @@ class _TrialModeProxy(AgentCheck):
                 error_report = inst.run()
             finally:
                 inst.log.logger.removeFilter(log_filter)
-                del inst.service_check  # restore to AgentCheck.service_check
+                inst._aggregator = real_agg
 
             if not error_report:
-                for a, kw in buffered_scs:
-                    inst.service_check(*a, **kw)  # replay winner's SCs via real method
+                for name, args, kwargs in buffer.calls:
+                    getattr(real_agg, name)(*args, **kwargs)
                 self._winner = inst
                 return
             last_error = error_report

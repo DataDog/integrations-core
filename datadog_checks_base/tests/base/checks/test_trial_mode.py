@@ -208,6 +208,113 @@ def test_winner_service_checks_are_replayed(aggregator):
     aggregator.assert_service_check("trial.health", status=AgentCheck.CRITICAL, count=0)
 
 
+# Regression tests for the broader contract: every submission family must be
+# buffered (not just service_check). A candidate that emits a metric/event/etc.
+# and then raises must leave no trace in the aggregator.
+
+
+class _GaugeBeforeFailCheck(AgentCheck):
+    """Submits a metric then raises."""
+
+    @classmethod
+    def generate_configs(cls, service_dict):
+        for p in service_dict["ports"]:
+            yield {"target": f"{service_dict['host']}:{p['number']}"}
+
+    def check(self, _):
+        self.gauge("trial.leak", 42, tags=["candidate:fail"])
+        raise ConnectionError("boom")
+
+
+class _GaugeWinOnSecondCheck(AgentCheck):
+    """First candidate submits a metric then fails; second wins and submits."""
+
+    @classmethod
+    def generate_configs(cls, service_dict):
+        for p in service_dict["ports"]:
+            yield {"target": f"{service_dict['host']}:{p['number']}"}
+
+    def check(self, _):
+        if not self.instance["target"].endswith(":9090"):
+            self.gauge("trial.leak", 1)
+            raise ConnectionError("wrong port")
+        self.gauge("trial.leak", 42)
+
+
+class _EventBeforeFailCheck(AgentCheck):
+    """Submits an event then raises."""
+
+    @classmethod
+    def generate_configs(cls, service_dict):
+        for p in service_dict["ports"]:
+            yield {"target": f"{service_dict['host']}:{p['number']}"}
+
+    def check(self, _):
+        self.event({"msg_title": "leaked", "msg_text": "x", "timestamp": 0})
+        raise ConnectionError("boom")
+
+
+class _HistogramBucketBeforeFailCheck(AgentCheck):
+    """Submits a histogram bucket then raises."""
+
+    @classmethod
+    def generate_configs(cls, service_dict):
+        for p in service_dict["ports"]:
+            yield {"target": f"{service_dict['host']}:{p['number']}"}
+
+    def check(self, _):
+        self.submit_histogram_bucket("trial.bucket", 1, 0, 10, monotonic=False, hostname="", tags=[])
+        raise ConnectionError("boom")
+
+
+class _EventPlatformBeforeFailCheck(AgentCheck):
+    """Submits an event-platform event then raises."""
+
+    @classmethod
+    def generate_configs(cls, service_dict):
+        for p in service_dict["ports"]:
+            yield {"target": f"{service_dict['host']}:{p['number']}"}
+
+    def check(self, _):
+        self.event_platform_event("payload", "dbm-samples")
+        raise ConnectionError("boom")
+
+
+def test_gauge_submissions_from_failed_candidates_are_suppressed(aggregator):
+    proxy = _make_proxy(_GaugeBeforeFailCheck, "t_gauge_suppressed")
+    proxy.run()
+
+    aggregator.assert_metric("trial.leak", count=0)
+
+
+def test_winner_gauge_submissions_are_replayed(aggregator):
+    proxy = _make_proxy(_GaugeWinOnSecondCheck, "t_gauge_winner")
+    proxy.run()
+
+    aggregator.assert_metric("trial.leak", value=42, count=1)
+
+
+def test_event_submissions_from_failed_candidates_are_suppressed(aggregator):
+    proxy = _make_proxy(_EventBeforeFailCheck, "t_event_suppressed")
+    proxy.run()
+
+    assert aggregator.events == []
+
+
+def test_histogram_bucket_submissions_from_failed_candidates_are_suppressed(aggregator):
+    proxy = _make_proxy(_HistogramBucketBeforeFailCheck, "t_bucket_suppressed")
+    proxy.run()
+
+    assert aggregator.histogram_bucket("trial.bucket") == []
+
+
+def test_event_platform_submissions_from_failed_candidates_are_suppressed(aggregator):
+    proxy = _make_proxy(_EventPlatformBeforeFailCheck, "t_ep_suppressed")
+    proxy.run()
+
+    assert aggregator.get_event_platform_events("dbm-samples", parse_json=False) == []
+
+
 @pytest.mark.parametrize(
     "level_in,level_out",
     [
