@@ -1,8 +1,8 @@
 {
-  "name": "Anthropic Org Membership Changes",
+  "name": "Claude Org Membership Changes",
   "type": "logs",
   "page": "stream",
-  "query": "source:anthropic-compliance-logs @evt.name:(org_user_invite_sent OR org_user_invite_accepted OR org_user_invite_revoked OR org_user_role_changed OR org_user_removed)",
+  "query": "source:claude-compliance-logs @evt.name:(org_user_invite_sent OR org_user_invite_accepted OR org_user_invite_revoked OR org_user_role_changed OR org_user_removed)",
   "timerange": {
     "interval_ms": 86400000
   },

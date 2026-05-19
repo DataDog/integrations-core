@@ -1,8 +1,8 @@
-# Anthropic Compliance
+# Claude Compliance
 
 ## Overview
 
-Datadog's Anthropic Compliance integration ingests audit activity logs from Anthropic's [Compliance API][1]. With this integration, security and compliance teams can:
+Datadog's Claude Compliance integration ingests audit activity logs from Anthropic's [Compliance API][1]. With this integration, security and compliance teams can:
 
 - **Monitor SSO sign-ins and authentication events** across your organization
 - **Track API key lifecycle** (creation, deletion, scope updates) for Admin, Platform, and Scoped API keys
@@ -34,14 +34,13 @@ The Compliance API is available to Anthropic Enterprise plan customers with the 
 
 ### 3. Configure the Datadog integration
 
-1. In Datadog, go to [**Integrations -> Anthropic Compliance**](https://app.datadoghq.com/integrations?integrationId=anthropic-compliance-logs).
-2. In the configuration panel, paste your **Admin API Key**.
-3. Click **Save Configuration**.
+1. Paste your **Admin API Key** into the configuration panel, paste your
+2. Click **Save Configuration**.
 
 ### 4. Validate
 
 1. Wait up to 5 minutes for the first crawl.
-2. Open [Log Explorer][3] and filter on `source:anthropic-compliance-logs`.
+2. Open [Log Explorer][3] and filter on `source:claude-compliance-logs`.
 3. Confirm logs appear with `evt.name` values such as `claude_chat_viewed`, `admin_api_key_created`, or `user_signed_in_sso`.
 
 ## Data Collected
@@ -55,19 +54,19 @@ The integration collects audit activity logs from `GET /v1/compliance/activities
 - An activity `type` such as `user_signed_in_sso`, `admin_api_key_created`, `org_user_invite_accepted`, or `claude_chat_viewed` (150+ activity types across 35+ categories)
 - Organization and workspace context
 
-Logs are tagged `source:anthropic-compliance-logs` and processed by a Datadog log pipeline that flattens the actor object into standard `usr.*` and `network.client.*` attributes and enriches the source IP with GeoIP and the User-Agent string.
+Logs are tagged `source:claude-compliance-logs` and processed by a Datadog log pipeline that flattens the actor object into standard `usr.*` and `network.client.*` attributes and enriches the source IP with GeoIP and the User-Agent string.
 
 ### Metrics
 
-Anthropic Compliance does not include any metrics.
+Claude Compliance does not include any metrics.
 
 ### Service Checks
 
-Anthropic Compliance does not include any service checks.
+Claude Compliance does not include any service checks.
 
 ### Events
 
-Anthropic Compliance does not include any events.
+Claude Compliance does not include any events.
 
 ## Troubleshooting
 
@@ -79,5 +78,5 @@ Need help? Contact [Datadog support][4].
 
 [1]: https://platform.claude.com/docs/en/api/compliance
 [2]: https://app.datadoghq.com/integrations?integrationId=anthropic-usage-and-costs
-[3]: https://app.datadoghq.com/logs?query=source%3Aanthropic-compliance-logs
+[3]: https://app.datadoghq.com/logs?query=source%3Aclaude-compliance-logs
 [4]: https://docs.datadoghq.com/help/

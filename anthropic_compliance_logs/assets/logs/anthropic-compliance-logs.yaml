@@ -1,5 +1,7 @@
 id: anthropic-compliance-logs
 backend_only: false
+installation_sources:
+  - claude-compliance-logs
 facets:
   - groups:
       - Event
@@ -88,10 +90,10 @@ facets:
     source: log
 pipeline:
   type: pipeline
-  name: Anthropic Compliance Logs
+  name: Claude Compliance Logs
   enabled: true
   filter:
-    query: source:anthropic-compliance-logs
+    query: source:claude-compliance-logs
   processors:
     - type: date-remapper
       name: Define `created_at` as the official date of the log
