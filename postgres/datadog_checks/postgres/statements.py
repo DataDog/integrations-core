@@ -219,6 +219,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     cursor.execute(query, params=params, binary=binary)
                     return cursor.fetchall(), cursor.description
         except psycopg.Error as e:
+            self._last_run_did_error = True
             # A failed query could've derived from incorrect columns within the cache. It's a rare edge case,
             # but the next time the query is run, it will retrieve the correct columns.
             self._log.warning("Failed to run query [%s] %s", query, params)
@@ -271,6 +272,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             return self._query_calls_cache.called_queryids
 
     def run_job(self):
+        self._last_run_did_error = False
         # do not emit any dd.internal metrics for DBM specific check code
         self.tags = [t for t in self._tags if not t.startswith('dd.internal')]
         self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
@@ -304,6 +306,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             for payload in payloads:
                 self._check.database_monitoring_query_metrics(payload)
         except Exception:
+            self._last_run_did_error = True
             self._log.exception('Unable to collect statement metrics due to an error')
             return []
 
@@ -432,6 +435,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 )
                 return rows
         except psycopg.Error as e:
+            self._last_run_did_error = True
             error_tag = "error:database-{}".format(type(e).__name__)
 
             if (isinstance(e, psycopg.errors.ObjectNotInPrerequisiteState)) and 'pg_stat_statements' in str(e):
@@ -519,6 +523,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     hostname=self._check.reported_hostname,
                 )
         except psycopg.Error as e:
+            self._last_run_did_error = True
             self._log.warning("Failed to query for pg_stat_statements_info: %s", e)
 
     @tracked_method(agent_check_getter=agent_check_getter)
@@ -544,6 +549,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 hostname=self._check.reported_hostname,
             )
         except psycopg.Error as e:
+            self._last_run_did_error = True
             self._log.warning("Failed to query for pg_stat_statements count: %s", e)
 
     def _baseline_metrics_query_key(self, row):

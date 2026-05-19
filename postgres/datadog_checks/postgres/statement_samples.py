@@ -323,11 +323,13 @@ class PostgresStatementSamples(DBMAsyncJob):
                         )
                     self._log.debug("found available pg_stat_activity columns: %s", available_columns)
                 except psycopg.errors.InvalidSchemaName as e:
+                    self._last_run_did_error = True
                     self._log.warning(
                         "cannot collect activity due to invalid schema in dbname=%s: %s", self._config.dbname, repr(e)
                     )
                     return None
                 except psycopg.DatabaseError as e:
+                    self._last_run_did_error = True
                     # if the schema is valid then it's some problem with the function (missing, or invalid permissions,
                     # incorrect definition)
                     self._check.record_warning(
@@ -469,6 +471,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
 
     def run_job(self):
+        self._last_run_did_error = False
         # do not emit any dd.internal metrics for DBM specific check code
         self.tags = [t for t in self._tags if not t.startswith('dd.internal')]
         self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
@@ -655,11 +658,13 @@ class PostgresStatementSamples(DBMAsyncJob):
         try:
             self._check.db_pool.get_connection(dbname)
         except psycopg.OperationalError as e:
+            self._last_run_did_error = True
             self._log.warning(
                 "cannot collect execution plans due to failed DB connection to dbname=%s: %s", dbname, repr(e)
             )
             return DBExplainError.connection_error, e
         except psycopg.DatabaseError as e:
+            self._last_run_did_error = True
             self._log.warning(
                 "cannot collect execution plans due to a database error in dbname=%s: %s", dbname, repr(e)
             )
@@ -668,13 +673,16 @@ class PostgresStatementSamples(DBMAsyncJob):
         try:
             result = self._run_explain(dbname, EXPLAIN_VALIDATION_QUERY, EXPLAIN_VALIDATION_QUERY)
         except psycopg.errors.InvalidSchemaName as e:
+            self._last_run_did_error = True
             self._log.warning("cannot collect execution plans due to invalid schema in dbname=%s: %s", dbname, repr(e))
             self._emit_run_explain_error(dbname, DBExplainError.invalid_schema, e)
             return DBExplainError.invalid_schema, e
         except psycopg.errors.DatatypeMismatch as e:
+            self._last_run_did_error = True
             self._emit_run_explain_error(dbname, DBExplainError.datatype_mismatch, e)
             return DBExplainError.datatype_mismatch, e
         except psycopg.DatabaseError as e:
+            self._last_run_did_error = True
             # if the schema is valid then it's some problem with the function (missing, or invalid permissions,
             # incorrect definition)
             self._emit_run_explain_error(dbname, DBExplainError.failed_function, e)
@@ -820,24 +828,28 @@ class PostgresStatementSamples(DBMAsyncJob):
                 return error_response
             return self._run_explain(dbname, statement, obfuscated_statement), None, None
         except psycopg.errors.UndefinedTable as e:
+            self._last_run_did_error = True
             self._log.debug("Failed to collect execution plan: %s", repr(e))
             error_response = None, DBExplainError.undefined_table, '{}'.format(type(e))
             self._explain_errors_cache[query_signature] = error_response
             self._emit_run_explain_error(dbname, DBExplainError.undefined_table, e)
             return error_response
         except psycopg.errors.UndefinedFunction as e:
+            self._last_run_did_error = True
             self._log.debug("Failed to collect execution plan: %s", repr(e))
             error_response = None, DBExplainError.undefined_function, '{}'.format(type(e))
             self._explain_errors_cache[query_signature] = error_response
             self._emit_run_explain_error(dbname, DBExplainError.undefined_function, e)
             return error_response
         except psycopg.errors.IndeterminateDatatype as e:
+            self._last_run_did_error = True
             self._log.debug("Failed to collect execution plan: %s", repr(e))
             error_response = None, DBExplainError.indeterminate_datatype, '{}'.format(type(e))
             self._explain_errors_cache[query_signature] = error_response
             self._emit_run_explain_error(dbname, DBExplainError.indeterminate_datatype, e)
             return error_response
         except psycopg.errors.DatabaseError as e:
+            self._last_run_did_error = True
             self._log.debug("Failed to collect execution plan: %s", repr(e))
             error_response = None, DBExplainError.database_error, '{}'.format(type(e))
             self._emit_run_explain_error(dbname, DBExplainError.database_error, e)
@@ -974,6 +986,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     continue
                 yield from self._collect_plan_for_statement(row)
             except Exception:
+                self._last_run_did_error = True
                 self._log.exception(
                     "Crashed trying to collect execution plan for statement in dbname=%s", row['datname']
                 )
