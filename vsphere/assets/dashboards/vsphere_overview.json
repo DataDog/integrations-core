@@ -857,7 +857,7 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "avg:vsphere.datastore.numberReadAveraged.avg{$vcenter_server,$vcenter_datacenter , $vsphere_host , $VM} by {vsphere_datastore}"
+                                "query": "avg:vsphere.datastore.numberReadAveraged.avg{$vcenter_server,$vcenter_datacenter,$vsphere_host,$VM} by {vmfs_uuid}"
                             }
                         ],
                         "response_format": "timeseries",
@@ -912,7 +912,7 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "avg:vsphere.datastore.numberWriteAveraged.avg{$vcenter_server,$vcenter_datacenter,$vsphere_host,$VM} by {vsphere_datastore}"
+                                "query": "avg:vsphere.datastore.numberWriteAveraged.avg{$vcenter_server,$vcenter_datacenter,$vsphere_host,$VM} by {vmfs_uuid}"
                             }
                         ],
                         "response_format": "timeseries",
