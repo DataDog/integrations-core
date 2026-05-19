@@ -53,8 +53,9 @@ def discover_instances(config, interval, check_ref):
                     del check
                     continue
                 finally:
-                    # Drain tasks left by this SNMP call; leftover handle_timeout tasks
-                    # would stop the loop before the next host's request completes.
+                    # Close the host's transport dispatcher to release its UDP socket FD, then
+                    # drain any leftover handle_timeout tasks so they don't stop the next host's loop.
+                    host_config._snmp_engine.transport_dispatcher.close_dispatcher()
                     _pending = asyncio.all_tasks(loop)
                     for _t in _pending:
                         _t.cancel()

@@ -1,4 +1,5 @@
 - name: openmetrics_endpoint
+  display_priority: 0
   required: true
   description: |
     The URL exposing metrics in the OpenMetrics format.
@@ -6,6 +7,7 @@
   value:
     type: string
 - name: namespace
+  display_priority: 0
   hidden: true
   description: |
     The namespace to be prepended to all metrics.
@@ -14,6 +16,7 @@
     type: string
     pattern: '\w*'
 - name: raw_metric_prefix
+  display_priority: 0
   description: |
     A prefix that is removed from all exposed metric names, if present.
     All configuration options will use the prefix-less name.
@@ -24,6 +27,7 @@
     display_default: null
 # Only shown for the generic `openmetrics` integration. Lets a user define which metrics they want to collect.
 - name: metrics
+  display_priority: 0
   hidden: true
   description: |
     This list defines which metrics to collect from the `openmetrics_endpoint`.
@@ -98,6 +102,7 @@
 # Hidden for the generic `openmetrics` integration, which uses the `metrics` field.
 # For custom openmetrics-based integrations this allows users to specify metrics in addition to the built-in ones.
 - name: extra_metrics
+  display_priority: 0
   description: |
     This list defines metrics to collect from the `openmetrics_endpoint`, in addition to
     what the check collects by default. If the check already collects a metric, then
@@ -170,6 +175,7 @@
               type: string
             additionalProperties: true
 - name: exclude_metrics
+  display_priority: 0
   description: |
     A list of metrics to exclude, with each entry being either
     the exact metric name or a regular expression.
@@ -183,6 +189,7 @@
     items:
       type: string
 - name: exclude_metrics_by_labels
+  display_priority: 0
   description: |
     A mapping of labels to exclude metrics with matching label name and their corresponding metric values. To match
     all values of a label, set it to `true`.
@@ -207,6 +214,7 @@
         items:
           type: string
 - name: tag_by_endpoint
+  display_priority: 0
   description: Whether to include an endpoint tag or not.
   fleet_configurable: true
   hidden: true
@@ -215,6 +223,7 @@
     example: False
     display_default: True
 - name: exclude_labels
+  display_priority: 0
   description: |
     A list of labels to exclude, useful for high cardinality values like timestamps or UUIDs.
     May be used in conjunction with `include_labels`.
@@ -227,6 +236,7 @@
     items:
       type: string
 - name: include_labels
+  display_priority: 0
   description: |
     A list of labels to include. May be used in conjunction with `exclude_labels`.
     Labels defined in `exclude_labels` will take precedence in case of overlap.
@@ -238,6 +248,7 @@
     items:
       type: string
 - name: rename_labels
+  display_priority: 0
   description: |
     A mapping of label names to their new names.
   fleet_configurable: true
@@ -247,6 +258,7 @@
       <LABEL_NAME_2>: <NEW_LABEL_NAME_2>
     type: object
 - name: enable_health_service_check
+  display_priority: 0
   description: |
     Whether or not to send a service check named `<NAMESPACE>.openmetrics.health` which reports
     the health of the `openmetrics_endpoint`.
@@ -255,6 +267,7 @@
     example: true
     type: boolean
 - name: ignore_connection_errors
+  display_priority: 0
   description: |
     Whether or not to ignore connection errors when scraping `openmetrics_endpoint`.
   fleet_configurable: true
@@ -262,12 +275,14 @@
     example: false
     type: boolean
 - name: hostname_label
+  display_priority: 0
   description: |
     Override the hostname for every metric submission with the value of one of its labels.
   fleet_configurable: true
   value:
     type: string
 - name: hostname_format
+  display_priority: 0
   description: |
     When `hostname_label` is set, this instructs the check how to format the values. The string
     `<HOSTNAME>` is replaced by the value of the label defined by `hostname_label`.
@@ -276,6 +291,7 @@
     example: <HOSTNAME>
     type: string
 - name: collect_histogram_buckets
+  display_priority: 0
   description: |
     Whether or not to send histogram buckets.
   fleet_configurable: true
@@ -283,6 +299,7 @@
     example: true
     type: boolean
 - name: non_cumulative_histogram_buckets
+  display_priority: 0
   fleet_configurable: true
   description: |
     Whether or not histogram buckets are non-cumulative and to come with a `lower_bound` tag.
@@ -290,6 +307,7 @@
     example: false
     type: boolean
 - name: histogram_buckets_as_distributions
+  display_priority: 0
   description: |
     Whether or not to send histogram buckets as Datadog distribution metrics. This implicitly
     enables the `collect_histogram_buckets` and `non_cumulative_histogram_buckets` options.
@@ -301,6 +319,7 @@
     example: false
     type: boolean
 - name: collect_counters_with_distributions
+  display_priority: 0
   description: |
     Whether or not to also collect the observation counter metrics ending in `.sum` and `.count`
     when sending histogram buckets as Datadog distribution metrics. This implicitly enables the
@@ -310,6 +329,7 @@
     example: false
     type: boolean
 - name: use_process_start_time
+  display_priority: 0
   description: |
     Whether to enable a heuristic for reporting counter values on the first scrape. When true,
     the first time an endpoint is scraped, check `process_start_time_seconds` to decide whether zero
@@ -320,6 +340,7 @@
     example: false
     type: boolean
 - name: share_labels
+  display_priority: 0
   description: |
     This mapping allows for the sharing of labels across multiple metrics. The keys represent the
     exposed metrics from which to share labels, and the values are mappings that configure the
@@ -363,6 +384,7 @@
           items:
             type: string
 - name: cache_shared_labels
+  display_priority: 0
   description: |
     When `share_labels` is set, it instructs the check to cache labels collected from the first payload
     for improved performance.
@@ -373,6 +395,7 @@
     type: boolean
     example: true
 - name: raw_line_filters
+  display_priority: 0
   description: |
     A list of regular expressions used to exclude lines read from the `openmetrics_endpoint`
     from being parsed.
@@ -382,6 +405,7 @@
     items:
       type: string
 - name: cache_metric_wildcards
+  display_priority: 0
   description: |
     Whether or not to cache data from metrics that are defined by regular expressions rather
     than the full metric name.
@@ -390,6 +414,7 @@
     example: true
     type: boolean
 - name: use_latest_spec
+  display_priority: 0
   description: |
     Whether or not the parser will strictly adhere to the OpenMetrics specification,
     regardless of the received `Content-Type` header.
@@ -399,6 +424,7 @@
     example: false
     type: boolean
 - name: telemetry
+  display_priority: 0
   description: |
     Whether or not to submit metrics prefixed by `<NAMESPACE>.telemetry.` for debugging purposes.
   fleet_configurable: true
@@ -406,6 +432,7 @@
     example: false
     type: boolean
 - name: ignore_tags
+  display_priority: 0
   description: |
     A list of regular expressions used to ignore tags added by Autodiscovery and entries in the `tags` option.
   fleet_configurable: true

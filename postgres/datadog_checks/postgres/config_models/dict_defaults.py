@@ -84,9 +84,23 @@ def instance_collect_settings():
     )
 
 
+def instance_collect_column_statistics():
+    return instance.CollectColumnStatistics(
+        enabled=False,
+        max_tables=500,
+        collection_interval=3600,
+        include_databases=[],
+        exclude_databases=[],
+        include_schemas=[],
+        exclude_schemas=[],
+        include_tables=[],
+        exclude_tables=[],
+    )
+
+
 def instance_collect_schemas():
     return instance.CollectSchemas(
-        enabled=False,
+        enabled=True,
         max_tables=300,
         max_columns=50,
         collection_interval=600,
@@ -131,4 +145,14 @@ def instance_locks_idle_in_transaction():
         enabled=True,
         collection_interval=300,
         max_rows=100,
+    )
+
+
+def instance_data_observability():
+    return instance.DataObservability(
+        enabled=False,
+        collection_interval=10,
+        run_sync=False,
+        config_id=None,
+        queries=(),
     )

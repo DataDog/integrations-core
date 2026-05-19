@@ -496,7 +496,11 @@ class SnmpCheck(AgentCheck):
             return error, tags
         finally:
             if loop is not None:
-                # Cancel pending pysnmp tasks and close the loop to release file descriptors.
+                # Explicitly close the transport dispatcher to release UDP socket FDs.
+                # asyncio.all_tasks only cancels Task objects; the UdpAsyncioTransport is a
+                # DatagramProtocol/Transport pair — its FD is only released by close_dispatcher().
+                config._snmp_engine.transport_dispatcher.close_dispatcher()
+                # Cancel remaining pysnmp tasks (e.g. handle_timeout) and close the loop.
                 pending = asyncio.all_tasks(loop)
                 for task in pending:
                     task.cancel()

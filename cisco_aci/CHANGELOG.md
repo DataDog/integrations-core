@@ -2,6 +2,28 @@
 
 <!-- towncrier release notes start -->
 
+## 5.0.0 / 2026-05-14
+
+***Removed***:
+
+* Remove tenant faults as events, faults are now only sent as logs. ([#23350](https://github.com/DataDog/integrations-core/pull/23350))
+
+***Added***:
+
+* Get health score from healthInst if fvOverallHealth isn't enabled. ([#21988](https://github.com/DataDog/integrations-core/pull/21988))
+
+## 4.14.2 / 2026-04-28
+
+***Fixed***:
+
+* Bump cryptography from 46.0.6 to 46.0.7 to address CVE-2026-39892. ([#23403](https://github.com/DataDog/integrations-core/pull/23403))
+
+## 4.14.1 / 2026-04-09 / Agent 7.78.0
+
+***Fixed***:
+
+* Bump `cryptography` to `==46.0.6` (CVE-2026-34073 / VULN-59768). ([#23223](https://github.com/DataDog/integrations-core/pull/23223))
+
 ## 4.14.0 / 2026-04-01
 
 ***Added***:

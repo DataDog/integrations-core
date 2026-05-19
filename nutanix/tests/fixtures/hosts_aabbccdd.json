@@ -1,0 +1,40 @@
+[
+  {
+    "data": [
+      {
+        "$objectType": "clustermgmt.v4.config.Host",
+        "extId": "eeee1111-2222-3333-4444-555566667777",
+        "hostName": "10-0-1-100-aws-us-west-2a",
+        "hostType": "HYPER_CONVERGED",
+        "hypervisor": {
+          "$objectType": "clustermgmt.v4.config.HypervisorReference",
+          "fullName": "AHV 10.3",
+          "type": "AHV",
+          "numberOfVms": 1,
+          "state": "ACROPOLIS_NORMAL",
+          "acropolisConnectionState": "CONNECTED"
+        },
+        "cluster": {
+          "name": "second-nutanix-cluster",
+          "$objectType": "clustermgmt.v4.config.ClusterReference",
+          "uuid": "aabbccdd-1111-2222-3333-444455556666"
+        },
+        "numberOfCpuCores": 8,
+        "numberOfCpuThreads": 16,
+        "numberOfCpuSockets": 1,
+        "cpuFrequencyHz": 2500000000,
+        "cpuModel": "Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz",
+        "memorySizeBytes": 137438953472,
+        "nodeStatus": "NORMAL"
+      }
+    ],
+    "metadata": {
+      "flags": [
+        {"name": "hasError", "value": false},
+        {"name": "isPaginated", "value": true},
+        {"name": "isTruncated", "value": false}
+      ],
+      "totalAvailableResults": 1
+    }
+  }
+]

@@ -6,7 +6,13 @@
 
 * Remove the Python check implementation. The `datadog_csi_driver` check now lives in the [datadog-agent](https://github.com/DataDog/datadog-agent) repository as a Go core check.
 
-## 1.5.0 / 2026-04-01
+## 1.5.1 / 2026-04-15
+
+***Fixed***:
+
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+
+## 1.5.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:
 

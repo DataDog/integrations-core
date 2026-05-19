@@ -2,7 +2,6 @@
 
 set -euxo pipefail
 
-"${DD_PYTHON3}" -m pip install --no-warn-script-location --upgrade pip
 "${DD_PYTHON3}" -m pip install --no-warn-script-location virtualenv
 "${DD_PYTHON3}" -m virtualenv py3
 
@@ -23,8 +22,8 @@ cp -R /opt/mqm "${DD_PREFIX_PATH}"
 
 # openssl
 DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
-VERSION="3.6.1" \
-SHA256="b1bfedcd5b289ff22aee87c9d600f515767ebf45f77168cb6d64f231f518a82e" \
+VERSION="3.6.2" \
+SHA256="aaf51a1fe064384f811daeaeb4ec4dce7340ec8bd893027eee676af31e83a04f" \
 RELATIVE_PATH="openssl-{{version}}" \
 CONFIGURE_SCRIPT="./config" \
   install-from-source \
@@ -96,12 +95,24 @@ rm "${DD_PREFIX_PATH}/bin/curl"
 
 # libpq and pg_config as needed by psycopg
 DOWNLOAD_URL="https://ftp.postgresql.org/pub/source/v{{version}}/postgresql-{{version}}.tar.bz2" \
-VERSION="16.9" \
-SHA256="07c00fb824df0a0c295f249f44691b86e3266753b380c96f633c3311e10bd005" \
+VERSION="18.3" \
+SHA256="d95663fbbf3a80f81a9d98d895266bdcb74ba274bcc04ef6d76630a72dee016f" \
 RELATIVE_PATH="postgresql-{{version}}" \
   install-from-source --without-readline --with-openssl --without-icu
 # Add paths to pg_config and to the library
 echo PATH="${DD_PREFIX_PATH}/bin:${PATH:-}" >> "$DD_ENV_FILE"
+
+# zstd for librdkafka compression support
+# Keep version in sync with github.com/DataDog/datadog-agent/deps/repos.MODULE.bazel
+DOWNLOAD_URL="https://github.com/facebook/zstd/releases/download/v{{version}}/zstd-{{version}}.tar.gz" \
+VERSION="1.5.7" \
+SHA256="eb33e51f49a15e023950cd7825ca74a4a2b43db8354825ac24fc1b7ee09e6fa3" \
+RELATIVE_PATH="zstd-{{version}}" \
+CONFIGURE_SCRIPT="true" \
+INSTALL_COMMAND="make prefix=${DD_PREFIX_PATH} install" \
+  install-from-source
+# Fix install name so delocate can bundle it from the correct path
+install_name_tool -id "${DD_PREFIX_PATH}/lib/libzstd.1.dylib" "${DD_PREFIX_PATH}/lib/libzstd.1.dylib"
 
 # Dependencies needed to build librdkafka (and thus, confluent-kafka) with kerberos support
 DOWNLOAD_URL="https://github.com/LMDB/lmdb/archive/LMDB_{{version}}.tar.gz" \

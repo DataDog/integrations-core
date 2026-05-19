@@ -8,6 +8,7 @@ on:
       - completed
 env:
   PYTHON_VERSION: "3.13"
+  INTEGRATIONS_WHEELS_STORAGE: "stable"
 
 jobs:
 
@@ -16,6 +17,8 @@ jobs:
     permissions:
         contents: read
         actions: read
+        # needed for dd-sts
+        id-token: write
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
@@ -26,10 +29,17 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
+    - name: Get Datadog credentials
+      id: dd-sts
+      uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+      with:
+        policy: integrations-core-api-key
+
     - name: Install ddev
-      run: |
-        pip install -e ./datadog_checks_dev[cli]
-        pip install -e ./ddev
+      uses: ./.github/actions/setup-ddev
+      with:
+        install-mode: local
+        cache-profile: local-ddev-base
 
     - name: Configure ddev
       run: |
@@ -45,7 +55,7 @@ jobs:
         cmd="ddev -v size status --commit \"$HEAD_SHA\" --format json"
 
         if [ "$EVENT_NAME" = "push" ] && [ "$HEAD_BRANCH" = "master" ]; then 
-          cmd="$cmd --to-dd-key ${{ secrets.DD_API_KEY }}"
+          cmd="$cmd --to-dd-key ${{ steps.dd-sts.outputs.api_key }}"
         fi
         echo "cmd=$cmd" >> $GITHUB_OUTPUT
     
@@ -76,4 +86,4 @@ jobs:
       with:
         name: status_compressed.json
         path: status_compressed.json
-        if-no-files-found: error        
+        if-no-files-found: error

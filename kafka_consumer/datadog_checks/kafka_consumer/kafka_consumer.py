@@ -84,7 +84,7 @@ class KafkaCheck(AgentCheck):
                         for topic, partition in offsets:
                             partitions.add((topic, partition))
                 # Expected format: ({(topic, partition): offset}, cluster_id)
-                highwater_offsets, cluster_id = self.get_watermark_offsets(partitions, mode=HIGH_WATERMARK)
+                highwater_offsets, cluster_id = self.get_highwater_offsets(partitions)
                 if self._data_streams_enabled:
                     broker_timestamps = self._load_broker_timestamps(persistent_cache_key)
                     self._add_broker_timestamps(broker_timestamps, highwater_offsets)
@@ -130,6 +130,7 @@ class KafkaCheck(AgentCheck):
 
         # Collect cluster metadata if enabled
         if self.config._cluster_monitoring_enabled:
+            self._send_cluster_monitoring_heartbeat(total_contexts, cluster_id)
             try:
                 self.metadata_collector.collect_all_metadata(highwater_offsets)
             except Exception as e:
@@ -140,6 +141,19 @@ class KafkaCheck(AgentCheck):
 
     def count_consumer_contexts(self, consumer_offsets):
         return sum(len(offsets) for offsets in consumer_offsets.values())
+
+    def _send_cluster_monitoring_heartbeat(self, total_contexts: int, cluster_id: str) -> None:
+        payload = {
+            'collection_timestamp': int(time() * 1000),
+            'kafka_cluster_id': cluster_id,
+            'config_type': 'heartbeat',
+            'contexts': total_contexts,
+            'contexts_limit': self._context_limit,
+            'bootstrap_servers': self.config._kafka_connect_str,
+        }
+        if self.config._kafka_cluster_id_override:
+            payload['original_kafka_cluster_id'] = self.config._auto_detected_cluster_id
+        self.event_platform_event(json.dumps(payload), "data-streams-message")
 
     def get_consumer_offsets(self):
         # {(consumer_group, topic, partition): offset}
@@ -246,10 +260,19 @@ class KafkaCheck(AgentCheck):
     def _add_broker_timestamps(self, broker_timestamps, highwater_offsets):
         for (topic, partition), highwater_offset in highwater_offsets.items():
             timestamps = broker_timestamps["{}_{}".format(topic, partition)]
+            # If the highwater offset went backwards (topic recreated,
+            # retention wipe, or offset reset) any cached pair with a larger
+            # offset points to a now-nonexistent message and would poison
+            # interpolation. Drop those entries.
+            stale = [o for o in timestamps if o > highwater_offset]
+            for o in stale:
+                del timestamps[o]
             timestamps[highwater_offset] = time()
-            # If there's too many timestamps, we delete the oldest
+            # If there's too many timestamps, we delete the oldest one (by
+            # timestamp, not by offset — evicting by min offset would discard
+            # the fresh post-reset entries and keep poisonous stale ones).
             if len(timestamps) > self._max_timestamps:
-                del timestamps[min(timestamps)]
+                del timestamps[min(timestamps, key=timestamps.get)]
 
     def _save_broker_timestamps(self, broker_timestamps, persistent_cache_key):
         """Saves broker timestamps to persistent cache."""
@@ -312,7 +335,7 @@ class KafkaCheck(AgentCheck):
                     reported_contexts += 1
 
                     if (topic, partition) not in highwater_offsets:
-                        self.log.warning(
+                        self.log.debug(
                             "Consumer group: %s has offsets for topic: %s partition: %s, "
                             "but no stored highwater offset (likely the partition is in the middle of leader failover) "
                             "so cannot calculate consumer lag.",
@@ -380,10 +403,9 @@ class KafkaCheck(AgentCheck):
         )
         return consumer_group_state
 
-    def get_watermark_offsets(self, partitions=None, mode=HIGH_WATERMARK):
-        self.log.debug('Getting %s offsets', 'highwater' if mode == HIGH_WATERMARK else 'lowwater')
+    def get_highwater_offsets(self, partitions=None):
+        self.log.debug('Getting highwater offsets')
 
-        # Build partitions set
         topic_partitions_to_check = set()
         if partitions is None:
             all_topic_partitions = self.client.get_topic_partitions()
@@ -406,25 +428,21 @@ class KafkaCheck(AgentCheck):
 
         dd_consumer_group = "datadog-agent"
 
-        # Open consumer once for both cluster_id and offset fetching
         self.client.open_consumer(dd_consumer_group)
-        cluster_id, _ = self.client.consumer_get_cluster_id_and_list_topics(dd_consumer_group)
+        try:
+            cluster_id, _ = self.client.consumer_get_cluster_id_and_list_topics(dd_consumer_group)
 
-        self.log.debug(
-            'Querying %s %s offsets',
-            len(topic_partitions_to_check),
-            'highwater' if mode == HIGH_WATERMARK else 'lowwater',
-        )
+            self.log.debug('Querying %s highwater offsets', len(topic_partitions_to_check))
 
-        result = {}
-        for topic, partition, offset in self.client.consumer_offsets_for_times(
-            partitions=topic_partitions_to_check, offset=mode
-        ):
-            result[(topic, partition)] = offset
+            result = {}
+            for topic, partition, offset in self.client.consumer_offsets_for_times(
+                partitions=topic_partitions_to_check, offset=HIGH_WATERMARK
+            ):
+                result[(topic, partition)] = offset
+        finally:
+            self.client.close_consumer()
 
-        self.client.close_consumer()
-
-        self.log.debug('Got %s %s offsets', len(result), 'highwater' if mode == HIGH_WATERMARK else 'lowwater')
+        self.log.debug('Got %s highwater offsets', len(result))
         return result, cluster_id
 
     def send_event(self, title, text, tags, event_type, aggregation_key, severity='info'):

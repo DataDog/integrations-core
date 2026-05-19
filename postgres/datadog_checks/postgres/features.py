@@ -17,6 +17,8 @@ class FeatureKey(Enum):
     COLLECT_SCHEMAS = "collect_schemas"
     QUERY_ACTIVITY = "query_activity"
     QUERY_METRICS = "query_metrics"
+    DATA_OBSERVABILITY = "data_observability"
+    COLLECT_COLUMN_STATISTICS = "collect_column_statistics"
 
 
 FeatureNames = {
@@ -26,6 +28,8 @@ FeatureNames = {
     FeatureKey.COLLECT_SCHEMAS: 'Collect Schemas',
     FeatureKey.QUERY_ACTIVITY: 'Query Activity',
     FeatureKey.QUERY_METRICS: 'Query Metrics',
+    FeatureKey.DATA_OBSERVABILITY: 'Data Observability',
+    FeatureKey.COLLECT_COLUMN_STATISTICS: 'Collect Column Statistics',
 }
 
 

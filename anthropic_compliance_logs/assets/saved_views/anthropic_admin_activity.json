@@ -1,0 +1,35 @@
+{
+  "name": "Anthropic Admin Activity",
+  "type": "logs",
+  "page": "stream",
+  "query": "source:anthropic-compliance-logs @actor.type:admin_api_key_actor",
+  "timerange": {
+    "interval_ms": 86400000
+  },
+  "visible_facets": [
+    "core_service",
+    "tag_source",
+    "core_status",
+    "log_evt.name",
+    "log_actor.type",
+    "log_actor.id",
+    "log_usr.email",
+    "log_network.client.ip"
+  ],
+  "options": {
+    "columns": [
+      "source",
+      "service",
+      "@evt.name",
+      "@actor.type",
+      "@usr.email",
+      "@network.client.ip",
+      "host"
+    ],
+    "sort": "desc",
+    "show_date_column": true,
+    "message_display": "inline",
+    "show_message_column": false,
+    "show_timeline": true
+  }
+}
