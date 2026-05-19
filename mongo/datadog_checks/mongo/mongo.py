@@ -315,8 +315,7 @@ class MongoDb(AgentCheck):
             self.log.debug('modules: %s', self._mongo_modules)
         if self._resolved_hostname is None:
             self._resolved_hostname = self._config.reported_database_hostname or self.api_client.hostname
-            if self._resolved_hostname is not None:
-                self.set_metadata('resolved_hostname', self._resolved_hostname)
+            self.set_metadata('resolved_hostname', self._resolved_hostname)
             self.log.debug('resolved_hostname: %s', self._resolved_hostname)
         if self._config.cluster_name:
             self.set_metadata('cluster_name', self._config.cluster_name)

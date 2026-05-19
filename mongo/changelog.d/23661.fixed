@@ -1,1 +1,1 @@
-Fix ``TypeError: argument 3 must be str, not None`` crash when ``serverStatus`` hostname lookup fails and ``reported_database_hostname`` is not set.
+Raise exceptions from the hostname property instead of returning None, so permission and connectivity errors surface as check failures rather than a confusing TypeError.
