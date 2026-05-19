@@ -94,25 +94,35 @@ def test_skips_on_fork_pull_request(ddev, fork_pr_context, mocker):
     get_labels.assert_not_called()
 
 
-def test_aborts_when_event_file_is_unreadable(ddev, monkeypatch, tmp_path, mocker):
-    """A malformed event payload must fail loudly, not silently skip."""
-    bad_event = tmp_path / 'event.json'
-    bad_event.write_text('{not valid json')
+@pytest.mark.parametrize(
+    ('contents', 'create_file'),
+    [
+        pytest.param('{not valid json', True, id='malformed-json'),
+        pytest.param('"a JSON string is not an object"', True, id='non-object-json'),
+        pytest.param(None, False, id='missing-file'),
+    ],
+)
+def test_aborts_when_event_file_is_unreadable(ddev, monkeypatch, tmp_path, mocker, contents, create_file):
+    """Anything that prevents reading a valid event object must fail loudly, not silently skip."""
+    event_path = tmp_path / 'event.json'
+    if create_file:
+        event_path.write_text(contents)
     monkeypatch.setenv('GITHUB_EVENT_NAME', 'pull_request')
-    monkeypatch.setenv('GITHUB_EVENT_PATH', str(bad_event))
+    monkeypatch.setenv('GITHUB_EVENT_PATH', str(event_path))
     get_labels = _mock_labels(mocker, [])
 
     result = ddev('validate', 'qa-label')
 
     assert result.exit_code == 1, result.output
-    assert 'Could not read GitHub event payload' in result.output
+    assert 'Could not read GitHub event payload' in result.output, result.output
     get_labels.assert_not_called()
 
 
 def test_skips_when_pr_number_is_missing(ddev, monkeypatch, tmp_path, mocker):
     """If the event payload lacks pull_request.number we can't fetch labels."""
     event = tmp_path / 'event.json'
-    event.write_text(json.dumps({'pull_request': {'head': {}, 'base': {}}}))
+    repo = {'repo': {'full_name': 'DataDog/integrations-core'}}
+    event.write_text(json.dumps({'pull_request': {'head': repo, 'base': repo}}))
     monkeypatch.setenv('GITHUB_EVENT_NAME', 'pull_request')
     monkeypatch.setenv('GITHUB_EVENT_PATH', str(event))
     monkeypatch.setenv('GITHUB_REPOSITORY', 'DataDog/integrations-core')
@@ -122,6 +132,22 @@ def test_skips_when_pr_number_is_missing(ddev, monkeypatch, tmp_path, mocker):
 
     assert result.exit_code == 0, result.output
     assert 'Could not determine pull request number' in result.output
+    get_labels.assert_not_called()
+
+
+def test_aborts_when_head_or_base_repo_is_missing(ddev, monkeypatch, tmp_path, mocker):
+    """An event payload without head/base repo info is malformed; don't silently skip."""
+    event = tmp_path / 'event.json'
+    event.write_text(json.dumps({'pull_request': {'number': 1, 'head': {}, 'base': {}}}))
+    monkeypatch.setenv('GITHUB_EVENT_NAME', 'pull_request')
+    monkeypatch.setenv('GITHUB_EVENT_PATH', str(event))
+    monkeypatch.delenv('GITHUB_REPOSITORY', raising=False)
+    get_labels = _mock_labels(mocker, [])
+
+    result = ddev('validate', 'qa-label')
+
+    assert result.exit_code == 1, result.output
+    assert 'missing head/base repo information' in result.output
     get_labels.assert_not_called()
 
 

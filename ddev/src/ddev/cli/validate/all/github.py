@@ -17,6 +17,16 @@ if TYPE_CHECKING:
 COMMENT_HEADING = "## Validation Report"
 
 
+def extract_pr_number(event: dict) -> int | None:
+    """Read the pull request number from an already-parsed GitHub Actions event payload."""
+    pr = event.get("pull_request")
+    if isinstance(pr, dict):
+        number = pr.get("number")
+        if isinstance(number, int):
+            return number
+    return None
+
+
 def parse_pr_number_from_event(event_path: str) -> int | None:
     """Extract the PR number from the GitHub Actions event JSON file."""
     try:
@@ -24,13 +34,7 @@ def parse_pr_number_from_event(event_path: str) -> int | None:
     except (json.JSONDecodeError, OSError):
         return None
 
-    pr = event.get("pull_request")
-    if isinstance(pr, dict):
-        number = pr.get("number")
-        if isinstance(number, int):
-            return number
-
-    return None
+    return extract_pr_number(event) if isinstance(event, dict) else None
 
 
 def parse_pr_number_from_ref(ref: str) -> int | None:
