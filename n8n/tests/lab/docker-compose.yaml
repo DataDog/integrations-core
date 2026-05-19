@@ -11,14 +11,23 @@ services:
   n8n:
     image: n8nio/n8n:${N8N_VERSION:-1.118.1}
     container_name: n8n-test
+    # Datadog autodiscovery: tells the Agent (started by `ddev env start --base`
+    # with DD_LOGS_ENABLED=true) to tail this container's stdout/stderr as n8n
+    # logs. Without this label the Agent has DD_LOGS_ENABLED but doesn't know
+    # which containers to attach to.
+    labels:
+      com.datadoghq.ad.logs: '[{"source": "n8n", "service": "n8n-main", "type": "docker"}]'
     ports:
-      - "${N8N_MAIN_HOST_PORT:-5678}:5678"
+      # Hardcoded ports for the lab (we own the host) so the traffic generator,
+      # the README, and the agent config can all assume `localhost:5678`/`5680`.
+      - "5678:5678"
     environment:
       - EXECUTIONS_MODE=queue
       - QUEUE_BULL_REDIS_HOST=redis
       - QUEUE_BULL_REDIS_PORT=6379
-      - N8N_LOG_LEVEL=debug
+      - N8N_LOG_LEVEL=info
       - N8N_LOG_OUTPUT=console
+      - N8N_LOG_FORMAT=json
       - N8N_HOST=0.0.0.0
       - N8N_PORT=5678
       - N8N_PROTOCOL=http
@@ -40,8 +49,15 @@ services:
     volumes:
       - n8n_data:/home/node/.n8n
       - ${N8N_LOG_FOLDER:-./logs}:/var/log/n8n
-      - ./sample_workflow.json:/workflows/sample_workflow.json:ro
-      - ./sample_workflow_failing.json:/workflows/sample_workflow_failing.json:ro
+      # Mount every workflow (test fixtures + lab fixtures) under a single
+      # /workflows/ tree so conftest can discover them with a single glob.
+      - ../docker/sample_workflow.json:/workflows/sample_workflow.json:ro
+      - ../docker/sample_workflow_failing.json:/workflows/sample_workflow_failing.json:ro
+      - ./workflows/lab_fast.json:/workflows/lab_fast.json:ro
+      - ./workflows/lab_slow.json:/workflows/lab_slow.json:ro
+      - ./workflows/lab_fail.json:/workflows/lab_fail.json:ro
+      - ./workflows/lab_flaky.json:/workflows/lab_flaky.json:ro
+      - ./workflows/lab_chain.json:/workflows/lab_chain.json:ro
     depends_on:
       redis:
         condition: service_healthy
@@ -56,14 +72,17 @@ services:
     image: n8nio/n8n:${N8N_VERSION:-1.118.1}
     container_name: n8n-test-worker
     command: ["worker"]
+    labels:
+      com.datadoghq.ad.logs: '[{"source": "n8n", "service": "n8n-worker", "type": "docker"}]'
     ports:
-      - "${N8N_WORKER_HOST_PORT:-5680}:5680"
+      - "5680:5680"
     environment:
       - EXECUTIONS_MODE=queue
       - QUEUE_BULL_REDIS_HOST=redis
       - QUEUE_BULL_REDIS_PORT=6379
       - N8N_LOG_LEVEL=info
       - N8N_LOG_OUTPUT=console
+      - N8N_LOG_FORMAT=json
       - N8N_RUNNERS_ENABLED=false
       - N8N_METRICS=true
       - N8N_METRICS_INCLUDE_DEFAULT_METRICS=true
@@ -83,4 +102,5 @@ services:
 
 volumes:
   n8n_data:
+    name: n8n_lab_data
     driver: local
