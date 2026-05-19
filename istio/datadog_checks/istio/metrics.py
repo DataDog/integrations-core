@@ -286,10 +286,6 @@ ZTUNNEL_METRICS = {
     'istio_xds_connection_terminations_total': 'xds.connection_terminations.total',
     'istio_xds_message_total': 'xds.message.total',
     'istio_xds_message_bytes_total': 'xds.message_bytes.total',
-    # Connection metrics (unstable)
-    'istio_connection_opens_total': 'connection.opens.total',
-    'istio_connection_closes_total': 'connection.closes.total',
-    'istio_connection_termination_total': 'connection.termination.total',
 }
 
 
