@@ -1,0 +1,1 @@
+Add a proof-of-concept `ddev lab` command that delegates Milvus lab lifecycle operations to the Agent E2E framework.

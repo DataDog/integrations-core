@@ -17,6 +17,7 @@ from ddev.cli.config import config
 from ddev.cli.dep import dep
 from ddev.cli.docs import docs
 from ddev.cli.env import env
+from ddev.cli.lab import lab
 from ddev.cli.meta import meta
 from ddev.cli.release import release
 from ddev.cli.size import size
@@ -157,6 +158,7 @@ ddev.add_command(create)
 ddev.add_command(dep)
 ddev.add_command(docs)
 ddev.add_command(env)
+ddev.add_command(lab)
 ddev.add_command(meta)
 ddev.add_command(release)
 ddev.add_command(run)

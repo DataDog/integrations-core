@@ -129,13 +129,31 @@ The same pattern can be reused for other single-node Docker-compatible integrati
 - **Garbage collection:** the existing Agent E2E flow relies primarily on explicit destroy tasks. A shared TTL-based lab registry would still need design work.
 - **Advanced topologies:** multi-node clusters such as Lustre may still require bespoke scenario code and close coordination with Agent DevX.
 
+## POC wrapper in this PR
+
+This PR includes a deliberately small `ddev lab` POC that delegates to the Milvus scenario from the `datadog-agent` branch `add-milvus-e2e-scenario`.
+
+```bash
+ddev lab create milvus --stack-name my-milvus-lab --use-fakeintake
+ddev lab destroy milvus --stack-name my-milvus-lab
+```
+
+The wrapper does not implement its own infrastructure logic. It resolves the configured `repos.agent` checkout, verifies that checkout is on `add-milvus-e2e-scenario`, then shells out to:
+
+```bash
+dda inv aws.create-milvus ...
+dda inv aws.destroy-milvus ...
+```
+
+This is intentionally a proof of concept, not a final CLI contract. It is meant to validate whether a thin `ddev` UX on top of Agent DevX E2E scenarios is useful before investing in a new lab backend.
+
 ## Recommended next step
 
 Use the Agent E2E framework as the Phase 1 execution backend for one or two reference labs. Keep the initial `ddev lab` wrapper intentionally small:
 
 ```bash
-ddev lab create <integration> --backend agent-e2e
-ddev lab destroy <integration> --backend agent-e2e
+ddev lab create <integration>
+ddev lab destroy <integration>
 ```
 
 If the developer experience is good, the wrapper can absorb more behavior from the design document: registry entries, normalized status, logs, SSH helpers, Agent upgrades, and eventually research-generated scenario scaffolding.
