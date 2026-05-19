@@ -161,11 +161,16 @@ class PostgresMetadata(DBMAsyncJob):
         return self._compiled_patterns_cache[pattern_str]
 
     def run_job(self):
+        self._last_run_did_error = False
         # do not emit any dd.internal metrics for DBM specific check code
         self.tags = [t for t in self._tags if not t.startswith("dd.internal")]
         self._tags_no_db = [t for t in self.tags if not t.startswith("db:")]
-        self.report_postgres_metadata()
-        self.report_postgres_extensions()
+        try:
+            self.report_postgres_metadata()
+            self.report_postgres_extensions()
+        except Exception as e:
+            self._last_run_did_error = True
+            self._log.exception("Failed to collect postgres metadata: %s", e)
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def report_postgres_extensions(self):
