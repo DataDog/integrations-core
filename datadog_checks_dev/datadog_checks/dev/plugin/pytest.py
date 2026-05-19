@@ -170,6 +170,16 @@ def dd_agent_check(request, aggregator, datadog_agent):
     from datadog_checks.dev import TempDir, run_command
 
     def run_check(config=None, **kwargs):
+        # In trial-mode (config-discovery) tests, the agent matches every
+        # service whose ad_identifier matches the auto_conf and schedules
+        # a check per match. Some matches may not actually expose the
+        # check's endpoint (e.g. ray's task-runner containers using the
+        # same image as the head/workers). The check command exits 0 when
+        # at least discovery_min_instances satisfied, but per-instance
+        # errors still flow through. Treat them as expected noise: the
+        # test's own metric assertions are the source of truth.
+        ignore_errors = kwargs.get('discovery_min_instances') is not None
+
         root = os.path.dirname(request.module.__file__)
         while True:
             if os.path.isfile(os.path.join(root, 'pyproject.toml')) or os.path.isfile(os.path.join(root, 'setup.py')):
@@ -228,7 +238,7 @@ def dd_agent_check(request, aggregator, datadog_agent):
                 collector = json.loads(raw_json)
             except Exception as e:
                 raise Exception("Error loading json: {}\nCollector Json Output:\n{}".format(e, raw_json))
-            replay_check_run(collector, aggregator, datadog_agent)
+            replay_check_run(collector, aggregator, datadog_agent, ignore_errors=ignore_errors)
 
         return aggregator
 
