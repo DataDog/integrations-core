@@ -30,7 +30,7 @@ def _load_event_payload() -> dict | None:
 
     Returns `None` when the path is unset (callers treat this as a benign
     skip). Raises `OSError`/`json.JSONDecodeError` if the path is set but the
-    file cannot be read or parsed, and `TypeError` if the payload parses to
+    file cannot be read or parsed, and `ValueError` if the payload parses to
     anything other than a JSON object. The caller turns each into an abort so
     every non-success exit goes through `app.abort` instead of bubbling as an
     uncaught exception.
@@ -41,7 +41,7 @@ def _load_event_payload() -> dict | None:
     with open(event_path, encoding='utf-8') as f:
         payload = json.load(f)
     if not isinstance(payload, dict):
-        raise TypeError(f'GitHub event payload at {event_path} is not a JSON object.')
+        raise ValueError(f'GitHub event payload at {event_path} is not a JSON object.')
     return payload
 
 
@@ -70,7 +70,7 @@ def qa_label(app: Application):
 
     try:
         event = _load_event_payload()
-    except (OSError, json.JSONDecodeError, TypeError) as exc:
+    except (OSError, json.JSONDecodeError, ValueError) as exc:
         app.abort(f'Could not read GitHub event payload: {exc}')
 
     if event is None:
