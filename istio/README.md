@@ -92,7 +92,7 @@ The method for applying these annotations varies depending on the [Istio deploym
 
 ##### Ambient mode configuration
 
-Istio ambient mode (GA in Istio v1.24) replaces sidecar injection with two shared components: the `ztunnel` DaemonSet (L4 zero-trust tunneling) and optional `waypoint` proxies (L7 HTTP/gRPC processing). Set `istio_mode: ambient` and configure one or more of `ztunnel_endpoint`, `waypoint_endpoint`, and `istiod_endpoint` on the same instance — the check scrapes each endpoint that is set. Adjust the URLs in the example below to match your cluster's hostnames and ports.
+Istio ambient mode, generally available in Istio v1.24, replaces sidecar injection with two shared components: the `ztunnel` DaemonSet (L4 zero-trust tunneling) and optional `waypoint` proxies (L7 HTTP/gRPC processing). Set `istio_mode: ambient` and configure one or more of `ztunnel_endpoint`, `waypoint_endpoint`, and `istiod_endpoint` on the same instance. The check scrapes each endpoint that is set. Adjust the URLs in the example below to match your cluster's hostnames and ports.
 
 Example static configuration in `istio.d/conf.yaml` covering all three components:
 
@@ -107,7 +107,7 @@ instances:
     istiod_endpoint: http://istiod.istio-system.svc:15014/metrics
 ```
 
-Replace `<NAMESPACE>` with the namespace where you ran `istioctl waypoint apply`. Omit `waypoint_endpoint` if you have not deployed a waypoint proxy. The same options can be set via the autodiscovery annotation syntax shown in the [Control plane configuration](#control-plane-configuration) section above.
+Replace `<NAMESPACE>` with the namespace where you ran `istioctl waypoint apply`. Omit `waypoint_endpoint` if you have not deployed a waypoint proxy. The same options can be set via the Autodiscovery annotation syntax shown in the [Control plane configuration](#control-plane-configuration) section above.
 
 #### Disable sidecar injection for Datadog Agent pods
 
