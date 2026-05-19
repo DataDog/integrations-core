@@ -183,6 +183,27 @@ class AgentCheck(object):
         except Exception:
             return cls
 
+    def __new__(cls, *args, **kwargs):
+        # Dispatch to _TrialModeProxy when the instance carries a __discovery_service__
+        # payload. _TrialModeProxy is NOT a subclass of cls: rtloader (three.cpp:727)
+        # skips any AgentCheck subclass that has subclasses of its own, so dynamic
+        # subclassing would break reloading the check on subsequent AD reconciles.
+        # target_cls is stored as an attribute; __init__ is called explicitly because
+        # Python skips it when __new__ returns a non-subclass instance.
+        if cls is not _TrialModeProxy:
+            instances = _extract_instances(args, kwargs)
+            if instances and instances[0].get("__discovery_service__") is not None:
+                proxy = super().__new__(_TrialModeProxy)
+                proxy._target_cls = cls
+                proxy.__init__(*args, **kwargs)
+                return proxy
+        return super().__new__(cls)
+
+    @classmethod
+    def generate_configs(cls, service_dict):
+        """Yield candidate instance dicts for trial-mode config discovery. Override to opt in."""
+        raise NotImplementedError(f"{cls.__name__} does not support config discovery; override generate_configs")
+
     def __init__(self, *args, **kwargs):
         # type: (*Any, **Any) -> None
         """
@@ -1611,3 +1632,89 @@ class AgentCheck(object):
             raise ValueError(f'Failed to load config: {stderr.decode("utf-8", errors="replace")}')
 
         return _parse_ast_config(stdout.strip().decode('utf-8'))
+
+
+def _extract_instances(args, kwargs):
+    """Pull the `instances` list out of the AgentCheck-style positional/kwarg args."""
+    if 'instances' in kwargs:
+        return kwargs['instances']
+    if len(args) > 3:
+        return args[3]  # old-style: (name, init_config, agentConfig, instances)
+    if len(args) > 2 and isinstance(args[2], (list, tuple)):
+        return args[2]  # new-style: (name, init_config, instances)
+    return None
+
+
+class _TrialErrorDowngrade(logging.Filter):
+    """Demote ERROR/CRITICAL log records to DEBUG during trial candidate runs."""
+
+    def filter(self, record):
+        if record.levelno >= logging.ERROR:
+            record.levelno = logging.DEBUG
+            record.levelname = 'DEBUG'
+        return True
+
+
+class _TrialModeProxy(AgentCheck):
+    """Probe candidate configs from generate_configs() and commit the first that runs cleanly.
+
+    Not a subclass of target_cls — see AgentCheck.__new__ for the rationale.
+    """
+
+    def __init__(self, *args, **kwargs):
+        AgentCheck.__init__(self, *args, **kwargs)
+        self._service_dict = self.instance["__discovery_service__"]
+        self._winner = None
+
+    def run(self):
+        if self._winner is not None:
+            return self._winner.run()
+        try:
+            self._run_trial()
+        except Exception as e:
+            return json.encode(
+                [
+                    {
+                        'message': self.sanitize(str(e)),
+                        'traceback': self.sanitize(traceback.format_exc()),
+                    }
+                ]
+            )
+        return ''
+
+    def cancel(self):
+        if self._winner is not None:
+            self._winner.cancel()
+
+    def _run_trial(self):
+        last_error = None
+        tried = 0
+        for candidate in self._target_cls.generate_configs(self._service_dict):
+            tried += 1
+            inst = self._target_cls(self.name, self.init_config, [candidate])
+            inst.check_id = self.check_id
+            inst.provider = self.provider
+
+            # Buffer service_check submissions so that failed candidates cannot
+            # emit CRITICAL service checks to the live aggregator. The instance
+            # attribute shadows AgentCheck.service_check; del restores it.
+            buffered_scs: list[tuple] = []
+            inst.service_check = lambda *a, _buf=buffered_scs, **kw: _buf.append((a, kw))
+
+            log_filter = _TrialErrorDowngrade()
+            inst.log.logger.addFilter(log_filter)
+            try:
+                error_report = inst.run()
+            finally:
+                inst.log.logger.removeFilter(log_filter)
+                del inst.service_check  # restore to AgentCheck.service_check
+
+            if not error_report:
+                for a, kw in buffered_scs:
+                    inst.service_check(*a, **kw)  # replay winner's SCs via real method
+                self._winner = inst
+                return
+            last_error = error_report
+        if tried == 0:
+            raise ConfigurationError("config-discovery: generate_configs() yielded no candidates")
+        raise ConfigurationError(f"config-discovery: no candidate accepted by check() ({last_error})")

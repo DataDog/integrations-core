@@ -32,6 +32,13 @@ class OpenMetricsBaseCheckV2(AgentCheck):
 
     DEFAULT_METRIC_LIMIT = 2000
 
+    # Subclasses can override to specify well-known port(s) for trial-mode
+    # config discovery.
+    DISCOVERY_PORT_HINTS: list[int] = []
+
+    # Subclasses can override if metrics are not at /metrics.
+    DISCOVERY_METRICS_PATH: str = "/metrics"
+
     # Allow tracing for openmetrics integrations
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
@@ -93,6 +100,21 @@ class OpenMetricsBaseCheckV2(AgentCheck):
 
         self.scrapers.clear()
         self.scrapers.update(scrapers)
+
+    @classmethod
+    def generate_configs(cls, service_dict):
+        """Yield candidate instance dicts for trial-mode config discovery."""
+        from datadog_checks.base.utils.discovery import Port, Service, candidate_ports
+
+        service = Service(
+            id=service_dict["id"],
+            host=service_dict["host"],
+            ports=tuple(Port(number=p["number"], name=p.get("name", "")) for p in service_dict["ports"]),
+        )
+        for port in candidate_ports(service, cls.DISCOVERY_PORT_HINTS):
+            yield {
+                "openmetrics_endpoint": (f"http://{service.host}:{port.number}{cls.DISCOVERY_METRICS_PATH}"),
+            }
 
     def create_scraper(self, config):
         """

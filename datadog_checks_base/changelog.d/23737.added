@@ -1,0 +1,1 @@
+Add trial-mode check proxy and discovery probe helpers (http_probe, tcp_probe, candidate_ports, verifier predicates, Service/Port types) to datadog_checks.base.utils.discovery and datadog_checks.base.checks.base for config-discovery.

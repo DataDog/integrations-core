@@ -6,6 +6,46 @@ from datadog_checks.base.constants import ServiceCheck
 
 from .utils import get_check
 
+_SVC_TWO_PORTS = {
+    "id": "svc1",
+    "host": "10.0.0.1",
+    "ports": [{"number": 9090, "name": ""}, {"number": 8080, "name": ""}],
+}
+
+
+def test_generate_configs_yields_all_ports_when_no_hints():
+    configs = list(OpenMetricsBaseCheckV2.generate_configs(_SVC_TWO_PORTS))
+    assert len(configs) == 2
+    assert configs[0]["openmetrics_endpoint"] == "http://10.0.0.1:9090/metrics"
+    assert configs[1]["openmetrics_endpoint"] == "http://10.0.0.1:8080/metrics"
+
+
+def test_generate_configs_hint_ports_come_first():
+    class HintedCheck(OpenMetricsBaseCheckV2):
+        __NAMESPACE__ = "test"
+        DISCOVERY_PORT_HINTS = [8080]
+
+    configs = list(HintedCheck.generate_configs(_SVC_TWO_PORTS))
+    assert len(configs) == 2
+    assert configs[0]["openmetrics_endpoint"] == "http://10.0.0.1:8080/metrics"
+    assert configs[1]["openmetrics_endpoint"] == "http://10.0.0.1:9090/metrics"
+
+
+def test_generate_configs_custom_metrics_path():
+    class CustomPathCheck(OpenMetricsBaseCheckV2):
+        __NAMESPACE__ = "test"
+        DISCOVERY_METRICS_PATH = "/custom/metrics"
+
+    svc = {"id": "svc1", "host": "10.0.0.1", "ports": [{"number": 9090, "name": ""}]}
+    configs = list(CustomPathCheck.generate_configs(svc))
+    assert configs == [{"openmetrics_endpoint": "http://10.0.0.1:9090/custom/metrics"}]
+
+
+def test_generate_configs_empty_ports_yields_nothing():
+    svc = {"id": "svc1", "host": "10.0.0.1", "ports": []}
+    configs = list(OpenMetricsBaseCheckV2.generate_configs(svc))
+    assert configs == []
+
 
 def test_default_config(aggregator, dd_run_check, mock_http_response):
     class Check(OpenMetricsBaseCheckV2):
