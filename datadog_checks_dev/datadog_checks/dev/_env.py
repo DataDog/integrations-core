@@ -110,7 +110,7 @@ def format_config(config):
     return config
 
 
-def replay_check_run(agent_collector, stub_aggregator, stub_agent, ignore_errors=False):
+def replay_check_run(agent_collector, stub_aggregator, stub_agent):
     errors = []
     for collector in agent_collector:
         aggregator = collector['aggregator']
@@ -171,7 +171,7 @@ def replay_check_run(agent_collector, stub_aggregator, stub_agent, ignore_errors
                     }
                 ]
             errors.extend(new_errors)
-    if errors and not ignore_errors:
+    if errors:
         raise Exception("\n".join("Message: {}\n{}".format(err['message'], err['traceback']) for err in errors))
 
 
