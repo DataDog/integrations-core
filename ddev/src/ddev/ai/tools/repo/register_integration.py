@@ -2,11 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Annotated, Literal
 
 import tomlkit
-from pydantic import Field
+from pydantic import AfterValidator, Field
 from tomlkit import TOMLDocument
 from tomlkit.items import Table
 
@@ -20,6 +21,10 @@ DISPLAY_NAME_PATH = ("overrides", "display-name")
 METRICS_PREFIX_PATH = ("overrides", "metrics-prefix")
 
 
+def _dedupe_preserve_order(values: list[str]) -> list[str]:
+    return list(dict.fromkeys(values))
+
+
 class RegisterIntegrationInput(BaseToolInput):
     platforms: Annotated[
         list[Literal["linux", "windows", "mac_os"]],
@@ -27,6 +32,7 @@ class RegisterIntegrationInput(BaseToolInput):
             description="Operating systems the integration supports.",
             min_length=1,
         ),
+        AfterValidator(_dedupe_preserve_order),
     ]
     display_name: Annotated[
         str | None,
@@ -42,6 +48,13 @@ class RegisterIntegrationInput(BaseToolInput):
             description="Metric prefix used by the integration. Provide only when the prefix is non-default.",
         ),
     ]
+
+
+@dataclass(frozen=True)
+class _PendingWrite:
+    path: tuple[str, ...]
+    value: object
+    label: str
 
 
 class RegisterIntegrationTool(BaseTool[RegisterIntegrationInput]):
@@ -74,39 +87,41 @@ class RegisterIntegrationTool(BaseTool[RegisterIntegrationInput]):
         except tomlkit.exceptions.TOMLKitError as e:
             return ToolResult(success=False, error=f"Failed to parse {config_path}: {e}")
 
-        planned: list[tuple[tuple[str, ...], object, str]] = [
-            (MANIFEST_PLATFORMS_PATH, list(tool_input.platforms), "manifest.platforms"),
+        planned: list[_PendingWrite] = [
+            _PendingWrite(MANIFEST_PLATFORMS_PATH, list(tool_input.platforms), "manifest.platforms"),
         ]
         if tool_input.display_name is not None:
-            planned.append((DISPLAY_NAME_PATH, tool_input.display_name, "display-name"))
+            planned.append(_PendingWrite(DISPLAY_NAME_PATH, tool_input.display_name, "display-name"))
         if tool_input.metrics_prefix is not None:
-            planned.append((METRICS_PREFIX_PATH, tool_input.metrics_prefix, "metrics-prefix"))
+            planned.append(_PendingWrite(METRICS_PREFIX_PATH, tool_input.metrics_prefix, "metrics-prefix"))
 
-        to_write: list[tuple[tuple[str, ...], object, str]] = []
-        for path, requested, label in planned:
-            existing = _read_existing(document, path, integration)
+        to_write: list[_PendingWrite] = []
+        for entry in planned:
+            existing = _read_existing(document, entry.path, integration)
             if existing is None:
-                to_write.append((path, requested, label))
-            elif not _equal(existing, requested):
+                to_write.append(entry)
+            elif not _equal(existing, entry.value):
                 return ToolResult(
                     success=False,
                     error=(
-                        f"{label} for {integration!r} already exists with a different value: "
-                        f"existing={_unwrap(existing)!r}, requested={requested!r}"
+                        f"{entry.label} for {integration!r} already exists with a different value: "
+                        f"existing={_unwrap(existing)!r}, requested={entry.value!r}"
                     ),
                 )
 
-        for path, value, _ in to_write:
-            _set_at_path(document, path, integration, value)
+        for entry in to_write:
+            _set_at_path(document, entry.path, integration, entry.value)
 
         if to_write:
             try:
                 config_path.write_text(tomlkit.dumps(document), encoding="utf-8")
             except OSError as e:
                 return ToolResult(success=False, error=f"Failed to write {config_path}: {e}")
+            written = ", ".join(entry.label for entry in to_write)
+            return ToolResult(success=True, data=f"Registered {integration!r} in: {written}")
 
-        sections = ", ".join(label for _, _, label in planned)
-        return ToolResult(success=True, data=f"Registered {integration!r} in: {sections}")
+        sections = ", ".join(entry.label for entry in planned)
+        return ToolResult(success=True, data=f"{integration!r} already registered in: {sections}")
 
 
 def _find_config(start: Path) -> Path | None:

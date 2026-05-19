@@ -7,6 +7,7 @@ from textwrap import dedent
 
 import pytest
 import tomlkit
+from tomlkit import TOMLDocument
 
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.repo.register_integration import RegisterIntegrationTool
@@ -60,19 +61,19 @@ def existing_tool(repo_root: Path) -> RegisterIntegrationTool:
     return _build_tool(repo_root, "existing_integration")
 
 
-def _read_config(repo_root: Path) -> dict:
+def _read_config(repo_root: Path) -> TOMLDocument:
     return tomlkit.parse((repo_root / ".ddev" / "config.toml").read_text(encoding="utf-8"))
 
 
-def _platforms_for(doc, integration: str):
+def _platforms_for(doc: TOMLDocument, integration: str) -> list[str] | None:
     return doc["overrides"]["manifest"]["platforms"].get(integration)
 
 
-def _display_name_for(doc, integration: str):
+def _display_name_for(doc: TOMLDocument, integration: str) -> str | None:
     return doc["overrides"]["display-name"].get(integration)
 
 
-def _metrics_prefix_for(doc, integration: str):
+def _metrics_prefix_for(doc: TOMLDocument, integration: str) -> str | None:
     return doc["overrides"]["metrics-prefix"].get(integration)
 
 
@@ -289,7 +290,7 @@ async def test_missing_config_returns_failure(tmp_path):
     result = await tool.run({"platforms": ["linux"]})
 
     assert result.success is False
-    assert result.error is not None
+    assert result.error.startswith("Could not locate")
 
 
 async def test_walks_up_to_find_config(repo_root):
