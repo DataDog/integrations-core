@@ -1,8 +1,8 @@
-# Claude Compliance
+# Claude Compliance API
 
 ## Overview
 
-Datadog's Claude Compliance integration ingests audit activity logs from Anthropic's [Compliance API][1]. With this integration, security and compliance teams can:
+Datadog's Claude Compliance API integration ingests audit activity logs from Anthropic's [Compliance API][1]. With this integration, security and compliance teams can:
 
 - **Monitor SSO sign-ins and authentication events** across your organization
 - **Track API key lifecycle** (creation, deletion, scope updates) for Admin, Platform, and Scoped API keys
