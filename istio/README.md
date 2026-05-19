@@ -92,7 +92,7 @@ The method for applying these annotations varies depending on the [Istio deploym
 
 ##### Ambient mode configuration
 
-Istio ambient mode (GA in Istio v1.24) replaces sidecar injection with two shared components: the `ztunnel` DaemonSet (L4 zero-trust tunneling) and optional `waypoint` proxies (L7 HTTP/gRPC processing). Set `istio_mode: ambient` and configure one or more of `ztunnel_endpoint`, `waypoint_endpoint`, and `istiod_endpoint` on the same instance — the check scrapes each endpoint that is set. Ztunnel and waypoint expose Prometheus metrics on port 15020; istiod on 15014.
+Istio ambient mode (GA in Istio v1.24) replaces sidecar injection with two shared components: the `ztunnel` DaemonSet (L4 zero-trust tunneling) and optional `waypoint` proxies (L7 HTTP/gRPC processing). Set `istio_mode: ambient` and configure one or more of `ztunnel_endpoint`, `waypoint_endpoint`, and `istiod_endpoint` on the same instance — the check scrapes each endpoint that is set. Adjust the URLs in the example below to match your cluster's hostnames and ports.
 
 Example static configuration in `istio.d/conf.yaml` covering all three components:
 
