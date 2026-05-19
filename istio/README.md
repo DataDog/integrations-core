@@ -90,6 +90,29 @@ This annotation specifies the container `discovery` to match the default contain
 
 The method for applying these annotations varies depending on the [Istio deployment strategy (Istioctl, Helm, Operator)][22] used. Consult the Istio documentation for the proper method to apply these pod annotations. See the [sample istio.d/conf.yaml][8] for all available configuration options.
 
+##### Ambient mode configuration
+
+Istio ambient mode (GA in Istio v1.24) replaces sidecar injection with two shared components: the `ztunnel` DaemonSet (L4 zero-trust tunneling) and optional `waypoint` proxies (L7 HTTP/gRPC processing). To collect metrics for these components, set `istio_mode: ambient` and point at the corresponding endpoints. Each component exposes Prometheus metrics on port 15020.
+
+Example annotation on the `ztunnel` DaemonSet in the `istio-system` namespace:
+
+```yaml
+ad.datadoghq.com/istio-proxy.checks: |
+  {
+    "istio": {
+      "instances": [
+        {
+          "istio_mode": "ambient",
+          "ztunnel_endpoint": "http://%%host%%:15020/stats/prometheus",
+          "use_openmetrics": "true"
+        }
+      ]
+    }
+  }
+```
+
+To also collect waypoint metrics, configure a second instance pointing at the waypoint deployment with `waypoint_endpoint`. The control-plane `istiod_endpoint` configuration above applies to ambient mode unchanged.
+
 #### Disable sidecar injection for Datadog Agent pods
 
 If you are installing the [Datadog Agent in a container][10], Datadog recommends that you first disable Istio's sidecar injection.
