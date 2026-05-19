@@ -80,6 +80,7 @@ class PostgresHealth(Health):
                 if diagnosis.result == Diagnosis.DIAGNOSIS_FAIL
                 else HealthStatus.OK,
                 data={
-                    "diagnosis": diagnosis,
+                    # Diagnoses are namedtuples and need to be converted to a dictionary to be JSON serializable
+                    "diagnosis": diagnosis._asdict(),
                 },
             )
