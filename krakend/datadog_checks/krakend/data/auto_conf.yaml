@@ -1,0 +1,5 @@
+ad_identifiers:
+  - krakend
+discovery: {}
+init_config:
+instances: []

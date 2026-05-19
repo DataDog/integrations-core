@@ -18,6 +18,24 @@ from tests.types import InstanceBuilder
 COMPOSE_FILE_E2E = Path(__file__).parent / "docker" / "docker-compose.yml"
 COMPOSE_FILE_LAB = Path(__file__).parent / "lab" / "docker-compose.yml"
 
+INTEGRATIONS_CORE_ROOT = Path(__file__).resolve().parents[2]
+KRAKEND_AUTOCONF = Path(__file__).parent.parent / "datadog_checks" / "krakend" / "data" / "auto_conf.yaml"
+DISCOVERY_HELPERS_DIR = (
+    INTEGRATIONS_CORE_ROOT / "datadog_checks_base" / "datadog_checks" / "base" / "utils" / "discovery"
+)
+OPENMETRICS_V2_BASE_PY = (
+    INTEGRATIONS_CORE_ROOT
+    / "datadog_checks_base"
+    / "datadog_checks"
+    / "base"
+    / "checks"
+    / "openmetrics"
+    / "v2"
+    / "base.py"
+)
+AGENTCHECK_BASE_PY = INTEGRATIONS_CORE_ROOT / "datadog_checks_base" / "datadog_checks" / "base" / "checks" / "base.py"
+SITE_PACKAGES = "/opt/datadog-agent/embedded/lib/python3.13/site-packages"
+
 
 @pytest.fixture(scope="session")
 def is_lab() -> bool:
@@ -52,9 +70,24 @@ def run_docker_e2e(env_vars: dict[str, str], conditions: list[LazyFunction]):
     ):
         asyncio.run(generate_sample_traffic())
 
-        yield {
-            "instances": [{"openmetrics_endpoint": OPEN_METRICS_ENDPOINT}],
-        }
+        yield (
+            {
+                "instances": [{"openmetrics_endpoint": OPEN_METRICS_ENDPOINT}],
+            },
+            {
+                # The autoconfig YAML + base helpers overlay let the
+                # discovery test exercise AD + discover() in this same
+                # env. They are no-ops for the regular test_e2e, which
+                # passes its own explicit config to dd_agent_check.
+                "docker_volumes": [
+                    f"{KRAKEND_AUTOCONF}:/etc/datadog-agent/conf.d/krakend.d/auto_conf.yaml:ro",
+                    f"{DISCOVERY_HELPERS_DIR}:{SITE_PACKAGES}/datadog_checks/base/utils/discovery:ro",
+                    f"{OPENMETRICS_V2_BASE_PY}:{SITE_PACKAGES}/datadog_checks/base/checks/openmetrics/v2/base.py:ro",
+                    f"{AGENTCHECK_BASE_PY}:{SITE_PACKAGES}/datadog_checks/base/checks/base.py:ro",
+                    "/var/run/docker.sock:/var/run/docker.sock:ro",
+                ],
+            },
+        )
 
 
 @pytest.fixture(scope="session")

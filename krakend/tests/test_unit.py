@@ -121,3 +121,21 @@ def test_service_check_emitted(ready_check: KrakendCheck, aggregator: Aggregator
 
 def test_http_code_class_tag(ready_check: KrakendCheck, aggregator: AggregatorStub):
     aggregator.assert_metric_has_tag("krakend.api.http_client.duration.bucket", "code_class:5XX")
+
+
+def test_generate_configs_yields_openmetrics_endpoints():
+    service = {
+        "id": "krakend-svc",
+        "host": "10.0.0.1",
+        "ports": [{"number": 9090, "name": ""}, {"number": 8080, "name": ""}],
+    }
+    configs = list(KrakendCheck.generate_configs(service))
+    assert len(configs) == 2
+    assert configs[0]["openmetrics_endpoint"] == "http://10.0.0.1:9090/metrics"
+    assert configs[1]["openmetrics_endpoint"] == "http://10.0.0.1:8080/metrics"
+
+
+def test_generate_configs_empty_ports():
+    service = {"id": "krakend-svc", "host": "10.0.0.1", "ports": []}
+    configs = list(KrakendCheck.generate_configs(service))
+    assert configs == []
