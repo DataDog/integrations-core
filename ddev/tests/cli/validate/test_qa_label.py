@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
-from unittest.mock import MagicMock
 
 import pytest
 
@@ -37,15 +36,16 @@ def fork_pr_context(monkeypatch, tmp_path):
     monkeypatch.setenv('GITHUB_REPOSITORY', 'DataDog/integrations-core')
 
 
-def _mock_pr_with_labels(mocker, labels):
-    pr = MagicMock()
-    pr.labels = sorted(labels)
-    return mocker.patch('ddev.utils.github.GitHubManager.get_pull_request_by_number', return_value=pr)
+def _mock_labels(mocker, labels):
+    return mocker.patch(
+        'ddev.utils.github.GitHubManager.get_pull_request_labels',
+        return_value=labels,
+    )
 
 
 @pytest.mark.parametrize('label', ['qa/required', 'qa/skip-qa'])
 def test_passes_with_exactly_one_qa_label(ddev, pr_context, mocker, label):
-    _mock_pr_with_labels(mocker, [label, 'integration/foo'])
+    _mock_labels(mocker, [label, 'integration/foo'])
 
     result = ddev('validate', 'qa-label')
 
@@ -54,7 +54,7 @@ def test_passes_with_exactly_one_qa_label(ddev, pr_context, mocker, label):
 
 
 def test_fails_when_no_qa_label(ddev, pr_context, mocker):
-    _mock_pr_with_labels(mocker, ['integration/foo', 'documentation'])
+    _mock_labels(mocker, ['integration/foo', 'documentation'])
 
     result = ddev('validate', 'qa-label')
 
@@ -65,7 +65,7 @@ def test_fails_when_no_qa_label(ddev, pr_context, mocker):
 
 
 def test_fails_when_both_qa_labels(ddev, pr_context, mocker):
-    _mock_pr_with_labels(mocker, ['qa/required', 'qa/skip-qa'])
+    _mock_labels(mocker, ['qa/required', 'qa/skip-qa'])
 
     result = ddev('validate', 'qa-label')
 
@@ -75,20 +75,61 @@ def test_fails_when_both_qa_labels(ddev, pr_context, mocker):
 
 def test_skips_outside_pull_request_context(ddev, monkeypatch, mocker):
     monkeypatch.delenv('GITHUB_EVENT_NAME', raising=False)
-    get_pr = _mock_pr_with_labels(mocker, [])
+    get_labels = _mock_labels(mocker, [])
 
     result = ddev('validate', 'qa-label')
 
     assert result.exit_code == 0, result.output
     assert 'Not running in a pull_request context' in result.output
-    get_pr.assert_not_called()
+    get_labels.assert_not_called()
 
 
 def test_skips_on_fork_pull_request(ddev, fork_pr_context, mocker):
-    get_pr = _mock_pr_with_labels(mocker, [])
+    get_labels = _mock_labels(mocker, [])
 
     result = ddev('validate', 'qa-label')
 
     assert result.exit_code == 0, result.output
     assert 'fork' in result.output.lower()
-    get_pr.assert_not_called()
+    get_labels.assert_not_called()
+
+
+def test_aborts_when_event_file_is_unreadable(ddev, monkeypatch, tmp_path, mocker):
+    """A malformed event payload must fail loudly, not silently skip."""
+    bad_event = tmp_path / 'event.json'
+    bad_event.write_text('{not valid json')
+    monkeypatch.setenv('GITHUB_EVENT_NAME', 'pull_request')
+    monkeypatch.setenv('GITHUB_EVENT_PATH', str(bad_event))
+    get_labels = _mock_labels(mocker, [])
+
+    result = ddev('validate', 'qa-label')
+
+    assert result.exit_code == 1, result.output
+    assert 'Could not read GitHub event payload' in result.output
+    get_labels.assert_not_called()
+
+
+def test_skips_when_pr_number_is_missing(ddev, monkeypatch, tmp_path, mocker):
+    """If the event payload lacks pull_request.number we can't fetch labels."""
+    event = tmp_path / 'event.json'
+    event.write_text(json.dumps({'pull_request': {'head': {}, 'base': {}}}))
+    monkeypatch.setenv('GITHUB_EVENT_NAME', 'pull_request')
+    monkeypatch.setenv('GITHUB_EVENT_PATH', str(event))
+    monkeypatch.setenv('GITHUB_REPOSITORY', 'DataDog/integrations-core')
+    get_labels = _mock_labels(mocker, [])
+
+    result = ddev('validate', 'qa-label')
+
+    assert result.exit_code == 0, result.output
+    assert 'Could not determine pull request number' in result.output
+    get_labels.assert_not_called()
+
+
+def test_aborts_when_pr_labels_cannot_be_fetched(ddev, pr_context, mocker):
+    """A None return from the labels API call means we can't make a decision — fail closed."""
+    _mock_labels(mocker, None)
+
+    result = ddev('validate', 'qa-label')
+
+    assert result.exit_code == 1, result.output
+    assert 'Could not fetch pull request' in result.output

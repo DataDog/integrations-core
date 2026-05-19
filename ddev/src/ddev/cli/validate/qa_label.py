@@ -13,31 +13,39 @@ if TYPE_CHECKING:
     from ddev.cli.application import Application
 
 
-REQUIRED_LABELS = ('qa/skip-qa', 'qa/required')
+REQUIRED_LABELS: frozenset[str] = frozenset({'qa/skip-qa', 'qa/required'})
 
 HELP_MESSAGE = (
     "Every pull request must declare its QA expectation by setting exactly one of:\n"
     "  - 'qa/required'  if this PR ships changes that need to be validated during QA.\n"
-    "  - 'qa/skip-qa'   if this PR does not need QA validation (e.g. docs, tests, "
+    "  - 'qa/skip-qa'   if this PR does not need QA validation (e.g., docs, tests, "
     "developer tooling, or no agent-impacting changes).\n"
 )
 
 
-def _load_event_payload() -> dict | None:
+def _load_event_payload(app: Application) -> dict | None:
+    """Return the parsed GitHub Actions event payload.
+
+    Returns `None` only when the path is unset (the caller treats that as a
+    benign skip). If the path is set but the file cannot be read or parsed,
+    abort: silently passing the gate would defeat its purpose.
+    """
     event_path = os.environ.get('GITHUB_EVENT_PATH')
     if not event_path:
         return None
     try:
         with open(event_path, encoding='utf-8') as f:
             return json.load(f)
-    except (OSError, json.JSONDecodeError):
-        return None
+    except (OSError, json.JSONDecodeError) as exc:
+        app.abort(f'Could not read GitHub event payload at {event_path}: {exc}')
 
 
 def _is_fork_pr(event: dict) -> bool:
     pr = event.get('pull_request') or {}
-    head_repo = ((pr.get('head') or {}).get('repo') or {}).get('full_name')
-    base_repo = os.environ.get('GITHUB_REPOSITORY') or ((pr.get('base') or {}).get('repo') or {}).get('full_name')
+    head = pr.get('head') or {}
+    head_repo = (head.get('repo') or {}).get('full_name')
+    base = pr.get('base') or {}
+    base_repo = os.environ.get('GITHUB_REPOSITORY') or (base.get('repo') or {}).get('full_name')
     if not head_repo or not base_repo:
         return False
     return head_repo != base_repo
@@ -61,9 +69,9 @@ def qa_label(app: Application) -> None:
         app.display_info('Not running in a pull_request context; skipping qa-label validation.')
         return
 
-    event = _load_event_payload()
+    event = _load_event_payload(app)
     if event is None:
-        app.display_info('Could not read GitHub event payload; skipping qa-label validation.')
+        app.display_info('GITHUB_EVENT_PATH is not set; skipping qa-label validation.')
         return
 
     if _is_fork_pr(event):
@@ -75,11 +83,11 @@ def qa_label(app: Application) -> None:
         app.display_warning('Could not determine pull request number; skipping qa-label validation.')
         return
 
-    pr = app.github.get_pull_request_by_number(str(pr_number))
-    if pr is None:
+    labels = app.github.get_pull_request_labels(pr_number)
+    if labels is None:
         app.abort(f'Could not fetch pull request #{pr_number} to read its labels.')
 
-    qa_labels = sorted(set(pr.labels) & set(REQUIRED_LABELS))
+    qa_labels = sorted(set(labels) & REQUIRED_LABELS)
 
     if len(qa_labels) == 1:
         app.display_success(f'QA label set: {qa_labels[0]}')
