@@ -134,14 +134,21 @@ The same pattern can be reused for other single-node Docker-compatible integrati
 This PR includes a deliberately small `ddev lab` POC that delegates to the Milvus scenario from the `datadog-agent` branch `add-milvus-e2e-scenario`.
 
 ```bash
+ddev lab list
 ddev lab create milvus --stack-name my-milvus-lab --use-fakeintake
+ddev lab status milvus --stack-name my-milvus-lab
+ddev lab show milvus --stack-name my-milvus-lab
+ddev lab connect milvus --stack-name my-milvus-lab
 ddev lab destroy milvus --stack-name my-milvus-lab
 ```
 
 The wrapper does not implement its own infrastructure logic. It resolves the configured `repos.agent` checkout, verifies that checkout is on `add-milvus-e2e-scenario`, then shells out to:
 
 ```bash
+dda inv aws.list-milvus ...
 dda inv aws.create-milvus ...
+dda inv aws.status-milvus ...
+dda inv aws.connect-milvus ...
 dda inv aws.destroy-milvus ...
 ```
 

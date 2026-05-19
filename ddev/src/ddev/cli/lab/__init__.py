@@ -22,6 +22,33 @@ def lab() -> None:
     """Manage remote integration labs."""
 
 
+@lab.command(name='list', short_help='List remote integration labs')
+@click.option(
+    '--agent-repo',
+    type=click.Path(file_okay=False, path_type=Path),
+    help='Path to a datadog-agent checkout. Defaults to the configured `repos.agent` path.',
+)
+@click.option(
+    '--agent-branch',
+    default=POC_AGENT_BRANCH,
+    show_default=True,
+    help='datadog-agent branch that contains the lab scenario POC.',
+)
+@click.option('--skip-branch-check', is_flag=True, help='Do not verify the datadog-agent checkout branch.')
+@click.pass_obj
+def list_command(
+    app: Application,
+    *,
+    agent_repo: Path | None,
+    agent_branch: str,
+    skip_branch_check: bool,
+) -> None:
+    """List remote integration labs by delegating to the Agent E2E framework."""
+    _run_agent_e2e_command(
+        app, _base_agent_e2e_command('list', 'milvus'), agent_repo, agent_branch, skip_branch_check
+    )
+
+
 @lab.command(short_help='Create a remote integration lab')
 @click.argument('integration')
 @click.option('--stack-name', help='Pulumi stack name to pass to the Agent E2E scenario.')
@@ -102,6 +129,112 @@ def destroy(
 ) -> None:
     """Destroy a remote integration lab by delegating to the Agent E2E framework."""
     command = _base_agent_e2e_command('destroy', integration)
+    if stack_name:
+        command.append(f'--stack-name={stack_name}')
+
+    _run_agent_e2e_command(app, command, agent_repo, agent_branch, skip_branch_check)
+
+
+@lab.command(short_help='Show remote integration lab status')
+@click.argument('integration')
+@click.option('--stack-name', help='Pulumi stack name to pass to the Agent E2E scenario.')
+@click.option(
+    '--agent-repo',
+    type=click.Path(file_okay=False, path_type=Path),
+    help='Path to a datadog-agent checkout. Defaults to the configured `repos.agent` path.',
+)
+@click.option(
+    '--agent-branch',
+    default=POC_AGENT_BRANCH,
+    show_default=True,
+    help='datadog-agent branch that contains the lab scenario POC.',
+)
+@click.option('--skip-branch-check', is_flag=True, help='Do not verify the datadog-agent checkout branch.')
+@click.pass_obj
+def show(
+    app: Application,
+    *,
+    integration: str,
+    stack_name: str | None,
+    agent_repo: Path | None,
+    agent_branch: str,
+    skip_branch_check: bool,
+) -> None:
+    """Show remote integration lab status by delegating to the Agent E2E framework."""
+    _status(app, integration, stack_name, agent_repo, agent_branch, skip_branch_check)
+
+
+@lab.command(short_help='Show remote integration lab status')
+@click.argument('integration')
+@click.option('--stack-name', help='Pulumi stack name to pass to the Agent E2E scenario.')
+@click.option(
+    '--agent-repo',
+    type=click.Path(file_okay=False, path_type=Path),
+    help='Path to a datadog-agent checkout. Defaults to the configured `repos.agent` path.',
+)
+@click.option(
+    '--agent-branch',
+    default=POC_AGENT_BRANCH,
+    show_default=True,
+    help='datadog-agent branch that contains the lab scenario POC.',
+)
+@click.option('--skip-branch-check', is_flag=True, help='Do not verify the datadog-agent checkout branch.')
+@click.pass_obj
+def status(
+    app: Application,
+    *,
+    integration: str,
+    stack_name: str | None,
+    agent_repo: Path | None,
+    agent_branch: str,
+    skip_branch_check: bool,
+) -> None:
+    """Show remote integration lab status by delegating to the Agent E2E framework."""
+    _status(app, integration, stack_name, agent_repo, agent_branch, skip_branch_check)
+
+
+@lab.command(short_help='Connect to a remote integration lab')
+@click.argument('integration')
+@click.option('--stack-name', help='Pulumi stack name to pass to the Agent E2E scenario.')
+@click.option(
+    '--agent-repo',
+    type=click.Path(file_okay=False, path_type=Path),
+    help='Path to a datadog-agent checkout. Defaults to the configured `repos.agent` path.',
+)
+@click.option(
+    '--agent-branch',
+    default=POC_AGENT_BRANCH,
+    show_default=True,
+    help='datadog-agent branch that contains the lab scenario POC.',
+)
+@click.option('--skip-branch-check', is_flag=True, help='Do not verify the datadog-agent checkout branch.')
+@click.pass_obj
+def connect(
+    app: Application,
+    *,
+    integration: str,
+    stack_name: str | None,
+    agent_repo: Path | None,
+    agent_branch: str,
+    skip_branch_check: bool,
+) -> None:
+    """Connect to a remote integration lab by delegating to the Agent E2E framework."""
+    command = _base_agent_e2e_command('connect', integration)
+    if stack_name:
+        command.append(f'--stack-name={stack_name}')
+
+    _run_agent_e2e_command(app, command, agent_repo, agent_branch, skip_branch_check)
+
+
+def _status(
+    app: Application,
+    integration: str,
+    stack_name: str | None,
+    agent_repo: Path | None,
+    agent_branch: str,
+    skip_branch_check: bool,
+) -> None:
+    command = _base_agent_e2e_command('status', integration)
     if stack_name:
         command.append(f'--stack-name={stack_name}')
 
