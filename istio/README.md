@@ -92,26 +92,22 @@ The method for applying these annotations varies depending on the [Istio deploym
 
 ##### Ambient mode configuration
 
-Istio ambient mode (GA in Istio v1.24) replaces sidecar injection with two shared components: the `ztunnel` DaemonSet (L4 zero-trust tunneling) and optional `waypoint` proxies (L7 HTTP/gRPC processing). To collect metrics for these components, set `istio_mode: ambient` and point at the corresponding endpoints. Each component exposes Prometheus metrics on port 15020.
+Istio ambient mode (GA in Istio v1.24) replaces sidecar injection with two shared components: the `ztunnel` DaemonSet (L4 zero-trust tunneling) and optional `waypoint` proxies (L7 HTTP/gRPC processing). Set `istio_mode: ambient` and configure one or more of `ztunnel_endpoint`, `waypoint_endpoint`, and `istiod_endpoint` on the same instance — the check scrapes each endpoint that is set. Ztunnel and waypoint expose Prometheus metrics on port 15020; istiod on 15014.
 
-Example annotation on the `ztunnel` DaemonSet in the `istio-system` namespace:
+Example static configuration in `istio.d/conf.yaml` covering all three components:
 
 ```yaml
-ad.datadoghq.com/istio-proxy.checks: |
-  {
-    "istio": {
-      "instances": [
-        {
-          "istio_mode": "ambient",
-          "ztunnel_endpoint": "http://%%host%%:15020/stats/prometheus",
-          "use_openmetrics": "true"
-        }
-      ]
-    }
-  }
+init_config:
+
+instances:
+  - istio_mode: ambient
+    use_openmetrics: true
+    ztunnel_endpoint: http://ztunnel.istio-system.svc:15020/stats/prometheus
+    waypoint_endpoint: http://waypoint.<NAMESPACE>.svc:15020/stats/prometheus
+    istiod_endpoint: http://istiod.istio-system.svc:15014/metrics
 ```
 
-To also collect waypoint metrics, configure a second instance pointing at the waypoint deployment with `waypoint_endpoint`. The control-plane `istiod_endpoint` configuration above applies to ambient mode unchanged.
+Replace `<NAMESPACE>` with the namespace where you ran `istioctl waypoint apply`. Omit `waypoint_endpoint` if you have not deployed a waypoint proxy. The same options can be set via the autodiscovery annotation syntax shown in the [Control plane configuration](#control-plane-configuration) section above.
 
 #### Disable sidecar injection for Datadog Agent pods
 
