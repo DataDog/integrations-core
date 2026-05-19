@@ -104,6 +104,7 @@ MAX_CUSTOM_RESULTS = 100
 
 PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s, %s, %s)"
 
+AUTOMATIC_DIAGNOSIS_INTERVAL = 5 * 60
 
 class PostgreSql(DatabaseCheck):
     """Collects per-database, and optionally per-relation metrics, custom metrics"""
@@ -1300,13 +1301,13 @@ class PostgreSql(DatabaseCheck):
                 if hasattr(job, '_last_run_did_error') and job._last_run_did_error:
                     should_run_diagnostics = True
             # Only automatically run every 5 minutes at most
-            if self._last_automatic_diagnosis and time.time() - self._last_automatic_diagnosis < 5 * 60:
+            if self._last_automatic_diagnosis and time() - self._last_automatic_diagnosis < AUTOMATIC_DIAGNOSIS_INTERVAL:
                 should_run_diagnostics = False
             # If it's been more than 5 minutes since the last error diagnosis, run again to see if the error is resolved
-            if self._last_diagnosis_had_errors and time.time() - self._last_diagnosis_had_errors >= 5 * 60:
+            if self._last_diagnosis_had_errors and time() - self._last_diagnosis_had_errors >= AUTOMATIC_DIAGNOSIS_INTERVAL:
                 should_run_diagnostics = True
             if should_run_diagnostics:
-                self._last_automatic_diagnosis = time.time()
+                self._last_automatic_diagnosis = time()
                 run_diagnostics(self)
                 self._last_diagnosis_had_errors = any(
                     diagnosis.result == Diagnosis.DIAGNOSIS_FAIL or diagnosis.result == Diagnosis.DIAGNOSIS_WARNING
