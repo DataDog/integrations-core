@@ -10,7 +10,8 @@
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "clustername:my_cluster",
-            "hosting_type:mongodb-atlas"
+            "hosting_type:mongodb-atlas",
+            "mongo_version:4.1.13"
         ],
         "timestamp": 1715911398111.2722,
         "metadata": [
@@ -600,7 +601,8 @@
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "clustername:my_cluster",
-            "hosting_type:mongodb-atlas"
+            "hosting_type:mongodb-atlas",
+            "mongo_version:4.1.13"
         ],
         "timestamp": 1715911398111.2722,
         "metadata": [

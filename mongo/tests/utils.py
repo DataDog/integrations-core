@@ -11,6 +11,7 @@ from .common import HERE
 def assert_metrics(check_instance, aggregator, metrics_categories, additional_tags=None, count=1):
     if additional_tags is None:
         additional_tags = []
+    version_tags = [f'mongo_version:{check_instance._mongo_version}'] if check_instance._mongo_version else []
     for cat in metrics_categories:
         with open(os.path.join(HERE, "results", f"metrics-{cat}.json"), 'r') as f:
             for metric in json.load(f):
@@ -18,7 +19,7 @@ def assert_metrics(check_instance, aggregator, metrics_categories, additional_ta
                     metric['name'],
                     value=metric['value'],
                     count=count,
-                    tags=additional_tags + metric['tags'] + check_instance.internal_resource_tags,
+                    tags=additional_tags + metric['tags'] + check_instance.internal_resource_tags + version_tags,
                     metric_type=metric['type'],
                 )
 
