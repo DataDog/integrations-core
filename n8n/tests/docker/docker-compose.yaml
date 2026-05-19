@@ -36,6 +36,7 @@ services:
       - DB_POSTGRESDB_DATABASE=n8n
       - DB_POSTGRESDB_USER=n8n
       - DB_POSTGRESDB_PASSWORD=n8n
+      - N8N_ENCRYPTION_KEY=test-encryption-key-not-a-secret
       - N8N_LOG_LEVEL=debug
       - N8N_LOG_OUTPUT=console
       - N8N_HOST=0.0.0.0
@@ -89,6 +90,7 @@ services:
       - DB_POSTGRESDB_DATABASE=n8n
       - DB_POSTGRESDB_USER=n8n
       - DB_POSTGRESDB_PASSWORD=n8n
+      - N8N_ENCRYPTION_KEY=test-encryption-key-not-a-secret
       - N8N_LOG_LEVEL=info
       - N8N_LOG_OUTPUT=console
       - N8N_RUNNERS_ENABLED=false
