@@ -18,7 +18,7 @@
 * Fix schema collection query failure when MySQL ANSI_QUOTES sql_mode is enabled. ([#23593](https://github.com/DataDog/integrations-core/pull/23593))
 * Log a warning when a 1045 access denied error occurs with no SSL configuration, hinting that SSL may be required by the MySQL instance. ([#23607](https://github.com/DataDog/integrations-core/pull/23607))
 
-## 15.16.1 / 2026-04-28
+## 15.16.1 / 2026-04-28 / Agent 7.79.0
 
 ***Fixed***:
 
