@@ -88,8 +88,6 @@ def test_cron_expression_accepts_valid(expression: str) -> None:
         "*/-1 * * * *",
         "1/2 * * * */0",
         "10-5 * * * *",
-        "0 0 1 1, 1, 3,3 *",
-        "0 0 1 1 ,3,3 *",
         "0 0 1- 3 * *",
         "0 0 1 -3 * *",
     ],
@@ -140,6 +138,9 @@ def test_unsatisfiable_combo_allowed_when_dow_provides_or_match() -> None:
         ("* 4,1-4,5 * * *", "* 1-5 * * *"),
         ("* * * * 2-3,4-5,3", "* * * * 2-5"),
         ("0 0 1 1,1,3,3 *", "0 0 1 1,3 *"),
+        ("0 0 1 1, 2, 3 *", "0 0 1 1,2,3 *"),
+        ("0 0 1 1 ,2 ,3 *", "0 0 1 1,2,3 *"),
+        ("*/5 , 7 * * * *", "*/5,7 * * * *"),
     ],
 )
 def test_semantically_equivalent_expressions_compare_equal(left_expression: str, right_expression: str) -> None:

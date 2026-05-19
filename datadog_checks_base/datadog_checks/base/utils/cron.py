@@ -15,11 +15,14 @@ and ``L``/``W``/``#`` extensions are rejected at parse time.
 
 from __future__ import annotations
 
+import re
 import time
 from calendar import monthrange
 from datetime import datetime, timedelta, timezone
 
 UTC = timezone.utc
+
+WHITESPACE_AROUND_COMMA = re.compile(r"\s*,\s*")
 
 MINUTE_RANGE = (0, 59)
 HOUR_RANGE = (0, 23)
@@ -122,7 +125,8 @@ class CronExpression:
         if stripped.startswith("@"):
             raise ValueError(f"shortcut expressions are not supported: {expression!r}")
 
-        fields = stripped.split()
+        normalized = WHITESPACE_AROUND_COMMA.sub(",", stripped)
+        fields = normalized.split()
         if len(fields) != 5:
             raise ValueError(f"expected 5 cron fields, got {len(fields)}: {expression!r}")
 
