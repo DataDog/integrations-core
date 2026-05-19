@@ -1,0 +1,1 @@
+Allow setting ``client_name`` on Redis connections for easier identification in CLIENT LIST output.
