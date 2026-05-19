@@ -248,6 +248,13 @@ NEXT_PREV_CASES = [
         utc_timestamp(2025, 12, 31, 23, 59),
         id="odd-minutes-via-n-step",
     ),
+    pytest.param(
+        "0 0 31 1 3",
+        utc_timestamp(2026, 2, 15),
+        utc_timestamp(2027, 1, 6),
+        utc_timestamp(2026, 1, 31),
+        id="vixie-or-with-month-boundary-cross",
+    ),
 ]
 
 
@@ -340,30 +347,30 @@ def test_scheduler_next_tick_none_before_first_call(daily_at_nine: CronScheduler
 
 
 def test_scheduler_fresh_no_ticks_due(daily_at_nine: CronScheduler) -> None:
-    out = list(daily_at_nine.due_ticks(now=utc_timestamp(2026, 1, 1, 8, 30)))
+    out = daily_at_nine.due_ticks(now=utc_timestamp(2026, 1, 1, 8, 30))
     assert out == []
     assert daily_at_nine.next_tick == utc_timestamp(2026, 1, 1, 9)
 
 
 def test_scheduler_fires_after_tick_crossed(daily_at_nine: CronScheduler) -> None:
-    list(daily_at_nine.due_ticks(now=utc_timestamp(2026, 1, 1, 8, 30)))
-    out = list(daily_at_nine.due_ticks(now=utc_timestamp(2026, 1, 1, 9, 0)))
+    daily_at_nine.due_ticks(now=utc_timestamp(2026, 1, 1, 8, 30))
+    out = daily_at_nine.due_ticks(now=utc_timestamp(2026, 1, 1, 9, 0))
     assert out == [utc_timestamp(2026, 1, 1, 9)]
     assert daily_at_nine.next_tick == utc_timestamp(2026, 1, 2, 9)
 
 
 def test_scheduler_idempotent_within_same_polling_window(daily_at_nine: CronScheduler) -> None:
-    list(daily_at_nine.due_ticks(now=utc_timestamp(2026, 1, 1, 8, 55)))
+    daily_at_nine.due_ticks(now=utc_timestamp(2026, 1, 1, 8, 55))
     poll = utc_timestamp(2026, 1, 1, 9, 1)
-    first = list(daily_at_nine.due_ticks(now=poll))
-    second = list(daily_at_nine.due_ticks(now=poll))
+    first = daily_at_nine.due_ticks(now=poll)
+    second = daily_at_nine.due_ticks(now=poll)
     assert first == [utc_timestamp(2026, 1, 1, 9)]
     assert second == []
 
 
 def test_scheduler_does_not_fire_past_tick_without_startup_lookback() -> None:
     s = CronScheduler("0 9 * * *")
-    out = list(s.due_ticks(now=utc_timestamp(2026, 1, 1, 9, 30)))
+    out = s.due_ticks(now=utc_timestamp(2026, 1, 1, 9, 30))
     assert out == []
     assert s.next_tick == utc_timestamp(2026, 1, 2, 9)
 
@@ -377,8 +384,8 @@ def test_scheduler_does_not_block(daily_at_nine: CronScheduler, monkeypatch: pyt
 
 
 def test_scheduler_yields_multiple_missed_ticks(daily_at_nine: CronScheduler) -> None:
-    list(daily_at_nine.due_ticks(now=utc_timestamp(2026, 1, 1, 8, 30)))
-    out = list(daily_at_nine.due_ticks(now=utc_timestamp(2026, 1, 4, 12, 0)))
+    daily_at_nine.due_ticks(now=utc_timestamp(2026, 1, 1, 8, 30))
+    out = daily_at_nine.due_ticks(now=utc_timestamp(2026, 1, 4, 12, 0))
     assert out == [
         utc_timestamp(2026, 1, 1, 9),
         utc_timestamp(2026, 1, 2, 9),
@@ -390,7 +397,7 @@ def test_scheduler_yields_multiple_missed_ticks(daily_at_nine: CronScheduler) ->
 
 def test_scheduler_advances_state_when_lookback_window_misses() -> None:
     s = CronScheduler("0 * * * *", startup_lookback=300)
-    out = list(s.due_ticks(now=utc_timestamp(2026, 1, 1, 12, 30)))
+    out = s.due_ticks(now=utc_timestamp(2026, 1, 1, 12, 30))
     assert out == []
     assert s.next_tick == utc_timestamp(2026, 1, 1, 13)
 
@@ -425,14 +432,14 @@ def test_scheduler_advances_state_when_lookback_window_misses() -> None:
 )
 def test_scheduler_startup_lookback(expression: str, lookback: float, now: float, expected: list[float]) -> None:
     s = CronScheduler(expression, startup_lookback=lookback)
-    assert list(s.due_ticks(now=now)) == expected
+    assert s.due_ticks(now=now) == expected
 
 
 def test_scheduler_default_now_uses_wall_clock(monkeypatch: pytest.MonkeyPatch) -> None:
     fixed = utc_timestamp(2026, 1, 1, 8, 30)
     monkeypatch.setattr(time, "time", lambda: fixed)
     s = CronScheduler("0 9 * * *")
-    assert list(s.due_ticks()) == []
+    assert s.due_ticks() == []
     assert s.next_tick == utc_timestamp(2026, 1, 1, 9)
 
 
@@ -443,7 +450,7 @@ def test_scheduler_due_ticks_returns_list(daily_at_nine: CronScheduler) -> None:
 
 def test_scheduler_advances_correctly_across_ten_ticks() -> None:
     s = CronScheduler("0 * * * *")
-    list(s.due_ticks(now=utc_timestamp(2026, 1, 1, 0, 30)))
+    s.due_ticks(now=utc_timestamp(2026, 1, 1, 0, 30))
     collected: list[float] = []
     for hour in range(1, 11):
         collected.extend(s.due_ticks(now=utc_timestamp(2026, 1, 1, hour, 0)))

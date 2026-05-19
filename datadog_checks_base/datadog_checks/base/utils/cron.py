@@ -27,6 +27,8 @@ DOM_RANGE = (1, 31)
 MONTH_RANGE = (1, 12)
 DOW_RANGE = (0, 7)
 
+MAX_DAYS_PER_MONTH = {1: 31, 2: 29, 3: 31, 4: 30, 5: 31, 6: 30, 7: 31, 8: 31, 9: 30, 10: 31, 11: 30, 12: 31}
+
 WALK_ITERATION_BUDGET = 366 * 8
 
 
@@ -126,11 +128,10 @@ class CronExpression:
         self._reject_unsatisfiable_dom_month()
 
     def _reject_unsatisfiable_dom_month(self) -> None:
-        if self._dow_restricted:
+        if self._dow_restricted or not self._dom_restricted:
             return
-        max_days_per_month = {1: 31, 2: 29, 3: 31, 4: 30, 5: 31, 6: 30, 7: 31, 8: 31, 9: 30, 10: 31, 11: 30, 12: 31}
         for month in self._months:
-            if any(day <= max_days_per_month[month] for day in self._doms):
+            if any(day <= MAX_DAYS_PER_MONTH[month] for day in self._doms):
                 return
         raise ValueError(
             f"cron expression {self._expression!r} can never fire: "
