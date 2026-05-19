@@ -132,6 +132,10 @@ def test_unsatisfiable_combo_allowed_when_dow_provides_or_match() -> None:
         ("0 0 * * 7", "0 0 * * 0"),
         ("0 0 * * 0,7", "0 0 * * 0"),
         ("0 0 * * 1-7", "0 0 * * 0-6"),
+        ("5,5,1-6 * * * *", "1-6 * * * *"),
+        ("* 4,1-4,5 * * *", "* 1-5 * * *"),
+        ("* * * * 2-3,4-5,3", "* * * * 2-5"),
+        ("0 0 1 1,1,3,3 *", "0 0 1 1,3 *"),
     ],
 )
 def test_semantically_equivalent_expressions_compare_equal(left_expression: str, right_expression: str) -> None:
@@ -254,6 +258,41 @@ NEXT_PREV_CASES = [
         utc_timestamp(2027, 1, 6),
         utc_timestamp(2026, 1, 31),
         id="vixie-or-with-month-boundary-cross",
+    ),
+    pytest.param(
+        "0 16 */2 * 6",
+        utc_timestamp(2023, 5, 2),
+        utc_timestamp(2023, 5, 3, 16),
+        utc_timestamp(2023, 5, 1, 16),
+        id="vixie-or-stepped-dom-with-saturday",
+    ),
+    pytest.param(
+        "5 0 */2 * *",
+        utc_timestamp(2012, 2, 24),
+        utc_timestamp(2012, 2, 25, 0, 5),
+        utc_timestamp(2012, 2, 23, 0, 5),
+        id="stepped-dom-previous-from-even-day",
+    ),
+    pytest.param(
+        "0 0 22 * *",
+        utc_timestamp(2012, 3, 15),
+        utc_timestamp(2012, 3, 22),
+        utc_timestamp(2012, 2, 22),
+        id="dom-prev-crosses-into-previous-month",
+    ),
+    pytest.param(
+        "0 0 * * 0,6",
+        utc_timestamp(2010, 8, 25, 15, 56),
+        utc_timestamp(2010, 8, 28),
+        utc_timestamp(2010, 8, 22),
+        id="weekend-dow-list-both-directions",
+    ),
+    pytest.param(
+        "0 0 1 1,3,6,9,12 *",
+        utc_timestamp(2026, 1, 15),
+        utc_timestamp(2026, 3, 1),
+        utc_timestamp(2026, 1, 1),
+        id="quarterly-via-month-comma-list",
     ),
 ]
 
