@@ -72,6 +72,7 @@ class PostgresHealth(Health):
         Run the diagnostics for the Postgres check.
         """
         for diagnosis in self.check.diagnosis.diagnoses:
+            self.check.log.info("Submitting diagnosis: %s", diagnosis._asdict())
             self.submit_health_event(
                 name=diagnosis.name,
                 status=HealthStatus.WARNING

@@ -1209,6 +1209,7 @@ class PostgreSql(DatabaseCheck):
         # Resend the initialization event. The submitter will debounce it
         self._submit_initialization_health_event()
 
+        self.log.info("Running check sanity check")
         should_run_diagnostics = False
 
         tags = copy.copy(self.tags)
@@ -1296,10 +1297,13 @@ class PostgreSql(DatabaseCheck):
                 raw=True,
             )
         finally:
+            self.log.info("Reach check finally")
             # Check each async job for if an error occurred during their most recent run
             # TODO: Encapsulate this into DBMAsyncJob
             for job in [self.statement_metrics, self.statement_samples, self.metadata_samples, self.data_observability]:
+                self.log.info("Checking job: %s", job.__class__.__name__)
                 if hasattr(job, '_last_run_did_error') and job._last_run_did_error:
+                    self.log.info("Job %s had an error", job.__class__.__name__)
                     should_run_diagnostics = True
             # Only automatically run every 5 minutes at most
             if (
@@ -1307,13 +1311,16 @@ class PostgreSql(DatabaseCheck):
                 and time() - self._last_automatic_diagnosis < AUTOMATIC_DIAGNOSIS_INTERVAL
             ):
                 should_run_diagnostics = False
+                self.log.info("Not running automatic diagnostics because it's been less than 5 minutes since the last run")
             # If it's been more than 5 minutes since the last error diagnosis, run again to see if the error is resolved
             if (
                 self._last_diagnosis_had_errors
                 and time() - self._last_diagnosis_had_errors >= AUTOMATIC_DIAGNOSIS_INTERVAL
             ):
                 should_run_diagnostics = True
+                self.log.info("Running automatic diagnostics because it's been more than 5 minutes since the last error diagnosis")
             if should_run_diagnostics:
+                self.log.info("Running automatic diagnostics")
                 self._last_automatic_diagnosis = time()
                 run_diagnostics(self)
                 self._last_diagnosis_had_errors = any(
