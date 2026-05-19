@@ -32,60 +32,70 @@ MAX_DAYS_PER_MONTH = {1: 31, 2: 29, 3: 31, 4: 30, 5: 31, 6: 30, 7: 31, 8: 31, 9:
 WALK_ITERATION_BUDGET = 366 * 8
 
 
-def _parse_field(field: str, low: int, high: int) -> tuple[tuple[int, ...], bool]:
-    """Parse one cron field into (sorted_unique_values, is_restricted)."""
+def _parse_field(field: str, low: int, high: int) -> tuple[int, ...]:
+    """Parse a comma-separated cron field into a sorted tuple of allowed values."""
     if not field:
         raise ValueError("empty cron field")
-
-    is_restricted = field != "*"
     values: set[int] = set()
-
     for chunk in field.split(","):
-        if not chunk:
-            raise ValueError(f"empty value in cron field: {field!r}")
-
-        base = chunk
-        step = 1
-        step_specified = "/" in chunk
-        if step_specified:
-            base, _, step_str = chunk.partition("/")
-            if not base or not step_str:
-                raise ValueError(f"malformed step expression: {chunk!r}")
-            try:
-                step = int(step_str)
-            except ValueError as exc:
-                raise ValueError(f"step must be an integer: {chunk!r}") from exc
-            if step <= 0:
-                raise ValueError(f"step must be positive: {chunk!r}")
-
-        if base == "*":
-            start, end = low, high
-        elif "-" in base:
-            left, _, right = base.partition("-")
-            if not left or not right:
-                raise ValueError(f"malformed range: {base!r}")
-            try:
-                start, end = int(left), int(right)
-            except ValueError as exc:
-                raise ValueError(f"range bounds must be integers: {base!r}") from exc
-            if start > end:
-                raise ValueError(f"range start must be <= end: {base!r}")
-        else:
-            try:
-                start = int(base)
-            except ValueError as exc:
-                raise ValueError(f"value must be an integer: {base!r}") from exc
-            end = high if step_specified else start
-
-        if start < low or end > high:
-            raise ValueError(f"value out of range [{low}, {high}] in {chunk!r}")
-
-        values.update(range(start, end + 1, step))
-
+        values.update(_expand_chunk(chunk, low, high))
     if not values:
         raise ValueError(f"cron field expanded to empty set: {field!r}")
+    return tuple(sorted(values))
 
-    return tuple(sorted(values)), is_restricted
+
+def _expand_chunk(chunk: str, low: int, high: int) -> range:
+    """Expand one comma-separated piece (with optional /step) into a numeric range."""
+    if not chunk:
+        raise ValueError("empty value in cron field")
+    base, step, step_specified = _split_step(chunk)
+    start, end = _parse_base(base, low, high, step_specified=step_specified)
+    if start < low or end > high:
+        raise ValueError(f"value out of range [{low}, {high}] in {chunk!r}")
+    return range(start, end + 1, step)
+
+
+def _split_step(chunk: str) -> tuple[str, int, bool]:
+    """Split 'base[/step]' into (base, step, step_specified). step defaults to 1."""
+    if "/" not in chunk:
+        return chunk, 1, False
+    base, _, step_str = chunk.partition("/")
+    if not base or not step_str:
+        raise ValueError(f"malformed step expression: {chunk!r}")
+    try:
+        step = int(step_str)
+    except ValueError as exc:
+        raise ValueError(f"step must be an integer: {chunk!r}") from exc
+    if step <= 0:
+        raise ValueError(f"step must be positive: {chunk!r}")
+    return base, step, True
+
+
+def _parse_base(base: str, low: int, high: int, *, step_specified: bool) -> tuple[int, int]:
+    """Parse the value portion of a chunk into an inclusive (start, end) pair."""
+    if base == "*":
+        return low, high
+    if "-" in base:
+        return _parse_range(base)
+    try:
+        value = int(base)
+    except ValueError as exc:
+        raise ValueError(f"value must be an integer: {base!r}") from exc
+    return (value, high) if step_specified else (value, value)
+
+
+def _parse_range(base: str) -> tuple[int, int]:
+    """Parse an inclusive 'n-m' range into (n, m)."""
+    left, _, right = base.partition("-")
+    if not left or not right:
+        raise ValueError(f"malformed range: {base!r}")
+    try:
+        start, end = int(left), int(right)
+    except ValueError as exc:
+        raise ValueError(f"range bounds must be integers: {base!r}") from exc
+    if start > end:
+        raise ValueError(f"range start must be <= end: {base!r}")
+    return start, end
 
 
 class CronExpression:
@@ -118,11 +128,13 @@ class CronExpression:
 
         minute_field, hour_field, dom_field, month_field, dow_field = fields
 
-        self._minutes, _ = _parse_field(minute_field, *MINUTE_RANGE)
-        self._hours, _ = _parse_field(hour_field, *HOUR_RANGE)
-        self._doms, self._dom_restricted = _parse_field(dom_field, *DOM_RANGE)
-        self._months, _ = _parse_field(month_field, *MONTH_RANGE)
-        raw_dows, self._dow_restricted = _parse_field(dow_field, *DOW_RANGE)
+        self._minutes = _parse_field(minute_field, *MINUTE_RANGE)
+        self._hours = _parse_field(hour_field, *HOUR_RANGE)
+        self._doms = _parse_field(dom_field, *DOM_RANGE)
+        self._dom_restricted = dom_field != "*"
+        self._months = _parse_field(month_field, *MONTH_RANGE)
+        raw_dows = _parse_field(dow_field, *DOW_RANGE)
+        self._dow_restricted = dow_field != "*"
         self._dows = tuple(sorted({0 if v == 7 else v for v in raw_dows}))
         self._expression = " ".join(fields)
         self._reject_unsatisfiable_dom_month()
@@ -245,10 +257,11 @@ class CronExpression:
                     return dt.replace(hour=hour, minute=0, second=0, microsecond=0)
             return (dt + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
 
+        last_minute = self._minutes[-1]
         for hour in reversed(self._hours):
             if hour < dt.hour:
-                return dt.replace(hour=hour, minute=59, second=0, microsecond=0)
-        return (dt - timedelta(days=1)).replace(hour=23, minute=59, second=0, microsecond=0)
+                return dt.replace(hour=hour, minute=last_minute, second=0, microsecond=0)
+        return (dt - timedelta(days=1)).replace(hour=self._hours[-1], minute=last_minute, second=0, microsecond=0)
 
     def _jump_minute(self, dt: datetime, forward: bool) -> datetime:
         if forward:
@@ -260,7 +273,7 @@ class CronExpression:
         for minute in reversed(self._minutes):
             if minute < dt.minute:
                 return dt.replace(minute=minute, second=0, microsecond=0)
-        return (dt - timedelta(hours=1)).replace(minute=59, second=0, microsecond=0)
+        return (dt - timedelta(hours=1)).replace(minute=self._minutes[-1], second=0, microsecond=0)
 
 
 class CronScheduler:
