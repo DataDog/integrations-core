@@ -1,1 +1,1 @@
-Raise exceptions from the hostname property instead of returning None, so permission and connectivity errors surface as check failures rather than a confusing TypeError.
+Raise exceptions from the hostname property, so permission and connectivity errors surface as check failures.
