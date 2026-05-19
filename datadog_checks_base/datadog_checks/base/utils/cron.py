@@ -3,18 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Standard 5-field UTC cron expression parsing and scheduling.
 
-This module exists so integrations that want cron-style firing inside their
-``check()`` method don't have to pull in a third-party cron library. Two
-classes are exposed:
-
 * ``CronExpression`` is the stateless tick calculator. Parse once, then ask
-  for the next/previous tick relative to any timestamp.
-* ``CronScheduler`` wraps an expression with the "is this tick mine to fire
-  yet?" state machine that fits the per-``check()`` invocation pattern.
+  for the next or previous tick relative to any timestamp.
+* ``CronScheduler`` wraps an expression with state to report which scheduled
+  ticks have elapsed since the last call.
 
 Only the standard 5-field syntax (minute hour day-of-month month day-of-week)
 in UTC is supported. ``@``-aliases, seconds, year, month/day name aliases,
-and ``L``/``W``/``#`` extensions are intentionally rejected.
+and ``L``/``W``/``#`` extensions are rejected at parse time.
 """
 
 from __future__ import annotations
@@ -22,7 +18,6 @@ from __future__ import annotations
 import time
 from calendar import monthrange
 from datetime import datetime, timedelta, timezone
-from typing import Iterator
 
 UTC = timezone.utc
 
@@ -49,7 +44,8 @@ def _parse_field(field: str, low: int, high: int) -> tuple[tuple[int, ...], bool
 
         base = chunk
         step = 1
-        if "/" in chunk:
+        step_specified = "/" in chunk
+        if step_specified:
             base, _, step_str = chunk.partition("/")
             if not base or not step_str:
                 raise ValueError(f"malformed step expression: {chunk!r}")
@@ -77,7 +73,7 @@ def _parse_field(field: str, low: int, high: int) -> tuple[tuple[int, ...], bool
                 start = int(base)
             except ValueError as exc:
                 raise ValueError(f"value must be an integer: {base!r}") from exc
-            end = start
+            end = high if step_specified else start
 
         if start < low or end > high:
             raise ValueError(f"value out of range [{low}, {high}] in {chunk!r}")
@@ -106,7 +102,7 @@ class CronExpression:
 
     def __init__(self, expression: str) -> None:
         if not isinstance(expression, str):
-            raise ValueError("cron expression must be a string")
+            raise TypeError("cron expression must be a string")
 
         stripped = expression.strip()
         if not stripped:
@@ -127,6 +123,30 @@ class CronExpression:
         raw_dows, self._dow_restricted = _parse_field(dow_field, *DOW_RANGE)
         self._dows = tuple(sorted({0 if v == 7 else v for v in raw_dows}))
         self._expression = " ".join(fields)
+        self._reject_unsatisfiable_dom_month()
+
+    def _reject_unsatisfiable_dom_month(self) -> None:
+        if self._dow_restricted:
+            return
+        max_days_per_month = {1: 31, 2: 29, 3: 31, 4: 30, 5: 31, 6: 30, 7: 31, 8: 31, 9: 30, 10: 31, 11: 30, 12: 31}
+        for month in self._months:
+            if any(day <= max_days_per_month[month] for day in self._doms):
+                return
+        raise ValueError(
+            f"cron expression {self._expression!r} can never fire: "
+            f"day-of-month {list(self._doms)} does not occur in months {list(self._months)}"
+        )
+
+    def _canonical_key(self) -> tuple:
+        return (
+            self._minutes,
+            self._hours,
+            self._doms,
+            self._months,
+            self._dows,
+            self._dom_restricted,
+            self._dow_restricted,
+        )
 
     def __repr__(self) -> str:
         return f"CronExpression({self._expression!r})"
@@ -134,10 +154,10 @@ class CronExpression:
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, CronExpression):
             return NotImplemented
-        return self._expression == other._expression
+        return self._canonical_key() == other._canonical_key()
 
     def __hash__(self) -> int:
-        return hash(self._expression)
+        return hash(self._canonical_key())
 
     @property
     def expression(self) -> str:
@@ -194,31 +214,22 @@ class CronExpression:
                 dt = self._jump_minute(dt, forward)
                 continue
             return dt.timestamp()
-        raise RuntimeError(
-            f"cron expression {self._expression!r} has no matching tick within {WALK_ITERATION_BUDGET} steps; "
-            "likely impossible (for example day 31 in a 30-day-only month)"
+        raise ValueError(
+            f"cron expression {self._expression!r} has no matching tick within {WALK_ITERATION_BUDGET} steps"
         )
 
     def _jump_month(self, dt: datetime, forward: bool) -> datetime:
-        year, month = dt.year, dt.month
+        year = dt.year
         if forward:
-            year, month = self._roll_month(year, month + 1, forward)
-            while month not in self._months:
-                year, month = self._roll_month(year, month + 1, forward)
-            return datetime(year, month, 1, 0, 0, tzinfo=UTC)
-
-        year, month = self._roll_month(year, month - 1, forward)
-        while month not in self._months:
-            year, month = self._roll_month(year, month - 1, forward)
-        return datetime(year, month, monthrange(year, month)[1], 23, 59, tzinfo=UTC)
-
-    @staticmethod
-    def _roll_month(year: int, month: int, forward: bool) -> tuple[int, int]:
-        if forward and month > 12:
-            return year + 1, 1
-        if not forward and month < 1:
-            return year - 1, 12
-        return year, month
+            for month in self._months:
+                if month > dt.month:
+                    return datetime(year, month, 1, 0, 0, tzinfo=UTC)
+            return datetime(year + 1, self._months[0], 1, 0, 0, tzinfo=UTC)
+        for month in reversed(self._months):
+            if month < dt.month:
+                return datetime(year, month, monthrange(year, month)[1], 23, 59, tzinfo=UTC)
+        last = self._months[-1]
+        return datetime(year - 1, last, monthrange(year - 1, last)[1], 23, 59, tzinfo=UTC)
 
     @staticmethod
     def _jump_day(dt: datetime, forward: bool) -> datetime:
@@ -252,16 +263,14 @@ class CronExpression:
 
 
 class CronScheduler:
-    """State machine that decides which cron ticks have elapsed since the last call.
+    """State machine that reports which cron ticks have elapsed since the last call.
 
-    Designed to be invoked once per ``AgentCheck.check()`` from the Agent's
-    polling loop. ``due_ticks(now)`` is non-blocking: it inspects the cached
-    next tick against ``now``, returns all elapsed ticks immediately, and
-    advances internal state. It never sleeps.
+    ``due_ticks(now)`` is non-blocking: it inspects the cached next tick against
+    ``now``, returns all elapsed ticks immediately, and advances internal state.
+    It never sleeps.
 
-    With ``startup_lookback > 0``, the first call also recovers the most
-    recent past tick when it falls within ``now - startup_lookback`` — useful
-    for surviving check restarts mid-cycle.
+    With ``startup_lookback > 0``, the first call also yields the most recent
+    past tick when it falls within ``now - startup_lookback``.
     """
 
     __slots__ = ("_expression", "_next_tick_cached", "_startup_lookback")
@@ -293,8 +302,8 @@ class CronScheduler:
         """Cached upcoming tick, or None before the first ``due_ticks`` call."""
         return self._next_tick_cached
 
-    def due_ticks(self, now: float | None = None) -> Iterator[float]:
-        """Return an iterator over scheduled ticks that have elapsed by ``now``."""
+    def due_ticks(self, now: float | None = None) -> list[float]:
+        """Return scheduled ticks that have elapsed by ``now``."""
         if now is None:
             now = time.time()
 
@@ -306,14 +315,14 @@ class CronScheduler:
                 if now - prev <= self._startup_lookback:
                     elapsed.append(prev)
             self._next_tick_cached = self._expression.next_tick(after=now)
-            return iter(elapsed)
+            return elapsed
 
         while now >= self._next_tick_cached:
             tick = self._next_tick_cached
             self._next_tick_cached = self._expression.next_tick(after=tick)
             elapsed.append(tick)
 
-        return iter(elapsed)
+        return elapsed
 
 
 __all__ = ["CronExpression", "CronScheduler"]
