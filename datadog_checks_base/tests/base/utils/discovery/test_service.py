@@ -41,3 +41,28 @@ def test_service_is_hashable():
 def test_service_ports_is_tuple_not_list():
     svc = Service(id="a", host="h", ports=(Port(1), Port(2)))
     assert isinstance(svc.ports, tuple)
+
+
+def test_url_host_ipv4_unchanged():
+    svc = Service(id="x", host="10.0.0.1", ports=())
+    assert svc.url_host == "10.0.0.1"
+
+
+def test_url_host_hostname_unchanged():
+    svc = Service(id="x", host="myhost.local", ports=())
+    assert svc.url_host == "myhost.local"
+
+
+def test_url_host_ipv6_gets_bracketed():
+    svc = Service(id="x", host="2001:db8::1", ports=())
+    assert svc.url_host == "[2001:db8::1]"
+
+
+def test_url_host_ipv6_loopback_gets_bracketed():
+    svc = Service(id="x", host="::1", ports=())
+    assert svc.url_host == "[::1]"
+
+
+def test_url_host_already_bracketed_ipv6_not_double_bracketed():
+    svc = Service(id="x", host="[2001:db8::1]", ports=())
+    assert svc.url_host == "[2001:db8::1]"

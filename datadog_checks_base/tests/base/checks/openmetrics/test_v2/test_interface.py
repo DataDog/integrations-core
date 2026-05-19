@@ -47,6 +47,18 @@ def test_generate_configs_empty_ports_yields_nothing():
     assert configs == []
 
 
+def test_generate_configs_brackets_ipv6_host():
+    svc = {"id": "svc1", "host": "2001:db8::1", "ports": [{"number": 9090, "name": ""}]}
+    configs = list(OpenMetricsBaseCheckV2.generate_configs(svc))
+    assert configs == [{"openmetrics_endpoint": "http://[2001:db8::1]:9090/metrics"}]
+
+
+def test_generate_configs_does_not_double_bracket_ipv6_host():
+    svc = {"id": "svc1", "host": "[2001:db8::1]", "ports": [{"number": 9090, "name": ""}]}
+    configs = list(OpenMetricsBaseCheckV2.generate_configs(svc))
+    assert configs == [{"openmetrics_endpoint": "http://[2001:db8::1]:9090/metrics"}]
+
+
 def test_default_config(aggregator, dd_run_check, mock_http_response):
     class Check(OpenMetricsBaseCheckV2):
         __NAMESPACE__ = 'test'
