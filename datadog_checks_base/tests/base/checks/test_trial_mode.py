@@ -7,6 +7,7 @@ import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.base import _TrialErrorDowngrade, _TrialModeProxy
+from datadog_checks.base.errors import ConfigurationError
 
 SERVICE = {
     "id": "svc1",
@@ -315,36 +316,38 @@ def test_event_platform_submissions_from_failed_candidates_are_suppressed(aggreg
     assert aggregator.get_event_platform_events("dbm-samples", parse_json=False) == []
 
 
-class _ProcessIsolatedSuccessCheck(AgentCheck):
-    """Process-isolated candidate that submits a metric and succeeds.
+# config-discovery and process_isolation are intentionally incompatible: a
+# process-isolated candidate's subprocess error does not propagate back to
+# AgentCheck.run()'s return value, so the trial proxy cannot tell a failed
+# candidate from a successful one. The proxy raises ConfigurationError
+# whenever the combination is seen — either in init_config or in a candidate
+# dict from generate_configs.
 
-    Verifies that the trial buffer composes with the existing process-isolation
-    machinery. The subprocess's ReplayAggregator prints submissions to stdout;
-    the parent's run_with_isolation evaluates the module-level `aggregator` at
-    call time and picks up the trial buffer (because _run_trial rebinds
-    base.aggregator the same way redirect.py does). Buffered calls are then
-    replayed onto the real aggregator once the candidate wins.
 
-    (Note: a "raise-after-submit in the subprocess" test would not work here
-    because run_with_isolation does not surface the subprocess's exception
-    back to the parent's run() return value, so the proxy cannot today
-    distinguish a process-isolated failure from a success. That's a separate
-    gap unrelated to the buffer mechanism.)
-    """
+class _PIInCandidateCheck(AgentCheck):
+    """generate_configs returns a candidate with process_isolation enabled."""
 
     @classmethod
     def generate_configs(cls, service_dict):
-        yield {"target": "winner", "process_isolation": True}
+        yield {"target": "x", "process_isolation": True}
 
     def check(self, _):
-        self.gauge("trial.isolated.winner", 1)
+        pass
 
 
-def test_process_isolated_trial_candidate_submissions_route_through_buffer(aggregator):
-    proxy = _make_proxy(_ProcessIsolatedSuccessCheck, "t_isolated_ok")
-    proxy.run()
+def test_process_isolation_in_init_config_raises():
+    with pytest.raises(ConfigurationError, match="process_isolation"):
+        _FailingTrialCheck(
+            "t_pi_init",
+            {"process_isolation": True},
+            [{"__discovery_service__": SERVICE}],
+        )
 
-    aggregator.assert_metric("trial.isolated.winner", count=1)
+
+def test_process_isolation_in_candidate_raises():
+    proxy = _make_proxy(_PIInCandidateCheck, "t_pi_candidate")
+    result = proxy.run()
+    assert "process_isolation" in result
 
 
 @pytest.mark.parametrize(

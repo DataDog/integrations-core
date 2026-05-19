@@ -102,6 +102,20 @@ GLOBAL_SECURE_FIELDS = frozenset(
 )
 
 
+class _AggregatorAccessor:
+    """Non-data descriptor returning the module-level ``aggregator`` at access time.
+
+    Resolved dynamically so a check running in a subprocess that has been
+    patched by ``utils/replay/redirect.py`` picks up the ReplayAggregator,
+    even though that patch happens after AgentCheck is imported. Per-instance
+    overrides (the trial proxy's buffer) shadow this since instance attributes
+    win over non-data descriptors.
+    """
+
+    def __get__(self, obj, objtype=None):
+        return aggregator
+
+
 @traced_class
 class AgentCheck(object):
     """
@@ -173,6 +187,15 @@ class AgentCheck(object):
     # be sent to the aggregator, the rest are dropped. The state is reset after each run.
     # See https://github.com/DataDog/integrations-core/pull/2093 for more information.
     DEFAULT_METRIC_LIMIT = 0
+
+    # Class-level descriptor that resolves the module-level `aggregator` at
+    # access time. Submission sites in this class call self._aggregator.submit_*
+    # so the trial-mode proxy can override per-instance (the instance attribute
+    # shadows this descriptor for a single candidate). Non-discovery code paths
+    # never set an instance attribute, so behavior is identical to using the
+    # module-level aggregator directly — and unlike a static class attribute,
+    # the descriptor's late binding composes with utils/replay/redirect.py.
+    _aggregator = _AggregatorAccessor()
 
     # Allow tracing for classic integrations
     def __init_subclass__(cls, *args, **kwargs):
@@ -777,7 +800,7 @@ class AgentCheck(object):
         if hostname is None:
             hostname = ''
 
-        aggregator.submit_histogram_bucket(
+        self._aggregator.submit_histogram_bucket(
             self,
             self.check_id,
             self._format_namespace(name, raw),
@@ -795,28 +818,28 @@ class AgentCheck(object):
         if raw_event is None:
             return
 
-        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-samples")
+        self._aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-samples")
 
     def database_monitoring_query_metrics(self, raw_event):
         # type: (str) -> None
         if raw_event is None:
             return
 
-        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metrics")
+        self._aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metrics")
 
     def database_monitoring_query_activity(self, raw_event):
         # type: (str) -> None
         if raw_event is None:
             return
 
-        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-activity")
+        self._aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-activity")
 
     def database_monitoring_metadata(self, raw_event):
         # type: (str) -> None
         if raw_event is None:
             return
 
-        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metadata")
+        self._aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metadata")
 
     def event_platform_event(self, raw_event, event_track_type):
         # type: (str, str) -> None
@@ -830,7 +853,7 @@ class AgentCheck(object):
         """
         if raw_event is None:
             return
-        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), event_track_type)
+        self._aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), event_track_type)
 
     def should_send_metric(self, metric_name):
         return not self._metric_excluded(metric_name) and self._metric_included(metric_name)
@@ -885,7 +908,7 @@ class AgentCheck(object):
             self.warning(err_msg)
             return
 
-        aggregator.submit_metric(self, self.check_id, mtype, name, value, tags, hostname, flush_first_value)
+        self._aggregator.submit_metric(self, self.check_id, mtype, name, value, tags, hostname, flush_first_value)
 
     def gauge(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
         # type: (str, float, Sequence[str], str, str, bool) -> None
@@ -1106,7 +1129,7 @@ class AgentCheck(object):
 
         message = self.sanitize(message)
 
-        aggregator.submit_service_check(
+        self._aggregator.submit_service_check(
             self, self.check_id, self._format_namespace(name, raw), status, tags, hostname, message
         )
 
@@ -1522,7 +1545,7 @@ class AgentCheck(object):
         if self.__NAMESPACE__:
             event.setdefault('source_type_name', self.__NAMESPACE__)
 
-        aggregator.submit_event(self, self.check_id, event)
+        self._aggregator.submit_event(self, self.check_id, event)
 
     def _normalize_tags_type(self, tags, device_name=None, metric_name=None):
         # type: (Sequence[Union[None, str, bytes]], str, str) -> List[str]
@@ -1696,6 +1719,12 @@ class _TrialModeProxy(AgentCheck):
         self._service_dict = self.instance["__discovery_service__"]
         self._winner = None
 
+        if is_affirmative(self.init_config.get('process_isolation', False)):
+            raise ConfigurationError(
+                "config-discovery does not currently support process_isolation. "
+                "Remove process_isolation from init_config in auto_conf.yaml."
+            )
+
     def run(self):
         if self._winner is not None:
             return self._winner.run()
@@ -1717,32 +1746,29 @@ class _TrialModeProxy(AgentCheck):
             self._winner.cancel()
 
     def _run_trial(self):
-        # Imported here to avoid a top-of-module circular import (this module
-        # is `datadog_checks.base.checks.base` itself).
-        import sys
-
-        base_module = sys.modules[__name__]
-
         last_error = None
         tried = 0
         for candidate in self._target_cls.generate_configs(self._service_dict):
+            if is_affirmative(candidate.get('process_isolation', False)):
+                raise ConfigurationError(
+                    "config-discovery does not currently support process_isolation in candidate configs."
+                )
             tried += 1
             inst = self._target_cls(self.name, self.init_config, [candidate])
             inst.check_id = self.check_id
             inst.provider = self.provider
 
-            # Route all aggregator submissions through a buffer so failed
-            # candidates leave no trace. AgentCheck submission sites reference
-            # the module-level `aggregator`, so rebinding base_module.aggregator
-            # captures everything (metrics, service checks, events, event
-            # platform events, histogram buckets). This is the same pattern
-            # utils/replay/redirect.py uses for process isolation, so the two
-            # mechanisms compose correctly: a process-isolated trial candidate
-            # passes the global `aggregator` to run_with_isolation, which
-            # resolves to the buffer at call time.
-            real_agg = base_module.aggregator
+            # Route this candidate's aggregator submissions through a buffer so
+            # failed candidates leave no trace. AgentCheck submission sites read
+            # self._aggregator, a class-level non-data descriptor that resolves
+            # to the module-level `aggregator` at access time. Setting an
+            # instance attribute below shadows the descriptor for *this* `inst`
+            # only — other checks (and their background threads) still see the
+            # descriptor and the real aggregator, so concurrent submissions
+            # never land in our buffer.
+            real_agg = aggregator
             buffer = _TrialAggregatorBuffer(real_agg)
-            base_module.aggregator = buffer
+            inst._aggregator = buffer
 
             log_filter = _TrialErrorDowngrade()
             inst.log.logger.addFilter(log_filter)
@@ -1750,7 +1776,7 @@ class _TrialModeProxy(AgentCheck):
                 error_report = inst.run()
             finally:
                 inst.log.logger.removeFilter(log_filter)
-                base_module.aggregator = real_agg
+                del inst._aggregator
 
             if not error_report:
                 for name, args, kwargs in buffer.calls:
