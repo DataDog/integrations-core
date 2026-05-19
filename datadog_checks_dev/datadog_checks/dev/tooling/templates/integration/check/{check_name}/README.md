@@ -37,7 +37,7 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 The {integration_name} integration does not include any events.
 
-### Service checks
+### Service Checks
 
 The {integration_name} integration does not include any service checks.
 
