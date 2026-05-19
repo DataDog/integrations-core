@@ -912,7 +912,7 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "avg:vsphere.disk.numberWriteAveraged.avg{vsphere_type:datastore,$vcenter_server,$vcenter_datacenter,$vsphere_host,$VM} by {vsphere_datastore}"
+                                "query": "avg:vsphere.datastore.numberWriteAveraged.avg{$vcenter_server,$vcenter_datacenter,$vsphere_host,$VM} by {vsphere_datastore}"
                             }
                         ],
                         "response_format": "timeseries",
