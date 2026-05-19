@@ -260,6 +260,28 @@ async def test_mismatch_on_metrics_prefix_fails(repo_root):
     assert "existing." in result.error
 
 
+async def test_structural_conflict_returns_clean_error(tmp_path):
+    """A scalar where a table is expected surfaces with integration + config path context."""
+    (tmp_path / ".ddev").mkdir()
+    (tmp_path / ".ddev" / "config.toml").write_text(
+        dedent(
+            """\
+            [overrides]
+            manifest = "not a table"
+            """
+        ),
+        encoding="utf-8",
+    )
+    tool = _build_tool(tmp_path, "kuma")
+
+    result = await tool.run({"platforms": ["linux"]})
+
+    assert result.success is False
+    assert "manifest.platforms" in result.error
+    assert "kuma" in result.error
+    assert "overrides.manifest" in result.error
+
+
 async def test_mismatch_leaves_other_sections_untouched(existing_tool, repo_root):
     """A mismatch on the mandatory section must not partially-write the optionals."""
     await existing_tool.run(

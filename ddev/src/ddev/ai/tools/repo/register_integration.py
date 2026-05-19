@@ -95,6 +95,17 @@ class RegisterIntegrationTool(BaseTool[RegisterIntegrationInput]):
         if tool_input.metrics_prefix is not None:
             planned.append(_PendingWrite(METRICS_PREFIX_PATH, tool_input.metrics_prefix, "metrics-prefix"))
 
+        for entry in planned:
+            conflict_at = _first_non_table_node(document, entry.path)
+            if conflict_at is not None:
+                return ToolResult(
+                    success=False,
+                    error=(
+                        f"{entry.label} for {integration!r} cannot be written to {config_path}: "
+                        f"{conflict_at} is not a table"
+                    ),
+                )
+
         to_write: list[_PendingWrite] = []
         for entry in planned:
             existing = _read_existing(document, entry.path, integration)
@@ -133,6 +144,22 @@ def _find_config(start: Path) -> Path | None:
     return None
 
 
+def _first_non_table_node(document: TOMLDocument, path: tuple[str, ...]) -> str | None:
+    """Return the dotted prefix of the first non-Table node along `path`, or None if writable."""
+    node: object = document
+    walked: list[str] = []
+    for part in path:
+        if not isinstance(node, (TOMLDocument, Table)):
+            return ".".join(walked)
+        if part not in node:
+            return None
+        walked.append(part)
+        node = node[part]
+    if not isinstance(node, (TOMLDocument, Table)):
+        return ".".join(walked)
+    return None
+
+
 def _read_existing(document: TOMLDocument, path: tuple[str, ...], key: str) -> object | None:
     node: object = document
     for part in path:
@@ -145,14 +172,16 @@ def _read_existing(document: TOMLDocument, path: tuple[str, ...], key: str) -> o
 
 
 def _set_at_path(document: TOMLDocument, path: tuple[str, ...], key: str, value: object) -> None:
+    """Set `key = value` inside the table at `path`, creating intermediate tables as needed.
+
+    Assumes the caller has preflighted `path` against the document so every existing
+    node along it is a Table — see `_first_non_table_node`.
+    """
     node: TOMLDocument | Table = document
     for part in path:
         if part not in node:
             node[part] = tomlkit.table()
-        child = node[part]
-        if not isinstance(child, (TOMLDocument, Table)):
-            raise TypeError(f"Expected table at {part!r}, found {type(child).__name__}")
-        node = child
+        node = node[part]
     node[key] = value
 
 
