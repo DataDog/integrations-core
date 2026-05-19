@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import os
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Annotated, Literal
@@ -64,6 +66,7 @@ class RegisterIntegrationTool(BaseTool[RegisterIntegrationInput]):
     directory has been scaffolded."""
 
     def __init__(self, policy: FileAccessPolicy) -> None:
+        # Config lives outside write_root; policy deny patterns do not apply here.
         self._write_root = policy.write_root
 
     @property
@@ -95,6 +98,7 @@ class RegisterIntegrationTool(BaseTool[RegisterIntegrationInput]):
         if tool_input.metrics_prefix is not None:
             planned.append(_PendingWrite(METRICS_PREFIX_PATH, tool_input.metrics_prefix, "metrics-prefix"))
 
+        to_write: list[_PendingWrite] = []
         for entry in planned:
             conflict_at = _first_non_table_node(document, entry.path)
             if conflict_at is not None:
@@ -105,9 +109,6 @@ class RegisterIntegrationTool(BaseTool[RegisterIntegrationInput]):
                         f"{conflict_at} is not a table"
                     ),
                 )
-
-        to_write: list[_PendingWrite] = []
-        for entry in planned:
             existing = _read_existing(document, entry.path, integration)
             if existing is None:
                 to_write.append(entry)
@@ -125,7 +126,7 @@ class RegisterIntegrationTool(BaseTool[RegisterIntegrationInput]):
 
         if to_write:
             try:
-                config_path.write_text(tomlkit.dumps(document), encoding="utf-8")
+                _atomic_write(config_path, tomlkit.dumps(document))
             except OSError as e:
                 return ToolResult(success=False, error=f"Failed to write {config_path}: {e}")
             written = ", ".join(entry.label for entry in to_write)
@@ -133,6 +134,21 @@ class RegisterIntegrationTool(BaseTool[RegisterIntegrationInput]):
 
         sections = ", ".join(entry.label for entry in planned)
         return ToolResult(success=True, data=f"{integration!r} already registered in: {sections}")
+
+
+def _atomic_write(path: Path, content: str) -> None:
+    fd, tmp_str = tempfile.mkstemp(dir=str(path.parent), prefix=f".{path.name}.", suffix=".tmp")
+    tmp_path = Path(tmp_str)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(content)
+        os.replace(tmp_path, path)
+    except BaseException:
+        try:
+            tmp_path.unlink()
+        except OSError:
+            pass
+        raise
 
 
 def _find_config(start: Path) -> Path | None:

@@ -10,6 +10,7 @@ import tomlkit
 from tomlkit import TOMLDocument
 
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
+from ddev.ai.tools.repo import register_integration as register_integration_module
 from ddev.ai.tools.repo.register_integration import RegisterIntegrationTool
 
 # ---------------------------------------------------------------------------
@@ -352,3 +353,75 @@ async def test_platform_list_ordering_preserved(repo_root, platforms):
     assert result.success is True
     doc = _read_config(repo_root)
     assert list(_platforms_for(doc, "kuma")) == platforms
+
+
+# ---------------------------------------------------------------------------
+# Dedup applied to platforms input
+# ---------------------------------------------------------------------------
+
+
+async def test_duplicate_platforms_are_deduped_preserving_order(tool, repo_root):
+    """Repeated entries in `platforms` are collapsed before being written."""
+    result = await tool.run({"platforms": ["linux", "windows", "linux"]})
+
+    assert result.success is True
+    doc = _read_config(repo_root)
+    assert list(_platforms_for(doc, "kuma")) == ["linux", "windows"]
+
+
+async def test_duplicate_platforms_matching_existing_are_noop(existing_tool, repo_root):
+    """An input with duplicates that dedups to the existing value is a silent noop."""
+    original_bytes = (repo_root / ".ddev" / "config.toml").read_bytes()
+
+    result = await existing_tool.run({"platforms": ["linux", "linux", "windows", "mac_os"]})
+
+    assert result.success is True
+    assert (repo_root / ".ddev" / "config.toml").read_bytes() == original_bytes
+
+
+# ---------------------------------------------------------------------------
+# IO and parse failure paths surface as clean tool errors
+# ---------------------------------------------------------------------------
+
+
+async def test_read_failure_returns_clean_error(tool, monkeypatch):
+    """An OSError raised while reading the config surfaces as a tool-level error."""
+
+    def fail_read(self, *args, **kwargs):
+        raise PermissionError(f"Permission denied: {self}")
+
+    monkeypatch.setattr(Path, "read_text", fail_read)
+
+    result = await tool.run({"platforms": ["linux"]})
+
+    assert result.success is False
+    assert result.error is not None
+    assert "Failed to read" in result.error
+
+
+async def test_malformed_config_returns_parse_failure(tmp_path):
+    """A config that doesn't parse surfaces as a parse error rather than an exception."""
+    (tmp_path / ".ddev").mkdir()
+    (tmp_path / ".ddev" / "config.toml").write_text("not = valid = toml", encoding="utf-8")
+    tool = _build_tool(tmp_path, "kuma")
+
+    result = await tool.run({"platforms": ["linux"]})
+
+    assert result.success is False
+    assert result.error is not None
+    assert "Failed to parse" in result.error
+
+
+async def test_write_failure_returns_clean_error(tool, monkeypatch):
+    """An OSError raised while writing the config surfaces as a tool-level error."""
+
+    def fail_write(path: Path, content: str) -> None:
+        raise PermissionError(f"Permission denied: {path}")
+
+    monkeypatch.setattr(register_integration_module, "_atomic_write", fail_write)
+
+    result = await tool.run({"platforms": ["linux"]})
+
+    assert result.success is False
+    assert result.error is not None
+    assert "Failed to write" in result.error
