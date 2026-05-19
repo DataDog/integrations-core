@@ -3,6 +3,7 @@ set -e
 
 ORIGINAL_DIR=$(pwd)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 ENV="py3.13-2"
 
 while [[ $# -gt 0 ]]; do
@@ -30,7 +31,7 @@ done
 cleanup() {
     echo ""
     echo "Cleaning up..."
-    cd "$SCRIPT_DIR"
+    cd "$PROJECT_DIR"
     hatch run lab:stop -e "$ENV" || true
     cd "$ORIGINAL_DIR"
     exit 0
@@ -40,7 +41,7 @@ cleanup() {
 # install our own EXIT trap to make sure `lab:stop` always runs even on Ctrl+C.
 trap cleanup EXIT
 
-cd "$SCRIPT_DIR"
+cd "$PROJECT_DIR"
 hatch run lab:start -e "$ENV"
 
 echo "Starting traffic (Ctrl+C to stop)..."
