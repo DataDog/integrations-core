@@ -2,6 +2,27 @@
 
 <!-- towncrier release notes start -->
 
+## 23.8.0 / 2026-05-14
+
+***Added***:
+
+* Add Data Observability async job for executing monitoring queries delivered via Remote Configuration. ([#23123](https://github.com/DataDog/integrations-core/pull/23123))
+* Add column statistics collection from pg_stats for Database Monitoring. ([#23364](https://github.com/DataDog/integrations-core/pull/23364))
+* Surface common Postgres and DBM setup issues through `datadog-agent diagnose`: connection/auth, Postgres version, server GUCs (`shared_preload_libraries`, `track_activity_query_size`, `track_io_timing`, `pg_stat_statements.max`), `pg_monitor` role, `pg_stat_activity` visibility, and per-database `datadog` schema, `pg_stat_statements`, and `datadog.explain_statement` checks. Probes are gated on the subfeature that consumes each dependency and cascade-suppressed so a single root cause yields one actionable row. The statement collector also now distinguishes `pg_stat_statements_not_loaded` from `pg_stat_statements_not_created` so `agent status` points at the right fix. ([#23433](https://github.com/DataDog/integrations-core/pull/23433))
+* Add Azure Workload Identity authentication support. ([#23436](https://github.com/DataDog/integrations-core/pull/23436))
+* Enable schema collection for Postgres by default. This functionality still requires `dbm:true` or `data_observability.enabled:true`. To disable, set `collect_schemas.enabled: false`. ([#23626](https://github.com/DataDog/integrations-core/pull/23626))
+
+***Fixed***:
+
+* Re-order configuration fields based on real-world usage data. ([#23273](https://github.com/DataDog/integrations-core/pull/23273))
+* Fix database name handling in schema collection query construction. ([#23389](https://github.com/DataDog/integrations-core/pull/23389))
+* Fix explain statement query construction when statement text contains dollar-quote delimiters. ([#23392](https://github.com/DataDog/integrations-core/pull/23392))
+* Fix connection leak and improve error handling during Postgres database connectivity diagnostics. ([#23602](https://github.com/DataDog/integrations-core/pull/23602))
+* Qualify the diagnose category with the instance host so multiple instances are distinguishable in `datadog-agent diagnose` output. ([#23620](https://github.com/DataDog/integrations-core/pull/23620))
+* Cleanup config field descriptions for Azure Cloud authentication mechanisms. ([#23625](https://github.com/DataDog/integrations-core/pull/23625))
+* Close dangling connections and break reference cycles on check cancel to reduce memory retention when checks are restarted or rescheduled. ([#23640](https://github.com/DataDog/integrations-core/pull/23640))
+* Eliminate reference cycle in diagnostic instrumentation. ([#23647](https://github.com/DataDog/integrations-core/pull/23647))
+
 ## 23.7.0 / 2026-04-15
 
 ***Added***:

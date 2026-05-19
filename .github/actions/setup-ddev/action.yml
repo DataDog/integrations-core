@@ -1,0 +1,190 @@
+name: Setup ddev
+description: Install uv, restore the shared Python dependency cache, and install ddev.
+
+inputs:
+  install-mode:
+    description: >-
+      Install source for ddev. Allowed values: local (install editable ddev and
+      datadog_checks_dev from this checkout), pypi (install ddev from PyPI).
+    required: false
+    default: local
+  cache-profile:
+    description: >-
+      Cache key profile to restore for local installs. Ignored when install-mode
+      is pypi. Allowed values: local-ddev-base (local ddev, datadog_checks_dev,
+      and datadog_checks_base dependencies), local-ddev (local ddev and
+      datadog_checks_dev dependencies).
+    required: false
+    default: local-ddev-base
+  ddev-version:
+    description: Optional PyPI ddev version specifier, for example ==16.0.0.
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Validate inputs
+      shell: bash
+      env:
+        CACHE_PROFILE: ${{ inputs.cache-profile }}
+        INSTALL_MODE: ${{ inputs.install-mode }}
+      run: |-
+        case "$INSTALL_MODE" in
+          local|pypi) ;;
+          *)
+            echo "::error::Invalid install-mode '$INSTALL_MODE'. Allowed values: local, pypi."
+            exit 1
+            ;;
+        esac
+
+        case "$CACHE_PROFILE" in
+          local-ddev-base|local-ddev) ;;
+          *)
+            echo "::error::Invalid cache-profile '$CACHE_PROFILE'. Allowed values: local-ddev-base, local-ddev."
+            exit 1
+            ;;
+        esac
+
+    - name: Compute cache date
+      id: cache-date
+      shell: bash
+      run: echo "date=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+      with:
+        enable-cache: false
+
+    - name: Restore local ddev cache
+      if: ${{ inputs.install-mode == 'local' && inputs.cache-profile == 'local-ddev-base' }}
+      id: restore-local-ddev-base-cache
+      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      with:
+        path: |
+          ${{ runner.os == 'Windows' && '~\AppData\Local\uv\cache' || runner.os == 'macOS' && '~/Library/Caches/uv' || '~/.cache/uv' }}
+          ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
+        key: >-
+          ${{ format(
+            'v02-uv-{0}-{1}-{2}-{3}-{4}',
+            env.pythonLocation,
+            hashFiles('datadog_checks_base/pyproject.toml'),
+            hashFiles('datadog_checks_dev/pyproject.toml'),
+            hashFiles('ddev/pyproject.toml'),
+            steps.cache-date.outputs.date
+          )}}
+        restore-keys: |-
+          ${{ format(
+            'v02-uv-{0}-{1}-{2}-{3}-',
+            env.pythonLocation,
+            hashFiles('datadog_checks_base/pyproject.toml'),
+            hashFiles('datadog_checks_dev/pyproject.toml'),
+            hashFiles('ddev/pyproject.toml')
+          )}}
+          ${{ format(
+            'v02-uv-{0}-{1}-{2}-{3}',
+            env.pythonLocation,
+            hashFiles('datadog_checks_base/pyproject.toml'),
+            hashFiles('datadog_checks_dev/pyproject.toml'),
+            hashFiles('ddev/pyproject.toml')
+          )}}
+          v02-uv-${{ env.pythonLocation }}
+
+    - name: Restore local ddev cache without base package
+      if: ${{ inputs.install-mode == 'local' && inputs.cache-profile == 'local-ddev' }}
+      id: restore-local-ddev-cache
+      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      with:
+        path: |
+          ${{ runner.os == 'Windows' && '~\AppData\Local\uv\cache' || runner.os == 'macOS' && '~/Library/Caches/uv' || '~/.cache/uv' }}
+          ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
+        key: >-
+          ${{ format(
+            'v02-uv-local-ddev-{0}-{1}-{2}-{3}',
+            env.pythonLocation,
+            hashFiles('datadog_checks_dev/pyproject.toml'),
+            hashFiles('ddev/pyproject.toml'),
+            steps.cache-date.outputs.date
+          )}}
+        restore-keys: |-
+          ${{ format(
+            'v02-uv-local-ddev-{0}-{1}-{2}-',
+            env.pythonLocation,
+            hashFiles('datadog_checks_dev/pyproject.toml'),
+            hashFiles('ddev/pyproject.toml')
+          )}}
+          ${{ format(
+            'v02-uv-local-ddev-{0}-{1}-{2}',
+            env.pythonLocation,
+            hashFiles('datadog_checks_dev/pyproject.toml'),
+            hashFiles('ddev/pyproject.toml')
+          )}}
+          v02-uv-local-ddev-${{ env.pythonLocation }}
+
+    - name: Restore PyPI ddev cache
+      if: ${{ inputs.install-mode == 'pypi' }}
+      id: restore-pypi-ddev-cache
+      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      with:
+        path: |
+          ${{ runner.os == 'Windows' && '~\AppData\Local\uv\cache' || runner.os == 'macOS' && '~/Library/Caches/uv' || '~/.cache/uv' }}
+          ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
+        key: >-
+          ${{ format(
+            'v02-uv-pypi-ddev-{0}-{1}-{2}',
+            env.pythonLocation,
+            inputs.ddev-version || 'latest',
+            steps.cache-date.outputs.date
+          )}}
+        restore-keys: |-
+          ${{ format(
+            'v02-uv-pypi-ddev-{0}-{1}-',
+            env.pythonLocation,
+            inputs.ddev-version || 'latest'
+          )}}
+          ${{ format(
+            'v02-uv-pypi-ddev-{0}-{1}',
+            env.pythonLocation,
+            inputs.ddev-version || 'latest'
+          )}}
+          v02-uv-pypi-ddev-${{ env.pythonLocation }}
+
+    - name: Install ddev from local folder
+      if: ${{ inputs.install-mode == 'local' }}
+      shell: bash
+      run: uv pip install --system -e ./datadog_checks_dev[cli] -e ./ddev
+
+    - name: Install ddev from PyPI
+      if: ${{ inputs.install-mode == 'pypi' }}
+      shell: bash
+      run: uv pip install --system "ddev${{ inputs.ddev-version }}"
+
+    - name: Save local ddev cache
+      if: ${{ inputs.install-mode == 'local' && inputs.cache-profile == 'local-ddev-base' && steps.restore-local-ddev-base-cache.outputs.cache-hit != 'true' }}
+      uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      continue-on-error: true
+      with:
+        path: |
+          ${{ runner.os == 'Windows' && '~\AppData\Local\uv\cache' || runner.os == 'macOS' && '~/Library/Caches/uv' || '~/.cache/uv' }}
+          ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
+        key: ${{ steps.restore-local-ddev-base-cache.outputs.cache-primary-key }}
+
+    - name: Save local ddev cache without base package
+      if: ${{ inputs.install-mode == 'local' && inputs.cache-profile == 'local-ddev' && steps.restore-local-ddev-cache.outputs.cache-hit != 'true' }}
+      uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      continue-on-error: true
+      with:
+        path: |
+          ${{ runner.os == 'Windows' && '~\AppData\Local\uv\cache' || runner.os == 'macOS' && '~/Library/Caches/uv' || '~/.cache/uv' }}
+          ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
+        key: ${{ steps.restore-local-ddev-cache.outputs.cache-primary-key }}
+
+    - name: Save PyPI ddev cache
+      if: ${{ inputs.install-mode == 'pypi' && steps.restore-pypi-ddev-cache.outputs.cache-hit != 'true' }}
+      uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      continue-on-error: true
+      with:
+        path: |
+          ${{ runner.os == 'Windows' && '~\AppData\Local\uv\cache' || runner.os == 'macOS' && '~/Library/Caches/uv' || '~/.cache/uv' }}
+          ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
+        key: ${{ steps.restore-pypi-ddev-cache.outputs.cache-primary-key }}
