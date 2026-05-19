@@ -315,6 +315,38 @@ def test_event_platform_submissions_from_failed_candidates_are_suppressed(aggreg
     assert aggregator.get_event_platform_events("dbm-samples", parse_json=False) == []
 
 
+class _ProcessIsolatedSuccessCheck(AgentCheck):
+    """Process-isolated candidate that submits a metric and succeeds.
+
+    Verifies that the trial buffer composes with the existing process-isolation
+    machinery. The subprocess's ReplayAggregator prints submissions to stdout;
+    the parent's run_with_isolation evaluates the module-level `aggregator` at
+    call time and picks up the trial buffer (because _run_trial rebinds
+    base.aggregator the same way redirect.py does). Buffered calls are then
+    replayed onto the real aggregator once the candidate wins.
+
+    (Note: a "raise-after-submit in the subprocess" test would not work here
+    because run_with_isolation does not surface the subprocess's exception
+    back to the parent's run() return value, so the proxy cannot today
+    distinguish a process-isolated failure from a success. That's a separate
+    gap unrelated to the buffer mechanism.)
+    """
+
+    @classmethod
+    def generate_configs(cls, service_dict):
+        yield {"target": "winner", "process_isolation": True}
+
+    def check(self, _):
+        self.gauge("trial.isolated.winner", 1)
+
+
+def test_process_isolated_trial_candidate_submissions_route_through_buffer(aggregator):
+    proxy = _make_proxy(_ProcessIsolatedSuccessCheck, "t_isolated_ok")
+    proxy.run()
+
+    aggregator.assert_metric("trial.isolated.winner", count=1)
+
+
 @pytest.mark.parametrize(
     "level_in,level_out",
     [
