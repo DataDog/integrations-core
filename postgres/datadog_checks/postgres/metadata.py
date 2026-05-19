@@ -170,7 +170,9 @@ class PostgresMetadata(DBMAsyncJob):
             self.report_postgres_extensions()
         except Exception as e:
             self._last_run_did_error = True
-            self._log.exception("Failed to collect postgres metadata: %s", e)
+            # Reraise the error to be caught by the job error handling
+            raise e
+
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def report_postgres_extensions(self):
