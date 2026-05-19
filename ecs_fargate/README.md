@@ -382,7 +382,7 @@ For environment variables available with the Docker Agent container, see the [Do
 | `DD_CHECKS_TAG_CARDINALITY`        | Add tags to check metrics                      |
 | `DD_DOGSTATSD_TAG_CARDINALITY`     | Add tags to custom metrics                     |
 
-For global tagging, it is recommended to use `DD_DOCKER_LABELS_AS_TAGS`. With this method, the Agent pulls in tags from your container labels. This requires you to add the appropriate labels to your other containers. Labels can be added directly in the [task definition][15].
+For tagging container-level metrics, the recommended method is DD_DOCKER_LABELS_AS_TAGS. With this method, the Agent pulls in tags from your container labels. This requires you to add the appropriate labels to your other containers. Labels can be added directly in the [task definition][15]. For task-level metrics in Fargate, use DD_TAGS on the Datadog Agent container instead.
 
 Format for the Agent container:
 
