@@ -170,9 +170,10 @@ def create_tunnel_metadata(
     namespace: str,
     peer_lookup: dict[str, tuple[str, str]],
     overlay_map: dict[str, str],
+    wan_labels: set[str],
     log: CheckLoggingAdapter,
 ) -> TunnelMetadata:
-    peer_hostname, wan_labels = parse_tunnel_alias(tunnel.tunnel_alias)
+    peer_hostname, tunnel_color = parse_tunnel_alias(tunnel.tunnel_alias, wan_labels)
     if not peer_hostname:
         log.debug("Peer hostname is not present on the tunnel alias %r", tunnel.tunnel_alias)
     peer_ip, peer_site = peer_lookup.get(peer_hostname, ('', ''))
@@ -188,9 +189,9 @@ def create_tunnel_metadata(
         dst_device_id=f'{namespace}:{peer_ip}' if peer_ip else '',
         src_site_id=src_site,
         dst_site_id=peer_site,
-        overlay_name=overlay_map.get(tunnel.overlay_id, tunnel.overlay_id) if overlay_map else None,
+        overlay_name=overlay_map.get(tunnel.overlay_id) if overlay_map else None,
         path_name=tunnel.tunnel_alias,
-        tunnel_color=wan_labels,
+        tunnel_color=tunnel_color,
     )
 
 

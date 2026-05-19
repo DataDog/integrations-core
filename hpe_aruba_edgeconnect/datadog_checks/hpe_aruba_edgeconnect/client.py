@@ -73,9 +73,8 @@ class OrchestratorClient(_BaseClient):
                     continue
                 name = entry.get('name')
                 overlay_id = entry.get('id')
-                if overlay_id is not None:
-                    overlay_id_str = str(overlay_id)
-                    overlay_map[overlay_id_str] = name or overlay_id_str
+                if overlay_id is not None and name:
+                    overlay_map[str(overlay_id)] = name
                 traffic_class = entry.get('trafficClass')
                 if traffic_class is not None and name:
                     traffic_class_map.setdefault(str(traffic_class), name)
@@ -149,4 +148,8 @@ class ApplianceClient(_BaseClient):
 
     def get_system_info(self) -> dict[str, Any]:
         resp = self._request('get', '/rest/json/systemInfo')
+        return resp.json()
+
+    def get_interface_labels(self) -> dict[str, Any]:
+        resp = self._request('get', '/rest/json/interfaceLabels')
         return resp.json()

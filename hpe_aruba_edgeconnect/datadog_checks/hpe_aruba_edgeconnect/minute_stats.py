@@ -57,6 +57,7 @@ if TYPE_CHECKING:
 
 _TUNNEL_ALIAS_WITH_LABELS_RE = re.compile(r'^to_(.+)_(\w+-\w+)$')
 _TUNNEL_ALIAS_RE = re.compile(r'^to_(.+)_\w+$')
+_NON_PEER_ALIAS_RE = re.compile(r'^\w+_(\w+)_.+$')
 
 
 _TUNNEL_AGGREGATE_ALIASES = frozenset({'all traffic', 'optimized traffic', 'pass-through', 'pass-through-unshaped'})
@@ -71,13 +72,18 @@ def _nonzero(raw: str | None) -> bool:
         return False
 
 
-def parse_tunnel_alias(alias: str) -> tuple[str, str]:
+def parse_tunnel_alias(alias: str, wan_labels: set[str] | None = None) -> tuple[str, str]:
+    """Returns (peer_hostname, tunnel_color) parsed from a tunnel alias."""
     m = _TUNNEL_ALIAS_WITH_LABELS_RE.match(alias)
     if m:
         return m.group(1), m.group(2)
     m = _TUNNEL_ALIAS_RE.match(alias)
     if m:
         return m.group(1), ''
+    if wan_labels:
+        m = _NON_PEER_ALIAS_RE.match(alias)
+        if m and m.group(1) in wan_labels:
+            return '', m.group(1)
     return '', ''
 
 
@@ -86,7 +92,7 @@ class TunnelV2Stats:
     tunnel_id: str
     tunnel_alias: str
     overlay_id: str
-    is_sdwan: Literal['true', 'false', 'unknown']
+    is_sdwan: Literal['true', 'false', '']
     bytes_wan_tx: float | None
     bytes_wan_rx: float | None
     bytes_lan_tx: float | None
@@ -102,13 +108,13 @@ class TunnelV2Stats:
 
     def __init__(self, cols: list[str]) -> None:
         n = len(cols)
-        self.tunnel_id = cols[TUNNEL_V2_COL_TUNNEL_ID] if n > TUNNEL_V2_COL_TUNNEL_ID else 'unknown'
-        self.tunnel_alias = cols[TUNNEL_V2_COL_ALIAS] if n > TUNNEL_V2_COL_ALIAS else 'unknown'
-        self.overlay_id = cols[TUNNEL_V2_COL_OVERLAY_ID] if n > TUNNEL_V2_COL_OVERLAY_ID else 'unknown'
+        self.tunnel_id = cols[TUNNEL_V2_COL_TUNNEL_ID] if n > TUNNEL_V2_COL_TUNNEL_ID else ''
+        self.tunnel_alias = cols[TUNNEL_V2_COL_ALIAS] if n > TUNNEL_V2_COL_ALIAS else ''
+        self.overlay_id = cols[TUNNEL_V2_COL_OVERLAY_ID] if n > TUNNEL_V2_COL_OVERLAY_ID else ''
         if n > TUNNEL_V2_COL_IS_SDWAN:
             self.is_sdwan = 'true' if cols[TUNNEL_V2_COL_IS_SDWAN] == '1' else 'false'
         else:
-            self.is_sdwan = 'unknown'
+            self.is_sdwan = ''
         self.bytes_wan_tx = float(cols[TUNNEL_V2_COL_BYTES_WAN_TX]) if n > TUNNEL_V2_COL_BYTES_WAN_TX else None
         self.bytes_wan_rx = float(cols[TUNNEL_V2_COL_BYTES_WAN_RX]) if n > TUNNEL_V2_COL_BYTES_WAN_RX else None
         self.bytes_lan_tx = float(cols[TUNNEL_V2_COL_BYTES_LAN_TX]) if n > TUNNEL_V2_COL_BYTES_LAN_TX else None
@@ -130,7 +136,9 @@ class TunnelV2Stats:
         """Records tunnel metrics and returns the extra tags for cross-referencing."""
         extra_tags = [f'tunnel_alias:{self.tunnel_alias}', f'is_sdwan:{self.is_sdwan}']
         if overlay_map:
-            extra_tags.append(f'overlay_name:{overlay_map.get(self.overlay_id, self.overlay_id)}')
+            overlay_name = overlay_map.get(self.overlay_id)
+            if overlay_name:
+                extra_tags.append(f'overlay_name:{overlay_name}')
         base_tunnel_tags = base_tags + [f'tunnel_name:{self.tunnel_id}'] + extra_tags
         for side, bytes_tx, bytes_rx, pkts_tx, pkts_rx in [
             ('wan', self.bytes_wan_tx, self.bytes_wan_rx, self.pkts_wan_tx, self.pkts_wan_rx),
@@ -181,7 +189,7 @@ class TunnelPeakStats:
     peak_latency: float | None
 
     def __init__(self, row: dict[str, str]) -> None:
-        self.tunname = v.strip() if (v := row.get('tunname')) is not None else "unknown"
+        self.tunname = v.strip() if (v := row.get('tunname')) is not None else ""
         self.peak_bytes_wan_tx = float(v) if (v := row.get('bytes_wtx')) is not None else None
         self.peak_bytes_wan_rx = float(v) if (v := row.get('bytes_wrx')) is not None else None
         self.peak_bytes_lan_tx = float(v) if (v := row.get('bytes_ltx')) is not None else None
@@ -228,7 +236,7 @@ class JitterStats:
     peak_jitter: float | None
 
     def __init__(self, row: dict[str, str]) -> None:
-        self.tunnel = v.strip() if (v := row.get('tunnel')) is not None else "unknown"
+        self.tunnel = v.strip() if (v := row.get('tunnel')) is not None else ""
         self.jitter = float(v) if (v := row.get(' jitter') or row.get('jitter')) is not None else None
         self.peak_jitter = float(v) if (v := row.get(' peak_jitter') or row.get('peak_jitter')) is not None else None
 
@@ -252,7 +260,7 @@ class MosStats:
     min_mos_prefec: float | None
 
     def __init__(self, row: dict[str, str]) -> None:
-        self.tunnel = v.strip() if (v := row.get('tunnel')) is not None else "unknown"
+        self.tunnel = v.strip() if (v := row.get('tunnel')) is not None else ""
         self.mos_postfec = float(v) if (v := row.get(' mos_postfec')) is not None else None
         self.mos_prefec = float(v) if (v := row.get(' mos_prefec')) is not None else None
         self.min_mos_postfec = float(v) if (v := row.get(' min_mos_postfec')) is not None else None
@@ -281,10 +289,10 @@ class TunnelAvailability:
 
     def __init__(self, cols: list[str]) -> None:
         n = len(cols)
-        self.tunnel_id = cols[TUNNEL_AVAIL_COL_TUNNEL_ID] if n > TUNNEL_AVAIL_COL_TUNNEL_ID else 'unknown'
-        self.alias = cols[TUNNEL_AVAIL_COL_ALIAS] if n > TUNNEL_AVAIL_COL_ALIAS else 'unknown'
+        self.tunnel_id = cols[TUNNEL_AVAIL_COL_TUNNEL_ID] if n > TUNNEL_AVAIL_COL_TUNNEL_ID else ''
+        self.alias = cols[TUNNEL_AVAIL_COL_ALIAS] if n > TUNNEL_AVAIL_COL_ALIAS else ''
         self.seconds_down = float(cols[TUNNEL_AVAIL_COL_SECONDS_DOWN]) if n > TUNNEL_AVAIL_COL_SECONDS_DOWN else None
-        self.color = cols[TUNNEL_AVAIL_COL_COLOR] if n > TUNNEL_AVAIL_COL_COLOR else 'unknown'
+        self.color = cols[TUNNEL_AVAIL_COL_COLOR] if n > TUNNEL_AVAIL_COL_COLOR else ''
         peer, _ = parse_tunnel_alias(self.alias)
         self.peer = peer or None
 
@@ -327,7 +335,7 @@ class InterfaceStats:
     _log: CheckLoggingAdapter
 
     def __init__(self, row: dict[str, str], logger: CheckLoggingAdapter) -> None:
-        self.ifname = v.strip() if (v := row.get('ifname')) is not None else "unknown"
+        self.ifname = v.strip() if (v := row.get('ifname')) is not None else ""
         self.bytes_tx = float(v) if (v := row.get('bytes_tx')) is not None else None
         self.bytes_rx = float(v) if (v := row.get('bytes_rx')) is not None else None
         self.fwdrops_bytes_tx = float(v) if (v := row.get('fwdrops_bytes_tx')) is not None else None
@@ -336,7 +344,7 @@ class InterfaceStats:
         self.fwdrops_pkts_rx = float(v) if (v := row.get('fwdrops_pkts_rx')) is not None else None
         self.max_bw_tx = float(v) if (v := row.get('max_bw_tx')) is not None else None
         self.max_bw_rx = float(v) if (v := row.get('max_bw_rx')) is not None else None
-        self.traftype = v.strip() if (v := row.get('traftype')) is not None else "unknown"
+        self.traftype = v.strip() if (v := row.get('traftype')) is not None else ""
         self._log = logger
 
     def record(self, store: MetricsStore, base_tags: list[str], device_id: str) -> None:
@@ -419,7 +427,7 @@ class InterfacePeakStats:
     _log: CheckLoggingAdapter
 
     def __init__(self, row: dict[str, str], logger: CheckLoggingAdapter) -> None:
-        self.ifname = v.strip() if (v := row.get('ifname')) is not None else "unknown"
+        self.ifname = v.strip() if (v := row.get('ifname')) is not None else ""
         self.peak_bytes_tx = float(v) if (v := row.get('bytes_tx')) is not None else None
         self.peak_bytes_rx = float(v) if (v := row.get('bytes_rx')) is not None else None
         self.peak_fwdrops_pkts_tx = float(v) if (v := row.get('fwdrops_pkts_tx')) is not None else None
@@ -428,7 +436,7 @@ class InterfacePeakStats:
         self.peak_fwdrops_bytes_rx = float(v) if (v := row.get('fwdrops_bytes_rx')) is not None else None
         self.peak_max_bw_tx = float(v) if (v := row.get('max_bw_tx')) is not None else None
         self.peak_max_bw_rx = float(v) if (v := row.get('max_bw_rx')) is not None else None
-        self.traftype = v.strip() if (v := row.get('traftype')) is not None else "unknown"
+        self.traftype = v.strip() if (v := row.get('traftype')) is not None else ""
         self._log = logger
 
     def record(
@@ -478,7 +486,7 @@ class InterfaceOverlayStats:
     max_bw_rx: float | None
 
     def __init__(self, row: dict[str, str]) -> None:
-        self.ifname = v.strip() if (v := row.get('ifname')) is not None else "unknown"
+        self.ifname = v.strip() if (v := row.get('ifname')) is not None else ""
         self.bytes_tx = float(v) if (v := row.get('bytes_tx')) is not None else None
         self.bytes_rx = float(v) if (v := row.get('bytes_rx')) is not None else None
         self.max_bw_tx = float(v) if (v := row.get('max_bw_tx')) is not None else None
@@ -521,8 +529,8 @@ class DscpStats:
     bytes_lan_rx: float | None
 
     def __init__(self, row: dict[str, str]) -> None:
-        self.dscp = v.strip() if (v := row.get('dscp')) is not None else "unknown"
-        self.traftype = v.strip() if (v := row.get('traftype')) is not None else "unknown"
+        self.dscp = v.strip() if (v := row.get('dscp')) is not None else ""
+        self.traftype = v.strip() if (v := row.get('traftype')) is not None else ""
         self.bytes_wan_tx = float(v) if (v := row.get('bytes_wtx')) is not None else None
         self.bytes_wan_rx = float(v) if (v := row.get('bytes_wrx')) is not None else None
         self.bytes_lan_tx = float(v) if (v := row.get('bytes_ltx')) is not None else None
@@ -582,8 +590,8 @@ class DscpPeakStats:
     peak_bytes_lan_rx: float | None
 
     def __init__(self, row: dict[str, str]) -> None:
-        self.dscp = v.strip() if (v := row.get('dscp')) is not None else "unknown"
-        self.traftype = v.strip() if (v := row.get('traftype')) is not None else "unknown"
+        self.dscp = v.strip() if (v := row.get('dscp')) is not None else ""
+        self.traftype = v.strip() if (v := row.get('traftype')) is not None else ""
         self.peak_bytes_wan_tx = float(v) if (v := row.get('bytes_wtx')) is not None else None
         self.peak_bytes_wan_rx = float(v) if (v := row.get('bytes_wrx')) is not None else None
         self.peak_bytes_lan_tx = float(v) if (v := row.get('bytes_ltx')) is not None else None
@@ -618,7 +626,7 @@ class ProbeStats:
 
     def __init__(self, cols: list[str]) -> None:
         n = len(cols)
-        self.probe_name = cols[PROBE_COL_PROBE_NAME] if n > PROBE_COL_PROBE_NAME else 'unknown'
+        self.probe_name = cols[PROBE_COL_PROBE_NAME] if n > PROBE_COL_PROBE_NAME else ''
         self.avg_latency = float(cols[PROBE_COL_AVG_LATENCY]) if n > PROBE_COL_AVG_LATENCY else None
         self.avg_loss = float(cols[PROBE_COL_AVG_LOSS]) if n > PROBE_COL_AVG_LOSS else None
         self.avg_jitter = float(cols[PROBE_COL_AVG_JITTER]) if n > PROBE_COL_AVG_JITTER else None
@@ -654,8 +662,8 @@ class ShaperStats:
     total_shaped_packets: float | None
 
     def __init__(self, row: dict[str, str]) -> None:
-        self.traffic_class = v.strip() if (v := row.get('traffic_class')) is not None else "unknown"
-        raw_direction = v.strip() if (v := row.get('direction')) is not None else "unknown"
+        self.traffic_class = v.strip() if (v := row.get('traffic_class')) is not None else ""
+        raw_direction = v.strip() if (v := row.get('direction')) is not None else ""
         self.direction = _SHAPER_DIRECTION_LABELS.get(raw_direction, raw_direction)
         self.qos_drops = float(v) if (v := row.get('qos_drops')) is not None else None
         self.other_drops = float(v) if (v := row.get('other_drops')) is not None else None
@@ -670,16 +678,14 @@ class ShaperStats:
     ) -> None:
         tags = base_tags + [f'direction:{self.direction}']
         if traffic_class_map:
-            if self.traffic_class in traffic_class_map:
-                overlay_name = traffic_class_map[self.traffic_class]
-            else:
-                overlay_name = self.traffic_class
-                if logger is not None:
-                    logger.debug(
-                        "No overlay name mapping found for traffic class %s; falling back to raw id",
-                        self.traffic_class,
-                    )
-            tags.append(f'overlay_name:{overlay_name}')
+            overlay_name = traffic_class_map.get(self.traffic_class)
+            if overlay_name:
+                tags.append(f'overlay_name:{overlay_name}')
+            elif logger is not None:
+                logger.debug(
+                    "No overlay name mapping found for traffic class %s; emitting metric without overlay_name tag",
+                    self.traffic_class,
+                )
         store.record('qos.class.drops', self.qos_drops, tags + ['drop_type:qos'], AggType.SUM)
         store.record('qos.class.drops', self.other_drops, tags + ['drop_type:other'], AggType.SUM)
         if self.qos_drops is not None and self.total_shaped_packets is not None and self.total_shaped_packets > 0:
@@ -705,9 +711,9 @@ class AppperfStats:
 
     def __init__(self, cols: list[str]) -> None:
         n = len(cols)
-        self.app_name = cols[APPPERF_COL_APP_NAME] if n > APPPERF_COL_APP_NAME else "unknown"
-        self.tunnel_name = cols[APPPERF_COL_TUNNEL_NAME] if n > APPPERF_COL_TUNNEL_NAME else "unknown"
-        self.transport_type = cols[APPPERF_COL_TRANSPORT_TYPE] if n > APPPERF_COL_TRANSPORT_TYPE else "unknown"
+        self.app_name = cols[APPPERF_COL_APP_NAME] if n > APPPERF_COL_APP_NAME else ""
+        self.tunnel_name = cols[APPPERF_COL_TUNNEL_NAME] if n > APPPERF_COL_TUNNEL_NAME else ""
+        self.transport_type = cols[APPPERF_COL_TRANSPORT_TYPE] if n > APPPERF_COL_TRANSPORT_TYPE else ""
         self.cnd_delay = float(cols[APPPERF_COL_CND_DELAY]) if n > APPPERF_COL_CND_DELAY else None
         self.snd_delay = float(cols[APPPERF_COL_SND_DELAY]) if n > APPPERF_COL_SND_DELAY else None
         self.app_delay = float(cols[APPPERF_COL_APP_DELAY]) if n > APPPERF_COL_APP_DELAY else None

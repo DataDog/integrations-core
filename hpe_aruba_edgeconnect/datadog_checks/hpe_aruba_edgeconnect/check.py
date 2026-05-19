@@ -259,6 +259,20 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
             ('system_info', lambda: self._collect_system_info(client, base_tags)),
         ]
         if latest_tunnel_stats:
+            wan_labels: set[str] = set()
+            try:
+                labels = client.get_interface_labels()
+            except Exception:
+                self.log.warning(
+                    "Failed to fetch interface labels for appliance %s; "
+                    "tunnel_color will be empty for non-overlay tunnels.",
+                    app_ip,
+                    exc_info=True,
+                )
+            else:
+                wan_entries = labels.get('wan') if isinstance(labels, dict) else None
+                if isinstance(wan_entries, dict):
+                    wan_labels = {name for name in wan_entries.values() if isinstance(name, str) and name}
             collectors.append(
                 (
                     'tunnel_metadata',
@@ -271,6 +285,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
                                 namespace,
                                 peer_lookup,
                                 overlay_map,
+                                wan_labels,
                                 self.log,
                             )
                             for t in latest_tunnel_stats

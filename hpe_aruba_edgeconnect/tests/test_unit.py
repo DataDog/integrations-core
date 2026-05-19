@@ -300,7 +300,6 @@ EXPECTED_VALUES = [
         [
             'tunnel_name:bondedTunnel_16',
             'tunnel_alias:to_NewYorkSP01_CriticalApps',
-            'overlay_name:2',
             'is_sdwan:false',
         ],
     ),
@@ -310,7 +309,6 @@ EXPECTED_VALUES = [
         [
             'tunnel_name:bondedTunnel_16',
             'tunnel_alias:to_NewYorkSP01_CriticalApps',
-            'overlay_name:2',
             'is_sdwan:false',
         ],
     ),
@@ -527,6 +525,7 @@ def _mock_appliance_client(
         alarms if alarms is not None else {'outstanding': [{'type': 'HW'}, {'type': 'TUNNEL'}]}
     )
     client.get_system_info.return_value = system_info if system_info is not None else _build_system_info(app_ip)
+    client.get_interface_labels.return_value = {'wan': {}, 'lan': {}}
     client.app_ip = app_ip
     return client
 
@@ -838,11 +837,11 @@ def test_get_overlay_config_returns_overlay_and_traffic_class_maps():
     client = OrchestratorClient(http, '10.0.0.1')
     overlay_map, traffic_class_map = client.get_overlay_config()
 
-    assert overlay_map == {'1': 'RealTime', '2': 'BulkData', '3': 'NoTrafficClass', '4': '4'}
+    assert overlay_map == {'1': 'RealTime', '2': 'BulkData', '3': 'NoTrafficClass'}
     assert traffic_class_map == {'1': 'RealTime', '2': 'BulkData'}
 
 
-def test_shaper_record_falls_back_to_raw_id():
+def test_shaper_record_skips_overlay_tag_when_no_mapping():
     store = MetricsStore()
     row = ShaperStats({'traffic_class': '7', 'direction': '0', 'qos_drops': '0', 'other_drops': '0'})
     row.record(store, [], traffic_class_map={'1': 'RealTime'})
@@ -851,7 +850,7 @@ def test_shaper_record_falls_back_to_raw_id():
     store.flush(mock_check)
 
     args, kwargs = mock_check.gauge.call_args_list[0]
-    assert 'overlay_name:7' in kwargs['tags']
+    assert not any(tag.startswith('overlay_name:') for tag in kwargs['tags'])
 
 
 def test_login_appliance_csrf_token():
@@ -1041,6 +1040,11 @@ def test_ndm_metadata_submitted(dd_run_check, aggregator, mocker, check):
         ]
     }
 
+    client.get_interface_labels.return_value = {
+        'wan': {'1': 'INET1', '2': 'MPLS1'},
+        'lan': {'3': 'Data', '4': 'Voice'},
+    }
+
     overlay_map = {'0': 'business'}
     _setup_mocks(mocker, check, APPLIANCE_PAYLOAD, appliance_client=client, overlay_map=overlay_map)
 
@@ -1115,7 +1119,13 @@ def test_ndm_metadata_submitted(dd_run_check, aggregator, mocker, check):
     assert ny_peer['tunnel_color'] == 'MPLS1-MPLS1'
     assert ny_peer['overlay_name'] == 'business'
 
-    # Tunnels: alias that does not match the ``to_<peer>_<color>`` pattern
+    # Tunnels: passthrough alias whose middle token is a WAN label resolves to a tunnel_color
+    passthrough_wan = by_alias['Passthrough_INET1_wan0']
+    assert passthrough_wan['dst_device_id'] == ''
+    assert passthrough_wan['dst_site_id'] == ''
+    assert passthrough_wan['tunnel_color'] == 'INET1'
+
+    # Tunnels: passthrough alias whose middle token is a LAN label is not treated as a tunnel_color
     non_matching = by_alias['Passthrough_Data_lan0']
     assert non_matching['dst_device_id'] == ''
     assert non_matching['dst_site_id'] == ''
