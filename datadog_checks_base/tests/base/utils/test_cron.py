@@ -88,6 +88,10 @@ def test_cron_expression_accepts_valid(expression: str) -> None:
         "*/-1 * * * *",
         "1/2 * * * */0",
         "10-5 * * * *",
+        "0 0 1 1, 1, 3,3 *",
+        "0 0 1 1 ,3,3 *",
+        "0 0 1- 3 * *",
+        "0 0 1 -3 * *",
     ],
 )
 def test_cron_expression_rejects_invalid(expression: str) -> None:
