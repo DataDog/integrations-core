@@ -48,12 +48,14 @@ class ClusterMetadataCollector:
         self.TOPIC_CONFIG_BATCH_SIZE = 100  # Max topics to describe_configs per check run
 
         self.SCHEMA_VERSION_CHECK_BATCH_SIZE = 200  # Lightweight calls, can do more per run
+        self.SCHEMA_COMPATIBILITY_BATCH_SIZE = 200  # Lightweight calls, refreshed on configs cadence
         self.SCHEMA_FETCH_CONCURRENCY = 10  # Parallel HTTP requests
 
         # Cache size limits
         self.BROKER_CONFIG_CACHE_MAX_SIZE = 1_000
         self.TOPIC_CONFIG_CACHE_MAX_SIZE = 20_000
         self.SCHEMA_VERSION_CHECK_CACHE_MAX_SIZE = 20_000
+        self.SCHEMA_COMPATIBILITY_FETCH_CACHE_MAX_SIZE = 20_000
         self.SCHEMA_ID_CACHE_MAX_SIZE = 20_000
 
         self.BROKER_CONFIG_CACHE_KEY = 'kafka_broker_config_cache'
@@ -63,6 +65,7 @@ class ClusterMetadataCollector:
         self.TOPIC_HWM_SUM_CACHE_KEY = 'kafka_topic_hwm_sum_cache'
         self.SCHEMA_CACHE_KEY = 'kafka_schema_cache'
         self.SCHEMA_VERSION_CHECK_CACHE_KEY = 'kafka_schema_version_check_cache'
+        self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY = 'kafka_schema_compatibility_fetch_cache'
         self.SCHEMA_LATEST_VERSION_CACHE_KEY = 'kafka_schema_latest_version_cache'
         self.SCHEMA_ID_CACHE_KEY = 'kafka_schema_id_cache'
 
@@ -1001,7 +1004,6 @@ class ClusterMetadataCollector:
 
         # Fetch latest versions in parallel for subjects that changed
         schema_responses = {}
-        compatibility_responses: dict[str, str | None] = {}
         if subjects_needing_full_fetch:
             with ThreadPoolExecutor(max_workers=self.SCHEMA_FETCH_CONCURRENCY) as executor:
                 future_to_subject = {
@@ -1015,10 +1017,19 @@ class ClusterMetadataCollector:
                     except Exception as e:
                         self.log.warning("Error getting schema details for %s: %s", subject, e)
 
+        # Per-subject compatibility refresh — runs on the broker/topic configs cadence,
+        # so a compatibility flip without a version bump still gets picked up.
+        # Subjects with a new version are always included in this run.
+        compat_due = self._get_items_to_fetch(self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY, subjects)
+        compat_due = compat_due[: self.SCHEMA_COMPATIBILITY_BATCH_SIZE]
+        compat_subjects_to_fetch = list(set(subjects_needing_full_fetch) | set(compat_due))
+
+        compatibility_responses: dict[str, str | None] = {}
+        if compat_subjects_to_fetch:
             with ThreadPoolExecutor(max_workers=self.SCHEMA_FETCH_CONCURRENCY) as executor:
                 future_to_subject = {
                     executor.submit(self._get_schema_registry_subject_compatibility, subject): subject
-                    for subject in subjects_needing_full_fetch
+                    for subject in compat_subjects_to_fetch
                 }
                 for future in as_completed(future_to_subject):
                     subject = future_to_subject[future]
@@ -1026,7 +1037,24 @@ class ClusterMetadataCollector:
                         compatibility_responses[subject] = future.result()
                     except Exception as e:
                         self.log.debug("Error getting compatibility for %s: %s", subject, e)
-                        compatibility_responses[subject] = None
+
+            self._mark_items_fetched(
+                self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY,
+                compat_subjects_to_fetch,
+                ttl_base=self.CONFIGS_REFRESH_INTERVAL,
+                ttl_jitter=self.CONFIGS_REFRESH_JITTER,
+                max_cache_size=self.SCHEMA_COMPATIBILITY_FETCH_CACHE_MAX_SIZE,
+            )
+
+        # Apply standalone compatibility updates to existing cache entries so that
+        # a compatibility flip alone (without a version bump) flows into the next
+        # schema emission via the cache_content key.
+        for subject, compatibility in compatibility_responses.items():
+            if compatibility is None or subject in subjects_needing_full_fetch:
+                continue
+            entry = latest_version_cache.get(subject)
+            if isinstance(entry, dict):
+                entry['compatibility'] = compatibility
 
         fetched_schemas = {}
 
