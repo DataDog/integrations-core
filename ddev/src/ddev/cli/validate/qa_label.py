@@ -8,8 +8,9 @@ import os
 from typing import TYPE_CHECKING
 
 import click
+from pydantic import ValidationError
 
-from ddev.cli.validate.all.github import extract_pr_number
+from ddev.utils.github_actions import GitHubEvent
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
@@ -25,32 +26,9 @@ HELP_MESSAGE = (
 )
 
 
-def _load_event_payload() -> dict | None:
-    """Read and parse the GitHub Actions event payload.
-
-    Returns `None` when the path is unset (callers treat this as a benign
-    skip). Raises `OSError`/`json.JSONDecodeError` if the path is set but the
-    file cannot be read or parsed, and `ValueError` if the payload parses to
-    anything other than a JSON object. The caller turns each into an abort so
-    every non-success exit goes through `app.abort` instead of bubbling as an
-    uncaught exception.
-    """
-    event_path = os.environ.get('GITHUB_EVENT_PATH')
-    if not event_path:
-        return None
-    with open(event_path, encoding='utf-8') as f:
-        payload = json.load(f)
-    if not isinstance(payload, dict):
-        raise ValueError(f'GitHub event payload at {event_path} is not a JSON object.')
-    return payload
-
-
-def _is_fork_pr(app: Application, event: dict) -> bool:
-    pr = event.get('pull_request') or {}
-    head = pr.get('head') or {}
-    head_repo = (head.get('repo') or {}).get('full_name')
-    base = pr.get('base') or {}
-    base_repo = os.environ.get('GITHUB_REPOSITORY') or (base.get('repo') or {}).get('full_name')
+def _is_fork_pr(app: Application, event: GitHubEvent) -> bool:
+    head_repo = event.head_repo
+    base_repo = os.environ.get('GITHUB_REPOSITORY') or event.base_repo
     if not head_repo or not base_repo:
         app.abort('pull_request event payload is missing head/base repo information.')
     return head_repo != base_repo
@@ -68,20 +46,21 @@ def qa_label(app: Application):
         app.display_info('Not running in a pull_request context; skipping qa-label validation.')
         return
 
-    try:
-        event = _load_event_payload()
-    except (OSError, json.JSONDecodeError, ValueError) as exc:
-        app.abort(f'Could not read GitHub event payload: {exc}')
-
-    if event is None:
+    event_path = os.environ.get('GITHUB_EVENT_PATH')
+    if not event_path:
         app.display_info('GITHUB_EVENT_PATH is not set; skipping qa-label validation.')
         return
+
+    try:
+        event = GitHubEvent.load(event_path)
+    except (OSError, json.JSONDecodeError, ValueError, ValidationError) as exc:
+        app.abort(f'Could not read GitHub event payload: {exc}')
 
     if _is_fork_pr(app, event):
         app.display_info('Pull request is from a fork; skipping qa-label validation.')
         return
 
-    pr_number = extract_pr_number(event)
+    pr_number = event.pr_number
     if pr_number is None:
         app.display_warning('Could not determine pull request number; skipping qa-label validation.')
         return

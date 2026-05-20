@@ -8,7 +8,9 @@ import json
 import os
 from typing import TYPE_CHECKING
 
-from ddev.utils.fs import Path
+from pydantic import ValidationError
+
+from ddev.utils.github_actions import GitHubEvent
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
@@ -17,24 +19,12 @@ if TYPE_CHECKING:
 COMMENT_HEADING = "## Validation Report"
 
 
-def extract_pr_number(event: dict) -> int | None:
-    """Read the pull request number from an already-parsed GitHub Actions event payload."""
-    pr = event.get("pull_request")
-    if isinstance(pr, dict):
-        number = pr.get("number")
-        if isinstance(number, int):
-            return number
-    return None
-
-
 def parse_pr_number_from_event(event_path: str) -> int | None:
     """Extract the PR number from the GitHub Actions event JSON file."""
     try:
-        event = json.loads(Path(event_path).read_text())
-    except (json.JSONDecodeError, OSError):
+        return GitHubEvent.load(event_path).pr_number
+    except (OSError, json.JSONDecodeError, ValueError, ValidationError):
         return None
-
-    return extract_pr_number(event) if isinstance(event, dict) else None
 
 
 def parse_pr_number_from_ref(ref: str) -> int | None:
