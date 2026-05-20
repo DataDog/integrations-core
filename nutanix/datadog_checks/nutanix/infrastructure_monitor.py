@@ -237,10 +237,12 @@ class InfrastructureMonitor:
         if not self._should_collect_vm(vm):
             return False
 
+        display_hostname = self._transform_hostname(vm_name)
+
         vm_tags = self.check.base_tags + self._extract_vm_tags(vm)
-        self._set_external_tags_for_host(vm_name, vm_tags)
-        self._report_vm_basic_metrics(vm, vm_name, vm_tags)
-        self._report_vm_stats(vm_id, vm_name, vm_tags, vm_stats_dict, cluster_name)
+        self._set_external_tags_for_host(display_hostname, vm_tags)
+        self._report_vm_basic_metrics(vm, display_hostname, vm_tags)
+        self._report_vm_stats(vm_id, display_hostname, vm_tags, vm_stats_dict, cluster_name)
         return True
 
     def _report_vm_basic_metrics(self, vm: dict, vm_name: str, vm_tags: list[str]) -> None:
@@ -435,11 +437,13 @@ class InfrastructureMonitor:
             self.host_count += 1
             self.host_names[host_id] = host_name
 
+            display_hostname = self._transform_hostname(host_name)
+
             host_tags = cluster_tags + self._extract_host_tags(host)
-            self.check.gauge("host.count", 1, hostname=host_name, tags=host_tags)
-            self._report_host_status_metrics(host, host_name, host_tags)
-            self._set_external_tags_for_host(host_name, host_tags)
-            self._report_host_capacity_metrics(host, host_name, host_tags)
+            self.check.gauge("host.count", 1, hostname=display_hostname, tags=host_tags)
+            self._report_host_status_metrics(host, display_hostname, host_tags)
+            self._set_external_tags_for_host(display_hostname, host_tags)
+            self._report_host_capacity_metrics(host, display_hostname, host_tags)
 
             try:
                 stats = self._get_stats(f"api/clustermgmt/v4.0/stats/clusters/{cluster_id}/hosts/{host_id}")
@@ -449,7 +453,7 @@ class InfrastructureMonitor:
                         stats,
                         HOST_STATS_METRICS,
                         host_tags,
-                        hostname=host_name,
+                        hostname=display_hostname,
                         extra_tags_by_key=self._get_disk_status_storage_tags(host_id),
                     )
             except Exception:
@@ -572,6 +576,17 @@ class InfrastructureMonitor:
                 return
 
         self.external_tags.append((hostname, {self.check.__NAMESPACE__: tags}))
+
+    def _transform_hostname(self, hostname: str | None) -> str | None:
+        """Apply hostname_transform config to a hostname."""
+        if not hostname:
+            return hostname
+        transform = self.check.config.hostname_transform
+        if transform == 'upper':
+            return hostname.upper()
+        if transform == 'lower':
+            return hostname.lower()
+        return hostname
 
     def _should_collect_vm(self, vm: dict) -> bool:
         """Check if a VM should be collected based on power state and resource filters."""
