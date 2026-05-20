@@ -178,6 +178,16 @@ files:
         example: 3600
         minimum: 1
 
+    - name: health_check_warning_events
+      fleet_configurable: true
+      description: |
+        Whether to emit a Datadog event when a Consul health check transitions to `warning`.
+        Critical health check events are always emitted when `collect_health_checks` is enabled.
+      value:
+        type: boolean
+        example: true
+        default: false
+  
     - template: instances/http
     - template: instances/default
   - template: logs
