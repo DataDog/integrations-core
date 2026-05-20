@@ -80,6 +80,7 @@ class CheckpointConfig(BaseModel):
 
 class AgentConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
+    provider: str = "anthropic"
     model: str | None = None
     max_tokens: int | None = None
     tools: list[str] = []

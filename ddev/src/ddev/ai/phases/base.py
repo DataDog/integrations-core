@@ -43,17 +43,6 @@ class PhaseRegistry:
         return self._registry[name]
 
 
-def _make_memory_resolver(checkpoint_manager: CheckpointManager) -> Callable[[str], str]:
-    """Build a resolver that reads phase memory files on demand for template substitution."""
-
-    def resolve(key: str) -> str:
-        if key.endswith("_memory"):
-            return checkpoint_manager.memory_content(key.removesuffix("_memory"))
-        return f"<VARIABLE UNDEFINED: {key}>"
-
-    return resolve
-
-
 class Phase(AsyncProcessor[PhaseTrigger]):
     """Lifecycle base for all phases.
 
@@ -133,7 +122,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
             "phase_name": self._phase_id,
             "checkpoints": self._checkpoint_manager.read(),
         }
-        self._resolver = _make_memory_resolver(self._checkpoint_manager)
+        self._resolver = self._checkpoint_manager.resolve_template_variable
 
         outcome = await self.execute(context)
 

@@ -7,9 +7,8 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-import anthropic
-
-from ddev.ai.agent.anthropic_client import AnthropicAgent
+from ddev.ai.agent.base import BaseAgent
+from ddev.ai.agent.build import AgentBuilder
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.base import Phase, PhaseOutcome
 from ddev.ai.phases.checkpoint import CheckpointManager
@@ -17,7 +16,6 @@ from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError
 from ddev.ai.phases.template import render_inline, render_prompt
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.tools.fs.file_registry import FileRegistry
-from ddev.ai.tools.registry import ToolRegistry
 
 
 def render_task_prompt(
@@ -55,8 +53,7 @@ class AgenticPhase(Phase):
         phase_id: str,
         dependencies: list[str],
         config: PhaseConfig,
-        agent_config: AgentConfig,
-        anthropic_client: anthropic.AsyncAnthropic,
+        agent_builder: AgentBuilder,
         checkpoint_manager: CheckpointManager,
         runtime_variables: dict[str, str],
         flow_variables: dict[str, str],
@@ -77,8 +74,7 @@ class AgenticPhase(Phase):
             callbacks=callbacks,
             logger=logger,
         )
-        self._agent_config = agent_config
-        self._anthropic_client = anthropic_client
+        self._agent_builder = agent_builder
 
     @classmethod
     def validate_config(
@@ -124,33 +120,14 @@ class AgenticPhase(Phase):
             total_output += last_result.total_output_tokens
         return total_input, total_output
 
-    def _build_agent_and_process(self, context: dict[str, Any]) -> tuple[AnthropicAgent, ReActProcess]:
+    def _build_agent_and_process(self, context: dict[str, Any]) -> tuple[BaseAgent[Any], ReActProcess]:
         """Build the agent and ReAct process used to drive task execution."""
         system_prompt = render_prompt(
             self._config_dir / "prompts" / f"{self._config.agent}.md",
             context,
             self._resolver,
         )
-        tool_registry = ToolRegistry.from_names(
-            self._agent_config.tools,
-            owner_id=self._phase_id,
-            file_registry=self._file_registry,
-        )
-
-        agent_kwargs: dict[str, Any] = {}
-        if self._agent_config.model is not None:
-            agent_kwargs["model"] = self._agent_config.model
-        if self._agent_config.max_tokens is not None:
-            agent_kwargs["max_tokens"] = self._agent_config.max_tokens
-
-        agent = AnthropicAgent(
-            client=self._anthropic_client,
-            tools=tool_registry,
-            system_prompt=system_prompt,
-            name=self._phase_id,
-            **agent_kwargs,
-        )
-
+        agent, tool_registry = self._agent_builder(system_prompt, self._phase_id)
         process = ReActProcess(
             agent=agent,
             tool_registry=tool_registry,
@@ -160,7 +137,7 @@ class AgenticPhase(Phase):
 
     async def _run_memory_step(
         self,
-        agent: AnthropicAgent,
+        agent: BaseAgent[Any],
         context: dict[str, Any],
     ) -> tuple[str, int, int]:
         """Run the final summary turn. Returns (memory_text, input_tokens, output_tokens)."""

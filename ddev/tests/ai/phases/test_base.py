@@ -3,11 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from datetime import UTC, datetime
-from unittest.mock import MagicMock
 
 import pytest
 
-from ddev.ai.phases.base import Phase, PhaseOutcome, _make_memory_resolver
+from ddev.ai.phases.base import Phase, PhaseOutcome
 from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import PhaseConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
@@ -49,32 +48,6 @@ def _make_stub_phase(
     )
     phase.queue = message_queue
     return phase, checkpoint_manager
-
-
-# ---------------------------------------------------------------------------
-# _make_memory_resolver
-# ---------------------------------------------------------------------------
-
-
-def test_resolver_memory_suffix(tmp_path):
-    mgr = CheckpointManager(tmp_path / "checkpoints.yaml")
-    mgr.write_phase_checkpoint("x", {})
-    mgr.write_memory("draft", "Draft memory content.")
-    resolver = _make_memory_resolver(mgr)
-    assert resolver("draft_memory") == "Draft memory content."
-
-
-def test_resolver_non_memory_key():
-    mgr = MagicMock()
-    resolver = _make_memory_resolver(mgr)
-    assert resolver("some_variable") == "<VARIABLE UNDEFINED: some_variable>"
-    mgr.memory_content.assert_not_called()
-
-
-def test_resolver_absent_memory(tmp_path):
-    mgr = CheckpointManager(tmp_path / "checkpoints.yaml")
-    resolver = _make_memory_resolver(mgr)
-    assert resolver("nonexistent_memory") == "<MEMORY NOT FOUND: nonexistent>"
 
 
 # ---------------------------------------------------------------------------

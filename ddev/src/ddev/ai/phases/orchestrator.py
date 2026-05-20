@@ -8,8 +8,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-import anthropic
-
+from ddev.ai.agent.build import make_agent_builder
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.agentic_phase import AgenticPhase
 from ddev.ai.phases.base import Phase, PhaseRegistry
@@ -48,13 +47,17 @@ class PhaseOrchestrator(EventBusOrchestrator):
         flow_yaml_path: Path,
         checkpoint_path: Path,
         runtime_variables: dict[str, str],
-        anthropic_client: anthropic.AsyncAnthropic,
+        agent_clients: dict[str, Any],
         file_access_policy: FileAccessPolicy,
         callbacks: Callbacks | None = None,
         grace_period: float = 10,
         logger: logging.Logger | None = None,
     ) -> None:
         """Initialize the orchestrator.
+
+        ``agent_clients`` maps provider name (e.g. ``"anthropic"``) to a constructed
+        provider client. ``build_agent`` looks up the right one based on each
+        ``AgentConfig.provider``.
 
         ``file_access_policy`` must have ``write_root`` set to the integration
         output directory so that agent writes are confined to that path.
@@ -63,7 +66,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._flow_yaml_path = flow_yaml_path
         self._checkpoint_path = checkpoint_path
         self._runtime_variables = runtime_variables
-        self._anthropic_client = anthropic_client
+        self._agent_clients = agent_clients
         self._callbacks: Callbacks = callbacks or Callbacks()
         self._phase_registry = PhaseRegistry()
         self._failed_phase: str | None = None
@@ -112,11 +115,13 @@ class PhaseOrchestrator(EventBusOrchestrator):
                 "logger": self._logger,
             }
             if issubclass(phase_cls, AgenticPhase):
-                if phase_config.agent is not None:
-                    phase_kwargs["agent_config"] = config.agents[phase_config.agent]
-                    phase_kwargs["anthropic_client"] = self._anthropic_client
-                else:
+                if phase_config.agent is None:
                     raise FlowConfigError(f"Phase '{phase_id}': agent must be set for AgenticPhase")
+                phase_kwargs["agent_builder"] = make_agent_builder(
+                    agent_config=config.agents[phase_config.agent],
+                    agent_clients=self._agent_clients,
+                    file_registry=self._file_registry,
+                )
 
             phase = phase_cls(**phase_kwargs)
 

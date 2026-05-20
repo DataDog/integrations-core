@@ -4,14 +4,13 @@
 
 import asyncio
 from typing import Any
-from unittest.mock import MagicMock
 
 import pytest
 
 from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolResultMessage
 from ddev.ai.phases.agentic_phase import AgenticPhase
 from ddev.ai.phases.checkpoint import CheckpointManager
-from ddev.ai.phases.config import AgentConfig, PhaseConfig, TaskConfig
+from ddev.ai.phases.config import PhaseConfig, TaskConfig
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.registry import ToolRegistry
@@ -86,24 +85,21 @@ class MockAgent:
         return None
 
 
-def make_agent_factory(mock_agent: MockAgent, captured_kwargs: dict[str, Any] | None = None):
-    """Create a callable that replaces AnthropicAgent constructor, returning the given mock.
+def make_agent_builder(mock_agent: MockAgent, captured_kwargs: dict[str, Any] | None = None):
+    """Create an agent_builder that returns the given mock and an empty ToolRegistry.
 
-    If ``captured_kwargs`` is provided, every call updates it with the kwargs passed to
-    the constructor — useful for asserting on system_prompt, tools, etc.
+    If ``captured_kwargs`` is provided, every call records the system_prompt and
+    owner_id passed in — useful for asserting on prompt rendering.
     """
 
-    def factory(**kwargs: Any) -> MockAgent:
+    def builder(system_prompt: str, owner_id: str) -> tuple[MockAgent, ToolRegistry]:
         if captured_kwargs is not None:
-            captured_kwargs.update(kwargs)
-        mock_agent.name = kwargs.get("name", "mock")
-        return mock_agent
+            captured_kwargs["system_prompt"] = system_prompt
+            captured_kwargs["owner_id"] = owner_id
+        mock_agent.name = owner_id
+        return mock_agent, ToolRegistry([])
 
-    return factory
-
-
-def _empty_registry_from_names(cls, names, *, owner_id, file_registry):
-    return ToolRegistry([])
+    return builder
 
 
 def make_agent_phase(
@@ -116,7 +112,6 @@ def make_agent_phase(
     dependencies: list[str] | None = None,
     tasks: list[TaskConfig] | None = None,
     checkpoint=None,
-    agent_tools: list[str] | None = None,
     flow_variables: dict[str, str] | None = None,
     runtime_variables: dict[str, str] | None = None,
     context_compact_threshold_pct: int = 80,
@@ -125,31 +120,22 @@ def make_agent_phase(
 ) -> tuple[AgenticPhase, CheckpointManager]:
     """Build an AgenticPhase ready for process_message-driven tests.
 
-    Patches ``AnthropicAgent`` and ``ToolRegistry.from_names`` so no real LLM or tools
-    are constructed. Pass ``captured_agent_kwargs`` (a dict) to record AnthropicAgent
-    constructor kwargs across calls (e.g. to inspect system_prompt rendering).
+    Injects a mock agent_builder so no real LLM or tools are constructed. Pass
+    ``captured_agent_kwargs`` (a dict) to record the rendered system_prompt and owner_id.
     """
-    monkeypatch.setattr(
-        "ddev.ai.phases.agentic_phase.AnthropicAgent",
-        make_agent_factory(mock_agent, captured_agent_kwargs),
-    )
-    monkeypatch.setattr(ToolRegistry, "from_names", classmethod(_empty_registry_from_names))
-
     config = PhaseConfig(
         agent="writer",
         tasks=tasks or [TaskConfig(name="t1", prompt="Do the work.")],
         checkpoint=checkpoint,
         context_compact_threshold_pct=context_compact_threshold_pct,
     )
-    agent_config = AgentConfig(tools=agent_tools or [])
     checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
 
     phase = AgenticPhase(
         phase_id=phase_id,
         dependencies=dependencies or [],
         config=config,
-        agent_config=agent_config,
-        anthropic_client=MagicMock(),
+        agent_builder=make_agent_builder(mock_agent, captured_agent_kwargs),
         checkpoint_manager=checkpoint_manager,
         runtime_variables=runtime_variables or {},
         flow_variables=flow_variables or {},
