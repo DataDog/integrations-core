@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import ValidationError
 
-from ddev.utils.github_actions import GitHubEvent
+from ddev.utils.github_actions import PullRequestEvent
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
@@ -22,7 +22,7 @@ COMMENT_HEADING = "## Validation Report"
 def parse_pr_number_from_event(event_path: str) -> int | None:
     """Extract the PR number from the GitHub Actions event JSON file."""
     try:
-        return GitHubEvent.load(event_path).pr_number
+        return PullRequestEvent.load(event_path).pr_number
     except (OSError, json.JSONDecodeError, ValueError, ValidationError):
         return None
 

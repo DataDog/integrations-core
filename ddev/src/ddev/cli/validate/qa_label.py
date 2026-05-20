@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 import click
 from pydantic import ValidationError
 
-from ddev.utils.github_actions import GitHubEvent
+from ddev.utils.github_actions import PullRequestEvent
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
@@ -26,7 +26,7 @@ HELP_MESSAGE = (
 )
 
 
-def _is_fork_pr(app: Application, event: GitHubEvent) -> bool:
+def _is_fork_pr(app: Application, event: PullRequestEvent) -> bool:
     head_repo = event.head_repo
     base_repo = os.environ.get('GITHUB_REPOSITORY') or event.base_repo
     if not head_repo or not base_repo:
@@ -52,7 +52,7 @@ def qa_label(app: Application):
         return
 
     try:
-        event = GitHubEvent.load(event_path)
+        event = PullRequestEvent.load(event_path)
     except (OSError, json.JSONDecodeError, ValueError, ValidationError) as exc:
         app.abort(f'Could not read GitHub event payload: {exc}')
 

@@ -30,7 +30,7 @@ class EventPullRequest(BaseModel):
     base: PullRequestRef | None = None
 
 
-class GitHubEvent(BaseModel):
+class PullRequestEvent(BaseModel):
     """Subset of a GitHub Actions ``pull_request`` event payload."""
 
     model_config = ConfigDict(extra='ignore')
@@ -38,7 +38,7 @@ class GitHubEvent(BaseModel):
     pull_request: EventPullRequest | None = None
 
     @classmethod
-    def load(cls, path: str) -> GitHubEvent:
+    def load(cls, path: str) -> PullRequestEvent:
         """Read and parse the event JSON file.
 
         Raises `OSError` if the file cannot be read, `json.JSONDecodeError`
