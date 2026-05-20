@@ -366,7 +366,11 @@ def status(targets_file: Path) -> dict[str, str]:
     container_rows: list[dict[str, str]] = []
     macos_rows: list[dict[str, str]] = []
     any_target_stale = False
+    supported_architectures = {"aarch64", "x86_64"}
+    supported_platforms = {"linux", "windows", "macos"}
     for row in target_rows:
+        assert row["platform"] in supported_platforms, f"platform must be one of: {supported_platforms}"
+        assert row["arch"] in supported_architectures, f"arch must be one of: {supported_architectures}"
         target = f"{row['platform']}-{row['arch']}"
         target_dir = HERE / 'images' / target
         if not target_dir.is_dir():
