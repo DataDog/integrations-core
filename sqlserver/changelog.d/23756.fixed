@@ -1,0 +1,1 @@
+Refactor `reported_hostname` resolution into `DatabaseCheck` base class; no behavior change for end users.

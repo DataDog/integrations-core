@@ -1332,6 +1332,6 @@ def test_debug_stats_kwargs_respects_exclude_hostname(exclude_hostname, expected
         'password': 'Password12!',
         'exclude_hostname': exclude_hostname,
     }
-    with mock.patch('datadog_checks.sqlserver.SQLServer.resolve_db_host', return_value='resolved.hostname'):
+    with mock.patch('datadog_checks.base.checks.db.resolve_db_host', return_value='resolved.hostname'):
         check = SQLServer(CHECK_NAME, {}, [instance])
     assert check.debug_stats_kwargs()['hostname'] == expected_hostname

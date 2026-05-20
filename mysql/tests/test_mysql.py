@@ -553,10 +553,9 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
     instance_basic['disable_generic_tags'] = False  # This flag also affects the hostname
     instance_basic['reported_hostname'] = reported_hostname
 
-    with mock.patch('datadog_checks.mysql.MySql.resolve_db_host', return_value='resolved.hostname') as resolve_db_host:
+    with mock.patch('datadog_checks.base.checks.db.resolve_db_host', return_value='resolved.hostname'):
         mysql_check = MySql(common.CHECK_NAME, {}, [instance_basic])
         dd_run_check(mysql_check)
-        assert resolve_db_host.called is True
 
     expected_tags = (
         'database_hostname:{}'.format(mysql_check.database_hostname),

@@ -322,13 +322,8 @@ class ClickhouseCheck(DatabaseCheck):
         return ['server:{}'.format(self._config.server)]
 
     @property
-    def reported_hostname(self) -> str | None:
-        """
-        Get the hostname to be reported in metrics and events.
-        """
-        if self._resolved_hostname is None:
-            self._resolved_hostname = self._config.server
-        return self._resolved_hostname
+    def _config_host(self) -> str:
+        return self._config.server
 
     @property
     def agent_hostname(self):

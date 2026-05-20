@@ -1,0 +1,1 @@
+Lift `reported_hostname` resolution into `DatabaseCheck` base class; add abstract `_config_host` property and concrete `resolved_hostname` property so all DBM checks share the same loopback-substitution logic.
