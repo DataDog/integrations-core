@@ -8,7 +8,7 @@ import pytest
 
 from datadog_checks.nutanix import NutanixCheck
 from tests.conftest import load_fixture_page
-from tests.constants import OFF_VM_NAME, OFF_VM_TAGS, PCVM_NAME, PCVM_TAGS
+from tests.constants import OFF_VM_NAME, OFF_VM_TAGS, PCVM_NAME, PCVM_TAGS, UBUNTU_VM_NAME, UBUNTU_VM_TAGS
 from tests.metrics import VM_STATS_METRICS_REQUIRED
 
 pytestmark = [pytest.mark.unit]
@@ -178,7 +178,7 @@ def test_hostname_transform_upper_applies_to_vm(dd_run_check, aggregator, mock_i
     check = NutanixCheck('nutanix', {}, [instance])
     dd_run_check(check)
 
-    aggregator.assert_metric("nutanix.vm.count", value=1, tags=PCVM_TAGS, hostname=PCVM_NAME.upper())
+    aggregator.assert_metric("nutanix.vm.count", value=1, tags=UBUNTU_VM_TAGS, hostname=UBUNTU_VM_NAME.upper())
 
 
 def test_hostname_transform_lower_applies_to_vm(dd_run_check, aggregator, mock_instance, mock_http_get):
