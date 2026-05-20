@@ -1,0 +1,1 @@
+Add `type: integer` to OCSF facets for `ocsf.activity_id`, `ocsf.category_uid`, `ocsf.class_uid`, `ocsf.status_id`, and `ocsf.severity_id`.
