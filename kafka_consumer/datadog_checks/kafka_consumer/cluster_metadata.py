@@ -1091,7 +1091,7 @@ class ClusterMetadataCollector:
 
             topic_name, schema_for = self._parse_subject(subject)
 
-            cache_content = f"{schema_id}:{schema_version}:{compatibility}:{schema_content}"
+            cache_content = f"{schema_id}:{schema_version}:{compatibility}:{global_compatibility}:{schema_content}"
 
             fetched_schemas[subject] = {
                 'cache_content': cache_content,
@@ -1131,7 +1131,9 @@ class ClusterMetadataCollector:
                 continue
 
             cached_compat = cached_info.get('compatibility')
-            all_schema_cache_contents[subject] = f"{schema_id}:{version}:{cached_compat}:{id_entry['schema']}"
+            all_schema_cache_contents[subject] = (
+                f"{schema_id}:{version}:{cached_compat}:{global_compatibility}:{id_entry['schema']}"
+            )
 
         # Determine which subjects need event emission (changed or TTL expired)
         schemas_to_emit = self._get_events_to_send(self.SCHEMA_CACHE_KEY, all_schema_cache_contents)
