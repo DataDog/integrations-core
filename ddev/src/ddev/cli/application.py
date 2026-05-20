@@ -140,11 +140,7 @@ class Application(Terminal):
     def _emit_github_annotation(self, level: AnnotationLevel, file: str, message: str, line: int) -> None:
         if not running_in_ci():
             return
-        # `print` (not `os.system("echo ...")`): the GH runner parses workflow commands
-        # off stdout, and shelling out would corrupt messages containing quotes / `$()`.
-        # The escapers below match `@actions/core`'s `escapeData` / `escapeProperty` —
-        # they ensure newlines, `%`, and (for properties) `:` / `,` don't break the
-        # command's framing. Do not remove them.
+        # `print` avoids shell injection; escapers match @actions/core's escapeData/escapeProperty - do not remove.
         escaped_file = escape_workflow_property(file)
         escaped_message = escape_workflow_data(message)
         print(f'::{level} file={escaped_file},line={line}::{escaped_message}')
