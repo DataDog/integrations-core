@@ -82,6 +82,16 @@ class PostgresHealth(Health):
                 else HealthStatus.OK,
                 data={
                     # Diagnoses are namedtuples and need to be converted to a dictionary to be JSON serializable
-                    "diagnosis": diagnosis._asdict(),
+                    # We manually map the result from an enum to a human-readable string
+                    "diagnosis": {
+                        **diagnosis._asdict(),
+                        "result": "ok"
+                        if diagnosis.result == Diagnosis.DIAGNOSIS_SUCCESS
+                        else "error"
+                        if diagnosis.result == Diagnosis.DIAGNOSIS_FAIL
+                        else "warning"
+                        if diagnosis.result == Diagnosis.DIAGNOSIS_WARNING
+                        else "unknown",
+                    },
                 },
             )
