@@ -177,6 +177,27 @@ class ClusterMetadataCollector:
         response.raise_for_status()
         return response.json()
 
+    def _get_schema_registry_global_compatibility(self) -> str | None:
+        base_url = self.config._collect_schema_registry
+        response = self.http.get(f"{base_url}/config")
+        response.raise_for_status()
+        return response.json().get('compatibilityLevel')
+
+    def _get_schema_registry_subject_compatibility(self, subject: str) -> str | None:
+        """Return the effective compatibility level for a subject.
+
+        Uses defaultToGlobal=true so subjects without an explicit override
+        return the global setting in a single call.
+        """
+        base_url = self.config._collect_schema_registry
+        encoded_subject = quote(subject, safe='')
+        response = self.http.get(
+            f"{base_url}/config/{encoded_subject}",
+            params={'defaultToGlobal': 'true'},
+        )
+        response.raise_for_status()
+        return response.json().get('compatibilityLevel')
+
     def collect_all_metadata(self, highwater_offsets):
         try:
             shared_metadata = self.client.kafka_client.list_topics(timeout=self.config._request_timeout)
@@ -411,7 +432,7 @@ class ClusterMetadataCollector:
                 if not broker_meta:
                     continue
 
-                tags = self._get_tags(cluster_id) + [
+                metric_tags = self._get_tags(cluster_id) + [
                     f'broker_id:{broker_id_str}',
                     f'broker_host:{broker_meta.host}',
                     f'broker_port:{broker_meta.port}',
@@ -443,7 +464,7 @@ class ClusterMetadataCollector:
                         try:
                             value = float(config_data[config_name]) if config_data[config_name] else 0
                             metric_name = f"broker.config.{config_name.replace('.', '_')}"
-                            self.check.gauge(metric_name, value, tags=tags)
+                            self.check.gauge(metric_name, value, tags=metric_tags)
                         except (ValueError, TypeError):
                             self.log.debug(
                                 "Could not convert broker %s config %s value %r to float",
@@ -457,7 +478,6 @@ class ClusterMetadataCollector:
 
                 fetched_broker_configs[broker_id_str] = {
                     'event_text': event_text,
-                    'tags': tags,
                     'broker_host': broker_meta.host,
                     'broker_port': broker_meta.port,
                 }
@@ -475,19 +495,6 @@ class ClusterMetadataCollector:
 
         for broker_id in brokers_to_emit:
             info = fetched_broker_configs[broker_id]
-            self.check.event(
-                {
-                    'timestamp': int(time.time()),
-                    'event_type': 'config_change',
-                    'source_type_name': 'kafka',
-                    'msg_title': f'Broker {broker_id} Configuration',
-                    'msg_text': info['event_text'],
-                    'tags': info['tags'] + ['event_type:broker_config'],
-                    'aggregation_key': f'kafka_broker_config_{broker_id}',
-                    'alert_type': 'info',
-                }
-            )
-
             self.check.event_platform_event(
                 json.dumps(
                     {
@@ -758,7 +765,6 @@ class ClusterMetadataCollector:
 
                 fetched_topic_configs[topic_name] = {
                     'event_text': event_text,
-                    'tags': topic_tags,
                 }
 
         self._mark_items_fetched(
@@ -774,19 +780,6 @@ class ClusterMetadataCollector:
 
         for topic_name in topics_to_emit:
             info = fetched_topic_configs[topic_name]
-            self.check.event(
-                {
-                    'timestamp': int(time.time()),
-                    'event_type': 'info',
-                    'source_type_name': 'kafka',
-                    'msg_title': f'Topic: {topic_name} (custom config)',
-                    'msg_text': info['event_text'],
-                    'tags': info['tags'] + ['event_type:topic_config'],
-                    'aggregation_key': f'kafka_topic_config_{topic_name}',
-                    'alert_type': 'info',
-                }
-            )
-
             self.check.event_platform_event(
                 json.dumps(
                     {
@@ -942,6 +935,12 @@ class ClusterMetadataCollector:
 
         self.check.gauge('schema_registry.subjects', len(subjects), tags=self._get_tags(cluster_id))
 
+        global_compatibility = None
+        try:
+            global_compatibility = self._get_schema_registry_global_compatibility()
+        except Exception as e:
+            self.log.warning("Failed to fetch global compatibility from Schema Registry: %s", e)
+
         # --- Tier 1: Lightweight version checks ---
         # GET /subjects/{subject}/versions returns just [1, 2, 3] — very cheap.
         # We use this to detect if a subject has a new version without fetching schema content.
@@ -1002,6 +1001,7 @@ class ClusterMetadataCollector:
 
         # Fetch latest versions in parallel for subjects that changed
         schema_responses = {}
+        compatibility_responses: dict[str, str | None] = {}
         if subjects_needing_full_fetch:
             with ThreadPoolExecutor(max_workers=self.SCHEMA_FETCH_CONCURRENCY) as executor:
                 future_to_subject = {
@@ -1015,6 +1015,19 @@ class ClusterMetadataCollector:
                     except Exception as e:
                         self.log.warning("Error getting schema details for %s: %s", subject, e)
 
+            with ThreadPoolExecutor(max_workers=self.SCHEMA_FETCH_CONCURRENCY) as executor:
+                future_to_subject = {
+                    executor.submit(self._get_schema_registry_subject_compatibility, subject): subject
+                    for subject in subjects_needing_full_fetch
+                }
+                for future in as_completed(future_to_subject):
+                    subject = future_to_subject[future]
+                    try:
+                        compatibility_responses[subject] = future.result()
+                    except Exception as e:
+                        self.log.debug("Error getting compatibility for %s: %s", subject, e)
+                        compatibility_responses[subject] = None
+
         fetched_schemas = {}
 
         for subject, latest_schema in schema_responses.items():
@@ -1026,8 +1039,13 @@ class ClusterMetadataCollector:
                 self.log.warning("Schema Registry returned incomplete data for %s: %s", subject, latest_schema)
                 continue
 
-            # Update the latest version cache with version and schema_id
-            latest_version_cache[subject] = {'version': schema_version, 'schema_id': schema_id}
+            compatibility = compatibility_responses.get(subject)
+
+            latest_version_cache[subject] = {
+                'version': schema_version,
+                'schema_id': schema_id,
+                'compatibility': compatibility,
+            }
 
             # Use permanent schema ID cache to avoid processing unchanged schemas.
             schema_id_str = str(schema_id)
@@ -1045,17 +1063,7 @@ class ClusterMetadataCollector:
 
             topic_name, schema_for = self._parse_subject(subject)
 
-            subject_tags = self._get_tags(cluster_id) + [f'subject:{subject}']
-            event_tags = subject_tags + [
-                f'schema_id:{schema_id}',
-                f'schema_version:{schema_version}',
-                f'schema_type:{schema_type}',
-                f'topic:{topic_name}',
-                f'schema_for:{schema_for}',
-                'event_type:schema_registry',
-            ]
-
-            cache_content = f"{schema_id}:{schema_version}:{schema_content}"
+            cache_content = f"{schema_id}:{schema_version}:{compatibility}:{schema_content}"
 
             fetched_schemas[subject] = {
                 'cache_content': cache_content,
@@ -1065,7 +1073,7 @@ class ClusterMetadataCollector:
                 'schema_version': schema_version,
                 'schema_id': schema_id,
                 'schema_type': schema_type,
-                'event_tags': event_tags,
+                'compatibility': compatibility,
             }
 
         # Persist caches
@@ -1094,7 +1102,8 @@ class ClusterMetadataCollector:
             if not id_entry:
                 continue
 
-            all_schema_cache_contents[subject] = f"{schema_id}:{version}:{id_entry['schema']}"
+            cached_compat = cached_info.get('compatibility')
+            all_schema_cache_contents[subject] = f"{schema_id}:{version}:{cached_compat}:{id_entry['schema']}"
 
         # Determine which subjects need event emission (changed or TTL expired)
         schemas_to_emit = self._get_events_to_send(self.SCHEMA_CACHE_KEY, all_schema_cache_contents)
@@ -1104,7 +1113,6 @@ class ClusterMetadataCollector:
             if subject in fetched_schemas:
                 info = fetched_schemas[subject]
             else:
-                # Reconstruct from caches
                 cached_info = latest_version_cache.get(subject, {})
                 version = cached_info.get('version')
                 schema_id = cached_info.get('schema_id')
@@ -1114,16 +1122,6 @@ class ClusterMetadataCollector:
 
                 topic_name, schema_for = self._parse_subject(subject)
 
-                subject_tags = self._get_tags(cluster_id) + [f'subject:{subject}']
-                event_tags = subject_tags + [
-                    f'schema_id:{schema_id}',
-                    f'schema_version:{version}',
-                    f'schema_type:{schema_type}',
-                    f'topic:{topic_name}',
-                    f'schema_for:{schema_for}',
-                    'event_type:schema_registry',
-                ]
-
                 info = {
                     'schema_content': schema_content,
                     'topic_name': topic_name,
@@ -1131,40 +1129,29 @@ class ClusterMetadataCollector:
                     'schema_version': version,
                     'schema_id': schema_id,
                     'schema_type': schema_type,
-                    'event_tags': event_tags,
+                    'compatibility': cached_info.get('compatibility'),
                 }
 
-            self.check.event(
-                {
-                    'timestamp': int(time.time()),
-                    'event_type': 'info',
-                    'source_type_name': 'kafka',
-                    'msg_title': f'{info["topic_name"]} ({info["schema_for"]}) - Schema v{info["schema_version"]}',
-                    'msg_text': info['schema_content'],
-                    'tags': info['event_tags'],
-                    'aggregation_key': f'kafka_schema_{subject}_{info["schema_version"]}',
-                    'alert_type': 'info',
-                }
-            )
+            ds_payload = {
+                'collection_timestamp': int(time.time() * 1000),
+                'kafka_cluster_id': cluster_id,
+                **self._original_cluster_id_field(),
+                'subject': subject,
+                'topic': info['topic_name'],
+                'schema_for': info['schema_for'],
+                'schema_id': info['schema_id'],
+                'schema_version': info['schema_version'],
+                'schema_type': info['schema_type'],
+                'config_type': 'schema',
+                'schema': info['schema_content'],
+            }
+            subject_compat = info.get('compatibility')
+            if subject_compat:
+                ds_payload['compatibility'] = subject_compat
+            if global_compatibility:
+                ds_payload['global_compatibility'] = global_compatibility
 
-            self.check.event_platform_event(
-                json.dumps(
-                    {
-                        'collection_timestamp': int(time.time() * 1000),
-                        'kafka_cluster_id': cluster_id,
-                        **self._original_cluster_id_field(),
-                        'subject': subject,
-                        'topic': info['topic_name'],
-                        'schema_for': info['schema_for'],
-                        'schema_id': info['schema_id'],
-                        'schema_version': info['schema_version'],
-                        'schema_type': info['schema_type'],
-                        'config_type': 'schema',
-                        'schema': info['schema_content'],
-                    }
-                ),
-                "data-streams-message",
-            )
+            self.check.event_platform_event(json.dumps(ds_payload), "data-streams-message")
 
     @staticmethod
     def _parse_subject(subject: str) -> tuple[str, str]:

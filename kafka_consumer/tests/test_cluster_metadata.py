@@ -207,6 +207,9 @@ def mock_schema_registry_methods(metadata_collector):
         }
     )
 
+    metadata_collector._get_schema_registry_global_compatibility = mock.Mock(return_value='BACKWARD')
+    metadata_collector._get_schema_registry_subject_compatibility = mock.Mock(return_value='BACKWARD')
+
 
 @pytest.fixture
 def cluster_config():
@@ -245,6 +248,10 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
 
     # Mock schema registry methods on metadata collector
     mock_schema_registry_methods(kafka_consumer_check.metadata_collector)
+    kafka_consumer_check.metadata_collector._get_schema_registry_global_compatibility = mock.Mock(
+        return_value='BACKWARD'
+    )
+    kafka_consumer_check.metadata_collector._get_schema_registry_subject_compatibility = mock.Mock(return_value='FULL')
 
     # Mock persistent cache for throughput calculation and schema registry events
     # Using per-partition format: partition 0 was at 75, partition 1 was at 175
@@ -479,32 +486,6 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
         tags=['test_tag:test_value', 'kafka_cluster_id:test-cluster-id'],
     )
 
-    # Verify broker configuration event structure and content
-    broker_config_events = [e for e in aggregator.events if 'event_type:broker_config' in e.get('tags', [])]
-    assert broker_config_events, f"Expected at least 1 broker config event, found {len(broker_config_events)}"
-
-    # Check broker event structure and content
-    broker_event = broker_config_events[0]
-    assert broker_event['event_type'] == 'config_change', "Broker event type should be 'config_change'"
-    assert broker_event['source_type_name'] == 'kafka', "Broker event source should be 'kafka'"
-    assert broker_event['msg_title'] == 'Broker 1 Configuration', "Broker event title mismatch"
-    assert broker_event['alert_type'] == 'info', "Broker event alert type should be 'info'"
-    assert broker_event['aggregation_key'] == 'kafka_broker_config_1', "Broker event aggregation key mismatch"
-
-    # Verify broker event tags
-    expected_broker_tags = [
-        'test_tag:test_value',
-        'kafka_cluster_id:test-cluster-id',
-        'broker_id:1',
-        'broker_host:broker1',
-        'broker_port:9092',
-        'event_type:broker_config',
-    ]
-    for tag in expected_broker_tags:
-        assert tag in broker_event['tags'], f"Missing broker event tag: {tag}"
-
-    # Verify broker config content (msg_text should be JSON with realistic config data)
-    broker_config_json = json.loads(broker_event['msg_text'])
     expected_broker_config = {
         'log.retention.bytes': '1073741824',
         'log.retention.ms': '604800000',
@@ -516,34 +497,7 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
         'min.insync.replicas': '1',
         'compression.type': 'producer',
     }
-    assert broker_config_json == expected_broker_config, (
-        f"Broker config mismatch. Expected {expected_broker_config}, got {broker_config_json}"
-    )
 
-    # Verify topic configuration event structure and content
-    topic_config_events = [e for e in aggregator.events if 'event_type:topic_config' in e.get('tags', [])]
-    assert topic_config_events, f"Expected at least 1 topic config event, found {len(topic_config_events)}"
-
-    # Check topic event structure and content
-    topic_event = topic_config_events[0]
-    assert topic_event['event_type'] == 'info', "Topic event type should be 'info'"
-    assert topic_event['source_type_name'] == 'kafka', "Topic event source should be 'kafka'"
-    assert topic_event['msg_title'] == 'Topic: test-topic (custom config)', "Topic event title mismatch"
-    assert topic_event['alert_type'] == 'info', "Topic event alert type should be 'info'"
-    assert topic_event['aggregation_key'] == 'kafka_topic_config_test-topic', "Topic event aggregation key mismatch"
-
-    # Verify topic event tags
-    expected_topic_tags = [
-        'test_tag:test_value',
-        'kafka_cluster_id:test-cluster-id',
-        'topic:test-topic',
-        'event_type:topic_config',
-    ]
-    for tag in expected_topic_tags:
-        assert tag in topic_event['tags'], f"Missing topic event tag: {tag}"
-
-    # Verify topic config content (msg_text should be JSON with realistic config data)
-    topic_config_json = json.loads(topic_event['msg_text'])
     expected_topic_config = {
         'retention.ms': '604800000',
         'retention.bytes': '-1',
@@ -551,25 +505,7 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
         'compression.type': 'producer',
         'cleanup.policy': 'delete',
     }
-    assert topic_config_json == expected_topic_config, (
-        f"Topic config mismatch. Expected {expected_topic_config}, got {topic_config_json}"
-    )
 
-    # Verify schema registry event - check complete structure and content
-    schema_events = [e for e in aggregator.events if 'event_type:schema_registry' in e.get('tags', [])]
-    assert len(schema_events) == 1, f"Expected 1 schema registry event, found {len(schema_events)}"
-
-    schema_event = schema_events[0]
-
-    # Verify event structure
-    assert schema_event['event_type'] == 'info', "Schema event type should be 'info'"
-    assert schema_event['source_type_name'] == 'kafka', "Schema event source should be 'kafka'"
-    assert schema_event['msg_title'] == 'test-topic (value) - Schema v2', "Schema event title mismatch"
-    assert schema_event['alert_type'] == 'info', "Schema event alert type should be 'info'"
-    assert schema_event['aggregation_key'] == 'kafka_schema_test-topic-value_2', "Schema event aggregation key mismatch"
-
-    # Verify schema content (msg_text should be a valid Avro schema JSON)
-    schema_json = json.loads(schema_event['msg_text'])
     expected_schema = {
         "type": "record",
         "name": "User",
@@ -580,28 +516,13 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
             {"name": "email", "type": ["null", "string"], "default": None},
         ],
     }
-    assert schema_json == expected_schema, f"Schema mismatch. Expected {expected_schema}, got {schema_json}"
 
-    # Verify the event has a timestamp
-    assert 'timestamp' in schema_event, "Schema event should have a timestamp"
-    assert isinstance(schema_event['timestamp'], int), "Schema event timestamp should be an integer"
+    # Broker, topic, and schema configs are emitted only to the Data Streams intake.
+    assert not [e for e in aggregator.events if 'event_type:broker_config' in e.get('tags', [])]
+    assert not [e for e in aggregator.events if 'event_type:topic_config' in e.get('tags', [])]
+    assert not [e for e in aggregator.events if 'event_type:schema_registry' in e.get('tags', [])]
 
-    # Verify all expected tags are present
-    expected_schema_tags = [
-        'test_tag:test_value',
-        'kafka_cluster_id:test-cluster-id',
-        'subject:test-topic-value',
-        'schema_id:1',
-        'schema_version:2',
-        'schema_type:AVRO',
-        'topic:test-topic',
-        'schema_for:value',
-        'event_type:schema_registry',
-    ]
-    for tag in expected_schema_tags:
-        assert tag in schema_event['tags'], f"Missing schema event tag: {tag}"
-
-    # Verify events are also sent to Data Streams intake
+    # Verify events are sent to Data Streams intake
     ds_calls = kafka_consumer_check.event_platform_event.call_args_list
     ds_events = [
         json.loads(call[0][0]) for call in ds_calls if len(call[0]) > 1 and call[0][1] == "data-streams-message"
@@ -638,6 +559,9 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
     assert schema_ds['schema_type'] == 'AVRO'
     assert 'collection_timestamp' in schema_ds
     assert 'schema' in schema_ds
+    assert schema_ds['compatibility'] == 'FULL'
+    assert schema_ds['global_compatibility'] == 'BACKWARD'
+    assert json.loads(schema_ds['schema']) == expected_schema
 
 
 def test_throughput_with_offset_decrease(check, dd_run_check, aggregator):
@@ -1363,6 +1287,14 @@ def test_schema_registry_url_encodes_subject_names(check):
     collector._get_schema_registry_latest_version(subject)
     collector.http.get.assert_called_with(
         'http://localhost:8081/subjects/google%2Fprotobuf%2Ftimestamp.proto/versions/latest'
+    )
+
+    collector.http.get.reset_mock()
+    mock_response.json.return_value = {'compatibilityLevel': 'BACKWARD'}
+    collector._get_schema_registry_subject_compatibility(subject)
+    collector.http.get.assert_called_with(
+        'http://localhost:8081/config/google%2Fprotobuf%2Ftimestamp.proto',
+        params={'defaultToGlobal': 'true'},
     )
 
 
