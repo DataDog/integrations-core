@@ -8,11 +8,14 @@ import argparse
 import os
 import re
 import sys
+import urllib.error
 
 # 2nd party.
+from tuf.api.exceptions import DownloadError
+
 from .download import DEFAULT_ROOT_LAYOUT_TYPE, REPOSITORY_URL_PREFIX, ROOT_LAYOUTS, TUFDownloader
 from .download_v2 import V2_REPOSITORY_URL, TUFPointerDownloader
-from .exceptions import NonCanonicalVersion, NonDatadogPackage
+from .exceptions import NonCanonicalVersion, NonDatadogPackage, TargetNotFoundError
 
 # Private module functions.
 
@@ -24,6 +27,14 @@ def __is_canonical(version):
 
     P = r'^([1-9]\d*!)?(0|[1-9]\d*)(\.(0|[1-9]\d*))*((a|b|rc)(0|[1-9]\d*))?(\.post(0|[1-9]\d*))?(\.dev(0|[1-9]\d*))?$'
     return re.match(P, version) is not None
+
+
+def _v2_failure_category(exc: Exception) -> str:
+    if isinstance(exc, TargetNotFoundError):
+        return 'target version not found'
+    if isinstance(exc, (DownloadError, TimeoutError, urllib.error.URLError)):
+        return 'network error'
+    return 'other'
 
 
 def __find_shipped_integrations():
@@ -158,7 +169,12 @@ def download():
         except Exception as exc:
             import logging
 
-            logging.getLogger(__name__).info('v2 download failed (%s: %s), falling back to v1', type(exc).__name__, exc)
+            logging.getLogger(__name__).info(
+                'v2 download failed (%s, %s: %s), falling back to v1',
+                _v2_failure_category(exc),
+                type(exc).__name__,
+                exc,
+            )
             tuf_downloader, standard_distribution_name, version, ignore_python_version = instantiate_downloader()
             run_downloader(tuf_downloader, standard_distribution_name, version, ignore_python_version)
 
@@ -187,7 +203,6 @@ def _download_v2():
     # v1 flags that are not applicable in v2: accept and warn so that callers
     # upgrading from v1 get a clear message instead of an argument error.
     parser.add_argument('--type', type=str, default=None, dest='_type_ignored')
-    parser.add_argument('--force', action='store_true', dest='_force_ignored')
     parser.add_argument('--ignore-python-version', action='store_true', dest='_ignore_python_version')
 
     args = parser.parse_args()
@@ -195,10 +210,7 @@ def _download_v2():
     if not args.standard_distribution_name.startswith('datadog-'):
         raise NonDatadogPackage(args.standard_distribution_name)
 
-    if args.version and not re.match(
-        r'^([1-9]\d*!)?(0|[1-9]\d*)(\.(0|[1-9]\d*))*((a|b|rc)(0|[1-9]\d*))?(\.post(0|[1-9]\d*))?(\.dev(0|[1-9]\d*))?$',
-        args.version,
-    ):
+    if args.version and not __is_canonical(args.version):
         raise NonCanonicalVersion(args.version)
 
     if args._type_ignored is not None:

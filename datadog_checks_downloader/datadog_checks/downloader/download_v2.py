@@ -2,32 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-"""TUF pointer-file downloader (v2 repository format).
+"""TUF pointer-file downloader for the v2 repository format.
 
-The v2 format stores a JSON pointer file as a TUF target at:
-
-    targets/<project>/<version>.json   (versioned pointer)
-    targets/<project>/latest.json      (copy of latest stable version pointer)
-
-Target files are content-addressed on S3 (consistent-snapshot format):
-the actual file at ``targets/<project>/<name>.json`` is stored as
-``targets/<project>/{sha256}.{name}.json``.  The TUF Updater resolves
-the hash-prefixed path automatically via TUF metadata.
-
-Each pointer file contains:
-
-    {
-      "digest":           "<sha256 hex>",
-      "length":           <int>,
-      "version":          "<semver>",
-      "repository":       "https://<bucket>.s3.amazonaws.com",
-      "wheel_path":       "/wheels/<project>/<wheel>.whl",
-      "attestation_path": "/attestations/<project>/<version>.sigstore.json"
-    }
-
-The downloader TUF-verifies the pointer file, then fetches the wheel from
-``repository + wheel_path`` and verifies the sha256 digest and byte length
-before writing to disk.
+The downloader TUF-verifies a JSON pointer target, downloads the referenced
+wheel, and verifies the wheel digest and byte length before writing it to disk.
 """
 
 import hashlib
@@ -82,7 +60,7 @@ class TUFPointerDownloader:
         """Seed *metadata_dir* with the bundled initial root.json trust anchor."""
         dest = metadata_dir / 'root.json'
         metadata = importlib.resources.files('datadog_checks.downloader') / 'data' / 'v2' / 'metadata'
-        dest.write_bytes((metadata / '1.root.json').read_bytes())
+        dest.write_bytes((metadata / 'root.json').read_bytes())
 
     def _make_updater(self, metadata_dir: Path, target_dir: Path) -> Updater:
         return Updater(
