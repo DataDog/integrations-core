@@ -81,7 +81,7 @@ def instance_empty_default_hostname():
 
 
 def instance_enable_automatic_diagnostics():
-    return True
+    return False
 
 
 def instance_enable_legacy_tags_normalization():
