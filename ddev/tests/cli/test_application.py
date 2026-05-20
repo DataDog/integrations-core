@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import pytest
 
-from ddev.cli.application import AnnotationLevel, _escape_workflow_data, _escape_workflow_property
+from ddev.utils.ci import AnnotationLevel, escape_workflow_data, escape_workflow_property
 
 
 @pytest.fixture
@@ -101,6 +101,14 @@ def test_annotate_display_queue_empty_emits_nothing(app, capsys, on_ci):
     assert capsys.readouterr().out == ''
 
 
+def test_annotate_display_queue_skips_unknown_levels(app, capsys, on_ci):
+    """Levels not declared on ``AnnotationLevel`` are silently dropped from the queue."""
+    queue = [('notice', 'ignored'), (AnnotationLevel.ERROR, 'kept')]
+    app.annotate_display_queue('file.py', queue)
+
+    assert capsys.readouterr().out == '::error file=file.py,line=1::kept\n'
+
+
 def test_annotate_display_queue_orders_errors_before_warnings(app, capsys, on_ci):
     """Output order follows `AnnotationLevel` declaration order regardless of input order."""
     queue = [
@@ -126,7 +134,7 @@ def test_annotate_display_queue_orders_errors_before_warnings(app, capsys, on_ci
     ],
 )
 def test_escape_workflow_data(raw, expected):
-    assert _escape_workflow_data(raw) == expected
+    assert escape_workflow_data(raw) == expected
 
 
 @pytest.mark.parametrize(
@@ -140,7 +148,7 @@ def test_escape_workflow_data(raw, expected):
     ],
 )
 def test_escape_workflow_property(raw, expected):
-    assert _escape_workflow_property(raw) == expected
+    assert escape_workflow_property(raw) == expected
 
 
 def test_annotate_escapes_newlines_in_message(app, capsys, on_ci):

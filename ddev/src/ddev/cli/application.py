@@ -6,7 +6,7 @@ from __future__ import annotations
 import logging
 import os
 from collections import defaultdict
-from enum import StrEnum
+from collections.abc import Iterable
 from functools import cached_property
 from typing import cast
 
@@ -14,35 +14,10 @@ from ddev.cli.terminal import Terminal
 from ddev.config.constants import AppEnvVars, ConfigEnvVars, VerbosityLevels
 from ddev.config.file import ConfigFileWithOverrides, RootConfig
 from ddev.repo.core import Repository
-from ddev.utils.ci import running_in_ci
+from ddev.utils.ci import AnnotationLevel, escape_workflow_data, escape_workflow_property, running_in_ci
 from ddev.utils.fs import Path
 from ddev.utils.github import GitHubManager
 from ddev.utils.platform import Platform
-
-
-class AnnotationLevel(StrEnum):
-    """Severity levels supported by GitHub Actions workflow-command annotations."""
-
-    ERROR = 'error'
-    WARNING = 'warning'
-
-
-def _escape_workflow_data(value: str) -> str:
-    """Escape a value for the ``message`` portion of a workflow command.
-
-    Mirrors ``escapeData`` from ``@actions/core``:
-    https://github.com/actions/toolkit/blob/main/packages/core/src/command.ts
-    """
-    return value.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
-
-
-def _escape_workflow_property(value: str) -> str:
-    """Escape a value for a workflow-command property (``file=...``, ``line=...``).
-
-    Mirrors ``escapeProperty`` from ``@actions/core``: same as ``_escape_workflow_data``
-    plus ``:`` and ``,`` so they don't terminate the property or the property list.
-    """
-    return _escape_workflow_data(value).replace(':', '%3A').replace(',', '%2C')
 
 
 class AppLoggingHandler(logging.Handler):
@@ -147,12 +122,12 @@ class Application(Terminal):
         self._emit_github_annotation(AnnotationLevel.WARNING, file, message, line)
 
     def annotate_display_queue(
-        self, file: str, display_queue: list[tuple[AnnotationLevel, str]], line: int = 1
+        self, file: str, display_queue: Iterable[tuple[AnnotationLevel, str]], line: int = 1
     ) -> None:
         """Emit one annotation per level from a queue of ``(level, message)`` tuples.
 
         Messages at the same level are joined with a newline so they render as a single
-        multi-line annotation (``_escape_workflow_data`` rewrites it to ``%0A``).
+        multi-line annotation (``escape_workflow_data`` rewrites it to ``%0A``).
         """
         grouped: defaultdict[AnnotationLevel, list[str]] = defaultdict(list)
         for level, message in display_queue:
@@ -170,10 +145,9 @@ class Application(Terminal):
         # The escapers below match `@actions/core`'s `escapeData` / `escapeProperty` —
         # they ensure newlines, `%`, and (for properties) `:` / `,` don't break the
         # command's framing. Do not remove them.
-        escaped_file = _escape_workflow_property(file)
-        escaped_line = _escape_workflow_property(str(line))
-        escaped_message = _escape_workflow_data(message)
-        print(f'::{level} file={escaped_file},line={escaped_line}::{escaped_message}')
+        escaped_file = escape_workflow_property(file)
+        escaped_message = escape_workflow_data(message)
+        print(f'::{level} file={escaped_file},line={line}::{escaped_message}')
 
     # TODO: remove everything below when the old CLI is gone
     def initialize_old_cli(self):
