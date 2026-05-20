@@ -1,0 +1,1 @@
+Add a `validate qa-label` check that fails CI unless the pull request carries exactly one of the `qa/required` or `qa/skip-qa` labels.
