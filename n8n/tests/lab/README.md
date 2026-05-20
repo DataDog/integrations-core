@@ -13,15 +13,33 @@ On top you get:
 
 ### Datadog credentials
 
-The lab uses a `.ddev.toml` in this directory (already committed) to point at an `n8nlab` ddev org. Add the matching entry to your global `~/.ddev/config.toml`:
+The lab uses a `.ddev.toml` in this directory to point at an `n8nlab` ddev org. The file is gitignored, so create it locally:
 
-```toml
-[orgs.n8nlab]
-api_key = "<your real Datadog API key>"
-site = "datadoghq.com"
-```
+1. From `n8n/tests/lab/`, generate a fresh override file:
 
-Use any org name you like; just keep `org = "n8nlab"` in `tests/lab/.ddev.toml` aligned with what you put in your global config.
+   ```bash
+   ddev config override
+   ```
+
+   This writes a `.ddev.toml` seeded with the inferred `repo` and `repos` mapping.
+
+2. Append the org selector to the generated `.ddev.toml`:
+
+   ```toml
+   org = "n8nlab"
+   ```
+
+   ddev discovers this file by walking the current directory upward, so the override applies to any `ddev` command run from `tests/lab/` or below.
+
+3. Add a matching org block to your global ddev config (find its path with `ddev config find`):
+
+   ```toml
+   [orgs.n8nlab]
+   api_key = "<your real Datadog API key>"
+   site = "datadoghq.com"
+   ```
+
+Use any org name you like; just keep the `org = "..."` line in `tests/lab/.ddev.toml` aligned with the `[orgs.<name>]` section in your global config.
 
 ### Traffic configuration
 
