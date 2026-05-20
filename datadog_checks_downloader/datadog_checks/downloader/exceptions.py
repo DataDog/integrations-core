@@ -30,11 +30,26 @@ class NonDatadogPackage(CLIError):
         return '{}'.format(self.standard_distribution_name)
 
 
+class MissingVersion(CLIError):
+    """Raised when --version is required but absent (e.g. with --unsafe-disable-verification)."""
+
+
 # Exceptions for the download module.
 
 
 class TargetNotFoundError(ChecksDownloaderException):
     """An exception raised when a target is not found."""
+
+
+class MalformedPointerError(ChecksDownloaderException):
+    """Raised when a TUF-signed pointer JSON is missing required fields."""
+
+    def __init__(self, project, missing_key):
+        self.project = project
+        self.missing_key = missing_key
+
+    def __str__(self):
+        return f'{self.project}: pointer missing required key {self.missing_key!r}'
 
 
 class DigestMismatch(ChecksDownloaderException):
