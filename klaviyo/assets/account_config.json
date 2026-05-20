@@ -1,0 +1,38 @@
+{
+    "supported_auth_methods": [
+      {
+        "auth_name": "oauth",
+        "auth_method": "oauth2_authorization_code",
+        "fields": [],
+        "authorization_server": {
+          "authorization_endpoint": "https://www.klaviyo.com/oauth/authorize"
+        },
+        "authorization_request": {
+          "scopes": [
+            "accounts:read",
+            "metrics:read",
+            "events:read",
+            "flows:read"
+          ],
+          "pkce": "required"
+        }
+      }
+    ],
+    "additional_config_fields": [
+      {
+        "type": "tags",
+        "key": "tags",
+        "label": "Tags",
+        "help": "",
+        "editable": true,
+        "required": false
+      }
+    ],
+    "dataflow_config": [
+        {
+          "dataflow_id": "klaviyo-logs",
+          "additional_config_fields": []
+        }
+    ]
+  }
+  
