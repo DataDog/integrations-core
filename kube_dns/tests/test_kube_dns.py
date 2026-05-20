@@ -92,9 +92,7 @@ class TestKubeDNS:
 
         check._perform_service_check(instance)
 
-        if expected_message is None:
-            check.service_check.assert_called_with(self.NAMESPACE + '.up', expected_status, tags=instance_tags)
-        else:
-            check.service_check.assert_called_with(
-                self.NAMESPACE + '.up', expected_status, tags=instance_tags, message=expected_message
-            )
+        expected_kwargs = {'tags': instance_tags}
+        if expected_message is not None:
+            expected_kwargs['message'] = expected_message
+        check.service_check.assert_called_with(self.NAMESPACE + '.up', expected_status, **expected_kwargs)
