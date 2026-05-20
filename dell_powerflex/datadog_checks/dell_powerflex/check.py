@@ -395,7 +395,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             'msg_title': title,
             'msg_text': msg_text,
             'alert_type': alert_type,
-            'source_type_name': self.__NAMESPACE__,
+            'source_type_name': 'dell-powerflex',
             'tags': tags,
         }
 

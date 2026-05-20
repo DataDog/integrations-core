@@ -106,3 +106,25 @@ files:
             collect_statistics: false
     - template: instances/http
     - template: instances/default
+  - template: logs
+    example:
+      - type: file
+        path: /opt/emc/scaleio/mdm/logs/eventLogger.log
+        source: dell_powerflex
+        service: <SERVICE>
+      - type: file
+        path: /opt/emc/scaleio/mdm/logs/trc.0
+        source: dell_powerflex
+        service: <SERVICE>
+      - type: file
+        path: /opt/emc/scaleio/sds/logs/trc.0
+        source: dell_powerflex
+        service: <SERVICE>
+      - type: file
+        path: /opt/emc/scaleio/lia/logs/trc.0
+        source: dell_powerflex
+        service: <SERVICE>
+      - type: file
+        path: /opt/emc/scaleio/activemq/data/activemq.log
+        source: dell_powerflex
+        service: <SERVICE>
