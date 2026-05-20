@@ -63,7 +63,9 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
 
     @cached_property
     def mypy_args(self):
-        return self.config.get('mypy-args', []) + ['--install-types', '--non-interactive']
+        return (
+            ['--explicit-package-bases'] + self.config.get('mypy-args', []) + ['--install-types', '--non-interactive']
+        )
 
     @cached_property
     def mypy_files(self):

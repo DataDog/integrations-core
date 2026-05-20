@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
-<yandex>
+<yandex replace="true">
     <users>
         <datadog>
             <password_sha256_hex>c851fedffc16075006179f5c6563369af48e2170e6d070758238c570bd5ebd32</password_sha256_hex>
-            <networks incl="networks" replace="replace">
+            <networks>
                 <ip>::/0</ip>
             </networks>
             <profile>default</profile>

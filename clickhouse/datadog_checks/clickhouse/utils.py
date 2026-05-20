@@ -25,3 +25,7 @@ class ErrorSanitizer(object):
 
 def compact_query(query):
     return re.sub(r'\n\s+', ' ', query.strip())
+
+
+def parse_version(version: str) -> list[int]:
+    return [int(v) for v in version.split('.')]
