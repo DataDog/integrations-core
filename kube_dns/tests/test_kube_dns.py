@@ -2,16 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# stdlib
-import os
-
 import mock
 import pytest
 import requests
 
-# project
 from datadog_checks.base import AgentCheck
 from datadog_checks.kube_dns import KubeDNSCheck
+
+from .common import make_mock_metrics
 
 customtag = "custom:tag"
 
@@ -19,17 +17,8 @@ instance = {'prometheus_endpoint': 'http://localhost:10055/metrics', 'tags': [cu
 
 
 @pytest.fixture()
-def mock_get():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    ):
-        yield
+def mock_get(mock_openmetrics_http):
+    return make_mock_metrics(mock_openmetrics_http, 'metrics.txt')
 
 
 @pytest.fixture
@@ -60,7 +49,7 @@ class TestKubeDNS:
         NAMESPACE + '.cachemiss_count.count',
     ]
 
-    def test_check(self, aggregator, mock_get):
+    def test_check(self, aggregator, mock_get, mock_healthcheck_wrapper):
         """
         Testing kube_dns check.
         """
@@ -83,26 +72,29 @@ class TestKubeDNS:
         aggregator.assert_metric(name)
         aggregator.assert_metric(name, tags=['custom:tag', 'system:reverse'])
 
-    def test_service_check_ok(self, monkeypatch):
+    @pytest.mark.parametrize(
+        'side_effect, expected_status, expected_message',
+        [
+            (None, AgentCheck.OK, None),
+            (requests.HTTPError('health check failed'), AgentCheck.CRITICAL, 'health check failed'),
+        ],
+        ids=['ok', 'http_error'],
+    )
+    def test_service_check(self, monkeypatch, side_effect, expected_status, expected_message):
         instance_tags = [customtag]
-
         check = KubeDNSCheck(self.CHECK_NAME, {}, [instance])
-
         monkeypatch.setattr(check, 'service_check', mock.Mock())
 
-        calls = [
-            mock.call(self.NAMESPACE + '.up', AgentCheck.OK, tags=instance_tags),
-            mock.call(self.NAMESPACE + '.up', AgentCheck.CRITICAL, tags=instance_tags, message='health check failed'),
-        ]
+        healthcheck_url = check.instance['health_url']
+        handler = mock.MagicMock()
+        handler.get.return_value.raise_for_status = mock.Mock(side_effect=side_effect)
+        check._http_handlers[healthcheck_url] = handler
 
-        # successful health check
-        with mock.patch('requests.Session.get', return_value=mock.MagicMock(status_code=200)):
-            check._perform_service_check(instance)
+        check._perform_service_check(instance)
 
-        # failed health check
-        raise_error = mock.Mock()
-        raise_error.side_effect = requests.HTTPError('health check failed')
-        with mock.patch('requests.Session.get', return_value=mock.MagicMock(raise_for_status=raise_error)):
-            check._perform_service_check(instance)
-
-        check.service_check.assert_has_calls(calls)
+        if expected_message is None:
+            check.service_check.assert_called_with(self.NAMESPACE + '.up', expected_status, tags=instance_tags)
+        else:
+            check.service_check.assert_called_with(
+                self.NAMESPACE + '.up', expected_status, tags=instance_tags, message=expected_message
+            )

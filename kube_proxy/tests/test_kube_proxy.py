@@ -2,14 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
-
 import mock
 import pytest
 import requests
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.kube_proxy import KubeProxyCheck
+
+from .common import make_mock_metrics
 
 instance = {'prometheus_url': 'http://localhost:10249/metrics'}
 instance2 = {'prometheus_url': 'http://localhost:10249/metrics', 'health_url': 'http://1.2.3.4:5678/healthz'}
@@ -20,36 +20,16 @@ NAMESPACE = 'kubeproxy'
 
 
 @pytest.fixture()
-def mock_iptables():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics_iptables.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    mock_iptables = mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    )
-    yield mock_iptables.start()
-    mock_iptables.stop()
+def mock_iptables(mock_openmetrics_http):
+    return make_mock_metrics(mock_openmetrics_http, 'metrics_iptables.txt')
 
 
 @pytest.fixture()
-def mock_userspace():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics_userspace.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    mock_userspace = mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    )
-    yield mock_userspace.start()
-    mock_userspace.stop()
+def mock_userspace(mock_openmetrics_http):
+    return make_mock_metrics(mock_openmetrics_http, 'metrics_userspace.txt')
 
 
-def test_check_iptables(aggregator, mock_iptables):
+def test_check_iptables(aggregator, mock_iptables, mock_healthcheck_wrapper):
     """
     Testing Kube_proxy in iptables mode.
     """
@@ -72,7 +52,7 @@ def test_check_iptables(aggregator, mock_iptables):
     aggregator.assert_all_metrics_covered()
 
 
-def test_check_userspace(aggregator, mock_userspace):
+def test_check_userspace(aggregator, mock_userspace, mock_healthcheck_wrapper):
     """
     Testing Kube_proxy in userspace mode.
     """
@@ -106,26 +86,29 @@ def test_service_check_custom_url():
     assert c.instance['health_url'] == 'http://1.2.3.4:5678/healthz'
 
 
-def test_service_check_ok(monkeypatch):
+@pytest.mark.parametrize(
+    'side_effect, expected_status, expected_message',
+    [
+        (None, AgentCheck.OK, None),
+        (requests.HTTPError('health check failed'), AgentCheck.CRITICAL, 'health check failed'),
+    ],
+    ids=['ok', 'http_error'],
+)
+def test_service_check(monkeypatch, side_effect, expected_status, expected_message):
     instance_tags = []
-
     check = KubeProxyCheck(CHECK_NAME, {}, [instance])
-
     monkeypatch.setattr(check, 'service_check', mock.Mock())
 
-    calls = [
-        mock.call(NAMESPACE + '.up', AgentCheck.OK, tags=instance_tags),
-        mock.call(NAMESPACE + '.up', AgentCheck.CRITICAL, tags=instance_tags, message='health check failed'),
-    ]
+    healthcheck_url = check.instance['health_url']
+    handler = mock.MagicMock()
+    handler.get.return_value.raise_for_status = mock.Mock(side_effect=side_effect)
+    check._http_handlers[healthcheck_url] = handler
 
-    # successful health check
-    with mock.patch('requests.Session.get', return_value=mock.MagicMock(status_code=200)):
-        check._perform_service_check(instance)
+    check._perform_service_check(instance)
 
-    # failed health check
-    raise_error = mock.Mock()
-    raise_error.side_effect = requests.HTTPError('health check failed')
-    with mock.patch('requests.Session.get', return_value=mock.MagicMock(raise_for_status=raise_error)):
-        check._perform_service_check(instance)
-
-    check.service_check.assert_has_calls(calls)
+    if expected_message is None:
+        check.service_check.assert_called_with(NAMESPACE + '.up', expected_status, tags=instance_tags)
+    else:
+        check.service_check.assert_called_with(
+            NAMESPACE + '.up', expected_status, tags=instance_tags, message=expected_message
+        )
