@@ -1537,7 +1537,7 @@ files:
         encounters an error and report the results to the Datadog platform. Diagnostics will run every 5 minutes at most.        
       hidden: true
       value:
-        example: true
+        example: false
         type: boolean
     - template: instances/db
       overrides:
