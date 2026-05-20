@@ -72,6 +72,26 @@ The `policy_validation_flags` [suppress specific validation errors][12] that may
 
 The integration automatically tags all metrics and service checks with the name of the store in the `certificate_store:<STORE>` tag. Certificate metrics and service checks are tagged with the certificate's subjects, thumbprints and serial numbers. CRL metrics and service checks are tagged with the CRL's issuer and thumbprint.
 
+Beginning with Agent v7.80, six opt-in flags expose additional certificate metadata as tags on per-certificate metrics and service checks. Each flag defaults to `false`; set it to `true` in your instance configuration to emit the corresponding tags.
+
+| Flag | Tags emitted |
+| --- | --- |
+| `certificate_template_tag` | `certificate_template`, `certificate_template_oid`, `certificate_template_major_version`, `certificate_template_minor_version` |
+| `enhanced_key_usage_tag` | `enhanced_key_usage` (one tag per EKU OID; well-known OIDs use short names) |
+| `friendly_name_tag` | `friendly_name` |
+| `subject_alternative_names_tag` | `subject_alt_name_dns`, `subject_alt_name_ip`, `subject_alt_name_email`, `subject_alt_name_uri` |
+| `issuer_tag` | `issuer_CN`, `issuer_O`, `issuer_OU`, and other issuer Distinguished Name components when present |
+| `signature_algorithm_tag` | `signature_algorithm` |
+
+Example configuration that enables the issuer and signature algorithm tags:
+
+```yaml
+instances:
+  - certificate_store: ROOT
+    issuer_tag: true
+    signature_algorithm_tag: true
+```
+
 ### Validation
 
 [Run the Agent's status subcommand][6] and look for `windows_certificate` under the Checks section.
