@@ -1,0 +1,1 @@
+Anchor in-core editable installs in the hatch environment collector to the project root so the post-install command works on hatch 1.10+ when invoked from a subdirectory of the integration.
