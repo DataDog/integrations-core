@@ -81,8 +81,8 @@ class TUFPointerDownloader:
     def _bootstrap_metadata_dir(self, metadata_dir: Path) -> None:
         """Seed *metadata_dir* with the bundled initial root.json trust anchor."""
         dest = metadata_dir / 'root.json'
-        pkg = importlib.resources.files('datadog_checks.downloader')
-        dest.write_bytes((pkg / '1.root.json').read_bytes())
+        metadata = importlib.resources.files('datadog_checks.downloader') / 'data' / 'v2' / 'metadata'
+        dest.write_bytes((metadata / '1.root.json').read_bytes())
 
     def _make_updater(self, metadata_dir: Path, target_dir: Path) -> Updater:
         return Updater(
