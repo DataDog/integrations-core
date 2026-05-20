@@ -1658,13 +1658,24 @@ class AgentCheck(object):
 
 
 def _extract_instances(args, kwargs):
-    """Pull the `instances` list out of the AgentCheck-style positional/kwarg args."""
+    """Pull the `instances` list out of the AgentCheck-style positional/kwarg args.
+
+    Supports three constructor shapes:
+    - new-style: ``(name, init_config, instances)``
+    - old-style: ``(name, init_config, agentConfig, instances)`` (agentConfig is a dict)
+    - subclass with extra positional args: e.g. PDHBaseCheck's
+      ``(name, init_config, instances, counter_list)``
+
+    Disambiguate by type: instances is a list/tuple of dicts; agentConfig is a
+    dict. The first arg at index 2 or 3 that matches the instances shape wins.
+    """
     if 'instances' in kwargs:
         return kwargs['instances']
-    if len(args) > 3:
-        return args[3]  # old-style: (name, init_config, agentConfig, instances)
-    if len(args) > 2 and isinstance(args[2], (list, tuple)):
-        return args[2]  # new-style: (name, init_config, instances)
+    for idx in (2, 3):
+        if len(args) > idx:
+            val = args[idx]
+            if isinstance(val, (list, tuple)) and val and isinstance(val[0], dict):
+                return val
     return None
 
 

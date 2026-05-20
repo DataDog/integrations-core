@@ -344,6 +344,29 @@ def test_process_isolation_in_init_config_raises():
         )
 
 
+class _SubclassWithExtraArgs(AgentCheck):
+    """Mirrors the PDHBaseCheck constructor shape (name, init_config, instances, extra_arg).
+
+    Regression test for _extract_instances: extra_arg is a list (counter
+    definitions in PDHBaseCheck's real signature) but must not be mistaken for
+    the instances list.
+    """
+
+    def __init__(self, name, init_config, instances, extra_arg):
+        super().__init__(name, init_config, instances)
+        self.extra_arg = extra_arg
+
+
+def test_subclass_with_extra_list_positional_arg_does_not_trip_discovery_dispatch():
+    extra = [['counter', 'name', 'gauge']]
+    inst = _SubclassWithExtraArgs("name", {}, [{"foo": "bar"}], extra)
+    # __new__ must not look at args[3] (extra) as instances and dispatch to the
+    # trial proxy. The constructed instance is the target class itself, not the
+    # proxy.
+    assert type(inst) is _SubclassWithExtraArgs
+    assert inst.extra_arg is extra
+
+
 def test_process_isolation_in_candidate_raises():
     proxy = _make_proxy(_PIInCandidateCheck, "t_pi_candidate")
     result = proxy.run()
