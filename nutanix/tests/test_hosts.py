@@ -102,3 +102,30 @@ def test_external_tags_for_host(dd_run_check, aggregator, mock_instance, mock_ht
         HOST_NAME,
         {'nutanix': HOST_TAGS},
     )
+
+
+def test_hostname_transform_upper_applies_to_host(dd_run_check, aggregator, mock_instance, mock_http_get):
+    instance = mock_instance.copy()
+    instance['hostname_transform'] = 'upper'
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric("nutanix.host.count", value=1, tags=HOST_TAGS, hostname=HOST_NAME.upper())
+
+
+def test_hostname_transform_lower_applies_to_host(dd_run_check, aggregator, mock_instance, mock_http_get):
+    instance = mock_instance.copy()
+    instance['hostname_transform'] = 'lower'
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric("nutanix.host.count", value=1, tags=HOST_TAGS, hostname=HOST_NAME.lower())
+
+
+def test_hostname_transform_default_leaves_host_unchanged(dd_run_check, aggregator, mock_instance, mock_http_get):
+    instance = mock_instance.copy()
+    instance['hostname_transform'] = 'default'
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric("nutanix.host.count", value=1, tags=HOST_TAGS, hostname=HOST_NAME)

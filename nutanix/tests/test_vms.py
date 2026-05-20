@@ -170,3 +170,21 @@ def test_external_tags_for_vm(dd_run_check, aggregator, mock_instance, mock_http
         PCVM_NAME,
         {'nutanix': PCVM_TAGS},
     )
+
+
+def test_hostname_transform_upper_applies_to_vm(dd_run_check, aggregator, mock_instance, mock_http_get):
+    instance = mock_instance.copy()
+    instance['hostname_transform'] = 'upper'
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric("nutanix.vm.count", value=1, tags=PCVM_TAGS, hostname=PCVM_NAME.upper())
+
+
+def test_hostname_transform_lower_applies_to_vm(dd_run_check, aggregator, mock_instance, mock_http_get):
+    instance = mock_instance.copy()
+    instance['hostname_transform'] = 'lower'
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric("nutanix.vm.count", value=1, tags=PCVM_TAGS, hostname=PCVM_NAME.lower())
