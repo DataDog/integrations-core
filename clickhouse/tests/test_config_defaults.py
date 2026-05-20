@@ -91,6 +91,9 @@ EXPECTED_DEFAULTS = {
     'custom_queries': None,
     'only_custom_queries': False,
     'use_global_custom_queries': 'true',
+    # === Query set selection (legacy vs advanced) ===
+    'use_legacy_queries': True,
+    'use_advanced_queries': True,
     # === Agent standard fields ===
     'min_collection_interval': 15,
     'empty_default_hostname': False,

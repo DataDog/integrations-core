@@ -627,10 +627,10 @@ class InfrastructureMonitor:
 
     def _aggregate_disk_status(self, disks: list[dict]) -> str:
         """Return the worst disk status across ``disks``: degraded > normal > $unknown."""
-        statuses = {d.get("status") for d in disks if d.get("status")}
+        statuses = {_normalize_tag_value(d.get("status")) for d in disks if d.get("status")}
         if statuses & DEGRADED_DISK_STATUSES:
             return "degraded"
-        if "NORMAL" in statuses:
+        if "normal" in statuses:
             return "normal"
         return "$unknown"
 
