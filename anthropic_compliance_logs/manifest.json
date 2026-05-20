@@ -9,7 +9,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Troubleshooting",
     "changelog": "CHANGELOG.md",
-    "description": "Collect compliance logs from claude for security monitoring and SIEM use cases.",
+    "description": "Collect compliance logs from Claude for security monitoring and SIEM use cases.",
     "title": "Claude Compliance Logs",
     "media": [],
     "classifier_tags": [
