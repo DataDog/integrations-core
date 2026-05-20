@@ -161,11 +161,11 @@ The OpenShift check does not include any Service Checks.
 
 ### Missing cluster quota metrics
 
-In an OpenShift cluster most of the Agent and Cluster Agent reported metrics are the same as other Kubernetes clusters. The only OpenShift specific metrics are the ones listed above starting with `openshift.*`. These correspond to the optional [OpenShift `ClusterResourceQuota` objects][19] that you can deploy in your clusters. If you are using native [Kubernetes `ResourceQuotas` objects][20] those are reported in the `kubernetes_state_core` (KSM) check as the `kubernetes_state.resourcequota.*` metrics.
+In an OpenShift cluster, most of the Agent and Cluster Agent reported metrics are the same as in other Kubernetes clusters. The only OpenShift-specific metrics are the ones listed above starting with `openshift.*`. These correspond to the optional [OpenShift `ClusterResourceQuota` objects][19] that you can deploy in your clusters. If you use native [Kubernetes `ResourceQuotas` objects][20], those are reported by the `kubernetes_state_core` (KSM) check as `kubernetes_state.resourcequota.*` metrics.
 
-These OpenShift metrics are reported per *active* `ClusterResourceQuota` as part of the Cluster Agent's [`kubernetes_apiserver` check][1]. For a `ClusterResourceQuota` to be active it needs to be able to identify an OpenShift project (Kubernetes namespace) with the matching label or annotation selectors.
+These OpenShift metrics are reported per *active* `ClusterResourceQuota` as part of the Cluster Agent's [`kubernetes_apiserver` check][1]. For a `ClusterResourceQuota` to be active, it must be able to identify an OpenShift project (Kubernetes namespace) with the matching label or annotation selectors.
 
-You can confirm that you have these resources by running `oc get clusterresourcequotas` to confirm they exist. Then run `oc describe clusterresourcequotas <NAME>` relative to them to confirm if they are active. An active quota looks like:
+You can confirm that these resources exist by running `oc get clusterresourcequotas`. Then, run `oc describe clusterresourcequotas <NAME>` to check whether a quota is active. An active quota looks like:
 
 ```
 $ oc describe clusterresourcequota example-cluster-quota
@@ -182,9 +182,9 @@ pods      1     10
 secrets   9     20
 ```
 
-In this above sample, metrics for this quota are reported for its pods and secrets usage only. As you apply quotas towards the [different resources][21] like CPU, storage, ConfigMaps, etc, those are reported accordingly.
+In the example above, metrics for this quota are reported only for pod and secret usage. As you apply quotas to [different resources][21] like CPU, storage, ConfigMaps, the corresponding usage metrics are reported.
 
-If your `ClusterResourceQuota` describe output is not showing any resources and their Used/Hard values, the quota is not actively applied relative to its selectors. There is no data reported relative to these non active quotas.
+If your `ClusterResourceQuota` describe output does not show any resources or their Used/Hard values, the quota is not actively applied by its selectors. No data is reported for these non-active quotas.
 
 Need help? Contact [Datadog support][14].
 
