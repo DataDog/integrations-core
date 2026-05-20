@@ -341,11 +341,15 @@ def test_reported_hostname_explicit_config():
 @pytest.mark.parametrize('loopback', ['localhost', '127.0.0.1'])
 def test_reported_hostname_loopback_substitutes_agent_hostname(loopback):
     instance = {**BASE_INSTANCE, 'server': loopback}
-    with mock.patch('datadog_checks.base.checks.db.resolve_db_host', return_value='my-agent-host'):
+    with mock.patch('datadog_checks.clickhouse.clickhouse.resolve_db_host', return_value='my-agent-host'):
         check = ClickhouseCheck('clickhouse', {}, [instance])
         assert check.reported_hostname == 'my-agent-host'
 
 
-def test_resolved_hostname_non_loopback():
-    check = ClickhouseCheck('clickhouse', {}, [BASE_INSTANCE])
-    assert check.resolved_hostname == BASE_INSTANCE['server']
+def test_reported_hostname_non_loopback():
+    with mock.patch(
+        'datadog_checks.clickhouse.clickhouse.resolve_db_host', return_value=BASE_INSTANCE['server']
+    ) as mock_resolve:
+        check = ClickhouseCheck('clickhouse', {}, [BASE_INSTANCE])
+        assert check.reported_hostname == BASE_INSTANCE['server']
+        mock_resolve.assert_called_once_with(BASE_INSTANCE['server'])

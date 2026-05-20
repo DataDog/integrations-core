@@ -180,7 +180,7 @@ def test_resolved_hostname(disable_generic_tags, expected_hostname, pg_instance,
     instance['disable_generic_tags'] = disable_generic_tags
 
     with mock.patch(
-        'datadog_checks.base.checks.db.resolve_db_host', return_value='resolved.hostname'
+        'datadog_checks.postgres.PostgreSql.resolve_db_host', return_value='resolved.hostname'
     ) as resolve_db_host_mock:
         check = integration_check(instance)
         assert check.resolved_hostname == expected_hostname
@@ -270,7 +270,7 @@ def test_debug_stats_kwargs_respects_exclude_hostname(
     integration_check, pg_instance, exclude_hostname, expected_hostname
 ):
     pg_instance['exclude_hostname'] = exclude_hostname
-    with mock.patch('datadog_checks.base.checks.db.resolve_db_host', return_value='resolved.hostname'):
+    with mock.patch('datadog_checks.postgres.PostgreSql.resolve_db_host', return_value='resolved.hostname'):
         check = integration_check(pg_instance)
     assert check.debug_stats_kwargs()['hostname'] == expected_hostname
 

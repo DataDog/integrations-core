@@ -651,8 +651,21 @@ class PostgreSql(DatabaseCheck):
                 return wal_level
 
     @property
-    def _config_host(self) -> str:
-        return self._config.host
+    def reported_hostname(self):
+        # type: () -> str
+        if self._config.exclude_hostname:
+            return None
+        return self.resolved_hostname
+
+    @property
+    def resolved_hostname(self):
+        # type: () -> str
+        if self._resolved_hostname is None:
+            if self._config.reported_hostname:
+                self._resolved_hostname = self._config.reported_hostname
+            else:
+                self._resolved_hostname = self.resolve_db_host()
+        return self._resolved_hostname
 
     @property
     def database_identifier(self):
