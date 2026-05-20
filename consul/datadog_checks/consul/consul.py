@@ -116,6 +116,12 @@ class ConsulCheck(OpenMetricsBaseCheck):
         self.collect_health_checks = self.instance.get(
             'collect_health_checks', self.init_config.get('collect_health_checks', False)
         )
+        self.health_check_warning_events = is_affirmative(
+            self.instance.get(
+            'health_check_warning_events',
+            self.init_config.get('health_check_warning_events', False),
+                            )
+        )
 
         if self.threads_count > 1:
             self.thread_pool = ThreadPool(self.threads_count)
@@ -407,22 +413,34 @@ class ConsulCheck(OpenMetricsBaseCheck):
                         self.gauge(HEALTH_CHECK_METRIC, status_value, tags=main_tags + node_tags)
                         self.health_checks[hc_id] = status_value
 
-                        if last_hc_value != status_value and status_value == 3:
-                            check_name = check.get("Name", "Consul Health Check")
-                            check_output = check.get("Output", "")
-                            self.event(
-                                {
-                                    "timestamp": timestamp(),
-                                    "event_type": "consul.check_failed",
-                                    "alert_type": "error",
-                                    "source_type_name": SOURCE_TYPE_NAME,
-                                    "msg_title": f"{check_name} Failed",
-                                    "aggregation_key": "consul.status_check",
-                                    "msg_text": f"Check {check_id} for service {service_name}, id: {service_id}"
-                                    f"failed on node {node_name}: {check_output}",
-                                    "tags": node_tags,
-                                }
-                            )
+                        if last_hc_value != status_value:
+                            if status_value == 3 or (status_value == 2 and self.health_check_warning_events):
+                                check_name = check.get("Name", "Consul Health Check")
+                                check_output = check.get("Output", "")
+                                
+                                if status_value == 3:
+                                    event_type = "consul.check_failed"
+                                    alert_type = "error"
+                                    label = "failed"
+                                else:
+                                    event_type = "consul.check_warning"
+                                    alert_type = "warning"
+                                    label = "warning"
+
+                                self.event(
+                                    {
+                                        "timestamp": timestamp(),
+                                        "event_type": event_type,
+                                        "alert_type": alert_type,
+                                        "source_type_name": SOURCE_TYPE_NAME,
+                                        "msg_title": f"{check_name} {label.capitalize()}",
+                                        "aggregation_key": "consul.status_check",
+                                        "msg_text": f"Check {check_id} for service {service_name}, id: {service_id} "
+                                        f"{label} on node {node_name}: {check_output}",
+                                        "tags": node_tags,
+                                    }
+                                )
+                            
 
                     if sc_id not in service_checks:
                         service_checks[sc_id] = {'status': status, 'tags': tags}
