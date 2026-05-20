@@ -5,6 +5,7 @@
 
 # 1st party.
 import argparse
+import logging
 import os
 import re
 import sys
@@ -15,7 +16,7 @@ from tuf.api.exceptions import DownloadError
 
 from .download import DEFAULT_ROOT_LAYOUT_TYPE, REPOSITORY_URL_PREFIX, ROOT_LAYOUTS, TUFDownloader
 from .download_v2 import V2_REPOSITORY_URL, TUFPointerDownloader
-from .exceptions import NonCanonicalVersion, NonDatadogPackage, TargetNotFoundError
+from .exceptions import CLIError, MissingVersion, NonCanonicalVersion, NonDatadogPackage, TargetNotFoundError
 
 # Private module functions.
 
@@ -160,27 +161,35 @@ def download():
     partial_args, _ = parser.parse_known_args()
 
     if partial_args.v2:
-        # Explicit --v2: strict v2, no fallback.
-        _download_v2()
-    else:
-        # Default: attempt v2, fall back to v1 on any failure.
-        try:
-            _download_v2()
-        except Exception as exc:
-            import logging
+        # Explicit --v2: strict v2, no fallback. Validation errors surface as-is.
+        run_v2_downloader(*instantiate_v2_downloader())
+        return
 
-            logging.getLogger(__name__).info(
-                'v2 download failed (%s, %s: %s), falling back to v1',
-                _v2_failure_category(exc),
-                type(exc).__name__,
-                exc,
-            )
-            tuf_downloader, standard_distribution_name, version, ignore_python_version = instantiate_downloader()
-            run_downloader(tuf_downloader, standard_distribution_name, version, ignore_python_version)
+    # Default: attempt v2, fall back to v1 on any download-path failure.
+    # User-input errors propagate directly so the caller sees the real
+    # problem instead of a misleading "v2 download failed" log line.
+    # NOTE for v1 test maintainers: every existing offline test in
+    # tests/test_downloader.py now traverses this v2 attempt before v1
+    # runs; each invocation does one extra (mocked or failing) round-trip.
+    try:
+        run_v2_downloader(*instantiate_v2_downloader())
+    except (CLIError, MissingVersion):
+        # NonDatadogPackage / NonCanonicalVersion / MissingVersion are user-input
+        # errors raised by v2 argument validation. v1 would raise the same; don't
+        # waste a fallback on them.
+        raise
+    except Exception as exc:
+        logging.getLogger(__name__).info(
+            'v2 download failed (%s, %s: %s), falling back to v1',
+            _v2_failure_category(exc),
+            type(exc).__name__,
+            exc,
+        )
+        tuf_downloader, standard_distribution_name, version, ignore_python_version = instantiate_downloader()
+        run_downloader(tuf_downloader, standard_distribution_name, version, ignore_python_version)
 
 
-def _download_v2():
-    """Entry point for the v2 pointer-file download path."""
+def _v2_parser():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -198,14 +207,25 @@ def _download_v2():
         help='Disable TUF verification and wheel digest checks; requires --version and downloads /wheels directly.',
     )
     parser.add_argument('-v', '--verbose', action='count', default=0)
-    parser.add_argument('--v2', action='store_true', default=True)  # consumed upstream; kept for completeness
+    parser.add_argument('--v2', action='store_true', default=False)
 
     # v1 flags that are not applicable in v2: accept and warn so that callers
     # upgrading from v1 get a clear message instead of an argument error.
-    parser.add_argument('--type', type=str, default=None, dest='_type_ignored')
-    parser.add_argument('--ignore-python-version', action='store_true', dest='_ignore_python_version')
+    # --force is silently accepted: it is a no-op in v2 (no in-toto layout to bypass).
+    parser.add_argument('--type', type=str, default=None, dest='ignored_type')
+    parser.add_argument('--ignore-python-version', action='store_true', dest='ignored_ignore_python_version')
+    parser.add_argument('--force', action='store_true', dest='ignored_force')
 
-    args = parser.parse_args()
+    return parser
+
+
+def instantiate_v2_downloader():
+    """Parse the v2 argv, validate inputs, and return (downloader, name, version, args).
+
+    Splits argument parsing from execution so the validation/warning branches can
+    be tested without patching sys.argv.
+    """
+    args = _v2_parser().parse_args()
 
     if not args.standard_distribution_name.startswith('datadog-'):
         raise NonDatadogPackage(args.standard_distribution_name)
@@ -213,17 +233,24 @@ def _download_v2():
     if args.version and not __is_canonical(args.version):
         raise NonCanonicalVersion(args.version)
 
-    if args._type_ignored is not None:
+    if args.ignored_type is not None:
         sys.stderr.write('WARNING: --type is not applicable with --v2 and will be ignored.\n')
-    if args._ignore_python_version:
+    if args.ignored_ignore_python_version:
         sys.stderr.write(
             'NOTE: --ignore-python-version is not applicable with --v2 (wheel selection happens at publish time).\n'
         )
 
+    remainder = min(args.verbose, 5) % 6
+    level = (6 - remainder) * 10
+    logging.basicConfig(format='%(levelname)-8s: %(message)s', level=level)
+
     downloader = TUFPointerDownloader(
         repository_url=args.repository,
-        verbose=args.verbose,
         disable_verification=args.unsafe_disable_verification,
     )
-    wheel_path = downloader.download(args.standard_distribution_name, version=args.version)
+    return downloader, args.standard_distribution_name, args.version, args
+
+
+def run_v2_downloader(downloader, standard_distribution_name, version, _args):
+    wheel_path = downloader.download(standard_distribution_name, version=version)
     print(wheel_path)  # pylint: disable=print-statement
