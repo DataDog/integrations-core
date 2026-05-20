@@ -1,0 +1,1 @@
+Collect Schema Registry compatibility (global and per-subject) and include it in the Data Streams schema payload.

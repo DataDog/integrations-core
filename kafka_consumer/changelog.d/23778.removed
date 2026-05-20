@@ -1,0 +1,1 @@
+Stop emitting Datadog Events for broker, topic, and schema registry configurations; these payloads continue to flow to the Data Streams intake.
