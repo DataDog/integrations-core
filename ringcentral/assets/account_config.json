@@ -1,0 +1,79 @@
+{
+    "supported_auth_methods": [
+      {
+        "auth_name": "oauth",
+        "auth_method": "oauth2_authorization_code",
+        "fields": [],
+        "authorization_server": {
+          "authorization_endpoint": "https://platform.ringcentral.com/restapi/oauth/authorize"
+        },
+        "authorization_request": {
+          "scopes": [
+            "ReadAccounts",
+            "ReadCallLog",
+            "ReadContacts",
+            "ReadMessages",
+            "ReadPresence"
+          ],
+          "pkce": "required"
+        }
+      }
+    ],
+    "additional_config_fields": [
+      {
+        "type": "tags",
+        "key": "tags",
+        "label": "Tags",
+        "help": "",
+        "editable": true,
+        "required": false
+      },
+      {
+        "type": "checkbox",
+        "key": "get_voice_calls",
+        "label": "Voice calls",
+        "help": "",
+        "editable": true,
+        "required": false,
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "key": "get_audit_logs",
+        "label": "Audit logs",
+        "help": "",
+        "editable": true,
+        "required": false,
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "key": "get_analytics_metrics",
+        "label": "Analytics metrics",
+        "help": "",
+        "editable": true,
+        "required": false,
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "key": "get_message_metrics",
+        "label": "SMS metrics",
+        "help": "",
+        "editable": true,
+        "required": false,
+        "default": true
+      }
+    ],
+    "dataflow_config": [
+        {
+          "dataflow_id": "ringcentral-logs",
+          "additional_config_fields": []
+        },
+        {
+          "dataflow_id": "ringcentral-metrics",
+          "additional_config_fields": []
+        }
+    ]
+  }
+  
