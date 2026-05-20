@@ -40,7 +40,8 @@ tests:
   sample: |
     2026-05-08 10:01:48,113 INFO  Waking up - Try to rotate-DB
   result:
-    custom: {}
+    custom: 
+      date: 1559154704133
     message: |
       2026-05-08 10:01:48,113 INFO  Waking up - Try to rotate-DB
     tags:
