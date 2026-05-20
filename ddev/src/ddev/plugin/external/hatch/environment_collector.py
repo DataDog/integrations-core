@@ -1,7 +1,6 @@
 import os
 import re
 from functools import cached_property
-from pathlib import Path
 from typing import Any
 
 from hatch.env.collectors.plugin.interface import EnvironmentCollectorInterface
@@ -191,12 +190,12 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
 
     def ruff_settings_dir(self):
         # If the local pyproject.toml exists and has ruff configuration, use it
-        local_pyproject = Path("./pyproject.toml")
+        local_pyproject = self.root / 'pyproject.toml'
         if local_pyproject.exists():
             pyproject_text = local_pyproject.read_text()
             if re.search(r'\[tool\.ruff\]', pyproject_text):
-                return "."
-        return ".."
+                return str(self.root)
+        return str(self.root.parent)
 
     def get_initial_config(self):
         settings_dir = self.ruff_settings_dir()
@@ -236,9 +235,10 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
         config = {'lint': lint_env}
 
         if self.check_types:
-            lint_env['scripts']['typing'] = [
-                f'mypy --config-file=../pyproject.toml {" ".join(self.mypy_args)} {" ".join(self.mypy_files)}'.rstrip()
-            ]
+            mypy_config = self.root.parent / 'pyproject.toml'
+            mypy_args = ' '.join(self.mypy_args)
+            mypy_files = ' '.join(self.mypy_files)
+            lint_env['scripts']['typing'] = [f'mypy --config-file={mypy_config} {mypy_args} {mypy_files}'.rstrip()]
             lint_env['scripts']['all'].append('typing')
             lint_env['dependencies'].extend(self.mypy_deps)
 
