@@ -3,21 +3,25 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import urllib.error
 
+import pytest
 from datadog_checks.downloader.cli import _v2_failure_category
 from datadog_checks.downloader.download import TUFDownloader
 from datadog_checks.downloader.exceptions import TargetNotFoundError
+from tuf.api.exceptions import DownloadError
 
 
-def test_v2_target_not_found_failure_category():
-    assert _v2_failure_category(TargetNotFoundError('missing')) == 'target version not found'
-
-
-def test_v2_network_failure_category():
-    assert _v2_failure_category(urllib.error.URLError('timeout')) == 'network error'
-
-
-def test_v2_other_failure_category():
-    assert _v2_failure_category(ValueError('bad pointer')) == 'other'
+@pytest.mark.parametrize(
+    'exc,expected',
+    [
+        pytest.param(TargetNotFoundError('missing'), 'target version not found', id='target-not-found'),
+        pytest.param(urllib.error.URLError('timeout'), 'network error', id='network-urlerror'),
+        pytest.param(DownloadError('boom'), 'network error', id='network-downloaderror'),
+        pytest.param(TimeoutError('slow'), 'network error', id='network-timeout'),
+        pytest.param(ValueError('bad pointer'), 'other', id='other'),
+    ],
+)
+def test_v2_failure_category(exc, expected):
+    assert _v2_failure_category(exc) == expected
 
 
 def test_non_official_wheel_filter(mocker):

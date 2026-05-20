@@ -6,28 +6,35 @@
 
 import hashlib
 import json
+import urllib.error
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from datadog_checks.downloader.download_v2 import TUFPointerDownloader
-from datadog_checks.downloader.exceptions import DigestMismatch, TargetNotFoundError
+from datadog_checks.downloader.exceptions import (
+    DigestMismatch,
+    MalformedPointerError,
+    MissingVersion,
+    TargetNotFoundError,
+)
 
-_PROJECT = 'datadog-postgres'
-_VERSION = '14.0.0'
-_WHEEL_CONTENT = b'fake wheel bytes for testing'
-_WHEEL_DIGEST = hashlib.sha256(_WHEEL_CONTENT).hexdigest()
-_WHEEL_LENGTH = len(_WHEEL_CONTENT)
-_REPO_URL = 'https://agent-integration-wheels-staging.s3.amazonaws.com'
+pytestmark = pytest.mark.offline
 
-_POINTER = {
-    'digest': _WHEEL_DIGEST,
-    'length': _WHEEL_LENGTH,
-    'version': _VERSION,
-    'repository': _REPO_URL,
-    'wheel_path': f'/wheels/{_PROJECT}/datadog_postgres-{_VERSION}-py3-none-any.whl',
-    'attestation_path': f'/attestations/{_PROJECT}/{_VERSION}.sigstore.json',
+PROJECT = 'datadog-postgres'
+VERSION = '14.0.0'
+WHEEL_CONTENT = b'fake wheel bytes for testing'
+WHEEL_DIGEST = hashlib.sha256(WHEEL_CONTENT).hexdigest()
+WHEEL_LENGTH = len(WHEEL_CONTENT)
+REPO_URL = 'https://agent-integration-wheels-staging.s3.amazonaws.com'
+
+POINTER = {
+    'digest': WHEEL_DIGEST,
+    'length': WHEEL_LENGTH,
+    'version': VERSION,
+    'repository': REPO_URL,
+    'wheel_path': f'/wheels/{PROJECT}/datadog_postgres-{VERSION}-py3-none-any.whl',
+    'attestation_path': f'/attestations/{PROJECT}/{VERSION}.sigstore.json',
 }
 
 
@@ -56,102 +63,146 @@ def _mock_response(content: bytes) -> MagicMock:
 @pytest.fixture
 def mock_urlopen():
     with patch('datadog_checks.downloader.download_v2.urllib.request.urlopen') as mock:
-        mock.return_value = _mock_response(_WHEEL_CONTENT)
+        mock.return_value = _mock_response(WHEEL_CONTENT)
         yield mock
 
 
 @pytest.fixture
 def mock_updater_cls():
     with patch('datadog_checks.downloader.download_v2.Updater') as mock:
-        mock.return_value = _mock_tuf_updater(_POINTER)
+        mock.return_value = _mock_tuf_updater(POINTER)
         yield mock
 
 
-class TestTargetPath:
-    def test_explicit_version_uses_versioned_pointer(self):
-        assert TUFPointerDownloader._target_path(_PROJECT, '1.0.0') == f'{_PROJECT}/1.0.0.json'
-
-    def test_missing_version_uses_latest_pointer(self):
-        assert TUFPointerDownloader._target_path(_PROJECT, None) == f'{_PROJECT}/latest.json'
-
-
-@pytest.mark.offline
-class TestHappyPath:
-    def test_download_returns_wheel_path(self, mock_urlopen, mock_updater_cls, tmp_path):
-        downloader = TUFPointerDownloader(repository_url=_REPO_URL)
-        wheel_path = downloader.download(_PROJECT, version=_VERSION, dest_dir=tmp_path)
-
-        assert wheel_path.exists()
-        assert wheel_path.read_bytes() == _WHEEL_CONTENT
-        assert wheel_path.name == f'datadog_postgres-{_VERSION}-py3-none-any.whl'
-
-    def test_repository_flag_overrides_pointer_repository(self, mock_urlopen, mock_updater_cls, tmp_path):
-        prod_pointer = {**_POINTER, 'repository': 'https://agent-integration-wheels-prod.s3.amazonaws.com'}
-        mock_updater_cls.return_value = _mock_tuf_updater(prod_pointer)
-
-        downloader = TUFPointerDownloader(repository_url=_REPO_URL)
-        downloader.download(_PROJECT, version=_VERSION, dest_dir=tmp_path)
-
-        mock_urlopen.assert_called_once_with(
-            f'{_REPO_URL}/wheels/{_PROJECT}/datadog_postgres-{_VERSION}-py3-none-any.whl'
-        )
-
-    def test_version_none_fetches_latest_pointer(self, mock_urlopen, mock_updater_cls, tmp_path):
-        downloader = TUFPointerDownloader(repository_url=_REPO_URL)
-        downloader.download(_PROJECT, dest_dir=tmp_path)
+class TestTargetResolution:
+    @pytest.mark.parametrize(
+        'version,expected_target',
+        [
+            pytest.param(VERSION, f'{PROJECT}/{VERSION}.json', id='explicit-version'),
+            pytest.param(None, f'{PROJECT}/latest.json', id='missing-version'),
+        ],
+    )
+    def test_get_pointer_requests_expected_target(self, mock_urlopen, mock_updater_cls, version, expected_target):
+        downloader = TUFPointerDownloader(repository_url=REPO_URL)
+        downloader.get_pointer(PROJECT, version=version)
 
         mock_updater = mock_updater_cls.return_value
-        assert mock_updater.get_targetinfo.call_args[0][0] == f'{_PROJECT}/latest.json'
+        assert mock_updater.get_targetinfo.call_args[0][0] == expected_target
 
 
-@pytest.mark.offline
+class TestHappyPath:
+    def test_download_returns_wheel_path(self, mock_urlopen, mock_updater_cls, tmp_path):
+        downloader = TUFPointerDownloader(repository_url=REPO_URL)
+        wheel_path = downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
+
+        assert wheel_path.exists()
+        assert wheel_path.read_bytes() == WHEEL_CONTENT
+        assert wheel_path.name == f'datadog_postgres-{VERSION}-py3-none-any.whl'
+
+    def test_repository_flag_overrides_pointer_repository(self, mock_urlopen, mock_updater_cls, tmp_path):
+        prod_pointer = {**POINTER, 'repository': 'https://agent-integration-wheels-prod.s3.amazonaws.com'}
+        mock_updater_cls.return_value = _mock_tuf_updater(prod_pointer)
+
+        downloader = TUFPointerDownloader(repository_url=REPO_URL)
+        downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
+
+        mock_urlopen.assert_called_once_with(
+            f'{REPO_URL}/wheels/{PROJECT}/datadog_postgres-{VERSION}-py3-none-any.whl',
+            timeout=60,
+        )
+
+
 class TestTargetNotFound:
     def test_raises_when_tuf_target_absent(self, mock_urlopen, mock_updater_cls):
         mock_updater = MagicMock()
         mock_updater.get_targetinfo.return_value = None
         mock_updater_cls.return_value = mock_updater
 
-        downloader = TUFPointerDownloader(repository_url=_REPO_URL)
-        with pytest.raises(TargetNotFoundError, match=_PROJECT):
-            downloader.get_pointer(_PROJECT, version='99.99.99')
+        downloader = TUFPointerDownloader(repository_url=REPO_URL)
+        with pytest.raises(TargetNotFoundError, match=PROJECT):
+            downloader.get_pointer(PROJECT, version='99.99.99')
 
 
-@pytest.mark.offline
 class TestDigestMismatch:
     def test_raises_on_corrupted_wheel(self, mock_urlopen, mock_updater_cls, tmp_path):
         mock_urlopen.return_value = _mock_response(b'tampered bytes')
 
-        downloader = TUFPointerDownloader(repository_url=_REPO_URL)
-        with pytest.raises(DigestMismatch, match=_PROJECT):
-            downloader.download(_PROJECT, version=_VERSION, dest_dir=tmp_path)
+        downloader = TUFPointerDownloader(repository_url=REPO_URL)
+        with pytest.raises(DigestMismatch, match=PROJECT):
+            downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
 
     def test_raises_on_length_mismatch(self, mock_urlopen, mock_updater_cls, tmp_path):
-        bad_pointer = {**_POINTER, 'length': _WHEEL_LENGTH + 1}
+        bad_pointer = {**POINTER, 'length': WHEEL_LENGTH + 1}
         mock_updater_cls.return_value = _mock_tuf_updater(bad_pointer)
 
-        downloader = TUFPointerDownloader(repository_url=_REPO_URL)
+        downloader = TUFPointerDownloader(repository_url=REPO_URL)
         with pytest.raises(DigestMismatch, match='length'):
-            downloader.download(_PROJECT, version=_VERSION, dest_dir=tmp_path)
+            downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
 
 
-@pytest.mark.offline
+class TestMalformedPointer:
+    @pytest.mark.parametrize('missing_key', ['digest', 'length', 'wheel_path'])
+    def test_raises_when_required_key_missing(self, mock_urlopen, mock_updater_cls, tmp_path, missing_key):
+        broken_pointer = {k: v for k, v in POINTER.items() if k != missing_key}
+        mock_updater_cls.return_value = _mock_tuf_updater(broken_pointer)
+
+        downloader = TUFPointerDownloader(repository_url=REPO_URL)
+        with pytest.raises(MalformedPointerError, match=missing_key):
+            downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
+
+
+class TestNetworkErrorMidDownload:
+    def test_http_error_propagates(self, mock_urlopen, mock_updater_cls, tmp_path):
+        mock_urlopen.side_effect = urllib.error.HTTPError(
+            url='http://example/x.whl', code=500, msg='boom', hdrs=None, fp=None
+        )
+
+        downloader = TUFPointerDownloader(repository_url=REPO_URL)
+        with pytest.raises(urllib.error.HTTPError):
+            downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
+
+    def test_url_error_propagates(self, mock_urlopen, mock_updater_cls, tmp_path):
+        mock_urlopen.side_effect = urllib.error.URLError('unreachable')
+
+        downloader = TUFPointerDownloader(repository_url=REPO_URL)
+        with pytest.raises(urllib.error.URLError):
+            downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
+
+
+class TestWheelPathNormalization:
+    def test_wheel_path_without_leading_slash_yields_malformed_url(self, mock_urlopen, mock_updater_cls, tmp_path):
+        # The pointer publisher controls wheel_path; we rely on the leading slash
+        # for URL composition. Document that contract by asserting the resulting
+        # URL is malformed (missing slash) so that any regression in the
+        # publisher is visible here.
+        no_slash_pointer = {**POINTER, 'wheel_path': f'wheels/{PROJECT}/datadog_postgres-{VERSION}-py3-none-any.whl'}
+        mock_updater_cls.return_value = _mock_tuf_updater(no_slash_pointer)
+
+        downloader = TUFPointerDownloader(repository_url=REPO_URL)
+        downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
+
+        called_url = mock_urlopen.call_args[0][0]
+        assert called_url == f'{REPO_URL}wheels/{PROJECT}/datadog_postgres-{VERSION}-py3-none-any.whl'
+
+
 class TestDisableVerification:
     def test_directly_downloads_wheel_without_tuf_or_digest_checks(self, mock_urlopen, tmp_path):
         content = b'bytes not matching any signed pointer'
         mock_urlopen.return_value = _mock_response(content)
 
         with patch('datadog_checks.downloader.download_v2.Updater') as mock_updater_cls:
-            downloader = TUFPointerDownloader(repository_url=_REPO_URL, disable_verification=True)
-            wheel_path = downloader.download(_PROJECT, version=_VERSION, dest_dir=tmp_path)
+            downloader = TUFPointerDownloader(repository_url=REPO_URL, disable_verification=True)
+            wheel_path = downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
 
         mock_urlopen.assert_called_once_with(
-            f'{_REPO_URL}/wheels/{_PROJECT}/datadog_postgres-{_VERSION}-py3-none-any.whl'
+            f'{REPO_URL}/wheels/{PROJECT}/datadog_postgres-{VERSION}-py3-none-any.whl',
+            timeout=60,
         )
-        assert wheel_path.name == f'datadog_postgres-{_VERSION}-py3-none-any.whl'
+        assert wheel_path.name == f'datadog_postgres-{VERSION}-py3-none-any.whl'
         assert wheel_path.read_bytes() == content
         mock_updater_cls.assert_not_called()
 
     def test_direct_download_requires_explicit_version(self, tmp_path):
-        downloader = TUFPointerDownloader(repository_url=_REPO_URL, disable_verification=True)
-        with pytest.raises(TargetNotFoundError, match='requires an explicit --version'):
-            downloader.download(_PROJECT, dest_dir=tmp_path)
+        downloader = TUFPointerDownloader(repository_url=REPO_URL, disable_verification=True)
+        with pytest.raises(MissingVersion, match='requires an explicit --version'):
+            downloader.download(PROJECT, dest_dir=tmp_path)
