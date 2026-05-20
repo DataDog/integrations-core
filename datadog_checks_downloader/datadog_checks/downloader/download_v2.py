@@ -8,6 +8,8 @@ The downloader TUF-verifies a JSON pointer target, downloads the referenced
 wheel, and verifies the wheel digest and byte length before writing it to disk.
 """
 
+from __future__ import annotations
+
 import hashlib
 import importlib.resources
 import json
@@ -19,11 +21,18 @@ from pathlib import Path
 from tuf.ngclient import Updater
 from tuf.ngclient.config import UpdaterConfig
 
-from .exceptions import DigestMismatch, TargetNotFoundError
+from .exceptions import DigestMismatch, MalformedPointerError, MissingVersion, TargetNotFoundError
 
 logger = logging.getLogger(__name__)
 
 V2_REPOSITORY_URL = "https://agent-integration-wheels-prod.s3.amazonaws.com"
+
+# Conservative timeout for wheel fetches against S3. The TUF metadata fetches go
+# through tuf.ngclient which sets its own fetcher timeout; this constant applies
+# only to the raw urlopen() in download().
+_WHEEL_FETCH_TIMEOUT_SECONDS = 60
+
+_REQUIRED_POINTER_KEYS = ('digest', 'length', 'wheel_path')
 
 
 class TUFPointerDownloader:
@@ -32,7 +41,6 @@ class TUFPointerDownloader:
     def __init__(
         self,
         repository_url: str,
-        verbose: int = 0,
         disable_verification: bool = False,
     ):
         """
@@ -42,10 +50,6 @@ class TUFPointerDownloader:
                               checks.  Use only as a break-glass escape hatch
                               (mirrors --unsafe-disable-verification in v1).
         """
-        remainder = min(verbose, 5) % 6
-        level = (6 - remainder) * 10
-        logging.basicConfig(format='%(levelname)-8s: %(message)s', level=level)
-
         self._repository_url = repository_url.rstrip('/')
         self._disable_verification = disable_verification
 
@@ -83,6 +87,24 @@ class TUFPointerDownloader:
 
     def _direct_wheel_url(self, project: str, version: str) -> str:
         return f'{self._repository_url}/wheels/{project}/{self._wheel_filename(project, version)}'
+
+    @staticmethod
+    def _validate_pointer(project: str, pointer: dict) -> None:
+        for key in _REQUIRED_POINTER_KEYS:
+            if key not in pointer:
+                raise MalformedPointerError(project, key)
+
+    @staticmethod
+    def _verify_content(project: str, content: bytes, pointer: dict) -> None:
+        actual_digest = hashlib.sha256(content).hexdigest()
+        if actual_digest != pointer['digest']:
+            raise DigestMismatch(project, pointer['digest'], actual_digest)
+        if len(content) != pointer['length']:
+            raise DigestMismatch(
+                project,
+                f'length={pointer["length"]}',
+                f'length={len(content)}',
+            )
 
     # ------------------------------------------------------------------
     # Public API
@@ -124,18 +146,25 @@ class TUFPointerDownloader:
     ) -> Path:
         """Download and sha256-verify the wheel for *project* at *version*.
 
-        Returns the absolute path to the downloaded ``.whl`` file.
-        Raises ``DigestMismatch`` if the wheel digest or length does not match
-        the pointer file.
+        Returns the absolute path to the downloaded ``.whl`` file. When
+        *dest_dir* is ``None`` the wheel is written into a fresh ``tempfile``
+        directory that the caller is expected to retain (Agent install scripts
+        consume the printed path after the process exits).
+
+        Raises ``MissingVersion`` if ``disable_verification`` is set but no
+        version is provided, ``MalformedPointerError`` if the signed pointer
+        lacks required fields, and ``DigestMismatch`` if the wheel digest or
+        length does not match the pointer.
         """
         if self._disable_verification:
             if version is None:
-                raise TargetNotFoundError('unsafe-disable-verification requires an explicit --version')
+                raise MissingVersion('unsafe-disable-verification requires an explicit --version')
             wheel_url = self._direct_wheel_url(project, version)
             wheel_filename = self._wheel_filename(project, version)
-            pointer = None
+            pointer: dict | None = None
         else:
             pointer = self.get_pointer(project, version)
+            self._validate_pointer(project, pointer)
             # Use the caller-supplied repository URL for the wheel fetch so that
             # --repository can point at a staging bucket and override the prod URL
             # baked into the pointer file.  This allows pre-promotion validation
@@ -143,22 +172,17 @@ class TUFPointerDownloader:
             wheel_url = self._repository_url + pointer['wheel_path']
             wheel_filename = Path(pointer['wheel_path']).name
 
+        # The CLI passes dest_dir=None; the resulting tempdir is intentionally
+        # not removed because the Agent installer reads the printed wheel path
+        # after this process exits.
         dest = (dest_dir or Path(tempfile.mkdtemp())) / wheel_filename
 
         logger.info('Downloading wheel from %s', wheel_url)
-        with urllib.request.urlopen(wheel_url) as resp:
+        with urllib.request.urlopen(wheel_url, timeout=_WHEEL_FETCH_TIMEOUT_SECONDS) as resp:
             content = resp.read()
 
         if pointer is not None:
-            actual_digest = hashlib.sha256(content).hexdigest()
-            if actual_digest != pointer['digest']:
-                raise DigestMismatch(project, pointer['digest'], actual_digest)
-            if len(content) != pointer['length']:
-                raise DigestMismatch(
-                    project,
-                    f'length={pointer["length"]}',
-                    f'length={len(content)}',
-                )
+            self._verify_content(project, content, pointer)
 
         dest.write_bytes(content)
         logger.info('Wrote %s to %s', wheel_filename, dest)
