@@ -27,7 +27,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 [Run the Agent's status subcommand][6] and look for `{check_name}` under the Checks section.
 
-## Data Collected
+## Data collected
 
 ### Metrics
 
