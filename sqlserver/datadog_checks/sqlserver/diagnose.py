@@ -121,9 +121,7 @@ DIAGNOSTIC_METADATA = {
             "Verifies VIEW DATABASE STATE on each autodiscovered database, required by the per-database "
             "DBM DMV reads (sys.dm_exec_sessions, sys.dm_db_index_usage_stats, sys.dm_db_file_space_usage, ...)."
         ),
-        "remediation": (
-            "Grant VIEW DATABASE STATE to the Datadog user on the listed databases."
-        ),
+        "remediation": ("Grant VIEW DATABASE STATE to the Datadog user on the listed databases."),
         "docs_url": SQLSERVER_DBM_GRANTS_DOCS_URL,
     },
 }
@@ -419,9 +417,7 @@ class SqlserverDiagnose:
             except Exception as e:
                 view_state_failures.append("{}: {}".format(name, e))
 
-        self._emit_per_database_connect_result(
-            connect_code, connect_failures, sample, candidates, truncated
-        )
+        self._emit_per_database_connect_result(connect_code, connect_failures, sample, candidates, truncated)
         self._emit_per_database_view_state_result(view_state_code, view_state_failures, accessible)
 
     def _emit_per_database_connect_result(
