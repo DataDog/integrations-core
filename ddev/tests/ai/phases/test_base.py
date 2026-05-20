@@ -213,6 +213,7 @@ async def test_extra_checkpoint_cannot_override_reserved_keys(flow_dir, message_
         await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     assert mgr.read() == {}
+    assert not mgr.memory_path("p1").exists()
 
 
 async def test_failed_phase_omits_memory_path(flow_dir, message_queue):

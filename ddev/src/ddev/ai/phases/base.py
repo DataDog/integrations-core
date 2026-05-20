@@ -108,6 +108,18 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         """Override to enforce per-subclass config invariants. Raise FlowConfigError on mismatch."""
         return None
 
+    @classmethod
+    def extra_init_kwargs(
+        cls,
+        phase_id: str,
+        phase_config: PhaseConfig,
+        agents: dict[str, AgentConfig],
+        agent_clients: dict[str, Any],
+        file_registry: FileRegistry,
+    ) -> dict[str, Any]:
+        """Override to inject subclass-specific kwargs into __init__ at construction time."""
+        return {}
+
     @abstractmethod
     async def execute(self, context: dict[str, Any]) -> PhaseOutcome: ...
 
@@ -126,8 +138,6 @@ class Phase(AsyncProcessor[PhaseTrigger]):
 
         outcome = await self.execute(context)
 
-        self._checkpoint_manager.write_memory(self._phase_id, outcome.memory_text)
-
         checkpoint_payload: dict[str, Any] = {
             "status": "success",
             "started_at": self._started_at.isoformat(),
@@ -145,6 +155,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
             )
         checkpoint_payload.update(outcome.extra_checkpoint)
 
+        self._checkpoint_manager.write_memory(self._phase_id, outcome.memory_text)
         self._checkpoint_manager.write_phase_checkpoint(self._phase_id, checkpoint_payload)
         await self._callbacks.fire_phase_finish(self._phase_id)
 

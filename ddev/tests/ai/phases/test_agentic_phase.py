@@ -298,7 +298,7 @@ async def test_runtime_variables_override_flow_variables(flow_dir, monkeypatch, 
 
 async def test_before_react_raises_propagates(flow_dir, monkeypatch, message_queue):
     mock_agent = MockAgent([])
-    phase, _ = make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
+    phase, mgr = make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
 
     def failing_hook():
         raise RuntimeError("setup failed")
@@ -308,13 +308,15 @@ async def test_before_react_raises_propagates(flow_dir, monkeypatch, message_que
     with pytest.raises(RuntimeError, match="setup failed"):
         await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
+    assert mgr.read() == {}
+
 
 async def test_after_react_raises_propagates(flow_dir, monkeypatch, message_queue):
     responses = [
         make_response("done", 100, 50),
     ]
     mock_agent = MockAgent(responses)
-    phase, _ = make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
+    phase, mgr = make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
 
     def failing_hook():
         raise RuntimeError("teardown failed")
@@ -323,6 +325,8 @@ async def test_after_react_raises_propagates(flow_dir, monkeypatch, message_queu
 
     with pytest.raises(RuntimeError, match="teardown failed"):
         await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert mgr.read() == {}
 
 
 # ---------------------------------------------------------------------------

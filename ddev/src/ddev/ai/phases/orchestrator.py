@@ -8,9 +8,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from ddev.ai.agent.build import make_agent_builder
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.phases.agentic_phase import AgenticPhase
 from ddev.ai.phases.base import Phase, PhaseRegistry
 from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import FlowConfig, FlowConfigError
@@ -114,14 +112,15 @@ class PhaseOrchestrator(EventBusOrchestrator):
                 "callbacks": self._callbacks,
                 "logger": self._logger,
             }
-            if issubclass(phase_cls, AgenticPhase):
-                if phase_config.agent is None:
-                    raise FlowConfigError(f"Phase '{phase_id}': agent must be set for AgenticPhase")
-                phase_kwargs["agent_builder"] = make_agent_builder(
-                    agent_config=config.agents[phase_config.agent],
+            phase_kwargs.update(
+                phase_cls.extra_init_kwargs(
+                    phase_id=phase_id,
+                    phase_config=phase_config,
+                    agents=config.agents,
                     agent_clients=self._agent_clients,
                     file_registry=self._file_registry,
                 )
+            )
 
             phase = phase_cls(**phase_kwargs)
 

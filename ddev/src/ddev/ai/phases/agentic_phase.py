@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from ddev.ai.agent.base import BaseAgent
-from ddev.ai.agent.build import AgentBuilder
+from ddev.ai.agent.build import AgentBuilder, make_agent_builder
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.base import Phase, PhaseOutcome
 from ddev.ai.phases.checkpoint import CheckpointManager
@@ -90,6 +90,25 @@ class AgenticPhase(Phase):
         if not config.tasks:
             raise FlowConfigError(f"Phase {phase_id!r} (AgenticPhase) must have at least one task")
 
+    @classmethod
+    def extra_init_kwargs(
+        cls,
+        phase_id: str,
+        phase_config: PhaseConfig,
+        agents: dict[str, AgentConfig],
+        agent_clients: dict[str, Any],
+        file_registry: FileRegistry,
+    ) -> dict[str, Any]:
+        if phase_config.agent is None:
+            raise FlowConfigError(f"Phase {phase_id!r} (AgenticPhase) requires 'agent'")
+        return {
+            "agent_builder": make_agent_builder(
+                agent_config=agents[phase_config.agent],
+                agent_clients=agent_clients,
+                file_registry=file_registry,
+            )
+        }
+
     def before_react(self) -> None:
         """Called once before agent/tools are created. Override for phase-specific setup."""
 
@@ -152,9 +171,6 @@ class AgenticPhase(Phase):
         return response.text, response.usage.input_tokens, response.usage.output_tokens
 
     async def execute(self, context: dict[str, Any]) -> PhaseOutcome:
-        if self._config.agent is None:
-            raise FlowConfigError(f"Phase '{self._phase_id}': agent must be set before execute()")
-
         self.before_react()
         agent, process = self._build_agent_and_process(context)
         total_input, total_output = await self.run_tasks(process, context)
