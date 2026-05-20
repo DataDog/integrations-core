@@ -80,7 +80,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
         if not self.in_core_repo:
             return self.uv_install_command('datadog-checks-dev')
         elif not (self.is_test_package or self.is_dev_package):
-            return self.uv_install_command('-e', '../datadog_checks_dev')
+            return self.uv_install_command('-e', str(self.root.parent / 'datadog_checks_dev'))
 
     def base_package_install_command(self, features):
         from ddev.testing.constants import TestEnvVars
@@ -90,14 +90,16 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
         elif not self.in_core_repo:
             return self.uv_install_command(self.format_base_package(features))
         elif not (self.is_base_package or self.is_dev_package):
-            return self.uv_install_command('-e', self.format_base_package(features, local=True))
+            return self.uv_install_command(
+                '-e', self.format_base_package(features, local_path=self.root.parent / 'datadog_checks_base')
+            )
 
     @staticmethod
-    def format_base_package(features, version='', local=False):
+    def format_base_package(features, version='', local_path=None):
         if not features:
             features = ['deps']
 
-        base_package = '../datadog_checks_base' if local else 'datadog-checks-base'
+        base_package = str(local_path) if local_path is not None else 'datadog-checks-base'
         formatted = f'{base_package}[{",".join(sorted(features))}]'
         if version:
             formatted += f'=={version}'
