@@ -36,7 +36,13 @@ def dd_environment(instance, dd_save_state):
         appliance_credentials = [
             {'cidr': '0.0.0.0/0', 'username': appliance_username, 'password': appliance_password},
         ]
-        inst = instance(orch_ip, username=username, password=password, appliance_credentials=appliance_credentials)
+        inst = instance(
+            orch_ip,
+            username=username,
+            password=password,
+            appliance_credentials=appliance_credentials,
+            send_ndm_metadata=True,
+        )
         dd_save_state('e2e_instance', inst)
         yield {
             'instances': [inst],
@@ -94,6 +100,7 @@ def instance():
         password: str = '',
         appliance_ips=None,
         appliance_credentials=None,
+        send_ndm_metadata: bool = False,
         **kwargs,
     ) -> dict:
         inst = {
@@ -101,6 +108,7 @@ def instance():
             'username': username,
             'password': password,
             'tls_verify': False,
+            'send_ndm_metadata': send_ndm_metadata,
             **kwargs,
         }
         if appliance_ips is not None:

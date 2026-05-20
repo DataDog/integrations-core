@@ -103,9 +103,17 @@ files:
       overrides:
         min_collection_interval.value.example: 60
         min_collection_interval.value.display_default: 60
+    - name: send_ndm_metadata
+      description: |
+        Set to `true` to enable Network Device Monitoring metadata (for devices, interfaces, topology) to be sent.
+      value:
+        type: boolean
+        example: False
+        default: False
   - template: logs
     example:
     - type: tcp
       port: 10514
       service: hpe_aruba_edgeconnect
       source: hpe_aruba_edgeconnect
+ 

@@ -70,10 +70,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
             raise
         self.gauge('orchestrator.reachability', 1, tags=orch_tags)
         appliances = self._collect_appliances_from_orch(orch_client)
-        current_ips = {ap.ip for ap in appliances}
-        stale_ips = set(self._appliance_clients) - current_ips
-        for ip in stale_ips:
-            del self._appliance_clients[ip]
+        self._remove_stale_appliance_clients({ap.ip for ap in appliances})
         with ThreadPoolExecutor(max_workers=self.config.max_concurrency) as pool:
             futs = {
                 pool.submit(
@@ -94,12 +91,17 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
                         self._appliance_clients.pop(ap.ip, None)
                     self.log.warning("Failed to collect from appliance %s", ap.ip, exc_info=True)
 
+    def _remove_stale_appliance_clients(self, current_ips: set[str]) -> None:
+        stale_ips = set(self._appliance_clients) - current_ips
+        for ip in stale_ips:
+            del self._appliance_clients[ip]
+
     def _submit_metadata(
         self,
-        items: list[DeviceMetadata | InterfaceMetadata | TunnelMetadata],
+        items: list[DeviceMetadata] | list[InterfaceMetadata] | list[TunnelMetadata],
         collect_timestamp: int | None = None,
     ) -> None:
-        if not items:
+        if not items or not self.config.send_ndm_metadata:
             return
         for batch in batch_payloads(self.config.namespace or 'default', items, collect_timestamp):
             self.event_platform_event(
@@ -124,12 +126,14 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
             self.config.appliance_credentials,
         )
         namespace: str = self.config.namespace or 'default'
-        devices: list[DeviceMetadata | InterfaceMetadata | TunnelMetadata] = []
+        devices: list[DeviceMetadata] = []
         for ap in appliances:
             tags = ap.tags(namespace)
             self.gauge('device.reachability', 1 if ap.is_reachable else 0, tags=tags)
-            devices.append(create_device_metadata(ap, namespace))
-        self._submit_metadata(devices)
+            if self.config.send_ndm_metadata:
+                devices.append(create_device_metadata(ap, namespace))
+        if self.config.send_ndm_metadata:
+            self._submit_metadata(devices)
         try:
             self._overlay_map, self._traffic_class_map = client.get_overlay_config()
         except Exception:
@@ -189,6 +193,58 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
             )
         return timestamps
 
+    def _collect_minute_stats(
+        self,
+        client: ApplianceClient,
+        app_ip: str,
+        timestamps: list[int],
+        base_tags: list[str],
+        device_id: str,
+        traffic_class_map: dict[str, str],
+        overlay_map: dict[str, str],
+    ) -> list[TunnelV2Stats]:
+        store = MetricsStore()
+        latest_tunnel_stats: list[TunnelV2Stats] = []
+        last_successful_ts: int | None = None
+        contents: dict[int, bytes] = {}
+        failed_ts: set[int] = set()
+        max_dl = min(len(timestamps), 5)
+        with ThreadPoolExecutor(max_workers=max_dl) as pool:
+            dl_futs = {pool.submit(client.get_minute_stats, f'st2-{ts}.tgz'): ts for ts in timestamps}
+            for fut in as_completed(dl_futs):
+                ts = dl_futs[fut]
+                try:
+                    contents[ts] = fut.result()
+                except Exception:
+                    self.log.warning(
+                        "Failed to download minute-stats archive st2-%d.tgz for appliance %s, skipping",
+                        ts,
+                        app_ip,
+                        exc_info=True,
+                    )
+                    failed_ts.add(ts)
+        for ts in reversed(timestamps):
+            if ts in failed_ts:
+                break
+            try:
+                minute_stats = MinuteStats(contents[ts], app_ip, ts, self.log)
+                minute_stats.record(store, base_tags, device_id, traffic_class_map, overlay_map)
+            except Exception:
+                self.log.warning(
+                    "Failed to process minute-stats archive st2-%d.tgz for appliance %s, skipping",
+                    ts,
+                    app_ip,
+                    exc_info=True,
+                )
+                break
+            last_successful_ts = ts
+            if minute_stats.tunnels:
+                latest_tunnel_stats = minute_stats.tunnels
+        store.flush(self)
+        if last_successful_ts is not None:
+            self.write_persistent_cache(f'last_timestamp:{app_ip}', str(last_successful_ts))
+        return latest_tunnel_stats
+
     def _collect_appliance(
         self,
         appliance: Appliance,
@@ -206,48 +262,12 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         newest = client.get_newest_timestamp()
 
         timestamps = self._timestamps_to_fetch(app_ip, newest)
-        latest_tunnel_stats: list[TunnelV2Stats] = []
         if timestamps:
-            store = MetricsStore()
-            last_successful_ts: int | None = None
-            contents: dict[int, bytes] = {}
-            failed_ts: set[int] = set()
-            max_dl = min(len(timestamps), 5)
-            with ThreadPoolExecutor(max_workers=max_dl) as pool:
-                dl_futs = {pool.submit(client.get_minute_stats, f'st2-{ts}.tgz'): ts for ts in timestamps}
-                for fut in as_completed(dl_futs):
-                    ts = dl_futs[fut]
-                    try:
-                        contents[ts] = fut.result()
-                    except Exception:
-                        self.log.warning(
-                            "Failed to download minute-stats archive st2-%d.tgz for appliance %s, skipping",
-                            ts,
-                            app_ip,
-                            exc_info=True,
-                        )
-                        failed_ts.add(ts)
-            for ts in reversed(timestamps):
-                if ts in failed_ts:
-                    break
-                try:
-                    minute_stats = MinuteStats(contents[ts], app_ip, ts, self.log)
-                    minute_stats.record(store, base_tags, device_id, traffic_class_map, overlay_map)
-                except Exception:
-                    self.log.warning(
-                        "Failed to process minute-stats archive st2-%d.tgz for appliance %s, skipping",
-                        ts,
-                        app_ip,
-                        exc_info=True,
-                    )
-                    break
-                last_successful_ts = ts
-                if minute_stats.tunnels:
-                    latest_tunnel_stats = minute_stats.tunnels
-            store.flush(self)
-            if last_successful_ts is not None:
-                self.write_persistent_cache(f'last_timestamp:{app_ip}', str(last_successful_ts))
+            latest_tunnel_stats = self._collect_minute_stats(
+                client, app_ip, timestamps, base_tags, device_id, traffic_class_map, overlay_map
+            )
         else:
+            latest_tunnel_stats = []
             self.log.debug("Appliance %s stats are up to date (last timestamp: %d)", app_ip, newest)
 
         collectors: list[tuple[str, Callable[[], None]]] = [
@@ -258,38 +278,17 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
             ('alarm_stats', lambda: self._collect_alarm_stats(client, base_tags)),
             ('system_info', lambda: self._collect_system_info(client, base_tags)),
         ]
-        if latest_tunnel_stats:
-            wan_labels: set[str] = set()
-            try:
-                labels = client.get_interface_labels()
-            except Exception:
-                self.log.warning(
-                    "Failed to fetch interface labels for appliance %s; "
-                    "tunnel_color will be empty for non-overlay tunnels.",
-                    app_ip,
-                    exc_info=True,
-                )
-            else:
-                wan_entries = labels.get('wan') if isinstance(labels, dict) else None
-                if isinstance(wan_entries, dict):
-                    wan_labels = {name for name in wan_entries.values() if isinstance(name, str) and name}
+        if latest_tunnel_stats and self.config.send_ndm_metadata:
             collectors.append(
                 (
                     'tunnel_metadata',
-                    lambda: self._submit_metadata(
-                        [
-                            create_tunnel_metadata(
-                                t,
-                                app_ip,
-                                appliance.site,
-                                namespace,
-                                peer_lookup,
-                                overlay_map,
-                                wan_labels,
-                                self.log,
-                            )
-                            for t in latest_tunnel_stats
-                        ],
+                    lambda: self._collect_tunnel_metadata(
+                        client,
+                        appliance,
+                        latest_tunnel_stats,
+                        peer_lookup,
+                        overlay_map,
+                        namespace,
                         newest,
                     ),
                 )
@@ -303,6 +302,45 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
                 except Exception:
                     self.log.warning("Collection step %s failed for appliance %s", futs[f], app_ip, exc_info=True)
 
+    def _collect_tunnel_metadata(
+        self,
+        client: ApplianceClient,
+        appliance: Appliance,
+        tunnel_stats: list[TunnelV2Stats],
+        peer_lookup: dict[str, tuple[str, str]],
+        overlay_map: dict[str, str],
+        namespace: str,
+        collect_timestamp: int,
+    ) -> None:
+        wan_labels: set[str] = set()
+        try:
+            labels = client.get_interface_labels()
+        except Exception:
+            self.log.warning(
+                "Failed to fetch interface labels for appliance %s; "
+                "tunnel_color will be empty for non-overlay tunnels.",
+                appliance.ip,
+                exc_info=True,
+            )
+        else:
+            wan_entries = labels.get('wan') if isinstance(labels, dict) else None
+            if isinstance(wan_entries, dict):
+                wan_labels = {name for name in wan_entries.values() if isinstance(name, str) and name}
+        tunnels: list[TunnelMetadata] = [
+            create_tunnel_metadata(
+                t,
+                appliance.ip,
+                appliance.site,
+                namespace,
+                peer_lookup,
+                overlay_map,
+                wan_labels,
+                self.log,
+            )
+            for t in tunnel_stats
+        ]
+        self._submit_metadata(tunnels, collect_timestamp)
+
     def _collect_network_interfaces(
         self,
         client: ApplianceClient,
@@ -312,7 +350,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
     ) -> None:
         data = client.get_network_interfaces()
         namespace: str = self.config.namespace or 'default'
-        interfaces: list[DeviceMetadata | InterfaceMetadata | TunnelMetadata] = []
+        interfaces: list[InterfaceMetadata] = []
         for iface in data.get('ifInfo', []):
             ifname = iface.get('ifname', 'unknown')
             iface_tags = base_tags + [
@@ -326,7 +364,8 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
             speed = _parse_speed(iface.get('speed'))
             if speed is not None:
                 self.gauge('interface.speed', speed, tags=iface_tags)
-            interfaces.append(create_interface_metadata(client.app_ip, iface, namespace))
+            if self.config.send_ndm_metadata:
+                interfaces.append(create_interface_metadata(client.app_ip, iface, namespace))
         self._submit_metadata(interfaces, collect_timestamp)
 
     def _collect_cpu_stats(self, client: ApplianceClient, base_tags: list[str], newest: int) -> None:

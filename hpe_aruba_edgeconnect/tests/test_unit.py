@@ -1028,7 +1028,16 @@ def test_up_to_date_appliance_skips_minute_stats_recording(dd_run_check, aggrega
     check.write_persistent_cache.assert_not_called()
 
 
-def test_ndm_metadata_submitted(dd_run_check, aggregator, mocker, check):
+def test_ndm_metadata_submitted(dd_run_check, aggregator, mocker, instance):
+    inst = instance(
+        'localhost:8443',
+        appliance_ips=['10.0.0.1'],
+        max_backfill_minutes=10,
+        send_ndm_metadata=True,
+    )
+    check = HpeArubaEdgeconnectCheck('hpe_aruba_edgeconnect', {}, [inst])
+    check.load_configuration_models()
+
     tgz_bytes = TGZ_BYTES[0]
 
     client = _mock_appliance_client(tgz_bytes)

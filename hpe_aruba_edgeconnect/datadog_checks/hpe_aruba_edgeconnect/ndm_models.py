@@ -197,7 +197,7 @@ def create_tunnel_metadata(
 
 def batch_payloads(
     namespace: str,
-    items: list[DeviceMetadata | InterfaceMetadata | TunnelMetadata],
+    items: list[DeviceMetadata] | list[InterfaceMetadata] | list[TunnelMetadata],
     collect_timestamp: int | None = None,
 ) -> Iterator[NetworkDevicesMetadata]:
     if not items:

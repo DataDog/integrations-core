@@ -424,6 +424,11 @@ instances:
     #   exclude:
     #   - <EXCLUDE_REGEX>
 
+    ## @param send_ndm_metadata - boolean - optional - default: false
+    ## Set to `true` to enable Network Device Monitoring metadata (for devices, interfaces, topology) to be sent.
+    #
+    # send_ndm_metadata: false
+
 ## Log Section
 ##
 ## type - required - Type of log input source (tcp / udp / file / windows_event).
