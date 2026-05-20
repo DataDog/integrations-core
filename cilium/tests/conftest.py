@@ -111,9 +111,11 @@ def setup_cilium():
     )
     if result.stderr:
         raise Exception(result.stderr)
-    pods = result.stdout.split(" ")
+    cilium_pods = result.stdout.split()
+    if not cilium_pods:
+        raise AssertionError("No Cilium pods found")
 
-    for pod in pods:
+    for pod in cilium_pods:
         result = run_command(
             [
                 "kubectl",
@@ -122,7 +124,7 @@ def setup_cilium():
                 "cilium",
                 "-c",
                 "cilium-agent",
-                pod.strip(),
+                pod,
                 "--",
                 "cilium",
                 "endpoint",
@@ -138,7 +140,7 @@ def setup_cilium():
         attempts=60,
         wait=2,
         args=(
-            pods[0].strip(),
+            cilium_pods,
             [
                 "cilium_forward_bytes_total",
                 "cilium_forward_count_total",
@@ -149,31 +151,32 @@ def setup_cilium():
     )()
 
 
-def wait_for_cilium_metric_families(pod, families):
+def wait_for_cilium_metric_families(pods, families):
     missing = []
-    for family in families:
-        result = run_command(
-            [
-                "kubectl",
-                "exec",
-                "-n",
-                "cilium",
-                "-c",
-                "cilium-agent",
-                pod,
-                "--",
-                "cilium",
-                "metrics",
-                "list",
-                "--match-pattern",
-                family,
-            ],
-            capture=True,
-        )
-        if result.stderr:
-            raise Exception(result.stderr)
-        if family not in result.stdout:
-            missing.append(family)
+    for pod in pods:
+        for family in families:
+            result = run_command(
+                [
+                    "kubectl",
+                    "exec",
+                    "-n",
+                    "cilium",
+                    "-c",
+                    "cilium-agent",
+                    pod,
+                    "--",
+                    "cilium",
+                    "metrics",
+                    "list",
+                    "--match-pattern",
+                    family,
+                ],
+                capture=True,
+            )
+            if result.stderr:
+                raise Exception(result.stderr)
+            if family not in result.stdout:
+                missing.append("{} on {}".format(family, pod))
 
     if missing:
         raise AssertionError("Cilium metric families are not available yet: {}".format(", ".join(missing)))
