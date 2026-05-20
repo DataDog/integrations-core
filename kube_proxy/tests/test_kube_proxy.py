@@ -87,14 +87,14 @@ def test_service_check_custom_url():
 
 
 @pytest.mark.parametrize(
-    'side_effect, expected_status, expected_message',
+    'side_effect, expected_status, extra_kwargs',
     [
-        (None, AgentCheck.OK, None),
-        (requests.HTTPError('health check failed'), AgentCheck.CRITICAL, 'health check failed'),
+        (None, AgentCheck.OK, {}),
+        (requests.HTTPError('health check failed'), AgentCheck.CRITICAL, {'message': 'health check failed'}),
     ],
     ids=['ok', 'http_error'],
 )
-def test_service_check(monkeypatch, side_effect, expected_status, expected_message):
+def test_service_check(monkeypatch, side_effect, expected_status, extra_kwargs):
     instance_tags = []
     check = KubeProxyCheck(CHECK_NAME, {}, [instance])
     monkeypatch.setattr(check, 'service_check', mock.Mock())
@@ -106,7 +106,4 @@ def test_service_check(monkeypatch, side_effect, expected_status, expected_messa
 
     check._perform_service_check(instance)
 
-    expected_kwargs = {'tags': instance_tags}
-    if expected_message is not None:
-        expected_kwargs['message'] = expected_message
-    check.service_check.assert_called_with(NAMESPACE + '.up', expected_status, **expected_kwargs)
+    check.service_check.assert_called_with(NAMESPACE + '.up', expected_status, tags=instance_tags, **extra_kwargs)
