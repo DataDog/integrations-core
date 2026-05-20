@@ -1,0 +1,75 @@
+id: "anthropic-compliance-logs"
+tests:
+ -
+  sample: |-
+    {
+      "actor" : {
+        "email_address" : "user@example.com",
+        "user_id" : "user_01FBY4qyk7SdPxJCAd4EfPbT",
+        "ip_address" : "192.0.2.1",
+        "type" : "user_actor",
+        "user_agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15"
+      },
+      "organization_id" : "org_01GuSHHxdWNCcTtk6Wr5arBM",
+      "organization_uuid" : "80cb55fa-462c-4bc0-82d6-07ebb1a6f004",
+      "created_at" : "2026-05-05T16:04:57.150724Z",
+      "id" : "activity_01R1sBnxj7yvtdZnt8DsfpRL",
+      "type" : "claude_chat_viewed",
+      "claude_chat_id" : "claude_chat_01AxWT9aH4swoDJ8u6dShxMV"
+    }
+  service: "anthropic.compliance"
+  result:
+    custom:
+      actor:
+        type: "user_actor"
+      claude_chat_id: "claude_chat_01AxWT9aH4swoDJ8u6dShxMV"
+      created_at: "2026-05-05T16:04:57.150724Z"
+      evt:
+        name: "claude_chat_viewed"
+      http:
+        useragent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15"
+        useragent_details:
+          browser:
+            family: "Safari"
+            major: "17"
+            minor: "0"
+          device:
+            brand: "Apple"
+            category: "Desktop"
+            family: "Mac"
+            model: "Mac"
+          os:
+            family: "Mac OS X"
+            major: "10"
+            minor: "15"
+            patch: "7"
+      id: "activity_01R1sBnxj7yvtdZnt8DsfpRL"
+      network:
+        client:
+          geoip: {}
+          ip: "192.0.2.1"
+      organization_id: "org_01GuSHHxdWNCcTtk6Wr5arBM"
+      organization_uuid: "80cb55fa-462c-4bc0-82d6-07ebb1a6f004"
+      usr:
+        email: "user@example.com"
+        id: "user_01FBY4qyk7SdPxJCAd4EfPbT"
+    message: |-
+      {
+        "actor" : {
+          "email_address" : "user@example.com",
+          "user_id" : "user_01FBY4qyk7SdPxJCAd4EfPbT",
+          "ip_address" : "192.0.2.1",
+          "type" : "user_actor",
+          "user_agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15"
+        },
+        "organization_id" : "org_01GuSHHxdWNCcTtk6Wr5arBM",
+        "organization_uuid" : "80cb55fa-462c-4bc0-82d6-07ebb1a6f004",
+        "created_at" : "2026-05-05T16:04:57.150724Z",
+        "id" : "activity_01R1sBnxj7yvtdZnt8DsfpRL",
+        "type" : "claude_chat_viewed",
+        "claude_chat_id" : "claude_chat_01AxWT9aH4swoDJ8u6dShxMV"
+      }
+    service: "anthropic.compliance"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1777997097150

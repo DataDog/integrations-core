@@ -8,7 +8,7 @@ import os
 from collections import defaultdict
 from collections.abc import Iterable
 from functools import cached_property
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from ddev.cli.terminal import Terminal
 from ddev.config.constants import AppEnvVars, ConfigEnvVars, VerbosityLevels
@@ -18,6 +18,9 @@ from ddev.utils.ci import AnnotationLevel, escape_workflow_data, escape_workflow
 from ddev.utils.fs import Path
 from ddev.utils.github import GitHubManager
 from ddev.utils.platform import Platform
+
+if TYPE_CHECKING:
+    from typing import Any, Callable, NoReturn
 
 
 class AppLoggingHandler(logging.Handler):
@@ -38,7 +41,7 @@ class AppLoggingHandler(logging.Handler):
 
 
 class Application(Terminal):
-    def __init__(self, exit_func, *args, **kwargs):
+    def __init__(self, exit_func: Callable[[int], NoReturn], *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.platform = Platform(self.escaped_output)
         self.__exit_func = exit_func
@@ -52,7 +55,7 @@ class Application(Terminal):
         self.__github = cast(GitHubManager, None)
 
         # TODO: remove this when the old CLI is gone
-        self.__config = {}
+        self.__config: dict[str, Any] = {}
 
     @property
     def config(self) -> RootConfig:
@@ -108,7 +111,7 @@ class Application(Terminal):
             self.repo, user=self.config.github.user, token=self.config.github.token, status=self.status
         )
 
-    def abort(self, text='', code=1, **kwargs):
+    def abort(self, text: str = '', code: int = 1, **kwargs: Any) -> NoReturn:
         if text:
             self.display_error(text, **kwargs)
         self.__exit_func(code)
