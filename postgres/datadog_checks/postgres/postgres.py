@@ -1306,7 +1306,7 @@ class PostgreSql(DatabaseCheck):
             )
         finally:
             self.log.info("Reach check finally")
-                    # Check each async job for if an error occurred during their most recent run
+            # Check each async job for if an error occurred during their most recent run
             # TODO: Encapsulate this into DBMAsyncJob
             for job in [self.statement_metrics, self.statement_samples, self.metadata_samples, self.data_observability]:
                 self.log.info("Checking job: %s", job.__class__.__name__)
@@ -1319,7 +1319,9 @@ class PostgreSql(DatabaseCheck):
                 and time() - self._last_diagnosis_had_errors >= AUTOMATIC_DIAGNOSIS_INTERVAL
             ):
                 should_run_diagnostics = True
-                self.log.info("Running automatic diagnostics because it's been more than 5 minutes since the last error diagnosis")
+                self.log.info(
+                    "Running automatic diagnostics because it's been more than 5 minutes since the last error diagnosis"
+                )
             if should_run_diagnostics:
                 self._run_automatic_diagnostics()
 
@@ -1333,7 +1335,9 @@ class PostgreSql(DatabaseCheck):
                 self._last_automatic_diagnosis
                 and time() - self._last_automatic_diagnosis < AUTOMATIC_DIAGNOSIS_INTERVAL
             ):
-                self.log.info("Not running automatic diagnostics because it's been less than 5 minutes since the last run")
+                self.log.info(
+                    "Not running automatic diagnostics because it's been less than 5 minutes since the last run"
+                )
                 return
             self.log.info("Running automatic diagnostics")
             self._last_automatic_diagnosis = time()

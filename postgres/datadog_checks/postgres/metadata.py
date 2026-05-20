@@ -174,7 +174,6 @@ class PostgresMetadata(DBMAsyncJob):
             # Reraise the error to be caught by the job error handling
             raise e
 
-
     @tracked_method(agent_check_getter=agent_check_getter)
     def report_postgres_extensions(self):
         # Only query if configured, according to interval
