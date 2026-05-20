@@ -986,6 +986,9 @@ def test_schema_registry_two_tier_fetch_on_new_version(check, dd_run_check, aggr
         return_value={'id': 99, 'version': 3, 'schema': avro_schema, 'schemaType': 'AVRO'}
     )
 
+    collector._get_schema_registry_global_compatibility = mock.Mock(return_value='BACKWARD')
+    collector._get_schema_registry_subject_compatibility = mock.Mock(return_value='BACKWARD')
+
     # Pre-populate: both subjects were last seen at version 2
     latest_version_cache = {
         'unchanged-topic-value': {'version': 2, 'schema_id': 50},
@@ -1017,8 +1020,9 @@ def test_schema_registry_two_tier_fetch_on_new_version(check, dd_run_check, aggr
 
     # Latest version cache should be updated for the changed subject
     updated_cache = json.loads(cache_storage['kafka_schema_latest_version_cache'])
-    assert updated_cache['changed-topic-value'] == {'version': 3, 'schema_id': 99}
-    assert updated_cache['unchanged-topic-value'] == {'version': 2, 'schema_id': 50}  # unchanged
+    assert updated_cache['changed-topic-value'] == {'version': 3, 'schema_id': 99, 'compatibility': 'BACKWARD'}
+    # Compatibility is refreshed on its own cadence, so the unchanged subject also picks it up.
+    assert updated_cache['unchanged-topic-value'] == {'version': 2, 'schema_id': 50, 'compatibility': 'BACKWARD'}
 
 
 @pytest.mark.parametrize(
