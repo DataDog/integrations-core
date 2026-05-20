@@ -1,0 +1,58 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "eafbb640-db8c-4ab5-94db-6bc2b80a071d",
+  "app_id": "anthropic-compliance-logs",
+  "owner": "saas-integrations",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Troubleshooting",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect compliance logs from Claude for security monitoring and SIEM use cases.",
+    "title": "Claude Compliance Logs",
+    "media": [],
+    "classifier_tags": [
+      "Category::AI/ML",
+      "Category::Log Collection",
+      "Category::Security",
+      "Submitted Data Type::Logs",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 78505088,
+      "source_type_name": "Anthropic Compliance",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Claude Compliance Logs Overview": "assets/dashboards/claude_compliance_logs_overview.json"
+    },
+    "monitors": {
+      "Claude Compliance Log Ingestion Has Stopped": "assets/monitors/claude_compliance_logs_no_data.json"
+    },
+    "saved_views": {
+      "All Claude Compliance Logs": "assets/saved_views/all_claude_compliance_logs.json",
+      "Claude Auth Events": "assets/saved_views/claude_auth_events.json",
+      "Claude API Key Lifecycle": "assets/saved_views/claude_api_key_lifecycle.json",
+      "Claude Admin Activity": "assets/saved_views/claude_admin_activity.json",
+      "Claude Org Membership Changes": "assets/saved_views/claude_org_membership_changes.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

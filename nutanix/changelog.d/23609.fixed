@@ -1,1 +1,0 @@
-Always emit `ntnx_host_type`, `ntnx_hypervisor_type`, and `ntnx_node_status` tags, with `$unknown` as the fallback when the source field is missing.

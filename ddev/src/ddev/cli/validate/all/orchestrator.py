@@ -104,6 +104,10 @@ VALIDATIONS: dict[str, ValidationConfig] = {
     "package": ValidationConfig(
         description="Validate Python package metadata and naming",
     ),
+    "qa-label": ValidationConfig(
+        description="Validate the pull request declares a QA decision label",
+        repo_wide=True,
+    ),
     "readmes": ValidationConfig(
         description="Validate README files have required sections",
     ),
