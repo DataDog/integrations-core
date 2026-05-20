@@ -13,33 +13,19 @@ On top you get:
 
 ### Datadog credentials
 
-The lab uses a `.ddev.toml` in this directory to point at an `n8nlab` ddev org. The file is gitignored, so create it locally:
+To run the lab, create a `.ddev.toml` in this directory selecting which org should land in:
 
-1. From `n8n/tests/lab/`, generate a fresh override file:
+```toml
+org = "<org-to-send-telemetry>"
+```
 
-   ```bash
-   ddev config override
-   ```
+Choose whichever Datadog org makes sense (dogfood, staging, pubplat, a personal org, …). The selected name must match an `[orgs.<name>]` block in your global ddev config. If you want to use a custom org that isn't there yet, add it — run `ddev config find` to locate the file, then append:
 
-   This writes a `.ddev.toml` seeded with the inferred `repo` and `repos` mapping.
-
-2. Append the org selector to the generated `.ddev.toml`:
-
-   ```toml
-   org = "n8nlab"
-   ```
-
-   ddev discovers this file by walking the current directory upward, so the override applies to any `ddev` command run from `tests/lab/` or below.
-
-3. Add a matching org block to your global ddev config (find its path with `ddev config find`):
-
-   ```toml
-   [orgs.n8nlab]
-   api_key = "<your real Datadog API key>"
-   site = "datadoghq.com"
-   ```
-
-Use any org name you like; just keep the `org = "..."` line in `tests/lab/.ddev.toml` aligned with the `[orgs.<name>]` section in your global config.
+```toml
+[orgs.<your-org-name>]
+api_key = "<your Datadog API key>"
+site = "datadoghq.com"
+```
 
 ### Traffic configuration
 
