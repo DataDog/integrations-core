@@ -11,21 +11,23 @@ from ddev.plugin.external.hatch.environment_collector import DatadogChecksEnviro
 @pytest.mark.parametrize(
     'features, version, local_path, expected',
     [
-        (['deps'], '', None, 'datadog-checks-base[deps]'),
-        ([], '', None, 'datadog-checks-base[deps]'),
-        (['deps', 'http'], '', None, 'datadog-checks-base[deps,http]'),
-        (['deps'], '1.2.3', None, 'datadog-checks-base[deps]==1.2.3'),
-        (
+        pytest.param(['deps'], '', None, 'datadog-checks-base[deps]', id='pypi_with_deps'),
+        pytest.param([], '', None, 'datadog-checks-base[deps]', id='pypi_empty_features_defaults_to_deps'),
+        pytest.param(['deps', 'http'], '', None, 'datadog-checks-base[deps,http]', id='pypi_multi_features'),
+        pytest.param(['deps'], '1.2.3', None, 'datadog-checks-base[deps]==1.2.3', id='pypi_with_version'),
+        pytest.param(
             ['deps'],
             '',
             Path('/repo/integrations-core/datadog_checks_base'),
             '/repo/integrations-core/datadog_checks_base[deps]',
+            id='local_path_with_deps',
         ),
-        (
+        pytest.param(
             ['deps', 'http'],
             '',
             Path('/repo/integrations-core/datadog_checks_base'),
             '/repo/integrations-core/datadog_checks_base[deps,http]',
+            id='local_path_multi_features',
         ),
     ],
 )
@@ -36,6 +38,8 @@ def test_format_base_package(features, version, local_path, expected):
 
 
 def test_base_package_install_command_uses_absolute_path_in_core(tmp_path, monkeypatch):
+    monkeypatch.delenv('DDEV_TEST_BASE_PACKAGE_VERSION', raising=False)
+
     integrations_core = tmp_path / 'integrations-core'
     (integrations_core / 'datadog_checks_base').mkdir(parents=True)
     integration_root = integrations_core / 'fake_integration'
@@ -69,8 +73,8 @@ def test_test_package_install_command_uses_absolute_path_in_core(tmp_path):
 @pytest.mark.parametrize(
     'has_local_ruff_config, expected_relative_to',
     [
-        (True, 'self'),
-        (False, 'parent'),
+        pytest.param(True, 'self', id='local_ruff_config_returns_integration_root'),
+        pytest.param(False, 'parent', id='no_local_ruff_config_returns_repo_root'),
     ],
 )
 def test_ruff_settings_dir_uses_absolute_path(tmp_path, monkeypatch, has_local_ruff_config, expected_relative_to):
