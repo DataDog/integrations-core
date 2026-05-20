@@ -435,7 +435,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
                                         "source_type_name": SOURCE_TYPE_NAME,
                                         "msg_title": f"{check_name} {label.capitalize()}",
                                         "aggregation_key": "consul.status_check",
-                                        "msg_text": f"Check {check_id} for service {service_name}, id: {service_id} "
+                                        "msg_text": f"Check {check_id} for service {service_name}, id: {service_id}"
                                         f"{label} on node {node_name}: {check_output}",
                                         "tags": node_tags,
                                     }
