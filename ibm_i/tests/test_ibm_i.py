@@ -319,3 +319,16 @@ def test_check_query_error(aggregator, instance):
         check.check(instance)
     aggregator.assert_service_check("ibm_i.can_connect", count=2, status=AgentCheck.OK)
     aggregator.assert_all_metrics_covered()
+
+def test_connection_failure(aggregator, instance):
+    check = IbmICheck('ibm_i', {}, [instance])
+    check.log = mock.MagicMock()
+    check.load_configuration_models()
+
+    with (
+        mock.patch('datadog_checks.ibm_i.IbmICheck.set_up_query_manager')
+    ):
+        check.check(instance)
+        assert check._query_manager is None
+    aggregator.assert_service_check("ibm_i.can_connect", count=1, status=AgentCheck.CRITICAL)
+    aggregator.assert_all_metrics_covered()
