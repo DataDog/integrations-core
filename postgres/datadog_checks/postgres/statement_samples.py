@@ -481,6 +481,12 @@ class PostgresStatementSamples(DBMAsyncJob):
             self._this_run_did_error = True
             raise
         finally:
+            # If we have any non-None values in the _collection_strategy_cache that means
+            # we were in an error state last time we checked
+            # Values are tuples of (DBExplainError, Exception)
+            if any(value[0] is not None for value in self._collection_strategy_cache.values()):
+                self._this_run_did_error = True
+
             self._log.info("statement samples did error: %s", self._this_run_did_error)
             self._last_run_did_error = self._this_run_did_error
 

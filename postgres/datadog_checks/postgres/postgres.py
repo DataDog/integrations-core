@@ -203,6 +203,14 @@ class PostgreSql(DatabaseCheck):
         self._is_running = False
         self._cancelled = False
 
+    def run_check_initializations(self):
+        try:
+            return super().run_check_initializations()
+        except Exception as e:
+            self.log.exception("Error during check initialization: %s", e)
+            self._run_automatic_diagnostics()
+            raise e
+
     def database_monitoring_column_statistics(self, raw_event: str):
         self.event_platform_event(raw_event, "dbm-column-statistics")
 
@@ -1298,20 +1306,13 @@ class PostgreSql(DatabaseCheck):
             )
         finally:
             self.log.info("Reach check finally")
-            # Check each async job for if an error occurred during their most recent run
+                    # Check each async job for if an error occurred during their most recent run
             # TODO: Encapsulate this into DBMAsyncJob
             for job in [self.statement_metrics, self.statement_samples, self.metadata_samples, self.data_observability]:
                 self.log.info("Checking job: %s", job.__class__.__name__)
                 if hasattr(job, '_last_run_did_error') and job._last_run_did_error:
                     self.log.info("Job %s had an error", job.__class__.__name__)
                     should_run_diagnostics = True
-            # Only automatically run every 5 minutes at most
-            if (
-                self._last_automatic_diagnosis
-                and time() - self._last_automatic_diagnosis < AUTOMATIC_DIAGNOSIS_INTERVAL
-            ):
-                should_run_diagnostics = False
-                self.log.info("Not running automatic diagnostics because it's been less than 5 minutes since the last run")
             # If it's been more than 5 minutes since the last error diagnosis, run again to see if the error is resolved
             if (
                 self._last_diagnosis_had_errors
@@ -1320,16 +1321,32 @@ class PostgreSql(DatabaseCheck):
                 should_run_diagnostics = True
                 self.log.info("Running automatic diagnostics because it's been more than 5 minutes since the last error diagnosis")
             if should_run_diagnostics:
-                self.log.info("Running automatic diagnostics")
-                self._last_automatic_diagnosis = time()
-                run_diagnostics(self)
-                self._last_diagnosis_had_errors = any(
-                    diagnosis.result == Diagnosis.DIAGNOSIS_FAIL or diagnosis.result == Diagnosis.DIAGNOSIS_WARNING
-                    for diagnosis in self.diagnosis.diagnoses
-                )
-                self.health.submit_diagnoses()
+                self._run_automatic_diagnostics()
+
             # Add the warnings saved during the execution of the check
             self._report_warnings()
+
+    def _run_automatic_diagnostics(self):
+        try:
+            # Only automatically run every 5 minutes at most
+            if (
+                self._last_automatic_diagnosis
+                and time() - self._last_automatic_diagnosis < AUTOMATIC_DIAGNOSIS_INTERVAL
+            ):
+                self.log.info("Not running automatic diagnostics because it's been less than 5 minutes since the last run")
+                return
+            self.log.info("Running automatic diagnostics")
+            self._last_automatic_diagnosis = time()
+            run_diagnostics(self)
+            self._last_diagnosis_had_errors = any(
+                diagnosis.result == Diagnosis.DIAGNOSIS_FAIL or diagnosis.result == Diagnosis.DIAGNOSIS_WARNING
+                for diagnosis in self.diagnosis.diagnoses
+            )
+            self.health.submit_diagnoses()
+        except Exception as e:
+            self.log.exception("Error during automatic diagnostics: %s", e)
+        finally:
+            self.log.info("Automatic diagnostics completed")
 
     def _update_tag_sets(self, tags):
         self._non_internal_tags = list(set(self._non_internal_tags) | set(tags))
