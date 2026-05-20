@@ -70,6 +70,7 @@ TOOL_MANIFEST: dict[str, ToolSpec] = {
     "ddev_env_stop": ToolSpec("shell.ddev.env_stop", "DdevEnvStopTool"),
     "ddev_env_test": ToolSpec("shell.ddev.env_test", "DdevEnvTestTool"),
     "ddev_release_changelog": ToolSpec("shell.ddev.release_changelog", "DdevReleaseChangelogTool"),
+    "ddev_validate": ToolSpec("shell.ddev.validate", "DdevValidateTool"),
 }
 
 
