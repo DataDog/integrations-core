@@ -1,5 +1,6 @@
 # Metrics mixin for Cisco Catalyst devices.
 # Stored in a separate file for reuse within the cisco-3850 compat shim.
+# CI baseline test: comment-only change to verify environmental flake (AGENT-15682).
 
 # Example sysDescr:
 #   "Cisco Systems WS-C6509.Cisco Catalyst Operating System Software, Version 5.5(8).Copyright (c) 1995-2001 by Cisco Systems."
