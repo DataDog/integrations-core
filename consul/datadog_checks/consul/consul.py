@@ -118,9 +118,9 @@ class ConsulCheck(OpenMetricsBaseCheck):
         )
         self.health_check_warning_events = is_affirmative(
             self.instance.get(
-            'health_check_warning_events',
-            self.init_config.get('health_check_warning_events', False),
-                            )
+                'health_check_warning_events',
+                self.init_config.get('health_check_warning_events', False),
+            )
         )
 
         if self.threads_count > 1:
@@ -417,7 +417,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
                             if status_value == 3 or (status_value == 2 and self.health_check_warning_events):
                                 check_name = check.get("Name", "Consul Health Check")
                                 check_output = check.get("Output", "")
-                                
+
                                 if status_value == 3:
                                     event_type = "consul.check_failed"
                                     alert_type = "error"
@@ -440,7 +440,6 @@ class ConsulCheck(OpenMetricsBaseCheck):
                                         "tags": node_tags,
                                     }
                                 )
-                            
 
                     if sc_id not in service_checks:
                         service_checks[sc_id] = {'status': status, 'tags': tags}
