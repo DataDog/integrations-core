@@ -1,0 +1,56 @@
+id: "dell-powerflex"
+tests:
+ -
+  sample: |
+    2026-05-07 18:07:29,512 | INFO  | Connector openwire started | org.apache.activemq.broker.TransportConnector | main
+  result:
+    custom: {}
+    message: |
+      2026-05-07 18:07:29,512 | INFO  | Connector openwire started | org.apache.activemq.broker.TransportConnector | main
+    tags:
+     - "source:dell-powerflex"
+ -
+  sample: |
+    2026-05-07 18:25:24,885 INFO  Starting EventLogger at INFO level
+  result:
+    custom: {}
+    message: |
+      2026-05-07 18:25:24,885 INFO  Starting EventLogger at INFO level
+    tags:
+     - "source:dell-powerflex"
+ -
+  sample: |
+    2026/05/18 11:34:09.597437 LOW:71d0000073a6:ndctl_GetNdctlInfo:00887: NDCTL lib not initialized
+  result:
+    custom: {}
+    message: |
+      2026/05/18 11:34:09.597437 LOW:71d0000073a6:ndctl_GetNdctlInfo:00887: NDCTL lib not initialized
+    tags:
+     - "source:dell-powerflex"
+ -
+  sample: |
+    2026-05-07 18:25:24,890 INFO  Final Parameters to use = {'conf_file': 'eventloggerconf.txt', 'conf_dir': '/opt/emc/scaleio/mdm/bin/../logs/../cfg/', 'log_dir': '/opt/emc/scaleio/mdm/bin/../logs/', 'db_dir': '/opt/emc/scaleio/mdm/bin/../logs/', 'debug_mode': False, 'timeout': '600', 'max_db_line_to_rotate': '100000', 'event_db_file_name': 'eventlog.db', 'overwrite_conf_file': False, 'force_full_rotating': False}
+  result:
+    custom: {}
+    message: |
+      2026-05-07 18:25:24,890 INFO  Final Parameters to use = {'conf_file': 'eventloggerconf.txt', 'conf_dir': '/opt/emc/scaleio/mdm/bin/../logs/../cfg/', 'log_dir': '/opt/emc/scaleio/mdm/bin/../logs/', 'db_dir': '/opt/emc/scaleio/mdm/bin/../logs/', 'debug_mode': False, 'timeout': '600', 'max_db_line_to_rotate': '100000', 'event_db_file_name': 'eventlog.db', 'overwrite_conf_file': False, 'force_full_rotating': False}
+    tags:
+     - "source:dell-powerflex"
+ -
+  sample: |
+    2026-05-08 10:01:48,113 INFO  Waking up - Try to rotate-DB
+  result:
+    custom: {}
+    message: |
+      2026-05-08 10:01:48,113 INFO  Waking up - Try to rotate-DB
+    tags:
+     - "source:dell-powerflex"
+ -
+  sample: |
+    2026/05/07 18:07:50.783317 LOW:000000000000:mosTrcLayer_Create:00210: ---------- Process started. Version PowerFlex R5Release, CodeBase , Feb 20 2025. PID 4522 ----------
+  result:
+    custom: {}
+    message: |
+      2026/05/07 18:07:50.783317 LOW:000000000000:mosTrcLayer_Create:00210: ---------- Process started. Version PowerFlex R5Release, CodeBase , Feb 20 2025. PID 4522 ----------
+    tags:
+     - "source:dell-powerflex"
