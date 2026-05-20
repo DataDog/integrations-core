@@ -70,5 +70,5 @@ files:
       value:
         type: boolean
         default: false
-        example: false
+        example: true
     - template: instances/default
