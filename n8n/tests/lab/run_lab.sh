@@ -2,8 +2,7 @@
 set -e
 
 ORIGINAL_DIR=$(pwd)
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 ENV="py3.13-2"
 
 while [[ $# -gt 0 ]]; do

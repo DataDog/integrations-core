@@ -208,11 +208,7 @@ def start(env: str) -> None:
             # configured in ``tests/conftest.py`` through the lab-only ``logs`` block.
             "-e",
             "DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true",
-        ],
-        # Run ddev from the lab dir so its cwd-upward .ddev.toml discovery picks up the
-        # lab's org override; the parent ``python -m tests.lab.traffic_generator`` still
-        # runs from n8n/ so the ``tests`` package resolves on sys.path.
-        cwd=str(LAB_DIR),
+        ]
     )
     if rc != 0:
         console.print(f"[bold red]ddev env start failed (exit {rc})[/bold red]")
@@ -242,7 +238,7 @@ def stop(env: str) -> None:
     """Tear down the lab environment."""
     console = Console()
     console.print(f"[bold cyan]Stopping environment {env}...[/bold cyan]")
-    rc = subprocess.call(["ddev", "env", "stop", "n8n", env], cwd=str(LAB_DIR))
+    rc = subprocess.call(["ddev", "env", "stop", "n8n", env])
     if rc != 0:
         console.print(f"[bold red]ddev env stop failed (exit {rc})[/bold red]")
         sys.exit(rc)
