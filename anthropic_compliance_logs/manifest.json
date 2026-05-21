@@ -3,14 +3,14 @@
   "app_uuid": "eafbb640-db8c-4ab5-94db-6bc2b80a071d",
   "app_id": "anthropic-compliance-logs",
   "owner": "saas-integrations",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Troubleshooting",
     "changelog": "CHANGELOG.md",
     "description": "Collect compliance logs from Claude for security monitoring and SIEM use cases.",
-    "title": "Claude Compliance Logs",
+    "title": "Claude Compliance",
     "media": [],
     "classifier_tags": [
       "Category::AI/ML",
