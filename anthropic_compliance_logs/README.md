@@ -35,7 +35,7 @@ The Compliance API is available to Anthropic Enterprise plan customers with the 
 ### 3. Configure the Datadog integration
 
 1. Paste your **Admin API Key** into the configuration panel.
-2. Click **Save Configuration**.
+2. Click **Create Account**.
 
 ### 4. Validate
 
