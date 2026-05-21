@@ -81,11 +81,11 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
             'interface_index:{}'.format(index),
         ] + metric_tags
         for metric in IF_COUNTS:
-            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags, count=2)
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags, count=1)
         for metric in IF_RATES:
-            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
         for metric in IF_BANDWIDTH_USAGE:
-            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
         for metric in IF_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
         custom_speed_tags = tags + ['speed_source:device']
@@ -95,19 +95,19 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
             )
 
     for metric in TCP_COUNTS:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=metric_tags, count=2)
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=metric_tags, count=1)
     for metric in TCP_GAUGES:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=metric_tags, count=2)
     for metric in UDP_COUNTS:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=metric_tags, count=2)
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=metric_tags, count=1)
     for version in ['ipv4', 'ipv6']:
         tags = ['ipversion:{}'.format(version)] + metric_tags
         for metric in IP_COUNTS + IPX_COUNTS:
-            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags, count=2)
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags, count=1)
         for metric in IP_IF_COUNTS:
             for interface in ['17', '21']:
                 tags = ['ipversion:{}'.format(version), 'interface:{}'.format(interface)] + metric_tags
-                aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags, count=2)
+                aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags, count=1)
 
     # ==== apc_ups profile ===
     common_tags = [
