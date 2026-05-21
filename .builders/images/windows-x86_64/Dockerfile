@@ -168,6 +168,10 @@ RUN New-Item -ItemType Junction -Path C:\OpenSSL -Target 'C:\Program Files\OpenS
 
 ENV CURL_VERSION="8.20.0"
 
+# Must match the confluent-kafka pin in agent_requirements.in.
+# build_wheels.py asserts these stay in sync at wheel-build time.
+ENV CONFLUENT_KAFKA_VERSION="2.13.2"
+
 # Set up runner
 COPY runner_dependencies.txt C:\runner_dependencies.txt
 RUN python -m pip install --no-warn-script-location -r C:\runner_dependencies.txt
