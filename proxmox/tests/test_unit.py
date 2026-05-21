@@ -524,6 +524,75 @@ def test_ha_metrics(dd_run_check, aggregator, instance):
     aggregator.assert_metric('proxmox.ha.quorate', hostname='ip-122-82-3-112', tags=['node_status:OK'])
 
 
+PERMISSION_DENIED_BODY = {"data": None, "message": "Permission check failed (/ , Sys.Audit)"}
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get'),
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/resources': MockResponse(status_code=200, json_data=PERMISSION_DENIED_BODY)
+                }
+            },
+            id='cluster/resources',
+        ),
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/metrics/export': MockResponse(
+                        status_code=200, json_data=PERMISSION_DENIED_BODY
+                    )
+                }
+            },
+            id='cluster/metrics/export',
+        ),
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/ha/status/current': MockResponse(
+                        status_code=200, json_data=PERMISSION_DENIED_BODY
+                    )
+                }
+            },
+            id='cluster/ha/status/current',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_null_data_raises(dd_run_check, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    with pytest.raises(Exception, match=r'Permission check failed \(/ , Sys.Audit\)'):
+        dd_run_check(check)
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get'),
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/nodes/ip-122-82-3-112/tasks': MockResponse(
+                        status_code=200, json_data=PERMISSION_DENIED_BODY
+                    )
+                }
+            },
+            id='nodes/{node}/tasks',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_tasks_null_data_raises(dd_run_check, instance):
+    instance = copy.deepcopy(instance)
+    instance['collect_tasks'] = True
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    with pytest.raises(Exception, match=r'Permission check failed \(/ , Sys.Audit\)'):
+        dd_run_check(check)
+
+
 @pytest.mark.parametrize(
     ('collect_tasks, task_types, expected_events'),
     [

@@ -140,6 +140,18 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             if metric_value is not None:
                 metric_method(f'{metric_name_remapped}', metric_value, tags=tags, hostname=hostname)
 
+    def _extract_data(self, response_json, url):
+        """Return the ``data`` field from a Proxmox API JSON response.
+
+        Proxmox returns ``data: null`` with a ``message`` for permission denials
+        and similar errors; raise in that case so the failure surfaces.
+        """
+        data = response_json.get('data')
+        if data is None:
+            message = response_json.get('message')
+            raise Exception(f"Proxmox API returned no data for {url}: {message}")
+        return data
+
     def _get_vm_hostname(self, vm_id, vm_name, node):
         try:
             url = f"{self.config.proxmox_server}/nodes/{node}/qemu/{vm_id}/agent/get-host-name"
@@ -206,9 +218,9 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
 
     def _collect_ha_metrics(self):
         self.log.debug("Collecting HA metrics")
-        ha_response = self.http.get(f"{self.config.proxmox_server}/cluster/ha/status/current")
-        ha_response_json = ha_response.json()
-        ha_statuses = ha_response_json.get('data', [])
+        url = f"{self.config.proxmox_server}/cluster/ha/status/current"
+        ha_response = self.http.get(url)
+        ha_statuses = self._extract_data(ha_response.json(), url)
         for ha_status in ha_statuses:
             if not ha_status.get('type') == 'quorum':
                 continue
@@ -223,15 +235,15 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
 
     def _collect_performance_metrics(self):
         self.log.debug("Collecting performance metrics")
-        metrics_response = self.http.get(f"{self.config.proxmox_server}/cluster/metrics/export")
+        url = f"{self.config.proxmox_server}/cluster/metrics/export"
+        metrics_response = self.http.get(url)
         if not metrics_response.ok:
             self.log.warning(
                 "Performance metrics endpoint not available (HTTP %s), skipping collection",
                 metrics_response.status_code,
             )
             return
-        metrics_response_json = metrics_response.json()
-        metrics = metrics_response_json.get('data', {}).get('data', [])
+        metrics = self._extract_data(metrics_response.json(), url).get('data', [])
 
         for metric in metrics:
             resource_id = metric.get('id')
@@ -253,9 +265,9 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
 
     def _collect_resource_metrics(self):
         self.log.debug("Collecting resource metrics.")
-        resources_response = self.http.get(f"{self.config.proxmox_server}/cluster/resources")
-        resources_response_json = resources_response.json()
-        resources = resources_response_json.get("data", [])
+        url = f"{self.config.proxmox_server}/cluster/resources"
+        resources_response = self.http.get(url)
+        resources = self._extract_data(resources_response.json(), url)
 
         external_tags = []
         all_resources = {}
@@ -359,13 +371,14 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
 
             now = get_current_datetime()
             params = {'since': since}
-            response = self.http.get(f"{self.config.proxmox_server}/nodes/{node_name}/tasks", params=params)
+            url = f"{self.config.proxmox_server}/nodes/{node_name}/tasks"
+            response = self.http.get(url, params=params)
             response.raise_for_status()
 
-            response_json = response.json().get("data", [])
+            tasks = self._extract_data(response.json(), url)
             self.last_event_collect_time = now
 
-            for task in response_json:
+            for task in tasks:
                 task_type = task.get('type')
 
                 if task_type not in self.config.collected_task_types:
