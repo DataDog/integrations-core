@@ -10,7 +10,7 @@ from clickhouse_connect.driver import httputil
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.utils.db import QueryManager
-from datadog_checks.base.utils.db.utils import TagManager, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import TagManager, default_json_event_encoding, resolve_db_host
 from datadog_checks.base.utils.serialization import json
 
 from . import advanced_queries, queries, utils
@@ -323,11 +323,11 @@ class ClickhouseCheck(DatabaseCheck):
 
     @property
     def reported_hostname(self) -> str | None:
-        """
-        Get the hostname to be reported in metrics and events.
-        """
         if self._resolved_hostname is None:
-            self._resolved_hostname = self._config.server
+            if self._config.reported_hostname:
+                self._resolved_hostname = self._config.reported_hostname
+            else:
+                self._resolved_hostname = resolve_db_host(self._config.server)
         return self._resolved_hostname
 
     @property

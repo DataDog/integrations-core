@@ -1,23 +1,20 @@
 {
-  "name": "All Anthropic Compliance Logs",
+  "name": "Claude Admin Activity",
   "type": "logs",
   "page": "stream",
-  "query": "source:anthropic-compliance-logs",
+  "query": "source:claude-compliance-logs @actor.type:admin_api_key_actor",
   "timerange": {
     "interval_ms": 86400000
   },
   "visible_facets": [
     "core_service",
     "tag_source",
-    "core_host",
     "core_status",
     "log_evt.name",
     "log_actor.type",
     "log_actor.id",
     "log_usr.email",
-    "log_usr.id",
-    "log_network.client.ip",
-    "log_network.client.geoip.country.iso_code"
+    "log_network.client.ip"
   ],
   "options": {
     "columns": [
