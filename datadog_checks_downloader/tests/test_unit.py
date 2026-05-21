@@ -4,10 +4,11 @@
 import urllib.error
 
 import pytest
+from tuf.api.exceptions import DownloadError
+
 from datadog_checks.downloader.cli import _v2_failure_category
 from datadog_checks.downloader.download import TUFDownloader
 from datadog_checks.downloader.exceptions import TargetNotFoundError
-from tuf.api.exceptions import DownloadError
 
 
 @pytest.mark.parametrize(

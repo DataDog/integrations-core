@@ -11,6 +11,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+
 from datadog_checks.downloader.download_v2 import TUFPointerDownloader
 from datadog_checks.downloader.exceptions import (
     DigestMismatch,
