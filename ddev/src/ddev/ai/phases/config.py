@@ -80,6 +80,7 @@ class CheckpointConfig(BaseModel):
 
 class AgentConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
+    provider: str = "anthropic"
     model: str | None = None
     max_tokens: int | None = None
     tools: list[str] = []
@@ -95,18 +96,11 @@ class AgentConfig(BaseModel):
 
 class PhaseConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    type: str = "Phase"
-    agent: str
-    tasks: list[TaskConfig]
+    type: str = "AgenticPhase"
+    agent: str | None = None
+    tasks: list[TaskConfig] = []
     context_compact_threshold_pct: int = 80
     checkpoint: CheckpointConfig | None = None
-
-    @field_validator("tasks", mode="after")
-    @classmethod
-    def at_least_one_task(cls, tasks: list[TaskConfig]) -> list[TaskConfig]:
-        if not tasks:
-            raise ValueError("A phase must have at least one task")
-        return tasks
 
 
 class FlowEntry(BaseModel):
@@ -140,7 +134,7 @@ class FlowConfig(BaseModel):
                     raise ValueError(f"Phase {entry.phase!r} depends on {dep!r} which is not scheduled in flow")
 
         for phase_id, phase in self.phases.items():
-            if phase.agent not in self.agents:
+            if phase.agent is not None and phase.agent not in self.agents:
                 raise ValueError(f"Phase {phase_id!r} references unknown agent: {phase.agent!r}")
 
         dependency_map = {entry.phase: entry.dependencies for entry in self.flow}
