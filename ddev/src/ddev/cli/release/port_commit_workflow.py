@@ -14,6 +14,7 @@ removed; on failure it is left in place for the user to inspect or finish manual
 
 from __future__ import annotations
 
+import contextlib
 import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -27,6 +28,7 @@ from ddev.utils.git import GitRepository
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
+    from ddev.utils.github_async.models import PullRequest
 
 
 PR_NUMBER_SUFFIX_PATTERN = re.compile(r'\s*\(#(\d+)\)\s*$')
@@ -34,10 +36,23 @@ PR_TEMPLATE_RELATIVE_PATH = '.github/PULL_REQUEST_TEMPLATE.md'
 PR_TEMPLATE_HEADING = '### What does this PR do?'
 IN_TOTO_SUFFIX = '.in-toto'
 WORKTREE_BASE = '.worktrees/port-commit'
+FULL_SHA_PATTERN = re.compile(r'^[0-9a-fA-F]{40}$')
+HEX_PATTERN = re.compile(r'^[0-9a-fA-F]+$')
+DIGITS_PATTERN = re.compile(r'^\d+$')
+PR_PREFIX_PATTERN = re.compile(r'^PR-(\d+)$', re.IGNORECASE)
+PR_URL_PATTERN = re.compile(r'^https?://github\.com/[^/]+/[^/]+/pull/(\d+)(?:[/?#].*)?$', re.IGNORECASE)
 
 
 class PortStepError(Exception):
     """Raised by a PortStep to signal a clean abort with a user-facing message."""
+
+
+class _CommitNotResolvable(Exception):
+    """Raised when a commit input cannot be resolved locally or via a SHA-targeted fetch."""
+
+
+class _PRNotFound(Exception):
+    """Raised when a PR lookup returns 404 so the caller can fall back to commit resolution."""
 
 
 class PortStep:
@@ -342,6 +357,164 @@ class CreatePullRequestStep(PortStep):
                 )
 
 
+def _resolve_input(app: Application, raw: str, *, dry_run: bool) -> str:
+    """Resolve the raw user input to a full commit SHA.
+
+    Handles three input shapes:
+    - Explicit PR form (`PR-12345` or a GitHub PR URL) -> looks up the PR.
+    - All-digits (e.g. `12345`) with a GitHub token configured -> tries as a PR; on 404 falls
+      back to commit resolution. Without a token the PR step is skipped.
+    - Anything else -> commit resolution.
+
+    Raises `_CommitNotResolvable` when nothing matches so the caller can decide how to abort.
+    """
+    raw = raw.strip()
+    pr_number = _extract_explicit_pr_number(raw)
+    if pr_number is not None:
+        return _resolve_pr_to_commit(app, pr_number, dry_run=dry_run)
+
+    is_digits = DIGITS_PATTERN.fullmatch(raw) is not None
+    if is_digits and app.config.github.token:
+        with contextlib.suppress(_PRNotFound):
+            return _resolve_pr_to_commit(app, int(raw), dry_run=dry_run)
+
+    try:
+        return _resolve_commit_or_fetch(app, raw, dry_run=dry_run)
+    except _CommitNotResolvable as exc:
+        if is_digits:
+            raise _CommitNotResolvable(
+                f'Could not resolve `{raw}` as a PR or a commit. '
+                'Pass the full 40-character SHA, or `PR-xxxxx` / a PR URL to disambiguate.'
+            ) from exc
+        raise
+
+
+def _extract_explicit_pr_number(raw: str) -> int | None:
+    """Return the PR number when `raw` is a `PR-12345` token or a GitHub PR URL, else None."""
+    for pattern in (PR_PREFIX_PATTERN, PR_URL_PATTERN):
+        match = pattern.fullmatch(raw)
+        if match:
+            return int(match.group(1))
+    return None
+
+
+def _resolve_pr_to_commit(app: Application, pr_number: int, *, dry_run: bool) -> str:
+    """Resolve a PR number to the SHA of its merge commit, validating squash-merge.
+
+    Raises `_PRNotFound` when GitHub returns 404. Raises `_CommitNotResolvable` (wrapped with PR
+    context) when the merge commit can't be resolved locally. Aborts on other auth / network /
+    validation errors so the user gets a clear, contextual message rather than a stack trace.
+    """
+    import asyncio
+
+    import httpx
+    from pydantic import ValidationError
+
+    if not app.config.github.token:
+        app.abort(
+            'GitHub token required to resolve a PR reference. Set `github.token`, or pass the '
+            'full commit SHA directly (--no-pr does not skip this lookup).'
+        )
+
+    owner, repo = resolve_owner_repo(app)
+    app.display_info(f'Resolving PR #{pr_number} via GitHub...')
+    try:
+        pr = asyncio.run(_fetch_pr(app.config.github.token, owner, repo, pr_number))
+    except httpx.HTTPStatusError as exc:
+        status = exc.response.status_code
+        if status == 404:
+            raise _PRNotFound(str(pr_number)) from exc
+        if status in (401, 403):
+            app.abort(
+                f'GitHub denied the request for PR #{pr_number} (HTTP {status}). '
+                'Check that `github.token` is set and has `repo` scope.'
+            )
+        app.abort(f'Failed to fetch PR #{pr_number} from GitHub: {exc}.')
+    except (httpx.HTTPError, ValidationError) as exc:
+        app.abort(f'Failed to fetch PR #{pr_number} from GitHub: {exc}.')
+
+    if not pr.merged:
+        app.abort(f'PR #{pr_number} is not merged; nothing to backport.')
+
+    if not pr.merge_commit_sha:
+        app.abort(f'PR #{pr_number} has no merge commit SHA available.')
+
+    try:
+        full_sha = _resolve_commit_or_fetch(app, pr.merge_commit_sha, dry_run=dry_run)
+    except _CommitNotResolvable as exc:
+        raise _CommitNotResolvable(
+            f'PR #{pr_number} was found but its merge commit `{pr.merge_commit_sha}` could not be resolved: {exc}'
+        ) from exc
+    _abort_if_merge_commit(app, pr_number, full_sha)
+    return full_sha
+
+
+async def _fetch_pr(token: str, owner: str, repo: str, pr_number: int) -> PullRequest:
+    from ddev.utils.github_async import async_github_client
+
+    async with async_github_client(token=token) as client:
+        response = await client.get_pull_request(owner=owner, repo=repo, pull_number=pr_number)
+        return response.data
+
+
+def _abort_if_merge_commit(app: Application, pr_number: int, full_sha: str) -> None:
+    """Abort when `full_sha` is a merge commit (>= 2 parents), which can't be backported as a single commit."""
+    try:
+        raw = app.repo.git.capture('rev-list', '--parents', '-n1', full_sha)
+    except OSError as exc:
+        app.abort(f'Could not inspect merge parents of `{full_sha}`: {exc}.')
+    else:
+        parent_count = max(len(raw.strip().split()) - 1, 0)
+        if parent_count >= 2:
+            app.abort(
+                f"PR #{pr_number} was not squash-merged, so there isn't a single commit to backport "
+                'the full PR. Run again with the specific commit you want to backport.'
+            )
+
+
+def _resolve_commit_or_fetch(app: Application, commit_hash: str, *, dry_run: bool) -> str:
+    """Return the full SHA for `commit_hash`, fetching from origin when the commit is not local.
+
+    Raises `_CommitNotResolvable` when the commit is neither available locally nor reachable on
+    origin. Falling back to a SHA-targeted fetch lets the command port commits that live on remote
+    branches the local repo does not track (the `remote.origin.fetch` refspec is often narrowed in
+    this repo to avoid pulling thousands of branches).
+
+    When `dry_run` is true, the fetch fallback is skipped to preserve the dry-run contract: a
+    non-local commit raises instead of mutating local state.
+    """
+    git = app.repo.git
+    with contextlib.suppress(OSError):
+        return git.capture('rev-parse', '--verify', f'{commit_hash}^{{commit}}').strip()
+
+    # Abbreviated SHAs cannot be fetched (GitHub's allowReachableSHA1InWant only honours full
+    # SHAs), so this is the real diagnosis regardless of dry-run mode. Surface it first.
+    if HEX_PATTERN.fullmatch(commit_hash) and not FULL_SHA_PATTERN.fullmatch(commit_hash):
+        raise _CommitNotResolvable(
+            f'Commit `{commit_hash}` is not in the local repository. '
+            'Pass the full 40-character SHA so it can be fetched from origin '
+            '(GitHub does not support SHA-targeted fetches for abbreviated SHAs).'
+        )
+
+    if dry_run:
+        raise _CommitNotResolvable(
+            f'Commit `{commit_hash}` is not in the local repository. '
+            'Re-run without `--dry-run` to fetch it from origin, or pre-fetch the commit manually.'
+        )
+
+    app.display_info(f'Commit `{commit_hash}` not found locally; fetching from origin.')
+    fetched = False
+    with contextlib.suppress(OSError):
+        git.run('fetch', 'origin', commit_hash)
+        fetched = True
+
+    if fetched:
+        with contextlib.suppress(OSError):
+            return git.capture('rev-parse', '--verify', f'{commit_hash}^{{commit}}').strip()
+
+    raise _CommitNotResolvable(f'Commit `{commit_hash}` does not exist locally or on origin.')
+
+
 def _path_exists_in_head(git: GitRepository, path: str) -> bool:
     try:
         git.capture('cat-file', '-e', f'HEAD:{path}')
@@ -355,7 +528,10 @@ def _resolve_in_toto_conflict(git: GitRepository, path: str) -> None:
         git.run('rm', '--force', path)
         return
     git.run('checkout', '--ours', path)
-    git.run('add', path)
+    # `.in-toto/` is gitignored in this repo, so `git add` refuses without `--force` even though
+    # the path is already tracked in HEAD. The force is safe: we only get here for paths that
+    # came out of `git diff --diff-filter=U`, i.e. files git itself flagged as needing resolution.
+    git.run('add', '--force', path)
 
 
 def _restore_path_from_head(git: GitRepository, path: str) -> None:
@@ -471,9 +647,9 @@ def resolve_port_plan(
         commit_hash = head_commit.sha
 
     try:
-        full_sha = app.repo.git.capture('rev-parse', '--verify', f'{commit_hash}^{{commit}}').strip()
-    except OSError:
-        app.abort(f'Commit `{commit_hash}` does not exist.')
+        full_sha = _resolve_input(app, commit_hash, dry_run=dry_run)
+    except _CommitNotResolvable as exc:
+        app.abort(str(exc))
 
     log_entries = app.repo.git.log(['hash:%H', 'subject:%s'], n=1, source=full_sha)
     if not log_entries:

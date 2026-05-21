@@ -33,6 +33,16 @@ jobs:
       with:
         fetch-depth: "0"
 
+    - name: Checkout integrations-core actions
+      if: inputs.repo != 'core'
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        repository: "DataDog/integrations-core"
+        ref: master
+        fetch-depth: 1
+        sparse-checkout: .github/actions
+        path: core-temp
+
     - name: Set up Python ${{ env.PYTHON_VERSION }}
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
@@ -40,13 +50,17 @@ jobs:
 
     - name: Install ddev from local folder
       if: inputs.repo == 'core'
-      run: |-
-        pip install -e ./datadog_checks_dev[cli]
-        pip install -e ./ddev
+      uses: ./.github/actions/setup-ddev
+      with:
+        install-mode: local
+        cache-profile: local-ddev-base
 
     - name: Install ddev from PyPI
       if: inputs.repo != 'core'
-      run: pip install ddev${{ inputs.ddev-version }}
+      uses: ./core-temp/.github/actions/setup-ddev
+      with:
+        install-mode: pypi
+        ddev-version: ${{ inputs.ddev-version }}
 
     - name: Configure ddev
       run: |

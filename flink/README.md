@@ -19,7 +19,7 @@ No additional installation is needed on your server.
 #### Metric collection
 
 <!-- partial
-{{< site-region region="gov" >}}
+{{< site-region region="gov,gov2" >}}
 1. Configure the [StatsD reporter][14] in Flink.
    In your `<FLINK_HOME>/conf/flink-conf.yaml`, add these lines:
    ```yaml

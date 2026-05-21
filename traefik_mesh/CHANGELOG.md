@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.5.1 / 2026-05-14
+
+***Fixed***:
+
+* Fix `get_version()` signature so version metadata is actually submitted. ([#23435](https://github.com/DataDog/integrations-core/pull/23435))
+
 ## 3.5.0 / 2026-04-15
 
 ***Added***:

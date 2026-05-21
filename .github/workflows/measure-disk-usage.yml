@@ -36,9 +36,10 @@ jobs:
         policy: integrations-core-api-key
 
     - name: Install ddev
-      run: |
-        pip install -e ./datadog_checks_dev[cli]
-        pip install -e ./ddev
+      uses: ./.github/actions/setup-ddev
+      with:
+        install-mode: local
+        cache-profile: local-ddev-base
 
     - name: Configure ddev
       run: |
@@ -85,4 +86,4 @@ jobs:
       with:
         name: status_compressed.json
         path: status_compressed.json
-        if-no-files-found: error        
+        if-no-files-found: error

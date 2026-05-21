@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "created_at": "2026-05-08",
+  "last_updated_at": "2026-05-08",
+  "title": "Compliance log ingestion has stopped",
+  "description": "Alerts when no Claude compliance log events are received within a recent window, indicating the crawler is broken, the Compliance API toggle was disabled, or the Admin API key lost compliance scope.",
+  "tags": [
+    "integration:anthropic-compliance-logs"
+  ],
+  "definition": {
+    "id": 1,
+    "name": "[Claude] Compliance log ingestion has stopped",
+    "type": "log alert",
+    "query": "logs(\"source:claude-compliance-logs\").index(\"*\").rollup(\"count\").last(\"1h\") < 1",
+    "message": "{{#is_alert}}\n## What's happening?\n\nNo Claude compliance log events have been received in the last 1 hour. The crawler normally polls every 5 minutes, so an hour of complete silence is a strong signal that compliance log ingestion has stopped.\n{{/is_alert}}\n\n{{#is_warning}}\n## What's happening?\n\nNo Claude compliance log events have been received in the last 30 minutes. The crawler normally polls every 5 minutes, so this gap may indicate an early sign of an ingestion problem.\n{{/is_warning}}\n\n{{#is_recovery}}\n## Recovered\n\nClaude compliance log ingestion has resumed. Events tagged `source:claude-compliance-logs` are flowing again.\n{{/is_recovery}}\n\n{{^is_recovery}}\n\n---\n\n## Impact\n\nWhile compliance logs are not being ingested, your organization loses visibility into Anthropic Console activity (member changes, workspace and API key management, billing actions, and other audit events) — which can create gaps in security review, incident response, and regulatory evidence.\n\n---\n\n## Common causes\n\n* **Compliance API was disabled** — Someone toggled off the Compliance API in the Anthropic Organization settings under Data and privacy.\n* **Admin API key was rotated or lost scope** — The Admin API key configured in Datadog was rotated, revoked, or no longer carries the `read:compliance_activities` scope.\n* **Anthropic Compliance API outage** — An upstream incident on Anthropic's Compliance API is preventing the crawler from retrieving events.\n\n---\n\n## How to investigate\n\n* Open the [Log Explorer scoped to Claude compliance logs](/logs?query=source%3Aclaude-compliance-logs) and confirm there is no recent activity.\n* Review the Claude Compliance Logs integration README for setup and troubleshooting steps.\n* In the Anthropic Console, go to **Settings -> Data and privacy** and confirm the Compliance API is enabled for the organization.\n* On the Datadog Claude Compliance Logs tile, verify the configured Admin API key is current.\n* Confirm the Admin API key still has the `read:compliance_activities` scope; rotate and re-enter the key in Datadog if necessary.\n* Check the [Anthropic status page](https://status.anthropic.com/) for any active Compliance API incidents.\n\n---\n\n## Related links\n\n* [Claude Compliance Logs integration documentation](https://docs.datadoghq.com/integrations/claude_compliance_logs/)\n* [Anthropic status page](https://status.anthropic.com/)\n{{/is_recovery}}",
+    "options": {
+      "thresholds": {
+        "critical": 1
+      },
+      "enable_logs_sample": true,
+      "notify_audit": false,
+      "require_full_window": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "include_tags": true,
+      "on_missing_data": "default",
+      "avalanche_window": 10,
+      "groupby_simple_monitor": false,
+      "silenced": {}
+    },
+    "priority": 3,
+    "restricted_roles": null
+  },
+  "template_variables": []
+}
