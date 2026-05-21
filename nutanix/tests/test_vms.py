@@ -102,6 +102,66 @@ def test_vms_collected_when_host_missing_name(
     aggregator.assert_metric("nutanix.host.count", count=1)
 
 
+@pytest.mark.parametrize("batch_vm_collection", [True, False])
+def test_vm_with_no_extid_is_skipped(
+    dd_run_check, aggregator, mock_instance, mock_http_get, mocker, batch_vm_collection
+) -> None:
+    mock_instance["batch_vm_collection"] = batch_vm_collection
+
+    all_vms = deepcopy(load_fixture_page("vms.json", 0)["data"])
+    vms_by_host: dict[str, list] = {}
+    for vm in all_vms:
+        host_id = (vm.get("host") or {}).get("extId") or ""
+        vms_by_host.setdefault(host_id, []).append(vm)
+
+    ubuntu_vm = next(v for v in vms_by_host["d8787814-4fe8-4ba5-931f-e1ee31c294a6"] if v.get("name") == "ubuntu-vm")
+    ubuntu_vm.pop("extId")
+
+    mocker.patch(
+        "datadog_checks.nutanix.infrastructure_monitor.InfrastructureMonitor._get_vms_for_host",
+        side_effect=lambda h: vms_by_host.get(h, []),
+    )
+
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    assert check.infrastructure_monitor.vm_count == 3
+    vm_names = {
+        tag.split(":", 1)[1]
+        for m in aggregator.metrics("nutanix.vm.count")
+        for tag in m.tags
+        if tag.startswith("ntnx_vm_name:")
+    }
+    assert "ubuntu-vm" not in vm_names
+
+
+@pytest.mark.parametrize("batch_vm_collection", [True, False])
+def test_vm_with_no_name_is_skipped(
+    dd_run_check, aggregator, mock_instance, mock_http_get, mocker, batch_vm_collection
+) -> None:
+    mock_instance["batch_vm_collection"] = batch_vm_collection
+
+    all_vms = deepcopy(load_fixture_page("vms.json", 0)["data"])
+    vms_by_host: dict[str, list] = {}
+    for vm in all_vms:
+        host_id = (vm.get("host") or {}).get("extId") or ""
+        vms_by_host.setdefault(host_id, []).append(vm)
+
+    ubuntu_vm = next(v for v in vms_by_host["d8787814-4fe8-4ba5-931f-e1ee31c294a6"] if v.get("name") == "ubuntu-vm")
+    ubuntu_vm.pop("name")
+
+    mocker.patch(
+        "datadog_checks.nutanix.infrastructure_monitor.InfrastructureMonitor._get_vms_for_host",
+        side_effect=lambda h: vms_by_host.get(h, []),
+    )
+
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    assert check.infrastructure_monitor.vm_count == 3
+    aggregator.assert_metric("nutanix.vm.count", count=3)
+
+
 def test_external_tags_for_vm(dd_run_check, aggregator, mock_instance, mock_http_get, datadog_agent):
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
