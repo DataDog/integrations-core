@@ -1,0 +1,199 @@
+# E2E Framework AI Flow Design
+
+## Summary
+
+Create a reusable AI flow plus a small internal runner for generating Datadog Agent E2E framework lab artifacts from an integrations-core integration. The flow writes directly into a fresh `datadog-agent` worktree created from the latest `origin/main` and produces the files needed to run an integration lab through the Agent E2E framework.
+
+The first version is intentionally A+: it provides reusable flow assets and internal execution plumbing, but it does not add a polished public `ddev` command. That keeps the change focused on output quality and the flow contract while leaving final CLI UX for a later step.
+
+## Goals
+
+- Generate Agent E2E framework integration component code.
+- Generate Agent E2E framework AWS lab scenario code.
+- Generate realistic load generation scripts that exercise the integration and make collected metrics look believable.
+- Generate Agent invoke tasks for creating, destroying, and connecting to the lab.
+- Register the generated scenario in the Agent E2E framework scenario registry.
+- Write generated files directly into an isolated local `datadog-agent` worktree created from latest main.
+
+## Non-goals
+
+- Add a stable user-facing `ddev` CLI command.
+- Provision or run the generated lab automatically.
+- Guarantee that every generated scenario works without human review.
+- Build a new infrastructure backend outside the Agent E2E framework.
+
+## Inputs
+
+The runner accepts runtime values for the flow:
+
+- `integration`: integrations-core integration name, for example `milvus`.
+- `integration_path`: path to the integration in integrations-core.
+- `agent_repo_path`: path to the local `datadog-agent` checkout.
+- `agent_worktree_path`: path to the new worktree created by the runner.
+- `branch_name`: branch name for the new Agent worktree.
+
+The flow reads from the integrations-core repository and writes only to the new Agent worktree.
+
+## Worktree setup
+
+The internal runner prepares the Agent checkout before the AI phases start:
+
+1. Validate that `agent_repo_path` is a git checkout of `datadog-agent`.
+2. Run `git fetch origin main` in that checkout.
+3. Create a branch and worktree from `origin/main` with `git worktree add -b <branch_name> <agent_worktree_path> origin/main`.
+4. Fail if the target worktree path or branch already exists, unless a future explicit overwrite option is added.
+5. Configure the AI file access policy so all generated writes are confined to `agent_worktree_path`.
+
+This avoids switching or mutating the user's existing Agent checkout while still ensuring the new worktree starts from the latest main.
+
+## Generated Agent files
+
+The flow writes these Agent paths:
+
+```text
+test/e2e-framework/components/datadog/apps/<integration>/
+  docker.go
+  docker-compose.yaml
+  load/...
+
+test/e2e-framework/scenarios/aws/<integration>/
+  run.go
+  BUILD.bazel
+
+tasks/e2e_framework/aws/<integration>.py
+
+test/e2e-framework/registry/scenarios.go
+```
+
+The load generator can be embedded in Compose for simple services or placed under `load/` when separate scripts are clearer. Prompts should prefer maintainable scripts over long inline shell blocks for non-trivial load behavior.
+
+## Invoke task contract
+
+The generated task module exposes at least:
+
+```bash
+dda inv aws.create-<integration>
+dda inv aws.destroy-<integration>
+dda inv aws.connect-<integration>
+```
+
+The create task supports the standard Agent E2E options used by similar scenarios, including stack name, Agent install toggle, Agent version, full image path, architecture, fakeintake, load balancer, Agent flavor, and Agent environment overrides where applicable.
+
+The connect task opens an SSH session to the host running the Agent. Multi-host selection is out of scope for the first version.
+
+The generated task may include extra helpers such as list or status when they follow existing Agent task conventions, but those helpers are not required.
+
+## Scenario registry contract
+
+The flow updates `test/e2e-framework/registry/scenarios.go` to import the generated scenario package and register:
+
+```go
+"aws/<integration>": <integration>.Run,
+```
+
+The review phase verifies that imports remain formatted and that the scenario key matches the invoke task's `scenario_name`.
+
+## Flow phases
+
+### 1. Research integration
+
+The research phase reads integrations-core artifacts for the selected integration:
+
+- check implementation code;
+- configuration spec and example config;
+- metrics metadata;
+- tests and fixtures;
+- README or docs;
+- existing E2E environments if present.
+
+It produces a concise research summary covering topology, required dependencies, ports, auth, startup sequence, metrics, realistic operations, and risks.
+
+### 2. Generate component and load code
+
+The component phase writes the Agent E2E app component:
+
+- `docker.go` with an embedded Compose manifest;
+- `docker-compose.yaml` for the service and dependencies;
+- load generation scripts when useful.
+
+The load generator must continuously exercise realistic service behavior. It should intentionally trigger all documented metrics where practical and document any metric that cannot be generated reliably in a local lab.
+
+### 3. Generate AWS scenario
+
+The scenario phase writes the AWS Pulumi scenario and Bazel target. It follows the conventions demonstrated by the Milvus E2E framework PR:
+
+- create an AWS environment;
+- create an EC2 Docker host;
+- export remote host and Docker outputs;
+- optionally deploy fakeintake;
+- deploy the containerized Agent;
+- attach the generated Compose manifest;
+- support Agent image/version and architecture options;
+- tag the Agent with stack and scenario metadata.
+
+### 4. Generate invoke tasks and registry wiring
+
+The task and registry phase writes the invoke task module and edits the scenario registry. It ensures task names, scenario names, stack lookup, SSH connection behavior, and useful command output are consistent with existing Agent E2E tasks.
+
+### 5. Review
+
+The review phase inspects generated files and reports required corrections. It checks:
+
+- expected files exist;
+- registry import and key are present;
+- task names match `aws.create-<integration>`, `aws.destroy-<integration>`, and `aws.connect-<integration>`;
+- scenario name is `aws/<integration>`;
+- load generation maps to the integration's metrics;
+- Go imports and Bazel dependencies look plausible;
+- no generated code writes outside the Agent worktree.
+
+## Internal runner design
+
+Add a small Python module that can be called by tests or future CLI code. The module should expose a typed function similar to:
+
+```python
+def prepare_and_run_e2e_lab_flow(
+    *,
+    integration: str,
+    integration_path: Path,
+    agent_repo_path: Path,
+    agent_worktree_parent: Path,
+    branch_name: str | None = None,
+    anthropic_client: anthropic.AsyncAnthropic,
+    callbacks: Callbacks | None = None,
+) -> Path:
+    ...
+```
+
+The function returns the created Agent worktree path. It prepares the worktree, constructs runtime variables, creates a checkpoint path, builds a `FileAccessPolicy` with the Agent worktree as the write root, and runs `PhaseOrchestrator` against the new flow's `flow.yaml`.
+
+The exact module path can be chosen during implementation, but it should live under `ddev/src/ddev/ai/` rather than `ddev/src/ddev/cli/` to keep it internal and reusable.
+
+## Error handling
+
+The runner fails before creating AI output if:
+
+- the integration path does not exist;
+- the Agent repo path does not exist;
+- `origin/main` cannot be fetched;
+- the generated branch or worktree path already exists;
+- the Agent repo is not a git checkout.
+
+If a phase fails after the worktree is created, the worktree is left in place for inspection and recovery. The error message should include the worktree path and checkpoint path when available.
+
+## Testing
+
+Unit tests should cover:
+
+- worktree command construction and failure handling with mocked subprocess/git calls;
+- runtime variable construction;
+- file access policy write root points at the Agent worktree;
+- flow config loads successfully and references existing prompt files;
+- required phases and dependencies are present;
+- generated prompt files are included in package data if packaging requires it.
+
+The implementation should not require live Anthropic calls in tests.
+
+## Open follow-up
+
+A later PR can add a public CLI command once the flow and generated artifacts are validated. Candidate commands include `ddev ai e2e-lab <integration>` or `ddev lab generate <integration>`.
