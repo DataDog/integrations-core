@@ -7,7 +7,7 @@
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
-    "support": "README.md#Support",
+    "support": "README.md#Troubleshooting",
     "changelog": "CHANGELOG.md",
     "description": "<FILL IN - A brief description of what this offering provides>",
     "title": "GTI VirusTotal",
