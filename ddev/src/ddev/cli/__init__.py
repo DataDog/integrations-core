@@ -10,6 +10,7 @@ from datadog_checks.dev.tooling.commands.run import run
 
 from ddev._version import __version__
 from ddev.cli import upgrade_check
+from ddev.cli.ai import ai
 from ddev.cli.application import Application
 from ddev.cli.ci import ci
 from ddev.cli.clean import clean
@@ -150,6 +151,7 @@ def ddev(
     app.initialize_old_cli()
 
 
+ddev.add_command(ai)
 ddev.add_command(ci)
 ddev.add_command(clean)
 ddev.add_command(config)
