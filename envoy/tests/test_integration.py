@@ -22,7 +22,7 @@ from .common import (
 pytestmark = [
     requires_new_environment,
     pytest.mark.integration,
-    pytest.mark.usefixtures('dd_environment'),
+    pytest.mark.usefixtures('dd_environment', 'exercise_envoy'),
     pytest.mark.flaky,
 ]
 
