@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 6.4.1 / 2026-05-14
+
+***Fixed***:
+
+* Remove the default auto configuration that used literal placeholder credentials. ([#23595](https://github.com/DataDog/integrations-core/pull/23595))
+
+## 6.4.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
 ## 6.3.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:

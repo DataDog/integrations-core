@@ -178,6 +178,7 @@ class InstanceConfig(BaseModel):
     operation_samples: Optional[OperationSamples] = None
     options: Optional[MappingProxyType[str, Any]] = None
     password: Optional[str] = None
+    propagate_agent_tags: Optional[bool] = None
     query_metrics: Optional[QueryMetrics] = None
     replica_check: Optional[bool] = None
     reported_database_hostname: Optional[str] = None

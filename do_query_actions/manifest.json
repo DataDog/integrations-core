@@ -3,7 +3,7 @@
   "app_uuid": "f1e2d3c4-b5a6-7890-1234-567890abcdef",
   "app_id": "do-query-actions",
   "owner": "agent-integrations",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",

@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: keeper
 metric_id: keeper
 backend_only: false

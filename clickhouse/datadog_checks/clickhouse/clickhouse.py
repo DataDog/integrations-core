@@ -10,14 +10,16 @@ from clickhouse_connect.driver import httputil
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.utils.db import QueryManager
-from datadog_checks.base.utils.db.utils import TagManager, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import TagManager, default_json_event_encoding, resolve_db_host
 from datadog_checks.base.utils.serialization import json
 
-from . import queries
+from . import advanced_queries, queries, utils
 from .__about__ import __version__
 from .config import build_config, sanitize
 from .health import ClickhouseHealth, HealthEvent, HealthStatus
+from .parts_and_merges import ClickhousePartsAndMerges
 from .query_completions import ClickhouseQueryCompletions
+from .query_errors import ClickhouseQueryErrors
 from .statement_samples import ClickhouseStatementSamples
 from .statements import ClickhouseStatementMetrics
 from .utils import ErrorSanitizer
@@ -75,27 +77,20 @@ class ClickhouseCheck(DatabaseCheck):
         # We'll connect on the first check run
         self._client = None
 
-        # Shared HTTP connection pool for all ClickHouse clients (main + DBM jobs)
-        # This reduces connection overhead while maintaining client isolation
-        # See: https://clickhouse.com/docs/integrations/language-clients/python/advanced-usage#customizing-the-http-connection-pool
-        self._pool_manager = httputil.get_pool_manager(maxsize=8, num_pools=4)
+        # Cache query manager per server version to avoid recompiling on every check run
+        self._query_manager: QueryManager | None = None
+        self._query_manager_version: str | None = None
 
-        self._query_manager = QueryManager(
-            self,
-            self.execute_query_raw,
-            queries=[
-                queries.SystemMetrics,
-                queries.SystemEventsToDeprecate,
-                queries.SystemEvents,
-                queries.SystemAsynchronousMetrics,
-                queries.SystemParts,
-                queries.SystemReplicas,
-                queries.SystemDictionaries,
-            ],
-            tags=self.tags,
-            error_handler=self._error_sanitizer.clean,
+        # Shared HTTP connection pool for all ClickHouse clients (main + DBM jobs).
+        # TLS settings must be baked in here: when pool_mgr is provided to get_client(),
+        # clickhouse-connect assigns it immediately and skips its own TLS pool creation,
+        # so verify=False would be silently ignored if the pool was created without it.
+        self._pool_manager = httputil.get_pool_manager(
+            maxsize=8,
+            num_pools=4,
+            verify=self._config.verify,
+            ca_cert=self._config.tls_ca_cert,
         )
-        self.check_initializations.append(self._query_manager.compile_queries)
 
         # Initialize DBM components if enabled
         self._init_dbm_components()
@@ -119,6 +114,18 @@ class ClickhouseCheck(DatabaseCheck):
             self.query_completions = ClickhouseQueryCompletions(self, self._config.query_completions)
         else:
             self.query_completions = None
+
+        # Initialize query errors (from system.query_log - failed queries)
+        if self._config.dbm and self._config.query_errors.enabled:
+            self.query_errors = ClickhouseQueryErrors(self, self._config.query_errors)
+        else:
+            self.query_errors = None
+
+        # Initialize parts and merges monitoring (from system.parts, merges, mutations, replication_queue)
+        if self._config.dbm and self._config.parts_and_merges.enabled:
+            self.parts_and_merges = ClickhousePartsAndMerges(self, self._config.parts_and_merges)
+        else:
+            self.parts_and_merges = None
 
     @property
     def tags(self) -> list[str]:
@@ -226,8 +233,12 @@ class ClickhouseCheck(DatabaseCheck):
 
     def check(self, _):
         self.connect()
+        self._server_version = self.select_version()
+        if self._query_manager is None or self._query_manager_version != self._server_version:
+            self._query_manager = self._build_query_manager()
+            self._query_manager_version = self._server_version
         self._query_manager.execute()
-        self.collect_version()
+        self.set_version_metadata(self._server_version)
 
         # Send database instance metadata
         self._send_database_instance_metadata()
@@ -244,10 +255,60 @@ class ClickhouseCheck(DatabaseCheck):
         if self.query_completions:
             self.query_completions.run_job_loop(self.tags)
 
-    @AgentCheck.metadata_entrypoint
-    def collect_version(self):
-        version = list(self.execute_query_raw('SELECT version()'))[0][0]
+        # Run query errors if DBM is enabled (from system.query_log - failed queries)
+        if self.query_errors:
+            self.query_errors.run_job_loop(self.tags)
 
+        # Run parts and merges monitoring if enabled
+        if self.parts_and_merges:
+            self.parts_and_merges.run_job_loop(self.tags)
+
+    def get_queries(self) -> list[dict]:
+        query_list = []
+
+        if self._config.use_legacy_queries:
+            query_list.extend(
+                [
+                    queries.SystemMetrics,
+                    queries.SystemEventsToDeprecate,
+                    queries.SystemEvents,
+                    queries.SystemAsynchronousMetrics,
+                    queries.SystemParts,
+                    queries.SystemReplicas,
+                    queries.SystemDictionaries,
+                ]
+            )
+
+        if self._config.use_advanced_queries:
+            query_list.extend(
+                [
+                    advanced_queries.SystemMetrics,
+                    advanced_queries.SystemEvents,
+                    advanced_queries.SystemAsynchronousMetrics,
+                ]
+            )
+            if self.version_ge('21.3'):
+                query_list.append(advanced_queries.SystemErrors)
+
+        return query_list
+
+    def _build_query_manager(self) -> QueryManager:
+        query_manager = QueryManager(
+            self,
+            self.execute_query_raw,
+            queries=self.get_queries(),
+            tags=self.tags,
+            error_handler=self._error_sanitizer.clean,
+        )
+        query_manager.compile_queries()
+
+        return query_manager
+
+    def select_version(self) -> str:
+        return self._client.command('SELECT version()', use_database=False)
+
+    @AgentCheck.metadata_entrypoint
+    def set_version_metadata(self, version: str):
         # The version comes in like `19.15.2.2` though sometimes there is no patch part
         version_parts = dict(zip(('year', 'major', 'minor', 'patch'), version.split('.')))
 
@@ -262,11 +323,11 @@ class ClickhouseCheck(DatabaseCheck):
 
     @property
     def reported_hostname(self) -> str | None:
-        """
-        Get the hostname to be reported in metrics and events.
-        """
         if self._resolved_hostname is None:
-            self._resolved_hostname = self._config.server
+            if self._config.reported_hostname:
+                self._resolved_hostname = self._config.reported_hostname
+            else:
+                self._resolved_hostname = resolve_db_host(self._config.server)
         return self._resolved_hostname
 
     @property
@@ -461,6 +522,10 @@ class ClickhouseCheck(DatabaseCheck):
             self.statement_samples.cancel()
         if self.query_completions:
             self.query_completions.cancel()
+        if self.query_errors:
+            self.query_errors.cancel()
+        if self.parts_and_merges:
+            self.parts_and_merges.cancel()
 
         # Wait for job loops to finish
         if self.statement_metrics and self.statement_metrics._job_loop_future:
@@ -469,6 +534,10 @@ class ClickhouseCheck(DatabaseCheck):
             self.statement_samples._job_loop_future.result()
         if self.query_completions and self.query_completions._job_loop_future:
             self.query_completions._job_loop_future.result()
+        if self.query_errors and self.query_errors._job_loop_future:
+            self.query_errors._job_loop_future.result()
+        if self.parts_and_merges and self.parts_and_merges._job_loop_future:
+            self.parts_and_merges._job_loop_future.result()
 
         # Close main client
         if self._client:
@@ -481,3 +550,23 @@ class ClickhouseCheck(DatabaseCheck):
         # Clear the shared pool manager
         # Note: urllib3 pool connections are automatically closed when idle
         self._pool_manager = None
+
+    def version_lt(self, version: str) -> bool:
+        """
+        Returns True if the current ClickHouse server version is less than the compared version, otherwise False.
+        """
+        # The `latest` version should always be greater than any other
+        if version == 'latest':
+            return True
+
+        return utils.parse_version(self._server_version) < utils.parse_version(version)
+
+    def version_ge(self, version: str) -> bool:
+        """
+        Returns True if the current ClickHouse server version is greater than the compared version, otherwise False.
+        """
+        # The `latest` version should always be less than any other
+        if version == 'latest':
+            return False
+
+        return utils.parse_version(self._server_version) >= utils.parse_version(version)

@@ -2,6 +2,25 @@
 
 <!-- towncrier release notes start -->
 
+## 9.5.2 / 2026-05-20
+
+***Fixed***:
+
+* Restore Istio ambient mode metric collection broken in 9.4.0: ztunnel counters are no longer silently dropped, proxy management metrics use the `workload_manager_*` names ztunnel actually emits, and the missing xDS message counters are now registered. ([#23707](https://github.com/DataDog/integrations-core/pull/23707))
+
+## 9.5.1 / 2026-04-15
+
+***Fixed***:
+
+* Polish fleet-configurable spec descriptions. ([#22967](https://github.com/DataDog/integrations-core/pull/22967))
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+
+## 9.5.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
 ## 9.4.0 / 2026-03-18
 
 ***Added***:

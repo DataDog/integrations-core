@@ -1,0 +1,38 @@
+# Policy for: .github/workflows/resolve-build-deps.yaml publish job in DataDog/integrations-core
+# Triggered by push to master or release branches, or workflow_dispatch
+#
+# Naming convention:
+#   self:               Only this repository (DataDog/integrations-core) can use this policy
+#   resolve-build-deps: Specific workflow
+#   push:               Primary trigger is push to protected branches
+#
+# Security model:
+#   - Publish job runs on push or workflow_dispatch to protected branches (master and X.Y.x)
+#   - Workflow file must be committed to the same branch
+#   - Pull request events are excluded by the job's if condition
+#
+# Permissions granted:
+#   - contents: write       - Push commits to branches
+#   - pull_requests: write  - Create pull requests
+#   - workflows: write      - Modify workflow files in generated commits
+#
+# Usage in workflows:
+#   - uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+#     with:
+#       scope: DataDog/integrations-core
+#       policy: self.resolve-build-deps.push
+
+issuer: https://token.actions.githubusercontent.com
+
+subject_pattern: repo:DataDog/integrations-core:ref:refs/heads/(master|\d+\.\d+\..*)
+
+claim_pattern:
+  event_name: (push|workflow_dispatch)
+  job_workflow_ref: DataDog/integrations-core/\.github/workflows/resolve-build-deps\.yaml@refs/heads/(master|\d+\.\d+\..*)
+  ref: refs/heads/(master|\d+\.\d+\..*)
+  repository: DataDog/integrations-core
+
+permissions:
+  contents: write
+  pull_requests: write
+  workflows: write

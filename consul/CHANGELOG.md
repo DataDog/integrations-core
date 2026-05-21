@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 5.5.0 / 2026-05-14
+
+***Added***:
+
+* Make the health check status cache size and TTL configurable via ``health_checks_cache_size`` and ``health_checks_cache_ttl``. ([#23603](https://github.com/DataDog/integrations-core/pull/23603))
+
+## 5.4.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
 ## 5.3.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:

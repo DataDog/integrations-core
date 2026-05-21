@@ -48,10 +48,16 @@ tests:
         device:
           hostname: "10.10.10.10"
           ip: "10.10.10.10"
+          name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
           type: "Unknown"
           type_id: 0
         metadata:
           event_code: "USER_MAC_CONFIG_CHANGE"
+          uid: "6532"
           original_time: "1.736329118112E9"
           product:
             name: "Auditd"
@@ -125,6 +131,11 @@ tests:
         device:
           hostname: "10.10.10.10"
           ip: "10.10.10.10"
+          name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
           type: "Unknown"
           type_id: 0
         dst_endpoint:
@@ -132,6 +143,7 @@ tests:
           ip: "10.10.10.10"
         metadata:
           event_code: "USER_AUTH"
+          uid: "1778"
           original_time: "1.740139921923E9"
           product:
             name: "Auditd"
@@ -181,12 +193,23 @@ tests:
         category_uid: 0
         class_name: "Base Event"
         class_uid: 0
+        device:
+          name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
+          type: "Unknown"
+          type_id: 0
         metadata:
           event_code: "MAC_STATUS"
+          uid: "1674"
           original_time: "1.740386730535E9"
           product:
             name: "Auditd"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -226,12 +249,23 @@ tests:
         category_uid: 0
         class_name: "Base Event"
         class_uid: 0
+        device:
+          name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
+          type: "Unknown"
+          type_id: 0
         metadata:
           event_code: "AVC"
+          uid: "182"
           original_time: "1.669185724533E9"
           product:
             name: "Auditd"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -278,12 +312,23 @@ tests:
         category_uid: 0
         class_name: "Base Event"
         class_uid: 0
+        device:
+          name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
+          type: "Unknown"
+          type_id: 0
         metadata:
           event_code: "USER_SELINUX_ERR"
+          uid: "198"
           original_time: "1.669714331555E9"
           product:
             name: "Auditd"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -330,12 +375,23 @@ tests:
         category_uid: 0
         class_name: "Base Event"
         class_uid: 0
+        device:
+          name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
+          type: "Unknown"
+          type_id: 0
         metadata:
           event_code: "USER_ROLE_CHANGE"
+          uid: "2606"
           original_time: "1.741000050325E9"
           product:
             name: "Auditd"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -375,12 +431,23 @@ tests:
         category_uid: 0
         class_name: "Base Event"
         class_uid: 0
+        device:
+          name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
+          type: "Unknown"
+          type_id: 0
         metadata:
           event_code: "MAC_CONFIG_CHANGE"
+          uid: "121"
           original_time: "1.678360880644E9"
           product:
             name: "Auditd"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -443,12 +510,18 @@ tests:
         device:
           hostname: "ub10-10-10-10"
           ip: "10.10.10.10"
+          name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
           type: "Unknown"
           type_id: 0
         group:
           uid: "1004"
         metadata:
           event_code: "ADD_GROUP"
+          uid: "5766"
           original_time: "1.740980591704E9"
           product:
             name: "Auditd"
@@ -521,12 +594,18 @@ tests:
         device:
           hostname: "localhost"
           ip: "10.10.10.10"
+          name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
           type: "Unknown"
           type_id: 0
         group:
           name: "testuser"
         metadata:
           event_code: "DEL_GROUP"
+          uid: "2333"
           original_time: "1.765794074279E9"
           product:
             name: "Auditd"
@@ -598,10 +677,16 @@ tests:
         device:
           hostname: "localhost"
           ip: "10.10.10.10"
+          name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
           type: "Unknown"
           type_id: 0
         metadata:
           event_code: "ADD_USER"
+          uid: "345"
           original_time: "1.635509157089E9"
           product:
             name: "Auditd"
@@ -676,10 +761,16 @@ tests:
         device:
           hostname: "localhost"
           ip: "10.10.10.10"
+          name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
           type: "Unknown"
           type_id: 0
         metadata:
           event_code: "DEL_USER"
+          uid: "2332"
           original_time: "1.740379094277E9"
           product:
             name: "Auditd"
@@ -757,10 +848,16 @@ tests:
         device:
           hostname: "localhost"
           ip: "10.10.10.10"
+          name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
           type: "Unknown"
           type_id: 0
         metadata:
           event_code: "USER_CHAUTHTOK"
+          uid: "347"
           original_time: "1.63550918986E9"
           product:
             name: "Auditd"
@@ -842,10 +939,16 @@ tests:
         device:
           hostname: "localhost"
           ip: "10.10.10.10"
+          name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
           type: "Unknown"
           type_id: 0
         metadata:
           event_code: "ROLE_ASSIGN"
+          uid: "879"
           original_time: "1.74072094567E9"
           product:
             name: "Auditd"
@@ -929,10 +1032,16 @@ tests:
         device:
           hostname: "localhost"
           ip: "10.10.10.10"
+          name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
           type: "Unknown"
           type_id: 0
         metadata:
           event_code: "ROLE_REMOVE"
+          uid: "1002"
           original_time: "1.740130059788E9"
           product:
             name: "Auditd"
@@ -998,6 +1107,10 @@ tests:
         class_uid: 1001
         device:
           name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
           type: "Unknown"
           type_id: 0
           uid: "fd:03"
@@ -1009,6 +1122,7 @@ tests:
           uid: "50314523"
         metadata:
           event_code: "PATH"
+          uid: "2247"
           original_time: "1.740378301873E9"
           product:
             name: "Auditd"
@@ -1062,6 +1176,10 @@ tests:
         class_uid: 1001
         device:
           name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
           type: "Unknown"
           type_id: 0
           uid: "fd:03"
@@ -1074,6 +1192,7 @@ tests:
           uid: "50314523"
         metadata:
           event_code: "PATH"
+          uid: "2247"
           original_time: "1.740378301873E9"
           product:
             name: "Auditd"
@@ -1127,6 +1246,10 @@ tests:
         class_uid: 1001
         device:
           name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
           type: "Unknown"
           type_id: 0
           uid: "fd:03"
@@ -1138,6 +1261,7 @@ tests:
           uid: "50314523"
         metadata:
           event_code: "PATH"
+          uid: "2247"
           original_time: "1.740378301873E9"
           product:
             name: "Auditd"
@@ -1191,6 +1315,10 @@ tests:
         class_uid: 1001
         device:
           name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
           type: "Unknown"
           type_id: 0
           uid: "fd:03"
@@ -1203,6 +1331,7 @@ tests:
           uid: "50314523"
         metadata:
           event_code: "PATH"
+          uid: "2247"
           original_time: "1.740378301873E9"
           product:
             name: "Auditd"
@@ -1240,12 +1369,23 @@ tests:
         category_uid: 0
         class_name: "Base Event"
         class_uid: 0
+        device:
+          name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
+          type: "Unknown"
+          type_id: 0
         metadata:
           event_code: "DAEMON_CONFIG"
+          uid: "946"
           original_time: "1.740139921923E9"
           product:
             name: "Auditd"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -1287,12 +1427,23 @@ tests:
         category_uid: 0
         class_name: "Base Event"
         class_uid: 0
+        device:
+          name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
+          type: "Unknown"
+          type_id: 0
         metadata:
           event_code: "DAEMON_ABORT"
+          uid: "1849"
           original_time: "1.740139921923E9"
           product:
             name: "Auditd"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -1335,12 +1486,23 @@ tests:
         category_uid: 0
         class_name: "Base Event"
         class_uid: 0
+        device:
+          name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
+          type: "Unknown"
+          type_id: 0
         metadata:
           event_code: "MAC_POLICY_LOAD"
+          uid: "235"
           original_time: "1.740139921923E9"
           product:
             name: "Auditd"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -1380,12 +1542,23 @@ tests:
         category_uid: 0
         class_name: "Base Event"
         class_uid: 0
+        device:
+          name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
+          type: "Unknown"
+          type_id: 0
         metadata:
           event_code: "CONFIG_CHANGE"
+          uid: "2361"
           original_time: "1.740139921923E9"
           product:
             name: "Auditd"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -1430,10 +1603,15 @@ tests:
         class_uid: 1007
         device:
           name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
           type: "Unknown"
           type_id: 0
         metadata:
           event_code: "EXECVE"
+          uid: "2249"
           original_time: "1.740378302456E9"
           product:
             name: "Auditd"
@@ -1510,10 +1688,15 @@ tests:
         class_uid: 1007
         device:
           name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
           type: "Unknown"
           type_id: 0
         metadata:
           event_code: "SYSCALL"
+          uid: "2250"
           original_time: "1.740378303123E9"
           product:
             name: "Auditd"
@@ -1585,18 +1768,43 @@ tests:
       ocsf:
         activity_id: 1
         activity_name: "Open"
+        actor:
+          process:
+            name: "bash"
+            path: "/usr/bin/bash"
+            pid: 226245
+            user:
+              name: "lima"
+              uid: "502"
+          session:
+            terminal: "pts0"
+            uid: "4"
+          user:
+            name: "lima"
+            uid: "502"
         category_name: "Network Activity"
         category_uid: 4
         class_name: "Network Activity"
         class_uid: 4001
+        device:
+          name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
+          type: "Unknown"
+          type_id: 0
         dst_endpoint:
           name: "Unknown"
         metadata:
           event_code: "SYSCALL"
+          uid: "354317"
           original_time: "1.770316388442E9"
           product:
             name: "Auditd"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -1640,15 +1848,26 @@ tests:
         category_uid: 4
         class_name: "Network Activity"
         class_uid: 4001
+        device:
+          name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
+          type: "Unknown"
+          type_id: 0
         dst_endpoint:
           ip: "1.2.3.4"
           port: 4444
         metadata:
           event_code: "SOCKADDR"
+          uid: "354317"
           original_time: "1.770316388442E9"
           product:
             name: "Auditd"
             vendor_name: "Linux"
+          profiles:
+           - "host"
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
@@ -1717,6 +1936,10 @@ tests:
         class_uid: 1001
         device:
           name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
           type: "Unknown"
           type_id: 0
         file:
@@ -1725,6 +1948,7 @@ tests:
           type_id: 0
         metadata:
           event_code: "SYSCALL"
+          uid: "2252"
           original_time: "1.740378303456E9"
           product:
             name: "Auditd"
@@ -1812,6 +2036,10 @@ tests:
         class_uid: 1001
         device:
           name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
           type: "Unknown"
           type_id: 0
         file:
@@ -1820,6 +2048,7 @@ tests:
           type_id: 0
         metadata:
           event_code: "SYSCALL"
+          uid: "2253"
           original_time: "1.740378303789E9"
           product:
             name: "Auditd"
@@ -1851,3 +2080,103 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1740378303789
+ -
+  sample: "type=SYSCALL msg=audit(1740378304.100:2260): arch=c000003e syscall=313 success=yes exit=0 a0=3 a1=0 a2=0 a3=0 items=0 ppid=1407 pid=226245 auid=502 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=pts0 ses=4 comm=\"insmod\" exe=\"/usr/bin/kmod\" subj=unconfined key=\"modules\"\x1dARCH=x86_64 SYSCALL=finit_module AUID=\"lima\" UID=\"root\" GID=\"root\" EUID=\"root\" SUID=\"root\" FSUID=\"root\" EGID=\"root\" SGID=\"root\" FSGID=\"root\""
+  result:
+    custom:
+      ARCH: "x86_64"
+      AUID: "lima"
+      EGID: "root"
+      EUID: "root"
+      FSGID: "root"
+      FSUID: "root"
+      GID: "root"
+      SGID: "root"
+      SUID: "root"
+      SYSCALL: "finit_module"
+      UID: "root"
+      a0: 3
+      a1: 0
+      a2: 0
+      a3: 0
+      arch: "c000003e"
+      auid: 502
+      comm: "insmod"
+      egid: 0
+      euid: 0
+      event_id: 2260
+      exe: "/usr/bin/kmod"
+      exit: 0
+      fsgid: 0
+      fsuid: 0
+      gid: 0
+      items: 0
+      key: "modules"
+      msg_raw: ""
+      ocsf:
+        activity_id: 1
+        activity_name: "Load"
+        actor:
+          app_name: "Unknown"
+          process:
+            name: "insmod"
+            path: "/usr/bin/kmod"
+            pid: 226245
+            user:
+              name: "root"
+              uid: "0"
+          session:
+            terminal: "pts0"
+            uid: "4"
+          user:
+            name: "lima"
+            uid: "502"
+        category_name: "System Activity"
+        category_uid: 1
+        class_name: "Module Activity"
+        class_uid: 1005
+        device:
+          name: "Unknown"
+          os:
+            name: "Linux"
+            type: "Linux"
+            type_id: 200
+          type: "Unknown"
+          type_id: 0
+        metadata:
+          event_code: "SYSCALL"
+          uid: "2260"
+          original_time: "1.7403783041E9"
+          product:
+            name: "Auditd"
+            vendor_name: "Linux"
+          version: "1.5.0"
+        module:
+          load_type: "Standard"
+          load_type_id: 1
+        severity: "Informational"
+        severity_id: 1
+        status: "Success"
+        status_id: 1
+        time: 1740378304100
+      pid: 226245
+      post_msg_kv: ""
+      ppid: 1407
+      pre_msg_kv: ""
+      ses: 4
+      sgid: 0
+      subj: "unconfined"
+      success: "yes"
+      suid: 0
+      syscall: 313
+      timestamp: 1.7403783041E12
+      tty: "pts0"
+      type: "SYSCALL"
+      uid: 0
+      usr:
+        id: 0
+        name: "root"
+    message: "type=SYSCALL msg=audit(1740378304.100:2260): arch=c000003e syscall=313 success=yes exit=0 a0=3 a1=0 a2=0 a3=0 items=0 ppid=1407 pid=226245 auid=502 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=pts0 ses=4 comm=\"insmod\" exe=\"/usr/bin/kmod\" subj=unconfined key=\"modules\"\x1dARCH=x86_64 SYSCALL=finit_module AUID=\"lima\" UID=\"root\" GID=\"root\" EUID=\"root\" SUID=\"root\" FSUID=\"root\" EGID=\"root\" SGID=\"root\" FSGID=\"root\""
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1740378304100

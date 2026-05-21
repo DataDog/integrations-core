@@ -823,7 +823,6 @@
                             "title": "Justification details",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {

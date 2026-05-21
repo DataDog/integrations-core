@@ -2,11 +2,11 @@
 
 ![Kafka Dashboard][1]
 
+**New:** [Kafka Monitoring][24] tracks consumer lag, throughput, schemas, and adds message reading capabilities.
+
 ## Overview
 
 View Kafka broker metrics and logs for a 360-view of the health and performance of your Kafka clusters in real time.
-
-Add [Data Streams Monitoring][24] to your producers and consumers to visualize the application topology, root cause issues across services, and measure end to end latency, throughput and lag.
 
 **Note**:
 
@@ -24,8 +24,6 @@ To collect Kafka consumer metrics, see the [kafka_consumer check][3].
 ### Installation
 
 The Agent's Kafka check is included in the [Datadog Agent][4] package, no additional installation is needed on your Kafka nodes.
-
-Add [Data Streams Monitoring][24] to your producers and consumers to visualize the application topology, root cause issues across services, and measure end to end latency, throughput and lag.
 
 The check collects metrics from JMX with [JMXFetch][5]. A JVM is needed on each kafka node so the Agent can run JMXFetch. The same JVM that Kafka uses can be used for this.
 
@@ -184,5 +182,4 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 [21]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
 [22]: https://raw.githubusercontent.com/DataDog/dd-agent/5.2.1/conf.d/kafka.yaml.example
 [23]: https://www.datadoghq.com/knowledge-center/apache-kafka/
-[24]: https://docs.datadoghq.com/data_streams/
-[25]: /data-streams
+[24]: https://docs.datadoghq.com/data_streams/kafka/?utm_source=docs&utm_medium=callout&utm_campaign=DocsCTA-DSMKafka-IntegrationsKafka

@@ -1,0 +1,5 @@
+provides:
+  - id: valence-security-logs
+    always_on: true
+    data_type: logs
+    direction: inbound

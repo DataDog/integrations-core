@@ -12,6 +12,9 @@ jobs:
   update:
     name: Update build_agent.yaml (${{ inputs.branch }})
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     env:
       BRANCH: ${{ inputs.branch }}
     steps:
@@ -20,31 +23,55 @@ jobs:
         with:
           ref: ${{ inputs.branch }}
 
-      - name: Verify preconditions
+      - name: Update build_agent.yaml
         run: |-
-          if ! grep -qE '^\s+branch:\s+main\s*$' .gitlab/build_agent.yaml; then
-            echo "build_agent.yaml already points to the release branch — nothing to do."
+          python3 - <<'PY'
+          import os
+          import re
+          from pathlib import Path
+
+          path = Path(".gitlab/build_agent.yaml")
+          content = path.read_text()
+          template_regex = re.compile(r"^\.build-agent-tpl:\n(?:[^\S\n].*(?:\n|$))*", re.MULTILINE)
+          branch_regex = re.compile(r"^(\s+branch:\s+)main([^\S\n]*)$", re.MULTILINE)
+
+          template_match = template_regex.search(content)
+          if template_match is None:
+              print("build_agent.yaml does not contain `.build-agent-tpl` — nothing to update.")
+              raise SystemExit(0)
+
+          template = template_match.group(0)
+          matches = list(branch_regex.finditer(template))
+          if not matches:
+              print("`.build-agent-tpl` does not contain a branch entry pointing to main — nothing to update.")
+              raise SystemExit(0)
+          if len(matches) != 1:
+              print(f"::error::Expected exactly one `.build-agent-tpl` branch pointing to main; found {len(matches)}.")
+              raise SystemExit(1)
+
+          def replacement(match):
+              return f"{match.group(1)}{os.environ['BRANCH']}{match.group(2)}"
+
+          updated_template, replacement_count = branch_regex.subn(replacement, template, count=1)
+          assert replacement_count == 1
+          path.write_text(content[: template_match.start()] + updated_template + content[template_match.end() :])
+          PY
+
+          if git diff --quiet -- .gitlab/build_agent.yaml; then
             exit 0
           fi
           if ! git ls-remote --exit-code --heads https://github.com/DataDog/datadog-agent.git "$BRANCH" >/dev/null 2>&1; then
-            echo "::error::Agent branch '$BRANCH' does not exist in DataDog/datadog-agent yet."
-            exit 1
+            echo "::warning::Agent branch '$BRANCH' does not exist in DataDog/datadog-agent yet. Creating the PR anyway."
           fi
           echo "needs_update=true" >> "$GITHUB_ENV"
 
-      - name: Update build_agent.yaml
+      - name: Get token via dd-octo-sts
         if: env.needs_update == 'true'
-        run: |-
-          sed -i "s/^    branch: main$/    branch: $BRANCH/" .gitlab/build_agent.yaml
-
-      - name: Create token
-        if: env.needs_update == 'true'
-        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+        uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
         id: token-generator
         with:
-          app-id: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_APP_ID }}
-          private-key: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_PRIVATE_KEY }}
-          repositories: integrations-core
+          scope: DataDog/integrations-core
+          policy: self.update-build-agent-yaml.dispatch
 
       - name: Create Pull Request
         if: env.needs_update == 'true'
