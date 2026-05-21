@@ -80,9 +80,7 @@ def qa_label(app: Application):
     if not qa_labels:
         app.display_error(f'PR #{pr_number} is missing an Agent-release QA decision label.')
     else:
-        app.display_error(
-            f'PR #{pr_number} has more than one Agent-release QA decision label: {", ".join(qa_labels)}.'
-        )
+        app.display_error(f'PR #{pr_number} has more than one Agent-release QA decision label: {", ".join(qa_labels)}.')
 
     app.display_info(HELP_MESSAGE)
     app.abort()
