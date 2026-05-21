@@ -77,3 +77,16 @@ def test_e2e_framework_lab_prompts_render_runtime_variables() -> None:
     assert "/repo/datadog-agent-worktrees/e2e-lab-redisdb" in render_prompt(
         FLOW_DIR / "prompts" / "component_writer.md", context
     )
+
+
+def test_e2e_framework_lab_prompts_include_autodiscovery_reachability_guidance() -> None:
+    component_task = (FLOW_DIR / "tasks" / "component.md").read_text()
+    review_task = (FLOW_DIR / "tasks" / "review.md").read_text()
+
+    assert "%%host%%" in component_task
+    assert "container that owns the label" in component_task
+    assert "put the label on the target service container" in component_task
+    assert "extra optional service instances" in component_task
+
+    assert "Autodiscovery" in review_task
+    assert "host and port resolve to a reachable listener" in review_task
