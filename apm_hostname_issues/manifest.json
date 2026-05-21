@@ -21,12 +21,13 @@
     "integration": {
       "auto_install": true,
       "source_type_name": "APM Hostname Issues",
-      "source_type_id": null,
       "events": {
         "creates_events": false
       },
       "metrics": {
-        "check": "datadog.apm.hostname_issue"
+        "prefix": "datadog.apm.",
+        "check": "datadog.apm.hostname_issue",
+        "metadata_path": "metadata.csv"
       }
     },
     "dashboards": {
