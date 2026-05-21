@@ -17,6 +17,7 @@
       "Category::Network",
       "Category::OS & System",
       "Category::Security",
+      "Category::SIEM",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",

@@ -17,8 +17,12 @@ if TYPE_CHECKING:
 
 BRANCH_NAME_PATTERN = r"^\d+\.\d+\.x$"
 BRANCH_NAME_REGEX = re.compile(BRANCH_NAME_PATTERN)
+BUILD_AGENT_YAML_PATH = '.gitlab/build_agent.yaml'
+BUILD_AGENT_TEMPLATE_PATTERN = r'^\.build-agent-tpl:\n(?:[^\S\n].*(?:\n|$))*'
+BUILD_AGENT_MAIN_BRANCH_PATTERN = r'^(\s+branch:\s+)main([^\S\n]*)$'
+BUILD_AGENT_TEMPLATE_REGEX = re.compile(BUILD_AGENT_TEMPLATE_PATTERN, re.MULTILINE)
+BUILD_AGENT_MAIN_BRANCH_REGEX = re.compile(BUILD_AGENT_MAIN_BRANCH_PATTERN, re.MULTILINE)
 GITHUB_LABEL_COLOR = '5319e7'
-DATADOG_AGENT_REPO_URL = 'https://github.com/DataDog/datadog-agent.git'
 
 
 @click.command
@@ -178,58 +182,59 @@ def suggest_next_branch(app: Application) -> str:
 
 
 def ensure_build_agent_yaml_updated(app: Application, branch_name: str) -> bool:
-    """
-    Ensure build_agent.yaml points to the correct agent branch for release builds.
-
-    This function:
-    1. Checks if the file still points to 'main' (needs update)
-    2. Checks if the agent branch exists in datadog-agent repository
-    3. Updates the file if both conditions are met
-
-    Args:
-        branch_name: The release branch name (e.g., '7.45.x')
-
-    Returns:
-        True if the file was updated, False otherwise.
-    """
+    """Update build_agent.yaml to point to the release branch when it still targets main."""
     from ddev.utils.fs import Path
 
-    build_agent_yaml = Path('.gitlab/build_agent.yaml')
+    build_agent_yaml = Path(BUILD_AGENT_YAML_PATH)
 
     if not build_agent_yaml.exists():
         app.display_warning(f'Warning: {build_agent_yaml} not found')
         return False
 
-    # Read the current content
     with open(build_agent_yaml, 'r') as f:
         content = f.read()
 
-    # Check if file still points to main (needs update)
-    old_pattern = r'(\s+branch:\s+)main'
-    if not re.search(old_pattern, content):
-        # Already updated to a release branch, nothing to do
+    matches = find_build_agent_template_main_branch_matches(content)
+    if not matches:
         return False
-
-    # Check if the agent branch exists in datadog-agent repository using git ls-remote
-    app.display_waiting(f'Checking if branch `{branch_name}` exists in datadog-agent...')
-    ls_remote_output = app.repo.git.capture('ls-remote', '--heads', DATADOG_AGENT_REPO_URL, branch_name)
-    if not ls_remote_output.strip():
-        app.display_warning(
-            f"Agent branch `{branch_name}` does not exist yet in datadog-agent. "
-            f"Keeping build_agent.yaml pointing to 'main'. "
-            f"The `update-build-agent-yaml` workflow will create a PR to update the file "
-            f"once the agent branch is created."
+    if len(matches) > 1:
+        app.abort(
+            f'Expected exactly one `.build-agent-tpl` branch pointing to `main` in `{BUILD_AGENT_YAML_PATH}`; '
+            f'found {len(matches)}.'
         )
         return False
 
-    # Agent branch exists, update the file
-    def replacement(match):
-        return match.group(1) + branch_name
-
-    updated_content = re.sub(old_pattern, replacement, content)
+    updated_content, replacement_count = replace_build_agent_template_main_branch(content, branch_name)
+    assert replacement_count == 1
 
     with open(build_agent_yaml, 'w') as f:
         f.write(updated_content)
 
     app.display_success(f'Updated build_agent.yaml file to use Agent branch: {branch_name}')
     return True
+
+
+def find_build_agent_template_main_branch_matches(content: str) -> list[re.Match[str]]:
+    template_match = BUILD_AGENT_TEMPLATE_REGEX.search(content)
+    if template_match is None:
+        return []
+
+    return list(BUILD_AGENT_MAIN_BRANCH_REGEX.finditer(template_match.group(0)))
+
+
+def replace_build_agent_template_main_branch(content: str, branch_name: str) -> tuple[str, int]:
+    template_match = BUILD_AGENT_TEMPLATE_REGEX.search(content)
+    if template_match is None:
+        return content, 0
+
+    def replacement(match: re.Match[str]) -> str:
+        return f'{match.group(1)}{branch_name}{match.group(2)}'
+
+    updated_template, replacement_count = BUILD_AGENT_MAIN_BRANCH_REGEX.subn(
+        replacement, template_match.group(0), count=1
+    )
+    if replacement_count == 0:
+        return content, 0
+
+    updated_content = content[: template_match.start()] + updated_template + content[template_match.end() :]
+    return updated_content, replacement_count
