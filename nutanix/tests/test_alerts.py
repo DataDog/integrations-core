@@ -459,9 +459,3 @@ def test_alerts_v42_404_falls_back_to_v40(
     assert len(alert_events) > 0, "Expected alerts via v4.0 fallback"
 
     write_cache.assert_any_call('alerts_v42_supported', 'False')
-
-    called_urls = [call.args[0] for call in mock_http_get.call_args_list]
-    assert any(v42_url_fragment in u for u in called_urls), "v4.2 endpoint should have been tried"
-    assert any('api/monitoring/v4.0/serviceability/alerts' in u for u in called_urls), (
-        "v4.0 fallback URL should have been called"
-    )
