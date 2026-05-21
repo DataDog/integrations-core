@@ -182,7 +182,7 @@ files:
       fleet_configurable: true
       description: |
         Whether to emit an event when a Consul health check transitions to `warning`.
-        Critical health check events are always emitted when `collect_health_checks` is enabled.
+        Events for critical health checks are always emitted when `collect_health_checks` is enabled.
       value:
         type: boolean
         example: true

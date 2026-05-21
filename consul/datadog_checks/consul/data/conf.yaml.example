@@ -162,7 +162,7 @@ instances:
 
     ## @param health_check_warning_events - boolean - optional - default: false
     ## Whether to emit an event when a Consul health check transitions to `warning`.
-    ## Critical health check events are always emitted when `collect_health_checks` is enabled.
+    ## Events for critical health checks are always emitted when `collect_health_checks` is enabled.
     #
     # health_check_warning_events: true
 
