@@ -1,0 +1,665 @@
+{
+  "title": "Claude Compliance Logs Overview",
+  "description": "Security and compliance visibility into Anthropic Console activity: SSO sign-ins, admin API key lifecycle, organization changes, and Claude chat/project access.",
+  "layout_type": "ordered",
+  "reflow_type": "fixed",
+  "is_read_only": false,
+  "notify_list": [],
+  "tags": ["integration:anthropic-compliance-logs"],
+  "template_variables": [
+    {
+      "name": "org",
+      "prefix": "@organization_id",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "actor_type",
+      "prefix": "@actor.type",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "event_name",
+      "prefix": "@evt.name",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "widgets": [
+    {
+      "definition": {
+        "title": "About Claude Compliance Logs",
+        "type": "group",
+        "background_color": "white",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "type": "image",
+              "url": "/static/images/logos/anthropic_large.svg",
+              "sizing": "contain",
+              "has_background": false,
+              "has_border": false,
+              "vertical_align": "center",
+              "horizontal_align": "center"
+            },
+            "layout": {"x": 0, "y": 0, "width": 5, "height": 2}
+          },
+          {
+            "definition": {
+              "type": "note",
+              "content": "## Claude Compliance Logs\n\nMonitor security-relevant activity from the Anthropic Console: SSO and password sign-ins, admin API key lifecycle, organization membership changes, SSO/SAML configuration updates, and Claude chat and project access events.\n\nAll widgets scope to `source:claude-compliance-logs`. Use the template variables at the top of the dashboard to slice by organization, actor type, or event name.\n\n### Useful links\n- [Claude Compliance Logs tile](https://app.datadoghq.com/integrations/claude-compliance-logs)\n- [Anthropic Console compliance API](https://docs.anthropic.com/en/api/compliance-api)\n- [Datadog Cloud SIEM](https://app.datadoghq.com/security)",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {"x": 0, "y": 2, "width": 5, "height": 4}
+          }
+        ]
+      },
+      "layout": {"x": 0, "y": 0, "width": 5, "height": 7}
+    },
+    {
+      "definition": {
+        "title": "Overview",
+        "type": "group",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "title": "Total compliance events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [{"formula": "query1"}],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {"query": "source:claude-compliance-logs $org $actor_type $event_name"},
+                      "indexes": ["*"],
+                      "group_by": [],
+                      "compute": {"aggregation": "count"},
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {"type": "bars"}
+            },
+            "layout": {"x": 0, "y": 0, "width": 2, "height": 2}
+          },
+          {
+            "definition": {
+              "title": "Unique actors",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [{"formula": "query1"}],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {"query": "source:claude-compliance-logs $org $actor_type $event_name"},
+                      "indexes": ["*"],
+                      "group_by": [],
+                      "compute": {"aggregation": "cardinality", "metric": "@usr.email"},
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {"type": "bars"}
+            },
+            "layout": {"x": 2, "y": 0, "width": 2, "height": 2}
+          },
+          {
+            "definition": {
+              "title": "Unique source IPs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [{"formula": "query1"}],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {"query": "source:claude-compliance-logs $org $actor_type $event_name"},
+                      "indexes": ["*"],
+                      "group_by": [],
+                      "compute": {"aggregation": "cardinality", "metric": "@network.client.ip"},
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {"type": "bars"}
+            },
+            "layout": {"x": 4, "y": 0, "width": 3, "height": 2}
+          },
+          {
+            "definition": {
+              "title": "Events over time by event name",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{"formula": "query1", "alias": "events"}],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {"query": "source:claude-compliance-logs $org $actor_type $event_name"},
+                      "indexes": ["*"],
+                      "group_by": [
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {"aggregation": "count", "order": "desc"},
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {"aggregation": "count"},
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {"palette": "dog_classic", "line_type": "solid", "line_width": "normal"},
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {"x": 0, "y": 2, "width": 7, "height": 3}
+          }
+        ]
+      },
+      "layout": {"x": 5, "y": 0, "width": 7, "height": 7}
+    },
+    {
+      "definition": {
+        "title": "Authentication & Geography",
+        "type": "group",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "type": "note",
+              "content": "Track sign-in activity across SSO, Google, Apple, and password flows. A spike in sign-outs without matching sign-ins, or sign-ins from unexpected countries, may indicate session hijacking or compromised credentials.",
+              "background_color": "purple",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {"x": 0, "y": 0, "width": 12, "height": 1}
+          },
+          {
+            "definition": {
+              "title": "Auth events timeline",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{"formula": "query1", "alias": "auth events"}],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {"query": "source:claude-compliance-logs @evt.name:(user_signed_in_sso OR user_signed_in_google OR user_signed_in_apple OR user_signed_in_password OR user_signed_out) $org $actor_type"},
+                      "indexes": ["*"],
+                      "group_by": [
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {"aggregation": "count", "order": "desc"},
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {"aggregation": "count"},
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {"palette": "dog_classic", "line_type": "solid", "line_width": "normal"},
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {"x": 0, "y": 1, "width": 6, "height": 4}
+          },
+          {
+            "definition": {
+              "title": "Sign-ins by country",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "geomap",
+              "requests": [
+                {
+                  "formulas": [{"formula": "query1"}],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {"query": "source:claude-compliance-logs @evt.name:user_signed_in_* $org $actor_type"},
+                      "indexes": ["*"],
+                      "group_by": [
+                        {
+                          "facet": "@network.client.geoip.country.iso_code",
+                          "limit": 250,
+                          "sort": {"aggregation": "count", "order": "desc"},
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {"aggregation": "count"},
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "style": {"palette": "hostmap_blues", "palette_flip": false},
+              "view": {"focus": "WORLD"}
+            },
+            "layout": {"x": 6, "y": 1, "width": 6, "height": 4}
+          }
+        ]
+      },
+      "layout": {"x": 0, "y": 7, "width": 12, "height": 6}
+    },
+    {
+      "definition": {
+        "title": "Event Breakdown",
+        "type": "group",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "type": "note",
+              "content": "Top event types and the kinds of actors generating them. A surge of `admin_api_key_actor` traffic, or unfamiliar event names, is worth investigating.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {"x": 0, "y": 0, "width": 12, "height": 1}
+          },
+          {
+            "definition": {
+              "title": "Top event types",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [{"formula": "query1"}],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {"query": "source:claude-compliance-logs $org $actor_type $event_name"},
+                      "indexes": ["*"],
+                      "group_by": [
+                        {
+                          "facet": "@evt.name",
+                          "limit": 15,
+                          "sort": {"aggregation": "count", "order": "desc"},
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {"aggregation": "count"},
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "style": {"display": {"type": "stacked", "legend": "automatic"}}
+            },
+            "layout": {"x": 0, "y": 1, "width": 6, "height": 4}
+          },
+          {
+            "definition": {
+              "title": "Events by actor type",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "sunburst",
+              "requests": [
+                {
+                  "formulas": [{"formula": "query1"}],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {"query": "source:claude-compliance-logs $org $event_name"},
+                      "indexes": ["*"],
+                      "group_by": [
+                        {
+                          "facet": "@actor.type",
+                          "limit": 10,
+                          "sort": {"aggregation": "count", "order": "desc"},
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {"aggregation": "count"},
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "style": {"palette": "datadog16"}
+                }
+              ],
+              "legend": {"type": "table"}
+            },
+            "layout": {"x": 6, "y": 1, "width": 6, "height": 4}
+          }
+        ]
+      },
+      "layout": {"x": 0, "y": 13, "width": 12, "height": 6}
+    },
+    {
+      "definition": {
+        "title": "Identity & Access",
+        "type": "group",
+        "background_color": "white",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "title": "Top actors",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [{"formula": "query1"}],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {"query": "source:claude-compliance-logs @usr.email:* $org $actor_type $event_name"},
+                      "indexes": ["*"],
+                      "group_by": [
+                        {
+                          "facet": "@usr.email",
+                          "limit": 15,
+                          "sort": {"aggregation": "count", "order": "desc"},
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {"aggregation": "count"},
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "style": {"display": {"type": "stacked", "legend": "automatic"}}
+            },
+            "layout": {"x": 0, "y": 0, "width": 6, "height": 4}
+          },
+          {
+            "definition": {
+              "title": "Top source IPs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [{"formula": "query1"}],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {"query": "source:claude-compliance-logs @network.client.ip:* $org $actor_type $event_name"},
+                      "indexes": ["*"],
+                      "group_by": [
+                        {
+                          "facet": "@network.client.ip",
+                          "limit": 15,
+                          "sort": {"aggregation": "count", "order": "desc"},
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {"aggregation": "count"},
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "style": {"display": {"type": "stacked", "legend": "automatic"}}
+            },
+            "layout": {"x": 6, "y": 0, "width": 6, "height": 4}
+          }
+        ]
+      },
+      "layout": {"x": 0, "y": 19, "width": 12, "height": 7}
+    },
+    {
+      "definition": {
+        "title": "Security-Sensitive Activity",
+        "type": "group",
+        "background_color": "vivid_orange",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "type": "note",
+              "content": "API key lifecycle changes and per-organization activity volume. Unexpected key creation or deletion bursts, or activity from unknown organizations, should be reviewed against your change-management records.",
+              "background_color": "orange",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {"x": 0, "y": 0, "width": 12, "height": 1}
+          },
+          {
+            "definition": {
+              "title": "API key lifecycle events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [{"formula": "query1"}],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {"query": "source:claude-compliance-logs @evt.name:(*api_key_created OR *api_key_deleted OR *api_key_updated) $org $actor_type"},
+                      "indexes": ["*"],
+                      "group_by": [
+                        {
+                          "facet": "@evt.name",
+                          "limit": 15,
+                          "sort": {"aggregation": "count", "order": "desc"},
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {"aggregation": "count"},
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "style": {"display": {"type": "stacked", "legend": "automatic"}}
+            },
+            "layout": {"x": 0, "y": 1, "width": 6, "height": 4}
+          },
+          {
+            "definition": {
+              "title": "Organization activity split",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [{"formula": "query1"}],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {"query": "source:claude-compliance-logs $org $actor_type $event_name"},
+                      "indexes": ["*"],
+                      "group_by": [
+                        {
+                          "facet": "@organization_id",
+                          "limit": 15,
+                          "sort": {"aggregation": "count", "order": "desc"},
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {"aggregation": "count"},
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "style": {"display": {"type": "stacked", "legend": "automatic"}}
+            },
+            "layout": {"x": 6, "y": 1, "width": 6, "height": 4}
+          }
+        ]
+      },
+      "layout": {"x": 0, "y": 26, "width": 12, "height": 6}
+    },
+    {
+      "definition": {
+        "title": "Admin & SSO Activity Streams",
+        "type": "group",
+        "background_color": "vivid_pink",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "type": "note",
+              "content": "High-impact security events: actions taken by admin API keys and changes to SSO/SAML configuration. Each entry should map to a known operator or change ticket.",
+              "background_color": "pink",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {"x": 0, "y": 0, "width": 12, "height": 1}
+          },
+          {
+            "definition": {
+              "title": "Admin actions",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "log_stream",
+              "indexes": ["*"],
+              "query": "source:claude-compliance-logs (@actor.type:admin_api_key_actor OR @evt.name:admin_*) $org $event_name",
+              "sort": {"column": "timestamp", "order": "desc"},
+              "columns": ["host", "@evt.name", "@usr.email", "@network.client.ip"],
+              "show_date_column": true,
+              "show_message_column": true,
+              "message_display": "inline"
+            },
+            "layout": {"x": 0, "y": 1, "width": 6, "height": 5}
+          },
+          {
+            "definition": {
+              "title": "SSO and SAML config changes",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "log_stream",
+              "indexes": ["*"],
+              "query": "source:claude-compliance-logs @evt.name:(*sso_* OR *saml_*) $org $actor_type",
+              "sort": {"column": "timestamp", "order": "desc"},
+              "columns": ["host", "@evt.name", "@usr.email", "@network.client.ip"],
+              "show_date_column": true,
+              "show_message_column": true,
+              "message_display": "inline"
+            },
+            "layout": {"x": 6, "y": 1, "width": 6, "height": 5}
+          }
+        ]
+      },
+      "layout": {"x": 0, "y": 32, "width": 12, "height": 7}
+    },
+    {
+      "definition": {
+        "title": "Recent Activity",
+        "type": "group",
+        "background_color": "white",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "title": "Recent compliance events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "log_stream",
+              "indexes": ["*"],
+              "query": "source:claude-compliance-logs $org $actor_type $event_name",
+              "sort": {"column": "timestamp", "order": "desc"},
+              "columns": ["host", "@evt.name", "@actor.type", "@usr.email", "@network.client.geoip.country.iso_code"],
+              "show_date_column": true,
+              "show_message_column": true,
+              "message_display": "inline"
+            },
+            "layout": {"x": 0, "y": 0, "width": 12, "height": 6}
+          }
+        ]
+      },
+      "layout": {"x": 0, "y": 39, "width": 12, "height": 7}
+    }
+  ]
+}

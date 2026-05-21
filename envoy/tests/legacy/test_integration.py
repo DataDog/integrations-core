@@ -12,7 +12,11 @@ from .common import ENVOY_VERSION, EXT_AUTHZ_METRICS, INSTANCES, RBAC_METRICS
 CHECK_NAME = 'envoy'
 UNIQUE_METRICS = EXT_AUTHZ_METRICS + RBAC_METRICS
 
-pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment'), pytest.mark.flaky]
+pytestmark = [
+    pytest.mark.integration,
+    pytest.mark.usefixtures('dd_environment', 'exercise_envoy'),
+    pytest.mark.flaky,
+]
 
 
 def test_success(aggregator, check, dd_run_check):
