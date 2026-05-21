@@ -23,6 +23,7 @@ EXPECTED_DEFAULTS = {
     'password': '',
     'connect_timeout': 10,
     'read_timeout': 10,
+    'reported_hostname': None,
     'compression': None,
     'tls_verify': False,
     'tls_ca_cert': None,

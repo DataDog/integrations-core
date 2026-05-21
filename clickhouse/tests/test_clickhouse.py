@@ -18,7 +18,7 @@ def test_check(aggregator, instance, dd_run_check):
     server_tag = 'server:{}'.format(instance['server'])
     port_tag = 'port:{}'.format(instance['port'])
     metrics = common.get_metrics(CLICKHOUSE_VERSION)
-    db_hostname_tag = 'database_hostname:{}'.format(instance['server'])
+    db_hostname_tag = 'database_hostname:{}'.format(check.reported_hostname)
     db_instance_tag = 'database_instance:{}:{}:default'.format(instance['server'], instance['port'])
 
     for metric in metrics:
@@ -55,7 +55,7 @@ def test_custom_queries(aggregator, instance, dd_run_check):
             'db:default',
             'foo:bar',
             'test:clickhouse',
-            'database_hostname:{}'.format(instance['server']),
+            'database_hostname:{}'.format(check.reported_hostname),
             'database_instance:{}:{}:default'.format(instance['server'], instance['port']),
         ],
     )
