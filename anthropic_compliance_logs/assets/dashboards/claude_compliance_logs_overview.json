@@ -50,7 +50,7 @@
           {
             "definition": {
               "type": "note",
-              "content": "## Claude Compliance Logs\n\nMonitor security-relevant activity from the Anthropic Console: SSO and password sign-ins, admin API key lifecycle, organization membership changes, SSO/SAML configuration updates, and Claude chat and project access events.\n\nAll widgets scope to `source:claude-compliance-logs`. Use the template variables at the top of the dashboard to slice by organization, actor type, or event name.\n\n### Useful links\n- [Claude Compliance Logs tile](https://app.datadoghq.com/integrations/claude-compliance-logs)\n- [Anthropic Console compliance API](https://docs.anthropic.com/en/api/compliance-api)\n- [Datadog Cloud SIEM](https://app.datadoghq.com/security)",
+              "content": "## Claude Compliance Logs\n\nMonitor security-relevant activity from the Anthropic Console: SSO and password sign-ins, admin API key lifecycle, organization membership changes, SSO/SAML configuration updates, and Claude chat and project access events.\n\nAll widgets scope to `source:claude-compliance-logs`. Use the template variables at the top of the dashboard to slice by organization, actor type, or event name.\n\n### Useful links\n- [Claude Compliance Logs tile](/security/siem/signals?query=%40workflow.rule.type%3A%28%22Log%20Detection%22%20OR%20%22Signal%20Correlation%22%29%20-%40workflow.rule.defaultRuleId%3Adef-000-wnp%20source%3Aclaude-compliance-logs)\n- [Anthropic Console compliance API](https://support.claude.com/en/articles/13015708-access-the-compliance-api)\n- [Datadog Cloud SIEM](/security)",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
@@ -242,7 +242,7 @@
                     {
                       "name": "query1",
                       "data_source": "logs",
-                      "search": {"query": "source:claude-compliance-logs @evt.name:(user_signed_in_sso OR user_signed_in_google OR user_signed_in_apple OR user_signed_in_password OR user_signed_out) $org $actor_type"},
+                      "search": {"query": "source:claude-compliance-logs @evt.name:(sso_login_succeeded OR social_login_succeeded OR magic_link_login_succeeded OR user_logged_out) $org $actor_type"},
                       "indexes": ["*"],
                       "group_by": [
                         {
@@ -277,7 +277,7 @@
                     {
                       "name": "query1",
                       "data_source": "logs",
-                      "search": {"query": "source:claude-compliance-logs @evt.name:user_signed_in_* $org $actor_type"},
+                      "search": {"query": "source:claude-compliance-logs @evt.name:(sso_login_succeeded OR social_login_succeeded OR magic_link_login_succeeded OR user_logged_out OR sso_login_failed OR sso_login_initiated) $org $actor_type"},
                       "indexes": ["*"],
                       "group_by": [
                         {
