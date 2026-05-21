@@ -1,0 +1,1 @@
+Reword the `qa-label` validation messages to make explicit that the check refers to the Datadog Agent release cycle.

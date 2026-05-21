@@ -67,6 +67,7 @@ facets:
     name: Activity ID
     path: ocsf.activity_id
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Activity Name
@@ -77,6 +78,7 @@ facets:
     name: Category ID
     path: ocsf.category_uid
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Category
@@ -87,6 +89,7 @@ facets:
     name: Class ID
     path: ocsf.class_uid
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Class
@@ -97,6 +100,7 @@ facets:
     name: Status ID
     path: ocsf.status_id
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Status
@@ -107,6 +111,7 @@ facets:
     name: Severity ID
     path: ocsf.severity_id
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Severity
