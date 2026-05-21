@@ -14,22 +14,22 @@
     "media": [
       {
         "caption": "Claude Compliance Logs - Overview",
-        "image_url": "assets/images/overview.png",
+        "image_url": "images/overview.png",
         "media_type": "image"
       },
       {
         "caption": "Claude Compliance Logs - Admin & SSO Activity Streams",
-        "image_url": "assets/images/admin_and_sso_activity_streams.png",
+        "image_url": "images/admin_and_sso_activity_streams.png",
         "media_type": "image"
       },
       {
         "caption": "Claude Compliance Logs - Recent Activity",
-        "image_url": "assets/images/recent_activity.png",
+        "image_url": "images/recent_activity.png",
         "media_type": "image"
       },
       {
         "caption": "Claude Compliance Logs - SSO & SAML Activity",
-        "image_url": "assets/images/sso_and_saml_activity.png",
+        "image_url": "images/sso_and_saml_activity.png",
         "media_type": "image"
       }
     ],
