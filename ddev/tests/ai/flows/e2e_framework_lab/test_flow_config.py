@@ -1,7 +1,6 @@
 from ddev.ai.flows.e2e_framework_lab.runner import FLOW_DIR
 from ddev.ai.phases.config import FlowConfig
 
-
 REQUIRED_PHASES = {
     "research_integration",
     "generate_component",
