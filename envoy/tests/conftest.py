@@ -35,10 +35,18 @@ def dd_environment():
         attempts=5,
         attempts_wait=10,
     ):
-        # Exercising envoy a bit will trigger extra metrics
-        requests.get('http://{}:8000/service/1'.format(HOST))
-        requests.get('http://{}:8000/service/2'.format(HOST))
         yield instance
+
+
+@pytest.fixture
+def exercise_envoy():
+    # Fire requests through Envoy's listener immediately before the check scrapes
+    # /stats so the vhost.vcluster histograms have samples in Envoy's current
+    # flush window. Without this, the time between env setup and the check
+    # invocation can span multiple 5s flush intervals, reducing the interval
+    # values to nan (which the parser filters out).
+    requests.get('http://{}:8000/service/1'.format(HOST))
+    requests.get('http://{}:8000/service/2'.format(HOST))
 
 
 @pytest.fixture

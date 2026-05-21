@@ -801,7 +801,6 @@ envoy.vhost.vcluster.upstream_rq_time.75percentile,gauge,,millisecond,,[Legacy] 
 envoy.vhost.vcluster.upstream_rq_time.90percentile,gauge,,millisecond,,[Legacy] Request time milliseconds 90-percentile,-1,envoy,,
 envoy.vhost.vcluster.upstream_rq_time.95percentile,gauge,,millisecond,,[Legacy] Request time milliseconds 95-percentile,-1,envoy,,
 envoy.vhost.vcluster.upstream_rq_time.99percentile,gauge,,millisecond,,[Legacy] Request time milliseconds 99-percentile,-1,envoy,,
-envoy.vhost.vcluster.upstream_rq_time.99_5percentile,gauge,,millisecond,,[Legacy] Request time milliseconds 99.5-percentile,-1,envoy,,
 envoy.vhost.vcluster.upstream_rq_time.99_9percentile,gauge,,millisecond,,[Legacy] Request time milliseconds 99.9-percentile,-1,envoy,,
 envoy.vhost.vcluster.upstream_rq_time.100percentile,gauge,,millisecond,,[Legacy] Request time milliseconds 100-percentile,-1,envoy,,
 envoy.http.dynamodb.operation.upstream_rq_time.0percentile,gauge,,millisecond,,[Legacy] Time spent on operation_name tag 0-percentile,-1,envoy,,
