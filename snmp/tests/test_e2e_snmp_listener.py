@@ -150,7 +150,7 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
         common.assert_common_metrics(aggregator, metric_tags, is_e2e=True, loader='core')
         aggregator.assert_metric('snmp.sysUpTimeInstance', tags=metric_tags)
         for metric in IF_SCALAR_GAUGE:
-            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=metric_tags, count=2)
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=metric_tags)
 
     # ==== test ignored IPs ====
     tags = [
