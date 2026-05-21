@@ -1,3 +1,4 @@
+# bypass-global-
 id: nginx
 metric_id: nginx
 backend_only: false

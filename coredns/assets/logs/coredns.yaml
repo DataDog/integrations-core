@@ -1,3 +1,4 @@
+# bypass-global-
 id: coredns
 metric_id: coredns
 backend_only: false
