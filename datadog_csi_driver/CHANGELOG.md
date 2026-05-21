@@ -2,7 +2,7 @@
 
 ## Agent 7.80.0
 
-* Starting from Agent 6.70.0, this integration has been moved as a core check to the Datadog Agent. Only assets are maintained in this repository.
+* Starting from Agent 7.80.0, this integration has been moved as a core check to the Datadog Agent. Only assets are maintained in this repository.
 
 ## 1.5.1 / 2026-04-15
 
