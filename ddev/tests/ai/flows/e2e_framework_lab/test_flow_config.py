@@ -90,3 +90,17 @@ def test_e2e_framework_lab_prompts_include_autodiscovery_reachability_guidance()
 
     assert "Autodiscovery" in review_task
     assert "host and port resolve to a reachable listener" in review_task
+
+
+def test_e2e_framework_lab_prompts_require_self_contained_compose_workloads() -> None:
+    component_task = (FLOW_DIR / "tasks" / "component.md").read_text()
+    review_task = (FLOW_DIR / "tasks" / "review.md").read_text()
+
+    assert "Extra Compose manifests" in component_task
+    assert "self-contained" in component_task
+    assert "relative bind mounts" in component_task
+    assert "explicitly copies" in component_task
+    assert "seed data matching configured key patterns" in component_task
+
+    assert "relative bind mounts" in review_task
+    assert "seed data matching configured key patterns" in review_task
