@@ -173,8 +173,8 @@ def wait_for_cilium_metric_families(pods, families):
                 ],
                 capture=True,
             )
-            if result.stderr:
-                raise Exception(result.stderr)
+            if result.code != 0:
+                raise Exception(result.stderr or result.stdout)
             if family not in result.stdout:
                 missing.append("{} on {}".format(family, pod))
 
