@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock
 
 import pytest
+import yaml
 
 from ddev.ai.flows.e2e_framework_lab.runner import E2EFrameworkLabFlowError, prepare_and_run_e2e_lab_flow
 from ddev.ai.flows.e2e_framework_lab.worktree import AgentWorktree
@@ -16,6 +17,23 @@ class CapturingOrchestrator:
 
     def run(self) -> None:
         self.ran = True
+        self.kwargs["checkpoint_path"].write_text(
+            yaml.safe_dump(
+                {
+                    "research_integration": {"status": "success"},
+                    "generate_component": {"status": "success"},
+                    "generate_scenario": {"status": "success"},
+                    "generate_tasks_and_registry": {"status": "success"},
+                    "review_lab": {"status": "success"},
+                }
+            )
+        )
+
+
+class IncompleteOrchestrator(CapturingOrchestrator):
+    def run(self) -> None:
+        self.ran = True
+        self.kwargs["checkpoint_path"].write_text(yaml.safe_dump({"research_integration": {"status": "success"}}))
 
 
 class FailingOrchestrator(CapturingOrchestrator):
@@ -39,12 +57,13 @@ def test_prepare_and_run_e2e_lab_flow_wires_orchestrator(tmp_path, monkeypatch) 
     monkeypatch.setattr("ddev.ai.flows.e2e_framework_lab.runner.prepare_agent_worktree", lambda **kwargs: worktree)
     monkeypatch.setattr("ddev.ai.flows.e2e_framework_lab.runner.PhaseOrchestrator", CapturingOrchestrator)
 
+    mock_client = MagicMock()
     result = prepare_and_run_e2e_lab_flow(
         integration="redisdb",
         integration_path=integration_path,
         agent_repo_path=agent_repo,
         agent_worktree_parent=tmp_path / "worktrees",
-        anthropic_client=MagicMock(),
+        anthropic_client=mock_client,
     )
 
     assert result.worktree == worktree
@@ -58,7 +77,9 @@ def test_prepare_and_run_e2e_lab_flow_wires_orchestrator(tmp_path, monkeypatch) 
         "agent_worktree_path": str(worktree.path),
         "branch_name": "e2e-lab-redisdb",
     }
+    assert orchestrator.kwargs["agent_clients"] == {"anthropic": mock_client}
     assert orchestrator.kwargs["file_access_policy"].write_root == worktree.path.resolve(strict=False)
+    assert orchestrator.kwargs["max_timeout"] == 1800
 
 
 def test_prepare_and_run_e2e_lab_flow_rejects_missing_integration_path(tmp_path) -> None:
@@ -70,6 +91,37 @@ def test_prepare_and_run_e2e_lab_flow_rejects_missing_integration_path(tmp_path)
             agent_worktree_parent=tmp_path / "worktrees",
             anthropic_client=MagicMock(),
         )
+
+
+def test_prepare_and_run_e2e_lab_flow_reports_incomplete_flow_with_paths(tmp_path, monkeypatch) -> None:
+    integration_path = tmp_path / "integrations-core" / "redisdb"
+    integration_path.mkdir(parents=True)
+    agent_repo = tmp_path / "datadog-agent"
+    agent_repo.mkdir()
+    worktree = AgentWorktree(
+        repo_path=agent_repo,
+        path=tmp_path / "agent-worktree",
+        branch_name="e2e-lab-redisdb",
+    )
+    worktree.path.mkdir()
+
+    monkeypatch.setattr("ddev.ai.flows.e2e_framework_lab.runner.prepare_agent_worktree", lambda **kwargs: worktree)
+    monkeypatch.setattr("ddev.ai.flows.e2e_framework_lab.runner.PhaseOrchestrator", IncompleteOrchestrator)
+
+    with pytest.raises(E2EFrameworkLabFlowError) as exc_info:
+        prepare_and_run_e2e_lab_flow(
+            integration="redisdb",
+            integration_path=integration_path,
+            agent_repo_path=agent_repo,
+            agent_worktree_parent=tmp_path / "worktrees",
+            anthropic_client=MagicMock(),
+        )
+
+    message = str(exc_info.value)
+    assert "Flow did not complete successfully" in message
+    assert "generate_component" in message
+    assert str(worktree.path) in message
+    assert "checkpoints.yaml" in message
 
 
 def test_prepare_and_run_e2e_lab_flow_reports_phase_failure_with_paths(tmp_path, monkeypatch) -> None:

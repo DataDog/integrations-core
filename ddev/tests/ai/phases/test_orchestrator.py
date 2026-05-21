@@ -140,6 +140,12 @@ def test_imported_class_not_registered():
     assert "BaseMessage" not in registry.known_names()
 
 
+def test_orchestrator_accepts_custom_max_timeout(tmp_path, make_orchestrator):
+    orchestrator = make_orchestrator(tmp_path, max_timeout=123)
+
+    assert orchestrator._max_timeout == 123
+
+
 def test_two_orchestrators_have_independent_registries(tmp_path, make_orchestrator):
     """Each PhaseOrchestrator owns its own registry; registering in one does not affect the other."""
     o1 = make_orchestrator(tmp_path)

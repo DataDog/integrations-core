@@ -49,6 +49,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         file_access_policy: FileAccessPolicy,
         callbacks: Callbacks | None = None,
         grace_period: float = 10,
+        max_timeout: float = 300,
         logger: logging.Logger | None = None,
     ) -> None:
         """Initialize the orchestrator.
@@ -60,7 +61,9 @@ class PhaseOrchestrator(EventBusOrchestrator):
         ``file_access_policy`` must have ``write_root`` set to the integration
         output directory so that agent writes are confined to that path.
         """
-        super().__init__(logger=logger or logging.getLogger(__name__), grace_period=grace_period)
+        super().__init__(
+            logger=logger or logging.getLogger(__name__), grace_period=grace_period, max_timeout=max_timeout
+        )
         self._flow_yaml_path = flow_yaml_path
         self._checkpoint_path = checkpoint_path
         self._runtime_variables = runtime_variables

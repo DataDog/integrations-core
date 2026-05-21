@@ -8,13 +8,16 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import anthropic
+import yaml
 
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.flows.e2e_framework_lab.worktree import AgentWorktree, prepare_agent_worktree
+from ddev.ai.phases.config import FlowConfig
 from ddev.ai.phases.orchestrator import PhaseOrchestrator
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 
 FLOW_DIR = Path(__file__).parent
+DEFAULT_MAX_TIMEOUT = 1800
 
 
 class E2EFrameworkLabFlowError(Exception):
@@ -38,6 +41,7 @@ def prepare_and_run_e2e_lab_flow(
     anthropic_client: anthropic.AsyncAnthropic,
     branch_name: str | None = None,
     callbacks: Callbacks | None = None,
+    max_timeout: float = DEFAULT_MAX_TIMEOUT,
 ) -> E2EFrameworkLabFlowResult:
     """Create an Agent worktree and run the E2E framework lab generation flow."""
 
@@ -66,9 +70,10 @@ def prepare_and_run_e2e_lab_flow(
         flow_yaml_path=FLOW_DIR / "flow.yaml",
         checkpoint_path=checkpoint_path,
         runtime_variables=runtime_variables,
-        anthropic_client=anthropic_client,
+        agent_clients={"anthropic": anthropic_client},
         file_access_policy=FileAccessPolicy(write_root=worktree.path),
         callbacks=callbacks,
+        max_timeout=max_timeout,
     )
 
     try:
@@ -81,4 +86,25 @@ def prepare_and_run_e2e_lab_flow(
             f"Original error: {e}"
         ) from e
 
+    _assert_flow_completed(checkpoint_path)
+
     return E2EFrameworkLabFlowResult(worktree=worktree, checkpoint_path=checkpoint_path)
+
+
+def _assert_flow_completed(checkpoint_path: Path) -> None:
+    config = FlowConfig.from_yaml(FLOW_DIR / "flow.yaml", FLOW_DIR)
+    expected_phases = [entry.phase for entry in config.flow]
+    try:
+        checkpoints = yaml.safe_load(checkpoint_path.read_text()) or {}
+    except OSError as e:
+        raise E2EFrameworkLabFlowError(f"Flow did not write checkpoints: {checkpoint_path}") from e
+
+    incomplete_phases = [
+        phase_id for phase_id in expected_phases if checkpoints.get(phase_id, {}).get("status") != "success"
+    ]
+    if incomplete_phases:
+        raise E2EFrameworkLabFlowError(
+            "Flow did not complete successfully. "
+            f"Incomplete phases: {', '.join(incomplete_phases)}. "
+            f"Checkpoint path: {checkpoint_path}."
+        )
