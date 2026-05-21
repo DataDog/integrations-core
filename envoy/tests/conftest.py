@@ -14,6 +14,13 @@ from datadog_checks.envoy import Envoy
 from .common import DEFAULT_INSTANCE, DOCKER_DIR, FIXTURE_DIR, HOST, URL
 from .legacy.common import FLAVOR, INSTANCES
 
+# Envoy's default stats_flush_interval (seconds). The exercise_envoy
+# fixture drives traffic for one full interval so the most recent
+# completed flush window always has samples; if Envoy's default changes
+# (or we ever set the interval explicitly in the test bootstrap config),
+# update this constant and the fixture timings follow.
+ENVOY_STATS_FLUSH_INTERVAL = 5
+
 
 @pytest.fixture(scope='session')
 def fixture_path():
@@ -44,16 +51,16 @@ def exercise_envoy():
     # Drive continuous traffic through Envoy's listener for one full stats
     # flush interval so the most recent flush window always has samples.
     # Envoy's text /stats endpoint reports per-interval quantile values
-    # that get recomputed on every 5s flush; an empty flush resets the
+    # that get recomputed on every flush; an empty flush resets the
     # interval percentiles to nan (see hist_approx_quantile in
     # libcircllhist), which the parser would then filter out. Spreading
     # requests across the window keeps the interval quantiles populated
     # regardless of where the test lands in Envoy's flush cycle.
-    deadline = time.monotonic() + 6
+    deadline = time.monotonic() + ENVOY_STATS_FLUSH_INTERVAL + 1
     while time.monotonic() < deadline:
         requests.get('http://{}:8000/service/1'.format(HOST))
         requests.get('http://{}:8000/service/2'.format(HOST))
-        time.sleep(0.5)
+        time.sleep(ENVOY_STATS_FLUSH_INTERVAL / 10)
 
 
 @pytest.fixture
