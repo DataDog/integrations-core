@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from importlib import import_module
+from pathlib import Path
+from typing import TYPE_CHECKING
 
 from anthropic.types import ToolParam
 
@@ -15,6 +17,9 @@ from ddev.ai.tools.fs.file_registry import FileRegistry
 from .core.protocol import ToolProtocol
 from .core.types import ToolResult
 
+if TYPE_CHECKING:
+    from ddev.ai.agent.build import SubagentBuilder
+
 
 @dataclass
 class ToolContext:
@@ -22,6 +27,9 @@ class ToolContext:
 
     file_registry: FileRegistry
     owner_id: str
+    allowed_tool_names: tuple[str, ...] = field(default_factory=tuple)
+    subagent_builder: SubagentBuilder | None = None
+    log_dir: Path | None = None
 
     @property
     def policy(self) -> FileAccessPolicy:
@@ -38,6 +46,21 @@ def _file_registry_factory(tool_cls: type, ctx: ToolContext) -> ToolProtocol:
 
 def _file_policy_factory(tool_cls: type, ctx: ToolContext) -> ToolProtocol:
     return tool_cls(ctx.policy)
+
+
+def _spawn_subagent_factory(tool_cls: type, ctx: ToolContext) -> ToolProtocol:
+    if ctx.subagent_builder is None or ctx.log_dir is None:
+        raise ValueError(
+            "Tool 'spawn_subagent' requires both 'subagent_builder' and 'log_dir' to be "
+            "passed to ToolRegistry.from_names."
+        )
+    allowed = [name for name in ctx.allowed_tool_names if name != "spawn_subagent"]
+    return tool_cls(
+        owner_id=ctx.owner_id,
+        subagent_builder=ctx.subagent_builder,
+        allowed_tools=allowed,
+        log_dir=ctx.log_dir,
+    )
 
 
 @dataclass(frozen=True)
@@ -71,6 +94,7 @@ TOOL_MANIFEST: dict[str, ToolSpec] = {
     "ddev_env_test": ToolSpec("shell.ddev.env_test", "DdevEnvTestTool"),
     "ddev_release_changelog": ToolSpec("shell.ddev.release_changelog", "DdevReleaseChangelogTool"),
     "ddev_validate": ToolSpec("shell.ddev.validate", "DdevValidateTool"),
+    "spawn_subagent": ToolSpec("agents.spawn_subagent", "SpawnSubagentTool", factory=_spawn_subagent_factory),
 }
 
 
@@ -92,6 +116,8 @@ class ToolRegistry:
         *,
         owner_id: str,
         file_registry: FileRegistry,
+        subagent_builder: SubagentBuilder | None = None,
+        log_dir: Path | None = None,
     ) -> ToolRegistry:
         """Build a ToolRegistry from a list of tool name strings.
 
@@ -102,6 +128,9 @@ class ToolRegistry:
         ctx = ToolContext(
             file_registry=file_registry,
             owner_id=owner_id,
+            allowed_tool_names=tuple(tool_names),
+            subagent_builder=subagent_builder,
+            log_dir=log_dir,
         )
         tools: list[ToolProtocol] = []
         for name in tool_names:

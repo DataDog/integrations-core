@@ -5,17 +5,26 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from ddev.ai.agent.anthropic_client import AnthropicAgent
 from ddev.ai.agent.base import BaseAgent
+from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.registry import ToolRegistry
 
 if TYPE_CHECKING:
     from ddev.ai.phases.config import AgentConfig
 
-AgentBuilder = Callable[[str, str], tuple[BaseAgent[Any], ToolRegistry]]
+SubagentBuilder = Callable[
+    [str, str, list[str]],  # (system_prompt, owner_id, tool_names)
+    tuple[BaseAgent[Any], ToolRegistry],
+]
+AgentBuilder = Callable[
+    [str, str, SubagentBuilder | None, Path | None],  # system_prompt, owner_id, subagent_builder, log_dir
+    tuple[BaseAgent[Any], ToolRegistry],
+]
 
 
 def _resolve_client(agent_clients: dict[str, Any], provider: str) -> Any:
@@ -25,19 +34,22 @@ def _resolve_client(agent_clients: dict[str, Any], provider: str) -> Any:
     return client
 
 
-def build_agent(
+def _build_agent_and_registry(
     agent_config: AgentConfig,
     agent_clients: dict[str, Any],
     system_prompt: str,
     owner_id: str,
+    tool_names: list[str],
     file_registry: FileRegistry,
+    subagent_builder: SubagentBuilder | None = None,
+    log_dir: Path | None = None,
 ) -> tuple[BaseAgent[Any], ToolRegistry]:
-    """Construct a provider-specific BaseAgent and its ToolRegistry from an AgentConfig."""
-
     tool_registry = ToolRegistry.from_names(
-        agent_config.tools,
+        tool_names,
         owner_id=owner_id,
         file_registry=file_registry,
+        subagent_builder=subagent_builder,
+        log_dir=log_dir,
     )
 
     if agent_config.provider == "anthropic":
@@ -58,20 +70,93 @@ def build_agent(
     raise ValueError(f"Unknown agent provider: {agent_config.provider!r}")
 
 
+def build_agent(
+    agent_config: AgentConfig,
+    agent_clients: dict[str, Any],
+    system_prompt: str,
+    owner_id: str,
+    file_registry: FileRegistry,
+    subagent_builder: SubagentBuilder | None = None,
+    log_dir: Path | None = None,
+) -> tuple[BaseAgent[Any], ToolRegistry]:
+    """Construct a provider-specific BaseAgent and its ToolRegistry from an AgentConfig."""
+    return _build_agent_and_registry(
+        agent_config=agent_config,
+        agent_clients=agent_clients,
+        system_prompt=system_prompt,
+        owner_id=owner_id,
+        tool_names=agent_config.tools,
+        file_registry=file_registry,
+        subagent_builder=subagent_builder,
+        log_dir=log_dir,
+    )
+
+
+def build_subagent(
+    parent_agent_config: AgentConfig,
+    agent_clients: dict[str, Any],
+    file_access_policy: FileAccessPolicy,
+    system_prompt: str,
+    owner_id: str,
+    tool_names: list[str],
+) -> tuple[BaseAgent[Any], ToolRegistry]:
+    """Build a subagent + ToolRegistry. Always uses a fresh FileRegistry.
+
+    Reuses the parent's provider/model/max_tokens. No subagent_builder or
+    log_dir is forwarded, so the subagent cannot recursively spawn subagents —
+    ToolRegistry.from_names will raise if spawn_subagent is in tool_names.
+    """
+    return _build_agent_and_registry(
+        agent_config=parent_agent_config,
+        agent_clients=agent_clients,
+        system_prompt=system_prompt,
+        owner_id=owner_id,
+        tool_names=tool_names,
+        file_registry=FileRegistry(policy=file_access_policy),
+    )
+
+
 def make_agent_builder(
     agent_config: AgentConfig,
     agent_clients: dict[str, Any],
     file_registry: FileRegistry,
 ) -> AgentBuilder:
-    """Return a closure that builds an agent+registry given a rendered system_prompt and owner_id."""
+    """Return a closure that builds an agent+registry given system_prompt, owner_id, subagent_builder, log_dir."""
 
-    def builder(system_prompt: str, owner_id: str) -> tuple[BaseAgent[Any], ToolRegistry]:
+    def builder(
+        system_prompt: str,
+        owner_id: str,
+        subagent_builder: SubagentBuilder | None,
+        log_dir: Path | None,
+    ) -> tuple[BaseAgent[Any], ToolRegistry]:
         return build_agent(
             agent_config=agent_config,
             agent_clients=agent_clients,
             system_prompt=system_prompt,
             owner_id=owner_id,
             file_registry=file_registry,
+            subagent_builder=subagent_builder,
+            log_dir=log_dir,
+        )
+
+    return builder
+
+
+def make_subagent_builder(
+    parent_agent_config: AgentConfig,
+    agent_clients: dict[str, Any],
+    file_access_policy: FileAccessPolicy,
+) -> SubagentBuilder:
+    """Return a closure that builds a subagent+registry given (system_prompt, owner_id, tool_names)."""
+
+    def builder(system_prompt: str, owner_id: str, tool_names: list[str]) -> tuple[BaseAgent[Any], ToolRegistry]:
+        return build_subagent(
+            parent_agent_config=parent_agent_config,
+            agent_clients=agent_clients,
+            file_access_policy=file_access_policy,
+            system_prompt=system_prompt,
+            owner_id=owner_id,
+            tool_names=tool_names,
         )
 
     return builder

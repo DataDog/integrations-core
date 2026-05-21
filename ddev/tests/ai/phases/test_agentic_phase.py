@@ -2,16 +2,27 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import json
 from pathlib import Path
 
 import pytest
 
+from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 from ddev.ai.phases.agentic_phase import AgenticPhase, render_memory_prompt, render_task_prompt
+from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
-from ddev.ai.phases.messages import PhaseTrigger
+from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
+from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
+from ddev.ai.tools.fs.file_registry import FileRegistry
+from ddev.ai.tools.registry import ToolRegistry
 
 from .conftest import MockAgent, make_agent_phase, make_response, resolve_key
+
+
+def read_jsonl(path: Path) -> list[dict]:
+    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+
 
 # ---------------------------------------------------------------------------
 # render_task_prompt
@@ -21,29 +32,24 @@ from .conftest import MockAgent, make_agent_phase, make_response, resolve_key
 def test_render_task_prompt_from_file(tmp_path):
     prompt_file = tmp_path / "task.md"
     prompt_file.write_text("Hello ${name}.")
-    task = TaskConfig(name="t1", prompt_path="task.md")
-    result = render_task_prompt(task, tmp_path, {"name": "Alice"})
+    result = render_task_prompt(TaskConfig(name="t1", prompt_path="task.md"), tmp_path, {"name": "Alice"})
     assert result == "Hello Alice."
 
 
 def test_render_task_prompt_inline():
-    task = TaskConfig(name="t1", prompt="Hello ${name}.")
-    result = render_task_prompt(task, None, {"name": "Bob"})
+    result = render_task_prompt(TaskConfig(name="t1", prompt="Hello ${name}."), None, {"name": "Bob"})
     assert result == "Hello Bob."
 
 
 def test_render_task_prompt_forwards_resolver(tmp_path):
-    prompt_file = tmp_path / "task.md"
-    prompt_file.write_text("Memory: ${draft_memory}")
-    task = TaskConfig(name="t1", prompt_path="task.md")
-    result = render_task_prompt(task, tmp_path, {}, resolve_key)
+    (tmp_path / "task.md").write_text("Memory: ${draft_memory}")
+    result = render_task_prompt(TaskConfig(name="t1", prompt_path="task.md"), tmp_path, {}, resolve_key)
     assert result == "Memory: resolved(draft_memory)"
 
 
-def test_render_task_prompt_raises_when_both_unset():
-    task = TaskConfig.model_construct(name="t1", prompt=None, prompt_path=None)
+def test_render_task_prompt_raises_when_no_source():
     with pytest.raises(FlowConfigError, match="prompt"):
-        render_task_prompt(task, None, {})
+        render_task_prompt(TaskConfig.model_construct(name="t1", prompt=None, prompt_path=None), None, {})
 
 
 # ---------------------------------------------------------------------------
@@ -52,23 +58,21 @@ def test_render_task_prompt_raises_when_both_unset():
 
 
 def test_render_memory_prompt_from_file(tmp_path):
-    mem_file = tmp_path / "mem.md"
-    mem_file.write_text("List files for ${phase_name}.")
-    checkpoint = CheckpointConfig(memory_prompt_path="mem.md")
-    result = render_memory_prompt(checkpoint, tmp_path, {"phase_name": "draft"})
+    (tmp_path / "mem.md").write_text("List files for ${phase_name}.")
+    result = render_memory_prompt(CheckpointConfig(memory_prompt_path="mem.md"), tmp_path, {"phase_name": "draft"})
     assert result == "List files for draft."
 
 
 def test_render_memory_prompt_inline():
-    checkpoint = CheckpointConfig(memory_prompt="List files for ${phase_name}.")
-    result = render_memory_prompt(checkpoint, None, {"phase_name": "draft"})
+    result = render_memory_prompt(
+        CheckpointConfig(memory_prompt="List files for ${phase_name}."), None, {"phase_name": "draft"}
+    )
     assert result == "List files for draft."
 
 
-def test_render_memory_prompt_raises_when_both_unset():
-    checkpoint = CheckpointConfig.model_construct(memory_prompt=None, memory_prompt_path=None)
+def test_render_memory_prompt_raises_when_no_source():
     with pytest.raises(FlowConfigError, match="memory_prompt"):
-        render_memory_prompt(checkpoint, None, {})
+        render_memory_prompt(CheckpointConfig.model_construct(memory_prompt=None, memory_prompt_path=None), None, {})
 
 
 # ---------------------------------------------------------------------------
@@ -76,262 +80,153 @@ def test_render_memory_prompt_raises_when_both_unset():
 # ---------------------------------------------------------------------------
 
 
-def test_agentic_phase_validate_config_rejects_missing_agent():
-    config = PhaseConfig(tasks=[TaskConfig(name="t1", prompt="x")])
-    with pytest.raises(FlowConfigError, match="requires 'agent'"):
-        AgenticPhase.validate_config("p1", config, {})
-
-
-def test_agentic_phase_validate_config_rejects_unknown_agent():
-    config = PhaseConfig(agent="ghost", tasks=[TaskConfig(name="t1", prompt="x")])
-    with pytest.raises(FlowConfigError, match="unknown agent"):
+@pytest.mark.parametrize(
+    "config,match",
+    [
+        (PhaseConfig(tasks=[TaskConfig(name="t1", prompt="x")]), "requires 'agent'"),
+        (PhaseConfig(agent="ghost", tasks=[TaskConfig(name="t1", prompt="x")]), "unknown agent"),
+        (PhaseConfig(agent="writer"), "at least one task"),
+    ],
+    ids=["missing_agent", "unknown_agent", "empty_tasks"],
+)
+def test_validate_config_rejects_invalid(config, match):
+    with pytest.raises(FlowConfigError, match=match):
         AgenticPhase.validate_config("p1", config, {"writer": AgentConfig()})
 
 
-def test_agentic_phase_validate_config_rejects_empty_tasks():
-    config = PhaseConfig(agent="writer")
-    with pytest.raises(FlowConfigError, match="at least one task"):
-        AgenticPhase.validate_config("p1", config, {"writer": AgentConfig()})
-
-
-def test_agentic_phase_validate_config_accepts_valid():
-    config = PhaseConfig(agent="writer", tasks=[TaskConfig(name="t1", prompt="x")])
-    AgenticPhase.validate_config("p1", config, {"writer": AgentConfig()})
+def test_validate_config_accepts_valid():
+    AgenticPhase.validate_config(
+        "p1", PhaseConfig(agent="writer", tasks=[TaskConfig(name="t1", prompt="x")]), {"writer": AgentConfig()}
+    )
 
 
 # ---------------------------------------------------------------------------
-# AgenticPhase.process_message — happy path
+# process_message — happy path
 # ---------------------------------------------------------------------------
 
 
 async def test_happy_path_single_task(flow_dir, monkeypatch, message_queue):
-    responses = [
-        make_response("task done", 100, 50),  # task 1 via ReActProcess
-        make_response("summary", 10, 5),  # memory step
-    ]
-    mock_agent = MockAgent(responses)
+    mock_agent = MockAgent([make_response("task done", 100, 50), make_response("summary", 10, 5)])
     phase, mgr = make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     assert mgr.memory_content("p1") == "summary"
-
     checkpoint = mgr.read()["p1"]
     assert checkpoint["status"] == "success"
-    assert checkpoint["tokens"]["total_input"] == 110
-    assert checkpoint["tokens"]["total_output"] == 55
-    assert checkpoint["memory_path"]
-
-    assert len(mock_agent.send_calls) == 2
+    assert checkpoint["tokens"] == {"total_input": 110, "total_output": 55}
     assert mock_agent.send_calls[0] == "Do the work."
     assert "Write a brief summary" in mock_agent.send_calls[1]
+    # checkpoint memory_path points to the written file
+    memory_path = Path(checkpoint["memory_path"])
+    assert memory_path.is_absolute() and memory_path.exists() and memory_path.name == "p1_memory.md"
 
 
-async def test_happy_path_two_tasks(flow_dir, monkeypatch, message_queue):
-    responses = [
-        make_response("task1 done", 100, 50),
-        make_response("task2 done", 200, 80),
-        make_response("summary", 10, 5),
-    ]
-    mock_agent = MockAgent(responses)
+async def test_happy_path_two_tasks_accumulates_tokens(flow_dir, monkeypatch, message_queue):
+    mock_agent = MockAgent(
+        [
+            make_response("t1 done", 100, 50),
+            make_response("t2 done", 200, 80),
+            make_response("summary", 10, 5),
+        ]
+    )
     phase, mgr = make_agent_phase(
         flow_dir,
         mock_agent,
         monkeypatch,
         message_queue,
-        tasks=[
-            TaskConfig(name="t1", prompt="First task."),
-            TaskConfig(name="t2", prompt="Second task."),
-        ],
+        tasks=[TaskConfig(name="t1", prompt="First."), TaskConfig(name="t2", prompt="Second.")],
     )
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
-    checkpoint = mgr.read()["p1"]
-    assert checkpoint["tokens"]["total_input"] == 310
-    assert checkpoint["tokens"]["total_output"] == 135
-    assert checkpoint["memory_path"]
+    assert mgr.read()["p1"]["tokens"] == {"total_input": 310, "total_output": 135}
 
 
 # ---------------------------------------------------------------------------
-# AgenticPhase.process_message — memory step with checkpoint config
+# process_message — context compaction
 # ---------------------------------------------------------------------------
 
 
-async def test_memory_step_with_checkpoint_config(flow_dir, monkeypatch, message_queue):
-    responses = [
-        make_response("task done", 100, 50),
-        make_response("summary with files", 10, 5),
-    ]
-    mock_agent = MockAgent(responses)
-    phase, mgr = make_agent_phase(
+@pytest.mark.parametrize("context_pct,expect_compact", [(85, True), (50, False)], ids=["above", "below"])
+async def test_compact_between_tasks(flow_dir, monkeypatch, message_queue, context_pct, expect_compact):
+    mock_agent = MockAgent(
+        [
+            make_response("t1 done", 100, 50, context_pct=context_pct),
+            make_response("t2 done", 200, 80),
+            make_response("summary", 10, 5),
+        ]
+    )
+    phase, _ = make_agent_phase(
         flow_dir,
         mock_agent,
         monkeypatch,
         message_queue,
-        checkpoint=CheckpointConfig(memory_prompt="Also list the files."),
+        tasks=[TaskConfig(name="t1", prompt="First."), TaskConfig(name="t2", prompt="Second.")],
     )
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
-    memory_prompt = mock_agent.send_calls[1]
-    assert "Also list the files." in memory_prompt
-    assert "Write a brief summary" in memory_prompt
+    assert (mock_agent.compact_call_count >= 1) == expect_compact
 
 
-async def test_memory_step_without_checkpoint_config(flow_dir, monkeypatch, message_queue):
-    responses = [
-        make_response("task done", 100, 50),
-        make_response("summary", 10, 5),
-    ]
-    mock_agent = MockAgent(responses)
+# ---------------------------------------------------------------------------
+# process_message — before_react / after_react hooks
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("hook_name", ["before_react", "after_react"], ids=["before", "after"])
+async def test_react_hook_failure_fails_phase(flow_dir, monkeypatch, message_queue, hook_name):
+    mock_agent = MockAgent([make_response("done", 100, 50)])
     phase, mgr = make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
+    setattr(phase, hook_name, lambda: (_ for _ in ()).throw(RuntimeError("hook failed")))
 
-    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+    with pytest.raises(RuntimeError, match="hook failed"):
+        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
-    memory_prompt = mock_agent.send_calls[1]
-    assert memory_prompt == "Write a brief summary of what you accomplished in this phase."
-
-
-# ---------------------------------------------------------------------------
-# AgenticPhase.process_message — context compaction between tasks
-# ---------------------------------------------------------------------------
-
-
-async def test_compact_between_tasks_when_above_threshold(flow_dir, monkeypatch, message_queue):
-    responses = [
-        make_response("task1 done", 100, 50, context_pct=85),  # above 80% threshold
-        make_response("task2 done", 200, 80),
-        make_response("summary", 10, 5),
-    ]
-    mock_agent = MockAgent(responses)
-    phase, mgr = make_agent_phase(
-        flow_dir,
-        mock_agent,
-        monkeypatch,
-        message_queue,
-        tasks=[
-            TaskConfig(name="t1", prompt="First task."),
-            TaskConfig(name="t2", prompt="Second task."),
-        ],
-    )
-
-    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
-
-    checkpoint = mgr.read()["p1"]
-    assert checkpoint["status"] == "success"
-    assert checkpoint["memory_path"]
-    assert mock_agent.compact_call_count >= 1
-
-
-async def test_no_compact_when_below_threshold(flow_dir, monkeypatch, message_queue):
-    responses = [
-        make_response("task1 done", 100, 50, context_pct=50),  # below 80% threshold
-        make_response("task2 done", 200, 80),
-        make_response("summary", 10, 5),
-    ]
-    mock_agent = MockAgent(responses)
-    phase, mgr = make_agent_phase(
-        flow_dir,
-        mock_agent,
-        monkeypatch,
-        message_queue,
-        tasks=[
-            TaskConfig(name="t1", prompt="First task."),
-            TaskConfig(name="t2", prompt="Second task."),
-        ],
-    )
-
-    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
-    checkpoint = mgr.read()["p1"]
-    assert checkpoint["status"] == "success"
-    assert checkpoint["memory_path"]
-    assert mock_agent.compact_call_count == 0
+    assert mgr.read() == {}
 
 
 # ---------------------------------------------------------------------------
-# AgenticPhase.process_message — template context
+# process_message — template context
 # ---------------------------------------------------------------------------
 
 
-async def test_flow_variables_in_system_prompt(flow_dir, monkeypatch, message_queue):
+async def test_flow_variables_rendered_in_system_prompt(flow_dir, monkeypatch, message_queue):
     (flow_dir / "prompts" / "writer.md").write_text("Project: ${project}")
     mock_agent = MockAgent([make_response("done", 100, 50), make_response("summary", 10, 5)])
-    captured_kwargs: dict = {}
+    captured: dict = {}
     phase, _ = make_agent_phase(
         flow_dir,
         mock_agent,
         monkeypatch,
         message_queue,
         flow_variables={"project": "myproj"},
-        captured_agent_kwargs=captured_kwargs,
+        captured_agent_kwargs=captured,
     )
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
-    assert captured_kwargs["system_prompt"] == "Project: myproj"
+    assert captured["system_prompt"] == "Project: myproj"
 
 
 async def test_runtime_variables_override_flow_variables(flow_dir, monkeypatch, message_queue):
     (flow_dir / "prompts" / "writer.md").write_text("Project: ${project}")
     mock_agent = MockAgent([make_response("done", 100, 50), make_response("summary", 10, 5)])
-    captured_kwargs: dict = {}
+    captured: dict = {}
     phase, _ = make_agent_phase(
         flow_dir,
         mock_agent,
         monkeypatch,
         message_queue,
-        flow_variables={"project": "flow_default"},
-        runtime_variables={"project": "runtime_override"},
-        captured_agent_kwargs=captured_kwargs,
+        flow_variables={"project": "flow"},
+        runtime_variables={"project": "runtime"},
+        captured_agent_kwargs=captured,
     )
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
-    assert captured_kwargs["system_prompt"] == "Project: runtime_override"
-
-
-# ---------------------------------------------------------------------------
-# AgenticPhase.process_message — before_react / after_react errors
-# ---------------------------------------------------------------------------
-
-
-async def test_before_react_raises_propagates(flow_dir, monkeypatch, message_queue):
-    mock_agent = MockAgent([])
-    phase, mgr = make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
-
-    def failing_hook():
-        raise RuntimeError("setup failed")
-
-    phase.before_react = failing_hook
-
-    with pytest.raises(RuntimeError, match="setup failed"):
-        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
-
-    assert mgr.read() == {}
-
-
-async def test_after_react_raises_propagates(flow_dir, monkeypatch, message_queue):
-    responses = [
-        make_response("done", 100, 50),
-    ]
-    mock_agent = MockAgent(responses)
-    phase, mgr = make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
-
-    def failing_hook():
-        raise RuntimeError("teardown failed")
-
-    phase.after_react = failing_hook
-
-    with pytest.raises(RuntimeError, match="teardown failed"):
-        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
-
-    assert mgr.read() == {}
-
-
-# ---------------------------------------------------------------------------
-# AgenticPhase.process_message — resolver integration with memory files
-# ---------------------------------------------------------------------------
+    assert captured["system_prompt"] == "Project: runtime"
 
 
 async def test_task_prompt_resolves_memory_variable(flow_dir, monkeypatch, message_queue):
@@ -344,7 +239,6 @@ async def test_task_prompt_resolves_memory_variable(flow_dir, monkeypatch, messa
         phase_id="review",
         tasks=[TaskConfig(name="t1", prompt="Review: ${draft_memory}")],
     )
-    mgr.write_phase_checkpoint("draft", {"status": "success"})
     mgr.write_memory("draft", "Created file.py")
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
@@ -353,14 +247,15 @@ async def test_task_prompt_resolves_memory_variable(flow_dir, monkeypatch, messa
 
 
 # ---------------------------------------------------------------------------
-# AgenticPhase.process_message — memory step failure behaviour
+# process_message — failure modes
 # ---------------------------------------------------------------------------
 
 
 async def test_memory_api_failure_fails_phase(flow_dir, monkeypatch, message_queue):
-    responses = [make_response("task done", 100, 50)]
-    mock_agent = MockAgent(responses)
-    phase, mgr = make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
+    # Only one response — IndexError when memory step tries to call agent again
+    phase, mgr = make_agent_phase(
+        flow_dir, MockAgent([make_response("task done", 100, 50)]), monkeypatch, message_queue
+    )
 
     with pytest.raises(IndexError):
         await phase.process_message(PhaseTrigger(id="start", phase_id=None))
@@ -368,45 +263,37 @@ async def test_memory_api_failure_fails_phase(flow_dir, monkeypatch, message_que
     assert mgr.read() == {}
 
 
-async def test_memory_template_error_fails_phase(flow_dir, monkeypatch, message_queue):
-    responses = [make_response("task done", 100, 50)]
-    mock_agent = MockAgent(responses)
+async def test_memory_template_render_failure_fails_phase(flow_dir, monkeypatch, message_queue):
     phase, mgr = make_agent_phase(
         flow_dir,
-        mock_agent,
+        MockAgent([make_response("task done", 100, 50)]),
         monkeypatch,
         message_queue,
         checkpoint=CheckpointConfig(memory_prompt="Summarize."),
     )
+    monkeypatch.setattr(
+        "ddev.ai.phases.agentic_phase.render_memory_prompt",
+        lambda *a, **kw: (_ for _ in ()).throw(ValueError("bad template")),
+    )
 
-    def raise_render_error(*args, **kwargs):
-        raise ValueError("template error")
-
-    monkeypatch.setattr("ddev.ai.phases.agentic_phase.render_memory_prompt", raise_render_error)
-
-    with pytest.raises(ValueError, match="template error"):
+    with pytest.raises(ValueError, match="bad template"):
         await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     assert mgr.read() == {}
 
 
-async def test_successful_phase_writes_memory_path_into_checkpoint(flow_dir, monkeypatch, message_queue):
-    responses = [
-        make_response("task done", 100, 50),
-        make_response("summary text", 10, 5),
-    ]
-    mock_agent = MockAgent(responses)
+async def test_disk_failure_on_write_memory_fails_phase(flow_dir, monkeypatch, message_queue):
+    mock_agent = MockAgent([make_response("task done", 100, 50), make_response("summary", 10, 5)])
     phase, mgr = make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
+    monkeypatch.setattr(
+        "ddev.ai.phases.checkpoint.CheckpointManager.write_memory",
+        lambda *a, **kw: (_ for _ in ()).throw(PermissionError("read-only")),
+    )
 
-    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+    with pytest.raises(PermissionError, match="read-only"):
+        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
-    checkpoint = mgr.read()["p1"]
-    assert "memory_path" in checkpoint
-    memory_path = Path(checkpoint["memory_path"])
-    assert memory_path.is_absolute()
-    assert memory_path.exists()
-    assert memory_path.name == "p1_memory.md"
-    assert memory_path.read_text() == "summary text"
+    assert mgr.read() == {}
 
 
 # ---------------------------------------------------------------------------
@@ -415,19 +302,15 @@ async def test_successful_phase_writes_memory_path_into_checkpoint(flow_dir, mon
 
 
 @pytest.mark.parametrize(
-    "checkpoint, expected_build_arg",
-    [
-        (None, None),
-        (CheckpointConfig(memory_prompt="anything"), "USER_ADDITIONS"),
-    ],
+    "checkpoint,expected_user_additions",
+    [(None, None), (CheckpointConfig(memory_prompt="anything"), "USER_ADDITIONS")],
     ids=["no_checkpoint", "with_checkpoint"],
 )
-async def test_run_memory_step_forwards_user_additions_to_build(
-    flow_dir, monkeypatch, message_queue, checkpoint, expected_build_arg
+async def test_run_memory_step_passes_user_additions_to_build(
+    flow_dir, monkeypatch, message_queue, checkpoint, expected_user_additions
 ):
     mock_agent = MockAgent([make_response("ok", 0, 0)])
     phase, mgr = make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue, checkpoint=checkpoint)
-
     monkeypatch.setattr("ddev.ai.phases.agentic_phase.render_memory_prompt", lambda *a, **kw: "USER_ADDITIONS")
     build_calls: list = []
     monkeypatch.setattr(
@@ -436,7 +319,7 @@ async def test_run_memory_step_forwards_user_additions_to_build(
 
     await phase._run_memory_step(mock_agent, {})
 
-    assert build_calls == [expected_build_arg]
+    assert build_calls == [expected_user_additions]
 
 
 async def test_run_memory_step_sends_built_prompt_with_no_tools(flow_dir, monkeypatch, message_queue):
@@ -444,13 +327,12 @@ async def test_run_memory_step_sends_built_prompt_with_no_tools(flow_dir, monkey
 
     class CapturingAgent(MockAgent):
         async def send(self, content, allowed_tools=None):
-            captured["content"] = content
-            captured["allowed_tools"] = allowed_tools
+            captured.update({"content": content, "allowed_tools": allowed_tools})
             return await super().send(content, allowed_tools)
 
     agent = CapturingAgent([make_response("ok", 0, 0)])
     phase, mgr = make_agent_phase(flow_dir, agent, monkeypatch, message_queue)
-    monkeypatch.setattr(mgr, "build_memory_prompt", lambda user_additions: "BUILT")
+    monkeypatch.setattr(mgr, "build_memory_prompt", lambda _: "BUILT")
 
     await phase._run_memory_step(agent, {})
 
@@ -479,24 +361,74 @@ async def test_run_memory_step_returns_response_data_and_fires_callbacks(flow_di
 
 
 # ---------------------------------------------------------------------------
-# AgenticPhase.process_message — disk failure regression
+# AgenticPhase with spawn_subagent — wiring smoke test
 # ---------------------------------------------------------------------------
 
 
-async def test_write_memory_disk_failure_fails_phase(flow_dir, monkeypatch, message_queue):
-    responses = [
-        make_response("task done", 100, 50),
-        make_response("summary text", 10, 5),
-    ]
-    mock_agent = MockAgent(responses)
-    phase, mgr = make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
+async def test_spawn_subagent_wiring(flow_dir, message_queue):
+    """Phase correctly passes subagent_builder + log_dir to the agent builder at execute time."""
 
-    def raise_permission_error(*args, **kwargs):
-        raise PermissionError("disk is read-only")
+    def make_usage() -> TokenUsage:
+        return TokenUsage(input_tokens=100, output_tokens=50, cache_read_input_tokens=0, cache_creation_input_tokens=0)
 
-    monkeypatch.setattr("ddev.ai.phases.checkpoint.CheckpointManager.write_memory", raise_permission_error)
+    spawn_call = ToolCall(
+        id="tc1",
+        name="spawn_subagent",
+        input={"system_prompt": "you are a helper", "prompt": "answer 42", "tools": [], "name": "child"},
+    )
+    parent_agent = MockAgent(
+        [
+            AgentResponse(stop_reason=StopReason.TOOL_USE, text="", tool_calls=[spawn_call], usage=make_usage()),
+            AgentResponse(stop_reason=StopReason.END_TURN, text="parent done", tool_calls=[], usage=make_usage()),
+            AgentResponse(stop_reason=StopReason.END_TURN, text="memory summary", tool_calls=[], usage=make_usage()),
+        ]
+    )
 
-    with pytest.raises(PermissionError, match="disk is read-only"):
-        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+    subagent_calls: list = []
 
-    assert mgr.read() == {}
+    def mock_subagent_builder(system_prompt: str, owner_id: str, tool_names: list[str]):
+        subagent_calls.append(system_prompt)
+        return MockAgent(
+            [AgentResponse(stop_reason=StopReason.END_TURN, text="42", tool_calls=[], usage=make_usage())]
+        ), ToolRegistry([])
+
+    from ddev.ai.tools.agents.spawn_subagent import SpawnSubagentTool
+
+    def agent_builder_fn(system_prompt: str, owner_id: str, subagent_builder=None, log_dir=None):
+        parent_agent.name = owner_id
+        return parent_agent, ToolRegistry(
+            [
+                SpawnSubagentTool(
+                    owner_id=owner_id,
+                    subagent_builder=subagent_builder,
+                    allowed_tools=[],
+                    log_dir=log_dir,
+                )
+            ]
+        )
+
+    checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
+    phase = AgenticPhase(
+        phase_id="p1",
+        dependencies=[],
+        config=PhaseConfig(agent="writer", tasks=[TaskConfig(name="t1", prompt="Do the work.")]),
+        agent_builder=agent_builder_fn,
+        checkpoint_manager=checkpoint_manager,
+        runtime_variables={},
+        flow_variables={},
+        config_dir=flow_dir,
+        file_registry=FileRegistry(policy=FileAccessPolicy(write_root=flow_dir)),
+        subagent_builder=mock_subagent_builder,
+    )
+    phase.queue = message_queue
+
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    submitted = [message_queue.get_nowait() for _ in range(message_queue.qsize())]
+    assert not any(isinstance(m, PhaseFailedMessage) for m in submitted)
+    assert subagent_calls == ["you are a helper"]
+
+    log_file = checkpoint_manager.root / "subagents" / "p1" / "001-child.jsonl"
+    assert log_file.exists()
+    events = {e["event"] for e in read_jsonl(log_file)}
+    assert {"start", "finish"} <= events

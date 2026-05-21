@@ -153,6 +153,7 @@ def test_available_tool_names_returns_fresh_copy():
 
 
 OWNER_ID = "test-agent"
+TOOLS_WITHOUT_EXTRA_DEPS = [n for n in ToolRegistry.available_tool_names() if n != "spawn_subagent"]
 
 
 def test_from_names_empty(tmp_path):
@@ -169,7 +170,7 @@ def test_from_names_unknown_raises(tmp_path):
         )
 
 
-@pytest.mark.parametrize("name", ToolRegistry.available_tool_names())
+@pytest.mark.parametrize("name", TOOLS_WITHOUT_EXTRA_DEPS)
 def test_from_names_each_known_tool(name, tmp_path):
     registry = ToolRegistry.from_names(
         [name], owner_id=OWNER_ID, file_registry=FileRegistry(policy=FileAccessPolicy(write_root=tmp_path))
@@ -179,7 +180,7 @@ def test_from_names_each_known_tool(name, tmp_path):
 
 
 def test_from_names_all_at_once(tmp_path):
-    all_names = ToolRegistry.available_tool_names()
+    all_names = TOOLS_WITHOUT_EXTRA_DEPS
     registry = ToolRegistry.from_names(
         all_names, owner_id=OWNER_ID, file_registry=FileRegistry(policy=FileAccessPolicy(write_root=tmp_path))
     )
@@ -187,9 +188,18 @@ def test_from_names_all_at_once(tmp_path):
     assert built_names == set(all_names)
 
 
+def test_from_names_spawn_subagent_without_deps_raises(tmp_path):
+    with pytest.raises(ValueError, match="requires both 'subagent_builder' and 'log_dir'"):
+        ToolRegistry.from_names(
+            ["spawn_subagent"],
+            owner_id=OWNER_ID,
+            file_registry=FileRegistry(policy=FileAccessPolicy(write_root=tmp_path)),
+        )
+
+
 def test_from_names_fs_tools_share_file_registry(tmp_path):
     """All tools that use the file registry in the same ToolRegistry share a single instance."""
-    all_names = ToolRegistry.available_tool_names()
+    all_names = TOOLS_WITHOUT_EXTRA_DEPS
     registry = ToolRegistry.from_names(
         all_names, owner_id=OWNER_ID, file_registry=FileRegistry(policy=FileAccessPolicy(write_root=tmp_path))
     )

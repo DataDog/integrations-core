@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from ddev.ai.agent.base import BaseAgent
-from ddev.ai.agent.build import AgentBuilder, make_agent_builder
+from ddev.ai.agent.build import AgentBuilder, SubagentBuilder, make_agent_builder, make_subagent_builder
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.base import Phase, PhaseOutcome
 from ddev.ai.phases.checkpoint import CheckpointManager
@@ -59,6 +59,7 @@ class AgenticPhase(Phase):
         flow_variables: dict[str, str],
         config_dir: Path,
         file_registry: FileRegistry,
+        subagent_builder: SubagentBuilder | None = None,
         callbacks: Callbacks | None = None,
         logger: logging.Logger | None = None,
     ) -> None:
@@ -75,6 +76,7 @@ class AgenticPhase(Phase):
             logger=logger,
         )
         self._agent_builder = agent_builder
+        self._subagent_builder = subagent_builder
 
     @classmethod
     def validate_config(
@@ -91,22 +93,36 @@ class AgenticPhase(Phase):
             raise FlowConfigError(f"Phase {phase_id!r} (AgenticPhase) must have at least one task")
 
     @classmethod
-    def extra_init_kwargs(
+    def extra_init_kwargs(  # type: ignore[override]
         cls,
+        *,
         phase_id: str,
         phase_config: PhaseConfig,
         agents: dict[str, AgentConfig],
         agent_clients: dict[str, Any],
         file_registry: FileRegistry,
+        **_: Any,
     ) -> dict[str, Any]:
         if phase_config.agent is None:
             raise FlowConfigError(f"Phase {phase_id!r} (AgenticPhase) requires 'agent'")
+        agent_config = agents[phase_config.agent]
+
+        subagent_builder = None
+        # TODO: generalize this dispatch if more agent-meta tools appear in tools/agents/.
+        if "spawn_subagent" in agent_config.tools:
+            subagent_builder = make_subagent_builder(
+                parent_agent_config=agent_config,
+                agent_clients=agent_clients,
+                file_access_policy=file_registry.policy,
+            )
+
         return {
             "agent_builder": make_agent_builder(
-                agent_config=agents[phase_config.agent],
+                agent_config=agent_config,
                 agent_clients=agent_clients,
                 file_registry=file_registry,
-            )
+            ),
+            "subagent_builder": subagent_builder,
         }
 
     def before_react(self) -> None:
@@ -146,7 +162,11 @@ class AgenticPhase(Phase):
             context,
             self._resolver,
         )
-        agent, tool_registry = self._agent_builder(system_prompt, self._phase_id)
+        log_dir = None
+        if self._subagent_builder is not None:
+            log_dir = self._checkpoint_manager.root / "subagents" / self._phase_id
+
+        agent, tool_registry = self._agent_builder(system_prompt, self._phase_id, self._subagent_builder, log_dir)
         process = ReActProcess(
             agent=agent,
             tool_registry=tool_registry,
