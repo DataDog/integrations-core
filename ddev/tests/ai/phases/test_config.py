@@ -104,14 +104,9 @@ def test_agent_config_optional_fields():
 
 def test_phase_config_defaults():
     pc = PhaseConfig(agent="writer", tasks=[TaskConfig(name="t1", prompt="Do it.")])
-    assert pc.type == "Phase"
+    assert pc.type == "AgenticPhase"
     assert pc.context_compact_threshold_pct == 80
     assert pc.checkpoint is None
-
-
-def test_phase_config_empty_tasks_raises():
-    with pytest.raises(ValidationError, match="at least one task"):
-        PhaseConfig(agent="writer", tasks=[])
 
 
 def test_phase_config_with_checkpoint():
@@ -182,6 +177,23 @@ def test_flow_config_unknown_agent_in_phase():
     raw["phases"]["p1"]["agent"] = "nonexistent"
     with pytest.raises(ValidationError, match="unknown agent"):
         FlowConfig.model_validate(raw)
+
+
+def test_flow_config_phase_without_agent_validates():
+    raw = {
+        "agents": {"writer": {"tools": []}},
+        "phases": {
+            "p1": {"agent": "writer", "tasks": [{"name": "t1", "prompt": "Do it."}]},
+            "noop": {"type": "SomeCustomPhase"},
+        },
+        "flow": [
+            {"phase": "p1"},
+            {"phase": "noop", "dependencies": ["p1"]},
+        ],
+    }
+    config = FlowConfig.model_validate(raw)
+    assert config.phases["noop"].agent is None
+    assert config.phases["noop"].tasks == []
 
 
 def test_flow_config_with_variables():

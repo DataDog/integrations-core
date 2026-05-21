@@ -55,3 +55,9 @@ class CheckpointManager:
         """Return the contents of a phase's memory file, or a NOT FOUND placeholder."""
         path = self.memory_path(phase_id)
         return path.read_text(encoding="utf-8") if path.exists() else f"<MEMORY NOT FOUND: {phase_id}>"
+
+    def resolve_template_variable(self, key: str) -> str:
+        """Resolve a template variable. ``<phase>_memory`` keys read the matching memory file."""
+        if key.endswith("_memory"):
+            return self.memory_content(key.removesuffix("_memory"))
+        return f"<VARIABLE UNDEFINED: {key}>"
