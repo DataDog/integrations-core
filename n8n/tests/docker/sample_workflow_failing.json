@@ -1,0 +1,50 @@
+{
+  "id": "testWorkflowFail",
+  "versionId": "00000000-0000-0000-0000-000000000002",
+  "name": "Failing Test Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "fail",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "33333333-3333-3333-3333-333333333333",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "test-fail-aaaa-bbbb-cccc-333333333333"
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "throw new Error('intentional failure for metrics tests');"
+      },
+      "id": "44444444-4444-4444-4444-444444444444",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

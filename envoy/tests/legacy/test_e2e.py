@@ -282,7 +282,7 @@ METRICS_V3 = [
 ]
 
 
-def test_e2e(dd_agent_check):
+def test_e2e(dd_agent_check, exercise_envoy):
     instance = {"stats_url": "http://{}:8001/stats".format(HOST)}
     aggregator = dd_agent_check(instance, rate=True)
     for metric in METRICS:
