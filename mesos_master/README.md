@@ -31,7 +31,7 @@ docker run -d --name datadog-agent \
   -e DD_API_KEY=<YOUR_DATADOG_API_KEY> \
   -e MESOS_MASTER=true \
   -e MARATHON_URL=http://leader.mesos:8080 \
-  datadog/agent:latest
+  registry.datadoghq.com/agent:latest
 ```
 
 Substitute your Datadog API key and Mesos Master's API URL into the command above.

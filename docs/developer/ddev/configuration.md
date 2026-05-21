@@ -43,11 +43,11 @@ Agent versions. For example, this configuration:
 agent = "master"
 
 [agents.master]
-docker = "datadog/agent-dev:master"
+docker = "registry.datadoghq.com/agent-dev:master-py3"
 local = "latest"
 
 [agents."7.18.1"]
-docker = "datadog/agent:7.18.1"
+docker = "registry.datadoghq.com/agent:7.18.1"
 local = "7.18.1"
 ```
 
