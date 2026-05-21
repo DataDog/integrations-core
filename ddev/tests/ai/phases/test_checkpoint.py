@@ -127,3 +127,17 @@ def test_memory_file_location(manager):
     assert expected_path.exists()
     assert expected_path.read_text() == "content"
     assert manager.memory_path("phase1") == expected_path.resolve()
+
+
+# ---------------------------------------------------------------------------
+# resolve_template_variable
+# ---------------------------------------------------------------------------
+
+
+def test_resolve_template_variable_memory_suffix(manager):
+    manager.write_memory("draft", "Draft memory content.")
+    assert manager.resolve_template_variable("draft_memory") == "Draft memory content."
+
+
+def test_resolve_template_variable_non_memory_key(manager):
+    assert manager.resolve_template_variable("some_variable") == "<VARIABLE UNDEFINED: some_variable>"
