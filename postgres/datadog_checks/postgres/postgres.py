@@ -1316,7 +1316,7 @@ class PostgreSql(DatabaseCheck):
             # If it's been more than 5 minutes since the last error diagnosis, run again to see if the error is resolved
             if (
                 self._last_diagnosis_had_errors
-                and time() - self._last_diagnosis_had_errors >= AUTOMATIC_DIAGNOSIS_INTERVAL
+                and time() - self._last_automatic_diagnosis >= AUTOMATIC_DIAGNOSIS_INTERVAL
             ):
                 should_run_diagnostics = True
                 self.log.info(
