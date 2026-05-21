@@ -309,7 +309,7 @@ def create_check(instance):
     return SnmpCheck('snmp', {}, [instance])
 
 
-def filter_metric_tags(tags):
+def filter_metric_tags(tags: list[str] | None) -> list[str] | None:
     """Drop device-level tags now joined from the NDM metadata payload at ingest.
 
     Tests pass the device-level `common_tags` list to both metric and metadata

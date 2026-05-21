@@ -36,7 +36,7 @@ def test_e2e_profile_server_iron_switch(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ] + []
-    metric_tags = common.filter_metric_tags(common_tags)
+    common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_host_resources_base(aggregator, common_tags)

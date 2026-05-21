@@ -35,7 +35,7 @@ def test_e2e_profile_netgear_access_point(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ]
-    metric_tags = common.filter_metric_tags(common_tags)
+    common.filter_metric_tags(common_tags)
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
