@@ -1,5 +1,6 @@
 from ddev.ai.flows.e2e_framework_lab.runner import FLOW_DIR
 from ddev.ai.phases.config import FlowConfig
+from ddev.ai.phases.template import render_prompt
 
 REQUIRED_PHASES = {
     "research_integration",
@@ -45,3 +46,34 @@ def test_e2e_framework_lab_flow_uses_write_tools_only_after_research() -> None:
     for agent_name in ["component_writer", "scenario_writer", "task_writer", "reviewer"]:
         assert "create_file" in config.agents[agent_name].tools
         assert "edit_file" in config.agents[agent_name].tools
+
+
+def test_e2e_framework_lab_prompts_render_runtime_variables() -> None:
+    context = {
+        "integration": "redisdb",
+        "integration_path": "/repo/redisdb",
+        "agent_repo_path": "/repo/datadog-agent",
+        "agent_worktree_path": "/repo/datadog-agent-worktrees/e2e-lab-redisdb",
+        "branch_name": "e2e-lab-redisdb",
+        "agent_e2e_docs_pr": "https://example.test/pr",
+        "research_integration_memory": "researched redisdb",
+        "generate_component_memory": "component ready",
+        "generate_scenario_memory": "scenario ready",
+        "generate_tasks_and_registry_memory": "tasks ready",
+    }
+
+    prompt_paths = [
+        *sorted((FLOW_DIR / "prompts").glob("*.md")),
+        *sorted((FLOW_DIR / "tasks").glob("*.md")),
+    ]
+
+    for prompt_path in prompt_paths:
+        rendered = render_prompt(prompt_path, context)
+        assert "{{" not in rendered, prompt_path
+        assert "}}" not in rendered, prompt_path
+
+    assert "redisdb" in render_prompt(FLOW_DIR / "tasks" / "research.md", context)
+    assert "researched redisdb" in render_prompt(FLOW_DIR / "tasks" / "component.md", context)
+    assert "/repo/datadog-agent-worktrees/e2e-lab-redisdb" in render_prompt(
+        FLOW_DIR / "prompts" / "component_writer.md", context
+    )

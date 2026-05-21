@@ -1,17 +1,17 @@
-Using the memories below, create the AWS E2E framework scenario for `{{integration}}`.
+Using the memories below, create the AWS E2E framework scenario for `$integration`.
 
 Research memory:
 
-{{research_integration_memory}}
+$research_integration_memory
 
 Component memory:
 
-{{generate_component_memory}}
+$generate_component_memory
 
-Required outputs under `{{agent_worktree_path}}`:
+Required outputs under `$agent_worktree_path`:
 
-- `test/e2e-framework/scenarios/aws/{{integration}}/run.go`
-- `test/e2e-framework/scenarios/aws/{{integration}}/BUILD.bazel`
+- `test/e2e-framework/scenarios/aws/$integration/run.go`
+- `test/e2e-framework/scenarios/aws/$integration/BUILD.bazel`
 
 The scenario must:
 
@@ -23,4 +23,4 @@ The scenario must:
 6. deploy a containerized Datadog Agent when enabled;
 7. attach the generated component Compose manifest;
 8. support Agent full image path, Agent version, JMX, and FIPS options when existing patterns support them;
-9. tag the Agent with `stackid:<stack>` and `scenario:{{integration}}`.
+9. tag the Agent with `stackid:<stack>` and `scenario:$integration`.

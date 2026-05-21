@@ -1,14 +1,14 @@
-Using the research memory below, create the Agent E2E app component for `{{integration}}`.
+Using the research memory below, create the Agent E2E app component for `$integration`.
 
 Research memory:
 
-{{research_integration_memory}}
+$research_integration_memory
 
-Required outputs under `{{agent_worktree_path}}`:
+Required outputs under `$agent_worktree_path`:
 
-- `test/e2e-framework/components/datadog/apps/{{integration}}/docker.go`
-- `test/e2e-framework/components/datadog/apps/{{integration}}/docker-compose.yaml`
-- load scripts under `test/e2e-framework/components/datadog/apps/{{integration}}/load/` when useful
+- `test/e2e-framework/components/datadog/apps/$integration/docker.go`
+- `test/e2e-framework/components/datadog/apps/$integration/docker-compose.yaml`
+- load scripts under `test/e2e-framework/components/datadog/apps/$integration/load/` when useful
 
 `docker.go` must embed `docker-compose.yaml` and expose a `docker.ComposeInlineManifest` named `DockerComposeManifest`.
 

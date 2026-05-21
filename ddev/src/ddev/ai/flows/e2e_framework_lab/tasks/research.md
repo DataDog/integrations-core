@@ -1,4 +1,4 @@
-Research the `{{integration}}` integration at `{{integration_path}}`.
+Research the `$integration` integration at `$integration_path`.
 
 Read these files when present:
 
