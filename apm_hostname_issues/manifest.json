@@ -27,9 +27,6 @@
       },
       "metrics": {
         "check": "datadog.apm.hostname_issue"
-      },
-      "service_checks": {
-        "metadata_path": "assets/service_checks.json"
       }
     },
     "dashboards": {
