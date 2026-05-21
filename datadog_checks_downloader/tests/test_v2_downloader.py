@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-"""Unit tests for TUFPointerDownloader (v2 repository format)."""
+"""Unit tests for TUFPointerDownloader (v2 repository format) and the v2 CLI surface."""
 
 import hashlib
 import json
@@ -12,11 +12,15 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from datadog_checks.downloader import cli
 from datadog_checks.downloader.download_v2 import TUFPointerDownloader
 from datadog_checks.downloader.exceptions import (
     DigestMismatch,
+    LengthMismatch,
     MalformedPointerError,
     MissingVersion,
+    NonCanonicalVersion,
+    NonDatadogPackage,
     TargetNotFoundError,
 )
 
@@ -40,7 +44,6 @@ POINTER = {
 
 
 def _mock_tuf_updater(pointer: dict) -> MagicMock:
-    """Return an Updater mock that writes *pointer* as target content."""
     pointer_bytes = json.dumps(pointer).encode()
     mock_updater = MagicMock()
     mock_updater.get_targetinfo.return_value = MagicMock()
@@ -126,19 +129,24 @@ class TestTargetNotFound:
 
 class TestDigestMismatch:
     def test_raises_on_corrupted_wheel(self, mock_urlopen, mock_updater_cls, tmp_path):
-        mock_urlopen.return_value = _mock_response(b'tampered bytes')
+        tampered = b'tampered bytes that match the pointer length'[:WHEEL_LENGTH]
+        mock_urlopen.return_value = _mock_response(tampered)
 
         downloader = TUFPointerDownloader(repository_url=REPO_URL)
         with pytest.raises(DigestMismatch, match=PROJECT):
             downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
 
-    def test_raises_on_length_mismatch(self, mock_urlopen, mock_updater_cls, tmp_path):
+
+class TestLengthMismatch:
+    def test_raises_when_pointer_length_does_not_match_wheel(self, mock_urlopen, mock_updater_cls, tmp_path):
         bad_pointer = {**POINTER, 'length': WHEEL_LENGTH + 1}
         mock_updater_cls.return_value = _mock_tuf_updater(bad_pointer)
 
         downloader = TUFPointerDownloader(repository_url=REPO_URL)
-        with pytest.raises(DigestMismatch, match='length'):
+        with pytest.raises(LengthMismatch) as exc_info:
             downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
+        assert exc_info.value.expected == WHEEL_LENGTH + 1
+        assert exc_info.value.actual == WHEEL_LENGTH
 
 
 class TestMalformedPointer:
@@ -150,6 +158,15 @@ class TestMalformedPointer:
         downloader = TUFPointerDownloader(repository_url=REPO_URL)
         with pytest.raises(MalformedPointerError, match=missing_key):
             downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
+
+    def test_raises_when_wheel_path_missing_leading_slash(self, mock_urlopen, mock_updater_cls, tmp_path):
+        no_slash_pointer = {**POINTER, 'wheel_path': f'wheels/{PROJECT}/datadog_postgres-{VERSION}-py3-none-any.whl'}
+        mock_updater_cls.return_value = _mock_tuf_updater(no_slash_pointer)
+
+        downloader = TUFPointerDownloader(repository_url=REPO_URL)
+        with pytest.raises(MalformedPointerError, match='wheel_path'):
+            downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
+        mock_urlopen.assert_not_called()
 
 
 class TestNetworkErrorMidDownload:
@@ -170,30 +187,13 @@ class TestNetworkErrorMidDownload:
             downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
 
 
-class TestWheelPathNormalization:
-    def test_wheel_path_without_leading_slash_yields_malformed_url(self, mock_urlopen, mock_updater_cls, tmp_path):
-        # The pointer publisher controls wheel_path; we rely on the leading slash
-        # for URL composition. Document that contract by asserting the resulting
-        # URL is malformed (missing slash) so that any regression in the
-        # publisher is visible here.
-        no_slash_pointer = {**POINTER, 'wheel_path': f'wheels/{PROJECT}/datadog_postgres-{VERSION}-py3-none-any.whl'}
-        mock_updater_cls.return_value = _mock_tuf_updater(no_slash_pointer)
-
-        downloader = TUFPointerDownloader(repository_url=REPO_URL)
-        downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
-
-        called_url = mock_urlopen.call_args[0][0]
-        assert called_url == f'{REPO_URL}wheels/{PROJECT}/datadog_postgres-{VERSION}-py3-none-any.whl'
-
-
 class TestDisableVerification:
-    def test_directly_downloads_wheel_without_tuf_or_digest_checks(self, mock_urlopen, tmp_path):
+    def test_directly_downloads_wheel_without_tuf_or_digest_checks(self, mock_urlopen, mock_updater_cls, tmp_path):
         content = b'bytes not matching any signed pointer'
         mock_urlopen.return_value = _mock_response(content)
 
-        with patch('datadog_checks.downloader.download_v2.Updater') as mock_updater_cls:
-            downloader = TUFPointerDownloader(repository_url=REPO_URL, disable_verification=True)
-            wheel_path = downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
+        downloader = TUFPointerDownloader(repository_url=REPO_URL, disable_verification=True)
+        wheel_path = downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
 
         mock_urlopen.assert_called_once_with(
             f'{REPO_URL}/wheels/{PROJECT}/datadog_postgres-{VERSION}-py3-none-any.whl',
@@ -207,3 +207,65 @@ class TestDisableVerification:
         downloader = TUFPointerDownloader(repository_url=REPO_URL, disable_verification=True)
         with pytest.raises(MissingVersion, match='requires an explicit --version'):
             downloader.download(PROJECT, dest_dir=tmp_path)
+
+
+class TestInstantiateV2Downloader:
+    def test_rejects_non_datadog_package(self, monkeypatch):
+        monkeypatch.setattr('sys.argv', ['downloader', 'requests'])
+        with pytest.raises(NonDatadogPackage, match='requests'):
+            cli.instantiate_v2_downloader()
+
+    def test_rejects_non_canonical_version(self, monkeypatch):
+        monkeypatch.setattr('sys.argv', ['downloader', 'datadog-postgres', '--version', 'banana'])
+        with pytest.raises(NonCanonicalVersion, match='banana'):
+            cli.instantiate_v2_downloader()
+
+    def test_warns_when_type_flag_supplied(self, monkeypatch, capsys):
+        monkeypatch.setattr('sys.argv', ['downloader', 'datadog-postgres', '--type', 'core'])
+        cli.instantiate_v2_downloader()
+        assert 'WARNING: --type' in capsys.readouterr().err
+
+    def test_warns_when_ignore_python_version_supplied(self, monkeypatch, capsys):
+        monkeypatch.setattr('sys.argv', ['downloader', 'datadog-postgres', '--ignore-python-version'])
+        cli.instantiate_v2_downloader()
+        assert 'NOTE: --ignore-python-version' in capsys.readouterr().err
+
+    def test_force_flag_is_silently_ignored(self, monkeypatch, capsys):
+        monkeypatch.setattr('sys.argv', ['downloader', 'datadog-postgres', '--force'])
+        cli.instantiate_v2_downloader()
+        assert capsys.readouterr().err == ''
+
+
+class TestCliDownloadFallback:
+    """Covers the cli.download() v2-attempt-then-v1-fallback orchestration."""
+
+    def test_strict_v2_raises_on_v2_failure(self, monkeypatch):
+        monkeypatch.setattr('sys.argv', ['downloader', 'datadog-postgres', '--v2'])
+        monkeypatch.setattr(cli, 'run_v2_downloader', MagicMock(side_effect=TargetNotFoundError('missing')))
+        v1 = MagicMock()
+        monkeypatch.setattr(cli, 'run_downloader', v1)
+        monkeypatch.setattr(cli, 'instantiate_downloader', MagicMock(return_value=(None, None, None, None)))
+
+        with pytest.raises(TargetNotFoundError):
+            cli.download()
+        v1.assert_not_called()
+
+    def test_default_falls_back_to_v1_on_v2_download_failure(self, monkeypatch):
+        monkeypatch.setattr('sys.argv', ['downloader', 'datadog-postgres'])
+        monkeypatch.setattr(cli, 'run_v2_downloader', MagicMock(side_effect=TargetNotFoundError('missing')))
+        v1 = MagicMock()
+        monkeypatch.setattr(cli, 'run_downloader', v1)
+        monkeypatch.setattr(cli, 'instantiate_downloader', MagicMock(return_value=('d', 'n', 'v', False)))
+
+        cli.download()
+        v1.assert_called_once_with('d', 'n', 'v', False)
+
+    def test_non_datadog_package_does_not_fall_back_to_v1(self, monkeypatch):
+        monkeypatch.setattr('sys.argv', ['downloader', 'requests'])
+        v1 = MagicMock()
+        monkeypatch.setattr(cli, 'run_downloader', v1)
+        monkeypatch.setattr(cli, 'instantiate_downloader', MagicMock())
+
+        with pytest.raises(NonDatadogPackage):
+            cli.download()
+        v1.assert_not_called()

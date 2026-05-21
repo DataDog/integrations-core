@@ -42,26 +42,38 @@ class TargetNotFoundError(ChecksDownloaderException):
 
 
 class MalformedPointerError(ChecksDownloaderException):
-    """Raised when a TUF-signed pointer JSON is missing required fields."""
+    """Raised when a TUF-signed pointer JSON is invalid or missing fields."""
 
-    def __init__(self, project, missing_key):
+    def __init__(self, project: str, field: str):
         self.project = project
-        self.missing_key = missing_key
+        self.field = field
 
-    def __str__(self):
-        return f'{self.project}: pointer missing required key {self.missing_key!r}'
+    def __str__(self) -> str:
+        return f'{self.project}: pointer field {self.field!r} is missing or malformed'
 
 
 class DigestMismatch(ChecksDownloaderException):
-    """Raised when the downloaded wheel's sha256 or length does not match the pointer."""
+    """Raised when the downloaded wheel's sha256 does not match the pointer."""
 
-    def __init__(self, project, expected, actual):
+    def __init__(self, project: str, expected: str, actual: str):
         self.project = project
         self.expected = expected
         self.actual = actual
 
-    def __str__(self):
-        return f'{self.project}: expected {self.expected}, got {self.actual}'
+    def __str__(self) -> str:
+        return f'{self.project}: expected digest {self.expected}, got {self.actual}'
+
+
+class LengthMismatch(ChecksDownloaderException):
+    """Raised when the downloaded wheel's byte length does not match the pointer."""
+
+    def __init__(self, project: str, expected: int, actual: int):
+        self.project = project
+        self.expected = expected
+        self.actual = actual
+
+    def __str__(self) -> str:
+        return f'{self.project}: expected length {self.expected}, got {self.actual}'
 
 
 class IncorrectRootLayoutType(ChecksDownloaderException):
