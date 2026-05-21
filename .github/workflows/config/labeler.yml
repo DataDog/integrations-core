@@ -106,6 +106,10 @@ integration/anyscale:
 - changed-files:
   - any-glob-to-any-file:
     - anyscale/**/*
+integration/apm_hostname_issues:
+- changed-files:
+  - any-glob-to-any-file:
+    - apm_hostname_issues/**/*
 integration/apache:
 - changed-files:
   - any-glob-to-any-file:
