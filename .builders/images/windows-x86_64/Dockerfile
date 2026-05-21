@@ -166,7 +166,7 @@ RUN New-Item -ItemType Junction -Path C:\OpenSSL -Target 'C:\Program Files\OpenS
     RunOnVSConsole -Command 'ninja -C C:\pgbuild install' && `
     Add-ToPath -Append "C:\postgresql\bin"
 
-ENV CURL_VERSION="8.19.0"
+ENV CURL_VERSION="8.20.0"
 
 # Set up runner
 COPY runner_dependencies.txt C:\runner_dependencies.txt
