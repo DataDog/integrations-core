@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 import os
+import threading
 import time
 
 import pytest
@@ -48,27 +49,35 @@ def dd_environment():
 
 @pytest.fixture
 def exercise_envoy():
-    # Drive continuous traffic through Envoy's listener for one full stats
-    # flush interval so the most recent flush window always has samples.
-    # Envoy's text /stats endpoint reports per-interval quantile values
-    # that get recomputed on every flush; an empty flush resets the
-    # interval percentiles to nan (see hist_approx_quantile in
-    # libcircllhist), which the parser would then filter out. Spreading
-    # requests across the window keeps the interval quantiles populated
-    # regardless of where the test lands in Envoy's flush cycle.
-    #
-    # Budget note: this buys us roughly one full flush interval of safe
-    # scrape window after the fixture yields, before the next empty flush
-    # wipes the interval values. The agent's --check-rate scrape typically
-    # takes 3-7s, so it lands comfortably inside that window. If the agent
-    # invocation ever gets significantly slower (e.g. longer rate delays
-    # or extra setup work) raise stats_flush_interval in front-envoy.yaml
-    # instead of leaning on this buffer.
-    deadline = time.monotonic() + ENVOY_STATS_FLUSH_INTERVAL + 1
-    while time.monotonic() < deadline:
-        requests.get('http://{}:8000/service/1'.format(HOST))
-        requests.get('http://{}:8000/service/2'.format(HOST))
-        time.sleep(ENVOY_STATS_FLUSH_INTERVAL / 10)
+    # Drive continuous traffic through Envoy's listener for the entire
+    # lifetime of the test. A background thread keeps firing requests
+    # until the fixture tears down, so every flush window — including
+    # those that close while the agent's check is in flight — has
+    # samples. Envoy's text /stats endpoint reports per-interval
+    # quantile values that get recomputed on every flush; an empty
+    # flush resets the interval percentiles to nan (see
+    # hist_approx_quantile in libcircllhist), which the parser would
+    # then filter out.
+    stop = threading.Event()
+
+    def fire_loop():
+        while not stop.is_set():
+            try:
+                requests.get('http://{}:8000/service/1'.format(HOST))
+                requests.get('http://{}:8000/service/2'.format(HOST))
+            except requests.RequestException:
+                pass
+            stop.wait(ENVOY_STATS_FLUSH_INTERVAL / 10)
+
+    thread = threading.Thread(target=fire_loop, daemon=True)
+    thread.start()
+    # Wait one full flush interval so the first non-empty flush rolls
+    # samples into the interval percentile view before the test body
+    # starts scraping.
+    time.sleep(ENVOY_STATS_FLUSH_INTERVAL + 1)
+    yield
+    stop.set()
+    thread.join(timeout=2)
 
 
 @pytest.fixture
