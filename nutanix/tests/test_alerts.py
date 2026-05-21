@@ -8,6 +8,7 @@ from unittest import mock
 
 import pytest
 
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.nutanix import NutanixCheck
 
 pytestmark = [pytest.mark.unit]
@@ -422,4 +423,45 @@ def test_alert_with_ip_address_rendering(get_current_datetime, dd_run_check, agg
     # Verify complete rendered message contains ip_address in proper context
     assert "Disk space usage for /var/log on Controller VM 10.0.0.108" in alert["msg_text"], (
         "Message should contain rendered ip_address in context"
+    )
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_alerts_v42_404_falls_back_to_v40(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
+):
+    """v4.2 alerts endpoint 404s -> check falls back to v4.0 and persists the cache flag.
+
+    Guards the Phase 1/Phase 2 dual-catch in activity_monitor._list_alerts. Without the
+    HTTPStatusError arm, the 404 raised by MockHTTPResponse.raise_for_status() escapes
+    the except clause and the v4.0 fallback never runs.
+    """
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    original_router = mock_http_get.side_effect
+    v42_url_fragment = 'api/monitoring/v4.2/serviceability/alerts'
+
+    def route_with_v42_404(url, *args, **kwargs):
+        if v42_url_fragment in url:
+            return MockHTTPResponse(status_code=404)
+        return original_router(url, *args, **kwargs)
+
+    mock_http_get.side_effect = route_with_v42_404
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    write_cache = mocker.patch.object(check, 'write_persistent_cache')
+
+    dd_run_check(check)
+
+    alert_events = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
+    assert len(alert_events) > 0, "Expected alerts via v4.0 fallback"
+
+    write_cache.assert_any_call('alerts_v42_supported', 'False')
+
+    called_urls = [call.args[0] for call in mock_http_get.call_args_list]
+    assert any(v42_url_fragment in u for u in called_urls), "v4.2 endpoint should have been tried"
+    assert any('api/monitoring/v4.0/serviceability/alerts' in u for u in called_urls), (
+        "v4.0 fallback URL should have been called"
     )
