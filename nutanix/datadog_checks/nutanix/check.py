@@ -6,6 +6,7 @@
 from datetime import datetime
 
 import requests
+from requests import exceptions as req_exc
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.http_exceptions import HTTPStatusError
@@ -175,9 +176,9 @@ class NutanixCheck(AgentCheck, ConfigMixin):
         except (
             requests.HTTPError,
             HTTPStatusError,
-            requests.exceptions.InvalidURL,
-            requests.exceptions.ConnectionError,
-            requests.exceptions.Timeout,
+            req_exc.InvalidURL,
+            req_exc.ConnectionError,
+            req_exc.Timeout,
         ) as e:
             self.log.error("[PC:%s:%s] Failed to connect: %s", self.pc_ip, self.pc_port, str(e))
         except Exception:
