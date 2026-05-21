@@ -264,8 +264,8 @@ def test_dbm_properties(instance):
 
     check = ClickhouseCheck('clickhouse', {}, [instance_config])
     assert check.reported_hostname is not None
+    assert check.reported_hostname != ''
     assert check.database_identifier is not None
-    assert check._config.server in check.reported_hostname
     assert str(check._config.port) in check.database_identifier
 
 

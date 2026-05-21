@@ -1,8 +1,8 @@
 {
-  "name": "Anthropic Auth Events",
+  "name": "Claude API Key Lifecycle",
   "type": "logs",
   "page": "stream",
-  "query": "source:anthropic-compliance-logs @evt.name:(user_signed_in_sso OR user_signed_in_google OR user_signed_in_apple OR user_signed_out OR user_signed_in_*)",
+  "query": "source:claude-compliance-logs @evt.name:(*api_key_created OR *api_key_deleted OR *api_key_updated OR *api_key_rotated)",
   "timerange": {
     "interval_ms": 86400000
   },
@@ -11,18 +11,19 @@
     "tag_source",
     "core_status",
     "log_evt.name",
+    "log_actor.type",
+    "log_actor.id",
     "log_usr.email",
-    "log_network.client.ip",
-    "log_network.client.geoip.country.iso_code"
+    "log_network.client.ip"
   ],
   "options": {
     "columns": [
       "source",
       "service",
       "@evt.name",
+      "@actor.type",
       "@usr.email",
       "@network.client.ip",
-      "@network.client.geoip.country.iso_code",
       "host"
     ],
     "sort": "desc",

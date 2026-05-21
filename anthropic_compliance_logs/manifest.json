@@ -9,8 +9,8 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Troubleshooting",
     "changelog": "CHANGELOG.md",
-    "description": "Collect compliance logs from Anthropic for security monitoring and SIEM use cases.",
-    "title": "Anthropic Compliance",
+    "description": "Collect compliance logs from Claude for security monitoring and SIEM use cases.",
+    "title": "Claude Compliance Logs",
     "media": [],
     "classifier_tags": [
       "Category::AI/ML",
@@ -36,17 +36,17 @@
       }
     },
     "dashboards": {
-      "Anthropic Compliance Logs Overview": "assets/dashboards/anthropic_compliance_logs_overview.json"
+      "Claude Compliance Logs Overview": "assets/dashboards/claude_compliance_logs_overview.json"
     },
     "monitors": {
-      "Anthropic Compliance Log Ingestion Has Stopped": "assets/monitors/anthropic_compliance_logs_no_data.json"
+      "Claude Compliance Log Ingestion Has Stopped": "assets/monitors/claude_compliance_logs_no_data.json"
     },
     "saved_views": {
-      "All Anthropic Compliance Logs": "assets/saved_views/all_anthropic_compliance_logs.json",
-      "Anthropic Auth Events": "assets/saved_views/anthropic_auth_events.json",
-      "Anthropic API Key Lifecycle": "assets/saved_views/anthropic_api_key_lifecycle.json",
-      "Anthropic Admin Activity": "assets/saved_views/anthropic_admin_activity.json",
-      "Anthropic Org Membership Changes": "assets/saved_views/anthropic_org_membership_changes.json"
+      "All Claude Compliance Logs": "assets/saved_views/all_claude_compliance_logs.json",
+      "Claude Auth Events": "assets/saved_views/claude_auth_events.json",
+      "Claude API Key Lifecycle": "assets/saved_views/claude_api_key_lifecycle.json",
+      "Claude Admin Activity": "assets/saved_views/claude_admin_activity.json",
+      "Claude Org Membership Changes": "assets/saved_views/claude_org_membership_changes.json"
     }
   },
   "author": {
