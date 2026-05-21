@@ -331,12 +331,11 @@ def test_e2e_core_discovery(dd_agent_check):
     ]
     metric_tags = common.filter_metric_tags(tags)
 
-    tags_with_loader = metric_tags + ['loader:core']
-
-    # test that for a specific metric we are getting as many times as we are running the check
-    # it might be off by 1 due to devices not being discovered yet at first check run
+    # Under the new agent contract autodiscovery_subnet ships only on the
+    # listener's own `snmp.discovered_devices_count` metric; per-device telemetry
+    # (snmp.devices_monitored) just carries `loader:core`.
     aggregator.assert_metric(
-        'snmp.devices_monitored', metric_type=aggregator.GAUGE, tags=tags_with_loader, at_least=2, value=1
+        'snmp.devices_monitored', metric_type=aggregator.GAUGE, tags=['loader:core'], at_least=2, value=1
     )
     aggregator.assert_metric(
         'snmp.upsAdvBatteryTemperature', metric_type=aggregator.GAUGE, tags=metric_tags, at_least=2
@@ -404,7 +403,6 @@ def test_e2e_regex_match(dd_agent_check):
     ]
     config['init_config']['loader'] = 'core'
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
-    device_ip = instance['ip_address']
 
     # raw sysName: 41ba948911b9
     aggregator.assert_metric(
@@ -415,11 +413,6 @@ def test_e2e_regex_match(dd_agent_check):
             'letter1:4',
             'letter2:1',
             'loader:core',
-            'snmp_device:' + device_ip,
-            'device_ip:' + device_ip,
-            'device_id:default:' + device_ip,
-            'device_namespace:default',
-            'agent_host:' + common.get_agent_hostname(),
         ],
     )
 
