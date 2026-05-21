@@ -63,13 +63,8 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
         'device_namespace:default',
         'agent_host:' + common.get_agent_hostname(),
     ]
-    # Per the new agent contract (#49822), only `autodiscovery_subnet` survives on
-    # per-device metrics under the core loader; device-identity tags and the
-    # listener's user-defined `tags:` (here tag1/tag2) are joined from the NDM
-    # metadata payload at ingest.
-    metric_tags = common.remove_tags(common.filter_metric_tags(common_tags), ['tag1', 'tag2'])
 
-    common.assert_common_metrics(aggregator, metric_tags, is_e2e=True, loader='core')
+    common.assert_common_metrics(aggregator, common_tags, is_e2e=True, loader='core')
     interfaces = [
         (13, 'eth0', 'kept'),
         (15, 'eth1', 'their forward oxen'),
@@ -79,7 +74,7 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
             'interface:{}'.format(interface),
             'interface_alias:{}'.format(if_desc),
             'interface_index:{}'.format(index),
-        ] + metric_tags
+        ] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags, count=1)
         for metric in IF_RATES:
@@ -95,18 +90,18 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
             )
 
     for metric in TCP_COUNTS:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=metric_tags, count=1)
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=common_tags, count=1)
     for metric in TCP_GAUGES:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=metric_tags, count=2)
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=2)
     for metric in UDP_COUNTS:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=metric_tags, count=1)
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=common_tags, count=1)
     for version in ['ipv4', 'ipv6']:
-        tags = ['ipversion:{}'.format(version)] + metric_tags
+        tags = ['ipversion:{}'.format(version)] + common_tags
         for metric in IP_COUNTS + IPX_COUNTS:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags, count=1)
         for metric in IP_IF_COUNTS:
             for interface in ['17', '21']:
-                tags = ['ipversion:{}'.format(version), 'interface:{}'.format(interface)] + metric_tags
+                tags = ['ipversion:{}'.format(version), 'interface:{}'.format(interface)] + common_tags
                 aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags, count=1)
 
     # ==== apc_ups profile ===
@@ -147,12 +142,11 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
             'device_namespace:test-auth-proto-{}'.format(auth_proto),
             'agent_host:' + common.get_agent_hostname(),
         ]
-        metric_tags = common.filter_metric_tags(common_tags)
 
-        common.assert_common_metrics(aggregator, metric_tags, is_e2e=True, loader='core')
-        aggregator.assert_metric('snmp.sysUpTimeInstance', tags=metric_tags)
+        common.assert_common_metrics(aggregator, common_tags, is_e2e=True, loader='core')
+        aggregator.assert_metric('snmp.sysUpTimeInstance', tags=common_tags)
         for metric in IF_SCALAR_GAUGE:
-            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=metric_tags, count=2)
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=2)
 
     # ==== test ignored IPs ====
     tags = [
