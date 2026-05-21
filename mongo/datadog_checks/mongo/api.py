@@ -272,4 +272,4 @@ class MongoApi(object):
             return self.__hostname
         except Exception as e:
             self._log.error('Unable to get hostname: %s', e)
-            return None
+            raise
