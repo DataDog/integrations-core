@@ -78,7 +78,8 @@ class PostgresHealth(Health):
                 status=HealthStatus.WARNING
                 if diagnosis.result == Diagnosis.DIAGNOSIS_WARNING
                 else HealthStatus.ERROR
-                if diagnosis.result == Diagnosis.DIAGNOSIS_FAIL or diagnosis.result == Diagnosis.DIAGNOSIS_UNEXPECTED_ERROR
+                if diagnosis.result == Diagnosis.DIAGNOSIS_FAIL
+                or diagnosis.result == Diagnosis.DIAGNOSIS_UNEXPECTED_ERROR
                 else HealthStatus.OK,
                 data={
                     # Diagnoses are namedtuples and need to be converted to a dictionary to be JSON serializable
@@ -88,7 +89,8 @@ class PostgresHealth(Health):
                         "result": "ok"
                         if diagnosis.result == Diagnosis.DIAGNOSIS_SUCCESS
                         else "error"
-                        if diagnosis.result == Diagnosis.DIAGNOSIS_FAIL or diagnosis.result == Diagnosis.DIAGNOSIS_UNEXPECTED_ERROR
+                        if diagnosis.result == Diagnosis.DIAGNOSIS_FAIL
+                        or diagnosis.result == Diagnosis.DIAGNOSIS_UNEXPECTED_ERROR
                         else "warning"
                         if diagnosis.result == Diagnosis.DIAGNOSIS_WARNING
                         else "unknown",
