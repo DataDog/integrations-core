@@ -16,6 +16,7 @@ from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck
 from datadog_checks.base.checks.kubelet_base.base import KubeletBase, KubeletCredentials, urljoin
 from datadog_checks.base.config import _is_affirmative
 from datadog_checks.base.errors import CheckException, SkipInstanceError
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.base.utils.tagging import tagger
 
 try:
@@ -435,7 +436,7 @@ class KubeletCheck(
         try:
             node_resp = self._retrieve_node_spec()
             node_resp.raise_for_status()
-        except requests.HTTPError as e:
+        except (requests.HTTPError, HTTPStatusError) as e:
             if node_resp.status_code == 404:
                 # ignore HTTPError, for supporting k8s >= 1.18 in a degrated mode
                 # in 1.18 the /spec can be reactivated from the kubelet config

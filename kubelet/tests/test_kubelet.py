@@ -10,11 +10,11 @@ from collections import defaultdict
 import mock
 import pytest
 import requests
-import requests_mock
 
 from datadog_checks.base.checks.kubelet_base.base import KubeletCredentials
 from datadog_checks.base.errors import SkipInstanceError
 from datadog_checks.base.utils.date import parse_rfc3339
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError
 from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.kubelet import KubeletCheck, PodListUtils
 
@@ -553,34 +553,31 @@ def _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, kube_version
     assert aggregator.metrics_asserted_pct == 100.0
 
 
-def test_kubelet_credentials_update(monkeypatch, aggregator):
+def test_kubelet_credentials_update(monkeypatch, aggregator, mock_openmetrics_http):
     instance = {
         'kubelet_metrics_endpoint': 'http://10.8.0.1:10255/metrics',
         'cadvisor_metrics_endpoint': 'http://10.8.0.1:10255/metrics/cadvisor',
     }
     check = mock_kubelet_check(monkeypatch, [instance], kube_version=None)
 
-    get = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: mock_from_file('kubelet_metrics_1_14.txt').splitlines()
+    mock_openmetrics_http.get.return_value = MockHTTPResponse(
+        content=mock_from_file('kubelet_metrics_1_14.txt'),
+        headers={'Content-Type': 'text/plain'},
     )
-    with mock.patch('requests.Session.get', return_value=get):
-        check.check(instance)
 
-    assert check._http_handlers[instance['kubelet_metrics_endpoint']].options['verify'] is True
-    assert check._http_handlers[instance['cadvisor_metrics_endpoint']].options['verify'] is True
-
-    get = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: mock_from_file('kubelet_metrics_1_14.txt').splitlines()
-    )
-    kubelet_conn_info = {'url': 'http://127.0.0.1:10255', 'ca_cert': False}
-    with (
-        mock.patch('requests.Session.get', return_value=get),
-        mock.patch('datadog_checks.kubelet.kubelet.get_connection_info', return_value=kubelet_conn_info),
+    with mock.patch(
+        'datadog_checks.kubelet.kubelet.get_connection_info',
+        return_value={'url': 'http://127.0.0.1:10255', 'ca_cert': True},
     ):
         check.check(instance)
+    assert check.kubelet_credentials.verify() is True
 
-    assert check._http_handlers[instance['kubelet_metrics_endpoint']].options['verify'] is False
-    assert check._http_handlers[instance['cadvisor_metrics_endpoint']].options['verify'] is False
+    with mock.patch(
+        'datadog_checks.kubelet.kubelet.get_connection_info',
+        return_value={'url': 'http://127.0.0.1:10255', 'ca_cert': False},
+    ):
+        check.check(instance)
+    assert check.kubelet_credentials.verify() is False
 
 
 def test_prometheus_cpu_summed(monkeypatch, aggregator, tagger):
@@ -1036,39 +1033,17 @@ def test_pod_expiration(monkeypatch, aggregator, tagger):
     aggregator.assert_metric("kubernetes.containers.running", value=1, tags=["pod_name:dd-agent-ntepl"])
 
 
-class MockedResponse(mock.Mock):
-    @staticmethod
-    def iter_lines(**kwargs):
-        return []
-
-
-def test_perform_kubelet_check(monkeypatch):
+def test_perform_kubelet_check(monkeypatch, mock_openmetrics_http):
     check = KubeletCheck('kubelet', {}, [{}])
     check.kube_health_url = "http://127.0.0.1:10255/healthz"
     check.kubelet_credentials = KubeletCredentials({})
     monkeypatch.setattr(check, 'service_check', mock.Mock())
 
-    instance_tags = ["one:1"]
-    get = MockedResponse()
-    with mock.patch('requests.Session.get', side_effect=get):
-        check._perform_kubelet_check(instance_tags)
+    mock_openmetrics_http.get.return_value = MockHTTPResponse(status_code=200)
 
-    get.assert_has_calls(
-        [
-            mock.call(
-                'http://127.0.0.1:10255/healthz',
-                auth=None,
-                cert=None,
-                headers=None,
-                params={'verbose': True},
-                proxies=None,
-                stream=False,
-                timeout=(10.0, 10.0),
-                verify=None,
-                allow_redirects=True,
-            )
-        ]
-    )
+    instance_tags = ["one:1"]
+    check._perform_kubelet_check(instance_tags)
+
     calls = [mock.call('kubernetes.kubelet.check', 0, tags=instance_tags)]
     check.service_check.assert_has_calls(calls)
 
@@ -1092,11 +1067,25 @@ def test_report_node_metrics_kubernetes1_18(monkeypatch, aggregator):
     check.kubelet_credentials = KubeletCredentials({'verify_tls': 'false'})
     check.node_spec_url = "http://localhost:10255/spec"
 
-    get = mock.MagicMock(status_code=404, iter_lines=lambda **kwargs: "Error Code")
-    get.raise_for_status.side_effect = requests.HTTPError('error')
-    with mock.patch('requests.Session.get', return_value=get):
-        check._report_node_metrics(['foo:bar'])
-        aggregator.assert_all_metrics_covered()
+    mock_resp = MockHTTPResponse(status_code=404, content='Error Code')
+    monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=mock_resp))
+    check._report_node_metrics(['foo:bar'])
+    aggregator.assert_all_metrics_covered()
+
+
+def test_report_node_metrics_kubernetes1_18_requests_httperror(monkeypatch, aggregator):
+    # In production, self.http.get returns a ResponseWrapper over requests.Response,
+    # whose raise_for_status() raises requests.HTTPError (not HTTPStatusError).
+    check = KubeletCheck('kubelet', {}, [{}])
+    check.kubelet_credentials = KubeletCredentials({'verify_tls': 'false'})
+    check.node_spec_url = "http://localhost:10255/spec"
+
+    mock_resp = mock.Mock()
+    mock_resp.status_code = 404
+    mock_resp.raise_for_status.side_effect = requests.HTTPError('404 Not Found')
+    monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=mock_resp))
+    check._report_node_metrics(['foo:bar'])
+    aggregator.assert_all_metrics_covered()
 
 
 def test_add_labels_to_tags(monkeypatch, aggregator):
@@ -1544,14 +1533,8 @@ def test_probe_metrics(monkeypatch, aggregator, tagger):
     )
 
 
-@pytest.fixture()
-def mock_request():
-    with requests_mock.Mocker() as m:
-        yield m
-
-
-def test_detect_probes(monkeypatch, mock_request):
-    mock_request.head('http://kubelet:10250/metrics/probes', status_code=200)
+def test_detect_probes(monkeypatch, mock_openmetrics_http):
+    mock_openmetrics_http.head.return_value = MockHTTPResponse(status_code=200)
     instance = {'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'}
     check = mock_kubelet_check(monkeypatch, [instance])
     scraper_config = check.get_scraper_config(instance)
@@ -1559,11 +1542,11 @@ def test_detect_probes(monkeypatch, mock_request):
     available = check.detect_probes(http_handler, 'http://kubelet:10250/metrics/probes')
     assert available is True
     assert check._probes_available is True
-    assert mock_request.call_count == 1
+    assert mock_openmetrics_http.head.call_count == 1
 
 
-def test_detect_probes_cached(monkeypatch, mock_request):
-    mock_request.head('http://kubelet:10250/metrics/probes', status_code=200)
+def test_detect_probes_cached(monkeypatch, mock_openmetrics_http):
+    mock_openmetrics_http.head.return_value = MockHTTPResponse(status_code=200)
     instance = {'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'}
     check = mock_kubelet_check(monkeypatch, [instance])
     scraper_config = check.get_scraper_config(instance)
@@ -1571,15 +1554,15 @@ def test_detect_probes_cached(monkeypatch, mock_request):
     available = check.detect_probes(http_handler, 'http://kubelet:10250/metrics/probes')
     assert available is True
     assert check._probes_available is True
-    assert mock_request.call_count == 1
+    assert mock_openmetrics_http.head.call_count == 1
     available = check.detect_probes(http_handler, 'http://kubelet:10250/metrics/probes')
     assert available is True
     assert check._probes_available is True
-    assert mock_request.call_count == 1
+    assert mock_openmetrics_http.head.call_count == 1
 
 
-def test_detect_probes_404(monkeypatch, mock_request):
-    mock_request.head('http://kubelet:10250/metrics/probes', status_code=404)
+def test_detect_probes_404(monkeypatch, mock_openmetrics_http):
+    mock_openmetrics_http.head.return_value = MockHTTPResponse(status_code=404)
     instance = {'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'}
     check = mock_kubelet_check(monkeypatch, [instance])
     scraper_config = check.get_scraper_config(instance)
@@ -1587,11 +1570,11 @@ def test_detect_probes_404(monkeypatch, mock_request):
     available = check.detect_probes(http_handler, 'http://kubelet:10250/metrics/probes')
     assert available is False
     assert check._probes_available is False
-    assert mock_request.call_count == 1
+    assert mock_openmetrics_http.head.call_count == 1
 
 
-def test_detect_probes_404_cached(monkeypatch, mock_request):
-    mock_request.head('http://kubelet:10250/metrics/probes', status_code=404)
+def test_detect_probes_404_cached(monkeypatch, mock_openmetrics_http):
+    mock_openmetrics_http.head.return_value = MockHTTPResponse(status_code=404)
     instance = {'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'}
     check = mock_kubelet_check(monkeypatch, [instance])
     scraper_config = check.get_scraper_config(instance)
@@ -1599,15 +1582,15 @@ def test_detect_probes_404_cached(monkeypatch, mock_request):
     available = check.detect_probes(http_handler, 'http://kubelet:10250/metrics/probes')
     assert available is False
     assert check._probes_available is False
-    assert mock_request.call_count == 1
+    assert mock_openmetrics_http.head.call_count == 1
     available = check.detect_probes(http_handler, 'http://kubelet:10250/metrics/probes')
     assert available is False
     assert check._probes_available is False
-    assert mock_request.call_count == 1
+    assert mock_openmetrics_http.head.call_count == 1
 
 
-def test_detect_probes_req_exception(monkeypatch, mock_request):
-    mock_request.head('http://kubelet:10250/metrics/probes', exc=requests.exceptions.ConnectTimeout)
+def test_detect_probes_req_exception(monkeypatch, mock_openmetrics_http):
+    mock_openmetrics_http.head.side_effect = HTTPConnectionError("connect timeout")
     instance = {'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'}
     check = mock_kubelet_check(monkeypatch, [instance])
     scraper_config = check.get_scraper_config(instance)
@@ -1615,7 +1598,7 @@ def test_detect_probes_req_exception(monkeypatch, mock_request):
     available = check.detect_probes(http_handler, 'http://kubelet:10250/metrics/probes')
     assert available is False
     assert check._probes_available is None
-    assert mock_request.call_count == 1
+    assert mock_openmetrics_http.head.call_count == 1
 
 
 def test_sanitize_url_label():
