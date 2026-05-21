@@ -41,18 +41,19 @@ def dd_environment():
 
 @pytest.fixture
 def exercise_envoy():
-    # Fire requests through Envoy's listener and wait long enough for at
-    # least one stats flush to roll the samples into the histogram interval
-    # view. Envoy's text /stats endpoint reports per-interval quantile values
-    # that update on each 5s flush; the parser drops any percentile whose
-    # interval value is nan. Without the sleep the scrape can land before
-    # the first flush after the requests (interval=nan, no metric emitted)
-    # or after multiple empty flushes have wiped the values (also nan).
-    # 6 seconds reliably lands us in the "one flush has captured the
-    # requests, next empty flush hasn't reset yet" window.
-    requests.get('http://{}:8000/service/1'.format(HOST))
-    requests.get('http://{}:8000/service/2'.format(HOST))
-    time.sleep(6)
+    # Drive continuous traffic through Envoy's listener for one full stats
+    # flush interval so the most recent flush window always has samples.
+    # Envoy's text /stats endpoint reports per-interval quantile values
+    # that get recomputed on every 5s flush; an empty flush resets the
+    # interval percentiles to nan (see hist_approx_quantile in
+    # libcircllhist), which the parser would then filter out. Spreading
+    # requests across the window keeps the interval quantiles populated
+    # regardless of where the test lands in Envoy's flush cycle.
+    deadline = time.monotonic() + 6
+    while time.monotonic() < deadline:
+        requests.get('http://{}:8000/service/1'.format(HOST))
+        requests.get('http://{}:8000/service/2'.format(HOST))
+        time.sleep(0.5)
 
 
 @pytest.fixture
