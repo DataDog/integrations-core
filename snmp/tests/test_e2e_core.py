@@ -311,35 +311,16 @@ def test_e2e_core_discovery(dd_agent_check):
     config['init_config']['loader'] = 'core'
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=False, times=3, pause=500)
 
-    network = config['instances'][0]['network_address']
-    ip_address = get_container_ip(SNMP_CONTAINER_NAME)
-    tags = [
-        # profile
-        'snmp_profile:apc_ups',
-        'model:APC Smart-UPS 600',
-        'firmware_version:2.0.3-test',
-        'serial_num:test_serial',
-        'ups_name:testIdentName',
-        'device_vendor:apc',
-        'device_namespace:default',
-        # autodiscovery
-        'autodiscovery_subnet:' + network,
-        'snmp_device:' + ip_address,
-        "device_ip:" + ip_address,
-        "device_id:default:" + ip_address,
-        'agent_host:' + common.get_agent_hostname(),
-    ]
-    metric_tags = common.filter_metric_tags(tags)
-
     # Under the new agent contract autodiscovery_subnet ships only on the
-    # listener's own `snmp.discovered_devices_count` metric; per-device telemetry
-    # (snmp.devices_monitored) just carries `loader:core`.
+    # listener's own snmp.discovered_devices_count metric. Per-device telemetry
+    # (snmp.devices_monitored) carries just `loader:core`, and the SNMP-sourced
+    # metrics for the discovered device (snmp.upsAdvBatteryTemperature here) ship
+    # with no device-level tags at all (only the `dd.internal.resource` tag,
+    # which the aggregator strips into Serie.Resources).
     aggregator.assert_metric(
         'snmp.devices_monitored', metric_type=aggregator.GAUGE, tags=['loader:core'], at_least=2, value=1
     )
-    aggregator.assert_metric(
-        'snmp.upsAdvBatteryTemperature', metric_type=aggregator.GAUGE, tags=metric_tags, at_least=2
-    )
+    aggregator.assert_metric('snmp.upsAdvBatteryTemperature', metric_type=aggregator.GAUGE, tags=[], at_least=2)
 
 
 def test_e2e_regex_match(dd_agent_check):
@@ -405,16 +386,11 @@ def test_e2e_regex_match(dd_agent_check):
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     # raw sysName: 41ba948911b9
-    aggregator.assert_metric(
-        'snmp.devices_monitored',
-        tags=[
-            'digits:41',
-            'remainder:ba948911b9',
-            'letter1:4',
-            'letter2:1',
-            'loader:core',
-        ],
-    )
+    # The instance's regex-derived metric_tags (digits/remainder/letter1/letter2)
+    # are now joined from the NDM metadata payload at ingest, not attached to
+    # the per-device telemetry metric. Verifying just that the agent successfully
+    # ran the check (snmp.devices_monitored is emitted with loader:core).
+    aggregator.assert_metric('snmp.devices_monitored', tags=['loader:core'])
 
 
 def test_e2e_meraki_cloud_controller(dd_agent_check):
