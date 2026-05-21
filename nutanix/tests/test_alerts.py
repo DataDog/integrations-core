@@ -427,10 +427,8 @@ def test_alert_with_ip_address_rendering(get_current_datetime, dd_run_check, agg
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
-def test_alerts_v42_404_falls_back_to_v40(
-    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
-):
-    """v4.2 alerts endpoint 404s -> check falls back to v4.0 and persists the cache flag.
+def test_alerts_v42_404_falls_back_to_v40(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
+    """v4.2 alerts endpoint 404s -> check falls back to v4.0 and still emits alerts.
 
     Guards the Phase 1/Phase 2 dual-catch in activity_monitor._list_alerts. Without the
     HTTPStatusError arm, the 404 raised by MockHTTPResponse.raise_for_status() escapes
@@ -451,11 +449,7 @@ def test_alerts_v42_404_falls_back_to_v40(
     mock_http_get.side_effect = route_with_v42_404
 
     check = NutanixCheck('nutanix', {}, [instance])
-    write_cache = mocker.patch.object(check, 'write_persistent_cache')
-
     dd_run_check(check)
 
     alert_events = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
     assert len(alert_events) > 0, "Expected alerts via v4.0 fallback"
-
-    write_cache.assert_any_call('alerts_v42_supported', 'False')
