@@ -77,6 +77,6 @@ Claude Compliance does not include any events.
 Need help? Contact [Datadog support][4].
 
 [1]: https://platform.claude.com/docs/en/api/compliance
-[2]: https://app.datadoghq.com/integrations?integrationId=anthropic-usage-and-costs
-[3]: https://app.datadoghq.com/logs?query=source%3Aclaude-compliance-logs
+[2]: /integrations?integrationId=anthropic-usage-and-costs
+[3]: /logs?query=source%3Aclaude-compliance-logs
 [4]: https://docs.datadoghq.com/help/
