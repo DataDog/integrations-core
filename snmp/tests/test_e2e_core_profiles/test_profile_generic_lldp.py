@@ -34,11 +34,9 @@ def test_e2e_profile_generic_lldp(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
     ]
-    metric_tags = common.filter_metric_tags(common_tags)
-
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
-    metric_tags = metric_tags + [
+    metric_tags = common.filter_metric_tags(common_tags) + [
         'lldp_rem_port_id:driving quaintly oxen but their oxen driving',
         'lldp_rem_port_id_subtype:interface_alias',
         'lldp_rem_sys_name:forward Jaded their Jaded zombies driving quaintly acted',

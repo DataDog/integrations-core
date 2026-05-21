@@ -166,12 +166,8 @@ def test_e2e_user_profiles_that_extend_profile_with_same_name(dd_agent_check):
     ]
     metric_tags = common.filter_metric_tags(tags)
 
-    aggregator.assert_metric(
-        'snmp.panSessionUtilization', metric_type=aggregator.GAUGE, tags=metric_tags, count=2
-    )
-    aggregator.assert_metric(
-        'snmp.panSessionUtilization_user', metric_type=aggregator.GAUGE, tags=metric_tags, count=2
-    )
+    aggregator.assert_metric('snmp.panSessionUtilization', metric_type=aggregator.GAUGE, tags=metric_tags, count=2)
+    aggregator.assert_metric('snmp.panSessionUtilization_user', metric_type=aggregator.GAUGE, tags=metric_tags, count=2)
 
     device = {
         'description': 'Palo Alto Networks PA-3000 series firewall',
@@ -235,9 +231,7 @@ def assert_apc_ups_metrics(dd_agent_check, config):
     )
 
     for metric in metrics.APC_UPS_METRICS:
-        aggregator.assert_metric(
-            'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=metric_tags, count=2
-        )
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=metric_tags, count=2)
 
     for metric, value in metrics.APC_UPS_UPS_BASIC_STATE_OUTPUT_STATE_METRICS:
         aggregator.assert_metric(metric, value=value, metric_type=aggregator.GAUGE, count=2, tags=metric_tags)
@@ -252,9 +246,7 @@ def assert_apc_ups_metrics(dd_agent_check, config):
         metric_type=aggregator.GAUGE,
         tags=group_state_tags,
     )
-    aggregator.assert_metric(
-        'snmp.upsOutletGroupStatus', metric_type=aggregator.GAUGE, tags=group_state_tags, value=1
-    )
+    aggregator.assert_metric('snmp.upsOutletGroupStatus', metric_type=aggregator.GAUGE, tags=group_state_tags, value=1)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
@@ -545,11 +537,9 @@ def test_e2e_core_cisco_csr(dd_agent_check):
         "device_id:default:{}".format(device_ip),
         'agent_host:' + common.get_agent_hostname(),
     ]
-    metric_tags = common.filter_metric_tags(global_tags)
-
     common.assert_common_metrics(aggregator, global_tags, is_e2e=True, loader='core')
 
-    metric_tags = metric_tags + [
+    metric_tags = common.filter_metric_tags(global_tags) + [
         'neighbor:244.12.239.177',
         'admin_status:start',
         'peer_state:established',
@@ -863,9 +853,7 @@ def test_e2e_cisco_legacy_wlc(dd_agent_check):
 
     ap_status_tags = ['ap_oper_status:associated', 'ap_admin_status:enable'] + ap_tags
 
-    aggregator.assert_metric(
-        "snmp.accessPoint".format(), metric_type=aggregator.GAUGE, tags=ap_status_tags, value=1
-    )
+    aggregator.assert_metric("snmp.accessPoint".format(), metric_type=aggregator.GAUGE, tags=ap_status_tags, value=1)
 
     if_ap_tags = ["ap_if_slot_id:0"] + ap_tags
     if_ap_status_tags = ['ap_if_oper_status:up', 'ap_if_admin_status:enable'] + if_ap_tags
@@ -892,9 +880,7 @@ def test_e2e_cisco_legacy_wlc(dd_agent_check):
 
     aggregator.assert_metric("snmp.wlan".format(), metric_type=aggregator.GAUGE, tags=wlan_status_tags, value=1)
 
-    aggregator.assert_metric(
-        'snmp.bsnDot11EssNumberOfMobileStations', metric_type=aggregator.GAUGE, tags=wlan_tags
-    )
+    aggregator.assert_metric('snmp.bsnDot11EssNumberOfMobileStations', metric_type=aggregator.GAUGE, tags=wlan_tags)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
