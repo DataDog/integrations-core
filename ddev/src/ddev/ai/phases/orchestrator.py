@@ -6,8 +6,7 @@ import importlib
 import inspect
 import logging
 from pathlib import Path
-
-import anthropic
+from typing import Any
 
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.base import Phase, PhaseRegistry
@@ -36,7 +35,7 @@ def _discover_and_register_phases(
         except Exception as e:
             raise FlowConfigError(f"Failed to import phase module '{py_file.stem}': {e}") from e
         for _, obj in inspect.getmembers(module, inspect.isclass):
-            if issubclass(obj, Phase) and obj.__module__ == module.__name__:
+            if issubclass(obj, Phase) and not inspect.isabstract(obj) and obj.__module__ == module.__name__:
                 registry.register(obj.__name__, obj)
 
 
@@ -46,13 +45,17 @@ class PhaseOrchestrator(EventBusOrchestrator):
         flow_yaml_path: Path,
         checkpoint_path: Path,
         runtime_variables: dict[str, str],
-        anthropic_client: anthropic.AsyncAnthropic,
+        agent_clients: dict[str, Any],
         file_access_policy: FileAccessPolicy,
         callbacks: Callbacks | None = None,
         grace_period: float = 10,
         logger: logging.Logger | None = None,
     ) -> None:
         """Initialize the orchestrator.
+
+        ``agent_clients`` maps provider name (e.g. ``"anthropic"``) to a constructed
+        provider client. ``build_agent`` looks up the right one based on each
+        ``AgentConfig.provider``.
 
         ``file_access_policy`` must have ``write_root`` set to the integration
         output directory so that agent writes are confined to that path.
@@ -61,7 +64,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._flow_yaml_path = flow_yaml_path
         self._checkpoint_path = checkpoint_path
         self._runtime_variables = runtime_variables
-        self._anthropic_client = anthropic_client
+        self._agent_clients = agent_clients
         self._callbacks: Callbacks = callbacks or Callbacks()
         self._phase_registry = PhaseRegistry()
         self._failed_phase: str | None = None
@@ -82,9 +85,10 @@ class PhaseOrchestrator(EventBusOrchestrator):
                 self._logger.warning("Phase %r is defined but not referenced in flow — it will not run", phase_id)
                 continue
             try:
-                self._phase_registry.get(phase_config.type)
+                phase_cls = self._phase_registry.get(phase_config.type)
             except ValueError as e:
                 raise FlowConfigError(str(e)) from e
+            phase_cls.validate_config(phase_id, phase_config, config.agents)
 
         checkpoint_manager = CheckpointManager(self._checkpoint_path)
 
@@ -93,24 +97,32 @@ class PhaseOrchestrator(EventBusOrchestrator):
         for entry in config.flow:
             phase_id = entry.phase
             phase_config = config.phases[phase_id]
-            agent_config = config.agents[phase_config.agent]
             dependencies = dependency_map[phase_id]
 
             phase_cls = self._phase_registry.get(phase_config.type)
-            phase = phase_cls(
-                phase_id=phase_id,
-                dependencies=dependencies,
-                config=phase_config,
-                agent_config=agent_config,
-                anthropic_client=self._anthropic_client,
-                checkpoint_manager=checkpoint_manager,
-                runtime_variables=self._runtime_variables,
-                flow_variables=config.variables,
-                config_dir=config_dir,
-                file_registry=self._file_registry,
-                callbacks=self._callbacks,
-                logger=self._logger,
+            phase_kwargs: dict[str, Any] = {
+                "phase_id": phase_id,
+                "dependencies": dependencies,
+                "config": phase_config,
+                "checkpoint_manager": checkpoint_manager,
+                "runtime_variables": self._runtime_variables,
+                "flow_variables": config.variables,
+                "config_dir": config_dir,
+                "file_registry": self._file_registry,
+                "callbacks": self._callbacks,
+                "logger": self._logger,
+            }
+            phase_kwargs.update(
+                phase_cls.extra_init_kwargs(
+                    phase_id=phase_id,
+                    phase_config=phase_config,
+                    agents=config.agents,
+                    agent_clients=self._agent_clients,
+                    file_registry=self._file_registry,
+                )
             )
+
+            phase = phase_cls(**phase_kwargs)
 
             self.register_processor(phase, [PhaseTrigger])
 

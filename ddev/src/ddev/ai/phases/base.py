@@ -3,24 +3,28 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import logging
+from abc import abstractmethod
 from collections.abc import Callable
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-import anthropic
-
-from ddev.ai.agent.anthropic_client import AnthropicAgent
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.checkpoint import CheckpointManager
-from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
+from ddev.ai.phases.config import AgentConfig, PhaseConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
-from ddev.ai.phases.template import render_inline, render_prompt
-from ddev.ai.react.process import ReActProcess
 from ddev.ai.tools.fs.file_registry import FileRegistry
-from ddev.ai.tools.registry import ToolRegistry
 from ddev.event_bus.exceptions import MessageProcessingError, ProcessorHookError
 from ddev.event_bus.orchestrator import AsyncProcessor, BaseMessage
+
+
+@dataclass
+class PhaseOutcome:
+    memory_text: str
+    total_input_tokens: int = 0
+    total_output_tokens: int = 0
+    extra_checkpoint: dict[str, Any] = field(default_factory=dict)
 
 
 class PhaseRegistry:
@@ -39,45 +43,11 @@ class PhaseRegistry:
         return self._registry[name]
 
 
-def _make_memory_resolver(checkpoint_manager: CheckpointManager) -> Callable[[str], str]:
-    """Build a resolver that reads phase memory files on demand for template substitution."""
-
-    def resolve(key: str) -> str:
-        if key.endswith("_memory"):
-            return checkpoint_manager.memory_content(key.removesuffix("_memory"))
-        return f"<VARIABLE UNDEFINED: {key}>"
-
-    return resolve
-
-
-def render_task_prompt(
-    task: TaskConfig,
-    config_dir: Path,
-    context: dict[str, Any],
-    resolver: Callable[[str], str] | None = None,
-) -> str:
-    """Render a task prompt -- from file if prompt_path is set, inline otherwise."""
-    if task.prompt_path is not None:
-        return render_prompt(config_dir / task.prompt_path, context, resolver)
-    if task.prompt is None:
-        raise FlowConfigError("TaskConfig must set either 'prompt' or 'prompt_path'")
-    return render_inline(task.prompt, context, resolver)
-
-
-def render_memory_prompt(checkpoint: CheckpointConfig, config_dir: Path, context: dict[str, Any]) -> str:
-    """Render a checkpoint memory prompt -- from file if memory_prompt_path is set, inline otherwise."""
-    if checkpoint.memory_prompt_path is not None:
-        return render_prompt(config_dir / checkpoint.memory_prompt_path, context)
-    if checkpoint.memory_prompt is None:
-        raise FlowConfigError("CheckpointConfig must set either 'memory_prompt' or 'memory_prompt_path'")
-    return render_inline(checkpoint.memory_prompt, context)
-
-
 class Phase(AsyncProcessor[PhaseTrigger]):
-    """Concrete base for all phases.
+    """Lifecycle base for all phases.
 
     process_message() implements the immutable pipeline skeleton.
-    Override before_react(), after_react(), and run_tasks() to customize phase behaviour.
+    Subclasses implement execute() to provide phase-specific logic.
     Registered in PhaseRegistry by _discover_and_register_phases() at startup.
     """
 
@@ -86,8 +56,6 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         phase_id: str,
         dependencies: list[str],
         config: PhaseConfig,
-        agent_config: AgentConfig,
-        anthropic_client: anthropic.AsyncAnthropic,
         checkpoint_manager: CheckpointManager,
         runtime_variables: dict[str, str],
         flow_variables: dict[str, str],
@@ -101,8 +69,6 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         self._dependencies = set(dependencies)
         self._remaining_dependencies = set(dependencies)
         self._config = config
-        self._agent_config = agent_config
-        self._anthropic_client = anthropic_client
         self._checkpoint_manager = checkpoint_manager
         self._runtime_variables = runtime_variables
         self._flow_variables = flow_variables
@@ -132,122 +98,65 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         self._executed = True
         return True
 
-    def before_react(self) -> None:
-        """Called once before agent/tools are created. Override for phase-specific setup."""
+    @classmethod
+    def validate_config(
+        cls,
+        phase_id: str,
+        config: PhaseConfig,
+        agents: dict[str, AgentConfig],
+    ) -> None:
+        """Override to enforce per-subclass config invariants. Raise FlowConfigError on mismatch."""
+        return None
 
-    def after_react(self) -> None:
-        """Called once after all tasks complete. Override for phase-specific teardown."""
+    @classmethod
+    def extra_init_kwargs(
+        cls,
+        phase_id: str,
+        phase_config: PhaseConfig,
+        agents: dict[str, AgentConfig],
+        agent_clients: dict[str, Any],
+        file_registry: FileRegistry,
+    ) -> dict[str, Any]:
+        """Override to inject subclass-specific kwargs into __init__ at construction time."""
+        return {}
 
-    async def run_tasks(
-        self,
-        process: ReActProcess,
-        context: dict[str, Any],
-    ) -> tuple[int, int]:
-        """Run the task loop. Returns (total_input_tokens, total_output_tokens).
-
-        Override to customize task execution -- e.g. add retries, change ordering, etc.
-        Default implementation iterates through config.tasks sequentially.
-        """
-        total_input = total_output = 0
-        last_result = None
-        for task in self._config.tasks:
-            if last_result is not None and last_result.context_usage is not None:
-                if last_result.context_usage.context_pct >= self._config.context_compact_threshold_pct:
-                    compact_in, compact_out = await process.compact()
-                    total_input += compact_in
-                    total_output += compact_out
-            prompt = render_task_prompt(task, self._config_dir, context, self._resolver)
-            last_result = await process.start(prompt)
-            total_input += last_result.total_input_tokens
-            total_output += last_result.total_output_tokens
-        return total_input, total_output
+    @abstractmethod
+    async def execute(self, context: dict[str, Any]) -> PhaseOutcome: ...
 
     async def process_message(self, message: PhaseTrigger) -> None:
-        """Full phase pipeline. Not intended to be overridden -- customise via the extension points."""
-        # 1. Record start time and notify observers
+        """Immutable pipeline skeleton. Not intended to be overridden — implement execute() instead."""
         self._started_at = datetime.now(UTC)
         await self._callbacks.fire_phase_start(self._phase_id)
 
-        # 2. Build template context and memory resolver
         context: dict[str, Any] = {
             **self._flow_variables,
             **self._runtime_variables,
             "phase_name": self._phase_id,
             "checkpoints": self._checkpoint_manager.read(),
         }
-        self._resolver = _make_memory_resolver(self._checkpoint_manager)
+        self._resolver = self._checkpoint_manager.resolve_template_variable
 
-        # 3. Call before_react()
-        self.before_react()
+        outcome = await self.execute(context)
 
-        # 4. Create system prompt, ToolRegistry, AnthropicAgent
-        system_prompt = render_prompt(
-            self._config_dir / "prompts" / f"{self._config.agent}.md",
-            context,
-            self._resolver,
-        )
-        tool_registry = ToolRegistry.from_names(
-            self._agent_config.tools,
-            owner_id=self._phase_id,
-            file_registry=self._file_registry,
-        )
-
-        agent_kwargs: dict[str, Any] = {}
-        if self._agent_config.model is not None:
-            agent_kwargs["model"] = self._agent_config.model
-        if self._agent_config.max_tokens is not None:
-            agent_kwargs["max_tokens"] = self._agent_config.max_tokens
-
-        agent = AnthropicAgent(
-            client=self._anthropic_client,
-            tools=tool_registry,
-            system_prompt=system_prompt,
-            name=self._phase_id,
-            **agent_kwargs,
-        )
-
-        # 5. Build ReActProcess
-        process = ReActProcess(
-            agent=agent,
-            tool_registry=tool_registry,
-            callbacks=self._callbacks,
-        )
-
-        # 6. Call run_tasks()
-        total_input, total_output = await self.run_tasks(process, context)
-
-        # 7. Call after_react()
-        self.after_react()
-
-        # 8. Build memory prompt (template errors fail the phase)
-        user_additions = None
-        if self._config.checkpoint is not None:
-            user_additions = render_memory_prompt(self._config.checkpoint, self._config_dir, context)
-        memory_prompt = self._checkpoint_manager.build_memory_prompt(user_additions)
-
-        # 9. Call the agent for the summary — text-only (allowed_tools=[])
-        await self._callbacks.fire_before_agent_send(1)
-
-        response = await agent.send(memory_prompt, allowed_tools=[])
-        total_input += response.usage.input_tokens
-        total_output += response.usage.output_tokens
-
-        await self._callbacks.fire_agent_response(response, 1)
-
-        # 10. Persist the memory file
-        self._checkpoint_manager.write_memory(self._phase_id, response.text)
-
-        # 11. Write the success checkpoint (with memory_path and final token totals)
-        self._checkpoint_manager.write_phase_checkpoint(
-            self._phase_id,
-            {
-                "status": "success",
-                "started_at": self._started_at.isoformat(),
-                "finished_at": datetime.now(UTC).isoformat(),
-                "tokens": {"total_input": total_input, "total_output": total_output},
-                "memory_path": str(self._checkpoint_manager.memory_path(self._phase_id)),
+        checkpoint_payload: dict[str, Any] = {
+            "status": "success",
+            "started_at": self._started_at.isoformat(),
+            "finished_at": datetime.now(UTC).isoformat(),
+            "tokens": {
+                "total_input": outcome.total_input_tokens,
+                "total_output": outcome.total_output_tokens,
             },
-        )
+            "memory_path": str(self._checkpoint_manager.memory_path(self._phase_id)),
+        }
+        reserved = set(checkpoint_payload) & set(outcome.extra_checkpoint)
+        if reserved:
+            raise ValueError(
+                f"Phase {self._phase_id!r}: extra_checkpoint cannot override reserved keys: {sorted(reserved)}"
+            )
+        checkpoint_payload.update(outcome.extra_checkpoint)
+
+        self._checkpoint_manager.write_memory(self._phase_id, outcome.memory_text)
+        self._checkpoint_manager.write_phase_checkpoint(self._phase_id, checkpoint_payload)
         await self._callbacks.fire_phase_finish(self._phase_id)
 
     async def on_success(self, message: PhaseTrigger) -> None:
