@@ -1,0 +1,45 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "68e1c7f4-8ccd-40b3-94f4-a8e63339fdce",
+  "app_id": "apm-hostname-issues",
+  "owner": "apm",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "",
+    "configuration": "",
+    "support": "",
+    "changelog": "",
+    "description": "Dashboards for diagnosing APM hostname configuration issues",
+    "title": "APM Hostname Issues",
+    "media": [],
+    "classifier_tags": [
+      "Category::Metrics",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_name": "APM Hostname Issues",
+      "source_type_id": null,
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "check": "datadog.apm.hostname_issue"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "apm_hostname_issues": "assets/dashboards/configuration_issues_dashboard.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
