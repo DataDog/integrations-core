@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 import os
+import time
 
 import pytest
 import requests
@@ -40,14 +41,18 @@ def dd_environment():
 
 @pytest.fixture
 def exercise_envoy():
-    # Fire requests through Envoy's listener immediately before the check
-    # scrapes /stats so the vhost.vcluster histograms have samples in Envoy's
-    # current flush window. Without this, the time between env setup and the
-    # check invocation can span multiple 5s flush intervals, by which point
-    # the histogram interval values have been reset to nan and the parser
-    # drops them silently.
+    # Fire requests through Envoy's listener and wait long enough for at
+    # least one stats flush to roll the samples into the histogram interval
+    # view. Envoy's text /stats endpoint reports per-interval quantile values
+    # that update on each 5s flush; the parser drops any percentile whose
+    # interval value is nan. Without the sleep the scrape can land before
+    # the first flush after the requests (interval=nan, no metric emitted)
+    # or after multiple empty flushes have wiped the values (also nan).
+    # 6 seconds reliably lands us in the "one flush has captured the
+    # requests, next empty flush hasn't reset yet" window.
     requests.get('http://{}:8000/service/1'.format(HOST))
     requests.get('http://{}:8000/service/2'.format(HOST))
+    time.sleep(6)
 
 
 @pytest.fixture
