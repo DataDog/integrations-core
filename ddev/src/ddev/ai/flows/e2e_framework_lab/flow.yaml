@@ -1,0 +1,77 @@
+variables:
+  agent_e2e_docs_pr: "https://github.com/DataDog/datadog-agent/pull/51021"
+  scenario_cloud: "aws"
+
+agents:
+  researcher:
+    tools: [read_file, grep, list_files]
+  component_writer:
+    tools: [read_file, grep, list_files, mkdir, create_file, edit_file, append_file]
+  scenario_writer:
+    tools: [read_file, grep, list_files, mkdir, create_file, edit_file, append_file]
+  task_writer:
+    tools: [read_file, grep, list_files, mkdir, create_file, edit_file, append_file]
+  reviewer:
+    tools: [read_file, grep, list_files, mkdir, create_file, edit_file, append_file]
+
+phases:
+  research_integration:
+    agent: researcher
+    tasks:
+      - name: Research integration behavior and metrics
+        prompt_path: tasks/research.md
+    checkpoint:
+      memory_prompt: |
+        Summarize the service topology, required dependencies, ports, authentication, startup order,
+        metrics to generate, realistic load operations, and known risks for the E2E framework lab.
+
+  generate_component:
+    agent: component_writer
+    tasks:
+      - name: Generate Docker component and load scripts
+        prompt_path: tasks/component.md
+    checkpoint:
+      memory_prompt: |
+        Summarize created component files, load generator behavior, exposed ports, health checks,
+        and how generated operations map to integration metrics.
+
+  generate_scenario:
+    agent: scenario_writer
+    tasks:
+      - name: Generate AWS E2E framework scenario
+        prompt_path: tasks/scenario.md
+    checkpoint:
+      memory_prompt: |
+        Summarize created scenario files, Pulumi resources, Agent options, fakeintake behavior,
+        exported outputs, and Bazel dependencies.
+
+  generate_tasks_and_registry:
+    agent: task_writer
+    tasks:
+      - name: Generate invoke tasks and registry wiring
+        prompt_path: tasks/tasks_and_registry.md
+    checkpoint:
+      memory_prompt: |
+        Summarize created task functions, scenario registry changes, connection commands,
+        and stack naming behavior.
+
+  review_lab:
+    agent: reviewer
+    tasks:
+      - name: Review generated lab artifacts
+        prompt_path: tasks/review.md
+    checkpoint:
+      memory_prompt: |
+        Summarize review results, corrections made, remaining manual validation commands,
+        and metrics that still need human verification.
+
+flow:
+  - phase: research_integration
+  - phase: generate_component
+    dependencies: [research_integration]
+  - phase: generate_scenario
+    dependencies: [research_integration, generate_component]
+  - phase: generate_tasks_and_registry
+    dependencies: [generate_scenario]
+  - phase: review_lab
+    dependencies: [generate_component, generate_scenario, generate_tasks_and_registry]
