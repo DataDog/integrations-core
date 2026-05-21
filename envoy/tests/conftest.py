@@ -56,6 +56,14 @@ def exercise_envoy():
     # libcircllhist), which the parser would then filter out. Spreading
     # requests across the window keeps the interval quantiles populated
     # regardless of where the test lands in Envoy's flush cycle.
+    #
+    # Budget note: this buys us roughly one full flush interval of safe
+    # scrape window after the fixture yields, before the next empty flush
+    # wipes the interval values. The agent's --check-rate scrape typically
+    # takes 3-7s, so it lands comfortably inside that window. If the agent
+    # invocation ever gets significantly slower (e.g. longer rate delays
+    # or extra setup work) raise stats_flush_interval in front-envoy.yaml
+    # instead of leaning on this buffer.
     deadline = time.monotonic() + ENVOY_STATS_FLUSH_INTERVAL + 1
     while time.monotonic() < deadline:
         requests.get('http://{}:8000/service/1'.format(HOST))
