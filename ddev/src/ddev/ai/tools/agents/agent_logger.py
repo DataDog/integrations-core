@@ -12,7 +12,7 @@ from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 from ddev.ai.tools.core.types import ToolResult
 
 
-class FileLogger:
+class AgentLogger:
     """Append-only JSONL writer for ReAct events plus subagent start/finish bookkeeping.
 
     Owns the file handle. Call build_callbacks() to obtain a Callbacks object whose
