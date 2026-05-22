@@ -26,8 +26,9 @@ jobs:
             per_page: 100,
           });
           const depPaths = ['agent_requirements.in'];
+          const depPrefixes = ['.builders/', '.deps/'];
           const changed = files.some(f =>
-            depPaths.includes(f.filename) || f.filename.startsWith('.deps/resolved/')
+            depPaths.includes(f.filename) || depPrefixes.some(p => f.filename.startsWith(p))
           );
           core.setOutput('changed', changed ? 'true' : 'false');
 
