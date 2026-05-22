@@ -25,7 +25,7 @@ jobs:
             pull_number: context.payload.pull_request.number,
             per_page: 100,
           });
-          const depPaths = ['agent_requirements.in'];
+          const depPaths = ['agent_requirements.in', '.github/workflows/resolve-build-deps.yaml'];
           const depPrefixes = ['.builders/', '.deps/'];
           const changed = files.some(f =>
             depPaths.includes(f.filename) || depPrefixes.some(p => f.filename.startsWith(p))
