@@ -285,6 +285,7 @@ class QueryMetrics(BaseModel):
     incremental_query_metrics: Optional[bool] = None
     pg_stat_statements_max_warning_threshold: Optional[float] = None
     run_sync: Optional[bool] = None
+    use_v2: Optional[bool] = None
 
 
 class QuerySamples(BaseModel):

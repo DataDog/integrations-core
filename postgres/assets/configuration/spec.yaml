@@ -767,6 +767,18 @@ files:
             type: number
             display_default: 300
             example: 300
+        - name: use_v2
+          hidden: true
+          description: |
+            Use the V2 statement metrics collection pipeline with layered caching.
+            V2 uses a lightweight integer-only pgss scan for change detection and a
+            two-tier obfuscation lookup (queryid -> query_signature ->
+            ObfuscationResult) that skips both the PG text fetch and the FFI
+            obfuscation call on cache hit. Raw query text is never cached.
+          value:
+            type: boolean
+            display_default: false
+            example: false
         - name: run_sync
           hidden: true
           description: |
