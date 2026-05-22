@@ -352,6 +352,32 @@ def calculate_wheel_sizes(wheel_path: Path) -> WheelSizes:
     return {'compressed': compressed_size, 'uncompressed': uncompressed_size}
 
 
+def assert_kafka_version_matches() -> None:
+    """Abort if CONFLUENT_KAFKA_VERSION env disagrees with the pin in requirements.in.
+
+    Set on the Windows builder image (see .builders/images/windows-x86_64/Dockerfile)
+    so the librdkafka build baked into the image stays in lockstep with the
+    confluent-kafka wheel built at run time. No-op on platforms where the env is unset.
+    """
+    expected = os.environ.get('CONFLUENT_KAFKA_VERSION')
+    if not expected:
+        return
+    requirements = MOUNT_DIR / 'requirements.in'
+    pin = None
+    for line in requirements.read_text(encoding='utf-8').splitlines():
+        match = re.match(r'^\s*confluent-kafka==([\d.]+)\s*$', line)
+        if match:
+            pin = match.group(1)
+            break
+    if pin is None:
+        abort('CONFLUENT_KAFKA_VERSION is set but no confluent-kafka== pin found in requirements.in.')
+    if pin != expected:
+        abort(
+            f'CONFLUENT_KAFKA_VERSION ({expected}) disagrees with confluent-kafka pin ({pin}). '
+            f'Bump ENV in .builders/images/windows-x86_64/Dockerfile in lockstep with agent_requirements.in.'
+        )
+
+
 def main():
     parser = argparse.ArgumentParser(prog='wheel-builder', allow_abbrev=False)
     parser.add_argument('--python', required=True)
@@ -397,6 +423,8 @@ def main():
         # Spaces are used to separate multiple values which means paths themselves cannot contain spaces, see:
         # https://github.com/pypa/pip/issues/10114#issuecomment-1880125475
         env_vars['PIP_FIND_LINKS'] = path_to_uri(staged_wheel_dir)
+
+        assert_kafka_version_matches()
 
         # Perform builder-specific logic if required
         if build_command := os.environ.get('DD_BUILD_COMMAND'):
