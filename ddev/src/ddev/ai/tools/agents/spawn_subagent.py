@@ -152,6 +152,11 @@ class SpawnSubagentTool(BaseTool[SpawnSubagentInput]):
             data = result.final_response.text
             if result.final_response.stop_reason == StopReason.MAX_TOKENS:
                 data = "[SUBAGENT HIT MAX_TOKENS — RESPONSE MAY BE TRUNCATED]\n\n" + data
-            return ToolResult(success=True, data=data)
+            return ToolResult(
+                success=True,
+                data=data,
+                total_input_tokens=result.total_input_tokens,
+                total_output_tokens=result.total_output_tokens,
+            )
         finally:
             logger.close()

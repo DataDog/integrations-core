@@ -113,6 +113,8 @@ class ReActProcess:
                     r if isinstance(r, ToolResult) else ToolResult(success=False, error=f"{type(r).__name__}: {r}")
                     for r in raw_results
                 ]
+                total_input += sum(result.total_input_tokens for result in tool_results)
+                total_output += sum(result.total_output_tokens for result in tool_results)
 
                 tool_call_results = list(zip(response.tool_calls, tool_results, strict=True))
 
