@@ -79,6 +79,14 @@ class ObfuscationLookup:
             self._misses += 1
             misses.add(qid)
 
+        logger.debug(
+            "lookup: requested=%d hits=%d misses=%d qid_map=%d sig_map=%d",
+            len(queryids),
+            len(hits),
+            len(misses),
+            len(self._qid_to_sig),
+            len(self._sig_to_result),
+        )
         return hits, misses
 
     def populate(self, raw_texts: dict[int, str]) -> dict[int, ObfuscationResult]:
@@ -101,12 +109,21 @@ class ObfuscationLookup:
 
             results[qid] = result
 
+        logger.debug(
+            "populate: input=%d obfuscated=%d qid_map=%d sig_map=%d",
+            len(raw_texts),
+            len(results),
+            len(self._qid_to_sig),
+            len(self._sig_to_result),
+        )
         return results
 
     def evict(self, queryids: set[int]) -> None:
         """Remove tier-1 entries for queryids evicted from pgss."""
         for qid in queryids:
             self._qid_to_sig.pop(qid, None)
+        if queryids:
+            logger.debug("evict: removed=%d qid_map=%d", len(queryids), len(self._qid_to_sig))
 
     def _obfuscate_single(self, raw_text: str) -> ObfuscationResult | None:
         try:
