@@ -13,9 +13,14 @@ from datadog_checks.dev.tooling.commands.console import (
     echo_warning,
 )
 from datadog_checks.dev.tooling.constants import AGENT_V5_ONLY, NOT_CHECKS, get_agent_release_requirements
-from datadog_checks.dev.tooling.release import get_package_name
+from datadog_checks.dev.tooling.release import get_folder_name, get_package_name
 from datadog_checks.dev.tooling.testing import process_checks_option
-from datadog_checks.dev.tooling.utils import complete_valid_checks, get_version_string, parse_agent_req_file
+from datadog_checks.dev.tooling.utils import (
+    complete_valid_checks,
+    get_valid_checks,
+    get_version_string,
+    parse_agent_req_file,
+)
 from datadog_checks.dev.utils import read_file
 
 
@@ -63,6 +68,32 @@ def agent_reqs(check):
     if unreleased_checks:
         joined_checks = ', '.join(unreleased_checks)
         echo_warning(f"{len(unreleased_checks)} unreleased checks: {joined_checks}")
+    stale_released_checks = find_stale_released_checks(agent_reqs_content)
+    if stale_released_checks:
+        failed_checks += len(stale_released_checks)
+        for package_name in stale_released_checks:
+            folder_name = get_folder_name(package_name)
+            message = (
+                f"{package_name} is pinned in requirements-agent-release.txt "
+                f"but `{folder_name}` is not present in the repo"
+            )
+            echo_failure(message)
+            annotate_error(release_requirements_file, message)
     if failed_checks:
         echo_failure(f"{failed_checks} checks out of sync")
         abort()
+
+
+def find_stale_released_checks(agent_reqs_content: dict[str, str]) -> list[str]:
+    """Return pinned Agent packages that no longer match a repo check."""
+    expected_packages = {
+        get_package_name(check_name)
+        for check_name in get_valid_checks()
+        if check_name not in AGENT_V5_ONLY | NOT_CHECKS
+    }
+
+    return sorted(
+        package_name
+        for package_name in agent_reqs_content
+        if package_name.startswith('datadog-') and package_name not in expected_packages
+    )
