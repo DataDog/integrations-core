@@ -85,6 +85,15 @@ class DeltaDetector:
 
         vanished_queryids = {k[0] for k in self._previous if k not in current}
 
+        logger.debug(
+            "delta: snapshot=%d prev=%d derivative=%d changed=%d vanished=%d",
+            len(current),
+            len(self._previous),
+            len(derivative_rows),
+            len(changed_queryids),
+            len(vanished_queryids),
+        )
+
         self._update_cache(current)
 
         return DeltaResult(
