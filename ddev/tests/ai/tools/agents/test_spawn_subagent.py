@@ -169,6 +169,30 @@ async def test_mkdir_failure(tmp_path):
     assert tool._counter == 0
 
 
+async def test_logger_open_failure_returns_tool_result(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def builder(
+        system_prompt: str,
+        owner_id: str,
+        tool_names: list[str],
+    ) -> tuple[BaseAgent[Any], ToolRegistry]:
+        raise AssertionError("builder should not be called")
+
+    def failing_logger(log_path: Path) -> None:
+        raise OSError("permission denied")
+
+    monkeypatch.setattr("ddev.ai.tools.agents.spawn_subagent.AgentLogger", failing_logger)
+
+    tool = make_tool(tmp_path, builder, allowed_tools=[])
+    result = await tool(SpawnSubagentInput(system_prompt="s", prompt="p", tools=[], name="x"))
+
+    assert result.success is False
+    assert "x" in result.error
+    assert "cannot open log file" in result.error
+    assert str(tmp_path / "001-x.jsonl") in result.error
+    assert "permission denied" in result.error
+    assert list(tmp_path.glob("*.jsonl")) == []
+
+
 # ---------------------------------------------------------------------------
 # Happy path
 # ---------------------------------------------------------------------------
