@@ -292,7 +292,9 @@ class ESCheck(AgentCheck):
         # This endpoint can return more data, all of what the /_cat/indices endpoint returns except index health.
         # The health we can get from /_cluster/health if we pass level=indices query param. Reference:
         # https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-health.html#cluster-health-api-query-params # noqa: E501
-        indices = self._get_data(self._join_url('/_stats/search', admin_forwarder))['indices']
+        indices = self._get_data(self._join_url('/_stats/search?forbid_closed_indices=false', admin_forwarder))[
+            'indices'
+        ]
         for (idx_name, data), (m_name, path) in product(indices.items(), INDEX_SEARCH_STATS):
             tags = base_tags + ['index_name:' + idx_name]
             self._process_metric(data, m_name, 'gauge', path, tags=tags)
