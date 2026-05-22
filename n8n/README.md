@@ -6,12 +6,11 @@ This check monitors [n8n][1] through the Datadog Agent.
 
 This integration collects n8n metrics including:
 - Cache metrics: hit, miss, and update counts.
-- Workflow metrics: started, success, and failed counters. Audit workflow life cycle counters. In n8n 2.x, an execution-duration histogram.
+- Workflow metrics: Started, success, and failed counters. Audit workflow life cycle counters. In n8n 2.x, an execution-duration histogram.
 - Node metrics: per-node counters (started and finished) emitted by worker processes in queue mode.
 - Queue metrics: queue depth; enqueued, dequeued, completed, failed, and stalled counters; and scaling-mode worker gauges.
 - HTTP metrics: request duration histograms tagged with status code.
 - Process and Node.js runtime metrics.
-
 
 ## Setup
 
@@ -26,7 +25,9 @@ No additional installation is needed on your server.
 
 #### Enable the n8n metrics endpoint
 
-The `/metrics` endpoint is disabled by default and must be enabled in your n8n configuration. **Note**: The `/metrics` endpoint is only available for self-hosted instances and is not available on n8n Cloud.
+The `/metrics` endpoint is disabled by default and must be enabled in your n8n configuration.
+
+**Note**: The `/metrics` endpoint is only available for self-hosted instances and is not available on n8n Cloud.
 
 Set the following environment variables to enable metrics:
 
