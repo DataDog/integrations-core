@@ -147,6 +147,20 @@ The review phase inspects generated files and reports required corrections. It c
 - Go imports and Bazel dependencies look plausible;
 - no generated code writes outside the Agent worktree.
 
+### 6. Optional deploy and validation loop
+
+Because the current AI phase harness does not support dynamic loops, the flow should support an opt-in fixed validation loop after static review:
+
+```text
+deploy_lab -> inspect_lab -> repair_lab -> redeploy_lab -> reinspect_lab -> final_report
+```
+
+The deploy and inspect steps should be deterministic runner-owned phases rather than unrestricted AI shell access. They run the generated Agent tasks, collect evidence, and write structured artifacts under `.ddev-ai/e2e-framework-lab/`, such as deployment logs, stack outputs, SSH commands, Agent status output, configcheck output, check output, Docker container status, and relevant container logs.
+
+`repair_lab` is the only additional editing phase. It receives the first deploy and inspection memories, edits generated files under the Agent worktree, and focuses on root causes such as incorrect ports, broken Autodiscovery labels, missing asset copying, failed load generators, invalid Go/Bazel imports, or task wiring issues. The second deploy and inspection pass verifies the repair without creating an open-ended retry loop.
+
+This loop must be opt-in, for example through a future `--deploy` flag. It must use a unique stack name, always report the cleanup command, and avoid infinite retries. Lab deployment and inspection can take substantially longer than generation, so the runner should use a larger timeout budget for deploy-enabled runs than for generation-only runs. A practical first timeout window is at least one hour for the complete deploy/inspect/repair/redeploy/reinspect/report sequence, with per-command timeouts sized for Pulumi, Docker image pulls, Agent startup, and check scheduling.
+
 ## Internal runner design
 
 Add a small Python module that can be called by tests or future CLI code. The module should expose a typed function similar to:
