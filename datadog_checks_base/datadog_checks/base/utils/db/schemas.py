@@ -73,19 +73,22 @@ class SchemaCollector(ABC):
                 if not database_name:
                     self._log.warning("database has no name %v", database)
                     continue
-                with self._get_cursor(database_name) as cursor:
-                    # Get the next row from the cursor
-                    next_row = self._get_next(cursor)
-                    while next_row:
-                        self._queued_rows.append(self._map_row(database, next_row))
-                        self._total_rows_count += 1
-                        # Because we're iterating over a cursor we need to try to get
-                        # the next row to see if we've reached the last row
+                try:
+                    with self._get_cursor(database_name) as cursor:
+                        # Get the next row from the cursor
                         next_row = self._get_next(cursor)
-                        self.maybe_flush(is_last_payload=False)
-                is_last_payload = database == databases[-1]
-                self.maybe_flush(is_last_payload)
-                self._log.debug("Completed collection of schemas for database %s", database_name)
+                        while next_row:
+                            self._queued_rows.append(self._map_row(database, next_row))
+                            self._total_rows_count += 1
+                            # Because we're iterating over a cursor we need to try to get
+                            # the next row to see if we've reached the last row
+                            next_row = self._get_next(cursor)
+                            self.maybe_flush(is_last_payload=False)
+                    self._log.debug("Completed collection of schemas for database %s", database_name)
+                except Exception as e:
+                    self._log.warning("Skipping database %s due to error: %s", database_name, e)
+                    continue
+            self.maybe_flush(is_last_payload=True)
         except Exception as e:
             status = "error"
             self._log.error("Error collecting schema: %s", e)
