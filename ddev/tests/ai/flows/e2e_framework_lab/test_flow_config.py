@@ -3,10 +3,13 @@ from ddev.ai.phases.config import FlowConfig
 from ddev.ai.phases.template import render_prompt
 
 REQUIRED_PHASES = {
-    "research_integration",
+    "research_technology",
+    "design_lab_topology",
+    "design_metric_workload",
+    "review_lab_design",
     "generate_component",
     "generate_scenario",
-    "generate_tasks_and_registry",
+    "generate_lab_manifest",
     "review_lab",
 }
 
@@ -16,10 +19,13 @@ def test_e2e_framework_lab_flow_loads() -> None:
 
     assert set(config.phases) == REQUIRED_PHASES
     assert [entry.phase for entry in config.flow] == [
-        "research_integration",
+        "research_technology",
+        "design_lab_topology",
+        "design_metric_workload",
+        "review_lab_design",
         "generate_component",
         "generate_scenario",
-        "generate_tasks_and_registry",
+        "generate_lab_manifest",
         "review_lab",
     ]
 
@@ -28,22 +34,25 @@ def test_e2e_framework_lab_flow_dependencies() -> None:
     config = FlowConfig.from_yaml(FLOW_DIR / "flow.yaml", FLOW_DIR)
     dependencies = {entry.phase: entry.dependencies for entry in config.flow}
 
-    assert dependencies["research_integration"] == []
-    assert dependencies["generate_component"] == ["research_integration"]
-    assert dependencies["generate_scenario"] == ["research_integration", "generate_component"]
-    assert dependencies["generate_tasks_and_registry"] == ["generate_scenario"]
-    assert dependencies["review_lab"] == [
-        "generate_component",
-        "generate_scenario",
-        "generate_tasks_and_registry",
+    assert dependencies["research_technology"] == []
+    assert dependencies["design_lab_topology"] == ["research_technology"]
+    assert dependencies["design_metric_workload"] == ["research_technology", "design_lab_topology"]
+    assert dependencies["review_lab_design"] == [
+        "research_technology",
+        "design_lab_topology",
+        "design_metric_workload",
     ]
+    assert dependencies["generate_component"] == ["review_lab_design"]
+    assert dependencies["generate_scenario"] == ["review_lab_design", "generate_component"]
+    assert dependencies["generate_lab_manifest"] == ["generate_scenario"]
+    assert dependencies["review_lab"] == ["generate_component", "generate_scenario", "generate_lab_manifest"]
 
 
 def test_e2e_framework_lab_flow_uses_write_tools_only_after_research() -> None:
     config = FlowConfig.from_yaml(FLOW_DIR / "flow.yaml", FLOW_DIR)
 
-    assert config.agents["researcher"].tools == ["read_file", "grep", "list_files"]
-    for agent_name in ["component_writer", "scenario_writer", "task_writer", "reviewer"]:
+    assert config.agents["researcher"].tools == ["read_file", "grep", "list_files", "http_get"]
+    for agent_name in ["component_writer", "scenario_writer", "manifest_writer", "reviewer"]:
         assert "create_file" in config.agents[agent_name].tools
         assert "edit_file" in config.agents[agent_name].tools
 
@@ -51,15 +60,16 @@ def test_e2e_framework_lab_flow_uses_write_tools_only_after_research() -> None:
 def test_e2e_framework_lab_prompts_render_runtime_variables() -> None:
     context = {
         "integration": "redisdb",
-        "integration_path": "/repo/redisdb",
-        "agent_repo_path": "/repo/datadog-agent",
-        "agent_worktree_path": "/repo/datadog-agent-worktrees/e2e-lab-redisdb",
-        "branch_name": "e2e-lab-redisdb",
+        "integration_path": "/repo/integrations-core/redisdb",
+        "lab_path": "/repo/integrations-core/redisdb/e2e_lab",
         "agent_e2e_docs_pr": "https://example.test/pr",
-        "research_integration_memory": "researched redisdb",
+        "research_technology_memory": "researched redisdb",
+        "design_lab_topology_memory": "topology ready",
+        "design_metric_workload_memory": "workload ready",
+        "review_lab_design_memory": "design reviewed",
         "generate_component_memory": "component ready",
         "generate_scenario_memory": "scenario ready",
-        "generate_tasks_and_registry_memory": "tasks ready",
+        "generate_lab_manifest_memory": "manifest ready",
     }
 
     prompt_paths = [
@@ -73,8 +83,8 @@ def test_e2e_framework_lab_prompts_render_runtime_variables() -> None:
         assert "}}" not in rendered, prompt_path
 
     assert "redisdb" in render_prompt(FLOW_DIR / "tasks" / "research.md", context)
-    assert "researched redisdb" in render_prompt(FLOW_DIR / "tasks" / "component.md", context)
-    assert "/repo/datadog-agent-worktrees/e2e-lab-redisdb" in render_prompt(
+    assert "researched redisdb" in render_prompt(FLOW_DIR / "tasks" / "design_topology.md", context)
+    assert "/repo/integrations-core/redisdb/e2e_lab" in render_prompt(
         FLOW_DIR / "prompts" / "component_writer.md", context
     )
 
@@ -106,3 +116,13 @@ def test_e2e_framework_lab_prompts_require_explicit_auxiliary_asset_copying() ->
     assert "local scripts, config files, or build contexts" in review_task
     assert "explicitly copied to the remote Docker host" in review_task
     assert "helper containers do not use images that trigger unrelated Autodiscovery" in review_task
+
+
+def test_e2e_framework_lab_memory_prompts_are_bounded() -> None:
+    config = FlowConfig.from_yaml(FLOW_DIR / "flow.yaml", FLOW_DIR)
+
+    for phase_id, phase in config.phases.items():
+        assert phase.checkpoint is not None
+        assert phase.checkpoint.memory_prompt is not None
+        assert "at most 12 bullets" in phase.checkpoint.memory_prompt, phase_id
+        assert "Do not include code blocks" in phase.checkpoint.memory_prompt, phase_id

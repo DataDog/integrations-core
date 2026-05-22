@@ -4,74 +4,120 @@ variables:
 
 agents:
   researcher:
-    tools: [read_file, grep, list_files]
+    tools: [read_file, grep, list_files, http_get]
+  designer:
+    tools: [read_file, grep, list_files, http_get]
   component_writer:
     tools: [read_file, grep, list_files, mkdir, create_file, edit_file, append_file]
   scenario_writer:
     tools: [read_file, grep, list_files, mkdir, create_file, edit_file, append_file]
-  task_writer:
+  manifest_writer:
     tools: [read_file, grep, list_files, mkdir, create_file, edit_file, append_file]
   reviewer:
     tools: [read_file, grep, list_files, mkdir, create_file, edit_file, append_file]
 
 phases:
-  research_integration:
+  research_technology:
     agent: researcher
     tasks:
-      - name: Research integration behavior and metrics
+      - name: Research technology behavior and metrics
         prompt_path: tasks/research.md
     checkpoint:
       memory_prompt: |
-        Summarize the service topology, required dependencies, ports, authentication, startup order,
-        metrics to generate, realistic load operations, and known risks for the E2E framework lab.
+        Summarize official documentation sources, available integrations-core evidence, service topology,
+        deployment modes, dependencies, ports, authentication, startup order, metrics/signals to generate,
+        realistic load operations, and risks for the E2E framework lab.
+        Keep the summary to at most 12 bullets. Do not include code blocks.
+
+  design_lab_topology:
+    agent: designer
+    tasks:
+      - name: Design lab topology
+        prompt_path: tasks/design_topology.md
+    checkpoint:
+      memory_prompt: |
+        Summarize the selected lab topology, deployment mode, containers or cloud resources, network reachability,
+        authentication, health checks, asset-copying strategy, and assumptions.
+        Keep the summary to at most 12 bullets. Do not include code blocks.
+
+  design_metric_workload:
+    agent: designer
+    tasks:
+      - name: Design metric workload
+        prompt_path: tasks/design_workload.md
+    checkpoint:
+      memory_prompt: |
+        Summarize seed data, continuous operations, expected metric or signal effects, workload health indicators,
+        metrics expected to stay zero, and metrics requiring manual validation.
+        Keep the summary to at most 12 bullets. Do not include code blocks.
+
+  review_lab_design:
+    agent: reviewer
+    tasks:
+      - name: Review lab design
+        prompt_path: tasks/review_design.md
+    checkpoint:
+      memory_prompt: |
+        Summarize design review findings, corrections, assumptions, risks, and generation guidance.
+        Keep the summary to at most 12 bullets. Do not include code blocks.
 
   generate_component:
     agent: component_writer
     tasks:
-      - name: Generate Docker component and load scripts
+      - name: Generate Docker Compose component and load scripts
         prompt_path: tasks/component.md
     checkpoint:
       memory_prompt: |
-        Summarize created component files, load generator behavior, exposed ports, health checks,
-        and how generated operations map to integration metrics.
+        Summarize created lab component files, load generator behavior, exposed ports, health checks,
+        and how generated operations map to integration metrics or documented upstream signals.
+        Keep the summary to at most 12 bullets. Do not include code blocks.
 
   generate_scenario:
     agent: scenario_writer
     tasks:
-      - name: Generate AWS E2E framework scenario
+      - name: Generate E2E framework scenario adapter
         prompt_path: tasks/scenario.md
     checkpoint:
       memory_prompt: |
-        Summarize created scenario files, Pulumi resources, Agent options, fakeintake behavior,
-        exported outputs, and Bazel dependencies.
+        Summarize created scenario adapter files, Agent E2E framework imports, integration installation behavior,
+        asset-copying behavior, fakeintake behavior, exported outputs, and known runtime assumptions.
+        Keep the summary to at most 12 bullets. Do not include code blocks.
 
-  generate_tasks_and_registry:
-    agent: task_writer
+  generate_lab_manifest:
+    agent: manifest_writer
     tasks:
-      - name: Generate invoke tasks and registry wiring
+      - name: Generate lab manifest and docs
         prompt_path: tasks/tasks_and_registry.md
     checkpoint:
       memory_prompt: |
-        Summarize created task functions, scenario registry changes, connection commands,
-        and stack naming behavior.
+        Summarize generated lab manifest, documented commands, integration source options,
+        validation commands, and cleanup guidance.
+        Keep the summary to at most 12 bullets. Do not include code blocks.
 
   review_lab:
     agent: reviewer
     tasks:
-      - name: Review generated lab artifacts
+      - name: Review generated integrations-core lab artifacts
         prompt_path: tasks/review.md
     checkpoint:
       memory_prompt: |
         Summarize review results, corrections made, remaining manual validation commands,
         and metrics that still need human verification.
+        Keep the summary to at most 12 bullets. Do not include code blocks.
 
 flow:
-  - phase: research_integration
+  - phase: research_technology
+  - phase: design_lab_topology
+    dependencies: [research_technology]
+  - phase: design_metric_workload
+    dependencies: [research_technology, design_lab_topology]
+  - phase: review_lab_design
+    dependencies: [research_technology, design_lab_topology, design_metric_workload]
   - phase: generate_component
-    dependencies: [research_integration]
+    dependencies: [review_lab_design]
   - phase: generate_scenario
-    dependencies: [research_integration, generate_component]
-  - phase: generate_tasks_and_registry
+    dependencies: [review_lab_design, generate_component]
+  - phase: generate_lab_manifest
     dependencies: [generate_scenario]
   - phase: review_lab
-    dependencies: [generate_component, generate_scenario, generate_tasks_and_registry]
+    dependencies: [generate_component, generate_scenario, generate_lab_manifest]

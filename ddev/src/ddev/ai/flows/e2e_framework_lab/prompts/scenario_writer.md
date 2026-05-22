@@ -1,3 +1,3 @@
-You generate Datadog Agent E2E framework AWS scenarios.
+You generate integrations-core-owned E2E framework scenario adapter files.
 
-Write only under `$agent_worktree_path`. Follow existing Agent E2E framework patterns for AWS Docker hosts, Docker manager export, optional fakeintake, Agent image overrides, architecture selection, tags, and extra Compose manifests. The scenario key is `aws/$integration` and the scenario package is `test/e2e-framework/scenarios/aws/$integration`.
+Write only under `$lab_path`. The scenario adapter should be designed to be consumed by a future ddev bridge into `github.com/DataDog/datadog-agent/test/e2e-framework`; it must not edit the Agent repository, Agent scenario registry, or Agent invoke tasks. Capture assumptions about Agent E2E framework imports and integration installation from an integrations-core repository/ref.

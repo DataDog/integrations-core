@@ -1,26 +1,35 @@
-Using the memories below, create the AWS E2E framework scenario for `$integration`.
+Using the memories below, create the integrations-core-owned E2E framework scenario adapter for `$integration`.
 
 Research memory:
+$research_technology_memory
 
-$research_integration_memory
+Topology memory:
+$design_lab_topology_memory
+
+Workload memory:
+$design_metric_workload_memory
+
+Design review memory:
+$review_lab_design_memory
 
 Component memory:
-
 $generate_component_memory
 
-Required outputs under `$agent_worktree_path`:
+Required output under `$lab_path`:
 
-- `test/e2e-framework/scenarios/aws/$integration/run.go`
-- `test/e2e-framework/scenarios/aws/$integration/BUILD.bazel`
+- `scenario.go`
 
-The scenario must:
+`scenario.go` is an adapter for a future ddev bridge into `github.com/DataDog/datadog-agent/test/e2e-framework`; it must not edit Agent files, Agent invoke tasks, or Agent scenario registries.
 
-1. create an AWS environment;
-2. create an EC2 Docker host;
-3. export remote host and Docker outputs;
-4. create a Docker manager;
-5. optionally deploy fakeintake with load balancer and retention options;
-6. deploy a containerized Datadog Agent when enabled;
-7. attach the generated component Compose manifest;
-8. support Agent full image path, Agent version, JMX, and FIPS options when existing patterns support them;
-9. tag the Agent with `stackid:<stack>` and `scenario:$integration`.
+The scenario adapter should document and sketch how the future bridge will:
+
+1. create the AWS environment and Docker host;
+2. attach `docker-compose.yaml` as an extra Compose manifest;
+3. copy listed auxiliary assets such as `load/...` to the remote Docker host;
+4. configure fakeintake when requested;
+5. install an unreleased integration from an integrations-core repository/ref into the deployed Agent;
+6. restart the Agent after installation;
+7. export remote host, Docker, Agent, and fakeintake outputs;
+8. expose validation commands for Agent status, configcheck, check output, Docker status, and workload logs.
+
+Keep the adapter maintainable and explicit about assumptions that the future ddev runtime bridge must satisfy.

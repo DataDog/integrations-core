@@ -55,13 +55,12 @@ class ReActProcess:
         Returns (input_tokens, output_tokens) from the compaction API call.
         Returns (0, 0) if history was already compact and no API call was made.
         """
+        if response is not None and response.stop_reason == StopReason.TOOL_USE:
+            return 0, 0
+
         await self._callbacks.fire_before_compact()
 
-        compact_response = None
-        if response is None or response.stop_reason != StopReason.TOOL_USE:
-            compact_response = await self._agent.compact()
-        else:
-            compact_response = await self._agent.compact_preserving_last_turn()
+        compact_response = await self._agent.compact()
 
         await self._callbacks.fire_after_compact()
         if compact_response is None:
@@ -101,7 +100,7 @@ class ReActProcess:
             await self._callbacks.fire_agent_response(response, iterations)
 
             # No iteration cap — this is an interactive CLI tool; the user can Ctrl+C to stop.
-            while response.stop_reason == StopReason.TOOL_USE:
+            while response.stop_reason == StopReason.TOOL_USE or response.tool_calls:
                 if not response.tool_calls:
                     raise AgentError("Agent returned stop_reason=TOOL_USE with no tool calls")
 
@@ -130,10 +129,8 @@ class ReActProcess:
 
                 await self._callbacks.fire_agent_response(response, iterations)
 
-                if self._is_compact_needed(response):
-                    compact_in, compact_out = await self.compact(response)
-                    total_input += compact_in
-                    total_output += compact_out
+                # Do not compact mid-tool loop: Anthropic requires each assistant tool_use
+                # to be followed immediately by its matching user tool_result message.
 
             react_result = ReActResult(
                 final_response=response,

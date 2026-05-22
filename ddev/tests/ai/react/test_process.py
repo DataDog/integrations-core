@@ -219,6 +219,24 @@ async def test_single_tool_call_executes_tool_and_returns() -> None:
     assert agent.send_calls[1][0].result.data == _TOOL_RESULT_DATA
 
 
+async def test_tool_call_is_answered_when_response_stops_for_max_tokens() -> None:
+    tc = make_tool_call("tc_01", "read_file")
+    responses = [
+        make_response(StopReason.MAX_TOKENS, tool_calls=[tc]),
+        make_response(StopReason.END_TURN),
+    ]
+    registry = MockToolRegistry()
+    agent = MockAgent(responses)
+
+    result = await make_process(agent, registry=registry).start("Do something")
+
+    assert result.final_response.stop_reason == StopReason.END_TURN
+    assert len(registry.run_calls) == 1
+    assert len(agent.send_calls) == 2
+    assert isinstance(agent.send_calls[1], list)
+    assert agent.send_calls[1][0].tool_call_id == "tc_01"
+
+
 # ---------------------------------------------------------------------------
 # Multi-tool parallel dispatch
 # ---------------------------------------------------------------------------
@@ -551,6 +569,21 @@ async def test_compact_fires_before_and_after_callbacks() -> None:
     assert recorder.after_compacts == 1
 
 
+async def test_compact_does_not_run_when_response_has_pending_tool_use() -> None:
+    agent = MockAgent([])
+    recorder = CallbackRecorder()
+    response = make_response(StopReason.TOOL_USE, tool_calls=[make_tool_call()])
+
+    compact_in, compact_out = await make_process(agent, callbacks=Callbacks([recorder.callback_set])).compact(response)
+
+    assert compact_in == 0
+    assert compact_out == 0
+    assert agent.compact_calls == 0
+    assert agent.compact_preserving_turn_calls == 0
+    assert recorder.before_compacts == 0
+    assert recorder.after_compacts == 0
+
+
 # ---------------------------------------------------------------------------
 # Auto-compact inside the ReAct loop
 # ---------------------------------------------------------------------------
@@ -560,28 +593,33 @@ def make_context_usage(pct: float, window: int = 200_000) -> ContextUsage:
     return ContextUsage(window_size=window, used_tokens=int(window * pct / 100))
 
 
-async def test_auto_compact_triggers_when_threshold_exceeded() -> None:
-    tc = make_tool_call()
+async def test_auto_compact_does_not_trigger_during_tool_use_turn() -> None:
+    first_tool = make_tool_call("tc_01")
+    second_tool = make_tool_call("tc_02")
     responses = [
-        make_response(StopReason.TOOL_USE, tool_calls=[tc]),
-        make_response(StopReason.END_TURN, context_usage=make_context_usage(80.0)),
+        make_response(StopReason.TOOL_USE, tool_calls=[first_tool]),
+        make_response(StopReason.TOOL_USE, tool_calls=[second_tool], context_usage=make_context_usage(80.0)),
+        make_response(StopReason.END_TURN),
     ]
     agent = MockAgent(responses)
     await make_process(agent, compact_threshold_pct=75.0).start("task")
-    assert agent.compact_calls == 1
+    assert agent.compact_calls == 0
+    assert agent.compact_preserving_turn_calls == 0
 
 
-async def test_auto_compact_fires_callbacks() -> None:
-    tc = make_tool_call()
+async def test_auto_compact_does_not_fire_callbacks_during_tool_use_turn() -> None:
+    first_tool = make_tool_call("tc_01")
+    second_tool = make_tool_call("tc_02")
     responses = [
-        make_response(StopReason.TOOL_USE, tool_calls=[tc]),
-        make_response(StopReason.END_TURN, context_usage=make_context_usage(80.0)),
+        make_response(StopReason.TOOL_USE, tool_calls=[first_tool]),
+        make_response(StopReason.TOOL_USE, tool_calls=[second_tool], context_usage=make_context_usage(80.0)),
+        make_response(StopReason.END_TURN),
     ]
     agent = MockAgent(responses)
     recorder = CallbackRecorder()
     await make_process(agent, callbacks=Callbacks([recorder.callback_set]), compact_threshold_pct=75.0).start("task")
-    assert recorder.before_compacts == 1
-    assert recorder.after_compacts == 1
+    assert recorder.before_compacts == 0
+    assert recorder.after_compacts == 0
 
 
 async def test_auto_compact_does_not_trigger_below_threshold() -> None:
@@ -592,6 +630,18 @@ async def test_auto_compact_does_not_trigger_below_threshold() -> None:
     ]
     agent = MockAgent(responses)
     await make_process(agent, compact_threshold_pct=75.0).start("task")
+    assert agent.compact_preserving_turn_calls == 0
+
+
+async def test_auto_compact_does_not_trigger_after_final_response() -> None:
+    tc = make_tool_call()
+    responses = [
+        make_response(StopReason.TOOL_USE, tool_calls=[tc]),
+        make_response(StopReason.END_TURN, context_usage=make_context_usage(99.0)),
+    ]
+    agent = MockAgent(responses)
+    await make_process(agent, compact_threshold_pct=75.0).start("task")
+    assert agent.compact_calls == 0
     assert agent.compact_preserving_turn_calls == 0
 
 
@@ -617,16 +667,24 @@ async def test_auto_compact_skipped_when_context_usage_is_none() -> None:
     assert agent.compact_preserving_turn_calls == 0
 
 
-async def test_auto_compact_tokens_included_in_result() -> None:
-    tc = make_tool_call()
+async def test_auto_compact_skipped_during_tool_use_tokens_not_included_in_result() -> None:
+    first_tool = make_tool_call("tc_01")
+    second_tool = make_tool_call("tc_02")
     responses = [
-        make_response(StopReason.TOOL_USE, tool_calls=[tc], input_tokens=100, output_tokens=50),
-        make_response(StopReason.END_TURN, context_usage=make_context_usage(80.0), input_tokens=200, output_tokens=80),
+        make_response(StopReason.TOOL_USE, tool_calls=[first_tool], input_tokens=100, output_tokens=50),
+        make_response(
+            StopReason.TOOL_USE,
+            tool_calls=[second_tool],
+            context_usage=make_context_usage(80.0),
+            input_tokens=200,
+            output_tokens=80,
+        ),
+        make_response(StopReason.END_TURN, input_tokens=70, output_tokens=20),
     ]
     agent = MockAgent(responses)
-    agent.compact_response = make_response(StopReason.END_TURN, input_tokens=30, output_tokens=10)
+    agent.compact_token_response = make_response(StopReason.END_TURN, input_tokens=30, output_tokens=10)
 
     result = await make_process(agent, compact_threshold_pct=75.0).start("task")
 
-    assert result.total_input_tokens == 100 + 200 + 30
-    assert result.total_output_tokens == 50 + 80 + 10
+    assert result.total_input_tokens == 100 + 200 + 70
+    assert result.total_output_tokens == 50 + 80 + 20

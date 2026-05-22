@@ -1,23 +1,26 @@
-Using the scenario memory below, create invoke tasks and registry wiring for `$integration`.
+Using the scenario memory below, create the integrations-core-owned lab manifest and documentation for `$integration`.
 
 Scenario memory:
 
 $generate_scenario_memory
 
-Required outputs under `$agent_worktree_path`:
+Required outputs under `$lab_path`:
 
-- `tasks/e2e_framework/aws/$integration.py`
-- edit `test/e2e-framework/registry/scenarios.go`
+- `lab.yaml`
+- `README.md`
 
-The invoke task module must define:
+Do not create Agent invoke tasks and do not edit Agent scenario registries.
 
-- `scenario_name = "aws/$integration"`
-- `create_$integration(...)` exposed by invoke as `aws.create-$integration`
-- `destroy_$integration(...)` exposed by invoke as `aws.destroy-$integration`
-- `connect_$integration(...)` exposed by invoke as `aws.connect-$integration`
+`lab.yaml` must include:
 
-The create task must support standard E2E framework options: config path, stack name, install Agent, Agent version, architecture, fakeintake, fakeintake load balancer, interactive mode, full image path, Agent flavor, and Agent environment.
+1. integration name;
+2. technology name;
+3. Agent check name;
+4. Compose file path;
+5. asset directories such as `load/`;
+6. integration source options for an integrations-core Git repository/ref and a future local path mode;
+7. deploy defaults such as cloud, region assumptions, stack naming, fakeintake, and Agent image options;
+8. validation commands for Agent status, configcheck, check output, Docker status, and workload logs;
+9. cleanup guidance.
 
-The connect task must SSH to the host running the Agent. Use the stack outputs and configured AWS private key path when present.
-
-Update `test/e2e-framework/registry/scenarios.go` to import the generated scenario package and register the `aws/$integration` key.
+`README.md` must explain the generated files, assumptions, future ddev bridge usage, manual validation commands, and cleanup commands.
