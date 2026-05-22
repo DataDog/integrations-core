@@ -189,6 +189,8 @@ async def test_happy_path(tmp_path: Path, name: str | None, expected_log_name: s
 
     assert result.success is True
     assert result.data == "ok"
+    assert result.total_input_tokens == 10
+    assert result.total_output_tokens == 5
 
     events = read_events(tmp_path / expected_log_name)
     assert events[0]["event"] == "start"
