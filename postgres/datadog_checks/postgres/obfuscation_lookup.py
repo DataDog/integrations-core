@@ -23,16 +23,11 @@ class ObfuscationResult:
 
 
 class ObfuscationLookup:
-    """Two-tier cache that maps queryid -> ObfuscationResult without
-    storing raw query text long-term.
+    """Two-tier LRU cache: queryid -> query_signature -> ObfuscationResult.
 
-    Tier 1: queryid -> query_signature  (thin, bounded to pgss_max)
-    Tier 2: query_signature -> ObfuscationResult  (deduped, bounded)
-
-    On a cache hit the caller gets the ObfuscationResult directly with no
-    PG roundtrip and no FFI call.  On a miss the caller must supply the
-    raw text (fetched from PG); we obfuscate it, learn the query_signature,
-    store both mappings, and discard the raw text.
+    Cache hit avoids both PG text fetch and FFI obfuscation. On miss the
+    caller supplies raw text; we obfuscate, store both mappings, and discard
+    the raw text. Multiple queryids sharing a query_signature share one result.
     """
 
     def __init__(self, maxsize: int, obfuscate_options: str, log_unobfuscated_queries: bool = False):
@@ -67,11 +62,7 @@ class ObfuscationLookup:
         self._misses = 0
 
     def lookup(self, queryids: set[int]) -> tuple[dict[int, ObfuscationResult], set[int]]:
-        """Look up ObfuscationResults for *queryids*.
-
-        Returns (hits, misses) where hits is queryid -> ObfuscationResult
-        and misses is the set of queryids that need raw text fetched from PG.
-        """
+        """Return (hits, misses) for the given queryids."""
         hits: dict[int, ObfuscationResult] = {}
         misses: set[int] = set()
 
@@ -91,12 +82,7 @@ class ObfuscationLookup:
         return hits, misses
 
     def populate(self, raw_texts: dict[int, str]) -> dict[int, ObfuscationResult]:
-        """Obfuscate raw texts for cache-miss queryids and store the results.
-
-        *raw_texts* maps queryid -> raw SQL text (as fetched from PG).
-        Returns queryid -> ObfuscationResult for successfully obfuscated entries.
-        Raw text is not retained after obfuscation.
-        """
+        """Obfuscate raw texts, store results, and return queryid -> ObfuscationResult."""
         results: dict[int, ObfuscationResult] = {}
 
         for qid, raw_text in raw_texts.items():
