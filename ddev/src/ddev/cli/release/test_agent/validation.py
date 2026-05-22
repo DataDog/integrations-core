@@ -108,7 +108,7 @@ def fetch_target(app: Application, target: ReleaseTarget) -> None:
     """
     if isinstance(target, Branch):
         kind = 'branch'
-        refspec = f'refs/heads/{target.name}:refs/remotes/origin/{target.name}'
+        refspec = f'+refs/heads/{target.name}:refs/remotes/origin/{target.name}'
     else:
         kind = 'tag'
         refspec = f'refs/tags/{target.name}:refs/tags/{target.name}'

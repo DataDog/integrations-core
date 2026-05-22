@@ -152,7 +152,7 @@ def test_fetch_target_is_called_with_branch_refspec(
     result = ddev('release', 'test-agent', '--branch', '7.80.x', '--yes')
 
     assert result.exit_code == 0, result.output
-    run_spy.assert_any_call('fetch', '--quiet', '--depth=1', 'origin', 'refs/heads/7.80.x:refs/remotes/origin/7.80.x')
+    run_spy.assert_any_call('fetch', '--quiet', '--depth=1', 'origin', '+refs/heads/7.80.x:refs/remotes/origin/7.80.x')
 
 
 def test_fetch_target_is_called_with_tag_refspec(
