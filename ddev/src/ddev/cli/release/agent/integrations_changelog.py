@@ -39,7 +39,10 @@ def integrations_changelog(app: Application, integrations: tuple[str], since: st
     if not integrations:
         integrations = [integration.name for integration in app.repo.integrations.iter_all('all')]
 
-    changes_per_agent = get_changes_per_agent(app.repo, since, to)
+    try:
+        changes_per_agent = get_changes_per_agent(app.repo, since, to)
+    except ValueError as exc:
+        app.abort(str(exc))
 
     integrations_versions: dict[str, dict[str, str]] = defaultdict(dict)
     for agent_version, version_changes in changes_per_agent.items():

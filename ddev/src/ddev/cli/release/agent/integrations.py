@@ -40,7 +40,10 @@ def integrations(app: Application, since: str, to: str, write: bool, force: bool
         integrations_contents.write(f'## Datadog Agent version {tag}\n\n')
         # Requirements for current tag
         file_contents = app.repo.git.show_file(req_file_name, tag)
-        catalog = exclude_unreleased_integrations(app.repo, parse_agent_req_file(file_contents), tag)
+        try:
+            catalog = exclude_unreleased_integrations(app.repo, parse_agent_req_file(file_contents), tag)
+        except ValueError as exc:
+            app.abort(str(exc))
         for name, ver in catalog.items():
             integrations_contents.write(f'* {name}: {ver}\n')
         integrations_contents.write('\n')

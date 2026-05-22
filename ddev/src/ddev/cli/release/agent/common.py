@@ -100,6 +100,7 @@ def normalize_catalog(catalog: dict[str, str]) -> dict[str, str]:
 
 
 def exclude_unreleased_integrations(repo: Repository, catalog: dict[str, str], agent_version: str) -> dict[str, str]:
+    """Filter integrations listed as unreleased for ``agent_version``; catalog keys may be raw or folder-normalized."""
     skipped_integrations = get_unreleased_integrations(repo, agent_version)
     if not skipped_integrations:
         return catalog
