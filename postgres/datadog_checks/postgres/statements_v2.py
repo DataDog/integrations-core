@@ -146,7 +146,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
         try:
             with self._check._get_main_db() as conn:
                 with conn.cursor(row_factory=row_factory) as cursor:
-                    self._log.debug("Running query [%s] %s", query, params)
+                    self._log.debug("Executing query [%s] params=%s", query, params)
                     cursor.execute(query, params=params)
                     return cursor.fetchall(), cursor.description
         except psycopg.Error as e:
@@ -168,7 +168,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
         _, description = self._execute_query(query)
         col_names = [desc[0] for desc in description] if description else []
         self._stat_column_cache = col_names
-        self._log.debug("Fetched columns %s", col_names)
+        self._log.debug("pgss columns: %d available", len(col_names))
         return col_names
 
     # -- pgss housekeeping metrics ----------------------------------------
@@ -335,6 +335,12 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
                 for qid, text in raw_texts.items()
                 if text and text != '<insufficient privilege>' and not text.startswith('/* DDIGNORE */')
             }
+            self._log.debug(
+                "resolve: fetched=%d filtered=%d for %d misses",
+                len(raw_texts),
+                len(filtered),
+                len(misses),
+            )
             populated = self._obfuscation_lookup.populate(filtered)
             hits.update(populated)
 
@@ -429,10 +435,9 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
 
         snapshot_rows = self._load_lightweight_snapshot()
         if not snapshot_rows:
-            self._log.debug("No snapshot rows returned from lightweight query")
+            self._log.debug("collect: no snapshot rows")
             return []
 
-        self._log.debug("Lightweight snapshot returned %d rows", len(snapshot_rows))
         delta = self._delta_detector.compute(snapshot_rows)
 
         self._check.gauge(
@@ -451,22 +456,17 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
         )
 
         if not delta.derivative_rows:
-            self._log.debug(
-                "No derivative rows (changed_queryids=%d, vanished=%d)",
-                len(delta.changed_queryids),
-                len(delta.vanished_queryids),
-            )
             return []
 
         obfuscations = self._resolve_obfuscations(delta.changed_queryids, delta.vanished_queryids)
-        self._log.debug(
-            "Resolved %d obfuscations for %d changed queryids",
-            len(obfuscations),
-            len(delta.changed_queryids),
-        )
-
         rows = self._assemble_rows(delta.derivative_rows, obfuscations)
-        self._log.debug("Assembled %d output rows from %d derivative rows", len(rows), len(delta.derivative_rows))
+        self._log.debug(
+            "collect: snapshot=%d derivative=%d obfuscated=%d output=%d",
+            len(snapshot_rows),
+            len(delta.derivative_rows),
+            len(obfuscations),
+            len(rows),
+        )
 
         self._check.gauge(
             'dd.postgres.queries.query_rows_raw',
