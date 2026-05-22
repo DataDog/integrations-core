@@ -1,0 +1,1 @@
+Add HTTPXWrapper, an httpx-backed HTTP client wrapper opt-in via the ``use_httpx`` instance config flag. The default remains the existing requests-based client.
