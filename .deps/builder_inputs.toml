@@ -1,0 +1,21 @@
+# Content hashes of the inputs that determine the resolution pipeline and each
+# builder image.
+#
+# The `Resolve Dependencies and Build Wheels` workflow uses these hashes to
+# gate the full pipeline (resolution.hash) and to decide whether to rebuild a
+# builder image from scratch or pull the existing one by digest (images.*).
+# The `verify-deps-pin` workflow checks resolution.hash on merge-queue refs.
+#
+# This file is rewritten by .builders/upload.py whenever dependency resolution
+# publishes new artifacts and should not be edited by hand.
+# Hash inputs are defined in .builders/inputs_hash.py (SHARED_INPUTS,
+# RESOLUTION_INPUTS).
+[resolution]
+hash = "8104b34b44ca0999d2483c114404e1b96d0f3610887ee1bcbf796cbe7b692fc1"
+
+[images]
+linux-aarch64 = "cac3eb96271496d0c482af95e7dd0766356ecc8d07623d33d8a5c7dc974a6e49"
+linux-x86_64 = "430b5dc4b41e6eb8a061c9418fb214adec780a957b0bd3bf7a861a7812d73993"
+macos-aarch64 = "bd20131cfae81eed46998431117e50a724744679c959a6d9648ca63dd4d3bfdc"
+macos-x86_64 = "37e8f1ef74292fb9f2df305603aa991121d35162d47eba98fcbd46e458f7dc54"
+windows-x86_64 = "898a5f8d290d6faf02384140a51f15b6c85ff4f0b778594fa758c483042e2854"

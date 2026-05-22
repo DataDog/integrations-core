@@ -6,7 +6,7 @@ import pytest
 from clickhouse_connect.driver.exceptions import Error, OperationalError
 
 from datadog_checks.base import ConfigurationError
-from datadog_checks.clickhouse import ClickhouseCheck, queries
+from datadog_checks.clickhouse import ClickhouseCheck, advanced_queries
 
 from .utils import ensure_csv_safe, parse_described_metrics, raise_error
 
@@ -40,10 +40,36 @@ def test_config(instance):
         )
 
 
+def test_config_verify_false(instance):
+    """Regression: verify: false must be forwarded to the shared pool manager.
+
+    When pool_mgr is provided to clickhouse-connect, it skips creating its own
+    TLS-aware pool, so TLS settings must be baked into the pool at creation time.
+    """
+    instance = {**instance, 'verify': False}
+    with mock.patch('clickhouse_connect.driver.httputil.get_pool_manager') as mock_pool:
+        mock_pool.return_value = mock.MagicMock()
+        ClickhouseCheck('clickhouse', {}, [instance])
+        mock_pool.assert_called_once_with(maxsize=8, num_pools=4, verify=False, ca_cert=None)
+
+
+def test_config_tls_ca_cert_forwarded_to_pool_manager(instance):
+    """Regression: tls_ca_cert must be forwarded to the shared pool manager.
+
+    Same failure mode as verify=False: if ca_cert isn't baked into the pre-supplied
+    pool manager, clickhouse-connect's get_client can't apply it later.
+    """
+    instance = {**instance, 'tls_ca_cert': '/path/to/ca.pem'}
+    with mock.patch('clickhouse_connect.driver.httputil.get_pool_manager') as mock_pool:
+        mock_pool.return_value = mock.MagicMock()
+        ClickhouseCheck('clickhouse', {}, [instance])
+        mock_pool.assert_called_once_with(maxsize=8, num_pools=4, verify=True, ca_cert='/path/to/ca.pem')
+
+
 def test_error_query(instance, dd_run_check):
     check = ClickhouseCheck('clickhouse', {}, [instance])
     check.log = mock.MagicMock()
-    del check.check_initializations[-2]
+    check.get_queries = lambda _: []
 
     client = mock.MagicMock()
     client.execute_iter = raise_error
@@ -57,12 +83,12 @@ def test_error_query(instance, dd_run_check):
     'metrics, ignored_columns, metric_source_url',
     [
         (
-            queries.SystemMetrics['columns'][1]['items'],
+            advanced_queries.SystemMetrics['columns'][1]['items'],
             {'Revision', 'VersionInteger'},
             'https://raw.githubusercontent.com/ClickHouse/ClickHouse/master/src/Common/CurrentMetrics.cpp',
         ),
         (
-            queries.SystemEvents['columns'][1]['items'],
+            advanced_queries.SystemEvents['columns'][1]['items'],
             set(),
             'https://raw.githubusercontent.com/ClickHouse/ClickHouse/master/src/Common/ProfileEvents.cpp',
         ),
@@ -239,6 +265,40 @@ def test_connect_no_password_uses_empty_string():
         assert kwargs['password'] == '', "connect() must pass password='' not password=None to clickhouse_connect"
 
 
+@pytest.mark.parametrize(
+    ['ch_version', 'comparable', 'expected'],
+    [
+        ('25', 'latest', True),
+        ('25', '25', False),
+        ('25.1', '25.2', True),
+        ('25.1.2.3', '25.1.2.10', True),
+        ('25.1', '25.3', True),
+        ('23.1', '25.1', True),
+    ],
+)
+def test_version_lt(instance, ch_version, comparable, expected):
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check._server_version = ch_version
+    assert check.version_lt(comparable) == expected
+
+
+@pytest.mark.parametrize(
+    ['ch_version', 'comparable', 'expected'],
+    [
+        ('25', 'latest', False),
+        ('25', '25', True),
+        ('25.1.2.3', '25.1.2', True),
+        ('25.1.2.3', '25.1.2.3', True),
+        ('25.1', '25.3', False),
+        ('23.1', '25.1', False),
+    ],
+)
+def test_version_ge(instance, ch_version, comparable, expected):
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check._server_version = ch_version
+    assert check.version_ge(comparable) == expected
+
+
 @pytest.mark.parametrize("bad_value", [0, -1, -100])
 def test_query_errors_zero_samples_per_hour_defaults(bad_value):
     """Zero or negative samples_per_hour_per_query must not crash the constructor via ZeroDivisionError."""
@@ -267,3 +327,29 @@ def test_query_completions_zero_samples_per_hour_defaults(bad_value):
     check = ClickhouseCheck('clickhouse', {}, [instance])
     assert check._config.query_completions.samples_per_hour_per_query > 0
     assert any('query_completions.samples_per_hour_per_query' in w for w in check._validation_result.warnings)
+
+
+BASE_INSTANCE = {'server': 'myhost.example.com', 'port': 8123, 'username': 'default'}
+
+
+def test_reported_hostname_explicit_config():
+    instance = {**BASE_INSTANCE, 'reported_hostname': 'custom-host'}
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    assert check.reported_hostname == 'custom-host'
+
+
+@pytest.mark.parametrize('loopback', ['localhost', '127.0.0.1'])
+def test_reported_hostname_loopback_substitutes_agent_hostname(loopback):
+    instance = {**BASE_INSTANCE, 'server': loopback}
+    with mock.patch('datadog_checks.clickhouse.clickhouse.resolve_db_host', return_value='my-agent-host'):
+        check = ClickhouseCheck('clickhouse', {}, [instance])
+        assert check.reported_hostname == 'my-agent-host'
+
+
+def test_reported_hostname_non_loopback():
+    with mock.patch(
+        'datadog_checks.clickhouse.clickhouse.resolve_db_host', return_value=BASE_INSTANCE['server']
+    ) as mock_resolve:
+        check = ClickhouseCheck('clickhouse', {}, [BASE_INSTANCE])
+        assert check.reported_hostname == BASE_INSTANCE['server']
+        mock_resolve.assert_called_once_with(BASE_INSTANCE['server'])

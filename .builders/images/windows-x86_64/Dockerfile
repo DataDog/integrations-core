@@ -127,11 +127,11 @@ RUN Get-RemoteFile `
     Add-ToPath -Append "C:\nasm\nasm-$Env:NASM_VERSION" && `
     Remove-Item "nasm-$Env:NASM_VERSION-win64.zip"
 
-ENV OPENSSL_VERSION="3.6.1"
+ENV OPENSSL_VERSION="3.6.2"
 RUN Get-RemoteFile `
       -Uri https://www.openssl.org/source/openssl-$Env:OPENSSL_VERSION.tar.gz `
       -Path openssl-$Env:OPENSSL_VERSION.tar.gz `
-      -Hash 'b1bfedcd5b289ff22aee87c9d600f515767ebf45f77168cb6d64f231f518a82e'; `
+      -Hash 'aaf51a1fe064384f811daeaeb4ec4dce7340ec8bd893027eee676af31e83a04f'; `
     7z x openssl-$Env:OPENSSL_VERSION.tar.gz -r -y && `
     7z x openssl-$Env:OPENSSL_VERSION.tar -oC:\openssl_3 && `
     cd C:\openssl_3\openssl-$Env:OPENSSL_VERSION && `
@@ -139,22 +139,34 @@ RUN Get-RemoteFile `
     'C:\perl\perl\bin\perl.exe Configure && `
     nmake && `
     nmake install_sw'
+# flex and bison are required for building PostgreSQL from source
+ENV WINFLEXBISON_VERSION="2.5.25"
+RUN Get-RemoteFile `
+      -Uri https://github.com/lexxmark/winflexbison/releases/download/v$Env:WINFLEXBISON_VERSION/win_flex_bison-$Env:WINFLEXBISON_VERSION.zip `
+      -Path win_flex_bison-$Env:WINFLEXBISON_VERSION.zip `
+      -Hash '8d324b62be33604b2c45ad1dd34ab93d722534448f55a16ca7292de32b6ac135'; `
+    7z x win_flex_bison-$Env:WINFLEXBISON_VERSION.zip -oC:\winflexbison && `
+    Remove-Item win_flex_bison-$Env:WINFLEXBISON_VERSION.zip && `
+    Add-ToPath -Append 'C:\winflexbison'
+# Meson + Ninja for building PostgreSQL 18+ on Windows
+RUN python -m pip install --no-warn-script-location meson ninja && `
+    Add-ToPath -Append 'C:\Program Files\Python313\Scripts'
 # libpq and pg_config as needed by psycopg
-ENV PG_VERSION="16.9"
-COPY pg_config.pl C:\pg_config.pl
+ENV PG_VERSION="18.3"
 RUN Get-RemoteFile `
       -Uri https://ftp.postgresql.org/pub/source/v$Env:PG_VERSION/postgresql-$Env:PG_VERSION.tar.bz2 `
       -Path postgresql-$Env:PG_VERSION.tar.bz2 `
-      -Hash '07c00fb824df0a0c295f249f44691b86e3266753b380c96f633c3311e10bd005'; `
+      -Hash 'd95663fbbf3a80f81a9d98d895266bdcb74ba274bcc04ef6d76630a72dee016f'; `
     7z x postgresql-$Env:PG_VERSION.tar.bz2 -r -y && `
-    7z x postgresql-$Env:PG_VERSION.tar -oC:\postgresql_src && `
-    cd C:\postgresql_src\postgresql-$Env:PG_VERSION\src\tools\msvc && `
-    Copy-Item C:\pg_config.pl -Destination .\config.pl && `
-    RunOnVSConsole -Command 'C:\perl\perl\bin\perl.exe build.pl' && `
-    RunOnVSConsole -Command 'C:\perl\perl\bin\perl.exe install.pl C:\postgresql' && `
+    7z x postgresql-$Env:PG_VERSION.tar -oC:\postgresql_src
+RUN New-Item -ItemType Junction -Path C:\OpenSSL -Target 'C:\Program Files\OpenSSL'; `
+    $mesonCmd = 'meson setup C:\pgbuild C:\postgresql_src\postgresql-' + $Env:PG_VERSION + ' --prefix=C:\postgresql -Dssl=openssl -Dextra_include_dirs=C:\OpenSSL\include -Dextra_lib_dirs=C:\OpenSSL\lib -Dgssapi=disabled -Dreadline=disabled -Dicu=disabled -Dnls=disabled -Dlz4=disabled -Dzstd=disabled -Dlibxml=disabled -Dlibxslt=disabled -Dllvm=disabled'; `
+    RunOnVSConsole -Command $mesonCmd && `
+    RunOnVSConsole -Command 'ninja -C C:\pgbuild' && `
+    RunOnVSConsole -Command 'ninja -C C:\pgbuild install' && `
     Add-ToPath -Append "C:\postgresql\bin"
 
-ENV CURL_VERSION="8.19.0"
+ENV CURL_VERSION="8.20.0"
 
 # Set up runner
 COPY runner_dependencies.txt C:\runner_dependencies.txt

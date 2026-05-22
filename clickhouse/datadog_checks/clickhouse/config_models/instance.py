@@ -52,6 +52,24 @@ class MetricPatterns(BaseModel):
     include: Optional[tuple[str, ...]] = None
 
 
+class PartsAndMerges(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_detached_parts_rows: Optional[int] = None
+    max_mutations_rows: Optional[int] = None
+    max_parts_rows: Optional[int] = None
+    max_replication_queue_rows: Optional[int] = None
+    run_sync: Optional[bool] = None
+    stalled_merge_elapsed_threshold_seconds: Optional[int] = None
+    stuck_replication_num_tries: Optional[int] = None
+    table_metrics_include_partition_tag: Optional[bool] = None
+    table_metrics_max_tables: Optional[int] = None
+
+
 class QueryCompletions(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -121,6 +139,7 @@ class InstanceConfig(BaseModel):
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     only_custom_queries: Optional[bool] = None
+    parts_and_merges: Optional[PartsAndMerges] = None
     password: Optional[str] = None
     port: Optional[int] = None
     query_completions: Optional[QueryCompletions] = None
@@ -128,13 +147,16 @@ class InstanceConfig(BaseModel):
     query_metrics: Optional[QueryMetrics] = None
     query_samples: Optional[QuerySamples] = None
     read_timeout: Optional[int] = None
+    reported_hostname: Optional[str] = None
     server: str
     service: Optional[str] = None
     single_endpoint_mode: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
     tls_ca_cert: Optional[str] = None
     tls_verify: Optional[bool] = None
+    use_advanced_queries: Optional[bool] = None
     use_global_custom_queries: Optional[str] = None
+    use_legacy_queries: Optional[bool] = None
     username: Optional[str] = None
     verify: Optional[bool] = None
 

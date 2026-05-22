@@ -121,6 +121,45 @@ class GitHubManager:
 
         return PullRequest(data['items'][0])
 
+    def list_open_pull_requests_targeting_base(self, base_branch: str, *, limit: int = 100) -> list[PullRequest]:
+        """
+        List open pull requests targeting the given base branch. Limit to 100 by default.
+        """
+        if limit < 1:
+            return []
+
+        prs: list[PullRequest] = []
+        max_per_page = 100
+        page = 1
+
+        # https://docs.github.com/en/search-github/searching-on-github/searching-issues-and-pull-requests
+        query = f'repo:{self.repo_id} is:pull-request is:open base:{base_branch}'
+
+        while len(prs) < limit:
+            requested_count = min(max_per_page, limit - len(prs))
+            response = self.__api_get(
+                self.ISSUE_SEARCH_API,
+                params={
+                    'q': query,
+                    'sort': 'updated',
+                    'order': 'desc',
+                    'per_page': requested_count,
+                    'page': page,
+                },
+            )
+            data = json.loads(response.text)
+            items = data.get('items', [])
+            if not items:
+                break
+
+            prs.extend(PullRequest(item) for item in items)
+            if len(items) < requested_count:
+                break
+
+            page += 1
+
+        return prs[:limit]
+
     def get_pull_request_by_number(self, number: str) -> PullRequest | None:
         response = self.__api_get(
             self.ISSUE_SEARCH_API,
@@ -167,6 +206,16 @@ class GitHubManager:
         response = self.__api_get(self.PULL_REQUEST_API.format(repo_id=self.repo_id, pr_number=pr_number))
         data = response.json()
         return data['head']['sha'], data['head']['ref']
+
+    def get_pull_request_labels(self, pr_number: int) -> list[str] | None:
+        """Return the label names on the given PR, or None if it could not be fetched."""
+        from httpx import HTTPStatusError
+
+        try:
+            response = self.__api_get(self.PULL_REQUEST_API.format(repo_id=self.repo_id, pr_number=pr_number))
+        except HTTPStatusError:
+            return None
+        return [label['name'] for label in response.json().get('labels', [])]
 
     def dispatch_workflow(self, workflow_id: str, ref: str, inputs: dict[str, Any]) -> None:
         """Trigger a workflow_dispatch event."""

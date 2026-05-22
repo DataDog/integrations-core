@@ -24,6 +24,7 @@ files:
             Specify the Istio data plane mode to monitor.
             - `sidecar`: Monitor Istio sidecar proxies (traditional mode)
             - `ambient`: Monitor Istio ambient mode components (ztunnel, waypoint proxies)
+          fleet_configurable: true
           value:
             example: sidecar
             display_default: sidecar
@@ -35,6 +36,7 @@ files:
             Ztunnel is the L4 proxy that provides zero-trust tunneling and mTLS for ambient mesh.
             Only used when `istio_mode` is set to `ambient`.
             Ztunnel metrics are exposed on port 15020.
+          fleet_configurable: true
           value:
             display_default: null
             example: http://ztunnel.istio-system:15020/stats/prometheus
@@ -45,6 +47,7 @@ files:
             Waypoint proxies provide optional L7 processing (HTTP/gRPC traffic management) in ambient mesh.
             Only used when `istio_mode` is set to `ambient`.
             Waypoint metrics are exposed on port 15020.
+          fleet_configurable: true
           value:
             display_default: null
             example: http://waypoint.istio-system:15020/stats/prometheus
