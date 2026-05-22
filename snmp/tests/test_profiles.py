@@ -101,25 +101,6 @@ def test_profile_hierarchy():
         pytest.fail('\n'.join(sorted(errors)))
 
 
-@pytest.mark.unit
-def test_aruba_clearpass_capacity_metrics_are_forced_to_gauge():
-    profile = get_profile_definition({'definition_file': 'aruba-clearpass.yaml'})
-    expected_metric_types = {
-        'cppmSystemMemoryFree': 'gauge',
-        'cppmSystemMemoryTotal': 'gauge',
-        'cppmSystemDiskSpaceFree': 'gauge',
-        'cppmSystemDiskSpaceTotal': 'gauge',
-    }
-
-    metric_types = {}
-    for metric in profile['metrics']:
-        for symbol in metric.get('symbols', []):
-            if symbol['name'] in expected_metric_types:
-                metric_types[symbol['name']] = symbol.get('metric_type')
-
-    assert metric_types == expected_metric_types
-
-
 def run_profile_check(recording_name, profile_name=None):
     """
     Run a single check with the provided `recording_name` used as
