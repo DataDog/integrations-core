@@ -4,7 +4,7 @@
 
 This check monitors [Temporal][1] through the Datadog Agent. 
 
-**Note**: This check can only be installed if you are self-hosting Temporal. **To monitor your Temporal Cloud instance**, follow the [Datadog Temporal Cloud integration documentation][13]. 
+**Note**: This check can only be installed if you are self-hosting Temporal. **To monitor your Temporal Cloud instance**, follow the [Datadog Temporal Cloud - OpenMetrics integration documentation][13]. 
 
 **Minimum Agent version:** 7.45.0
 
@@ -71,11 +71,11 @@ No additional installation is needed on your server.
 
 For containerized environments, refer to [Configure integrations with Autodiscovery on Kubernetes][14] or [Configure integrations with Autodiscovery on Docker][15] for instructions on using the parameters below. See the [sample temporal.d/conf.yaml][4] for a complete list of configuration options.
 
-| Parameter            | Value                                |
-| -------------------- | ------------------------------------ |
-| `<INTEGRATION_NAME>` | `temporal`                          |
-| `<INIT_CONFIG>`      | blank or `{}`                        |
-| `<INSTANCES_CONFIG>`  | `{"openmetrics_endpoint": "<LISTEN_ADDRESS>/<HANDLER_PATH>"}`, where `<LISTEN_ADDRESS>` and `<HANDLER_PATH>` are replaced by the `listenAddress` and `handlerPath` from your Temporal server configuration. |
+| Parameter            | Value                                                                                                                                                                                                       |
+|----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `temporal`                                                                                                                                                                                                  |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                                                                                                                                               |
+| `<INSTANCES_CONFIG>` | `{"openmetrics_endpoint": "<LISTEN_ADDRESS>/<HANDLER_PATH>"}`, where `<LISTEN_ADDRESS>` and `<HANDLER_PATH>` are replaced by the `listenAddress` and `handlerPath` from your Temporal server configuration. |
 
 Note that when Temporal services in a cluster are deployed independently, every service exposes its own metrics. As a result, you need to configure the `prometheus` endpoint for every service that you want to monitor and define a separate `instance` on the integration's configuration for each of them.
 
@@ -99,8 +99,8 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 Apply the following configuration parameter to `logs`:
 
-| Parameter      | Value                                               |
-| -------------- | --------------------------------------------------- |
+| Parameter      | Value                                                                                     |
+|----------------|-------------------------------------------------------------------------------------------|
 | `<LOG_CONFIG>` | `{"source": "temporal", "type": "file", "path": "/var/log/temporal/temporal-server.log"}` |
 
 **Example**
@@ -168,7 +168,7 @@ Additional helpful documentation, links, and articles:
 [10]: https://docs.temporal.io/references/configuration#prometheus
 [11]: https://docs.temporal.io/references/configuration#log
 [12]: https://www.datadoghq.com/blog/temporal-server-integration/
-[13]: https://docs.datadoghq.com/integrations/temporal_cloud/
+[13]: https://docs.datadoghq.com/integrations/temporal-cloud-openmetrics/
 [14]: https://docs.datadoghq.com/containers/kubernetes/integrations/
 [15]: https://docs.datadoghq.com/containers/docker/integrations/
 [16]: https://docs.datadoghq.com/containers/guide/ad_identifiers/
