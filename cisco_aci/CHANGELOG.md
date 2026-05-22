@@ -12,7 +12,7 @@
 
 * Get health score from healthInst if fvOverallHealth isn't enabled. ([#21988](https://github.com/DataDog/integrations-core/pull/21988))
 
-## 4.14.2 / 2026-04-28
+## 4.14.2 / 2026-04-28 / Agent 7.79.0
 
 ***Fixed***:
 

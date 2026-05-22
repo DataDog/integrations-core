@@ -13,7 +13,7 @@
 * Fix `nutanix.vm.disk_capacity_bytes` to report allocated disk capacity per VM. ([#23583](https://github.com/DataDog/integrations-core/pull/23583))
 * Always emit `ntnx_host_type`, `ntnx_hypervisor_type`, and `ntnx_node_status` tags, with `$unknown` as the fallback when the source field is missing. ([#23609](https://github.com/DataDog/integrations-core/pull/23609))
 
-## 1.2.0 / 2026-04-15
+## 1.2.0 / 2026-04-15 / Agent 7.79.0
 
 ***Added***:
 

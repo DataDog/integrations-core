@@ -8,7 +8,7 @@
 
 * Restore Istio ambient mode metric collection broken in 9.4.0: ztunnel counters are no longer silently dropped, proxy management metrics use the `workload_manager_*` names ztunnel actually emits, and the missing xDS message counters are now registered. ([#23707](https://github.com/DataDog/integrations-core/pull/23707))
 
-## 9.5.1 / 2026-04-15
+## 9.5.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:
 

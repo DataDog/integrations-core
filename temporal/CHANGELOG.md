@@ -8,7 +8,7 @@
 
 * Add support for Temporal v1.29.2 metrics with unit of measurement suffixes and additional server metrics. ([#22379](https://github.com/DataDog/integrations-core/pull/22379))
 
-## 4.5.1 / 2026-04-15
+## 4.5.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:
 
