@@ -821,23 +821,9 @@ class AgentCheck(object):
         # type: (str, str, dict | None, dict, int | None, int | None) -> None
         """Ship a resource on the ``genresources`` event-platform track.
 
-        Runs the producer contract: redact -> deterministic JSON encode -> size
-        check -> proto serialize -> dispatch via ``event_platform_event``. Drops
-        with a warning + ``dropped`` counter on size overrun or serialization
-        failure. The downstream intake is the schema authority; this producer
-        does not validate field names locally.
-
-        ``redact`` is a required mapping ``{"paths": [...], "annotation_keys": [...]}``
-        that the integration owns. To explicitly skip redaction, pass empty
-        lists (forces a conscious decision per resource type). See
-        :func:`datadog_checks.base.utils.genresources.apply_deny_list` for the
-        path syntax.
-
-        ``seen_at`` / ``expire_at`` must be ``int`` unix-seconds. Floats and
-        other numerics are ignored with a warning rather than silently
-        truncated. Set ``seen_at == expire_at`` to delete a resource; v1
-        producers do not invoke this path. ``source`` is always
-        ``integrations-core``.
+        ``redact`` is required: ``{"paths": [...], "annotation_keys": [...]}``.
+        Pass empty lists to skip redaction explicitly. ``seen_at`` / ``expire_at``
+        are optional ``int`` unix-seconds.
         """
         if fields is None:
             return
