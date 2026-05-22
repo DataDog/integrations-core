@@ -111,6 +111,20 @@ class TestSchemaCollectorEmptyLastDb(TestSchemaCollector):
         return None
 
 
+class TestSchemaCollectorAllFailing(TestSchemaCollector):
+    """Simulates all databases raising errors on cursor open."""
+
+    __test__ = False
+
+    def _get_databases(self):
+        return [{'name': 'db_a'}, {'name': 'db_b'}]
+
+    @contextmanager
+    def _get_cursor(self, database: str):
+        raise RuntimeError("Cannot open database")
+        yield  # make it a generator
+
+
 class TestSchemaCollectorWithInaccessibleDb(TestSchemaCollector):
     """Simulates multiple databases where one raises an error on cursor open."""
 
@@ -211,6 +225,21 @@ def test_schema_collector_skips_inaccessible_database(aggregator):
     skipped_metrics = aggregator.metrics(f"dd.{check.dbms}.schema.skipped_databases_count")
     assert len(skipped_metrics) == 1
     assert skipped_metrics[0].value == 1
+
+
+@pytest.mark.unit
+def test_schema_collector_all_databases_skipped_emits_no_payload(aggregator):
+    """When every database is skipped, no payload is emitted."""
+    check = TestDatabaseCheck()
+    collector = TestSchemaCollectorAllFailing(check, SchemaCollectorConfig())
+    collector.collect_schemas()
+
+    events = aggregator.get_event_platform_events("dbm-metadata")
+    assert len(events) == 0
+
+    skipped_metrics = aggregator.metrics(f"dd.{check.dbms}.schema.skipped_databases_count")
+    assert len(skipped_metrics) == 1
+    assert skipped_metrics[0].value == 2
 
 
 @pytest.mark.unit

@@ -91,7 +91,8 @@ class SchemaCollector(ABC):
                         raise
                     self._skipped_databases_count += 1
                     self._log.warning("Skipping database %s due to error", database_name, exc_info=True)
-            self.maybe_flush(is_last_payload=True)
+            if self._queued_rows or self._collection_payloads_count > 0:
+                self.maybe_flush(is_last_payload=True)
         except Exception as e:
             status = "error"
             self._log.error("Error collecting schema: %s", e)

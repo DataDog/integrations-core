@@ -1,0 +1,1 @@
+Restrict per-database error recovery in schema collection to pyodbc driver errors, preventing internal programming errors from being silently swallowed.
