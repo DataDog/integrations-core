@@ -178,14 +178,20 @@ RUN python -m pip install --no-warn-script-location -r C:\runner_dependencies.tx
 
 COPY build_script.ps1 C:\build_script.ps1
 COPY update_librdkafka_manifest.py C:\update_librdkafka_manifest.py
-ENV DD_BUILD_COMMAND="pwsh C:\build_script.ps1"
 
-# Python packages that we want to build regardless of whether prebuilt versions exist on PyPI
-ENV PIP_NO_BINARY="confluent_kafka"
-# Where to find native dependencies when building extensions and for wheel repairing
+# Native dep output directories must exist before the build script writes into them.
 RUN New-Item -Path "C:\include" -ItemType Directory
 RUN New-Item -Path "C:\lib" -ItemType Directory
 RUN New-Item -Path "C:\bin" -ItemType Directory
+
+# Build librdkafka and its vcpkg deps (OpenSSL, curl, zlib, zstd) at image-build
+# time so binaries are baked into image layers and survive across wheel-build runs.
+# Previously this ran at wheel-build time on every run (~25 min per run).
+RUN RunOnVSConsole -Command 'pwsh C:\build_script.ps1'
+
+# Python packages that we want to build regardless of whether prebuilt versions exist on PyPI
+ENV PIP_NO_BINARY="confluent_kafka"
+# Native dependency search paths for downstream wheel builds.
 ENV INCLUDE="C:\include"
 ENV LIB="C:\lib"
 RUN Add-ToPath -Append "C:\bin"
