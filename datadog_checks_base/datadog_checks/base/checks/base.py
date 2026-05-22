@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import builtins
 import copy
 import functools
 import importlib
@@ -798,18 +799,136 @@ class AgentCheck(object):
         aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metadata")
 
     def event_platform_event(self, raw_event, event_track_type):
-        # type: (str, str) -> None
+        # type: (str | bytes, str) -> None
         """Send an event platform event.
 
         Parameters:
-            raw_event (str):
-                JSON formatted string representing the event to send
+            raw_event (str | bytes):
+                JSON formatted string representing the event to send, or
+                pre-encoded bytes for proto tracks such as ``genresources``
             event_track_type (str):
                 type of event ingested and processed by the event platform
         """
         if raw_event is None:
             return
-        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), event_track_type)
+        if isinstance(raw_event, (bytearray, memoryview)):
+            raw_event = bytes(raw_event)
+        elif not isinstance(raw_event, bytes):
+            raw_event = to_native_string(raw_event)
+        aggregator.submit_event_platform_event(self, self.check_id, raw_event, event_track_type)
+
+    def submit_generic_resource(self, *, type, key, fields, redact, seen_at=None, expire_at=None):
+        # type: (str, str, dict | None, dict, int | None, int | None) -> None
+        """Ship a resource on the ``genresources`` event-platform track.
+
+        Runs the producer contract: redact -> deterministic JSON encode -> size
+        check -> proto serialize -> dispatch via ``event_platform_event``. Drops
+        with a warning + ``dropped`` counter on size overrun or serialization
+        failure. REDAPL is the schema authority; this producer does not
+        validate field names locally.
+
+        ``redact`` is a required mapping ``{"paths": [...], "annotation_keys": [...]}``
+        that the integration owns. To explicitly skip redaction, pass empty
+        lists (forces a conscious decision per resource type). See
+        :func:`datadog_checks.base.utils.genresources.apply_deny_list` for the
+        path syntax.
+
+        ``seen_at`` / ``expire_at`` must be ``int`` unix-seconds. Floats and
+        other numerics are ignored with a warning rather than silently
+        truncated. Set ``seen_at == expire_at`` to delete a resource; v1
+        producers do not invoke this path. ``source`` is always
+        ``integrations-core``.
+        """
+        if fields is None:
+            return
+
+        import json as _json
+
+        from datadog_checks.base.utils.genresources import (
+            GENRESOURCES_TRACK,
+            INTEGRATIONS_CORE_SOURCE,
+            MAX_FIELDS_JSON_BYTES,
+            GenericResource,
+            GenericResourceEvent,
+            apply_deny_list,
+        )
+
+        integration = self.name
+
+        def _emit_dropped(count=1):
+            datadog_agent.emit_agent_telemetry(integration, "datadog.agent.check.genresources.dropped", count, "count")
+
+        if not key:
+            self.log.warning("genresources: dropping resource with empty key for type=%s", type)
+            _emit_dropped()
+            return
+
+        if not isinstance(fields, dict):
+            self.log.warning(
+                "genresources: dropping resource with non-dict fields type=%s key=%s actual_type=%s",
+                type,
+                key,
+                builtins.type(fields).__name__,
+            )
+            _emit_dropped()
+            return
+
+        redacted_fields = apply_deny_list(
+            fields,
+            paths=redact.get("paths", []),
+            annotation_keys=redact.get("annotation_keys", []),
+        )
+
+        try:
+            fields_json = _json.dumps(redacted_fields, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        except (TypeError, ValueError):
+            self.log.exception("genresources: failed to encode fields for type=%s key=%s", type, key)
+            _emit_dropped()
+            return
+
+        if len(fields_json) > MAX_FIELDS_JSON_BYTES:
+            self.log.warning(
+                "genresources: dropping oversize resource type=%s key=%s size=%d",
+                type,
+                key,
+                len(fields_json),
+            )
+            _emit_dropped()
+            return
+
+        resource = GenericResource(type=type, key=key, fields_json=fields_json)
+        if seen_at is not None:
+            if isinstance(seen_at, int) and not isinstance(seen_at, bool):
+                resource.seen_at.seconds = seen_at
+            else:
+                self.log.warning(
+                    "genresources: ignoring non-int seen_at for type=%s key=%s value=%r",
+                    type,
+                    key,
+                    seen_at,
+                )
+
+        if expire_at is not None:
+            if isinstance(expire_at, int) and not isinstance(expire_at, bool):
+                resource.expire_at.seconds = expire_at
+            else:
+                self.log.warning(
+                    "genresources: ignoring non-int expire_at for type=%s key=%s value=%r",
+                    type,
+                    key,
+                    expire_at,
+                )
+
+        event = GenericResourceEvent(source=INTEGRATIONS_CORE_SOURCE, resource=resource)
+        try:
+            payload = event.SerializeToString()
+        except Exception:
+            self.log.exception("genresources: failed to serialize type=%s key=%s", type, key)
+            _emit_dropped()
+            return
+
+        self.event_platform_event(payload, GENRESOURCES_TRACK)
+        datadog_agent.emit_agent_telemetry(integration, "datadog.agent.check.genresources.emitted", 1, "count")
 
     def should_send_metric(self, metric_name):
         return not self._metric_excluded(metric_name) and self._metric_included(metric_name)

@@ -1425,3 +1425,19 @@ def test_profile_memory_when_enabled(should_profile_value, expected_calls):
 
     assert check.should_profile_memory.call_count == 1
     assert check.profile_memory.call_count == expected_calls
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [b"\x08\x96\x01", bytearray(b"\x08\x96\x01"), memoryview(b"\x08\x96\x01")],
+    ids=["bytes", "bytearray", "memoryview"],
+)
+def test_event_platform_event_delivers_byte_like_payloads_as_bytes(aggregator, payload):
+    from datadog_checks.base import AgentCheck
+
+    check = AgentCheck("test", {}, [{}])
+    check.event_platform_event(payload, "genresources")
+
+    [received] = aggregator.get_event_platform_events("genresources", parse_json=False)
+    assert received == b"\x08\x96\x01"
+    assert isinstance(received, bytes)
