@@ -183,7 +183,7 @@
                {
                   "id":4302529319173068,
                   "definition":{
-                     "title":"Total affected spans ",
+                     "title":"Total affected spans",
                      "title_size":"16",
                      "title_align":"left",
                      "type":"query_value",
