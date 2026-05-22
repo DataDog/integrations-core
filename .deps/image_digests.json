@@ -1,5 +1,5 @@
 {
-  "linux-aarch64": "sha256:75e43dcd27c73cb11b93530d0f4a6e832ed36c8940777f361e03fe4fd0311ce1",
-  "linux-x86_64": "sha256:6a16bc2e11096b8c17bfdc1deaef4b5f0828ea57811bbffc31a84a354b663cf8",
-  "windows-x86_64": "sha256:db6ee72b8ef6e6ba9ce212d02b320e5a6a9e0ae20e578693f94a15f7aff417e0"
+  "linux-aarch64": "sha256:67ce10febfd314cd2fcdc3ae33209c3b37277a3e4a452c7dfd408f885de06bfd",
+  "linux-x86_64": "sha256:41a0b42f62074e6200f8a8e59d0f27f3913a9aab0ea610ba17ed51bb307a70ed",
+  "windows-x86_64": "sha256:8cd1f72c73611f520596d3788da7e7b62bcb6c0d40fdcee3612e845a5aad8ad5"
 }

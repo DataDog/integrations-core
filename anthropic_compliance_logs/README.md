@@ -35,7 +35,7 @@ The Compliance API is available to Anthropic Enterprise plan customers with the 
 ### 3. Configure the Datadog integration
 
 1. Paste your **Admin API Key** into the configuration panel.
-2. Click **Save Configuration**.
+2. Click **Create Account**.
 
 ### 4. Validate
 
@@ -77,6 +77,6 @@ Claude Compliance does not include any events.
 Need help? Contact [Datadog support][4].
 
 [1]: https://platform.claude.com/docs/en/api/compliance
-[2]: https://app.datadoghq.com/integrations?integrationId=anthropic-usage-and-costs
-[3]: https://app.datadoghq.com/logs?query=source%3Aclaude-compliance-logs
+[2]: /integrations?integrationId=anthropic-usage-and-costs
+[3]: /logs?query=source%3Aclaude-compliance-logs
 [4]: https://docs.datadoghq.com/help/
