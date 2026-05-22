@@ -31,6 +31,10 @@ jobs:
   gate:
     name: Check content hashes
     runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      pull-requests: read
+      statuses: write
     outputs:
       needs_resolution: ${{ steps.hash-check.outputs.needs_resolution }}
       matrix_container: ${{ steps.hash-check.outputs.matrix_container }}
@@ -50,6 +54,43 @@ jobs:
         run: |
           python .builders/inputs_hash.py status .builders/targets.json \
             >> "$GITHUB_OUTPUT"
+
+      - name: Set dependency-wheel-promotion status
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            const needsResolution = '${{ steps.hash-check.outputs.needs_resolution }}' === 'true';
+            const prs = await github.paginate(github.rest.repos.listPullRequestsAssociatedWithCommit, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+            });
+
+            let hasResolutionOutput = false;
+            for (const pr of prs.filter(pr => pr.state === 'open')) {
+              const files = await github.paginate(github.rest.pulls.listFiles, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                per_page: 100,
+              });
+              if (files.some(file => file.filename.startsWith('.deps/'))) {
+                hasResolutionOutput = true;
+                break;
+              }
+            }
+
+            const promotionRequired = needsResolution || hasResolutionOutput;
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: promotionRequired ? 'pending' : 'success',
+              context: 'dependency-wheel-promotion',
+              description: promotionRequired
+                ? 'Wheels must be promoted to stable before merge. Run: ddev dep promote <PR_URL>'
+                : 'No dependency resolution needed; promotion not required.',
+            });
 
   test:
     name: Run tests
