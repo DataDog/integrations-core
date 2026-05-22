@@ -92,15 +92,17 @@ def test_e2e_framework_lab_prompts_include_autodiscovery_reachability_guidance()
     assert "host and port resolve to a reachable listener" in review_task
 
 
-def test_e2e_framework_lab_prompts_require_self_contained_compose_workloads() -> None:
+def test_e2e_framework_lab_prompts_require_explicit_auxiliary_asset_copying() -> None:
     component_task = (FLOW_DIR / "tasks" / "component.md").read_text()
     review_task = (FLOW_DIR / "tasks" / "review.md").read_text()
 
     assert "Extra Compose manifests" in component_task
-    assert "self-contained" in component_task
-    assert "relative bind mounts" in component_task
-    assert "explicitly copies" in component_task
+    assert "keep workload scripts as files" in component_task
+    assert "explicitly copy those assets" in component_task
+    assert "WithPulumiDependsOn" in component_task
+    assert "avoid using service images for helper containers" in component_task
     assert "seed data matching configured key patterns" in component_task
 
-    assert "relative bind mounts" in review_task
-    assert "seed data matching configured key patterns" in review_task
+    assert "local scripts, config files, or build contexts" in review_task
+    assert "explicitly copied to the remote Docker host" in review_task
+    assert "helper containers do not use images that trigger unrelated Autodiscovery" in review_task

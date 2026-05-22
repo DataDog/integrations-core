@@ -25,6 +25,7 @@ Check and correct these items:
 7. task `scenario_name` is exactly `aws/$integration`;
 8. `test/e2e-framework/registry/scenarios.go` imports and registers the scenario;
 9. Autodiscovery labels are attached to the containers they describe, and every generated check instance's host and port resolve to a reachable listener;
-10. extra Compose workloads avoid relative bind mounts, local build contexts, or local scripts unless the scenario explicitly copies those files to the remote host;
-11. load generation creates seed data matching configured key patterns or resource selectors before expecting non-empty metrics;
-12. final response lists manual validation commands for the human reviewer.
+10. local scripts, config files, or build contexts referenced by Compose are explicitly copied to the remote Docker host and wired into Agent startup dependencies;
+11. helper containers do not use images that trigger unrelated Autodiscovery checks for services they do not actually run;
+12. load generation creates seed data matching configured key patterns or resource selectors before expecting non-empty metrics;
+13. final response lists manual validation commands for the human reviewer.
