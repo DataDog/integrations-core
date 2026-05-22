@@ -69,6 +69,10 @@ class DeltaDetector:
                 if self._execution_indicators:
                     indicator_cols = self._execution_indicators & available_metrics
 
+            if indicator_cols:
+                if not any(row[col] - prev[col] > 0 for col in indicator_cols):
+                    continue
+
             has_negative = False
             has_change = False
             for col in available_metrics:
@@ -81,15 +85,6 @@ class DeltaDetector:
 
             if has_negative or not has_change:
                 continue
-
-            if indicator_cols:
-                has_indicator_change = False
-                for col in indicator_cols:
-                    if row[col] - prev[col] > 0:
-                        has_indicator_change = True
-                        break
-                if not has_indicator_change:
-                    continue
 
             derivative = {}
             for col in row:
