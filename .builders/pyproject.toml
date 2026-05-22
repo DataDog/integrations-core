@@ -1,5 +1,9 @@
+[tool.pytest.ini_options]
+pythonpath = ["scripts"]
+
 [tool.mypy]
 python_version = "3.13"
+mypy_path = "scripts"
 follow_imports = "normal"
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
