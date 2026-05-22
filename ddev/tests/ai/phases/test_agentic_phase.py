@@ -124,7 +124,8 @@ async def test_happy_path_single_task(flow_dir, monkeypatch, message_queue):
 
     assert len(mock_agent.send_calls) == 2
     assert mock_agent.send_calls[0] == "Do the work."
-    assert "Write a brief summary" in mock_agent.send_calls[1]
+    assert "concise checkpoint summary" in mock_agent.send_calls[1]
+    assert "at most 12 bullets" in mock_agent.send_calls[1]
 
 
 async def test_happy_path_two_tasks(flow_dir, monkeypatch, message_queue):
@@ -176,7 +177,8 @@ async def test_memory_step_with_checkpoint_config(flow_dir, monkeypatch, message
 
     memory_prompt = mock_agent.send_calls[1]
     assert "Also list the files." in memory_prompt
-    assert "Write a brief summary" in memory_prompt
+    assert "concise checkpoint summary" in memory_prompt
+    assert "at most 12 bullets" in memory_prompt
 
 
 async def test_memory_step_without_checkpoint_config(flow_dir, monkeypatch, message_queue):
@@ -190,7 +192,10 @@ async def test_memory_step_without_checkpoint_config(flow_dir, monkeypatch, mess
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     memory_prompt = mock_agent.send_calls[1]
-    assert memory_prompt == "Write a brief summary of what you accomplished in this phase."
+    assert memory_prompt == (
+        "Write a concise checkpoint summary of what you accomplished in this phase. "
+        "Use at most 12 bullets and do not include code blocks."
+    )
 
 
 # ---------------------------------------------------------------------------

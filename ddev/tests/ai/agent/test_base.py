@@ -24,12 +24,14 @@ class ConcreteAgent(BaseAgent[dict]):
         self._responses = list(responses or [])
         self._idx = 0
         self.send_calls: list[dict] = []
+        self.history_seen_by_send: list[list[dict]] = []
 
     async def send(
         self,
         content: str | list[ToolResultMessage],
         allowed_tools: list[str] | None = None,
     ) -> AgentResponse:
+        self.history_seen_by_send.append(list(self._history))
         self.send_calls.append(
             {"content": content, "allowed_tools": allowed_tools, "system_prompt": self._system_prompt}
         )
@@ -220,6 +222,16 @@ async def test_compact_preserving_last_turn_produces_four_messages() -> None:
     await agent.compact_preserving_last_turn()
     # original + summary + last user + last assistant
     assert len(agent.history) == 4
+
+
+async def test_compact_preserving_last_turn_compacts_without_unresolved_tool_turn() -> None:
+    agent = ConcreteAgent(responses=["summary"])
+    original_history = make_history(6)
+    agent._history = list(original_history)
+
+    await agent.compact_preserving_last_turn()
+
+    assert agent.history_seen_by_send[0] == original_history[:-2]
 
 
 # ---------------------------------------------------------------------------

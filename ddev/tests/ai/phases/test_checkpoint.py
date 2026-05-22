@@ -80,13 +80,18 @@ def test_write_overwrites_existing_phase(manager):
 
 def test_build_memory_prompt_no_additions(manager):
     result = manager.build_memory_prompt(None)
-    assert result == "Write a brief summary of what you accomplished in this phase."
+    assert result == (
+        "Write a concise checkpoint summary of what you accomplished in this phase. "
+        "Use at most 12 bullets and do not include code blocks."
+    )
 
 
 def test_build_memory_prompt_with_additions(manager):
     result = manager.build_memory_prompt("Also list the files you created.")
     assert result.startswith("Also list the files you created.")
-    assert "Write a brief summary" in result
+    assert "concise checkpoint summary" in result
+    assert "at most 12 bullets" in result
+    assert "do not include code blocks" in result
 
 
 # ---------------------------------------------------------------------------

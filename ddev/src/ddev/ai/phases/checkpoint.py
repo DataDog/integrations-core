@@ -39,7 +39,10 @@ class CheckpointManager:
 
     def build_memory_prompt(self, user_additions: str | None) -> str:
         """Build the memory prompt to send to the agent at the end of a phase."""
-        base_prompt = "Write a brief summary of what you accomplished in this phase."
+        base_prompt = (
+            "Write a concise checkpoint summary of what you accomplished in this phase. "
+            "Use at most 12 bullets and do not include code blocks."
+        )
         return f"{user_additions}\n\n{base_prompt}" if user_additions else base_prompt
 
     def memory_path(self, phase_id: str) -> Path:

@@ -88,8 +88,14 @@ class BaseAgent[TMessage](ABC):
         if len(self._history) <= 3:
             return None
 
+        original_history = list(self._history)
         last_turn = self._history[-2:]  # [user(tool_results_N), assistant(tool_use_N+1)]
-        response = await self.compact()
+        self._history = self._history[:-2]
+        try:
+            response = await self.compact()
+        except Exception:
+            self._history = original_history
+            raise
         self._history.extend(last_turn)
         return response
 
