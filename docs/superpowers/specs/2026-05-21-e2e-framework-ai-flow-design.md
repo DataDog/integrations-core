@@ -194,6 +194,30 @@ Unit tests should cover:
 
 The implementation should not require live Anthropic calls in tests.
 
+## Future work
+
+A stronger long-term model is to make integrations-core the source of truth for generated lab definitions and use the Agent repository only as the E2E framework runtime provider. In that model, the AI flow writes integration-owned lab artifacts near the check, for example:
+
+```text
+<integration>/e2e_lab/
+  docker-compose.yaml
+  load/...
+  scenario.go
+  lab.yaml
+```
+
+The `ddev` runner would then bridge those artifacts into the Agent E2E framework by using the configured `[repos].agent` checkout. The bridge could create a temporary Go workspace or generated adapter that imports `github.com/DataDog/datadog-agent/test/e2e-framework`, registers the integration scenario for the current run, copies auxiliary assets to the remote Docker host, and invokes the existing Pulumi-backed Agent E2E framework without committing scenario code, task code, or registry edits to `datadog-agent`.
+
+This would move review and ownership to the integrations-core PR where the check, metrics, config, and tests already live. It would also avoid repeatedly generating Agent branches solely to add app components, AWS scenarios, invoke tasks, and registry wiring. The current direct-to-Agent flow remains useful as a prototype and compatibility bridge while output quality, framework APIs, and runner behavior are validated.
+
+Open design questions for this future mode:
+
+- whether the temporary adapter should live entirely under a generated directory in integrations-core, in a disposable Agent worktree, or in a ddev-managed cache;
+- how to pin or validate compatibility with the Agent E2E framework APIs;
+- whether lab tasks should be generated Python invoke tasks, declarative `lab.yaml`, or native `ddev lab create/destroy/connect` commands;
+- how to handle Go module, Bazel, and Pulumi setup when importing the Agent E2E framework from outside the Agent repository;
+- how to package and copy local load scripts, config files, Docker build contexts, and other auxiliary assets in a reusable way.
+
 ## Open follow-up
 
-A later PR can add a public CLI command once the flow and generated artifacts are validated. Candidate commands include `ddev ai e2e-lab <integration>` or `ddev lab generate <integration>`.
+A later PR can refine the public CLI once the flow and generated artifacts are validated. Candidate commands include `ddev ai generate-lab <integration>` for AI generation and `ddev lab create <integration>` for running an integrations-core-owned lab.
