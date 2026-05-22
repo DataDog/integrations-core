@@ -1,0 +1,1 @@
+Add V2 statement metrics collection pipeline with change detection and cached obfuscation, reducing collection latency and memory allocations on the Python and Go runtimes.
