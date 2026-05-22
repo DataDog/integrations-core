@@ -17,9 +17,10 @@ from tuf.api.exceptions import DownloadError
 
 from .download import DEFAULT_ROOT_LAYOUT_TYPE, REPOSITORY_URL_PREFIX, ROOT_LAYOUTS, TUFDownloader
 from .download_v2 import V2_REPOSITORY_URL, TUFPointerDownloader
-from .exceptions import CLIError, NonCanonicalVersion, NonDatadogPackage, TargetNotFoundError
+from .exceptions import CLIError, MissingVersion, NonCanonicalVersion, NonDatadogPackage, TargetNotFoundError
 
 V2_FALLBACK_ERRORS: tuple[type[BaseException], ...] = (
+    MissingVersion,
     TargetNotFoundError,
     DownloadError,
     TimeoutError,
@@ -164,21 +165,15 @@ def run_downloader(tuf_downloader, standard_distribution_name, version, ignore_p
 
 
 def download() -> None:
-    parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument('--v2', action='store_true', default=False)
-    partial_args, _ = parser.parse_known_args()
+    downloader, name, version, args = instantiate_v2_downloader()
 
-    downloader, name, version, _ = instantiate_v2_downloader()
-
-    if partial_args.v2:
+    if args.v2:
+        warn_v2_ignored_args(args)
         run_v2_downloader(downloader, name, version)
         return
 
     try:
         run_v2_downloader(downloader, name, version)
-    except CLIError:
-        # NonDatadogPackage, NonCanonicalVersion, MissingVersion: v1 would raise the same.
-        raise
     except V2_FALLBACK_ERRORS as exc:
         # Integrity failures (DigestMismatch / LengthMismatch / MalformedPointerError) are
         # intentionally not in V2_FALLBACK_ERRORS — they must propagate, not be masked by v1.
@@ -189,6 +184,9 @@ def download() -> None:
             exc,
         )
         run_downloader(*instantiate_downloader())
+    except CLIError:
+        # NonDatadogPackage and NonCanonicalVersion: v1 would raise the same.
+        raise
 
 
 def _v2_parser() -> argparse.ArgumentParser:
@@ -219,6 +217,15 @@ def _v2_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def warn_v2_ignored_args(args: argparse.Namespace) -> None:
+    if args.ignored_type is not None:
+        sys.stderr.write('WARNING: --type is not applicable with --v2 and will be ignored.\n')
+    if args.ignored_ignore_python_version:
+        sys.stderr.write(
+            'NOTE: --ignore-python-version is not applicable with --v2 (wheel selection happens at publish time).\n'
+        )
+
+
 def instantiate_v2_downloader() -> tuple[TUFPointerDownloader, str, str | None, argparse.Namespace]:
     args = _v2_parser().parse_args()
 
@@ -227,13 +234,6 @@ def instantiate_v2_downloader() -> tuple[TUFPointerDownloader, str, str | None, 
 
     if args.version and not __is_canonical(args.version):
         raise NonCanonicalVersion(args.version)
-
-    if args.ignored_type is not None:
-        sys.stderr.write('WARNING: --type is not applicable with --v2 and will be ignored.\n')
-    if args.ignored_ignore_python_version:
-        sys.stderr.write(
-            'NOTE: --ignore-python-version is not applicable with --v2 (wheel selection happens at publish time).\n'
-        )
 
     remainder = min(args.verbose, 5) % 6
     level = (6 - remainder) * 10

@@ -220,15 +220,22 @@ class TestInstantiateV2Downloader:
         with pytest.raises(NonCanonicalVersion, match='banana'):
             cli.instantiate_v2_downloader()
 
-    def test_warns_when_type_flag_supplied(self, monkeypatch, capsys):
-        monkeypatch.setattr('sys.argv', ['downloader', 'datadog-postgres', '--type', 'core'])
+    def test_does_not_warn_when_v1_compat_flags_are_parsed(self, monkeypatch, capsys):
+        monkeypatch.setattr(
+            'sys.argv', ['downloader', 'datadog-postgres', '--type', 'core', '--ignore-python-version']
+        )
         cli.instantiate_v2_downloader()
-        assert 'WARNING: --type' in capsys.readouterr().err
+        assert capsys.readouterr().err == ''
 
-    def test_warns_when_ignore_python_version_supplied(self, monkeypatch, capsys):
-        monkeypatch.setattr('sys.argv', ['downloader', 'datadog-postgres', '--ignore-python-version'])
-        cli.instantiate_v2_downloader()
-        assert 'NOTE: --ignore-python-version' in capsys.readouterr().err
+    def test_warns_for_v1_compat_flags_in_strict_v2_mode(self, monkeypatch, capsys):
+        monkeypatch.setattr(
+            'sys.argv', ['downloader', 'datadog-postgres', '--v2', '--type', 'core', '--ignore-python-version']
+        )
+        _, _, _, args = cli.instantiate_v2_downloader()
+        cli.warn_v2_ignored_args(args)
+        stderr = capsys.readouterr().err
+        assert 'WARNING: --type' in stderr
+        assert 'NOTE: --ignore-python-version' in stderr
 
     def test_force_flag_is_silently_ignored(self, monkeypatch, capsys):
         monkeypatch.setattr('sys.argv', ['downloader', 'datadog-postgres', '--force'])
@@ -259,6 +266,16 @@ class TestCliDownloadFallback:
 
         cli.download()
         v1.assert_called_once_with('d', 'n', 'v', False)
+
+    def test_default_falls_back_to_v1_when_v2_unsafe_download_requires_version(self, monkeypatch):
+        monkeypatch.setattr('sys.argv', ['downloader', 'datadog-postgres', '--unsafe-disable-verification'])
+        monkeypatch.setattr(cli, 'run_v2_downloader', MagicMock(side_effect=MissingVersion('missing')))
+        v1 = MagicMock()
+        monkeypatch.setattr(cli, 'run_downloader', v1)
+        monkeypatch.setattr(cli, 'instantiate_downloader', MagicMock(return_value=('d', 'n', None, False)))
+
+        cli.download()
+        v1.assert_called_once_with('d', 'n', None, False)
 
     def test_non_datadog_package_does_not_fall_back_to_v1(self, monkeypatch):
         monkeypatch.setattr('sys.argv', ['downloader', 'requests'])
