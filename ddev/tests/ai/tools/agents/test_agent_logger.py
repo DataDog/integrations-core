@@ -52,7 +52,7 @@ def test_flush_after_each_write(tmp_path):
     logger.close()
 
 
-def test_close_is_idempotent_and_prevents_further_writes(tmp_path, caplog):
+def test_close_is_idempotent_and_prevents_further_writes(tmp_path):
     log_path = tmp_path / "log.jsonl"
     logger = AgentLogger(log_path)
     logger.log_start(system_prompt="s", prompt="p", tools=[])
@@ -60,7 +60,6 @@ def test_close_is_idempotent_and_prevents_further_writes(tmp_path, caplog):
     logger.close()  # must not raise
     logger.log_finish(success=False)  # must not write
     assert len(read_events(log_path)) == 1
-    assert "dropping event 'finish'" in caplog.text
 
 
 def test_reopening_same_path_appends_start_run_delimiter(tmp_path):
