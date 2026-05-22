@@ -69,11 +69,14 @@ Copy-Item "${srcdir}\librdkafka.lib","${srcdir}\librdkafkacpp.lib" -Destination 
 New-Item -Path $includedir\librdkafka -ItemType Directory
 Copy-Item -Path ".\src\*" -Filter *.h -Destination $includedir\librdkafka
 
-# Free disk space before the layer is committed. The build outputs we ship live
-# in C:\bin, C:\lib, and C:\include. Everything else is intermediate. This must
-# happen in the same RUN as the build — a later layer cannot shrink bytes that
-# are already committed to an earlier one.
+# Drop build intermediates so they don't bloat this image layer. Surfaces partial
+# failures as warnings so they're greppable in the docker build log rather than
+# silently shipping a fatter image.
 Set-Location C:\
-Remove-Item -Recurse -Force C:\vcpkg -ErrorAction Continue
-Remove-Item -Recurse -Force C:\librdkafka -ErrorAction Continue
-Remove-Item -Force "C:\librdkafka-${kafka_version}.tar" -ErrorAction Continue
+foreach ($path in @('C:\vcpkg', 'C:\librdkafka', "C:\librdkafka-${kafka_version}.tar")) {
+    try {
+        Remove-Item -Recurse -Force $path -ErrorAction Stop
+    } catch {
+        Write-Warning "Cleanup of $path failed (image will be larger than expected): $_"
+    }
+}

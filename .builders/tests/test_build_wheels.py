@@ -47,3 +47,11 @@ def test_aborts_when_env_set_but_no_pin(tmp_path, monkeypatch):
 
     with pytest.raises(SystemExit):
         build_wheels.assert_kafka_version_matches()
+
+
+def test_aborts_when_requirements_file_missing(tmp_path, monkeypatch):
+    monkeypatch.setenv('CONFLUENT_KAFKA_VERSION', '2.13.2')
+    monkeypatch.setattr(build_wheels, 'MOUNT_DIR', tmp_path)
+
+    with pytest.raises(SystemExit):
+        build_wheels.assert_kafka_version_matches()

@@ -186,7 +186,6 @@ RUN python -m pip install --no-warn-script-location -r C:\runner_dependencies.tx
 COPY build_script.ps1 C:\build_script.ps1
 COPY update_librdkafka_manifest.py C:\update_librdkafka_manifest.py
 
-# Native dep output directories must exist before the build script writes into them.
 RUN New-Item -Path "C:\include" -ItemType Directory
 RUN New-Item -Path "C:\lib" -ItemType Directory
 RUN New-Item -Path "C:\bin" -ItemType Directory
@@ -198,7 +197,7 @@ RUN RunOnVSConsole -Command 'pwsh C:\build_script.ps1'
 
 # Python packages that we want to build regardless of whether prebuilt versions exist on PyPI
 ENV PIP_NO_BINARY="confluent_kafka"
-# Native dependency search paths for downstream wheel builds.
+# Where to find native dependencies when building extensions and for wheel repairing
 ENV INCLUDE="C:\include"
 ENV LIB="C:\lib"
 RUN Add-ToPath -Append "C:\bin"

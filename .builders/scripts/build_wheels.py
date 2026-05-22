@@ -353,19 +353,16 @@ def calculate_wheel_sizes(wheel_path: Path) -> WheelSizes:
 
 
 def assert_kafka_version_matches() -> None:
-    """Abort if CONFLUENT_KAFKA_VERSION env disagrees with the pin in requirements.in.
-
-    Set on the Windows builder image (see .builders/images/windows-x86_64/Dockerfile)
-    so the librdkafka build baked into the image stays in lockstep with the
-    confluent-kafka wheel built at run time. No-op on platforms where the env is unset.
-    """
+    """Abort if CONFLUENT_KAFKA_VERSION env disagrees with the pin in requirements.in."""
     expected = os.environ.get('CONFLUENT_KAFKA_VERSION')
     if not expected:
         return
     requirements = MOUNT_DIR / 'requirements.in'
+    if not requirements.is_file():
+        abort(f'CONFLUENT_KAFKA_VERSION is set but {requirements} is missing — is the build mount configured?')
     pin = None
     for line in requirements.read_text(encoding='utf-8').splitlines():
-        match = re.match(r'^\s*confluent-kafka==([\d.]+)\s*$', line)
+        match = re.match(r'^\s*confluent-kafka==(\d+(?:\.\d+){2})\s*$', line)
         if match:
             pin = match.group(1)
             break
