@@ -114,7 +114,7 @@ You can enable LLM Observability in different environments. Follow the appropria
      -p 127.0.0.1:8125:8125/udp \
      -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
      -e DD_APM_ENABLED=true \
-     gcr.io/datadoghq/agent:latest
+     registry.datadoghq.com/agent:latest
    ```
 
 2. Install the `ddtrace` package if it isn't installed yet:
@@ -193,7 +193,7 @@ This will display detailed information about any errors or issues with tracing.
      -p 127.0.0.1:8125:8125/udp \
      -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
      -e DD_APM_ENABLED=true \
-     gcr.io/datadoghq/agent:latest
+     registry.datadoghq.com/agent:latest
    ```
 
 2. Install the Datadog APM Python library.
@@ -292,7 +292,7 @@ You can enable LLM Observability in different environments. Follow the appropria
      -p 127.0.0.1:8125:8125/udp \
      -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
      -e DD_APM_ENABLED=true \
-     gcr.io/datadoghq/agent:latest
+     registry.datadoghq.com/agent:latest
    ```
 
 2. Install the Datadog APM Node.js library.
@@ -367,7 +367,7 @@ This will display detailed information about any errors or issues with tracing.
      -p 127.0.0.1:8125:8125/udp \
      -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
      -e DD_APM_ENABLED=true \
-     gcr.io/datadoghq/agent:latest
+     registry.datadoghq.com/agent:latest
    ```
 
 2. Install the Datadog APM Node.js library.
@@ -443,7 +443,7 @@ Validate that the APM Node.js library can communicate with your Agent by examini
      -p 127.0.0.1:8125:8125/udp \
      -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
      -e DD_APM_ENABLED=true \
-     gcr.io/datadoghq/agent:latest
+     registry.datadoghq.com/agent:latest
    ```
 
 2. [Install the Datadog APM PHP library][16].
