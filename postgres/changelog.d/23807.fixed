@@ -1,1 +1,0 @@
-Restrict per-database error recovery in schema collection to psycopg driver errors, preventing internal errors from being silently swallowed.
