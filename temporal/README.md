@@ -4,7 +4,7 @@
 
 This check monitors [Temporal][1] through the Datadog Agent. 
 
-**Note**: This check can only be installed if you are self-hosting Temporal. **To monitor your Temporal Cloud instance**, follow the [Datadog Temporal Cloud integration documentation][13]. 
+**Note**: This check can only be installed if you are self-hosting Temporal. **To monitor your Temporal Cloud instance**, follow the [Datadog Temporal Cloud - OpenMetrics integration documentation][13]. 
 
 **Minimum Agent version:** 7.45.0
 
@@ -168,7 +168,7 @@ Additional helpful documentation, links, and articles:
 [10]: https://docs.temporal.io/references/configuration#prometheus
 [11]: https://docs.temporal.io/references/configuration#log
 [12]: https://www.datadoghq.com/blog/temporal-server-integration/
-[13]: https://docs.datadoghq.com/integrations/temporal_cloud/
+[13]: https://docs.datadoghq.com/integrations/temporal-cloud-openmetrics/
 [14]: https://docs.datadoghq.com/containers/kubernetes/integrations/
 [15]: https://docs.datadoghq.com/containers/docker/integrations/
 [16]: https://docs.datadoghq.com/containers/guide/ad_identifiers/
