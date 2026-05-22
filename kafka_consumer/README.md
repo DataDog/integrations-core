@@ -105,7 +105,7 @@ instances:
 
 See [metadata.csv][9] for a list of metrics provided by this check.
 
-### Kafka messages
+### Kafka messages (DSM only)
 
 This integration is used by [Data Streams Monitoring][18] to [retrieve messages from Kafka on demand][21].
 
