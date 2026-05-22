@@ -2,13 +2,19 @@
 
 <!-- towncrier release notes start -->
 
+## 37.37.0 / 2026-05-14
+
+***Added***:
+
+* Add a per-performance-object `include_total` option (default `false`) to the Windows perf-counter framework. When set to `true`, the `_Total` aggregate instance is collected instead of being excluded by default. ([#23530](https://github.com/DataDog/integrations-core/pull/23530))
+
 ## 37.36.0 / 2026-04-24
 
 ***Added***:
 
 * Add parameterized query support to QueryExecutor. ([#23469](https://github.com/DataDog/integrations-core/pull/23469))
 
-## 37.35.1 / 2026-04-28
+## 37.35.1 / 2026-04-28 / Agent 7.79.0
 
 ***Fixed***:
 

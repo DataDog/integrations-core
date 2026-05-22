@@ -15,6 +15,7 @@
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Windows",
+      "Category::SIEM",
       "Supported OS::Windows",
       "Offering::Integration"
     ]

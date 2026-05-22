@@ -65,7 +65,7 @@ If you are not using DC/OS, use the Marathon web UI or post to the API URL the f
       }
     ],
     "docker": {
-      "image": "datadog/agent:latest",
+      "image": "registry.datadoghq.com/agent:latest",
       "network": "BRIDGE",
       "portMappings": [
         {

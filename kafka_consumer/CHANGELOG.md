@@ -2,6 +2,25 @@
 
 <!-- towncrier release notes start -->
 
+## 7.3.0 / 2026-05-14
+
+***Added***:
+
+* Add an `out_of_sync_broker_id` tag to the `kafka.partition.*` metrics (when `enable_cluster_monitoring` is true) identifying each assigned replica that is not in the partition's ISR. Use it to attribute under-replicated partitions to specific broker IDs. ([#23428](https://github.com/DataDog/integrations-core/pull/23428))
+* Include `bootstrap_servers` in the Kafka consumer cluster monitoring heartbeat payload. ([#23475](https://github.com/DataDog/integrations-core/pull/23475))
+
+***Fixed***:
+
+* Filter out errored partitions from offsets_for_times results to prevent invalid offset reporting ([#23242](https://github.com/DataDog/integrations-core/pull/23242))
+* Lower log level from WARN to DEBUG for the message emitted when a consumer group has offsets for a partition but no stored highwater offset (typically during leader failover). ([#23388](https://github.com/DataDog/integrations-core/pull/23388))
+* When a topic's highwater offset decreases (retention wipe, topic recreation, or offset reset), purge cached (offset, timestamp) pairs whose offset is above the new highwater and switch eviction to oldest-timestamp instead of smallest-offset. Previously, stale pre-reset entries poisoned interpolation and pinned `kafka.estimated_consumer_lag` to a wall-clock value equal to how long ago the reset happened. ([#23409](https://github.com/DataDog/integrations-core/pull/23409))
+
+## 7.2.1 / 2026-05-12 / Agent 7.79.0
+
+***Fixed***:
+
+* Switch cluster monitoring's earliest-offset fetch to AdminClient.list_offsets(earliest), and isolate its failures so an earliest-offset error no longer drops topic.message_rate, partition.isr, topic.config.*, and other unrelated topic-metadata metrics. ([#23580](https://github.com/DataDog/integrations-core/pull/23580))
+
 ## 7.2.0 / 2026-04-15
 
 ***Added***:

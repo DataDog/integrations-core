@@ -1,8 +1,7 @@
 # CHANGELOG - datadog_csi_driver
 
-<!-- towncrier release notes start -->
 
-## 1.5.1 / 2026-04-15
+## 1.5.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:
 

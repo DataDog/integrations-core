@@ -3,6 +3,26 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
+# Subset of HOST_STATS_METRICS keys whose emitted metrics carry the ntnx_disk_status tag.
+HOST_STORAGE_STAT_KEYS: frozenset[str] = frozenset(
+    {
+        "freePhysicalStorageBytes",
+        "logicalStorageUsageBytes",
+        "storageCapacityBytes",
+        "storageUsageBytes",
+    }
+)
+
+# Disk status enum values that aggregate to ntnx_disk_status:degraded.
+DEGRADED_DISK_STATUSES: frozenset[str] = frozenset(
+    {
+        "marked_for_removal_but_not_detachable",
+        "data_migration_initiated",
+        "detachable",
+    }
+)
+
+
 CLUSTER_STATS_METRICS = {
     "aggregateHypervisorMemoryUsagePpm": "cluster.aggregate_hypervisor.memory_usage",  # ppm
     "controllerAvgIoLatencyUsecs": "cluster.controller.avg_io_latency",  # usecs

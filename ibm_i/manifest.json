@@ -15,6 +15,7 @@
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::macOS",
+      "Supported OS::AIX",
       "Category::OS & System",
       "Offering::Integration"
     ]

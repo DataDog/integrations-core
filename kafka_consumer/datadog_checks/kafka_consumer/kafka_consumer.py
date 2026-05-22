@@ -84,7 +84,7 @@ class KafkaCheck(AgentCheck):
                         for topic, partition in offsets:
                             partitions.add((topic, partition))
                 # Expected format: ({(topic, partition): offset}, cluster_id)
-                highwater_offsets, cluster_id = self.get_watermark_offsets(partitions, mode=HIGH_WATERMARK)
+                highwater_offsets, cluster_id = self.get_highwater_offsets(partitions)
                 if self._data_streams_enabled:
                     broker_timestamps = self._load_broker_timestamps(persistent_cache_key)
                     self._add_broker_timestamps(broker_timestamps, highwater_offsets)
@@ -403,10 +403,9 @@ class KafkaCheck(AgentCheck):
         )
         return consumer_group_state
 
-    def get_watermark_offsets(self, partitions=None, mode=HIGH_WATERMARK):
-        self.log.debug('Getting %s offsets', 'highwater' if mode == HIGH_WATERMARK else 'lowwater')
+    def get_highwater_offsets(self, partitions=None):
+        self.log.debug('Getting highwater offsets')
 
-        # Build partitions set
         topic_partitions_to_check = set()
         if partitions is None:
             all_topic_partitions = self.client.get_topic_partitions()
@@ -429,26 +428,21 @@ class KafkaCheck(AgentCheck):
 
         dd_consumer_group = "datadog-agent"
 
-        # Open consumer once for both cluster_id and offset fetching
         self.client.open_consumer(dd_consumer_group)
         try:
             cluster_id, _ = self.client.consumer_get_cluster_id_and_list_topics(dd_consumer_group)
 
-            self.log.debug(
-                'Querying %s %s offsets',
-                len(topic_partitions_to_check),
-                'highwater' if mode == HIGH_WATERMARK else 'lowwater',
-            )
+            self.log.debug('Querying %s highwater offsets', len(topic_partitions_to_check))
 
             result = {}
             for topic, partition, offset in self.client.consumer_offsets_for_times(
-                partitions=topic_partitions_to_check, offset=mode
+                partitions=topic_partitions_to_check, offset=HIGH_WATERMARK
             ):
                 result[(topic, partition)] = offset
         finally:
             self.client.close_consumer()
 
-        self.log.debug('Got %s %s offsets', len(result), 'highwater' if mode == HIGH_WATERMARK else 'lowwater')
+        self.log.debug('Got %s highwater offsets', len(result))
         return result, cluster_id
 
     def send_event(self, title, text, tags, event_type, aggregation_key, severity='info'):

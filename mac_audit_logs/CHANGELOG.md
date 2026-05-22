@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 1.4.1 / 2026-04-28
+## 1.4.2 / 2026-05-14
+
+***Fixed***:
+
+* Batch audit log files into a single auditreduce invocation so the check keeps up with frequent file rotation. ([#22925](https://github.com/DataDog/integrations-core/pull/22925))
+
+## 1.4.1 / 2026-04-28 / Agent 7.79.0
 
 ***Fixed***:
 
