@@ -1,0 +1,1 @@
+Skip inaccessible databases during DBM schema collection instead of aborting collection for all databases.
