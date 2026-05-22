@@ -45,6 +45,7 @@ from datadog_checks.postgres.relationsmanager import (
 )
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
+from datadog_checks.postgres.statements_v2 import PostgresStatementMetricsV2
 
 from .__about__ import __version__
 from .config import build_config, sanitize
@@ -166,7 +167,10 @@ class PostgreSql(DatabaseCheck):
             token_provider=self.build_token_provider(),
         )
         self.metrics_cache = PostgresMetricsCache(self._config)
-        self.statement_metrics = PostgresStatementMetrics(self, self._config)
+        if self._config.query_metrics.use_v2:
+            self.statement_metrics = PostgresStatementMetricsV2(self, self._config)
+        else:
+            self.statement_metrics = PostgresStatementMetrics(self, self._config)
         self.statement_samples = PostgresStatementSamples(self, self._config)
         self.metadata_samples = PostgresMetadata(self, self._config)
         self.data_observability = PostgresDataObservability(self, self._config)
