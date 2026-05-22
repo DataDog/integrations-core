@@ -269,3 +269,22 @@ class TestCliDownloadFallback:
         with pytest.raises(NonDatadogPackage):
             cli.download()
         v1.assert_not_called()
+
+    @pytest.mark.parametrize(
+        'integrity_exc',
+        [
+            pytest.param(DigestMismatch(PROJECT, 'a', 'b'), id='digest-mismatch'),
+            pytest.param(LengthMismatch(PROJECT, 1, 2), id='length-mismatch'),
+            pytest.param(MalformedPointerError(PROJECT, 'digest'), id='malformed-pointer'),
+        ],
+    )
+    def test_integrity_errors_do_not_fall_back_to_v1(self, monkeypatch, integrity_exc):
+        monkeypatch.setattr('sys.argv', ['downloader', 'datadog-postgres'])
+        monkeypatch.setattr(cli, 'run_v2_downloader', MagicMock(side_effect=integrity_exc))
+        v1 = MagicMock()
+        monkeypatch.setattr(cli, 'run_downloader', v1)
+        monkeypatch.setattr(cli, 'instantiate_downloader', MagicMock())
+
+        with pytest.raises(type(integrity_exc)):
+            cli.download()
+        v1.assert_not_called()

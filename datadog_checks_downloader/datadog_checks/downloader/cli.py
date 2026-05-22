@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from __future__ import annotations
 
 # 1st party.
 import argparse
@@ -17,6 +18,13 @@ from tuf.api.exceptions import DownloadError
 from .download import DEFAULT_ROOT_LAYOUT_TYPE, REPOSITORY_URL_PREFIX, ROOT_LAYOUTS, TUFDownloader
 from .download_v2 import V2_REPOSITORY_URL, TUFPointerDownloader
 from .exceptions import CLIError, NonCanonicalVersion, NonDatadogPackage, TargetNotFoundError
+
+V2_FALLBACK_ERRORS: tuple[type[BaseException], ...] = (
+    TargetNotFoundError,
+    DownloadError,
+    TimeoutError,
+    urllib.error.URLError,
+)
 
 # Private module functions.
 
@@ -171,7 +179,9 @@ def download() -> None:
     except CLIError:
         # NonDatadogPackage, NonCanonicalVersion, MissingVersion: v1 would raise the same.
         raise
-    except Exception as exc:
+    except V2_FALLBACK_ERRORS as exc:
+        # Integrity failures (DigestMismatch / LengthMismatch / MalformedPointerError) are
+        # intentionally not in V2_FALLBACK_ERRORS — they must propagate, not be masked by v1.
         logging.getLogger(__name__).info(
             'v2 download failed (%s, %s: %s), falling back to v1',
             _v2_failure_category(exc),
