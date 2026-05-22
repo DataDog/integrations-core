@@ -170,6 +170,13 @@ ENV CURL_VERSION="8.20.0"
 
 # Must match the confluent-kafka pin in agent_requirements.in.
 # build_wheels.py asserts these stay in sync at wheel-build time.
+#
+# Bump checklist (update all in lockstep):
+#   1. agent_requirements.in            confluent-kafka==X.Y.Z
+#   2. ENV CONFLUENT_KAFKA_VERSION      this line
+#   3. build_script.ps1                 -Hash for the librdkafka vX.Y.Z tarball
+#   4. build_script.ps1                 $desired_commit for vcpkg (only if upstream
+#                                       deps demand a newer toolchain)
 ENV CONFLUENT_KAFKA_VERSION="2.13.2"
 
 # Set up runner

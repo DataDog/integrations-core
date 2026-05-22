@@ -69,3 +69,11 @@ Copy-Item "${srcdir}\librdkafka.lib","${srcdir}\librdkafkacpp.lib" -Destination 
 New-Item -Path $includedir\librdkafka -ItemType Directory
 Copy-Item -Path ".\src\*" -Filter *.h -Destination $includedir\librdkafka
 
+# Free disk space before the layer is committed. The build outputs we ship live
+# in C:\bin, C:\lib, and C:\include. Everything else is intermediate. This must
+# happen in the same RUN as the build — a later layer cannot shrink bytes that
+# are already committed to an earlier one.
+Set-Location C:\
+Remove-Item -Recurse -Force C:\vcpkg -ErrorAction Continue
+Remove-Item -Recurse -Force C:\librdkafka -ErrorAction Continue
+Remove-Item -Force "C:\librdkafka-${kafka_version}.tar" -ErrorAction Continue
