@@ -73,7 +73,6 @@ def dd_environment(instance, dd_save_state):
             connect_timeout=2,
             appliance_ips={'exclude': [f'{EXCLUDED_APPLIANCE_IP}/32']},
         )
-        dd_save_state('e2e_instance', inst)
 
         with docker_run(
             compose_file=COMPOSE_FILE,
