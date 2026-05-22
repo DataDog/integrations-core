@@ -48,6 +48,7 @@ def instance_query_metrics():
         full_statement_text_cache_max_size=10000,
         full_statement_text_samples_per_hour_per_query=1,
         run_sync=False,
+        use_v2=False,
     )
 
 
