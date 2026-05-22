@@ -226,20 +226,28 @@ def test_schema_collector_skips_inaccessible_database(aggregator):
     assert len(skipped_metrics) == 1
     assert skipped_metrics[0].value == 1
 
+    time_metrics = aggregator.metrics(f"dd.{check.dbms}.schema.time")
+    assert any("status:partial" in m.tags for m in time_metrics)
+
 
 @pytest.mark.unit
-def test_schema_collector_all_databases_skipped_emits_no_payload(aggregator):
-    """When every database is skipped, no payload is emitted."""
+def test_schema_collector_all_databases_skipped(aggregator):
+    """When every database is skipped, a terminal payload is still emitted and status is partial."""
     check = TestDatabaseCheck()
     collector = TestSchemaCollectorAllFailing(check, SchemaCollectorConfig())
     collector.collect_schemas()
 
     events = aggregator.get_event_platform_events("dbm-metadata")
-    assert len(events) == 0
+    assert len(events) == 1
+    assert events[0]['metadata'] == []
+    assert events[0]['collection_payloads_count'] == 1
 
     skipped_metrics = aggregator.metrics(f"dd.{check.dbms}.schema.skipped_databases_count")
     assert len(skipped_metrics) == 1
     assert skipped_metrics[0].value == 2
+
+    time_metrics = aggregator.metrics(f"dd.{check.dbms}.schema.time")
+    assert any("status:partial" in m.tags for m in time_metrics)
 
 
 @pytest.mark.unit

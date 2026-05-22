@@ -70,8 +70,9 @@ class SchemaCollector(ABC):
             self._log.debug("Collecting schemas for %d databases", len(databases))
             for database in databases:
                 self._collect_database_schemas(database)
-            if self._queued_rows or self._collection_payloads_count > 0:
-                self.maybe_flush(is_last_payload=True)
+            if self._skipped_databases_count > 0:
+                status = "partial"
+            self.maybe_flush(is_last_payload=True)
         except Exception as e:
             status = "error"
             self._log.error("Error collecting schema: %s", e)
