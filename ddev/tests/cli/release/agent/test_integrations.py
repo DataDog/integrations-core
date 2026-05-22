@@ -2,10 +2,15 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+from types import SimpleNamespace
 
 import pytest
 
-from ddev.cli.release.agent.common import agent_version_in_range
+from ddev.cli.release.agent.common import (
+    UNRELEASED_INTEGRATIONS_CONFIG,
+    agent_version_in_range,
+    get_unreleased_integrations,
+)
 
 
 def test_integrations_without_arguments(fake_integrations, ddev):
@@ -55,11 +60,37 @@ def test_integrations_since_to(fake_integrations, ddev):
     assert result.output.rstrip('\n') == expected_output.strip('\n')
 
 
-def test_agent_version_in_range_is_inclusive():
-    assert agent_version_in_range('7.78.0', '7.74.0..7.78.0')
-    assert agent_version_in_range('7.74.0', '7.74.0..7.78.0')
-    assert agent_version_in_range('7.77.0', '7.74.0..7.78.0')
-    assert not agent_version_in_range('7.79.0', '7.74.0..7.78.0')
+@pytest.mark.parametrize(
+    ('version', 'expected'),
+    [
+        pytest.param('7.74.0', True, id='lower-bound-inclusive'),
+        pytest.param('7.78.0', True, id='upper-bound-inclusive'),
+        pytest.param('7.77.0', True, id='middle'),
+        pytest.param('7.73.0', False, id='below-range'),
+        pytest.param('7.79.0', False, id='above-range'),
+    ],
+)
+def test_agent_version_in_range_is_inclusive(version, expected):
+    assert agent_version_in_range(version, '7.74.0..7.78.0') is expected
+
+
+def test_agent_version_in_range_raises_on_malformed_range():
+    with pytest.raises(ValueError, match="Invalid version range '7.74.0'"):
+        agent_version_in_range('7.74.0', '7.74.0')
+
+
+def test_get_unreleased_integrations_combines_both_keys():
+    config_data = {
+        'by-integration': {'datadog-bar': ['7.78.0']},
+        'by-agent-version-range': {'7.74.0..7.78.0': ['datadog-foo']},
+    }
+    repo = SimpleNamespace(
+        config=SimpleNamespace(
+            get=lambda key, default=None: config_data if key == UNRELEASED_INTEGRATIONS_CONFIG else default,
+        )
+    )
+
+    assert get_unreleased_integrations(repo, '7.78.0') == {'bar', 'foo'}
 
 
 def test_integrations_skips_unreleased_integrations(repo_with_history, config_file, ddev, write_repo_config):

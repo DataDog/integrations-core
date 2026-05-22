@@ -1,0 +1,1 @@
+Skip integrations pinned in Agent release requirements but not actually shipped in a given Agent release, configurable under `[overrides.release.agent.unreleased-integrations]` in `.ddev/config.toml`.

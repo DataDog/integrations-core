@@ -62,7 +62,7 @@ def repo_with_history(tmp_path_factory):
 def write_repo_config() -> Callable[[Path, str], None]:
     def write_config(repo_path: Path, contents: str) -> None:
         config_dir = repo_path / '.ddev'
-        config_dir.mkdir()
+        config_dir.mkdir(exist_ok=True)
         (config_dir / 'config.toml').write_text(contents)
 
     return write_config

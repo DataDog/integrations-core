@@ -74,9 +74,6 @@ def get_changes_per_agent(repo: Repository, since: str, to: str) -> AgentChangel
         file_contents = repo.git.show_file(req_file_name, agent_tags[i])
         catalog_prev = parse_agent_req_file(file_contents)
 
-        # at some point in the git history, the requirements file erroneously
-        # contained the folder name instead of the package name for each check,
-        # let's be resilient by normalizing all entries to be folder names
         catalog_now = exclude_unreleased_integrations(repo, normalize_catalog(catalog_now), current_tag)
         catalog_prev = exclude_unreleased_integrations(repo, normalize_catalog(catalog_prev), agent_tags[i])
 
@@ -95,19 +92,20 @@ def get_changes_per_agent(repo: Repository, since: str, to: str) -> AgentChangel
     return changes_per_agent
 
 
+# at some point in the git history, the requirements file erroneously
+# contained the folder name instead of the package name for each check,
+# let's be resilient by normalizing all entries to be folder names
 def normalize_catalog(catalog: dict[str, str]) -> dict[str, str]:
     return {normalize_package_name(k): v for k, v in catalog.items()}
 
 
 def exclude_unreleased_integrations(repo: Repository, catalog: dict[str, str], agent_version: str) -> dict[str, str]:
-    if skipped_integrations := get_unreleased_integrations(repo, agent_version):
-        return {
-            name: version
-            for name, version in catalog.items()
-            if normalize_package_name(name) not in skipped_integrations
-        }
-    else:
+    skipped_integrations = get_unreleased_integrations(repo, agent_version)
+    if not skipped_integrations:
         return catalog
+    return {
+        name: version for name, version in catalog.items() if normalize_package_name(name) not in skipped_integrations
+    }
 
 
 def get_unreleased_integrations(repo: Repository, agent_version: str) -> set[str]:
@@ -128,7 +126,14 @@ def get_unreleased_integrations(repo: Repository, agent_version: str) -> set[str
 def agent_version_in_range(agent_version: str, version_range: str) -> bool:
     from packaging.version import parse as parse_version
 
-    start, end = version_range.split('..', 1)
+    parts = version_range.split('..', 1)
+    if len(parts) != 2:
+        raise ValueError(
+            f"Invalid version range {version_range!r} in "
+            f"{UNRELEASED_INTEGRATIONS_CONFIG}/by-agent-version-range; "
+            "expected format: 'START..END'"
+        )
+    start, end = parts
     version = parse_version(agent_version)
     start_version = parse_version(start)
     end_version = parse_version(end)
