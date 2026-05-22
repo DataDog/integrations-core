@@ -82,9 +82,11 @@ def dd_environment(dd_save_state):
 
 @pytest.fixture(scope='session')
 def instance(dd_get_state):
-    return dd_get_state(
+    # Phase 2 MVP POC opt-in (see RFC 2026-02-11): exercise HTTPXWrapper end-to-end.
+    base_instance = dd_get_state(
         'kuma_instance',
         default={
             'openmetrics_endpoint': 'http://localhost:5680/metrics',
         },
     )
+    return {**base_instance, 'use_httpx': True}

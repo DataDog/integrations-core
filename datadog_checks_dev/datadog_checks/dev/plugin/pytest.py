@@ -297,9 +297,25 @@ def mock_response():
 
 @pytest.fixture
 def mock_http_response(mocker, mock_response):
-    yield lambda *args, **kwargs: mocker.patch(
-        kwargs.pop('method', _DEFAULT_MOCK_METHOD), return_value=mock_response(*args, **kwargs)
-    )
+    """Patch the default HTTP entry-point to return a ``MockHTTPResponse``.
+
+    Patches ``requests.Session.get`` by default. When ``method`` is the default,
+    we also patch ``httpx.Client.send`` so that checks opting into the Phase 2
+    HTTPXWrapper via ``use_httpx=true`` are intercepted by the same fixture.
+    """
+
+    def _patch(*args, **kwargs):
+        method = kwargs.pop('method', _DEFAULT_MOCK_METHOD)
+        response = mock_response(*args, **kwargs)
+        primary = mocker.patch(method, return_value=response)
+        if method == _DEFAULT_MOCK_METHOD:
+            try:
+                mocker.patch('httpx.Client.request', return_value=response)
+            except (ImportError, AttributeError, ModuleNotFoundError):
+                pass
+        return primary
+
+    yield _patch
 
 
 @pytest.fixture

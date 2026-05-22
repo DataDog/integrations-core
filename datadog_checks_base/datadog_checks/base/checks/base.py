@@ -412,10 +412,18 @@ class AgentCheck(object):
         Only new checks or checks on Agent 6.13+ can and should use this for HTTP requests.
         """
         if not hasattr(self, '_http'):
-            # See Performance Optimizations in this package's README.md.
-            from datadog_checks.base.utils.http import RequestsWrapper
+            instance = self.instance or {}
+            if is_affirmative(instance.get('use_httpx', False)):
+                # Per Phase 2 MVP D4: an ImportError surfaces at construction
+                # time if httpx is not installed.
+                from datadog_checks.base.utils.http_httpx import HTTPXWrapper
 
-            self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
+                self._http = HTTPXWrapper(instance, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
+            else:
+                # See Performance Optimizations in this package's README.md.
+                from datadog_checks.base.utils.http import RequestsWrapper
+
+                self._http = RequestsWrapper(instance, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
         return self._http
 
