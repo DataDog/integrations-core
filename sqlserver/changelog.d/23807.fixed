@@ -1,1 +1,1 @@
-Skip inaccessible databases during DBM schema collection instead of aborting collection for all databases. Databases that cannot be opened (e.g. an older on-disk format mounted on a newer SQL Server instance) are now skipped with a warning and counted in the `dd.sqlserver.schema.skipped_databases_count` metric.
+Skip inaccessible databases during DBM schema collection instead of aborting collection for all databases. Databases that cannot be opened are now skipped with a warning.

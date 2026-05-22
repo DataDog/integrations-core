@@ -94,9 +94,7 @@ class SQLServerSchemaCollector(SchemaCollector):
         return "sqlserver_databases"
 
     def _is_connection_error(self, e: Exception) -> bool:
-        """Return True only for pyodbc database-level errors.
-
-        This prevents internal errors (e.g. uninitialized pre-2017 cursor, logic bugs in _map_row)
+        """Return True only for pyodbc database-level errors, preventing internal errors
         from being silently classified as per-database skips.
         """
         try:

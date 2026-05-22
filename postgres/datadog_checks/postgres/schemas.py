@@ -202,12 +202,14 @@ class PostgresSchemaCollector(SchemaCollector):
         return "pg_databases"
 
     def _is_connection_error(self, e: Exception) -> bool:
-        """Return True only for psycopg database-level errors."""
+        """Return True only for psycopg operational errors, preventing internal errors
+        from being silently classified as per-database skips.
+        """
         try:
             import psycopg
         except ImportError:
             return True
-        return isinstance(e, psycopg.Error)
+        return isinstance(e, psycopg.OperationalError)
 
     def _get_databases(self):
         query = DATABASE_INFORMATION_QUERY
