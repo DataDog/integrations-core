@@ -68,17 +68,18 @@ def agent_reqs(check):
     if unreleased_checks:
         joined_checks = ', '.join(unreleased_checks)
         echo_warning(f"{len(unreleased_checks)} unreleased checks: {joined_checks}")
-    stale_released_checks = find_stale_released_checks(agent_reqs_content)
-    if stale_released_checks:
-        failed_checks += len(stale_released_checks)
-        for package_name in stale_released_checks:
-            folder_name = get_folder_name(package_name)
-            message = (
-                f"{package_name} is pinned in requirements-agent-release.txt "
-                f"but `{folder_name}` is not present in the repo"
-            )
-            echo_failure(message)
-            annotate_error(release_requirements_file, message)
+    if check is None or check.lower() == 'all':
+        stale_released_checks = find_stale_released_checks(agent_reqs_content)
+        if stale_released_checks:
+            failed_checks += len(stale_released_checks)
+            for package_name in stale_released_checks:
+                folder_name = get_folder_name(package_name)
+                message = (
+                    f"{package_name} is pinned in requirements-agent-release.txt "
+                    f"but `{folder_name}` is not present in the repo"
+                )
+                echo_failure(message)
+                annotate_error(release_requirements_file, message)
     if failed_checks:
         echo_failure(f"{failed_checks} checks out of sync")
         abort()

@@ -47,6 +47,17 @@ def test_validate_agent_reqs_passes_when_every_entry_has_a_folder(isolated_root)
     assert 'pinned in requirements-agent-release.txt' not in result.output
 
 
+def test_validate_agent_reqs_does_not_report_stale_entries_when_scoped_to_a_check(isolated_root):
+    write_check('foo', '1.0.0')
+    with open('requirements-agent-release.txt', 'w', encoding='utf-8') as f:
+        f.write('# DO NOT PASS THIS TO PIP DIRECTLY\ndatadog-foo==1.0.0\ndatadog-snowflake==7.13.0\n')
+
+    result = isolated_root.invoke(agent_reqs, ['foo'])
+
+    assert result.exit_code == 0
+    assert 'datadog-snowflake is pinned' not in result.output
+
+
 def write_check(name: str, version: str) -> None:
     """Create the minimum check structure needed by agent-reqs."""
     check_package = os.path.join(name, 'datadog_checks', name)
