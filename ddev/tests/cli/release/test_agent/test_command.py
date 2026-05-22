@@ -107,6 +107,65 @@ def test_dry_run_does_not_dispatch(ddev: CliRunner, fake_async_github: FakeAsync
     assert 'Dry run' in result.output
 
 
+def test_monitor_invokes_workflow_monitor(
+    ddev: CliRunner,
+    mocker: MockerFixture,
+    fake_async_github: FakeAsyncGitHubClient,
+) -> None:
+    monitor = mocker.patch('ddev.cli.release.test_agent.monitoring.monitor_dispatched_workflows', return_value=None)
+
+    result = ddev('release', 'test-agent', '--branch', '7.80.x', '--yes', '--monitor')
+
+    assert result.exit_code == 0, result.output
+    monitor.assert_called_once()
+    _, token = monitor.call_args.args
+    assert token == 'ghp_test'
+    workflows = monitor.call_args.kwargs['workflows']
+    assert monitor.call_args.kwargs['poll_interval'] == 10.0
+    assert [workflow.label for workflow in workflows] == ['Linux', 'Windows']
+    assert [workflow.html_url for workflow in workflows] == [DEFAULT_DISPATCH_HTML_URL, DEFAULT_DISPATCH_HTML_URL]
+    assert 'Workflows dispatched' not in result.output
+    assert DEFAULT_DISPATCH_HTML_URL not in result.output
+
+
+def test_monitor_uses_requested_poll_interval(
+    ddev: CliRunner,
+    mocker: MockerFixture,
+    fake_async_github: FakeAsyncGitHubClient,
+) -> None:
+    monitor = mocker.patch('ddev.cli.release.test_agent.monitoring.monitor_dispatched_workflows', return_value=None)
+
+    result = ddev(
+        'release',
+        'test-agent',
+        '--branch',
+        '7.80.x',
+        '--yes',
+        '--monitor',
+        '--poll-interval',
+        '15',
+    )
+
+    assert result.exit_code == 0, result.output
+    assert monitor.call_args.kwargs['poll_interval'] == 15.0
+
+
+def test_monitor_error_aborts_command(
+    ddev: CliRunner,
+    mocker: MockerFixture,
+    fake_async_github: FakeAsyncGitHubClient,
+) -> None:
+    mocker.patch(
+        'ddev.cli.release.test_agent.monitoring.monitor_dispatched_workflows',
+        side_effect=RuntimeError('GitHub API unavailable'),
+    )
+
+    result = ddev('release', 'test-agent', '--branch', '7.80.x', '--yes', '--monitor')
+
+    assert result.exit_code != 0, result.output
+    assert 'Failed to monitor workflows: GitHub API unavailable' in result.output
+
+
 def test_branch_with_no_rcs_aborts(
     ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
 ) -> None:

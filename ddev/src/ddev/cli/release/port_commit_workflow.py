@@ -695,7 +695,7 @@ def resolve_port_plan(
         dry_run=dry_run,
     )
 
-    app.output(_format_plan_summary(plan), stderr=True)
+    app.output(_format_plan_summary(app, plan), stderr=True)
 
     if not dry_run and not click.confirm('Continue?'):
         app.abort('Did not get confirmation, aborting.')
@@ -705,7 +705,6 @@ def resolve_port_plan(
 
 def display_completion_summary(app: Application, plan: PortPlan, *, pr_url: str | None) -> None:
     """Print a panel summarising the port outcome."""
-    text = Text()
     rows: list[tuple[str, str]] = [
         ('Commit', f'{plan.full_sha[:10]} - {plan.clean_subject}'),
         ('Target', plan.target_branch),
@@ -714,17 +713,13 @@ def display_completion_summary(app: Application, plan: PortPlan, *, pr_url: str 
     if pr_url is not None:
         rows.append(('Pull request', pr_url))
 
-    label_width = max(len(label) for label, _ in rows)
-    for i, (label, value) in enumerate(rows):
-        if i:
-            text.append('\n')
-        text.append(f'{label}:'.ljust(label_width + 2), style='bold')
-        text.append(value)
-
-    app.output(Panel(text, title='Backport completed', title_align='left', border_style='cyan'), stderr=True)
+    app.output(
+        Panel(app.labeled_lines(rows), title='Backport completed', title_align='left', border_style='cyan'),
+        stderr=True,
+    )
 
 
-def _format_plan_summary(plan: PortPlan) -> Text:
+def _format_plan_summary(app: Application, plan: PortPlan) -> Text:
     text = Text()
     text.append('Configuration:', style='bold')
 
@@ -739,10 +734,8 @@ def _format_plan_summary(plan: PortPlan) -> Text:
         ('Verify commit', str(plan.verify)),
         ('Dry run', str(plan.dry_run)),
     ]
-    for label, value in rows:
-        text.append('\n  ')
-        text.append(f'{label}:', style='bold')
-        text.append(f' {value}')
+    text.append('\n')
+    text.append_text(app.labeled_lines(rows, indent='  ', align=False))
     return text
 
 

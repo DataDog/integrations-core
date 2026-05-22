@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import asyncio
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from ddev.cli.release.test_agent.validation import WORKFLOW_LINUX, WORKFLOW_WINDOWS
@@ -26,8 +27,18 @@ REPO_OWNER = 'DataDog'
 REPO_NAME = 'integrations-core'
 
 
-def dispatch_both(token: str, *, ref: str, inputs: dict[str, str]) -> tuple[str, str]:
-    """Dispatch both workflows in parallel via the async GitHub client. Returns (linux_url, windows_url)."""
+@dataclass(frozen=True)
+class DispatchedWorkflow:
+    """A workflow run created by `ddev release test-agent`."""
+
+    label: str
+    workflow_id: str
+    run_id: int
+    html_url: str
+
+
+def dispatch_both(token: str, *, ref: str, inputs: dict[str, str]) -> tuple[DispatchedWorkflow, DispatchedWorkflow]:
+    """Dispatch both workflows in parallel via the async GitHub client."""
     from ddev.utils.github_async import async_github_client
 
     async def run_dispatches() -> Sequence[DispatchOutcome]:
@@ -52,11 +63,11 @@ def dispatch_both(token: str, *, ref: str, inputs: dict[str, str]) -> tuple[str,
                 return_exceptions=True,
             )
 
-    return extract_run_urls(asyncio.run(run_dispatches()))
+    return extract_dispatched_workflows(asyncio.run(run_dispatches()))
 
 
-def extract_run_urls(results: Sequence[DispatchOutcome]) -> tuple[str, str]:
-    """Pull html_urls out of two gather results, raising on any exception with a partial-success hint.
+def extract_dispatched_workflows(results: Sequence[DispatchOutcome]) -> tuple[DispatchedWorkflow, DispatchedWorkflow]:
+    """Pull workflow runs out of two gather results, raising on any exception with a partial-success hint.
 
     `asyncio.gather(return_exceptions=True)` captures `CancelledError`/`KeyboardInterrupt`
     (`BaseException` subclasses, not `Exception`) into its result list. Re-raise those first
@@ -84,4 +95,17 @@ def extract_run_urls(results: Sequence[DispatchOutcome]) -> tuple[str, str]:
             f'Windows dispatch failed: {windows_result}. The other workflow was dispatched at {sibling}.'
         ) from windows_result
 
-    return linux_result.data.html_url, windows_result.data.html_url
+    return (
+        DispatchedWorkflow(
+            label='Linux',
+            workflow_id=WORKFLOW_LINUX,
+            run_id=linux_result.data.workflow_run_id,
+            html_url=linux_result.data.html_url,
+        ),
+        DispatchedWorkflow(
+            label='Windows',
+            workflow_id=WORKFLOW_WINDOWS,
+            run_id=windows_result.data.workflow_run_id,
+            html_url=windows_result.data.html_url,
+        ),
+    )

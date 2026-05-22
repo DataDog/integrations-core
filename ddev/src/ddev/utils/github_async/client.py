@@ -21,6 +21,7 @@ from .models import (
     PullRequest,
     PullRequestReviewComment,
     WorkflowDispatchResult,
+    WorkflowJobsList,
     WorkflowRun,
 )
 
@@ -280,6 +281,34 @@ class AsyncGitHubClient:
         endpoint = f"/repos/{owner}/{repo}/actions/runs/{run_id}/artifacts"
         async for response in self._paginated_request("GET", endpoint, timeout=timeout, params={"per_page": per_page}):
             yield self._parse_response(response, ArtifactsList)
+
+    async def list_workflow_run_jobs(
+        self,
+        owner: str,
+        repo: str,
+        run_id: int,
+        per_page: int = 30,
+        timeout: float | None = None,
+    ) -> AsyncIterator[GitHubResponse[WorkflowJobsList]]:
+        """
+        Calls the GitHub API to list jobs for a workflow run (paginated).
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/actions/workflow-jobs#list-jobs-for-a-workflow-run
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            run_id: Numeric ID of the workflow run.
+            per_page: Number of jobs per page (default 30, max 100).
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+
+        Returns:
+            AsyncIterator[GitHubResponse[WorkflowJobsList]]: One page of jobs per iteration.
+        """
+        endpoint = f"/repos/{owner}/{repo}/actions/runs/{run_id}/jobs"
+        async for response in self._paginated_request("GET", endpoint, timeout=timeout, params={"per_page": per_page}):
+            yield self._parse_response(response, WorkflowJobsList)
 
     async def create_issue_comment(
         self,

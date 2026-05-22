@@ -42,7 +42,7 @@ from typing import Any
 import httpx
 
 from ddev.utils.github_async import GitHubResponse
-from ddev.utils.github_async.models import Label, PullRequest, WorkflowDispatchResult
+from ddev.utils.github_async.models import Label, PullRequest, WorkflowDispatchResult, WorkflowJobsList, WorkflowRun
 
 # Stable URL baked into the default `create_workflow_dispatch` response. Exported so tests
 # that assert on the URL can reference the helper rather than duplicating the literal.
@@ -88,6 +88,20 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
                 run_url='https://api.github.com/repos/test/repo/actions/runs/1',
                 html_url=DEFAULT_DISPATCH_HTML_URL,
             ),
+            headers={},
+        ),
+        'get_workflow_run': lambda: GitHubResponse(
+            data=WorkflowRun(
+                id=1,
+                name='test-agent',
+                status='completed',
+                conclusion='success',
+                html_url=DEFAULT_DISPATCH_HTML_URL,
+            ),
+            headers={},
+        ),
+        'list_workflow_run_jobs': lambda: GitHubResponse(
+            data=WorkflowJobsList(total_count=0, jobs=[]),
             headers={},
         ),
     }
@@ -226,6 +240,38 @@ class FakeAsyncGitHubClient:
             inputs=inputs,
             timeout=timeout,
             return_run_details=return_run_details,
+        )
+
+    async def get_workflow_run(
+        self,
+        owner: str,
+        repo: str,
+        run_id: int,
+        timeout: float | None = None,
+    ) -> GitHubResponse[Any]:
+        return self._call(
+            'get_workflow_run',
+            owner=owner,
+            repo=repo,
+            run_id=run_id,
+            timeout=timeout,
+        )
+
+    async def list_workflow_run_jobs(
+        self,
+        owner: str,
+        repo: str,
+        run_id: int,
+        per_page: int = 30,
+        timeout: float | None = None,
+    ):
+        yield self._call(
+            'list_workflow_run_jobs',
+            owner=owner,
+            repo=repo,
+            run_id=run_id,
+            per_page=per_page,
+            timeout=timeout,
         )
 
     async def aclose(self) -> None:
