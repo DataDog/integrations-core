@@ -4,10 +4,10 @@
 
 This check monitors [n8n][1] through the Datadog Agent.
 
-Collect n8n metrics including:
+This integration collects n8n metrics including:
 - Cache metrics: hit, miss, and update counts.
-- Workflow metrics: started, success, failed counters, audit workflow lifecycle counters; in n8n 2.x, an execution-duration histogram.
-- Node metrics: per-node started and finished counters emitted by worker processes in queue mode.
+- Workflow metrics: started, success, and failed counters. Audit workflow life cycle counters. In n8n 2.x, an execution-duration histogram.
+- Node metrics: per-node counters (started and finished) emitted by worker processes in queue mode.
 - Queue metrics: queue depth; enqueued, dequeued, completed, failed, and stalled counters; and scaling-mode worker gauges.
 - HTTP metrics: request duration histograms tagged with status code.
 - Process and Node.js runtime metrics.
@@ -15,7 +15,7 @@ Collect n8n metrics including:
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery integration templates][3] for guidance on applying these instructions.
 
 ### Installation
 
@@ -26,7 +26,7 @@ No additional installation is needed on your server.
 
 #### Enable the n8n metrics endpoint
 
-The `/metrics` endpoint is disabled by default and must be enabled in your n8n configuration. Note that the `/metrics` endpoint is only available for self-hosted instances and is not available on n8n Cloud.
+The `/metrics` endpoint is disabled by default and must be enabled in your n8n configuration. **Note**: The `/metrics` endpoint is only available for self-hosted instances and is not available on n8n Cloud.
 
 Set the following environment variables to enable metrics:
 
@@ -51,7 +51,7 @@ N8N_METRICS_PREFIX=n8n_
 
 For more details, see the n8n documentation on [enabling Prometheus metrics][10].
 
-If you change `N8N_METRICS_PREFIX` from its default of `n8n_`, you **must** also set `raw_metric_prefix` in the integration's `conf.yaml` to the same value. Otherwise the check will not recognize the exposed metric names and will silently submit nothing:
+If you change `N8N_METRICS_PREFIX` from its default of `n8n_`, you **must** also set `raw_metric_prefix` in the integration's `conf.yaml` to the same value. Otherwise the check does not recognize the exposed metric names and silently submits nothing:
 
 ```yaml
 instances:
@@ -63,12 +63,12 @@ instances:
 
 Most n8n counters are registered dynamically the first time their underlying event fires. The integration ships mappings for around 70 of these event-bus counters, including:
 
-- Workflow lifecycle: `n8n.workflow.started.count`, `n8n.workflow.success.count`, `n8n.workflow.failed.count`, `n8n.workflow.cancelled.count`
+- Workflow life cycle: `n8n.workflow.started.count`, `n8n.workflow.success.count`, `n8n.workflow.failed.count`, `n8n.workflow.cancelled.count`
 - Audit (workflow, user, credentials, package, variable, execution data): `n8n.audit.workflow.executed.count`, `n8n.audit.user.login.success.count`, `n8n.audit.user.credentials.created.count`, and similar
 - AI nodes: `n8n.ai.tool.called.count`, `n8n.ai.llm.generated.count`, `n8n.ai.vector.store.searched.count`, and similar
-- Runner, queue, and node lifecycle: `n8n.runner.task.requested.count`, `n8n.queue.job.completed.count`, `n8n.node.started.count`, `n8n.node.finished.count`
+- Runner, queue, and node life cycle: `n8n.runner.task.requested.count`, `n8n.queue.job.completed.count`, `n8n.node.started.count`, `n8n.node.finished.count`
 
-These counters do not appear on the `/metrics` endpoint until the corresponding event has occurred. A healthy idle deployment will not produce data points for them until that activity fires. The complete list is in [`metadata.csv`][7].
+These counters do not appear on the `/metrics` endpoint until the corresponding event has occurred. A healthy idle deployment does not produce datapoints for them until that activity fires. The complete list is in [`metadata.csv`][7].
 
 If a future n8n release exposes a new event-driven counter that is not yet covered by this integration, add it to the `extra_metrics` option in your instance configuration:
 
@@ -85,7 +85,9 @@ The left-hand side is the Prometheus counter name as n8n exposes it (keep the `_
 
 In queue mode, n8n runs separate worker processes that execute jobs picked up from a Redis-backed queue. Each worker exposes its own `/metrics` endpoint and emits a different subset of metrics than the main process. Worker-observed metrics include `n8n.queue.job.dequeued.count`, `n8n.queue.job.stalled.count`, `n8n.node.started.count`, `n8n.node.finished.count`, and `n8n.runner.task.requested.count`. Main-only metrics include `n8n.instance.role.leader` and the `n8n.scaling.mode.queue.jobs.*` family.
 
-To expose worker metrics, set `QUEUE_HEALTH_CHECK_ACTIVE=true` and `QUEUE_HEALTH_CHECK_PORT=<port>` on each worker. **In n8n 2.x, port `5679` is reserved for the task runner broker, so pick a different port (for example `5680`).**
+To expose worker metrics, set `QUEUE_HEALTH_CHECK_ACTIVE=true` and `QUEUE_HEALTH_CHECK_PORT=<port>` on each worker.
+
+**Note**: In n8n 2.x, port `5679` is reserved for the task runner broker. Pick a different port (for example `5680`).
 
 For full coverage in queue deployments, configure one Datadog instance per n8n process exposing `/metrics`, including main and worker processes:
 
@@ -107,11 +109,11 @@ Several metric families were introduced in n8n 2.x and are not emitted on n8n 1.
 - The `n8n.{production,manual,production.root}.executions`, `n8n.users.total`, `n8n.enabled.users`, `n8n.workflows.total`, and `n8n.credentials.total` family. Only emitted when `N8N_METRICS_INCLUDE_WORKFLOW_STATISTICS=true` is set.
 - The `n8n.expression.*` family (`evaluation.duration.seconds`, `code.cache.{hit,miss,eviction,size}`, `pool.{acquired,replenish.failed,scaled.up,scaled.to.zero}`). Only emitted when n8n is running the new VM-isolated expression engine *and* observability for it is on. Set `N8N_EXPRESSION_ENGINE=vm` and `N8N_EXPRESSION_ENGINE_OBSERVABILITY_ENABLED=true` on the n8n process; both default to off (the engine defaults to `legacy`). These metrics surface the per-expression evaluation latency, the compiled-expression LRU cache hit and miss rates, and the V8-isolate pool's idle scaling behavior. They are most useful for troubleshooting workflow latency that traces back to slow `{{ ... }}` evaluation.
 
-Some metrics only emit samples after the corresponding runtime event occurs. For example, failures-only counters (`*.failures.count`) need an authentication failure, audit workflow counters need the matching workflow state transition, and the libuv `n8n.nodejs.active.requests` gauge needs an in-flight libuv request. A healthy idle deployment may not produce data points for these metrics until that activity occurs.
+Some metrics only emit samples after the corresponding runtime event occurs. For example, failures-only counters (`*.failures.count`) need an authentication failure, audit workflow counters need the matching workflow state transition, and the libuv `n8n.nodejs.active.requests` gauge needs an in-flight libuv request. A healthy idle deployment may not produce datapoints for these metrics until that activity occurs.
 
 #### Tag cardinality
 
-When `N8N_METRICS_INCLUDE_WORKFLOW_ID_LABEL=true`, http and workflow execution histograms are tagged with `workflow_id` (and similar labels for nodes). On deployments with many distinct workflows or nodes, this can produce high-cardinality metrics. Drop the label via `exclude_labels` or omit `N8N_METRICS_INCLUDE_WORKFLOW_ID_LABEL` to keep tag cardinality bounded.
+When `N8N_METRICS_INCLUDE_WORKFLOW_ID_LABEL=true`, http and workflow execution histograms are tagged with `workflow_id` (and similar labels for nodes). On deployments with many distinct workflows or nodes, this can produce high-cardinality metrics. Drop the label through `exclude_labels` or omit `N8N_METRICS_INCLUDE_WORKFLOW_ID_LABEL` to keep tag cardinality bounded.
 
 #### Configure the Datadog Agent
 
@@ -121,7 +123,7 @@ When `N8N_METRICS_INCLUDE_WORKFLOW_ID_LABEL=true`, http and workflow execution h
 
 ### Log collection
 
-_Available for Agent versions >6.0_
+**Note**: Available for Agent versions 6.0 and later.
 
 #### Enable n8n logging
 
@@ -212,7 +214,7 @@ Each event contains rich metadata including `executionId`, `workflowId`, `workfl
 
 [Run the Agent's status subcommand][6] and look for `n8n` under the Checks section.
 
-## Data collected
+## Data Collected
 
 ### Metrics
 
