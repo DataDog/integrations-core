@@ -505,6 +505,10 @@ services:
   paths:
   - litellm/datadog_checks/litellm/
   - litellm/tests/
+- id: lparstats
+  paths:
+  - lparstats/datadog_checks/lparstats/
+  - lparstats/tests/
 - id: lustre
   paths:
   - lustre/datadog_checks/lustre/
@@ -577,6 +581,10 @@ services:
   paths:
   - nginx_ingress_controller/datadog_checks/nginx_ingress_controller/
   - nginx_ingress_controller/tests/
+- id: nifi
+  paths:
+  - nifi/datadog_checks/nifi/
+  - nifi/tests/
 - id: nutanix
   paths:
   - nutanix/datadog_checks/nutanix/
