@@ -824,8 +824,8 @@ class AgentCheck(object):
         Runs the producer contract: redact -> deterministic JSON encode -> size
         check -> proto serialize -> dispatch via ``event_platform_event``. Drops
         with a warning + ``dropped`` counter on size overrun or serialization
-        failure. REDAPL is the schema authority; this producer does not
-        validate field names locally.
+        failure. The downstream intake is the schema authority; this producer
+        does not validate field names locally.
 
         ``redact`` is a required mapping ``{"paths": [...], "annotation_keys": [...]}``
         that the integration owns. To explicitly skip redaction, pass empty

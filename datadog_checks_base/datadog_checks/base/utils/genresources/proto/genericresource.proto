@@ -1,8 +1,9 @@
 syntax = "proto3";
 
-// Public-repo-safe wire envelope for the `genresources` event-platform track.
-// Field numbers preserved from upstream so bytes are wire-compatible with REDAPL.
-// Do not add fields without REDAPL eng approval.
+// Wire envelope for the `genresources` event-platform track.
+// Field numbers are preserved from the upstream schema so payloads remain
+// wire-compatible with the downstream resource intake.
+// Do not add fields without coordinating with the resource intake owners.
 
 package datadog.genresources.v1;
 
