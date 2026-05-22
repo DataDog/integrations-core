@@ -52,7 +52,7 @@ def test_flush_after_each_write(tmp_path):
     logger.close()
 
 
-def test_close_is_idempotent_and_prevents_further_writes(tmp_path):
+def test_close_is_idempotent_and_prevents_further_writes(tmp_path, caplog):
     log_path = tmp_path / "log.jsonl"
     logger = AgentLogger(log_path)
     logger.log_start(system_prompt="s", prompt="p", tools=[])
@@ -60,6 +60,26 @@ def test_close_is_idempotent_and_prevents_further_writes(tmp_path):
     logger.close()  # must not raise
     logger.log_finish(success=False)  # must not write
     assert len(read_events(log_path)) == 1
+    assert "dropping event 'finish'" in caplog.text
+
+
+def test_reopening_same_path_appends_start_run_delimiter(tmp_path):
+    log_path = tmp_path / "log.jsonl"
+
+    logger = AgentLogger(log_path)
+    logger.log_start(system_prompt="s", prompt="first", tools=[])
+    logger.log_finish(success=True)
+    logger.close()
+
+    logger = AgentLogger(log_path)
+    logger.log_start(system_prompt="s", prompt="second", tools=[])
+    logger.log_finish(success=True)
+    logger.close()
+
+    events = read_events(log_path)
+    assert [event["event"] for event in events] == ["start", "finish", "start", "finish"]
+    assert events[0]["prompt"] == "first"
+    assert events[2]["prompt"] == "second"
 
 
 def test_constructor_requires_existing_parent(tmp_path):

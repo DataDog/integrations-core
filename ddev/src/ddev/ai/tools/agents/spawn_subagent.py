@@ -38,6 +38,7 @@ class SpawnSubagentInput(BaseToolInput):
         str | None,
         Field(
             description=("Optional short human-readable name for the subagent."),
+            pattern=r"^$|^[A-Za-z0-9._-]{1,64}$",
         ),
     ] = None
 

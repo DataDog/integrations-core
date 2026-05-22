@@ -16,6 +16,7 @@ from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError
 from ddev.ai.phases.template import render_inline, render_prompt
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.tools.fs.file_registry import FileRegistry
+from ddev.ai.tools.registry import TOOL_MANIFEST
 
 
 def render_task_prompt(
@@ -77,6 +78,9 @@ class AgenticPhase(Phase):
         )
         self._agent_builder = agent_builder
         self._subagent_builder = subagent_builder
+        self._subagent_log_dir = (
+            checkpoint_manager.root / "subagents" / phase_id if subagent_builder is not None else None
+        )
 
     @classmethod
     def validate_config(
@@ -108,8 +112,12 @@ class AgenticPhase(Phase):
         agent_config = agents[phase_config.agent]
 
         subagent_builder = None
-        # TODO: generalize this dispatch if more agent-meta tools appear in tools/agents/.
-        if "spawn_subagent" in agent_config.tools:
+        requires_subagent_builder = any(
+            spec.requires_subagent_builder
+            for name in agent_config.tools
+            if (spec := TOOL_MANIFEST.get(name)) is not None
+        )
+        if requires_subagent_builder:
             subagent_builder = make_subagent_builder(
                 parent_agent_config=agent_config,
                 agent_clients=agent_clients,
@@ -162,11 +170,12 @@ class AgenticPhase(Phase):
             context,
             self._resolver,
         )
-        log_dir = None
-        if self._subagent_builder is not None:
-            log_dir = self._checkpoint_manager.root / "subagents" / self._phase_id
-
-        agent, tool_registry = self._agent_builder(system_prompt, self._phase_id, self._subagent_builder, log_dir)
+        agent, tool_registry = self._agent_builder(
+            system_prompt,
+            self._phase_id,
+            self._subagent_builder,
+            self._subagent_log_dir,
+        )
         process = ReActProcess(
             agent=agent,
             tool_registry=tool_registry,

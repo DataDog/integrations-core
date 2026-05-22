@@ -70,11 +70,13 @@ class ToolSpec:
     ``module`` is relative to the registry's package (e.g. ``"fs.read_file"``).
     ``factory`` receives the already-imported class and the shared ToolContext
     and returns a constructed tool instance.
+    ``requires_subagent_builder`` marks agentic tools that need subagent wiring.
     """
 
     module: str
     cls: str
     factory: Callable[[type, ToolContext], ToolProtocol] = _plain_factory
+    requires_subagent_builder: bool = False
 
 
 TOOL_MANIFEST: dict[str, ToolSpec] = {
@@ -94,7 +96,12 @@ TOOL_MANIFEST: dict[str, ToolSpec] = {
     "ddev_env_test": ToolSpec("shell.ddev.env_test", "DdevEnvTestTool"),
     "ddev_release_changelog": ToolSpec("shell.ddev.release_changelog", "DdevReleaseChangelogTool"),
     "ddev_validate": ToolSpec("shell.ddev.validate", "DdevValidateTool"),
-    "spawn_subagent": ToolSpec("agents.spawn_subagent", "SpawnSubagentTool", factory=_spawn_subagent_factory),
+    "spawn_subagent": ToolSpec(
+        "agents.spawn_subagent",
+        "SpawnSubagentTool",
+        factory=_spawn_subagent_factory,
+        requires_subagent_builder=True,
+    ),
 }
 
 
