@@ -80,19 +80,33 @@ def test_build_agent_uses_config_tools(file_registry, clients):
 # ---------------------------------------------------------------------------
 
 
-def test_build_subagent_creates_fresh_file_registry(policy, clients):
+def test_build_subagent_reuses_shared_file_registry(file_registry, clients):
     config = AgentConfig(provider="anthropic", tools=[])
-    caller_registry = FileRegistry(policy=policy)
-    _, reg_a = build_subagent(config, clients, policy, "sys", "a", [])
-    _, reg_b = build_subagent(config, clients, policy, "sys", "b", [])
-    assert reg_a is not reg_b
-    assert reg_a is not caller_registry
+    _, registry = build_subagent(config, clients, file_registry, "sys", "child", ["read_file", "edit_file"])
+
+    for tool in registry._tools.values():
+        assert tool._registry is file_registry
+        assert tool._owner_id == "child"
 
 
-def test_build_subagent_recursion_guard(policy, clients):
+def test_build_subagent_recursion_guard(file_registry, clients):
     config = AgentConfig.model_construct(provider="anthropic", tools=[])
     with pytest.raises(ValueError):
-        build_subagent(config, clients, policy, "sys", "sub", ["spawn_subagent"])
+        build_subagent(config, clients, file_registry, "sys", "sub", ["spawn_subagent"])
+
+
+async def test_shared_registry_does_not_share_parent_read_authorization(file_registry, clients, tmp_path):
+    config = AgentConfig(provider="anthropic", tools=[])
+    path = tmp_path / "file.txt"
+    path.write_text("before", encoding="utf-8")
+    file_registry.record("parent", str(path), "before")
+
+    _, registry = build_subagent(config, clients, file_registry, "sys", "parent.sub.001-child", ["edit_file"])
+    result = await registry.run("edit_file", {"path": str(path), "old_string": "before", "new_string": "after"})
+
+    assert result.success is False
+    assert "Not authorized" in result.error
+    assert path.read_text(encoding="utf-8") == "before"
 
 
 # ---------------------------------------------------------------------------
@@ -108,9 +122,9 @@ def test_make_agent_builder(file_registry, clients):
     assert agent.name == "p1"
 
 
-def test_make_subagent_builder(policy, clients):
+def test_make_subagent_builder(file_registry, clients):
     config = AgentConfig(provider="anthropic", tools=[])
-    builder = make_subagent_builder(config, clients, policy)
+    builder = make_subagent_builder(config, clients, file_registry)
     agent, registry = builder("sys", "sub-1", [])
     assert isinstance(agent, AnthropicAgent)
     assert agent.name == "sub-1"

@@ -121,7 +121,7 @@ class AgenticPhase(Phase):
             subagent_builder = make_subagent_builder(
                 parent_agent_config=agent_config,
                 agent_clients=agent_clients,
-                file_access_policy=file_registry.policy,
+                file_registry=file_registry,
             )
 
         return {

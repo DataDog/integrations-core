@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING, Any
 
 from ddev.ai.agent.anthropic_client import AnthropicAgent
 from ddev.ai.agent.base import BaseAgent
-from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.registry import ToolRegistry
 
@@ -95,12 +94,12 @@ def build_agent(
 def build_subagent(
     parent_agent_config: AgentConfig,
     agent_clients: dict[str, Any],
-    file_access_policy: FileAccessPolicy,
+    file_registry: FileRegistry,
     system_prompt: str,
     owner_id: str,
     tool_names: list[str],
 ) -> tuple[BaseAgent[Any], ToolRegistry]:
-    """Build a subagent + ToolRegistry. Always uses a fresh FileRegistry.
+    """Build a subagent + ToolRegistry using the shared FileRegistry.
 
     Reuses the parent's provider/model/max_tokens. No subagent_builder or
     log_dir is forwarded, so the subagent cannot recursively spawn subagents —
@@ -112,7 +111,7 @@ def build_subagent(
         system_prompt=system_prompt,
         owner_id=owner_id,
         tool_names=tool_names,
-        file_registry=FileRegistry(policy=file_access_policy),
+        file_registry=file_registry,
     )
 
 
@@ -145,7 +144,7 @@ def make_agent_builder(
 def make_subagent_builder(
     parent_agent_config: AgentConfig,
     agent_clients: dict[str, Any],
-    file_access_policy: FileAccessPolicy,
+    file_registry: FileRegistry,
 ) -> SubagentBuilder:
     """Return a closure that builds a subagent+registry given (system_prompt, owner_id, tool_names)."""
 
@@ -153,7 +152,7 @@ def make_subagent_builder(
         return build_subagent(
             parent_agent_config=parent_agent_config,
             agent_clients=agent_clients,
-            file_access_policy=file_access_policy,
+            file_registry=file_registry,
             system_prompt=system_prompt,
             owner_id=owner_id,
             tool_names=tool_names,
