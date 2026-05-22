@@ -56,6 +56,7 @@ class SchemaCollector(ABC):
         self._collection_payloads_count = 0
         self._queued_rows = []
         self._total_rows_count = 0
+        self._skipped_databases_count = 0
 
     def collect_schemas(self) -> bool:
         """
@@ -86,8 +87,10 @@ class SchemaCollector(ABC):
                             self.maybe_flush(is_last_payload=False)
                     self._log.debug("Completed collection of schemas for database %s", database_name)
                 except Exception as e:
-                    self._log.warning("Skipping database %s due to error: %s", database_name, e)
-                    continue
+                    if not self._is_connection_error(e):
+                        raise
+                    self._skipped_databases_count += 1
+                    self._log.warning("Skipping database %s due to error", database_name, exc_info=True)
             self.maybe_flush(is_last_payload=True)
         except Exception as e:
             status = "error"
@@ -111,6 +114,13 @@ class SchemaCollector(ABC):
             self._check.gauge(
                 f"dd.{self._check.dbms}.schema.payloads_count",
                 self._collection_payloads_count,
+                tags=self._check.tags + ["status:" + status],
+                hostname=self._check.reported_hostname,
+                raw=True,
+            )
+            self._check.gauge(
+                f"dd.{self._check.dbms}.schema.skipped_databases_count",
+                self._skipped_databases_count,
                 tags=self._check.tags + ["status:" + status],
                 hostname=self._check.reported_hostname,
                 raw=True,
@@ -181,6 +191,15 @@ class SchemaCollector(ABC):
         Subclasses should override this method to return the next row from the cursor.
         """
         raise NotImplementedError("Subclasses must implement _get_next")
+
+    def _is_connection_error(self, e: Exception) -> bool:
+        """Return True if e is a recoverable per-database error that allows skipping this database.
+
+        Defaults to True so all exceptions are treated as recoverable. Override in subclasses
+        to restrict skipping to specific driver-level connection errors, which prevents
+        programming errors or logic bugs from being silently swallowed.
+        """
+        return True
 
     def _map_row(self, database: DatabaseInfo, _cursor_row) -> DatabaseObject:
         """

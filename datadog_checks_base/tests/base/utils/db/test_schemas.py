@@ -111,6 +111,34 @@ class TestSchemaCollectorEmptyLastDb(TestSchemaCollector):
         return None
 
 
+class TestSchemaCollectorWithInaccessibleDb(TestSchemaCollector):
+    """Simulates multiple databases where one raises an error on cursor open."""
+
+    __test__ = False
+
+    def __init__(self, check, config):
+        super().__init__(check, config)
+        self._current_rows = []
+
+    def _get_databases(self):
+        return [{'name': 'db_accessible'}, {'name': 'db_inaccessible'}, {'name': 'db_also_accessible'}]
+
+    @contextmanager
+    def _get_cursor(self, database: str):
+        if database == 'db_inaccessible':
+            raise RuntimeError("Cannot open database version 852")
+        self._current_rows = [{'table_name': 'users'}]
+        self._row_index = 0
+        yield {}
+
+    def _get_next(self, _cursor):
+        if self._row_index < len(self._current_rows):
+            row = self._current_rows[self._row_index]
+            self._row_index += 1
+            return row
+        return None
+
+
 @pytest.mark.unit
 def test_schema_collector(aggregator):
     check = TestDatabaseCheck()
@@ -164,3 +192,38 @@ def test_schema_collector_chunk_size_flush(aggregator):
     assert len(events) == 2
     assert 'collection_payloads_count' not in events[0]
     assert events[-1]['collection_payloads_count'] == len(events)
+
+
+@pytest.mark.unit
+def test_schema_collector_skips_inaccessible_database(aggregator):
+    """An inaccessible database is skipped and collection continues for the remaining databases."""
+    check = TestDatabaseCheck()
+    collector = TestSchemaCollectorWithInaccessibleDb(check, SchemaCollectorConfig())
+    collector.collect_schemas()
+
+    events = aggregator.get_event_platform_events("dbm-metadata")
+    assert len(events) == 1
+    event = events[0]
+    assert len(event['metadata']) == 2
+    assert all(row['name'] != 'db_inaccessible' for row in event['metadata'])
+    assert event['collection_payloads_count'] == 1
+
+    skipped_metrics = aggregator.metrics(f"dd.{check.dbms}.schema.skipped_databases_count")
+    assert len(skipped_metrics) == 1
+    assert skipped_metrics[0].value == 1
+
+
+@pytest.mark.unit
+def test_schema_collector_reraises_non_connection_error(aggregator):
+    """When _is_connection_error returns False, errors propagate instead of being swallowed."""
+
+    class StrictCollector(TestSchemaCollectorWithInaccessibleDb):
+        __test__ = False
+
+        def _is_connection_error(self, e: Exception) -> bool:
+            return False
+
+    check = TestDatabaseCheck()
+    collector = StrictCollector(check, SchemaCollectorConfig())
+    with pytest.raises(RuntimeError, match="Cannot open database version 852"):
+        collector.collect_schemas()
