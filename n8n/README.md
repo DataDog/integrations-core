@@ -214,7 +214,7 @@ Each event contains rich metadata including `executionId`, `workflowId`, `workfl
 
 [Run the Agent's status subcommand][6] and look for `n8n` under the Checks section.
 
-## Data Collected
+## Data collected
 
 ### Metrics
 
