@@ -153,6 +153,7 @@ facets:
     name: Activity ID
     path: ocsf.activity_id
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Activity Name
@@ -160,24 +161,26 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Category Name
+    name: Category
     path: ocsf.category_name
     source: log
   - groups:
       - OCSF
-    name: Category UID
+    name: Category ID
     path: ocsf.category_uid
     source: log
+    type: integer
   - groups:
       - OCSF
-    name: Class Name
+    name: Class
     path: ocsf.class_name
     source: log
   - groups:
       - OCSF
-    name: Class UID
+    name: Class ID
     path: ocsf.class_uid
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Severity
@@ -188,6 +191,7 @@ facets:
     name: Severity ID
     path: ocsf.severity_id
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Status
@@ -198,11 +202,13 @@ facets:
     name: Status ID
     path: ocsf.status_id
     source: log
+    type: integer
   - groups:
       - OCSF
-    name: Type UID
+    name: Type ID
     path: ocsf.type_uid
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Type Name
@@ -225,27 +231,31 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Source Endpoint IP
+    name: Source IP Address
     path: ocsf.src_endpoint.ip
     source: log
-  - groups:
+  - facetType: range
+    groups:
       - OCSF
-    name: Source Endpoint Port
+    name: Src Endpoint Port
     path: ocsf.src_endpoint.port
     source: log
+    type: integer
   - groups:
       - OCSF
-    name: Destination Endpoint IP
+    name: Destination IP Address
     path: ocsf.dst_endpoint.ip
     source: log
-  - groups:
+  - facetType: range
+    groups:
       - OCSF
-    name: Destination Endpoint Port
+    name: Dst Endpoint Port
     path: ocsf.dst_endpoint.port
     source: log
+    type: integer
   - groups:
       - OCSF
-    name: Destination Endpoint Hostname
+    name: Dst Endpoint Hostname
     path: ocsf.dst_endpoint.hostname
     source: log
   - groups:
@@ -255,32 +265,33 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: HTTP Response Code
+    name: Response Code
     path: ocsf.http_response.code
     source: log
+    type: integer
   - groups:
       - OCSF
-    name: HTTP URL
+    name: Request URL String
     path: ocsf.http_request.url.url_string
     source: log
   - groups:
       - OCSF
-    name: HTTP User Agent
+    name: HTTP User-Agent
     path: ocsf.http_request.user_agent
     source: log
   - groups:
       - OCSF
-    name: Actor User Name
+    name: Name
     path: ocsf.actor.user.name
     source: log
   - groups:
       - OCSF
-    name: User Name
+    name: Target Name
     path: ocsf.user.name
     source: log
   - groups:
       - OCSF
-    name: User Email
+    name: Target Email Address
     path: ocsf.user.email_addr
     source: log
   - groups:
@@ -292,16 +303,6 @@ facets:
       - OCSF
     name: Device IP
     path: ocsf.device.ip
-    source: log
-  - groups:
-      - OCSF
-    name: Connection Direction
-    path: ocsf.connection_info.direction
-    source: log
-  - groups:
-      - OCSF
-    name: Connection Direction ID
-    path: ocsf.connection_info.direction_id
     source: log
   - groups:
       - OCSF
@@ -2659,7 +2660,7 @@ pipeline:
               overrideOnConflict: true
               targetFormat: string
             - type: schema-remapper
-              name: Map `PRAConnectionID` to `ocsf.metadata.uid`
+              name: Map `PRAConnectionID`, `ConnectionID`, `SessionID` to `ocsf.metadata.uid`
               sources:
                 - PRAConnectionID
                 - ConnectionID
@@ -2805,7 +2806,7 @@ pipeline:
               overrideOnConflict: true
               targetFormat: string
             - type: schema-remapper
-              name: Map `ConnectionID` to `ocsf.connection_info.uid`
+              name: Map `ConnectionID`, `PRAConnectionID` to `ocsf.connection_info.uid`
               sources:
                 - ConnectionID
                 - PRAConnectionID
@@ -2814,7 +2815,7 @@ pipeline:
               overrideOnConflict: true
               targetFormat: string
             - type: schema-remapper
-              name: Map `SessionID` to `ocsf.connection_info.session.uid`
+              name: Map `SessionID`, `PRAConnectionID` to `ocsf.connection_info.session.uid`
               sources:
                 - SessionID
                 - PRAConnectionID
@@ -3029,7 +3030,7 @@ pipeline:
               overrideOnConflict: true
               targetFormat: string
             - type: schema-remapper
-              name: Map `PRAConnectionID` to `ocsf.metadata.uid`
+              name: Map `PRAConnectionID`, `ConnectionID`, `SessionID` to `ocsf.metadata.uid`
               sources:
                 - PRAConnectionID
                 - ConnectionID
@@ -3135,7 +3136,7 @@ pipeline:
               overrideOnConflict: true
               targetFormat: string
             - type: schema-remapper
-              name: Map `Application` to `ocsf.dst_endpoint.name`
+              name: Map `Application`, `Hostname` to `ocsf.dst_endpoint.name`
               sources:
                 - Application
                 - Hostname
@@ -3168,7 +3169,7 @@ pipeline:
               overrideOnConflict: true
               targetFormat: string
             - type: schema-remapper
-              name: Map `ConnectionID` to `ocsf.connection_info.uid`
+              name: Map `ConnectionID`, `PRAConnectionID` to `ocsf.connection_info.uid`
               sources:
                 - ConnectionID
                 - PRAConnectionID
@@ -3177,7 +3178,7 @@ pipeline:
               overrideOnConflict: true
               targetFormat: string
             - type: schema-remapper
-              name: Map `SessionID` to `ocsf.connection_info.session.uid`
+              name: Map `SessionID`, `PRAConnectionID` to `ocsf.connection_info.session.uid`
               sources:
                 - SessionID
                 - PRAConnectionID
@@ -3571,7 +3572,7 @@ pipeline:
               overrideOnConflict: true
               targetFormat: string
             - type: schema-remapper
-              name: Map `Hostname` to `ocsf.dst_endpoint.name`
+              name: Map `Hostname`, `Application` to `ocsf.dst_endpoint.name`
               sources:
                 - Hostname
                 - Application
@@ -3914,7 +3915,7 @@ pipeline:
               overrideOnConflict: true
               targetFormat: string
             - type: schema-remapper
-              name: Map `PrivateIP` to `ocsf.device.ip`
+              name: Map `PrivateIP`, `PublicIP` to `ocsf.device.ip`
               sources:
                 - PrivateIP
                 - PublicIP
