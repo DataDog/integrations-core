@@ -5,28 +5,34 @@
 import asyncio
 import json
 from pathlib import Path
+from typing import Any
 
 import pytest
+from anthropic.types import ToolParam
 
+from ddev.ai.agent.base import BaseAgent
+from ddev.ai.agent.build import SubagentBuilder
 from ddev.ai.agent.exceptions import AgentError
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall, ToolResultMessage
 from ddev.ai.tools.agents.spawn_subagent import SpawnSubagentInput, SpawnSubagentTool
 from ddev.ai.tools.core.types import ToolResult
+from ddev.ai.tools.registry import ToolRegistry
 
 # ---------------------------------------------------------------------------
 # Mock helpers
 # ---------------------------------------------------------------------------
 
 
-class MockAgent:
+class MockAgent(BaseAgent[Any]):
     def __init__(self, responses: list[AgentResponse]) -> None:
+        super().__init__("mock", "", ToolRegistry([]))
         self._responses = list(responses)
         self._index = 0
-        self.name = "mock"
-        self._history: list = []
 
     async def send(
-        self, content: str | list[ToolResultMessage], allowed_tools: list[str] | None = None
+        self,
+        content: str | list[ToolResultMessage],
+        allowed_tools: list[str] | None = None,
     ) -> AgentResponse:
         response = self._responses[self._index]
         self._index += 1
@@ -42,15 +48,18 @@ class MockAgent:
         return None
 
 
-class _RaisingAgent:
+class _RaisingAgent(BaseAgent[Any]):
     """Raises a fixed exception on every send() call."""
 
     def __init__(self, exc: BaseException) -> None:
+        super().__init__("raising", "", ToolRegistry([]))
         self._exc = exc
-        self.name = "raising"
-        self._history: list = []
 
-    async def send(self, content, allowed_tools=None) -> AgentResponse:
+    async def send(
+        self,
+        content: str | list[ToolResultMessage],
+        allowed_tools: list[str] | None = None,
+    ) -> AgentResponse:
         raise self._exc
 
     def reset(self) -> None:
@@ -63,15 +72,16 @@ class _RaisingAgent:
         return None
 
 
-class MockToolRegistry:
+class MockToolRegistry(ToolRegistry):
     def __init__(self, result: ToolResult | None = None) -> None:
+        super().__init__([])
         self._result = result or ToolResult(success=True, data="ok")
 
     @property
-    def definitions(self) -> list:
+    def definitions(self) -> list[ToolParam]:
         return []
 
-    async def run(self, name: str, raw: dict) -> ToolResult:
+    async def run(self, name: str, raw: dict[str, object]) -> ToolResult:
         return self._result
 
 
@@ -88,18 +98,21 @@ def make_response(
     )
 
 
-def make_builder(responses: list[AgentResponse], tool_result: ToolResult | None = None):
+def make_builder(responses: list[AgentResponse], tool_result: ToolResult | None = None) -> SubagentBuilder:
     """Return a builder closure that replays fixed responses."""
     tr = tool_result or ToolResult(success=True, data="ok")
 
-    def builder(system_prompt: str, owner_id: str, tool_names: list[str]):
+    def builder(system_prompt: str, owner_id: str, tool_names: list[str]) -> tuple[BaseAgent[Any], ToolRegistry]:
         return MockAgent(list(responses)), MockToolRegistry(tr)
 
     return builder
 
 
 def make_tool(
-    log_dir: Path, builder, allowed_tools: list[str] | None = None, owner_id: str = "parent"
+    log_dir: Path,
+    builder: SubagentBuilder,
+    allowed_tools: list[str] | None = None,
+    owner_id: str = "parent",
 ) -> SpawnSubagentTool:
     return SpawnSubagentTool(
         owner_id=owner_id,
@@ -161,14 +174,23 @@ async def test_mkdir_failure(tmp_path):
 # ---------------------------------------------------------------------------
 
 
-async def test_happy_path(tmp_path):
+@pytest.mark.parametrize(
+    ("name", "expected_log_name"),
+    [
+        ("worker", "001-worker.jsonl"),
+        (None, "001-unnamed.jsonl"),
+        ("", "001-unnamed.jsonl"),
+    ],
+    ids=["named", "none", "empty"],
+)
+async def test_happy_path(tmp_path: Path, name: str | None, expected_log_name: str) -> None:
     tool = make_tool(tmp_path, make_builder([make_response(text="ok")]))
-    result = await tool(SpawnSubagentInput(system_prompt="sys", prompt="do it", tools=[], name="worker"))
+    result = await tool(SpawnSubagentInput(system_prompt="sys", prompt="do it", tools=[], name=name))
 
     assert result.success is True
     assert result.data == "ok"
 
-    events = read_events(tmp_path / "001-worker.jsonl")
+    events = read_events(tmp_path / expected_log_name)
     assert events[0]["event"] == "start"
     assert events[-1]["event"] == "finish"
     assert events[-1]["success"] is True
@@ -211,7 +233,11 @@ async def test_max_tokens_response_prefixed(tmp_path):
 
 
 async def test_builder_failure(tmp_path):
-    def failing_builder(sp, oid, tns):
+    def failing_builder(
+        system_prompt: str,
+        owner_id: str,
+        tool_names: list[str],
+    ) -> tuple[BaseAgent[Any], ToolRegistry]:
         raise ValueError("boom")
 
     tool = SpawnSubagentTool(owner_id="parent", subagent_builder=failing_builder, allowed_tools=[], log_dir=tmp_path)
@@ -226,7 +252,11 @@ async def test_builder_failure(tmp_path):
 
 
 async def test_react_process_failure(tmp_path):
-    def builder(sp, oid, tns):
+    def builder(
+        system_prompt: str,
+        owner_id: str,
+        tool_names: list[str],
+    ) -> tuple[BaseAgent[Any], ToolRegistry]:
         return _RaisingAgent(AgentError("rate limit")), MockToolRegistry()
 
     tool = make_tool(tmp_path, builder)
@@ -244,7 +274,11 @@ async def test_react_process_failure(tmp_path):
 async def test_finally_close_runs_on_base_exception(tmp_path):
     """KeyboardInterrupt propagates but logger.close() still runs via finally."""
 
-    def builder(sp, oid, tns):
+    def builder(
+        system_prompt: str,
+        owner_id: str,
+        tool_names: list[str],
+    ) -> tuple[BaseAgent[Any], ToolRegistry]:
         return _RaisingAgent(KeyboardInterrupt()), MockToolRegistry()
 
     tool = make_tool(tmp_path, builder)
@@ -275,7 +309,11 @@ async def test_counter_increments_per_invocation(tmp_path):
 async def test_parallel_spawns_get_distinct_counters(tmp_path):
     owner_ids: list[str] = []
 
-    def recording_builder(sp: str, owner_id: str, tns: list[str]):
+    def recording_builder(
+        system_prompt: str,
+        owner_id: str,
+        tool_names: list[str],
+    ) -> tuple[BaseAgent[Any], ToolRegistry]:
         owner_ids.append(owner_id)
         return MockAgent([make_response(text="ok")]), MockToolRegistry()
 
@@ -299,12 +337,16 @@ async def test_parallel_spawns_get_distinct_counters(tmp_path):
     [
         {"prompt": "x"},
         {"system_prompt": "s", "prompt": "p", "tools": [], "bad_field": True},
+        {"system_prompt": "s", "prompt": "p", "tools": [], "name": "../oops"},
     ],
-    ids=["missing_field", "extra_field"],
+    ids=["missing_field", "extra_field", "unsafe_name"],
 )
-async def test_pydantic_rejects_invalid_input(raw):
+async def test_pydantic_rejects_invalid_input(raw: dict[str, object]) -> None:
     tool = SpawnSubagentTool(
-        owner_id="p", subagent_builder=lambda *a: (None, None), allowed_tools=[], log_dir=Path("/tmp")
+        owner_id="p",
+        subagent_builder=make_builder([make_response()]),
+        allowed_tools=[],
+        log_dir=Path("/tmp"),
     )
     result = await tool.run(raw)
     assert result.success is False

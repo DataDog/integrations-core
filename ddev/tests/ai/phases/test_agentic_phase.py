@@ -365,6 +365,27 @@ async def test_run_memory_step_returns_response_data_and_fires_callbacks(flow_di
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.parametrize(
+    ("tools", "expected"),
+    [(["spawn_subagent"], True), (["read_file"], False), ([], False)],
+    ids=["spawn", "regular_tool", "no_tools"],
+)
+def test_extra_init_kwargs_creates_subagent_builder_from_tool_metadata(
+    flow_dir: Path,
+    tools: list[str],
+    expected: bool,
+) -> None:
+    kwargs = AgenticPhase.extra_init_kwargs(
+        phase_id="p1",
+        phase_config=PhaseConfig(agent="writer", tasks=[TaskConfig(name="t1", prompt="Do the work.")]),
+        agents={"writer": AgentConfig(tools=tools)},
+        agent_clients={},
+        file_registry=FileRegistry(policy=FileAccessPolicy(write_root=flow_dir)),
+    )
+
+    assert (kwargs["subagent_builder"] is not None) is expected
+
+
 async def test_spawn_subagent_wiring(flow_dir, message_queue):
     """Phase correctly passes subagent_builder + log_dir to the agent builder at execute time."""
 
@@ -394,7 +415,17 @@ async def test_spawn_subagent_wiring(flow_dir, message_queue):
 
     from ddev.ai.tools.agents.spawn_subagent import SpawnSubagentTool
 
-    def agent_builder_fn(system_prompt: str, owner_id: str, subagent_builder=None, log_dir=None):
+    captured_log_dirs: list[Path | None] = []
+
+    def agent_builder_fn(
+        system_prompt: str,
+        owner_id: str,
+        subagent_builder=None,
+        log_dir: Path | None = None,
+    ):
+        captured_log_dirs.append(log_dir)
+        assert subagent_builder is not None
+        assert log_dir is not None
         parent_agent.name = owner_id
         return parent_agent, ToolRegistry(
             [
@@ -427,6 +458,7 @@ async def test_spawn_subagent_wiring(flow_dir, message_queue):
     submitted = [message_queue.get_nowait() for _ in range(message_queue.qsize())]
     assert not any(isinstance(m, PhaseFailedMessage) for m in submitted)
     assert subagent_calls == ["you are a helper"]
+    assert captured_log_dirs == [checkpoint_manager.root / "subagents" / "p1"]
 
     log_file = checkpoint_manager.root / "subagents" / "p1" / "001-child.jsonl"
     assert log_file.exists()
