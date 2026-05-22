@@ -1,4 +1,4 @@
-# bypass-global-
+# bypass-global-date-remapper-parse-failure-checks
 id: haproxy
 tests:
 - sample: 10.0.1.2:33317 [06/Feb/2009:12:14:14.655] http-in static/srv1 10/0/30/69/109 200 2750 - - ---- 1/1/1/1/0 0/0 {1wt.eu} {} "GET /index.html HTTP/1.1"
