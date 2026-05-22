@@ -69,28 +69,7 @@ class SchemaCollector(ABC):
             databases = self._get_databases()
             self._log.debug("Collecting schemas for %d databases", len(databases))
             for database in databases:
-                self._log.debug("Starting collection of schemas for database %s", database['name'])
-                database_name = database['name']
-                if not database_name:
-                    self._log.warning("database has no name %v", database)
-                    continue
-                try:
-                    with self._get_cursor(database_name) as cursor:
-                        # Get the next row from the cursor
-                        next_row = self._get_next(cursor)
-                        while next_row:
-                            self._queued_rows.append(self._map_row(database, next_row))
-                            self._total_rows_count += 1
-                            # Because we're iterating over a cursor we need to try to get
-                            # the next row to see if we've reached the last row
-                            next_row = self._get_next(cursor)
-                            self.maybe_flush(is_last_payload=False)
-                    self._log.debug("Completed collection of schemas for database %s", database_name)
-                except Exception as e:
-                    if not self._is_connection_error(e):
-                        raise
-                    self._skipped_databases_count += 1
-                    self._log.warning("Skipping database %s due to error", database_name, exc_info=True)
+                self._collect_database_schemas(database)
             if self._queued_rows or self._collection_payloads_count > 0:
                 self.maybe_flush(is_last_payload=True)
         except Exception as e:
@@ -129,6 +108,29 @@ class SchemaCollector(ABC):
 
             self._reset()
         return True
+
+    def _collect_database_schemas(self, database: DatabaseInfo) -> None:
+        database_name = database['name']
+        if not database_name:
+            self._log.warning("database has no name %v", database)
+            return
+        try:
+            self._log.debug("Starting collection of schemas for database %s", database_name)
+            with self._get_cursor(database_name) as cursor:
+                # Because we're iterating over a cursor we need to try to get
+                # the next row to see if we've reached the last row
+                next_row = self._get_next(cursor)
+                while next_row:
+                    self._queued_rows.append(self._map_row(database, next_row))
+                    self._total_rows_count += 1
+                    next_row = self._get_next(cursor)
+                    self.maybe_flush(is_last_payload=False)
+            self._log.debug("Completed collection of schemas for database %s", database_name)
+        except Exception as e:
+            if not self._is_connection_error(e):
+                raise
+            self._skipped_databases_count += 1
+            self._log.warning("Skipping database %s due to error", database_name, exc_info=True)
 
     @property
     def base_event(self):
