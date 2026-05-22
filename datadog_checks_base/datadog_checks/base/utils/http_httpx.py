@@ -271,10 +271,15 @@ class HTTPXWrapper:
         timeout = _build_timeout(config)
         allow_redirects = is_affirmative(config['allow_redirects'])
 
+        # ``proxies`` is included as ``None`` for shape-parity with
+        # ``RequestsWrapper.options`` so existing reads of
+        # ``check.http.options['proxies']`` do not KeyError on a check that
+        # opts into HTTPXWrapper. Proxy wiring itself is Phase 3.
         self.options: dict[str, Any] = {
             'auth': auth,
             'cert': cert,
             'headers': headers,
+            'proxies': None,
             'timeout': timeout,
             'verify': verify,
             'allow_redirects': allow_redirects,
@@ -390,6 +395,14 @@ class HTTPXWrapper:
         ``data``, ``timeout``, and ``extra_headers``. ``allow_redirects`` and
         ``verify`` / ``cert`` are client-level and not overridable per request
         in the MVP.
+
+        Any kwarg not in the passthrough list below is silently dropped. This
+        is intentional — ``RequestsWrapper`` accepts a broader set of options
+        than the MVP supports, and silently dropping unknown kwargs lets
+        existing call sites (notably the OM v2 scraper, which passes
+        ``stream=True``) work without lib-specific branches at the call site.
+        Unsupported kwargs that materially affect behavior should be added to
+        the passthrough list in Phase 3.
         """
         kwargs: dict[str, Any] = {}
         passthrough = ('params', 'json', 'data', 'content', 'files', 'cookies')

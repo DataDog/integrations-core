@@ -35,3 +35,15 @@ def test_module_import_fails_without_httpx(monkeypatch):
     monkeypatch.delitem(sys.modules, 'datadog_checks.base.utils.http_httpx', raising=False)
     with pytest.raises(ImportError):
         import datadog_checks.base.utils.http_httpx  # noqa: F401
+
+
+def test_agentcheck_http_dispatch_returns_httpx_wrapper():
+    """Mirror of test_http.py::test_activate for the use_httpx=True path.
+
+    The default-path counterpart (``use_httpx`` absent → ``RequestsWrapper``) is
+    already covered by ``tests/base/utils/http/test_http.py::TestAttribute::test_activate``.
+    """
+    from datadog_checks.base import AgentCheck
+
+    check = AgentCheck('test', {}, [{'use_httpx': True}])
+    assert isinstance(check.http, HTTPXWrapper)

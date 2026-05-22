@@ -31,6 +31,12 @@ def test_basic_auth_only_when_both_user_and_password_set(capturing_transport, ca
     assert 'authorization' not in captured_requests[0].headers
 
 
+def test_basic_auth_skipped_when_only_password_set(capturing_transport, captured_requests):
+    http = HTTPXWrapper({'password': 'secret'}, {}, transport=capturing_transport)
+    http.get('http://example.test/')
+    assert 'authorization' not in captured_requests[0].headers
+
+
 def test_basic_auth_options_exposes_auth(capturing_transport):
     http = HTTPXWrapper(
         {'username': 'alice', 'password': 'secret'},

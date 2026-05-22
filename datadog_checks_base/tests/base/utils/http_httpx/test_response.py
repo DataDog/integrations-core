@@ -72,6 +72,23 @@ def test_response_iter_content(status_transport_factory):
     assert b''.join(chunks) == b'abcdef'
 
 
+def test_response_iter_content_chunk_size_none(status_transport_factory):
+    transport = status_transport_factory(200, b'hello')
+    http = HTTPXWrapper({}, {}, transport=transport)
+    response = http.get('http://example.test/')
+    chunks = list(response.iter_content())
+    assert chunks == [b'hello']
+
+
+def test_response_iter_content_decode_unicode(status_transport_factory):
+    transport = status_transport_factory(200, b'hello world')
+    http = HTTPXWrapper({}, {}, transport=transport)
+    response = http.get('http://example.test/')
+    chunks = list(response.iter_content(chunk_size=3, decode_unicode=True))
+    assert all(isinstance(c, str) for c in chunks)
+    assert ''.join(chunks) == 'hello world'
+
+
 def test_response_iter_lines_bytes_default(status_transport_factory):
     transport = status_transport_factory(200, b'a\nb\nc')
     http = HTTPXWrapper({}, {}, transport=transport)
@@ -114,6 +131,26 @@ def test_response_elapsed(status_transport_factory):
     http = HTTPXWrapper({}, {}, transport=transport)
     response = http.get('http://example.test/')
     assert response.elapsed is not None
+
+
+def test_response_elapsed_returns_zero_on_runtime_error(status_transport_factory):
+    """Cover the RuntimeError fallback in HTTPXResponseAdapter.elapsed.
+
+    httpx 0.28 raises ``RuntimeError`` from ``.elapsed`` until the bound stream's
+    ``close()`` has finalized the timer. When MockTransport bypasses that path
+    by serving buffered content, the adapter should return ``timedelta(0)`` so
+    callers never see the RuntimeError.
+    """
+    from datetime import timedelta
+
+    transport = status_transport_factory(200, b'hello')
+    http = HTTPXWrapper({}, {}, transport=transport)
+    response = http.get('http://example.test/')
+    # Forge the MockTransport quirk explicitly: if ``_elapsed`` was set, drop it
+    # so the property has to take the except branch.
+    if hasattr(response._response, '_elapsed'):
+        delattr(response._response, '_elapsed')
+    assert response.elapsed == timedelta(0)
 
 
 def test_response_close(status_transport_factory):

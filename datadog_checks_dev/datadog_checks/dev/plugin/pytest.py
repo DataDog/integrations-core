@@ -300,7 +300,7 @@ def mock_http_response(mocker, mock_response):
     """Patch the default HTTP entry-point to return a ``MockHTTPResponse``.
 
     Patches ``requests.Session.get`` by default. When ``method`` is the default,
-    we also patch ``httpx.Client.send`` so that checks opting into the Phase 2
+    we also patch ``httpx.Client.request`` so that checks opting into the Phase 2
     HTTPXWrapper via ``use_httpx=true`` are intercepted by the same fixture.
     """
 
