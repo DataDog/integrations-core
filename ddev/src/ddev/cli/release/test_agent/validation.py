@@ -76,19 +76,19 @@ def validate_input(app: Application, branch: str | None, tag: str | None) -> Rel
     """
     if branch is not None and tag is not None:
         app.abort('Cannot use --branch and --tag together; pick one.')
+    if branch is None and tag is None:
+        app.abort('Exactly one of --branch or --tag must be provided.')
 
     if branch is not None:
         if not re.match(BRANCH_PATTERN, branch):
             app.abort(f'Invalid branch: {branch!r}. Must match {BRANCH_PATTERN}.')
         return Branch(branch)
 
-    if tag is not None:
-        normalized = tag.removeprefix('v')
-        if not re.match(TAG_PATTERN, normalized):
-            app.abort(f'Invalid tag: {tag!r}. Must match {TAG_PATTERN}.')
-        return Tag(normalized)
-
-    app.abort('Exactly one of --branch or --tag must be provided.')
+    assert tag is not None
+    normalized = tag.removeprefix('v')
+    if not re.match(TAG_PATTERN, normalized):
+        app.abort(f'Invalid tag: {tag!r}. Must match {TAG_PATTERN}.')
+    return Tag(normalized)
 
 
 def local_ref_for(target: ReleaseTarget) -> str:

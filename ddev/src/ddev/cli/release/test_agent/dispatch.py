@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from ddev.utils.github_async import GitHubResponse
     from ddev.utils.github_async.models import WorkflowDispatchResult
 
-    DispatchOutcome = GitHubResponse[WorkflowDispatchResult] | BaseException
+type DispatchOutcome = GitHubResponse[WorkflowDispatchResult] | BaseException
 
 # Hard-coded: the two test workflows only live on DataDog/integrations-core. Forks and other
 # integrations repos (extras, marketplace) have nothing to dispatch even if the branch/tag exists,
