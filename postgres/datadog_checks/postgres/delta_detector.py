@@ -19,13 +19,7 @@ class DeltaResult:
 
 
 class DeltaDetector:
-    """Computes derivative counter values from pg_stat_statements snapshots.
-
-    Operates entirely in queryid-space using lightweight integer-only rows
-    (no query text, no obfuscation). Each snapshot is diffed against the
-    previous one to produce per-(queryid, dbid, userid) derivative rows for
-    only the statements whose counters actually changed.
-    """
+    """Diffs consecutive pgss snapshots to produce per-key derivative rows for changed statements only."""
 
     def __init__(self, metric_columns: frozenset[str], execution_indicators: frozenset[str] | None = None):
         self._metric_columns = metric_columns
@@ -36,13 +30,7 @@ class DeltaDetector:
         self._previous.clear()
 
     def compute(self, rows: list[dict]) -> DeltaResult:
-        """Diff *rows* against the previous snapshot and return a DeltaResult.
-
-        Each element of *rows* must contain at least ``queryid``, ``dbid``,
-        ``userid`` (the pgss natural key) plus the counter columns configured
-        at init time.  Non-metric columns (e.g. ``datname``, ``rolname``) are
-        carried through to the derivative rows unchanged.
-        """
+        """Diff *rows* against the previous snapshot."""
         current: dict[PgssKey, dict] = {}
         for row in rows:
             key = (row['queryid'], row['dbid'], row['userid'])

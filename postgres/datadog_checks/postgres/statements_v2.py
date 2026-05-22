@@ -1,20 +1,6 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-"""Statement metrics collection with layered caching.
-
-Uses a two-layer pipeline:
-
-  1. **DeltaDetector** -- lightweight integer-only pgss scan to detect which
-     queryids actually changed since the last collection interval.
-  2. **ObfuscationLookup** -- two-tier cache (queryid -> query_signature ->
-     ObfuscationResult) that skips both the PG text fetch *and* the FFI
-     obfuscation call on cache hit.  Multiple queryids that normalize to the
-     same query_signature share a single ObfuscationResult.
-
-Raw query text is never cached; it is fetched from PG on cache miss, passed
-through the Go obfuscator, and immediately discarded.
-"""
 
 from __future__ import annotations
 
@@ -93,11 +79,14 @@ def _output_row_key(row):
 
 
 class PostgresStatementMetricsV2(DBMAsyncJob):
-    """Collects telemetry for SQL statements using layered caching.
+    """Collects statement metrics using change detection and cached obfuscation.
 
-    Separates change detection (integer-only pgss scan) from obfuscation
-    resolution (two-tier ObfuscationLookup) to minimize wire traffic, FFI
-    calls, and memory usage.  Raw query text is never cached.
+    Each collection cycle:
+      1. Query pg_stat_statements(false) for counters only (no query text).
+      2. Diff against the previous snapshot to find changed rows.
+      3. For changed queryids, look up cached ObfuscationResults; on miss,
+         fetch text from PG, obfuscate via FFI, cache, and discard raw text.
+      4. Merge derivative rows by (query_signature, datname, rolname) and emit.
     """
 
     def __init__(self, check, config: InstanceConfig):
@@ -149,9 +138,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
         self._delta_detector = None
         self._obfuscation_lookup = None
 
-    # ------------------------------------------------------------------
-    # Database helpers
-    # ------------------------------------------------------------------
+    # -- Database helpers ------------------------------------------------
 
     def _execute_query(self, query, params=(), row_factory=None) -> tuple[list, list]:
         if self._cancel_event.is_set():
@@ -167,9 +154,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
             self._stat_column_cache = []
             raise e
 
-    # ------------------------------------------------------------------
-    # Column introspection
-    # ------------------------------------------------------------------
+    # -- Column introspection ---------------------------------------------
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_pg_stat_statements_columns(self):
@@ -186,9 +171,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
         self._log.debug("Fetched columns %s", col_names)
         return col_names
 
-    # ------------------------------------------------------------------
-    # pgss housekeeping metrics
-    # ------------------------------------------------------------------
+    # -- pgss housekeeping metrics ----------------------------------------
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _emit_pg_stat_statements_metrics(self):
@@ -254,9 +237,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
                 ),
             )
 
-    # ------------------------------------------------------------------
-    # Cache size management
-    # ------------------------------------------------------------------
+    # -- Cache size management --------------------------------------------
 
     def _sync_cache_sizes(self):
         pgss_max_setting = self._check.pg_settings.get("pg_stat_statements.max")
@@ -264,9 +245,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
         if self._obfuscation_lookup._maxsize != pgss_max:
             self._obfuscation_lookup._maxsize = pgss_max
 
-    # ------------------------------------------------------------------
-    # Layer 1: Lightweight snapshot (integer-only, no query text)
-    # ------------------------------------------------------------------
+    # -- Lightweight snapshot (integer-only, no query text) ---------------
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _load_lightweight_snapshot(self) -> list[dict]:
@@ -321,9 +300,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
             self._handle_pgss_error(e)
             return []
 
-    # ------------------------------------------------------------------
-    # Layer 2: Obfuscation resolution (queryid -> ObfuscationResult)
-    # ------------------------------------------------------------------
+    # -- Obfuscation resolution -------------------------------------------
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _resolve_obfuscations(
@@ -372,9 +349,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
             self._log.warning("Failed to fetch query text for %d queryids: %s", len(queryids), e)
             return {}
 
-    # ------------------------------------------------------------------
-    # Assembly: build output rows from derivative rows + ObfuscationResults
-    # ------------------------------------------------------------------
+    # -- Row assembly -----------------------------------------------------
 
     def _assemble_rows(self, derivative_rows: list[dict], obfuscations: dict[int, ObfuscationResult]) -> list[dict]:
         assembled: list[dict] = []
@@ -410,9 +385,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
                 merged[key] = row
         return list(merged.values())
 
-    # ------------------------------------------------------------------
-    # Main collection pipeline
-    # ------------------------------------------------------------------
+    # -- Main collection pipeline -----------------------------------------
 
     def run_job(self):
         self.tags = [t for t in self._tags if not t.startswith('dd.internal')]
@@ -505,9 +478,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
 
         return rows
 
-    # ------------------------------------------------------------------
-    # Output formatting (identical contracts to V1)
-    # ------------------------------------------------------------------
+    # -- Output formatting ------------------------------------------------
 
     def _get_query_metrics_payloads(self, payload_wrapper, rows):
         payloads = []
@@ -570,9 +541,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
                 },
             }
 
-    # ------------------------------------------------------------------
-    # Error handling
-    # ------------------------------------------------------------------
+    # -- Error handling ---------------------------------------------------
 
     def _handle_pgss_error(self, e: psycopg.Error):
         error_tag = "error:database-{}".format(type(e).__name__)
