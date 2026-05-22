@@ -5,6 +5,8 @@ import re
 
 import pytest
 
+from ddev.cli.release.agent.common import agent_version_in_range
+
 
 def test_integrations_without_arguments(fake_integrations, ddev):
     result = ddev('release', 'agent', 'integrations')
@@ -49,6 +51,34 @@ def test_integrations_since_to(fake_integrations, ddev):
 
 * foo: 1.5.0
 * bar: 1.0.0
+* datadog_checks_base: 2.1.3"""
+    assert result.output.rstrip('\n') == expected_output.strip('\n')
+
+
+def test_agent_version_in_range_is_inclusive():
+    assert agent_version_in_range('7.78.0', '7.74.0..7.78.0')
+    assert agent_version_in_range('7.74.0', '7.74.0..7.78.0')
+    assert agent_version_in_range('7.77.0', '7.74.0..7.78.0')
+    assert not agent_version_in_range('7.79.0', '7.74.0..7.78.0')
+
+
+def test_integrations_skips_unreleased_integrations(repo_with_history, config_file, ddev, write_repo_config):
+    config_file.model.repos['core'] = str(repo_with_history.path)
+    config_file.save()
+    write_repo_config(
+        repo_with_history.path,
+        """
+[overrides.release.agent.unreleased-integrations.by-agent-version-range]
+"7.38.0..7.39.0" = ["datadog-bar"]
+""",
+    )
+
+    result = ddev('release', 'agent', 'integrations', '--since', '7.38.0', '--to', '7.38.0')
+    assert result.exit_code == 0
+
+    expected_output = """## Datadog Agent version 7.38.0
+
+* foo: 1.5.0
 * datadog_checks_base: 2.1.3"""
     assert result.output.rstrip('\n') == expected_output.strip('\n')
 

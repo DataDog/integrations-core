@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     AgentChangelog = dict[str, dict[str, tuple[str, bool, bool]]]
 
 DATADOG_PACKAGE_PREFIX = 'datadog-'
+UNRELEASED_INTEGRATIONS_CONFIG = '/overrides/release/agent/unreleased-integrations'
 
 
 def get_agent_tags(repo: Repository, since: str, to: str) -> list[str]:
@@ -76,8 +77,8 @@ def get_changes_per_agent(repo: Repository, since: str, to: str) -> AgentChangel
         # at some point in the git history, the requirements file erroneously
         # contained the folder name instead of the package name for each check,
         # let's be resilient by normalizing all entries to be folder names
-        catalog_now = normalize_catalog(catalog_now)
-        catalog_prev = normalize_catalog(catalog_prev)
+        catalog_now = exclude_unreleased_integrations(repo, normalize_catalog(catalog_now), current_tag)
+        catalog_prev = exclude_unreleased_integrations(repo, normalize_catalog(catalog_prev), agent_tags[i])
 
         changes_per_agent[current_tag] = {}
 
@@ -96,6 +97,43 @@ def get_changes_per_agent(repo: Repository, since: str, to: str) -> AgentChangel
 
 def normalize_catalog(catalog: dict[str, str]) -> dict[str, str]:
     return {normalize_package_name(k): v for k, v in catalog.items()}
+
+
+def exclude_unreleased_integrations(repo: Repository, catalog: dict[str, str], agent_version: str) -> dict[str, str]:
+    if skipped_integrations := get_unreleased_integrations(repo, agent_version):
+        return {
+            name: version
+            for name, version in catalog.items()
+            if normalize_package_name(name) not in skipped_integrations
+        }
+    else:
+        return catalog
+
+
+def get_unreleased_integrations(repo: Repository, agent_version: str) -> set[str]:
+    unreleased_integrations = repo.config.get(UNRELEASED_INTEGRATIONS_CONFIG, default={})
+    by_integration = unreleased_integrations.get('by-integration', {})
+    by_agent_version_range = unreleased_integrations.get('by-agent-version-range', {})
+
+    skipped_integrations = {
+        normalize_package_name(name) for name, versions in by_integration.items() if agent_version in versions
+    }
+    for version_range, integration_names in by_agent_version_range.items():
+        if agent_version_in_range(agent_version, version_range):
+            skipped_integrations.update(normalize_package_name(name) for name in integration_names)
+
+    return skipped_integrations
+
+
+def agent_version_in_range(agent_version: str, version_range: str) -> bool:
+    from packaging.version import parse as parse_version
+
+    start, end = version_range.split('..', 1)
+    version = parse_version(agent_version)
+    start_version = parse_version(start)
+    end_version = parse_version(end)
+
+    return start_version <= version <= end_version
 
 
 def normalize_package_name(name: str) -> str:

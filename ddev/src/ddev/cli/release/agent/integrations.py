@@ -29,7 +29,7 @@ def integrations(app: Application, since: str, to: str, write: bool, force: bool
     tool will generate the list for every Agent since version 6.3.0
     (before that point we don't have enough information to build the log).
     """
-    from ddev.cli.release.agent.common import get_agent_tags, parse_agent_req_file
+    from ddev.cli.release.agent.common import exclude_unreleased_integrations, get_agent_tags, parse_agent_req_file
 
     agent_tags = get_agent_tags(app.repo, since, to)
     # get the list of integrations shipped with the agent from the requirements file
@@ -40,7 +40,8 @@ def integrations(app: Application, since: str, to: str, write: bool, force: bool
         integrations_contents.write(f'## Datadog Agent version {tag}\n\n')
         # Requirements for current tag
         file_contents = app.repo.git.show_file(req_file_name, tag)
-        for name, ver in parse_agent_req_file(file_contents).items():
+        catalog = exclude_unreleased_integrations(app.repo, parse_agent_req_file(file_contents), tag)
+        for name, ver in catalog.items():
             integrations_contents.write(f'* {name}: {ver}\n')
         integrations_contents.write('\n')
 

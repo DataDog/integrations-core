@@ -240,6 +240,26 @@ trace-captures = false
 ## Just in case __pycache__ is present in the root of the repo
 __pycache__ = false
 
+# Integrations that were pinned in requirements-agent-release.txt but were not shipped
+# in the listed Agent releases. Agent release generation uses these entries to skip
+# false positives when building AGENT_INTEGRATIONS.md and Agent changelog data.
+# Use by-integration for one-off skips:
+#   integration_name = ["7.78.0", "7.79.0"]
+# Use by-agent-version-range for inclusive Agent version ranges:
+#   "7.74.0..7.78.0" = ["datadog-first-integration", "datadog-second-integration"]
+[overrides.release.agent.unreleased-integrations]
+
+[overrides.release.agent.unreleased-integrations.by-integration]
+
+[overrides.release.agent.unreleased-integrations.by-agent-version-range]
+"7.74.0..7.78.0" = [
+  "datadog-control-m",
+  "datadog-krakend",
+  "datadog-lustre",
+  "datadog-n8n",
+  "datadog-prefect",
+]
+
 # Explicitely add the platforms supported by an integration for those where the manifest has been
 # removed.
 # This is a temporary fix while we implement a metadata.json file that we can add to each integration

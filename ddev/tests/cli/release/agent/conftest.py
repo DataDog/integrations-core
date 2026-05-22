@@ -1,9 +1,12 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from collections.abc import Callable
+
 import pytest
 
 from ddev.repo.core import Repository
+from ddev.utils.fs import Path
 
 
 @pytest.fixture
@@ -53,6 +56,16 @@ def repo_with_history(tmp_path_factory):
     write_dummy_pyproject(repo.path, 'datadog_checks_base')
 
     yield repo
+
+
+@pytest.fixture
+def write_repo_config() -> Callable[[Path, str], None]:
+    def write_config(repo_path: Path, contents: str) -> None:
+        config_dir = repo_path / '.ddev'
+        config_dir.mkdir()
+        (config_dir / 'config.toml').write_text(contents)
+
+    return write_config
 
 
 def write_agent_requirements(repo_path, requirements):
