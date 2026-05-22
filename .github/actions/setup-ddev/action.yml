@@ -47,8 +47,8 @@ runs:
             ;;
         esac
 
-        if [[ -n "$DDEV_VERSION" && ! "$DDEV_VERSION" =~ ^(===|==|~=|!=|<=|>=|<|>)[A-Za-z0-9._*+!,-]+$ ]]; then
-          echo "::error::Invalid ddev-version '$DDEV_VERSION'. Use a PEP 440-style version specifier such as ==16.0.0."
+        if [[ -n "$DDEV_VERSION" && ! "$DDEV_VERSION" =~ ^(===|==|~=|!=|<=|>=|<|>)[A-Za-z0-9._*+!-]+(,(===|==|~=|!=|<=|>=|<|>)[A-Za-z0-9._*+!-]+)*$ ]]; then
+          echo "::error::Invalid ddev-version '$DDEV_VERSION'. Use a PEP 440-style version specifier such as ==16.0.0 or >=16,<17."
           exit 1
         fi
 
