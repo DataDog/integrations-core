@@ -106,7 +106,9 @@ The research phase reads integrations-core artifacts for the selected integratio
 - README or docs;
 - existing E2E environments if present.
 
-It produces a concise research summary covering topology, required dependencies, ports, auth, startup sequence, metrics, realistic operations, and risks.
+The research phase should also look up official upstream service documentation online when network access is available. It should prefer vendor-maintained docs over blog posts or generated examples, capture the source URLs in memory, and use those docs to validate service topology, container images, ports, authentication, health checks, realistic workload operations, and metrics semantics. If official docs cannot be reached, the phase should record that limitation and continue with repository-local evidence.
+
+It produces a concise research summary covering topology, required dependencies, ports, auth, startup sequence, metrics, realistic operations, official documentation sources, and risks.
 
 ### 2. Generate component and load code
 
