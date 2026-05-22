@@ -175,7 +175,7 @@ async def test_happy_path(tmp_path):
 
 
 async def test_multi_iteration_wires_callbacks(tmp_path):
-    """Proves FileLogger callbacks are wired: a subagent tool call produces a tool_call log event."""
+    """Proves AgentLogger callbacks are wired: a subagent tool call produces a tool_call log event."""
     tool_call = ToolCall(id="tc1", name="read_file", input={"path": "/f"})
     tool = make_tool(
         tmp_path,

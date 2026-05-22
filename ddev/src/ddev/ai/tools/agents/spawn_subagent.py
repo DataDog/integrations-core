@@ -9,8 +9,8 @@ from pydantic import Field
 
 from ddev.ai.agent.build import SubagentBuilder
 from ddev.ai.agent.types import StopReason
-from ddev.ai.callbacks.file_logger import FileLogger
 from ddev.ai.react.process import ReActProcess
+from ddev.ai.tools.agents.agent_logger import AgentLogger
 from ddev.ai.tools.core.base import BaseTool, BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
 
@@ -105,7 +105,7 @@ class SpawnSubagentTool(BaseTool[SpawnSubagentInput]):
         subagent_id = f"{self._owner_id}.sub.{self._counter:03d}-{label}"
         log_path = self._log_dir / f"{self._counter:03d}-{label}.jsonl"
 
-        logger = FileLogger(log_path)
+        logger = AgentLogger(log_path)
         try:
             logger.log_start(
                 system_prompt=tool_input.system_prompt,

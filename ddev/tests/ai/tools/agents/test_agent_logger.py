@@ -7,7 +7,7 @@ import json
 import pytest
 
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall
-from ddev.ai.callbacks.file_logger import FileLogger
+from ddev.ai.tools.agents.agent_logger import AgentLogger
 from ddev.ai.tools.core.types import ToolResult
 
 
@@ -31,7 +31,7 @@ def read_events(log_path) -> list[dict]:
 
 def test_log_entries_are_valid_jsonl_with_timestamp(tmp_path):
     log_path = tmp_path / "log.jsonl"
-    logger = FileLogger(log_path)
+    logger = AgentLogger(log_path)
     logger.log_start(system_prompt="sys", prompt="go", tools=["read_file"])
     logger.log_finish(success=True, iterations=1)
     logger.close()
@@ -45,7 +45,7 @@ def test_log_entries_are_valid_jsonl_with_timestamp(tmp_path):
 
 def test_flush_after_each_write(tmp_path):
     log_path = tmp_path / "log.jsonl"
-    logger = FileLogger(log_path)
+    logger = AgentLogger(log_path)
     logger.log_start(system_prompt="s", prompt="p", tools=[])
     # A second file handle reads the line without closing the logger first
     assert log_path.read_text(encoding="utf-8").strip() != ""
@@ -54,7 +54,7 @@ def test_flush_after_each_write(tmp_path):
 
 def test_close_is_idempotent_and_prevents_further_writes(tmp_path):
     log_path = tmp_path / "log.jsonl"
-    logger = FileLogger(log_path)
+    logger = AgentLogger(log_path)
     logger.log_start(system_prompt="s", prompt="p", tools=[])
     logger.close()
     logger.close()  # must not raise
@@ -64,12 +64,12 @@ def test_close_is_idempotent_and_prevents_further_writes(tmp_path):
 
 def test_constructor_requires_existing_parent(tmp_path):
     with pytest.raises(OSError):
-        FileLogger(tmp_path / "doesnotexist" / "log.jsonl")
+        AgentLogger(tmp_path / "doesnotexist" / "log.jsonl")
 
 
 def test_non_serializable_values_use_str_repr(tmp_path):
     log_path = tmp_path / "log.jsonl"
-    logger = FileLogger(log_path)
+    logger = AgentLogger(log_path)
 
     class Unserializable:
         def __repr__(self):
@@ -88,7 +88,7 @@ def test_non_serializable_values_use_str_repr(tmp_path):
 
 async def test_build_callbacks_fires_all_event_types(tmp_path):
     log_path = tmp_path / "log.jsonl"
-    logger = FileLogger(log_path)
+    logger = AgentLogger(log_path)
     callbacks = logger.build_callbacks()
 
     tool_call = ToolCall(id="tc1", name="read_file", input={"path": "/f"})
