@@ -221,9 +221,7 @@ class TestInstantiateV2Downloader:
             cli.instantiate_v2_downloader()
 
     def test_does_not_warn_when_v1_compat_flags_are_parsed(self, monkeypatch, capsys):
-        monkeypatch.setattr(
-            'sys.argv', ['downloader', 'datadog-postgres', '--type', 'core', '--ignore-python-version']
-        )
+        monkeypatch.setattr('sys.argv', ['downloader', 'datadog-postgres', '--type', 'core', '--ignore-python-version'])
         cli.instantiate_v2_downloader()
         assert capsys.readouterr().err == ''
 
