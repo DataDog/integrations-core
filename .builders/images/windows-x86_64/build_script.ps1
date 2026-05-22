@@ -3,9 +3,12 @@ $PSNativeCommandUseErrorActionPreference = $true
 
 . C:\helpers.ps1
 
-# The librdkafka version needs to stay in sync with the confluent-kafka version,
-# thus we extract the version from the requirements file
-$kafka_version = Get-Content 'C:\mnt\requirements.in' | perl -nE 'say/^\D*(\d+\.\d+\.\d+)\D*$/ if /confluent-kafka==/'
+# Source of truth is the Dockerfile ENV; build_wheels.py asserts this stays
+# in lockstep with the confluent-kafka pin in agent_requirements.in.
+$kafka_version = $Env:CONFLUENT_KAFKA_VERSION
+if (-not $kafka_version) {
+    throw "CONFLUENT_KAFKA_VERSION env is not set"
+}
 Write-Host "Will build librdkafka $kafka_version"
 
 # Download and unpack the source
