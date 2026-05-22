@@ -21,10 +21,13 @@ def test_context_manager(capturing_transport):
 
 
 def test_single_client_reused_across_requests(capturing_transport, captured_requests):
+    """Phase 2 MVP D3: the wrapper holds one ``httpx.Client`` across all requests."""
     http = HTTPXWrapper({}, {}, transport=capturing_transport)
+    client_before_requests = http._client
     http.get('http://example.test/a')
     http.get('http://example.test/b')
     http.post('http://example.test/c', json={'x': 1})
+    assert http._client is client_before_requests
     assert len(captured_requests) == 3
 
 

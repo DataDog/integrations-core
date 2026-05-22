@@ -105,32 +105,46 @@ def test_response_iter_lines_decode_unicode(status_transport_factory):
     assert lines == ['a', 'b', 'c']
 
 
-def test_response_encoding(status_transport_factory):
+def test_response_encoding_default_is_utf8(status_transport_factory):
     transport = status_transport_factory(200, b'')
     http = HTTPXWrapper({}, {}, transport=transport)
     response = http.get('http://example.test/')
-    assert response.encoding is not None
+    # httpx defaults to utf-8 when no charset is signalled. Pin the exact value
+    # so a future httpx change that returns ``None`` here surfaces immediately.
+    assert response.encoding == 'utf-8'
+
+
+def test_response_encoding_setter_propagates_to_inner_response(status_transport_factory):
+    """OM v2 scraper does ``response.encoding = 'utf-8'`` after the request."""
+    transport = status_transport_factory(200, b'')
+    http = HTTPXWrapper({}, {}, transport=transport)
+    response = http.get('http://example.test/')
+    response.encoding = 'latin-1'
+    assert response.encoding == 'latin-1'
+    assert response._response.encoding == 'latin-1'
 
 
 def test_response_url(status_transport_factory):
     transport = status_transport_factory(200, b'')
     http = HTTPXWrapper({}, {}, transport=transport)
     response = http.get('http://example.test/path?x=1')
-    assert 'example.test' in str(response.url)
+    assert str(response.url) == 'http://example.test/path?x=1'
 
 
 def test_response_cookies_empty_by_default(status_transport_factory):
     transport = status_transport_factory(200, b'')
     http = HTTPXWrapper({}, {}, transport=transport)
     response = http.get('http://example.test/')
-    assert response.cookies is not None
+    assert len(response.cookies) == 0
 
 
 def test_response_elapsed(status_transport_factory):
+    from datetime import timedelta
+
     transport = status_transport_factory(200, b'')
     http = HTTPXWrapper({}, {}, transport=transport)
     response = http.get('http://example.test/')
-    assert response.elapsed is not None
+    assert isinstance(response.elapsed, timedelta)
 
 
 def test_response_elapsed_returns_zero_on_runtime_error(status_transport_factory):
@@ -153,20 +167,36 @@ def test_response_elapsed_returns_zero_on_runtime_error(status_transport_factory
     assert response.elapsed == timedelta(0)
 
 
-def test_response_close(status_transport_factory):
+def test_response_close_marks_inner_response_closed(status_transport_factory):
     transport = status_transport_factory(200, b'')
     http = HTTPXWrapper({}, {}, transport=transport)
     response = http.get('http://example.test/')
     response.close()
+    assert response._response.is_closed is True
 
 
-def test_response_ok_property(status_transport_factory):
+@pytest.mark.parametrize('status_code,expected_ok', [(200, True), (204, True), (301, True), (400, False), (500, False)])
+def test_response_ok_property(status_transport_factory, status_code, expected_ok):
+    transport = status_transport_factory(status_code, b'')
+    http = HTTPXWrapper({}, {}, transport=transport)
+    response = http.get('http://example.test/')
+    assert response.ok is expected_ok
+
+
+def test_response_reason_from_httpx_response(status_transport_factory):
+    """``reason`` reads from the underlying ``httpx.Response.reason_phrase``."""
     transport = status_transport_factory(200, b'')
     http = HTTPXWrapper({}, {}, transport=transport)
     response = http.get('http://example.test/')
-    assert response.ok is True
+    assert response.reason == 'OK'
 
-    transport = status_transport_factory(500, b'')
-    http = HTTPXWrapper({}, {}, transport=transport)
-    response = http.get('http://example.test/')
-    assert response.ok is False
+
+def test_response_reason_falls_back_when_reason_phrase_missing():
+    """Mock fixtures expose ``.reason``, not ``.reason_phrase`` — the adapter handles that."""
+    from datadog_checks.base.utils.http_httpx import HTTPXResponseAdapter
+
+    class _FakeResponseExposingReason:
+        reason = 'Not Found'
+
+    adapter = HTTPXResponseAdapter(_FakeResponseExposingReason())  # type: ignore[arg-type]
+    assert adapter.reason == 'Not Found'

@@ -49,10 +49,8 @@ STANDARD_FIELDS = {
     'timeout': DEFAULT_TIMEOUT,
     'tls_ca_cert': None,
     'tls_cert': None,
-    'tls_ignore_warning': False,
     'tls_private_key': None,
     'tls_verify': True,
-    'use_legacy_auth_encoding': True,
     'username': None,
 }
 
@@ -142,7 +140,14 @@ class HTTPXResponseAdapter:
 
     @property
     def reason(self) -> str:
-        return self._response.reason_phrase
+        # The protocol field is ``reason``; ``httpx.Response`` calls the same
+        # field ``reason_phrase``, while ``MockHTTPResponse`` (used by the
+        # ``mock_http_response`` test fixture) exposes ``reason`` directly.
+        # Prefer the httpx name, fall back to the agnostic one.
+        reason = getattr(self._response, 'reason_phrase', None)
+        if reason is not None:
+            return reason
+        return getattr(self._response, 'reason', '') or ''
 
     @property
     def encoding(self) -> str | None:
@@ -297,9 +302,6 @@ class HTTPXWrapper:
         default_fields = dict(STANDARD_FIELDS)
         default_fields['log_requests'] = init_config.get('log_requests', default_fields['log_requests'])
         default_fields['timeout'] = init_config.get('timeout', default_fields['timeout'])
-        default_fields['tls_ignore_warning'] = init_config.get(
-            'tls_ignore_warning', default_fields['tls_ignore_warning']
-        )
 
         config = {field: instance.get(field, value) for field, value in default_fields.items()}
 
@@ -454,7 +456,11 @@ class HTTPXWrapper:
         return None
 
     def __del__(self) -> None:
+        # Match ``RequestsWrapper.__del__`` — narrow to ``AttributeError`` so
+        # genuine httpx-close failures still surface during teardown.
+        # ``AttributeError`` fires when ``__init__`` raised before ``_client``
+        # was assigned and Python still calls ``__del__``.
         try:
             self.close()
-        except Exception:
+        except AttributeError:
             pass

@@ -73,7 +73,11 @@ def dd_environment(dd_save_state):
 
             metrics_endpoint = f'http://{kuma_metrics_url}:{kuma_metrics_port}/metrics'
 
-            env_instance = {'openmetrics_endpoint': metrics_endpoint}
+            # Phase 2 MVP POC opt-in: kuma is one of two integrations exercising
+            # HTTPXWrapper end-to-end. Setting use_httpx here (rather than only
+            # in the `instance` fixture) makes the flag flow into the Agent
+            # process during e2e runs that read from dd_environment.
+            env_instance = {'openmetrics_endpoint': metrics_endpoint, 'use_httpx': True}
 
             dd_save_state("kuma_instance", env_instance)
 
@@ -82,11 +86,10 @@ def dd_environment(dd_save_state):
 
 @pytest.fixture(scope='session')
 def instance(dd_get_state):
-    # Phase 2 MVP POC opt-in (see RFC 2026-02-11): exercise HTTPXWrapper end-to-end.
-    base_instance = dd_get_state(
+    return dd_get_state(
         'kuma_instance',
         default={
             'openmetrics_endpoint': 'http://localhost:5680/metrics',
+            'use_httpx': True,
         },
     )
-    return {**base_instance, 'use_httpx': True}

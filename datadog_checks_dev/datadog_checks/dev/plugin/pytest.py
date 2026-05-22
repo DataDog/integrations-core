@@ -299,9 +299,15 @@ def mock_response():
 def mock_http_response(mocker, mock_response):
     """Patch the default HTTP entry-point to return a ``MockHTTPResponse``.
 
-    Patches ``requests.Session.get`` by default. When ``method`` is the default,
-    we also patch ``httpx.Client.request`` so that checks opting into the Phase 2
-    HTTPXWrapper via ``use_httpx=true`` are intercepted by the same fixture.
+    Patches ``requests.Session.get`` by default. When the caller does not
+    override ``method``, also patches ``httpx.Client.request`` so that checks
+    opting into the Phase 2 HTTPXWrapper via ``use_httpx=true`` are intercepted
+    by the same fixture.
+
+    Note: passing an explicit ``method=`` skips the httpx companion patch. This
+    is intentional — a custom ``method`` already names the exact target. If a
+    check under ``use_httpx=true`` needs both, patch the httpx target with its
+    own ``method=`` call after.
     """
 
     def _patch(*args, **kwargs):
@@ -309,9 +315,13 @@ def mock_http_response(mocker, mock_response):
         response = mock_response(*args, **kwargs)
         primary = mocker.patch(method, return_value=response)
         if method == _DEFAULT_MOCK_METHOD:
+            # ``ImportError`` covers the case where httpx is not installed in
+            # the test env (default RequestsWrapper-only consumers). Anything
+            # narrower (like a missing ``Client.request``) is a genuine bug we
+            # want to surface, not swallow.
             try:
                 mocker.patch('httpx.Client.request', return_value=response)
-            except (ImportError, AttributeError, ModuleNotFoundError):
+            except ImportError:
                 pass
         return primary
 
