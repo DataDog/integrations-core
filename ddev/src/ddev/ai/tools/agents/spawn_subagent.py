@@ -106,7 +106,14 @@ class SpawnSubagentTool(BaseTool[SpawnSubagentInput]):
         subagent_id = f"{self._owner_id}.sub.{self._counter:03d}-{label}"
         log_path = self._log_dir / f"{self._counter:03d}-{label}.jsonl"
 
-        logger = AgentLogger(log_path)
+        try:
+            logger = AgentLogger(log_path)
+        except OSError as e:
+            return ToolResult(
+                success=False,
+                error=f"Subagent {label!r} not spawned: cannot open log file {log_path}: {e}",
+            )
+
         try:
             logger.log_start(
                 system_prompt=tool_input.system_prompt,
