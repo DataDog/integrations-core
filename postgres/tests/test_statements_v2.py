@@ -1,6 +1,6 @@
-# (C) Datadog, Inc. 2025-present
+# (C) Datadog, Inc. 2026-present
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 """Unit tests for the V2 statement metrics layers (DeltaDetector, ObfuscationLookup)."""
 
 from datadog_checks.postgres.delta_detector import DeltaDetector
