@@ -4,7 +4,6 @@ gates:
 - type: total_coverage_percentage
   config:
     threshold: 75
-    notify_only: true
     services:
     - '*'
     - '!openstack'
@@ -12,10 +11,25 @@ gates:
     - '!tokumx'
     - '!snmp'
     - '!sap_hana'
+    - '!kafka_actions'
+    - '!datadog_checks_dev'
+    - '!tekton'
+    - '!vertica'
+- type: total_coverage_percentage
+  config:
+    threshold: 74
+    services:
+    - kafka_actions
+- type: total_coverage_percentage
+  config:
+    threshold: 60
+    services:
+    - datadog_checks_dev
+    - tekton
+    - vertica
 - type: total_coverage_percentage
   config:
     threshold: 50
-    notify_only: true
     services:
     - openstack
     - teradata
@@ -23,7 +37,6 @@ gates:
 - type: total_coverage_percentage
   config:
     threshold: 30
-    notify_only: true
     services:
     - snmp
     - sap_hana
