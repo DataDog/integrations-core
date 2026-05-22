@@ -35,6 +35,46 @@ tests:
         usr:
           email: "financeadmin@test.com"
           id: 99887766554433221
+        User: financeadmin@test.com
+        ModifiedBy: 99887766554433221
+        ocsf:
+          severity: Informational
+          activity_name: Logon
+          metadata:
+            uid: b11bb11b-2233-bbc2-223bc223456b
+            product:
+              name: Zscaler Private Access
+              vendor_name: Zscaler
+            modified_time: 1756364535000
+            event_code: Sign In
+            logged_time: 1756364535000
+            version: 1.5.0
+          category_uid: 3
+          category_name: Identity & Access Management
+          message: Sign In
+          actor:
+            user:
+              uid: '99887766554433221'
+              email_addr: financeadmin@test.com
+              type_id: 2
+              name: financeadmin@test.com
+              type: Admin
+          status_id: 1
+          class_uid: 3002
+          activity_id: 1
+          time: 1756364535000
+          dst_endpoint:
+            name: finance.test.com
+          severity_id: 1
+          class_name: Authentication
+          user:
+            uid: '99887766554433221'
+            email_addr: financeadmin@test.com
+            type_id: 2
+            name: financeadmin@test.com
+            type: Admin
+          status: Success
+        CreationTime: '2025-08-28T07:02:15.000Z'
       message: |-
         {
           "User" : "financeadmin@test.com",
@@ -54,7 +94,7 @@ tests:
         }
       service: "audit-logs"
       tags:
-      - "source:LOGS_SOURCE"
+        - "source:LOGS_SOURCE"
       timestamp: 1756364535000
   -
     sample: |-
@@ -116,9 +156,9 @@ tests:
         EventType: "app-connector-status"
         HostStartTime: "1513229995"
         InterfaceDefRoute: "eth0"
-        Latitude: 47.0
+        Latitude: 47
         LogTimestamp: "2025-08-28T08:15:42Z"
-        Longitude: -122.0
+        Longitude: -122
         MemUtilization: 20
         MicroTenantID: "145257480799129312"
         NumOfInterfaces: 2
@@ -141,6 +181,42 @@ tests:
           client:
             geoip: {}
             ip: "52.224.237.221"
+        PublicIP: 52.224.237.221
+        ocsf:
+          severity: Informational
+          activity_name: Collect
+          metadata:
+            uid: 8A64Qwj9zCkfYDGJVoUZ
+            product:
+              name: Zscaler Private Access
+              vendor_name: Zscaler
+              version: 19.20.3
+            tenant_uid: '145257480799129312'
+            event_code: app-connector-status
+            logged_time: 1756368942000
+            version: 1.5.0
+          category_uid: 5
+          category_name: Discovery
+          status_id: 1
+          class_uid: 5001
+          activity_id: 2
+          time: 1756368942000
+          severity_id: 1
+          class_name: Device Inventory Info
+          device:
+            uid: 8A64Qwj9zCkfYDGJVoUZ
+            boot_time: 1513229995000
+            created_time: 1555920005000
+            type_id: 99
+            ip: 10.0.0.4
+            name: Seattle App Connector 1
+            interface_name: eth0
+            location:
+              country: US
+              lat: 47
+              long: -122
+            type: app-connector-status
+          status: Success
       message: |-
         {
           "Connector" : "Seattle App Connector 1",
@@ -184,7 +260,7 @@ tests:
         }
       service: "app-connector-status"
       tags:
-      - "source:LOGS_SOURCE"
+        - "source:LOGS_SOURCE"
       timestamp: 1
   -
     sample: |-
@@ -242,12 +318,12 @@ tests:
         MicroTenantID: "23459872345987"
         Platform: "windows"
         PosturesHit:
-        - "vpn-secure,av-installed"
+          - "vpn-secure,av-installed"
         PosturesHitCount: 1
         PosturesMissCount: 2
         PosturesMisses:
-        - "disk-encryption"
-        - "firewall-enabled"
+          - "disk-encryption"
+          - "firewall-enabled"
         PrivateIP: "10.0.5.12"
         SAMLAttributes: "myname:alice,myemail:alice.w@contoso.com"
         SessionID: "XyZp98KlMn56"
@@ -269,6 +345,35 @@ tests:
             ip: "52.174.23.17"
         usr:
           name: "alice.w"
+        PublicIP: 52.174.23.17
+        ocsf:
+          severity: Informational
+          activity_name: Collect
+          metadata:
+            uid: XyZp98KlMn56
+            product:
+              name: Zscaler Private Access
+              vendor_name: Zscaler
+              version: 20.1.0-12-g5e7d3b9
+            tenant_uid: '23459872345987'
+            event_code: user-status
+            logged_time: 1559549500000
+            version: 1.5.0
+          category_uid: 5
+          category_name: Discovery
+          status_id: 1
+          class_uid: 5003
+          activity_id: 2
+          time: 1559549500000
+          severity_id: 1
+          class_name: User Inventory Info
+          user:
+            uid: alice.w
+            type_id: 1
+            name: alice.w
+            type: User
+          status: Success
+        Username: alice.w
       message: |-
         {
           "ZEN" : "broker3.eu1",
@@ -308,7 +413,7 @@ tests:
         }
       service: "user-status"
       tags:
-      - "source:LOGS_SOURCE"
+        - "source:LOGS_SOURCE"
       timestamp: 1
   -
     sample: |-
@@ -367,7 +472,7 @@ tests:
         "InspectionPolicy" : 145254438888543731,
         "InspectionRuleProcessingTime" : 0,
         "ConnectionID" : "a9K2s3LmTnYz84GhXvP1",
-        "LogTimestamp" : "Sun Aug 28 07:02:11 2025"
+        "LogTimestamp" : "Thu Aug 28 07:02:11 2025"
       }
     result:
       custom:
@@ -393,7 +498,7 @@ tests:
         InspectionRespBodyProcessingTime: 5
         InspectionRespHeadersProcessingTime: 30
         InspectionRuleProcessingTime: 0
-        LogTimestamp: "Sun Aug 28 07:02:11 2025"
+        LogTimestamp: "Thu Aug 28 07:02:11 2025"
         OriginDomain: ""
         ParanoiaLevel: 2
         Protocol: "1.1"
@@ -440,6 +545,71 @@ tests:
             port: 54521
         usr:
           id: "user1@alphacorp.com"
+        ClientPort: 54521
+        ProtocolVersion: ''
+        StatusCode: 200
+        ClientPublicIp: 192.168.1.101
+        ocsf:
+          http_response:
+            code: 200
+            content_type: ''
+            body_length: 512
+            status: success
+          severity: Informational
+          activity_name: Get
+          metadata:
+            product:
+              name: Zscaler Private Access
+              vendor_name: Zscaler
+            event_code: app-protection
+            version: 1.5.0
+            logged_time: 1756364531000
+          category_uid: 4
+          category_name: Network Activity
+          status_code: '200'
+          src_endpoint:
+            owner:
+              uid: user1@alphacorp.com
+              email_addr: user1@alphacorp.com
+              name: user1@alphacorp.com
+            port: 54521
+            ip: 192.168.1.101
+          message: success
+          status_detail: success
+          status_id: 1
+          connection_info:
+            uid: a9K2s3LmTnYz84GhXvP1
+            protocol_ver: '1.1'
+            direction_id: 1
+            direction: Inbound
+          class_uid: 4002
+          activity_id: 3
+          http_request:
+            uid: a9K2s3LmTnYz84GhXvP1
+            http_method: GET
+            version: '1.1'
+            url:
+              path: /login
+              hostname: alphacorp.com
+              domain: alphacorp.com
+            user_agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+            body_length: 0
+          dst_endpoint:
+            type_id: 1
+            domain: alphacorp.com
+            type: Server
+            hostname: alphacorp.com
+          severity_id: 1
+          class_name: HTTP Activity
+          status: Success
+          traffic:
+            bytes: 1752
+          time: 1756364531000
+        Method: GET
+        URL: /login
+        UserID: user1@alphacorp.com
+        UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+        timestamp: 1756364531000
       message: |-
         {
           "ContentType" : "",
@@ -496,12 +666,12 @@ tests:
           "InspectionPolicy" : 145254438888543731,
           "InspectionRuleProcessingTime" : 0,
           "ConnectionID" : "a9K2s3LmTnYz84GhXvP1",
-          "LogTimestamp" : "Sun Aug 28 07:02:11 2025"
+          "LogTimestamp" : "Thu Aug 28 07:02:11 2025"
         }
       service: "app-protection"
       tags:
-      - "source:LOGS_SOURCE"
-      timestamp: 1
+        - "source:LOGS_SOURCE"
+      timestamp: 1756364531000
   -
     sample: |-
       {
@@ -602,6 +772,67 @@ tests:
             ip: "198.51.100.10"
         usr:
           id: "jane.doe@demo.org"
+        StatusCode: 502
+        URL: /api/v1/login
+        ClientPublicIp: 198.51.100.10
+        ocsf:
+          http_response:
+            code: 502
+            latency: 109
+            length: 498
+          severity: High
+          activity_name: Post
+          metadata:
+            product:
+              name: Zscaler Private Access
+              vendor_name: Zscaler
+            event_code: browser-access
+            logged_time: 1756365145000
+            version: 1.5.0
+          category_uid: 4
+          category_name: Network Activity
+          status_code: '502'
+          src_endpoint:
+            owner:
+              uid: jane.doe@demo.org
+              email_addr: jane.doe@demo.org
+              name: jane.doe@demo.org
+            port: 60012
+            type_id: 8
+            ip: 198.51.100.10
+            type: Browser
+          message: AuthRedirect
+          status_detail: AuthRedirect
+          status_id: 2
+          connection_info:
+            uid: xyz908op
+            direction_id: 2
+            protocol_name: HTTPS
+            direction: Outbound
+          class_uid: 4002
+          activity_id: 6
+          http_request:
+            referrer: https://beta.demo.org
+            uid: xyz908op
+            http_method: POST
+            length: 1200
+            url:
+              path: /api/v1/login
+              hostname: api.beta.demo.org
+              port: 443
+            user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/605.1.15
+          time: 1756365145000
+          dst_endpoint:
+            port: 443
+            type_id: 1
+            type: Server
+            hostname: api.beta.demo.org
+          severity_id: 4
+          class_name: HTTP Activity
+          status: Failure
+        UserAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/605.1.15
+        NameID: jane.doe@demo.org
+        Method: POST
       message: |-
         {
           "Origin" : "https://beta.demo.org",
@@ -645,7 +876,7 @@ tests:
         }
       service: "browser-access"
       tags:
-      - "source:LOGS_SOURCE"
+        - "source:LOGS_SOURCE"
       timestamp: 1
   -
     sample: |-
@@ -720,6 +951,67 @@ tests:
         timestamp: 1756446042000
         usr:
           name: "dave@global.com"
+        ocsf:
+          severity: Informational
+          activity_name: Open
+          metadata:
+            uid: PRA-SESSION-1
+            product:
+              feature:
+                name: SSH
+              name: Zscaler Private Access
+              vendor_name: Zscaler
+            event_code: user-activity
+            logged_time: 1756446042000
+            original_time: Fri Aug 29 05:40:42 2025
+            correlation_uid: '11111'
+            version: 1.5.0
+          category_uid: 4
+          auth_type: Password
+          category_name: Network Activity
+          status_code: ''
+          src_endpoint:
+            owner:
+              email_addr: dave@global.com
+              type_id: 1
+              name: dave@global.com
+              type: User
+            ip: 23.44.55.66
+            location:
+              country: US
+              city: New York
+          auth_type_id: 5
+          status_detail: ''
+          status_id: 1
+          connection_info:
+            uid: pra001,conn001
+            direction_id: 1
+            session:
+              uid: pra001
+            direction: Inbound
+          class_uid: 4007
+          activity_id: 1
+          time: 1756446042000
+          dst_endpoint:
+            owner:
+              type_id: 2
+              name: root
+              type: Admin
+            hostname: PRA-SERVER
+            os:
+              type_id: 200
+              type: Linux
+              name: linux
+            port: 22
+            type_id: 1
+            ip: 10.40.1.100
+            name: PRA-SSH-Server
+            type: Server
+          severity_id: 1
+          class_name: SSH Activity
+          status: Success
+        ClientPublicIP: 23.44.55.66
+        Username: dave@global.com
       message: |-
         {
           "Policy" : "PRA SSH Policy",
@@ -756,7 +1048,7 @@ tests:
         }
       service: "user-activity"
       tags:
-      - "source:LOGS_SOURCE"
+        - "source:LOGS_SOURCE"
       timestamp: 1756446042000
   -
     sample: |-
@@ -790,7 +1082,7 @@ tests:
         AgentID: "72097421269663744-12345678901234567"
         AgentName: "agent3.nextgen.net"
         AppExecutablePath:
-        - "/usr/bin/curl"
+          - "/usr/bin/curl"
         AppName: "curl"
         AppZoneID: "72097421269663744-34567890123456789"
         AppZoneName: "prod-zone"
@@ -818,6 +1110,56 @@ tests:
             ip: "10.45.23.89"
             port: 43321
         timestamp: 1756446042000
+        DestinationPort: 43321
+        SourceIP: 192.168.1.101
+        ocsf:
+          severity: High
+          activity_name: Refuse
+          metadata:
+            product:
+              name: Zscaler Private Access
+              vendor_name: Zscaler
+            event_code: microsegmentation
+            logged_time: 1756446042000
+            original_time: Fri Aug 29 05:40:42 2025
+            version: 1.5.0
+            profiles:
+              - security_control
+              - host
+          category_uid: 4
+          category_name: Network Activity
+          src_endpoint:
+            port: 54521
+            ip: 192.168.1.101
+          status_detail: NO_POLICY_EXISTS
+          status_id: 2
+          connection_info:
+            protocol_num: 6
+            direction_id: 2
+            direction: Outbound
+          class_uid: 4001
+          activity_id: 5
+          time: 1756446042000
+          dst_endpoint:
+            uid: 72097421269663744-23456789012345678
+            port: 43321
+            ip: 10.45.23.89
+            name: app01.nextgen.net
+          severity_id: 4
+          class_name: Network Activity
+          device:
+            uid: 72097421269663744-12345678901234567
+            name: agent3.nextgen.net
+            type_id: 1
+            type: Server
+          status: Failure
+          disposition: Blocked
+          firewall_rule:
+            uid: 72097421269663744-45678901234567890
+            name: web_tls_policy
+          disposition_id: 2
+        SourcePorts: 54521
+        DestinationIP: 10.45.23.89
       message: |-
         {
           "AppExecutablePath" : [ "/usr/bin/curl" ],
@@ -846,5 +1188,434 @@ tests:
         }
       service: "microsegmentation"
       tags:
-      - "source:LOGS_SOURCE"
+        - "source:LOGS_SOURCE"
       timestamp: 1756446042000
+  -
+    sample: |-
+      {
+        "User" : "sysadmin@test.com",
+        "ClientAuditUpdate" : "0",
+        "RequestID" : "c22cc22c-3344-cdd3-334cd334567c",
+        "ObjectID" : "11122233344455566",
+        "EventType" : "audit-logs",
+        "AuditOperationType" : "Create",
+        "CustomerID" : 22345678901234567,
+        "ModifiedBy" : 99887766554433221,
+        "ObjectName" : "salesforce-app-segment",
+        "ObjectType" : "Application",
+        "ModifiedTime" : "2025-09-15T14:30:22.000Z",
+        "AuditNewValue" : "{\"id\":\"11122233344455566\",\"name\":\"salesforce-app-segment\",\"domainNames\":[\"salesforce.test.com\"],\"tcpPortRange\":[{\"from\":\"443\",\"to\":\"443\"}],\"enabled\":\"true\"}",
+        "CreationTime" : "2025-09-15T14:30:22.000Z",
+        "AuditOldValue" : ""
+      }
+    result:
+      custom:
+        AuditNewValue: "{\"id\":\"11122233344455566\",\"name\":\"salesforce-app-segment\",\"domainNames\":[\"salesforce.test.com\"],\"tcpPortRange\":[{\"from\":\"443\",\"to\":\"443\"}],\"enabled\":\"true\"}"
+        AuditOldValue: ""
+        AuditOperationType: "Create"
+        ClientAuditUpdate: "0"
+        CustomerID: 22345678901234567
+        EventType: "audit-logs"
+        ModifiedTime: "2025-09-15T14:30:22.000Z"
+        ObjectID: "11122233344455566"
+        ObjectName: "salesforce-app-segment"
+        ObjectType: "Application"
+        RequestID: "c22cc22c-3344-cdd3-334cd334567c"
+        timestamp: "2025-09-15T14:30:22.000Z"
+        usr:
+          email: "sysadmin@test.com"
+          id: 99887766554433221
+        User: sysadmin@test.com
+        ModifiedBy: 99887766554433221
+        ocsf:
+          severity: Informational
+          activity_name: Create
+          metadata:
+            uid: c22cc22c-3344-cdd3-334cd334567c
+            product:
+              name: Zscaler Private Access
+              vendor_name: Zscaler
+            modified_time: 1757946622000
+            logged_time: 1757946622000
+            original_time: '2025-09-15T14:30:22.000Z'
+            version: 1.5.0
+            event_code: audit-logs
+          category_uid: 3
+          category_name: Identity & Access Management
+          message: Create
+          entity_result:
+            uid: '11122233344455566'
+            name: salesforce-app-segment
+            type: Application
+          actor:
+            user:
+              uid: '99887766554433221'
+              email_addr: sysadmin@test.com
+              type_id: 2
+              name: sysadmin@test.com
+              type: Admin
+          status_id: 1
+          class_uid: 3004
+          activity_id: 1
+          time: 1757946622000
+          severity_id: 1
+          class_name: Entity Management
+          entity:
+            uid: '11122233344455566'
+            name: salesforce-app-segment
+            type: Application
+          status: Success
+        CreationTime: '2025-09-15T14:30:22.000Z'
+      message: |-
+        {
+          "User" : "sysadmin@test.com",
+          "ClientAuditUpdate" : "0",
+          "RequestID" : "c22cc22c-3344-cdd3-334cd334567c",
+          "ObjectID" : "11122233344455566",
+          "EventType" : "audit-logs",
+          "AuditOperationType" : "Create",
+          "CustomerID" : 22345678901234567,
+          "ModifiedBy" : 99887766554433221,
+          "ObjectName" : "salesforce-app-segment",
+          "ObjectType" : "Application",
+          "ModifiedTime" : "2025-09-15T14:30:22.000Z",
+          "AuditNewValue" : "{\"id\":\"11122233344455566\",\"name\":\"salesforce-app-segment\",\"domainNames\":[\"salesforce.test.com\"],\"tcpPortRange\":[{\"from\":\"443\",\"to\":\"443\"}],\"enabled\":\"true\"}",
+          "CreationTime" : "2025-09-15T14:30:22.000Z",
+          "AuditOldValue" : ""
+        }
+      service: "audit-logs"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1757946622000
+  -
+    sample: |-
+      {
+        "Policy" : "Default Web Access",
+        "ServerPort" : 443,
+        "ServerIP" : "10.20.30.40",
+        "Connector" : "DC1-AppConnector-1",
+        "Platform" : "windows",
+        "Customer" : "Acme Corp",
+        "EventType" : "user-activity",
+        "ClientCity" : "Chicago",
+        "ClientZEN" : "broker2.us-central",
+        "ClientCountryCode" : "US",
+        "Idp" : "Okta",
+        "ConnectionStatus" : "close",
+        "AppGroup" : "Internal Web Apps",
+        "ClientPrivateIP" : "192.168.10.50",
+        "DoubleEncryption" : "1",
+        "Hostname" : "intranet.acme.local",
+        "IPProtocol" : 6,
+        "ClientPublicIP" : "73.45.123.45",
+        "Username" : "bob.smith@acme.com",
+        "TotalBytesRx" : 25840,
+        "TotalBytesTx" : 8420,
+        "LogTimestamp" : "Mon Sep 15 09:22:11 2025",
+        "SessionID" : "sess987",
+        "Application" : "intranet.acme.local"
+      }
+    result:
+      custom:
+        AppGroup: "Internal Web Apps"
+        Application: "intranet.acme.local"
+        ClientCity: "Chicago"
+        ClientCountryCode: "US"
+        ClientPrivateIP: "192.168.10.50"
+        ClientZEN: "broker2.us-central"
+        ConnectionStatus: "close"
+        Connector: "DC1-AppConnector-1"
+        Customer: "Acme Corp"
+        DoubleEncryption: "1"
+        EventType: "user-activity"
+        Hostname: "intranet.acme.local"
+        IPProtocol: 6
+        IPProtocolName: "TCP"
+        Idp: "Okta"
+        LogTimestamp: "Mon Sep 15 09:22:11 2025"
+        Platform: "windows"
+        Policy: "Default Web Access"
+        SessionID: "sess987"
+        TotalBytesRx: 25840
+        TotalBytesTx: 8420
+        network:
+          client:
+            geoip: {}
+            ip: "73.45.123.45"
+          destination:
+            geoip: {}
+            ip: "10.20.30.40"
+            port: 443
+        timestamp: 1757928131000
+        usr:
+          name: "bob.smith@acme.com"
+        ServerIP: 10.20.30.40
+        ocsf:
+          severity: Informational
+          activity_name: Close
+          metadata:
+            uid: sess987
+            product:
+              name: Zscaler Private Access
+              vendor_name: Zscaler
+            event_code: user-activity
+            logged_time: 1757928131000
+            original_time: Mon Sep 15 09:22:11 2025
+            version: 1.5.0
+          category_uid: 4
+          category_name: Network Activity
+          tunnel_interface:
+            type_id: 4
+            ip: 192.168.10.50
+            type: Tunnel
+          tunnel_type_id: 2
+          session:
+            uid: sess987
+          src_endpoint:
+            owner:
+              uid: bob.smith@acme.com
+              email_addr: bob.smith@acme.com
+              name: bob.smith@acme.com
+            ip: 73.45.123.45
+            location:
+              country: US
+              city: Chicago
+          status_id: 1
+          class_uid: 4014
+          activity_id: 2
+          time: 1757928131000
+          dst_endpoint:
+            hostname: intranet.acme.local
+            port: 443
+            ip: 10.20.30.40
+            name: intranet.acme.local
+            svc_name: intranet.acme.local
+          severity_id: 1
+          class_name: Tunnel Activity
+          user:
+            uid: bob.smith@acme.com
+            email_addr: bob.smith@acme.com
+            type_id: 1
+            name: bob.smith@acme.com
+            type: User
+          device:
+            hostname: intranet.acme.local
+            os:
+              type_id: 100
+              type: Windows
+              name: windows
+            type_id: 2
+            ip: 73.45.123.45
+            name: intranet.acme.local
+            location:
+              country: US
+              city: Chicago
+            type: Desktop
+          tunnel_type: Full Tunnel
+          status: Success
+        ClientPublicIP: 73.45.123.45
+        Username: bob.smith@acme.com
+        ServerPort: 443
+      message: |-
+        {
+          "Policy" : "Default Web Access",
+          "ServerPort" : 443,
+          "ServerIP" : "10.20.30.40",
+          "Connector" : "DC1-AppConnector-1",
+          "Platform" : "windows",
+          "Customer" : "Acme Corp",
+          "EventType" : "user-activity",
+          "ClientCity" : "Chicago",
+          "ClientZEN" : "broker2.us-central",
+          "ClientCountryCode" : "US",
+          "Idp" : "Okta",
+          "ConnectionStatus" : "close",
+          "AppGroup" : "Internal Web Apps",
+          "ClientPrivateIP" : "192.168.10.50",
+          "DoubleEncryption" : "1",
+          "Hostname" : "intranet.acme.local",
+          "IPProtocol" : 6,
+          "ClientPublicIP" : "73.45.123.45",
+          "Username" : "bob.smith@acme.com",
+          "TotalBytesRx" : 25840,
+          "TotalBytesTx" : 8420,
+          "LogTimestamp" : "Mon Sep 15 09:22:11 2025",
+          "SessionID" : "sess987",
+          "Application" : "intranet.acme.local"
+        }
+      service: "user-activity"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1757928131000
+  -
+    sample: |-
+      {
+        "Policy" : "PRA RDP Policy",
+        "ServicePort" : 3389,
+        "Connector" : "EU-AppConnector-1",
+        "Platform" : "windows",
+        "Customer" : "EuroCorp",
+        "EventType" : "user-activity",
+        "PRAConsoleType" : "RDP",
+        "ClientCity" : "Dublin",
+        "ClientZEN" : "broker2.eu-west",
+        "PRACredentialLoginType" : "Username/Password",
+        "ClientCountryCode" : "IE",
+        "Idp" : "AzureAD",
+        "PRAConnectionID" : "PRA-RDP-SESSION-7",
+        "PRAErrorStatus" : "",
+        "PRASharedMode" : "control",
+        "ConnectionStatus" : "active",
+        "PRAApprovalID" : 33333,
+        "AppGroup" : "Privileged Access",
+        "ClientPrivateIP" : "10.0.6.21",
+        "DoubleEncryption" : "0",
+        "Hostname" : "PRA-RDP-SERVER",
+        "Host" : "10.50.2.200",
+        "PRACredentialUserName" : "administrator",
+        "ConnectionID" : "pra-rdp-007,conn007",
+        "ClientPublicIP" : "85.12.44.77",
+        "Username" : "carol@eurocorp.com",
+        "PRARecordingStatus" : "Available",
+        "PRACapabilityPolicyID" : 44444,
+        "LogTimestamp" : "Tue Sep 16 11:05:30 2025",
+        "SessionID" : "pra-rdp-007",
+        "Application" : "PRA-RDP-Server"
+      }
+    result:
+      custom:
+        AppGroup: "Privileged Access"
+        Application: "PRA-RDP-Server"
+        ClientCity: "Dublin"
+        ClientCountryCode: "IE"
+        ClientPrivateIP: "10.0.6.21"
+        ClientZEN: "broker2.eu-west"
+        ConnectionID: "pra-rdp-007,conn007"
+        ConnectionStatus: "active"
+        Connector: "EU-AppConnector-1"
+        Customer: "EuroCorp"
+        DoubleEncryption: "0"
+        EventType: "user-activity"
+        Host: "10.50.2.200"
+        Hostname: "PRA-RDP-SERVER"
+        Idp: "AzureAD"
+        LogTimestamp: "Tue Sep 16 11:05:30 2025"
+        PRAApprovalID: 33333
+        PRACapabilityPolicyID: 44444
+        PRAConnectionID: "PRA-RDP-SESSION-7"
+        PRAConsoleType: "RDP"
+        PRACredentialLoginType: "Username/Password"
+        PRACredentialUserName: "administrator"
+        PRAErrorStatus: ""
+        PRARecordingStatus: "Available"
+        PRASharedMode: "control"
+        Platform: "windows"
+        Policy: "PRA RDP Policy"
+        ServicePort: 3389
+        SessionID: "pra-rdp-007"
+        network:
+          client:
+            geoip: {}
+            ip: "85.12.44.77"
+        timestamp: 1758020730000
+        usr:
+          name: "carol@eurocorp.com"
+        ocsf:
+          severity: Informational
+          activity_name: Traffic
+          metadata:
+            uid: PRA-RDP-SESSION-7
+            product:
+              name: Zscaler Private Access
+              vendor_name: Zscaler
+            event_code: user-activity
+            logged_time: 1758020730000
+            original_time: Tue Sep 16 11:05:30 2025
+            version: 1.5.0
+          category_uid: 4
+          category_name: Network Activity
+          status_code: ''
+          src_endpoint:
+            owner:
+              uid: carol@eurocorp.com
+              type_id: 1
+              name: carol@eurocorp.com
+              type: User
+            zone: broker2.eu-west
+            ip: 85.12.44.77
+            location:
+              country: IE
+              city: Dublin
+          status_detail: ''
+          status_id: 1
+          connection_info:
+            uid: pra-rdp-007,conn007
+            protocol_num: 6
+            direction_id: 1
+            session:
+              uid: pra-rdp-007
+            direction: Inbound
+            protocol_name: TCP
+          response:
+            error: ''
+          class_uid: 4005
+          activity_id: 6
+          time: 1758020730000
+          dst_endpoint:
+            owner:
+              type_id: 2
+              name: administrator
+              type: Admin
+            hostname: PRA-RDP-SERVER
+            os:
+              type_id: 100
+              name: windows
+              type: Windows
+            port: 3389
+            type_id: 1
+            ip: 10.50.2.200
+            name: PRA-RDP-SERVER
+            type: Server
+          severity_id: 1
+          class_name: RDP Activity
+          status: Success
+        ClientPublicIP: 85.12.44.77
+        Username: carol@eurocorp.com
+      message: |-
+        {
+          "Policy" : "PRA RDP Policy",
+          "ServicePort" : 3389,
+          "Connector" : "EU-AppConnector-1",
+          "Platform" : "windows",
+          "Customer" : "EuroCorp",
+          "EventType" : "user-activity",
+          "PRAConsoleType" : "RDP",
+          "ClientCity" : "Dublin",
+          "ClientZEN" : "broker2.eu-west",
+          "PRACredentialLoginType" : "Username/Password",
+          "ClientCountryCode" : "IE",
+          "Idp" : "AzureAD",
+          "PRAConnectionID" : "PRA-RDP-SESSION-7",
+          "PRAErrorStatus" : "",
+          "PRASharedMode" : "control",
+          "ConnectionStatus" : "active",
+          "PRAApprovalID" : 33333,
+          "AppGroup" : "Privileged Access",
+          "ClientPrivateIP" : "10.0.6.21",
+          "DoubleEncryption" : "0",
+          "Hostname" : "PRA-RDP-SERVER",
+          "Host" : "10.50.2.200",
+          "PRACredentialUserName" : "administrator",
+          "ConnectionID" : "pra-rdp-007,conn007",
+          "ClientPublicIP" : "85.12.44.77",
+          "Username" : "carol@eurocorp.com",
+          "PRARecordingStatus" : "Available",
+          "PRACapabilityPolicyID" : 44444,
+          "LogTimestamp" : "Tue Sep 16 11:05:30 2025",
+          "SessionID" : "pra-rdp-007",
+          "Application" : "PRA-RDP-Server"
+        }
+      service: "user-activity"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1758020730000
