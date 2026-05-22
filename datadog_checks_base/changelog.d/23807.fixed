@@ -1,0 +1,1 @@
+Skip inaccessible databases in schema collection instead of aborting the entire run.
