@@ -115,6 +115,8 @@ class SchemaCollector(ABC):
         if not database_name:
             self._log.warning("database has no name %v", database)
             return
+        rows_start = len(self._queued_rows)
+        payloads_before = self._collection_payloads_count
         try:
             self._log.debug("Starting collection of schemas for database %s", database_name)
             with self._get_cursor(database_name) as cursor:
@@ -130,6 +132,18 @@ class SchemaCollector(ABC):
         except Exception as e:
             if not self._is_connection_error(e):
                 raise
+            # Discard any unflushed rows buffered so far for this database so they
+            # don't pollute the snapshot with partial data.
+            discarded = len(self._queued_rows) - rows_start
+            if discarded > 0:
+                del self._queued_rows[rows_start:]
+                self._total_rows_count -= discarded
+            # Rows already sent via maybe_flush cannot be recalled.
+            if self._collection_payloads_count > payloads_before:
+                self._log.warning(
+                    "Database %s skipped after partial flush — snapshot may contain incomplete rows",
+                    database_name,
+                )
             self._skipped_databases_count += 1
             self._log.warning("Skipping database %s due to error", database_name, exc_info=True)
 
