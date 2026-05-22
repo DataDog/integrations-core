@@ -4,7 +4,7 @@
 
 This dashboard helps diagnose APM hostname configuration issues. It shows services emitting hostnames that resemble pod names or empty hostnames, both of which can impact your product experience and can be resolved with proper configuration.
 
-These issues can occur for all OpenTelemetry setups (Collector and DDOT) as well as Datadog Agent setups.
+These issues can occur for all OpenTelemetry setups, including Collector, Datadog OpenTelemetry Distro (DDOT), and Datadog Agent setups.
 
 ## Setup
 

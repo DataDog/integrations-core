@@ -1,12 +1,12 @@
 {
    "title":"Hostname Configuration Issues Dashboard",
-   "description":"This is a dashboard to examine potential hostname configuration issues. You can see if any of your services has hostnames that seem to resemble podnames or services that are emitting empty hostnames. Both of these issues might impact your product experience and can be resolved with proper configuration. These issues can occur for all OpenTelemetry setups (Collector and DDOT).",
+   "description":"This dashboard tracks potential hostname configuration issues. You can see if any of your services have hostnames that seem to resemble pod names or services that are emitting empty hostnames. Both of these issues might impact your product experience and can be resolved with proper configuration. These issues can occur for all OpenTelemetry setups, including Collector and Datadog OpenTelemetry Distro (DDOT).",
    "widgets":[
       {
          "id":8573572782389341,
          "definition":{
             "type":"note",
-            "content":"This is a dashboard to examine potential hostname configuration issues. You can see if any of your services has hostnames that seem to resemble podnames or services that are emitting empty hostnames. Both of these issues might impact your product experience and can be resolved with proper configuration. \n\nProper hostname configuration depends on your set up. To learn how to configure hostnames properly with OpenTelemetry, check out [this documentation](https://docs.datadoghq.com/opentelemetry/config/hostname_tagging/?tab=host). To learn how to configure hostnames with Agent check out [this documentation](https://docs.datadoghq.com/agent/troubleshooting/hostname_containers/?tab=datadogoperator).",
+            "content":"This dashboard tracks potential hostname configuration issues. You can see if any of your services have hostnames that seem to resemble pod names or services that are emitting empty hostnames. Both of these issues might impact your product experience and can be resolved with proper configuration. \n\nProper hostname configuration depends on your setup. To learn how to configure hostnames properly with OpenTelemetry, see [Hostname and Tagging](https://docs.datadoghq.com/opentelemetry/config/hostname_tagging/). To learn how to configure hostnames with the Datadog Agent, see [Hostname Detection in Containers](https://docs.datadoghq.com/agent/troubleshooting/hostname_containers/).",
             "background_color":"white",
             "font_size":"14",
             "text_align":"left",
@@ -26,7 +26,7 @@
       {
          "id":2292956402325562,
          "definition":{
-            "title":"Pod like hostnames (hostnames that look like podnames, likely misconfigured)",
+            "title":"Pod-like hostnames (hostnames that look like pod names, likely misconfigured)",
             "show_title":true,
             "type":"group",
             "layout_type":"ordered",
@@ -34,7 +34,7 @@
                {
                   "id":2712225072112407,
                   "definition":{
-                     "title":"Total affected spans ",
+                     "title":"Total affected spans",
                      "title_size":"16",
                      "title_align":"left",
                      "type":"query_value",
@@ -221,7 +221,7 @@
                {
                   "id":7313851251156465,
                   "definition":{
-                     "title":"Services generating empty hostnames ",
+                     "title":"Services generating empty hostnames",
                      "title_size":"16",
                      "title_align":"left",
                      "type":"toplist",

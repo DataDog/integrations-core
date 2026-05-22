@@ -9,7 +9,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Troubleshooting",
     "changelog": "CHANGELOG.md",
-    "description": "Dashboards for diagnosing APM hostname configuration issues",
+    "description": "Dashboard for diagnosing APM hostname configuration issues",
     "title": "APM Hostname Issues",
     "media": [],
     "classifier_tags": [
