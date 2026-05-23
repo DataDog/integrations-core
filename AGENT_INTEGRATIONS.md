@@ -1359,7 +1359,6 @@
 * datadog-cockroachdb: 6.4.0
 * datadog-confluent-platform: 3.3.0
 * datadog-consul: 5.4.0
-* datadog-control-m: 1.1.0
 * datadog-coredns: 6.4.0
 * datadog-couch: 9.4.0
 * datadog-couchbase: 6.5.0
@@ -1433,7 +1432,6 @@
 * datadog-keda: 2.4.0
 * datadog-keycloak: 1.2.0
 * datadog-kong: 6.4.0
-* datadog-krakend: 1.4.0
 * datadog-kube-apiserver-metrics: 7.5.0
 * datadog-kube-controller-manager: 8.4.0
 * datadog-kube-dns: 7.4.0
@@ -1455,7 +1453,6 @@
 * datadog-linux-audit-logs: 1.2.0
 * datadog-linux-proc-extras: 4.3.0
 * datadog-litellm: 2.4.0
-* datadog-lustre: 1.5.0
 * datadog-mac-audit-logs: 1.4.0
 * datadog-mapr: 3.4.0
 * datadog-mapreduce: 7.4.0
@@ -1469,7 +1466,6 @@
 * datadog-milvus: 2.5.0
 * datadog-mongo: 10.9.0
 * datadog-mysql: 15.15.1
-* datadog-n8n: 1.1.0
 * datadog-nagios: 3.4.0
 * datadog-network: 5.7.0
 * datadog-nfsstat: 3.5.0
@@ -1494,7 +1490,6 @@
 * datadog-postfix: 3.4.0
 * datadog-postgres: 23.6.0
 * datadog-powerdns-recursor: 5.4.0
-* datadog-prefect: 1.0.0
 * datadog-presto: 3.4.0
 * datadog-process: 5.5.0
 * datadog-prometheus: 6.3.0
@@ -1692,7 +1687,6 @@
 * datadog-keda: 2.3.0
 * datadog-keycloak: 1.2.0
 * datadog-kong: 6.3.0
-* datadog-krakend: 1.3.0
 * datadog-kube-apiserver-metrics: 7.4.0
 * datadog-kube-controller-manager: 8.3.0
 * datadog-kube-dns: 7.3.0
@@ -1714,7 +1708,6 @@
 * datadog-linux-audit-logs: 1.2.0
 * datadog-linux-proc-extras: 4.3.0
 * datadog-litellm: 2.3.0
-* datadog-lustre: 1.4.0
 * datadog-mac-audit-logs: 1.3.0
 * datadog-mapr: 3.3.0
 * datadog-mapreduce: 7.3.0
@@ -1949,7 +1942,6 @@
 * datadog-keda: 2.3.0
 * datadog-keycloak: 1.2.0
 * datadog-kong: 6.3.0
-* datadog-krakend: 1.3.0
 * datadog-kube-apiserver-metrics: 7.4.0
 * datadog-kube-controller-manager: 8.3.0
 * datadog-kube-dns: 7.3.0
@@ -1971,7 +1963,6 @@
 * datadog-linux-audit-logs: 1.2.0
 * datadog-linux-proc-extras: 4.3.0
 * datadog-litellm: 2.3.0
-* datadog-lustre: 1.4.0
 * datadog-mac-audit-logs: 1.3.0
 * datadog-mapr: 3.3.0
 * datadog-mapreduce: 7.3.0
@@ -2206,7 +2197,6 @@
 * datadog-keda: 2.3.0
 * datadog-keycloak: 1.2.0
 * datadog-kong: 6.3.0
-* datadog-krakend: 1.3.0
 * datadog-kube-apiserver-metrics: 7.4.0
 * datadog-kube-controller-manager: 8.3.0
 * datadog-kube-dns: 7.3.0
@@ -2228,7 +2218,6 @@
 * datadog-linux-audit-logs: 1.2.0
 * datadog-linux-proc-extras: 4.3.0
 * datadog-litellm: 2.3.0
-* datadog-lustre: 1.4.0
 * datadog-mac-audit-logs: 1.3.0
 * datadog-mapr: 3.3.0
 * datadog-mapreduce: 7.3.0
@@ -2463,7 +2452,6 @@
 * datadog-keda: 2.3.0
 * datadog-keycloak: 1.2.0
 * datadog-kong: 6.3.0
-* datadog-krakend: 1.3.0
 * datadog-kube-apiserver-metrics: 7.4.0
 * datadog-kube-controller-manager: 8.3.0
 * datadog-kube-dns: 7.3.0
@@ -2485,7 +2473,6 @@
 * datadog-linux-audit-logs: 1.2.0
 * datadog-linux-proc-extras: 4.3.0
 * datadog-litellm: 2.3.0
-* datadog-lustre: 1.4.0
 * datadog-mac-audit-logs: 1.3.0
 * datadog-mapr: 3.3.0
 * datadog-mapreduce: 7.3.0
@@ -2717,7 +2704,6 @@
 * datadog-keda: 2.2.0
 * datadog-keycloak: 1.2.0
 * datadog-kong: 6.2.0
-* datadog-krakend: 1.2.0
 * datadog-kube-apiserver-metrics: 7.3.0
 * datadog-kube-controller-manager: 8.2.0
 * datadog-kube-dns: 7.2.0
@@ -2739,7 +2725,6 @@
 * datadog-linux-audit-logs: 1.2.0
 * datadog-linux-proc-extras: 4.2.0
 * datadog-litellm: 2.2.0
-* datadog-lustre: 1.3.0
 * datadog-mac-audit-logs: 1.2.0
 * datadog-mapr: 3.2.0
 * datadog-mapreduce: 7.2.0
@@ -2971,7 +2956,6 @@
 * datadog-keda: 2.2.0
 * datadog-keycloak: 1.2.0
 * datadog-kong: 6.2.0
-* datadog-krakend: 1.2.0
 * datadog-kube-apiserver-metrics: 7.3.0
 * datadog-kube-controller-manager: 8.2.0
 * datadog-kube-dns: 7.2.0
@@ -2993,7 +2977,6 @@
 * datadog-linux-audit-logs: 1.2.0
 * datadog-linux-proc-extras: 4.2.0
 * datadog-litellm: 2.2.0
-* datadog-lustre: 1.3.0
 * datadog-mac-audit-logs: 1.2.0
 * datadog-mapr: 3.2.0
 * datadog-mapreduce: 7.2.0
@@ -3225,7 +3208,6 @@
 * datadog-keda: 2.2.0
 * datadog-keycloak: 1.2.0
 * datadog-kong: 6.2.0
-* datadog-krakend: 1.2.0
 * datadog-kube-apiserver-metrics: 7.3.0
 * datadog-kube-controller-manager: 8.2.0
 * datadog-kube-dns: 7.2.0
@@ -3247,7 +3229,6 @@
 * datadog-linux-audit-logs: 1.2.0
 * datadog-linux-proc-extras: 4.2.0
 * datadog-litellm: 2.2.0
-* datadog-lustre: 1.3.0
 * datadog-mac-audit-logs: 1.2.0
 * datadog-mapr: 3.2.0
 * datadog-mapreduce: 7.2.0
@@ -3479,7 +3460,6 @@
 * datadog-keda: 2.2.0
 * datadog-keycloak: 1.2.0
 * datadog-kong: 6.2.0
-* datadog-krakend: 1.2.0
 * datadog-kube-apiserver-metrics: 7.3.0
 * datadog-kube-controller-manager: 8.2.0
 * datadog-kube-dns: 7.2.0
@@ -3501,7 +3481,6 @@
 * datadog-linux-audit-logs: 1.2.0
 * datadog-linux-proc-extras: 4.2.0
 * datadog-litellm: 2.2.0
-* datadog-lustre: 1.3.0
 * datadog-mac-audit-logs: 1.2.0
 * datadog-mapr: 3.2.0
 * datadog-mapreduce: 7.2.0
@@ -3733,7 +3712,6 @@
 * datadog-keda: 2.2.0
 * datadog-keycloak: 1.2.0
 * datadog-kong: 6.2.0
-* datadog-krakend: 1.2.0
 * datadog-kube-apiserver-metrics: 7.3.0
 * datadog-kube-controller-manager: 8.2.0
 * datadog-kube-dns: 7.2.0
@@ -3755,7 +3733,6 @@
 * datadog-linux-audit-logs: 1.2.0
 * datadog-linux-proc-extras: 4.2.0
 * datadog-litellm: 2.2.0
-* datadog-lustre: 1.3.0
 * datadog-mac-audit-logs: 1.2.0
 * datadog-mapr: 3.2.0
 * datadog-mapreduce: 7.2.0
@@ -3986,7 +3963,6 @@
 * datadog-keda: 2.2.0
 * datadog-keycloak: 1.2.0
 * datadog-kong: 6.2.0
-* datadog-krakend: 1.2.0
 * datadog-kube-apiserver-metrics: 7.3.0
 * datadog-kube-controller-manager: 8.2.0
 * datadog-kube-dns: 7.2.0
@@ -4008,7 +3984,6 @@
 * datadog-linux-audit-logs: 1.2.0
 * datadog-linux-proc-extras: 4.2.0
 * datadog-litellm: 2.2.0
-* datadog-lustre: 1.3.0
 * datadog-mac-audit-logs: 1.2.0
 * datadog-mapr: 3.2.0
 * datadog-mapreduce: 7.2.0
@@ -4239,7 +4214,6 @@
 * datadog-keda: 2.2.0
 * datadog-keycloak: 1.2.0
 * datadog-kong: 6.2.0
-* datadog-krakend: 1.2.0
 * datadog-kube-apiserver-metrics: 7.3.0
 * datadog-kube-controller-manager: 8.2.0
 * datadog-kube-dns: 7.2.0
@@ -4261,7 +4235,6 @@
 * datadog-linux-audit-logs: 1.2.0
 * datadog-linux-proc-extras: 4.2.0
 * datadog-litellm: 2.2.0
-* datadog-lustre: 1.3.0
 * datadog-mac-audit-logs: 1.2.0
 * datadog-mapr: 3.2.0
 * datadog-mapreduce: 7.2.0
@@ -4492,7 +4465,6 @@
 * datadog-keda: 2.2.0
 * datadog-keycloak: 1.2.0
 * datadog-kong: 6.2.0
-* datadog-krakend: 1.2.0
 * datadog-kube-apiserver-metrics: 7.3.0
 * datadog-kube-controller-manager: 8.2.0
 * datadog-kube-dns: 7.2.0
@@ -4514,7 +4486,6 @@
 * datadog-linux-audit-logs: 1.2.0
 * datadog-linux-proc-extras: 4.2.0
 * datadog-litellm: 2.2.0
-* datadog-lustre: 1.3.0
 * datadog-mac-audit-logs: 1.2.0
 * datadog-mapr: 3.2.0
 * datadog-mapreduce: 7.2.0
@@ -4745,7 +4716,6 @@
 * datadog-keda: 2.2.0
 * datadog-keycloak: 1.2.0
 * datadog-kong: 6.2.0
-* datadog-krakend: 1.2.0
 * datadog-kube-apiserver-metrics: 7.3.0
 * datadog-kube-controller-manager: 8.2.0
 * datadog-kube-dns: 7.2.0
@@ -4767,7 +4737,6 @@
 * datadog-linux-audit-logs: 1.2.0
 * datadog-linux-proc-extras: 4.2.0
 * datadog-litellm: 2.2.0
-* datadog-lustre: 1.3.0
 * datadog-mac-audit-logs: 1.2.0
 * datadog-mapr: 3.2.0
 * datadog-mapreduce: 7.2.0
@@ -4997,7 +4966,6 @@
 * datadog-keda: 2.2.0
 * datadog-keycloak: 1.2.0
 * datadog-kong: 6.2.0
-* datadog-krakend: 1.2.0
 * datadog-kube-apiserver-metrics: 7.3.0
 * datadog-kube-controller-manager: 8.2.0
 * datadog-kube-dns: 7.2.0
@@ -5019,7 +4987,6 @@
 * datadog-linux-audit-logs: 1.2.0
 * datadog-linux-proc-extras: 4.2.0
 * datadog-litellm: 2.2.0
-* datadog-lustre: 1.3.0
 * datadog-mac-audit-logs: 1.2.0
 * datadog-mapr: 3.2.0
 * datadog-mapreduce: 7.2.0

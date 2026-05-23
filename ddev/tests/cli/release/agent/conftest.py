@@ -96,6 +96,52 @@ classifiers = [
 
 
 @pytest.fixture
+def repo_with_agent_release_exclusion_range(tmp_path_factory, config_file):
+    repo_path = tmp_path_factory.mktemp('integrations-core')
+    repo = Repository('integrations-core', str(repo_path))
+
+    def commit(msg):
+        repo.git.run('commit', '--no-verify', '-a', '-m', msg)
+
+    repo.git.run('init')
+    repo.git.run('config', 'user.email', 'you@example.com')
+    repo.git.run('config', 'user.name', 'Your Name')
+    repo.git.run('config', 'commit.gpgsign', 'false')
+    repo.git.run('config', 'tag.gpgsign', 'false')
+
+    write_agent_requirements(repo.path, ['datadog-existingcheck==2.0.0'])
+    repo.git.run('add', '.')
+    commit('7.73.0 release')
+    repo.git.run('tag', '7.73.0')
+
+    write_agent_requirements(repo.path, ['datadog-existingcheck==2.0.0', 'datadog-temporary==1.0.0'])
+    commit('7.74.0 release')
+    repo.git.run('tag', '7.74.0')
+
+    write_agent_requirements(repo.path, ['datadog-existingcheck==2.0.0', 'datadog-temporary==1.0.1'])
+    commit('7.78.0 release')
+    repo.git.run('tag', '7.78.0')
+
+    repo.git.run('tag', '7.78.1')
+
+    (repo.path / '.ddev').mkdir()
+    (repo.path / '.ddev' / 'config.toml').write_text(
+        '''
+[overrides.release.agent.integrations.exclude_by_agent_version]
+"7.74.0..7.78.0" = ["datadog-temporary"]
+'''
+    )
+
+    write_dummy_manifest(repo.path, 'existingcheck')
+    write_dummy_manifest(repo.path, 'temporary')
+
+    config_file.model.repos['core'] = str(repo.path)
+    config_file.save()
+
+    yield repo
+
+
+@pytest.fixture
 def repo_with_new_integration_patched(tmp_path_factory, config_file):
     """
     Sets up a repo where a new integration is released at version 1.0.1 (not 1.0.0).

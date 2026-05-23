@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     AgentChangelog = dict[str, dict[str, tuple[str, bool, bool]]]
 
 DATADOG_PACKAGE_PREFIX = 'datadog-'
+AGENT_INTEGRATION_EXCLUSIONS_CONFIG = '/overrides/release/agent/integrations/exclude_by_agent_version'
 
 
 def get_agent_tags(repo: Repository, since: str, to: str) -> list[str]:
@@ -64,14 +65,9 @@ def get_changes_per_agent(repo: Repository, since: str, to: str) -> AgentChangel
     changes_per_agent: AgentChangelog = {}
     # to keep indexing easy, we run the loop off-by-one
     for i in range(1, len(agent_tags)):
-        req_file_name = repo.agent_release_requirements.name
         current_tag = agent_tags[i - 1]
-        # Requirements for current tag
-        file_contents = repo.git.show_file(req_file_name, current_tag)
-        catalog_now = parse_agent_req_file(file_contents)
-        # Requirements for previous tag
-        file_contents = repo.git.show_file(req_file_name, agent_tags[i])
-        catalog_prev = parse_agent_req_file(file_contents)
+        catalog_now = get_agent_release_catalog(repo, current_tag)
+        catalog_prev = get_agent_release_catalog(repo, agent_tags[i])
 
         # at some point in the git history, the requirements file erroneously
         # contained the folder name instead of the package name for each check,
@@ -92,6 +88,43 @@ def get_changes_per_agent(repo: Repository, since: str, to: str) -> AgentChangel
                 # New integration
                 changes_per_agent[current_tag][name] = (ver, True, False)
     return changes_per_agent
+
+
+def get_agent_release_catalog(repo: Repository, agent_version: str) -> dict[str, str]:
+    """Return the requirements catalog for an Agent tag with configured historical corrections applied."""
+    file_contents = repo.git.show_file(repo.agent_release_requirements.name, agent_version)
+    catalog = parse_agent_req_file(file_contents)
+    excluded_integrations = _get_excluded_agent_integrations(repo, agent_version)
+
+    if not excluded_integrations:
+        return catalog
+
+    return {
+        name: version for name, version in catalog.items() if normalize_package_name(name) not in excluded_integrations
+    }
+
+
+def _get_excluded_agent_integrations(repo: Repository, agent_version: str) -> set[str]:
+    from packaging.version import Version
+
+    exclusions_by_range = repo.config.get(AGENT_INTEGRATION_EXCLUSIONS_CONFIG, {})
+    if not exclusions_by_range:
+        return set()
+
+    version = Version(agent_version)
+    excluded_integrations = set()
+    for version_range, integrations in exclusions_by_range.items():
+        start, separator, end = version_range.partition('..')
+        if not separator:
+            raise ValueError(
+                f'Invalid Agent integration exclusion range {version_range!r}. '
+                'Expected format: "<START_VERSION>..<END_VERSION>".'
+            )
+
+        if Version(start) <= version <= Version(end):
+            excluded_integrations.update(normalize_package_name(integration) for integration in integrations)
+
+    return excluded_integrations
 
 
 def normalize_catalog(catalog: dict[str, str]) -> dict[str, str]:

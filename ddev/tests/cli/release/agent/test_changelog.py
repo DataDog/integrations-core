@@ -90,6 +90,31 @@ def test_new_integration_with_non_initial_version(repo_with_new_integration_patc
     assert mock_fetch_tags.call_count == 1
 
 
+def test_changelog_given_version_scoped_exclusion_returns_new_integration_after_range(
+    repo_with_agent_release_exclusion_range, ddev, mocker
+):
+    mock_fetch_tags = mocker.patch('ddev.utils.git.GitRepository.fetch_tags')
+
+    result = ddev('release', 'agent', 'changelog', '--since', '7.73.0', '--to', '7.78.1')
+    assert result.exit_code == 0
+
+    expected_output = """## Datadog Agent version [7.78.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7781)
+
+### New Integrations
+* temporary [1.0.1](https://github.com/DataDog/integrations-core/blob/master/temporary/CHANGELOG.md)
+
+## Datadog Agent version [7.78.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7780)
+
+* There were no integration updates for this version of the Agent.
+
+## Datadog Agent version [7.74.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7740)
+
+* There were no integration updates for this version of the Agent.
+"""
+    assert result.output.rstrip('\n') == expected_output.strip('\n')
+    assert mock_fetch_tags.call_count == 1
+
+
 @pytest.fixture
 def repo_with_fake_changelog(repo_with_history, config_file):
     config_file.model.repos['core'] = str(repo_with_history.path)
