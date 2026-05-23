@@ -15,7 +15,7 @@
 * Lower log level from WARN to DEBUG for the message emitted when a consumer group has offsets for a partition but no stored highwater offset (typically during leader failover). ([#23388](https://github.com/DataDog/integrations-core/pull/23388))
 * When a topic's highwater offset decreases (retention wipe, topic recreation, or offset reset), purge cached (offset, timestamp) pairs whose offset is above the new highwater and switch eviction to oldest-timestamp instead of smallest-offset. Previously, stale pre-reset entries poisoned interpolation and pinned `kafka.estimated_consumer_lag` to a wall-clock value equal to how long ago the reset happened. ([#23409](https://github.com/DataDog/integrations-core/pull/23409))
 
-## 7.2.1 / 2026-05-12
+## 7.2.1 / 2026-05-12 / Agent 7.79.0
 
 ***Fixed***:
 
