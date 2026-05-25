@@ -23,8 +23,7 @@ from datadog_checks.dev.replay.pbt.cache import copy_replay_cache, mutate_reques
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
-PROPERTY_DETERMINISTIC = 'deterministic'
-PROPERTY_OPENMETRICS_LABEL_ORDER = 'openmetrics-label-order'
+from ddev.replay_pbt.properties import REPLAY_PBT_PROPERTY_CHOICES, ReplayPBTProperty
 
 
 class ReplayPBTContext:
@@ -33,10 +32,9 @@ class ReplayPBTContext:
         self.environment = _required_env('DDEV_REPLAY_PBT_ENVIRONMENT')
         self.cache = Path(_required_env('DDEV_REPLAY_PBT_CACHE'))
         self.ref = os.environ.get('DDEV_REPLAY_PBT_REF', 'HEAD')
-        self.properties = {item for item in os.environ.get('DDEV_REPLAY_PBT_PROPERTIES', '').split(',') if item} or {
-            PROPERTY_DETERMINISTIC,
-            PROPERTY_OPENMETRICS_LABEL_ORDER,
-        }
+        self.properties = {item for item in os.environ.get('DDEV_REPLAY_PBT_PROPERTIES', '').split(',') if item} or set(
+            REPLAY_PBT_PROPERTY_CHOICES
+        )
         self.artifacts = Path(_required_env('DDEV_REPLAY_PBT_ARTIFACTS'))
         self.check_class = os.environ.get('DDEV_REPLAY_PBT_CHECK_CLASS')
         self.old_env = os.environ.get('DDEV_REPLAY_PBT_OLD_ENV')
@@ -108,10 +106,10 @@ def test_cached_replay_is_deterministic_for_same_ref(replay_pbt_context: ReplayP
     # exact artifact directory; the second run replays that materialized cache so
     # this catches nondeterminism in check execution, replay adapters,
     # normalization, and compare-check artifact regeneration.
-    _skip_unselected(replay_pbt_context, PROPERTY_DETERMINISTIC)
+    _skip_unselected(replay_pbt_context, ReplayPBTProperty.DETERMINISTIC)
 
-    first = replay_pbt_context.artifacts / PROPERTY_DETERMINISTIC / 'first'
-    second = replay_pbt_context.artifacts / PROPERTY_DETERMINISTIC / 'second'
+    first = replay_pbt_context.artifacts / ReplayPBTProperty.DETERMINISTIC / 'first'
+    second = replay_pbt_context.artifacts / ReplayPBTProperty.DETERMINISTIC / 'second'
     first_diff = _run_compare_check_cache(context=replay_pbt_context, cache=replay_pbt_context.cache, artifacts=first)
     second_diff = _run_compare_check_cache(context=replay_pbt_context, cache=first, artifacts=second)
 
@@ -129,10 +127,10 @@ def test_label_order_mutated_cache_matches_original_output(replay_pbt_context: R
     # test copies the replay cache, applies that mutation to adapter-saved
     # request fixtures, then runs the real integration check against original and
     # mutated caches and compares normalized outputs.
-    _skip_unselected(replay_pbt_context, PROPERTY_OPENMETRICS_LABEL_ORDER)
+    _skip_unselected(replay_pbt_context, ReplayPBTProperty.OPENMETRICS_LABEL_ORDER)
     assert mutation == 'sort-openmetrics-labels'
 
-    property_dir = replay_pbt_context.artifacts / PROPERTY_OPENMETRICS_LABEL_ORDER
+    property_dir = replay_pbt_context.artifacts / ReplayPBTProperty.OPENMETRICS_LABEL_ORDER
     original = property_dir / 'original'
     mutated = property_dir / 'mutated'
     mutated_cache = copy_replay_cache(replay_pbt_context.cache, property_dir / 'mutated-cache')
