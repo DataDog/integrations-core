@@ -70,51 +70,35 @@ def mock_size_status():
 
 
 @pytest.mark.parametrize(
-    "args, use_dependency_sizes",
+    "args",
     [
-        ([], False),
-        (["--compressed"], False),
-        (["--format", "csv,markdown,json,png"], False),
-        (["--show-gui"], False),
-        (["--platform", "linux-aarch64", "--python", "3.12"], False),
-        (["--platform", "linux-aarch64", "--python", "3.12", "--compressed"], False),
-        (["--platform", "linux-aarch64", "--python", "3.12", "--format", "csv,markdown,json,png"], False),
-        (["--platform", "linux-aarch64", "--python", "3.12", "--show-gui"], False),
+        [],
+        ["--compressed"],
+        ["--format", "csv,markdown,json,png"],
+        ["--show-gui"],
+        ["--commit", "1234567890"],
+        ["--platform", "linux-aarch64", "--python", "3.12"],
+        ["--platform", "linux-aarch64", "--python", "3.12", "--compressed"],
+        ["--platform", "linux-aarch64", "--python", "3.12", "--format", "csv,markdown,json,png"],
+        ["--platform", "linux-aarch64", "--python", "3.12", "--show-gui"],
     ],
     ids=[
         "no_args",
         "compressed",
         "format",
         "show_gui",
+        "commit",
         "platform_and_version",
         "platform_version_compressed",
         "platform_version_format",
         "platform_version_show_gui",
     ],
 )
-def test_status(ddev, mock_size_status, tmp_path, args, use_dependency_sizes):
+def test_status(ddev, mock_size_status, args):
     command = ["size", "status"] + args
 
-    if use_dependency_sizes:
-        fake_deps = [
-            {
-                "Name": "dep1",
-                "Version": "1.1.1",
-                "Size_Bytes": 5678,
-                "Size": 123,
-                "Type": "Dependency",
-            }
-        ]
-        dependency_sizes_file = tmp_path / "sizes"
-        dependency_sizes_file.write_text("{}")
-        command.extend(["--dependency-sizes", str(dependency_sizes_file)])
-
-        with patch("ddev.cli.size.utils.common_funcs.get_dependencies_from_json", return_value=fake_deps):
-            result = ddev(*command)
-            assert result.exit_code == 0
-    else:
-        result = ddev(*command)
-        assert result.exit_code == 0
+    result = ddev(*command)
+    assert result.exit_code == 0
 
 
 @pytest.mark.parametrize(
@@ -125,35 +109,20 @@ def test_status(ddev, mock_size_status, tmp_path, args, use_dependency_sizes):
         "to_dd_org",
         "to_dd_key",
         "commit",
-        "dependency_sizes_path",
-        "create_dependency_sizes_file",
         "should_abort",
     ),
     [
         # Valid cases
-        ("linux-x86_64", "3.12", ["csv"], None, None, None, None, False, False),
-        ("macos-x86_64", "3.12", [], None, None, "1234567890", None, False, False),
-        ("linux-aarch64", "3.12", [], None, None, None, Path("sizes"), True, False),
+        ("linux-x86_64", "3.12", ["csv"], None, None, None, False),
+        ("macos-x86_64", "3.12", [], None, None, "1234567890", False),
         # Invalid platform
-        ("invalid-platform", "3.12", [], None, None, None, None, False, True),
+        ("invalid-platform", "3.12", [], None, None, None, True),
         # Invalid version
-        ("linux-x86_64", "2.7", [], None, None, None, None, False, True),
-        # Invalid dependency sizes file
-        ("linux-x86_64", "3.12", [], None, None, None, Path("sizes"), False, True),
-        # Both commit and dependency_sizes
-        (
-            "linux-x86_64",
-            "3.12",
-            [],
-            None,
-            None,
-            "1234567890",
-            Path("sizes"),
-            True,
-            True,
-        ),
+        ("linux-x86_64", "2.7", [], None, None, None, True),
         # Invalid format
-        ("linux-x86_64", "3.12", ["invalid-format"], None, None, None, None, False, True),
+        ("linux-x86_64", "3.12", ["invalid-format"], None, None, None, True),
+        # Missing commit for Datadog metrics
+        ("linux-x86_64", "3.12", [], "test-org", None, None, True),
         # Both to_dd_org and to_dd_key
         (
             "linux-x86_64",
@@ -162,8 +131,6 @@ def test_status(ddev, mock_size_status, tmp_path, args, use_dependency_sizes):
             "test-org",
             "test-key",
             None,
-            None,
-            False,
             True,
         ),
         # Multiple errors
@@ -174,20 +141,16 @@ def test_status(ddev, mock_size_status, tmp_path, args, use_dependency_sizes):
             "test-org",
             "test-key",
             "1234567890",
-            Path("sizes"),
-            True,
             True,
         ),
     ],
     ids=[
         "valid_simple",
         "valid_with_commit",
-        "valid_with_dependency_sizes",
         "invalid_platform",
         "invalid_version",
-        "invalid_dependency_sizes_file",
-        "commit_and_dependency_sizes",
         "invalid_format",
+        "to_dd_without_commit",
         "to_dd_org_and_to_dd_key",
         "multiple_errors",
     ],
@@ -199,19 +162,11 @@ def test_validate_parameters(
     to_dd_org,
     to_dd_key,
     commit,
-    dependency_sizes_path,
-    create_dependency_sizes_file,
     should_abort,
-    tmp_path,
 ):
     valid_platforms = ["linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"]
     valid_versions = ["3.12"]
 
-    dependency_sizes = None
-    if dependency_sizes_path:
-        dependency_sizes = tmp_path / dependency_sizes_path
-        if create_dependency_sizes_file:
-            dependency_sizes.touch()
     app = MagicMock()
     app.abort.side_effect = SystemExit
 
@@ -225,7 +180,6 @@ def test_validate_parameters(
                 format,
                 to_dd_org,
                 commit,
-                dependency_sizes,
                 to_dd_key,
                 app,
             )
@@ -239,7 +193,6 @@ def test_validate_parameters(
             format,
             to_dd_org,
             commit,
-            dependency_sizes,
             to_dd_key,
             app,
         )
