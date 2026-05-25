@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -129,6 +130,8 @@ def compare_check(
         app.display_header(f'{integration.display_name}: {env_name}')
         effective_old_env = old_hatch_env or env_name
         effective_new_env = new_hatch_env or env_name
+        old_head = _git_rev_parse(app.repo.path, old_ref)
+        new_head = _git_rev_parse(app.repo.path, new_ref or 'HEAD')
         resolved_replay_cache = _resolve_replay_cache(
             app.repo.path,
             integration.name,
@@ -138,6 +141,9 @@ def compare_check(
             effective_old_env,
             effective_new_env,
             comparison_mode,
+            old_head=old_head,
+            new_head=new_head,
+            check_class=check_class,
         )
         if replay_cache_auto:
             app.display_info(f'Using replay cache: {resolved_replay_cache}')
@@ -149,6 +155,8 @@ def compare_check(
             storage=storage,
             old_ref=old_ref,
             new_ref=new_ref,
+            old_head=old_head,
+            new_head=new_head,
             check_class=check_class,
             artifacts=artifacts,
             exact_artifacts_dir=exact_artifacts_dir,
@@ -207,6 +215,8 @@ def _compare_one_environment(
     storage,
     old_ref: str,
     new_ref: str | None,
+    old_head: str,
+    new_head: str,
     check_class: str | None,
     artifacts: StdPath | None,
     exact_artifacts_dir: bool,
@@ -233,6 +243,7 @@ def _compare_one_environment(
     started_envs: list[str] = []
     old_returncode = None
     new_returncode = None
+    refs: dict = {}
     old_mode = 'replay' if replay_cache else 'record'
     new_mode = None
     same_fixture = comparison_mode == 'same-fixture-replay'
@@ -241,8 +252,9 @@ def _compare_one_environment(
         new_ref_label = new_ref or 'working-tree'
         refs = {
             'old_ref': old_ref,
+            'old_head': old_head,
             'new_ref': new_ref_label,
-            'new_head': _git_rev_parse(app.repo.path, 'HEAD'),
+            'new_head': new_head,
             'new_dirty': _git_dirty(app.repo.path),
             'fixture_env': fixture_env,
             'old_env': old_hatch_env,
@@ -252,6 +264,7 @@ def _compare_one_environment(
             'record_ref': 'cache' if replay_cache else 'old',
             'replay_cache': str(replay_cache) if replay_cache else None,
             'adapter': adapter,
+            'check_class': check_class,
         }
         (run_dir / 'refs.json').write_text(json.dumps(refs, indent=2, sort_keys=True) + '\n')
 
@@ -472,6 +485,22 @@ def _compare_one_environment(
             except Exception as e:
                 app.display_warning(f'Failed to stop environment {integration.name}:{env_name}: {e}')
 
+    if refs:
+        _write_fixture_key(
+            run_dir,
+            refs,
+            integration=integration.name,
+            adapter=adapter,
+            old_hatch_env=old_hatch_env,
+            new_hatch_env=new_hatch_env,
+            comparison_mode=comparison_mode,
+            fixture_env=fixture_env,
+            old_head=old_head,
+            new_head=new_head,
+            check_class=check_class,
+        )
+        (run_dir / 'refs.json').write_text(json.dumps(refs, indent=2, sort_keys=True) + '\n')
+
     return run_dir, _write_diff_artifacts(run_dir)
 
 
@@ -487,6 +516,55 @@ def _format_diff_summary(diff: dict) -> str:
     )
 
 
+def _required_cache_files(comparison_mode: str) -> list[str]:
+    if comparison_mode == 'same-fixture-replay':
+        return ['config.json', 'capture.json']
+    return ['old.config.json', 'capture.json', 'new.config.json', 'new.capture.json']
+
+
+def _file_sha256(path: StdPath) -> str:
+    digest = hashlib.sha256()
+    with path.open('rb') as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b''):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _write_fixture_key(
+    run_dir: StdPath,
+    refs: dict,
+    *,
+    integration: str,
+    adapter: str,
+    old_hatch_env: str,
+    new_hatch_env: str,
+    comparison_mode: str,
+    fixture_env: str | None,
+    old_head: str,
+    new_head: str,
+    check_class: str | None,
+) -> None:
+    files = {}
+    for name in _required_cache_files(comparison_mode):
+        path = run_dir / name
+        if path.is_file():
+            files[name] = _file_sha256(path)
+
+    refs['fixture_key'] = {
+        'version': 1,
+        'integration': integration,
+        'adapter': adapter,
+        'comparison_mode': comparison_mode,
+        'fixture_env': fixture_env,
+        'old_env': old_hatch_env,
+        'new_env': new_hatch_env,
+        'record_old_head': old_head,
+        'record_new_head': new_head if comparison_mode == 'record-each-side' else None,
+        'check_class': check_class,
+        'files': files,
+    }
+
+
 def _resolve_replay_cache(
     repo_path,
     integration: str,
@@ -496,6 +574,10 @@ def _resolve_replay_cache(
     old_hatch_env: str,
     new_hatch_env: str,
     comparison_mode: str,
+    *,
+    old_head: str,
+    new_head: str,
+    check_class: str | None,
 ) -> StdPath | None:
     if not replay_cache:
         return None
@@ -511,11 +593,15 @@ def _resolve_replay_cache(
     for candidate in candidates:
         if _is_suitable_replay_cache(
             candidate,
+            integration=integration,
             adapter=adapter,
             old_hatch_env=old_hatch_env,
             new_hatch_env=new_hatch_env,
             comparison_mode=comparison_mode,
             fixture_env=environment if comparison_mode == 'same-fixture-replay' else None,
+            old_head=old_head,
+            new_head=new_head,
+            check_class=check_class,
         ):
             return candidate
 
@@ -551,40 +637,54 @@ def _iter_replay_cache_candidates(cache_root: StdPath) -> list[StdPath]:
 def _is_suitable_replay_cache(
     cache_dir: StdPath,
     *,
+    integration: str,
     adapter: str,
     old_hatch_env: str,
     new_hatch_env: str,
     comparison_mode: str,
     fixture_env: str | None,
+    old_head: str,
+    new_head: str,
+    check_class: str | None,
 ) -> bool:
-    required_files = ['capture.json']
-    if comparison_mode == 'same-fixture-replay':
-        required_files.append('config.json')
-    else:
-        required_files.extend(['old.config.json', 'new.config.json', 'new.capture.json'])
-
+    required_files = _required_cache_files(comparison_mode)
     if any(not (cache_dir / name).is_file() for name in required_files):
         return False
 
     refs_file = cache_dir / 'refs.json'
     if not refs_file.is_file():
-        return True
+        return False
 
     try:
         refs = json.loads(refs_file.read_text())
     except Exception:
         return False
 
+    fixture_key = refs.get('fixture_key')
+    if not isinstance(fixture_key, dict):
+        return False
+
     expected = {
+        'version': 1,
+        'integration': integration,
         'adapter': adapter,
         'comparison_mode': comparison_mode,
+        'fixture_env': fixture_env,
         'old_env': old_hatch_env,
         'new_env': new_hatch_env,
+        'record_old_head': old_head,
+        'record_new_head': new_head if comparison_mode == 'record-each-side' else None,
+        'check_class': check_class,
     }
-    if fixture_env is not None:
-        expected['fixture_env'] = fixture_env
 
-    return all(refs.get(key, value) == value for key, value in expected.items())
+    if any(fixture_key.get(key) != value for key, value in expected.items()):
+        return False
+
+    hashes = fixture_key.get('files')
+    if not isinstance(hashes, dict):
+        return False
+
+    return all(hashes.get(name) == _file_sha256(cache_dir / name) for name in required_files)
 
 
 def _resolve_artifacts_dir(
