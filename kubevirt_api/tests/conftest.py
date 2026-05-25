@@ -54,6 +54,15 @@ def setup_kubevirt():
     # deploy a VirtualMachine instance
     run_command(["kubectl", "apply", "-f", os.path.join(HERE, "kind", "vm.yaml")])
     run_command(["kubectl", "patch", "virtualmachine", "testvm", "--type", "merge", "-p", '{"spec":{"running":true}}'])
+    run_command(
+        [
+            "kubectl",
+            "wait",
+            "virtualmachineinstance/testvm",
+            "--for=jsonpath={.status.phase}=Running",
+            "--timeout=5m",
+        ]
+    )
 
 
 @pytest.fixture(scope="session")

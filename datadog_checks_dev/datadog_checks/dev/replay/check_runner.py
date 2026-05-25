@@ -21,6 +21,16 @@ from datadog_checks.dev.replay.pytest import build_check_instances
 
 
 def test_replay_check_runner(monkeypatch, aggregator, datadog_agent, dd_run_check):
+    from datadog_checks.base.utils import time as dd_time
+    import time
+
+    current_time = [{args.replay_time!r}]
+    monkeypatch.setattr(time, 'time', lambda: current_time[0])
+    monkeypatch.setattr(time, 'monotonic', lambda: current_time[0])
+    monkeypatch.setattr(time, 'perf_counter', lambda: current_time[0])
+    monkeypatch.setattr(dd_time, 'epoch_offset', lambda: current_time[0])
+    monkeypatch.setattr(dd_time, 'time_func', lambda: current_time[0])
+
     config = json.loads(Path({str(args.config)!r}).read_text())
     instances = config.get('instances', [config])
     fixture = Path({str(args.fixture)!r})
@@ -30,6 +40,7 @@ def test_replay_check_runner(monkeypatch, aggregator, datadog_agent, dd_run_chec
     checks = build_check_instances({args.check_class!r}, instances, {args.check_name!r})
     outputs = []
     for index in range(readings):
+        current_time[0] = {args.replay_time!r} + index * {args.reading_interval!r}
         for check in checks:
             dd_run_check(check)
         outputs.append({{'index': index, 'output': serialize_aggregator(aggregator, datadog_agent)}})
@@ -65,6 +76,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument('--fixture', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--readings', type=int, default=1)
+    parser.add_argument('--replay-time', type=float, default=1_700_000_000.0)
+    parser.add_argument('--reading-interval', type=float, default=15.0)
     args = parser.parse_args(argv)
 
     if args.readings < 1:

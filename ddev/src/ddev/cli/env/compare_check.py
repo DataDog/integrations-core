@@ -94,6 +94,20 @@ OUTPUT_COLLECTIONS = (
     type=click.IntRange(min=1),
     help='Number of check readings to record/replay.',
 )
+@click.option(
+    '--replay-time',
+    default=1_700_000_000.0,
+    show_default=True,
+    type=float,
+    help='Logical Unix time injected into check replay runs.',
+)
+@click.option(
+    '--reading-interval',
+    default=15.0,
+    show_default=True,
+    type=float,
+    help='Logical seconds between check readings.',
+)
 @click.pass_context
 def compare_check(
     ctx: click.Context,
@@ -112,6 +126,8 @@ def compare_check(
     comparison_mode: str,
     recreate: bool,
     readings: int,
+    replay_time: float,
+    reading_interval: float,
 ):
     """
     Compare no-Agent check output across two integrations-core refs.
@@ -187,6 +203,8 @@ def compare_check(
             comparison_mode=comparison_mode,
             recreate=recreate,
             readings=readings,
+            replay_time=replay_time,
+            reading_interval=reading_interval,
         )
         batch_results.append((env_name, run_dir, diff))
         app.display_success(f'Wrote compare-check artifacts to {run_dir}')
@@ -248,6 +266,8 @@ def _compare_one_environment(
     comparison_mode: str,
     recreate: bool,
     readings: int,
+    replay_time: float,
+    reading_interval: float,
 ) -> tuple[StdPath, dict]:
     app: Application = ctx.obj
     run_dir = _resolve_artifacts_dir(
@@ -289,6 +309,8 @@ def _compare_one_environment(
             'check_class': check_class,
             'cache_version': REPLAY_CACHE_VERSION,
             'readings': readings,
+            'replay_time': replay_time,
+            'reading_interval': reading_interval,
         }
         (run_dir / 'refs.json').write_text(json.dumps(refs, indent=2, sort_keys=True) + '\n')
 
@@ -324,6 +346,8 @@ def _compare_one_environment(
                         fixture_name='capture.json',
                         output_name='old.raw.json',
                         readings=readings,
+                        replay_time=replay_time,
+                        reading_interval=reading_interval,
                     )
 
                     new_mode = 'replay'
@@ -342,6 +366,8 @@ def _compare_one_environment(
                         fixture_name='capture.json',
                         output_name='new.raw.json',
                         readings=readings,
+                        replay_time=replay_time,
+                        reading_interval=reading_interval,
                     )
                 else:
                     _copy_cache_file(replay_cache, run_dir, 'old.config.json')
@@ -364,6 +390,8 @@ def _compare_one_environment(
                         fixture_name='capture.json',
                         output_name='old.raw.json',
                         readings=readings,
+                        replay_time=replay_time,
+                        reading_interval=reading_interval,
                     )
 
                     new_mode = 'replay'
@@ -382,6 +410,8 @@ def _compare_one_environment(
                         fixture_name='new.capture.json',
                         output_name='new.raw.json',
                         readings=readings,
+                        replay_time=replay_time,
+                        reading_interval=reading_interval,
                     )
             elif same_fixture:
                 phase = 'environment_setup'
@@ -406,6 +436,8 @@ def _compare_one_environment(
                     fixture_name='capture.json',
                     output_name='old.raw.json',
                     readings=readings,
+                    replay_time=replay_time,
+                    reading_interval=reading_interval,
                 )
 
                 if not (run_dir / 'capture.json').is_file():
@@ -431,6 +463,8 @@ def _compare_one_environment(
                     fixture_name=new_fixture,
                     output_name='new.raw.json',
                     readings=readings,
+                    replay_time=replay_time,
+                    reading_interval=reading_interval,
                 )
             else:
                 phase = 'old_environment_setup'
@@ -454,6 +488,8 @@ def _compare_one_environment(
                     fixture_name='capture.json',
                     output_name='old.raw.json',
                     readings=readings,
+                    replay_time=replay_time,
+                    reading_interval=reading_interval,
                 )
 
                 if old_hatch_env in started_envs:
@@ -482,6 +518,8 @@ def _compare_one_environment(
                     fixture_name='new.capture.json',
                     output_name='new.raw.json',
                     readings=readings,
+                    replay_time=replay_time,
+                    reading_interval=reading_interval,
                 )
 
             status = {
@@ -494,6 +532,8 @@ def _compare_one_environment(
                 'same_fixture': same_fixture,
                 'replay_cache': replay_cache_provenance,
                 'readings': readings,
+                'replay_time': replay_time,
+                'reading_interval': reading_interval,
                 'comparable': old_returncode == 0
                 and new_returncode == 0
                 and (new_mode == 'replay' or not same_fixture),
@@ -511,6 +551,8 @@ def _compare_one_environment(
             'same_fixture': same_fixture,
             'replay_cache': replay_cache_provenance,
             'readings': readings,
+            'replay_time': replay_time,
+            'reading_interval': reading_interval,
             'comparable': False,
             'error': str(e),
             'exception_type': type(e).__name__,
@@ -925,6 +967,8 @@ def _run_hatch(
     fixture_name: str,
     output_name: str,
     readings: int,
+    replay_time: float,
+    reading_interval: float,
 ) -> int:
     integration_dir = repo / integration
     env = os.environ.copy()
@@ -958,6 +1002,10 @@ def _run_hatch(
         str(artifacts / output_name),
         '--readings',
         str(readings),
+        '--replay-time',
+        str(replay_time),
+        '--reading-interval',
+        str(reading_interval),
     ]
     if check_class:
         run_args.extend(('--check-class', check_class))
