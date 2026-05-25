@@ -12,6 +12,7 @@ against the integration replay-PBT test module.
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -167,16 +168,17 @@ def replay_pbt(
     }
     config_path.write_text(json.dumps(config, indent=2, sort_keys=True) + '\n')
 
+    env = {**os.environ, 'DDEV_REPLAY_PBT_CONFIG': str(config_path)}
     app.platform.check_command(
         [
             sys.executable,
             '-m',
             'pytest',
+            '--noconftest',
             'tests/cli/env/test_replay_pbt.py',
-            '--replay-pbt-config',
-            str(config_path),
         ],
         cwd=ddev_dir,
+        env=env,
     )
 
 

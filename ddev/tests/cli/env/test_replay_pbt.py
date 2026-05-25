@@ -15,6 +15,7 @@ from __future__ import annotations
 import csv
 import json
 import math
+import os
 import subprocess
 import sys
 from collections.abc import Callable
@@ -65,7 +66,9 @@ class ReplayPBTContext:
 
 @pytest.fixture(scope='session')
 def replay_pbt_context(pytestconfig) -> ReplayPBTContext:
-    config_path = pytestconfig.getoption('--replay-pbt-config')
+    config_path = os.environ.get('DDEV_REPLAY_PBT_CONFIG') or pytestconfig.getoption(
+        '--replay-pbt-config', default=None
+    )
     if not config_path:
         pytest.skip('Pass --replay-pbt-config or run through `ddev env replay-pbt`.')
     return ReplayPBTContext(json.loads(Path(config_path).read_text()))
