@@ -40,11 +40,7 @@ def dd_environment(instance):
     }
 
     if common.TLS_ENABLED:
-        # Must refer to a path within the Agent container.
-        instance = instance.copy()
-        instance['tls_cert'] = '/tmp/voltdb-certs/client.pem'
-        instance['tls_ca_cert'] = '/tmp/voltdb-certs/ca.pem'
-        e2e_metadata = {'docker_volumes': ['{}:/tmp/voltdb-certs'.format(common.TLS_CERTS_DIR)]}
+        e2e_metadata = {'docker_volumes': ['{}:{}'.format(common.TLS_CERTS_DIR, common.TLS_CERTS_DIR)]}
     else:
         e2e_metadata = {}
 

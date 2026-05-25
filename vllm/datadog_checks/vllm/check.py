@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from urllib.parse import urlsplit, urlunsplit
+
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2  # noqa: F401
 
 from .metrics import METRIC_MAP, RAY_METRIC_MAP, RENAME_LABELS_MAP
@@ -22,8 +24,7 @@ class vLLMCheck(OpenMetricsBaseCheckV2):
 
     @AgentCheck.metadata_entrypoint
     def _submit_version_metadata(self):
-        endpoint = self.instance["openmetrics_endpoint"].replace("/metrics", "/version")
-        response = self.http.get(endpoint)
+        response = self.http.get(self._get_version_endpoint())
         response.raise_for_status()
 
         data = response.json()
@@ -44,6 +45,12 @@ class vLLMCheck(OpenMetricsBaseCheckV2):
             self.set_metadata('version', version_raw, scheme='semver', part_map=version_parts)
         else:
             self.log.debug("Invalid vLLM version format: %s", version)
+
+    def _get_version_endpoint(self):
+        endpoint = self.instance["openmetrics_endpoint"]
+        parsed = urlsplit(endpoint)
+        path = parsed.path.rsplit('/', 1)[0] + '/version'
+        return urlunsplit((parsed.scheme, parsed.netloc, path, '', ''))
 
     def check(self, instance):
         super().check(instance)
