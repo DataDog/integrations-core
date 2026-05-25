@@ -51,43 +51,29 @@ def test_promote_aborts_when_no_run_details_returned(ddev, mocker):
     assert 'Promote workflow dispatched' not in result.output
 
 
-def test_promote_suppresses_httpx_logs_and_restores_level(ddev, mocker):
-    httpx_logger = logging.getLogger('httpx')
-    original_level = httpx_logger.level
-    httpx_logger.setLevel(logging.DEBUG)
-
+def test_promote_suppresses_httpx_logs_and_restores_level(ddev, mocker, httpx_at_debug):
     captured_levels = []
 
     def capture_level(*_args, **_kwargs):
-        captured_levels.append(httpx_logger.level)
+        captured_levels.append(httpx_at_debug.level)
         return ('deadbeef', 'feature-branch')
 
     mocker.patch('ddev.utils.github.GitHubManager.get_pr_head', side_effect=capture_level)
     mocker.patch('ddev.utils.github.GitHubManager.dispatch_workflow', return_value=RUN_DETAILS)
 
-    try:
-        result = ddev('dep', 'promote', 'https://github.com/DataDog/integrations-core/pull/12345')
+    result = ddev('dep', 'promote', 'https://github.com/DataDog/integrations-core/pull/12345')
 
-        assert result.exit_code == 0, result.output
-        assert captured_levels == [logging.WARNING]
-        assert httpx_logger.level == logging.DEBUG
-    finally:
-        httpx_logger.setLevel(original_level)
+    assert result.exit_code == 0, result.output
+    assert captured_levels == [logging.WARNING]
+    assert httpx_at_debug.level == logging.DEBUG
 
 
-def test_promote_restores_httpx_log_level_on_failure(ddev, mocker):
+def test_promote_restores_httpx_log_level_on_failure(ddev, mocker, httpx_at_debug):
     """Ensure the finally branch restores the previous httpx logger level even when an API call raises."""
-    httpx_logger = logging.getLogger('httpx')
-    original_level = httpx_logger.level
-    httpx_logger.setLevel(logging.DEBUG)
-
     mocker.patch('ddev.utils.github.GitHubManager.get_pr_head', side_effect=RuntimeError('boom'))
     mocker.patch('ddev.utils.github.GitHubManager.dispatch_workflow')
 
-    try:
-        with pytest.raises(RuntimeError, match='boom'):
-            ddev('dep', 'promote', 'https://github.com/DataDog/integrations-core/pull/12345')
+    with pytest.raises(RuntimeError, match='boom'):
+        ddev('dep', 'promote', 'https://github.com/DataDog/integrations-core/pull/12345')
 
-        assert httpx_logger.level == logging.DEBUG
-    finally:
-        httpx_logger.setLevel(original_level)
+    assert httpx_at_debug.level == logging.DEBUG

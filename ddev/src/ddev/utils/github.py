@@ -6,9 +6,11 @@ from __future__ import annotations
 import json
 from functools import cached_property
 from time import time
-from typing import TYPE_CHECKING, Any, Literal, overload
+from typing import TYPE_CHECKING, overload
 
 if TYPE_CHECKING:
+    from typing import Any, Literal
+
     from httpx import Client
 
     from ddev.cli.terminal import BorrowedStatus
