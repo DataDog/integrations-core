@@ -4,10 +4,11 @@
 from __future__ import annotations
 
 import json
+import os
 import re
-import shlex
 import shutil
 import subprocess
+import sys
 import tempfile
 from datetime import datetime, timezone
 from functools import partial
@@ -43,9 +44,30 @@ if TYPE_CHECKING:
     help='Treat --artifacts as the exact run directory instead of creating a timestamped child directory.',
 )
 @click.option('--overwrite', is_flag=True, help='Remove an existing exact artifacts directory before writing.')
-@click.option('--image', default='datadog/agent-dev:nightly-main-py3', show_default=True)
-@click.option('--adapter', default='requests', show_default=True, type=click.Choice(['requests']))
+@click.option('--adapter', default='requests', show_default=True, type=click.Choice(['requests', 'subprocess']))
+@click.option(
+    '--old-env',
+    'old_hatch_env',
+    help='Hatch env for the old side. Defaults to the selected fixture environment.',
+)
+@click.option(
+    '--new-env',
+    'new_hatch_env',
+    help='Hatch env for the new side. Defaults to the selected fixture environment.',
+)
+@click.option(
+    '--comparison-mode',
+    default='same-fixture-replay',
+    show_default=True,
+    type=click.Choice(['same-fixture-replay', 'record-each-side']),
+    help='Use one recorded fixture for both sides, or record each side from its own environment.',
+)
 @click.option('--recreate', '-r', is_flag=True, help='Recreate the environment before comparing')
+@click.option(
+    '--fail-on-diff',
+    is_flag=True,
+    help='Exit non-zero when any selected environment has a diff or incomplete comparison.',
+)
 @click.pass_context
 def compare_check(
     ctx: click.Context,
@@ -58,25 +80,35 @@ def compare_check(
     artifacts: StdPath | None,
     exact_artifacts_dir: bool,
     overwrite: bool,
-    image: str,
     adapter: str,
+    old_hatch_env: str | None,
+    new_hatch_env: str | None,
+    comparison_mode: str,
     recreate: bool,
+    fail_on_diff: bool,
 ):
     """
     Compare no-Agent check output across two integrations-core refs.
 
-    This first-slice implementation records HTTP input from OLD_REF and replays the
-    same fixture to NEW_REF inside isolated Docker containers.
+    This implementation records input from OLD_REF and replays it to NEW_REF through
+    isolated Hatch environments.
     """
     from ddev.e2e.config import EnvDataStorage
 
     app: Application = ctx.obj
     integration = app.repo.integrations.get(intg_name)
     storage = EnvDataStorage(app.data_dir)
-    env_names = _select_env_names(ctx, integration, storage, environment)
-    if not env_names:
-        app.display_info(f"Selected target {integration.name!r} has no matching E2E environments.")
-        return
+    if comparison_mode == 'record-each-side':
+        if environment is not None:
+            raise click.ClickException('record-each-side mode uses --old-env/--new-env; omit ENVIRONMENT.')
+        if not old_hatch_env or not new_hatch_env:
+            raise click.ClickException('record-each-side mode requires both --old-env and --new-env.')
+        env_names = [f'{old_hatch_env}__vs__{new_hatch_env}']
+    else:
+        env_names = _select_env_names(ctx, integration, storage, environment)
+        if not env_names:
+            app.display_info(f"Selected target {integration.name!r} has no matching E2E environments.")
+            return
 
     batch_results = []
     for env_name in env_names:
@@ -92,8 +124,10 @@ def compare_check(
             artifacts=artifacts,
             exact_artifacts_dir=exact_artifacts_dir,
             overwrite=overwrite,
-            image=image,
             adapter=adapter,
+            old_hatch_env=old_hatch_env or env_name,
+            new_hatch_env=new_hatch_env or env_name,
+            comparison_mode=comparison_mode,
             recreate=recreate,
         )
         batch_results.append((env_name, run_dir, diff))
@@ -104,6 +138,10 @@ def compare_check(
         app.display_header('compare-check summary')
         for env_name, run_dir, diff in batch_results:
             app.display_info(f'{env_name}: {_format_diff_summary(diff)} ({run_dir})')
+
+    changed_envs = [env_name for env_name, _, diff in batch_results if diff.get('changed')]
+    if fail_on_diff and changed_envs:
+        raise click.ClickException(f'compare-check detected differences or incomplete runs: {", ".join(changed_envs)}')
 
 
 def _select_env_names(ctx: click.Context, integration, storage, environment: str | None) -> list[str]:
@@ -143,34 +181,13 @@ def _compare_one_environment(
     artifacts: StdPath | None,
     exact_artifacts_dir: bool,
     overwrite: bool,
-    image: str,
     adapter: str,
+    old_hatch_env: str,
+    new_hatch_env: str,
+    comparison_mode: str,
     recreate: bool,
 ) -> tuple[StdPath, dict]:
-    from ddev.cli.env.start import start
-    from ddev.cli.env.stop import stop
-
     app: Application = ctx.obj
-    env_data = storage.get(integration.name, environment)
-    started_env = False
-    if recreate and env_data.exists():
-        ctx.invoke(stop, intg_name=integration.name, environment=environment, ignore_state=False)
-
-    if not env_data.exists():
-        ctx.invoke(
-            start,
-            intg_name=integration.name,
-            environment=environment,
-            local_dev=False,
-            local_base=False,
-            agent_build=None,
-            extra_env_vars=(),
-            dogstatsd=False,
-            hide_help=True,
-            ignore_state=False,
-        )
-        started_env = True
-
     run_dir = _resolve_artifacts_dir(
         app.repo.path,
         artifacts,
@@ -180,10 +197,32 @@ def _compare_one_environment(
         exact_artifacts_dir,
         overwrite,
     )
-    config = env_data.read_config()
-    (run_dir / 'config.json').write_text(json.dumps(config, indent=2, sort_keys=True) + '\n')
 
+    phase = 'artifact_setup'
+    started_envs: list[str] = []
+    old_returncode = None
+    new_returncode = None
+    new_mode = None
+    same_fixture = comparison_mode == 'same-fixture-replay'
+    fixture_env = environment if same_fixture else None
     try:
+        new_ref_label = new_ref or 'working-tree'
+        refs = {
+            'old_ref': old_ref,
+            'new_ref': new_ref_label,
+            'new_head': _git_rev_parse(app.repo.path, 'HEAD'),
+            'new_dirty': _git_dirty(app.repo.path),
+            'fixture_env': fixture_env,
+            'old_env': old_hatch_env,
+            'new_env': new_hatch_env,
+            'comparison_mode': comparison_mode,
+            'same_fixture': same_fixture,
+            'record_ref': 'old',
+            'adapter': adapter,
+        }
+        (run_dir / 'refs.json').write_text(json.dumps(refs, indent=2, sort_keys=True) + '\n')
+
+        phase = 'worktree_setup'
         with tempfile.TemporaryDirectory(prefix='compare-check-') as temp_dir:
             temp_path = StdPath(temp_dir)
             old_tree = temp_path / 'old'
@@ -191,63 +230,134 @@ def _compare_one_environment(
             if new_ref:
                 new_tree = temp_path / 'new'
                 _git_worktree(app.repo.path, new_ref, new_tree)
-                new_ref_label = new_ref
             else:
                 new_tree = StdPath(str(app.repo.path))
-                new_ref_label = 'working-tree'
 
-            refs = {
-                'old_ref': old_ref,
-                'new_ref': new_ref_label,
-                'new_head': _git_rev_parse(app.repo.path, 'HEAD'),
-                'new_dirty': _git_dirty(app.repo.path),
-                'record_ref': 'old',
-                'adapter': adapter,
-            }
-            (run_dir / 'refs.json').write_text(json.dumps(refs, indent=2, sort_keys=True) + '\n')
+            if same_fixture:
+                phase = 'environment_setup'
+                if _ensure_environment(ctx, integration, storage, fixture_env, recreate):
+                    started_envs.append(fixture_env)
 
-            old_returncode = _run_container(
-                repo=old_tree,
-                platform_repo=StdPath(str(app.repo.path)),
-                artifacts=run_dir,
-                image=image,
-                integration=integration.name,
-                check_name=integration.name,
-                check_class=check_class,
-                mode='record',
-                fixture_name='capture.json',
-                output_name='old.raw.json',
-            )
+                config = storage.get(integration.name, fixture_env).read_config()
+                (run_dir / 'config.json').write_text(json.dumps(config, indent=2, sort_keys=True) + '\n')
 
-            # Prefer replaying the old fixture. If old failed before writing any fixture at all,
-            # still run the new side in record mode so both refs get a best-effort execution result.
-            new_mode = 'replay' if (run_dir / 'capture.json').is_file() else 'record'
-            new_fixture = 'capture.json' if new_mode == 'replay' else 'new.capture.json'
-            new_returncode = _run_container(
-                repo=new_tree,
-                platform_repo=StdPath(str(app.repo.path)),
-                artifacts=run_dir,
-                image=image,
-                integration=integration.name,
-                check_name=integration.name,
-                check_class=check_class,
-                mode=new_mode,
-                fixture_name=new_fixture,
-                output_name='new.raw.json',
-            )
+                phase = 'old_run'
+                old_returncode = _run_hatch(
+                    repo=old_tree,
+                    platform_repo=StdPath(str(app.repo.path)),
+                    artifacts=run_dir,
+                    integration=integration.name,
+                    hatch_env=old_hatch_env,
+                    check_name=integration.name,
+                    check_class=check_class,
+                    mode='record',
+                    adapter=adapter,
+                    config_name='config.json',
+                    fixture_name='capture.json',
+                    output_name='old.raw.json',
+                )
+
+                # Prefer replaying the old fixture. If old failed before writing any fixture at all,
+                # still run the new side in record mode so both refs get a best-effort execution result.
+                new_mode = 'replay' if (run_dir / 'capture.json').is_file() else 'record'
+                new_fixture = 'capture.json' if new_mode == 'replay' else 'new.capture.json'
+                phase = 'new_run'
+                new_returncode = _run_hatch(
+                    repo=new_tree,
+                    platform_repo=StdPath(str(app.repo.path)),
+                    artifacts=run_dir,
+                    integration=integration.name,
+                    hatch_env=new_hatch_env,
+                    check_name=integration.name,
+                    check_class=check_class,
+                    mode=new_mode,
+                    adapter=adapter,
+                    config_name='config.json',
+                    fixture_name=new_fixture,
+                    output_name='new.raw.json',
+                )
+            else:
+                phase = 'old_environment_setup'
+                if _ensure_environment(ctx, integration, storage, old_hatch_env, recreate):
+                    started_envs.append(old_hatch_env)
+                old_config = storage.get(integration.name, old_hatch_env).read_config()
+                (run_dir / 'old.config.json').write_text(json.dumps(old_config, indent=2, sort_keys=True) + '\n')
+
+                phase = 'old_run'
+                old_returncode = _run_hatch(
+                    repo=old_tree,
+                    platform_repo=StdPath(str(app.repo.path)),
+                    artifacts=run_dir,
+                    integration=integration.name,
+                    hatch_env=old_hatch_env,
+                    check_name=integration.name,
+                    check_class=check_class,
+                    mode='record',
+                    adapter=adapter,
+                    config_name='old.config.json',
+                    fixture_name='capture.json',
+                    output_name='old.raw.json',
+                )
+
+                if old_hatch_env in started_envs:
+                    _stop_environment(ctx, integration, old_hatch_env)
+                    started_envs.remove(old_hatch_env)
+
+                phase = 'new_environment_setup'
+                if _ensure_environment(ctx, integration, storage, new_hatch_env, recreate):
+                    started_envs.append(new_hatch_env)
+                new_config = storage.get(integration.name, new_hatch_env).read_config()
+                (run_dir / 'new.config.json').write_text(json.dumps(new_config, indent=2, sort_keys=True) + '\n')
+
+                new_mode = 'record'
+                phase = 'new_run'
+                new_returncode = _run_hatch(
+                    repo=new_tree,
+                    platform_repo=StdPath(str(app.repo.path)),
+                    artifacts=run_dir,
+                    integration=integration.name,
+                    hatch_env=new_hatch_env,
+                    check_name=integration.name,
+                    check_class=check_class,
+                    mode='record',
+                    adapter=adapter,
+                    config_name='new.config.json',
+                    fixture_name='new.capture.json',
+                    output_name='new.raw.json',
+                )
+
             status = {
                 'old_returncode': old_returncode,
                 'new_returncode': new_returncode,
                 'new_mode': new_mode,
-                'comparable': old_returncode == 0 and new_returncode == 0 and new_mode == 'replay',
+                'phase': 'complete',
+                'comparison_mode': comparison_mode,
+                'same_fixture': same_fixture,
+                'comparable': old_returncode == 0
+                and new_returncode == 0
+                and (new_mode == 'replay' or not same_fixture),
             }
             (run_dir / 'run_status.json').write_text(json.dumps(status, indent=2, sort_keys=True) + '\n')
+    except Exception as e:
+        app.display_warning(f'compare-check failed for {integration.name}:{environment} during {phase}: {e}')
+        status = {
+            'old_returncode': old_returncode,
+            'new_returncode': new_returncode,
+            'new_mode': new_mode,
+            'phase': phase,
+            'comparison_mode': comparison_mode,
+            'same_fixture': same_fixture,
+            'comparable': False,
+            'error': str(e),
+            'exception_type': type(e).__name__,
+        }
+        (run_dir / 'run_status.json').write_text(json.dumps(status, indent=2, sort_keys=True) + '\n')
     finally:
-        if started_env:
+        for env_name in reversed(started_envs):
             try:
-                ctx.invoke(stop, intg_name=integration.name, environment=environment, ignore_state=False)
+                _stop_environment(ctx, integration, env_name)
             except Exception as e:
-                app.display_warning(f'Failed to stop environment {integration.name}:{environment}: {e}')
+                app.display_warning(f'Failed to stop environment {integration.name}:{env_name}: {e}')
 
     return run_dir, _write_diff_artifacts(run_dir)
 
@@ -313,6 +423,38 @@ def _update_latest(root: StdPath, run_dir: StdPath) -> None:
         pass
 
 
+def _ensure_environment(ctx: click.Context, integration, storage, environment: str, recreate: bool) -> bool:
+    from ddev.cli.env.start import start
+    from ddev.cli.env.stop import stop
+
+    env_data = storage.get(integration.name, environment)
+    if recreate and env_data.exists():
+        ctx.invoke(stop, intg_name=integration.name, environment=environment, ignore_state=False)
+
+    if env_data.exists():
+        return False
+
+    ctx.invoke(
+        start,
+        intg_name=integration.name,
+        environment=environment,
+        local_dev=False,
+        local_base=False,
+        agent_build=None,
+        extra_env_vars=(),
+        dogstatsd=False,
+        hide_help=True,
+        ignore_state=False,
+    )
+    return True
+
+
+def _stop_environment(ctx: click.Context, integration, environment: str) -> None:
+    from ddev.cli.env.stop import stop
+
+    ctx.invoke(stop, intg_name=integration.name, environment=environment, ignore_state=False)
+
+
 def _git_worktree(repo, ref: str, path: StdPath) -> None:
     subprocess.run(['git', '-C', str(repo), 'worktree', 'add', '--detach', str(path), ref], check=True)
 
@@ -325,66 +467,58 @@ def _git_dirty(repo) -> bool:
     return bool(subprocess.check_output(['git', '-C', str(repo), 'status', '--porcelain'], text=True).strip())
 
 
-def _run_container(
+def _run_hatch(
     *,
     repo: StdPath,
     platform_repo: StdPath,
     artifacts: StdPath,
-    image: str,
     integration: str,
+    hatch_env: str,
     check_name: str,
     check_class: str | None,
     mode: str,
+    adapter: str,
+    config_name: str,
     fixture_name: str,
     output_name: str,
 ) -> int:
-    python = '/opt/datadog-agent/embedded/bin/python'
-    install = ' && '.join(
-        [
-            f'{python} -m pip install -q -e /platform/datadog_checks_dev',
-            f'{python} -m pip install -q -e {shlex.quote("/repo/datadog_checks_base[db,deps,http,json,kube]")}',
-            f'{python} -m pip install -q -e {shlex.quote(f"/repo/{integration}[deps]")}',
-        ]
-    )
-    run_args = [
-        python,
-        '-m datadog_checks.dev.replay.check_runner',
-        '--check-name',
-        shlex.quote(check_name),
-        '--config /artifacts/config.json',
-        '--mode',
-        mode,
-        f'--fixture /artifacts/{fixture_name}',
-        '--output',
-        f'/artifacts/{output_name}',
-    ]
-    if check_class:
-        run_args.extend(('--check-class', shlex.quote(check_class)))
-    run = ' '.join(run_args)
-    command = f'{install} && {run}'
-    result = subprocess.run(
-        [
-            'docker',
-            'run',
-            '--rm',
-            '--network',
-            'host',
-            '-v',
-            f'{repo}:/repo:ro',
-            '-v',
-            f'{platform_repo}:/platform:ro',
-            '-v',
-            f'{artifacts}:/artifacts',
-            '-e',
-            'DDEV_SKIP_GENERIC_TAGS_CHECK=true',
-            '--entrypoint',
-            'bash',
-            image,
-            '-lc',
-            command,
-        ],
+    integration_dir = repo / integration
+    env = os.environ.copy()
+    env['DDEV_SKIP_GENERIC_TAGS_CHECK'] = 'true'
+    env.pop('PYTHONPATH', None)
+    env.pop('VIRTUAL_ENV', None)
+
+    hatch = [sys.executable, '-m', 'hatch', '--no-color', '--no-interactive', 'run', f'{hatch_env}:python']
+    install_result = subprocess.run(
+        [*hatch, '-m', 'pip', 'install', '-q', '-e', str(platform_repo / 'datadog_checks_dev')],
+        cwd=integration_dir,
+        env=env,
         check=False,
     )
+    if install_result.returncode != 0:
+        return install_result.returncode
+
+    run_args = [
+        *hatch,
+        '-m',
+        'datadog_checks.dev.replay.check_runner',
+        '--check-name',
+        check_name,
+        '--config',
+        str(artifacts / config_name),
+        '--mode',
+        mode,
+        '--adapter',
+        adapter,
+        '--fixture',
+        str(artifacts / fixture_name),
+        '--output',
+        str(artifacts / output_name),
+    ]
+    if check_class:
+        run_args.extend(('--check-class', check_class))
+
+    result = subprocess.run(run_args, cwd=integration_dir, env=env, check=False)
     return result.returncode
 
 
@@ -408,13 +542,19 @@ def _write_diff_artifacts(artifacts: StdPath) -> dict:
             },
         }
         (artifacts / 'diff.json').write_text(json.dumps(diff, indent=2, sort_keys=True) + '\n')
+        error = status.get('error')
+        error_line = f'- Error: {error}\n' if error else ''
         (artifacts / 'summary.md').write_text(
             '# compare-check summary\n\n'
             '- Incomplete: True\n'
             f'- Missing artifacts: {", ".join(missing)}\n'
+            f'- Phase: {status.get("phase", "unknown")}\n'
+            f'- Comparison mode: {status.get("comparison_mode", "unknown")}\n'
+            f'- Same fixture: {status.get("same_fixture", "unknown")}\n'
             f'- Old return code: {status.get("old_returncode", "unknown")}\n'
             f'- New return code: {status.get("new_returncode", "unknown")}\n'
             f'- New mode: {status.get("new_mode", "unknown")}\n'
+            f'{error_line}'
         )
         return diff
 
@@ -424,6 +564,9 @@ def _write_diff_artifacts(artifacts: StdPath) -> dict:
     new_normalized = normalize_output(new_raw)
     diff = diff_outputs(old_normalized, new_normalized)
     diff['run_status'] = status
+    diff['incomplete'] = not status.get('comparable', True)
+    if diff['incomplete']:
+        diff['changed'] = True
 
     (artifacts / 'old.normalized.json').write_text(json.dumps(old_normalized, indent=2, sort_keys=True) + '\n')
     (artifacts / 'new.normalized.json').write_text(json.dumps(new_normalized, indent=2, sort_keys=True) + '\n')
@@ -431,7 +574,11 @@ def _write_diff_artifacts(artifacts: StdPath) -> dict:
     (artifacts / 'summary.md').write_text(
         '# compare-check summary\n\n'
         f'- Changed: {diff["changed"]}\n'
+        f'- Incomplete: {diff["incomplete"]}\n'
         f'- Comparable: {status.get("comparable", True)}\n'
+        f'- Phase: {status.get("phase", "unknown")}\n'
+        f'- Comparison mode: {status.get("comparison_mode", "unknown")}\n'
+        f'- Same fixture: {status.get("same_fixture", "unknown")}\n'
         f'- Old return code: {status.get("old_returncode", 0)}\n'
         f'- New return code: {status.get("new_returncode", 0)}\n'
         f'- Old metrics: {len(old_normalized["metrics"])}\n'

@@ -9,7 +9,12 @@ import pytest
 import requests
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils import subprocess_output
 from datadog_checks.dev.replay.adapters.requests import build_get_record, install_replay_session_get
+from datadog_checks.dev.replay.adapters.subprocess import (
+    install_live_recording_get_subprocess_output,
+    install_replay_get_subprocess_output,
+)
 from datadog_checks.dev.replay.diff import diff_outputs
 from datadog_checks.dev.replay.normalize import normalize_output
 from datadog_checks.dev.replay.pytest import infer_check_class
@@ -83,3 +88,57 @@ def test_requests_replay_fixture_miss_when_records_exhausted(monkeypatch, tmp_pa
     requests.Session().get('http://example.test/metrics')
     with pytest.raises(AssertionError, match='No recorded HTTP response'):
         requests.Session().get('http://example.test/metrics')
+
+
+def test_subprocess_record_and_replay(monkeypatch, tmp_path):
+    fixture_path = tmp_path / 'capture.json'
+
+    def fake_get_subprocess_output(cmd, log, *args, **kwargs):
+        return 'stdout', 'stderr', 0
+
+    monkeypatch.setattr(subprocess_output, 'get_subprocess_output', fake_get_subprocess_output)
+    install_live_recording_get_subprocess_output(monkeypatch, fixture_path)
+
+    assert subprocess_output.get_subprocess_output(['example', 'command'], None) == ('stdout', 'stderr', 0)
+
+    install_replay_get_subprocess_output(monkeypatch, fixture_path)
+    assert subprocess_output.get_subprocess_output(['example', 'command'], None) == ('stdout', 'stderr', 0)
+
+
+def test_subprocess_replay_fixture_miss_on_wrong_command(monkeypatch, tmp_path):
+    fixture_path = tmp_path / 'capture.json'
+    fixture_path.write_text(
+        json.dumps(
+            [
+                {
+                    'argv': ['expected'],
+                    'stdout': 'stdout',
+                    'stderr': 'stderr',
+                    'returncode': 0,
+                    'exception': None,
+                }
+            ]
+        )
+        + '\n'
+    )
+    install_replay_get_subprocess_output(monkeypatch, fixture_path)
+
+    with pytest.raises(AssertionError, match='does not match'):
+        subprocess_output.get_subprocess_output(['actual'], None)
+
+
+def test_subprocess_record_and_replay_exception(monkeypatch, tmp_path):
+    fixture_path = tmp_path / 'capture.json'
+
+    def fake_get_subprocess_output(cmd, log, *args, **kwargs):
+        raise OSError('boom')
+
+    monkeypatch.setattr(subprocess_output, 'get_subprocess_output', fake_get_subprocess_output)
+    install_live_recording_get_subprocess_output(monkeypatch, fixture_path)
+
+    with pytest.raises(OSError, match='boom'):
+        subprocess_output.get_subprocess_output(['example'], None)
+
+    install_replay_get_subprocess_output(monkeypatch, fixture_path)
+    with pytest.raises(OSError, match='boom'):
+        subprocess_output.get_subprocess_output(['example'], None)
