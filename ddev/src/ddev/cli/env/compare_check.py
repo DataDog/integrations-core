@@ -46,8 +46,10 @@ if TYPE_CHECKING:
 @click.option('--overwrite', is_flag=True, help='Remove an existing exact artifacts directory before writing.')
 @click.option(
     '--replay-cache',
-    type=click.Path(exists=True, file_okay=False, path_type=StdPath),
-    help='Existing compare-check artifact directory to replay from instead of recording live input.',
+    help=(
+        'Existing compare-check artifact directory to replay from instead of recording live input. '
+        'Use "auto" or "latest" to find the newest suitable default artifact for each selected environment.'
+    ),
 )
 @click.option('--adapter', default='requests', show_default=True, type=click.Choice(['requests', 'subprocess']))
 @click.option(
@@ -85,7 +87,7 @@ def compare_check(
     artifacts: StdPath | None,
     exact_artifacts_dir: bool,
     overwrite: bool,
-    replay_cache: StdPath | None,
+    replay_cache: str | None,
     adapter: str,
     old_hatch_env: str | None,
     new_hatch_env: str | None,
@@ -116,12 +118,30 @@ def compare_check(
             app.display_info(f"Selected target {integration.name!r} has no matching E2E environments.")
             return
 
-    if replay_cache and len(env_names) > 1:
-        raise click.ClickException('--replay-cache can only be used with one selected environment.')
+    replay_cache_auto = replay_cache in ('auto', 'latest')
+    if replay_cache and not replay_cache_auto and len(env_names) > 1:
+        raise click.ClickException(
+            '--replay-cache can only use an explicit artifact directory with one selected environment.'
+        )
 
     batch_results = []
     for env_name in env_names:
         app.display_header(f'{integration.display_name}: {env_name}')
+        effective_old_env = old_hatch_env or env_name
+        effective_new_env = new_hatch_env or env_name
+        resolved_replay_cache = _resolve_replay_cache(
+            app.repo.path,
+            integration.name,
+            env_name,
+            replay_cache,
+            adapter,
+            effective_old_env,
+            effective_new_env,
+            comparison_mode,
+        )
+        if replay_cache_auto:
+            app.display_info(f'Using replay cache: {resolved_replay_cache}')
+
         run_dir, diff = _compare_one_environment(
             ctx=ctx,
             integration=integration,
@@ -133,10 +153,10 @@ def compare_check(
             artifacts=artifacts,
             exact_artifacts_dir=exact_artifacts_dir,
             overwrite=overwrite,
-            replay_cache=replay_cache,
+            replay_cache=resolved_replay_cache,
             adapter=adapter,
-            old_hatch_env=old_hatch_env or env_name,
-            new_hatch_env=new_hatch_env or env_name,
+            old_hatch_env=effective_old_env,
+            new_hatch_env=effective_new_env,
             comparison_mode=comparison_mode,
             recreate=recreate,
         )
@@ -465,6 +485,106 @@ def _format_diff_summary(diff: dict) -> str:
         f'metrics +{len(diff["collections"]["metrics"]["added"])} '
         f'-{len(diff["collections"]["metrics"]["removed"])}'
     )
+
+
+def _resolve_replay_cache(
+    repo_path,
+    integration: str,
+    environment: str,
+    replay_cache: str | None,
+    adapter: str,
+    old_hatch_env: str,
+    new_hatch_env: str,
+    comparison_mode: str,
+) -> StdPath | None:
+    if not replay_cache:
+        return None
+
+    if replay_cache not in ('auto', 'latest'):
+        cache_dir = StdPath(replay_cache)
+        if not cache_dir.is_dir():
+            raise click.ClickException(f'Replay cache directory does not exist: {cache_dir}')
+        return cache_dir
+
+    cache_root = StdPath(str(repo_path)) / '.ddev' / 'replay' / integration / environment
+    candidates = _iter_replay_cache_candidates(cache_root)
+    for candidate in candidates:
+        if _is_suitable_replay_cache(
+            candidate,
+            adapter=adapter,
+            old_hatch_env=old_hatch_env,
+            new_hatch_env=new_hatch_env,
+            comparison_mode=comparison_mode,
+            fixture_env=environment if comparison_mode == 'same-fixture-replay' else None,
+        ):
+            return candidate
+
+    raise click.ClickException(
+        f'Unable to find a suitable replay cache under {cache_root}. '
+        'Run compare-check once without --replay-cache to create one, or pass an explicit artifact directory.'
+    )
+
+
+def _iter_replay_cache_candidates(cache_root: StdPath) -> list[StdPath]:
+    if not cache_root.is_dir():
+        return []
+
+    candidates = []
+    latest = cache_root / 'latest'
+    if latest.exists():
+        try:
+            candidates.append(latest.resolve())
+        except OSError:
+            pass
+
+    latest_txt = cache_root / 'latest.txt'
+    if latest_txt.is_file():
+        latest_path = StdPath(latest_txt.read_text().strip())
+        if latest_path.is_dir():
+            candidates.append(latest_path)
+
+    candidates.extend(path for path in cache_root.iterdir() if path.is_dir() and path.name != 'latest')
+    unique_candidates = {candidate.resolve(): candidate for candidate in candidates if candidate.is_dir()}
+    return sorted(unique_candidates, key=lambda path: path.stat().st_mtime, reverse=True)
+
+
+def _is_suitable_replay_cache(
+    cache_dir: StdPath,
+    *,
+    adapter: str,
+    old_hatch_env: str,
+    new_hatch_env: str,
+    comparison_mode: str,
+    fixture_env: str | None,
+) -> bool:
+    required_files = ['capture.json']
+    if comparison_mode == 'same-fixture-replay':
+        required_files.append('config.json')
+    else:
+        required_files.extend(['old.config.json', 'new.config.json', 'new.capture.json'])
+
+    if any(not (cache_dir / name).is_file() for name in required_files):
+        return False
+
+    refs_file = cache_dir / 'refs.json'
+    if not refs_file.is_file():
+        return True
+
+    try:
+        refs = json.loads(refs_file.read_text())
+    except Exception:
+        return False
+
+    expected = {
+        'adapter': adapter,
+        'comparison_mode': comparison_mode,
+        'old_env': old_hatch_env,
+        'new_env': new_hatch_env,
+    }
+    if fixture_env is not None:
+        expected['fixture_env'] = fixture_env
+
+    return all(refs.get(key, value) == value for key, value in expected.items())
 
 
 def _resolve_artifacts_dir(
