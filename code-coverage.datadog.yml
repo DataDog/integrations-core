@@ -217,10 +217,6 @@ services:
   paths:
   - datadog_cluster_agent/datadog_checks/datadog_cluster_agent/
   - datadog_cluster_agent/tests/
-- id: datadog_csi_driver
-  paths:
-  - datadog_csi_driver/datadog_checks/datadog_csi_driver/
-  - datadog_csi_driver/tests/
 - id: dcgm
   paths:
   - dcgm/datadog_checks/dcgm/

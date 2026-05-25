@@ -53,6 +53,16 @@ def _set_wrong_paths(config_path):
         yaml.safe_dump(config, f, default_flow_style=False, sort_keys=False)
 
 
+def _add_stale_service(config_path):
+    with config_path.open(encoding='utf-8') as f:
+        config = yaml.safe_load(f)
+
+    config.setdefault('services', []).append({'id': 'stale_service', 'paths': ['stale_service/tests/']})
+
+    with config_path.open(mode='w', encoding='utf-8') as f:
+        yaml.safe_dump(config, f, default_flow_style=False, sort_keys=False)
+
+
 @pytest.mark.parametrize(
     'corrupt_config, expected_error',
     [
@@ -62,6 +72,7 @@ def _set_wrong_paths(config_path):
             "Service `active_directory` has incorrect coverage source paths",
             id='incorrect_paths',
         ),
+        pytest.param(_add_stale_service, "stale service", id='stale_services'),
     ],
 )
 def test_code_coverage_config(ddev, repository, helpers, corrupt_config, expected_error):
@@ -82,10 +93,7 @@ def test_code_coverage_config(ddev, repository, helpers, corrupt_config, expecte
     assert result.exit_code == 0, f"Expected validation to pass after sync: {result.output}"
 
 
-def test_code_coverage_file_missing(ddev, repository, helpers, config_file):
-    config_file.model.repos['core'] = str(repository.path)
-    config_file.save()
-
+def test_code_coverage_file_missing(ddev, repository, helpers):
     (repository.path / 'code-coverage.datadog.yml').unlink()
 
     result = ddev("-c", "validate", "ci")

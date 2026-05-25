@@ -275,6 +275,22 @@ def _validate_code_coverage(
     fixed = False
     error_message = ''
 
+    stale_services = sorted(existing_service_ids - expected_checks)
+    if stale_services:
+        num_stale = len(stale_services)
+        service_label = 'services' if num_stale > 1 else 'service'
+        stale_service_names = ', '.join(stale_services)
+        message = f'Code coverage config has {num_stale} stale {service_label}: {stale_service_names}\n'
+
+        if sync:
+            fixed = True
+            existing_services = [s for s in existing_services if s.get('id', '') not in stale_services]
+            for service_id in stale_services:
+                app.display_success(f'Removed stale service `{service_id}`\n')
+        else:
+            success = False
+            error_message += message
+
     # Validate existing services have correct paths
     for service in existing_services:
         service_id = service.get('id', '')
