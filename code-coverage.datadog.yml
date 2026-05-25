@@ -15,11 +15,15 @@ gates:
     - '!datadog_checks_dev'
     - '!tekton'
     - '!vertica'
+    - '!istio'
+    - '!cilium'
 - type: total_coverage_percentage
   config:
     threshold: 74
     services:
     - kafka_actions
+    - istio
+    - cilium
 - type: total_coverage_percentage
   config:
     threshold: 60
