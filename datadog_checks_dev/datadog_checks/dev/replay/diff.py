@@ -15,7 +15,7 @@ def _key(item: Any) -> str:
 def diff_outputs(old: dict[str, Any], new: dict[str, Any]) -> dict[str, Any]:
     """Return multiset additions/removals for each top-level output collection."""
     diff: dict[str, Any] = {'changed': False, 'collections': {}}
-    for name in ('metrics', 'service_checks', 'events'):
+    for name in ('metrics', 'service_checks', 'events', 'metadata'):
         old_counts = Counter(_key(item) for item in old.get(name, []))
         new_counts = Counter(_key(item) for item in new.get(name, []))
         removed = list((old_counts - new_counts).elements())

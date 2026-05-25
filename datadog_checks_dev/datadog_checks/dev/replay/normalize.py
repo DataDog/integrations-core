@@ -26,6 +26,10 @@ def normalize_output(output: dict[str, Any]) -> dict[str, Any]:
         item['tags'] = _sorted_tags(item.get('tags'))
         service_checks.append(item)
 
+    metadata = []
+    for item in output.get('metadata', []):
+        metadata.append(dict(item))
+
     return {
         'metrics': sorted(
             metrics,
@@ -44,4 +48,5 @@ def normalize_output(output: dict[str, Any]) -> dict[str, Any]:
         ),
         'events': output.get('events', []),
         'event_platform_events': output.get('event_platform_events', {}),
+        'metadata': sorted(metadata, key=lambda item: (item.get('check_id'), item.get('name'), item.get('value'))),
     }

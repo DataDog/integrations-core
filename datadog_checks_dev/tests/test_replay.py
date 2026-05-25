@@ -11,6 +11,11 @@ import requests
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils import subprocess_output
 from datadog_checks.dev.replay.adapters import install_replay_adapter
+from datadog_checks.dev.replay.adapters.process import (
+    install_live_recording_process_state,
+    install_replay_process_state,
+)
+from datadog_checks.dev.replay.adapters.psycopg import install_live_recording_psycopg, install_replay_psycopg
 from datadog_checks.dev.replay.adapters.requests import build_get_record, install_replay_session_get
 from datadog_checks.dev.replay.adapters.subprocess import (
     install_live_recording_get_subprocess_output,
@@ -211,3 +216,107 @@ def test_tcp_replay_fixture_miss_on_wrong_operation(monkeypatch, tmp_path):
     check = ZookeeperCheck()
     with pytest.raises(AssertionError, match='does not match'):
         check._send_command('stat')
+
+
+def test_process_record_and_replay(monkeypatch, tmp_path):
+    fixture_path = tmp_path / 'capture.json'
+
+    class FakeProcess:
+        def __init__(self, pid, cmdline=None, children=None, cpu_times=None):
+            self.pid = pid
+            self._cmdline = cmdline or []
+            self._children = children or []
+            self._cpu_times = list(cpu_times or [])
+
+        def cmdline(self):
+            return self._cmdline
+
+        def children(self):
+            return self._children
+
+        def cpu_times(self):
+            return self._cpu_times.pop(0)
+
+    child = FakeProcess(2, cpu_times=[(1.0, 0.0), (1.5, 0.0)])
+    master = FakeProcess(1, ['gunicorn: master [example]'], [child])
+    fake_psutil = types.ModuleType('psutil')
+    fake_psutil.NoSuchProcess = type('NoSuchProcess', (Exception,), {})
+    fake_psutil.AccessDenied = type('AccessDenied', (Exception,), {})
+    fake_psutil.process_iter = lambda: [master]
+    monkeypatch.setitem(sys.modules, 'psutil', fake_psutil)
+    install_live_recording_process_state(monkeypatch, fixture_path)
+
+    processes = list(fake_psutil.process_iter())
+    assert processes[0].cmdline() == ['gunicorn: master [example]']
+    workers = processes[0].children()
+    assert workers[0].cpu_times() == [1.0, 0.0]
+    assert workers[0].cpu_times() == [1.5, 0.0]
+
+    install_replay_process_state(monkeypatch, fixture_path)
+    processes = list(fake_psutil.process_iter())
+    assert processes[0].cmdline() == ['gunicorn: master [example]']
+    workers = processes[0].children()
+    assert workers[0].cpu_times() == [1.0, 0.0]
+    assert workers[0].cpu_times() == [1.5, 0.0]
+
+
+def test_psycopg_record_and_replay(monkeypatch, tmp_path):
+    fixture_path = tmp_path / 'capture.json'
+
+    class FakeCursor:
+        def __init__(self, rows):
+            self._rows = rows
+
+        def execute(self, sql, params=None, *args, **kwargs):
+            self.sql = sql
+            self.params = params
+
+        def fetchall(self):
+            return self._rows
+
+        def close(self):
+            pass
+
+    class FakeConnection:
+        def cursor(self, *args, **kwargs):
+            return FakeCursor([{'database': 'example', 'avg_recv': 1}])
+
+        def close(self):
+            pass
+
+    fake_pg = types.ModuleType('psycopg')
+    fake_pg.ProgrammingError = type('ProgrammingError', (Exception,), {})
+    fake_pg.OperationalError = type('OperationalError', (Exception,), {})
+    fake_pg.InterfaceError = type('InterfaceError', (Exception,), {})
+    fake_pg.Error = type('Error', (Exception,), {})
+    fake_pg.connect = lambda *args, **kwargs: FakeConnection()
+    monkeypatch.setitem(sys.modules, 'psycopg', fake_pg)
+
+    install_live_recording_psycopg(monkeypatch, fixture_path)
+    connection = fake_pg.connect(host='localhost', password='secret')
+    cursor = connection.cursor(row_factory=lambda row: row)
+    cursor.execute('SHOW STATS')
+    assert list(cursor) == [{'database': 'example', 'avg_recv': 1}]
+
+    install_replay_psycopg(monkeypatch, fixture_path)
+    connection = fake_pg.connect(host='localhost', password='secret')
+    cursor = connection.cursor(row_factory=lambda row: row)
+    cursor.execute('SHOW STATS')
+    assert list(cursor) == [{'database': 'example', 'avg_recv': 1}]
+
+
+def test_normalize_output_sorts_metadata():
+    output = {
+        'metrics': [],
+        'service_checks': [],
+        'events': [],
+        'event_platform_events': {},
+        'metadata': [
+            {'check_id': 'b', 'name': 'version.raw', 'value': '2.0.0'},
+            {'check_id': 'a', 'name': 'version.raw', 'value': '1.0.0'},
+        ],
+    }
+
+    normalized = normalize_output(output)
+
+    assert [item['check_id'] for item in normalized['metadata']] == ['a', 'b']

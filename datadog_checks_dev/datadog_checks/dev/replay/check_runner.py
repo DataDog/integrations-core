@@ -22,14 +22,14 @@ from datadog_checks.dev.replay.output import serialize_aggregator
 from datadog_checks.dev.replay.pytest import run_check_instances
 
 
-def test_replay_check_runner(monkeypatch, aggregator, dd_run_check):
+def test_replay_check_runner(monkeypatch, aggregator, datadog_agent, dd_run_check):
     config = json.loads(Path({str(args.config)!r}).read_text())
     instances = config.get('instances', [config])
     fixture = Path({str(args.fixture)!r})
     install_replay_adapter(monkeypatch, {args.adapter!r}, {args.mode!r}, fixture)
 
     run_check_instances({args.check_class!r}, instances, dd_run_check, {args.check_name!r})
-    output = json.dumps(serialize_aggregator(aggregator), indent=2, sort_keys=True) + '\\n'
+    output = json.dumps(serialize_aggregator(aggregator, datadog_agent), indent=2, sort_keys=True) + '\\n'
     Path({str(args.output)!r}).write_text(output)
 '''
     )

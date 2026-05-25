@@ -17,9 +17,9 @@ def _jsonify(value: Any) -> Any:
     return value
 
 
-def serialize_aggregator(aggregator) -> dict[str, Any]:
-    """Serialize the pytest stub aggregator into a stable JSON-compatible shape."""
-    return {
+def serialize_aggregator(aggregator, datadog_agent=None) -> dict[str, Any]:
+    """Serialize pytest stub output into a stable JSON-compatible shape."""
+    output = {
         'metrics': [
             _jsonify(metric)
             for metric_name in sorted(aggregator._metrics)
@@ -35,4 +35,11 @@ def serialize_aggregator(aggregator) -> dict[str, Any]:
             event_type: [_jsonify(event) for event in events]
             for event_type, events in sorted(aggregator._event_platform_events.items())
         },
+        'metadata': [],
     }
+    if datadog_agent is not None:
+        output['metadata'] = [
+            {'check_id': check_id, 'name': name, 'value': _jsonify(value)}
+            for (check_id, name), value in sorted(datadog_agent._metadata.items())
+        ]
+    return output

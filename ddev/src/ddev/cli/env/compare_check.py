@@ -52,7 +52,12 @@ if TYPE_CHECKING:
         'Use "auto" or "latest" to find the newest suitable default artifact for each selected environment.'
     ),
 )
-@click.option('--adapter', default='requests', show_default=True, type=click.Choice(['requests', 'subprocess', 'tcp']))
+@click.option(
+    '--adapter',
+    default='requests',
+    show_default=True,
+    type=click.Choice(['requests', 'subprocess', 'tcp', 'process', 'psycopg']),
+)
 @click.option(
     '--old-env',
     'old_hatch_env',
@@ -513,7 +518,9 @@ def _format_diff_summary(diff: dict) -> str:
         f'old rc {status.get("old_returncode", "?")}; '
         f'new rc {status.get("new_returncode", "?")}; '
         f'metrics +{len(diff["collections"]["metrics"]["added"])} '
-        f'-{len(diff["collections"]["metrics"]["removed"])}'
+        f'-{len(diff["collections"]["metrics"]["removed"])}; '
+        f'metadata +{len(diff["collections"].get("metadata", {}).get("added", []))} '
+        f'-{len(diff["collections"].get("metadata", {}).get("removed", []))}'
     )
 
 
@@ -882,6 +889,7 @@ def _write_diff_artifacts(artifacts: StdPath) -> dict:
                 'metrics': {'added': [], 'removed': []},
                 'service_checks': {'added': [], 'removed': []},
                 'events': {'added': [], 'removed': []},
+                'metadata': {'added': [], 'removed': []},
             },
         }
         (artifacts / 'diff.json').write_text(json.dumps(diff, indent=2, sort_keys=True) + '\n')
@@ -928,5 +936,9 @@ def _write_diff_artifacts(artifacts: StdPath) -> dict:
         f'- New metrics: {len(new_normalized["metrics"])}\n'
         f'- Metric records added: {len(diff["collections"]["metrics"]["added"])}\n'
         f'- Metric records removed: {len(diff["collections"]["metrics"]["removed"])}\n'
+        f'- Old metadata: {len(old_normalized["metadata"])}\n'
+        f'- New metadata: {len(new_normalized["metadata"])}\n'
+        f'- Metadata records added: {len(diff["collections"]["metadata"]["added"])}\n'
+        f'- Metadata records removed: {len(diff["collections"]["metadata"]["removed"])}\n'
     )
     return diff
