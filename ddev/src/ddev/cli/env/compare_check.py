@@ -176,6 +176,8 @@ def _run_container(
             f'{platform_repo}:/platform:ro',
             '-v',
             f'{artifacts}:/artifacts',
+            '-e',
+            'DDEV_SKIP_GENERIC_TAGS_CHECK=true',
             '--entrypoint',
             'bash',
             image,
