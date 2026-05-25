@@ -1,6 +1,14 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+"""Tests for compare-check replay-cache suitability and discovery.
+
+Cached replay depends on artifact directories being matched to the integration,
+Hatch envs, adapter set, recorded refs, and fixture file hashes that produced
+them. These tests cover that cache contract directly so auto/latest cache
+selection does not accidentally replay stale or incompatible fixtures.
+"""
+
 from __future__ import annotations
 
 import json

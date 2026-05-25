@@ -1,6 +1,15 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+"""Small OpenMetrics helpers for replay-cache metamorphic tests.
+
+This is intentionally not a complete OpenMetrics parser. It supports the simple
+sample-line shapes emitted by many integration fixtures well enough to apply
+safe metamorphic transformations, such as reordering labels, while preserving
+unsupported lines unchanged so generators do not accidentally invent new input
+semantics.
+"""
+
 from __future__ import annotations
 
 import re

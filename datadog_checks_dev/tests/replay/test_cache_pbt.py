@@ -1,6 +1,14 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+"""Property tests for replay-cache mutation helpers.
+
+These tests stay below the integration runner and verify that cache-level
+mutations preserve the semantics they claim to preserve for both legacy list
+captures and newer manifest-based captures. That keeps later integration PBT
+failures focused on check behavior instead of malformed mutated cache files.
+"""
+
 from __future__ import annotations
 
 import json

@@ -1,6 +1,14 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+"""Helpers for building and mutating replay-cache directories in PBT.
+
+These utilities operate on cached compare-check artifacts rather than live E2E
+services. They let tests copy a seed replay cache, apply a semantics-preserving
+mutation to adapter-captured data, and then feed that mutated cache back into
+cached replay so failures are reproducible as ordinary artifact directories.
+"""
+
 from __future__ import annotations
 
 import json

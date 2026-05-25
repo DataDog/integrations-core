@@ -1,6 +1,15 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+"""Property-based tests for replay adapter contracts.
+
+These tests exercise the replay harness itself, not any particular integration.
+They generate small synthetic fixture records for each adapter and assert the
+core adapter contract: valid records round-trip through monkeypatched calls,
+wrong operations fail clearly, and exhausted fixtures do not silently produce
+extra data.
+"""
+
 import json
 import sys
 import types

@@ -1,6 +1,14 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+"""Property tests for OpenMetrics replay-body mutations.
+
+The integration-level replay PBT relies on mutating captured OpenMetrics bodies
+without changing their semantic sample set. These tests prove that the helper
+parser/renderer and label-order mutator preserve sample identity for generated
+simple sample lines before those mutations are used against real replay caches.
+"""
+
 from __future__ import annotations
 
 from hypothesis import HealthCheck, given, settings
