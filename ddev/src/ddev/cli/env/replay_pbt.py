@@ -20,10 +20,11 @@ from typing import TYPE_CHECKING
 
 import click
 
-from ddev.replay_pbt.properties import REPLAY_PBT_PROPERTY_CHOICES
-
 if TYPE_CHECKING:
     from ddev.cli.application import Application
+
+
+PROPERTIES = ('deterministic', 'openmetrics-label-order')
 
 
 @click.command('replay-pbt', short_help='Run cached replay property checks for an integration')
@@ -39,7 +40,7 @@ if TYPE_CHECKING:
     '--property',
     'properties',
     multiple=True,
-    type=click.Choice(REPLAY_PBT_PROPERTY_CHOICES),
+    type=click.Choice(PROPERTIES),
     help='Property to run. May be passed multiple times. Defaults to all properties.',
 )
 @click.option(
@@ -71,7 +72,7 @@ def replay_pbt(
 ) -> None:
     """Run cached replay PBT/metamorphic checks for one integration environment."""
     app: Application = ctx.obj
-    selected_properties = properties or REPLAY_PBT_PROPERTY_CHOICES
+    selected_properties = properties or PROPERTIES
     run_root = _resolve_replay_pbt_root(app.repo.path, artifacts, intg_name, environment, git_ref, overwrite)
     ddev_dir = StdPath(str(app.repo.path)) / 'ddev'
 
