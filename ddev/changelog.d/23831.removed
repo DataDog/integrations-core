@@ -1,0 +1,1 @@
+Remove the `--dependency-sizes` option and GitHub artifact fetching from `ddev size status`.
