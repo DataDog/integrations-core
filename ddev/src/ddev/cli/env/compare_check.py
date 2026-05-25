@@ -248,6 +248,7 @@ def _compare_one_environment(
     new_mode = None
     same_fixture = comparison_mode == 'same-fixture-replay'
     fixture_env = environment if same_fixture else None
+    replay_cache_provenance = _replay_cache_provenance(app.repo.path, integration.name, environment, replay_cache)
     try:
         new_ref_label = new_ref or 'working-tree'
         refs = {
@@ -262,7 +263,7 @@ def _compare_one_environment(
             'comparison_mode': comparison_mode,
             'same_fixture': same_fixture,
             'record_ref': 'cache' if replay_cache else 'old',
-            'replay_cache': str(replay_cache) if replay_cache else None,
+            'replay_cache': replay_cache_provenance,
             'adapter': adapter,
             'check_class': check_class,
         }
@@ -456,7 +457,7 @@ def _compare_one_environment(
                 'phase': 'complete',
                 'comparison_mode': comparison_mode,
                 'same_fixture': same_fixture,
-                'replay_cache': str(replay_cache) if replay_cache else None,
+                'replay_cache': replay_cache_provenance,
                 'comparable': old_returncode == 0
                 and new_returncode == 0
                 and (new_mode == 'replay' or not same_fixture),
@@ -472,7 +473,7 @@ def _compare_one_environment(
             'phase': phase,
             'comparison_mode': comparison_mode,
             'same_fixture': same_fixture,
-            'replay_cache': str(replay_cache) if replay_cache else None,
+            'replay_cache': replay_cache_provenance,
             'comparable': False,
             'error': str(e),
             'exception_type': type(e).__name__,
@@ -514,6 +515,28 @@ def _format_diff_summary(diff: dict) -> str:
         f'metrics +{len(diff["collections"]["metrics"]["added"])} '
         f'-{len(diff["collections"]["metrics"]["removed"])}'
     )
+
+
+def _replay_cache_provenance(
+    repo_path, integration: str, environment: str, replay_cache: StdPath | None
+) -> dict | None:
+    if replay_cache is None:
+        return None
+
+    cache_dir = replay_cache.resolve()
+    default_root = (StdPath(str(repo_path)) / '.ddev' / 'replay' / integration / environment).resolve()
+    provenance = {
+        'source_run_id': cache_dir.name,
+    }
+    try:
+        relative = cache_dir.relative_to(default_root)
+    except ValueError:
+        provenance['source'] = 'external'
+    else:
+        provenance['source'] = 'default-artifact-root'
+        provenance['cache_root'] = f'.ddev/replay/{integration}/{environment}'
+        provenance['relative_path'] = relative.as_posix()
+    return provenance
 
 
 def _required_cache_files(comparison_mode: str) -> list[str]:
