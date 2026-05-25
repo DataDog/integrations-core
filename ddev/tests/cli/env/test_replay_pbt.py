@@ -6,14 +6,13 @@
 These tests are the real integration checks for replay-PBT: they take an
 adapter-saved compare-check cache, run the target integration through cached
 replay, optionally mutate the cache, and assert properties over normalized check
-output. The CLI command supplies the target/cache through environment variables
+output. The CLI command supplies the target/cache through a JSON config file
 so this file remains normal pytest/Hypothesis code with reproducible artifacts.
 """
 
 from __future__ import annotations
 
 import json
-import os
 import subprocess
 import sys
 from pathlib import Path
@@ -27,30 +26,24 @@ from ddev.replay_pbt.properties import REPLAY_PBT_PROPERTY_CHOICES, ReplayPBTPro
 
 
 class ReplayPBTContext:
-    def __init__(self) -> None:
-        self.integration = _required_env('DDEV_REPLAY_PBT_INTEGRATION')
-        self.environment = _required_env('DDEV_REPLAY_PBT_ENVIRONMENT')
-        self.cache = Path(_required_env('DDEV_REPLAY_PBT_CACHE'))
-        self.ref = os.environ.get('DDEV_REPLAY_PBT_REF', 'HEAD')
-        self.properties = {item for item in os.environ.get('DDEV_REPLAY_PBT_PROPERTIES', '').split(',') if item} or set(
-            REPLAY_PBT_PROPERTY_CHOICES
-        )
-        self.artifacts = Path(_required_env('DDEV_REPLAY_PBT_ARTIFACTS'))
-        self.check_class = os.environ.get('DDEV_REPLAY_PBT_CHECK_CLASS')
-        self.old_env = os.environ.get('DDEV_REPLAY_PBT_OLD_ENV')
-        self.new_env = os.environ.get('DDEV_REPLAY_PBT_NEW_ENV')
-
-
-def _required_env(name: str) -> str:
-    value = os.environ.get(name)
-    if not value:
-        pytest.skip(f'{name} is required; run through `ddev env replay-pbt` or set replay-PBT env vars.')
-    return value
+    def __init__(self, config: dict) -> None:
+        self.integration = config['integration']
+        self.environment = config['environment']
+        self.cache = Path(config['replay_cache'])
+        self.ref = config.get('ref') or 'HEAD'
+        self.properties = set(config.get('properties') or REPLAY_PBT_PROPERTY_CHOICES)
+        self.artifacts = Path(config['artifacts'])
+        self.check_class = config.get('check_class')
+        self.old_env = config.get('old_env')
+        self.new_env = config.get('new_env')
 
 
 @pytest.fixture(scope='session')
-def replay_pbt_context() -> ReplayPBTContext:
-    return ReplayPBTContext()
+def replay_pbt_context(pytestconfig) -> ReplayPBTContext:
+    config_path = pytestconfig.getoption('--replay-pbt-config')
+    if not config_path:
+        pytest.skip('Pass --replay-pbt-config or run through `ddev env replay-pbt`.')
+    return ReplayPBTContext(json.loads(Path(config_path).read_text()))
 
 
 def _skip_unselected(context: ReplayPBTContext, property_name: str) -> None:

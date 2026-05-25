@@ -11,7 +11,7 @@ against the integration replay-PBT test module.
 
 from __future__ import annotations
 
-import os
+import json
 import shutil
 import sys
 from datetime import datetime, timezone
@@ -78,28 +78,30 @@ def replay_pbt(
     app.display_header(f'Replay PBT: {intg_name}:{environment}')
     app.display_info(f'Writing replay-pbt artifacts to {run_root}')
 
-    env = os.environ.copy()
-    env.update(
-        {
-            'DDEV_REPLAY_PBT_INTEGRATION': intg_name,
-            'DDEV_REPLAY_PBT_ENVIRONMENT': environment,
-            'DDEV_REPLAY_PBT_CACHE': replay_cache,
-            'DDEV_REPLAY_PBT_REF': git_ref,
-            'DDEV_REPLAY_PBT_PROPERTIES': ','.join(selected_properties),
-            'DDEV_REPLAY_PBT_ARTIFACTS': str(run_root),
-        }
-    )
-    if check_class:
-        env['DDEV_REPLAY_PBT_CHECK_CLASS'] = check_class
-    if old_hatch_env:
-        env['DDEV_REPLAY_PBT_OLD_ENV'] = old_hatch_env
-    if new_hatch_env:
-        env['DDEV_REPLAY_PBT_NEW_ENV'] = new_hatch_env
+    config_path = run_root / 'replay-pbt-config.json'
+    config = {
+        'integration': intg_name,
+        'environment': environment,
+        'replay_cache': replay_cache,
+        'ref': git_ref,
+        'properties': list(selected_properties),
+        'artifacts': str(run_root),
+        'check_class': check_class,
+        'old_env': old_hatch_env,
+        'new_env': new_hatch_env,
+    }
+    config_path.write_text(json.dumps(config, indent=2, sort_keys=True) + '\n')
 
     app.platform.check_command(
-        [sys.executable, '-m', 'pytest', 'tests/cli/env/test_replay_pbt.py'],
+        [
+            sys.executable,
+            '-m',
+            'pytest',
+            'tests/cli/env/test_replay_pbt.py',
+            '--replay-pbt-config',
+            str(config_path),
+        ],
         cwd=ddev_dir,
-        env=env,
     )
 
 
