@@ -8,6 +8,8 @@ from typing import Any
 import pytest
 import requests
 
+from datadog_checks.dev.replay.redaction import scrub_request_record, scrub_url
+
 
 class FixtureResponse:
     """Small requests.Response stand-in backed by a fixture body."""
@@ -47,18 +49,22 @@ class FixtureResponse:
 
 def build_get_record(url: str, body: str, status: int = 200, headers: dict[str, str] | None = None) -> dict[str, Any]:
     """Create the JSON-serializable fixture shape used by record and replay."""
-    return {
-        "method": "GET",
-        "url": url,
-        "status": status,
-        "headers": dict(headers or {"Content-Type": "text/plain"}),
-        "body": body,
-    }
+    return scrub_request_record(
+        {
+            "method": "GET",
+            "url": url,
+            "status": status,
+            "headers": dict(headers or {"Content-Type": "text/plain"}),
+            "body": body,
+        }
+    )
 
 
 def record_from_response(url: str, response: requests.Response) -> dict[str, Any]:
     """Create a fixture record from a live requests response."""
-    return build_get_record(url, response.text, status=response.status_code, headers=dict(response.headers))
+    return scrub_request_record(
+        build_get_record(url, response.text, status=response.status_code, headers=dict(response.headers))
+    )
 
 
 def install_recording_session_get(
@@ -102,7 +108,7 @@ def install_replay_session_get(monkeypatch: pytest.MonkeyPatch, fixture_path: Pa
             raise AssertionError("No recorded HTTP response available for replay")
 
         record = records[len(replayed)]
-        if record["method"] != "GET" or record["url"] != url:
+        if record["method"] != "GET" or record["url"] != scrub_url(url):
             raise AssertionError("Recorded HTTP request does not match replay request")
 
         replayed.append(record)

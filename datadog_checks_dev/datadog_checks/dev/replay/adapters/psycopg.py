@@ -9,24 +9,20 @@ from typing import Any
 
 import pytest
 
+from datadog_checks.dev.replay.redaction import scrub_json
+
 _REDACTED = '******'
 
 
 def _json_safe(value: Any) -> Any:
-    if isinstance(value, dict):
-        return {str(key): _json_safe(val) for key, val in value.items()}
-    if isinstance(value, (list, tuple)):
-        return [_json_safe(item) for item in value]
-    if isinstance(value, (str, int, float, bool)) or value is None:
-        return value
-    return str(value)
+    return scrub_json(value)
 
 
 def _exception_record(exc: BaseException) -> dict[str, str]:
     return {
         'type': type(exc).__name__,
         'module': type(exc).__module__,
-        'message': str(exc),
+        'message': str(scrub_json(str(exc))),
     }
 
 

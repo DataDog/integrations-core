@@ -9,12 +9,14 @@ from typing import Any
 
 import pytest
 
+from datadog_checks.dev.replay.redaction import scrub_json
+
 
 def _exception_record(exc: BaseException) -> dict[str, str]:
     return {
         'type': type(exc).__name__,
         'module': type(exc).__module__,
-        'message': str(exc),
+        'message': str(scrub_json(str(exc))),
     }
 
 
@@ -50,7 +52,7 @@ def _raise_recorded_exception(record: dict[str, Any]) -> None:
 def _normalize_cmdline(cmdline: Any) -> list[str]:
     if cmdline is None:
         return []
-    return [str(part) for part in cmdline]
+    return [str(part) for part in scrub_json(list(cmdline))]
 
 
 def _cpu_times_to_list(cpu_times: Any) -> list[float]:

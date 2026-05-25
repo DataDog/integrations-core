@@ -11,6 +11,8 @@ from typing import Any
 
 import pytest
 
+from datadog_checks.dev.replay.redaction import scrub_json
+
 
 def _bytes_record(data: bytes) -> str:
     return base64.b64encode(data).decode('ascii')
@@ -32,7 +34,7 @@ def _exception_record(exc: BaseException) -> dict[str, str]:
     return {
         'type': type(exc).__name__,
         'module': type(exc).__module__,
-        'message': str(exc),
+        'message': str(scrub_json(str(exc))),
     }
 
 

@@ -17,6 +17,7 @@ from pathlib import Path as StdPath
 from typing import TYPE_CHECKING
 
 import click
+from datadog_checks.dev.replay.redaction import scrub_json, scrub_output
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
@@ -575,7 +576,10 @@ def _compare_one_environment(
             except Exception as e:
                 app.display_warning(f'Failed to stop environment {integration.name}:{env_name}: {e}')
 
+    _scrub_replay_artifacts(run_dir)
+
     if refs:
+        refs['redaction'] = {'version': 1, 'enabled': True}
         _write_fixture_key(
             run_dir,
             refs,
@@ -593,6 +597,18 @@ def _compare_one_environment(
         (run_dir / 'refs.json').write_text(json.dumps(refs, indent=2, sort_keys=True) + '\n')
 
     return run_dir, _write_diff_artifacts(run_dir)
+
+
+def _scrub_replay_artifacts(run_dir: StdPath) -> None:
+    for name in ('config.json', 'record.config.json', 'replay.config.json'):
+        path = run_dir / name
+        if not path.is_file():
+            continue
+        try:
+            data = json.loads(path.read_text())
+        except Exception:
+            continue
+        path.write_text(json.dumps(scrub_json(data), indent=2, sort_keys=True) + '\n')
 
 
 def _format_diff_summary(diff: dict) -> str:
@@ -1114,8 +1130,8 @@ def _write_diff_artifacts(artifacts: StdPath) -> dict:
         )
         return diff
 
-    record_raw = json.loads((artifacts / 'record.raw.json').read_text())
-    replay_raw = json.loads((artifacts / 'replay.raw.json').read_text())
+    record_raw = scrub_output(json.loads((artifacts / 'record.raw.json').read_text()))
+    replay_raw = scrub_output(json.loads((artifacts / 'replay.raw.json').read_text()))
     record_normalized = _normalize_reading_envelope(record_raw)
     replay_normalized = _normalize_reading_envelope(replay_raw)
     diff = _diff_reading_envelopes(record_normalized, replay_normalized)
@@ -1124,6 +1140,8 @@ def _write_diff_artifacts(artifacts: StdPath) -> dict:
     if diff['incomplete']:
         diff['changed'] = True
 
+    (artifacts / 'record.raw.json').write_text(json.dumps(record_raw, indent=2, sort_keys=True) + '\n')
+    (artifacts / 'replay.raw.json').write_text(json.dumps(replay_raw, indent=2, sort_keys=True) + '\n')
     (artifacts / 'record.normalized.json').write_text(json.dumps(record_normalized, indent=2, sort_keys=True) + '\n')
     (artifacts / 'replay.normalized.json').write_text(json.dumps(replay_normalized, indent=2, sort_keys=True) + '\n')
     (artifacts / 'diff.json').write_text(json.dumps(diff, indent=2, sort_keys=True) + '\n')

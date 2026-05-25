@@ -9,18 +9,20 @@ from typing import Any
 
 import pytest
 
+from datadog_checks.dev.replay.redaction import scrub_json
+
 
 def _normalize_cmd(cmd: Any) -> list[str]:
     if isinstance(cmd, (list, tuple)):
-        return [str(part) for part in cmd]
-    return [str(cmd)]
+        return [str(part) for part in scrub_json(list(cmd))]
+    return [str(scrub_json(str(cmd)))]
 
 
 def _exception_record(exc: BaseException) -> dict[str, str]:
     return {
         'type': type(exc).__name__,
         'module': type(exc).__module__,
-        'message': str(exc),
+        'message': str(scrub_json(str(exc))),
     }
 
 
@@ -40,8 +42,8 @@ def _raise_recorded_exception(record: dict[str, Any]) -> None:
 def _record_success(cmd: Any, stdout: str, stderr: str, returncode: int) -> dict[str, Any]:
     return {
         'argv': _normalize_cmd(cmd),
-        'stdout': stdout,
-        'stderr': stderr,
+        'stdout': scrub_json(stdout),
+        'stderr': scrub_json(stderr),
         'returncode': returncode,
         'exception': None,
     }
