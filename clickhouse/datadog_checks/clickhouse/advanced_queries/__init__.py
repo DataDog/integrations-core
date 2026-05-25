@@ -30,9 +30,12 @@ cache: dict[str, dict[str, Any]] = {}
 
 def load(name: str) -> dict[str, Any]:
     """Return the QueryManager-shaped query dict for ``name`` (e.g. ``"system_events"``)."""
-    with open(os.path.join(DATA_DIR, f'{name}.json'), encoding='utf-8') as f:
-        spec = json.load(f)
-    if 'items' not in spec:
+    try:
+        with open(os.path.join(DATA_DIR, f'{name}.json'), encoding='utf-8') as f:
+            spec = json.load(f)
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f'failed to load advanced query {name!r}') from exc
+    if 'columns' in spec:
         return {'name': spec['name'], 'query': spec['query'], 'columns': spec['columns']}
     items = _build_items(spec['items'], spec['prefix'])
     return {
@@ -66,7 +69,8 @@ def _build_items(compact: dict[str, Any], prefix: str) -> dict[str, dict[str, An
 def warm_cache() -> None:
     """Populate the module cache for every known query name. Idempotent."""
     for attr, file in NAMES.items():
-        cache.setdefault(attr, load(file))
+        if attr not in cache:
+            cache[attr] = load(file)
 
 
 def __getattr__(name: str) -> dict[str, Any]:
