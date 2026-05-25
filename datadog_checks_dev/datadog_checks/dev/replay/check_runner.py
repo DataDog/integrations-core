@@ -8,6 +8,8 @@ import sys
 import tempfile
 from pathlib import Path
 
+from datadog_checks.dev.replay.adapters import ADAPTERS
+
 
 def _write_pytest_file(path: Path, args: argparse.Namespace) -> None:
     path.write_text(
@@ -15,12 +17,7 @@ def _write_pytest_file(path: Path, args: argparse.Namespace) -> None:
 import json
 from pathlib import Path
 
-from datadog_checks.dev.replay.adapters.requests import install_live_recording_session_get, install_replay_session_get
-from datadog_checks.dev.replay.adapters.subprocess import (
-    install_live_recording_get_subprocess_output,
-    install_replay_get_subprocess_output,
-)
-from datadog_checks.dev.replay.adapters.tcp import install_live_recording_tcp_clients, install_replay_tcp_clients
+from datadog_checks.dev.replay.adapters import install_replay_adapter
 from datadog_checks.dev.replay.output import serialize_aggregator
 from datadog_checks.dev.replay.pytest import run_check_instances
 
@@ -29,29 +26,7 @@ def test_replay_check_runner(monkeypatch, aggregator, dd_run_check):
     config = json.loads(Path({str(args.config)!r}).read_text())
     instances = config.get('instances', [config])
     fixture = Path({str(args.fixture)!r})
-    if {args.adapter!r} == 'requests':
-        if {args.mode!r} == 'record':
-            install_live_recording_session_get(monkeypatch, fixture)
-        elif {args.mode!r} == 'replay':
-            install_replay_session_get(monkeypatch, fixture)
-        else:
-            raise AssertionError('unsupported replay mode')
-    elif {args.adapter!r} == 'subprocess':
-        if {args.mode!r} == 'record':
-            install_live_recording_get_subprocess_output(monkeypatch, fixture)
-        elif {args.mode!r} == 'replay':
-            install_replay_get_subprocess_output(monkeypatch, fixture)
-        else:
-            raise AssertionError('unsupported replay mode')
-    elif {args.adapter!r} == 'tcp':
-        if {args.mode!r} == 'record':
-            install_live_recording_tcp_clients(monkeypatch, fixture)
-        elif {args.mode!r} == 'replay':
-            install_replay_tcp_clients(monkeypatch, fixture)
-        else:
-            raise AssertionError('unsupported replay mode')
-    else:
-        raise AssertionError('unsupported replay adapter')
+    install_replay_adapter(monkeypatch, {args.adapter!r}, {args.mode!r}, fixture)
 
     run_check_instances({args.check_class!r}, instances, dd_run_check, {args.check_name!r})
     output = json.dumps(serialize_aggregator(aggregator), indent=2, sort_keys=True) + '\\n'
@@ -66,7 +41,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument('--check-class')
     parser.add_argument('--config', type=Path, required=True)
     parser.add_argument('--mode', choices=['record', 'replay'], required=True)
-    parser.add_argument('--adapter', choices=['requests', 'subprocess', 'tcp'], default='requests')
+    parser.add_argument('--adapter', choices=ADAPTERS, default='requests')
     parser.add_argument('--fixture', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args(argv)

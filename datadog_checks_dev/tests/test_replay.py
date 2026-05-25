@@ -10,6 +10,7 @@ import requests
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils import subprocess_output
+from datadog_checks.dev.replay.adapters import install_replay_adapter
 from datadog_checks.dev.replay.adapters.requests import build_get_record, install_replay_session_get
 from datadog_checks.dev.replay.adapters.subprocess import (
     install_live_recording_get_subprocess_output,
@@ -89,6 +90,21 @@ def test_requests_replay_fixture_miss_when_records_exhausted(monkeypatch, tmp_pa
     requests.Session().get('http://example.test/metrics')
     with pytest.raises(AssertionError, match='No recorded HTTP response'):
         requests.Session().get('http://example.test/metrics')
+
+
+def test_install_replay_adapter_dispatches_requests_replay(monkeypatch, tmp_path):
+    fixture_path = tmp_path / 'capture.json'
+    fixture_path.write_text(json.dumps([build_get_record('http://example.test/metrics', 'metric 1\n')]) + '\n')
+
+    install_replay_adapter(monkeypatch, 'requests', 'replay', fixture_path)
+
+    response = requests.Session().get('http://example.test/metrics')
+    assert response.text == 'metric 1\n'
+
+
+def test_install_replay_adapter_rejects_unsupported_adapter(monkeypatch, tmp_path):
+    with pytest.raises(AssertionError, match='unsupported replay adapter'):
+        install_replay_adapter(monkeypatch, 'unknown', 'replay', tmp_path / 'capture.json')
 
 
 def test_subprocess_record_and_replay(monkeypatch, tmp_path):
