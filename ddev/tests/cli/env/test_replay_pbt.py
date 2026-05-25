@@ -37,6 +37,7 @@ from datadog_checks.dev.replay.pbt.cache import (
     mutate_request_capture_json_whitespace,
     mutate_request_capture_label_order,
 )
+from datadog_checks.dev.replay.pbt.openmetrics import parse_sample_line
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
@@ -51,6 +52,7 @@ PROPERTIES = (
     'json-whitespace',
     'json-string-escapes',
     'metadata-emitted-metrics',
+    'openmetrics-coverage',
     'asset-query-metrics-in-metadata',
     'asset-query-tags-seen-in-replay',
     'output-finite-values',
@@ -129,8 +131,15 @@ def _run_compare_check_cache(
         command.extend(['--replay-env', context.replay_env])
 
     result = subprocess.run(command, cwd=Path.cwd(), text=True, capture_output=True)
-    assert result.returncode == 0, f'stdout:\n{result.stdout}\nstderr:\n{result.stderr}'
-    return json.loads((artifacts / 'diff.json').read_text())
+    assert result.returncode == 0, _format_compare_check_output(result)
+
+    diff_path = artifacts / 'diff.json'
+    assert diff_path.is_file(), f'compare-check did not write {diff_path}\n{_format_compare_check_output(result)}'
+    return json.loads(diff_path.read_text())
+
+
+def _format_compare_check_output(result: subprocess.CompletedProcess[str]) -> str:
+    return f'stdout:\n{result.stdout}\nstderr:\n{result.stderr}'
 
 
 def _read_normalized(run_dir: Path) -> dict:
@@ -244,6 +253,8 @@ SUBMISSION_TO_METADATA_TYPE = {
     'historate': 'rate',
 }
 
+CUSTOM_QUERY_METRIC_TYPES = frozenset(SUBMISSION_TO_METADATA_TYPE)
+
 QUERY_METRIC_PATTERN = re.compile(
     r'(?<![A-Za-z0-9_.])(?:avg|sum|min|max|last|count|median|p\d+):'
     r'([A-Za-z_][A-Za-z0-9_.]*(?:\.[A-Za-z0-9_]+)*)\{'
@@ -303,6 +314,13 @@ def _load_metadata_rows(repo_root: Path, integration: str) -> dict[str, dict[str
     return rows
 
 
+def _load_metadata_rows_or_skip(repo_root: Path, integration: str) -> dict[str, dict[str, str]]:
+    metadata_path = repo_root / integration / 'metadata.csv'
+    if not metadata_path.is_file():
+        pytest.skip(f'Integration has no metadata.csv: {metadata_path}')
+    return _load_metadata_rows(repo_root, integration)
+
+
 def _load_manifest_metric_prefix(repo_root: Path, integration: str) -> str | None:
     manifest_path = repo_root / integration / 'manifest.json'
     if not manifest_path.is_file():
@@ -312,6 +330,243 @@ def _load_manifest_metric_prefix(repo_root: Path, integration: str) -> str | Non
     metrics = manifest.get('assets', {}).get('integration', {}).get('metrics', {})
     prefix = metrics.get('prefix')
     return prefix if isinstance(prefix, str) and prefix else None
+
+
+def _request_capture_files(cache_dir: Path) -> list[Path]:
+    manifest_path = cache_dir / 'capture.json'
+    manifest = json.loads(manifest_path.read_text())
+    if isinstance(manifest, dict):
+        files = manifest.get('files', {})
+        requests_file = files.get('requests') if isinstance(files, dict) else None
+        if requests_file:
+            return [cache_dir / str(requests_file)]
+        return []
+    if isinstance(manifest, list):
+        return [manifest_path]
+    return []
+
+
+def _iter_request_capture_records(cache_dir: Path) -> Iterator[dict[str, Any]]:
+    for capture_file in _request_capture_files(cache_dir):
+        records = json.loads(capture_file.read_text())
+        if not isinstance(records, list):
+            continue
+        for record in records:
+            if isinstance(record, dict):
+                yield record
+
+
+def _raw_openmetrics_family_name(sample_name: str) -> str:
+    for suffix in ('_bucket', '_total', '_sum', '_count'):
+        if sample_name.endswith(suffix):
+            return sample_name[: -len(suffix)]
+    return sample_name
+
+
+def _observed_openmetrics_families(cache_dir: Path) -> set[str]:
+    families = set()
+    for record in _iter_request_capture_records(cache_dir):
+        body = record.get('body')
+        if not isinstance(body, str):
+            continue
+        for line in body.split('\n'):
+            sample = parse_sample_line(line)
+            if sample is not None:
+                families.add(_raw_openmetrics_family_name(sample.name))
+    return families
+
+
+def _load_replay_config(cache_dir: Path) -> dict[str, Any]:
+    config_path = cache_dir / 'config.json'
+    if not config_path.is_file():
+        return {}
+    config = json.loads(config_path.read_text())
+    return config if isinstance(config, dict) else {}
+
+
+def _load_raw_metric_prefixes(cache_dir: Path) -> set[str]:
+    config = _load_replay_config(cache_dir)
+    instances = config.get('instances')
+    if not isinstance(instances, list):
+        return set()
+
+    prefixes = set()
+    for instance in instances:
+        if not isinstance(instance, dict):
+            continue
+        for key in ('raw_metric_prefix', 'metrics_prefix'):
+            value = instance.get(key)
+            if isinstance(value, str) and value:
+                prefixes.add(value)
+    return prefixes
+
+
+def _metric_name_stem(name: str, *, prefixes: set[str]) -> str:
+    stem = name
+    for prefix in sorted(prefixes, key=len, reverse=True):
+        if stem.startswith(prefix):
+            stem = stem[len(prefix) :]
+            break
+    for suffix in ('_bucket', '_total', '_sum', '_count', '.bucket', '.total', '.sum', '.count'):
+        if stem.endswith(suffix):
+            stem = stem[: -len(suffix)]
+            break
+    return stem.strip('._').replace(':', '.').replace('_', '.')
+
+
+def _family_is_heuristically_emitted(raw_family: str, emitted_metric_names: set[str], *, prefixes: set[str]) -> bool:
+    raw_stems = {
+        _metric_name_stem(raw_family, prefixes=prefixes),
+        _metric_name_stem(raw_family, prefixes=set()),
+    }
+    raw_stems = {stem for stem in raw_stems if stem}
+    for emitted_name in emitted_metric_names:
+        emitted_stem = _metric_name_stem(emitted_name, prefixes=prefixes)
+        for raw_stem in raw_stems:
+            if (
+                emitted_stem == raw_stem
+                or emitted_stem.startswith(f'{raw_stem}.')
+                or emitted_stem.endswith(f'.{raw_stem}')
+            ):
+                return True
+    return False
+
+
+def _iter_custom_query_metric_names(value: Any) -> Iterator[str]:
+    if isinstance(value, dict):
+        metric_type = value.get('type')
+        name = value.get('name')
+        if isinstance(metric_type, str) and metric_type in CUSTOM_QUERY_METRIC_TYPES and isinstance(name, str) and name:
+            yield name
+
+        for child in value.values():
+            yield from _iter_custom_query_metric_names(child)
+    elif isinstance(value, list):
+        for child in value:
+            yield from _iter_custom_query_metric_names(child)
+
+
+def _custom_metric_name_candidates(name: str, metric_prefix: str | None) -> Iterator[str]:
+    yield name
+    if metric_prefix and not name.startswith(metric_prefix):
+        yield f'{metric_prefix}{name}'
+
+
+def _configured_custom_metric_names(cache_dir: Path, metric_prefix: str | None) -> set[str]:
+    config = _load_replay_config(cache_dir)
+    sections = [config.get('init_config')]
+    instances = config.get('instances')
+    if isinstance(instances, list):
+        sections.extend(instances)
+
+    names = set()
+    for section in sections:
+        if not isinstance(section, dict):
+            continue
+        for key in ('custom_queries', 'global_custom_queries'):
+            for name in _iter_custom_query_metric_names(section.get(key)):
+                names.update(_custom_metric_name_candidates(name, metric_prefix))
+    return names
+
+
+def _emitted_metric_names(output: dict[str, Any]) -> set[str]:
+    names = set()
+    for reading_output in _normalized_reading_outputs(output):
+        _assert_normalized_output_contract(reading_output)
+        for metric in reading_output.get('metrics', []):
+            name = metric.get('name')
+            if isinstance(name, str) and name:
+                names.add(name)
+    return names
+
+
+def _coverage_ratio(numerator: int, denominator: int) -> float | None:
+    if denominator == 0:
+        return None
+    return numerator / denominator
+
+
+def _format_percent(value: float | None) -> str:
+    if value is None:
+        return 'n/a'
+    return f'{value:.1%}'
+
+
+def _compute_openmetrics_coverage(
+    *, cache_dir: Path, output: dict[str, Any], metadata_rows: dict[str, dict[str, str]], metric_prefix: str | None
+) -> dict[str, Any]:
+    observed_families = _observed_openmetrics_families(cache_dir)
+    emitted_names = _emitted_metric_names(output)
+    metadata_names = set(metadata_rows)
+    prefixes = _load_raw_metric_prefixes(cache_dir)
+    if metric_prefix:
+        prefixes.add(metric_prefix)
+        prefixes.add(metric_prefix.replace('.', '_'))
+
+    observed_covered = {
+        family
+        for family in observed_families
+        if _family_is_heuristically_emitted(family, emitted_names, prefixes=prefixes)
+    }
+    observed_missing = observed_families - observed_covered
+    metadata_emitted = metadata_names & emitted_names
+    metadata_unemitted = metadata_names - emitted_names
+
+    return {
+        'integration_prefix': metric_prefix,
+        'raw_metric_prefixes': sorted(prefixes),
+        'observed_to_emitted': {
+            'coverage': _coverage_ratio(len(observed_covered), len(observed_families)),
+            'covered_count': len(observed_covered),
+            'missing_count': len(observed_missing),
+            'observed_count': len(observed_families),
+            'covered_families': sorted(observed_covered),
+            'missing_families': sorted(observed_missing),
+        },
+        'supported_to_emitted': {
+            'coverage': _coverage_ratio(len(metadata_emitted), len(metadata_names)),
+            'emitted_count': len(metadata_emitted),
+            'unemitted_count': len(metadata_unemitted),
+            'supported_count': len(metadata_names),
+            'emitted_metrics': sorted(metadata_emitted),
+            'unemitted_metrics': sorted(metadata_unemitted),
+        },
+        'emitted_metrics': sorted(emitted_names),
+    }
+
+
+def _write_openmetrics_coverage(property_dir: Path, coverage: dict[str, Any]) -> None:
+    property_dir.mkdir(parents=True, exist_ok=True)
+    (property_dir / 'coverage.json').write_text(json.dumps(coverage, indent=2, sort_keys=True) + '\n')
+
+    observed = coverage['observed_to_emitted']
+    supported = coverage['supported_to_emitted']
+    lines = [
+        '# OpenMetrics replay coverage',
+        '',
+        'This is a generic, advisory coverage report. The observed-to-emitted direction uses a name-stem heuristic '
+        'because integrations can rename upstream families in integration-specific ways.',
+        '',
+        '## Summary',
+        '',
+        f'- Observed upstream families: {observed["observed_count"]}',
+        f'- Observed upstream families heuristically emitted: {observed["covered_count"]}',
+        f'- Observed -> emitted coverage: {_format_percent(observed["coverage"])}',
+        f'- Supported metadata metrics: {supported["supported_count"]}',
+        f'- Supported metadata metrics emitted by this replay: {supported["emitted_count"]}',
+        f'- Supported -> emitted coverage: {_format_percent(supported["coverage"])}',
+        '',
+        '## Observed upstream families not heuristically emitted',
+        '',
+    ]
+    lines.extend(f'- `{family}`' for family in observed['missing_families'][:200])
+    if len(observed['missing_families']) > 200:
+        lines.append(f'- ... {len(observed["missing_families"]) - 200} more')
+    lines.extend(['', '## Supported metadata metrics not emitted by this replay', ''])
+    lines.extend(f'- `{metric}`' for metric in supported['unemitted_metrics'][:200])
+    if len(supported['unemitted_metrics']) > 200:
+        lines.append(f'- ... {len(supported["unemitted_metrics"]) - 200} more')
+    (property_dir / 'coverage.md').write_text('\n'.join(lines) + '\n')
 
 
 def _iter_asset_json_paths(repo_root: Path, integration: str) -> Iterator[tuple[str, Path]]:
@@ -554,15 +809,26 @@ def _assert_monotonic_count_values_nonnegative(output: dict[str, Any]) -> None:
         pytest.skip('No non-sum monotonic_count metrics emitted by this replay cache.')
 
 
-def _assert_emitted_metrics_match_metadata(output: dict[str, Any], metadata_rows: dict[str, dict[str, str]]) -> None:
+def _assert_emitted_metrics_match_metadata(
+    output: dict[str, Any],
+    metadata_rows: dict[str, dict[str, str]],
+    *,
+    configured_custom_metrics: set[str] | None = None,
+) -> None:
+    configured_custom_metrics = configured_custom_metrics or set()
     missing = []
     mismatched = []
     emitted_count = 0
+    validated_count = 0
     for reading_output in _normalized_reading_outputs(output):
         _assert_normalized_output_contract(reading_output)
         emitted_count += len(reading_output.get('metrics', []))
         for metric in reading_output.get('metrics', []):
             name = metric.get('name')
+            if name in configured_custom_metrics:
+                continue
+
+            validated_count += 1
             row = metadata_rows.get(name)
             if row is None:
                 missing.append(name)
@@ -581,7 +847,10 @@ def _assert_emitted_metrics_match_metadata(output: dict[str, Any], metadata_rows
                     }
                 )
 
-    assert emitted_count, 'normalized output has no emitted metrics to validate against metadata.csv'
+    if emitted_count == 0:
+        pytest.skip('No metrics emitted by this replay cache.')
+    if validated_count == 0:
+        pytest.skip('Only configured custom metrics were emitted by this replay cache.')
     assert not missing, f'emitted metrics missing from metadata.csv: {sorted(set(missing))[:20]!r}'
     assert not mismatched, f'emitted metric type mismatches against metadata.csv: {mismatched[:20]!r}'
 
@@ -626,6 +895,30 @@ def test_same_context_coverage_rejects_added_metric_contexts():
         _assert_normalized_outputs_match(original, mutated)
 
 
+def test_run_compare_check_cache_reports_missing_diff_json(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    context = ReplayPBTContext(
+        {
+            'integration': 'example',
+            'environment': 'py3',
+            'replay_cache': str(tmp_path / 'cache'),
+            'artifacts': str(tmp_path / 'artifacts'),
+        }
+    )
+
+    def fake_run(*args: Any, **kwargs: Any) -> subprocess.CompletedProcess[str]:
+        return subprocess.CompletedProcess(args=args, returncode=0, stdout='compare stdout', stderr='compare stderr')
+
+    monkeypatch.setattr(subprocess, 'run', fake_run)
+
+    with pytest.raises(AssertionError, match='compare-check did not write') as exc_info:
+        _run_compare_check_cache(context=context, cache=context.cache, artifacts=context.artifacts)
+
+    message = str(exc_info.value)
+    assert 'diff.json' in message
+    assert 'compare stdout' in message
+    assert 'compare stderr' in message
+
+
 def test_emitted_metrics_match_metadata_accepts_mapped_submission_types():
     output = {
         'metrics': [
@@ -644,6 +937,70 @@ def test_emitted_metrics_match_metadata_accepts_mapped_submission_types():
     _assert_emitted_metrics_match_metadata(output, metadata_rows)
 
 
+def test_emitted_metrics_match_metadata_skips_no_metric_output():
+    output = {'metrics': [], 'service_checks': []}
+
+    with pytest.raises(pytest.skip.Exception, match='No metrics emitted'):
+        _assert_emitted_metrics_match_metadata(output, {})
+
+
+def test_load_metadata_rows_or_skip_skips_missing_metadata_csv(tmp_path: Path):
+    with pytest.raises(pytest.skip.Exception, match='has no metadata.csv'):
+        _load_metadata_rows_or_skip(tmp_path, 'openmetrics')
+
+
+def test_configured_custom_metric_names_extracts_custom_queries(tmp_path: Path):
+    cache = tmp_path / 'cache'
+    cache.mkdir()
+    (cache / 'config.json').write_text(
+        json.dumps(
+            {
+                'init_config': {
+                    'global_custom_queries': [{'columns': [{'name': 'global.custom.metric', 'type': 'gauge'}]}]
+                },
+                'instances': [
+                    {
+                        'custom_queries': [
+                            {
+                                'columns': [
+                                    {'name': 'custom.heroes.count', 'type': 'gauge'},
+                                    {'name': 'dynamic_tag', 'type': 'tag'},
+                                ]
+                            }
+                        ]
+                    },
+                    {'custom_queries': [{'columns': [{'name': 'elasticsearch.custom.metric', 'type': 'gauge'}]}]},
+                ],
+            }
+        )
+    )
+
+    assert _configured_custom_metric_names(cache, 'voltdb.') == {
+        'global.custom.metric',
+        'voltdb.global.custom.metric',
+        'custom.heroes.count',
+        'voltdb.custom.heroes.count',
+        'elasticsearch.custom.metric',
+        'voltdb.elasticsearch.custom.metric',
+    }
+
+
+def test_emitted_metrics_match_metadata_ignores_configured_custom_metrics():
+    output = {
+        'metrics': [
+            {'name': 'example.metric', 'type': 0, 'value': 1.0, 'tags': []},
+            {'name': 'example.custom.metric', 'type': 0, 'value': 2.0, 'tags': []},
+        ],
+        'service_checks': [],
+    }
+
+    _assert_emitted_metrics_match_metadata(
+        output,
+        {'example.metric': {'metric_type': 'gauge'}},
+        configured_custom_metrics={'example.custom.metric'},
+    )
+
+
 def test_emitted_metrics_match_metadata_rejects_missing_metric():
     output = {'metrics': [{'name': 'missing.metric', 'type': 0, 'value': 1.0, 'tags': []}], 'service_checks': []}
 
@@ -657,6 +1014,79 @@ def test_emitted_metrics_match_metadata_rejects_type_mismatch():
 
     with pytest.raises(AssertionError, match='type mismatches'):
         _assert_emitted_metrics_match_metadata(output, metadata_rows)
+
+
+def test_openmetrics_coverage_counts_observed_and_supported_directions(tmp_path: Path):
+    cache = tmp_path / 'cache'
+    cache.mkdir()
+    (cache / 'config.json').write_text(json.dumps({'instances': [{'raw_metric_prefix': 'n8n_'}]}))
+    (cache / 'capture.json').write_text(json.dumps({'files': {'requests': 'capture.requests.json'}}))
+    (cache / 'capture.requests.json').write_text(
+        json.dumps(
+            [
+                {
+                    'body': '\n'.join(
+                        [
+                            '# TYPE n8n_workflow_execution_duration_seconds histogram',
+                            'n8n_workflow_execution_duration_seconds_bucket{le="1"} 1',
+                            'n8n_workflow_execution_duration_seconds_sum 2',
+                            'n8n_unmapped_total 3',
+                        ]
+                    ),
+                    'headers': {'Content-Type': 'text/plain'},
+                }
+            ]
+        )
+    )
+    output = {
+        'metrics': [
+            {'name': 'n8n.workflow.execution.duration.seconds.count', 'type': 3, 'value': 1.0, 'tags': []},
+            {'name': 'n8n.workflow.execution.duration.seconds.sum', 'type': 0, 'value': 2.0, 'tags': []},
+        ],
+        'service_checks': [],
+    }
+
+    coverage = _compute_openmetrics_coverage(
+        cache_dir=cache,
+        output=output,
+        metadata_rows={
+            'n8n.workflow.execution.duration.seconds.count': {'metric_type': 'count'},
+            'n8n.workflow.execution.duration.seconds.sum': {'metric_type': 'gauge'},
+            'n8n.not.emitted': {'metric_type': 'gauge'},
+        },
+        metric_prefix='n8n.',
+    )
+
+    assert coverage['observed_to_emitted']['observed_count'] == 2
+    assert coverage['observed_to_emitted']['covered_families'] == ['n8n_workflow_execution_duration_seconds']
+    assert coverage['observed_to_emitted']['missing_families'] == ['n8n_unmapped']
+    assert coverage['supported_to_emitted']['supported_count'] == 3
+    assert coverage['supported_to_emitted']['emitted_count'] == 2
+
+
+def test_write_openmetrics_coverage_artifacts(tmp_path: Path):
+    coverage = {
+        'observed_to_emitted': {
+            'coverage': 0.5,
+            'covered_count': 1,
+            'missing_count': 1,
+            'observed_count': 2,
+            'missing_families': ['missing_raw_family'],
+        },
+        'supported_to_emitted': {
+            'coverage': 0.25,
+            'emitted_count': 1,
+            'unemitted_count': 3,
+            'supported_count': 4,
+            'unemitted_metrics': ['example.not_emitted'],
+        },
+        'emitted_metrics': ['example.emitted'],
+    }
+
+    _write_openmetrics_coverage(tmp_path, coverage)
+
+    assert json.loads((tmp_path / 'coverage.json').read_text())['observed_to_emitted']['coverage'] == 0.5
+    assert 'Observed -> emitted coverage: 50.0%' in (tmp_path / 'coverage.md').read_text()
 
 
 def _write_asset_query_fixture(repo_root: Path) -> None:
@@ -972,8 +1402,43 @@ def test_emitted_metrics_match_metadata(replay_pbt_context: ReplayPBTContext, va
     property_dir = replay_pbt_context.artifacts / property_name
     diff = _run_compare_check_cache(context=replay_pbt_context, cache=replay_pbt_context.cache, artifacts=property_dir)
     assert diff['changed'] is False
+    metadata_rows = _load_metadata_rows_or_skip(replay_pbt_context.repo, replay_pbt_context.integration)
+    configured_custom_metrics = _configured_custom_metric_names(
+        property_dir,
+        _load_manifest_metric_prefix(replay_pbt_context.repo, replay_pbt_context.integration),
+    )
+    _assert_emitted_metrics_match_metadata(
+        _read_normalized(property_dir), metadata_rows, configured_custom_metrics=configured_custom_metrics
+    )
+
+
+@settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@given(validation=st.sampled_from(['openmetrics-coverage']))
+def test_openmetrics_replay_coverage(replay_pbt_context: ReplayPBTContext, validation: str):
+    # Coverage/report property: for replay caches containing Prometheus/OpenMetrics
+    # response bodies, report both observed-upstream-family -> emitted Datadog
+    # coverage and supported metadata metric -> emitted-in-this-env coverage.
+    # The observed direction is heuristic because integrations may rename raw
+    # families in integration-specific ways; this property writes artifacts and
+    # does not impose thresholds by default.
+    property_name = 'openmetrics-coverage'
+    _skip_unselected(replay_pbt_context, property_name)
+    assert validation == 'openmetrics-coverage'
+
+    property_dir = replay_pbt_context.artifacts / property_name
+    diff = _run_compare_check_cache(context=replay_pbt_context, cache=replay_pbt_context.cache, artifacts=property_dir)
+    assert diff['changed'] is False
+    if not _observed_openmetrics_families(property_dir):
+        pytest.skip('Replay cache has no request records with OpenMetrics samples.')
+
     metadata_rows = _load_metadata_rows(replay_pbt_context.repo, replay_pbt_context.integration)
-    _assert_emitted_metrics_match_metadata(_read_normalized(property_dir), metadata_rows)
+    coverage = _compute_openmetrics_coverage(
+        cache_dir=property_dir,
+        output=_read_normalized(property_dir),
+        metadata_rows=metadata_rows,
+        metric_prefix=_load_manifest_metric_prefix(replay_pbt_context.repo, replay_pbt_context.integration),
+    )
+    _write_openmetrics_coverage(property_dir, coverage)
 
 
 @settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])

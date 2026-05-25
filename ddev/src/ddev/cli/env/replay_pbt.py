@@ -37,6 +37,7 @@ PROPERTIES = (
     'json-whitespace',
     'json-string-escapes',
     'metadata-emitted-metrics',
+    'openmetrics-coverage',
     'asset-query-metrics-in-metadata',
     'asset-query-tags-seen-in-replay',
     'output-finite-values',
