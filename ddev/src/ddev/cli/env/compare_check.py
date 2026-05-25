@@ -52,7 +52,7 @@ if TYPE_CHECKING:
         'Use "auto" or "latest" to find the newest suitable default artifact for each selected environment.'
     ),
 )
-@click.option('--adapter', default='requests', show_default=True, type=click.Choice(['requests', 'subprocess']))
+@click.option('--adapter', default='requests', show_default=True, type=click.Choice(['requests', 'subprocess', 'tcp']))
 @click.option(
     '--old-env',
     'old_hatch_env',

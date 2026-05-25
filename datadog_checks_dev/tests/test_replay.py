@@ -15,6 +15,7 @@ from datadog_checks.dev.replay.adapters.subprocess import (
     install_live_recording_get_subprocess_output,
     install_replay_get_subprocess_output,
 )
+from datadog_checks.dev.replay.adapters.tcp import install_live_recording_tcp_clients, install_replay_tcp_clients
 from datadog_checks.dev.replay.diff import diff_outputs
 from datadog_checks.dev.replay.normalize import normalize_output
 from datadog_checks.dev.replay.pytest import infer_check_class
@@ -142,3 +143,55 @@ def test_subprocess_record_and_replay_exception(monkeypatch, tmp_path):
     install_replay_get_subprocess_output(monkeypatch, fixture_path)
     with pytest.raises(OSError, match='boom'):
         subprocess_output.get_subprocess_output(['example'], None)
+
+
+def test_tcp_zookeeper_record_and_replay(monkeypatch, tmp_path):
+    from io import StringIO
+
+    class ZookeeperCheck:
+        def _send_command(self, command):
+            return StringIO(f'response for {command}')
+
+    module = types.ModuleType('datadog_checks.zk.zk')
+    module.ZookeeperCheck = ZookeeperCheck
+    monkeypatch.setitem(sys.modules, 'datadog_checks.zk.zk', module)
+
+    fixture_path = tmp_path / 'capture.json'
+    install_live_recording_tcp_clients(monkeypatch, fixture_path)
+
+    check = ZookeeperCheck()
+    assert check._send_command('ruok').getvalue() == 'response for ruok'
+
+    install_replay_tcp_clients(monkeypatch, fixture_path)
+    assert check._send_command('ruok').getvalue() == 'response for ruok'
+
+
+def test_tcp_replay_fixture_miss_on_wrong_operation(monkeypatch, tmp_path):
+    class ZookeeperCheck:
+        def _send_command(self, command):
+            raise AssertionError('should be patched')
+
+    module = types.ModuleType('datadog_checks.zk.zk')
+    module.ZookeeperCheck = ZookeeperCheck
+    monkeypatch.setitem(sys.modules, 'datadog_checks.zk.zk', module)
+
+    fixture_path = tmp_path / 'capture.json'
+    fixture_path.write_text(
+        json.dumps(
+            [
+                {
+                    'operation': 'ZookeeperCheck._send_command',
+                    'args': ['ruok'],
+                    'kwargs': {},
+                    'result': 'imok',
+                    'exception': None,
+                }
+            ]
+        )
+        + '\n'
+    )
+    install_replay_tcp_clients(monkeypatch, fixture_path)
+
+    check = ZookeeperCheck()
+    with pytest.raises(AssertionError, match='does not match'):
+        check._send_command('stat')
