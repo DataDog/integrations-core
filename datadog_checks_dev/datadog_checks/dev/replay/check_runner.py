@@ -34,6 +34,7 @@ def test_replay_check_runner(monkeypatch, aggregator, datadog_agent, dd_run_chec
     monkeypatch.setattr(dd_time, 'time_func', lambda: current_time[0])
 
     config = json.loads(Path({str(args.config)!r}).read_text())
+    init_config = config.get('init_config') or {{}}
     instances = config.get('instances', [config])
     fixture = Path({str(args.fixture)!r})
     adapter_records = install_replay_adapters(
@@ -45,7 +46,7 @@ def test_replay_check_runner(monkeypatch, aggregator, datadog_agent, dd_run_chec
     )
 
     readings = {args.readings!r}
-    checks = build_check_instances({args.check_class!r}, instances, {args.check_name!r})
+    checks = build_check_instances({args.check_class!r}, instances, {args.check_name!r}, init_config=init_config)
     outputs = []
     for index in range(readings):
         current_time[0] = {args.replay_time!r} + index * {args.reading_interval!r}

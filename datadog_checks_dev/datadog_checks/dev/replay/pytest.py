@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from importlib import import_module
+from pathlib import Path
 from typing import Any
 
 
@@ -46,7 +47,43 @@ def infer_check_class(check_name: str):
     )
 
 
-def build_check_instances(check_class: str | type | None, instances: list[dict[str, Any]], check_name: str):
+def _find_default_ca_bundle() -> str | None:
+    """Find a local CA bundle usable outside the Agent embedded runtime."""
+    try:
+        import certifi
+    except ImportError:
+        pass
+    else:
+        certifi_path = Path(certifi.where())
+        if certifi_path.is_file():
+            return str(certifi_path)
+
+    import ssl
+
+    default_paths = ssl.get_default_verify_paths()
+    for candidate in (default_paths.cafile, '/etc/ssl/certs/ca-certificates.crt'):
+        if candidate and Path(candidate).is_file():
+            return candidate
+
+    return None
+
+
+def _apply_no_agent_init_config_defaults(check_name: str, init_config: dict[str, Any]) -> dict[str, Any]:
+    """Add init_config defaults needed by checks that normally run inside the Agent."""
+    resolved_init_config = dict(init_config)
+    if check_name == 'http_check' and not resolved_init_config.get('ca_certs'):
+        ca_bundle = _find_default_ca_bundle()
+        if ca_bundle:
+            resolved_init_config['ca_certs'] = ca_bundle
+    return resolved_init_config
+
+
+def build_check_instances(
+    check_class: str | type | None,
+    instances: list[dict[str, Any]],
+    check_name: str,
+    init_config: dict[str, Any] | None = None,
+):
     """Build one check object per instance, preserving object state across readings."""
     if check_class is None:
         cls = infer_check_class(check_name)
@@ -55,10 +92,17 @@ def build_check_instances(check_class: str | type | None, instances: list[dict[s
     else:
         cls = check_class
 
-    return [cls(check_name, {}, [instance]) for instance in instances]
+    resolved_init_config = _apply_no_agent_init_config_defaults(check_name, init_config or {})
+    return [cls(check_name, resolved_init_config, [instance]) for instance in instances]
 
 
-def run_check_instances(check_class: str | type | None, instances: list[dict[str, Any]], dd_run_check, check_name: str):
+def run_check_instances(
+    check_class: str | type | None,
+    instances: list[dict[str, Any]],
+    dd_run_check,
+    check_name: str,
+    init_config: dict[str, Any] | None = None,
+):
     """Run a Python check class once for each provided instance using pytest's dd_run_check fixture."""
-    for check in build_check_instances(check_class, instances, check_name):
+    for check in build_check_instances(check_class, instances, check_name, init_config=init_config):
         dd_run_check(check)
