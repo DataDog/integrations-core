@@ -110,12 +110,11 @@ class IbmWasCheck(AgentCheck):
             and tag == 'CountStatistic'
         ):
             tag = 'TimeStatistic'
-        self.metric_type_mapping[tag](metric_name, value, tags=tags)
-
-        # creates new JVM metrics correctly as gauges
         if prefix == "jvm":
-            jvm_metric_name = "{}_gauge".format(metric_name)
-            self.gauge(jvm_metric_name, value, tags=tags)
+            self.gauge(metric_name, value, tags=tags)
+            self.gauge("{}_gauge".format(metric_name), value, tags=tags)
+        else:
+            self.metric_type_mapping[tag](metric_name, value, tags=tags)
 
     def make_request(self):
         try:

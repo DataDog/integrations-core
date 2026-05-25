@@ -1,9 +1,9 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 ibm_was.can_connect,gauge,,,,The ability of the integration to connect to the Perf Servlet to collect metrics,0,ibm_was,was can connect,
 ibm_was.jdbc.allocate_count,gauge,,connection,,The total number of managed connections that were allocated since pool creation.,0,ibm_was,jdbc allocated count,
-ibm_was.jdbc.close_count,gauge,,connection,,The total number of managed connections that were destroyed since pool creation.,0,ibm_was,jdbc close count,
+ibm_was.jdbc.close_count,count,,connection,,The total number of managed connections that were destroyed since pool creation.,0,ibm_was,jdbc close count,
 ibm_was.jdbc.connection_handle_count,gauge,,connection,,The number of connections that are in use. Can include multiple connections that are shared from a single managed connection.,0,ibm_was,jdbc connection handle count,
-ibm_was.jdbc.create_count,gauge,,connection,,The total number of managed connections that were created since pool creation.,0,ibm_was,jdbc create count,
+ibm_was.jdbc.create_count,count,,connection,,The total number of managed connections that were created since pool creation.,0,ibm_was,jdbc create count,
 ibm_was.jdbc.fault_count,gauge,,,,"The total number of faults, such as timeouts, in the connection pool.",0,ibm_was,jdbc Fault Count,
 ibm_was.jdbc.free_pool_size,gauge,,connection,,The number of managed connections that are in the free pool.,0,ibm_was,jdbc free pool size,
 ibm_was.jdbc.jdbc_time,gauge,,millisecond,,"The average time in milliseconds spent running in the JDBC driver that includes time that is spent in the JDBC driver, network, and database.",0,ibm_was,jdbc time,

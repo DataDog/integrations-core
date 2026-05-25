@@ -31,6 +31,8 @@ def test_metric_collection_per_category(aggregator, instance, check):
         aggregator.assert_metric(metric_name)
         aggregator.assert_metric_has_tag(metric_name, 'key1:value1')
 
+    aggregator.assert_metric('ibm_was.jvm.heap_size', metric_type=aggregator.GAUGE)
+
 
 def test_custom_query(aggregator, instance, check):
     with mock.patch('datadog_checks.ibm_was.IbmWasCheck.make_request', return_value=mock_data('server.xml')):
