@@ -53,6 +53,11 @@ def build_get_record(url: str, body: str, status: int = 200, headers: dict[str, 
     }
 
 
+def record_from_response(url: str, response: requests.Response) -> dict[str, Any]:
+    """Create a fixture record from a live requests response."""
+    return build_get_record(url, response.text, status=response.status_code, headers=dict(response.headers))
+
+
 def install_recording_session_get(
     monkeypatch: pytest.MonkeyPatch, fixture_path: Path, responses_by_url: dict[str, dict[str, Any]]
 ) -> list[dict[str, Any]]:
@@ -64,6 +69,21 @@ def install_recording_session_get(
         records.append(record)
         fixture_path.write_text(json.dumps(records, indent=2, sort_keys=True) + "\n")
         return FixtureResponse(record)
+
+    monkeypatch.setattr(requests.Session, "get", recorded_get)
+    return records
+
+
+def install_live_recording_session_get(monkeypatch: pytest.MonkeyPatch, fixture_path: Path) -> list[dict[str, Any]]:
+    """Record real cilium HTTP GETs while still returning live responses to the check."""
+    records: list[dict[str, Any]] = []
+    original_get = requests.Session.get
+
+    def recorded_get(session: requests.Session, url: str, **kwargs: Any) -> requests.Response:
+        response = original_get(session, url, **kwargs)
+        records.append(record_from_response(url, response))
+        fixture_path.write_text(json.dumps(records, indent=2, sort_keys=True) + "\n")
+        return response
 
     monkeypatch.setattr(requests.Session, "get", recorded_get)
     return records
