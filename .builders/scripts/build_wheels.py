@@ -51,6 +51,7 @@ INDEX_BASE_URL = 'https://agent-int-packages.datadoghq.com'
 CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
 CUSTOM_BUILT_INDEX = f'{INDEX_BASE_URL}/built'
 UNNORMALIZED_PROJECT_NAME_CHARS = re.compile(r'[-_.]+')
+KAFKA_PIN_RE = re.compile(r'^\s*confluent-kafka(?:\[[^\]]+\])?\s*==\s*([^\s;#]+)')
 
 
 class WheelSizes(TypedDict):
@@ -353,7 +354,15 @@ def calculate_wheel_sizes(wheel_path: Path) -> WheelSizes:
 
 
 def assert_kafka_version_matches() -> None:
-    """Abort if CONFLUENT_KAFKA_VERSION env disagrees with the pin in requirements.in."""
+    """Abort if CONFLUENT_KAFKA_VERSION env disagrees with the pin in requirements.in.
+
+    Env is set only in .builders/images/windows-x86_64/Dockerfile.
+    Bump checklist when changing the confluent-kafka version:
+      1. agent_requirements.in              confluent-kafka==X.Y.Z
+      2. Dockerfile  ENV CONFLUENT_KAFKA_VERSION   this value
+      3. build_script.ps1                   -Hash for the vX.Y.Z tarball
+      4. build_script.ps1                   $desired_commit for vcpkg
+    """
     expected = os.environ.get('CONFLUENT_KAFKA_VERSION')
     if not expected:
         return
@@ -361,13 +370,16 @@ def assert_kafka_version_matches() -> None:
     if not requirements.is_file():
         abort(f'CONFLUENT_KAFKA_VERSION is set but {requirements} is missing — is the build mount configured?')
     pin = None
-    for line in requirements.read_text(encoding='utf-8').splitlines():
-        match = re.match(r'^\s*confluent-kafka==(\d+(?:\.\d+){2})\s*$', line)
+    for raw in requirements.read_text(encoding='utf-8').splitlines():
+        match = KAFKA_PIN_RE.match(raw.split('#', 1)[0])
         if match:
             pin = match.group(1)
             break
     if pin is None:
-        abort('CONFLUENT_KAFKA_VERSION is set but no confluent-kafka== pin found in requirements.in.')
+        abort(
+            f'CONFLUENT_KAFKA_VERSION ({expected}) is set but no confluent-kafka== pin '
+            f'found in {requirements}. Did agent_requirements.in change shape?'
+        )
     if pin != expected:
         abort(
             f'CONFLUENT_KAFKA_VERSION ({expected}) disagrees with confluent-kafka pin ({pin}). '
@@ -388,6 +400,9 @@ def main():
         python_path = PY2_PATH
     else:
         abort(f'Invalid python version: {python_version}')
+
+    # No-op on Linux/macOS: CONFLUENT_KAFKA_VERSION is set only in the Windows Dockerfile.
+    assert_kafka_version_matches()
 
     wheels_dir = MOUNT_DIR / 'wheels'
     built_wheels_dir = wheels_dir / 'built'
@@ -420,8 +435,6 @@ def main():
         # Spaces are used to separate multiple values which means paths themselves cannot contain spaces, see:
         # https://github.com/pypa/pip/issues/10114#issuecomment-1880125475
         env_vars['PIP_FIND_LINKS'] = path_to_uri(staged_wheel_dir)
-
-        assert_kafka_version_matches()
 
         # Perform builder-specific logic if required
         if build_command := os.environ.get('DD_BUILD_COMMAND'):

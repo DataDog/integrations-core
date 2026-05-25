@@ -12,6 +12,7 @@ if (-not $kafka_version) {
 Write-Host "Will build librdkafka $kafka_version"
 
 # Download and unpack the source
+# -Hash must be bumped in lockstep with CONFLUENT_KAFKA_VERSION (see Dockerfile checklist).
 Get-RemoteFile `
   -Uri "https://github.com/confluentinc/librdkafka/archive/refs/tags/v${kafka_version}.tar.gz" `
   -Path "librdkafka-${kafka_version}.tar.gz" `
@@ -27,6 +28,7 @@ Remove-Item "librdkafka-${kafka_version}.tar.gz"
 $triplet = "x64-windows"
 $vcpkg_dir = "C:\vcpkg"
 $librdkafka_dir = "C:\librdkafka\librdkafka-${kafka_version}"
+# $desired_commit must be bumped in lockstep with CONFLUENT_KAFKA_VERSION (see Dockerfile checklist).
 $desired_commit = "3e797c57a635d3ce8f3473ef344ea44c09c246c8"
 
 # Clone and configure vcpkg
