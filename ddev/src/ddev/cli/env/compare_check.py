@@ -582,6 +582,9 @@ def _fixture_bundle_file_names(run_dir: StdPath, manifest_name: str) -> list[str
     except Exception:
         return [manifest_name]
 
+    if not isinstance(manifest, dict):
+        return [manifest_name]
+
     files = [manifest_name]
     component_files = manifest.get('files', {})
     if isinstance(component_files, dict):

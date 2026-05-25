@@ -71,6 +71,13 @@ def _write_valid_cache(
     return refs
 
 
+def test_cache_file_names_accepts_legacy_list_capture(tmp_path):
+    _write_cache_file(tmp_path, 'config.json')
+    (tmp_path / 'capture.json').write_text('[]')
+
+    assert _cache_file_names(tmp_path, 'same-fixture-replay') == ['config.json', 'capture.json']
+
+
 @pbt_settings
 @given(comparison_mode=comparison_modes)
 def test_required_cache_files_by_comparison_mode(comparison_mode):
