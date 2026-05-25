@@ -100,8 +100,7 @@ def test_dispatch_workflow_default_returns_none(github_manager, mocker):
 
     assert result is None
     api_post.assert_called_once()
-    args, kwargs = api_post.call_args
-    payload = json.loads(kwargs['content'])
+    payload = json.loads(api_post.call_args.kwargs['content'])
     assert payload == {'ref': 'master', 'inputs': {'pr_number': '123', 'head_sha': 'deadbeef'}}
     assert 'return_run_details' not in payload
 

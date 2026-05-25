@@ -6,7 +6,7 @@ from __future__ import annotations
 import json
 from functools import cached_property
 from time import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 if TYPE_CHECKING:
     from httpx import Client
@@ -216,6 +216,24 @@ class GitHubManager:
         except HTTPStatusError:
             return None
         return [label['name'] for label in response.json().get('labels', [])]
+
+    @overload
+    def dispatch_workflow(
+        self,
+        workflow_id: str,
+        ref: str,
+        inputs: dict[str, Any],
+        return_run_details: Literal[False] = False,
+    ) -> None: ...
+
+    @overload
+    def dispatch_workflow(
+        self,
+        workflow_id: str,
+        ref: str,
+        inputs: dict[str, Any],
+        return_run_details: Literal[True],
+    ) -> dict[str, Any]: ...
 
     def dispatch_workflow(
         self,

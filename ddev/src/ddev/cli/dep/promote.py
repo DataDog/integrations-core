@@ -56,9 +56,10 @@ def promote(app: Application, pr_url: str):
                 inputs={'pr_number': str(pr_number), 'head_sha': head_sha},
                 return_run_details=True,
             )
+
+        if not run_details:
+            app.abort('Workflow dispatched but no run details were returned.')
+        app.display_success(f'Promote workflow dispatched for PR #{pr_number}.')
+        app.display_info(f'Workflow run: {run_details["html_url"]}')
     finally:
         httpx_logger.setLevel(previous_level)
-
-    app.display_success(f'Promote workflow dispatched for PR #{pr_number}.')
-    assert run_details is not None
-    app.display_info(f'Workflow run: {run_details["html_url"]}')
