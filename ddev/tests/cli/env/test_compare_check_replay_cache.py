@@ -56,6 +56,7 @@ def _write_valid_cache(
     old_head: str = 'old-head',
     new_head: str = 'new-head',
     check_class: str | None = None,
+    readings: int = 1,
 ) -> dict:
     for name in _required_cache_files(comparison_mode):
         _write_cache_file(cache_dir, name)
@@ -73,6 +74,7 @@ def _write_valid_cache(
         'record_old_head': old_head,
         'record_new_head': new_head if comparison_mode == 'record-each-side' else None,
         'check_class': check_class,
+        'readings': readings,
         'files': {name: _file_sha256(cache_dir / name) for name in cache_files},
     }
     refs = {'fixture_key': fixture_key}
@@ -127,6 +129,7 @@ def test_suitable_replay_cache_accepts_matching_fixture_key(tmp_path, comparison
         old_head='old-head',
         new_head='new-head',
         check_class=None,
+        readings=1,
     )
 
 
@@ -152,6 +155,7 @@ def test_suitable_replay_cache_rejects_missing_required_files(tmp_path, comparis
             old_head='old-head',
             new_head='new-head',
             check_class=None,
+            readings=1,
         )
 
 
@@ -171,6 +175,7 @@ def test_suitable_replay_cache_rejects_missing_required_files(tmp_path, comparis
             'record_old_head',
             'record_new_head',
             'check_class',
+            'readings',
         ]
     ),
     replacement=non_empty_safe_text,
@@ -201,6 +206,7 @@ def test_suitable_replay_cache_rejects_fixture_key_mismatch(tmp_path, comparison
         old_head='old-head',
         new_head='new-head',
         check_class=None,
+        readings=1,
     )
 
 
@@ -223,6 +229,7 @@ def test_suitable_replay_cache_rejects_file_hash_mismatch(tmp_path, comparison_m
         old_head='old-head',
         new_head='new-head',
         check_class=None,
+        readings=1,
     )
 
 

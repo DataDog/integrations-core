@@ -59,6 +59,16 @@ def test_requests_replay_round_trips_response(monkeypatch, tmp_path, url, body, 
     assert response.ok is (status < 400)
 
 
+def test_requests_replay_response_json_decodes_body(monkeypatch, tmp_path):
+    fixture_path = tmp_path / 'capture.json'
+    record = build_get_record('http://example.test/json', '{"version": "1.2.3"}')
+    fixture_path.write_text(json.dumps([record]) + '\n')
+
+    install_replay_session_get(monkeypatch, fixture_path)
+
+    assert requests.Session().get('http://example.test/json').json() == {'version': '1.2.3'}
+
+
 @pbt_settings
 @given(url_a=urls, url_b=urls)
 def test_requests_replay_rejects_wrong_url(monkeypatch, tmp_path, url_a, url_b):

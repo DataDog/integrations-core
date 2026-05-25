@@ -65,6 +65,17 @@ def _serialize_telemetry(datadog_agent) -> list[dict[str, Any]]:
     return telemetry
 
 
+def reset_serialized_output(aggregator, datadog_agent=None) -> None:
+    """Clear output collectors while preserving check and Agent persistent state."""
+    aggregator.reset()
+    if datadog_agent is None:
+        return
+    datadog_agent._sent_logs.clear()
+    datadog_agent._metadata.clear()
+    datadog_agent._external_tags.clear()
+    datadog_agent._sent_telemetry.clear()
+
+
 def serialize_aggregator(aggregator, datadog_agent=None) -> dict[str, Any]:
     """Serialize pytest stub output into a stable JSON-compatible shape."""
     output = {

@@ -13,10 +13,17 @@ from __future__ import annotations
 
 import json
 import shutil
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-from datadog_checks.dev.replay.pbt.openmetrics import mutate_body_label_order
+from datadog_checks.dev.replay.pbt.openmetrics import (
+    insert_comment_and_blank_lines,
+    mutate_body_label_order,
+    mutate_help_text,
+    remove_help_lines,
+    toggle_final_newline,
+)
 
 
 def copy_replay_cache(source: Path, destination: Path) -> Path:
@@ -40,12 +47,11 @@ def _request_capture_files(cache_dir: Path) -> list[Path]:
     return []
 
 
-def mutate_request_capture_label_order(cache_dir: Path) -> int:
-    """Sort labels in OpenMetrics response bodies for request replay captures.
-
-    Returns the number of HTTP records whose body changed. Unsupported capture
-    shapes or unsupported body lines are preserved unchanged.
-    """
+def _mutate_request_capture_bodies(
+    cache_dir: Path,
+    mutate_body: Callable[[str], str],
+    should_mutate_record: Callable[[dict[str, Any]], bool] | None = None,
+) -> int:
     changed_records = 0
     for capture_file in _request_capture_files(cache_dir):
         records: Any = json.loads(capture_file.read_text())
@@ -55,13 +61,60 @@ def mutate_request_capture_label_order(cache_dir: Path) -> int:
         for record in records:
             if not isinstance(record, dict):
                 continue
+            if should_mutate_record is not None and not should_mutate_record(record):
+                continue
             body = record.get('body')
             if not isinstance(body, str):
                 continue
-            mutated_body = mutate_body_label_order(body)
+            mutated_body = mutate_body(body)
             if mutated_body != body:
                 record['body'] = mutated_body
                 changed_records += 1
 
         capture_file.write_text(json.dumps(records, indent=2, sort_keys=True) + '\n')
     return changed_records
+
+
+def mutate_request_capture_label_order(cache_dir: Path) -> int:
+    """Sort labels in OpenMetrics response bodies for request replay captures.
+
+    Returns the number of HTTP records whose body changed. Unsupported capture
+    shapes or unsupported body lines are preserved unchanged.
+    """
+    return _mutate_request_capture_bodies(cache_dir, mutate_body_label_order)
+
+
+def _is_not_strict_openmetrics_record(record: dict[str, Any]) -> bool:
+    headers = record.get('headers')
+    if not isinstance(headers, dict):
+        return True
+    for name, value in headers.items():
+        if str(name).lower() != 'content-type':
+            continue
+        media_type = str(value).split(';', 1)[0].strip().lower()
+        return media_type != 'application/openmetrics-text'
+    return True
+
+
+def mutate_request_capture_comments_and_blank_lines(cache_dir: Path) -> int:
+    """Add semantically ignored comments and blank lines to Prometheus text request captures."""
+    return _mutate_request_capture_bodies(
+        cache_dir, insert_comment_and_blank_lines, should_mutate_record=_is_not_strict_openmetrics_record
+    )
+
+
+def mutate_request_capture_final_newline(cache_dir: Path) -> int:
+    """Add or remove one final newline in Prometheus text request capture bodies."""
+    return _mutate_request_capture_bodies(
+        cache_dir, toggle_final_newline, should_mutate_record=_is_not_strict_openmetrics_record
+    )
+
+
+def mutate_request_capture_help_text(cache_dir: Path) -> int:
+    """Replace HELP doc text in request capture bodies."""
+    return _mutate_request_capture_bodies(cache_dir, mutate_help_text)
+
+
+def mutate_request_capture_help_removal(cache_dir: Path) -> int:
+    """Remove HELP lines from request capture bodies."""
+    return _mutate_request_capture_bodies(cache_dir, remove_help_lines)

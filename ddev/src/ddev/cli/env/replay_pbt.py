@@ -24,7 +24,15 @@ if TYPE_CHECKING:
     from ddev.cli.application import Application
 
 
-PROPERTIES = ('deterministic', 'openmetrics-label-order')
+PROPERTIES = (
+    'deterministic',
+    'openmetrics-label-order',
+    'openmetrics-comments-blank-lines',
+    'openmetrics-final-newline',
+    'openmetrics-help-text',
+    'openmetrics-help-removal',
+    'metadata-emitted-metrics',
+)
 
 
 @click.command('replay-pbt', short_help='Run cached replay property checks for an integration')
@@ -50,6 +58,9 @@ PROPERTIES = ('deterministic', 'openmetrics-label-order')
 @click.option('--old-env', 'old_hatch_env', help='Hatch env for the old side. Defaults to ENVIRONMENT.')
 @click.option('--new-env', 'new_hatch_env', help='Hatch env for the new side. Defaults to ENVIRONMENT.')
 @click.option(
+    '--readings', default=1, show_default=True, type=click.IntRange(min=1), help='Number of check readings to replay.'
+)
+@click.option(
     '--artifacts',
     type=click.Path(file_okay=False, path_type=StdPath),
     help='Exact artifact root for this replay-pbt run. Defaults to .ddev/replay-pbt under the repository root.',
@@ -67,6 +78,7 @@ def replay_pbt(
     check_class: str | None,
     old_hatch_env: str | None,
     new_hatch_env: str | None,
+    readings: int,
     artifacts: StdPath | None,
     overwrite: bool,
 ) -> None:
@@ -87,6 +99,8 @@ def replay_pbt(
         'ref': git_ref,
         'properties': list(selected_properties),
         'artifacts': str(run_root),
+        'repo': str(app.repo.path),
+        'readings': readings,
         'check_class': check_class,
         'old_env': old_hatch_env,
         'new_env': new_hatch_env,

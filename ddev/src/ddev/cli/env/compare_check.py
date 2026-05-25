@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 # Manual cache invalidation knob for compare-check artifacts. Bump this whenever
 # replay fixture semantics or suitability criteria change in a way that should
 # make existing .ddev/replay caches ineligible for --replay-cache auto/latest.
-REPLAY_CACHE_VERSION = 2
+REPLAY_CACHE_VERSION = 3
 REPLAY_ADAPTER = 'all'
 OUTPUT_COLLECTIONS = (
     'metrics',
@@ -87,6 +87,13 @@ OUTPUT_COLLECTIONS = (
     help='Use one recorded fixture for both sides, or record each side from its own environment.',
 )
 @click.option('--recreate', '-r', is_flag=True, help='Recreate the environment before comparing')
+@click.option(
+    '--readings',
+    default=1,
+    show_default=True,
+    type=click.IntRange(min=1),
+    help='Number of check readings to record/replay.',
+)
 @click.pass_context
 def compare_check(
     ctx: click.Context,
@@ -104,6 +111,7 @@ def compare_check(
     new_hatch_env: str | None,
     comparison_mode: str,
     recreate: bool,
+    readings: int,
 ):
     """
     Compare no-Agent check output across two integrations-core refs.
@@ -154,6 +162,7 @@ def compare_check(
             old_head=old_head,
             new_head=new_head,
             check_class=check_class,
+            readings=readings,
         )
         if replay_cache_auto:
             app.display_info(f'Using replay cache: {resolved_replay_cache}')
@@ -177,6 +186,7 @@ def compare_check(
             new_hatch_env=effective_new_env,
             comparison_mode=comparison_mode,
             recreate=recreate,
+            readings=readings,
         )
         batch_results.append((env_name, run_dir, diff))
         app.display_success(f'Wrote compare-check artifacts to {run_dir}')
@@ -237,6 +247,7 @@ def _compare_one_environment(
     new_hatch_env: str,
     comparison_mode: str,
     recreate: bool,
+    readings: int,
 ) -> tuple[StdPath, dict]:
     app: Application = ctx.obj
     run_dir = _resolve_artifacts_dir(
@@ -277,6 +288,7 @@ def _compare_one_environment(
             'adapter': adapter,
             'check_class': check_class,
             'cache_version': REPLAY_CACHE_VERSION,
+            'readings': readings,
         }
         (run_dir / 'refs.json').write_text(json.dumps(refs, indent=2, sort_keys=True) + '\n')
 
@@ -311,6 +323,7 @@ def _compare_one_environment(
                         config_name='config.json',
                         fixture_name='capture.json',
                         output_name='old.raw.json',
+                        readings=readings,
                     )
 
                     new_mode = 'replay'
@@ -328,6 +341,7 @@ def _compare_one_environment(
                         config_name='config.json',
                         fixture_name='capture.json',
                         output_name='new.raw.json',
+                        readings=readings,
                     )
                 else:
                     _copy_cache_file(replay_cache, run_dir, 'old.config.json')
@@ -349,6 +363,7 @@ def _compare_one_environment(
                         config_name='old.config.json',
                         fixture_name='capture.json',
                         output_name='old.raw.json',
+                        readings=readings,
                     )
 
                     new_mode = 'replay'
@@ -366,6 +381,7 @@ def _compare_one_environment(
                         config_name='new.config.json',
                         fixture_name='new.capture.json',
                         output_name='new.raw.json',
+                        readings=readings,
                     )
             elif same_fixture:
                 phase = 'environment_setup'
@@ -389,6 +405,7 @@ def _compare_one_environment(
                     config_name='config.json',
                     fixture_name='capture.json',
                     output_name='old.raw.json',
+                    readings=readings,
                 )
 
                 if not (run_dir / 'capture.json').is_file():
@@ -413,6 +430,7 @@ def _compare_one_environment(
                     config_name='config.json',
                     fixture_name=new_fixture,
                     output_name='new.raw.json',
+                    readings=readings,
                 )
             else:
                 phase = 'old_environment_setup'
@@ -435,6 +453,7 @@ def _compare_one_environment(
                     config_name='old.config.json',
                     fixture_name='capture.json',
                     output_name='old.raw.json',
+                    readings=readings,
                 )
 
                 if old_hatch_env in started_envs:
@@ -462,6 +481,7 @@ def _compare_one_environment(
                     config_name='new.config.json',
                     fixture_name='new.capture.json',
                     output_name='new.raw.json',
+                    readings=readings,
                 )
 
             status = {
@@ -473,6 +493,7 @@ def _compare_one_environment(
                 'comparison_mode': comparison_mode,
                 'same_fixture': same_fixture,
                 'replay_cache': replay_cache_provenance,
+                'readings': readings,
                 'comparable': old_returncode == 0
                 and new_returncode == 0
                 and (new_mode == 'replay' or not same_fixture),
@@ -489,6 +510,7 @@ def _compare_one_environment(
             'comparison_mode': comparison_mode,
             'same_fixture': same_fixture,
             'replay_cache': replay_cache_provenance,
+            'readings': readings,
             'comparable': False,
             'error': str(e),
             'exception_type': type(e).__name__,
@@ -514,6 +536,7 @@ def _compare_one_environment(
             old_head=old_head,
             new_head=new_head,
             check_class=check_class,
+            readings=readings,
         )
         (run_dir / 'refs.json').write_text(json.dumps(refs, indent=2, sort_keys=True) + '\n')
 
@@ -618,6 +641,7 @@ def _write_fixture_key(
     old_head: str,
     new_head: str,
     check_class: str | None,
+    readings: int,
 ) -> None:
     files = {}
     for name in _cache_file_names(run_dir, comparison_mode):
@@ -637,6 +661,7 @@ def _write_fixture_key(
         'record_old_head': old_head,
         'record_new_head': new_head if comparison_mode == 'record-each-side' else None,
         'check_class': check_class,
+        'readings': readings,
         'files': files,
     }
 
@@ -654,6 +679,7 @@ def _resolve_replay_cache(
     old_head: str,
     new_head: str,
     check_class: str | None,
+    readings: int,
 ) -> StdPath | None:
     if not replay_cache:
         return None
@@ -678,6 +704,7 @@ def _resolve_replay_cache(
             old_head=old_head,
             new_head=new_head,
             check_class=check_class,
+            readings=readings,
         ):
             return candidate
 
@@ -722,6 +749,7 @@ def _is_suitable_replay_cache(
     old_head: str,
     new_head: str,
     check_class: str | None,
+    readings: int,
 ) -> bool:
     required_files = _required_cache_files(comparison_mode)
     if any(not (cache_dir / name).is_file() for name in required_files):
@@ -756,6 +784,7 @@ def _is_suitable_replay_cache(
         'record_old_head': old_head,
         'record_new_head': new_head if comparison_mode == 'record-each-side' else None,
         'check_class': check_class,
+        'readings': readings,
     }
 
     if any(fixture_key.get(key) != value for key, value in expected.items()):
@@ -895,6 +924,7 @@ def _run_hatch(
     config_name: str,
     fixture_name: str,
     output_name: str,
+    readings: int,
 ) -> int:
     integration_dir = repo / integration
     env = os.environ.copy()
@@ -926,6 +956,8 @@ def _run_hatch(
         str(artifacts / fixture_name),
         '--output',
         str(artifacts / output_name),
+        '--readings',
+        str(readings),
     ]
     if check_class:
         run_args.extend(('--check-class', check_class))
@@ -934,10 +966,68 @@ def _run_hatch(
     return result.returncode
 
 
-def _write_diff_artifacts(artifacts: StdPath) -> dict:
-    from datadog_checks.dev.replay.diff import diff_outputs
+def _reading_outputs(envelope: dict) -> list[dict]:
+    if envelope.get('version') == 2 and isinstance(envelope.get('readings'), list):
+        return [reading.get('output', {}) for reading in envelope['readings']]
+    return [envelope]
+
+
+def _normalize_reading_envelope(raw: dict) -> dict:
     from datadog_checks.dev.replay.normalize import normalize_output
 
+    if raw.get('version') != 2:
+        return normalize_output(raw)
+    return {
+        'version': 2,
+        'readings': [
+            {'index': reading.get('index', index), 'output': normalize_output(reading.get('output', {}))}
+            for index, reading in enumerate(raw.get('readings', []))
+        ],
+    }
+
+
+def _collection_totals(envelope: dict) -> dict[str, int]:
+    totals = dict.fromkeys(OUTPUT_COLLECTIONS, 0)
+    for output in _reading_outputs(envelope):
+        for name in OUTPUT_COLLECTIONS:
+            totals[name] += len(output.get(name, []))
+    return totals
+
+
+def _merge_collection_diffs(reading_diffs: list[dict]) -> dict:
+    merged = {name: {'added': [], 'removed': []} for name in OUTPUT_COLLECTIONS}
+    for reading_diff in reading_diffs:
+        for name in OUTPUT_COLLECTIONS:
+            collection = reading_diff.get('collections', {}).get(name, {})
+            merged[name]['added'].extend(collection.get('added', []))
+            merged[name]['removed'].extend(collection.get('removed', []))
+    return merged
+
+
+def _diff_reading_envelopes(old_normalized: dict, new_normalized: dict) -> dict:
+    from datadog_checks.dev.replay.diff import diff_outputs
+
+    old_outputs = _reading_outputs(old_normalized)
+    new_outputs = _reading_outputs(new_normalized)
+    reading_diffs = []
+    for index, (old_output, new_output) in enumerate(zip(old_outputs, new_outputs, strict=False)):
+        reading_diff = diff_outputs(old_output, new_output)
+        reading_diff['index'] = index
+        reading_diffs.append(reading_diff)
+
+    length_changed = len(old_outputs) != len(new_outputs)
+    return {
+        'version': 2,
+        'changed': length_changed or any(reading_diff.get('changed') for reading_diff in reading_diffs),
+        'reading_count_changed': length_changed,
+        'old_readings': len(old_outputs),
+        'new_readings': len(new_outputs),
+        'readings': reading_diffs,
+        'collections': _merge_collection_diffs(reading_diffs),
+    }
+
+
+def _write_diff_artifacts(artifacts: StdPath) -> dict:
     status_file = artifacts / 'run_status.json'
     status = json.loads(status_file.read_text()) if status_file.is_file() else {}
     missing = [name for name in ('old.raw.json', 'new.raw.json') if not (artifacts / name).is_file()]
@@ -968,9 +1058,9 @@ def _write_diff_artifacts(artifacts: StdPath) -> dict:
 
     old_raw = json.loads((artifacts / 'old.raw.json').read_text())
     new_raw = json.loads((artifacts / 'new.raw.json').read_text())
-    old_normalized = normalize_output(old_raw)
-    new_normalized = normalize_output(new_raw)
-    diff = diff_outputs(old_normalized, new_normalized)
+    old_normalized = _normalize_reading_envelope(old_raw)
+    new_normalized = _normalize_reading_envelope(new_raw)
+    diff = _diff_reading_envelopes(old_normalized, new_normalized)
     diff['run_status'] = status
     diff['incomplete'] = not status.get('comparable', True)
     if diff['incomplete']:
@@ -979,9 +1069,11 @@ def _write_diff_artifacts(artifacts: StdPath) -> dict:
     (artifacts / 'old.normalized.json').write_text(json.dumps(old_normalized, indent=2, sort_keys=True) + '\n')
     (artifacts / 'new.normalized.json').write_text(json.dumps(new_normalized, indent=2, sort_keys=True) + '\n')
     (artifacts / 'diff.json').write_text(json.dumps(diff, indent=2, sort_keys=True) + '\n')
+    old_totals = _collection_totals(old_normalized)
+    new_totals = _collection_totals(new_normalized)
     collection_lines = ''.join(
-        f'- Old {name}: {len(old_normalized.get(name, []))}\n'
-        f'- New {name}: {len(new_normalized.get(name, []))}\n'
+        f'- Old {name}: {old_totals[name]}\n'
+        f'- New {name}: {new_totals[name]}\n'
         f'- {name} records added: {len(diff["collections"].get(name, {}).get("added", []))}\n'
         f'- {name} records removed: {len(diff["collections"].get(name, {}).get("removed", []))}\n'
         for name in OUTPUT_COLLECTIONS

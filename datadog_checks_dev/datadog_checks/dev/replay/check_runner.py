@@ -16,8 +16,8 @@ import json
 from pathlib import Path
 
 from datadog_checks.dev.replay.adapters import install_replay_adapters, write_fixture_manifest, read_fixture_manifest
-from datadog_checks.dev.replay.output import serialize_aggregator
-from datadog_checks.dev.replay.pytest import run_check_instances
+from datadog_checks.dev.replay.output import reset_serialized_output, serialize_aggregator
+from datadog_checks.dev.replay.pytest import build_check_instances
 
 
 def test_replay_check_runner(monkeypatch, aggregator, datadog_agent, dd_run_check):
@@ -26,18 +26,31 @@ def test_replay_check_runner(monkeypatch, aggregator, datadog_agent, dd_run_chec
     fixture = Path({str(args.fixture)!r})
     adapter_records = install_replay_adapters(monkeypatch, {args.mode!r}, fixture, {args.check_name!r})
 
-    run_check_instances({args.check_class!r}, instances, dd_run_check, {args.check_name!r})
+    readings = {args.readings!r}
+    checks = build_check_instances({args.check_class!r}, instances, {args.check_name!r})
+    outputs = []
+    for index in range(readings):
+        for check in checks:
+            dd_run_check(check)
+        outputs.append({{'index': index, 'output': serialize_aggregator(aggregator, datadog_agent)}})
+        if index + 1 < readings:
+            reset_serialized_output(aggregator, datadog_agent)
+
     if {args.mode!r} == 'record':
-        manifest = write_fixture_manifest(fixture, adapter_records)
+        manifest = write_fixture_manifest(fixture, adapter_records, readings=readings)
         assert manifest['adapters'], 'Replay adapters captured zero records during record mode'
     else:
         manifest = read_fixture_manifest(fixture)
         assert manifest['adapters'], 'Replay fixture has zero records'
+        assert manifest.get('readings') == readings, (
+            f"Replay fixture was recorded with {{manifest.get('readings')}} readings "
+            f"but this run requested {{readings}}"
+        )
         for adapter in manifest['adapters']:
             expected_count = manifest['counts'][adapter]
             actual_count = len(adapter_records.get(adapter, []))
             assert actual_count == expected_count, f'Replay did not consume all {{adapter}} fixture entries'
-    output = json.dumps(serialize_aggregator(aggregator, datadog_agent), indent=2, sort_keys=True) + '\\n'
+    output = json.dumps({{'version': 2, 'readings': outputs}}, indent=2, sort_keys=True) + '\\n'
     Path({str(args.output)!r}).write_text(output)
 '''
     )
@@ -51,7 +64,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument('--mode', choices=['record', 'replay'], required=True)
     parser.add_argument('--fixture', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--readings', type=int, default=1)
     args = parser.parse_args(argv)
+
+    if args.readings < 1:
+        parser.error('--readings must be >= 1')
 
     args.fixture.parent.mkdir(parents=True, exist_ok=True)
     args.output.parent.mkdir(parents=True, exist_ok=True)

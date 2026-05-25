@@ -38,6 +38,9 @@ class FixtureResponse:
         if self.status_code >= 400:
             raise requests.HTTPError(response=self)
 
+    def json(self, **kwargs: Any) -> Any:
+        return json.loads(self.text, **kwargs)
+
     def close(self) -> None:
         pass
 

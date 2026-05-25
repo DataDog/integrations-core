@@ -46,8 +46,8 @@ def infer_check_class(check_name: str):
     )
 
 
-def run_check_instances(check_class: str | type | None, instances: list[dict[str, Any]], dd_run_check, check_name: str):
-    """Run a Python check class once for each provided instance using pytest's dd_run_check fixture."""
+def build_check_instances(check_class: str | type | None, instances: list[dict[str, Any]], check_name: str):
+    """Build one check object per instance, preserving object state across readings."""
     if check_class is None:
         cls = infer_check_class(check_name)
     elif isinstance(check_class, str):
@@ -55,6 +55,10 @@ def run_check_instances(check_class: str | type | None, instances: list[dict[str
     else:
         cls = check_class
 
-    for instance in instances:
-        check = cls(check_name, {}, [instance])
+    return [cls(check_name, {}, [instance]) for instance in instances]
+
+
+def run_check_instances(check_class: str | type | None, instances: list[dict[str, Any]], dd_run_check, check_name: str):
+    """Run a Python check class once for each provided instance using pytest's dd_run_check fixture."""
+    for check in build_check_instances(check_class, instances, check_name):
         dd_run_check(check)

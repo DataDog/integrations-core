@@ -16,11 +16,15 @@ from hypothesis import strategies as st
 
 from datadog_checks.dev.replay.pbt.openmetrics import (
     OpenMetricsSample,
+    insert_comment_and_blank_lines,
     mutate_body_label_order,
+    mutate_help_text,
     parse_sample_line,
+    remove_help_lines,
     render_sample,
     reorder_sample_labels,
     semantic_samples,
+    toggle_final_newline,
 )
 
 pbt_settings = settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
@@ -82,3 +86,78 @@ def test_body_label_order_mutation_preserves_sample_semantics(prefix, sample):
 @given(line=st.one_of(st.just(''), st.just('# HELP metric help'), st.just('# TYPE metric gauge')))
 def test_label_order_mutation_preserves_non_sample_lines(line):
     assert reorder_sample_labels(line) == line
+
+
+@pbt_settings
+@given(sample=samples)
+def test_comment_and_blank_line_insertion_preserves_sample_semantics(sample):
+    body = '\n'.join(
+        [
+            '# HELP example_metric Example metric',
+            '# TYPE example_metric gauge',
+            render_sample(sample),
+        ]
+    )
+
+    assert semantic_samples(insert_comment_and_blank_lines(body)) == semantic_samples(body)
+
+
+@pbt_settings
+@given(body=st.text(max_size=80).filter(lambda body: not semantic_samples(body)))
+def test_comment_and_blank_line_insertion_preserves_non_sample_bodies(body):
+    assert insert_comment_and_blank_lines(body) == body
+
+
+@pbt_settings
+@given(sample=samples)
+def test_final_newline_toggle_preserves_sample_semantics(sample):
+    body = render_sample(sample)
+
+    assert semantic_samples(toggle_final_newline(body)) == semantic_samples(body)
+    assert semantic_samples(toggle_final_newline(f'{body}\n')) == semantic_samples(body)
+
+
+@pbt_settings
+@given(body=st.text(max_size=80).filter(lambda body: not semantic_samples(body)))
+def test_final_newline_toggle_preserves_non_sample_bodies(body):
+    assert toggle_final_newline(body) == body
+
+
+@pbt_settings
+@given(sample=samples)
+def test_help_text_mutation_preserves_sample_semantics(sample):
+    body = '\n'.join(
+        [
+            f'# HELP {sample.name} original help text',
+            f'# TYPE {sample.name} gauge',
+            render_sample(sample),
+        ]
+    )
+
+    assert semantic_samples(mutate_help_text(body)) == semantic_samples(body)
+
+
+@pbt_settings
+@given(body=st.text(max_size=80).filter(lambda body: not semantic_samples(body)))
+def test_help_text_mutation_preserves_non_sample_bodies(body):
+    assert mutate_help_text(body) == body
+
+
+@pbt_settings
+@given(sample=samples)
+def test_help_line_removal_preserves_sample_semantics(sample):
+    body = '\n'.join(
+        [
+            f'# HELP {sample.name} original help text',
+            f'# TYPE {sample.name} gauge',
+            render_sample(sample),
+        ]
+    )
+
+    assert semantic_samples(remove_help_lines(body)) == semantic_samples(body)
+
+
+@pbt_settings
+@given(body=st.text(max_size=80).filter(lambda body: not semantic_samples(body)))
+def test_help_line_removal_preserves_non_sample_bodies(body):
+    assert remove_help_lines(body) == body

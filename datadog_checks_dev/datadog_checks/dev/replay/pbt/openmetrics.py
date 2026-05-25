@@ -24,6 +24,7 @@ _SAMPLE_RE = re.compile(
     r'\s*$'
 )
 _LABEL_NAME_RE = re.compile(r'^[A-Za-z_][A-Za-z0-9_]*$')
+_HELP_RE = re.compile(r'^(?P<prefix>#\s+HELP\s+)(?P<name>[A-Za-z_:][A-Za-z0-9_:]*)(?:\s+.*)?$')
 
 
 @dataclass(frozen=True)
@@ -139,6 +140,44 @@ def reorder_sample_labels(line: str) -> str:
 
 def mutate_body_label_order(body: str) -> str:
     return '\n'.join(reorder_sample_labels(line) for line in body.split('\n'))
+
+
+def insert_comment_and_blank_lines(body: str) -> str:
+    """Add semantically ignored OpenMetrics comments and blank lines."""
+    if not semantic_samples(body):
+        return body
+    return f'# replay-pbt ignored comment\n\n{body}'
+
+
+def toggle_final_newline(body: str) -> str:
+    """Add or remove one final newline for bodies with parsed samples."""
+    if not semantic_samples(body):
+        return body
+    if body.endswith('\n'):
+        return body[:-1]
+    return f'{body}\n'
+
+
+def mutate_help_text(body: str) -> str:
+    """Replace HELP doc text while preserving metric names and line positions."""
+    if not semantic_samples(body):
+        return body
+
+    lines = []
+    for line in body.split('\n'):
+        match = _HELP_RE.match(line)
+        if match is None:
+            lines.append(line)
+            continue
+        lines.append(f'{match.group("prefix")}{match.group("name")} replay-pbt help text')
+    return '\n'.join(lines)
+
+
+def remove_help_lines(body: str) -> str:
+    """Remove HELP lines from bodies with parsed samples."""
+    if not semantic_samples(body):
+        return body
+    return '\n'.join(line for line in body.split('\n') if _HELP_RE.match(line) is None)
 
 
 def semantic_samples(body: str) -> list[tuple[str, tuple[tuple[str, str], ...], str, str | None]]:

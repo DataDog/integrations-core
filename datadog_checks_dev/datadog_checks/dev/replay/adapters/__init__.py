@@ -112,7 +112,9 @@ def component_fixture_path(fixture_path: Path, adapter: str) -> Path:
     return fixture_path.with_name(f'{fixture_path.stem}.{adapter}{fixture_path.suffix}')
 
 
-def write_fixture_manifest(fixture_path: Path, adapter_records: dict[str, list[dict[str, Any]]]) -> dict[str, Any]:
+def write_fixture_manifest(
+    fixture_path: Path, adapter_records: dict[str, list[dict[str, Any]]], readings: int = 1
+) -> dict[str, Any]:
     files = {}
     counts = {}
     for adapter in ADAPTERS:
@@ -126,7 +128,8 @@ def write_fixture_manifest(fixture_path: Path, adapter_records: dict[str, list[d
         counts[adapter] = len(records)
 
     manifest = {
-        'version': 1,
+        'version': 2,
+        'readings': readings,
         'adapters': list(files),
         'files': files,
         'counts': counts,
@@ -137,8 +140,10 @@ def write_fixture_manifest(fixture_path: Path, adapter_records: dict[str, list[d
 
 def read_fixture_manifest(fixture_path: Path) -> dict[str, Any]:
     manifest = json.loads(fixture_path.read_text())
-    if not isinstance(manifest, dict) or manifest.get('version') != 1:
+    if not isinstance(manifest, dict) or manifest.get('version') not in {1, 2}:
         raise AssertionError('Invalid replay fixture manifest')
     if not isinstance(manifest.get('adapters'), list) or not isinstance(manifest.get('files'), dict):
         raise AssertionError('Invalid replay fixture manifest')
+    if manifest.get('version') == 1:
+        manifest['readings'] = 1
     return manifest
