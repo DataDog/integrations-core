@@ -350,7 +350,7 @@ jobs:
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: replay-pbt-result-${{ inputs.property_set }}-${{ matrix.artifact_slug }}
-        path: ${{ runner.temp }}/replay-pbt-result
+        path: /tmp/replay-pbt-result
         if-no-files-found: warn
 
     - name: Upload failure artifacts
@@ -359,7 +359,7 @@ jobs:
       with:
         name: replay-pbt-artifacts-${{ inputs.property_set }}-${{ matrix.artifact_slug }}
         path: |
-          ${{ runner.temp }}/replay-pbt-artifacts
+          /tmp/replay-pbt-artifacts
           .ddev/replay/${{ matrix.integration }}/${{ matrix.environment }}
         if-no-files-found: ignore
 
