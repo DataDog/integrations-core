@@ -29,20 +29,11 @@ values = st.one_of(
 )
 timestamps = st.one_of(st.none(), st.integers(min_value=0, max_value=4_102_444_800).map(str))
 label_sets = st.dictionaries(label_names, label_values, max_size=8).map(lambda labels: tuple(labels.items()))
-
-
-@st.composite
-def samples(draw):
-    return OpenMetricsSample(
-        name=draw(metric_names),
-        labels=draw(label_sets),
-        value=draw(values),
-        timestamp=draw(timestamps),
-    )
+samples = st.builds(OpenMetricsSample, name=metric_names, labels=label_sets, value=values, timestamp=timestamps)
 
 
 @pbt_settings
-@given(sample=samples())
+@given(sample=samples)
 def test_sample_render_parse_round_trips_semantics(sample):
     parsed = parse_sample_line(render_sample(sample))
 
@@ -51,7 +42,7 @@ def test_sample_render_parse_round_trips_semantics(sample):
 
 
 @pbt_settings
-@given(sample=samples().filter(lambda sample: len(sample.labels) >= 2))
+@given(sample=samples.filter(lambda sample: len(sample.labels) >= 2))
 def test_reordering_labels_preserves_sample_semantics(sample):
     original = render_sample(sample, labels=reversed(sample.labels))
     mutated = reorder_sample_labels(original)
@@ -65,7 +56,7 @@ def test_reordering_labels_preserves_sample_semantics(sample):
 
 
 @pbt_settings
-@given(prefix=st.text(max_size=40), sample=samples())
+@given(prefix=st.text(max_size=40), sample=samples)
 def test_body_label_order_mutation_preserves_sample_semantics(prefix, sample):
     body = '\n'.join(
         [

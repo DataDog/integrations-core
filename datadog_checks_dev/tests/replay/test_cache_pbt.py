@@ -26,16 +26,9 @@ values = st.integers(min_value=-1_000_000, max_value=1_000_000).map(str)
 label_sets = st.dictionaries(label_names, label_values, min_size=2, max_size=8).map(
     lambda labels: tuple(labels.items())
 )
-
-
-@st.composite
-def sample_bodies(draw):
-    sample = OpenMetricsSample(
-        name=draw(metric_names),
-        labels=draw(label_sets),
-        value=draw(values),
-    )
-    return '\n'.join(
+samples = st.builds(OpenMetricsSample, name=metric_names, labels=label_sets, value=values)
+sample_bodies = samples.map(
+    lambda sample: '\n'.join(
         [
             '# HELP generated_metric Generated metric',
             '# TYPE generated_metric gauge',
@@ -43,6 +36,7 @@ def sample_bodies(draw):
             '',
         ]
     )
+)
 
 
 def _write_legacy_cache(cache_dir, body: str) -> None:
@@ -65,7 +59,7 @@ def _write_manifest_cache(cache_dir, body: str) -> None:
 
 
 @pbt_settings
-@given(body=sample_bodies())
+@given(body=sample_bodies)
 def test_mutating_legacy_request_capture_label_order_preserves_semantics(tmp_path, body):
     cache_dir = tmp_path / 'cache'
     _write_legacy_cache(cache_dir, body)
@@ -77,7 +71,7 @@ def test_mutating_legacy_request_capture_label_order_preserves_semantics(tmp_pat
 
 
 @pbt_settings
-@given(body=sample_bodies())
+@given(body=sample_bodies)
 def test_mutating_manifest_request_capture_label_order_preserves_semantics(tmp_path, body):
     cache_dir = tmp_path / 'cache'
     _write_manifest_cache(cache_dir, body)
