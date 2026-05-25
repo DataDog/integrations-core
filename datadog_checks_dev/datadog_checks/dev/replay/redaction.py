@@ -20,21 +20,23 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 REDACTED = '<REDACTED>'
 
 SENSITIVE_KEY_RE = re.compile(
-    r'(?i)(^|[_\-.])(authorization|proxy-authorization|cookie|set-cookie|api[_-]?key|app[_-]?key|application[_-]?key|token|access[_-]?token|refresh[_-]?token|id[_-]?token|secret|password|passwd|passphrase|private[_-]?key|client[_-]?secret|credential|signature|session|csrf|xsrf|access[_-]?key|secret[_-]?key)($|[_\-.])'
+    r'(?i)(^|[_\-.])(authorization|proxy-authorization|cookie|set-cookie|api[_-]?key|app[_-]?key|application[_-]?key|token|access[_-]?token|refresh[_-]?token|id[_-]?token|secret|password|passwd|passphrase|private[_-]?key|client[_-]?secret|credential|signature|csrf|xsrf|access[_-]?key|secret[_-]?key)($|[_\-.])'
 )
 SENSITIVE_QUERY_KEY_RE = re.compile(
-    r'(?i)(api[_-]?key|app[_-]?key|application[_-]?key|token|access[_-]?token|refresh[_-]?token|id[_-]?token|secret|password|passwd|passphrase|client[_-]?secret|signature|credential|session|csrf|xsrf)'
+    r'(?i)(api[_-]?key|app[_-]?key|application[_-]?key|token|access[_-]?token|refresh[_-]?token|id[_-]?token|secret|password|passwd|passphrase|client[_-]?secret|signature|credential|csrf|xsrf)'
 )
 SENSITIVE_TAG_KEY_RE = re.compile(
-    r'(?i)(api[_-]?key|app[_-]?key|application[_-]?key|token|access[_-]?token|refresh[_-]?token|id[_-]?token|secret|password|passwd|passphrase|client[_-]?secret|credential|session)'
+    r'(?i)(api[_-]?key|app[_-]?key|application[_-]?key|token|access[_-]?token|refresh[_-]?token|id[_-]?token|secret|password|passwd|passphrase|client[_-]?secret|credential)'
+)
+SENSITIVE_SESSION_KEY_RE = re.compile(r'(?i)(^|[_\-.])session(?:$|[_\-.]?id($|[_\-.]))')
+
+KEY_VALUE_TEXT_RE = re.compile(
+    r'(?i)\b(api[_-]?key|app[_-]?key|application[_-]?key|access[_-]?token|refresh[_-]?token|id[_-]?token|token|secret|password|passwd|client[_-]?secret|signature|session)=("[^"\n]*"|[^&\s,}]+)'
 )
 
 TEXT_REPLACEMENTS = (
     re.compile(r'(?i)\bBearer\s+[A-Za-z0-9._~+/-]{8,}={0,2}'),
     re.compile(r'(?i)\bBasic\s+[A-Za-z0-9+/]{12,}={0,2}'),
-    re.compile(
-        r'(?i)(api[_-]?key|app[_-]?key|application[_-]?key|access[_-]?token|refresh[_-]?token|id[_-]?token|token|secret|password|passwd|client[_-]?secret|signature|session)=([^&\s]+)'
-    ),
     re.compile(r'\b(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9_]{20,}\b'),
     re.compile(r'\bgithub_pat_[A-Za-z0-9_]{20,}\b'),
     re.compile(r'\bxox[baprs]-[A-Za-z0-9-]{20,}\b'),
@@ -45,11 +47,27 @@ TEXT_REPLACEMENTS = (
 
 
 def is_sensitive_key(key: str) -> bool:
-    return bool(SENSITIVE_KEY_RE.search(key))
+    return bool(SENSITIVE_KEY_RE.search(key) or SENSITIVE_SESSION_KEY_RE.search(key))
+
+
+def is_sensitive_query_key(key: str) -> bool:
+    return bool(SENSITIVE_QUERY_KEY_RE.search(key) or SENSITIVE_SESSION_KEY_RE.search(key))
+
+
+def is_sensitive_tag_key(key: str) -> bool:
+    return bool(SENSITIVE_TAG_KEY_RE.search(key) or SENSITIVE_SESSION_KEY_RE.search(key))
+
+
+def redact_key_value_match(match: re.Match[str]) -> str:
+    key = match.group(1)
+    value = match.group(2)
+    if value.startswith('"') and value.endswith('"'):
+        return f'{key}="{REDACTED}"'
+    return f'{key}={REDACTED}'
 
 
 def scrub_text(value: str) -> str:
-    scrubbed = value
+    scrubbed = KEY_VALUE_TEXT_RE.sub(redact_key_value_match, value)
     for pattern in TEXT_REPLACEMENTS:
         scrubbed = pattern.sub(REDACTED, scrubbed)
     return scrubbed
@@ -64,7 +82,7 @@ def scrub_url(url: str) -> str:
     query = []
     changed = False
     for key, value in parse_qsl(parts.query, keep_blank_values=True):
-        if SENSITIVE_QUERY_KEY_RE.search(key):
+        if is_sensitive_query_key(key):
             query.append((key, REDACTED))
             changed = True
         else:
@@ -76,7 +94,7 @@ def scrub_url(url: str) -> str:
 
 def scrub_tag(tag: str) -> str:
     key, sep, value = tag.partition(':')
-    if sep and SENSITIVE_TAG_KEY_RE.search(key):
+    if sep and is_sensitive_tag_key(key):
         return f'{key}:{REDACTED}'
     return scrub_text(tag)
 
