@@ -102,6 +102,12 @@ def _read_normalized(run_dir: Path) -> dict:
 
 
 def test_cached_replay_is_deterministic_for_same_ref(replay_pbt_context: ReplayPBTContext):
+    # Determinism property: replaying the same cached fixture through the same
+    # integration ref twice should produce identical normalized output. The
+    # first compare-check run also materializes `auto`/`latest` caches into an
+    # exact artifact directory; the second run replays that materialized cache so
+    # this catches nondeterminism in check execution, replay adapters,
+    # normalization, and compare-check artifact regeneration.
     _skip_unselected(replay_pbt_context, PROPERTY_DETERMINISTIC)
 
     first = replay_pbt_context.artifacts / PROPERTY_DETERMINISTIC / 'first'
@@ -117,6 +123,12 @@ def test_cached_replay_is_deterministic_for_same_ref(replay_pbt_context: ReplayP
 @settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @given(mutation=st.sampled_from(['sort-openmetrics-labels']))
 def test_label_order_mutated_cache_matches_original_output(replay_pbt_context: ReplayPBTContext, mutation: str):
+    # Metamorphic OpenMetrics property: label order in a Prometheus/OpenMetrics
+    # sample is not semantically meaningful, so sorting labels inside captured
+    # request bodies should not change normalized Datadog check output. This
+    # test copies the replay cache, applies that mutation to adapter-saved
+    # request fixtures, then runs the real integration check against original and
+    # mutated caches and compares normalized outputs.
     _skip_unselected(replay_pbt_context, PROPERTY_OPENMETRICS_LABEL_ORDER)
     assert mutation == 'sort-openmetrics-labels'
 
