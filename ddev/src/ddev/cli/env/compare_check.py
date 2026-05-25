@@ -22,7 +22,8 @@ if TYPE_CHECKING:
 @click.option('--old-ref', required=True, help='Git ref to record the fixture and produce old output')
 @click.option('--new-ref', required=True, help='Git ref to replay the fixture and produce new output')
 @click.option(
-    '--check-class', required=True, help='Import spec for the check class, e.g. datadog_checks.cilium:CiliumCheck'
+    '--check-class',
+    help='Optional import spec for the check class, e.g. datadog_checks.cilium:CiliumCheck. Defaults to inference.',
 )
 @click.option('--artifacts', type=click.Path(file_okay=False, path_type=StdPath), required=True)
 @click.option('--image', default='datadog/agent-dev:nightly-main-py3', show_default=True)
@@ -36,7 +37,7 @@ def compare_check(
     environment: str,
     old_ref: str,
     new_ref: str,
-    check_class: str,
+    check_class: str | None,
     artifacts: StdPath,
     image: str,
     adapter: str,
@@ -134,7 +135,7 @@ def _run_container(
     image: str,
     integration: str,
     check_name: str,
-    check_class: str,
+    check_class: str | None,
     mode: str,
     output_name: str,
 ) -> None:
@@ -146,22 +147,21 @@ def _run_container(
             f'{python} -m pip install -q -e {shlex.quote(f"/repo/{integration}[deps]")}',
         ]
     )
-    run = ' '.join(
-        [
-            python,
-            '-m datadog_checks.dev.replay.check_runner',
-            '--check-name',
-            shlex.quote(check_name),
-            '--check-class',
-            shlex.quote(check_class),
-            '--config /artifacts/config.json',
-            '--mode',
-            mode,
-            '--fixture /artifacts/capture.json',
-            '--output',
-            f'/artifacts/{output_name}',
-        ]
-    )
+    run_args = [
+        python,
+        '-m datadog_checks.dev.replay.check_runner',
+        '--check-name',
+        shlex.quote(check_name),
+        '--config /artifacts/config.json',
+        '--mode',
+        mode,
+        '--fixture /artifacts/capture.json',
+        '--output',
+        f'/artifacts/{output_name}',
+    ]
+    if check_class:
+        run_args.extend(('--check-class', shlex.quote(check_class)))
+    run = ' '.join(run_args)
     command = f'{install} && {run}'
     subprocess.run(
         [

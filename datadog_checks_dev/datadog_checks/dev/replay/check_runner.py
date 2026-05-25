@@ -41,7 +41,7 @@ def test_replay_check_runner(monkeypatch, aggregator, dd_run_check):
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description='Run a no-Agent check in record or replay mode.')
     parser.add_argument('--check-name', required=True)
-    parser.add_argument('--check-class', required=True)
+    parser.add_argument('--check-class')
     parser.add_argument('--config', type=Path, required=True)
     parser.add_argument('--mode', choices=['record', 'replay'], required=True)
     parser.add_argument('--fixture', type=Path, required=True)
