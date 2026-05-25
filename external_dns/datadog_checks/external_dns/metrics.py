@@ -29,10 +29,15 @@ from copy import deepcopy
 COMMON_METRICS = {
     'external_dns_registry_endpoints_total': 'registry.endpoints.total',  # gauge
     'external_dns_source_endpoints_total': 'source.endpoints.total',  # gauge
+    # OpenMetrics V2 parses counters without the `_total` suffix; OMV1 keeps the full name.
+    'external_dns_source_errors': 'source.errors.total',  # counter
     'external_dns_source_errors_total': 'source.errors.total',  # counter
+    'external_dns_registry_errors': 'registry.errors.total',  # counter
     'external_dns_registry_errors_total': 'registry.errors.total',  # counter
     # Legacy metric names (without external_dns_ prefix, from older versions)
+    'source_errors': 'source.errors.total',  # counter
     'source_errors_total': 'source.errors.total',  # counter
+    'registry_errors': 'registry.errors.total',  # counter
     'registry_errors_total': 'registry.errors.total',  # counter
     'external_dns_controller_last_sync_timestamp_seconds': 'controller.last_sync',  # gauge
 }
@@ -63,11 +68,24 @@ DEFAULT_METRICS.update(NEW_METRICS)
 
 METRIC_MAP = deepcopy(DEFAULT_METRICS)
 
+COUNTER_METRICS = {
+    'external_dns_source_errors',
+    'external_dns_source_errors_total',
+    'external_dns_registry_errors',
+    'external_dns_registry_errors_total',
+    'source_errors',
+    'source_errors_total',
+    'registry_errors',
+    'registry_errors_total',
+}
+
 
 def construct_metrics_config(metric_map: dict) -> list:
     """Convert legacy metric map to OpenMetricsBaseCheckV2 format."""
     metrics = []
     for raw_metric_name, metric_name in metric_map.items():
-        config = {raw_metric_name: {'name': metric_name}}
-        metrics.append(config)
+        config = {'name': metric_name}
+        if raw_metric_name in COUNTER_METRICS:
+            config['type'] = 'counter'
+        metrics.append({raw_metric_name: config})
     return metrics

@@ -18,6 +18,13 @@ FIXTURE_DIR = os.path.join(HERE, 'fixtures')
 CHECK_NAME = 'external_dns'
 NAMESPACE = 'external_dns'
 
+E2E_PROMETHEUS_URL = 'http://localhost:7979/metrics'
+PROMETHEUS_HEALTH_TAGS = ['custom:tag', f'endpoint:{E2E_PROMETHEUS_URL}']
+OPENMETRICS_HEALTH_TAGS = PROMETHEUS_HEALTH_TAGS
+
+# Non-zero counter values in metrics-legacy.txt and metrics-1.20.txt
+REGISTRY_ERRORS_COUNT = 3
+SOURCE_ERRORS_COUNT = 7
 
 # =============================================================================
 # external-dns v1.15.0 (legacy) metrics
@@ -37,17 +44,21 @@ LEGACY_GAUGE_METRICS = [
     NAMESPACE + '.source.aaaa_records',
 ]
 
-# Counters in legacy version (value=0 in fixture, won't be submitted by OMV2 on first scrape)
-LEGACY_COUNTER_METRICS = [
+COUNTER_METRICS_OMV1 = [
     NAMESPACE + '.source.errors.total',
     NAMESPACE + '.registry.errors.total',
 ]
 
-# OpenMetrics V1: counters submitted as gauges
-LEGACY_METRICS_OMV1 = LEGACY_GAUGE_METRICS + LEGACY_COUNTER_METRICS
+COUNTER_METRICS_OMV2 = [
+    NAMESPACE + '.source.errors.total.count',
+    NAMESPACE + '.registry.errors.total.count',
+]
 
-# OpenMetrics V2: counters with value 0 won't appear
-LEGACY_METRICS_OMV2 = LEGACY_GAUGE_METRICS
+# OpenMetrics V1: counters submitted as gauges
+LEGACY_METRICS_OMV1 = LEGACY_GAUGE_METRICS + COUNTER_METRICS_OMV1
+
+# OpenMetrics V2: non-zero counters are submitted as monotonic_count with a .count suffix
+LEGACY_METRICS_OMV2 = LEGACY_GAUGE_METRICS + COUNTER_METRICS_OMV2
 
 
 # =============================================================================
@@ -68,16 +79,10 @@ V120_GAUGE_METRICS = [
 # Summary metrics (http_request_duration_seconds)
 V120_SUMMARY_BASE = NAMESPACE + '.http.request.duration_seconds'
 
-# Counters in v1.20.0 (value=0 in fixture)
-V120_COUNTER_METRICS = [
-    NAMESPACE + '.source.errors.total',
-    NAMESPACE + '.registry.errors.total',
-]
-
 # OpenMetrics V1: summary generates .quantile, .sum, .count; counters as gauges
 V120_METRICS_OMV1 = (
     V120_GAUGE_METRICS
-    + V120_COUNTER_METRICS
+    + COUNTER_METRICS_OMV1
     + [
         V120_SUMMARY_BASE + '.quantile',
         V120_SUMMARY_BASE + '.sum',
@@ -85,9 +90,32 @@ V120_METRICS_OMV1 = (
     ]
 )
 
-# OpenMetrics V2: counters with value 0 won't appear
-V120_METRICS_OMV2 = V120_GAUGE_METRICS + [
+# OpenMetrics V2: non-zero counters are submitted as monotonic_count with a .count suffix
+V120_METRICS_OMV2 = (
+    V120_GAUGE_METRICS
+    + COUNTER_METRICS_OMV2
+    + [
+        V120_SUMMARY_BASE + '.quantile',
+        V120_SUMMARY_BASE + '.sum',
+        V120_SUMMARY_BASE + '.count',
+    ]
+)
+
+# Metrics documented in metadata.csv but only emitted by one external-dns version
+LEGACY_ONLY_METADATA_METRICS = [
+    NAMESPACE + '.controller.verified_a_records',
+    NAMESPACE + '.controller.verified_aaaa_records',
+    NAMESPACE + '.registry.a_records',
+    NAMESPACE + '.registry.aaaa_records',
+    NAMESPACE + '.source.a_records',
+    NAMESPACE + '.source.aaaa_records',
+]
+
+V120_ONLY_METADATA_METRICS = [
+    NAMESPACE + '.controller.verified_records',
+    V120_SUMMARY_BASE + '.count',
     V120_SUMMARY_BASE + '.quantile',
     V120_SUMMARY_BASE + '.sum',
-    V120_SUMMARY_BASE + '.count',
+    NAMESPACE + '.registry.records',
+    NAMESPACE + '.source.records',
 ]

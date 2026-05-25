@@ -44,20 +44,15 @@ class ExternalDNSCheck(OpenMetricsBaseCheck):
         if endpoint is None:
             raise ConfigurationError("Unable to find prometheus endpoint in config file.")
 
-        metrics = [DEFAULT_METRICS]
-        metrics.extend(instance.get('metrics', []))
+        metrics = [DEFAULT_METRICS, *instance.get('metrics', [])]
 
         # Rename 'host' label to 'http_host' since 'host' is a reserved Datadog tag
-        labels_mapper = {'host': 'http_host'}
-        labels_mapper.update(instance.get('labels_mapper', {}))
+        labels_mapper = {'host': 'http_host', **instance.get('labels_mapper', {})}
 
-        instance.update(
-            {
-                'prometheus_url': endpoint,
-                'namespace': 'external_dns',
-                'metrics': metrics,
-                'labels_mapper': labels_mapper,
-            }
-        )
-
-        return instance
+        return {
+            **instance,
+            'prometheus_url': endpoint,
+            'namespace': 'external_dns',
+            'metrics': metrics,
+            'labels_mapper': labels_mapper,
+        }

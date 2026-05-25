@@ -1,3 +1,6 @@
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.7762368873864365e+09
 # HELP external_dns_controller_last_reconcile_timestamp_seconds Timestamp of last attempted sync with the DNS provider
 # TYPE external_dns_controller_last_reconcile_timestamp_seconds gauge
 external_dns_controller_last_reconcile_timestamp_seconds 1.776236885445872e+09
@@ -24,7 +27,7 @@ external_dns_registry_aaaa_records 0
 external_dns_registry_endpoints_total 333
 # HELP external_dns_registry_errors_total Number of Registry errors.
 # TYPE external_dns_registry_errors_total counter
-external_dns_registry_errors_total 0
+external_dns_registry_errors_total 3
 # HELP external_dns_source_a_records Number of Source A records.
 # TYPE external_dns_source_a_records gauge
 external_dns_source_a_records 0
@@ -36,7 +39,7 @@ external_dns_source_aaaa_records 0
 external_dns_source_endpoints_total 50
 # HELP external_dns_source_errors_total Number of Source errors.
 # TYPE external_dns_source_errors_total counter
-external_dns_source_errors_total 0
+external_dns_source_errors_total 7
 # HELP external_dns_webhook_provider_adjustendpoints_errors_total Errors with AdjustEndpoints method
 # TYPE external_dns_webhook_provider_adjustendpoints_errors_total gauge
 external_dns_webhook_provider_adjustendpoints_errors_total 0

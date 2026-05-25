@@ -5,12 +5,21 @@ import pytest
 
 from datadog_checks.base import AgentCheck
 
+from .common import OPENMETRICS_HEALTH_TAGS, PROMETHEUS_HEALTH_TAGS
 
-# Minimal E2E testing
+
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, aggregator, instance):
+@pytest.mark.parametrize(
+    'instance_fixture,service_check,tags',
+    [
+        ('instance', 'external_dns.prometheus.health', PROMETHEUS_HEALTH_TAGS),
+        ('instance_e2e_omv2', 'external_dns.openmetrics.health', OPENMETRICS_HEALTH_TAGS),
+    ],
+    ids=['omv1', 'omv2'],
+)
+def test_e2e(dd_agent_check, aggregator, request, instance_fixture, service_check, tags):
+    """Both integration versions raise and report CRITICAL on their respective health check."""
+    instance = request.getfixturevalue(instance_fixture)
     with pytest.raises(Exception):
         dd_agent_check(instance, rate=True)
-    endpoint_tag = "endpoint:" + instance.get('prometheus_url')
-    tags = instance.get('tags').append(endpoint_tag)
-    aggregator.assert_service_check("external_dns.prometheus.health", AgentCheck.CRITICAL, count=2, tags=tags)
+    aggregator.assert_service_check(service_check, AgentCheck.CRITICAL, count=2, tags=tags)

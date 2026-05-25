@@ -10,7 +10,7 @@ For more information about External DNS, see the [GitHub repo][1].
 
 ## Setup
 
-This OpenMetrics-based integration has two modes: latest mode (enabled by setting `openmetrics_endpoint`) and legacy mode (enabled by setting `prometheus_url`). Datadog recommends using the latest mode for all new deployments. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][10].
+This OpenMetrics-based integration has two modes: latest mode (enabled by setting `openmetrics_endpoint`) and legacy mode (enabled by setting `prometheus_url`). Datadog recommends using the latest mode for all new deployments. For more information, see [Latest and Legacy Versioning for OpenMetrics-based Integrations][10].
 
 ### Prerequisites
 
@@ -24,7 +24,7 @@ The External DNS check is included in the [Datadog Agent][2] package. You do not
 
 ### Configuration
 
-**Note**: For hosts unable to use Python 3, see the legacy mode [configuration example][11]. The `external_dns.d/auto_conf.yaml` file enables the `prometheus_url` option for legacy mode by default. See the sample [external_dns.d/conf.yaml.example][3] for all available configuration options.
+See the sample [external_dns.d/conf.yaml.example][3] for all available configuration options. For hosts unable to use Python 3, see the legacy mode [configuration example][11].
 
 To configure this check for an Agent running on Kubernetes:
 
@@ -128,7 +128,7 @@ The latest mode submits the `.sum` and `.count` summary samples as `monotonic_co
 
 The integration supports two modes that handle Prometheus metric types differently:
 
-| Prometheus Type | Legacy mode (`prometheus_url`) | Latest mode (`openmetrics_endpoint`) |
+| Prometheus type | Legacy mode (`prometheus_url`) | Latest mode (`openmetrics_endpoint`) |
 |-----------------|-------------------------------|-------------------------------------|
 | gauge | gauge | gauge |
 | counter | gauge (raw value) | monotonic_count (delta between scrapes) |

@@ -4,7 +4,7 @@
 
 
 def initialize_instance(values, **kwargs):
-    if 'prometheus_url' not in values and 'openmetrics_endpoint' not in values:
+    if not values.get('prometheus_url') and not values.get('openmetrics_endpoint'):
         raise ValueError('Field `prometheus_url` or `openmetrics_endpoint` must be set')
 
     return values
