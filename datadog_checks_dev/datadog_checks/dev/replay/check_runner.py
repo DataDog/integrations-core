@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 import tempfile
 from pathlib import Path
@@ -33,7 +32,8 @@ def test_replay_check_runner(monkeypatch, aggregator, dd_run_check):
         raise AssertionError('unsupported replay mode')
 
     run_check_instances({args.check_class!r}, instances, dd_run_check, {args.check_name!r})
-    Path({str(args.output)!r}).write_text(json.dumps(serialize_aggregator(aggregator), indent=2, sort_keys=True) + '\\n')
+    output = json.dumps(serialize_aggregator(aggregator), indent=2, sort_keys=True) + '\\n'
+    Path({str(args.output)!r}).write_text(output)
 '''
     )
 
