@@ -2,7 +2,17 @@
 
 <!-- towncrier release notes start -->
 
-## 4.14.2 / 2026-04-28
+## 5.0.0 / 2026-05-14
+
+***Removed***:
+
+* Remove tenant faults as events, faults are now only sent as logs. ([#23350](https://github.com/DataDog/integrations-core/pull/23350))
+
+***Added***:
+
+* Get health score from healthInst if fvOverallHealth isn't enabled. ([#21988](https://github.com/DataDog/integrations-core/pull/21988))
+
+## 4.14.2 / 2026-04-28 / Agent 7.79.0
 
 ***Fixed***:
 
