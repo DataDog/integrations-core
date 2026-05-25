@@ -23,7 +23,6 @@ gates:
     services:
     - kafka_actions
     - istio
-    - cilium
 - type: total_coverage_percentage
   config:
     threshold: 60
@@ -31,6 +30,7 @@ gates:
     - datadog_checks_dev
     - tekton
     - vertica
+    - cilium
 - type: total_coverage_percentage
   config:
     threshold: 50
