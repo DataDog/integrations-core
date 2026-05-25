@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -22,6 +23,7 @@ from datadog_checks.dev.replay.adapters.subprocess import (
 from datadog_checks.dev.replay.adapters.tcp import install_live_recording_tcp_clients, install_replay_tcp_clients
 
 ADAPTERS = ('requests', 'subprocess', 'tcp', 'process', 'psycopg')
+ADAPTER_ENV_VAR = 'DD_REPLAY_ADAPTERS'
 MODES = ('record', 'replay')
 
 
@@ -39,8 +41,11 @@ def install_replay_adapters(
 def _install_recording_adapters(
     monkeypatch: pytest.MonkeyPatch, fixture_path: Path, check_name: str | None
 ) -> dict[str, list[dict[str, Any]]]:
+    enabled_adapters = set(_enabled_adapters())
     installed: dict[str, list[dict[str, Any]]] = {}
     for adapter in ADAPTERS:
+        if adapter not in enabled_adapters:
+            continue
         component_path = component_fixture_path(fixture_path, adapter)
         try:
             installed[adapter] = _install_one(monkeypatch, adapter, 'record', component_path, check_name, strict=False)
@@ -59,13 +64,28 @@ def _install_replay_adapters(
     monkeypatch: pytest.MonkeyPatch, fixture_path: Path, check_name: str | None
 ) -> dict[str, list[dict[str, Any]]]:
     manifest = read_fixture_manifest(fixture_path)
+    enabled_adapters = set(_enabled_adapters())
     installed: dict[str, list[dict[str, Any]]] = {}
     for adapter in manifest['adapters']:
+        if adapter not in enabled_adapters:
+            continue
         if adapter not in ADAPTERS:
             raise AssertionError(f'unsupported replay adapter in fixture manifest: {adapter}')
         component_path = fixture_path.with_name(manifest['files'][adapter])
         installed[adapter] = _install_one(monkeypatch, adapter, 'replay', component_path, check_name, strict=True)
     return installed
+
+
+def _enabled_adapters() -> tuple[str, ...]:
+    configured = os.environ.get(ADAPTER_ENV_VAR)
+    if not configured:
+        return ADAPTERS
+
+    adapters = tuple(adapter.strip() for adapter in configured.split(',') if adapter.strip())
+    unknown = sorted(set(adapters) - set(ADAPTERS))
+    if unknown:
+        raise AssertionError(f'unsupported replay adapter in {ADAPTER_ENV_VAR}: {", ".join(unknown)}')
+    return adapters
 
 
 def _install_one(
