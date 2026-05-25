@@ -3,9 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import json
 from collections import Counter
 from typing import Any
-import json
 
 
 def _key(item: Any) -> str:

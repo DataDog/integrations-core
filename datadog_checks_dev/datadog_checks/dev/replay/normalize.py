@@ -27,7 +27,17 @@ def normalize_output(output: dict[str, Any]) -> dict[str, Any]:
         service_checks.append(item)
 
     return {
-        'metrics': sorted(metrics, key=lambda m: (m.get('name'), m.get('type'), m.get('value'), m.get('hostname'), m.get('device'), m.get('tags') or [])),
+        'metrics': sorted(
+            metrics,
+            key=lambda m: (
+                m.get('name'),
+                m.get('type'),
+                m.get('value'),
+                m.get('hostname'),
+                m.get('device'),
+                m.get('tags') or [],
+            ),
+        ),
         'service_checks': sorted(
             service_checks,
             key=lambda s: (s.get('name'), s.get('status'), s.get('hostname'), s.get('message'), s.get('tags') or []),
