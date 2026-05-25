@@ -33,24 +33,24 @@ def load(name: str) -> dict[str, Any]:
     try:
         with open(os.path.join(DATA_DIR, f'{name}.json'), encoding='utf-8') as f:
             spec = json.load(f)
-    except (OSError, json.JSONDecodeError) as exc:
+        if 'columns' in spec:
+            return {'name': spec['name'], 'query': spec['query'], 'columns': spec['columns']}
+        items = _build_items(spec['items'], spec['prefix'])
+        return {
+            'name': spec['name'],
+            'query': spec['query'],
+            'columns': [
+                {'name': spec['value_column'], 'type': 'source'},
+                {
+                    'name': spec['match_column'],
+                    'type': 'match',
+                    'source': spec['value_column'],
+                    'items': items,
+                },
+            ],
+        }
+    except (OSError, json.JSONDecodeError, KeyError) as exc:
         raise RuntimeError(f'failed to load advanced query {name!r}') from exc
-    if 'columns' in spec:
-        return {'name': spec['name'], 'query': spec['query'], 'columns': spec['columns']}
-    items = _build_items(spec['items'], spec['prefix'])
-    return {
-        'name': spec['name'],
-        'query': spec['query'],
-        'columns': [
-            {'name': spec['value_column'], 'type': 'source'},
-            {
-                'name': spec['match_column'],
-                'type': 'match',
-                'source': spec['value_column'],
-                'items': items,
-            },
-        ],
-    }
 
 
 def _build_items(compact: dict[str, Any], prefix: str) -> dict[str, dict[str, Any]]:

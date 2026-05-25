@@ -120,18 +120,6 @@ QUERY_SPECS = {
     ),
 }
 
-SYSTEM_ERRORS_SPEC = {
-    'name': 'system.errors',
-    'query': 'SELECT value, name, code, remote FROM system.errors WHERE value > 0',
-    'columns': [
-        {'name': 'errors.raised', 'type': 'monotonic_count'},
-        {'name': 'error_name', 'type': 'tag'},
-        {'name': 'error_code', 'type': 'tag'},
-        {'name': 'remote', 'type': 'tag', 'boolean': True},
-    ],
-}
-SYSTEM_ERRORS_TARGET = os.path.join(DATA_DIR, 'system_errors.json')
-
 
 class Templates(Enum):
     TESTS_METRICS = Template(
@@ -332,11 +320,6 @@ def write_json(target_path: str, spec: dict) -> None:
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
     write_file(target_path, json.dumps(spec, indent=2) + '\n')
-
-
-def generate_system_errors() -> None:
-    """Emit the static ``system_errors.json`` file (no per-metric items)."""
-    write_json(SYSTEM_ERRORS_TARGET, SYSTEM_ERRORS_SPEC)
 
 
 def generate_metadata_file(metrics: Iterable[ClickhouseMetric]):
@@ -560,9 +543,6 @@ def generate():
         generate_queries(generator.query_spec, metrics.all.values())
         all.update(metrics.all)
         calculated.append(metrics)
-
-    # generate the static system_errors.json
-    generate_system_errors()
 
     # generate metadata.csv file
     generate_metadata_file(all.values())
