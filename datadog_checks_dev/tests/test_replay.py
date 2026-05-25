@@ -59,6 +59,23 @@ def test_infer_check_class_from_module_exports(monkeypatch):
     assert infer_check_class('example_replay') is ExampleCheck
 
 
+def test_serialize_aggregator_includes_check_state(aggregator):
+    check = ExampleCheck('example', {}, [{}])
+    check.tags = ['flavor:mysql', 'env:prod']
+    check.service_check_tags = ['service:mysql']
+
+    output = serialize_aggregator(aggregator, checks=[check])
+
+    assert output['check_states'] == [
+        {
+            'index': 0,
+            'class': f'{ExampleCheck.__module__}.ExampleCheck',
+            'tags': ['flavor:mysql', 'env:prod'],
+            'service_check_tags': ['service:mysql'],
+        }
+    ]
+
+
 def test_normalize_output_sorts_metrics_and_tags():
     output = {
         'metrics': [
@@ -68,12 +85,14 @@ def test_normalize_output_sorts_metrics_and_tags():
         'service_checks': [],
         'events': [],
         'event_platform_events': {},
+        'check_states': [{'index': 0, 'class': 'Example', 'tags': ['b:2', 'a:1']}],
     }
 
     normalized = normalize_output(output)
 
     assert [metric['name'] for metric in normalized['metrics']] == ['a.metric', 'z.metric']
     assert normalized['metrics'][1]['tags'] == ['a:1', 'b:2']
+    assert normalized['check_states'][0]['tags'] == ['a:1', 'b:2']
 
 
 def test_diff_outputs_reports_added_and_removed_metric_records():

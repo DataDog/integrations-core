@@ -34,6 +34,17 @@ def _normalize_collection(output: dict[str, Any], name: str) -> list[Any]:
     return sorted([dict(item) for item in output.get(name, [])], key=_json_sort_key)
 
 
+def _normalize_check_states(check_states: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    normalized = []
+    for state in check_states:
+        item = dict(state)
+        for attr in ('tags', 'service_check_tags', '_non_internal_tags'):
+            if attr in item:
+                item[attr] = _sorted_tags(item[attr])
+        normalized.append(item)
+    return sorted(normalized, key=_json_sort_key)
+
+
 def normalize_output(output: dict[str, Any]) -> dict[str, Any]:
     """Normalize check output enough for deterministic first-slice comparisons."""
     metrics = []
@@ -71,4 +82,5 @@ def normalize_output(output: dict[str, Any]) -> dict[str, Any]:
         'persistent_cache': _normalize_collection(output, 'persistent_cache'),
         'agent_logs': _normalize_collection(output, 'agent_logs'),
         'telemetry': _normalize_collection(output, 'telemetry'),
+        'check_states': _normalize_check_states(output.get('check_states', [])),
     }

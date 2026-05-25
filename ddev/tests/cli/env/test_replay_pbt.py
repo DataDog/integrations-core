@@ -52,6 +52,7 @@ PROPERTIES = (
     'json-whitespace',
     'json-string-escapes',
     'metadata-emitted-metrics',
+    'repeated-run-tag-stability',
     'openmetrics-coverage',
     'asset-query-metrics-in-metadata',
     'asset-query-tags-seen-in-replay',
@@ -177,6 +178,39 @@ def _assert_stable_tags(tags: Any, owner: str) -> None:
     assert all(isinstance(tag, str) and tag for tag in tags), f'{owner} tags must be non-empty strings'
     assert tags == sorted(tags), f'{owner} tags are not sorted: {tags!r}'
     assert len(tags) == len(set(tags)), f'{owner} tags contain duplicates: {tags!r}'
+
+
+CHECK_STATE_TAG_ATTRIBUTES = ('tags', 'service_check_tags', '_non_internal_tags')
+
+
+def _check_state_tag_contexts(output: dict[str, Any]) -> set[tuple[Any, ...]]:
+    contexts = set()
+    for state_index, state in enumerate(output.get('check_states', [])):
+        check_id = (state.get('index', state_index), state.get('class'))
+        for attr in CHECK_STATE_TAG_ATTRIBUTES:
+            if attr not in state:
+                continue
+            tags = state.get(attr)
+            _assert_stable_tags(tags, f'check_states[{state_index}].{attr}')
+            contexts.add((*check_id, attr, tuple(tags or [])))
+    return contexts
+
+
+def _assert_repeated_run_tag_stability(envelope: dict[str, Any]) -> None:
+    outputs = _normalized_reading_outputs(envelope)
+    if len(outputs) < 2:
+        pytest.skip('repeated-run-tag-stability requires --readings >= 2.')
+
+    baseline = _check_state_tag_contexts(outputs[0])
+    for index, output in enumerate(outputs):
+        _assert_normalized_output_contract(output)
+        current = _check_state_tag_contexts(output)
+        if index == 0:
+            continue
+        added = sorted(current - baseline, key=repr)
+        removed = sorted(baseline - current, key=repr)
+        assert not added, f'check tag state grew or changed at reading {index}: {added[:10]!r}'
+        assert not removed, f'check tag state was removed or changed at reading {index}: {removed[:10]!r}'
 
 
 def _metric_contexts(output: dict[str, Any]) -> set[tuple[Any, ...]]:
@@ -1016,6 +1050,86 @@ def test_emitted_metrics_match_metadata_rejects_type_mismatch():
         _assert_emitted_metrics_match_metadata(output, metadata_rows)
 
 
+def test_repeated_run_tag_stability_rejects_duplicate_check_tags():
+    envelope = {
+        'version': 2,
+        'readings': [
+            {
+                'index': 0,
+                'output': {
+                    'metrics': [],
+                    'service_checks': [],
+                    'check_states': [{'index': 0, 'class': 'Example', 'tags': ['flavor:mysql']}],
+                },
+            },
+            {
+                'index': 1,
+                'output': {
+                    'metrics': [],
+                    'service_checks': [],
+                    'check_states': [{'index': 0, 'class': 'Example', 'tags': ['flavor:mysql', 'flavor:mysql']}],
+                },
+            },
+        ],
+    }
+
+    with pytest.raises(AssertionError, match='contain duplicates'):
+        _assert_repeated_run_tag_stability(envelope)
+
+
+def test_repeated_run_tag_stability_rejects_check_tag_growth():
+    envelope = {
+        'version': 2,
+        'readings': [
+            {
+                'index': 0,
+                'output': {
+                    'metrics': [],
+                    'service_checks': [],
+                    'check_states': [{'index': 0, 'class': 'Example', 'tags': ['flavor:mysql']}],
+                },
+            },
+            {
+                'index': 1,
+                'output': {
+                    'metrics': [],
+                    'service_checks': [],
+                    'check_states': [{'index': 0, 'class': 'Example', 'tags': ['extra:true', 'flavor:mysql']}],
+                },
+            },
+        ],
+    }
+
+    with pytest.raises(AssertionError, match='grew or changed'):
+        _assert_repeated_run_tag_stability(envelope)
+
+
+def test_repeated_run_tag_stability_accepts_stable_check_tags():
+    envelope = {
+        'version': 2,
+        'readings': [
+            {
+                'index': 0,
+                'output': {
+                    'metrics': [{'name': 'example.metric', 'type': 0, 'value': 1.0, 'tags': ['flavor:mysql']}],
+                    'service_checks': [],
+                    'check_states': [{'index': 0, 'class': 'Example', 'tags': ['flavor:mysql']}],
+                },
+            },
+            {
+                'index': 1,
+                'output': {
+                    'metrics': [{'name': 'example.metric', 'type': 0, 'value': 2.0, 'tags': ['flavor:mysql']}],
+                    'service_checks': [],
+                    'check_states': [{'index': 0, 'class': 'Example', 'tags': ['flavor:mysql']}],
+                },
+            },
+        ],
+    }
+
+    _assert_repeated_run_tag_stability(envelope)
+
+
 def test_openmetrics_coverage_counts_observed_and_supported_directions(tmp_path: Path):
     cache = tmp_path / 'cache'
     cache.mkdir()
@@ -1410,6 +1524,24 @@ def test_emitted_metrics_match_metadata(replay_pbt_context: ReplayPBTContext, va
     _assert_emitted_metrics_match_metadata(
         _read_normalized(property_dir), metadata_rows, configured_custom_metrics=configured_custom_metrics
     )
+
+
+@settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@given(validation=st.sampled_from(['repeated-run-tag-stability']))
+def test_repeated_run_tags_are_stable(replay_pbt_context: ReplayPBTContext, validation: str):
+    # Stateful repeated-run property: compare-check reuses the same check
+    # instance across readings. Check-level tag attributes and emitted context
+    # tags should converge after the first run, not grow on every check run.
+    # This targets bugs like a database integration appending a version/resource
+    # tag to self.tags on each invocation.
+    property_name = 'repeated-run-tag-stability'
+    _skip_unselected(replay_pbt_context, property_name)
+    assert validation == 'repeated-run-tag-stability'
+
+    property_dir = replay_pbt_context.artifacts / property_name
+    diff = _run_compare_check_cache(context=replay_pbt_context, cache=replay_pbt_context.cache, artifacts=property_dir)
+    assert diff['changed'] is False
+    _assert_repeated_run_tag_stability(_read_normalized(property_dir))
 
 
 @settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])

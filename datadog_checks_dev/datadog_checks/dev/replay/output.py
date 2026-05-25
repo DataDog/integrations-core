@@ -65,6 +65,31 @@ def _serialize_telemetry(datadog_agent) -> list[dict[str, Any]]:
     return telemetry
 
 
+def _serialize_check_states(checks) -> list[dict[str, Any]]:
+    """Serialize a small allowlist of long-lived check state for invariant tests.
+
+    Replay check runners reuse the same check instances across readings to mimic
+    long-lived Agent processes. Capturing mutable tag attributes lets
+    integration-level properties catch bugs where a check appends to its base
+    tag list every run, even if a particular sparse fixture does not emit those
+    tags on a metric.
+    """
+    states = []
+    for index, check in enumerate(checks or []):
+        state = {
+            'index': index,
+            'class': f'{check.__class__.__module__}.{check.__class__.__name__}',
+        }
+        for attr in ('tags', 'service_check_tags', '_non_internal_tags'):
+            value = getattr(check, attr, None)
+            if value is None:
+                continue
+            if isinstance(value, (list, tuple)):
+                state[attr] = [str(item) for item in value]
+        states.append(state)
+    return states
+
+
 def reset_serialized_output(aggregator, datadog_agent=None) -> None:
     """Clear output collectors while preserving check and Agent persistent state."""
     aggregator.reset()
@@ -76,7 +101,7 @@ def reset_serialized_output(aggregator, datadog_agent=None) -> None:
     datadog_agent._sent_telemetry.clear()
 
 
-def serialize_aggregator(aggregator, datadog_agent=None) -> dict[str, Any]:
+def serialize_aggregator(aggregator, datadog_agent=None, checks=None) -> dict[str, Any]:
     """Serialize pytest stub output into a stable JSON-compatible shape."""
     output = {
         'metrics': [
@@ -99,6 +124,7 @@ def serialize_aggregator(aggregator, datadog_agent=None) -> dict[str, Any]:
         'persistent_cache': [],
         'agent_logs': [],
         'telemetry': [],
+        'check_states': _serialize_check_states(checks),
     }
     if datadog_agent is not None:
         output['metadata'] = _serialize_metadata(datadog_agent)
