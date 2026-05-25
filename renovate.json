@@ -7,8 +7,8 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": [
-        "^\\.github/workflows/[^/]+\\.ya?ml$"
+      "managerFilePatterns": [
+        "/^\\.github/workflows/[^/]+\\.ya?ml$/"
       ],
       "matchStrings": [
         "(?<depName>[a-zA-Z][a-zA-Z0-9._-]*)==(?<currentValue>[0-9]+(?:\\.[0-9]+){1,2})",
@@ -19,8 +19,8 @@
     {
       "customType": "regex",
       "description": "Track image:tag@digest references in the tagger Dockerfile (uv, dd-octo-sts).",
-      "fileMatch": [
-        "^\\.gitlab/tagger/Dockerfile$"
+      "managerFilePatterns": [
+        "/^\\.gitlab/tagger/Dockerfile$/"
       ],
       "matchStrings": [
         "(?:COPY --from=|FROM )(?<depName>[^\\s:@]+):(?<currentValue>[^\\s@]+)@(?<currentDigest>sha256:[a-f0-9]+)"
