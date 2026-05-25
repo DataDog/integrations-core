@@ -61,7 +61,7 @@ def record_from_response(url: str, response: requests.Response) -> dict[str, Any
 def install_recording_session_get(
     monkeypatch: pytest.MonkeyPatch, fixture_path: Path, responses_by_url: dict[str, dict[str, Any]]
 ) -> list[dict[str, Any]]:
-    """Record cilium HTTP GETs while serving deterministic fixture-backed responses."""
+    """Record HTTP GETs while serving deterministic fixture-backed responses."""
     records: list[dict[str, Any]] = []
 
     def recorded_get(_session: requests.Session, url: str, **kwargs: Any) -> FixtureResponse:
@@ -75,7 +75,7 @@ def install_recording_session_get(
 
 
 def install_live_recording_session_get(monkeypatch: pytest.MonkeyPatch, fixture_path: Path) -> list[dict[str, Any]]:
-    """Record real cilium HTTP GETs while still returning live responses to the check."""
+    """Record real HTTP GETs while still returning live responses to the check."""
     records: list[dict[str, Any]] = []
     original_get = requests.Session.get
 
@@ -90,7 +90,7 @@ def install_live_recording_session_get(monkeypatch: pytest.MonkeyPatch, fixture_
 
 
 def install_replay_session_get(monkeypatch: pytest.MonkeyPatch, fixture_path: Path) -> list[dict[str, Any]]:
-    """Replay cilium HTTP GETs from recorded fixture records in order."""
+    """Replay HTTP GETs from recorded fixture records in order."""
     records = json.loads(fixture_path.read_text())
     replayed: list[dict[str, Any]] = []
 

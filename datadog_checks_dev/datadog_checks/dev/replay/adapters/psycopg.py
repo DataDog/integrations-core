@@ -172,8 +172,9 @@ class _RecordingCursor:
 
 
 class _ReplayCursorState:
-    def __init__(self, records: list[dict[str, Any]]):
+    def __init__(self, records: list[dict[str, Any]], replayed: list[dict[str, Any]]):
         self.records = records
+        self.replayed = replayed
         self.index = 0
 
     def next(self, operation: str) -> dict[str, Any]:
@@ -183,6 +184,7 @@ class _ReplayCursorState:
         if record.get('operation') != operation:
             raise AssertionError('Recorded psycopg operation does not match replay operation')
         self.index += 1
+        self.replayed.append(record)
         if record.get('exception'):
             _raise_recorded_exception(record)
         return record
@@ -277,15 +279,14 @@ def install_replay_psycopg(monkeypatch: pytest.MonkeyPatch, fixture_path: Path) 
     import psycopg as pg
 
     records = json.loads(fixture_path.read_text())
-    state = _ReplayCursorState(records)
     replayed: list[dict[str, Any]] = []
+    state = _ReplayCursorState(records, replayed)
 
     def replayed_connect(*args: Any, **kwargs: Any) -> _ReplayConnection:
         record = state.next('psycopg.connect')
         expected = _connect_record(args, kwargs)
         if record.get('args') != expected['args'] or record.get('kwargs') != expected['kwargs']:
             raise AssertionError('Recorded psycopg connection does not match replay connection')
-        replayed.append(record)
         return _ReplayConnection(state)
 
     monkeypatch.setattr(pg, 'connect', replayed_connect)

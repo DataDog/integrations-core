@@ -110,8 +110,9 @@ class _RecordingProcess:
 
 
 class _ReplayCursor:
-    def __init__(self, records: list[dict[str, Any]]):
+    def __init__(self, records: list[dict[str, Any]], replayed: list[dict[str, Any]]):
         self._records = records
+        self._replayed = replayed
         self._index = 0
 
     def next(self, operation: str, pid: int | None = None) -> dict[str, Any]:
@@ -123,6 +124,7 @@ class _ReplayCursor:
         if pid is not None and record.get('pid') != pid:
             raise AssertionError('Recorded process pid does not match replay pid')
         self._index += 1
+        self._replayed.append(record)
         if record.get('exception'):
             _raise_recorded_exception(record)
         return record
@@ -147,11 +149,11 @@ class _ReplayProcess:
 
 def _install_gunicorn_version_recorder(
     monkeypatch: pytest.MonkeyPatch, fixture_path: Path, records: list[dict[str, Any]]
-) -> None:
+) -> bool:
     try:
         from datadog_checks.gunicorn import gunicorn
     except Exception:
-        return
+        return False
 
     original_get_gunicorn_version = gunicorn.get_gunicorn_version
 
@@ -169,13 +171,14 @@ def _install_gunicorn_version_recorder(
         return stdout, stderr, returncode
 
     monkeypatch.setattr(gunicorn, 'get_gunicorn_version', recorded_get_gunicorn_version)
+    return True
 
 
-def _install_gunicorn_version_replay(monkeypatch: pytest.MonkeyPatch, cursor: _ReplayCursor) -> None:
+def _install_gunicorn_version_replay(monkeypatch: pytest.MonkeyPatch, cursor: _ReplayCursor) -> bool:
     try:
         from datadog_checks.gunicorn import gunicorn
     except Exception:
-        return
+        return False
 
     def replayed_get_gunicorn_version(cmd: str) -> tuple[str, str, int]:
         record = cursor.next('gunicorn.get_gunicorn_version')
@@ -185,9 +188,12 @@ def _install_gunicorn_version_replay(monkeypatch: pytest.MonkeyPatch, cursor: _R
         return result.get('stdout', ''), result.get('stderr', ''), result.get('returncode', 0)
 
     monkeypatch.setattr(gunicorn, 'get_gunicorn_version', replayed_get_gunicorn_version)
+    return True
 
 
-def install_live_recording_process_state(monkeypatch: pytest.MonkeyPatch, fixture_path: Path) -> list[dict[str, Any]]:
+def install_live_recording_process_state(
+    monkeypatch: pytest.MonkeyPatch, fixture_path: Path, check_name: str | None = None
+) -> list[dict[str, Any]]:
     """Record psutil process-state calls and Gunicorn version probing while executing live."""
     import psutil
 
@@ -202,24 +208,29 @@ def install_live_recording_process_state(monkeypatch: pytest.MonkeyPatch, fixtur
         return [_RecordingProcess(process, records, fixture_path) for process in processes]
 
     monkeypatch.setattr(psutil, 'process_iter', recorded_process_iter)
-    _install_gunicorn_version_recorder(monkeypatch, fixture_path, records)
+    installed_gunicorn = _install_gunicorn_version_recorder(monkeypatch, fixture_path, records)
+    if check_name == 'gunicorn' and not installed_gunicorn:
+        raise AssertionError('Process replay adapter could not install Gunicorn version patch point')
     return records
 
 
-def install_replay_process_state(monkeypatch: pytest.MonkeyPatch, fixture_path: Path) -> list[dict[str, Any]]:
+def install_replay_process_state(
+    monkeypatch: pytest.MonkeyPatch, fixture_path: Path, check_name: str | None = None
+) -> list[dict[str, Any]]:
     """Replay psutil process-state calls and Gunicorn version probing from fixture records."""
     import psutil
 
     records = json.loads(fixture_path.read_text())
-    cursor = _ReplayCursor(records)
     replayed: list[dict[str, Any]] = []
+    cursor = _ReplayCursor(records, replayed)
 
     def replayed_process_iter(*args: Any, **kwargs: Any) -> list[_ReplayProcess]:
         record = cursor.next('psutil.process_iter')
-        replayed.append(record)
         return [_ReplayProcess(pid, cursor) for pid in (record.get('result') or [])]
 
     monkeypatch.setattr(psutil, 'process_iter', replayed_process_iter)
-    _install_gunicorn_version_replay(monkeypatch, cursor)
+    installed_gunicorn = _install_gunicorn_version_replay(monkeypatch, cursor)
+    if check_name == 'gunicorn' and not installed_gunicorn:
+        raise AssertionError('Process replay adapter could not install Gunicorn version patch point')
     monkeypatch.setattr('time.sleep', lambda seconds: None)
     return replayed

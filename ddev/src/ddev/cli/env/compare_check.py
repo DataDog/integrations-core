@@ -25,7 +25,8 @@ if TYPE_CHECKING:
 # Manual cache invalidation knob for compare-check artifacts. Bump this whenever
 # replay fixture semantics or suitability criteria change in a way that should
 # make existing .ddev/replay caches ineligible for --replay-cache auto/latest.
-REPLAY_CACHE_VERSION = 1
+REPLAY_CACHE_VERSION = 2
+REPLAY_ADAPTER = 'all'
 OUTPUT_COLLECTIONS = (
     'metrics',
     'service_checks',
@@ -69,12 +70,6 @@ OUTPUT_COLLECTIONS = (
     ),
 )
 @click.option(
-    '--adapter',
-    default='requests',
-    show_default=True,
-    type=click.Choice(['requests', 'subprocess', 'tcp', 'process', 'psycopg']),
-)
-@click.option(
     '--old-env',
     'old_hatch_env',
     help='Hatch env for the old side. Defaults to the selected fixture environment.',
@@ -92,11 +87,6 @@ OUTPUT_COLLECTIONS = (
     help='Use one recorded fixture for both sides, or record each side from its own environment.',
 )
 @click.option('--recreate', '-r', is_flag=True, help='Recreate the environment before comparing')
-@click.option(
-    '--fail-on-diff',
-    is_flag=True,
-    help='Exit non-zero when any selected environment has a diff or incomplete comparison.',
-)
 @click.pass_context
 def compare_check(
     ctx: click.Context,
@@ -110,12 +100,10 @@ def compare_check(
     exact_artifacts_dir: bool,
     overwrite: bool,
     replay_cache: str | None,
-    adapter: str,
     old_hatch_env: str | None,
     new_hatch_env: str | None,
     comparison_mode: str,
     recreate: bool,
-    fail_on_diff: bool,
 ):
     """
     Compare no-Agent check output across two integrations-core refs.
@@ -127,6 +115,7 @@ def compare_check(
 
     app: Application = ctx.obj
     integration = app.repo.integrations.get(intg_name)
+    adapter = REPLAY_ADAPTER
     storage = EnvDataStorage(app.data_dir)
     if comparison_mode == 'record-each-side':
         if environment is not None:
@@ -199,7 +188,7 @@ def compare_check(
             app.display_info(f'{env_name}: {_format_diff_summary(diff)} ({run_dir})')
 
     changed_envs = [env_name for env_name, _, diff in batch_results if diff.get('changed')]
-    if fail_on_diff and changed_envs:
+    if changed_envs:
         raise click.ClickException(f'compare-check detected differences or incomplete runs: {", ".join(changed_envs)}')
 
 
@@ -306,7 +295,7 @@ def _compare_one_environment(
                 phase = 'cache_setup'
                 if same_fixture:
                     _copy_cache_file(replay_cache, run_dir, 'config.json')
-                    _copy_cache_file(replay_cache, run_dir, 'capture.json')
+                    _copy_fixture_bundle(replay_cache, run_dir, 'capture.json')
 
                     phase = 'old_run'
                     old_returncode = _run_hatch(
@@ -342,9 +331,9 @@ def _compare_one_environment(
                     )
                 else:
                     _copy_cache_file(replay_cache, run_dir, 'old.config.json')
-                    _copy_cache_file(replay_cache, run_dir, 'capture.json')
+                    _copy_fixture_bundle(replay_cache, run_dir, 'capture.json')
                     _copy_cache_file(replay_cache, run_dir, 'new.config.json')
-                    _copy_cache_file(replay_cache, run_dir, 'new.capture.json')
+                    _copy_fixture_bundle(replay_cache, run_dir, 'new.capture.json')
 
                     phase = 'old_run'
                     old_returncode = _run_hatch(
@@ -402,10 +391,14 @@ def _compare_one_environment(
                     output_name='old.raw.json',
                 )
 
-                # Prefer replaying the old fixture. If old failed before writing any fixture at all,
-                # still run the new side in record mode so both refs get a best-effort execution result.
-                new_mode = 'replay' if (run_dir / 'capture.json').is_file() else 'record'
-                new_fixture = 'capture.json' if new_mode == 'replay' else 'new.capture.json'
+                if not (run_dir / 'capture.json').is_file():
+                    raise click.ClickException(
+                        'Old record run did not produce capture.json; refusing to run the new side without '
+                        'same-fixture replay input.'
+                    )
+
+                new_mode = 'replay'
+                new_fixture = 'capture.json'
                 phase = 'new_run'
                 new_returncode = _run_hatch(
                     repo=new_tree,
@@ -579,6 +572,36 @@ def _file_sha256(path: StdPath) -> str:
     return digest.hexdigest()
 
 
+def _fixture_bundle_file_names(run_dir: StdPath, manifest_name: str) -> list[str]:
+    manifest_path = run_dir / manifest_name
+    if not manifest_path.is_file():
+        return [manifest_name]
+
+    try:
+        manifest = json.loads(manifest_path.read_text())
+    except Exception:
+        return [manifest_name]
+
+    files = [manifest_name]
+    component_files = manifest.get('files', {})
+    if isinstance(component_files, dict):
+        files.extend(str(name) for name in component_files.values())
+    return files
+
+
+def _cache_file_names(run_dir: StdPath, comparison_mode: str) -> list[str]:
+    if comparison_mode == 'same-fixture-replay':
+        names = ['config.json']
+        names.extend(_fixture_bundle_file_names(run_dir, 'capture.json'))
+        return names
+
+    names = ['old.config.json']
+    names.extend(_fixture_bundle_file_names(run_dir, 'capture.json'))
+    names.append('new.config.json')
+    names.extend(_fixture_bundle_file_names(run_dir, 'new.capture.json'))
+    return names
+
+
 def _write_fixture_key(
     run_dir: StdPath,
     refs: dict,
@@ -594,7 +617,7 @@ def _write_fixture_key(
     check_class: str | None,
 ) -> None:
     files = {}
-    for name in _required_cache_files(comparison_mode):
+    for name in _cache_file_names(run_dir, comparison_mode):
         path = run_dir / name
         if path.is_file():
             files[name] = _file_sha256(path)
@@ -701,6 +724,10 @@ def _is_suitable_replay_cache(
     if any(not (cache_dir / name).is_file() for name in required_files):
         return False
 
+    cache_files = _cache_file_names(cache_dir, comparison_mode)
+    if any(not (cache_dir / name).is_file() for name in cache_files):
+        return False
+
     refs_file = cache_dir / 'refs.json'
     if not refs_file.is_file():
         return False
@@ -735,7 +762,7 @@ def _is_suitable_replay_cache(
     if not isinstance(hashes, dict):
         return False
 
-    return all(hashes.get(name) == _file_sha256(cache_dir / name) for name in required_files)
+    return all(hashes.get(name) == _file_sha256(cache_dir / name) for name in cache_files)
 
 
 def _resolve_artifacts_dir(
@@ -792,6 +819,16 @@ def _copy_cache_file(cache_dir: StdPath, run_dir: StdPath, name: str) -> None:
     if not source.is_file():
         raise click.ClickException(f'Replay cache is missing required file: {source}')
     shutil.copy2(source, run_dir / name)
+
+
+def _copy_fixture_bundle(cache_dir: StdPath, run_dir: StdPath, manifest_name: str) -> None:
+    _copy_cache_file(cache_dir, run_dir, manifest_name)
+    manifest = json.loads((run_dir / manifest_name).read_text())
+    component_files = manifest.get('files', {})
+    if not isinstance(component_files, dict):
+        raise click.ClickException(f'Replay fixture manifest has invalid files map: {cache_dir / manifest_name}')
+    for component_name in component_files.values():
+        _copy_cache_file(cache_dir, run_dir, str(component_name))
 
 
 def _ensure_environment(ctx: click.Context, integration, storage, environment: str, recreate: bool) -> bool:
@@ -879,8 +916,6 @@ def _run_hatch(
         str(artifacts / config_name),
         '--mode',
         mode,
-        '--adapter',
-        adapter,
         '--fixture',
         str(artifacts / fixture_name),
         '--output',

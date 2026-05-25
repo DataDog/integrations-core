@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+import socket
 import sys
 import types
 
@@ -10,7 +11,7 @@ import requests
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils import subprocess_output
-from datadog_checks.dev.replay.adapters import install_replay_adapter
+from datadog_checks.dev.replay.adapters import install_replay_adapters, write_fixture_manifest
 from datadog_checks.dev.replay.adapters.process import (
     install_live_recording_process_state,
     install_replay_process_state,
@@ -113,19 +114,16 @@ def test_requests_replay_fixture_miss_when_records_exhausted(monkeypatch, tmp_pa
         requests.Session().get('http://example.test/metrics')
 
 
-def test_install_replay_adapter_dispatches_requests_replay(monkeypatch, tmp_path):
+def test_install_replay_adapters_dispatches_requests_replay(monkeypatch, tmp_path):
     fixture_path = tmp_path / 'capture.json'
-    fixture_path.write_text(json.dumps([build_get_record('http://example.test/metrics', 'metric 1\n')]) + '\n')
+    request_fixture = tmp_path / 'capture.requests.json'
+    request_fixture.write_text(json.dumps([build_get_record('http://example.test/metrics', 'metric 1\n')]) + '\n')
+    write_fixture_manifest(fixture_path, {'requests': []})
 
-    install_replay_adapter(monkeypatch, 'requests', 'replay', fixture_path)
+    install_replay_adapters(monkeypatch, 'replay', fixture_path)
 
     response = requests.Session().get('http://example.test/metrics')
     assert response.text == 'metric 1\n'
-
-
-def test_install_replay_adapter_rejects_unsupported_adapter(monkeypatch, tmp_path):
-    with pytest.raises(AssertionError, match='unsupported replay adapter'):
-        install_replay_adapter(monkeypatch, 'unknown', 'replay', tmp_path / 'capture.json')
 
 
 def test_subprocess_record_and_replay(monkeypatch, tmp_path):
@@ -182,56 +180,66 @@ def test_subprocess_record_and_replay_exception(monkeypatch, tmp_path):
         subprocess_output.get_subprocess_output(['example'], None)
 
 
-def test_tcp_zookeeper_record_and_replay(monkeypatch, tmp_path):
-    from io import StringIO
+def test_tcp_socket_record_and_replay(monkeypatch, tmp_path):
+    class FakeSocket:
+        def __init__(self):
+            self._responses = [b'imok', b'']
 
-    class ZookeeperCheck:
-        def _send_command(self, command):
-            return StringIO(f'response for {command}')
+        def settimeout(self, timeout):
+            self.timeout = timeout
 
-    module = types.ModuleType('datadog_checks.zk.zk')
-    module.ZookeeperCheck = ZookeeperCheck
-    monkeypatch.setitem(sys.modules, 'datadog_checks.zk.zk', module)
+        def sendall(self, data):
+            self.sent = data
+
+        def recv(self, bufsize):
+            return self._responses.pop(0)
+
+        def close(self):
+            self.closed = True
+
+    monkeypatch.setattr(socket, 'create_connection', lambda *args, **kwargs: FakeSocket())
 
     fixture_path = tmp_path / 'capture.json'
     install_live_recording_tcp_clients(monkeypatch, fixture_path)
 
-    check = ZookeeperCheck()
-    assert check._send_command('ruok').getvalue() == 'response for ruok'
+    sock = socket.create_connection(('localhost', 2181))
+    sock.settimeout(3.0)
+    sock.sendall(b'ruok\n')
+    assert sock.recv(1024) == b'imok'
+    assert sock.recv(1024) == b''
+    sock.close()
 
     install_replay_tcp_clients(monkeypatch, fixture_path)
-    assert check._send_command('ruok').getvalue() == 'response for ruok'
+    sock = socket.create_connection(('localhost', 2181))
+    sock.settimeout(3.0)
+    sock.sendall(b'ruok\n')
+    assert sock.recv(1024) == b'imok'
+    assert sock.recv(1024) == b''
+    sock.close()
 
 
-def test_tcp_replay_fixture_miss_on_wrong_operation(monkeypatch, tmp_path):
-    class ZookeeperCheck:
-        def _send_command(self, command):
-            raise AssertionError('should be patched')
-
-    module = types.ModuleType('datadog_checks.zk.zk')
-    module.ZookeeperCheck = ZookeeperCheck
-    monkeypatch.setitem(sys.modules, 'datadog_checks.zk.zk', module)
-
+def test_tcp_replay_fixture_miss_on_wrong_send(monkeypatch, tmp_path):
     fixture_path = tmp_path / 'capture.json'
     fixture_path.write_text(
         json.dumps(
             [
                 {
-                    'operation': 'ZookeeperCheck._send_command',
-                    'args': ['ruok'],
-                    'kwargs': {},
-                    'result': 'imok',
+                    'operation': 'socket.create_connection',
+                    'address': ['localhost', 2181],
+                    'timeout': None,
+                    'source_address': None,
                     'exception': None,
-                }
+                },
+                {'operation': 'socket.sendall', 'data_b64': 'cnVvawo=', 'exception': None},
             ]
         )
         + '\n'
     )
     install_replay_tcp_clients(monkeypatch, fixture_path)
 
-    check = ZookeeperCheck()
+    sock = socket.create_connection(('localhost', 2181))
     with pytest.raises(AssertionError, match='does not match'):
-        check._send_command('stat')
+        sock.sendall(b'stat\n')
 
 
 def test_process_record_and_replay(monkeypatch, tmp_path):

@@ -5,31 +5,27 @@ from __future__ import annotations
 
 import base64
 import json
-from io import StringIO
+import socket
 from pathlib import Path
 from typing import Any
 
 import pytest
 
 
-def _json_safe(value: Any) -> Any:
-    if isinstance(value, bytes):
-        return {'__bytes__': base64.b64encode(value).decode('ascii')}
-    if isinstance(value, dict):
-        return {_json_safe(key): _json_safe(val) for key, val in value.items()}
-    if isinstance(value, (list, tuple)):
-        return [_json_safe(item) for item in value]
-    return value
+def _bytes_record(data: bytes) -> str:
+    return base64.b64encode(data).decode('ascii')
 
 
-def _from_json_safe(value: Any) -> Any:
-    if isinstance(value, dict):
-        if set(value) == {'__bytes__'}:
-            return base64.b64decode(value['__bytes__'].encode('ascii'))
-        return {_from_json_safe(key): _from_json_safe(val) for key, val in value.items()}
-    if isinstance(value, list):
-        return [_from_json_safe(item) for item in value]
-    return value
+def _record_bytes(data: str) -> bytes:
+    return base64.b64decode(data.encode('ascii'))
+
+
+def _json_safe_address(address: Any) -> Any:
+    if isinstance(address, tuple):
+        return [_json_safe_address(part) for part in address]
+    if isinstance(address, list):
+        return [_json_safe_address(part) for part in address]
+    return address
 
 
 def _exception_record(exc: BaseException) -> dict[str, str]:
@@ -44,142 +40,184 @@ def _raise_recorded_exception(record: dict[str, Any]) -> None:
     exception = record.get('exception') or {}
     message = exception.get('message', '')
     exception_type = exception.get('type')
-    if exception_type == 'OSError':
+    if exception_type == 'timeout':
+        raise socket.timeout(message)
+    if exception_type == 'gaierror':
+        raise socket.gaierror(message)
+    if exception_type in {'OSError', 'error'}:
         raise OSError(message)
-    if exception_type == 'TimeoutError':
-        raise TimeoutError(message)
-    if exception_type == 'ConnectionError':
-        raise ConnectionError(message)
-    if exception_type == 'AssertionError':
-        raise AssertionError(message)
     raise Exception(message)
-
-
-def _args(args: tuple[Any, ...]) -> list[Any]:
-    return [_json_safe(arg) for arg in args]
 
 
 def _write_records(path: Path, records: list[dict[str, Any]]) -> None:
     path.write_text(json.dumps(records, indent=2, sort_keys=True) + '\n')
 
 
-def install_live_recording_tcp_clients(monkeypatch: pytest.MonkeyPatch, fixture_path: Path) -> list[dict[str, Any]]:
-    """Record simple TCP-client calls used by memcache and ZooKeeper checks."""
+class _RecordingSocket:
+    def __init__(self, sock: socket.socket, records: list[dict[str, Any]], fixture_path: Path):
+        self._sock = sock
+        self._records = records
+        self._fixture_path = fixture_path
+
+    def _append(self, record: dict[str, Any]) -> None:
+        self._records.append(record)
+        _write_records(self._fixture_path, self._records)
+
+    def send(self, data: bytes, *args: Any, **kwargs: Any) -> int:
+        sent = self._sock.send(data, *args, **kwargs)
+        self._append({'operation': 'socket.send', 'data_b64': _bytes_record(data[:sent]), 'exception': None})
+        return sent
+
+    def sendall(self, data: bytes, *args: Any, **kwargs: Any) -> None:
+        self._sock.sendall(data, *args, **kwargs)
+        self._append({'operation': 'socket.sendall', 'data_b64': _bytes_record(data), 'exception': None})
+        return None
+
+    def recv(self, bufsize: int, *args: Any, **kwargs: Any) -> bytes:
+        try:
+            data = self._sock.recv(bufsize, *args, **kwargs)
+        except Exception as exc:
+            self._append({'operation': 'socket.recv', 'bufsize': bufsize, 'exception': _exception_record(exc)})
+            raise
+        self._append(
+            {'operation': 'socket.recv', 'bufsize': bufsize, 'data_b64': _bytes_record(data), 'exception': None}
+        )
+        return data
+
+    def settimeout(self, timeout: float | None) -> None:
+        self._sock.settimeout(timeout)
+        self._append({'operation': 'socket.settimeout', 'timeout': timeout, 'exception': None})
+
+    def close(self) -> None:
+        self._sock.close()
+        self._append({'operation': 'socket.close', 'exception': None})
+
+    def __enter__(self) -> '_RecordingSocket':
+        return self
+
+    def __exit__(self, exc_type: object, exc: object, traceback: object) -> None:
+        self.close()
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._sock, name)
+
+
+class _ReplaySocket:
+    def __init__(self, records: list[dict[str, Any]], replayed: list[dict[str, Any]]):
+        self._records = records
+        self._replayed = replayed
+        self._pending_recv = b''
+
+    def _next(self, operation: str) -> dict[str, Any]:
+        if len(self._replayed) >= len(self._records):
+            raise AssertionError(f'No recorded TCP socket operation available for {operation}')
+        record = self._records[len(self._replayed)]
+        if record.get('operation') != operation:
+            raise AssertionError('Recorded TCP socket operation does not match replay operation')
+        self._replayed.append(record)
+        if record.get('exception'):
+            _raise_recorded_exception(record)
+        return record
+
+    def send(self, data: bytes, *args: Any, **kwargs: Any) -> int:
+        record = self._next('socket.send')
+        if _record_bytes(record['data_b64']) != data:
+            raise AssertionError('Recorded TCP socket send does not match replay send')
+        return len(data)
+
+    def sendall(self, data: bytes, *args: Any, **kwargs: Any) -> None:
+        record = self._next('socket.sendall')
+        if _record_bytes(record['data_b64']) != data:
+            raise AssertionError('Recorded TCP socket sendall does not match replay sendall')
+        return None
+
+    def recv(self, bufsize: int, *args: Any, **kwargs: Any) -> bytes:
+        if not self._pending_recv:
+            record = self._next('socket.recv')
+            self._pending_recv = _record_bytes(record.get('data_b64', ''))
+
+        data = self._pending_recv[:bufsize]
+        self._pending_recv = self._pending_recv[bufsize:]
+        return data
+
+    def settimeout(self, timeout: float | None) -> None:
+        record = self._next('socket.settimeout')
+        if record.get('timeout') != timeout:
+            raise AssertionError('Recorded TCP socket timeout does not match replay timeout')
+
+    def close(self) -> None:
+        self._next('socket.close')
+
+    def __enter__(self) -> '_ReplaySocket':
+        return self
+
+    def __exit__(self, exc_type: object, exc: object, traceback: object) -> None:
+        self.close()
+
+
+def install_live_recording_tcp_clients(
+    monkeypatch: pytest.MonkeyPatch,
+    fixture_path: Path,
+    check_name: str | None = None,
+    *,
+    strict: bool = True,
+) -> list[dict[str, Any]]:
+    """Record plain TCP traffic through socket.create_connection."""
     records: list[dict[str, Any]] = []
-    _install_memcache_recorder(monkeypatch, fixture_path, records)
-    _install_zookeeper_recorder(monkeypatch, fixture_path, records)
+    original_create_connection = socket.create_connection
+
+    def recorded_create_connection(
+        address: Any, timeout: float | object = socket._GLOBAL_DEFAULT_TIMEOUT, source_address: Any = None
+    ) -> _RecordingSocket:
+        record = {
+            'operation': 'socket.create_connection',
+            'address': _json_safe_address(address),
+            'timeout': None if timeout is socket._GLOBAL_DEFAULT_TIMEOUT else timeout,
+            'source_address': _json_safe_address(source_address),
+        }
+        try:
+            sock = original_create_connection(address, timeout, source_address)
+        except Exception as exc:
+            record['exception'] = _exception_record(exc)
+            records.append(record)
+            _write_records(fixture_path, records)
+            raise
+
+        record['exception'] = None
+        records.append(record)
+        _write_records(fixture_path, records)
+        return _RecordingSocket(sock, records, fixture_path)
+
+    monkeypatch.setattr(socket, 'create_connection', recorded_create_connection)
     return records
 
 
-def install_replay_tcp_clients(monkeypatch: pytest.MonkeyPatch, fixture_path: Path) -> list[dict[str, Any]]:
-    """Replay simple TCP-client calls used by memcache and ZooKeeper checks."""
+def install_replay_tcp_clients(
+    monkeypatch: pytest.MonkeyPatch,
+    fixture_path: Path,
+    check_name: str | None = None,
+    *,
+    strict: bool = True,
+) -> list[dict[str, Any]]:
+    """Replay plain TCP traffic recorded through socket.create_connection."""
     records = json.loads(fixture_path.read_text())
     replayed: list[dict[str, Any]] = []
-    _install_memcache_replay(monkeypatch, records, replayed)
-    _install_zookeeper_replay(monkeypatch, records, replayed)
+
+    def replayed_create_connection(
+        address: Any, timeout: float | object = socket._GLOBAL_DEFAULT_TIMEOUT, source_address: Any = None
+    ) -> _ReplaySocket:
+        if len(replayed) >= len(records):
+            raise AssertionError('No recorded TCP socket connection available for replay')
+        record = records[len(replayed)]
+        if record.get('operation') != 'socket.create_connection':
+            raise AssertionError('Recorded TCP socket operation does not match replay connection')
+        expected_timeout = None if timeout is socket._GLOBAL_DEFAULT_TIMEOUT else timeout
+        if record.get('address') != _json_safe_address(address) or record.get('timeout') != expected_timeout:
+            raise AssertionError('Recorded TCP socket connection does not match replay connection')
+        replayed.append(record)
+        if record.get('exception'):
+            _raise_recorded_exception(record)
+        return _ReplaySocket(records, replayed)
+
+    monkeypatch.setattr(socket, 'create_connection', replayed_create_connection)
     return replayed
-
-
-def _next_record(
-    records: list[dict[str, Any]], replayed: list[dict[str, Any]], operation: str, args: list[Any]
-) -> dict[str, Any]:
-    if len(replayed) >= len(records):
-        raise AssertionError(f'No recorded TCP client response available for {operation}')
-
-    record = records[len(replayed)]
-    if record['operation'] != operation or record.get('args', []) != args:
-        raise AssertionError('Recorded TCP client operation does not match replay operation')
-
-    replayed.append(record)
-    if record.get('exception'):
-        _raise_recorded_exception(record)
-    return record
-
-
-def _install_memcache_recorder(
-    monkeypatch: pytest.MonkeyPatch, fixture_path: Path, records: list[dict[str, Any]]
-) -> None:
-    try:
-        import bmemcached
-    except Exception:
-        return
-
-    original_stats = bmemcached.Client.stats
-
-    def recorded_stats(client: Any, *args: Any, **kwargs: Any) -> Any:
-        record = {'operation': 'bmemcached.Client.stats', 'args': _args(args), 'kwargs': _json_safe(kwargs)}
-        try:
-            result = original_stats(client, *args, **kwargs)
-        except Exception as exc:
-            record['exception'] = _exception_record(exc)
-            records.append(record)
-            _write_records(fixture_path, records)
-            raise
-
-        record['result'] = _json_safe(result)
-        record['exception'] = None
-        records.append(record)
-        _write_records(fixture_path, records)
-        return result
-
-    monkeypatch.setattr(bmemcached.Client, 'stats', recorded_stats)
-
-
-def _install_memcache_replay(
-    monkeypatch: pytest.MonkeyPatch, records: list[dict[str, Any]], replayed: list[dict[str, Any]]
-) -> None:
-    try:
-        import bmemcached
-    except Exception:
-        return
-
-    def replayed_stats(client: Any, *args: Any, **kwargs: Any) -> Any:
-        record = _next_record(records, replayed, 'bmemcached.Client.stats', _args(args))
-        return _from_json_safe(record.get('result'))
-
-    monkeypatch.setattr(bmemcached.Client, 'stats', replayed_stats)
-
-
-def _install_zookeeper_recorder(
-    monkeypatch: pytest.MonkeyPatch, fixture_path: Path, records: list[dict[str, Any]]
-) -> None:
-    try:
-        from datadog_checks.zk.zk import ZookeeperCheck
-    except Exception:
-        return
-
-    original_send_command = ZookeeperCheck._send_command
-
-    def recorded_send_command(check: Any, command: str) -> StringIO:
-        record = {'operation': 'ZookeeperCheck._send_command', 'args': [command], 'kwargs': {}}
-        try:
-            result = original_send_command(check, command)
-        except Exception as exc:
-            record['exception'] = _exception_record(exc)
-            records.append(record)
-            _write_records(fixture_path, records)
-            raise
-
-        output = result.getvalue()
-        record['result'] = output
-        record['exception'] = None
-        records.append(record)
-        _write_records(fixture_path, records)
-        return StringIO(output)
-
-    monkeypatch.setattr(ZookeeperCheck, '_send_command', recorded_send_command)
-
-
-def _install_zookeeper_replay(
-    monkeypatch: pytest.MonkeyPatch, records: list[dict[str, Any]], replayed: list[dict[str, Any]]
-) -> None:
-    try:
-        from datadog_checks.zk.zk import ZookeeperCheck
-    except Exception:
-        return
-
-    def replayed_send_command(check: Any, command: str) -> StringIO:
-        record = _next_record(records, replayed, 'ZookeeperCheck._send_command', [command])
-        return StringIO(record.get('result', ''))
-
-    monkeypatch.setattr(ZookeeperCheck, '_send_command', replayed_send_command)
