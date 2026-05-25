@@ -5,11 +5,11 @@ import json
 
 import pytest
 
-from datadog_checks.cilium import CiliumCheck
+from datadog_checks.dev.replay.adapters.requests import install_live_recording_session_get, install_replay_session_get
+from datadog_checks.dev.replay.pytest import run_check_instances
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import AGENT_V2_METRICS, OPERATOR_V2_PROCESS_METRICS, OPTIONAL_METRICS, requires_new_environment
-from .monkeypatch_replay import install_live_recording_session_get, install_replay_session_get
 
 pytestmark = [requires_new_environment, pytest.mark.e2e]
 
@@ -20,9 +20,7 @@ def cilium_instances(dd_environment, dd_get_state):
 
 
 def _run_cilium_check(cilium_instances, dd_run_check):
-    for instance in cilium_instances['instances']:
-        check = CiliumCheck('cilium', {}, [instance])
-        dd_run_check(check)
+    run_check_instances('datadog_checks.cilium:CiliumCheck', cilium_instances['instances'], dd_run_check, 'cilium')
 
 
 def _assert_e2e_metrics(aggregator):

@@ -6,6 +6,11 @@ import os
 
 import pytest
 
+from datadog_checks.dev.replay.adapters.requests import (
+    build_get_record,
+    install_recording_session_get,
+    install_replay_session_get,
+)
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import (
@@ -20,7 +25,6 @@ from .common import (
     OPERATOR_V2_METRICS_1_14,
     requires_new_environment,
 )
-from .monkeypatch_replay import build_get_record, install_recording_session_get, install_replay_session_get
 
 pytestmark = [requires_new_environment, pytest.mark.unit]
 
