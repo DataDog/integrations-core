@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import tempfile
 from datetime import datetime, timezone
+from functools import partial
 from pathlib import Path as StdPath
 from typing import TYPE_CHECKING
 
@@ -21,7 +22,7 @@ if TYPE_CHECKING:
 
 @click.command('compare-check', short_help='Compare no-Agent check output across two refs')
 @click.argument('intg_name', metavar='INTEGRATION')
-@click.argument('environment')
+@click.argument('environment', required=False)
 @click.option('--old-ref', required=True, help='Git ref to record the fixture and produce old output')
 @click.option(
     '--new-ref',
@@ -50,7 +51,7 @@ def compare_check(
     ctx: click.Context,
     *,
     intg_name: str,
-    environment: str,
+    environment: str | None,
     old_ref: str,
     new_ref: str | None,
     check_class: str | None,
@@ -67,23 +68,98 @@ def compare_check(
     This first-slice implementation records HTTP input from OLD_REF and replays the
     same fixture to NEW_REF inside isolated Docker containers.
     """
-    from ddev.cli.env.start import start
-    from ddev.cli.env.stop import stop
     from ddev.e2e.config import EnvDataStorage
 
     app: Application = ctx.obj
     integration = app.repo.integrations.get(intg_name)
     storage = EnvDataStorage(app.data_dir)
-    env_data = storage.get(integration.name, environment)
+    env_names = _select_env_names(ctx, integration, storage, environment)
+    if not env_names:
+        app.display_info(f"Selected target {integration.name!r} has no matching E2E environments.")
+        return
 
+    batch_results = []
+    for env_name in env_names:
+        app.display_header(f'{integration.display_name}: {env_name}')
+        run_dir, diff = _compare_one_environment(
+            ctx=ctx,
+            integration=integration,
+            environment=env_name,
+            storage=storage,
+            old_ref=old_ref,
+            new_ref=new_ref,
+            check_class=check_class,
+            artifacts=artifacts,
+            exact_artifacts_dir=exact_artifacts_dir,
+            overwrite=overwrite,
+            image=image,
+            adapter=adapter,
+            recreate=recreate,
+        )
+        batch_results.append((env_name, run_dir, diff))
+        app.display_success(f'Wrote compare-check artifacts to {run_dir}')
+        app.display_info(_format_diff_summary(diff))
+
+    if len(batch_results) > 1:
+        app.display_header('compare-check summary')
+        for env_name, run_dir, diff in batch_results:
+            app.display_info(f'{env_name}: {_format_diff_summary(diff)} ({run_dir})')
+
+
+def _select_env_names(ctx: click.Context, integration, storage, environment: str | None) -> list[str]:
+    from ddev.cli.env.test import is_e2e_environment, is_selected_environment, uses_platform, uses_python_version
+    from ddev.utils.ci import running_in_ci
+    from ddev.utils.hatch import list_environment_names
+
+    app: Application = ctx.obj
+    active_envs = storage.get_environments(integration.name)
+    if environment is None:
+        environment = 'all' if (not active_envs or running_in_ci()) else 'active'
+
+    if environment == 'active':
+        return active_envs
+
+    return list_environment_names(
+        app.platform,
+        integration,
+        filters=[
+            is_e2e_environment,
+            partial(uses_python_version, python_filter=None),
+            partial(uses_platform, platform=app.platform.name),
+            partial(is_selected_environment, environment_name=environment),
+        ],
+    )
+
+
+def _compare_one_environment(
+    *,
+    ctx: click.Context,
+    integration,
+    environment: str,
+    storage,
+    old_ref: str,
+    new_ref: str | None,
+    check_class: str | None,
+    artifacts: StdPath | None,
+    exact_artifacts_dir: bool,
+    overwrite: bool,
+    image: str,
+    adapter: str,
+    recreate: bool,
+) -> tuple[StdPath, dict]:
+    from ddev.cli.env.start import start
+    from ddev.cli.env.stop import stop
+
+    app: Application = ctx.obj
+    env_data = storage.get(integration.name, environment)
     started_env = False
     if recreate and env_data.exists():
-        ctx.invoke(stop, intg_name=intg_name, environment=environment, ignore_state=False)
+        ctx.invoke(stop, intg_name=integration.name, environment=environment, ignore_state=False)
 
     if not env_data.exists():
         ctx.invoke(
             start,
-            intg_name=intg_name,
+            intg_name=integration.name,
             environment=environment,
             local_dev=False,
             local_base=False,
@@ -95,7 +171,7 @@ def compare_check(
         )
         started_env = True
 
-    artifacts = _resolve_artifacts_dir(
+    run_dir = _resolve_artifacts_dir(
         app.repo.path,
         artifacts,
         integration.name,
@@ -105,8 +181,7 @@ def compare_check(
         overwrite,
     )
     config = env_data.read_config()
-    config_file = artifacts / 'config.json'
-    config_file.write_text(json.dumps(config, indent=2, sort_keys=True) + '\n')
+    (run_dir / 'config.json').write_text(json.dumps(config, indent=2, sort_keys=True) + '\n')
 
     try:
         with tempfile.TemporaryDirectory(prefix='compare-check-') as temp_dir:
@@ -129,14 +204,14 @@ def compare_check(
                 'record_ref': 'old',
                 'adapter': adapter,
             }
-            (artifacts / 'refs.json').write_text(json.dumps(refs, indent=2, sort_keys=True) + '\n')
+            (run_dir / 'refs.json').write_text(json.dumps(refs, indent=2, sort_keys=True) + '\n')
 
             _run_container(
                 repo=old_tree,
                 platform_repo=StdPath(str(app.repo.path)),
-                artifacts=artifacts,
+                artifacts=run_dir,
                 image=image,
-                integration=intg_name,
+                integration=integration.name,
                 check_name=integration.name,
                 check_class=check_class,
                 mode='record',
@@ -145,9 +220,9 @@ def compare_check(
             _run_container(
                 repo=new_tree,
                 platform_repo=StdPath(str(app.repo.path)),
-                artifacts=artifacts,
+                artifacts=run_dir,
                 image=image,
-                integration=intg_name,
+                integration=integration.name,
                 check_name=integration.name,
                 check_class=check_class,
                 mode='replay',
@@ -155,11 +230,13 @@ def compare_check(
             )
     finally:
         if started_env:
-            ctx.invoke(stop, intg_name=intg_name, environment=environment, ignore_state=False)
+            ctx.invoke(stop, intg_name=integration.name, environment=environment, ignore_state=False)
 
-    diff = _write_diff_artifacts(artifacts)
-    app.display_success(f'Wrote compare-check artifacts to {artifacts}')
-    app.display_info(
+    return run_dir, _write_diff_artifacts(run_dir)
+
+
+def _format_diff_summary(diff: dict) -> str:
+    return (
         f'Changed: {diff["changed"]}; '
         f'metrics +{len(diff["collections"]["metrics"]["added"])} '
         f'-{len(diff["collections"]["metrics"]["removed"])}'
