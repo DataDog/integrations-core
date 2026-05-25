@@ -430,6 +430,7 @@ def dbm_instance(pg_instance):
     pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2}
     pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 0.2}
     pg_instance['collect_settings'] = {'enabled': False}
+    pg_instance['collect_column_statistics'] = {'enabled': False}
     # Set collection_interval close to 0. This is needed if the test runs the check multiple times.
     # This prevents DBMAsync from skipping job executions, as it is designed
     # to not execute jobs more frequently than their collection period.
@@ -1215,7 +1216,7 @@ def test_activity_reported_hostname(
     check = integration_check(dbm_instance)
     check._connect()
 
-    run_one_check(check)
+    run_one_check(check, cancel=False)
     run_one_check(check)
 
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
@@ -1480,7 +1481,7 @@ def test_async_job_enabled(
     dbm_instance['query_metrics'] = {'enabled': statement_metrics_enabled, 'run_sync': False}
     check = integration_check(dbm_instance)
     check._connect()
-    run_one_check(check)
+    run_one_check(check, cancel=False)
     if statement_samples_enabled or statement_activity_enabled:
         assert check.statement_samples._job_loop_future is not None
     else:
@@ -1713,8 +1714,8 @@ def test_async_job_cancel_cancel(aggregator, integration_check, dbm_instance):
     check = integration_check(dbm_instance)
     check._connect()
     run_one_check(check)
-    assert not check.statement_samples._job_loop_future.running(), "samples thread should be stopped"
-    assert not check.statement_metrics._job_loop_future.running(), "metrics thread should be stopped"
+    assert check.statement_samples._job_loop_future is None, "samples future should be cleaned up after cancel"
+    assert check.statement_metrics._job_loop_future is None, "metrics future should be cleaned up after cancel"
     # if the thread doesn't start until after the cancel signal is set then the db connection will never
     # be created in the first place
     assert check.db_pool.pools.get(dbm_instance['dbname']) is None, "db connection should be gone"

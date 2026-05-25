@@ -30,6 +30,7 @@ CONFIGS = {
     [
         pytest.param('{"pull_request": {"number": 42}}', 42, id="happy-path"),
         pytest.param("{bad json}", None, id="malformed-json"),
+        pytest.param("[]", None, id="not-an-object"),
         pytest.param("{}", None, id="missing-pr-key"),
         pytest.param('{"pull_request": "bad"}', None, id="pr-not-dict"),
         pytest.param('{"pull_request": {}}', None, id="missing-number"),

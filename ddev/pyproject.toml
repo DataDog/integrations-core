@@ -78,6 +78,9 @@ include = ["src"]
 python-version = "3.13"
 scripts = ["ddev"]
 
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
 # Keep Black configuration to generate models through validate
 # Switch to Ruff after it provides a Python API
 [tool.black]

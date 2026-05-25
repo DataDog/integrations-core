@@ -1,0 +1,1 @@
+Restore the legacy `validate jmx-metrics` command file to keep the release pipeline's in-toto attestation valid; the command is still served by `ddev`.

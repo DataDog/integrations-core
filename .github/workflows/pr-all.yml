@@ -16,6 +16,7 @@ on:
     - '.github/workflows/test-all.yml'
     # Also run if the action to install test-target scripts changes
     - '.github/actions/setup-test-target-scripts/**'
+    - '.github/actions/setup-ddev/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.head_ref }}
