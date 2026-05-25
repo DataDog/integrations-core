@@ -827,6 +827,9 @@ def _copy_cache_file(cache_dir: StdPath, run_dir: StdPath, name: str) -> None:
 def _copy_fixture_bundle(cache_dir: StdPath, run_dir: StdPath, manifest_name: str) -> None:
     _copy_cache_file(cache_dir, run_dir, manifest_name)
     manifest = json.loads((run_dir / manifest_name).read_text())
+    if not isinstance(manifest, dict):
+        return
+
     component_files = manifest.get('files', {})
     if not isinstance(component_files, dict):
         raise click.ClickException(f'Replay fixture manifest has invalid files map: {cache_dir / manifest_name}')

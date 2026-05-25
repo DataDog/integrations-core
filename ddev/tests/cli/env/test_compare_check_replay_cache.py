@@ -13,6 +13,7 @@ from hypothesis import strategies as st
 from ddev.cli.env.compare_check import (
     REPLAY_CACHE_VERSION,
     _cache_file_names,
+    _copy_fixture_bundle,
     _file_sha256,
     _is_suitable_replay_cache,
     _iter_replay_cache_candidates,
@@ -76,6 +77,18 @@ def test_cache_file_names_accepts_legacy_list_capture(tmp_path):
     (tmp_path / 'capture.json').write_text('[]')
 
     assert _cache_file_names(tmp_path, 'same-fixture-replay') == ['config.json', 'capture.json']
+
+
+def test_copy_fixture_bundle_accepts_legacy_list_capture(tmp_path):
+    cache_dir = tmp_path / 'cache'
+    run_dir = tmp_path / 'run'
+    cache_dir.mkdir()
+    run_dir.mkdir()
+    (cache_dir / 'capture.json').write_text('[]')
+
+    _copy_fixture_bundle(cache_dir, run_dir, 'capture.json')
+
+    assert (run_dir / 'capture.json').read_text() == '[]'
 
 
 @pbt_settings
