@@ -48,6 +48,23 @@ def target_ref_head(target_ref: str) -> str:
     return git('rev-parse', target_ref)
 
 
+def has_python_check(integration: str) -> bool:
+    package_dir = REPO_ROOT / integration / 'datadog_checks' / integration
+    if not package_dir.is_dir():
+        return False
+
+    for path in package_dir.glob('*.py'):
+        if path.name in {'__about__.py'}:
+            continue
+        try:
+            text = path.read_text(encoding='utf-8')
+        except UnicodeDecodeError:
+            continue
+        if re.search(r'^class\s+\w*Check\b', text, flags=re.MULTILINE):
+            return True
+    return False
+
+
 def load_cached_targets() -> set[tuple[str, str]]:
     cached: set[tuple[str, str]] = set()
     replay_root = REPO_ROOT / '.ddev' / 'replay'
@@ -107,6 +124,8 @@ def main() -> None:
         if platform != args.platform:
             continue
         if integration in {'ddev', 'datadog_checks_base', 'datadog_checks_dev', 'datadog_checks_downloader'}:
+            continue
+        if not has_python_check(integration):
             continue
         if cached_targets is not None and (integration, environment) not in cached_targets:
             continue
