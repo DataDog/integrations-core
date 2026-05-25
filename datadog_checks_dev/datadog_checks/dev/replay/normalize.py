@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import json
 from typing import Any
 
 
@@ -10,6 +11,27 @@ def _sorted_tags(tags: Any) -> Any:
     if tags is None:
         return None
     return sorted(tags)
+
+
+def _json_sort_key(item: Any) -> str:
+    return json.dumps(item, sort_keys=True, separators=(',', ':'), default=str)
+
+
+def _normalize_external_tags(external_tags: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    normalized = []
+    for item in external_tags:
+        source_map = item.get('source_map') or {}
+        normalized.append(
+            {
+                'hostname': item.get('hostname'),
+                'source_map': {str(source): sorted(tags or []) for source, tags in sorted(source_map.items())},
+            }
+        )
+    return sorted(normalized, key=_json_sort_key)
+
+
+def _normalize_collection(output: dict[str, Any], name: str) -> list[Any]:
+    return sorted([dict(item) for item in output.get(name, [])], key=_json_sort_key)
 
 
 def normalize_output(output: dict[str, Any]) -> dict[str, Any]:
@@ -25,10 +47,6 @@ def normalize_output(output: dict[str, Any]) -> dict[str, Any]:
         item = dict(service_check)
         item['tags'] = _sorted_tags(item.get('tags'))
         service_checks.append(item)
-
-    metadata = []
-    for item in output.get('metadata', []):
-        metadata.append(dict(item))
 
     return {
         'metrics': sorted(
@@ -48,5 +66,9 @@ def normalize_output(output: dict[str, Any]) -> dict[str, Any]:
         ),
         'events': output.get('events', []),
         'event_platform_events': output.get('event_platform_events', {}),
-        'metadata': sorted(metadata, key=lambda item: (item.get('check_id'), item.get('name'), item.get('value'))),
+        'metadata': _normalize_collection(output, 'metadata'),
+        'external_tags': _normalize_external_tags(output.get('external_tags', [])),
+        'persistent_cache': _normalize_collection(output, 'persistent_cache'),
+        'agent_logs': _normalize_collection(output, 'agent_logs'),
+        'telemetry': _normalize_collection(output, 'telemetry'),
     }

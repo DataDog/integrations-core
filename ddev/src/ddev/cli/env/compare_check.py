@@ -22,6 +22,22 @@ if TYPE_CHECKING:
     from ddev.cli.application import Application
 
 
+# Manual cache invalidation knob for compare-check artifacts. Bump this whenever
+# replay fixture semantics or suitability criteria change in a way that should
+# make existing .ddev/replay caches ineligible for --replay-cache auto/latest.
+REPLAY_CACHE_VERSION = 1
+OUTPUT_COLLECTIONS = (
+    'metrics',
+    'service_checks',
+    'events',
+    'metadata',
+    'external_tags',
+    'persistent_cache',
+    'agent_logs',
+    'telemetry',
+)
+
+
 @click.command('compare-check', short_help='Compare no-Agent check output across two refs')
 @click.argument('intg_name', metavar='INTEGRATION')
 @click.argument('environment', required=False)
@@ -271,6 +287,7 @@ def _compare_one_environment(
             'replay_cache': replay_cache_provenance,
             'adapter': adapter,
             'check_class': check_class,
+            'cache_version': REPLAY_CACHE_VERSION,
         }
         (run_dir / 'refs.json').write_text(json.dumps(refs, indent=2, sort_keys=True) + '\n')
 
@@ -513,14 +530,16 @@ def _compare_one_environment(
 def _format_diff_summary(diff: dict) -> str:
     status = diff.get('run_status', {})
     prefix = 'Incomplete; ' if diff.get('incomplete') else ''
+    collection_summary = '; '.join(
+        f'{name} +{len(diff["collections"].get(name, {}).get("added", []))} '
+        f'-{len(diff["collections"].get(name, {}).get("removed", []))}'
+        for name in OUTPUT_COLLECTIONS
+    )
     return (
         f'{prefix}Changed: {diff["changed"]}; '
         f'old rc {status.get("old_returncode", "?")}; '
         f'new rc {status.get("new_returncode", "?")}; '
-        f'metrics +{len(diff["collections"]["metrics"]["added"])} '
-        f'-{len(diff["collections"]["metrics"]["removed"])}; '
-        f'metadata +{len(diff["collections"].get("metadata", {}).get("added", []))} '
-        f'-{len(diff["collections"].get("metadata", {}).get("removed", []))}'
+        f'{collection_summary}'
     )
 
 
@@ -582,6 +601,7 @@ def _write_fixture_key(
 
     refs['fixture_key'] = {
         'version': 1,
+        'cache_version': REPLAY_CACHE_VERSION,
         'integration': integration,
         'adapter': adapter,
         'comparison_mode': comparison_mode,
@@ -696,6 +716,7 @@ def _is_suitable_replay_cache(
 
     expected = {
         'version': 1,
+        'cache_version': REPLAY_CACHE_VERSION,
         'integration': integration,
         'adapter': adapter,
         'comparison_mode': comparison_mode,
@@ -885,12 +906,7 @@ def _write_diff_artifacts(artifacts: StdPath) -> dict:
             'incomplete': True,
             'missing_artifacts': missing,
             'run_status': status,
-            'collections': {
-                'metrics': {'added': [], 'removed': []},
-                'service_checks': {'added': [], 'removed': []},
-                'events': {'added': [], 'removed': []},
-                'metadata': {'added': [], 'removed': []},
-            },
+            'collections': {name: {'added': [], 'removed': []} for name in OUTPUT_COLLECTIONS},
         }
         (artifacts / 'diff.json').write_text(json.dumps(diff, indent=2, sort_keys=True) + '\n')
         error = status.get('error')
@@ -922,6 +938,13 @@ def _write_diff_artifacts(artifacts: StdPath) -> dict:
     (artifacts / 'old.normalized.json').write_text(json.dumps(old_normalized, indent=2, sort_keys=True) + '\n')
     (artifacts / 'new.normalized.json').write_text(json.dumps(new_normalized, indent=2, sort_keys=True) + '\n')
     (artifacts / 'diff.json').write_text(json.dumps(diff, indent=2, sort_keys=True) + '\n')
+    collection_lines = ''.join(
+        f'- Old {name}: {len(old_normalized.get(name, []))}\n'
+        f'- New {name}: {len(new_normalized.get(name, []))}\n'
+        f'- {name} records added: {len(diff["collections"].get(name, {}).get("added", []))}\n'
+        f'- {name} records removed: {len(diff["collections"].get(name, {}).get("removed", []))}\n'
+        for name in OUTPUT_COLLECTIONS
+    )
     (artifacts / 'summary.md').write_text(
         '# compare-check summary\n\n'
         f'- Changed: {diff["changed"]}\n'
@@ -932,13 +955,6 @@ def _write_diff_artifacts(artifacts: StdPath) -> dict:
         f'- Same fixture: {status.get("same_fixture", "unknown")}\n'
         f'- Old return code: {status.get("old_returncode", 0)}\n'
         f'- New return code: {status.get("new_returncode", 0)}\n'
-        f'- Old metrics: {len(old_normalized["metrics"])}\n'
-        f'- New metrics: {len(new_normalized["metrics"])}\n'
-        f'- Metric records added: {len(diff["collections"]["metrics"]["added"])}\n'
-        f'- Metric records removed: {len(diff["collections"]["metrics"]["removed"])}\n'
-        f'- Old metadata: {len(old_normalized["metadata"])}\n'
-        f'- New metadata: {len(new_normalized["metadata"])}\n'
-        f'- Metadata records added: {len(diff["collections"]["metadata"]["added"])}\n'
-        f'- Metadata records removed: {len(diff["collections"]["metadata"]["removed"])}\n'
+        f'{collection_lines}'
     )
     return diff

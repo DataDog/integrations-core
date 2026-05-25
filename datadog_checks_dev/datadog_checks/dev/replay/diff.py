@@ -12,10 +12,22 @@ def _key(item: Any) -> str:
     return json.dumps(item, sort_keys=True, separators=(',', ':'))
 
 
+OUTPUT_COLLECTIONS = (
+    'metrics',
+    'service_checks',
+    'events',
+    'metadata',
+    'external_tags',
+    'persistent_cache',
+    'agent_logs',
+    'telemetry',
+)
+
+
 def diff_outputs(old: dict[str, Any], new: dict[str, Any]) -> dict[str, Any]:
     """Return multiset additions/removals for each top-level output collection."""
     diff: dict[str, Any] = {'changed': False, 'collections': {}}
-    for name in ('metrics', 'service_checks', 'events', 'metadata'):
+    for name in OUTPUT_COLLECTIONS:
         old_counts = Counter(_key(item) for item in old.get(name, []))
         new_counts = Counter(_key(item) for item in new.get(name, []))
         removed = list((old_counts - new_counts).elements())

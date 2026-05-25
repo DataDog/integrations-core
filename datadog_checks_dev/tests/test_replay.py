@@ -24,12 +24,28 @@ from datadog_checks.dev.replay.adapters.subprocess import (
 from datadog_checks.dev.replay.adapters.tcp import install_live_recording_tcp_clients, install_replay_tcp_clients
 from datadog_checks.dev.replay.diff import diff_outputs
 from datadog_checks.dev.replay.normalize import normalize_output
+from datadog_checks.dev.replay.output import serialize_aggregator
 from datadog_checks.dev.replay.pytest import infer_check_class
 
 
 class ExampleCheck(AgentCheck):
     def check(self, instance):
         pass
+
+
+class AgentOutputReplayCheck(AgentCheck):
+    __NAMESPACE__ = 'agent_output_replay'
+
+    def check(self, instance):
+        self.gauge('metric', 1, tags=['b:2', 'a:1'])
+        self.set_metadata('version.raw', '1.2.3')
+        self.set_external_tags([('external.example', {'src': ['z:9', 'a:1']})])
+        self.write_persistent_cache('cursor', 'abc')
+        self.send_log({'message': 'hello'}, cursor={'offset': 2}, stream='default')
+        from datadog_checks.base.agent import datadog_agent
+
+        datadog_agent.set_check_metadata(self.check_id, 'flavor', {'name': 'example'})
+        datadog_agent.emit_agent_telemetry(self.name, 'telemetry.metric', 7, 'gauge')
 
 
 def test_infer_check_class_from_module_exports(monkeypatch):
@@ -320,3 +336,39 @@ def test_normalize_output_sorts_metadata():
     normalized = normalize_output(output)
 
     assert [item['check_id'] for item in normalized['metadata']] == ['a', 'b']
+
+
+def test_serialize_aggregator_includes_base_agent_outputs(aggregator, datadog_agent, dd_run_check):
+    datadog_agent._sent_telemetry.clear()
+    check = AgentOutputReplayCheck('agent_output_replay', {}, [{}])
+    check.check_id = 'agent_output_replay:123'
+
+    dd_run_check(check)
+
+    output = normalize_output(serialize_aggregator(aggregator, datadog_agent))
+
+    assert output['metrics'][0]['name'] == 'agent_output_replay.metric'
+    assert output['metadata'] == [
+        {'check_id': 'agent_output_replay:123', 'name': 'flavor', 'value': {'name': 'example'}},
+        {'check_id': 'agent_output_replay:123', 'name': 'version.raw', 'value': '1.2.3'},
+    ]
+    assert output['external_tags'] == [
+        {'hostname': 'external.example', 'source_map': {'src': ['a:1', 'z:9']}},
+    ]
+    assert {'key': 'agent_output_replay:123_cursor', 'value': 'abc'} in output['persistent_cache']
+    assert {'key': 'agent_output_replay:123_log_cursor_default', 'value': '{"offset":2}'} in output['persistent_cache']
+    assert output['agent_logs'] == [
+        {
+            'check_id': 'agent_output_replay:123',
+            'index': 0,
+            'log': {'message': 'hello'},
+        },
+    ]
+    assert output['telemetry'] == [
+        {
+            'check_name': 'agent_output_replay',
+            'metric_name': 'telemetry.metric',
+            'metric_type': 'gauge',
+            'value': 7,
+        },
+    ]

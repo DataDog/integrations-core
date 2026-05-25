@@ -17,6 +17,54 @@ def _jsonify(value: Any) -> Any:
     return value
 
 
+def _serialize_metadata(datadog_agent) -> list[dict[str, Any]]:
+    return [
+        {'check_id': check_id, 'name': name, 'value': _jsonify(value)}
+        for (check_id, name), value in sorted(datadog_agent._metadata.items())
+    ]
+
+
+def _serialize_external_tags(datadog_agent) -> list[dict[str, Any]]:
+    external_tags = []
+    for hostname, source_map in datadog_agent._external_tags:
+        external_tags.append(
+            {
+                'hostname': _jsonify(hostname),
+                'source_map': {
+                    str(source): sorted(_jsonify(tags) or []) for source, tags in sorted(source_map.items())
+                },
+            }
+        )
+    return sorted(external_tags, key=lambda item: str(item['hostname']))
+
+
+def _serialize_persistent_cache(datadog_agent) -> list[dict[str, Any]]:
+    return [{'key': key, 'value': _jsonify(value)} for key, value in sorted(datadog_agent._cache.items())]
+
+
+def _serialize_agent_logs(datadog_agent) -> list[dict[str, Any]]:
+    logs = []
+    for check_id in sorted(datadog_agent._sent_logs):
+        for index, log in enumerate(datadog_agent._sent_logs[check_id]):
+            logs.append({'check_id': check_id, 'index': index, 'log': _jsonify(log)})
+    return logs
+
+
+def _serialize_telemetry(datadog_agent) -> list[dict[str, Any]]:
+    telemetry = []
+    for (check_name, metric_name, metric_type), values in sorted(datadog_agent._sent_telemetry.items()):
+        for value in values:
+            telemetry.append(
+                {
+                    'check_name': check_name,
+                    'metric_name': metric_name,
+                    'metric_type': metric_type,
+                    'value': _jsonify(value),
+                }
+            )
+    return telemetry
+
+
 def serialize_aggregator(aggregator, datadog_agent=None) -> dict[str, Any]:
     """Serialize pytest stub output into a stable JSON-compatible shape."""
     output = {
@@ -36,10 +84,15 @@ def serialize_aggregator(aggregator, datadog_agent=None) -> dict[str, Any]:
             for event_type, events in sorted(aggregator._event_platform_events.items())
         },
         'metadata': [],
+        'external_tags': [],
+        'persistent_cache': [],
+        'agent_logs': [],
+        'telemetry': [],
     }
     if datadog_agent is not None:
-        output['metadata'] = [
-            {'check_id': check_id, 'name': name, 'value': _jsonify(value)}
-            for (check_id, name), value in sorted(datadog_agent._metadata.items())
-        ]
+        output['metadata'] = _serialize_metadata(datadog_agent)
+        output['external_tags'] = _serialize_external_tags(datadog_agent)
+        output['persistent_cache'] = _serialize_persistent_cache(datadog_agent)
+        output['agent_logs'] = _serialize_agent_logs(datadog_agent)
+        output['telemetry'] = _serialize_telemetry(datadog_agent)
     return output
