@@ -288,7 +288,10 @@ class TestLabelRenaming:
     def test_custom_renames_merge_with_default(
         self, aggregator, mock_http_response_v120, dd_run_check, endpoint_key, rename_key
     ):
-        """User-provided renames merge with the default `host -> http_host` rename across OMV1/OMV2 and legacy/native keys."""
+        """
+        User-provided renames merge with the default `host -> http_host` rename across OMV1/OMV2
+        and legacy/native keys.
+        """
         instance = {
             endpoint_key: 'http://localhost:7979/metrics',
             rename_key: {'method': 'http_method'},
