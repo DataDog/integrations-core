@@ -33,6 +33,7 @@ def load(name: str) -> dict[str, Any]:
     try:
         with open(os.path.join(DATA_DIR, f'{name}.json'), encoding='utf-8') as f:
             spec = json.load(f)
+        # `system_errors` ships its columns verbatim; the other three are built from compact items.
         if 'columns' in spec:
             return {'name': spec['name'], 'query': spec['query'], 'columns': spec['columns']}
         items = _build_items(spec['items'], spec['prefix'])
@@ -49,11 +50,11 @@ def load(name: str) -> dict[str, Any]:
                 },
             ],
         }
-    except (OSError, json.JSONDecodeError, KeyError) as exc:
+    except (OSError, json.JSONDecodeError, KeyError, TypeError, AttributeError) as exc:
         raise RuntimeError(f'failed to load advanced query {name!r}') from exc
 
 
-def _build_items(compact: dict[str, Any], prefix: str) -> dict[str, dict[str, Any]]:
+def _build_items(compact: dict[str, list[str] | dict[str, str]], prefix: str) -> dict[str, dict[str, Any]]:
     """Expand the compact ``{type: keys | {key: scale}}`` map to the per-entry dict shape."""
     merged: dict[str, dict[str, Any]] = {}
     for type_name, group in compact.items():

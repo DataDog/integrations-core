@@ -75,7 +75,7 @@ class MetricKind(StrEnum):
 
 
 @dataclass
-class Template:
+class FileTemplate:
     source_path: str
     target_path: str
 
@@ -122,7 +122,7 @@ QUERY_SPECS = {
 
 
 class Templates(Enum):
-    TESTS_METRICS = Template(
+    TESTS_METRICS = FileTemplate(
         source_path='tests_metrics.tpl',
         target_path=os.path.join(TESTS_DIR, 'advanced_metrics.py'),
     )
@@ -151,7 +151,7 @@ def write_file(file, contents, encoding='utf-8'):
         f.write(contents)
 
 
-def generate_queries_file(template: Template, config: dict):
+def generate_queries_file(template: FileTemplate, config: dict):
     source_path = os.path.join(TEMPLATES_DIR, template.source_path)
     if not os.path.exists(source_path):
         print(f'Unknown template file: {source_path}')
