@@ -51,12 +51,14 @@ jobs:
       - name: Measure disk usage (Uncompressed)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ddev -v size status --commit "${{ github.sha }}" --format json --to-dd-key ${{ steps.dd-sts.outputs.api_key }}
+          DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
+        run: ddev -v size status --commit "${{ github.sha }}" --branch "${{ github.ref_name }}" --format json --to-dd-key "$DD_API_KEY"
 
       - name: Measure disk usage (Compressed)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ddev -v size status --commit "${{ github.sha }}" --format json --to-dd-key ${{ steps.dd-sts.outputs.api_key }} --compressed
+          DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
+        run: ddev -v size status --commit "${{ github.sha }}" --branch "${{ github.ref_name }}" --format json --to-dd-key "$DD_API_KEY" --compressed
 
       - name: Upload JSON uncompressed sizes artifact
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
