@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import shutil
+import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path as StdPath
@@ -43,10 +44,26 @@ PROPERTIES = (
 @click.argument('environment')
 @click.option(
     '--replay-cache',
-    required=True,
+    default='auto',
+    show_default=True,
     help='Existing compare-check artifact directory, or "auto"/"latest" for the selected integration environment.',
 )
-@click.option('--ref', 'git_ref', default='HEAD', show_default=True, help='Git ref to replay on both sides.')
+@click.option(
+    '--target-ref',
+    '--ref',
+    'target_ref',
+    default='HEAD',
+    show_default=True,
+    help='Git ref under test for replay-side execution.',
+)
+@click.option(
+    '--fixture-ref',
+    default=None,
+    help=(
+        'Git ref that produced the replay fixture. Defaults to the latest integration release tag, '
+        'falling back to --target-ref.'
+    ),
+)
 @click.option(
     '--property',
     'properties',
@@ -58,10 +75,20 @@ PROPERTIES = (
     '--check-class',
     help='Optional import spec for the check class, e.g. datadog_checks.cilium:CiliumCheck. Defaults to inference.',
 )
-@click.option('--old-env', 'old_hatch_env', help='Hatch env for the old side. Defaults to ENVIRONMENT.')
-@click.option('--new-env', 'new_hatch_env', help='Hatch env for the new side. Defaults to ENVIRONMENT.')
 @click.option(
-    '--readings', default=1, show_default=True, type=click.IntRange(min=1), help='Number of check readings to replay.'
+    '--record-env',
+    '--old-env',
+    'record_hatch_env',
+    help='Hatch env used for record-side execution. Defaults to ENVIRONMENT.',
+)
+@click.option(
+    '--replay-env',
+    '--new-env',
+    'replay_hatch_env',
+    help='Hatch env used for replay-side execution. Defaults to ENVIRONMENT.',
+)
+@click.option(
+    '--readings', default=2, show_default=True, type=click.IntRange(min=1), help='Number of check readings to replay.'
 )
 @click.option(
     '--artifacts',
@@ -69,6 +96,9 @@ PROPERTIES = (
     help='Exact artifact root for this replay-pbt run. Defaults to .ddev/replay-pbt under the repository root.',
 )
 @click.option('--overwrite', is_flag=True, help='Remove an existing --artifacts directory before writing.')
+@click.option(
+    '--check-cache-only', is_flag=True, help='Validate replay-cache suitability and exit without running tests.'
+)
 @click.pass_context
 def replay_pbt(
     ctx: click.Context,
@@ -76,19 +106,40 @@ def replay_pbt(
     intg_name: str,
     environment: str,
     replay_cache: str,
-    git_ref: str,
+    target_ref: str,
+    fixture_ref: str | None,
     properties: tuple[str, ...],
     check_class: str | None,
-    old_hatch_env: str | None,
-    new_hatch_env: str | None,
+    record_hatch_env: str | None,
+    replay_hatch_env: str | None,
     readings: int,
     artifacts: StdPath | None,
     overwrite: bool,
+    check_cache_only: bool,
 ) -> None:
     """Run cached replay PBT/metamorphic checks for one integration environment."""
     app: Application = ctx.obj
     selected_properties = properties or PROPERTIES
-    run_root = _resolve_replay_pbt_root(app.repo.path, artifacts, intg_name, environment, git_ref, overwrite)
+    effective_fixture_ref = fixture_ref or _latest_integration_release_tag(app.repo.path, intg_name) or target_ref
+    if fixture_ref is None:
+        app.display_info(f'Using fixture ref: {effective_fixture_ref}')
+    if check_cache_only:
+        resolved_cache = _check_replay_cache(
+            app,
+            intg_name=intg_name,
+            environment=environment,
+            replay_cache=replay_cache,
+            fixture_ref=effective_fixture_ref,
+            target_ref=target_ref,
+            record_hatch_env=record_hatch_env,
+            replay_hatch_env=replay_hatch_env,
+            check_class=check_class,
+            readings=readings,
+        )
+        app.display_success(f'Replay cache is suitable: {resolved_cache}')
+        return
+
+    run_root = _resolve_replay_pbt_root(app.repo.path, artifacts, intg_name, environment, target_ref, overwrite)
     ddev_dir = StdPath(str(app.repo.path)) / 'ddev'
 
     app.display_header(f'Replay PBT: {intg_name}:{environment}')
@@ -99,14 +150,20 @@ def replay_pbt(
         'integration': intg_name,
         'environment': environment,
         'replay_cache': replay_cache,
-        'ref': git_ref,
+        'fixture_ref': effective_fixture_ref,
+        'target_ref': target_ref,
+        # Backward-compatible key for older direct pytest invocations.
+        'ref': target_ref,
         'properties': list(selected_properties),
         'artifacts': str(run_root),
         'repo': str(app.repo.path),
         'readings': readings,
         'check_class': check_class,
-        'old_env': old_hatch_env,
-        'new_env': new_hatch_env,
+        'record_env': record_hatch_env,
+        'replay_env': replay_hatch_env,
+        # Backward-compatible keys for older direct pytest invocations.
+        'old_env': record_hatch_env,
+        'new_env': replay_hatch_env,
     }
     config_path.write_text(json.dumps(config, indent=2, sort_keys=True) + '\n')
 
@@ -120,6 +177,51 @@ def replay_pbt(
             str(config_path),
         ],
         cwd=ddev_dir,
+    )
+
+
+def _latest_integration_release_tag(repo_path, integration: str) -> str | None:
+    try:
+        tags = subprocess.check_output(
+            ['git', '-C', str(repo_path), 'tag', '--list', f'{integration}-*', '--sort=-v:refname'],
+            text=True,
+        ).splitlines()
+    except subprocess.CalledProcessError:
+        return None
+
+    return tags[0] if tags else None
+
+
+def _check_replay_cache(
+    app: Application,
+    *,
+    intg_name: str,
+    environment: str,
+    replay_cache: str,
+    fixture_ref: str,
+    target_ref: str,
+    record_hatch_env: str | None,
+    replay_hatch_env: str | None,
+    check_class: str | None,
+    readings: int,
+) -> StdPath | None:
+    from ddev.cli.env.compare_check import REPLAY_ADAPTER, _git_rev_parse, _resolve_replay_cache
+
+    record_head = _git_rev_parse(app.repo.path, fixture_ref)
+    replay_head = _git_rev_parse(app.repo.path, target_ref)
+    return _resolve_replay_cache(
+        app.repo.path,
+        intg_name,
+        environment,
+        replay_cache,
+        REPLAY_ADAPTER,
+        record_hatch_env or environment,
+        replay_hatch_env or environment,
+        'same-fixture-replay',
+        record_head=record_head,
+        replay_head=replay_head,
+        check_class=check_class,
+        readings=readings,
     )
 
 

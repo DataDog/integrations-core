@@ -52,14 +52,15 @@ class ReplayPBTContext:
         self.integration = config['integration']
         self.environment = config['environment']
         self.cache = Path(config['replay_cache'])
-        self.ref = config.get('ref') or 'HEAD'
+        self.target_ref = config.get('target_ref') or config.get('ref') or 'HEAD'
+        self.fixture_ref = config.get('fixture_ref') or self.target_ref
         self.properties = set(config.get('properties') or PROPERTIES)
         self.artifacts = Path(config['artifacts'])
         self.repo = Path(config.get('repo') or Path(__file__).resolve().parents[4])
         self.readings = config.get('readings') or 1
         self.check_class = config.get('check_class')
-        self.old_env = config.get('old_env')
-        self.new_env = config.get('new_env')
+        self.record_env = config.get('record_env') or config.get('old_env')
+        self.replay_env = config.get('replay_env') or config.get('new_env')
 
 
 @pytest.fixture(scope='session')
@@ -89,10 +90,10 @@ def _run_compare_check_cache(
         'compare-check',
         context.integration,
         context.environment,
-        '--old-ref',
-        context.ref,
-        '--new-ref',
-        context.ref,
+        '--record-ref',
+        context.fixture_ref,
+        '--replay-ref',
+        context.target_ref,
         '--replay-cache',
         str(cache),
         '--artifacts',
@@ -104,10 +105,10 @@ def _run_compare_check_cache(
     ]
     if context.check_class:
         command.extend(['--check-class', context.check_class])
-    if context.old_env:
-        command.extend(['--old-env', context.old_env])
-    if context.new_env:
-        command.extend(['--new-env', context.new_env])
+    if context.record_env:
+        command.extend(['--record-env', context.record_env])
+    if context.replay_env:
+        command.extend(['--replay-env', context.replay_env])
 
     result = subprocess.run(command, cwd=Path.cwd(), text=True, capture_output=True)
     assert result.returncode == 0, f'stdout:\n{result.stdout}\nstderr:\n{result.stderr}'
@@ -115,7 +116,7 @@ def _run_compare_check_cache(
 
 
 def _read_normalized(run_dir: Path) -> dict:
-    return json.loads((run_dir / 'new.normalized.json').read_text())
+    return json.loads((run_dir / 'replay.normalized.json').read_text())
 
 
 RATE = 1

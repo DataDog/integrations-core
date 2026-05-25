@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 # Manual cache invalidation knob for compare-check artifacts. Bump this whenever
 # replay fixture semantics or suitability criteria change in a way that should
 # make existing .ddev/replay caches ineligible for --replay-cache auto/latest.
-REPLAY_CACHE_VERSION = 3
+REPLAY_CACHE_VERSION = 4
 REPLAY_ADAPTER = 'all'
 OUTPUT_COLLECTIONS = (
     'metrics',
@@ -42,10 +42,18 @@ OUTPUT_COLLECTIONS = (
 @click.command('compare-check', short_help='Compare no-Agent check output across two refs')
 @click.argument('intg_name', metavar='INTEGRATION')
 @click.argument('environment', required=False)
-@click.option('--old-ref', required=True, help='Git ref to record the fixture and produce old output')
 @click.option(
+    '--record-ref',
+    '--old-ref',
+    'record_ref',
+    required=True,
+    help='Git ref used to record fixture input and produce record-side output.',
+)
+@click.option(
+    '--replay-ref',
     '--new-ref',
-    help='Git ref to replay the fixture and produce new output. Defaults to the current working tree.',
+    'replay_ref',
+    help='Git ref used to replay fixture input and produce replay-side output. Defaults to the current working tree.',
 )
 @click.option(
     '--check-class',
@@ -70,14 +78,16 @@ OUTPUT_COLLECTIONS = (
     ),
 )
 @click.option(
+    '--record-env',
     '--old-env',
-    'old_hatch_env',
-    help='Hatch env for the old side. Defaults to the selected fixture environment.',
+    'record_hatch_env',
+    help='Hatch env used for record-side execution. Defaults to the selected fixture environment.',
 )
 @click.option(
+    '--replay-env',
     '--new-env',
-    'new_hatch_env',
-    help='Hatch env for the new side. Defaults to the selected fixture environment.',
+    'replay_hatch_env',
+    help='Hatch env used for replay-side execution. Defaults to the selected fixture environment.',
 )
 @click.option(
     '--comparison-mode',
@@ -114,15 +124,15 @@ def compare_check(
     *,
     intg_name: str,
     environment: str | None,
-    old_ref: str,
-    new_ref: str | None,
+    record_ref: str,
+    replay_ref: str | None,
     check_class: str | None,
     artifacts: StdPath | None,
     exact_artifacts_dir: bool,
     overwrite: bool,
     replay_cache: str | None,
-    old_hatch_env: str | None,
-    new_hatch_env: str | None,
+    record_hatch_env: str | None,
+    replay_hatch_env: str | None,
     comparison_mode: str,
     recreate: bool,
     readings: int,
@@ -132,8 +142,8 @@ def compare_check(
     """
     Compare no-Agent check output across two integrations-core refs.
 
-    This implementation records input from OLD_REF and replays it to NEW_REF through
-    isolated Hatch environments.
+    This implementation records input from RECORD_REF and replays it to REPLAY_REF
+    through isolated Hatch environments.
     """
     from ddev.e2e.config import EnvDataStorage
 
@@ -143,10 +153,10 @@ def compare_check(
     storage = EnvDataStorage(app.data_dir)
     if comparison_mode == 'record-each-side':
         if environment is not None:
-            raise click.ClickException('record-each-side mode uses --old-env/--new-env; omit ENVIRONMENT.')
-        if not old_hatch_env or not new_hatch_env:
-            raise click.ClickException('record-each-side mode requires both --old-env and --new-env.')
-        env_names = [f'{old_hatch_env}__vs__{new_hatch_env}']
+            raise click.ClickException('record-each-side mode uses --record-env/--replay-env; omit ENVIRONMENT.')
+        if not record_hatch_env or not replay_hatch_env:
+            raise click.ClickException('record-each-side mode requires both --record-env and --replay-env.')
+        env_names = [f'{record_hatch_env}__vs__{replay_hatch_env}']
     else:
         env_names = _select_env_names(ctx, integration, storage, environment)
         if not env_names:
@@ -162,21 +172,21 @@ def compare_check(
     batch_results = []
     for env_name in env_names:
         app.display_header(f'{integration.display_name}: {env_name}')
-        effective_old_env = old_hatch_env or env_name
-        effective_new_env = new_hatch_env or env_name
-        old_head = _git_rev_parse(app.repo.path, old_ref)
-        new_head = _git_rev_parse(app.repo.path, new_ref or 'HEAD')
+        effective_record_env = record_hatch_env or env_name
+        effective_replay_env = replay_hatch_env or env_name
+        record_head = _git_rev_parse(app.repo.path, record_ref)
+        replay_head = _git_rev_parse(app.repo.path, replay_ref or 'HEAD')
         resolved_replay_cache = _resolve_replay_cache(
             app.repo.path,
             integration.name,
             env_name,
             replay_cache,
             adapter,
-            effective_old_env,
-            effective_new_env,
+            effective_record_env,
+            effective_replay_env,
             comparison_mode,
-            old_head=old_head,
-            new_head=new_head,
+            record_head=record_head,
+            replay_head=replay_head,
             check_class=check_class,
             readings=readings,
         )
@@ -188,18 +198,18 @@ def compare_check(
             integration=integration,
             environment=env_name,
             storage=storage,
-            old_ref=old_ref,
-            new_ref=new_ref,
-            old_head=old_head,
-            new_head=new_head,
+            record_ref=record_ref,
+            replay_ref=replay_ref,
+            record_head=record_head,
+            replay_head=replay_head,
             check_class=check_class,
             artifacts=artifacts,
             exact_artifacts_dir=exact_artifacts_dir,
             overwrite=overwrite,
             replay_cache=resolved_replay_cache,
             adapter=adapter,
-            old_hatch_env=effective_old_env,
-            new_hatch_env=effective_new_env,
+            record_hatch_env=effective_record_env,
+            replay_hatch_env=effective_replay_env,
             comparison_mode=comparison_mode,
             recreate=recreate,
             readings=readings,
@@ -251,18 +261,18 @@ def _compare_one_environment(
     integration,
     environment: str,
     storage,
-    old_ref: str,
-    new_ref: str | None,
-    old_head: str,
-    new_head: str,
+    record_ref: str,
+    replay_ref: str | None,
+    record_head: str,
+    replay_head: str,
     check_class: str | None,
     artifacts: StdPath | None,
     exact_artifacts_dir: bool,
     overwrite: bool,
     replay_cache: StdPath | None,
     adapter: str,
-    old_hatch_env: str,
-    new_hatch_env: str,
+    record_hatch_env: str,
+    replay_hatch_env: str,
     comparison_mode: str,
     recreate: bool,
     readings: int,
@@ -275,35 +285,35 @@ def _compare_one_environment(
         artifacts,
         integration.name,
         environment,
-        new_ref or 'working-tree',
+        replay_ref or 'working-tree',
         exact_artifacts_dir,
         overwrite,
     )
 
     phase = 'artifact_setup'
     started_envs: list[str] = []
-    old_returncode = None
-    new_returncode = None
+    record_returncode = None
+    replay_returncode = None
     refs: dict = {}
-    old_mode = 'replay' if replay_cache else 'record'
-    new_mode = None
+    record_mode = 'replay' if replay_cache else 'record'
+    replay_mode = None
     same_fixture = comparison_mode == 'same-fixture-replay'
     fixture_env = environment if same_fixture else None
     replay_cache_provenance = _replay_cache_provenance(app.repo.path, integration.name, environment, replay_cache)
     try:
-        new_ref_label = new_ref or 'working-tree'
+        replay_ref_label = replay_ref or 'working-tree'
         refs = {
-            'old_ref': old_ref,
-            'old_head': old_head,
-            'new_ref': new_ref_label,
-            'new_head': new_head,
-            'new_dirty': _git_dirty(app.repo.path),
+            'record_ref': record_ref,
+            'record_head': record_head,
+            'replay_ref': replay_ref_label,
+            'replay_head': replay_head,
+            'replay_dirty': _git_dirty(app.repo.path),
             'fixture_env': fixture_env,
-            'old_env': old_hatch_env,
-            'new_env': new_hatch_env,
+            'record_env': record_hatch_env,
+            'replay_env': replay_hatch_env,
             'comparison_mode': comparison_mode,
             'same_fixture': same_fixture,
-            'record_ref': 'cache' if replay_cache else 'old',
+            'record_source': 'cache' if replay_cache else 'live',
             'replay_cache': replay_cache_provenance,
             'adapter': adapter,
             'check_class': check_class,
@@ -317,13 +327,13 @@ def _compare_one_environment(
         phase = 'worktree_setup'
         with tempfile.TemporaryDirectory(prefix='compare-check-') as temp_dir:
             temp_path = StdPath(temp_dir)
-            old_tree = temp_path / 'old'
-            _git_worktree(app.repo.path, old_ref, old_tree)
-            if new_ref:
-                new_tree = temp_path / 'new'
-                _git_worktree(app.repo.path, new_ref, new_tree)
+            record_tree = temp_path / 'record'
+            _git_worktree(app.repo.path, record_ref, record_tree)
+            if replay_ref:
+                replay_tree = temp_path / 'replay'
+                _git_worktree(app.repo.path, replay_ref, replay_tree)
             else:
-                new_tree = StdPath(str(app.repo.path))
+                replay_tree = StdPath(str(app.repo.path))
 
             if replay_cache:
                 phase = 'cache_setup'
@@ -331,84 +341,84 @@ def _compare_one_environment(
                     _copy_cache_file(replay_cache, run_dir, 'config.json')
                     _copy_fixture_bundle(replay_cache, run_dir, 'capture.json')
 
-                    phase = 'old_run'
-                    old_returncode = _run_hatch(
-                        repo=old_tree,
+                    phase = 'record_run'
+                    record_returncode = _run_hatch(
+                        repo=record_tree,
                         platform_repo=StdPath(str(app.repo.path)),
                         artifacts=run_dir,
                         integration=integration.name,
-                        hatch_env=old_hatch_env,
+                        hatch_env=record_hatch_env,
                         check_name=integration.name,
                         check_class=check_class,
                         mode='replay',
                         adapter=adapter,
                         config_name='config.json',
                         fixture_name='capture.json',
-                        output_name='old.raw.json',
+                        output_name='record.raw.json',
                         readings=readings,
                         replay_time=replay_time,
                         reading_interval=reading_interval,
                     )
 
-                    new_mode = 'replay'
-                    phase = 'new_run'
-                    new_returncode = _run_hatch(
-                        repo=new_tree,
+                    replay_mode = 'replay'
+                    phase = 'replay_run'
+                    replay_returncode = _run_hatch(
+                        repo=replay_tree,
                         platform_repo=StdPath(str(app.repo.path)),
                         artifacts=run_dir,
                         integration=integration.name,
-                        hatch_env=new_hatch_env,
+                        hatch_env=replay_hatch_env,
                         check_name=integration.name,
                         check_class=check_class,
                         mode='replay',
                         adapter=adapter,
                         config_name='config.json',
                         fixture_name='capture.json',
-                        output_name='new.raw.json',
+                        output_name='replay.raw.json',
                         readings=readings,
                         replay_time=replay_time,
                         reading_interval=reading_interval,
                     )
                 else:
-                    _copy_cache_file(replay_cache, run_dir, 'old.config.json')
+                    _copy_cache_file(replay_cache, run_dir, 'record.config.json')
                     _copy_fixture_bundle(replay_cache, run_dir, 'capture.json')
-                    _copy_cache_file(replay_cache, run_dir, 'new.config.json')
-                    _copy_fixture_bundle(replay_cache, run_dir, 'new.capture.json')
+                    _copy_cache_file(replay_cache, run_dir, 'replay.config.json')
+                    _copy_fixture_bundle(replay_cache, run_dir, 'replay.capture.json')
 
-                    phase = 'old_run'
-                    old_returncode = _run_hatch(
-                        repo=old_tree,
+                    phase = 'record_run'
+                    record_returncode = _run_hatch(
+                        repo=record_tree,
                         platform_repo=StdPath(str(app.repo.path)),
                         artifacts=run_dir,
                         integration=integration.name,
-                        hatch_env=old_hatch_env,
+                        hatch_env=record_hatch_env,
                         check_name=integration.name,
                         check_class=check_class,
                         mode='replay',
                         adapter=adapter,
-                        config_name='old.config.json',
+                        config_name='record.config.json',
                         fixture_name='capture.json',
-                        output_name='old.raw.json',
+                        output_name='record.raw.json',
                         readings=readings,
                         replay_time=replay_time,
                         reading_interval=reading_interval,
                     )
 
-                    new_mode = 'replay'
-                    phase = 'new_run'
-                    new_returncode = _run_hatch(
-                        repo=new_tree,
+                    replay_mode = 'replay'
+                    phase = 'replay_run'
+                    replay_returncode = _run_hatch(
+                        repo=replay_tree,
                         platform_repo=StdPath(str(app.repo.path)),
                         artifacts=run_dir,
                         integration=integration.name,
-                        hatch_env=new_hatch_env,
+                        hatch_env=replay_hatch_env,
                         check_name=integration.name,
                         check_class=check_class,
                         mode='replay',
                         adapter=adapter,
-                        config_name='new.config.json',
-                        fixture_name='new.capture.json',
-                        output_name='new.raw.json',
+                        config_name='replay.config.json',
+                        fixture_name='replay.capture.json',
+                        output_name='replay.raw.json',
                         readings=readings,
                         replay_time=replay_time,
                         reading_interval=reading_interval,
@@ -421,20 +431,20 @@ def _compare_one_environment(
                 config = storage.get(integration.name, fixture_env).read_config()
                 (run_dir / 'config.json').write_text(json.dumps(config, indent=2, sort_keys=True) + '\n')
 
-                phase = 'old_run'
-                old_returncode = _run_hatch(
-                    repo=old_tree,
+                phase = 'record_run'
+                record_returncode = _run_hatch(
+                    repo=record_tree,
                     platform_repo=StdPath(str(app.repo.path)),
                     artifacts=run_dir,
                     integration=integration.name,
-                    hatch_env=old_hatch_env,
+                    hatch_env=record_hatch_env,
                     check_name=integration.name,
                     check_class=check_class,
                     mode='record',
                     adapter=adapter,
                     config_name='config.json',
                     fixture_name='capture.json',
-                    output_name='old.raw.json',
+                    output_name='record.raw.json',
                     readings=readings,
                     replay_time=replay_time,
                     reading_interval=reading_interval,
@@ -442,91 +452,91 @@ def _compare_one_environment(
 
                 if not (run_dir / 'capture.json').is_file():
                     raise click.ClickException(
-                        'Old record run did not produce capture.json; refusing to run the new side without '
+                        'Record-side run did not produce capture.json; refusing to run the replay side without '
                         'same-fixture replay input.'
                     )
 
-                new_mode = 'replay'
-                new_fixture = 'capture.json'
-                phase = 'new_run'
-                new_returncode = _run_hatch(
-                    repo=new_tree,
+                replay_mode = 'replay'
+                replay_fixture = 'capture.json'
+                phase = 'replay_run'
+                replay_returncode = _run_hatch(
+                    repo=replay_tree,
                     platform_repo=StdPath(str(app.repo.path)),
                     artifacts=run_dir,
                     integration=integration.name,
-                    hatch_env=new_hatch_env,
+                    hatch_env=replay_hatch_env,
                     check_name=integration.name,
                     check_class=check_class,
-                    mode=new_mode,
+                    mode=replay_mode,
                     adapter=adapter,
                     config_name='config.json',
-                    fixture_name=new_fixture,
-                    output_name='new.raw.json',
+                    fixture_name=replay_fixture,
+                    output_name='replay.raw.json',
                     readings=readings,
                     replay_time=replay_time,
                     reading_interval=reading_interval,
                 )
             else:
-                phase = 'old_environment_setup'
-                if _ensure_environment(ctx, integration, storage, old_hatch_env, recreate):
-                    started_envs.append(old_hatch_env)
-                old_config = storage.get(integration.name, old_hatch_env).read_config()
-                (run_dir / 'old.config.json').write_text(json.dumps(old_config, indent=2, sort_keys=True) + '\n')
+                phase = 'record_environment_setup'
+                if _ensure_environment(ctx, integration, storage, record_hatch_env, recreate):
+                    started_envs.append(record_hatch_env)
+                record_config = storage.get(integration.name, record_hatch_env).read_config()
+                (run_dir / 'record.config.json').write_text(json.dumps(record_config, indent=2, sort_keys=True) + '\n')
 
-                phase = 'old_run'
-                old_returncode = _run_hatch(
-                    repo=old_tree,
+                phase = 'record_run'
+                record_returncode = _run_hatch(
+                    repo=record_tree,
                     platform_repo=StdPath(str(app.repo.path)),
                     artifacts=run_dir,
                     integration=integration.name,
-                    hatch_env=old_hatch_env,
+                    hatch_env=record_hatch_env,
                     check_name=integration.name,
                     check_class=check_class,
                     mode='record',
                     adapter=adapter,
-                    config_name='old.config.json',
+                    config_name='record.config.json',
                     fixture_name='capture.json',
-                    output_name='old.raw.json',
+                    output_name='record.raw.json',
                     readings=readings,
                     replay_time=replay_time,
                     reading_interval=reading_interval,
                 )
 
-                if old_hatch_env in started_envs:
-                    _stop_environment(ctx, integration, old_hatch_env)
-                    started_envs.remove(old_hatch_env)
+                if record_hatch_env in started_envs:
+                    _stop_environment(ctx, integration, record_hatch_env)
+                    started_envs.remove(record_hatch_env)
 
-                phase = 'new_environment_setup'
-                if _ensure_environment(ctx, integration, storage, new_hatch_env, recreate):
-                    started_envs.append(new_hatch_env)
-                new_config = storage.get(integration.name, new_hatch_env).read_config()
-                (run_dir / 'new.config.json').write_text(json.dumps(new_config, indent=2, sort_keys=True) + '\n')
+                phase = 'replay_environment_setup'
+                if _ensure_environment(ctx, integration, storage, replay_hatch_env, recreate):
+                    started_envs.append(replay_hatch_env)
+                replay_config = storage.get(integration.name, replay_hatch_env).read_config()
+                (run_dir / 'replay.config.json').write_text(json.dumps(replay_config, indent=2, sort_keys=True) + '\n')
 
-                new_mode = 'record'
-                phase = 'new_run'
-                new_returncode = _run_hatch(
-                    repo=new_tree,
+                replay_mode = 'record'
+                phase = 'replay_run'
+                replay_returncode = _run_hatch(
+                    repo=replay_tree,
                     platform_repo=StdPath(str(app.repo.path)),
                     artifacts=run_dir,
                     integration=integration.name,
-                    hatch_env=new_hatch_env,
+                    hatch_env=replay_hatch_env,
                     check_name=integration.name,
                     check_class=check_class,
                     mode='record',
                     adapter=adapter,
-                    config_name='new.config.json',
-                    fixture_name='new.capture.json',
-                    output_name='new.raw.json',
+                    config_name='replay.config.json',
+                    fixture_name='replay.capture.json',
+                    output_name='replay.raw.json',
                     readings=readings,
                     replay_time=replay_time,
                     reading_interval=reading_interval,
                 )
 
             status = {
-                'old_returncode': old_returncode,
-                'new_returncode': new_returncode,
-                'old_mode': old_mode,
-                'new_mode': new_mode,
+                'record_returncode': record_returncode,
+                'replay_returncode': replay_returncode,
+                'record_mode': record_mode,
+                'replay_mode': replay_mode,
                 'phase': 'complete',
                 'comparison_mode': comparison_mode,
                 'same_fixture': same_fixture,
@@ -534,18 +544,18 @@ def _compare_one_environment(
                 'readings': readings,
                 'replay_time': replay_time,
                 'reading_interval': reading_interval,
-                'comparable': old_returncode == 0
-                and new_returncode == 0
-                and (new_mode == 'replay' or not same_fixture),
+                'comparable': record_returncode == 0
+                and replay_returncode == 0
+                and (replay_mode == 'replay' or not same_fixture),
             }
             (run_dir / 'run_status.json').write_text(json.dumps(status, indent=2, sort_keys=True) + '\n')
     except Exception as e:
         app.display_warning(f'compare-check failed for {integration.name}:{environment} during {phase}: {e}')
         status = {
-            'old_returncode': old_returncode,
-            'new_returncode': new_returncode,
-            'old_mode': old_mode,
-            'new_mode': new_mode,
+            'record_returncode': record_returncode,
+            'replay_returncode': replay_returncode,
+            'record_mode': record_mode,
+            'replay_mode': replay_mode,
             'phase': phase,
             'comparison_mode': comparison_mode,
             'same_fixture': same_fixture,
@@ -571,12 +581,12 @@ def _compare_one_environment(
             refs,
             integration=integration.name,
             adapter=adapter,
-            old_hatch_env=old_hatch_env,
-            new_hatch_env=new_hatch_env,
+            record_hatch_env=record_hatch_env,
+            replay_hatch_env=replay_hatch_env,
             comparison_mode=comparison_mode,
             fixture_env=fixture_env,
-            old_head=old_head,
-            new_head=new_head,
+            record_head=record_head,
+            replay_head=replay_head,
             check_class=check_class,
             readings=readings,
         )
@@ -595,8 +605,8 @@ def _format_diff_summary(diff: dict) -> str:
     )
     return (
         f'{prefix}Changed: {diff["changed"]}; '
-        f'old rc {status.get("old_returncode", "?")}; '
-        f'new rc {status.get("new_returncode", "?")}; '
+        f'record rc {status.get("record_returncode", "?")}; '
+        f'replay rc {status.get("replay_returncode", "?")}; '
         f'{collection_summary}'
     )
 
@@ -626,7 +636,7 @@ def _replay_cache_provenance(
 def _required_cache_files(comparison_mode: str) -> list[str]:
     if comparison_mode == 'same-fixture-replay':
         return ['config.json', 'capture.json']
-    return ['old.config.json', 'capture.json', 'new.config.json', 'new.capture.json']
+    return ['record.config.json', 'capture.json', 'replay.config.json', 'replay.capture.json']
 
 
 def _file_sha256(path: StdPath) -> str:
@@ -663,10 +673,10 @@ def _cache_file_names(run_dir: StdPath, comparison_mode: str) -> list[str]:
         names.extend(_fixture_bundle_file_names(run_dir, 'capture.json'))
         return names
 
-    names = ['old.config.json']
+    names = ['record.config.json']
     names.extend(_fixture_bundle_file_names(run_dir, 'capture.json'))
-    names.append('new.config.json')
-    names.extend(_fixture_bundle_file_names(run_dir, 'new.capture.json'))
+    names.append('replay.config.json')
+    names.extend(_fixture_bundle_file_names(run_dir, 'replay.capture.json'))
     return names
 
 
@@ -676,12 +686,12 @@ def _write_fixture_key(
     *,
     integration: str,
     adapter: str,
-    old_hatch_env: str,
-    new_hatch_env: str,
+    record_hatch_env: str,
+    replay_hatch_env: str,
     comparison_mode: str,
     fixture_env: str | None,
-    old_head: str,
-    new_head: str,
+    record_head: str,
+    replay_head: str,
     check_class: str | None,
     readings: int,
 ) -> None:
@@ -698,10 +708,10 @@ def _write_fixture_key(
         'adapter': adapter,
         'comparison_mode': comparison_mode,
         'fixture_env': fixture_env,
-        'old_env': old_hatch_env,
-        'new_env': new_hatch_env,
-        'record_old_head': old_head,
-        'record_new_head': new_head if comparison_mode == 'record-each-side' else None,
+        'record_env': record_hatch_env,
+        'replay_env': replay_hatch_env,
+        'record_head': record_head,
+        'replay_head': replay_head if comparison_mode == 'record-each-side' else None,
         'check_class': check_class,
         'readings': readings,
         'files': files,
@@ -714,12 +724,12 @@ def _resolve_replay_cache(
     environment: str,
     replay_cache: str | None,
     adapter: str,
-    old_hatch_env: str,
-    new_hatch_env: str,
+    record_hatch_env: str,
+    replay_hatch_env: str,
     comparison_mode: str,
     *,
-    old_head: str,
-    new_head: str,
+    record_head: str,
+    replay_head: str,
     check_class: str | None,
     readings: int,
 ) -> StdPath | None:
@@ -739,12 +749,12 @@ def _resolve_replay_cache(
             candidate,
             integration=integration,
             adapter=adapter,
-            old_hatch_env=old_hatch_env,
-            new_hatch_env=new_hatch_env,
+            record_hatch_env=record_hatch_env,
+            replay_hatch_env=replay_hatch_env,
             comparison_mode=comparison_mode,
             fixture_env=environment if comparison_mode == 'same-fixture-replay' else None,
-            old_head=old_head,
-            new_head=new_head,
+            record_head=record_head,
+            replay_head=replay_head,
             check_class=check_class,
             readings=readings,
         ):
@@ -784,12 +794,12 @@ def _is_suitable_replay_cache(
     *,
     integration: str,
     adapter: str,
-    old_hatch_env: str,
-    new_hatch_env: str,
+    record_hatch_env: str,
+    replay_hatch_env: str,
     comparison_mode: str,
     fixture_env: str | None,
-    old_head: str,
-    new_head: str,
+    record_head: str,
+    replay_head: str,
     check_class: str | None,
     readings: int,
 ) -> bool:
@@ -821,10 +831,10 @@ def _is_suitable_replay_cache(
         'adapter': adapter,
         'comparison_mode': comparison_mode,
         'fixture_env': fixture_env,
-        'old_env': old_hatch_env,
-        'new_env': new_hatch_env,
-        'record_old_head': old_head,
-        'record_new_head': new_head if comparison_mode == 'record-each-side' else None,
+        'record_env': record_hatch_env,
+        'replay_env': replay_hatch_env,
+        'record_head': record_head,
+        'replay_head': replay_head if comparison_mode == 'record-each-side' else None,
         'check_class': check_class,
         'readings': readings,
     }
@@ -844,7 +854,7 @@ def _resolve_artifacts_dir(
     artifacts: StdPath | None,
     integration: str,
     environment: str,
-    new_ref: str,
+    replay_ref: str,
     exact: bool,
     overwrite: bool,
 ) -> StdPath:
@@ -853,7 +863,7 @@ def _resolve_artifacts_dir(
         run_dir = root
         latest_root = root.parent
     else:
-        run_id = f'{datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")}-{_slug(new_ref)}'
+        run_id = f'{datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")}-{_slug(replay_ref)}'
         latest_root = root / integration / environment
         run_dir = latest_root / run_id
 
@@ -1052,24 +1062,24 @@ def _merge_collection_diffs(reading_diffs: list[dict]) -> dict:
     return merged
 
 
-def _diff_reading_envelopes(old_normalized: dict, new_normalized: dict) -> dict:
+def _diff_reading_envelopes(record_normalized: dict, replay_normalized: dict) -> dict:
     from datadog_checks.dev.replay.diff import diff_outputs
 
-    old_outputs = _reading_outputs(old_normalized)
-    new_outputs = _reading_outputs(new_normalized)
+    record_outputs = _reading_outputs(record_normalized)
+    replay_outputs = _reading_outputs(replay_normalized)
     reading_diffs = []
-    for index, (old_output, new_output) in enumerate(zip(old_outputs, new_outputs, strict=False)):
-        reading_diff = diff_outputs(old_output, new_output)
+    for index, (record_output, replay_output) in enumerate(zip(record_outputs, replay_outputs, strict=False)):
+        reading_diff = diff_outputs(record_output, replay_output)
         reading_diff['index'] = index
         reading_diffs.append(reading_diff)
 
-    length_changed = len(old_outputs) != len(new_outputs)
+    length_changed = len(record_outputs) != len(replay_outputs)
     return {
         'version': 2,
         'changed': length_changed or any(reading_diff.get('changed') for reading_diff in reading_diffs),
         'reading_count_changed': length_changed,
-        'old_readings': len(old_outputs),
-        'new_readings': len(new_outputs),
+        'record_readings': len(record_outputs),
+        'replay_readings': len(replay_outputs),
         'readings': reading_diffs,
         'collections': _merge_collection_diffs(reading_diffs),
     }
@@ -1078,7 +1088,7 @@ def _diff_reading_envelopes(old_normalized: dict, new_normalized: dict) -> dict:
 def _write_diff_artifacts(artifacts: StdPath) -> dict:
     status_file = artifacts / 'run_status.json'
     status = json.loads(status_file.read_text()) if status_file.is_file() else {}
-    missing = [name for name in ('old.raw.json', 'new.raw.json') if not (artifacts / name).is_file()]
+    missing = [name for name in ('record.raw.json', 'replay.raw.json') if not (artifacts / name).is_file()]
     if missing:
         diff = {
             'changed': True,
@@ -1097,31 +1107,31 @@ def _write_diff_artifacts(artifacts: StdPath) -> dict:
             f'- Phase: {status.get("phase", "unknown")}\n'
             f'- Comparison mode: {status.get("comparison_mode", "unknown")}\n'
             f'- Same fixture: {status.get("same_fixture", "unknown")}\n'
-            f'- Old return code: {status.get("old_returncode", "unknown")}\n'
-            f'- New return code: {status.get("new_returncode", "unknown")}\n'
-            f'- New mode: {status.get("new_mode", "unknown")}\n'
+            f'- Record return code: {status.get("record_returncode", "unknown")}\n'
+            f'- Replay return code: {status.get("replay_returncode", "unknown")}\n'
+            f'- Replay mode: {status.get("replay_mode", "unknown")}\n'
             f'{error_line}'
         )
         return diff
 
-    old_raw = json.loads((artifacts / 'old.raw.json').read_text())
-    new_raw = json.loads((artifacts / 'new.raw.json').read_text())
-    old_normalized = _normalize_reading_envelope(old_raw)
-    new_normalized = _normalize_reading_envelope(new_raw)
-    diff = _diff_reading_envelopes(old_normalized, new_normalized)
+    record_raw = json.loads((artifacts / 'record.raw.json').read_text())
+    replay_raw = json.loads((artifacts / 'replay.raw.json').read_text())
+    record_normalized = _normalize_reading_envelope(record_raw)
+    replay_normalized = _normalize_reading_envelope(replay_raw)
+    diff = _diff_reading_envelopes(record_normalized, replay_normalized)
     diff['run_status'] = status
     diff['incomplete'] = not status.get('comparable', True)
     if diff['incomplete']:
         diff['changed'] = True
 
-    (artifacts / 'old.normalized.json').write_text(json.dumps(old_normalized, indent=2, sort_keys=True) + '\n')
-    (artifacts / 'new.normalized.json').write_text(json.dumps(new_normalized, indent=2, sort_keys=True) + '\n')
+    (artifacts / 'record.normalized.json').write_text(json.dumps(record_normalized, indent=2, sort_keys=True) + '\n')
+    (artifacts / 'replay.normalized.json').write_text(json.dumps(replay_normalized, indent=2, sort_keys=True) + '\n')
     (artifacts / 'diff.json').write_text(json.dumps(diff, indent=2, sort_keys=True) + '\n')
-    old_totals = _collection_totals(old_normalized)
-    new_totals = _collection_totals(new_normalized)
+    record_totals = _collection_totals(record_normalized)
+    replay_totals = _collection_totals(replay_normalized)
     collection_lines = ''.join(
-        f'- Old {name}: {old_totals[name]}\n'
-        f'- New {name}: {new_totals[name]}\n'
+        f'- Record {name}: {record_totals[name]}\n'
+        f'- Replay {name}: {replay_totals[name]}\n'
         f'- {name} records added: {len(diff["collections"].get(name, {}).get("added", []))}\n'
         f'- {name} records removed: {len(diff["collections"].get(name, {}).get("removed", []))}\n'
         for name in OUTPUT_COLLECTIONS
@@ -1134,8 +1144,8 @@ def _write_diff_artifacts(artifacts: StdPath) -> dict:
         f'- Phase: {status.get("phase", "unknown")}\n'
         f'- Comparison mode: {status.get("comparison_mode", "unknown")}\n'
         f'- Same fixture: {status.get("same_fixture", "unknown")}\n'
-        f'- Old return code: {status.get("old_returncode", 0)}\n'
-        f'- New return code: {status.get("new_returncode", 0)}\n'
+        f'- Record return code: {status.get("record_returncode", 0)}\n'
+        f'- Replay return code: {status.get("replay_returncode", 0)}\n'
         f'{collection_lines}'
     )
     return diff

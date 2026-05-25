@@ -94,6 +94,107 @@ jobs:
       context: "pr"
     secrets: inherit
 
+  replay-pbt:
+    name: Replay PBT smoke
+    if: >
+      github.event_name == 'pull_request' &&
+      inputs.repo == 'core' &&
+      startsWith(github.head_ref, 'nubtron/metadata-e2e-monkeypatch-replay')
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+
+    permissions:
+      contents: read
+
+    env:
+      REPLAY_PBT_INTEGRATION: krakend
+      REPLAY_PBT_ENVIRONMENT: py3.13-2.10
+      REPLAY_PBT_FIXTURE_REF: krakend-1.4.1
+      REPLAY_PBT_READINGS: "2"
+      REPLAY_PBT_CACHE_KEY: replay-pbt-v4-krakend-py3.13-2.10-readings2-fixture-krakend-1.4.1
+
+    steps:
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+    - name: Set up Python 3.13
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      with:
+        python-version: "3.13"
+
+    - name: Install ddev from local folder
+      uses: ./.github/actions/setup-ddev
+      with:
+        install-mode: local
+        cache-profile: local-ddev-base
+
+    - name: Configure ddev
+      run: |
+        ddev config set upgrade_check false
+        ddev config set repos.core .
+        ddev config set repo core
+
+    - name: Restore replay cache
+      id: restore-replay-cache
+      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      with:
+        path: .ddev/replay/${{ env.REPLAY_PBT_INTEGRATION }}/${{ env.REPLAY_PBT_ENVIRONMENT }}
+        key: ${{ env.REPLAY_PBT_CACHE_KEY }}
+
+    - name: Prepare KrakenD test environment
+      run: ddev ci setup ${{ env.REPLAY_PBT_INTEGRATION }}:${{ env.REPLAY_PBT_ENVIRONMENT }}
+
+    - name: Ensure Docker is running
+      run: bash .github/actions/setup-test-target-scripts/src/ensure-docker.sh
+
+    - name: Seed replay cache if needed
+      run: |
+        set -euo pipefail
+
+        if ddev env replay-pbt "$REPLAY_PBT_INTEGRATION" "$REPLAY_PBT_ENVIRONMENT" \
+          --fixture-ref "$REPLAY_PBT_FIXTURE_REF" \
+          --target-ref HEAD \
+          --replay-cache latest \
+          --readings "$REPLAY_PBT_READINGS" \
+          --check-cache-only; then
+          echo "Found suitable restored replay cache"
+          exit 0
+        fi
+
+        echo "No suitable restored replay cache; seeding a new one"
+        ddev env compare-check "$REPLAY_PBT_INTEGRATION" "$REPLAY_PBT_ENVIRONMENT" \
+          --record-ref "$REPLAY_PBT_FIXTURE_REF" \
+          --replay-ref HEAD \
+          --readings "$REPLAY_PBT_READINGS"
+
+    - name: Run replay PBT
+      run: |
+        ddev env replay-pbt "$REPLAY_PBT_INTEGRATION" "$REPLAY_PBT_ENVIRONMENT" \
+          --fixture-ref "$REPLAY_PBT_FIXTURE_REF" \
+          --target-ref HEAD \
+          --replay-cache latest \
+          --readings "$REPLAY_PBT_READINGS" \
+          --property deterministic \
+          --property metadata-emitted-metrics \
+          --artifacts "$RUNNER_TEMP/replay-pbt" \
+          --overwrite
+
+    - name: Save replay cache
+      if: success() && steps.restore-replay-cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      with:
+        path: .ddev/replay/${{ env.REPLAY_PBT_INTEGRATION }}/${{ env.REPLAY_PBT_ENVIRONMENT }}
+        key: ${{ env.REPLAY_PBT_CACHE_KEY }}
+
+    - name: Upload replay artifacts
+      if: always()
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      with:
+        name: replay-pbt-artifacts
+        path: |
+          .ddev/replay/${{ env.REPLAY_PBT_INTEGRATION }}/${{ env.REPLAY_PBT_ENVIRONMENT }}
+          ${{ runner.temp }}/replay-pbt
+        if-no-files-found: ignore
+
   save-event:
     needs:
     - test
@@ -146,6 +247,7 @@ jobs:
     needs:
     - test
     - test-minimum-base-package
+    - replay-pbt
     # In integrations-core and integrations-extras repos the tests are flaky enough that
     # it would be a pain to merge PRs with the Merge Queue enabled.
     # While we work on the tests, we skip the job if it's triggered by Merge Queue.
@@ -158,4 +260,4 @@ jobs:
       uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
       with:
         jobs: ${{ toJSON(needs) }}
-        allowed-skips: test, test-minimum-base-package
+        allowed-skips: test, test-minimum-base-package, replay-pbt

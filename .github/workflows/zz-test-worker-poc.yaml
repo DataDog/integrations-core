@@ -1,159 +1,453 @@
-name: ZZ - POC - Test Worker
+name: Replay PBT POC
+run-name: >-
+  Replay PBT POC / ${{ inputs.mode }} / ${{ inputs.property_set }} /
+  shard ${{ inputs.shard_index }} of ${{ inputs.shard_count }}
 
 on:
   workflow_dispatch:
     inputs:
-      matrix_json:
-        description: 'JSON string defining the dynamic matrices for all jobs'
+      mode:
+        description: Which integration/env targets to include
         required: true
-        type: string
-      checkout_ref:
-        description: 'Commit SHA to check out. This is the commit where the repo will be checked out.'
+        default: all-declared
+        type: choice
+        options:
+        - changed
+        - all-cached
+        - all-declared
+      seed_missing_caches:
+        description: Start E2E envs and seed compare-check caches when no suitable cache is restored
         required: true
-        type: string
-      source_sha:
-        description: 'Source SHA to use for the check run'
+        default: false
+        type: boolean
+      property_set:
+        description: replay-PBT property set to run
         required: true
-        type: string
-      name:
+        default: smoke
+        type: choice
+        options:
+        - smoke
+        - all
+      target_ref:
+        description: Git ref under test
         required: true
+        default: HEAD
         type: string
+      base_ref:
+        description: Base ref for mode=changed
+        required: true
+        default: origin/master
+        type: string
+      max_targets:
+        description: Maximum targets in this dispatch after sharding
+        required: true
+        default: 200
+        type: number
+      allow_truncation:
+        description: Allow dropping targets after max_targets. Keep false for full coverage runs.
+        required: true
+        default: false
+        type: boolean
+      max_parallel:
+        description: Maximum replay-PBT matrix jobs to run concurrently
+        required: true
+        default: 8
+        type: number
+      shard_index:
+        description: Zero-based shard index
+        required: true
+        default: 0
+        type: number
+      shard_count:
+        description: Total shard count
+        required: true
+        default: 1
+        type: number
+      readings:
+        description: Number of check readings to replay
+        required: true
+        default: 2
+        type: number
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.mode }}-${{ inputs.shard_index }}-${{ inputs.shard_count }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
-  create_check_run:
-    runs-on: ubuntu-latest
+  compute-matrix:
+    name: Compute replay-PBT matrix
+    runs-on: ubuntu-22.04
     permissions:
-      id-token: write
       contents: read
     outputs:
-      check_run_id: ${{ steps.create_check.outputs.result }}
+      matrix: ${{ steps.compute.outputs.matrix }}
+      count: ${{ steps.count.outputs.count }}
     steps:
-      - name: Get GitHub token via dd-octo-sts
-        uses: DataDog/dd-octo-sts-action@acaa02eee7e3bb0839e4272dacb37b8f3b58ba80
-        id: octo-sts
-        with:
-          scope: DataDog/integrations-core
-          policy: self.test-worker-poc
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        fetch-depth: 0
 
-      - name: Create Check Run
-        id: create_check
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
-        with:
-          github-token: ${{ steps.octo-sts.outputs.token }}
-          script: |
-            const response = await github.rest.checks.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              name: 'Test Worker POC - ${{ inputs.name }}',
-              head_sha: '${{ inputs.source_sha }}',
-              status: 'in_progress',
-              details_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}',
-              output: {
-                title: 'Test Worker POC Running - ${{ inputs.name }}',
-                summary: 'The test worker POC workflow is currently running for ${{ inputs.name }}.'
-              }
-            });
-            return response.data.id;
+    - name: Set up Python 3.13
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      with:
+        python-version: "3.13"
 
-  setup:
-    needs: create_check_run
-    runs-on: ubuntu-latest
-    outputs:
-      work_matrix: ${{ steps.set_matrix.outputs.work_matrix }}
+    - name: Validate workflow inputs
+      run: |
+        python - <<'PY'
+        import os
+        import re
+        import sys
 
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-        with:
-          ref: ${{ inputs.checkout_ref }}
+        values = {
+            'base_ref': os.environ['BASE_REF'],
+            'target_ref': os.environ['TARGET_REF'],
+        }
+        pattern = re.compile(r'^[A-Za-z0-9][A-Za-z0-9._/-]{0,199}$')
+        for name, value in values.items():
+            if not pattern.fullmatch(value) or '..' in value or value.endswith('/'):
+                print(f'Invalid {name}: {value!r}', file=sys.stderr)
+                sys.exit(2)
+        PY
+      env:
+        BASE_REF: ${{ inputs.base_ref }}
+        TARGET_REF: ${{ inputs.target_ref }}
 
-      - name: Set up Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
-        with:
-          python-version: '3.13'
+    - name: Fetch base ref for changed mode
+      if: inputs.mode == 'changed'
+      run: git fetch --no-tags --filter=blob:none origin "$BASE_REF"
+      env:
+        BASE_REF: ${{ inputs.base_ref }}
 
-      - name: Parse matrix and set matrix output
-        id: set_matrix
-        run: |
-          COMBINED_MATRIX=$(python .github/workflows/scripts/explode-matrix.py '${{ inputs.matrix_json }}')
+    - name: Compute matrix
+      id: compute
+      run: |
+        extra_args=()
+        if [[ "${{ inputs.allow_truncation }}" == "true" ]]; then
+          extra_args+=(--allow-truncation)
+        fi
 
-          if [ $? -ne 0 ]; then
-            echo "::error::Python script failed to generate matrix."
-            exit 1
-          fi
+        python .github/workflows/scripts/replay-pbt-matrix.py \
+          --mode "${{ inputs.mode }}" \
+          --ref "${{ inputs.base_ref }}" \
+          --target-ref "${{ inputs.target_ref }}" \
+          --readings "${{ inputs.readings }}" \
+          --max-targets "${{ inputs.max_targets }}" \
+          --shard-index "${{ inputs.shard_index }}" \
+          --shard-count "${{ inputs.shard_count }}" \
+          "${extra_args[@]}" \
+          > /tmp/replay-pbt-matrix.json
+        cat /tmp/replay-pbt-matrix.json
+        echo "matrix=$(cat /tmp/replay-pbt-matrix.json)" >> "$GITHUB_OUTPUT"
 
-          echo "work_matrix=$COMBINED_MATRIX" >> $GITHUB_OUTPUT
+    - name: Count targets
+      id: count
+      run: |
+        count=$(python - <<'PY'
+        import json
+        print(len(json.load(open('/tmp/replay-pbt-matrix.json'))))
+        PY
+        )
+        echo "count=$count" >> "$GITHUB_OUTPUT"
+        echo "Replay PBT target count: $count"
 
-          echo "Debug: Combined Matrix: $COMBINED_MATRIX"
+    - name: Upload matrix
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      with:
+        name: replay-pbt-matrix
+        path: /tmp/replay-pbt-matrix.json
 
-  run_work:
-    needs: setup
-    runs-on: ubuntu-latest
-    name: ${{ matrix.name }}
+  replay-pbt:
+    name: ${{ inputs.property_set }} / ${{ matrix.name }}
+    needs: compute-matrix
+    if: needs.compute-matrix.outputs.matrix != '[]'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
     strategy:
       fail-fast: false
+      max-parallel: ${{ fromJSON(inputs.max_parallel) }}
       matrix:
-        include: ${{ fromJSON(needs.setup.outputs.work_matrix) }}
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-        with:
-          ref: ${{ inputs.checkout_ref }}
-
-      - name: Run Generic Task
-        run: |
-          echo "Running generic logic for job: ${{ matrix.name }}"
-          echo "Platform: ${{ matrix.platform }}"
-          echo "Runner: ${{ matrix.runner }}"
-          echo "Target: ${{ matrix.target }}"
-          echo "Git SHA: $(git rev-parse HEAD)"
-
-  complete_check_run:
-    runs-on: ubuntu-latest
-    if: always()
-    needs: [create_check_run, run_work]
+        include: ${{ fromJSON(needs.compute-matrix.outputs.matrix) }}
     permissions:
-      id-token: write
+      contents: read
+    env:
+      REPLAY_PBT_INTEGRATION: ${{ matrix.integration }}
+      REPLAY_PBT_ENVIRONMENT: ${{ matrix.environment }}
+      REPLAY_PBT_FIXTURE_REF: ${{ matrix.fixture_ref }}
+      REPLAY_PBT_TARGET_REF: ${{ matrix.target_ref }}
+      REPLAY_PBT_READINGS: ${{ matrix.readings }}
+      REPLAY_PBT_CACHE_KEY: ${{ matrix.cache_key }}
+      REPLAY_PBT_ARTIFACT_SLUG: ${{ matrix.artifact_slug }}
+      REPLAY_PBT_PROPERTY_SET: ${{ inputs.property_set }}
+      REPLAY_PBT_MODE: ${{ inputs.mode }}
+      REPLAY_PBT_SHARD_INDEX: ${{ inputs.shard_index }}
+      REPLAY_PBT_SHARD_COUNT: ${{ inputs.shard_count }}
+      REPLAY_PBT_RESULT_DIR: ${{ runner.temp }}/replay-pbt-result
+      REPLAY_PBT_ARTIFACTS: ${{ runner.temp }}/replay-pbt-artifacts
+    steps:
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python 3.13
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      with:
+        python-version: "3.13"
+
+    - name: Install workflow scripts
+      uses: ./.github/actions/setup-test-target-scripts
+
+    - name: Install ddev from local folder
+      uses: ./.github/actions/setup-ddev
+      with:
+        install-mode: local
+        cache-profile: local-ddev-base
+
+    - name: Configure ddev
+      run: |
+        ddev config set upgrade_check false
+        ddev config set repos.core .
+        ddev config set repo core
+
+    - name: Restore replay cache
+      id: replay-cache
+      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      with:
+        path: .ddev/replay/${{ matrix.integration }}/${{ matrix.environment }}
+        key: ${{ matrix.cache_key }}
+
+    - name: Probe or seed replay cache
+      id: prepare
+      run: |
+        set -euo pipefail
+        mkdir -p "$REPLAY_PBT_RESULT_DIR"
+        result="$REPLAY_PBT_RESULT_DIR/result.json"
+
+        if ddev env replay-pbt "$REPLAY_PBT_INTEGRATION" "$REPLAY_PBT_ENVIRONMENT" \
+          --fixture-ref "$REPLAY_PBT_FIXTURE_REF" \
+          --target-ref "$REPLAY_PBT_TARGET_REF" \
+          --replay-cache latest \
+          --readings "$REPLAY_PBT_READINGS" \
+          --check-cache-only; then
+          echo "run_pbt=true" >> "$GITHUB_OUTPUT"
+          echo "cache_ready=true" >> "$GITHUB_OUTPUT"
+          echo '{"status":"cache-hit"}' > "$result"
+          exit 0
+        fi
+
+        if [[ "${{ inputs.seed_missing_caches }}" != "true" ]]; then
+          echo "No suitable replay cache restored; skipping target because seed_missing_caches=false"
+          echo "run_pbt=false" >> "$GITHUB_OUTPUT"
+          echo "cache_ready=false" >> "$GITHUB_OUTPUT"
+          python - <<PY > "$result"
+        import json, os
+        print(json.dumps({
+            "status": "skipped-missing-cache",
+            "integration": os.environ["REPLAY_PBT_INTEGRATION"],
+            "environment": os.environ["REPLAY_PBT_ENVIRONMENT"],
+            "fixture_ref": os.environ["REPLAY_PBT_FIXTURE_REF"],
+            "cache_key": os.environ["REPLAY_PBT_CACHE_KEY"],
+            "mode": os.environ["REPLAY_PBT_MODE"],
+            "property_set": os.environ["REPLAY_PBT_PROPERTY_SET"],
+            "readings": os.environ["REPLAY_PBT_READINGS"],
+            "target_ref": os.environ["REPLAY_PBT_TARGET_REF"],
+            "shard_index": os.environ["REPLAY_PBT_SHARD_INDEX"],
+            "shard_count": os.environ["REPLAY_PBT_SHARD_COUNT"],
+        }, sort_keys=True))
+        PY
+          exit 0
+        fi
+
+        echo "No suitable replay cache restored; seeding from $REPLAY_PBT_FIXTURE_REF"
+        bash .github/workflows/scripts/ensure-docker.sh
+        ddev ci setup "$REPLAY_PBT_INTEGRATION:$REPLAY_PBT_ENVIRONMENT"
+        ddev env compare-check "$REPLAY_PBT_INTEGRATION" "$REPLAY_PBT_ENVIRONMENT" \
+          --record-ref "$REPLAY_PBT_FIXTURE_REF" \
+          --replay-ref "$REPLAY_PBT_TARGET_REF" \
+          --readings "$REPLAY_PBT_READINGS"
+
+        echo "run_pbt=true" >> "$GITHUB_OUTPUT"
+        echo "cache_ready=true" >> "$GITHUB_OUTPUT"
+        echo '{"status":"seeded-cache"}' > "$result"
+
+    - name: Run replay PBT
+      if: steps.prepare.outputs.run_pbt == 'true'
+      run: |
+        set -euo pipefail
+        props=()
+        if [[ "${{ inputs.property_set }}" == "smoke" ]]; then
+          props+=(--property deterministic)
+          props+=(--property metadata-emitted-metrics)
+          props+=(--property output-finite-values)
+          props+=(--property rate-finite-values)
+          props+=(--property monotonic-count-nonnegative)
+        fi
+
+        ddev env replay-pbt "$REPLAY_PBT_INTEGRATION" "$REPLAY_PBT_ENVIRONMENT" \
+          --fixture-ref "$REPLAY_PBT_FIXTURE_REF" \
+          --target-ref "$REPLAY_PBT_TARGET_REF" \
+          --replay-cache latest \
+          --readings "$REPLAY_PBT_READINGS" \
+          --artifacts "$REPLAY_PBT_ARTIFACTS" \
+          --overwrite \
+          "${props[@]}"
+
+        python - <<'PY' > "$REPLAY_PBT_RESULT_DIR/result.json"
+        import json, os
+        print(json.dumps({
+            "status": "passed",
+            "integration": os.environ["REPLAY_PBT_INTEGRATION"],
+            "environment": os.environ["REPLAY_PBT_ENVIRONMENT"],
+            "fixture_ref": os.environ["REPLAY_PBT_FIXTURE_REF"],
+            "cache_key": os.environ["REPLAY_PBT_CACHE_KEY"],
+            "mode": os.environ["REPLAY_PBT_MODE"],
+            "property_set": os.environ["REPLAY_PBT_PROPERTY_SET"],
+            "readings": os.environ["REPLAY_PBT_READINGS"],
+            "target_ref": os.environ["REPLAY_PBT_TARGET_REF"],
+            "shard_index": os.environ["REPLAY_PBT_SHARD_INDEX"],
+            "shard_count": os.environ["REPLAY_PBT_SHARD_COUNT"],
+        }, sort_keys=True))
+        PY
+
+    - name: Save replay cache
+      if: success() && steps.prepare.outputs.cache_ready == 'true' && steps.replay-cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      with:
+        path: .ddev/replay/${{ matrix.integration }}/${{ matrix.environment }}
+        key: ${{ matrix.cache_key }}
+
+    - name: Record failure result
+      if: failure()
+      run: |
+        mkdir -p "$REPLAY_PBT_RESULT_DIR"
+        python - <<'PY' > "$REPLAY_PBT_RESULT_DIR/result.json"
+        import json, os
+        print(json.dumps({
+            "status": "failed",
+            "integration": os.environ["REPLAY_PBT_INTEGRATION"],
+            "environment": os.environ["REPLAY_PBT_ENVIRONMENT"],
+            "fixture_ref": os.environ["REPLAY_PBT_FIXTURE_REF"],
+            "cache_key": os.environ["REPLAY_PBT_CACHE_KEY"],
+            "mode": os.environ["REPLAY_PBT_MODE"],
+            "property_set": os.environ["REPLAY_PBT_PROPERTY_SET"],
+            "readings": os.environ["REPLAY_PBT_READINGS"],
+            "target_ref": os.environ["REPLAY_PBT_TARGET_REF"],
+            "shard_index": os.environ["REPLAY_PBT_SHARD_INDEX"],
+            "shard_count": os.environ["REPLAY_PBT_SHARD_COUNT"],
+        }, sort_keys=True))
+        PY
+
+    - name: Upload result
+      if: always()
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      with:
+        name: replay-pbt-result-${{ inputs.property_set }}-${{ matrix.artifact_slug }}
+        path: ${{ runner.temp }}/replay-pbt-result
+        if-no-files-found: warn
+
+    - name: Upload failure artifacts
+      if: failure()
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      with:
+        name: replay-pbt-artifacts-${{ inputs.property_set }}-${{ matrix.artifact_slug }}
+        path: |
+          ${{ runner.temp }}/replay-pbt-artifacts
+          .ddev/replay/${{ matrix.integration }}/${{ matrix.environment }}
+        if-no-files-found: ignore
+
+  summarize:
+    name: Collect replay-PBT results
+    needs:
+    - compute-matrix
+    - replay-pbt
+    if: always() && needs.compute-matrix.outputs.matrix != '[]'
+    runs-on: ubuntu-22.04
+    permissions:
       contents: read
     steps:
-      - name: Get GitHub token via dd-octo-sts
-        uses: DataDog/dd-octo-sts-action@acaa02eee7e3bb0839e4272dacb37b8f3b58ba80
-        id: octo-sts
-        with:
-          scope: DataDog/integrations-core
-          policy: self.test-worker-poc
+    - name: Download result artifacts
+      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+      with:
+        pattern: replay-pbt-result-*
+        path: replay-pbt-results
+        merge-multiple: false
 
-      - name: Complete Check Run
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
-        with:
-          github-token: ${{ steps.octo-sts.outputs.token }}
-          script: |
-            const check_run_id = ${{ needs.create_check_run.outputs.check_run_id }};
-            const conclusion = '${{ needs.run_work.result }}';
+    - name: Build result table
+      run: |
+        python - <<'PY' | tee "$GITHUB_STEP_SUMMARY"
+        import json
+        from collections import Counter
+        from pathlib import Path
 
-            // Map actions conclusion to check run conclusion
-            // https://docs.github.com/en/rest/checks/runs?apiVersion=2022-11-28#update-a-check-run
-            let checkConclusion = conclusion;
-            if (conclusion === 'skipped') {
-              checkConclusion = 'neutral';
-            } else if (conclusion === 'cancelled') {
-              checkConclusion = 'cancelled';
-            } else if (conclusion === 'failure') {
-              checkConclusion = 'failure';
-            } else if (conclusion === 'success') {
-              checkConclusion = 'success';
-            }
+        rows = []
+        for path in Path('replay-pbt-results').glob('**/result.json'):
+            rows.append(json.loads(path.read_text()))
+        rows.sort(
+            key=lambda row: (
+                row.get('status', ''),
+                row.get('property_set', ''),
+                row.get('integration', ''),
+                row.get('environment', ''),
+            )
+        )
+        counts = Counter(row.get('status', 'unknown') for row in rows)
+        property_sets = Counter(row.get('property_set', 'unknown') for row in rows)
 
-            await github.rest.checks.update({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              check_run_id: check_run_id,
-              status: 'completed',
-              conclusion: checkConclusion,
-              details_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}',
-              output: {
-                title: 'Test Worker POC Completed - ${{ inputs.name }}',
-                summary: `The workflow completed with status: ${conclusion} for ${{ inputs.name }}.`
-              }
-            });
+        Path('replay-pbt-summary.json').write_text(json.dumps(rows, indent=2, sort_keys=True) + '\n')
+        tsv_columns = (
+            'status',
+            'mode',
+            'property_set',
+            'integration',
+            'environment',
+            'fixture_ref',
+            'target_ref',
+            'readings',
+            'shard_index',
+            'shard_count',
+            'cache_key',
+        )
+        with Path('replay-pbt-summary.tsv').open('w') as f:
+            f.write('\t'.join(tsv_columns) + '\n')
+            for row in rows:
+                f.write('\t'.join(str(row.get(key, '')) for key in tsv_columns) + '\n')
+
+        print('# Replay PBT summary')
+        print()
+        print(f'- Mode: ${{ inputs.mode }}')
+        print(f'- Property set input: ${{ inputs.property_set }}')
+        print(f'- Shard: ${{ inputs.shard_index }} of ${{ inputs.shard_count }}')
+        print(f'- Targets in matrix: ${{ needs.compute-matrix.outputs.count }}')
+        print(f'- Result files collected: {len(rows)}')
+        for status, count in sorted(counts.items()):
+            print(f'- {status}: {count}')
+        print()
+        print('## Property sets observed')
+        print()
+        for property_set, count in sorted(property_sets.items()):
+            print(f'- {property_set}: {count}')
+        print()
+        print('## Results')
+        print()
+        print('| status | mode | property set | integration | environment | fixture ref | target ref |')
+        print('|---|---|---|---|---|---|---|')
+        for row in rows:
+            print(
+                f"| {row.get('status', '')} | {row.get('mode', '')} | {row.get('property_set', '')} | "
+                f"{row.get('integration', '')} | {row.get('environment', '')} | "
+                f"{row.get('fixture_ref', '')} | {row.get('target_ref', '')} |"
+            )
+        PY
+
+    - name: Upload summary artifacts
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      with:
+        name: replay-pbt-summary-${{ inputs.property_set }}
+        path: |
+          replay-pbt-summary.json
+          replay-pbt-summary.tsv
+        if-no-files-found: error
