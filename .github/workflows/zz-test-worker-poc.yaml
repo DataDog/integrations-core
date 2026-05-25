@@ -280,7 +280,7 @@ jobs:
     - name: Run replay PBT
       if: steps.prepare.outputs.run_pbt == 'true'
       run: |
-        set -euo pipefail
+        set -uo pipefail
         props=()
         if [[ "${{ inputs.property_set }}" == "smoke" ]]; then
           props+=(--property deterministic)
@@ -290,6 +290,7 @@ jobs:
           props+=(--property monotonic-count-nonnegative)
         fi
 
+        log_path="$REPLAY_PBT_RESULT_DIR/replay-pbt.log"
         ddev env replay-pbt "$REPLAY_PBT_INTEGRATION" "$REPLAY_PBT_ENVIRONMENT" \
           --fixture-ref "$REPLAY_PBT_FIXTURE_REF" \
           --target-ref "$REPLAY_PBT_TARGET_REF" \
@@ -298,12 +299,34 @@ jobs:
           --adapters "$REPLAY_PBT_ADAPTERS" \
           --artifacts "$REPLAY_PBT_ARTIFACTS" \
           --overwrite \
-          "${props[@]}"
+          "${props[@]}" 2>&1 | tee "$log_path"
+        rc=${PIPESTATUS[0]}
+        export REPLAY_PBT_EXIT_CODE="$rc"
 
         python - <<'PY' > "$REPLAY_PBT_RESULT_DIR/result.json"
-        import json, os
+        import json
+        import os
+        import re
+        from pathlib import Path
+
+        rc = int(os.environ['REPLAY_PBT_EXIT_CODE'])
+        log_path = Path(os.environ['REPLAY_PBT_RESULT_DIR']) / 'replay-pbt.log'
+        text = log_path.read_text(errors='replace') if log_path.is_file() else ''
+        failed_tests = []
+        short_errors = []
+        for line in text.splitlines():
+            if line.startswith('FAILED '):
+                failed_tests.append(line.removeprefix('FAILED ').strip())
+            elif 'AssertionError:' in line or 'Error:' in line or 'Traceback' in line:
+                stripped = re.sub(r'\x1b\[[0-9;]*m', '', line).strip()
+                if stripped and len(short_errors) < 20:
+                    short_errors.append(stripped[:500])
+
         print(json.dumps({
-            "status": "passed",
+            "status": "passed" if rc == 0 else "failed",
+            "exit_code": rc,
+            "failed_tests": failed_tests,
+            "short_errors": short_errors,
             "integration": os.environ["REPLAY_PBT_INTEGRATION"],
             "environment": os.environ["REPLAY_PBT_ENVIRONMENT"],
             "fixture_ref": os.environ["REPLAY_PBT_FIXTURE_REF"],
@@ -316,6 +339,7 @@ jobs:
             "shard_count": os.environ["REPLAY_PBT_SHARD_COUNT"],
         }, sort_keys=True))
         PY
+        exit "$rc"
 
     - name: Save replay cache
       if: success() && steps.prepare.outputs.cache_ready == 'true' && steps.replay-cache.outputs.cache-hit != 'true'
@@ -328,10 +352,14 @@ jobs:
       if: failure()
       run: |
         mkdir -p "$REPLAY_PBT_RESULT_DIR"
+        if [[ -f "$REPLAY_PBT_RESULT_DIR/result.json" ]]; then
+          echo "Preserving replay-PBT result written by failed command"
+          exit 0
+        fi
         python - <<'PY' > "$REPLAY_PBT_RESULT_DIR/result.json"
         import json, os
         print(json.dumps({
-            "status": "failed",
+            "status": "failed-before-replay-pbt",
             "integration": os.environ["REPLAY_PBT_INTEGRATION"],
             "environment": os.environ["REPLAY_PBT_ENVIRONMENT"],
             "fixture_ref": os.environ["REPLAY_PBT_FIXTURE_REF"],
@@ -411,6 +439,9 @@ jobs:
             'fixture_ref',
             'target_ref',
             'readings',
+            'exit_code',
+            'failed_tests',
+            'short_errors',
             'shard_index',
             'shard_count',
             'cache_key',
@@ -437,13 +468,14 @@ jobs:
         print()
         print('## Results')
         print()
-        print('| status | mode | property set | integration | environment | fixture ref | target ref |')
-        print('|---|---|---|---|---|---|---|')
+        print('| status | mode | property set | integration | environment | fixture ref | target ref | failures |')
+        print('|---|---|---|---|---|---|---|---|')
         for row in rows:
             print(
                 f"| {row.get('status', '')} | {row.get('mode', '')} | {row.get('property_set', '')} | "
                 f"{row.get('integration', '')} | {row.get('environment', '')} | "
-                f"{row.get('fixture_ref', '')} | {row.get('target_ref', '')} |"
+                f"{row.get('fixture_ref', '')} | {row.get('target_ref', '')} | "
+                f"{'<br>'.join(row.get('failed_tests') or row.get('short_errors') or [])[:1000]} |"
             )
         PY
 
