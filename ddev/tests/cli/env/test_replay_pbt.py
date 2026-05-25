@@ -41,6 +41,9 @@ PROPERTIES = (
     'openmetrics-help-text',
     'openmetrics-help-removal',
     'metadata-emitted-metrics',
+    'output-finite-values',
+    'rate-finite-values',
+    'monotonic-count-nonnegative',
 )
 
 
@@ -113,6 +116,10 @@ def _run_compare_check_cache(
 
 def _read_normalized(run_dir: Path) -> dict:
     return json.loads((run_dir / 'new.normalized.json').read_text())
+
+
+RATE = 1
+MONOTONIC_COUNT = 3
 
 
 def _assert_normalized_output_contract(output: dict[str, Any]) -> None:
@@ -233,6 +240,36 @@ def _load_metadata_rows(repo_root: Path, integration: str) -> dict[str, dict[str
     return rows
 
 
+def _assert_rate_values_finite(output: dict[str, Any]) -> None:
+    seen = 0
+    for reading_output in _normalized_reading_outputs(output):
+        _assert_normalized_output_contract(reading_output)
+        for index, metric in enumerate(reading_output.get('metrics', [])):
+            if metric.get('type') != RATE:
+                continue
+            seen += 1
+            value = metric.get('value')
+            assert isinstance(value, int | float) and math.isfinite(value), f'rate metric[{index}] is not finite'
+    if seen == 0:
+        pytest.skip('No rate metrics emitted by this replay cache.')
+
+
+def _assert_monotonic_count_values_nonnegative(output: dict[str, Any]) -> None:
+    seen = 0
+    for reading_output in _normalized_reading_outputs(output):
+        _assert_normalized_output_contract(reading_output)
+        for index, metric in enumerate(reading_output.get('metrics', [])):
+            if metric.get('type') != MONOTONIC_COUNT:
+                continue
+            if str(metric.get('name', '')).endswith('.sum'):
+                continue
+            seen += 1
+            value = metric.get('value')
+            assert isinstance(value, int | float) and value >= 0, f'monotonic_count metric[{index}] is negative'
+    if seen == 0:
+        pytest.skip('No non-sum monotonic_count metrics emitted by this replay cache.')
+
+
 def _assert_emitted_metrics_match_metadata(output: dict[str, Any], metadata_rows: dict[str, dict[str, str]]) -> None:
     missing = []
     mismatched = []
@@ -336,6 +373,26 @@ def test_emitted_metrics_match_metadata_rejects_type_mismatch():
 
     with pytest.raises(AssertionError, match='type mismatches'):
         _assert_emitted_metrics_match_metadata(output, metadata_rows)
+
+
+def test_rate_values_finite_rejects_non_finite_rate():
+    output = {
+        'metrics': [{'name': 'example.rate', 'type': RATE, 'value': float('inf'), 'tags': []}],
+        'service_checks': [],
+    }
+
+    with pytest.raises(AssertionError, match='not finite'):
+        _assert_rate_values_finite(output)
+
+
+def test_monotonic_count_values_nonnegative_rejects_negative_count():
+    output = {
+        'metrics': [{'name': 'example.count', 'type': MONOTONIC_COUNT, 'value': -1.0, 'tags': []}],
+        'service_checks': [],
+    }
+
+    with pytest.raises(AssertionError, match='negative'):
+        _assert_monotonic_count_values_nonnegative(output)
 
 
 def test_cached_replay_is_deterministic_for_same_ref(replay_pbt_context: ReplayPBTContext):
@@ -469,6 +526,46 @@ def test_emitted_metrics_match_metadata(replay_pbt_context: ReplayPBTContext, va
     assert diff['changed'] is False
     metadata_rows = _load_metadata_rows(replay_pbt_context.repo, replay_pbt_context.integration)
     _assert_emitted_metrics_match_metadata(_read_normalized(property_dir), metadata_rows)
+
+
+@settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@given(validation=st.sampled_from(['finite-values']))
+def test_output_values_are_finite(replay_pbt_context: ReplayPBTContext, validation: str):
+    property_name = 'output-finite-values'
+    _skip_unselected(replay_pbt_context, property_name)
+    assert validation == 'finite-values'
+
+    property_dir = replay_pbt_context.artifacts / property_name
+    diff = _run_compare_check_cache(context=replay_pbt_context, cache=replay_pbt_context.cache, artifacts=property_dir)
+    assert diff['changed'] is False
+    for output in _normalized_reading_outputs(_read_normalized(property_dir)):
+        _assert_normalized_output_contract(output)
+
+
+@settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@given(validation=st.sampled_from(['rate-values-finite']))
+def test_rate_values_are_finite(replay_pbt_context: ReplayPBTContext, validation: str):
+    property_name = 'rate-finite-values'
+    _skip_unselected(replay_pbt_context, property_name)
+    assert validation == 'rate-values-finite'
+
+    property_dir = replay_pbt_context.artifacts / property_name
+    diff = _run_compare_check_cache(context=replay_pbt_context, cache=replay_pbt_context.cache, artifacts=property_dir)
+    assert diff['changed'] is False
+    _assert_rate_values_finite(_read_normalized(property_dir))
+
+
+@settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@given(validation=st.sampled_from(['monotonic-count-nonnegative']))
+def test_monotonic_count_values_are_nonnegative(replay_pbt_context: ReplayPBTContext, validation: str):
+    property_name = 'monotonic-count-nonnegative'
+    _skip_unselected(replay_pbt_context, property_name)
+    assert validation == 'monotonic-count-nonnegative'
+
+    property_dir = replay_pbt_context.artifacts / property_name
+    diff = _run_compare_check_cache(context=replay_pbt_context, cache=replay_pbt_context.cache, artifacts=property_dir)
+    assert diff['changed'] is False
+    _assert_monotonic_count_values_nonnegative(_read_normalized(property_dir))
 
 
 def _assert_mutated_cache_matches_original_output(

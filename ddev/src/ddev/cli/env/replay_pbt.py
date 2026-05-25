@@ -32,6 +32,9 @@ PROPERTIES = (
     'openmetrics-help-text',
     'openmetrics-help-removal',
     'metadata-emitted-metrics',
+    'output-finite-values',
+    'rate-finite-values',
+    'monotonic-count-nonnegative',
 )
 
 

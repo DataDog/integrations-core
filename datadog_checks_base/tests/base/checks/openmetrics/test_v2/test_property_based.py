@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Property-based tests for OpenMetricsBaseCheckV2."""
 
+import math
+
 import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
@@ -18,6 +20,12 @@ metric_names = st.from_regex(r'[a-z][0-9a-z]*(?:_[0-9a-z]+)*', fullmatch=True)
 metric_values = st.floats(min_value=-1e15, max_value=1e15, allow_nan=False, allow_infinity=False)
 # OM/Prometheus counters are monotonic counts, they must be GE 0.
 counter_values = st.floats(min_value=0, max_value=1e15, allow_nan=False, allow_infinity=False)
+histogram_bounds = st.lists(
+    st.floats(min_value=0.001, max_value=1e6, allow_nan=False, allow_infinity=False),
+    min_size=1,
+    max_size=8,
+    unique=True,
+).map(sorted)
 
 
 PROMETHEUS_HEADERS = {}
@@ -30,6 +38,19 @@ format_params = pytest.mark.parametrize(
         pytest.param(OPENMETRICS_HEADERS, "\n# EOF", id="openmetrics"),
     ],
 )
+
+
+def _submitted_metrics(aggregator, names):
+    return [metric for name in names for metric in aggregator._metrics.get(name, [])]
+
+
+def _assert_metrics_are_nonnegative_monotonic_counts(aggregator, names):
+    metrics = _submitted_metrics(aggregator, names)
+    assert metrics, f'Expected monotonic count submissions for {sorted(names)}'
+    for metric in metrics:
+        assert metric.type == aggregator.MONOTONIC_COUNT
+        assert math.isfinite(metric.value)
+        assert metric.value >= 0
 
 
 def _missing_metrics_msg(expected, submitted):
@@ -81,6 +102,30 @@ def openmetrics_counter_payload_and_names(draw):
     OpenMetrics parser instead of the Prometheus text parser.
     """
     return _build_payload_and_names(draw, "counter", counter_values, sample_suffix="_total", footer="# EOF")
+
+
+@st.composite
+def histogram_payload_and_names(draw):
+    names = draw(st.lists(metric_names, min_size=1, max_size=8, unique=True))
+    lines = []
+    for name in names:
+        bounds = draw(histogram_bounds)
+        bucket_values = []
+        current = draw(counter_values)
+        for _bound in bounds:
+            current += draw(counter_values)
+            bucket_values.append(current)
+        count = current + draw(counter_values)
+        total = count + draw(counter_values)
+
+        lines.append(f'# HELP {name} generated')
+        lines.append(f'# TYPE {name} histogram')
+        for bound, value in zip(bounds, bucket_values, strict=True):
+            lines.append(f'{name}_bucket{{le="{bound:.17g}"}} {value:.17g}')
+        lines.append(f'{name}_bucket{{le="+Inf"}} {count:.17g}')
+        lines.append(f'{name}_count {count:.17g}')
+        lines.append(f'{name}_sum {total:.17g}')
+    return '\n'.join(lines), names
 
 
 @st.composite
@@ -198,6 +243,7 @@ def test_prometheus_counter_submissions_are_suffixed_with_count(aggregator, dd_r
     expected = {f"test.{name}.count" for name in names}
 
     assert expected <= submitted, _missing_metrics_msg(expected, submitted)
+    _assert_metrics_are_nonnegative_monotonic_counts(aggregator, expected)
 
 
 @given(data=openmetrics_counter_payload_and_names())
@@ -221,6 +267,7 @@ def test_openmetrics_counter_submissions_are_suffixed_with_count(aggregator, dd_
     expected = {f"test.{name}.count" for name in names}
 
     assert expected <= submitted, _missing_metrics_msg(expected, submitted)
+    _assert_metrics_are_nonnegative_monotonic_counts(aggregator, expected)
 
 
 @counter_format_params
@@ -246,3 +293,28 @@ def test_counter_submission_count_lower_bound(
     expected = {f"test.{name}.count" for name in mapped}
 
     assert expected <= submitted, _missing_metrics_msg(expected, submitted)
+    _assert_metrics_are_nonnegative_monotonic_counts(aggregator, expected)
+
+
+@given(data=histogram_payload_and_names())
+def test_histogram_default_submissions_are_nonnegative_monotonic_counts(
+    aggregator, dd_run_check, mock_http_response, data
+):
+    """Default V2 histograms submit count/sum/bucket metrics as monotonic counts."""
+    payload, names = data
+
+    aggregator.reset()
+    mock_http_response(payload)
+    check = get_check({"metrics": [".+"]})
+    dd_run_check(check)
+    dd_run_check(check)
+
+    submitted = set(aggregator.metric_names)
+    expected = {
+        metric_name
+        for name in names
+        for metric_name in (f"test.{name}.bucket", f"test.{name}.count", f"test.{name}.sum")
+    }
+
+    assert expected <= submitted, _missing_metrics_msg(expected, submitted)
+    _assert_metrics_are_nonnegative_monotonic_counts(aggregator, expected)
