@@ -202,10 +202,7 @@ def dd_environment(dd_save_state):
                     "use_openmetrics": "true",
                 }
                 CheckEndpoints(
-                    [
-                        instance[endpoint]
-                        for endpoint in ("ztunnel_endpoint", "waypoint_endpoint", "istiod_endpoint")
-                    ],
+                    [instance[endpoint] for endpoint in ("ztunnel_endpoint", "waypoint_endpoint", "istiod_endpoint")],
                     attempts=30,
                 )()
                 dd_save_state("istio_instance", instance)

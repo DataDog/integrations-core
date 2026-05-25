@@ -432,6 +432,7 @@ def _compare_one_environment(
                         reading_interval=reading_interval,
                     )
             elif same_fixture:
+                assert fixture_env is not None
                 phase = 'environment_setup'
                 if _ensure_environment(ctx, integration, storage, fixture_env, recreate):
                     started_envs.append(fixture_env)
@@ -1078,7 +1079,7 @@ def _collection_totals(envelope: dict) -> dict[str, int]:
 
 
 def _merge_collection_diffs(reading_diffs: list[dict]) -> dict:
-    merged = {name: {'added': [], 'removed': []} for name in OUTPUT_COLLECTIONS}
+    merged: dict[str, dict[str, list]] = {name: {'added': [], 'removed': []} for name in OUTPUT_COLLECTIONS}
     for reading_diff in reading_diffs:
         for name in OUTPUT_COLLECTIONS:
             collection = reading_diff.get('collections', {}).get(name, {})
@@ -1115,7 +1116,7 @@ def _write_diff_artifacts(artifacts: StdPath) -> dict:
     status = json.loads(status_file.read_text()) if status_file.is_file() else {}
     missing = [name for name in ('record.raw.json', 'replay.raw.json') if not (artifacts / name).is_file()]
     if missing:
-        diff = {
+        diff: dict = {
             'changed': True,
             'incomplete': True,
             'missing_artifacts': missing,
