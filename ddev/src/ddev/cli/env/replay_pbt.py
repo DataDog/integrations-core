@@ -1,27 +1,24 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Run property/metamorphic checks against cached integration replay artifacts.
+"""Thin CLI wrapper for cached integration replay property tests.
 
-This command is the user-facing entry point for testing a real integration with
-adapter-saved replay data. It deliberately builds on ``compare-check`` cached
-replay instead of starting E2E environments: first replay a cache through the
-real check as a baseline, then optionally mutate a copy of the cache and assert
-that evidence-backed invariants still hold over normalized check output.
+The actual replay-PBT assertions live in pytest so they get normal test output,
+Hypothesis integration, and focused failure reporting. This command only turns a
+user-friendly `ddev env replay-pbt ...` invocation into a configured pytest run
+against the integration replay-PBT test module.
 """
 
 from __future__ import annotations
 
-import json
+import os
 import shutil
+import sys
 from datetime import datetime, timezone
 from pathlib import Path as StdPath
 from typing import TYPE_CHECKING
 
 import click
-from datadog_checks.dev.replay.pbt.cache import copy_replay_cache, mutate_request_capture_label_order
-
-from ddev.cli.env.compare_check import compare_check
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
@@ -78,90 +75,34 @@ def replay_pbt(
     app: Application = ctx.obj
     selected_properties = properties or PROPERTIES
     run_root = _resolve_replay_pbt_root(app.repo.path, artifacts, intg_name, environment, git_ref, overwrite)
+    ddev_dir = StdPath(str(app.repo.path)) / 'ddev'
+
     app.display_header(f'Replay PBT: {intg_name}:{environment}')
     app.display_info(f'Writing replay-pbt artifacts to {run_root}')
 
-    summaries = []
-    materialized_cache: StdPath | None = None
-    baseline_normalized: dict | None = None
+    env = os.environ.copy()
+    env.update(
+        {
+            'DDEV_REPLAY_PBT_INTEGRATION': intg_name,
+            'DDEV_REPLAY_PBT_ENVIRONMENT': environment,
+            'DDEV_REPLAY_PBT_CACHE': replay_cache,
+            'DDEV_REPLAY_PBT_REF': git_ref,
+            'DDEV_REPLAY_PBT_PROPERTIES': ','.join(selected_properties),
+            'DDEV_REPLAY_PBT_ARTIFACTS': str(run_root),
+        }
+    )
+    if check_class:
+        env['DDEV_REPLAY_PBT_CHECK_CLASS'] = check_class
+    if old_hatch_env:
+        env['DDEV_REPLAY_PBT_OLD_ENV'] = old_hatch_env
+    if new_hatch_env:
+        env['DDEV_REPLAY_PBT_NEW_ENV'] = new_hatch_env
 
-    if PROPERTY_DETERMINISTIC in selected_properties:
-        first_dir = run_root / PROPERTY_DETERMINISTIC / 'first'
-        second_dir = run_root / PROPERTY_DETERMINISTIC / 'second'
-        _run_compare_check(
-            ctx,
-            intg_name=intg_name,
-            environment=environment,
-            git_ref=git_ref,
-            replay_cache=replay_cache,
-            check_class=check_class,
-            old_hatch_env=old_hatch_env,
-            new_hatch_env=new_hatch_env,
-            artifacts=first_dir,
-        )
-        _run_compare_check(
-            ctx,
-            intg_name=intg_name,
-            environment=environment,
-            git_ref=git_ref,
-            replay_cache=str(first_dir),
-            check_class=check_class,
-            old_hatch_env=old_hatch_env,
-            new_hatch_env=new_hatch_env,
-            artifacts=second_dir,
-        )
-        first_normalized = _read_normalized(first_dir)
-        second_normalized = _read_normalized(second_dir)
-        if first_normalized != second_normalized:
-            raise click.ClickException('deterministic replay property failed: normalized outputs differ')
-        materialized_cache = first_dir
-        baseline_normalized = first_normalized
-        summaries.append('deterministic: passed')
-
-    if PROPERTY_OPENMETRICS_LABEL_ORDER in selected_properties:
-        property_dir = run_root / PROPERTY_OPENMETRICS_LABEL_ORDER
-        original_dir = property_dir / 'original'
-        mutated_dir = property_dir / 'mutated'
-        if materialized_cache is None or baseline_normalized is None:
-            _run_compare_check(
-                ctx,
-                intg_name=intg_name,
-                environment=environment,
-                git_ref=git_ref,
-                replay_cache=replay_cache,
-                check_class=check_class,
-                old_hatch_env=old_hatch_env,
-                new_hatch_env=new_hatch_env,
-                artifacts=original_dir,
-            )
-            materialized_cache = original_dir
-            baseline_normalized = _read_normalized(original_dir)
-
-        mutated_cache = property_dir / 'mutated-cache'
-        copy_replay_cache(materialized_cache, mutated_cache)
-        changed_records = mutate_request_capture_label_order(mutated_cache)
-        if changed_records == 0:
-            summaries.append('openmetrics-label-order: skipped (no reorderable request records)')
-        else:
-            _run_compare_check(
-                ctx,
-                intg_name=intg_name,
-                environment=environment,
-                git_ref=git_ref,
-                replay_cache=str(mutated_cache),
-                check_class=check_class,
-                old_hatch_env=old_hatch_env,
-                new_hatch_env=new_hatch_env,
-                artifacts=mutated_dir,
-            )
-            mutated_normalized = _read_normalized(mutated_dir)
-            if baseline_normalized != mutated_normalized:
-                raise click.ClickException('openmetrics-label-order property failed: normalized outputs differ')
-            summaries.append(f'openmetrics-label-order: passed ({changed_records} mutated records)')
-
-    (run_root / 'summary.json').write_text(json.dumps({'properties': summaries}, indent=2, sort_keys=True) + '\n')
-    for summary in summaries:
-        app.display_success(summary)
+    app.platform.check_command(
+        [sys.executable, '-m', 'pytest', 'tests/cli/env/test_replay_pbt.py'],
+        cwd=ddev_dir,
+        env=env,
+    )
 
 
 def _resolve_replay_pbt_root(
@@ -181,40 +122,6 @@ def _resolve_replay_pbt_root(
         shutil.rmtree(run_root)
     run_root.mkdir(parents=True)
     return run_root
-
-
-def _run_compare_check(
-    ctx: click.Context,
-    *,
-    intg_name: str,
-    environment: str,
-    git_ref: str,
-    replay_cache: str,
-    check_class: str | None,
-    old_hatch_env: str | None,
-    new_hatch_env: str | None,
-    artifacts: StdPath,
-) -> None:
-    ctx.invoke(
-        compare_check,
-        intg_name=intg_name,
-        environment=environment,
-        old_ref=git_ref,
-        new_ref=git_ref,
-        check_class=check_class,
-        artifacts=artifacts,
-        exact_artifacts_dir=True,
-        overwrite=True,
-        replay_cache=replay_cache,
-        old_hatch_env=old_hatch_env,
-        new_hatch_env=new_hatch_env,
-        comparison_mode='same-fixture-replay',
-        recreate=False,
-    )
-
-
-def _read_normalized(run_dir: StdPath) -> dict:
-    return json.loads((run_dir / 'new.normalized.json').read_text())
 
 
 def _slug(value: str) -> str:
