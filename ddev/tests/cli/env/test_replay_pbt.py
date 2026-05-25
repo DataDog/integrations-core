@@ -60,6 +60,7 @@ class ReplayPBTContext:
         self.repo = Path(config.get('repo') or Path(__file__).resolve().parents[4])
         self.readings = config.get('readings') or 1
         self.check_class = config.get('check_class')
+        self.adapters = config.get('adapters') or 'all'
         self.record_env = config.get('record_env') or config.get('old_env')
         self.replay_env = config.get('replay_env') or config.get('new_env')
 
@@ -105,6 +106,8 @@ def _run_compare_check_cache(
         '--overwrite',
         '--readings',
         str(context.readings),
+        '--adapters',
+        context.adapters,
     ]
     if context.check_class:
         command.extend(['--check-class', context.check_class])

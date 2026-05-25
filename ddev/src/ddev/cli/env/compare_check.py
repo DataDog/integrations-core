@@ -119,6 +119,12 @@ OUTPUT_COLLECTIONS = (
     type=float,
     help='Logical seconds between check readings.',
 )
+@click.option(
+    '--adapters',
+    default=REPLAY_ADAPTER,
+    show_default=True,
+    help='Comma-separated replay adapters to record/replay, or "all".',
+)
 @click.pass_context
 def compare_check(
     ctx: click.Context,
@@ -139,6 +145,7 @@ def compare_check(
     readings: int,
     replay_time: float,
     reading_interval: float,
+    adapters: str,
 ):
     """
     Compare no-Agent check output across two integrations-core refs.
@@ -150,7 +157,7 @@ def compare_check(
 
     app: Application = ctx.obj
     integration = app.repo.integrations.get(intg_name)
-    adapter = REPLAY_ADAPTER
+    adapter = adapters
     storage = EnvDataStorage(app.data_dir)
     if comparison_mode == 'record-each-side':
         if environment is not None:
@@ -1032,6 +1039,8 @@ def _run_hatch(
         str(replay_time),
         '--reading-interval',
         str(reading_interval),
+        '--adapters',
+        adapter,
     ]
     if check_class:
         run_args.extend(('--check-class', check_class))

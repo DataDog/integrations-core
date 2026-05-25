@@ -100,6 +100,7 @@ PROPERTIES = (
 @click.option(
     '--check-cache-only', is_flag=True, help='Validate replay-cache suitability and exit without running tests.'
 )
+@click.option('--adapters', default='all', show_default=True, help='Comma-separated replay adapters, or "all".')
 @click.pass_context
 def replay_pbt(
     ctx: click.Context,
@@ -117,6 +118,7 @@ def replay_pbt(
     artifacts: StdPath | None,
     overwrite: bool,
     check_cache_only: bool,
+    adapters: str,
 ) -> None:
     """Run cached replay PBT/metamorphic checks for one integration environment."""
     app: Application = ctx.obj
@@ -136,6 +138,7 @@ def replay_pbt(
             replay_hatch_env=replay_hatch_env,
             check_class=check_class,
             readings=readings,
+            adapters=adapters,
         )
         app.display_success(f'Replay cache is suitable: {resolved_cache}')
         return
@@ -160,6 +163,7 @@ def replay_pbt(
         'repo': str(app.repo.path),
         'readings': readings,
         'check_class': check_class,
+        'adapters': adapters,
         'record_env': record_hatch_env,
         'replay_env': replay_hatch_env,
         # Backward-compatible keys for older direct pytest invocations.
@@ -206,8 +210,9 @@ def _check_replay_cache(
     replay_hatch_env: str | None,
     check_class: str | None,
     readings: int,
+    adapters: str,
 ) -> StdPath | None:
-    from ddev.cli.env.compare_check import REPLAY_ADAPTER, _git_rev_parse, _resolve_replay_cache
+    from ddev.cli.env.compare_check import _git_rev_parse, _resolve_replay_cache
 
     record_head = _git_rev_parse(app.repo.path, fixture_ref)
     replay_head = _git_rev_parse(app.repo.path, target_ref)
@@ -216,7 +221,7 @@ def _check_replay_cache(
         intg_name,
         environment,
         replay_cache,
-        REPLAY_ADAPTER,
+        adapters,
         record_hatch_env or environment,
         replay_hatch_env or environment,
         'same-fixture-replay',

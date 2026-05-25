@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
 from typing import Any
 
@@ -23,25 +22,28 @@ from datadog_checks.dev.replay.adapters.subprocess import (
 from datadog_checks.dev.replay.adapters.tcp import install_live_recording_tcp_clients, install_replay_tcp_clients
 
 ADAPTERS = ('requests', 'subprocess', 'tcp', 'process', 'psycopg')
-ADAPTER_ENV_VAR = 'DD_REPLAY_ADAPTERS'
 MODES = ('record', 'replay')
 
 
 def install_replay_adapters(
-    monkeypatch: pytest.MonkeyPatch, mode: str, fixture_path: Path, check_name: str | None = None
+    monkeypatch: pytest.MonkeyPatch,
+    mode: str,
+    fixture_path: Path,
+    check_name: str | None = None,
+    adapters: tuple[str, ...] | None = None,
 ) -> dict[str, list[dict[str, Any]]]:
     """Install all available replay adapters into the current pytest process."""
     if mode == 'record':
-        return _install_recording_adapters(monkeypatch, fixture_path, check_name)
+        return _install_recording_adapters(monkeypatch, fixture_path, check_name, adapters)
     if mode == 'replay':
-        return _install_replay_adapters(monkeypatch, fixture_path, check_name)
+        return _install_replay_adapters(monkeypatch, fixture_path, check_name, adapters)
     raise AssertionError('unsupported replay mode')
 
 
 def _install_recording_adapters(
-    monkeypatch: pytest.MonkeyPatch, fixture_path: Path, check_name: str | None
+    monkeypatch: pytest.MonkeyPatch, fixture_path: Path, check_name: str | None, adapters: tuple[str, ...] | None
 ) -> dict[str, list[dict[str, Any]]]:
-    enabled_adapters = set(_enabled_adapters())
+    enabled_adapters = set(_enabled_adapters(adapters))
     installed: dict[str, list[dict[str, Any]]] = {}
     for adapter in ADAPTERS:
         if adapter not in enabled_adapters:
@@ -61,10 +63,10 @@ def _install_recording_adapters(
 
 
 def _install_replay_adapters(
-    monkeypatch: pytest.MonkeyPatch, fixture_path: Path, check_name: str | None
+    monkeypatch: pytest.MonkeyPatch, fixture_path: Path, check_name: str | None, adapters: tuple[str, ...] | None
 ) -> dict[str, list[dict[str, Any]]]:
     manifest = read_fixture_manifest(fixture_path)
-    enabled_adapters = set(_enabled_adapters())
+    enabled_adapters = set(_enabled_adapters(adapters))
     installed: dict[str, list[dict[str, Any]]] = {}
     for adapter in manifest['adapters']:
         if adapter not in enabled_adapters:
@@ -76,15 +78,13 @@ def _install_replay_adapters(
     return installed
 
 
-def _enabled_adapters() -> tuple[str, ...]:
-    configured = os.environ.get(ADAPTER_ENV_VAR)
-    if not configured:
+def _enabled_adapters(adapters: tuple[str, ...] | None) -> tuple[str, ...]:
+    if adapters is None:
         return ADAPTERS
 
-    adapters = tuple(adapter.strip() for adapter in configured.split(',') if adapter.strip())
     unknown = sorted(set(adapters) - set(ADAPTERS))
     if unknown:
-        raise AssertionError(f'unsupported replay adapter in {ADAPTER_ENV_VAR}: {", ".join(unknown)}')
+        raise AssertionError(f'unsupported replay adapter: {", ".join(unknown)}')
     return adapters
 
 

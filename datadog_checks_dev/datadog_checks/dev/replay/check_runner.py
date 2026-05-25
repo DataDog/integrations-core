@@ -8,6 +8,8 @@ import sys
 import tempfile
 from pathlib import Path
 
+from datadog_checks.dev.replay.adapters import ADAPTERS
+
 
 def _write_pytest_file(path: Path, args: argparse.Namespace) -> None:
     path.write_text(
@@ -34,7 +36,13 @@ def test_replay_check_runner(monkeypatch, aggregator, datadog_agent, dd_run_chec
     config = json.loads(Path({str(args.config)!r}).read_text())
     instances = config.get('instances', [config])
     fixture = Path({str(args.fixture)!r})
-    adapter_records = install_replay_adapters(monkeypatch, {args.mode!r}, fixture, {args.check_name!r})
+    adapter_records = install_replay_adapters(
+        monkeypatch,
+        {args.mode!r},
+        fixture,
+        {args.check_name!r},
+        adapters={args.adapters_tuple!r},
+    )
 
     readings = {args.readings!r}
     checks = build_check_instances({args.check_class!r}, instances, {args.check_name!r})
@@ -78,10 +86,23 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument('--readings', type=int, default=1)
     parser.add_argument('--replay-time', type=float, default=1_700_000_000.0)
     parser.add_argument('--reading-interval', type=float, default=15.0)
+    parser.add_argument(
+        '--adapters',
+        default='all',
+        help='Comma-separated replay adapters to install. Defaults to all adapters.',
+    )
     args = parser.parse_args(argv)
 
     if args.readings < 1:
         parser.error('--readings must be >= 1')
+
+    if args.adapters == 'all':
+        args.adapters_tuple = None
+    else:
+        args.adapters_tuple = tuple(adapter.strip() for adapter in args.adapters.split(',') if adapter.strip())
+        unknown = sorted(set(args.adapters_tuple) - set(ADAPTERS))
+        if unknown:
+            parser.error(f'unsupported replay adapter(s): {", ".join(unknown)}')
 
     args.fixture.parent.mkdir(parents=True, exist_ok=True)
     args.output.parent.mkdir(parents=True, exist_ok=True)

@@ -397,7 +397,7 @@ def test_psycopg_replay_round_trips_query_rows(monkeypatch, tmp_path, sql, param
     assert list(cursor) == rows
 
 
-def test_adapter_env_var_can_disable_tcp(monkeypatch, tmp_path):
+def test_adapter_argument_can_disable_tcp(monkeypatch, tmp_path):
     from datadog_checks.dev.replay.adapters import install_replay_adapters
 
     fixture = tmp_path / 'capture.json'
@@ -415,8 +415,6 @@ def test_adapter_env_var_can_disable_tcp(monkeypatch, tmp_path):
     (tmp_path / 'capture.requests.json').write_text('[]')
     (tmp_path / 'capture.tcp.json').write_text('[]')
 
-    monkeypatch.setenv('DD_REPLAY_ADAPTERS', 'requests')
-
-    installed = install_replay_adapters(monkeypatch, 'replay', fixture, 'example')
+    installed = install_replay_adapters(monkeypatch, 'replay', fixture, 'example', adapters=('requests',))
 
     assert set(installed) == {'requests'}

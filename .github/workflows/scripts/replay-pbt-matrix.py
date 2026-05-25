@@ -123,7 +123,8 @@ def main() -> None:
                 'readings': args.readings,
                 'artifact_slug': slug(f'{integration}-{environment}'),
                 'cache_key': 'replay-pbt-v4-'
-                f'{slug(integration)}-{slug(environment)}-readings{slug(args.readings)}-fixture-{slug(fixture_ref)}',
+                f'{slug(integration)}-{slug(environment)}-readings{slug(args.readings)}-fixture-{slug(fixture_ref)}'
+                '-adapters-notcp',
             }
         )
 

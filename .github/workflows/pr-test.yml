@@ -111,8 +111,8 @@ jobs:
       REPLAY_PBT_ENVIRONMENT: py3.13-2.10
       REPLAY_PBT_FIXTURE_REF: krakend-1.4.1
       REPLAY_PBT_READINGS: "2"
-      REPLAY_PBT_CACHE_KEY: replay-pbt-v4-krakend-py3.13-2.10-readings2-fixture-krakend-1.4.1
-      DD_REPLAY_ADAPTERS: requests,subprocess,process,psycopg
+      REPLAY_PBT_ADAPTERS: requests,subprocess,process,psycopg
+      REPLAY_PBT_CACHE_KEY: replay-pbt-v4-krakend-py3.13-2.10-readings2-fixture-krakend-1.4.1-adapters-notcp
 
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -158,6 +158,7 @@ jobs:
           --target-ref HEAD \
           --replay-cache latest \
           --readings "$REPLAY_PBT_READINGS" \
+          --adapters "$REPLAY_PBT_ADAPTERS" \
           --check-cache-only; then
           echo "Found suitable restored replay cache"
           exit 0
@@ -167,7 +168,8 @@ jobs:
         ddev env compare-check "$REPLAY_PBT_INTEGRATION" "$REPLAY_PBT_ENVIRONMENT" \
           --record-ref "$REPLAY_PBT_FIXTURE_REF" \
           --replay-ref HEAD \
-          --readings "$REPLAY_PBT_READINGS"
+          --readings "$REPLAY_PBT_READINGS" \
+          --adapters "$REPLAY_PBT_ADAPTERS"
 
     - name: Run replay PBT
       run: |
@@ -176,6 +178,7 @@ jobs:
           --target-ref HEAD \
           --replay-cache latest \
           --readings "$REPLAY_PBT_READINGS" \
+          --adapters "$REPLAY_PBT_ADAPTERS" \
           --property deterministic \
           --property metadata-emitted-metrics \
           --artifacts "$RUNNER_TEMP/replay-pbt" \

@@ -188,7 +188,7 @@ jobs:
       REPLAY_PBT_SHARD_COUNT: ${{ inputs.shard_count }}
       REPLAY_PBT_RESULT_DIR: ${{ runner.temp }}/replay-pbt-result
       REPLAY_PBT_ARTIFACTS: ${{ runner.temp }}/replay-pbt-artifacts
-      DD_REPLAY_ADAPTERS: requests,subprocess,process,psycopg
+      REPLAY_PBT_ADAPTERS: requests,subprocess,process,psycopg
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
@@ -233,6 +233,7 @@ jobs:
           --target-ref "$REPLAY_PBT_TARGET_REF" \
           --replay-cache latest \
           --readings "$REPLAY_PBT_READINGS" \
+          --adapters "$REPLAY_PBT_ADAPTERS" \
           --check-cache-only; then
           echo "run_pbt=true" >> "$GITHUB_OUTPUT"
           echo "cache_ready=true" >> "$GITHUB_OUTPUT"
@@ -269,7 +270,8 @@ jobs:
         ddev env compare-check "$REPLAY_PBT_INTEGRATION" "$REPLAY_PBT_ENVIRONMENT" \
           --record-ref "$REPLAY_PBT_FIXTURE_REF" \
           --replay-ref "$REPLAY_PBT_TARGET_REF" \
-          --readings "$REPLAY_PBT_READINGS"
+          --readings "$REPLAY_PBT_READINGS" \
+          --adapters "$REPLAY_PBT_ADAPTERS"
 
         echo "run_pbt=true" >> "$GITHUB_OUTPUT"
         echo "cache_ready=true" >> "$GITHUB_OUTPUT"
@@ -293,6 +295,7 @@ jobs:
           --target-ref "$REPLAY_PBT_TARGET_REF" \
           --replay-cache latest \
           --readings "$REPLAY_PBT_READINGS" \
+          --adapters "$REPLAY_PBT_ADAPTERS" \
           --artifacts "$REPLAY_PBT_ARTIFACTS" \
           --overwrite \
           "${props[@]}"
