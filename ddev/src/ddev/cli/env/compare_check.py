@@ -206,7 +206,7 @@ def _compare_one_environment(
             }
             (run_dir / 'refs.json').write_text(json.dumps(refs, indent=2, sort_keys=True) + '\n')
 
-            _run_container(
+            old_returncode = _run_container(
                 repo=old_tree,
                 platform_repo=StdPath(str(app.repo.path)),
                 artifacts=run_dir,
@@ -215,9 +215,15 @@ def _compare_one_environment(
                 check_name=integration.name,
                 check_class=check_class,
                 mode='record',
+                fixture_name='capture.json',
                 output_name='old.raw.json',
             )
-            _run_container(
+
+            # Prefer replaying the old fixture. If old failed before writing any fixture at all,
+            # still run the new side in record mode so both refs get a best-effort execution result.
+            new_mode = 'replay' if (run_dir / 'capture.json').is_file() else 'record'
+            new_fixture = 'capture.json' if new_mode == 'replay' else 'new.capture.json'
+            new_returncode = _run_container(
                 repo=new_tree,
                 platform_repo=StdPath(str(app.repo.path)),
                 artifacts=run_dir,
@@ -225,19 +231,34 @@ def _compare_one_environment(
                 integration=integration.name,
                 check_name=integration.name,
                 check_class=check_class,
-                mode='replay',
+                mode=new_mode,
+                fixture_name=new_fixture,
                 output_name='new.raw.json',
             )
+            status = {
+                'old_returncode': old_returncode,
+                'new_returncode': new_returncode,
+                'new_mode': new_mode,
+                'comparable': old_returncode == 0 and new_returncode == 0 and new_mode == 'replay',
+            }
+            (run_dir / 'run_status.json').write_text(json.dumps(status, indent=2, sort_keys=True) + '\n')
     finally:
         if started_env:
-            ctx.invoke(stop, intg_name=integration.name, environment=environment, ignore_state=False)
+            try:
+                ctx.invoke(stop, intg_name=integration.name, environment=environment, ignore_state=False)
+            except Exception as e:
+                app.display_warning(f'Failed to stop environment {integration.name}:{environment}: {e}')
 
     return run_dir, _write_diff_artifacts(run_dir)
 
 
 def _format_diff_summary(diff: dict) -> str:
+    status = diff.get('run_status', {})
+    prefix = 'Incomplete; ' if diff.get('incomplete') else ''
     return (
-        f'Changed: {diff["changed"]}; '
+        f'{prefix}Changed: {diff["changed"]}; '
+        f'old rc {status.get("old_returncode", "?")}; '
+        f'new rc {status.get("new_returncode", "?")}; '
         f'metrics +{len(diff["collections"]["metrics"]["added"])} '
         f'-{len(diff["collections"]["metrics"]["removed"])}'
     )
@@ -314,8 +335,9 @@ def _run_container(
     check_name: str,
     check_class: str | None,
     mode: str,
+    fixture_name: str,
     output_name: str,
-) -> None:
+) -> int:
     python = '/opt/datadog-agent/embedded/bin/python'
     install = ' && '.join(
         [
@@ -332,7 +354,7 @@ def _run_container(
         '--config /artifacts/config.json',
         '--mode',
         mode,
-        '--fixture /artifacts/capture.json',
+        f'--fixture /artifacts/{fixture_name}',
         '--output',
         f'/artifacts/{output_name}',
     ]
@@ -340,7 +362,7 @@ def _run_container(
         run_args.extend(('--check-class', shlex.quote(check_class)))
     run = ' '.join(run_args)
     command = f'{install} && {run}'
-    subprocess.run(
+    result = subprocess.run(
         [
             'docker',
             'run',
@@ -361,19 +383,47 @@ def _run_container(
             '-lc',
             command,
         ],
-        check=True,
+        check=False,
     )
+    return result.returncode
 
 
 def _write_diff_artifacts(artifacts: StdPath) -> dict:
     from datadog_checks.dev.replay.diff import diff_outputs
     from datadog_checks.dev.replay.normalize import normalize_output
 
+    status_file = artifacts / 'run_status.json'
+    status = json.loads(status_file.read_text()) if status_file.is_file() else {}
+    missing = [name for name in ('old.raw.json', 'new.raw.json') if not (artifacts / name).is_file()]
+    if missing:
+        diff = {
+            'changed': True,
+            'incomplete': True,
+            'missing_artifacts': missing,
+            'run_status': status,
+            'collections': {
+                'metrics': {'added': [], 'removed': []},
+                'service_checks': {'added': [], 'removed': []},
+                'events': {'added': [], 'removed': []},
+            },
+        }
+        (artifacts / 'diff.json').write_text(json.dumps(diff, indent=2, sort_keys=True) + '\n')
+        (artifacts / 'summary.md').write_text(
+            '# compare-check summary\n\n'
+            '- Incomplete: True\n'
+            f'- Missing artifacts: {", ".join(missing)}\n'
+            f'- Old return code: {status.get("old_returncode", "unknown")}\n'
+            f'- New return code: {status.get("new_returncode", "unknown")}\n'
+            f'- New mode: {status.get("new_mode", "unknown")}\n'
+        )
+        return diff
+
     old_raw = json.loads((artifacts / 'old.raw.json').read_text())
     new_raw = json.loads((artifacts / 'new.raw.json').read_text())
     old_normalized = normalize_output(old_raw)
     new_normalized = normalize_output(new_raw)
     diff = diff_outputs(old_normalized, new_normalized)
+    diff['run_status'] = status
 
     (artifacts / 'old.normalized.json').write_text(json.dumps(old_normalized, indent=2, sort_keys=True) + '\n')
     (artifacts / 'new.normalized.json').write_text(json.dumps(new_normalized, indent=2, sort_keys=True) + '\n')
@@ -381,6 +431,9 @@ def _write_diff_artifacts(artifacts: StdPath) -> dict:
     (artifacts / 'summary.md').write_text(
         '# compare-check summary\n\n'
         f'- Changed: {diff["changed"]}\n'
+        f'- Comparable: {status.get("comparable", True)}\n'
+        f'- Old return code: {status.get("old_returncode", 0)}\n'
+        f'- New return code: {status.get("new_returncode", 0)}\n'
         f'- Old metrics: {len(old_normalized["metrics"])}\n'
         f'- New metrics: {len(new_normalized["metrics"])}\n'
         f'- Metric records added: {len(diff["collections"]["metrics"]["added"])}\n'
