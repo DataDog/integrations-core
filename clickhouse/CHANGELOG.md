@@ -13,7 +13,7 @@
 * Fix SSL certificate verification being ignored when `verify: false` is set. The shared connection pool was created without TLS settings, causing `verify=False` to be silently ignored when clickhouse-connect skips its own TLS pool creation for a pre-supplied pool manager. ([#23450](https://github.com/DataDog/integrations-core/pull/23450))
 * Skip emitting empty storage_health payloads when every parts-and-merges collection is empty. ([#23553](https://github.com/DataDog/integrations-core/pull/23553))
 
-## 6.6.0 / 2026-04-15
+## 6.6.0 / 2026-04-15 / Agent 7.79.0
 
 ***Added***:
 
