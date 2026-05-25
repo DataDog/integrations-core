@@ -150,7 +150,7 @@ def get_instances(agent_host, agent_port, operator_host, operator_port, use_open
 
 
 @pytest.fixture(scope="session")
-def dd_environment(dd_save_state):
+def dd_environment():
     use_openmetrics = CILIUM_LEGACY == "false"
     kind_config = os.path.join(HERE, "kind", "kind-config.yaml")
     with TempDir("helm_dir") as helm_dir:
@@ -180,7 +180,6 @@ def dd_environment(dd_save_state):
                     ],
                     attempts=30,
                 )()
-                dd_save_state("cilium_instances", instances)
 
                 yield instances
 
