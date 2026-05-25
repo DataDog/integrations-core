@@ -20,7 +20,10 @@ if TYPE_CHECKING:
 @click.argument('intg_name', metavar='INTEGRATION')
 @click.argument('environment')
 @click.option('--old-ref', required=True, help='Git ref to record the fixture and produce old output')
-@click.option('--new-ref', required=True, help='Git ref to replay the fixture and produce new output')
+@click.option(
+    '--new-ref',
+    help='Git ref to replay the fixture and produce new output. Defaults to the current working tree.',
+)
 @click.option(
     '--check-class',
     help='Optional import spec for the check class, e.g. datadog_checks.cilium:CiliumCheck. Defaults to inference.',
@@ -36,7 +39,7 @@ def compare_check(
     intg_name: str,
     environment: str,
     old_ref: str,
-    new_ref: str,
+    new_ref: str | None,
     check_class: str | None,
     artifacts: StdPath,
     image: str,
@@ -86,11 +89,23 @@ def compare_check(
         with tempfile.TemporaryDirectory(prefix='compare-check-') as temp_dir:
             temp_path = StdPath(temp_dir)
             old_tree = temp_path / 'old'
-            new_tree = temp_path / 'new'
             _git_worktree(app.repo.path, old_ref, old_tree)
-            _git_worktree(app.repo.path, new_ref, new_tree)
+            if new_ref:
+                new_tree = temp_path / 'new'
+                _git_worktree(app.repo.path, new_ref, new_tree)
+                new_ref_label = new_ref
+            else:
+                new_tree = StdPath(str(app.repo.path))
+                new_ref_label = 'working-tree'
 
-            refs = {'old_ref': old_ref, 'new_ref': new_ref, 'record_ref': 'old', 'adapter': adapter}
+            refs = {
+                'old_ref': old_ref,
+                'new_ref': new_ref_label,
+                'new_head': _git_rev_parse(app.repo.path, 'HEAD'),
+                'new_dirty': _git_dirty(app.repo.path),
+                'record_ref': 'old',
+                'adapter': adapter,
+            }
             (artifacts / 'refs.json').write_text(json.dumps(refs, indent=2, sort_keys=True) + '\n')
 
             _run_container(
@@ -125,6 +140,14 @@ def compare_check(
 
 def _git_worktree(repo, ref: str, path: StdPath) -> None:
     subprocess.run(['git', '-C', str(repo), 'worktree', 'add', '--detach', str(path), ref], check=True)
+
+
+def _git_rev_parse(repo, ref: str) -> str:
+    return subprocess.check_output(['git', '-C', str(repo), 'rev-parse', ref], text=True).strip()
+
+
+def _git_dirty(repo) -> bool:
+    return bool(subprocess.check_output(['git', '-C', str(repo), 'status', '--porcelain'], text=True).strip())
 
 
 def _run_container(
