@@ -1,0 +1,23 @@
+{
+  "name": "system.errors",
+  "query": "SELECT value, name, code, remote FROM system.errors WHERE value > 0",
+  "columns": [
+    {
+      "name": "errors.raised",
+      "type": "monotonic_count"
+    },
+    {
+      "name": "error_name",
+      "type": "tag"
+    },
+    {
+      "name": "error_code",
+      "type": "tag"
+    },
+    {
+      "name": "remote",
+      "type": "tag",
+      "boolean": true
+    }
+  ]
+}

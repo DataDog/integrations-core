@@ -69,6 +69,7 @@ class ClickhouseCheck(DatabaseCheck):
 
         self._error_sanitizer = ErrorSanitizer(self._config.password)
         self.check_initializations.append(self.validate_config)
+        self.check_initializations.append(advanced_queries.initializer(self))
 
         # Submit health event with config validation result
         # Tags are now available so health events will include them
