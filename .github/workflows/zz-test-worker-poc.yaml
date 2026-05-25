@@ -186,8 +186,8 @@ jobs:
       REPLAY_PBT_MODE: ${{ inputs.mode }}
       REPLAY_PBT_SHARD_INDEX: ${{ inputs.shard_index }}
       REPLAY_PBT_SHARD_COUNT: ${{ inputs.shard_count }}
-      REPLAY_PBT_RESULT_DIR: ${{ runner.temp }}/replay-pbt-result
-      REPLAY_PBT_ARTIFACTS: ${{ runner.temp }}/replay-pbt-artifacts
+      REPLAY_PBT_RESULT_DIR: /tmp/replay-pbt-result
+      REPLAY_PBT_ARTIFACTS: /tmp/replay-pbt-artifacts
       REPLAY_PBT_ADAPTERS: requests,subprocess,process,psycopg
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
