@@ -44,6 +44,11 @@ if TYPE_CHECKING:
     help='Treat --artifacts as the exact run directory instead of creating a timestamped child directory.',
 )
 @click.option('--overwrite', is_flag=True, help='Remove an existing exact artifacts directory before writing.')
+@click.option(
+    '--replay-cache',
+    type=click.Path(exists=True, file_okay=False, path_type=StdPath),
+    help='Existing compare-check artifact directory to replay from instead of recording live input.',
+)
 @click.option('--adapter', default='requests', show_default=True, type=click.Choice(['requests', 'subprocess']))
 @click.option(
     '--old-env',
@@ -80,6 +85,7 @@ def compare_check(
     artifacts: StdPath | None,
     exact_artifacts_dir: bool,
     overwrite: bool,
+    replay_cache: StdPath | None,
     adapter: str,
     old_hatch_env: str | None,
     new_hatch_env: str | None,
@@ -110,6 +116,9 @@ def compare_check(
             app.display_info(f"Selected target {integration.name!r} has no matching E2E environments.")
             return
 
+    if replay_cache and len(env_names) > 1:
+        raise click.ClickException('--replay-cache can only be used with one selected environment.')
+
     batch_results = []
     for env_name in env_names:
         app.display_header(f'{integration.display_name}: {env_name}')
@@ -124,6 +133,7 @@ def compare_check(
             artifacts=artifacts,
             exact_artifacts_dir=exact_artifacts_dir,
             overwrite=overwrite,
+            replay_cache=replay_cache,
             adapter=adapter,
             old_hatch_env=old_hatch_env or env_name,
             new_hatch_env=new_hatch_env or env_name,
@@ -181,6 +191,7 @@ def _compare_one_environment(
     artifacts: StdPath | None,
     exact_artifacts_dir: bool,
     overwrite: bool,
+    replay_cache: StdPath | None,
     adapter: str,
     old_hatch_env: str,
     new_hatch_env: str,
@@ -202,6 +213,7 @@ def _compare_one_environment(
     started_envs: list[str] = []
     old_returncode = None
     new_returncode = None
+    old_mode = 'replay' if replay_cache else 'record'
     new_mode = None
     same_fixture = comparison_mode == 'same-fixture-replay'
     fixture_env = environment if same_fixture else None
@@ -217,7 +229,8 @@ def _compare_one_environment(
             'new_env': new_hatch_env,
             'comparison_mode': comparison_mode,
             'same_fixture': same_fixture,
-            'record_ref': 'old',
+            'record_ref': 'cache' if replay_cache else 'old',
+            'replay_cache': str(replay_cache) if replay_cache else None,
             'adapter': adapter,
         }
         (run_dir / 'refs.json').write_text(json.dumps(refs, indent=2, sort_keys=True) + '\n')
@@ -233,7 +246,83 @@ def _compare_one_environment(
             else:
                 new_tree = StdPath(str(app.repo.path))
 
-            if same_fixture:
+            if replay_cache:
+                phase = 'cache_setup'
+                if same_fixture:
+                    _copy_cache_file(replay_cache, run_dir, 'config.json')
+                    _copy_cache_file(replay_cache, run_dir, 'capture.json')
+
+                    phase = 'old_run'
+                    old_returncode = _run_hatch(
+                        repo=old_tree,
+                        platform_repo=StdPath(str(app.repo.path)),
+                        artifacts=run_dir,
+                        integration=integration.name,
+                        hatch_env=old_hatch_env,
+                        check_name=integration.name,
+                        check_class=check_class,
+                        mode='replay',
+                        adapter=adapter,
+                        config_name='config.json',
+                        fixture_name='capture.json',
+                        output_name='old.raw.json',
+                    )
+
+                    new_mode = 'replay'
+                    phase = 'new_run'
+                    new_returncode = _run_hatch(
+                        repo=new_tree,
+                        platform_repo=StdPath(str(app.repo.path)),
+                        artifacts=run_dir,
+                        integration=integration.name,
+                        hatch_env=new_hatch_env,
+                        check_name=integration.name,
+                        check_class=check_class,
+                        mode='replay',
+                        adapter=adapter,
+                        config_name='config.json',
+                        fixture_name='capture.json',
+                        output_name='new.raw.json',
+                    )
+                else:
+                    _copy_cache_file(replay_cache, run_dir, 'old.config.json')
+                    _copy_cache_file(replay_cache, run_dir, 'capture.json')
+                    _copy_cache_file(replay_cache, run_dir, 'new.config.json')
+                    _copy_cache_file(replay_cache, run_dir, 'new.capture.json')
+
+                    phase = 'old_run'
+                    old_returncode = _run_hatch(
+                        repo=old_tree,
+                        platform_repo=StdPath(str(app.repo.path)),
+                        artifacts=run_dir,
+                        integration=integration.name,
+                        hatch_env=old_hatch_env,
+                        check_name=integration.name,
+                        check_class=check_class,
+                        mode='replay',
+                        adapter=adapter,
+                        config_name='old.config.json',
+                        fixture_name='capture.json',
+                        output_name='old.raw.json',
+                    )
+
+                    new_mode = 'replay'
+                    phase = 'new_run'
+                    new_returncode = _run_hatch(
+                        repo=new_tree,
+                        platform_repo=StdPath(str(app.repo.path)),
+                        artifacts=run_dir,
+                        integration=integration.name,
+                        hatch_env=new_hatch_env,
+                        check_name=integration.name,
+                        check_class=check_class,
+                        mode='replay',
+                        adapter=adapter,
+                        config_name='new.config.json',
+                        fixture_name='new.capture.json',
+                        output_name='new.raw.json',
+                    )
+            elif same_fixture:
                 phase = 'environment_setup'
                 if _ensure_environment(ctx, integration, storage, fixture_env, recreate):
                     started_envs.append(fixture_env)
@@ -329,10 +418,12 @@ def _compare_one_environment(
             status = {
                 'old_returncode': old_returncode,
                 'new_returncode': new_returncode,
+                'old_mode': old_mode,
                 'new_mode': new_mode,
                 'phase': 'complete',
                 'comparison_mode': comparison_mode,
                 'same_fixture': same_fixture,
+                'replay_cache': str(replay_cache) if replay_cache else None,
                 'comparable': old_returncode == 0
                 and new_returncode == 0
                 and (new_mode == 'replay' or not same_fixture),
@@ -343,10 +434,12 @@ def _compare_one_environment(
         status = {
             'old_returncode': old_returncode,
             'new_returncode': new_returncode,
+            'old_mode': old_mode,
             'new_mode': new_mode,
             'phase': phase,
             'comparison_mode': comparison_mode,
             'same_fixture': same_fixture,
+            'replay_cache': str(replay_cache) if replay_cache else None,
             'comparable': False,
             'error': str(e),
             'exception_type': type(e).__name__,
@@ -421,6 +514,13 @@ def _update_latest(root: StdPath, run_dir: StdPath) -> None:
     except OSError:
         # Symlinks are a convenience; latest.txt is the portable pointer.
         pass
+
+
+def _copy_cache_file(cache_dir: StdPath, run_dir: StdPath, name: str) -> None:
+    source = cache_dir / name
+    if not source.is_file():
+        raise click.ClickException(f'Replay cache is missing required file: {source}')
+    shutil.copy2(source, run_dir / name)
 
 
 def _ensure_environment(ctx: click.Context, integration, storage, environment: str, recreate: bool) -> bool:
