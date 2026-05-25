@@ -288,10 +288,27 @@ def generate_queries(query_spec: QuerySpec, metrics: Iterable[ClickhouseMetric])
     items: dict[str, list[str] | dict[str, str]] = {}
     for metric in sorted(metrics):
         metric_type, scale = metric.metric_type_info()
+        existing = items.get(metric_type)
         if scale is None:
-            items.setdefault(metric_type, []).append(metric.name)
+            if existing is None:
+                items[metric_type] = [metric.name]
+            elif isinstance(existing, list):
+                existing.append(metric.name)
+            else:
+                raise ValueError(
+                    f"metric type {metric_type!r} mixes scaled and unscaled entries; "
+                    f"{metric.name!r} has no scale but earlier entries did"
+                )
         else:
-            items.setdefault(metric_type, {})[metric.name] = scale
+            if existing is None:
+                items[metric_type] = {metric.name: scale}
+            elif isinstance(existing, dict):
+                existing[metric.name] = scale
+            else:
+                raise ValueError(
+                    f"metric type {metric_type!r} mixes scaled and unscaled entries; "
+                    f"{metric.name!r} has scale {scale!r} but earlier entries had none"
+                )
     items_sorted: dict[str, list[str] | dict[str, str]] = {}
     for type_name in sorted(items):
         group = items[type_name]

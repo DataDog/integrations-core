@@ -3,16 +3,18 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Advanced ClickHouse query definitions sourced from per-system-table JSON files.
 
-The check registers ``initializer(check)`` on its ``check_initializations`` deque so the
-data is parsed once on the first check run. Module attributes (``SystemEvents`` etc.)
-remain accessible through ``__getattr__`` for callers that import them directly.
+The check appends ``warm_cache`` to its ``check_initializations`` deque so the data is
+parsed once on the first check run. Module attributes (``SystemEvents`` etc.) remain
+accessible through ``__getattr__`` for callers that import them directly.
 """
 
 from __future__ import annotations
 
 import json
 import os
-from collections.abc import Callable
+from typing import Any
+
+__all__ = ['SystemAsynchronousMetrics', 'SystemErrors', 'SystemEvents', 'SystemMetrics']
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
 
@@ -23,8 +25,10 @@ NAMES = {
     'SystemErrors': 'system_errors',
 }
 
+cache: dict[str, dict[str, Any]] = {}
 
-def load(name: str) -> dict:
+
+def load(name: str) -> dict[str, Any]:
     """Return the QueryManager-shaped query dict for ``name`` (e.g. ``"system_events"``)."""
     with open(os.path.join(DATA_DIR, f'{name}.json'), encoding='utf-8') as f:
         spec = json.load(f)
@@ -46,9 +50,9 @@ def load(name: str) -> dict:
     }
 
 
-def _build_items(compact: dict, prefix: str) -> dict:
+def _build_items(compact: dict[str, Any], prefix: str) -> dict[str, dict[str, Any]]:
     """Expand the compact ``{type: keys | {key: scale}}`` map to the per-entry dict shape."""
-    merged: dict[str, dict] = {}
+    merged: dict[str, dict[str, Any]] = {}
     for type_name, group in compact.items():
         if isinstance(group, dict):
             for key, scale in group.items():
@@ -59,22 +63,15 @@ def _build_items(compact: dict, prefix: str) -> dict:
     return dict(sorted(merged.items()))
 
 
-_cache: dict[str, dict] = {}
+def warm_cache() -> None:
+    """Populate the module cache for every known query name. Idempotent."""
+    for attr, file in NAMES.items():
+        cache.setdefault(attr, load(file))
 
 
-def __getattr__(name: str) -> dict:
+def __getattr__(name: str) -> dict[str, Any]:
     if name not in NAMES:
-        raise AttributeError(name)
-    if name not in _cache:
-        _cache[name] = load(NAMES[name])
-    return _cache[name]
-
-
-def initializer(check) -> Callable[[], None]:
-    """Return a no-arg callable that warms the module cache on first check run."""
-
-    def _load() -> None:
-        for attr, file in NAMES.items():
-            _cache.setdefault(attr, load(file))
-
-    return _load
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    if name not in cache:
+        cache[name] = load(NAMES[name])
+    return cache[name]
