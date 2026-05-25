@@ -7,6 +7,7 @@ from copy import deepcopy
 import pytest
 
 from datadog_checks.dev import get_here
+from datadog_checks.dev.conditions import CheckEndpoints
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
@@ -71,6 +72,8 @@ def dd_environment(dd_save_state):
                 'repo_server_endpoint': repo_server_endpoint,
                 'notifications_controller_endpoint': notifications_controller_endpoint,
             }
+
+            CheckEndpoints(list(instance.values()), attempts=30)()
 
             # save this instance to use for openmetrics_v2 instance, since the endpoint is different each run
             dd_save_state("argocd_instance", instance)
