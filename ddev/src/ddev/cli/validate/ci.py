@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+from collections import Counter
 from typing import TYPE_CHECKING, Any
 
 import click
@@ -269,11 +270,39 @@ def _validate_code_coverage(
             expected_checks.add(check)
 
     existing_services = config.get('services') or []
-    existing_service_ids = {s['id'] for s in existing_services if 'id' in s}
+    existing_service_id_list = [s['id'] for s in existing_services if 'id' in s]
+    existing_service_ids = set(existing_service_id_list)
 
     success = True
     fixed = False
     error_message = ''
+
+    duplicate_services = sorted(
+        service_id for service_id, count in Counter(existing_service_id_list).items() if count > 1
+    )
+    if duplicate_services:
+        num_duplicate = len(duplicate_services)
+        service_label = 'service IDs' if num_duplicate > 1 else 'service ID'
+        duplicate_service_names = ', '.join(duplicate_services)
+        message = f'Code coverage config has {num_duplicate} duplicate {service_label}: {duplicate_service_names}\n'
+
+        if sync:
+            fixed = True
+            deduplicated_services = []
+            seen_service_ids = set()
+            for service in existing_services:
+                service_id = service.get('id', '')
+                if service_id in seen_service_ids:
+                    app.display_success(f'Removed duplicate service `{service_id}`\n')
+                    continue
+
+                seen_service_ids.add(service_id)
+                deduplicated_services.append(service)
+
+            existing_services = deduplicated_services
+        else:
+            success = False
+            error_message += message
 
     stale_services = sorted(existing_service_ids - expected_checks)
     if stale_services:

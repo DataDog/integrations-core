@@ -65,6 +65,17 @@ def _add_stale_service(config_path):
         yaml.safe_dump(config, f, default_flow_style=False, sort_keys=False)
 
 
+def _add_duplicate_service(config_path: Path) -> None:
+    with config_path.open(encoding='utf-8') as f:
+        config = yaml.safe_load(f)
+
+    duplicate_service = next(service for service in config['services'] if service.get('id') == 'active_directory')
+    config['services'].append({'id': duplicate_service['id'], 'paths': list(duplicate_service['paths'])})
+
+    with config_path.open(mode='w', encoding='utf-8') as f:
+        yaml.safe_dump(config, f, default_flow_style=False, sort_keys=False)
+
+
 def _remove_gates(config_path: Path) -> None:
     with config_path.open(encoding='utf-8') as f:
         config = yaml.safe_load(f)
@@ -96,6 +107,11 @@ def _clear_gates(config_path: Path) -> None:
         ),
         pytest.param(
             _add_stale_service, "Code coverage config has 1 stale service: stale_service", id='stale_services'
+        ),
+        pytest.param(
+            _add_duplicate_service,
+            "Code coverage config has 1 duplicate service ID: active_directory",
+            id='duplicate_services',
         ),
         pytest.param(_remove_gates, "Code coverage config has no coverage gates", id='missing_gates'),
         pytest.param(_clear_gates, "Code coverage config has no coverage gates", id='empty_gates'),
