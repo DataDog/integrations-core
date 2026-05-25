@@ -25,7 +25,7 @@ NAMES = {
     'SystemErrors': 'system_errors',
 }
 
-cache: dict[str, dict[str, Any]] = {}
+_cache: dict[str, dict[str, Any]] = {}
 
 
 def load(name: str) -> dict[str, Any]:
@@ -33,7 +33,7 @@ def load(name: str) -> dict[str, Any]:
     try:
         with open(os.path.join(DATA_DIR, f'{name}.json'), encoding='utf-8') as f:
             spec = json.load(f)
-        # `system_errors` ships its columns verbatim; the other three are built from compact items.
+        # Verbatim format: spec carries a pre-built `columns` list; otherwise build from compact `items`.
         if 'columns' in spec:
             return {'name': spec['name'], 'query': spec['query'], 'columns': spec['columns']}
         items = _build_items(spec['items'], spec['prefix'])
@@ -70,13 +70,13 @@ def _build_items(compact: dict[str, list[str] | dict[str, str]], prefix: str) ->
 def warm_cache() -> None:
     """Populate the module cache for every known query name. Idempotent."""
     for attr, file in NAMES.items():
-        if attr not in cache:
-            cache[attr] = load(file)
+        if attr not in _cache:
+            _cache[attr] = load(file)
 
 
 def __getattr__(name: str) -> dict[str, Any]:
     if name not in NAMES:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    if name not in cache:
-        cache[name] = load(NAMES[name])
-    return cache[name]
+    if name not in _cache:
+        _cache[name] = load(NAMES[name])
+    return _cache[name]

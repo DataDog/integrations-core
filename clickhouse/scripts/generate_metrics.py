@@ -12,7 +12,7 @@ import os
 import pprint
 import re
 from dataclasses import dataclass
-from enum import Enum, StrEnum
+from enum import StrEnum
 from typing import Iterable
 
 import requests
@@ -121,11 +121,10 @@ QUERY_SPECS = {
 }
 
 
-class Templates(Enum):
-    TESTS_METRICS = FileTemplate(
-        source_path='tests_metrics.tpl',
-        target_path=os.path.join(TESTS_DIR, 'advanced_metrics.py'),
-    )
+TESTS_METRICS_TEMPLATE = FileTemplate(
+    source_path='tests_metrics.tpl',
+    target_path=os.path.join(TESTS_DIR, 'advanced_metrics.py'),
+)
 
 
 def versions() -> list[str]:
@@ -511,7 +510,7 @@ def generate_test_data(metrics_data: list[CalculatedMetrics]):
         'base_version_mapper': printable_consts_mapper(versioned_base_metrics),
         'optional_version_mapper': printable_consts_mapper(versioned_optional_metrics, optional=True),
     }
-    generate_queries_file(Templates.TESTS_METRICS.value, config)
+    generate_queries_file(TESTS_METRICS_TEMPLATE, config)
 
 
 def generate():
