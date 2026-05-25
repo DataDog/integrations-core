@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 
 import pytest
+from datadog_checks.dev.replay.pbt.cache import copy_replay_cache, mutate_request_capture_label_order
 
 
 def _replay_pbt_settings() -> tuple[str, str, Path, str]:
@@ -81,4 +82,35 @@ def test_cached_replay_is_deterministic_for_same_ref(tmp_path):
     assert second_diff['changed'] is False
     assert json.loads((first / 'new.normalized.json').read_text()) == json.loads(
         (second / 'new.normalized.json').read_text()
+    )
+
+
+def test_label_order_mutated_cache_matches_original_output(tmp_path):
+    integration, environment, cache, ref = _replay_pbt_settings()
+    mutated_cache = copy_replay_cache(cache, tmp_path / 'mutated-cache')
+    changed_records = mutate_request_capture_label_order(mutated_cache)
+    if changed_records == 0:
+        pytest.skip('Replay cache has no request records with reorderable OpenMetrics labels.')
+
+    original = tmp_path / 'original'
+    mutated = tmp_path / 'mutated'
+    original_diff = _run_compare_check_cache(
+        integration=integration,
+        environment=environment,
+        cache=cache,
+        ref=ref,
+        artifacts=original,
+    )
+    mutated_diff = _run_compare_check_cache(
+        integration=integration,
+        environment=environment,
+        cache=mutated_cache,
+        ref=ref,
+        artifacts=mutated,
+    )
+
+    assert original_diff['changed'] is False
+    assert mutated_diff['changed'] is False
+    assert json.loads((original / 'new.normalized.json').read_text()) == json.loads(
+        (mutated / 'new.normalized.json').read_text()
     )
