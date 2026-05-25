@@ -17,6 +17,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+from datadog_checks.dev.replay.pbt.json import mutate_json_whitespace, mutate_object_key_order, mutate_string_escapes
 from datadog_checks.dev.replay.pbt.openmetrics import (
     insert_comment_and_blank_lines,
     mutate_body_label_order,
@@ -118,3 +119,28 @@ def mutate_request_capture_help_text(cache_dir: Path) -> int:
 def mutate_request_capture_help_removal(cache_dir: Path) -> int:
     """Remove HELP lines from request capture bodies."""
     return _mutate_request_capture_bodies(cache_dir, remove_help_lines)
+
+
+def _is_json_record(record: dict[str, Any]) -> bool:
+    headers = record.get('headers')
+    if isinstance(headers, dict):
+        for name, value in headers.items():
+            if str(name).lower() == 'content-type' and 'json' in str(value).lower():
+                return True
+    body = record.get('body')
+    return isinstance(body, str) and body.lstrip()[:1] in {'{', '['}
+
+
+def mutate_request_capture_json_object_key_order(cache_dir: Path) -> int:
+    """Sort JSON object keys in request capture response bodies."""
+    return _mutate_request_capture_bodies(cache_dir, mutate_object_key_order, should_mutate_record=_is_json_record)
+
+
+def mutate_request_capture_json_whitespace(cache_dir: Path) -> int:
+    """Change insignificant JSON whitespace in request capture response bodies."""
+    return _mutate_request_capture_bodies(cache_dir, mutate_json_whitespace, should_mutate_record=_is_json_record)
+
+
+def mutate_request_capture_json_string_escapes(cache_dir: Path) -> int:
+    """Toggle JSON string escaping in request capture response bodies."""
+    return _mutate_request_capture_bodies(cache_dir, mutate_string_escapes, should_mutate_record=_is_json_record)

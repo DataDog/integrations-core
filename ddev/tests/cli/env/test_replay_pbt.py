@@ -16,9 +16,12 @@ import csv
 import json
 import math
 import os
+import re
 import subprocess
 import sys
-from collections.abc import Callable
+import warnings
+from collections.abc import Callable, Iterator
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -29,6 +32,9 @@ from datadog_checks.dev.replay.pbt.cache import (
     mutate_request_capture_final_newline,
     mutate_request_capture_help_removal,
     mutate_request_capture_help_text,
+    mutate_request_capture_json_object_key_order,
+    mutate_request_capture_json_string_escapes,
+    mutate_request_capture_json_whitespace,
     mutate_request_capture_label_order,
 )
 from hypothesis import HealthCheck, given, settings
@@ -41,7 +47,12 @@ PROPERTIES = (
     'openmetrics-final-newline',
     'openmetrics-help-text',
     'openmetrics-help-removal',
+    'json-object-key-order',
+    'json-whitespace',
+    'json-string-escapes',
     'metadata-emitted-metrics',
+    'asset-query-metrics-in-metadata',
+    'asset-query-tags-seen-in-replay',
     'output-finite-values',
     'rate-finite-values',
     'monotonic-count-nonnegative',
@@ -61,6 +72,7 @@ class ReplayPBTContext:
         self.readings = config.get('readings') or 1
         self.check_class = config.get('check_class')
         self.adapters = config.get('adapters') or 'all'
+        self.warnings_as_errors = bool(config.get('warnings_as_errors'))
         self.record_env = config.get('record_env') or config.get('old_env')
         self.replay_env = config.get('replay_env') or config.get('new_env')
 
@@ -232,6 +244,50 @@ SUBMISSION_TO_METADATA_TYPE = {
     'historate': 'rate',
 }
 
+QUERY_METRIC_PATTERN = re.compile(
+    r'(?<![A-Za-z0-9_.])(?:avg|sum|min|max|last|count|median|p\d+):'
+    r'([A-Za-z_][A-Za-z0-9_.]*(?:\.[A-Za-z0-9_]+)*)\{'
+)
+QUERY_FILTER_PATTERN = re.compile(r'\{([^}]*)\}')
+QUERY_GROUP_BY_PATTERN = re.compile(r'\bby\s*\{([^}]*)\}')
+QUERY_TAG_FILTER_PATTERN = re.compile(r'\b([A-Za-z_][A-Za-z0-9_./-]*)\s*(?::|\s+IN\s*\()')
+QUERY_TEMPLATE_VARIABLE_PATTERN = re.compile(r'\$([A-Za-z_][A-Za-z0-9_]*)')
+
+
+@dataclass(frozen=True)
+class AssetQuery:
+    path: str
+    asset_type: str
+    query: str
+    metric_names: tuple[str, ...]
+    tag_keys: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class ReplayPBTFinding:
+    level: str
+    check: str
+    message: str
+    path: str | None = None
+    query: str | None = None
+    metric: str | None = None
+    tag_key: str | None = None
+
+    def as_dict(self) -> dict[str, str | None]:
+        return {
+            'level': self.level,
+            'check': self.check,
+            'message': self.message,
+            'path': self.path,
+            'query': self.query,
+            'metric': self.metric,
+            'tag_key': self.tag_key,
+        }
+
+
+class ReplayPBTWarning(UserWarning):
+    pass
+
 
 def _load_metadata_rows(repo_root: Path, integration: str) -> dict[str, dict[str, str]]:
     metadata_path = repo_root / integration / 'metadata.csv'
@@ -245,6 +301,227 @@ def _load_metadata_rows(repo_root: Path, integration: str) -> dict[str, dict[str
             assert metric_name not in rows, f'duplicate metadata metric_name {metric_name!r} in {metadata_path}'
             rows[metric_name] = row
     return rows
+
+
+def _load_manifest_metric_prefix(repo_root: Path, integration: str) -> str | None:
+    manifest_path = repo_root / integration / 'manifest.json'
+    if not manifest_path.is_file():
+        return None
+
+    manifest = json.loads(manifest_path.read_text())
+    metrics = manifest.get('assets', {}).get('integration', {}).get('metrics', {})
+    prefix = metrics.get('prefix')
+    return prefix if isinstance(prefix, str) and prefix else None
+
+
+def _iter_asset_json_paths(repo_root: Path, integration: str) -> Iterator[tuple[str, Path]]:
+    integration_root = repo_root / integration
+    for asset_type in ('dashboards', 'monitors'):
+        asset_root = integration_root / 'assets' / asset_type
+        if not asset_root.is_dir():
+            continue
+        for path in sorted(asset_root.glob('*.json')):
+            yield asset_type, path
+
+
+def _iter_query_strings(decoded: Any) -> Iterator[str]:
+    if isinstance(decoded, dict):
+        for key, value in decoded.items():
+            if key in {'query', 'q'} and isinstance(value, str):
+                yield value
+            yield from _iter_query_strings(value)
+    elif isinstance(decoded, list):
+        for value in decoded:
+            yield from _iter_query_strings(value)
+
+
+def _dashboard_template_variable_prefixes(decoded: Any) -> dict[str, str]:
+    if not isinstance(decoded, dict):
+        return {}
+
+    prefixes = {}
+    for variable in decoded.get('template_variables') or []:
+        if not isinstance(variable, dict):
+            continue
+        name = variable.get('name')
+        prefix = variable.get('prefix') or name
+        if isinstance(name, str) and name and isinstance(prefix, str) and prefix:
+            prefixes[name] = prefix
+    return prefixes
+
+
+def _extract_metric_names_from_query(query: str) -> tuple[str, ...]:
+    return tuple(sorted(set(QUERY_METRIC_PATTERN.findall(query))))
+
+
+def _extract_query_tag_keys(query: str, template_variable_prefixes: dict[str, str] | None = None) -> tuple[str, ...]:
+    template_variable_prefixes = template_variable_prefixes or {}
+    tag_keys = set()
+
+    for variable_name in QUERY_TEMPLATE_VARIABLE_PATTERN.findall(query):
+        tag_keys.add(template_variable_prefixes.get(variable_name, variable_name))
+
+    for group_by in QUERY_GROUP_BY_PATTERN.findall(query):
+        for tag_key in group_by.split(','):
+            tag_key = tag_key.strip()
+            if tag_key and tag_key != '*':
+                tag_keys.add(tag_key)
+
+    for filter_expression in QUERY_FILTER_PATTERN.findall(query):
+        for tag_key in QUERY_TAG_FILTER_PATTERN.findall(filter_expression):
+            tag_keys.add(tag_key)
+
+    return tuple(sorted(tag_keys))
+
+
+def _load_asset_queries(repo_root: Path, integration: str) -> list[AssetQuery]:
+    queries = []
+    for asset_type, path in _iter_asset_json_paths(repo_root, integration):
+        decoded = json.loads(path.read_text())
+        template_variable_prefixes = _dashboard_template_variable_prefixes(decoded)
+        for query in _iter_query_strings(decoded):
+            metric_names = _extract_metric_names_from_query(query)
+            if not metric_names:
+                continue
+            queries.append(
+                AssetQuery(
+                    path=str(path.relative_to(repo_root)),
+                    asset_type=asset_type,
+                    query=query,
+                    metric_names=metric_names,
+                    tag_keys=_extract_query_tag_keys(query, template_variable_prefixes),
+                )
+            )
+    return queries
+
+
+def _asset_metric_metadata_findings(
+    *, repo_root: Path, integration: str, metadata_rows: dict[str, dict[str, str]]
+) -> list[ReplayPBTFinding]:
+    prefix = _load_manifest_metric_prefix(repo_root, integration)
+    if not prefix:
+        return [
+            ReplayPBTFinding(
+                level='warning',
+                check='asset-query-metrics-in-metadata',
+                message='Integration manifest does not declare a metric prefix; asset metric metadata check skipped.',
+            )
+        ]
+
+    findings = []
+    for asset_query in _load_asset_queries(repo_root, integration):
+        for metric_name in asset_query.metric_names:
+            if not metric_name.startswith(prefix) or metric_name in metadata_rows:
+                continue
+            findings.append(
+                ReplayPBTFinding(
+                    level='error',
+                    check='asset-query-metrics-in-metadata',
+                    message='Integration asset query references a metric missing from metadata.csv.',
+                    path=asset_query.path,
+                    query=asset_query.query,
+                    metric=metric_name,
+                )
+            )
+    return findings
+
+
+def _emitted_metric_tag_keys(output: dict[str, Any]) -> dict[str, set[str]]:
+    metric_tag_keys = {}
+    for reading_output in _normalized_reading_outputs(output):
+        _assert_normalized_output_contract(reading_output)
+        for metric in reading_output.get('metrics', []):
+            name = metric.get('name')
+            if not isinstance(name, str) or not name:
+                continue
+            keys = metric_tag_keys.setdefault(name, set())
+            for tag in metric.get('tags') or []:
+                if ':' in tag:
+                    keys.add(tag.split(':', 1)[0])
+    return metric_tag_keys
+
+
+def _asset_query_replay_tag_findings(
+    *, repo_root: Path, integration: str, output: dict[str, Any], metadata_rows: dict[str, dict[str, str]]
+) -> list[ReplayPBTFinding]:
+    prefix = _load_manifest_metric_prefix(repo_root, integration)
+    emitted_tag_keys = _emitted_metric_tag_keys(output)
+    emitted_metric_names = set(emitted_tag_keys)
+    findings = []
+
+    for asset_query in _load_asset_queries(repo_root, integration):
+        for metric_name in asset_query.metric_names:
+            if (
+                prefix
+                and metric_name.startswith(prefix)
+                and metric_name in metadata_rows
+                and metric_name not in emitted_metric_names
+            ):
+                findings.append(
+                    ReplayPBTFinding(
+                        level='warning',
+                        check='asset-query-tags-seen-in-replay',
+                        message='Integration asset query metric was not emitted by this replay fixture.',
+                        path=asset_query.path,
+                        query=asset_query.query,
+                        metric=metric_name,
+                    )
+                )
+                continue
+
+            if metric_name not in emitted_metric_names:
+                continue
+
+            missing_tag_keys = set(asset_query.tag_keys) - emitted_tag_keys[metric_name]
+            for tag_key in sorted(missing_tag_keys):
+                findings.append(
+                    ReplayPBTFinding(
+                        level='warning',
+                        check='asset-query-tags-seen-in-replay',
+                        message='Integration asset query tag key was not seen on emitted replay metric.',
+                        path=asset_query.path,
+                        query=asset_query.query,
+                        metric=metric_name,
+                        tag_key=tag_key,
+                    )
+                )
+    return findings
+
+
+def _write_findings(property_dir: Path, findings: list[ReplayPBTFinding]) -> None:
+    property_dir.mkdir(parents=True, exist_ok=True)
+    serialized = [finding.as_dict() for finding in findings]
+    (property_dir / 'findings.json').write_text(json.dumps(serialized, indent=2, sort_keys=True) + '\n')
+
+    lines = ['# Replay PBT findings', '']
+    if not findings:
+        lines.append('No findings.')
+    for finding in findings:
+        lines.extend(
+            [
+                f'- **{finding.level.upper()}** `{finding.check}`: {finding.message}',
+                f'  - metric: `{finding.metric}`' if finding.metric else '',
+                f'  - tag key: `{finding.tag_key}`' if finding.tag_key else '',
+                f'  - path: `{finding.path}`' if finding.path else '',
+                f'  - query: `{finding.query}`' if finding.query else '',
+            ]
+        )
+    (property_dir / 'warnings.md').write_text('\n'.join(line for line in lines if line) + '\n')
+
+
+def _handle_findings(context: ReplayPBTContext, property_name: str, findings: list[ReplayPBTFinding]) -> None:
+    _write_findings(context.artifacts / property_name, findings)
+
+    for finding in findings:
+        if finding.level == 'warning':
+            warnings.warn(f'{finding.check}: {finding.message}', ReplayPBTWarning, stacklevel=2)
+
+    failures = [
+        finding
+        for finding in findings
+        if finding.level == 'error' or (context.warnings_as_errors and finding.level == 'warning')
+    ]
+    assert not failures, f'{property_name} findings: {[finding.as_dict() for finding in failures[:20]]!r}'
 
 
 def _assert_rate_values_finite(output: dict[str, Any]) -> None:
@@ -380,6 +657,115 @@ def test_emitted_metrics_match_metadata_rejects_type_mismatch():
 
     with pytest.raises(AssertionError, match='type mismatches'):
         _assert_emitted_metrics_match_metadata(output, metadata_rows)
+
+
+def _write_asset_query_fixture(repo_root: Path) -> None:
+    integration_root = repo_root / 'example'
+    (integration_root / 'assets' / 'dashboards').mkdir(parents=True)
+    (integration_root / 'assets' / 'monitors').mkdir(parents=True)
+    (integration_root / 'manifest.json').write_text(
+        json.dumps({'assets': {'integration': {'metrics': {'prefix': 'example.'}}}})
+    )
+    (integration_root / 'assets' / 'dashboards' / 'overview.json').write_text(
+        json.dumps(
+            {
+                'template_variables': [{'name': 'service', 'prefix': 'service'}],
+                'widgets': [
+                    {
+                        'definition': {
+                            'requests': [
+                                {'queries': [{'query': 'avg:example.request.count{$service,status:ok} by {endpoint}'}]}
+                            ]
+                        }
+                    }
+                ],
+            }
+        )
+    )
+    (integration_root / 'assets' / 'monitors' / 'latency.json').write_text(
+        json.dumps({'definition': {'query': 'avg(last_5m):avg:external.request.count{*} > 1'}})
+    )
+
+
+def test_extract_metric_names_from_query_handles_nested_monitor_query():
+    assert _extract_metric_names_from_query(
+        "avg(last_4h):anomalies(avg:haproxy.backend.denied.resp_rate{*} by {host}, 'agile') >= 1"
+    ) == ('haproxy.backend.denied.resp_rate',)
+
+
+def test_extract_query_tag_keys_maps_dashboard_template_variables():
+    assert _extract_query_tag_keys(
+        'sum:example.request.count{$service,status:ok,error_type IN (timeout)} by {endpoint}',
+        {'service': 'service_name'},
+    ) == ('endpoint', 'error_type', 'service_name', 'status')
+
+
+def test_asset_metric_metadata_findings_ignore_external_metrics(tmp_path: Path):
+    _write_asset_query_fixture(tmp_path)
+
+    findings = _asset_metric_metadata_findings(
+        repo_root=tmp_path,
+        integration='example',
+        metadata_rows={'example.request.count': {'metric_type': 'count'}},
+    )
+
+    assert findings == []
+
+
+def test_asset_metric_metadata_findings_report_missing_integration_metric(tmp_path: Path):
+    _write_asset_query_fixture(tmp_path)
+
+    findings = _asset_metric_metadata_findings(repo_root=tmp_path, integration='example', metadata_rows={})
+
+    assert len(findings) == 1
+    assert findings[0].level == 'error'
+    assert findings[0].metric == 'example.request.count'
+    assert findings[0].path == 'example/assets/dashboards/overview.json'
+
+
+def test_asset_query_replay_tag_findings_warn_on_unemitted_metric_and_missing_tags(tmp_path: Path):
+    _write_asset_query_fixture(tmp_path)
+    output = {
+        'metrics': [{'name': 'example.request.count', 'type': 0, 'value': 1.0, 'tags': ['service:api']}],
+        'service_checks': [],
+    }
+
+    findings = _asset_query_replay_tag_findings(
+        repo_root=tmp_path,
+        integration='example',
+        output=output,
+        metadata_rows={'example.request.count': {'metric_type': 'count'}, 'example.other': {'metric_type': 'gauge'}},
+    )
+
+    assert {(finding.level, finding.metric, finding.tag_key) for finding in findings} == {
+        ('warning', 'example.request.count', 'endpoint'),
+        ('warning', 'example.request.count', 'status'),
+    }
+
+
+def test_handle_findings_writes_artifacts_and_can_promote_warnings_to_errors(tmp_path: Path):
+    context = ReplayPBTContext(
+        {
+            'integration': 'example',
+            'environment': 'py3',
+            'replay_cache': str(tmp_path / 'cache'),
+            'artifacts': str(tmp_path / 'artifacts'),
+            'warnings_as_errors': True,
+        }
+    )
+    findings = [
+        ReplayPBTFinding(
+            level='warning',
+            check='asset-query-tags-seen-in-replay',
+            message='warning promoted to error',
+        )
+    ]
+
+    with pytest.warns(ReplayPBTWarning), pytest.raises(AssertionError, match='warning promoted to error'):
+        _handle_findings(context, 'asset-query-tags-seen-in-replay', findings)
+
+    assert (tmp_path / 'artifacts' / 'asset-query-tags-seen-in-replay' / 'findings.json').is_file()
+    assert (tmp_path / 'artifacts' / 'asset-query-tags-seen-in-replay' / 'warnings.md').is_file()
 
 
 def test_rate_values_finite_rejects_non_finite_rate():
@@ -520,6 +906,61 @@ def test_help_removal_mutated_cache_matches_original_output(replay_pbt_context: 
 
 
 @settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@given(mutation=st.sampled_from(['sort-json-object-keys']))
+def test_json_object_key_order_mutated_cache_matches_original_output(
+    replay_pbt_context: ReplayPBTContext, mutation: str
+):
+    # Metamorphic JSON property: object member order is not semantically
+    # meaningful, so sorting JSON response object keys should not change
+    # normalized Datadog check output.
+    property_name = 'json-object-key-order'
+    _skip_unselected(replay_pbt_context, property_name)
+    assert mutation == 'sort-json-object-keys'
+
+    _assert_mutated_cache_matches_original_output(
+        context=replay_pbt_context,
+        property_name=property_name,
+        mutate_cache=mutate_request_capture_json_object_key_order,
+        no_change_reason='Replay cache has no JSON request records with reorderable object keys.',
+    )
+
+
+@settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@given(mutation=st.sampled_from(['change-json-whitespace']))
+def test_json_whitespace_mutated_cache_matches_original_output(replay_pbt_context: ReplayPBTContext, mutation: str):
+    # Metamorphic JSON property: insignificant JSON whitespace does not affect
+    # decoded values, so reserializing captured JSON response bodies should not
+    # change normalized Datadog check output.
+    property_name = 'json-whitespace'
+    _skip_unselected(replay_pbt_context, property_name)
+    assert mutation == 'change-json-whitespace'
+
+    _assert_mutated_cache_matches_original_output(
+        context=replay_pbt_context,
+        property_name=property_name,
+        mutate_cache=mutate_request_capture_json_whitespace,
+        no_change_reason='Replay cache has no JSON request records.',
+    )
+
+
+@settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@given(mutation=st.sampled_from(['normalize-json-string-escapes']))
+def test_json_string_escape_mutated_cache_matches_original_output(replay_pbt_context: ReplayPBTContext, mutation: str):
+    # Metamorphic JSON property: different JSON string escaping that decodes to
+    # the same values should not affect check output.
+    property_name = 'json-string-escapes'
+    _skip_unselected(replay_pbt_context, property_name)
+    assert mutation == 'normalize-json-string-escapes'
+
+    _assert_mutated_cache_matches_original_output(
+        context=replay_pbt_context,
+        property_name=property_name,
+        mutate_cache=mutate_request_capture_json_string_escapes,
+        no_change_reason='Replay cache has no JSON request records.',
+    )
+
+
+@settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @given(validation=st.sampled_from(['emitted-metrics-match-metadata']))
 def test_emitted_metrics_match_metadata(replay_pbt_context: ReplayPBTContext, validation: str):
     # Metadata-backed property: metadata.csv is the canonical metric contract, so
@@ -533,6 +974,50 @@ def test_emitted_metrics_match_metadata(replay_pbt_context: ReplayPBTContext, va
     assert diff['changed'] is False
     metadata_rows = _load_metadata_rows(replay_pbt_context.repo, replay_pbt_context.integration)
     _assert_emitted_metrics_match_metadata(_read_normalized(property_dir), metadata_rows)
+
+
+@settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@given(validation=st.sampled_from(['asset-query-metrics-in-metadata']))
+def test_asset_query_metrics_match_metadata(replay_pbt_context: ReplayPBTContext, validation: str):
+    property_name = 'asset-query-metrics-in-metadata'
+    _skip_unselected(replay_pbt_context, property_name)
+    assert validation == 'asset-query-metrics-in-metadata'
+
+    metadata_rows = _load_metadata_rows(replay_pbt_context.repo, replay_pbt_context.integration)
+    asset_queries = _load_asset_queries(replay_pbt_context.repo, replay_pbt_context.integration)
+    if not asset_queries:
+        pytest.skip('Integration has no dashboard or monitor metric queries to validate against metadata.csv.')
+
+    findings = _asset_metric_metadata_findings(
+        repo_root=replay_pbt_context.repo,
+        integration=replay_pbt_context.integration,
+        metadata_rows=metadata_rows,
+    )
+    _handle_findings(replay_pbt_context, property_name, findings)
+
+
+@settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@given(validation=st.sampled_from(['asset-query-tags-seen-in-replay']))
+def test_asset_query_tags_are_seen_in_replay(replay_pbt_context: ReplayPBTContext, validation: str):
+    property_name = 'asset-query-tags-seen-in-replay'
+    _skip_unselected(replay_pbt_context, property_name)
+    assert validation == 'asset-query-tags-seen-in-replay'
+
+    asset_queries = _load_asset_queries(replay_pbt_context.repo, replay_pbt_context.integration)
+    if not asset_queries:
+        pytest.skip('Integration has no dashboard or monitor metric queries to compare with replay output.')
+
+    property_dir = replay_pbt_context.artifacts / property_name
+    diff = _run_compare_check_cache(context=replay_pbt_context, cache=replay_pbt_context.cache, artifacts=property_dir)
+    assert diff['changed'] is False
+    metadata_rows = _load_metadata_rows(replay_pbt_context.repo, replay_pbt_context.integration)
+    findings = _asset_query_replay_tag_findings(
+        repo_root=replay_pbt_context.repo,
+        integration=replay_pbt_context.integration,
+        output=_read_normalized(property_dir),
+        metadata_rows=metadata_rows,
+    )
+    _handle_findings(replay_pbt_context, property_name, findings)
 
 
 @settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
@@ -585,14 +1070,19 @@ def _assert_mutated_cache_matches_original_output(
     property_dir = context.artifacts / property_name
     original = property_dir / 'original'
     mutated = property_dir / 'mutated'
-    mutated_cache = copy_replay_cache(context.cache, property_dir / 'mutated-cache')
+
+    # First materialize auto/latest caches into an exact compare-check artifact
+    # directory. Mutating the materialized cache keeps cache selection and
+    # fixture compatibility logic centralized in compare-check.
+    original_diff = _run_compare_check_cache(context=context, cache=context.cache, artifacts=original)
+    assert original_diff['changed'] is False
+
+    mutated_cache = copy_replay_cache(original, property_dir / 'mutated-cache')
     changed_records = mutate_cache(mutated_cache)
     if changed_records == 0:
         pytest.skip(no_change_reason)
 
-    original_diff = _run_compare_check_cache(context=context, cache=context.cache, artifacts=original)
     mutated_diff = _run_compare_check_cache(context=context, cache=mutated_cache, artifacts=mutated)
 
-    assert original_diff['changed'] is False
     assert mutated_diff['changed'] is False
     _assert_normalized_outputs_match(_read_normalized(original), _read_normalized(mutated))

@@ -23,6 +23,9 @@ from datadog_checks.dev.replay.pbt.cache import (
     mutate_request_capture_final_newline,
     mutate_request_capture_help_removal,
     mutate_request_capture_help_text,
+    mutate_request_capture_json_object_key_order,
+    mutate_request_capture_json_string_escapes,
+    mutate_request_capture_json_whitespace,
     mutate_request_capture_label_order,
 )
 from datadog_checks.dev.replay.pbt.openmetrics import OpenMetricsSample, render_sample, semantic_samples
@@ -191,6 +194,63 @@ def test_mutating_manifest_request_capture_help_removal_preserves_semantics(tmp_
 
     records = json.loads((cache_dir / 'capture.requests.json').read_text())
     assert semantic_samples(records[0]['body']) == semantic_samples(body)
+
+
+json_values = st.recursive(
+    st.one_of(
+        st.none(),
+        st.booleans(),
+        st.integers(min_value=-1_000_000, max_value=1_000_000),
+        st.floats(allow_nan=False, allow_infinity=False, width=32),
+        st.text(alphabet=st.characters(blacklist_categories=('Cs',)), max_size=40),
+    ),
+    lambda children: st.one_of(
+        st.lists(children, max_size=8),
+        st.dictionaries(
+            st.text(alphabet=st.characters(blacklist_categories=('Cs',)), max_size=20), children, max_size=8
+        ),
+    ),
+    max_leaves=30,
+)
+
+
+@pbt_settings
+@given(value=json_values)
+def test_mutating_manifest_request_capture_json_key_order_preserves_semantics(tmp_path, value):
+    cache_dir = tmp_path / 'cache'
+    body = json.dumps(value, ensure_ascii=False)
+    _write_manifest_cache(cache_dir, body, headers={'Content-Type': 'application/json'})
+
+    mutate_request_capture_json_object_key_order(cache_dir)
+
+    records = json.loads((cache_dir / 'capture.requests.json').read_text())
+    assert json.loads(records[0]['body']) == value
+
+
+@pbt_settings
+@given(value=json_values)
+def test_mutating_manifest_request_capture_json_whitespace_preserves_semantics(tmp_path, value):
+    cache_dir = tmp_path / 'cache'
+    body = json.dumps(value, ensure_ascii=False)
+    _write_manifest_cache(cache_dir, body, headers={'Content-Type': 'application/json'})
+
+    mutate_request_capture_json_whitespace(cache_dir)
+
+    records = json.loads((cache_dir / 'capture.requests.json').read_text())
+    assert json.loads(records[0]['body']) == value
+
+
+@pbt_settings
+@given(value=json_values)
+def test_mutating_manifest_request_capture_json_string_escapes_preserves_semantics(tmp_path, value):
+    cache_dir = tmp_path / 'cache'
+    body = json.dumps(value, ensure_ascii=False)
+    _write_manifest_cache(cache_dir, body, headers={'Content-Type': 'application/json'})
+
+    mutate_request_capture_json_string_escapes(cache_dir)
+
+    records = json.loads((cache_dir / 'capture.requests.json').read_text())
+    assert json.loads(records[0]['body']) == value
 
 
 def test_prometheus_formatting_mutations_skip_strict_openmetrics_records(tmp_path):

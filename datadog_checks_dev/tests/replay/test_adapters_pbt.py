@@ -23,7 +23,12 @@ from hypothesis import strategies as st
 from datadog_checks.base.utils import subprocess_output
 from datadog_checks.dev.replay.adapters.process import install_replay_process_state
 from datadog_checks.dev.replay.adapters.psycopg import install_replay_psycopg
-from datadog_checks.dev.replay.adapters.requests import build_get_record, install_replay_session_get
+from datadog_checks.dev.replay.adapters.requests import (
+    build_get_record,
+    build_request_record,
+    install_replay_session_get,
+    install_replay_session_request,
+)
 from datadog_checks.dev.replay.adapters.subprocess import install_replay_get_subprocess_output
 from datadog_checks.dev.replay.adapters.tcp import install_replay_tcp_clients
 
@@ -35,6 +40,13 @@ non_empty_safe_text = safe_text.filter(bool)
 urls = st.from_regex(r'https?://example\.test/[A-Za-z0-9/_-]{1,40}', fullmatch=True)
 headers = st.dictionaries(non_empty_safe_text, safe_text, min_size=1, max_size=5)
 optional_headers = st.one_of(st.none(), headers)
+http_methods = st.sampled_from(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD'])
+json_scalars = st.one_of(st.none(), st.booleans(), st.integers(), safe_text)
+json_values = st.recursive(
+    json_scalars,
+    lambda children: st.one_of(st.lists(children, max_size=4), st.dictionaries(safe_text, children, max_size=4)),
+    max_leaves=12,
+)
 argvs = st.lists(safe_text, max_size=5).map(list)
 
 
@@ -67,6 +79,85 @@ def test_requests_replay_response_json_decodes_body(monkeypatch, tmp_path):
     install_replay_session_get(monkeypatch, fixture_path)
 
     assert requests.Session().get('http://example.test/json').json() == {'version': '1.2.3'}
+
+
+@pbt_settings
+@given(
+    method=http_methods,
+    url=urls,
+    body=safe_text,
+    status=st.integers(min_value=100, max_value=599),
+    response_headers=optional_headers,
+    payload=json_values,
+)
+def test_requests_replay_round_trips_all_methods_and_json_payload(
+    monkeypatch, tmp_path, method, url, body, status, response_headers, payload
+):
+    fixture_path = tmp_path / 'capture.json'
+    record = build_request_record(
+        method, url, body, status=status, headers=response_headers, request_kwargs={'json': payload}
+    )
+    fixture_path.write_text(json.dumps([record]) + '\n')
+
+    install_replay_session_request(monkeypatch, fixture_path)
+
+    response = requests.Session().request(method, url, json=payload)
+
+    assert response.status_code == status
+    assert response.text == body
+    assert response.content == body.encode('utf-8')
+    assert dict(response.headers) == record['headers']
+    assert response.headers.get('content-type') == record['headers'].get('Content-Type')
+
+
+@pbt_settings
+@given(method_a=http_methods, method_b=http_methods, url=urls)
+def test_requests_replay_rejects_wrong_method(monkeypatch, tmp_path, method_a, method_b, url):
+    assume(method_a != method_b)
+    fixture_path = tmp_path / 'capture.json'
+    fixture_path.write_text(json.dumps([build_request_record(method_a, url, 'body')]) + '\n')
+
+    install_replay_session_request(monkeypatch, fixture_path)
+
+    with pytest.raises(AssertionError, match='does not match'):
+        requests.Session().request(method_b, url)
+
+
+@pbt_settings
+@given(url=urls, payload_a=json_values, payload_b=json_values)
+def test_requests_replay_rejects_wrong_json_payload(monkeypatch, tmp_path, url, payload_a, payload_b):
+    assume(payload_a != payload_b)
+    fixture_path = tmp_path / 'capture.json'
+    fixture_path.write_text(
+        json.dumps([build_request_record('POST', url, 'body', request_kwargs={'json': payload_a})]) + '\n'
+    )
+
+    install_replay_session_request(monkeypatch, fixture_path)
+
+    with pytest.raises(AssertionError, match='request_json does not match'):
+        requests.Session().post(url, json=payload_b)
+
+
+@pbt_settings
+@given(
+    token=st.text(alphabet='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', min_size=16, max_size=40)
+)
+def test_requests_replay_scrubs_sensitive_request_identity(monkeypatch, tmp_path, token):
+    url = 'http://example.test/scrubbed-request'
+    fixture_path = tmp_path / 'capture.json'
+    record = build_request_record(
+        'POST',
+        url,
+        '{}',
+        headers={'Content-Type': 'application/json'},
+        request_kwargs={'json': {'api_key': token, 'nested': {'access_token': token}}},
+    )
+    fixture_path.write_text(json.dumps([record]) + '\n')
+
+    assert token not in fixture_path.read_text()
+
+    install_replay_session_request(monkeypatch, fixture_path)
+    requests.Session().post(url, json={'api_key': token, 'nested': {'access_token': token}})
 
 
 @pbt_settings

@@ -20,18 +20,21 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 REDACTED = '<REDACTED>'
 
 SENSITIVE_KEY_RE = re.compile(
-    r'(?i)(^|[_\-.])(authorization|proxy-authorization|cookie|set-cookie|api[_-]?key|app[_-]?key|application[_-]?key|token|secret|password|passwd|private[_-]?key|client[_-]?secret|credential|signature|access[_-]?key|secret[_-]?key)($|[_\-.])'
+    r'(?i)(^|[_\-.])(authorization|proxy-authorization|cookie|set-cookie|api[_-]?key|app[_-]?key|application[_-]?key|token|access[_-]?token|refresh[_-]?token|id[_-]?token|secret|password|passwd|passphrase|private[_-]?key|client[_-]?secret|credential|signature|session|csrf|xsrf|access[_-]?key|secret[_-]?key)($|[_\-.])'
 )
 SENSITIVE_QUERY_KEY_RE = re.compile(
-    r'(?i)(api[_-]?key|app[_-]?key|application[_-]?key|token|secret|password|passwd|client[_-]?secret|signature|credential)'
+    r'(?i)(api[_-]?key|app[_-]?key|application[_-]?key|token|access[_-]?token|refresh[_-]?token|id[_-]?token|secret|password|passwd|passphrase|client[_-]?secret|signature|credential|session|csrf|xsrf)'
 )
 SENSITIVE_TAG_KEY_RE = re.compile(
-    r'(?i)(api[_-]?key|app[_-]?key|application[_-]?key|token|secret|password|passwd|client[_-]?secret|credential)'
+    r'(?i)(api[_-]?key|app[_-]?key|application[_-]?key|token|access[_-]?token|refresh[_-]?token|id[_-]?token|secret|password|passwd|passphrase|client[_-]?secret|credential|session)'
 )
 
 TEXT_REPLACEMENTS = (
     re.compile(r'(?i)\bBearer\s+[A-Za-z0-9._~+/-]{8,}={0,2}'),
     re.compile(r'(?i)\bBasic\s+[A-Za-z0-9+/]{12,}={0,2}'),
+    re.compile(
+        r'(?i)(api[_-]?key|app[_-]?key|application[_-]?key|access[_-]?token|refresh[_-]?token|id[_-]?token|token|secret|password|passwd|client[_-]?secret|signature|session)=([^&\s]+)'
+    ),
     re.compile(r'\b(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9_]{20,}\b'),
     re.compile(r'\bgithub_pat_[A-Za-z0-9_]{20,}\b'),
     re.compile(r'\bxox[baprs]-[A-Za-z0-9-]{20,}\b'),
@@ -119,10 +122,22 @@ def scrub_output(value: Any) -> Any:
 
 def scrub_request_record(record: dict[str, Any]) -> dict[str, Any]:
     scrubbed = dict(record)
+    if isinstance(scrubbed.get('method'), str):
+        scrubbed['method'] = scrubbed['method'].upper()
     if isinstance(scrubbed.get('url'), str):
         scrubbed['url'] = scrub_url(scrubbed['url'])
     if isinstance(scrubbed.get('headers'), dict):
         scrubbed['headers'] = scrub_json(scrubbed['headers'])
+    if isinstance(scrubbed.get('request_headers'), dict):
+        scrubbed['request_headers'] = scrub_json(scrubbed['request_headers'])
+    if 'request_json' in scrubbed:
+        scrubbed['request_json'] = scrub_json(scrubbed['request_json'])
+    if isinstance(scrubbed.get('request_data'), str):
+        scrubbed['request_data'] = scrub_text(scrubbed['request_data'])
+    else:
+        scrubbed['request_data'] = scrub_json(scrubbed.get('request_data')) if 'request_data' in scrubbed else None
+        if scrubbed.get('request_data') is None:
+            scrubbed.pop('request_data', None)
     body = scrubbed.get('body')
     if isinstance(body, str):
         content_type = ''

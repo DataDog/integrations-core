@@ -41,6 +41,26 @@ def test_scrub_request_record_redacts_headers_url_and_json_body():
     assert record['body'] == '{"password": "<REDACTED>", "value": 1}'
 
 
+def test_scrub_request_record_redacts_request_identity_fields():
+    record = scrub_request_record(
+        {
+            'method': 'post',
+            'url': 'http://example.com/api',
+            'request_headers': {'X-Api-Key': 'abc123'},
+            'request_json': {'access_token': 'secret-token', 'safe': 'value'},
+            'request_data': 'client_secret=hidden&name=demo',
+            'status': 200,
+            'headers': {'Content-Type': 'application/json'},
+            'body': '{}',
+        }
+    )
+
+    assert record['method'] == 'POST'
+    assert record['request_headers']['X-Api-Key'] == REDACTED
+    assert record['request_json'] == {'access_token': REDACTED, 'safe': 'value'}
+    assert 'hidden' not in record['request_data']
+
+
 def test_scrub_tag_redacts_sensitive_tag_values():
     assert scrub_tag('token:abc123') == f'token:{REDACTED}'
     assert scrub_tag('env:test') == 'env:test'

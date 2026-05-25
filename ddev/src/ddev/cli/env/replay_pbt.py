@@ -33,7 +33,12 @@ PROPERTIES = (
     'openmetrics-final-newline',
     'openmetrics-help-text',
     'openmetrics-help-removal',
+    'json-object-key-order',
+    'json-whitespace',
+    'json-string-escapes',
     'metadata-emitted-metrics',
+    'asset-query-metrics-in-metadata',
+    'asset-query-tags-seen-in-replay',
     'output-finite-values',
     'rate-finite-values',
     'monotonic-count-nonnegative',
@@ -101,6 +106,7 @@ PROPERTIES = (
     '--check-cache-only', is_flag=True, help='Validate replay-cache suitability and exit without running tests.'
 )
 @click.option('--adapters', default='all', show_default=True, help='Comma-separated replay adapters, or "all".')
+@click.option('--warnings-as-errors', is_flag=True, help='Promote replay-PBT advisory warnings to test failures.')
 @click.pass_context
 def replay_pbt(
     ctx: click.Context,
@@ -119,6 +125,7 @@ def replay_pbt(
     overwrite: bool,
     check_cache_only: bool,
     adapters: str,
+    warnings_as_errors: bool,
 ) -> None:
     """Run cached replay PBT/metamorphic checks for one integration environment."""
     app: Application = ctx.obj
@@ -164,6 +171,7 @@ def replay_pbt(
         'readings': readings,
         'check_class': check_class,
         'adapters': adapters,
+        'warnings_as_errors': warnings_as_errors,
         'record_env': record_hatch_env,
         'replay_env': replay_hatch_env,
         # Backward-compatible keys for older direct pytest invocations.
