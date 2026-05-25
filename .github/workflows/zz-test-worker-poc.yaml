@@ -48,11 +48,6 @@ on:
         required: true
         default: false
         type: boolean
-      max_parallel:
-        description: Maximum replay-PBT matrix jobs to run concurrently
-        required: true
-        default: 8
-        type: number
       shard_index:
         description: Zero-based shard index
         required: true
@@ -169,7 +164,6 @@ jobs:
     timeout-minutes: 120
     strategy:
       fail-fast: false
-      max-parallel: ${{ fromJSON(inputs.max_parallel) }}
       matrix:
         include: ${{ fromJSON(needs.compute-matrix.outputs.matrix) }}
     permissions:
@@ -280,6 +274,7 @@ jobs:
     - name: Run replay PBT
       if: steps.prepare.outputs.run_pbt == 'true'
       run: |
+        set +e
         set -uo pipefail
         props=()
         if [[ "${{ inputs.property_set }}" == "smoke" ]]; then
@@ -301,6 +296,7 @@ jobs:
           --overwrite \
           "${props[@]}" 2>&1 | tee "$log_path"
         rc=${PIPESTATUS[0]}
+        set -e
         export REPLAY_PBT_EXIT_CODE="$rc"
 
         python - <<'PY' > "$REPLAY_PBT_RESULT_DIR/result.json"
@@ -352,7 +348,16 @@ jobs:
       if: failure()
       run: |
         mkdir -p "$REPLAY_PBT_RESULT_DIR"
-        if [[ -f "$REPLAY_PBT_RESULT_DIR/result.json" ]]; then
+        if [[ -f "$REPLAY_PBT_RESULT_DIR/result.json" ]] && python - <<'PY'
+        import json
+        import os
+        from pathlib import Path
+
+        result_path = Path(os.environ['REPLAY_PBT_RESULT_DIR']) / 'result.json'
+        status = json.loads(result_path.read_text()).get('status')
+        raise SystemExit(0 if status not in {'cache-hit', 'seeded-cache'} else 1)
+        PY
+        then
           echo "Preserving replay-PBT result written by failed command"
           exit 0
         fi
