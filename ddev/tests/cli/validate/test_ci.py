@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from pathlib import Path
+
 import pytest
 import yaml
 
@@ -63,16 +65,40 @@ def _add_stale_service(config_path):
         yaml.safe_dump(config, f, default_flow_style=False, sort_keys=False)
 
 
+def _remove_gates(config_path: Path) -> None:
+    with config_path.open(encoding='utf-8') as f:
+        config = yaml.safe_load(f)
+
+    config.pop('gates', None)
+
+    with config_path.open(mode='w', encoding='utf-8') as f:
+        yaml.safe_dump(config, f, default_flow_style=False, sort_keys=False)
+
+
+def _clear_gates(config_path: Path) -> None:
+    with config_path.open(encoding='utf-8') as f:
+        config = yaml.safe_load(f)
+
+    config['gates'] = []
+
+    with config_path.open(mode='w', encoding='utf-8') as f:
+        yaml.safe_dump(config, f, default_flow_style=False, sort_keys=False)
+
+
 @pytest.mark.parametrize(
     'corrupt_config, expected_error',
     [
-        pytest.param(_remove_service, "missing service", id='missing_services'),
+        pytest.param(_remove_service, "Code coverage config has 1 missing service", id='missing_services'),
         pytest.param(
             _set_wrong_paths,
             "Service `active_directory` has incorrect coverage source paths",
             id='incorrect_paths',
         ),
-        pytest.param(_add_stale_service, "stale service", id='stale_services'),
+        pytest.param(
+            _add_stale_service, "Code coverage config has 1 stale service: stale_service", id='stale_services'
+        ),
+        pytest.param(_remove_gates, "Code coverage config has no coverage gates", id='missing_gates'),
+        pytest.param(_clear_gates, "Code coverage config has no coverage gates", id='empty_gates'),
     ],
 )
 def test_code_coverage_config(ddev, repository, helpers, corrupt_config, expected_error):

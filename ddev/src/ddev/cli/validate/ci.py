@@ -328,17 +328,11 @@ def _validate_code_coverage(
             success = False
             error_message += message
 
-    if not success:
-        app.display_info('Try running `ddev validate ci --sync`\n')
-        validation_tracker.error((str(config_path),), message=error_message)
-        validation_tracker.display()
-        app.abort()
-    elif fixed:
-        config['services'] = sorted(existing_services, key=lambda s: s.get('id', ''))
-
-        # Ensure at least one gate exists
-        gates = config.get('gates') or []
-        if not gates:
+    gates = config.get('gates') or []
+    if not gates:
+        message = 'Code coverage config has no coverage gates\n'
+        if sync:
+            fixed = True
             gates.append(
                 {
                     'type': 'total_coverage_percentage',
@@ -347,6 +341,17 @@ def _validate_code_coverage(
             )
             config['gates'] = gates
             app.display_success(f'Added default coverage gate with {DEFAULT_COVERAGE_THRESHOLD}% threshold\n')
+        else:
+            success = False
+            error_message += message
+
+    if not success:
+        app.display_info('Try running `ddev validate ci --sync`\n')
+        validation_tracker.error((str(config_path),), message=error_message)
+        validation_tracker.display()
+        app.abort()
+    elif fixed:
+        config['services'] = sorted(existing_services, key=lambda s: s.get('id', ''))
 
         output = yaml.safe_dump(config, default_flow_style=False, sort_keys=False)
         config_path.write_text(output)
