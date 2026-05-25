@@ -4,9 +4,12 @@
 from __future__ import annotations
 
 import json
+import re
 import shlex
+import shutil
 import subprocess
 import tempfile
+from datetime import datetime, timezone
 from pathlib import Path as StdPath
 from typing import TYPE_CHECKING
 
@@ -28,7 +31,17 @@ if TYPE_CHECKING:
     '--check-class',
     help='Optional import spec for the check class, e.g. datadog_checks.cilium:CiliumCheck. Defaults to inference.',
 )
-@click.option('--artifacts', type=click.Path(file_okay=False, path_type=StdPath), required=True)
+@click.option(
+    '--artifacts',
+    type=click.Path(file_okay=False, path_type=StdPath),
+    help='Artifact root. Defaults to .ddev/replay under the repository root.',
+)
+@click.option(
+    '--exact-artifacts-dir',
+    is_flag=True,
+    help='Treat --artifacts as the exact run directory instead of creating a timestamped child directory.',
+)
+@click.option('--overwrite', is_flag=True, help='Remove an existing exact artifacts directory before writing.')
 @click.option('--image', default='datadog/agent-dev:nightly-main-py3', show_default=True)
 @click.option('--adapter', default='requests', show_default=True, type=click.Choice(['requests']))
 @click.option('--recreate', '-r', is_flag=True, help='Recreate the environment before comparing')
@@ -41,7 +54,9 @@ def compare_check(
     old_ref: str,
     new_ref: str | None,
     check_class: str | None,
-    artifacts: StdPath,
+    artifacts: StdPath | None,
+    exact_artifacts_dir: bool,
+    overwrite: bool,
     image: str,
     adapter: str,
     recreate: bool,
@@ -80,7 +95,15 @@ def compare_check(
         )
         started_env = True
 
-    artifacts.mkdir(parents=True, exist_ok=True)
+    artifacts = _resolve_artifacts_dir(
+        app.repo.path,
+        artifacts,
+        integration.name,
+        environment,
+        new_ref or 'working-tree',
+        exact_artifacts_dir,
+        overwrite,
+    )
     config = env_data.read_config()
     config_file = artifacts / 'config.json'
     config_file.write_text(json.dumps(config, indent=2, sort_keys=True) + '\n')
@@ -134,8 +157,62 @@ def compare_check(
         if started_env:
             ctx.invoke(stop, intg_name=intg_name, environment=environment, ignore_state=False)
 
-    _write_diff_artifacts(artifacts)
+    diff = _write_diff_artifacts(artifacts)
     app.display_success(f'Wrote compare-check artifacts to {artifacts}')
+    app.display_info(
+        f'Changed: {diff["changed"]}; '
+        f'metrics +{len(diff["collections"]["metrics"]["added"])} '
+        f'-{len(diff["collections"]["metrics"]["removed"])}'
+    )
+
+
+def _resolve_artifacts_dir(
+    repo_path,
+    artifacts: StdPath | None,
+    integration: str,
+    environment: str,
+    new_ref: str,
+    exact: bool,
+    overwrite: bool,
+) -> StdPath:
+    root = artifacts or (StdPath(str(repo_path)) / '.ddev' / 'replay')
+    if exact:
+        run_dir = root
+        latest_root = root.parent
+    else:
+        run_id = f'{datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")}-{_slug(new_ref)}'
+        latest_root = root / integration / environment
+        run_dir = latest_root / run_id
+
+    if run_dir.exists():
+        if overwrite:
+            shutil.rmtree(run_dir)
+        else:
+            raise click.ClickException(
+                f'Artifacts directory already exists: {run_dir}. Use --overwrite or omit --exact-artifacts-dir.'
+            )
+
+    run_dir.mkdir(parents=True)
+    _update_latest(latest_root, run_dir)
+    return run_dir
+
+
+def _slug(value: str) -> str:
+    value = re.sub(r'[^A-Za-z0-9_.-]+', '-', value).strip('-')
+    return value[:60] or 'run'
+
+
+def _update_latest(root: StdPath, run_dir: StdPath) -> None:
+    root.mkdir(parents=True, exist_ok=True)
+    (root / 'latest.txt').write_text(str(run_dir) + '\n')
+    latest = root / 'latest'
+    try:
+        if latest.is_symlink() or latest.exists():
+            latest.unlink()
+        latest.symlink_to(run_dir, target_is_directory=True)
+    except OSError:
+        # Symlinks are a convenience; latest.txt is the portable pointer.
+        pass
 
 
 def _git_worktree(repo, ref: str, path: StdPath) -> None:
@@ -211,7 +288,7 @@ def _run_container(
     )
 
 
-def _write_diff_artifacts(artifacts: StdPath) -> None:
+def _write_diff_artifacts(artifacts: StdPath) -> dict:
     from datadog_checks.dev.replay.diff import diff_outputs
     from datadog_checks.dev.replay.normalize import normalize_output
 
@@ -229,4 +306,7 @@ def _write_diff_artifacts(artifacts: StdPath) -> None:
         f'- Changed: {diff["changed"]}\n'
         f'- Old metrics: {len(old_normalized["metrics"])}\n'
         f'- New metrics: {len(new_normalized["metrics"])}\n'
+        f'- Metric records added: {len(diff["collections"]["metrics"]["added"])}\n'
+        f'- Metric records removed: {len(diff["collections"]["metrics"]["removed"])}\n'
     )
+    return diff
