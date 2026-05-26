@@ -55,9 +55,10 @@ def test_check_filters_metrics_config(
     prefixed_metrics: dict[str, list] = {expected_prefix: [] for expected_prefix in expected_prefixes}
 
     for expected_prefix in expected_prefixes:
-        prefixed_metrics[expected_prefix].extend(
-            [metric for metric in final_config["metrics"][0] if metric.startswith(expected_prefix)]
-        )
+        for metrics_dict in final_config["metrics"]:
+            prefixed_metrics[expected_prefix].extend(
+                [metric for metric in metrics_dict if metric.startswith(expected_prefix)]
+            )
 
     errors = []
     for expected_prefix in expected_prefixes:
@@ -113,6 +114,43 @@ def test_check_filters_metrics(aggregator: AggregatorStub, expected_metrics: lis
 def test_labels_renaming(ready_check: KrakendCheck, aggregator: AggregatorStub, metric: str, tag: str):
     # All metrics should include the value from target_info with the appropriate tags renamed
     aggregator.assert_metric_has_tag(metric, tag)
+
+
+@pytest.mark.parametrize(
+    "go_metrics, expected_rename_labels",
+    [
+        (
+            True,
+            {
+                "service_version": "krakend.service_version",
+                "service_name": "krakend.service_name",
+                "version": "go_version",
+            },
+        ),
+        (
+            False,
+            {"service_version": "krakend.service_version", "service_name": "krakend.service_name"},
+        ),
+    ],
+    ids=["go_metrics_enabled", "go_metrics_disabled"],
+)
+def test_default_rename_labels(
+    check: KrakendCheck,
+    instance: InstanceBuilder,
+    go_metrics: bool,
+    expected_rename_labels: dict[str, str],
+):
+    final_config = check.get_config_with_defaults(instance(go_metrics=go_metrics))
+
+    assert final_config["rename_labels"] == expected_rename_labels
+
+
+def test_user_rename_labels_take_precedence(check: KrakendCheck, instance: InstanceBuilder):
+    instance_config = instance() | {"rename_labels": {"pod": "pod_name"}}
+
+    final_config = check.get_config_with_defaults(instance_config)
+
+    assert final_config["rename_labels"] == {"pod": "pod_name"}
 
 
 def test_service_check_emitted(ready_check: KrakendCheck, aggregator: AggregatorStub):
