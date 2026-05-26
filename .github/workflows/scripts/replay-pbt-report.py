@@ -318,6 +318,27 @@ def finding_subject(finding: dict[str, Any]) -> str:
     return str(finding.get("metric") or finding.get("tag_key") or finding.get("query") or "")
 
 
+def target_url(row: dict[str, Any]) -> str:
+    return str(row.get("job_url") or row.get("run_url") or "")
+
+
+def target_link_md(row: dict[str, Any]) -> str:
+    target = md_escape(row.get("target", ""))
+    url = target_url(row)
+    if url:
+        return f"[`{target}`]({md_escape(url)})"
+    return f"`{target}`"
+
+
+def target_link_html(row: dict[str, Any]) -> str:
+    target = html.escape(str(row.get("target", "")))
+    url = target_url(row)
+    if url:
+        label = "job" if row.get("job_url") else "run"
+        return f"<a href='{html.escape(url)}'><code>{target}</code></a> <span class='tiny'>{label}</span>"
+    return f"<code>{target}</code>"
+
+
 def group_actionable_findings(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
     actionable = [f for f in findings if (f.get("level") or "").lower() in {"error", "warning", "warn"}]
     groups: dict[tuple[str, str, str, str, str], dict[str, Any]] = {}
@@ -339,6 +360,8 @@ def group_actionable_findings(findings: list[dict[str, Any]]) -> list[dict[str, 
                 "check": finding.get("check", ""),
                 "path": finding.get("path", ""),
                 "message": finding.get("message", ""),
+                "run_url": finding.get("run_url", ""),
+                "job_url": finding.get("job_url", ""),
                 "count": 0,
                 "subjects": [],
             },
@@ -498,7 +521,7 @@ def build_markdown(
         examples_by_category: dict[str, list[str]] = defaultdict(list)
         for row in rows:
             if row["category"] != "passed" and len(examples_by_category[row["category"]]) < 4:
-                examples_by_category[row["category"]].append(f"`{row['target']}`")
+                examples_by_category[row["category"]].append(target_link_md(row))
         for category, count in category_counts.most_common():
             icon, label, description = CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS["unknown"])
             examples = ", ".join(examples_by_category[category])
@@ -517,7 +540,7 @@ def build_markdown(
             if group["count"] > len(group["subjects"][:5]):
                 examples += f", +{group['count'] - len(group['subjects'][:5])} more"
             lines.append(
-                f"| `{group['target']}` | **{md_escape(group['property_label'])}**<br/><sub>`{md_escape(group['property'])}`</sub> | {group['count']} | {examples} | {md_escape(group['message'])} |"
+                f"| {target_link_md(group)} | **{md_escape(group['property_label'])}**<br/><sub>`{md_escape(group['property'])}`</sub> | {group['count']} | {examples} | {md_escape(group['message'])} |"
             )
         if len(groups) > 12:
             lines.append(f"\n_… {len(groups) - 12} more grouped finding rows in `report.html` and `findings.tsv`._")
@@ -538,7 +561,7 @@ def build_markdown(
         )
         for coverage in sorted_coverages[:20]:
             lines.append(
-                f"| `{coverage.get('target', '')}` | {pct(coverage.get('endpoint_to_emitted_coverage'))} | {pct(coverage.get('metadata_to_emitted_coverage'))} | {coverage.get('endpoint_count') or ''} | {coverage.get('metadata_count') or ''} |"
+                f"| {target_link_md(coverage)} | {pct(coverage.get('endpoint_to_emitted_coverage'))} | {pct(coverage.get('metadata_to_emitted_coverage'))} | {coverage.get('endpoint_count') or ''} | {coverage.get('metadata_count') or ''} |"
             )
         if len(coverages) > 20:
             lines.append(f"\n_… {len(coverages) - 20} more coverage rows in the report bundle._")
@@ -561,7 +584,7 @@ def build_markdown(
             for row in grouped_rows[:50]:
                 shard_link = f"[run]({row.get('run_url')})" if row.get("run_url") else ""
                 lines.append(
-                    f"| `{row['target']}` | `{md_escape(row.get('fixture_ref', ''))}` | {row.get('failing_property_count', 0)} | {md_escape(row.get('summary', ''))} | {shard_link} |"
+                    f"| {target_link_md(row)} | `{md_escape(row.get('fixture_ref', ''))}` | {row.get('failing_property_count', 0)} | {md_escape(row.get('summary', ''))} | {shard_link} |"
                 )
             if len(grouped_rows) > 50:
                 lines.append(f"| _… {len(grouped_rows) - 50} more_ | | | | |")
@@ -642,7 +665,7 @@ def build_html(
     )
     finding_cards = "".join(
         "<article class='finding'>"
-        f"<div><strong>{esc(group['property_label'])}</strong> <code>{esc(group['target'])}</code></div>"
+        f"<div><strong>{esc(group['property_label'])}</strong> {target_link_html(group)}</div>"
         f"<p>{esc(group['message'])}</p>"
         f"<p class='muted'>{esc(group['property_description'])}</p>"
         f"<p><span class='badge'>{group['count']} repeated row(s)</span> <code>{esc(group['path'])}</code></p>"
@@ -652,7 +675,7 @@ def build_html(
     ) or "<p>No actionable finding groups collected.</p>"
     target_rows = "".join(
         "<tr>"
-        f"<td><code>{esc(row['target'])}</code></td>"
+        f"<td>{target_link_html(row)}</td>"
         f"<td>{''.join(f'<span class="pill {state}">{esc(label)}: {esc(state)}</span>' for label, state in target_step_state(row, artifact_targets))}</td>"
         f"<td>{esc(row['status'])}</td>"
         f"<td>{esc(row['category_label'])}</td>"
@@ -662,7 +685,7 @@ def build_html(
         for row in rows
     )
     coverage_rows = "".join(
-        f"<tr><td><code>{esc(c.get('target'))}</code></td><td>{esc(pct(c.get('endpoint_to_emitted_coverage')))}</td><td>{esc(pct(c.get('metadata_to_emitted_coverage')))}</td><td>{esc(c.get('endpoint_count'))}</td><td>{esc(c.get('metadata_count'))}</td></tr>"
+        f"<tr><td>{target_link_html(c)}</td><td>{esc(pct(c.get('endpoint_to_emitted_coverage')))}</td><td>{esc(pct(c.get('metadata_to_emitted_coverage')))}</td><td>{esc(c.get('endpoint_count'))}</td><td>{esc(c.get('metadata_count'))}</td></tr>"
         for c in sorted(coverages, key=lambda item: str(item.get('target', '')))[:80]
     ) or "<tr><td colspan='5'>No coverage reports collected.</td></tr>"
     return f"""<!doctype html>
@@ -740,6 +763,9 @@ def main() -> None:
     rows = load_results(args.results)
     attach_current_run(rows)
     property_results, findings, coverages = load_findings_and_coverages(args.findings)
+    attach_current_run(findings)
+    attach_current_run(coverages)
+    attach_current_run(property_results)
 
     status_counts = Counter(row["status"] for row in rows)
     category_counts = Counter(row["category"] for row in rows if row["category"] != "passed")

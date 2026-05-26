@@ -33,6 +33,11 @@ def gh_json(api_path: str) -> Any:
     return json.loads(result.stdout)
 
 
+def list_run_jobs(run_id: str) -> dict[str, str]:
+    jobs = gh_json(f'repos/DataDog/integrations-core/actions/runs/{run_id}/jobs?per_page=100').get('jobs', [])
+    return {str(job.get('name', '')): str(job.get('html_url', '')) for job in jobs if job.get('name') and job.get('html_url')}
+
+
 def download_artifact(run_id: str, destination: Path) -> dict[str, Any]:
     artifacts = gh_json(f'repos/DataDog/integrations-core/actions/runs/{run_id}/artifacts?per_page=100')['artifacts']
     matches = [artifact for artifact in artifacts if artifact.get('name') == 'replay-pbt-report']
@@ -49,6 +54,7 @@ def download_artifact(run_id: str, destination: Path) -> dict[str, Any]:
         'display_title': run.get('display_title', ''),
         'status': run.get('status', ''),
         'conclusion': run.get('conclusion', ''),
+        'job_urls': list_run_jobs(run_id),
         'artifact_archive': archive,
     }
 
@@ -117,28 +123,33 @@ def main() -> None:
         tmpdir = Path(tmpdir_str)
         for run_id in run_ids:
             run_info = download_artifact(run_id, tmpdir)
-            shard_runs.append({k: v for k, v in run_info.items() if k != 'artifact_archive'})
+            shard_runs.append({k: v for k, v in run_info.items() if k not in {'artifact_archive', 'job_urls'}})
             report_dir = extract_inner_report(run_info['artifact_archive'], tmpdir / run_id)
+            job_urls = run_info.get('job_urls', {})
             for row in read_json(report_dir / 'targets.json'):
                 if isinstance(row, dict):
                     row.setdefault('run_id', run_id)
                     row.setdefault('run_url', run_info.get('url', ''))
                     row.setdefault('run_title', run_info.get('display_title', ''))
+                    row.setdefault('job_url', job_urls.get(str(row.get('target', '')), ''))
                     targets.append(row)
             for row in read_json(report_dir / 'findings.json'):
                 if isinstance(row, dict):
                     row.setdefault('run_id', run_id)
                     row.setdefault('run_url', run_info.get('url', ''))
+                    row.setdefault('job_url', job_urls.get(str(row.get('target', '')), ''))
                     findings.append(row)
             for row in read_json(report_dir / 'coverage-summary.json'):
                 if isinstance(row, dict):
                     row.setdefault('run_id', run_id)
                     row.setdefault('run_url', run_info.get('url', ''))
+                    row.setdefault('job_url', job_urls.get(str(row.get('target', '')), ''))
                     coverages.append(row)
             for row in read_json(report_dir / 'property-results.json'):
                 if isinstance(row, dict):
                     row.setdefault('run_id', run_id)
                     row.setdefault('run_url', run_info.get('url', ''))
+                    row.setdefault('job_url', job_urls.get(str(row.get('target', '')), ''))
                     property_results.append(row)
 
     targets = dedupe(targets, ('target', 'status', 'category', 'run_id'))
@@ -188,10 +199,10 @@ def main() -> None:
     report.write_json(args.out_dir / 'findings.json', findings)
     report.write_json(args.out_dir / 'coverage-summary.json', coverages)
     report.write_tsv(args.out_dir / 'summary.tsv', [summary], [k for k in summary if k != 'shard_runs'])
-    report.write_tsv(args.out_dir / 'targets.tsv', targets, ['status', 'category', 'category_label', 'integration', 'environment', 'target', 'fixture_ref', 'target_ref', 'failing_property_count', 'summary', 'run_id', 'run_url'])
+    report.write_tsv(args.out_dir / 'targets.tsv', targets, ['status', 'category', 'category_label', 'integration', 'environment', 'target', 'fixture_ref', 'target_ref', 'failing_property_count', 'summary', 'run_id', 'run_url', 'job_url'])
     report.write_tsv(args.out_dir / 'failure-categories.tsv', categories, ['category', 'label', 'count', 'description'])
-    report.write_tsv(args.out_dir / 'findings.tsv', findings, ['level', 'property', 'check', 'integration', 'environment', 'target', 'metric', 'tag_key', 'path', 'message', 'query', 'run_id', 'run_url'])
-    report.write_tsv(args.out_dir / 'coverage-summary.tsv', coverages, ['property', 'integration', 'environment', 'target', 'endpoint_count', 'endpoint_emitted_count', 'endpoint_missing_count', 'endpoint_to_emitted_coverage', 'metadata_count', 'metadata_emitted_count', 'metadata_unemitted_count', 'metadata_to_emitted_coverage', 'run_id', 'run_url'])
+    report.write_tsv(args.out_dir / 'findings.tsv', findings, ['level', 'property', 'check', 'integration', 'environment', 'target', 'metric', 'tag_key', 'path', 'message', 'query', 'run_id', 'run_url', 'job_url'])
+    report.write_tsv(args.out_dir / 'coverage-summary.tsv', coverages, ['property', 'integration', 'environment', 'target', 'endpoint_count', 'endpoint_emitted_count', 'endpoint_missing_count', 'endpoint_to_emitted_coverage', 'metadata_count', 'metadata_emitted_count', 'metadata_unemitted_count', 'metadata_to_emitted_coverage', 'run_id', 'run_url', 'job_url'])
     report.write_zip(args.zip, args.out_dir)
     print(markdown)
 
