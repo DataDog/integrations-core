@@ -509,7 +509,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: "@ocsf.metadata.event_code:(sso_login_initiated OR sso_login_succeeded)"
+        query: "@ocsf.metadata.event_code:(sso_login_initiated OR sso_login_succeeded OR sso_login_failed OR user_logged_out)"
       processors:
         - type: string-builder-processor
           name: Add service name
@@ -648,9 +648,13 @@ pipeline:
               name: ocsf.activity_id
               categories:
                 - filter:
-                    query: "@ocsf.metadata.event_code:(sso_login_initiated OR sso_login_succeeded)"
+                    query: "@ocsf.metadata.event_code:(sso_login_initiated OR sso_login_succeeded OR sso_login_failed)"
                   name: Logon
                   id: 1
+                - filter:
+                    query: "@ocsf.metadata.event_code:user_logged_out"
+                  name: Logoff
+                  id: 2
                 - filter:
                     query: "@ocsf.metadata.event_code:*"
                   name: Other
@@ -690,7 +694,7 @@ pipeline:
               name: ocsf.status_id
               categories:
                 - filter:
-                    query: "@ocsf.metadata.event_code:sso_login_succeeded"
+                    query: "@ocsf.metadata.event_code:(sso_login_succeeded OR user_logged_out)"
                   name: Success
                   id: 1
                 - filter:
