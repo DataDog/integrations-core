@@ -16,6 +16,7 @@ from datadog_checks.base.checks.openmetrics.v2.metrics_mapping import (
     ConfigOptionTruthy,
     MetricsMapping,
 )
+from datadog_checks.base.errors import ConfigurationError
 
 _DEFAULT_INSTANCE: dict[str, object] = {'openmetrics_endpoint': 'http://test:9090/metrics'}
 
@@ -111,6 +112,18 @@ def test_composite_predicates(cls: type[AllOf] | type[AnyOf], config: dict[str, 
     assert pred.should_load(config) is expected
 
 
+@pytest.mark.parametrize(
+    "cls, expected",
+    [
+        (AllOf, True),
+        (AnyOf, False),
+    ],
+    ids=["all_of_vacuous_truth", "any_of_vacuous_falsity"],
+)
+def test_composite_predicates_empty(cls: type[AllOf] | type[AnyOf], expected: bool):
+    assert cls().should_load({}) is expected
+
+
 # ---------------------------------------------------------------------------
 # MetricsMapping
 # ---------------------------------------------------------------------------
@@ -158,14 +171,14 @@ def test_load_metrics_file_errors(make_check: CheckFactory, tmp_path: Path, file
     (tmp_path / filename).write_text(content)
     check = make_check()
     with patch.object(type(check), '_get_package_dir', return_value=tmp_path):
-        with pytest.raises(RuntimeError, match=match):
+        with pytest.raises(ConfigurationError, match=match):
             check._load_metrics_file(Path(filename))
 
 
 def test_load_metrics_file_missing(make_check: CheckFactory, tmp_path: Path):
     check = make_check()
     with patch.object(type(check), '_get_package_dir', return_value=tmp_path):
-        with pytest.raises(FileNotFoundError):
+        with pytest.raises(ConfigurationError, match="Failed to read metrics file"):
             check._load_metrics_file(Path("nonexistent.yaml"))
 
 
@@ -251,6 +264,36 @@ def test_load_file_based_metrics_cached_across_calls(make_check: CheckFactory, t
         first = check._load_file_based_metrics({})
         second = check._load_file_based_metrics({})
     assert first is second
+
+
+def test_load_file_based_metrics_cache_ignores_config_changes(make_check: CheckFactory, tmp_path: Path):
+    """Predicate re-evaluation is suppressed once the cache is populated: a second call with a
+    different config returns the first-call result without consulting the predicates again."""
+    write_yaml(tmp_path, "metrics/always.yaml", {"m1": "d1"})
+    write_yaml(tmp_path, "metrics/extra.yaml", {"m2": "d2"})
+
+    class Check(OpenMetricsBaseCheckV2):
+        METRICS_MAP = [
+            MetricsMapping(Path("metrics/always.yaml")),
+            MetricsMapping(Path("metrics/extra.yaml"), predicate=ConfigOptionTruthy("extra", default=False)),
+        ]
+
+    check = make_check(cls=Check)
+    with patch.object(Check, '_get_package_dir', return_value=tmp_path):
+        first = check._load_file_based_metrics({'extra': False})
+        second = check._load_file_based_metrics({'extra': True})
+    assert first is second
+    assert len(first) == 1
+
+
+def test_load_file_based_metrics_permanent_failure_fails_once(make_check: CheckFactory, tmp_path: Path):
+    """A malformed YAML file raises on the first call; subsequent calls return the empty cache."""
+    (tmp_path / "metrics.yml").write_text("foo: [bar")
+    check = make_check()
+    with patch.object(type(check), '_get_package_dir', return_value=tmp_path):
+        with pytest.raises(ConfigurationError, match="Failed to parse"):
+            check._load_file_based_metrics({})
+        assert check._load_file_based_metrics({}) == []
 
 
 def test_load_file_based_metrics_does_not_accumulate_on_repeated_scraper_creation(

@@ -125,6 +125,12 @@ class OpenMetricsBaseCheckV2(AgentCheck):
             scraper.set_dynamic_tags(*tags)
 
     def get_config_with_defaults(self, config):
+        """Combine instance config with class defaults and file-based metric mappings.
+
+        Subclasses that override this method must call ``super().get_config_with_defaults(config)``;
+        otherwise the YAML mappings declared via ``METRICS_MAP`` (or discovered by convention) are
+        silently skipped.
+        """
         defaults = self.get_default_config()
         if file_metrics := self._load_file_based_metrics(config):
             defaults['metrics'] = list(defaults.get('metrics', [])) + file_metrics
@@ -153,17 +159,21 @@ class OpenMetricsBaseCheckV2(AgentCheck):
 
         Falls back to convention-based discovery of ``metrics.yaml`` or
         ``metrics.yml`` (in that order) when ``METRICS_MAP`` is empty.
+
+        Permanent load failures (malformed YAML, unreadable files) are raised
+        once on the first call; the cache is sealed beforehand so subsequent
+        scrapes do not retry and re-raise the same error.
         """
         if self._file_metrics is not None:
             return self._file_metrics
 
+        self._file_metrics = []
         if not self.METRICS_MAP:
             package_dir = self._get_package_dir()
             for candidate in (Path("metrics.yaml"), Path("metrics.yml")):
                 if (package_dir / candidate).is_file():
                     self._file_metrics = [self._load_metrics_file(candidate)]
-                    return self._file_metrics
-            self._file_metrics = []
+                    break
         else:
             self._file_metrics = [
                 self._load_metrics_file(source.path) for source in self.METRICS_MAP if source.should_load(config)
@@ -179,9 +189,11 @@ class OpenMetricsBaseCheckV2(AgentCheck):
             with open(file_path) as f:
                 data = yaml.safe_load(f)
         except yaml.YAMLError as e:
-            raise RuntimeError(f"Failed to parse metrics file {path}: {e}") from None
+            raise ConfigurationError(f"Failed to parse metrics file {path}: {e}") from None
+        except OSError as e:
+            raise ConfigurationError(f"Failed to read metrics file {path}: {e}") from None
         if not isinstance(data, dict):
-            raise RuntimeError(f"Metrics file {path} must contain a YAML mapping, got {type(data).__name__}")
+            raise ConfigurationError(f"Metrics file {path} must contain a YAML mapping, got {type(data).__name__}")
         return data
 
     @contextmanager
