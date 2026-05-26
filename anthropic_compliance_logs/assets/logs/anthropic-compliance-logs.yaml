@@ -794,13 +794,6 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `auth_method` to `ocsf.auth_protocol`
-              sources:
-                - auth_method
-              target: ocsf.auth_protocol
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
               name: Map `ocsf.service.name` to `ocsf.service.name`
               sources:
                 - ocsf.service.name
