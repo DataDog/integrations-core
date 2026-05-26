@@ -12,6 +12,7 @@ services:
       - ${DD_LOG_1}:/var/log/voltdb.log
     ports:
       - ${VOLTDB_CLIENT_PORT}:${VOLTDB_CLIENT_PORT}  # Native client port: https://docs.voltdb.com/UsingVoltDB/HostConfigPortOpts.php
+      - ${VOLTDB_HTTP_PORT}:${VOLTDB_HTTP_PORT}  # HTTP/JSON interface (used by http transport): https://docs.voltdb.com/UsingVoltDB/ProgLangJson.php
 
   voltdb1:
     image: ${VOLTDB_IMAGE}

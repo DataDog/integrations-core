@@ -49,12 +49,18 @@ def dd_environment(instance):
         'VOLTDB_IMAGE': common.VOLTDB_IMAGE,
         'VOLTDB_DEPLOYMENT': common.VOLTDB_DEPLOYMENT,
         'VOLTDB_CLIENT_PORT': str(common.VOLTDB_CLIENT_PORT),
+        'VOLTDB_HTTP_PORT': str(common.VOLTDB_HTTP_PORT),
     }
 
     if common.TLS_ENABLED:
         # Must refer to a path within the Agent container.
         instance = instance.copy()
-        instance['ssl_config_file'] = '/tmp/voltdb-certs/ca.pem'
+        if common.VOLTDB_TRANSPORT == 'http':
+            # The HTTP transport runs through the framework's RequestsWrapper,
+            # which picks up `tls_ca_cert` (and friends) automatically.
+            instance['tls_ca_cert'] = '/tmp/voltdb-certs/ca.pem'
+        else:
+            instance['ssl_config_file'] = '/tmp/voltdb-certs/ca.pem'
         e2e_metadata = {'docker_volumes': ['{}:/tmp/voltdb-certs'.format(common.TLS_CERTS_DIR)]}
     else:
         e2e_metadata = {}

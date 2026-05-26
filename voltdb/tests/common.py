@@ -171,18 +171,39 @@ TLS_CERTS_DIR = os.path.join(HERE, 'compose', 'certs')
 # so we reuse the same `ca.pem` the docker compose fixture already ships.
 TLS_CONFIG_FILE = os.path.join(TLS_CERTS_DIR, 'ca.pem')
 
+# `VOLTDB_TRANSPORT` is set by the hatch matrix (`native` or `http`) so the
+# same E2E suite exercises both transports end-to-end.
+VOLTDB_TRANSPORT = os.environ.get('VOLTDB_TRANSPORT', 'native')
+
 VOLTDB_DEPLOYMENT = os.path.join(HERE, 'compose', 'deployment-tls.xml' if TLS_ENABLED else 'deployment.xml')
 VOLTDB_CLIENT_PORT = 21212
+# HTTP port the VoltDB JSON interface listens on (matches deployment.xml).
+VOLTDB_HTTP_PORT = 8443 if TLS_ENABLED else 8080
+VOLTDB_HTTP_SCHEME = 'https' if TLS_ENABLED else 'http'
+VOLTDB_HTTP_URL = '{}://{}:{}'.format(VOLTDB_HTTP_SCHEME, HOST, VOLTDB_HTTP_PORT)
 
-SERVICE_CHECK_TAGS = ['host:{}'.format(HOST), 'port:{}'.format(VOLTDB_CLIENT_PORT)]
+if VOLTDB_TRANSPORT == 'http':
+    SERVICE_CHECK_TAGS = ['host:{}'.format(HOST), 'port:{}'.format(VOLTDB_HTTP_PORT)]
+else:
+    SERVICE_CHECK_TAGS = ['host:{}'.format(HOST), 'port:{}'.format(VOLTDB_CLIENT_PORT)]
 
 VOLTDB_VERSION = os.environ['VOLTDB_VERSION']
 VOLTDB_IMAGE = os.environ['VOLTDB_IMAGE']
 
-BASE_INSTANCE = {
-    'host': HOST,
-    'port': VOLTDB_CLIENT_PORT,
-    'username': 'doggo',
-    'password': 'doggopass',
-    'tags': ['test:voltdb'],
-}  # type: Instance
+if VOLTDB_TRANSPORT == 'http':
+    # url:-based config exercises the HTTP/JSON transport against the same
+    # docker fixture the native tests use.
+    BASE_INSTANCE = {
+        'url': VOLTDB_HTTP_URL,
+        'username': 'doggo',
+        'password': 'doggopass',
+        'tags': ['test:voltdb'],
+    }  # type: Instance
+else:
+    BASE_INSTANCE = {
+        'host': HOST,
+        'port': VOLTDB_CLIENT_PORT,
+        'username': 'doggo',
+        'password': 'doggopass',
+        'tags': ['test:voltdb'],
+    }  # type: Instance

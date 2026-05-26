@@ -60,16 +60,26 @@ class VoltDBCheck(AgentCheck):
         response = self._client.call_procedure('@SystemInformation', ['OVERVIEW'])
         self._client.raise_for_status(response)
 
-        rows = response.tables[0].tuples  # type: List[list]
+        table = response.tables[0]
+        # Look up KEY and VALUE column indexes by name so we tolerate VoltDB
+        # versions that reorder or add columns to the OVERVIEW response.
+        col_index = {col.name: i for i, col in enumerate(table.columns)}
+        key_idx = col_index.get('KEY')
+        value_idx = col_index.get('VALUE')
+        if key_idx is None or value_idx is None:
+            self.log.debug(
+                'VoltDB @SystemInformation OVERVIEW response is missing KEY or VALUE columns; got %s',
+                list(col_index),
+            )
+            return None
 
         # NOTE: there will be one VERSION row per server in the cluster.
         # Arbitrarily use the first one we see.
-        for row in rows:
-            _, column, value = row[0], row[1], row[2]
-            if column == 'VERSION':
-                return self._transform_version(value)
+        for row in table.tuples:
+            if row[key_idx] == 'VERSION':
+                return self._transform_version(row[value_idx])
 
-        self.log.debug('VERSION column not found: %s', [row[1] for row in rows])
+        self.log.debug('VERSION column not found: %s', [row[key_idx] for row in table.tuples])
         return None
 
     def _transform_version(self, raw):

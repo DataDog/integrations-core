@@ -12,7 +12,7 @@ agnostic to which transport is in use.
 """
 
 import json
-from typing import Callable, List, Optional, Union  # noqa: F401
+from typing import Callable, List, Optional, Union
 from urllib.parse import urljoin
 
 import requests
@@ -23,18 +23,16 @@ from .client import VoltDBError
 class HttpColumn(object):
     __slots__ = ('name',)
 
-    def __init__(self, name):
-        # type: (str) -> None
+    def __init__(self, name: str) -> None:
         self.name = name
 
 
 class HttpTable(object):
     __slots__ = ('columns', 'tuples')
 
-    def __init__(self, schema, data):
-        # type: (Optional[list], list) -> None
-        self.columns = [HttpColumn(entry['name']) for entry in (schema or [])]
-        self.tuples = data or []
+    def __init__(self, schema: Optional[list], data: Optional[list]) -> None:
+        self.columns: List[HttpColumn] = [HttpColumn(entry['name']) for entry in (schema or [])]
+        self.tuples: list = data or []
 
 
 class HttpResponse(object):
@@ -42,11 +40,12 @@ class HttpResponse(object):
 
     SUCCESS = 1
 
-    def __init__(self, json_data):
-        # type: (dict) -> None
-        self.status = json_data.get('status')
-        self.statusString = json_data.get('statusstring')
-        self.tables = [HttpTable(r.get('schema'), r.get('data')) for r in json_data.get('results') or []]
+    def __init__(self, json_data: dict) -> None:
+        self.status: Optional[int] = json_data.get('status')
+        self.statusString: Optional[str] = json_data.get('statusstring')
+        self.tables: List[HttpTable] = [
+            HttpTable(r.get('schema'), r.get('data')) for r in json_data.get('results') or []
+        ]
 
 
 class HttpClient(object):
@@ -58,14 +57,19 @@ class HttpClient(object):
 
     SUCCESS = HttpResponse.SUCCESS
 
-    def __init__(self, url, http_get, username, password, password_hashed=False):
-        # type: (str, Callable[..., requests.Response], str, str, bool) -> None
+    def __init__(
+        self,
+        url: str,
+        http_get: Callable[..., requests.Response],
+        username: str,
+        password: str,
+        password_hashed: bool = False,
+    ) -> None:
         self._api_url = urljoin(url, '/api/1.0/')
         self._auth = VoltDBAuth(username, password, password_hashed)
         self._http_get = http_get
 
-    def call_procedure(self, procedure, params=None):
-        # type: (str, Union[str, list, None]) -> HttpResponse
+    def call_procedure(self, procedure: str, params: Union[str, list, None] = None) -> HttpResponse:
         if params is None:
             parameters = ''
         elif isinstance(params, str):
@@ -81,26 +85,22 @@ class HttpClient(object):
         response.raise_for_status()
         return HttpResponse(response.json())
 
-    def raise_for_status(self, response):
-        # type: (HttpResponse) -> None
+    def raise_for_status(self, response: HttpResponse) -> None:
         if response.status != self.SUCCESS:
             raise VoltDBError(response.status, response.statusString)
 
-    def close(self):
-        # type: () -> None
+    def close(self) -> None:
         # Connection pooling is handled by the underlying requests Session.
         return None
 
 
 class VoltDBAuth(requests.auth.AuthBase):
-    def __init__(self, username, password, password_hashed):
-        # type: (str, str, bool) -> None
+    def __init__(self, username: str, password: str, password_hashed: bool) -> None:
         self._username = username
         self._password = password
         self._password_hashed = password_hashed
 
-    def __call__(self, r):
-        # type: (requests.PreparedRequest) -> requests.PreparedRequest
+    def __call__(self, r: requests.PreparedRequest) -> requests.PreparedRequest:
         # See: https://docs.voltdb.com/UsingVoltDB/ProgLangJson.php
         params = {
             'User': self._username,

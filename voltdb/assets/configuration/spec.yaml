@@ -66,6 +66,7 @@ files:
             value:
               type: integer
               example: 21212
+              default: 21212
 
           - name: username
             description: The username to use to authenticate with VoltDB.
@@ -91,6 +92,7 @@ files:
             value:
               type: boolean
               example: false
+              default: false
 
           - name: ssl_config_file
             description: |
@@ -109,6 +111,7 @@ files:
             value:
               type: number
               example: 8
+              default: 8
 
           - name: procedure_timeout
             description: |
@@ -171,6 +174,7 @@ files:
             value:
               type: boolean
               example: false
+              default: false
 
           - template: instances/http
             overrides:

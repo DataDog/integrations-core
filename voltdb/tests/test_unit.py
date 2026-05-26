@@ -416,44 +416,44 @@ def test_password_hashed_only_kept_for_http():
 
 
 def test_http_mode_end_to_end(aggregator, dd_run_check):
-    """When `url` is set, the check uses the HTTP transport and unwraps the
-    JSON response into the same `tables[].columns[].name` / `tuples` shape the
-    native code path uses."""
+    """When `url` is set, the check uses the HTTP transport and exposes
+    responses through the same `tables[].columns[].name` / `tuples` shape
+    the native code path uses."""
     import mock
 
-    def fake_get(url, auth=None, params=None, **_):
-        proc = params['Procedure']
-        resp = mock.MagicMock()
-        resp.status_code = 200
-        resp.raise_for_status = lambda: None
-        if proc == '@SystemInformation':
-            resp.json = lambda: {
-                'status': 1,
-                'results': [
-                    {
-                        'schema': [{'name': 'HOST_ID'}, {'name': 'KEY'}, {'name': 'VALUE'}],
-                        'data': [[0, 'VERSION', '14.2']],
-                    }
-                ],
-            }
-        elif proc == '@Statistics' and '"CPU"' in params['Parameters']:
-            resp.json = lambda: {
-                'status': 1,
-                'results': [
-                    {
-                        'schema': [
-                            {'name': 'TIMESTAMP'},
-                            {'name': 'HOST_ID'},
-                            {'name': 'HOSTNAME'},
-                            {'name': 'PERCENT_USED'},
-                        ],
-                        'data': [[1234567890, 7, 'host-X', 42.5]],
-                    }
-                ],
-            }
-        else:
-            resp.json = lambda: {'status': 1, 'results': []}
-        return resp
+    from datadog_checks.voltdb.http_client import HttpResponse
+
+    def fake_call_procedure(procedure, params=None):
+        if procedure == '@SystemInformation':
+            return HttpResponse(
+                {
+                    'status': 1,
+                    'results': [
+                        {
+                            'schema': [{'name': 'HOST_ID'}, {'name': 'KEY'}, {'name': 'VALUE'}],
+                            'data': [[0, 'VERSION', '14.2']],
+                        }
+                    ],
+                }
+            )
+        if procedure == '@Statistics' and params and params[0] == 'CPU':
+            return HttpResponse(
+                {
+                    'status': 1,
+                    'results': [
+                        {
+                            'schema': [
+                                {'name': 'TIMESTAMP'},
+                                {'name': 'HOST_ID'},
+                                {'name': 'HOSTNAME'},
+                                {'name': 'PERCENT_USED'},
+                            ],
+                            'data': [[1234567890, 7, 'host-X', 42.5]],
+                        }
+                    ],
+                }
+            )
+        return HttpResponse({'status': 1, 'results': []})
 
     instance = {
         'url': 'http://vmc.example:8080',
@@ -462,7 +462,13 @@ def test_http_mode_end_to_end(aggregator, dd_run_check):
         'statistics_components': ['CPU'],
         'tags': ['live:test'],
     }
-    with mock.patch('requests.Session.get', side_effect=fake_get):
+    with mock.patch('datadog_checks.voltdb.check.HttpClient') as m:
+        client = m.return_value
+        client.SUCCESS = HttpResponse.SUCCESS
+        client.call_procedure.side_effect = fake_call_procedure
+        client.raise_for_status = lambda r: None
+        client.close = lambda: None
+
         check = VoltDBCheck('voltdb', {}, [instance])
         dd_run_check(check)
 

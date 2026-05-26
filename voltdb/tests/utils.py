@@ -55,12 +55,15 @@ class EnsureExpectedMetricsShowUp(LazyFunction):
 
     def __init__(self, instance):
         # type: (Instance) -> None
+        # Always use the native binary client for the priming step — the
+        # database client port is available regardless of which transport
+        # the integration under test is configured for.
         self._client = Client(
-            endpoints=[(instance['host'], instance.get('port', 21212))],
+            endpoints=[(common.HOST, common.VOLTDB_CLIENT_PORT)],
             username='admin',
             password='admin',
-            use_ssl=instance.get('use_ssl', False),
-            ssl_config_file=instance.get('ssl_config_file'),
+            use_ssl=common.TLS_ENABLED,
+            ssl_config_file=common.TLS_CONFIG_FILE if common.TLS_ENABLED else None,
         )
 
     def __call__(self):
