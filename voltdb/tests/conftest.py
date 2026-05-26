@@ -100,7 +100,16 @@ def instance():
 @pytest.fixture(scope='session')
 def instance_all(instance):
     # type: (Instance) -> Instance
-    instance = common.BASE_INSTANCE.copy()
+    # Unit tests using `mock_results` mock the native `Client`, so this fixture
+    # always exposes a native-shaped instance regardless of which transport the
+    # integration matrix is exercising end-to-end.
+    instance = {
+        'host': common.HOST,
+        'port': common.VOLTDB_CLIENT_PORT,
+        'username': 'doggo',
+        'password': 'doggopass',
+        'tags': ['test:voltdb'],
+    }
     instance['statistics_components'] = [
         'COMMANDLOG',
         'CPU',

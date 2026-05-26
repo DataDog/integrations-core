@@ -28,16 +28,25 @@ class TestCheck:
     def test_failure_connection_refused(self, aggregator, instance):
         # type: (AggregatorStub, Instance) -> None
         instance = instance.copy()
-        instance['host'] = 'doesnotexist'
-        # Speed up the test
+        # Point the configured transport at an unresolvable host so both the
+        # native binary client and the HTTP/VMC transport hit a connect error.
+        if instance.get('url'):
+            instance['url'] = instance['url'].replace(common.HOST, 'doesnotexist')
+            expected_port = common.VOLTDB_HTTP_PORT
+        else:
+            instance['host'] = 'doesnotexist'
+            expected_port = instance.get('port', 21212)
+        # Speed up the test (only the native client honours this; HTTP uses
+        # `timeout`).
         instance['connect_timeout'] = 2
+        instance['timeout'] = 2
 
         check = VoltDBCheck('voltdb', {}, [instance])
 
         with pytest.raises(Exception):
             check.check(instance)
 
-        tags = ['host:doesnotexist', 'port:{}'.format(instance.get('port', 21212))]
+        tags = ['host:doesnotexist', 'port:{}'.format(expected_port)]
         assertions.assert_service_checks(aggregator, instance, connect_status=VoltDBCheck.CRITICAL, tags=tags)
 
     def test_failure_unauthorized(self, aggregator, instance):
