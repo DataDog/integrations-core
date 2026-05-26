@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
 import logging
 from contextlib import nullcontext as does_not_raise
 
@@ -528,7 +527,6 @@ def test_add_broker_timestamps_evicts_by_oldest_timestamp(kafka_instance, check)
     assert 500 not in timestamps  # oldest by timestamp
     assert 400 in timestamps
     assert 600 in timestamps
-
 
 
 def test_count_consumer_contexts(check, kafka_instance):

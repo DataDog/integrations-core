@@ -466,5 +466,3 @@ def test_regex_consumer_groups(
     aggregator.assert_metric("kafka.estimated_consumer_lag", count=consumer_lag_seconds_count)
 
     assert expected_warning in caplog.text
-
-
