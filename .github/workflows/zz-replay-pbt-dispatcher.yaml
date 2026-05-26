@@ -1,0 +1,192 @@
+name: Replay PBT POC Dispatcher
+run-name: >-
+  Replay PBT POC dispatcher / ${{ inputs.mode }} /
+  ${{ inputs.shard_count }} shards
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Which integration/env targets to include
+        required: true
+        default: all-declared
+        type: choice
+        options:
+        - changed
+        - all-cached
+        - all-declared
+      seed_missing_caches:
+        description: Start E2E envs and seed compare-check caches when no suitable cache is restored
+        required: true
+        default: true
+        type: boolean
+      target_ref:
+        description: Git ref under test for replay-PBT worker jobs
+        required: true
+        default: HEAD
+        type: string
+      base_ref:
+        description: Base ref for mode=changed
+        required: true
+        default: origin/master
+        type: string
+      max_targets_per_shard:
+        description: Maximum targets per worker shard after sharding
+        required: true
+        default: 200
+        type: number
+      allow_truncation:
+        description: Allow workers to drop targets after max_targets_per_shard. Keep false for full coverage runs.
+        required: true
+        default: false
+        type: boolean
+      shard_count:
+        description: Number of worker shards to dispatch
+        required: true
+        default: 2
+        type: number
+      readings:
+        description: Number of check readings to replay
+        required: true
+        default: 2
+        type: number
+      worker_ref:
+        description: Git ref containing zz-test-worker-poc.yaml. Defaults to this dispatcher ref.
+        required: false
+        default: ""
+        type: string
+      dry_run:
+        description: Print worker dispatches without starting them
+        required: true
+        default: false
+        type: boolean
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.mode }}-${{ inputs.shard_count }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  dispatch:
+    name: Dispatch Replay PBT worker shards
+    runs-on: ubuntu-22.04
+    permissions:
+      actions: write
+      contents: read
+    steps:
+    - name: Validate dispatcher inputs
+      run: |
+        python - <<'PY'
+        import os
+        import re
+        import sys
+
+        int_values = {
+            'shard_count': os.environ['SHARD_COUNT'],
+            'max_targets_per_shard': os.environ['MAX_TARGETS_PER_SHARD'],
+            'readings': os.environ['READINGS'],
+        }
+        for name, value in int_values.items():
+            try:
+                parsed = int(value)
+            except ValueError:
+                print(f'Invalid integer {name}: {value!r}', file=sys.stderr)
+                sys.exit(2)
+            if parsed < 1:
+                print(f'{name} must be >= 1, got {parsed}', file=sys.stderr)
+                sys.exit(2)
+
+        refs = {
+            'base_ref': os.environ['BASE_REF'],
+            'target_ref': os.environ['TARGET_REF'],
+            'worker_ref': os.environ['WORKER_REF'],
+        }
+        pattern = re.compile(r'^[A-Za-z0-9][A-Za-z0-9._/-]{0,199}$')
+        for name, value in refs.items():
+            if not value:
+                continue
+            if not pattern.fullmatch(value) or '..' in value or value.endswith('/'):
+                print(f'Invalid {name}: {value!r}', file=sys.stderr)
+                sys.exit(2)
+        PY
+      env:
+        BASE_REF: ${{ inputs.base_ref }}
+        TARGET_REF: ${{ inputs.target_ref }}
+        WORKER_REF: ${{ inputs.worker_ref || github.ref_name }}
+        SHARD_COUNT: ${{ inputs.shard_count }}
+        MAX_TARGETS_PER_SHARD: ${{ inputs.max_targets_per_shard }}
+        READINGS: ${{ inputs.readings }}
+
+    - name: Dispatch worker shards
+      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      env:
+        MODE: ${{ inputs.mode }}
+        SEED_MISSING_CACHES: ${{ inputs.seed_missing_caches }}
+        TARGET_REF: ${{ inputs.target_ref }}
+        BASE_REF: ${{ inputs.base_ref }}
+        MAX_TARGETS_PER_SHARD: ${{ inputs.max_targets_per_shard }}
+        ALLOW_TRUNCATION: ${{ inputs.allow_truncation }}
+        SHARD_COUNT: ${{ inputs.shard_count }}
+        READINGS: ${{ inputs.readings }}
+        WORKER_REF: ${{ inputs.worker_ref || github.ref_name }}
+        DRY_RUN: ${{ inputs.dry_run }}
+      with:
+        script: |
+          const shardCount = Number(process.env.SHARD_COUNT);
+          const workerRef = process.env.WORKER_REF;
+          const dryRun = process.env.DRY_RUN === 'true';
+          const workflow_id = 'zz-test-worker-poc.yaml';
+          const inputs = {
+            mode: process.env.MODE,
+            seed_missing_caches: process.env.SEED_MISSING_CACHES,
+            target_ref: process.env.TARGET_REF,
+            base_ref: process.env.BASE_REF,
+            max_targets: process.env.MAX_TARGETS_PER_SHARD,
+            allow_truncation: process.env.ALLOW_TRUNCATION,
+            shard_count: process.env.SHARD_COUNT,
+            readings: process.env.READINGS,
+          };
+
+          const rows = [];
+          for (let shardIndex = 0; shardIndex < shardCount; shardIndex += 1) {
+            const shardInputs = {...inputs, shard_index: String(shardIndex)};
+            rows.push({shardIndex, ref: workerRef, inputs: shardInputs});
+            if (!dryRun) {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id,
+                ref: workerRef,
+                inputs: shardInputs,
+              });
+            }
+          }
+
+          const mode = dryRun ? 'Would dispatch' : 'Dispatched';
+          core.summary
+            .addHeading('Replay PBT dispatcher')
+            .addRaw(`**${mode} ${rows.length} worker shard(s).**\n\n`)
+            .addTable([
+              [
+                {data: 'Shard', header: true},
+                {data: 'Worker ref', header: true},
+                {data: 'Mode', header: true},
+                {data: 'Max targets', header: true},
+                {data: 'Seed caches', header: true},
+              ],
+              ...rows.map(row => [
+                `${row.shardIndex} of ${shardCount}`,
+                `\`${row.ref}\``,
+                `\`${row.inputs.mode}\``,
+                `\`${row.inputs.max_targets}\``,
+                `\`${row.inputs.seed_missing_caches}\``,
+              ]),
+            ])
+            .addRaw('\n')
+            .addRaw(`Worker workflow: \`${workflow_id}\`\n`)
+            .write();
+
+          return rows;
