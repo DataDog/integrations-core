@@ -440,24 +440,20 @@ pipeline:
                   name: User
                   id: 1
                 - filter:
-                    query: "@actor.type:(api_actor OR admin_api_key_actor)"
+                    query: "@actor.type:(api_actor OR admin_api_key_actor OR scim_directory_sync_actor OR anthropic_actor)"
                   name: Service
                   id: 4
                 - filter:
-                    query: "@actor.type:unauthenticated_user_actor"
+                    query: "@actor.type:*"
                   name: Unknown
                   id: 0
-                - filter:
-                    query: "@actor.type:*"
-                  name: Other
-                  id: 99
               targets:
                 name: ocsf.actor.user.type
                 id: ocsf.actor.user.type_id
               fallback:
                 values:
-                  ocsf.actor.user.type: Other
-                  ocsf.actor.user.type_id: "99"
+                  ocsf.actor.user.type: Unknown
+                  ocsf.actor.user.type_id: "0"
                 sources:
                   ocsf.actor.user.type:
                     - actor.type
@@ -632,24 +628,20 @@ pipeline:
                   name: User
                   id: 1
                 - filter:
-                    query: "@actor.type:(api_actor OR admin_api_key_actor)"
+                    query: "@actor.type:(api_actor OR admin_api_key_actor OR scim_directory_sync_actor OR anthropic_actor)"
                   name: Service
                   id: 4
                 - filter:
-                    query: "@actor.type:unauthenticated_user_actor"
+                    query: "@actor.type:*"
                   name: Unknown
                   id: 0
-                - filter:
-                    query: "@actor.type:*"
-                  name: Other
-                  id: 99
               targets:
                 name: ocsf.actor.user.type
                 id: ocsf.actor.user.type_id
               fallback:
                 values:
-                  ocsf.actor.user.type: Other
-                  ocsf.actor.user.type_id: "99"
+                  ocsf.actor.user.type: Unknown
+                  ocsf.actor.user.type_id: "0"
                 sources:
                   ocsf.actor.user.type:
                     - actor.type
@@ -839,24 +831,20 @@ pipeline:
                   name: User
                   id: 1
                 - filter:
-                    query: "@actor.type:(api_actor OR admin_api_key_actor)"
+                    query: "@actor.type:(api_actor OR admin_api_key_actor OR scim_directory_sync_actor OR anthropic_actor)"
                   name: Service
                   id: 4
                 - filter:
-                    query: "@actor.type:unauthenticated_user_actor"
+                    query: "@actor.type:*"
                   name: Unknown
                   id: 0
-                - filter:
-                    query: "@actor.type:*"
-                  name: Other
-                  id: 99
               targets:
                 name: ocsf.actor.user.type
                 id: ocsf.actor.user.type_id
               fallback:
                 values:
-                  ocsf.actor.user.type: Other
-                  ocsf.actor.user.type_id: "99"
+                  ocsf.actor.user.type: Unknown
+                  ocsf.actor.user.type_id: "0"
                 sources:
                   ocsf.actor.user.type:
                     - actor.type
@@ -1127,24 +1115,20 @@ pipeline:
                   name: User
                   id: 1
                 - filter:
-                    query: "@actor.type:(api_actor OR admin_api_key_actor)"
+                    query: "@actor.type:(api_actor OR admin_api_key_actor OR scim_directory_sync_actor OR anthropic_actor)"
                   name: Service
                   id: 4
                 - filter:
-                    query: "@actor.type:unauthenticated_user_actor"
+                    query: "@actor.type:*"
                   name: Unknown
                   id: 0
-                - filter:
-                    query: "@actor.type:*"
-                  name: Other
-                  id: 99
               targets:
                 name: ocsf.actor.user.type
                 id: ocsf.actor.user.type_id
               fallback:
                 values:
-                  ocsf.actor.user.type: Other
-                  ocsf.actor.user.type_id: "99"
+                  ocsf.actor.user.type: Unknown
+                  ocsf.actor.user.type_id: "0"
                 sources:
                   ocsf.actor.user.type:
                     - actor.type
@@ -1327,24 +1311,20 @@ pipeline:
                   name: User
                   id: 1
                 - filter:
-                    query: "@actor.type:(api_actor OR admin_api_key_actor)"
+                    query: "@actor.type:(api_actor OR admin_api_key_actor OR scim_directory_sync_actor OR anthropic_actor)"
                   name: Service
                   id: 4
                 - filter:
-                    query: "@actor.type:unauthenticated_user_actor"
+                    query: "@actor.type:*"
                   name: Unknown
                   id: 0
-                - filter:
-                    query: "@actor.type:*"
-                  name: Other
-                  id: 99
               targets:
                 name: ocsf.src_endpoint.owner.type
                 id: ocsf.src_endpoint.owner.type_id
               fallback:
                 values:
-                  ocsf.src_endpoint.owner.type: Other
-                  ocsf.src_endpoint.owner.type_id: "99"
+                  ocsf.src_endpoint.owner.type: Unknown
+                  ocsf.src_endpoint.owner.type_id: "0"
                 sources:
                   ocsf.src_endpoint.owner.type:
                     - actor.type
@@ -1556,24 +1536,20 @@ pipeline:
                   name: User
                   id: 1
                 - filter:
-                    query: "@actor.type:(api_actor OR admin_api_key_actor)"
+                    query: "@actor.type:(api_actor OR admin_api_key_actor OR scim_directory_sync_actor OR anthropic_actor)"
                   name: Service
                   id: 4
                 - filter:
-                    query: "@actor.type:unauthenticated_user_actor"
+                    query: "@actor.type:*"
                   name: Unknown
                   id: 0
-                - filter:
-                    query: "@actor.type:*"
-                  name: Other
-                  id: 99
               targets:
                 name: ocsf.actor.user.type
                 id: ocsf.actor.user.type_id
               fallback:
                 values:
-                  ocsf.actor.user.type: Other
-                  ocsf.actor.user.type_id: "99"
+                  ocsf.actor.user.type: Unknown
+                  ocsf.actor.user.type_id: "0"
                 sources:
                   ocsf.actor.user.type:
                     - actor.type
