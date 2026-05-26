@@ -18,7 +18,7 @@
     },
     {
       "customType": "regex",
-      "description": "Track image:tag@digest references in the tagger Dockerfile (uv, dd-octo-sts).",
+      "description": "Track image:tag@digest references in Dockerfiles.",
       "managerFilePatterns": [
         "/^\\.gitlab/tagger/Dockerfile$/"
       ],
@@ -136,15 +136,15 @@
       "matchManagers": [
         "custom.regex"
       ],
-      "matchFileNames": [
-        ".gitlab/tagger/Dockerfile"
+      "matchDatasources": [
+        "docker"
       ],
-      "groupName": "tagger image deps",
+      "groupName": "docker images",
       "schedule": [
         "before 6am on Monday"
       ],
       "labels": [
-        "renovate/tagger-image",
+        "renovate/docker-images",
         "qa/skip-qa"
       ],
       "minimumReleaseAge": "7 days"
