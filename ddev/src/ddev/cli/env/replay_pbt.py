@@ -21,30 +21,10 @@ from pathlib import Path as StdPath
 from typing import TYPE_CHECKING
 
 import click
+from datadog_checks.dev.replay.pbt.properties import PROPERTIES
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
-
-
-PROPERTIES = (
-    'deterministic',
-    'openmetrics-label-order',
-    'openmetrics-comments-blank-lines',
-    'openmetrics-final-newline',
-    'openmetrics-help-text',
-    'openmetrics-help-removal',
-    'json-object-key-order',
-    'json-whitespace',
-    'json-string-escapes',
-    'metadata-emitted-metrics',
-    'repeated-run-tag-stability',
-    'openmetrics-coverage',
-    'asset-query-metrics-in-metadata',
-    'asset-query-tags-seen-in-replay',
-    'output-finite-values',
-    'rate-finite-values',
-    'monotonic-count-nonnegative',
-)
 
 
 @click.command('replay-pbt', short_help='Run cached replay property checks for an integration')

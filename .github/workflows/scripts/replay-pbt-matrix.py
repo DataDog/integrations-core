@@ -48,6 +48,14 @@ def target_ref_head(target_ref: str) -> str:
     return git('rev-parse', target_ref)
 
 
+def replay_cache_version() -> int:
+    source = REPO_ROOT / 'ddev' / 'src' / 'ddev' / 'cli' / 'env' / 'compare_check.py'
+    match = re.search(r'^REPLAY_CACHE_VERSION\s*=\s*(\d+)\s*$', source.read_text(), flags=re.MULTILINE)
+    if not match:
+        raise RuntimeError(f'Unable to read REPLAY_CACHE_VERSION from {source}')
+    return int(match.group(1))
+
+
 def has_python_check(integration: str) -> bool:
     package_dir = REPO_ROOT / integration / 'datadog_checks' / integration
     if not package_dir.is_dir():
@@ -111,6 +119,7 @@ def main() -> None:
     normal_matrix = construct_job_matrix(REPO_ROOT, targets)
     cached_targets = load_cached_targets() if args.mode == 'all-cached' else None
     target_head = target_ref_head(args.target_ref)
+    cache_version = replay_cache_version()
 
     replay_matrix = []
     for job in normal_matrix:
@@ -141,7 +150,7 @@ def main() -> None:
                 'target_head': target_head,
                 'readings': args.readings,
                 'artifact_slug': slug(f'{integration}-{environment}'),
-                'cache_key': 'replay-pbt-v4-'
+                'cache_key': f'replay-pbt-v{cache_version}-'
                 f'{slug(integration)}-{slug(environment)}-readings{slug(args.readings)}-fixture-{slug(fixture_ref)}'
                 '-adapters-notcp',
             }

@@ -26,6 +26,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from datadog_checks.dev.replay.pbt.artifacts import write_property_result
 from datadog_checks.dev.replay.pbt.cache import (
     copy_replay_cache,
     mutate_request_capture_comments_and_blank_lines,
@@ -38,29 +39,9 @@ from datadog_checks.dev.replay.pbt.cache import (
     mutate_request_capture_label_order,
 )
 from datadog_checks.dev.replay.pbt.openmetrics import parse_sample_line
+from datadog_checks.dev.replay.pbt.properties import PROPERTIES
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
-
-PROPERTIES = (
-    'deterministic',
-    'openmetrics-label-order',
-    'openmetrics-comments-blank-lines',
-    'openmetrics-final-newline',
-    'openmetrics-help-text',
-    'openmetrics-help-removal',
-    'json-object-key-order',
-    'json-whitespace',
-    'json-string-escapes',
-    'metadata-emitted-metrics',
-    'repeated-run-tag-stability',
-    'openmetrics-coverage',
-    'asset-query-metrics-in-metadata',
-    'asset-query-tags-seen-in-replay',
-    'output-finite-values',
-    'rate-finite-values',
-    'monotonic-count-nonnegative',
-)
-
 
 class ReplayPBTContext:
     def __init__(self, config: dict) -> None:
@@ -607,6 +588,20 @@ def _write_openmetrics_coverage(property_dir: Path, coverage: dict[str, Any]) ->
     if len(supported['unemitted_metrics']) > 200:
         lines.append(f'- ... {len(supported["unemitted_metrics"]) - 200} more')
     (property_dir / 'coverage.md').write_text('\n'.join(lines) + '\n')
+    write_property_result(
+        property_dir,
+        property_name='openmetrics-coverage',
+        artifacts=[
+            {'kind': 'coverage', 'path': 'coverage.json', 'format': 'json'},
+            {'kind': 'coverage-markdown', 'path': 'coverage.md', 'format': 'markdown'},
+        ],
+        counts={
+            'observed_families': observed['observed_count'],
+            'observed_families_covered': observed['covered_count'],
+            'supported_metrics': supported['supported_count'],
+            'supported_metrics_emitted': supported['emitted_count'],
+        },
+    )
 
 
 def _iter_asset_json_paths(repo_root: Path, integration: str) -> Iterator[tuple[str, Path]]:
@@ -802,6 +797,18 @@ def _write_findings(property_dir: Path, findings: list[ReplayPBTFinding]) -> Non
             ]
         )
     (property_dir / 'warnings.md').write_text('\n'.join(line for line in lines if line) + '\n')
+    write_property_result(
+        property_dir,
+        property_name=findings[0].check if findings else property_dir.name,
+        artifacts=[
+            {'kind': 'findings', 'path': 'findings.json', 'format': 'json'},
+            {'kind': 'findings-markdown', 'path': 'warnings.md', 'format': 'markdown'},
+        ],
+        counts={
+            'errors': sum(1 for finding in findings if finding.level == 'error'),
+            'warnings': sum(1 for finding in findings if finding.level == 'warning'),
+        },
+    )
 
 
 def _handle_findings(context: ReplayPBTContext, property_name: str, findings: list[ReplayPBTFinding]) -> None:
@@ -1207,6 +1214,9 @@ def test_write_openmetrics_coverage_artifacts(tmp_path: Path):
 
     assert json.loads((tmp_path / 'coverage.json').read_text())['observed_to_emitted']['coverage'] == 0.5
     assert 'Observed -> emitted coverage: 50.0%' in (tmp_path / 'coverage.md').read_text()
+    result = json.loads((tmp_path / 'property-result.json').read_text())
+    assert result['property'] == 'openmetrics-coverage'
+    assert [artifact['path'] for artifact in result['artifacts']] == ['coverage.json', 'coverage.md']
 
 
 def _write_asset_query_fixture(repo_root: Path) -> None:
@@ -1314,8 +1324,12 @@ def test_handle_findings_writes_artifacts_and_can_promote_warnings_to_errors(tmp
     with pytest.warns(ReplayPBTWarning), pytest.raises(AssertionError, match='warning promoted to error'):
         _handle_findings(context, 'asset-query-tags-seen-in-replay', findings)
 
-    assert (tmp_path / 'artifacts' / 'asset-query-tags-seen-in-replay' / 'findings.json').is_file()
-    assert (tmp_path / 'artifacts' / 'asset-query-tags-seen-in-replay' / 'warnings.md').is_file()
+    property_dir = tmp_path / 'artifacts' / 'asset-query-tags-seen-in-replay'
+    assert (property_dir / 'findings.json').is_file()
+    assert (property_dir / 'warnings.md').is_file()
+    result = json.loads((property_dir / 'property-result.json').read_text())
+    assert result['property'] == 'asset-query-tags-seen-in-replay'
+    assert result['counts'] == {'errors': 0, 'warnings': 1}
 
 
 def test_rate_values_finite_rejects_non_finite_rate():
