@@ -1,7 +1,7 @@
 name: Replay PBT POC
 run-name: >-
   Replay PBT POC / ${{ inputs.mode }} /
-  shard ${{ inputs.shard_index }} of ${{ inputs.shard_count }}
+  ${{ inputs.dispatch_shards && format('dispatch {0} shards', inputs.shard_count) || format('shard {0} of {1}', inputs.shard_index, inputs.shard_count) }}
 
 on:
   workflow_dispatch:
@@ -55,9 +55,24 @@ on:
         required: true
         default: 2
         type: number
+      dispatch_shards:
+        description: Dispatch every shard from this existing master-visible worker workflow instead of running one shard
+        required: true
+        default: false
+        type: boolean
+      worker_ref:
+        description: Git ref containing this worker workflow. Defaults to the dispatch ref.
+        required: false
+        default: ""
+        type: string
+      dry_run:
+        description: Print worker dispatches without starting them; only used when dispatch_shards=true
+        required: true
+        default: false
+        type: boolean
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.mode }}-${{ inputs.shard_index }}-${{ inputs.shard_count }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.mode }}-${{ inputs.dispatch_shards }}-${{ inputs.shard_index }}-${{ inputs.shard_count }}
   cancel-in-progress: false
 
 defaults:
@@ -65,8 +80,134 @@ defaults:
     shell: bash
 
 jobs:
+  dispatch-shards:
+    name: Dispatch Replay PBT worker shards
+    if: ${{ inputs.dispatch_shards }}
+    runs-on: ubuntu-22.04
+    permissions:
+      actions: write
+      contents: read
+    steps:
+    - name: Validate dispatcher inputs
+      run: |
+        python - <<'PY'
+        import os
+        import re
+        import sys
+
+        int_values = {
+            'shard_count': os.environ['SHARD_COUNT'],
+            'max_targets': os.environ['MAX_TARGETS'],
+            'readings': os.environ['READINGS'],
+        }
+        for name, value in int_values.items():
+            try:
+                parsed = int(value)
+            except ValueError:
+                print(f'Invalid integer {name}: {value!r}', file=sys.stderr)
+                sys.exit(2)
+            if parsed < 1:
+                print(f'{name} must be >= 1, got {parsed}', file=sys.stderr)
+                sys.exit(2)
+
+        refs = {
+            'base_ref': os.environ['BASE_REF'],
+            'target_ref': os.environ['TARGET_REF'],
+            'worker_ref': os.environ['WORKER_REF'],
+        }
+        pattern = re.compile(r'^[A-Za-z0-9][A-Za-z0-9._/-]{0,199}$')
+        for name, value in refs.items():
+            if not value:
+                continue
+            if not pattern.fullmatch(value) or '..' in value or value.endswith('/'):
+                print(f'Invalid {name}: {value!r}', file=sys.stderr)
+                sys.exit(2)
+        PY
+      env:
+        BASE_REF: ${{ inputs.base_ref }}
+        TARGET_REF: ${{ inputs.target_ref }}
+        WORKER_REF: ${{ inputs.worker_ref || github.ref_name }}
+        SHARD_COUNT: ${{ inputs.shard_count }}
+        MAX_TARGETS: ${{ inputs.max_targets }}
+        READINGS: ${{ inputs.readings }}
+
+    - name: Dispatch worker shards
+      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      env:
+        MODE: ${{ inputs.mode }}
+        SEED_MISSING_CACHES: ${{ inputs.seed_missing_caches }}
+        TARGET_REF: ${{ inputs.target_ref }}
+        BASE_REF: ${{ inputs.base_ref }}
+        MAX_TARGETS: ${{ inputs.max_targets }}
+        ALLOW_TRUNCATION: ${{ inputs.allow_truncation }}
+        SHARD_COUNT: ${{ inputs.shard_count }}
+        READINGS: ${{ inputs.readings }}
+        WORKER_REF: ${{ inputs.worker_ref || github.ref_name }}
+        DRY_RUN: ${{ inputs.dry_run }}
+      with:
+        script: |
+          const shardCount = Number(process.env.SHARD_COUNT);
+          const workerRef = process.env.WORKER_REF;
+          const dryRun = process.env.DRY_RUN === 'true';
+          const workflow_id = 'zz-test-worker-poc.yaml';
+          const baseInputs = {
+            mode: process.env.MODE,
+            seed_missing_caches: process.env.SEED_MISSING_CACHES,
+            target_ref: process.env.TARGET_REF,
+            base_ref: process.env.BASE_REF,
+            max_targets: process.env.MAX_TARGETS,
+            allow_truncation: process.env.ALLOW_TRUNCATION,
+            shard_count: process.env.SHARD_COUNT,
+            readings: process.env.READINGS,
+            dispatch_shards: 'false',
+            worker_ref: '',
+            dry_run: 'false',
+          };
+
+          const rows = [];
+          for (let shardIndex = 0; shardIndex < shardCount; shardIndex += 1) {
+            const shardInputs = {...baseInputs, shard_index: String(shardIndex)};
+            rows.push({shardIndex, ref: workerRef, inputs: shardInputs});
+            if (!dryRun) {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id,
+                ref: workerRef,
+                inputs: shardInputs,
+              });
+            }
+          }
+
+          const mode = dryRun ? 'Would dispatch' : 'Dispatched';
+          await core.summary
+            .addHeading('Replay PBT shard dispatcher')
+            .addRaw(`**${mode} ${rows.length} worker shard(s).**\n\n`)
+            .addTable([
+              [
+                {data: 'Shard', header: true},
+                {data: 'Worker ref', header: true},
+                {data: 'Mode', header: true},
+                {data: 'Max targets', header: true},
+                {data: 'Seed caches', header: true},
+              ],
+              ...rows.map(row => [
+                `${row.shardIndex} of ${shardCount}`,
+                `\`${row.ref}\``,
+                `\`${row.inputs.mode}\``,
+                `\`${row.inputs.max_targets}\``,
+                `\`${row.inputs.seed_missing_caches}\``,
+              ]),
+            ])
+            .addRaw('\n')
+            .addRaw(`Worker workflow: \`${workflow_id}\`\n`)
+            .write();
+
+          return rows;
+
   compute-matrix:
     name: Compute replay-PBT matrix
+    if: ${{ !inputs.dispatch_shards }}
     runs-on: ubuntu-22.04
     permissions:
       contents: read
@@ -151,7 +292,7 @@ jobs:
   replay-pbt:
     name: ${{ matrix.name }}
     needs: compute-matrix
-    if: needs.compute-matrix.outputs.matrix != '[]'
+    if: ${{ !inputs.dispatch_shards && needs.compute-matrix.outputs.matrix != '[]' }}
     runs-on: ubuntu-22.04
     timeout-minutes: 120
     strategy:
@@ -434,7 +575,7 @@ jobs:
     needs:
     - compute-matrix
     - replay-pbt
-    if: always() && needs.compute-matrix.outputs.matrix != '[]'
+    if: ${{ !inputs.dispatch_shards && always() && needs.compute-matrix.outputs.matrix != '[]' }}
     runs-on: ubuntu-22.04
     permissions:
       contents: read
