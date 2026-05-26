@@ -2026,7 +2026,6 @@ tests:
         time: 1778858531738
         user:
           email_addr: "invitee@example.com"
-          uid: "user_01EXAMPLEUSERID0000000000"
       organization_id: "org_01EXAMPLEORGID00000000000"
       organization_uuid: "00000000-0000-0000-0000-000000000000"
       type: "org_user_invite_sent"
@@ -2054,7 +2053,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1778858531738
-
  -
   sample: |-
     {
@@ -3109,4 +3107,5 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463154445
+
 
