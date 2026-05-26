@@ -1,7 +1,7 @@
 name: Replay PBT POC
 run-name: >-
   Replay PBT POC / ${{ inputs.mode }} /
-  ${{ inputs.combine_reports && format('combine {0}', inputs.run_group) || inputs.dispatch_shards && format('dispatch {0} shards', inputs.shard_count) || format('shard {0} of {1} / {2}', inputs.shard_index, inputs.shard_count, inputs.run_group) }}
+  ${{ inputs.combine_reports && format('combine {0}', inputs.run_group) || inputs.dispatch_shards && (inputs.shard_indices != '' && format('dispatch shards {0} of {1}', inputs.shard_indices, inputs.shard_count) || format('dispatch {0} shards', inputs.shard_count)) || format('shard {0} of {1} / {2}', inputs.shard_index, inputs.shard_count, inputs.run_group) }}
 
 on:
   workflow_dispatch:
@@ -108,6 +108,9 @@ concurrency:
 defaults:
   run:
     shell: bash
+
+permissions:
+  contents: read
 
 jobs:
   dispatch-shards:
@@ -333,11 +336,15 @@ jobs:
         echo "count=$count" >> "$GITHUB_OUTPUT"
         echo "Replay PBT target count: $count"
 
+    - name: Scan matrix artifact
+      run: python .github/workflows/scripts/replay-pbt-secret-scan.py /tmp/replay-pbt-matrix.json
+
     - name: Upload matrix
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: replay-pbt-matrix
         path: /tmp/replay-pbt-matrix.json
+        retention-days: 1
 
   replay-pbt:
     name: ${{ matrix.name }}
@@ -601,6 +608,10 @@ jobs:
                 shutil.copy2(source, destination)
         PY
 
+    - name: Scan lightweight artifacts
+      if: always()
+      run: python .github/workflows/scripts/replay-pbt-secret-scan.py /tmp/replay-pbt-findings /tmp/replay-pbt-result
+
     - name: Upload property findings
       if: always()
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
@@ -660,13 +671,16 @@ jobs:
           --target-count "${{ needs.compute-matrix.outputs.count }}" \
           | tee "$GITHUB_STEP_SUMMARY"
 
+    - name: Scan report bundle
+      run: python .github/workflows/scripts/replay-pbt-secret-scan.py replay-pbt-report replay-pbt-report.zip
+
     - name: Upload report bundle
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: replay-pbt-report
         path: replay-pbt-report.zip
         if-no-files-found: error
-        retention-days: 14
+        retention-days: 1
 
   auto-combine:
     name: Dispatch combined Replay PBT report
@@ -781,10 +795,13 @@ jobs:
           --run-group "${{ inputs.run_group }}" \
           | tee "$GITHUB_STEP_SUMMARY"
 
+    - name: Scan combined report bundle
+      run: python .github/workflows/scripts/replay-pbt-secret-scan.py replay-pbt-combined-report replay-pbt-combined-report.zip
+
     - name: Upload combined report bundle
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: replay-pbt-combined-report
         path: replay-pbt-combined-report.zip
         if-no-files-found: error
-        retention-days: 14
+        retention-days: 1
