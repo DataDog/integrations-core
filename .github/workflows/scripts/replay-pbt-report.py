@@ -52,6 +52,25 @@ CATEGORY_DEFINITIONS = {
     "unknown": ("❔", "Unknown", "No usable status was reported."),
 }
 
+STATUS_DEFINITIONS = {
+    "passed": ("✅", "Passed"),
+    "failed": ("❌", "Property failure"),
+    "failed-before-replay-pbt": ("🧱", "Setup/cache failure"),
+    "skipped-missing-cache": ("⏭️", "Skipped: missing cache"),
+    "cache-hit": ("✅", "Cache ready"),
+    "seeded-cache": ("✅", "Cache seeded"),
+}
+
+
+def status_icon(status: Any) -> str:
+    return STATUS_DEFINITIONS.get(str(status or ""), ("❔", "Unknown"))[0]
+
+
+def status_label(status: Any) -> str:
+    text = str(status or "unknown")
+    return STATUS_DEFINITIONS.get(text, ("❔", text.replace("-", " ").title()))[1]
+
+
 PROPERTY_DEFINITIONS = {
     "deterministic": (
         "Determinism",
@@ -572,7 +591,7 @@ def build_individual_target_markdown(
         f"| Target ref | `{md_escape(row.get('target_ref', ''))}` |",
         f"| Readings | `{md_escape(row.get('readings', ''))}` |",
         f"| Replay cache key | `{md_escape(row.get('cache_key', ''))}` |",
-        f"| Status | `{md_escape(row.get('status', 'unknown'))}` |",
+        f"| Status | {status_icon(row.get('status'))} **{md_escape(status_label(row.get('status')))}** |",
         f"| Category | {icon} **{md_escape(label)}** |",
         "",
         "### What this means",
@@ -591,7 +610,7 @@ def build_individual_target_markdown(
         for prop in target_properties:
             prop_name = prop.get("property", "")
             lines.append(
-                f"| {property_display_md(prop_name)} | `{md_escape(prop.get('status', ''))}` | {md_escape(property_description(prop_name))} |"
+                f"| {property_display_md(prop_name)} | {status_icon(prop.get('status'))} {md_escape(status_label(prop.get('status')))} | {md_escape(property_description(prop_name))} |"
             )
     elif row.get("status") in {"failed-before-replay-pbt", "skipped-missing-cache"}:
         lines.append("Property tests did not run for this target. The job stopped before replay-PBT could produce per-property results.")
@@ -784,8 +803,7 @@ def build_markdown(
         ]
     )
     for status, count in sorted(status_counts.items(), key=lambda item: (-item[1], item[0])):
-        icon = "✅" if status == "passed" else "❌" if status == "failed" else "🧱" if status == "failed-before-replay-pbt" else "⏭️"
-        lines.append(f"| {icon} `{status}` | {count} | `{bar(count, total)}` |")
+        lines.append(f"| {status_icon(status)} **{md_escape(status_label(status))}**<br/><sub>`{md_escape(status)}`</sub> | {count} | `{bar(count, total)}` |")
     lines.append("")
 
     lines.extend(["## Failure categories", ""])
@@ -891,7 +909,7 @@ def build_html(
         return html.escape(str(value or ""))
 
     status_cards = "".join(
-        f"<div class='stat'><span>{esc(status)}</span><strong>{count}</strong><div class='bar'><i style='width:{100*count/total:.1f}%'></i></div></div>"
+        f"<div class='stat'><span>{esc(status_label(status))}</span><strong>{count}</strong><div class='bar'><i style='width:{100*count/total:.1f}%'></i></div><small><code>{esc(status)}</code></small></div>"
         for status, count in status_counts.most_common()
     )
     steps = [
@@ -946,7 +964,7 @@ def build_html(
         icon, label, description = CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS["unknown"])
         target_name = str(row.get("target", ""))
         prop_rows = "".join(
-            f"<tr><td>{property_display_html(prop.get('property'))}</td><td>{esc(prop.get('status'))}</td><td>{esc(property_description(prop.get('property')))}</td></tr>"
+            f"<tr><td>{property_display_html(prop.get('property'))}</td><td>{esc(status_icon(prop.get('status')))} {esc(status_label(prop.get('status')))}</td><td>{esc(property_description(prop.get('property')))}</td></tr>"
             for prop in property_results_for_target(property_results, target_name)
         ) or "<tr><td colspan='3'>No per-property manifests were collected for this target.</td></tr>"
         target_coverage_rows = "".join(
@@ -963,7 +981,7 @@ def build_html(
     <tr><th>Environment</th><td><code>{esc(row.get('environment'))}</code></td></tr>
     <tr><th>Fixture ref</th><td><code>{esc(row.get('fixture_ref'))}</code></td></tr>
     <tr><th>Target ref</th><td><code>{esc(row.get('target_ref'))}</code></td></tr>
-    <tr><th>Status</th><td><code>{esc(row.get('status'))}</code></td></tr>
+    <tr><th>Status</th><td>{esc(status_icon(row.get('status')))} <strong>{esc(status_label(row.get('status')))}</strong><br><small><code>{esc(row.get('status'))}</code></small></td></tr>
     <tr><th>Category</th><td>{esc(icon)} <strong>{esc(label)}</strong></td></tr>
   </tbody></table>
   <h3>What this means</h3>
@@ -1004,7 +1022,7 @@ def build_html(
             "<tr>"
             f"<td>{target_link_html(row)}</td>"
             f"<td>{pipeline_html}</td>"
-            f"<td>{esc(row['status'])}</td>"
+            f"<td>{esc(status_icon(row['status']))} {esc(status_label(row['status']))}<br><small><code>{esc(row['status'])}</code></small></td>"
             f"<td>{esc(row['category_label'])}</td>"
             f"<td>{esc(row['summary'])}</td>"
             f"<td>{run_link}</td>"
