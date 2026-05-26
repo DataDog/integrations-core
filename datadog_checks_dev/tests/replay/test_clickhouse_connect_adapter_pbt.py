@@ -152,7 +152,7 @@ def test_clickhouse_connect_replay_rejects_wrong_query(tmp_path, sql_a, sql_b):
 
         install_replay_clickhouse_connect(monkeypatch, fixture_path)
         client = fake_clickhouse_connect.get_client()
-        with pytest.raises(AssertionError, match='query does not match'):
+        with pytest.raises(AssertionError, match='clickhouse.client.query'):
             client.query(sql_b)
     finally:
         monkeypatch.undo()
@@ -205,5 +205,34 @@ def test_clickhouse_connect_replay_round_trips_recorded_runtime_errors(tmp_path,
             client.ping()
 
         assert str(exc_info.value) == message
+    finally:
+        monkeypatch.undo()
+
+
+def test_clickhouse_connect_replays_version_command_from_legacy_version_query(tmp_path):
+    monkeypatch = pytest.MonkeyPatch()
+    try:
+        fake_clickhouse_connect = install_fake_clickhouse_connect(monkeypatch)
+        fixture_path = tmp_path / 'capture.json'
+        fixture_path.write_text(
+            json.dumps(
+                [
+                    {'operation': 'clickhouse_connect.get_client', 'args': [], 'kwargs': {}, 'exception': None},
+                    {
+                        'operation': 'clickhouse.client.query',
+                        'sql': 'SELECT version()',
+                        'args': [],
+                        'kwargs': {},
+                        'result_rows': [['25.3.14.14']],
+                        'exception': None,
+                    },
+                ]
+            )
+            + '\n'
+        )
+
+        install_replay_clickhouse_connect(monkeypatch, fixture_path)
+        client = fake_clickhouse_connect.get_client()
+        assert client.command('SELECT version()', use_database=False) == '25.3.14.14'
     finally:
         monkeypatch.undo()

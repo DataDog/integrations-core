@@ -174,19 +174,33 @@ class _ReplayState:
     def __init__(self, records: list[dict[str, Any]], replayed: list[dict[str, Any]]):
         self.records = records
         self.replayed = replayed
-        self.index = 0
+        self.consumed: set[int] = set()
 
-    def next(self, operation: str) -> dict[str, Any]:
-        if self.index >= len(self.records):
-            raise AssertionError(f'No recorded ClickHouse operation available for {operation}')
-        record = self.records[self.index]
-        if record.get('operation') != operation:
-            raise AssertionError('Recorded ClickHouse operation does not match replay operation')
-        self.index += 1
-        self.replayed.append(record)
-        if record.get('exception'):
-            _raise_recorded_exception(record)
-        return record
+    def take(self, operation: str, *, expected: dict[str, Any] | None = None) -> dict[str, Any]:
+        """Return the first unconsumed matching ClickHouse operation.
+
+        ClickHouse check versions can legitimately reorder independent queries
+        during refactors. Replaying by operation identity instead of strict global
+        sequence lets compare-check focus on output regressions while still
+        failing on missing/new SQL, command, or connection shapes. Duplicate
+        identical operations remain ordered by their appearance in the fixture.
+        """
+        saw_operation = False
+        for index, record in enumerate(self.records):
+            if index in self.consumed or record.get('operation') != operation:
+                continue
+            saw_operation = True
+            if expected is not None and any(record.get(key) != value for key, value in expected.items()):
+                continue
+            self.consumed.add(index)
+            self.replayed.append(record)
+            if record.get('exception'):
+                _raise_recorded_exception(record)
+            return record
+
+        if expected is not None and saw_operation:
+            raise AssertionError(f'Recorded ClickHouse {operation} does not match replay identity')
+        raise AssertionError(f'No recorded ClickHouse operation available for {operation}')
 
 
 class _ReplayClient:
@@ -194,28 +208,45 @@ class _ReplayClient:
         self._state = state
 
     def query(self, query: Any, *args: Any, **kwargs: Any) -> _ReplayQueryResult:
-        record = self._state.next('clickhouse.client.query')
         expected = _query_identity(query, args, kwargs)
-        if record.get('sql') != expected['sql'] or record.get('args') != expected['args'] or record.get(
-            'kwargs'
-        ) != expected['kwargs']:
-            raise AssertionError('Recorded ClickHouse query does not match replay query')
+        record = self._state.take(
+            'clickhouse.client.query',
+            expected={'sql': expected['sql'], 'args': expected['args'], 'kwargs': expected['kwargs']},
+        )
         return _ReplayQueryResult(record)
 
     def command(self, command: Any, *args: Any, **kwargs: Any) -> Any:
-        record = self._state.next('clickhouse.client.command')
         expected = _command_identity(command, args, kwargs)
-        if record.get('command') != expected['command'] or record.get('args') != expected['args'] or record.get(
-            'kwargs'
-        ) != expected['kwargs']:
-            raise AssertionError('Recorded ClickHouse command does not match replay command')
+        try:
+            record = self._state.take(
+                'clickhouse.client.command',
+                expected={'command': expected['command'], 'args': expected['args'], 'kwargs': expected['kwargs']},
+            )
+        except AssertionError as exc:
+            if str(command).strip().upper() != 'SELECT VERSION()':
+                raise
+            try:
+                # Older ClickHouse check versions fetched the version through
+                # client.query('SELECT version()') while newer versions use
+                # client.command(...). Treat those two client API shapes as
+                # equivalent so release-to-PR replay can focus on emitted output.
+                query_record = self._state.take(
+                    'clickhouse.client.query',
+                    expected={'sql': 'SELECT version()', 'args': [], 'kwargs': {}},
+                )
+            except AssertionError:
+                raise exc
+            rows = query_record.get('result_rows') or []
+            if rows and rows[0]:
+                return rows[0][0]
+            return None
         return record.get('result')
 
     def ping(self) -> bool:
-        return bool(self._state.next('clickhouse.client.ping').get('result'))
+        return bool(self._state.take('clickhouse.client.ping').get('result'))
 
     def close(self) -> Any:
-        return self._state.next('clickhouse.client.close').get('result')
+        return self._state.take('clickhouse.client.close').get('result')
 
 
 def install_live_recording_clickhouse_connect(
@@ -255,10 +286,11 @@ def install_replay_clickhouse_connect(monkeypatch: pytest.MonkeyPatch, fixture_p
     state = _ReplayState(records, replayed)
 
     def replayed_get_client(*args: Any, **kwargs: Any) -> _ReplayClient:
-        record = state.next('clickhouse_connect.get_client')
         expected = _call_identity(args, kwargs)
-        if record.get('args') != expected['args'] or record.get('kwargs') != expected['kwargs']:
-            raise AssertionError('Recorded ClickHouse connection does not match replay connection')
+        state.take(
+            'clickhouse_connect.get_client',
+            expected={'args': expected['args'], 'kwargs': expected['kwargs']},
+        )
         return _ReplayClient(state)
 
     monkeypatch.setattr(clickhouse_connect, 'get_client', replayed_get_client)
