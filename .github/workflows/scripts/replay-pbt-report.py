@@ -268,6 +268,64 @@ def md_escape(text: Any) -> str:
     return sanitize_text(text, max_len=MAX_DETAIL_TEXT).replace("|", "\\|")
 
 
+def replay_step_counts(rows: list[dict[str, Any]], findings: list[dict[str, Any]], coverages: list[dict[str, Any]]) -> dict[str, int]:
+    status_counts = Counter(row["status"] for row in rows)
+    artifact_targets = {finding.get("target") for finding in findings if finding.get("target")}
+    artifact_targets.update(coverage.get("target") for coverage in coverages if coverage.get("target"))
+    return {
+        "targets": len(rows),
+        "cache_ready": status_counts.get("passed", 0) + status_counts.get("failed", 0),
+        "cache_blocked": status_counts.get("failed-before-replay-pbt", 0) + status_counts.get("skipped-missing-cache", 0),
+        "replay_passed": status_counts.get("passed", 0),
+        "replay_failed": status_counts.get("failed", 0),
+        "replay_not_run": status_counts.get("failed-before-replay-pbt", 0) + status_counts.get("skipped-missing-cache", 0),
+        "artifact_targets": len(artifact_targets),
+        "findings": len(findings),
+        "coverage_reports": len(coverages),
+    }
+
+
+def target_step_state(row: dict[str, Any], artifact_targets: set[str]) -> list[tuple[str, str]]:
+    status = row.get("status")
+    target = row.get("target", "")
+    cache_state = "ok" if status in {"passed", "failed"} else "blocked" if status == "failed-before-replay-pbt" else "skipped"
+    replay_state = "ok" if status == "passed" else "fail" if status == "failed" else "blocked"
+    artifact_state = "ok" if target in artifact_targets else "none"
+    return [
+        ("Matrix", "ok"),
+        ("Cache", cache_state),
+        ("Replay", replay_state),
+        ("Artifacts", artifact_state),
+    ]
+
+
+def build_replay_flow_markdown(rows: list[dict[str, Any]], findings: list[dict[str, Any]], coverages: list[dict[str, Any]]) -> list[str]:
+    counts = replay_step_counts(rows, findings, coverages)
+    return [
+        "## How this Replay PBT job works",
+        "",
+        "This POC compares a check's behavior against a replay cache, then mutates replay inputs to verify properties such as determinism, metadata consistency, and OpenMetrics coverage.",
+        "",
+        "```mermaid",
+        "flowchart LR",
+        f"  A[\"1. Build target matrix<br/>{counts['targets']} target result(s)\"] --> B[\"2. Restore or seed replay cache<br/>{counts['cache_ready']} ready / {counts['cache_blocked']} blocked\"]",
+        "  B --> C[\"3. Run no-Agent replay<br/>same fixture, target ref\"]",
+        f"  C --> D[\"4. Check replay properties<br/>{counts['replay_passed']} passed / {counts['replay_failed']} failed / {counts['replay_not_run']} not run\"]",
+        f"  D --> E[\"5. Collect lightweight findings<br/>{counts['artifact_targets']} targets, {counts['findings']} findings, {counts['coverage_reports']} coverage reports\"]",
+        "  E --> F[\"6. Build report bundle<br/>Markdown + HTML + JSON/TSV\"]",
+        "```",
+        "",
+        "| Step | What happens | Result in this shard |",
+        "|---|---|---:|",
+        f"| 1. Matrix | Select integration/environment targets for this shard. | {counts['targets']} result file(s) |",
+        f"| 2. Cache | Restore a replay cache or seed one with compare-check. | {counts['cache_ready']} ready, {counts['cache_blocked']} blocked/skipped |",
+        f"| 3–4. Replay properties | Run replay-PBT properties against the cached fixture. | {counts['replay_passed']} passed, {counts['replay_failed']} failed, {counts['replay_not_run']} not run |",
+        f"| 5. Findings | Copy only allowlisted lightweight findings/coverage JSON. | {counts['findings']} findings, {counts['coverage_reports']} coverage reports |",
+        "| 6. Report | Generate this human summary and a sanitized report zip. | complete |",
+        "",
+    ]
+
+
 def build_markdown(rows: list[dict[str, Any]], findings: list[dict[str, Any]], coverages: list[dict[str, Any]], *, mode: str, shard: str, target_count: str) -> str:
     status_counts = Counter(row["status"] for row in rows)
     category_counts = Counter(row["category"] for row in rows if row["category"] != "passed")
@@ -286,6 +344,7 @@ def build_markdown(rows: list[dict[str, Any]], findings: list[dict[str, Any]], c
             f"**Targets in matrix:** `{target_count}`  ",
             f"**Result files collected:** `{total}`",
             "",
+            *build_replay_flow_markdown(rows, findings, coverages),
             "## Overview",
             "",
             "| Status | Count | Distribution |",
@@ -381,28 +440,67 @@ def build_markdown(rows: list[dict[str, Any]], findings: list[dict[str, Any]], c
 
 def build_html(markdown: str, rows: list[dict[str, Any]], findings: list[dict[str, Any]], coverages: list[dict[str, Any]]) -> str:
     status_counts = Counter(row["status"] for row in rows)
+    category_counts = Counter(row["category"] for row in rows if row["category"] != "passed")
+    counts = replay_step_counts(rows, findings, coverages)
+    artifact_targets = {finding.get("target") for finding in findings if finding.get("target")}
+    artifact_targets.update(coverage.get("target") for coverage in coverages if coverage.get("target"))
     total = len(rows) or 1
     bars = "".join(
         f"<div><strong>{html.escape(status)}</strong> {count}<div class='bar'><span style='width:{100*count/total:.1f}%'></span></div></div>"
         for status, count in status_counts.most_common()
     )
+    steps = [
+        ("1", "Target matrix", f"{counts['targets']} target results", "Select integration/environment targets for this shard.", "ok"),
+        ("2", "Replay cache", f"{counts['cache_ready']} ready · {counts['cache_blocked']} blocked", "Restore a cache or seed one with compare-check.", "warn" if counts['cache_blocked'] else "ok"),
+        ("3", "No-Agent replay", "recorded fixture → target ref", "Run the check without a live Agent against replayed adapter input.", "ok"),
+        ("4", "Property checks", f"{counts['replay_passed']} passed · {counts['replay_failed']} failed · {counts['replay_not_run']} not run", "Check determinism, cache mutations, metadata contracts, and coverage.", "fail" if counts['replay_failed'] else "ok"),
+        ("5", "Findings", f"{counts['findings']} findings · {counts['coverage_reports']} coverage reports", "Collect only lightweight allowlisted JSON findings and coverage.", "warn" if counts['findings'] else "ok"),
+        ("6", "Report", "HTML + Markdown + JSON/TSV zip", "Create a sanitized report bundle for the workflow results.", "ok"),
+    ]
+    step_cards = "".join(
+        f"<section class='step {state}'><div class='step-num'>{num}</div><h3>{html.escape(title)}</h3><p class='metric'>{html.escape(metric)}</p><p>{html.escape(desc)}</p></section>"
+        for num, title, metric, desc, state in steps
+    )
     target_rows = "".join(
-        f"<tr><td>{html.escape(row['target'])}</td><td>{html.escape(row['status'])}</td><td>{html.escape(row['category_label'])}</td><td>{html.escape(row['summary'])}</td></tr>"
+        "<tr>"
+        f"<td><code>{html.escape(row['target'])}</code></td>"
+        f"<td>{''.join(f'<span class=\"pill {state}\">{html.escape(label)}: {html.escape(state)}</span>' for label, state in target_step_state(row, artifact_targets))}</td>"
+        f"<td>{html.escape(row['status'])}</td>"
+        f"<td>{html.escape(row['category_label'])}</td>"
+        f"<td>{html.escape(row['summary'])}</td>"
+        "</tr>"
         for row in rows
+    )
+    category_rows = "".join(
+        f"<tr><td>{html.escape(CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS['unknown'])[0])} {html.escape(CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS['unknown'])[1])}</td><td>{count}</td><td>{html.escape(CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS['unknown'])[2])}</td></tr>"
+        for category, count in category_counts.most_common()
     )
     return f"""<!doctype html>
 <html><head><meta charset='utf-8'><title>Replay PBT report</title>
 <style>
-body{{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:2rem;line-height:1.45;color:#1f2328}}
-.card{{border:1px solid #d0d7de;border-radius:10px;padding:1rem;margin:1rem 0;background:#f6f8fa}}
+:root{{--ok:#1f883d;--fail:#cf222e;--warn:#bf8700;--muted:#6e7781;--line:#d0d7de;--bg:#f6f8fa;--purple:#8250df}}
+body{{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:2rem;line-height:1.45;color:#1f2328;background:white}}
+.hero{{background:linear-gradient(135deg,#f6f8ff,#fff);border:1px solid var(--line);border-radius:16px;padding:1.5rem;margin-bottom:1rem}}
+.card{{border:1px solid var(--line);border-radius:12px;padding:1rem;margin:1rem 0;background:var(--bg)}}
+.flow{{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.75rem;margin:1rem 0}}
+.step{{position:relative;border:1px solid var(--line);border-radius:14px;padding:1rem;background:white;box-shadow:0 1px 2px rgba(31,35,40,.06)}}
+.step:after{{content:'→';position:absolute;right:-.65rem;top:45%;color:var(--muted);font-weight:700}}
+.step:last-child:after{{content:''}}
+.step.ok{{border-top:5px solid var(--ok)}}.step.fail{{border-top:5px solid var(--fail)}}.step.warn{{border-top:5px solid var(--warn)}}
+.step-num{{width:2rem;height:2rem;border-radius:999px;background:#eef2ff;color:var(--purple);display:grid;place-items:center;font-weight:700}}
+.step h3{{margin:.55rem 0 .15rem}}.metric{{font-weight:700;margin:.25rem 0;color:#24292f}}
 .bar{{height:12px;background:#eaeef2;border-radius:999px;overflow:hidden;margin:.25rem 0 1rem}}
-.bar span{{display:block;height:100%;background:#8250df}}
-table{{border-collapse:collapse;width:100%;font-size:13px}}td,th{{border:1px solid #d0d7de;padding:.35rem;text-align:left;vertical-align:top}}th{{background:#f6f8fa}}
-code{{background:#f6f8fa;padding:.1rem .25rem;border-radius:4px}}
+.bar span{{display:block;height:100%;background:var(--purple)}}
+table{{border-collapse:collapse;width:100%;font-size:13px}}td,th{{border:1px solid var(--line);padding:.45rem;text-align:left;vertical-align:top}}th{{background:var(--bg)}}
+code{{background:var(--bg);padding:.1rem .25rem;border-radius:4px}}
+.pill{{display:inline-block;border-radius:999px;padding:.12rem .45rem;margin:.1rem;font-size:12px;border:1px solid var(--line)}}
+.pill.ok{{background:#dafbe1;color:#116329;border-color:#aceebb}}.pill.fail{{background:#ffebe9;color:#82071e;border-color:#ffcecb}}.pill.warn,.pill.blocked{{background:#fff8c5;color:#633c01;border-color:#fae17d}}.pill.skipped,.pill.none{{background:#f6f8fa;color:#57606a}}.pill.blocked{{background:#fff8c5}}pre{{white-space:pre-wrap;max-height:35rem;overflow:auto}}
 </style></head><body>
-<h1>Replay PBT report</h1>
+<div class='hero'><h1>Replay PBT workflow results</h1><p>This report explains the workflow pipeline and shows which step each target reached.</p></div>
+<div class='card'><h2>Workflow flow</h2><div class='flow'>{step_cards}</div></div>
 <div class='card'><h2>Status distribution</h2>{bars}</div>
-<div class='card'><h2>Targets</h2><table><thead><tr><th>Target</th><th>Status</th><th>Category</th><th>Summary</th></tr></thead><tbody>{target_rows}</tbody></table></div>
+<div class='card'><h2>Failure categories</h2><table><thead><tr><th>Category</th><th>Count</th><th>Meaning</th></tr></thead><tbody>{category_rows or '<tr><td colspan="3">No failures</td></tr>'}</tbody></table></div>
+<div class='card'><h2>Targets by workflow step</h2><table><thead><tr><th>Target</th><th>Pipeline state</th><th>Status</th><th>Category</th><th>Summary</th></tr></thead><tbody>{target_rows}</tbody></table></div>
 <div class='card'><h2>Markdown source</h2><pre>{html.escape(markdown[:20000])}</pre></div>
 </body></html>"""
 
