@@ -326,7 +326,16 @@ def build_replay_flow_markdown(rows: list[dict[str, Any]], findings: list[dict[s
     ]
 
 
-def build_markdown(rows: list[dict[str, Any]], findings: list[dict[str, Any]], coverages: list[dict[str, Any]], *, mode: str, shard: str, target_count: str) -> str:
+def build_markdown(
+    rows: list[dict[str, Any]],
+    findings: list[dict[str, Any]],
+    coverages: list[dict[str, Any]],
+    *,
+    mode: str,
+    shard: str,
+    target_count: str,
+    shard_runs: list[dict[str, Any]] | None = None,
+) -> str:
     status_counts = Counter(row["status"] for row in rows)
     category_counts = Counter(row["category"] for row in rows if row["category"] != "passed")
     total = len(rows)
@@ -345,6 +354,19 @@ def build_markdown(rows: list[dict[str, Any]], findings: list[dict[str, Any]], c
             f"**Result files collected:** `{total}`",
             "",
             *build_replay_flow_markdown(rows, findings, coverages),
+        ]
+    )
+    if shard_runs:
+        lines.extend(["## Shard runs", "", "| Shard run | Conclusion | Link |", "|---|---|---|"])
+        for run in shard_runs:
+            run_id = md_escape(run.get("run_id", ""))
+            title = md_escape(run.get("display_title", ""))
+            conclusion = md_escape(run.get("conclusion", ""))
+            url = md_escape(run.get("url", ""))
+            lines.append(f"| `{run_id}` {title} | `{conclusion}` | [run]({url}) |")
+        lines.append("")
+    lines.extend(
+        [
             "## Overview",
             "",
             "| Status | Count | Distribution |",
@@ -438,7 +460,13 @@ def build_markdown(rows: list[dict[str, Any]], findings: list[dict[str, Any]], c
     return "\n".join(lines) + "\n"
 
 
-def build_html(markdown: str, rows: list[dict[str, Any]], findings: list[dict[str, Any]], coverages: list[dict[str, Any]]) -> str:
+def build_html(
+    markdown: str,
+    rows: list[dict[str, Any]],
+    findings: list[dict[str, Any]],
+    coverages: list[dict[str, Any]],
+    shard_runs: list[dict[str, Any]] | None = None,
+) -> str:
     status_counts = Counter(row["status"] for row in rows)
     category_counts = Counter(row["category"] for row in rows if row["category"] != "passed")
     counts = replay_step_counts(rows, findings, coverages)
@@ -461,16 +489,29 @@ def build_html(markdown: str, rows: list[dict[str, Any]], findings: list[dict[st
         f"<section class='step {state}'><div class='step-num'>{num}</div><h3>{html.escape(title)}</h3><p class='metric'>{html.escape(metric)}</p><p>{html.escape(desc)}</p></section>"
         for num, title, metric, desc, state in steps
     )
-    target_rows = "".join(
-        "<tr>"
-        f"<td><code>{html.escape(row['target'])}</code></td>"
-        f"<td>{''.join(f'<span class=\"pill {state}\">{html.escape(label)}: {html.escape(state)}</span>' for label, state in target_step_state(row, artifact_targets))}</td>"
-        f"<td>{html.escape(row['status'])}</td>"
-        f"<td>{html.escape(row['category_label'])}</td>"
-        f"<td>{html.escape(row['summary'])}</td>"
-        "</tr>"
-        for row in rows
+    target_row_parts = []
+    for row in rows:
+        pipeline = ''.join(
+            f'<span class="pill {state}">{html.escape(label)}: {html.escape(state)}</span>'
+            for label, state in target_step_state(row, artifact_targets)
+        )
+        shard_link = f'<a href="{html.escape(str(row.get("run_url", "")))}">shard</a>' if row.get('run_url') else ''
+        target_row_parts.append(
+            "<tr>"
+            f"<td><code>{html.escape(row['target'])}</code></td>"
+            f"<td>{pipeline}</td>"
+            f"<td>{html.escape(row['status'])}</td>"
+            f"<td>{html.escape(row['category_label'])}</td>"
+            f"<td>{html.escape(row['summary'])}</td>"
+            f"<td>{shard_link}</td>"
+            "</tr>"
+        )
+    target_rows = ''.join(target_row_parts)
+    shard_rows = "".join(
+        f"<tr><td><code>{html.escape(str(run.get('run_id', '')))}</code></td><td>{html.escape(str(run.get('display_title', '')))}</td><td>{html.escape(str(run.get('conclusion', '')))}</td><td><a href='{html.escape(str(run.get('url', '')))}'>run</a></td></tr>"
+        for run in (shard_runs or [])
     )
+    shard_card = f"<div class='card'><h2>Shard runs</h2><table><thead><tr><th>Run ID</th><th>Title</th><th>Conclusion</th><th>Link</th></tr></thead><tbody>{shard_rows}</tbody></table></div>" if shard_rows else ""
     category_rows = "".join(
         f"<tr><td>{html.escape(CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS['unknown'])[0])} {html.escape(CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS['unknown'])[1])}</td><td>{count}</td><td>{html.escape(CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS['unknown'])[2])}</td></tr>"
         for category, count in category_counts.most_common()
@@ -498,9 +539,10 @@ code{{background:var(--bg);padding:.1rem .25rem;border-radius:4px}}
 </style></head><body>
 <div class='hero'><h1>Replay PBT workflow results</h1><p>This report explains the workflow pipeline and shows which step each target reached.</p></div>
 <div class='card'><h2>Workflow flow</h2><div class='flow'>{step_cards}</div></div>
+{shard_card}
 <div class='card'><h2>Status distribution</h2>{bars}</div>
 <div class='card'><h2>Failure categories</h2><table><thead><tr><th>Category</th><th>Count</th><th>Meaning</th></tr></thead><tbody>{category_rows or '<tr><td colspan="3">No failures</td></tr>'}</tbody></table></div>
-<div class='card'><h2>Targets by workflow step</h2><table><thead><tr><th>Target</th><th>Pipeline state</th><th>Status</th><th>Category</th><th>Summary</th></tr></thead><tbody>{target_rows}</tbody></table></div>
+<div class='card'><h2>Targets by workflow step</h2><table><thead><tr><th>Target</th><th>Pipeline state</th><th>Status</th><th>Category</th><th>Summary</th><th>Shard run</th></tr></thead><tbody>{target_rows}</tbody></table></div>
 <div class='card'><h2>Markdown source</h2><pre>{html.escape(markdown[:20000])}</pre></div>
 </body></html>"""
 

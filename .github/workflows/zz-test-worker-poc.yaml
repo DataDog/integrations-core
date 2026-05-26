@@ -1,7 +1,7 @@
 name: Replay PBT POC
 run-name: >-
   Replay PBT POC / ${{ inputs.mode }} /
-  ${{ inputs.dispatch_shards && format('dispatch {0} shards', inputs.shard_count) || format('shard {0} of {1}', inputs.shard_index, inputs.shard_count) }}
+  ${{ inputs.combine_reports && format('combine {0}', inputs.run_group) || inputs.dispatch_shards && format('dispatch {0} shards', inputs.shard_count) || format('shard {0} of {1} / {2}', inputs.shard_index, inputs.shard_count, inputs.run_group) }}
 
 on:
   workflow_dispatch:
@@ -70,6 +70,36 @@ on:
         required: true
         default: false
         type: boolean
+      shard_indices:
+        description: Optional comma-separated shard indices to dispatch. Empty means every shard.
+        required: false
+        default: ""
+        type: string
+      run_group:
+        description: Shared identifier linking shard worker runs and the combined report. Dispatcher generates one when empty.
+        required: false
+        default: ""
+        type: string
+      run_group_expected_shards:
+        description: Number of shard runs expected in run_group. Dispatcher sets this automatically.
+        required: false
+        default: 0
+        type: number
+      auto_combine:
+        description: Coordinator worker waits for sibling shards in run_group and dispatches combine mode.
+        required: true
+        default: false
+        type: boolean
+      combine_reports:
+        description: Combine completed shard report artifacts from report_run_ids.
+        required: true
+        default: false
+        type: boolean
+      report_run_ids:
+        description: Comma-separated workflow run IDs to combine.
+        required: false
+        default: ""
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.mode }}-${{ inputs.dispatch_shards }}-${{ inputs.shard_index }}-${{ inputs.shard_count }}
@@ -144,11 +174,23 @@ jobs:
         READINGS: ${{ inputs.readings }}
         WORKER_REF: ${{ inputs.worker_ref || github.ref_name }}
         DRY_RUN: ${{ inputs.dry_run }}
+        SHARD_INDICES: ${{ inputs.shard_indices }}
+        RUN_GROUP: ${{ inputs.run_group }}
       with:
         script: |
           const shardCount = Number(process.env.SHARD_COUNT);
           const workerRef = process.env.WORKER_REF;
           const dryRun = process.env.DRY_RUN === 'true';
+          const runGroup = process.env.RUN_GROUP || `replay-pbt-${context.runId}`;
+          const shardIndices = process.env.SHARD_INDICES.trim()
+            ? process.env.SHARD_INDICES.split(',').map(value => Number(value.trim()))
+            : Array.from({length: shardCount}, (_, index) => index);
+          for (const shardIndex of shardIndices) {
+            if (!Number.isInteger(shardIndex) || shardIndex < 0 || shardIndex >= shardCount) {
+              throw new Error(`Invalid shard index ${shardIndex}; expected 0 <= index < ${shardCount}`);
+            }
+          }
+          const coordinatorShard = shardIndices[shardIndices.length - 1];
           const workflow_id = 'zz-test-worker-poc.yaml';
           const baseInputs = {
             mode: process.env.MODE,
@@ -162,11 +204,17 @@ jobs:
             dispatch_shards: 'false',
             worker_ref: '',
             dry_run: 'false',
+            shard_indices: '',
+            run_group: runGroup,
+            run_group_expected_shards: String(shardIndices.length),
+            auto_combine: 'false',
+            combine_reports: 'false',
+            report_run_ids: '',
           };
 
           const rows = [];
-          for (let shardIndex = 0; shardIndex < shardCount; shardIndex += 1) {
-            const shardInputs = {...baseInputs, shard_index: String(shardIndex)};
+          for (const shardIndex of shardIndices) {
+            const shardInputs = {...baseInputs, shard_index: String(shardIndex), auto_combine: String(shardIndex === coordinatorShard)};
             rows.push({shardIndex, ref: workerRef, inputs: shardInputs});
             if (!dryRun) {
               await github.rest.actions.createWorkflowDispatch({
@@ -200,6 +248,8 @@ jobs:
               ]),
             ])
             .addRaw('\n')
+            .addRaw(`Run group: \`${runGroup}\`\n`)
+            .addRaw(`Coordinator shard: \`${coordinatorShard}\`\n`)
             .addRaw(`Worker workflow: \`${workflow_id}\`\n`)
             .write();
 
@@ -207,7 +257,7 @@ jobs:
 
   compute-matrix:
     name: Compute replay-PBT matrix
-    if: ${{ !inputs.dispatch_shards }}
+    if: ${{ !inputs.dispatch_shards && !inputs.combine_reports }}
     runs-on: ubuntu-22.04
     permissions:
       contents: read
@@ -292,7 +342,7 @@ jobs:
   replay-pbt:
     name: ${{ matrix.name }}
     needs: compute-matrix
-    if: ${{ !inputs.dispatch_shards && needs.compute-matrix.outputs.matrix != '[]' }}
+    if: ${{ !inputs.dispatch_shards && !inputs.combine_reports && needs.compute-matrix.outputs.matrix != '[]' }}
     runs-on: ubuntu-22.04
     timeout-minutes: 120
     strategy:
@@ -575,7 +625,7 @@ jobs:
     needs:
     - compute-matrix
     - replay-pbt
-    if: ${{ !inputs.dispatch_shards && always() && needs.compute-matrix.outputs.matrix != '[]' }}
+    if: ${{ !inputs.dispatch_shards && !inputs.combine_reports && always() && needs.compute-matrix.outputs.matrix != '[]' }}
     runs-on: ubuntu-22.04
     permissions:
       contents: read
@@ -615,5 +665,126 @@ jobs:
       with:
         name: replay-pbt-report
         path: replay-pbt-report.zip
+        if-no-files-found: error
+        retention-days: 14
+
+  auto-combine:
+    name: Dispatch combined Replay PBT report
+    needs:
+    - summarize
+    if: ${{ !inputs.dispatch_shards && !inputs.combine_reports && inputs.auto_combine && always() }}
+    runs-on: ubuntu-22.04
+    permissions:
+      actions: write
+      contents: read
+    steps:
+    - name: Wait for sibling shards and dispatch combiner
+      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      env:
+        RUN_GROUP: ${{ inputs.run_group }}
+        EXPECTED_SHARDS: ${{ inputs.run_group_expected_shards }}
+        WORKER_REF: ${{ github.ref_name }}
+      with:
+        script: |
+          const runGroup = process.env.RUN_GROUP;
+          const expected = Number(process.env.EXPECTED_SHARDS || '0');
+          if (!runGroup || expected < 1) {
+            core.info('No run_group or expected shard count; skipping auto-combine.');
+            return;
+          }
+          const workflow_id = 'zz-test-worker-poc.yaml';
+          const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+          const deadline = Date.now() + 4 * 60 * 60 * 1000;
+          let matched = [];
+          while (Date.now() < deadline) {
+            const response = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id,
+              branch: process.env.WORKER_REF,
+              per_page: 100,
+            });
+            matched = response.data.workflow_runs.filter(run =>
+              run.display_title &&
+              run.display_title.includes(runGroup) &&
+              run.display_title.includes('shard ') &&
+              !run.display_title.includes('dispatch') &&
+              !run.display_title.includes('combine')
+            );
+            core.info(`Found ${matched.length}/${expected} shard run(s) for ${runGroup}: ${matched.map(run => `${run.id}:${run.status}`).join(', ')}`);
+            const completeEnough = matched.every(run => run.status === 'completed' || run.id === context.runId);
+            if (matched.length >= expected && completeEnough) {
+              break;
+            }
+            await sleep(60_000);
+          }
+          if (matched.length < expected || !matched.every(run => run.status === 'completed' || run.id === context.runId)) {
+            throw new Error(`Timed out waiting for ${expected} completed shard runs for ${runGroup}`);
+          }
+          const runIds = matched
+            .sort((a, b) => a.display_title.localeCompare(b.display_title))
+            .map(run => String(run.id))
+            .join(',');
+          await github.rest.actions.createWorkflowDispatch({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            workflow_id,
+            ref: process.env.WORKER_REF,
+            inputs: {
+              mode: 'all-declared',
+              seed_missing_caches: 'false',
+              target_ref: 'HEAD',
+              base_ref: 'origin/master',
+              max_targets: '1',
+              allow_truncation: 'true',
+              shard_index: '0',
+              shard_count: '1',
+              readings: '2',
+              dispatch_shards: 'false',
+              worker_ref: '',
+              dry_run: 'false',
+              shard_indices: '',
+              run_group: runGroup,
+              run_group_expected_shards: String(expected),
+              auto_combine: 'false',
+              combine_reports: 'true',
+              report_run_ids: runIds,
+            },
+          });
+          await core.summary
+            .addHeading('Replay PBT auto-combine')
+            .addRaw(`Dispatched combiner for run group \`${runGroup}\`.\n\n`)
+            .addRaw(`Shard run IDs: \`${runIds}\`\n`)
+            .write();
+
+  combine-reports:
+    name: Combine Replay PBT shard reports
+    if: ${{ inputs.combine_reports }}
+    runs-on: ubuntu-22.04
+    permissions:
+      actions: read
+      contents: read
+    steps:
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        fetch-depth: 1
+
+    - name: Build combined Replay PBT report
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        python .github/workflows/scripts/replay-pbt-combine-reports.py \
+          --run-ids "${{ inputs.report_run_ids }}" \
+          --out-dir replay-pbt-combined-report \
+          --zip replay-pbt-combined-report.zip \
+          --mode "${{ inputs.mode }}" \
+          --run-group "${{ inputs.run_group }}" \
+          | tee "$GITHUB_STEP_SUMMARY"
+
+    - name: Upload combined report bundle
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      with:
+        name: replay-pbt-combined-report
+        path: replay-pbt-combined-report.zip
         if-no-files-found: error
         retention-days: 14
