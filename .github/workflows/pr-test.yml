@@ -191,6 +191,10 @@ jobs:
         path: .ddev/replay/${{ env.REPLAY_PBT_INTEGRATION }}/${{ env.REPLAY_PBT_ENVIRONMENT }}
         key: ${{ env.REPLAY_PBT_CACHE_KEY }}
 
+    - name: Scan replay findings
+      if: always()
+      run: python .github/workflows/scripts/replay-pbt-secret-scan.py ${{ runner.temp }}/replay-pbt
+
     - name: Upload replay findings
       if: always()
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
