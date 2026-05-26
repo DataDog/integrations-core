@@ -465,10 +465,11 @@ def load_results(root: Path) -> list[dict[str, Any]]:
     return rows
 
 
-def load_findings_and_coverages(root: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+def load_findings_and_coverages(root: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
     property_results: list[dict[str, Any]] = []
     findings: list[dict[str, Any]] = []
     coverages: list[dict[str, Any]] = []
+    release_diffs: list[dict[str, Any]] = []
 
     for manifest_path in sorted(root.glob("**/property-result.json")):
         manifest = load_json(manifest_path)
@@ -524,6 +525,25 @@ def load_findings_and_coverages(root: Path) -> tuple[list[dict[str, Any]], list[
                     }
                     finding_row["display_message"] = sanitize_text(asset_finding_message(finding_row), max_len=400)
                     findings.append(finding_row)
+            elif kind == "summary" and isinstance(data, dict) and rel_path == "release-diff-summary.json":
+                collections = data.get("collections") if isinstance(data.get("collections"), dict) else {}
+                release_diffs.append(
+                    {
+                        "target": target_slug(target),
+                        "integration": target.get("integration", ""),
+                        "environment": target.get("environment", ""),
+                        "record_ref": data.get("record_ref", ""),
+                        "target_ref": data.get("target_ref", ""),
+                        "changed": data.get("changed"),
+                        "incomplete": data.get("incomplete"),
+                        "collections": collections,
+                        "changed_collections": ", ".join(
+                            f"{name} (+{counts.get('added', 0)} -{counts.get('removed', 0)})"
+                            for name, counts in sorted(collections.items())
+                            if isinstance(counts, dict)
+                        ),
+                    }
+                )
             elif kind == "coverage" and isinstance(data, dict):
                 endpoint = data.get("endpoint_to_emitted") or data.get("observed_to_emitted") or {}
                 metadata = data.get("metadata_to_emitted") or data.get("supported_to_emitted") or {}
@@ -544,7 +564,7 @@ def load_findings_and_coverages(root: Path) -> tuple[list[dict[str, Any]], list[
                     }
                 )
 
-    return property_results, findings, coverages
+    return property_results, findings, coverages, release_diffs
 
 
 def coverage_number(value: Any) -> float | None:
@@ -784,6 +804,7 @@ def build_individual_target_markdown(
     property_results: list[dict[str, Any]],
     findings: list[dict[str, Any]],
     coverages: list[dict[str, Any]],
+    release_diffs: list[dict[str, Any]],
 ) -> list[str]:
     category = row.get("category", "unknown")
     icon, label, description = CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS["unknown"])
@@ -791,6 +812,7 @@ def build_individual_target_markdown(
     target_properties = property_results_for_target(property_results, str(target))
     target_findings = findings_for_target(findings, str(target))
     target_coverages = coverages_for_target(coverages, str(target))
+    target_release_diffs = [diff for diff in release_diffs if diff.get("target") == target]
 
     lines = [
         "## Individual target report",
@@ -871,6 +893,17 @@ def build_individual_target_markdown(
         for coverage in target_coverages:
             lines.append(
                 f"| {property_display_md(coverage.get('property', ''))} | {coverage_bar_md(coverage.get('endpoint_to_emitted_coverage'))} | {coverage_bar_md(coverage.get('metadata_to_emitted_coverage'))} | {coverage.get('endpoint_count') or ''} | {coverage.get('metadata_count') or ''} |"
+            )
+        lines.append("")
+
+    if target_release_diffs:
+        lines.extend(["### Latest release differential", ""])
+        lines.extend(["| Record ref | Target ref | Changed | Collections |", "|---|---|---|---|"])
+        for diff in target_release_diffs:
+            changed = "Yes" if diff.get("changed") else "No"
+            collections = md_escape(diff.get("changed_collections") or "No output differences")
+            lines.append(
+                f"| `{md_escape(diff.get('record_ref', ''))}` | `{md_escape(diff.get('target_ref', ''))}` | {changed} | {collections} |"
             )
         lines.append("")
 
@@ -972,6 +1005,7 @@ def build_markdown(
     shard_runs: list[dict[str, Any]] | None = None,
     artifact_name: str = "replay-pbt-report",
     property_results: list[dict[str, Any]] | None = None,
+    release_diffs: list[dict[str, Any]] | None = None,
 ) -> str:
     status_counts = Counter(row["status"] for row in rows)
     category_counts = Counter(row["category"] for row in rows if row["category"] != "passed")
@@ -982,6 +1016,7 @@ def build_markdown(
     current_id = current_run_id()
     groups = group_actionable_findings(findings)
     property_results = property_results or []
+    release_diffs = release_diffs or []
 
     lines: list[str] = []
     lines.extend(
@@ -1011,7 +1046,7 @@ def build_markdown(
 
     lines.extend(build_replay_flow_markdown(rows, findings, coverages))
     if len(rows) == 1:
-        lines.extend(build_individual_target_markdown(rows[0], property_results, findings, coverages))
+        lines.extend(build_individual_target_markdown(rows[0], property_results, findings, coverages, release_diffs))
     lines.extend(
         [
             "## Outcome summary",
@@ -1055,6 +1090,33 @@ def build_markdown(
             lines.append(f"\n_… {len(groups) - 12} more grouped finding rows in `report.html` and `findings.tsv`._")
     else:
         lines.append("No actionable property findings collected.")
+    lines.append("")
+
+    lines.extend(["## Latest release differential", ""])
+    if release_diffs:
+        lines.extend(["| Target | Record ref | Target ref | Changed | Collections |", "|---|---|---|---|---|"])
+        for diff in release_diffs[:30]:
+            changed = "Yes" if diff.get("changed") else "No"
+            collections = md_escape(diff.get("changed_collections") or "No output differences")
+            lines.append(
+                f"| {target_link_md(diff)} | `{md_escape(diff.get('record_ref', ''))}` | `{md_escape(diff.get('target_ref', ''))}` | {changed} | {collections} |"
+            )
+        if len(release_diffs) > 30:
+            remaining = release_diffs[30:]
+            lines.append("")
+            lines.append(f"<details><summary>🔁 More release differential rows ({len(remaining)})</summary>")
+            lines.append("")
+            lines.extend(["| Target | Record ref | Target ref | Changed | Collections |", "|---|---|---|---|---|"])
+            for diff in remaining:
+                changed = "Yes" if diff.get("changed") else "No"
+                collections = md_escape(diff.get("changed_collections") or "No output differences")
+                lines.append(
+                    f"| {target_link_md(diff)} | `{md_escape(diff.get('record_ref', ''))}` | `{md_escape(diff.get('target_ref', ''))}` | {changed} | {collections} |"
+                )
+            lines.append("")
+            lines.append("</details>")
+    else:
+        lines.append("No latest-release differential summaries collected.")
     lines.append("")
 
     lines.extend(["## OpenMetrics coverage", ""])
@@ -1121,12 +1183,14 @@ def build_html(
     coverages: list[dict[str, Any]],
     shard_runs: list[dict[str, Any]] | None = None,
     property_results: list[dict[str, Any]] | None = None,
+    release_diffs: list[dict[str, Any]] | None = None,
 ) -> str:
     status_counts = Counter(row["status"] for row in rows)
     category_counts = Counter(row["category"] for row in rows if row["category"] != "passed")
     counts = replay_step_counts(rows, findings, coverages)
     groups = group_actionable_findings(findings)
     property_results = property_results or []
+    release_diffs = release_diffs or []
     artifact_targets = {finding.get("target") for finding in findings if finding.get("target")}
     artifact_targets.update(coverage.get("target") for coverage in coverages if coverage.get("target"))
     total = len(rows) or 1
@@ -1195,6 +1259,10 @@ def build_html(
             f"<tr><td>{property_display_html(prop.get('property'))}</td><td>{esc(status_icon(prop.get('status')))} {esc(status_label(prop.get('status')))}</td><td>{esc(property_description(prop.get('property')))}</td></tr>"
             for prop in property_results_for_target(property_results, target_name)
         ) or "<tr><td colspan='3'>No per-property manifests were collected for this target.</td></tr>"
+        target_release_diff_rows = "".join(
+            f"<tr><td><code>{esc(diff.get('record_ref'))}</code></td><td><code>{esc(diff.get('target_ref'))}</code></td><td>{'Yes' if diff.get('changed') else 'No'}</td><td>{esc(diff.get('changed_collections') or 'No output differences')}</td></tr>"
+            for diff in release_diffs if diff.get('target') == target_name
+        ) or "<tr><td colspan='4'>No latest-release differential summary collected for this target.</td></tr>"
         target_coverage_rows = "".join(
             f"<tr><td>{property_display_html(coverage.get('property'))}</td><td>{coverage_bar_html(coverage.get('endpoint_to_emitted_coverage'))}</td><td>{coverage_bar_html(coverage.get('metadata_to_emitted_coverage'))}</td><td>{esc(coverage.get('endpoint_count'))}</td><td>{esc(coverage.get('metadata_count'))}</td></tr>"
             for coverage in coverages_for_target(coverages, target_name)
@@ -1218,6 +1286,8 @@ def build_html(
   <p><strong>Suggested next step:</strong> {esc(CATEGORY_NEXT_STEPS.get(str(category), CATEGORY_NEXT_STEPS['unknown']))}</p>
   <h3>Property results</h3>
   <table><thead><tr><th>Property</th><th>Status</th><th>What it checks</th></tr></thead><tbody>{prop_rows}</tbody></table>
+  <h3>Latest release differential</h3>
+  <table><thead><tr><th>Record ref</th><th>Target ref</th><th>Changed</th><th>Collections</th></tr></thead><tbody>{target_release_diff_rows}</tbody></table>
   <h3>Coverage chart</h3>
   <p class='muted'>Coverage is a signal about how much this replay fixture exercises, not a pass/fail grade by itself.</p>
   <table><thead><tr><th>Property</th><th>Endpoint → emitted</th><th>metadata.csv → emitted</th><th>Endpoint count</th><th>Metadata count</th></tr></thead><tbody>{target_coverage_rows}</tbody></table>
@@ -1257,6 +1327,10 @@ def build_html(
             "</tr>"
         )
     target_rows = ''.join(target_row_parts)
+    release_diff_rows = "".join(
+        f"<tr><td>{target_link_html(diff)}</td><td><code>{esc(diff.get('record_ref'))}</code></td><td><code>{esc(diff.get('target_ref'))}</code></td><td>{'Yes' if diff.get('changed') else 'No'}</td><td>{esc(diff.get('changed_collections') or 'No output differences')}</td></tr>"
+        for diff in sorted(release_diffs, key=lambda item: str(item.get('target', '')))[:80]
+    ) or "<tr><td colspan='5'>No latest-release differential summaries collected.</td></tr>"
     coverage_rows = "".join(
         f"<tr><td>{target_link_html(c)}</td><td>{coverage_bar_html(c.get('endpoint_to_emitted_coverage'))}</td><td>{coverage_bar_html(c.get('metadata_to_emitted_coverage'))}</td><td>{esc(c.get('endpoint_count'))}</td><td>{esc(c.get('metadata_count'))}</td></tr>"
         for c in sorted(coverages, key=lambda item: str(item.get('target', '')))[:80]
@@ -1286,6 +1360,7 @@ table{{border-collapse:collapse;width:100%;font-size:13px;background:white}}td,t
 <section class='card'><h2>Failure categories</h2><table><thead><tr><th>Category</th><th>Count</th><th>Meaning</th></tr></thead><tbody>{category_rows or '<tr><td colspan="3">No failures</td></tr>'}</tbody></table></section>
 <section class='card'><h2>Actionable finding groups</h2><p>Repeated metric/tag rows are collapsed. Use the examples to see the shape of the issue, then open <code>findings.tsv</code> for raw rows if needed.</p>{finding_cards}</section>
 <section class='card'><h2>Targets by workflow step</h2><table><thead><tr><th>Target</th><th>Pipeline state</th><th>Status</th><th>Category</th><th>Summary</th><th>Shard</th></tr></thead><tbody>{target_rows}</tbody></table></section>
+<section class='card'><h2>Latest release differential</h2><table><thead><tr><th>Target</th><th>Record ref</th><th>Target ref</th><th>Changed</th><th>Collections</th></tr></thead><tbody>{release_diff_rows}</tbody></table></section>
 <section class='card'><h2>OpenMetrics coverage</h2><table><thead><tr><th>Target</th><th>Endpoint → emitted</th><th>metadata.csv → emitted</th><th>Endpoint count</th><th>Metadata count</th></tr></thead><tbody>{coverage_rows}</tbody></table></section>
 </main></body></html>"""
 
@@ -1316,6 +1391,8 @@ def write_zip(zip_path: Path, report_dir: Path) -> None:
         "findings.tsv",
         "coverage-summary.json",
         "coverage-summary.tsv",
+        "release-diffs.json",
+        "release-diffs.tsv",
     }
     with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
         for path in sorted(report_dir.iterdir()):
@@ -1338,9 +1415,10 @@ def main() -> None:
     args.out_dir.mkdir(parents=True, exist_ok=True)
     rows = load_results(args.results)
     attach_current_run(rows)
-    property_results, findings, coverages = load_findings_and_coverages(args.findings)
+    property_results, findings, coverages, release_diffs = load_findings_and_coverages(args.findings)
     attach_current_run(findings)
     attach_current_run(coverages)
+    attach_current_run(release_diffs)
     attach_current_run(property_results)
 
     status_counts = Counter(row["status"] for row in rows)
@@ -1357,6 +1435,7 @@ def main() -> None:
         "property_result_count": len(property_results),
         "finding_count": len(findings),
         "coverage_count": len(coverages),
+        "release_diff_count": len(release_diffs),
     }
     categories = [
         {
@@ -1377,8 +1456,9 @@ def main() -> None:
         target_count=args.target_count,
         artifact_name=args.artifact_name,
         property_results=property_results,
+        release_diffs=release_diffs,
     )
-    html_report = build_html(markdown, rows, findings, coverages, property_results=property_results)
+    html_report = build_html(markdown, rows, findings, coverages, property_results=property_results, release_diffs=release_diffs)
 
     (args.out_dir / "report.md").write_text(markdown)
     (args.out_dir / "report.html").write_text(html_report)
@@ -1389,12 +1469,14 @@ def main() -> None:
     write_json(args.out_dir / "property-results.json", property_results)
     write_json(args.out_dir / "findings.json", findings)
     write_json(args.out_dir / "coverage-summary.json", coverages)
+    write_json(args.out_dir / "release-diffs.json", release_diffs)
 
     write_tsv(args.out_dir / "summary.tsv", [summary], list(summary.keys()))
     write_tsv(args.out_dir / "targets.tsv", rows, ["status", "category", "category_label", "integration", "environment", "target", "fixture_ref", "target_ref", "failing_property_count", "summary"])
     write_tsv(args.out_dir / "failure-categories.tsv", categories, ["category", "label", "count", "description"])
     write_tsv(args.out_dir / "findings.tsv", findings, ["level", "property", "check", "integration", "environment", "target", "asset_type", "collection", "metric", "tag_key", "path", "message", "display_message", "query"])
     write_tsv(args.out_dir / "coverage-summary.tsv", coverages, ["property", "integration", "environment", "target", "endpoint_count", "endpoint_emitted_count", "endpoint_missing_count", "endpoint_to_emitted_coverage", "metadata_count", "metadata_emitted_count", "metadata_unemitted_count", "metadata_to_emitted_coverage"])
+    write_tsv(args.out_dir / "release-diffs.tsv", release_diffs, ["integration", "environment", "target", "record_ref", "target_ref", "changed", "incomplete", "changed_collections", "run_id", "run_url", "job_url"])
 
     write_zip(args.zip, args.out_dir)
     print(markdown)

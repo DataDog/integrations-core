@@ -595,7 +595,7 @@ jobs:
                 # Defense in depth: only collect schema-known lightweight JSON
                 # artifacts. Never copy arbitrary property artifact paths into
                 # the cross-job summary inputs.
-                if artifact.get('kind') not in {'findings', 'coverage'} or artifact.get('format') != 'json':
+                if artifact.get('kind') not in {'findings', 'coverage', 'summary'} or artifact.get('format') != 'json':
                     continue
                 rel_path = artifact.get('path')
                 if not isinstance(rel_path, str) or rel_path.startswith('/') or '..' in Path(rel_path).parts:

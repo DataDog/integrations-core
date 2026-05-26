@@ -117,6 +117,7 @@ def main() -> None:
     findings: list[dict[str, Any]] = []
     coverages: list[dict[str, Any]] = []
     property_results: list[dict[str, Any]] = []
+    release_diffs: list[dict[str, Any]] = []
     shard_runs: list[dict[str, Any]] = []
 
     with tempfile.TemporaryDirectory() as tmpdir_str:
@@ -151,11 +152,18 @@ def main() -> None:
                     row.setdefault('run_url', run_info.get('url', ''))
                     row.setdefault('job_url', job_urls.get(str(row.get('target', '')), ''))
                     property_results.append(row)
+            for row in read_json(report_dir / 'release-diffs.json'):
+                if isinstance(row, dict):
+                    row.setdefault('run_id', run_id)
+                    row.setdefault('run_url', run_info.get('url', ''))
+                    row.setdefault('job_url', job_urls.get(str(row.get('target', '')), ''))
+                    release_diffs.append(row)
 
     targets = dedupe(targets, ('target', 'status', 'category', 'run_id'))
     findings = dedupe(findings, ('target', 'property', 'check', 'metric', 'tag_key', 'path', 'message'))
     coverages = dedupe(coverages, ('target', 'property'))
     property_results = dedupe(property_results, ('target', 'property', 'status'))
+    release_diffs = dedupe(release_diffs, ('target', 'record_ref', 'target_ref'))
 
     from collections import Counter
     from datetime import datetime, timezone
@@ -175,6 +183,7 @@ def main() -> None:
         'property_result_count': len(property_results),
         'finding_count': len(findings),
         'coverage_count': len(coverages),
+        'release_diff_count': len(release_diffs),
     }
     categories = [
         {
@@ -195,8 +204,17 @@ def main() -> None:
         target_count=str(len(targets)),
         shard_runs=shard_runs,
         property_results=property_results,
+        release_diffs=release_diffs,
     )
-    html_report = report.build_html(markdown, targets, findings, coverages, shard_runs=shard_runs, property_results=property_results)
+    html_report = report.build_html(
+        markdown,
+        targets,
+        findings,
+        coverages,
+        shard_runs=shard_runs,
+        property_results=property_results,
+        release_diffs=release_diffs,
+    )
 
     (args.out_dir / 'report.md').write_text(markdown)
     (args.out_dir / 'report.html').write_text(html_report)
@@ -207,11 +225,13 @@ def main() -> None:
     report.write_json(args.out_dir / 'property-results.json', property_results)
     report.write_json(args.out_dir / 'findings.json', findings)
     report.write_json(args.out_dir / 'coverage-summary.json', coverages)
+    report.write_json(args.out_dir / 'release-diffs.json', release_diffs)
     report.write_tsv(args.out_dir / 'summary.tsv', [summary], [k for k in summary if k != 'shard_runs'])
     report.write_tsv(args.out_dir / 'targets.tsv', targets, ['status', 'category', 'category_label', 'integration', 'environment', 'target', 'fixture_ref', 'target_ref', 'failing_property_count', 'summary', 'run_id', 'run_url', 'job_url'])
     report.write_tsv(args.out_dir / 'failure-categories.tsv', categories, ['category', 'label', 'count', 'description'])
     report.write_tsv(args.out_dir / 'findings.tsv', findings, ['level', 'property', 'check', 'integration', 'environment', 'target', 'asset_type', 'collection', 'metric', 'tag_key', 'path', 'message', 'display_message', 'query', 'run_id', 'run_url', 'job_url'])
     report.write_tsv(args.out_dir / 'coverage-summary.tsv', coverages, ['property', 'integration', 'environment', 'target', 'endpoint_count', 'endpoint_emitted_count', 'endpoint_missing_count', 'endpoint_to_emitted_coverage', 'metadata_count', 'metadata_emitted_count', 'metadata_unemitted_count', 'metadata_to_emitted_coverage', 'run_id', 'run_url', 'job_url'])
+    report.write_tsv(args.out_dir / 'release-diffs.tsv', release_diffs, ['integration', 'environment', 'target', 'record_ref', 'target_ref', 'changed', 'incomplete', 'changed_collections', 'run_id', 'run_url', 'job_url'])
     report.write_zip(args.zip, args.out_dir)
     print(markdown)
 
