@@ -647,10 +647,6 @@ def build_individual_target_markdown(
             replay_reproduce_command(row),
             "```",
             "",
-            "### What is intentionally not in this report",
-            "",
-            "Raw replay caches, captured responses, full configs, and full logs are not uploaded in the report artifact. The report only includes small allowlisted summaries so it is safe to share in CI artifacts.",
-            "",
         ]
     )
     return lines
