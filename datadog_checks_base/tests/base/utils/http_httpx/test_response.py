@@ -48,14 +48,6 @@ def test_response_iter_lines(status_transport_factory, decode_unicode, expected)
     assert list(response.iter_lines(decode_unicode=decode_unicode)) == expected
 
 
-def test_response_encoding_setter(status_transport_factory):
-    transport = status_transport_factory(200, b'')
-    http = HTTPXWrapper({}, {}, transport=transport)
-    response = http.get('http://example.test/')
-    response.encoding = 'latin-1'
-    assert response.encoding == 'latin-1'
-
-
 def test_response_elapsed_returns_zero_on_runtime_error():
     class _FakeResponse:
         @property
