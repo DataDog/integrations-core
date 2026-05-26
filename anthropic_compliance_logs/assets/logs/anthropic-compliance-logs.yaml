@@ -410,19 +410,13 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `organization_id` to `ocsf.actor.user.org.name`
+              name: Map `organization_id`, `organization_uuid` to `ocsf.actor.user.org.uid`
               sources:
                 - organization_id
-              target: ocsf.actor.user.org.name
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `organization_uuid` to `ocsf.actor.user.org.uid`
-              sources:
                 - organization_uuid
               target: ocsf.actor.user.org.uid
               preserveSource: true
-              overrideOnConflict: true
+              overrideOnConflict: false
             - type: schema-remapper
               name: Map `deleted_user_id` to `ocsf.user.uid`
               sources:
@@ -580,19 +574,13 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `organization_id` to `ocsf.actor.user.org.name`
+              name: Map `organization_id`, `organization_uuid` to `ocsf.actor.user.org.uid`
               sources:
                 - organization_id
-              target: ocsf.actor.user.org.name
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `organization_uuid` to `ocsf.actor.user.org.uid`
-              sources:
                 - organization_uuid
               target: ocsf.actor.user.org.uid
               preserveSource: true
-              overrideOnConflict: true
+              overrideOnConflict: false
             - type: schema-remapper
               name: Map `actor.user_id` to `ocsf.user.uid`
               sources:
@@ -785,12 +773,13 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `organization_uuid` to `ocsf.actor.user.org.uid`
+              name: Map `organization_id`, `organization_uuid` to `ocsf.actor.user.org.uid`
               sources:
+                - organization_id
                 - organization_uuid
               target: ocsf.actor.user.org.uid
               preserveSource: true
-              overrideOnConflict: true
+              overrideOnConflict: false
             - type: schema-remapper
               name: Map `ocsf.service.name` to `ocsf.service.name`
               sources:
@@ -1022,12 +1011,13 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `organization_id` to `ocsf.user.org.uid`
+              name: Map `organization_id`, `organization_uuid` to `ocsf.user.org.uid`
               sources:
                 - organization_id
+                - organization_uuid
               target: ocsf.user.org.uid
               preserveSource: true
-              overrideOnConflict: true
+              overrideOnConflict: false
             - type: schema-remapper
               name: Map `target_id` to `ocsf.user.uid`
               sources:
@@ -1199,12 +1189,13 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `organization_uuid` to `ocsf.src_endpoint.owner.org.uid`
+              name: Map `organization_id`, `organization_uuid` to `ocsf.src_endpoint.owner.org.uid`
               sources:
+                - organization_id
                 - organization_uuid
               target: ocsf.src_endpoint.owner.org.uid
               preserveSource: true
-              overrideOnConflict: true
+              overrideOnConflict: false
             - type: schema-remapper
               name: Map `claude_chat_id`, `claude_file_id`, `claude_project_document_id`, `claude_artifact_id`, `skill_id`, `claude_project_id`, `id` to `ocsf.web_resources.uid`
               sources:
