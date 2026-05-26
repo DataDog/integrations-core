@@ -154,8 +154,7 @@ def test_metrics_mapping_should_load_with_predicate():
 def test_load_metrics_file(make_check: CheckFactory, tmp_path: Path):
     write_yaml(tmp_path, "go.yaml", {"go_goroutines": "go.goroutines"})
     check = make_check()
-    with patch.object(type(check), '_get_package_dir', return_value=tmp_path):
-        assert check._load_metrics_file(Path("go.yaml")) == {"go_goroutines": "go.goroutines"}
+    assert check._load_metrics_file(tmp_path / "go.yaml") == {"go_goroutines": "go.goroutines"}
 
 
 @pytest.mark.parametrize(
@@ -170,16 +169,14 @@ def test_load_metrics_file(make_check: CheckFactory, tmp_path: Path):
 def test_load_metrics_file_errors(make_check: CheckFactory, tmp_path: Path, filename: str, content: str, match: str):
     (tmp_path / filename).write_text(content)
     check = make_check()
-    with patch.object(type(check), '_get_package_dir', return_value=tmp_path):
-        with pytest.raises(ConfigurationError, match=match):
-            check._load_metrics_file(Path(filename))
+    with pytest.raises(ConfigurationError, match=match):
+        check._load_metrics_file(tmp_path / filename)
 
 
 def test_load_metrics_file_missing(make_check: CheckFactory, tmp_path: Path):
     check = make_check()
-    with patch.object(type(check), '_get_package_dir', return_value=tmp_path):
-        with pytest.raises(ConfigurationError, match="Failed to read metrics file"):
-            check._load_metrics_file(Path("nonexistent.yaml"))
+    with pytest.raises(ConfigurationError, match="Failed to read metrics file"):
+        check._load_metrics_file(tmp_path / "nonexistent.yaml")
 
 
 # ---------------------------------------------------------------------------
@@ -216,7 +213,7 @@ def test_load_file_based_metrics_explicit(make_check: CheckFactory, tmp_path: Pa
     write_yaml(tmp_path, "metrics/b.yaml", {"m2": "d2"})
 
     class Check(OpenMetricsBaseCheckV2):
-        METRICS_MAP = [MetricsMapping(Path("metrics/a.yaml")), MetricsMapping(Path("metrics/b.yaml"))]
+        METRICS_MAP = (MetricsMapping(Path("metrics/a.yaml")), MetricsMapping(Path("metrics/b.yaml")))
 
     check = make_check(cls=Check)
     with patch.object(type(check), '_get_package_dir', return_value=tmp_path):
@@ -229,10 +226,10 @@ def test_load_file_based_metrics_predicate_filters(make_check: CheckFactory, tmp
     write_yaml(tmp_path, "metrics/conditional.yaml", {"m2": "d2"})
 
     class Check(OpenMetricsBaseCheckV2):
-        METRICS_MAP = [
+        METRICS_MAP = (
             MetricsMapping(Path("metrics/always.yaml")),
             MetricsMapping(Path("metrics/conditional.yaml"), predicate=ConfigOptionTruthy("extra", default=False)),
-        ]
+        )
 
     check_base = make_check(cls=Check)
     check_extra = make_check(cls=Check, instance={'extra': True})
@@ -246,7 +243,7 @@ def test_load_file_based_metrics_explicit_skips_convention(make_check: CheckFact
     write_yaml(tmp_path, "explicit.yaml", {"explicit": "metric"})
 
     class Check(OpenMetricsBaseCheckV2):
-        METRICS_MAP = [MetricsMapping(Path("explicit.yaml"))]
+        METRICS_MAP = (MetricsMapping(Path("explicit.yaml")),)
 
     check = make_check(cls=Check)
     with patch.object(type(check), '_get_package_dir', return_value=tmp_path):
@@ -275,10 +272,10 @@ def test_load_file_based_metrics_cache_ignores_config_changes(make_check: CheckF
     write_yaml(tmp_path, "metrics/extra.yaml", {"m2": "d2"})
 
     class Check(OpenMetricsBaseCheckV2):
-        METRICS_MAP = [
+        METRICS_MAP = (
             MetricsMapping(Path("metrics/always.yaml")),
             MetricsMapping(Path("metrics/extra.yaml"), predicate=ConfigOptionTruthy("extra", default=False)),
-        ]
+        )
 
     check = make_check(cls=Check)
     with patch.object(Check, '_get_package_dir', return_value=tmp_path):
@@ -305,11 +302,11 @@ def test_load_file_based_metrics_multi_file_failure_seals_empty(make_check: Chec
     write_yaml(tmp_path, "metrics/c.yaml", {"c": "dd.c"})
 
     class Check(OpenMetricsBaseCheckV2):
-        METRICS_MAP = [
+        METRICS_MAP = (
             MetricsMapping(Path("metrics/a.yaml")),
             MetricsMapping(Path("metrics/b.yaml")),
             MetricsMapping(Path("metrics/c.yaml")),
-        ]
+        )
 
     check = make_check(cls=Check)
     with patch.object(Check, '_get_package_dir', return_value=tmp_path):

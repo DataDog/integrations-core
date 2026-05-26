@@ -5,23 +5,23 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 from datadog_checks.base.config import is_affirmative
 
 if TYPE_CHECKING:
-    from typing import Any
-
     from datadog_checks.base.types import InstanceType
 
-_RawMetricsConfig = dict[str, str | dict[str, str]]
+_RawMetricsConfig = dict[str, str | dict[str, Any]]
 """Metric name mapping loaded from a YAML file.
 
-Keys are raw Prometheus metric names, values are either Datadog metric names
-(simple renaming) or dicts with ``name``, ``type``, etc. (full config).
+Keys are raw Prometheus metric names; values are either Datadog metric names
+(simple renaming) or dicts describing transformer configuration. The inner
+dict carries the full ``OpenMetricsScraper`` transformer shape (type, label
+maps, nested options), so it is intentionally widened to ``dict[str, Any]``.
 
 Internal: the type the loader returns; integration authors should not need to
-reference this directly. Annotate against ``dict[str, Any]`` if you must.
+reference this directly.
 """
 
 
@@ -104,10 +104,10 @@ class MetricsMapping:
     subclasses. The YAML file should contain a flat mapping of Prometheus
     metric names to Datadog metric names::
 
-        METRICS_MAP = [
+        METRICS_MAP = (
             MetricsMapping(Path("metrics/default.yaml")),
             MetricsMapping(Path("metrics/go.yaml"), predicate=ConfigOptionTruthy("go_metrics")),
-        ]
+        )
     """
 
     path: Path

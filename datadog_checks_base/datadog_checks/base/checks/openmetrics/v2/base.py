@@ -153,10 +153,10 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         """Load metric mappings from YAML files declared in ``METRICS_MAP``.
 
         Results are cached for the lifetime of the check instance. Predicates
-        are evaluated once against the first ``config`` supplied — since
-        ``METRICS_MAP`` is a class-level declaration and the instance config
-        does not change between runs, subsequent calls always receive the same
-        effective configuration.
+        are evaluated once against the first ``config`` supplied; ``METRICS_MAP``
+        is a class-level declaration and the instance config does not change
+        between runs, so subsequent calls always receive the same effective
+        configuration.
 
         Falls back to convention-based discovery of ``metrics.yaml`` or
         ``metrics.yml`` (in that order) when ``METRICS_MAP`` is empty.
@@ -165,28 +165,30 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         once on the first call; the cache is sealed beforehand so subsequent
         scrapes do not retry and re-raise the same error. A failure on any
         single file in a multi-file ``METRICS_MAP`` discards results from
-        files loaded earlier in the same call — the cache lands as ``[]``,
-        not as a partial mapping.
+        files loaded earlier in the same call: the cache lands as ``[]``, not
+        as a partial mapping.
         """
         if self._file_metrics is not None:
             return self._file_metrics
 
         self._file_metrics = []
+        package_dir = self._get_package_dir()
         if not self.METRICS_MAP:
-            package_dir = self._get_package_dir()
             for candidate in (Path("metrics.yaml"), Path("metrics.yml")):
-                if (package_dir / candidate).is_file():
-                    self._file_metrics = [self._load_metrics_file(candidate)]
+                resolved = package_dir / candidate
+                if resolved.is_file():
+                    self._file_metrics = [self._load_metrics_file(resolved)]
                     break
         else:
             self._file_metrics = [
-                self._load_metrics_file(source.path) for source in self.METRICS_MAP if source.should_load(config)
+                self._load_metrics_file(package_dir / source.path)
+                for source in self.METRICS_MAP
+                if source.should_load(config)
             ]
 
         return self._file_metrics
 
-    def _load_metrics_file(self, path: Path) -> _RawMetricsConfig:
-        file_path = self._get_package_dir() / path
+    def _load_metrics_file(self, file_path: Path) -> _RawMetricsConfig:
         try:
             with open(file_path) as f:
                 data = yaml.safe_load(f)
