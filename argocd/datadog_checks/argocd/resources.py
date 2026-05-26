@@ -9,6 +9,7 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Callable
+from urllib.parse import urlparse
 
 if TYPE_CHECKING:
     from .check import ArgocdCheck
@@ -130,6 +131,7 @@ class ArgocdResourceCollector:
         self._max_resources: int = instance.get("max_resources_per_cycle", 10000)
         self._extra_paths: list[str] = list(instance.get("extra_redaction_paths") or [])
         self._auth_token: str | None = instance.get("generic_resources_auth_token")
+        self._instance_prefix: str = urlparse(self._endpoint).hostname or "" if self._endpoint else ""
 
     def collect(self) -> None:
         if not self._endpoint:
@@ -181,9 +183,12 @@ class ArgocdResourceCollector:
 
     def _emit_item(self, item: dict, spec: ResourceTypeSpec, *, seen_at: int, expire_at: int) -> None:
         try:
+            key = spec.key_builder(item)
+            if self._instance_prefix:
+                key = f"{self._instance_prefix}:{key}"
             self.check.submit_generic_resource(
                 type=spec.resource_type,
-                key=spec.key_builder(item),
+                key=key,
                 fields=item,
                 redact={
                     "paths": list(spec.paths) + self._extra_paths,

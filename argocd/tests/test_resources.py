@@ -79,9 +79,9 @@ def test_collect_emits_applications_clusters_and_repositories(aggregator, mock_h
         check._resource_collector.collect()
 
     by_type = {call.kwargs["type"]: call.kwargs for call in submit.call_args_list}
-    assert by_type["argocd_application"]["key"] == "https://kubernetes.default.svc:argocd:checkout"
-    assert by_type["argocd_cluster"]["key"] == "https://cluster-a.example"
-    assert by_type["argocd_repository"]["key"] == "https://github.com/team/repo"
+    assert by_type["argocd_application"]["key"] == "argocd.example.com:https://kubernetes.default.svc:argocd:checkout"
+    assert by_type["argocd_cluster"]["key"] == "argocd.example.com:https://cluster-a.example"
+    assert by_type["argocd_repository"]["key"] == "argocd.example.com:https://github.com/team/repo"
     for spec_type, redact_paths in (
         ("argocd_application", APPLICATION_REDACTION_PATHS),
         ("argocd_cluster", CLUSTER_REDACTION_PATHS),

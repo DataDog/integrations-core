@@ -44,9 +44,9 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         self._resource_collector = ArgocdResourceCollector(self)
 
     def check(self, instance):
-        super().check(instance)
         if self.instance.get("collect_genresources"):
             self._resource_collector.collect()
+        super().check(instance)
 
     def parse_config(self):
         endpoint_configs = [
@@ -104,7 +104,7 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         return argocd_cluster_connection_status_transformer
 
     def configure_additional_transformers(self):
-        endpoints = [key for key in self.instance.keys() if "_endpoint" in key]
+        endpoints = [key for key in self.instance.keys() if "_endpoint" in key and self.instance[key] in self.scrapers]
         for endpoint in endpoints:
             if endpoint == "app_controller_endpoint":
                 self.scrapers[self.instance[endpoint]].metric_transformer.add_custom_transformer(
