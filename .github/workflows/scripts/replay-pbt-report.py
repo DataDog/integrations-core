@@ -38,23 +38,24 @@ PRIVATE_KEY_TEXT_RE = re.compile(r"(?is)-----BEGIN [A-Z ]*PRIVATE KEY-----.*?---
 URL_CREDENTIAL_TEXT_RE = re.compile(r"(?i)(https?://)[^\s/@:]+:[^\s/@]+@")
 
 CATEGORY_DEFINITIONS = {
-    "passed": ("✅", "Passed", "All replay-PBT properties passed."),
-    "failed-before-replay-pbt": ("🧱", "Failed before replay-PBT", "Setup, cache probing/seeding, compare-check, or orchestration failed before property tests ran."),
-    "skipped-missing-cache": ("⏭️", "Skipped missing cache", "No suitable replay cache was restored and seeding was disabled."),
-    "ordering-only-nondeterminism": ("🔢", "Ordering-only nondeterminism", "Same content was emitted in a different order."),
-    "replay-nondeterminism": ("🧬", "Replay output changed", "Same fixture/ref produced genuinely different normalized outputs across repeated replay runs."),
-    "openmetrics-input-invariance": ("🔀", "OpenMetrics input invariance", "Changing semantically irrelevant Prometheus/OpenMetrics text changed emitted output."),
-    "json-input-invariance": ("🧾", "JSON input invariance", "Changing semantically irrelevant JSON formatting or key order changed emitted output."),
-    "metadata-contract": ("📋", "Metadata contract", "metadata.csv and emitted metrics/tags disagree."),
-    "asset-query-metadata": ("📊", "Asset query metadata", "Dashboard or monitor queries reference metrics missing from metadata.csv."),
-    "asset-query-replay-coverage": ("🧭", "Asset query replay coverage", "Dashboard or monitor query metrics/tags were not observed in this replay fixture."),
-    "openmetrics-coverage": ("📈", "OpenMetrics fixture coverage", "The replay fixture covers only part of the observed OpenMetrics or metadata surface."),
-    "tag-state-stability": ("🏷️", "Tag state stability", "Check-level tag state changed or grew across repeated readings."),
-    "invalid-metric-values": ("🧮", "Invalid metric values", "The check emitted non-finite or invalid metric values."),
-    "unsupported-negative": ("🚧", "Unsupported or negative fixture", "The target appears intentionally unsupported or uses a negative/error-path fixture."),
-    "replay-harness": ("🛠️", "Replay harness", "Replay framework or adapter behavior likely needs work."),
-    "other-failed": ("❓", "Other replay-PBT failure", "Failed during replay-PBT but did not match a known category."),
-    "unknown": ("❔", "Unknown", "No usable status was reported."),
+    "passed": ("✅", "Passed", "All Replay PBT checks passed."),
+    "failed-before-replay-pbt": ("🧱", "Setup or cache failed", "The job failed while preparing the target, restoring/seeding the cache, or running compare-check. Replay PBT did not run cleanly."),
+    "skipped-missing-cache": ("⏭️", "Not tested: missing cache", "No replay cache was available and cache seeding was disabled for this run."),
+    "ordering-only-nondeterminism": ("🔢", "Same output, different order", "The replay emitted the same data, but list ordering changed between runs."),
+    "replay-nondeterminism": ("🧬", "Replay output changed", "The same fixture and code emitted different normalized data between runs."),
+    "openmetrics-input-invariance": ("🔀", "OpenMetrics formatting changed output", "A semantically equivalent Prometheus/OpenMetrics text change affected emitted metrics."),
+    "json-input-invariance": ("🧾", "JSON formatting changed output", "A semantically equivalent JSON formatting or key-order change affected emitted metrics."),
+    "release-differential": ("🔁", "Output changed since latest release", "HEAD emits different normalized output than the latest released integration for the same replay fixture."),
+    "metadata-contract": ("📋", "Emitted metric metadata mismatch", "A metric emitted by the check is missing from metadata.csv or has a different declared type."),
+    "asset-query-metadata": ("📊", "Asset query references undocumented metric", "A dashboard or monitor query references a metric that is not documented in metadata.csv."),
+    "asset-query-replay-coverage": ("🧭", "Asset query not covered by fixture", "A dashboard or monitor query uses metrics or tags that this replay fixture did not emit."),
+    "openmetrics-coverage": ("📈", "Sparse OpenMetrics fixture", "The replay fixture covers only part of the observed OpenMetrics or metadata surface."),
+    "tag-state-stability": ("🏷️", "Tags changed between readings", "Check-level tag state changed, duplicated, or grew across repeated readings."),
+    "invalid-metric-values": ("🧮", "Invalid metric value", "The check emitted NaN, infinity, a negative monotonic count, or another invalid value."),
+    "unsupported-negative": ("🚧", "Unsupported or negative fixture", "The target appears intentionally unsupported for replay or uses an expected error-path fixture."),
+    "replay-harness": ("🛠️", "Replay harness issue", "The failure likely comes from adapter coverage, cache matching, fixture selection, or environment mirroring."),
+    "other-failed": ("❓", "Unclassified Replay PBT failure", "Replay PBT failed, but the report could not map it to a known category yet."),
+    "unknown": ("❔", "Unknown", "The job did not report enough information to classify the result."),
 }
 
 STATUS_DEFINITIONS = {
@@ -80,6 +81,10 @@ PROPERTY_DEFINITIONS = {
     "deterministic": (
         "Determinism",
         "Replay the same cached input twice. The check should emit the same normalized output both times.",
+    ),
+    "latest-release-diff": (
+        "Latest release differential",
+        "Compare HEAD with the latest released integration tag using the same replay fixture. Output changes should be reviewed as intentional or not.",
     ),
     "openmetrics-label-order": (
         "OpenMetrics label order",
@@ -154,22 +159,23 @@ PROPERTY_DEFINITIONS = {
 
 CATEGORY_NEXT_STEPS = {
     "passed": "No action needed for this target.",
-    "failed-before-replay-pbt": "Start with the setup or cache-seeding logs. The property tests did not get a clean chance to run.",
+    "failed-before-replay-pbt": "Open the setup/cache logs first. Fix the environment, cache restore, cache seeding, or compare-check failure before investigating properties.",
     "skipped-missing-cache": "Seed or restore a replay cache for this target, then rerun Replay PBT.",
-    "ordering-only-nondeterminism": "Normalize or sort the reported output collection, either in replay normalization or in the check output if the order has no semantic meaning.",
-    "replay-nondeterminism": "Inspect time, random values, state accumulation, process output, or replay adapter behavior.",
-    "openmetrics-input-invariance": "Compare the original and mutated OpenMetrics fixtures. If the mutation is semantically equivalent, inspect parser or integration assumptions about text formatting.",
-    "json-input-invariance": "Compare original and mutated JSON fixtures. If decoded JSON is equivalent, inspect code that may depend on formatting or key order.",
-    "metadata-contract": "Check metadata.csv against the emitted metric name/type. Add or fix metadata rows when the emitted metric is valid.",
-    "asset-query-metadata": "Inspect the listed dashboard/monitor query. Add missing metadata.csv rows or update the asset query if it references stale metrics.",
-    "asset-query-replay-coverage": "Treat this as a fixture coverage signal first. Check whether the replay fixture exercises the dashboard/monitor metric and tags.",
-    "openmetrics-coverage": "Use this as a coverage signal first. Check whether the fixture is sparse before treating it as a product bug.",
-    "tag-state-stability": "Look for checks that append to tag lists or mutable state on every reading instead of rebuilding tags per run.",
-    "invalid-metric-values": "Find the metric that emitted NaN, infinity, or an invalid count/rate value and guard or normalize the calculation.",
-    "unsupported-negative": "Confirm whether this target is intentionally unsupported for replay or uses an error-path fixture. If yes, mark it out of scope.",
-    "replay-harness": "This likely needs replay harness work: adapter coverage, cache matching, fixture selection, or environment mirroring.",
-    "other-failed": "Open the failed test names and short errors below, then classify the failure before treating it as an integration bug.",
-    "unknown": "The job did not report enough information. Check the workflow logs first.",
+    "ordering-only-nondeterminism": "Sort or canonicalize the affected output collection if order has no semantic meaning.",
+    "replay-nondeterminism": "Look for time, random values, process state, accumulated check state, or adapter output that changes between identical replays.",
+    "openmetrics-input-invariance": "Compare the original and mutated OpenMetrics fixtures. If the mutation is semantically equivalent, inspect parser or check assumptions about text formatting.",
+    "json-input-invariance": "Compare original and mutated JSON fixtures. If decoded JSON is equivalent, inspect code that depends on key order, whitespace, or string escaping.",
+    "release-differential": "Decide whether the output change is intentional. If yes, update metadata/assets/tests or note it in the PR; if not, inspect the added/removed output collections.",
+    "metadata-contract": "Check metadata.csv for the emitted metric name and type. Add/fix metadata when the emitted metric is valid.",
+    "asset-query-metadata": "Check the listed dashboard or monitor query. Add metadata.csv rows for valid metrics, or update stale asset queries.",
+    "asset-query-replay-coverage": "Treat this as fixture coverage first. Check whether the replay fixture should exercise the listed dashboard/monitor metric and tags.",
+    "openmetrics-coverage": "Treat this as fixture coverage first. If coverage should be higher, seed a richer fixture or inspect the OpenMetrics mapping.",
+    "tag-state-stability": "Look for checks that mutate tag lists or check attributes across readings instead of rebuilding tags per run.",
+    "invalid-metric-values": "Find the metric calculation that produced the invalid value and guard, default, or normalize it.",
+    "unsupported-negative": "Confirm whether replay is intentionally unsupported or the fixture is an expected error path; if so, mark it out of scope.",
+    "replay-harness": "Investigate replay adapter coverage, cache matching, fixture selection, or environment mirroring before changing integration behavior.",
+    "other-failed": "Open the failed checks and short errors below, then decide whether this is an integration issue or a new report category.",
+    "unknown": "Open the workflow logs first; the job did not produce enough structured data for classification.",
 }
 
 
@@ -244,6 +250,10 @@ TEST_DEFINITIONS = {
     "test_openmetrics_replay_coverage": (
         "OpenMetrics replay coverage",
         "The replay fixture did not cover enough of the observed OpenMetrics surface or metadata surface.",
+    ),
+    "test_latest_release_output_matches_target": (
+        "Output matches latest release",
+        "HEAD should emit the same normalized output as the latest released integration for the same replay fixture, unless the change is intentional.",
     ),
     "test_cached_replay_is_deterministic_for_same_ref": (
         "Replay is deterministic",
@@ -341,6 +351,8 @@ def classify(row: dict[str, Any]) -> str:
     if not haystack:
         return "unknown" if not status else "other-failed"
 
+    if "latest-release-diff" in haystack or "latest release" in haystack or "output changed compared to the latest release" in haystack:
+        return "release-differential"
     if "differs only by ordering" in haystack:
         return "ordering-only-nondeterminism"
     if "test_cached_replay_is_deterministic_for_same_ref" in haystack:
@@ -633,8 +645,18 @@ def asset_finding_message(finding: dict[str, Any]) -> str:
     return message
 
 
+
+
+def finding_source_label(finding: dict[str, Any]) -> str:
+    if finding.get("asset_type"):
+        return asset_type_label(finding.get("asset_type"))
+    if finding.get("collection"):
+        return f"Output: {finding.get('collection')}"
+    return "Output"
+
+
 def finding_subject(finding: dict[str, Any]) -> str:
-    return str(finding.get("metric") or finding.get("tag_key") or finding.get("query") or "")
+    return str(finding.get("metric") or finding.get("tag_key") or finding.get("collection") or finding.get("query") or "")
 
 
 def target_url(row: dict[str, Any]) -> str:
@@ -656,6 +678,22 @@ def target_link_html(row: dict[str, Any]) -> str:
         label = "job" if row.get("job_url") else "run"
         return f"<a href='{html.escape(url)}'><code>{target}</code></a> <span class='tiny'>{label}</span>"
     return f"<code>{target}</code>"
+
+
+
+
+def group_context_md(group: dict[str, Any]) -> str:
+    parts = []
+    if group.get("asset_type"):
+        parts.append(asset_type_label(group.get("asset_type")))
+    parts.append(f"`{md_escape(group.get('property', ''))}`")
+    return " · ".join(parts)
+
+
+def group_context_html(group: dict[str, Any]) -> str:
+    if not group.get("asset_type"):
+        return ""
+    return f" <span class='badge'>{html.escape(asset_type_label(group.get('asset_type')))}</span>"
 
 
 def group_actionable_findings(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -819,7 +857,7 @@ def build_individual_target_markdown(
         for finding in target_findings[:12]:
             subject = finding_subject(finding)
             lines.append(
-                f"| `{md_escape(finding.get('level', ''))}` | {md_escape(asset_type_label(finding.get('asset_type', '')))} | {property_display_md(finding.get('property', ''))} | `{md_escape(subject)}` | {md_escape(finding.get('display_message') or finding.get('message', ''))} |"
+                f"| `{md_escape(finding.get('level', ''))}` | {md_escape(finding_source_label(finding))} | {property_display_md(finding.get('property', ''))} | `{md_escape(subject)}` | {md_escape(finding.get('display_message') or finding.get('message', ''))} |"
             )
         if len(target_findings) > 12:
             lines.append(f"| _… {len(target_findings) - 12} more_ | | | | See `findings.tsv`. |")
@@ -1011,7 +1049,7 @@ def build_markdown(
             if group["count"] > len(group["subjects"][:5]):
                 examples += f", +{group['count'] - len(group['subjects'][:5])} more"
             lines.append(
-                f"| {target_link_md(group)} | **{md_escape(group['property_label'])}**<br/><sub>{md_escape(group.get('asset_type_label', 'Asset'))} · `{md_escape(group['property'])}`</sub> | {group['count']} | {examples} | {md_escape(group['message'])} |"
+                f"| {target_link_md(group)} | **{md_escape(group['property_label'])}**<br/><sub>{group_context_md(group)}</sub> | {group['count']} | {examples} | {md_escape(group['message'])} |"
             )
         if len(groups) > 12:
             lines.append(f"\n_… {len(groups) - 12} more grouped finding rows in `report.html` and `findings.tsv`._")
@@ -1193,7 +1231,7 @@ def build_html(
     )
     finding_cards = "".join(
         "<article class='finding'>"
-        f"<div><strong>{esc(group['property_label'])}</strong> <span class='badge'>{esc(group.get('asset_type_label', 'Asset'))}</span> {target_link_html(group)}</div>"
+        f"<div><strong>{esc(group['property_label'])}</strong> {group_context_html(group)} {target_link_html(group)}</div>"
         f"<p>{esc(group['message'])}</p>"
         f"<p class='muted'>{esc(group['property_description'])}</p>"
         f"<p><span class='badge'>{group['count']} repeated row(s)</span> <code>{esc(group['path'])}</code></p>"
@@ -1355,7 +1393,7 @@ def main() -> None:
     write_tsv(args.out_dir / "summary.tsv", [summary], list(summary.keys()))
     write_tsv(args.out_dir / "targets.tsv", rows, ["status", "category", "category_label", "integration", "environment", "target", "fixture_ref", "target_ref", "failing_property_count", "summary"])
     write_tsv(args.out_dir / "failure-categories.tsv", categories, ["category", "label", "count", "description"])
-    write_tsv(args.out_dir / "findings.tsv", findings, ["level", "property", "check", "integration", "environment", "target", "asset_type", "metric", "tag_key", "path", "message", "display_message", "query"])
+    write_tsv(args.out_dir / "findings.tsv", findings, ["level", "property", "check", "integration", "environment", "target", "asset_type", "collection", "metric", "tag_key", "path", "message", "display_message", "query"])
     write_tsv(args.out_dir / "coverage-summary.tsv", coverages, ["property", "integration", "environment", "target", "endpoint_count", "endpoint_emitted_count", "endpoint_missing_count", "endpoint_to_emitted_coverage", "metadata_count", "metadata_emitted_count", "metadata_unemitted_count", "metadata_to_emitted_coverage"])
 
     write_zip(args.zip, args.out_dir)

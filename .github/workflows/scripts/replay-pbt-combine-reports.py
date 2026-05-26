@@ -210,7 +210,7 @@ def main() -> None:
     report.write_tsv(args.out_dir / 'summary.tsv', [summary], [k for k in summary if k != 'shard_runs'])
     report.write_tsv(args.out_dir / 'targets.tsv', targets, ['status', 'category', 'category_label', 'integration', 'environment', 'target', 'fixture_ref', 'target_ref', 'failing_property_count', 'summary', 'run_id', 'run_url', 'job_url'])
     report.write_tsv(args.out_dir / 'failure-categories.tsv', categories, ['category', 'label', 'count', 'description'])
-    report.write_tsv(args.out_dir / 'findings.tsv', findings, ['level', 'property', 'check', 'integration', 'environment', 'target', 'asset_type', 'metric', 'tag_key', 'path', 'message', 'display_message', 'query', 'run_id', 'run_url', 'job_url'])
+    report.write_tsv(args.out_dir / 'findings.tsv', findings, ['level', 'property', 'check', 'integration', 'environment', 'target', 'asset_type', 'collection', 'metric', 'tag_key', 'path', 'message', 'display_message', 'query', 'run_id', 'run_url', 'job_url'])
     report.write_tsv(args.out_dir / 'coverage-summary.tsv', coverages, ['property', 'integration', 'environment', 'target', 'endpoint_count', 'endpoint_emitted_count', 'endpoint_missing_count', 'endpoint_to_emitted_coverage', 'metadata_count', 'metadata_emitted_count', 'metadata_unemitted_count', 'metadata_to_emitted_coverage', 'run_id', 'run_url', 'job_url'])
     report.write_zip(args.zip, args.out_dir)
     print(markdown)

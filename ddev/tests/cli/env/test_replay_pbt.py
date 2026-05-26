@@ -81,6 +81,7 @@ def _run_compare_check_cache(
     context: ReplayPBTContext,
     cache: Path | str,
     artifacts: Path,
+    allow_diff: bool = False,
 ) -> dict:
     ddev_executable = Path(sys.executable).with_name('ddev')
     command = [
@@ -113,9 +114,11 @@ def _run_compare_check_cache(
         command.extend(['--replay-env', context.replay_env])
 
     result = subprocess.run(command, cwd=Path.cwd(), text=True, capture_output=True)
-    assert result.returncode == 0, _format_compare_check_output(result)
-
     diff_path = artifacts / 'diff.json'
+    if allow_diff and diff_path.is_file():
+        return json.loads(diff_path.read_text())
+
+    assert result.returncode == 0, _format_compare_check_output(result)
     assert diff_path.is_file(), f'compare-check did not write {diff_path}\n{_format_compare_check_output(result)}'
     return json.loads(diff_path.read_text())
 
@@ -128,8 +131,73 @@ def _read_normalized(run_dir: Path) -> dict:
     return json.loads((run_dir / 'replay.normalized.json').read_text())
 
 
+def _collection_change_counts(diff: dict) -> dict[str, dict[str, int]]:
+    collections = diff.get('collections') or {}
+    counts = {}
+    for collection in DIFF_OUTPUT_COLLECTIONS:
+        collection_diff = collections.get(collection) or {}
+        added = len(collection_diff.get('added') or [])
+        removed = len(collection_diff.get('removed') or [])
+        if added or removed:
+            counts[collection] = {'added': added, 'removed': removed}
+    return counts
+
+
+def _release_diff_findings(diff: dict) -> list[ReplayPBTFinding]:
+    findings = []
+    for collection, counts in _collection_change_counts(diff).items():
+        total = counts['added'] + counts['removed']
+        findings.append(
+            ReplayPBTFinding(
+                level='error',
+                check='latest-release-diff',
+                message=f'Output changed compared to the latest release for {collection}.',
+                collection=collection,
+                metric=f'{total} change(s): +{counts["added"]} -{counts["removed"]}',
+            )
+        )
+    return findings
+
+
+def _write_release_diff_artifacts(property_dir: Path, diff: dict, *, context: ReplayPBTContext) -> None:
+    property_dir.mkdir(parents=True, exist_ok=True)
+    summary = {
+        'changed': diff.get('changed'),
+        'incomplete': diff.get('incomplete'),
+        'record_ref': context.fixture_ref,
+        'target_ref': context.target_ref,
+        'collections': _collection_change_counts(diff),
+    }
+    (property_dir / 'release-diff-summary.json').write_text(json.dumps(summary, indent=2, sort_keys=True) + '\n')
+    findings = _release_diff_findings(diff)
+    _write_findings(property_dir, findings)
+    write_property_result(
+        property_dir,
+        property_name='latest-release-diff',
+        artifacts=[
+            {'kind': 'summary', 'path': 'release-diff-summary.json', 'format': 'json'},
+            {'kind': 'findings', 'path': 'findings.json', 'format': 'json'},
+            {'kind': 'findings-markdown', 'path': 'warnings.md', 'format': 'markdown'},
+        ],
+        counts={
+            'errors': sum(1 for finding in findings if finding.level == 'error'),
+            'warnings': sum(1 for finding in findings if finding.level == 'warning'),
+        },
+    )
+
+
 RATE = 1
 MONOTONIC_COUNT = 3
+DIFF_OUTPUT_COLLECTIONS = (
+    'metrics',
+    'service_checks',
+    'events',
+    'metadata',
+    'external_tags',
+    'persistent_cache',
+    'agent_logs',
+    'telemetry',
+)
 
 
 def _assert_normalized_output_contract(output: dict[str, Any]) -> None:
@@ -319,6 +387,7 @@ class ReplayPBTFinding:
     metric: str | None = None
     tag_key: str | None = None
     asset_type: str | None = None
+    collection: str | None = None
 
     def as_dict(self) -> dict[str, str | None]:
         return {
@@ -330,6 +399,7 @@ class ReplayPBTFinding:
             'metric': self.metric,
             'tag_key': self.tag_key,
             'asset_type': self.asset_type,
+            'collection': self.collection,
         }
 
 
@@ -1403,6 +1473,31 @@ def test_cached_replay_is_deterministic_for_same_ref(replay_pbt_context: ReplayP
     assert first_diff['changed'] is False
     assert second_diff['changed'] is False
     _assert_normalized_outputs_match(_read_normalized(first), _read_normalized(second))
+
+
+@settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@given(validation=st.sampled_from(['latest-release-diff']))
+def test_latest_release_output_matches_target(replay_pbt_context: ReplayPBTContext, validation: str):
+    # Differential property: replay the same cached fixture through the latest
+    # released integration code and through the target ref. Any output diff is a
+    # release-to-PR behavior change that should be reviewed as intentional or not.
+    property_name = 'latest-release-diff'
+    _skip_unselected(replay_pbt_context, property_name)
+    assert validation == 'latest-release-diff'
+
+    if replay_pbt_context.fixture_ref == replay_pbt_context.target_ref:
+        pytest.skip('latest-release-diff requires a distinct latest release tag and target ref.')
+
+    property_dir = replay_pbt_context.artifacts / property_name
+    diff = _run_compare_check_cache(
+        context=replay_pbt_context,
+        cache=replay_pbt_context.cache,
+        artifacts=property_dir,
+        allow_diff=True,
+    )
+    _write_release_diff_artifacts(property_dir, diff, context=replay_pbt_context)
+
+    assert diff['changed'] is False, 'Output changed compared to the latest release; review release diff findings.'
 
 
 @settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])

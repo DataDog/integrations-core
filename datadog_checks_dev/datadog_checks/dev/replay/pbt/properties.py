@@ -5,6 +5,7 @@ from __future__ import annotations
 
 PROPERTIES = (
     'deterministic',
+    'latest-release-diff',
     'openmetrics-label-order',
     'openmetrics-comments-blank-lines',
     'openmetrics-final-newline',
