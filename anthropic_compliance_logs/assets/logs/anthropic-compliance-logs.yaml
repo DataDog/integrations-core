@@ -305,20 +305,10 @@ pipeline:
       filter:
         query: "@ocsf.metadata.event_code:(claude_user_settings_updated OR org_user_deleted OR org_user_invite_sent OR org_user_invite_accepted OR platform_api_key_created OR platform_api_key_updated)"
       processors:
-        - type: attribute-remapper
-          name: Map `created_at` to `ocsf.time`
-          enabled: true
-          sources:
-            - created_at
-          sourceType: attribute
-          target: ocsf.time
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
         - type: grok-parser
-          name: Parse ocsf.time
+          name: Parse `created_at` to `ocsf.time`
           enabled: true
-          source: ocsf.time
+          source: created_at
           samples:
             - "2026-05-22T15:21:54.358426Z"
           grok:
@@ -517,20 +507,10 @@ pipeline:
           template: "Claude SSO"
           target: ocsf.service.name
           replaceMissing: false
-        - type: attribute-remapper
-          name: Map `created_at` to `ocsf.time`
-          enabled: true
-          sources:
-            - created_at
-          sourceType: attribute
-          target: ocsf.time
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
         - type: grok-parser
-          name: Parse ocsf.time
+          name: Parse `created_at` to `ocsf.time`
           enabled: true
-          source: ocsf.time
+          source: created_at
           samples:
             - "2026-05-22T15:21:54.358426Z"
           grok:
@@ -758,20 +738,10 @@ pipeline:
       filter:
         query: "@ocsf.metadata.event_code:(role_assignment_granted OR role_assignment_revoked)"
       processors:
-        - type: attribute-remapper
-          name: Map `created_at` to `ocsf.time`
-          enabled: true
-          sources:
-            - created_at
-          sourceType: attribute
-          target: ocsf.time
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
         - type: grok-parser
-          name: Parse ocsf.time
+          name: Parse `created_at` to `ocsf.time`
           enabled: true
-          source: ocsf.time
+          source: created_at
           samples:
             - "2026-05-22T15:21:54.358426Z"
           grok:
@@ -974,20 +944,10 @@ pipeline:
       filter:
         query: "@ocsf.metadata.event_code:(claude_chat_created OR claude_chat_viewed OR claude_chat_updated OR claude_chat_deleted OR claude_project_created OR claude_project_viewed OR claude_file_uploaded OR claude_file_viewed OR claude_project_document_uploaded OR claude_project_file_uploaded OR claude_artifact_viewed OR claude_skill_created OR claude_skill_replaced OR org_users_listed OR platform_usage_report_messages_viewed OR platform_usage_report_claude_code_viewed)"
       processors:
-        - type: attribute-remapper
-          name: Map `created_at` to `ocsf.time`
-          enabled: true
-          sources:
-            - created_at
-          sourceType: attribute
-          target: ocsf.time
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
         - type: grok-parser
-          name: Parse ocsf.time
+          name: Parse `created_at` to `ocsf.time`
           enabled: true
-          source: ocsf.time
+          source: created_at
           samples:
             - "2026-05-22T15:21:54.358426Z"
           grok:
@@ -1174,20 +1134,10 @@ pipeline:
       filter:
         query: "@ocsf.metadata.event_code:compliance_api_accessed"
       processors:
-        - type: attribute-remapper
-          name: Map `created_at` to `ocsf.time`
-          enabled: true
-          sources:
-            - created_at
-          sourceType: attribute
-          target: ocsf.time
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
         - type: grok-parser
-          name: Parse ocsf.time
+          name: Parse `created_at` to `ocsf.time`
           enabled: true
-          source: ocsf.time
+          source: created_at
           samples:
             - "2026-05-22T15:21:54.358426Z"
           grok:
