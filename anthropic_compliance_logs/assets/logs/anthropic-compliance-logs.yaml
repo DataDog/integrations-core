@@ -297,14 +297,16 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: true
-    - type: pipeline
-      name: OCSF sub pipeline for class Account Change [3001]
-      enabled: true
-      ocsf:
-        isOcsf: true
-      filter:
-        query: "@ocsf.metadata.event_code:(claude_user_settings_updated OR org_user_deleted OR org_user_invite_sent OR org_user_invite_accepted OR platform_api_key_created OR platform_api_key_updated)"
-      processors:
+        - type: attribute-remapper
+          name: Map `created_at` to `ocsf.metadata.original_time`
+          enabled: true
+          sources:
+            - created_at
+          sourceType: attribute
+          target: ocsf.metadata.original_time
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
         - type: grok-parser
           name: Parse `created_at` to `ocsf.time`
           enabled: true
@@ -317,6 +319,14 @@ pipeline:
               parsing_time %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'"):ocsf.time}
               parsing_time_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"):ocsf.time}
               parsing_time_s %{date("yyyy-MM-dd'T'HH:mm:ss'Z'"):ocsf.time}
+    - type: pipeline
+      name: OCSF sub pipeline for class Account Change [3001]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@ocsf.metadata.event_code:(claude_user_settings_updated OR org_user_deleted OR org_user_invite_sent OR org_user_invite_accepted OR platform_api_key_created OR platform_api_key_updated)"
+      processors:
         - type: schema-processor
           name: Apply OCSF schema for 3001
           enabled: true
@@ -364,9 +374,9 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `created_at` to `ocsf.metadata.original_time`
+              name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
               sources:
-                - created_at
+                - ocsf.metadata.original_time
               target: ocsf.metadata.original_time
               preserveSource: true
               overrideOnConflict: true
@@ -507,18 +517,6 @@ pipeline:
           template: "Claude SSO"
           target: ocsf.service.name
           replaceMissing: false
-        - type: grok-parser
-          name: Parse `created_at` to `ocsf.time`
-          enabled: true
-          source: created_at
-          samples:
-            - "2026-05-22T15:21:54.358426Z"
-          grok:
-            supportRules: ""
-            matchRules: |
-              parsing_time %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'"):ocsf.time}
-              parsing_time_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"):ocsf.time}
-              parsing_time_s %{date("yyyy-MM-dd'T'HH:mm:ss'Z'"):ocsf.time}
         - type: schema-processor
           name: Apply OCSF schema for 3002
           enabled: true
@@ -573,9 +571,9 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `created_at` to `ocsf.metadata.original_time`
+              name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
               sources:
-                - created_at
+                - ocsf.metadata.original_time
               target: ocsf.metadata.original_time
               preserveSource: true
               overrideOnConflict: true
@@ -815,9 +813,9 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `created_at` to `ocsf.metadata.original_time`
+              name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
               sources:
-                - created_at
+                - ocsf.metadata.original_time
               target: ocsf.metadata.original_time
               preserveSource: true
               overrideOnConflict: true
@@ -944,18 +942,6 @@ pipeline:
       filter:
         query: "@ocsf.metadata.event_code:(claude_chat_created OR claude_chat_viewed OR claude_chat_updated OR claude_chat_deleted OR claude_project_created OR claude_project_viewed OR claude_file_uploaded OR claude_file_viewed OR claude_project_document_uploaded OR claude_project_file_uploaded OR claude_artifact_viewed OR claude_skill_created OR claude_skill_replaced OR org_users_listed OR platform_usage_report_messages_viewed OR platform_usage_report_claude_code_viewed)"
       processors:
-        - type: grok-parser
-          name: Parse `created_at` to `ocsf.time`
-          enabled: true
-          source: created_at
-          samples:
-            - "2026-05-22T15:21:54.358426Z"
-          grok:
-            supportRules: ""
-            matchRules: |
-              parsing_time %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'"):ocsf.time}
-              parsing_time_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"):ocsf.time}
-              parsing_time_s %{date("yyyy-MM-dd'T'HH:mm:ss'Z'"):ocsf.time}
         - type: schema-processor
           name: Apply OCSF schema for 6001
           enabled: true
@@ -1003,9 +989,9 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `created_at` to `ocsf.metadata.original_time`
+              name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
               sources:
-                - created_at
+                - ocsf.metadata.original_time
               target: ocsf.metadata.original_time
               preserveSource: true
               overrideOnConflict: true
@@ -1134,18 +1120,6 @@ pipeline:
       filter:
         query: "@ocsf.metadata.event_code:compliance_api_accessed"
       processors:
-        - type: grok-parser
-          name: Parse `created_at` to `ocsf.time`
-          enabled: true
-          source: created_at
-          samples:
-            - "2026-05-22T15:21:54.358426Z"
-          grok:
-            supportRules: ""
-            matchRules: |
-              parsing_time %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'"):ocsf.time}
-              parsing_time_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"):ocsf.time}
-              parsing_time_s %{date("yyyy-MM-dd'T'HH:mm:ss'Z'"):ocsf.time}
         - type: schema-processor
           name: Apply OCSF schema for 6003
           enabled: true
@@ -1193,9 +1167,9 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `created_at` to `ocsf.metadata.original_time`
+              name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
               sources:
-                - created_at
+                - ocsf.metadata.original_time
               target: ocsf.metadata.original_time
               preserveSource: true
               overrideOnConflict: true
