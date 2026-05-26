@@ -5,17 +5,17 @@ tests:
     {
       "actor" : {
         "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
         "ip_address" : "2001:db8::1",
         "type" : "user_actor",
-        "user_agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36",
-        "user_id" : "user_01EXAMPLEUSERID0000000000"
+        "user_agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"
       },
       "claude_artifact_id" : "claude_artifact_01EXAMPLEARTIFACT0",
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
       "created_at" : "2026-05-22T15:25:13.701734Z",
       "id" : "activity_01EXAMPLEACTIVITY0000000",
-      "organization_id" : "org_01EXAMPLEORGID00000000000",
-      "type" : "claude_artifact_viewed",
-      "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+      "type" : "claude_artifact_viewed"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -96,39 +96,39 @@ tests:
       {
         "actor" : {
           "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
           "ip_address" : "2001:db8::1",
           "type" : "user_actor",
-          "user_agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36",
-          "user_id" : "user_01EXAMPLEUSERID0000000000"
+          "user_agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"
         },
         "claude_artifact_id" : "claude_artifact_01EXAMPLEARTIFACT0",
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
         "created_at" : "2026-05-22T15:25:13.701734Z",
         "id" : "activity_01EXAMPLEACTIVITY0000000",
-        "organization_id" : "org_01EXAMPLEORGID00000000000",
-        "type" : "claude_artifact_viewed",
-        "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+        "type" : "claude_artifact_viewed"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463513701
+
  -
   sample: |-
     {
       "actor" : {
         "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
         "ip_address" : "192.0.2.1",
         "type" : "user_actor",
-        "user_agent" : "Mozilla/5.0 Claude/1.3883.0",
-        "user_id" : "user_01EXAMPLEUSERID0000000000"
+        "user_agent" : "Mozilla/5.0 Claude/1.3883.0"
       },
-      "claude_chat_id" : "claude_chat_01EXAMPLECHATID000000",
-      "claude_project_id" : null,
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
       "created_at" : "2026-05-22T15:21:54.358426Z",
       "id" : "activity_01EXAMPLEACTIVITY0000000",
-      "organization_id" : "org_01EXAMPLEORGID00000000000",
       "type" : "claude_chat_created",
-      "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+      "claude_chat_id" : "claude_chat_01EXAMPLECHATID000000"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -200,40 +200,39 @@ tests:
       {
         "actor" : {
           "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
           "ip_address" : "192.0.2.1",
           "type" : "user_actor",
-          "user_agent" : "Mozilla/5.0 Claude/1.3883.0",
-          "user_id" : "user_01EXAMPLEUSERID0000000000"
+          "user_agent" : "Mozilla/5.0 Claude/1.3883.0"
         },
-        "claude_chat_id" : "claude_chat_01EXAMPLECHATID000000",
-        "claude_project_id" : null,
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
         "created_at" : "2026-05-22T15:21:54.358426Z",
         "id" : "activity_01EXAMPLEACTIVITY0000000",
-        "organization_id" : "org_01EXAMPLEORGID00000000000",
         "type" : "claude_chat_created",
-        "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+        "claude_chat_id" : "claude_chat_01EXAMPLECHATID000000"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463314358
+
  -
   sample: |-
     {
       "actor" : {
         "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
         "ip_address" : "2001:db8::1",
         "type" : "user_actor",
-        "user_agent" : "Mozilla/5.0 Claude/1.5354.0",
-        "user_id" : "user_01EXAMPLEUSERID0000000000"
+        "user_agent" : "Mozilla/5.0 Claude/1.5354.0"
       },
-      "claude_chat_id" : "claude_chat_01EXAMPLECHATID000000",
-      "claude_project_id" : null,
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
       "created_at" : "2026-05-22T15:21:03.415347Z",
       "id" : "activity_01EXAMPLEACTIVITY0000000",
-      "organization_id" : "org_01EXAMPLEORGID00000000000",
       "type" : "claude_chat_deleted",
-      "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+      "claude_chat_id" : "claude_chat_01EXAMPLECHATID000000"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -305,40 +304,40 @@ tests:
       {
         "actor" : {
           "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
           "ip_address" : "2001:db8::1",
           "type" : "user_actor",
-          "user_agent" : "Mozilla/5.0 Claude/1.5354.0",
-          "user_id" : "user_01EXAMPLEUSERID0000000000"
+          "user_agent" : "Mozilla/5.0 Claude/1.5354.0"
         },
-        "claude_chat_id" : "claude_chat_01EXAMPLECHATID000000",
-        "claude_project_id" : null,
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
         "created_at" : "2026-05-22T15:21:03.415347Z",
         "id" : "activity_01EXAMPLEACTIVITY0000000",
-        "organization_id" : "org_01EXAMPLEORGID00000000000",
         "type" : "claude_chat_deleted",
-        "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+        "claude_chat_id" : "claude_chat_01EXAMPLECHATID000000"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463263415
+
  -
   sample: |-
     {
       "actor" : {
         "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
         "ip_address" : "2001:db8::1",
         "type" : "user_actor",
-        "user_agent" : "Mozilla/5.0",
-        "user_id" : "user_01EXAMPLEUSERID0000000000"
+        "user_agent" : "Mozilla/5.0"
       },
-      "claude_chat_id" : "claude_chat_01EXAMPLECHATID000000",
       "claude_project_id" : "claude_proj_01EXAMPLEPROJECT00000",
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
       "created_at" : "2026-05-22T15:21:44.621308Z",
       "id" : "activity_01EXAMPLEACTIVITY0000000",
-      "organization_id" : "org_01EXAMPLEORGID00000000000",
       "type" : "claude_chat_updated",
-      "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+      "claude_chat_id" : "claude_chat_01EXAMPLECHATID000000"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -411,40 +410,40 @@ tests:
       {
         "actor" : {
           "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
           "ip_address" : "2001:db8::1",
           "type" : "user_actor",
-          "user_agent" : "Mozilla/5.0",
-          "user_id" : "user_01EXAMPLEUSERID0000000000"
+          "user_agent" : "Mozilla/5.0"
         },
-        "claude_chat_id" : "claude_chat_01EXAMPLECHATID000000",
         "claude_project_id" : "claude_proj_01EXAMPLEPROJECT00000",
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
         "created_at" : "2026-05-22T15:21:44.621308Z",
         "id" : "activity_01EXAMPLEACTIVITY0000000",
-        "organization_id" : "org_01EXAMPLEORGID00000000000",
         "type" : "claude_chat_updated",
-        "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+        "claude_chat_id" : "claude_chat_01EXAMPLECHATID000000"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463304621
+
  -
   sample: |-
     {
       "actor" : {
         "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
         "ip_address" : "2001:db8::1",
         "type" : "user_actor",
-        "user_agent" : "Mozilla/5.0",
-        "user_id" : "user_01EXAMPLEUSERID0000000000"
+        "user_agent" : "Mozilla/5.0"
       },
-      "claude_chat_id" : "claude_chat_01EXAMPLECHATID000000",
-      "claude_project_id" : null,
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
       "created_at" : "2026-05-22T15:21:53.556370Z",
       "id" : "activity_01EXAMPLEACTIVITY0000000",
-      "organization_id" : "org_01EXAMPLEORGID00000000000",
       "type" : "claude_chat_viewed",
-      "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+      "claude_chat_id" : "claude_chat_01EXAMPLECHATID000000"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -516,42 +515,40 @@ tests:
       {
         "actor" : {
           "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
           "ip_address" : "2001:db8::1",
           "type" : "user_actor",
-          "user_agent" : "Mozilla/5.0",
-          "user_id" : "user_01EXAMPLEUSERID0000000000"
+          "user_agent" : "Mozilla/5.0"
         },
-        "claude_chat_id" : "claude_chat_01EXAMPLECHATID000000",
-        "claude_project_id" : null,
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
         "created_at" : "2026-05-22T15:21:53.556370Z",
         "id" : "activity_01EXAMPLEACTIVITY0000000",
-        "organization_id" : "org_01EXAMPLEORGID00000000000",
         "type" : "claude_chat_viewed",
-        "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+        "claude_chat_id" : "claude_chat_01EXAMPLECHATID000000"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463313556
+
  -
   sample: |-
     {
       "actor" : {
         "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
         "ip_address" : "2001:db8::1",
         "type" : "user_actor",
-        "user_agent" : "Mozilla/5.0",
-        "user_id" : "user_01EXAMPLEUSERID0000000000"
+        "user_agent" : "Mozilla/5.0"
       },
-      "claude_chat_id" : null,
-      "claude_file_id" : "claude_file_01EXAMPLEFILEID000000",
-      "claude_project_id" : null,
-      "created_at" : "2026-05-22T15:21:32.702968Z",
       "filename" : "example-image.png",
-      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "claude_file_id" : "claude_file_01EXAMPLEFILEID000000",
       "organization_id" : "org_01EXAMPLEORGID00000000000",
-      "type" : "claude_file_uploaded",
-      "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "created_at" : "2026-05-22T15:21:32.702968Z",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "claude_file_uploaded"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -625,44 +622,41 @@ tests:
       {
         "actor" : {
           "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
           "ip_address" : "2001:db8::1",
           "type" : "user_actor",
-          "user_agent" : "Mozilla/5.0",
-          "user_id" : "user_01EXAMPLEUSERID0000000000"
+          "user_agent" : "Mozilla/5.0"
         },
-        "claude_chat_id" : null,
-        "claude_file_id" : "claude_file_01EXAMPLEFILEID000000",
-        "claude_project_id" : null,
-        "created_at" : "2026-05-22T15:21:32.702968Z",
         "filename" : "example-image.png",
-        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "claude_file_id" : "claude_file_01EXAMPLEFILEID000000",
         "organization_id" : "org_01EXAMPLEORGID00000000000",
-        "type" : "claude_file_uploaded",
-        "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "created_at" : "2026-05-22T15:21:32.702968Z",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "claude_file_uploaded"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463292702
+
  -
   sample: |-
     {
       "actor" : {
         "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
         "ip_address" : "192.0.2.1",
         "type" : "user_actor",
-        "user_agent" : "Mozilla/5.0 Claude/1.3883.0",
-        "user_id" : "user_01EXAMPLEUSERID0000000000"
+        "user_agent" : "Mozilla/5.0 Claude/1.3883.0"
       },
-      "claude_artifact_id" : null,
-      "claude_file_id" : "claude_file_01EXAMPLEFILEID000000",
-      "claude_project_id" : null,
-      "created_at" : "2026-05-22T15:21:50.616332Z",
       "filename" : "example-screenshot.png",
-      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "claude_file_id" : "claude_file_01EXAMPLEFILEID000000",
       "organization_id" : "org_01EXAMPLEORGID00000000000",
-      "type" : "claude_file_viewed",
-      "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "created_at" : "2026-05-22T15:21:50.616332Z",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "claude_file_viewed"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -736,41 +730,40 @@ tests:
       {
         "actor" : {
           "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
           "ip_address" : "192.0.2.1",
           "type" : "user_actor",
-          "user_agent" : "Mozilla/5.0 Claude/1.3883.0",
-          "user_id" : "user_01EXAMPLEUSERID0000000000"
+          "user_agent" : "Mozilla/5.0 Claude/1.3883.0"
         },
-        "claude_artifact_id" : null,
-        "claude_file_id" : "claude_file_01EXAMPLEFILEID000000",
-        "claude_project_id" : null,
-        "created_at" : "2026-05-22T15:21:50.616332Z",
         "filename" : "example-screenshot.png",
-        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "claude_file_id" : "claude_file_01EXAMPLEFILEID000000",
         "organization_id" : "org_01EXAMPLEORGID00000000000",
-        "type" : "claude_file_viewed",
-        "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "created_at" : "2026-05-22T15:21:50.616332Z",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "claude_file_viewed"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463310616
+
  -
   sample: |-
     {
       "actor" : {
         "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
         "ip_address" : "2001:db8::1",
         "type" : "user_actor",
-        "user_agent" : "Mozilla/5.0",
-        "user_id" : "user_01EXAMPLEUSERID0000000000"
+        "user_agent" : "Mozilla/5.0"
       },
       "claude_project_id" : "claude_proj_01EXAMPLEPROJECT00000",
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
       "created_at" : "2026-05-22T15:21:10.594873Z",
       "id" : "activity_01EXAMPLEACTIVITY0000000",
-      "organization_id" : "org_01EXAMPLEORGID00000000000",
-      "type" : "claude_project_created",
-      "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+      "type" : "claude_project_created"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -842,40 +835,41 @@ tests:
       {
         "actor" : {
           "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
           "ip_address" : "2001:db8::1",
           "type" : "user_actor",
-          "user_agent" : "Mozilla/5.0",
-          "user_id" : "user_01EXAMPLEUSERID0000000000"
+          "user_agent" : "Mozilla/5.0"
         },
         "claude_project_id" : "claude_proj_01EXAMPLEPROJECT00000",
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
         "created_at" : "2026-05-22T15:21:10.594873Z",
         "id" : "activity_01EXAMPLEACTIVITY0000000",
-        "organization_id" : "org_01EXAMPLEORGID00000000000",
-        "type" : "claude_project_created",
-        "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+        "type" : "claude_project_created"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463270594
+
  -
   sample: |-
     {
       "actor" : {
         "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
         "ip_address" : "2001:db8::1",
         "type" : "user_actor",
-        "user_agent" : "Mozilla/5.0",
-        "user_id" : "user_01EXAMPLEUSERID0000000000"
+        "user_agent" : "Mozilla/5.0"
       },
-      "claude_project_document_id" : "claude_proj_doc_01EXAMPLEDOC0000000000",
       "claude_project_id" : "claude_proj_01EXAMPLEPROJECT00000",
-      "created_at" : "2026-05-22T15:23:05.845058Z",
       "filename" : "example-document.pdf",
-      "id" : "activity_01EXAMPLEACTIVITY0000000",
       "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "created_at" : "2026-05-22T15:23:05.845058Z",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
       "type" : "claude_project_document_uploaded",
-      "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+      "claude_project_document_id" : "claude_proj_doc_01EXAMPLEDOC0000000000"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -950,42 +944,43 @@ tests:
       {
         "actor" : {
           "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
           "ip_address" : "2001:db8::1",
           "type" : "user_actor",
-          "user_agent" : "Mozilla/5.0",
-          "user_id" : "user_01EXAMPLEUSERID0000000000"
+          "user_agent" : "Mozilla/5.0"
         },
-        "claude_project_document_id" : "claude_proj_doc_01EXAMPLEDOC0000000000",
         "claude_project_id" : "claude_proj_01EXAMPLEPROJECT00000",
-        "created_at" : "2026-05-22T15:23:05.845058Z",
         "filename" : "example-document.pdf",
-        "id" : "activity_01EXAMPLEACTIVITY0000000",
         "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "created_at" : "2026-05-22T15:23:05.845058Z",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
         "type" : "claude_project_document_uploaded",
-        "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+        "claude_project_document_id" : "claude_proj_doc_01EXAMPLEDOC0000000000"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463385845
+
  -
   sample: |-
     {
       "actor" : {
         "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
         "ip_address" : "2001:db8::1",
         "type" : "user_actor",
-        "user_agent" : "Mozilla/5.0",
-        "user_id" : "user_01EXAMPLEUSERID0000000000"
+        "user_agent" : "Mozilla/5.0"
       },
-      "claude_file_id" : "claude_file_01EXAMPLEFILEID000000",
       "claude_project_id" : "claude_proj_01EXAMPLEPROJECT00000",
-      "created_at" : "2026-05-22T15:20:23.462825Z",
       "filename" : "example-file.txt",
-      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "claude_file_id" : "claude_file_01EXAMPLEFILEID000000",
       "organization_id" : "org_01EXAMPLEORGID00000000000",
-      "type" : "claude_project_file_uploaded",
-      "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "created_at" : "2026-05-22T15:20:23.462825Z",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "claude_project_file_uploaded"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -1060,41 +1055,42 @@ tests:
       {
         "actor" : {
           "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
           "ip_address" : "2001:db8::1",
           "type" : "user_actor",
-          "user_agent" : "Mozilla/5.0",
-          "user_id" : "user_01EXAMPLEUSERID0000000000"
+          "user_agent" : "Mozilla/5.0"
         },
-        "claude_file_id" : "claude_file_01EXAMPLEFILEID000000",
         "claude_project_id" : "claude_proj_01EXAMPLEPROJECT00000",
-        "created_at" : "2026-05-22T15:20:23.462825Z",
         "filename" : "example-file.txt",
-        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "claude_file_id" : "claude_file_01EXAMPLEFILEID000000",
         "organization_id" : "org_01EXAMPLEORGID00000000000",
-        "type" : "claude_project_file_uploaded",
-        "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "created_at" : "2026-05-22T15:20:23.462825Z",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "claude_project_file_uploaded"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463223462
+
  -
   sample: |-
     {
       "actor" : {
         "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
         "ip_address" : "192.0.2.1",
         "type" : "user_actor",
-        "user_agent" : "Mozilla/5.0",
-        "user_id" : "user_01EXAMPLEUSERID0000000000"
+        "user_agent" : "Mozilla/5.0"
       },
       "claude_project_id" : "claude_proj_01EXAMPLEPROJECT00000",
+      "preview_only" : false,
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
       "created_at" : "2026-05-22T15:21:48.506301Z",
       "id" : "activity_01EXAMPLEACTIVITY0000000",
-      "organization_id" : "org_01EXAMPLEORGID00000000000",
-      "preview_only" : false,
-      "type" : "claude_project_viewed",
-      "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+      "type" : "claude_project_viewed"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -1167,40 +1163,41 @@ tests:
       {
         "actor" : {
           "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
           "ip_address" : "192.0.2.1",
           "type" : "user_actor",
-          "user_agent" : "Mozilla/5.0",
-          "user_id" : "user_01EXAMPLEUSERID0000000000"
+          "user_agent" : "Mozilla/5.0"
         },
         "claude_project_id" : "claude_proj_01EXAMPLEPROJECT00000",
+        "preview_only" : false,
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
         "created_at" : "2026-05-22T15:21:48.506301Z",
         "id" : "activity_01EXAMPLEACTIVITY0000000",
-        "organization_id" : "org_01EXAMPLEORGID00000000000",
-        "preview_only" : false,
-        "type" : "claude_project_viewed",
-        "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+        "type" : "claude_project_viewed"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463308506
+
  -
   sample: |-
     {
       "actor" : {
         "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
         "ip_address" : "192.0.2.1",
         "type" : "user_actor",
-        "user_agent" : "Mozilla/5.0 Claude/1.3883.0",
-        "user_id" : "user_01EXAMPLEUSERID0000000000"
+        "user_agent" : "Mozilla/5.0 Claude/1.3883.0"
       },
-      "created_at" : "2026-05-22T15:21:44.267747Z",
-      "id" : "activity_01EXAMPLEACTIVITY0000000",
       "organization_id" : "org_01EXAMPLEORGID00000000000",
-      "skill_id" : "skill_01EXAMPLESKILLID00000000",
       "skill_name" : "example-skill-name",
-      "type" : "claude_skill_created",
-      "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "created_at" : "2026-05-22T15:21:44.267747Z",
+      "skill_id" : "skill_01EXAMPLESKILLID00000000",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "claude_skill_created"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -1274,40 +1271,41 @@ tests:
       {
         "actor" : {
           "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
           "ip_address" : "192.0.2.1",
           "type" : "user_actor",
-          "user_agent" : "Mozilla/5.0 Claude/1.3883.0",
-          "user_id" : "user_01EXAMPLEUSERID0000000000"
+          "user_agent" : "Mozilla/5.0 Claude/1.3883.0"
         },
-        "created_at" : "2026-05-22T15:21:44.267747Z",
-        "id" : "activity_01EXAMPLEACTIVITY0000000",
         "organization_id" : "org_01EXAMPLEORGID00000000000",
-        "skill_id" : "skill_01EXAMPLESKILLID00000000",
         "skill_name" : "example-skill-name",
-        "type" : "claude_skill_created",
-        "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "created_at" : "2026-05-22T15:21:44.267747Z",
+        "skill_id" : "skill_01EXAMPLESKILLID00000000",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "claude_skill_created"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463304267
+
  -
   sample: |-
     {
       "actor" : {
         "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
         "ip_address" : "192.0.2.1",
         "type" : "user_actor",
-        "user_agent" : "Mozilla/5.0 Claude/1.7196.1",
-        "user_id" : "user_01EXAMPLEUSERID0000000000"
+        "user_agent" : "Mozilla/5.0 Claude/1.7196.1"
       },
-      "created_at" : "2026-05-22T15:21:17.287525Z",
-      "id" : "activity_01EXAMPLEACTIVITY0000000",
       "organization_id" : "org_01EXAMPLEORGID00000000000",
-      "skill_id" : "skill_01EXAMPLESKILLID00000000",
       "skill_name" : "example-skill-name",
-      "type" : "claude_skill_replaced",
-      "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "created_at" : "2026-05-22T15:21:17.287525Z",
+      "skill_id" : "skill_01EXAMPLESKILLID00000000",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "claude_skill_replaced"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -1381,49 +1379,46 @@ tests:
       {
         "actor" : {
           "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
           "ip_address" : "192.0.2.1",
           "type" : "user_actor",
-          "user_agent" : "Mozilla/5.0 Claude/1.7196.1",
-          "user_id" : "user_01EXAMPLEUSERID0000000000"
+          "user_agent" : "Mozilla/5.0 Claude/1.7196.1"
         },
-        "created_at" : "2026-05-22T15:21:17.287525Z",
-        "id" : "activity_01EXAMPLEACTIVITY0000000",
         "organization_id" : "org_01EXAMPLEORGID00000000000",
-        "skill_id" : "skill_01EXAMPLESKILLID00000000",
         "skill_name" : "example-skill-name",
-        "type" : "claude_skill_replaced",
-        "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "created_at" : "2026-05-22T15:21:17.287525Z",
+        "skill_id" : "skill_01EXAMPLESKILLID00000000",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "claude_skill_replaced"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463277287
+
  -
   sample: |-
     {
       "actor" : {
         "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
         "ip_address" : "192.0.2.1",
         "type" : "user_actor",
-        "user_agent" : "Mozilla/5.0",
-        "user_id" : "user_01EXAMPLEUSERID0000000000"
+        "user_agent" : "Mozilla/5.0"
       },
       "created_at" : "2026-05-22T15:21:50.371418Z",
       "id" : "activity_01EXAMPLEACTIVITY0000000",
-      "organization_id" : null,
       "type" : "claude_user_settings_updated",
-      "updates" : [
-        {
-          "current_value" : {
-            "example_tool" : true
-          },
-          "previous_value" : {
-            "example_tool" : false
-          },
-          "type" : "mcp_tools_enabled"
+      "updates" : [ {
+        "previous_value" : {
+          "example_tool" : false
+        },
+        "type" : "mcp_tools_enabled",
+        "current_value" : {
+          "example_tool" : true
         }
-      ],
-      "organization_uuid" : null
+      } ]
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -1486,11 +1481,12 @@ tests:
           uid: "user_01EXAMPLEUSERID0000000000"
       type: "claude_user_settings_updated"
       updates:
-      - current_value:
-          example_tool: true
+       -
         previous_value:
           example_tool: false
         type: "mcp_tools_enabled"
+        current_value:
+          example_tool: true
       usr:
         email: "user@example.com"
         id: "user_01EXAMPLEUSERID0000000000"
@@ -1498,51 +1494,45 @@ tests:
       {
         "actor" : {
           "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
           "ip_address" : "192.0.2.1",
           "type" : "user_actor",
-          "user_agent" : "Mozilla/5.0",
-          "user_id" : "user_01EXAMPLEUSERID0000000000"
+          "user_agent" : "Mozilla/5.0"
         },
         "created_at" : "2026-05-22T15:21:50.371418Z",
         "id" : "activity_01EXAMPLEACTIVITY0000000",
-        "organization_id" : null,
         "type" : "claude_user_settings_updated",
-        "updates" : [
-          {
-            "current_value" : {
-              "example_tool" : true
-            },
-            "previous_value" : {
-              "example_tool" : false
-            },
-            "type" : "mcp_tools_enabled"
+        "updates" : [ {
+          "previous_value" : {
+            "example_tool" : false
+          },
+          "type" : "mcp_tools_enabled",
+          "current_value" : {
+            "example_tool" : true
           }
-        ],
-        "organization_uuid" : null
+        } ]
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463310371
+
  -
   sample: |-
     {
       "actor" : {
-        "api_key_id" : "apikey_01EXAMPLEAPIKEY000000000",
         "ip_address" : "192.0.2.1",
         "type" : "api_actor",
+        "api_key_id" : "apikey_01EXAMPLEAPIKEY000000000",
         "user_agent" : "example-client/1.0"
       },
+      "status_code" : 200,
       "created_at" : "2026-05-22T15:21:38.920308Z",
       "id" : "activity_01EXAMPLEACTIVITY0000000",
-      "organization_id" : null,
-      "request_body" : null,
-      "request_id" : "req_011CbEXAMPLEREQUEST00000",
       "request_method" : "GET",
-      "status_code" : 200,
       "type" : "compliance_api_accessed",
-      "url" : "https://api.anthropic.com/v1/compliance/activities?<query-redacted>",
-      "organization_uuid" : null
+      "request_id" : "req_011CbEXAMPLEREQUEST00000",
+      "url" : "https://api.anthropic.com/v1/compliance/activities?<query-redacted>"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -1619,26 +1609,24 @@ tests:
     message: |-
       {
         "actor" : {
-          "api_key_id" : "apikey_01EXAMPLEAPIKEY000000000",
           "ip_address" : "192.0.2.1",
           "type" : "api_actor",
+          "api_key_id" : "apikey_01EXAMPLEAPIKEY000000000",
           "user_agent" : "example-client/1.0"
         },
+        "status_code" : 200,
         "created_at" : "2026-05-22T15:21:38.920308Z",
         "id" : "activity_01EXAMPLEACTIVITY0000000",
-        "organization_id" : null,
-        "request_body" : null,
-        "request_id" : "req_011CbEXAMPLEREQUEST00000",
         "request_method" : "GET",
-        "status_code" : 200,
         "type" : "compliance_api_accessed",
-        "url" : "https://api.anthropic.com/v1/compliance/activities?<query-redacted>",
-        "organization_uuid" : null
+        "request_id" : "req_011CbEXAMPLEREQUEST00000",
+        "url" : "https://api.anthropic.com/v1/compliance/activities?<query-redacted>"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463298920
+
  -
   sample: |-
     {
@@ -1648,13 +1636,12 @@ tests:
         "type" : "admin_api_key_actor",
         "user_agent" : "python-requests/2.32.5"
       },
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
       "created_at" : "2026-05-22T15:07:03.419782Z",
-      "deleted_user_email" : null,
       "deleted_user_id" : "user_01EXAMPLEUSERID0000000000",
       "id" : "activity_01EXAMPLEACTIVITY0000000",
-      "organization_id" : "org_01EXAMPLEORGID00000000000",
-      "type" : "org_user_deleted",
-      "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+      "type" : "org_user_deleted"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -1729,35 +1716,35 @@ tests:
           "type" : "admin_api_key_actor",
           "user_agent" : "python-requests/2.32.5"
         },
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
         "created_at" : "2026-05-22T15:07:03.419782Z",
-        "deleted_user_email" : null,
         "deleted_user_id" : "user_01EXAMPLEUSERID0000000000",
         "id" : "activity_01EXAMPLEACTIVITY0000000",
-        "organization_id" : "org_01EXAMPLEORGID00000000000",
-        "type" : "org_user_deleted",
-        "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+        "type" : "org_user_deleted"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779462423419
+
  -
   sample: |-
     {
       "actor" : {
         "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
         "ip_address" : "192.0.2.1",
         "type" : "user_actor",
-        "user_agent" : "Mozilla/5.0",
-        "user_id" : "user_01EXAMPLEUSERID0000000000"
+        "user_agent" : "Mozilla/5.0"
       },
-      "created_at" : "2026-04-22T12:38:58.658822Z",
       "deleted_user_email" : "user@example.com",
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "created_at" : "2026-04-22T12:38:58.658822Z",
       "deleted_user_id" : "user_01EXAMPLEUSERID0000000000",
       "id" : "activity_01EXAMPLEACTIVITY0000000",
-      "organization_id" : "org_01EXAMPLEORGID00000000000",
-      "type" : "org_user_deleted",
-      "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+      "type" : "org_user_deleted"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -1833,39 +1820,40 @@ tests:
       {
         "actor" : {
           "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
           "ip_address" : "192.0.2.1",
           "type" : "user_actor",
-          "user_agent" : "Mozilla/5.0",
-          "user_id" : "user_01EXAMPLEUSERID0000000000"
+          "user_agent" : "Mozilla/5.0"
         },
-        "created_at" : "2026-04-22T12:38:58.658822Z",
         "deleted_user_email" : "user@example.com",
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "created_at" : "2026-04-22T12:38:58.658822Z",
         "deleted_user_id" : "user_01EXAMPLEUSERID0000000000",
         "id" : "activity_01EXAMPLEACTIVITY0000000",
-        "organization_id" : "org_01EXAMPLEORGID00000000000",
-        "type" : "org_user_deleted",
-        "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+        "type" : "org_user_deleted"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1776861538658
+
  -
   sample: |-
     {
       "actor" : {
         "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
         "ip_address" : "192.0.2.1",
         "type" : "user_actor",
-        "user_agent" : "Mozilla/5.0",
-        "user_id" : "user_01EXAMPLEUSERID0000000000"
+        "user_agent" : "Mozilla/5.0"
       },
-      "created_at" : "2026-05-15T15:22:37.490878Z",
-      "id" : "activity_01EXAMPLEACTIVITY0000000",
       "invite_id" : "invite_01EXAMPLEINVITE0000000000",
       "organization_id" : "org_01EXAMPLEORGID00000000000",
-      "type" : "org_user_invite_accepted",
-      "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "created_at" : "2026-05-15T15:22:37.490878Z",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "org_user_invite_accepted"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -1940,39 +1928,40 @@ tests:
       {
         "actor" : {
           "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
           "ip_address" : "192.0.2.1",
           "type" : "user_actor",
-          "user_agent" : "Mozilla/5.0",
-          "user_id" : "user_01EXAMPLEUSERID0000000000"
+          "user_agent" : "Mozilla/5.0"
         },
-        "created_at" : "2026-05-15T15:22:37.490878Z",
-        "id" : "activity_01EXAMPLEACTIVITY0000000",
         "invite_id" : "invite_01EXAMPLEINVITE0000000000",
         "organization_id" : "org_01EXAMPLEORGID00000000000",
-        "type" : "org_user_invite_accepted",
-        "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "created_at" : "2026-05-15T15:22:37.490878Z",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "org_user_invite_accepted"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1778858557490
+
  -
   sample: |-
     {
       "actor" : {
         "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
         "ip_address" : "2001:db8::1",
         "type" : "user_actor",
-        "user_agent" : "Mozilla/5.0",
-        "user_id" : "user_01EXAMPLEUSERID0000000000"
+        "user_agent" : "Mozilla/5.0"
       },
+      "invited_role" : "owner",
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
       "created_at" : "2026-05-15T15:22:11.738584Z",
       "id" : "activity_01EXAMPLEACTIVITY0000000",
       "invited_email" : "invitee@example.com",
-      "invited_role" : "owner",
-      "organization_id" : "org_01EXAMPLEORGID00000000000",
-      "type" : "org_user_invite_sent",
-      "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+      "type" : "org_user_invite_sent"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -2048,23 +2037,24 @@ tests:
       {
         "actor" : {
           "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
           "ip_address" : "2001:db8::1",
           "type" : "user_actor",
-          "user_agent" : "Mozilla/5.0",
-          "user_id" : "user_01EXAMPLEUSERID0000000000"
+          "user_agent" : "Mozilla/5.0"
         },
+        "invited_role" : "owner",
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
         "created_at" : "2026-05-15T15:22:11.738584Z",
         "id" : "activity_01EXAMPLEACTIVITY0000000",
         "invited_email" : "invitee@example.com",
-        "invited_role" : "owner",
-        "organization_id" : "org_01EXAMPLEORGID00000000000",
-        "type" : "org_user_invite_sent",
-        "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+        "type" : "org_user_invite_sent"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1778858531738
+
  -
   sample: |-
     {
@@ -2074,11 +2064,11 @@ tests:
         "type" : "admin_api_key_actor",
         "user_agent" : "example-client/1.0"
       },
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
       "created_at" : "2026-05-22T15:21:51.118101Z",
       "id" : "activity_01EXAMPLEACTIVITY0000000",
-      "organization_id" : "org_01EXAMPLEORGID00000000000",
-      "type" : "org_users_listed",
-      "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+      "type" : "org_users_listed"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -2148,31 +2138,32 @@ tests:
           "type" : "admin_api_key_actor",
           "user_agent" : "example-client/1.0"
         },
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
         "created_at" : "2026-05-22T15:21:51.118101Z",
         "id" : "activity_01EXAMPLEACTIVITY0000000",
-        "organization_id" : "org_01EXAMPLEORGID00000000000",
-        "type" : "org_users_listed",
-        "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+        "type" : "org_users_listed"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463311118
+
  -
   sample: |-
     {
       "actor" : {
         "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
         "ip_address" : "192.0.2.1",
         "type" : "user_actor",
-        "user_agent" : "Mozilla/5.0",
-        "user_id" : "user_01EXAMPLEUSERID0000000000"
+        "user_agent" : "Mozilla/5.0"
       },
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
       "created_at" : "2026-05-22T15:20:55.593806Z",
       "id" : "activity_01EXAMPLEACTIVITY0000000",
-      "organization_id" : "org_01EXAMPLEORGID00000000000",
-      "type" : "org_users_listed",
-      "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+      "type" : "org_users_listed"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -2243,37 +2234,38 @@ tests:
       {
         "actor" : {
           "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
           "ip_address" : "192.0.2.1",
           "type" : "user_actor",
-          "user_agent" : "Mozilla/5.0",
-          "user_id" : "user_01EXAMPLEUSERID0000000000"
+          "user_agent" : "Mozilla/5.0"
         },
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
         "created_at" : "2026-05-22T15:20:55.593806Z",
         "id" : "activity_01EXAMPLEACTIVITY0000000",
-        "organization_id" : "org_01EXAMPLEORGID00000000000",
-        "type" : "org_users_listed",
-        "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+        "type" : "org_users_listed"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463255593
+
  -
   sample: |-
     {
       "actor" : {
         "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
         "ip_address" : "2001:db8::1",
         "type" : "user_actor",
-        "user_agent" : "Mozilla/5.0",
-        "user_id" : "user_01EXAMPLEUSERID0000000000"
+        "user_agent" : "Mozilla/5.0"
       },
-      "api_key_id" : "apikey_01EXAMPLEAPIKEY000000000",
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
       "created_at" : "2026-05-22T15:21:23.115384Z",
       "id" : "activity_01EXAMPLEACTIVITY0000000",
-      "organization_id" : "org_01EXAMPLEORGID00000000000",
       "type" : "platform_api_key_created",
-      "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+      "api_key_id" : "apikey_01EXAMPLEAPIKEY000000000"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -2349,45 +2341,44 @@ tests:
       {
         "actor" : {
           "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
           "ip_address" : "2001:db8::1",
           "type" : "user_actor",
-          "user_agent" : "Mozilla/5.0",
-          "user_id" : "user_01EXAMPLEUSERID0000000000"
+          "user_agent" : "Mozilla/5.0"
         },
-        "api_key_id" : "apikey_01EXAMPLEAPIKEY000000000",
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
         "created_at" : "2026-05-22T15:21:23.115384Z",
         "id" : "activity_01EXAMPLEACTIVITY0000000",
-        "organization_id" : "org_01EXAMPLEORGID00000000000",
         "type" : "platform_api_key_created",
-        "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+        "api_key_id" : "apikey_01EXAMPLEAPIKEY000000000"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463283115
+
  -
   sample: |-
     {
       "actor" : {
         "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
         "ip_address" : "2001:db8::1",
         "type" : "user_actor",
-        "user_agent" : "Mozilla/5.0",
-        "user_id" : "user_01EXAMPLEUSERID0000000000"
+        "user_agent" : "Mozilla/5.0"
       },
-      "api_key_id" : "apikey_01EXAMPLEAPIKEY000000000",
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
       "created_at" : "2026-05-22T15:23:11.707169Z",
       "id" : "activity_01EXAMPLEACTIVITY0000000",
-      "organization_id" : "org_01EXAMPLEORGID00000000000",
       "type" : "platform_api_key_updated",
-      "updates" : [
-        {
-          "current_value" : "archived",
-          "previous_value" : "active",
-          "type" : "status"
-        }
-      ],
-      "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+      "updates" : [ {
+        "previous_value" : "active",
+        "type" : "status",
+        "current_value" : "archived"
+      } ],
+      "api_key_id" : "apikey_01EXAMPLEAPIKEY000000000"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -2457,9 +2448,10 @@ tests:
       organization_uuid: "00000000-0000-0000-0000-000000000000"
       type: "platform_api_key_updated"
       updates:
-      - current_value: "archived"
+       -
         previous_value: "active"
         type: "status"
+        current_value: "archived"
       usr:
         email: "user@example.com"
         id: "user_01EXAMPLEUSERID0000000000"
@@ -2467,29 +2459,28 @@ tests:
       {
         "actor" : {
           "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
           "ip_address" : "2001:db8::1",
           "type" : "user_actor",
-          "user_agent" : "Mozilla/5.0",
-          "user_id" : "user_01EXAMPLEUSERID0000000000"
+          "user_agent" : "Mozilla/5.0"
         },
-        "api_key_id" : "apikey_01EXAMPLEAPIKEY000000000",
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
         "created_at" : "2026-05-22T15:23:11.707169Z",
         "id" : "activity_01EXAMPLEACTIVITY0000000",
-        "organization_id" : "org_01EXAMPLEORGID00000000000",
         "type" : "platform_api_key_updated",
-        "updates" : [
-          {
-            "current_value" : "archived",
-            "previous_value" : "active",
-            "type" : "status"
-          }
-        ],
-        "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+        "updates" : [ {
+          "previous_value" : "active",
+          "type" : "status",
+          "current_value" : "archived"
+        } ],
+        "api_key_id" : "apikey_01EXAMPLEAPIKEY000000000"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463391707
+
  -
   sample: |-
     {
@@ -2499,11 +2490,11 @@ tests:
         "type" : "admin_api_key_actor",
         "user_agent" : "example-client/1.0"
       },
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
       "created_at" : "2026-05-22T15:25:08.967308Z",
       "id" : "activity_01EXAMPLEACTIVITY0000000",
-      "organization_id" : "org_01EXAMPLEORGID00000000000",
-      "type" : "platform_usage_report_claude_code_viewed",
-      "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+      "type" : "platform_usage_report_claude_code_viewed"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -2573,16 +2564,17 @@ tests:
           "type" : "admin_api_key_actor",
           "user_agent" : "example-client/1.0"
         },
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
         "created_at" : "2026-05-22T15:25:08.967308Z",
         "id" : "activity_01EXAMPLEACTIVITY0000000",
-        "organization_id" : "org_01EXAMPLEORGID00000000000",
-        "type" : "platform_usage_report_claude_code_viewed",
-        "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+        "type" : "platform_usage_report_claude_code_viewed"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463508967
+
  -
   sample: |-
     {
@@ -2592,11 +2584,11 @@ tests:
         "type" : "admin_api_key_actor",
         "user_agent" : "example-client/1.0"
       },
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
       "created_at" : "2026-05-22T15:24:38.318204Z",
       "id" : "activity_01EXAMPLEACTIVITY0000000",
-      "organization_id" : "org_01EXAMPLEORGID00000000000",
-      "type" : "platform_usage_report_messages_viewed",
-      "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+      "type" : "platform_usage_report_messages_viewed"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -2666,36 +2658,37 @@ tests:
           "type" : "admin_api_key_actor",
           "user_agent" : "example-client/1.0"
         },
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
         "created_at" : "2026-05-22T15:24:38.318204Z",
         "id" : "activity_01EXAMPLEACTIVITY0000000",
-        "organization_id" : "org_01EXAMPLEORGID00000000000",
-        "type" : "platform_usage_report_messages_viewed",
-        "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+        "type" : "platform_usage_report_messages_viewed"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463478318
+
  -
   sample: |-
     {
       "actor" : {
         "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
         "ip_address" : "2001:db8::1",
         "type" : "user_actor",
-        "user_agent" : "Mozilla/5.0",
-        "user_id" : "user_01EXAMPLEUSERID0000000000"
+        "user_agent" : "Mozilla/5.0"
       },
-      "created_at" : "2026-05-22T15:21:10.596119Z",
-      "id" : "activity_01EXAMPLEACTIVITY0000000",
-      "organization_id" : "org_01EXAMPLEORGID00000000000",
-      "resource_id" : "claude_proj_01EXAMPLEPROJECT00000",
-      "resource_type" : "chat_project",
       "role" : "chat_project:owner",
-      "target_id" : "user_01EXAMPLEUSERID0000000000",
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "resource_type" : "chat_project",
       "target_type" : "organization_member",
-      "type" : "role_assignment_granted",
-      "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+      "created_at" : "2026-05-22T15:21:10.596119Z",
+      "resource_id" : "claude_proj_01EXAMPLEPROJECT00000",
+      "target_id" : "user_01EXAMPLEUSERID0000000000",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "role_assignment_granted"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -2747,7 +2740,7 @@ tests:
           uid: "activity_01EXAMPLEACTIVITY0000000"
           version: "1.5.0"
         privileges:
-        - "chat_project:owner"
+         - "chat_project:owner"
         resources:
           type: "chat_project"
           uid: "claude_proj_01EXAMPLEPROJECT00000"
@@ -2777,46 +2770,47 @@ tests:
       {
         "actor" : {
           "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
           "ip_address" : "2001:db8::1",
           "type" : "user_actor",
-          "user_agent" : "Mozilla/5.0",
-          "user_id" : "user_01EXAMPLEUSERID0000000000"
+          "user_agent" : "Mozilla/5.0"
         },
-        "created_at" : "2026-05-22T15:21:10.596119Z",
-        "id" : "activity_01EXAMPLEACTIVITY0000000",
-        "organization_id" : "org_01EXAMPLEORGID00000000000",
-        "resource_id" : "claude_proj_01EXAMPLEPROJECT00000",
-        "resource_type" : "chat_project",
         "role" : "chat_project:owner",
-        "target_id" : "user_01EXAMPLEUSERID0000000000",
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "resource_type" : "chat_project",
         "target_type" : "organization_member",
-        "type" : "role_assignment_granted",
-        "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+        "created_at" : "2026-05-22T15:21:10.596119Z",
+        "resource_id" : "claude_proj_01EXAMPLEPROJECT00000",
+        "target_id" : "user_01EXAMPLEUSERID0000000000",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "role_assignment_granted"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463270596
+
  -
   sample: |-
     {
       "actor" : {
         "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
         "ip_address" : "192.0.2.1",
         "type" : "user_actor",
-        "user_agent" : "Mozilla/5.0 Claude/1.6259.0",
-        "user_id" : "user_01EXAMPLEUSERID0000000000"
+        "user_agent" : "Mozilla/5.0 Claude/1.6259.0"
       },
-      "created_at" : "2026-05-21T20:47:11.194821Z",
-      "id" : "activity_01EXAMPLEACTIVITY0000000",
-      "organization_id" : "org_01EXAMPLEORGID00000000000",
-      "resource_id" : "skill_01EXAMPLESKILLID00000000",
-      "resource_type" : "skill",
       "role" : "skill:viewer",
-      "target_id" : "user_01EXAMPLEUSERID0000000000",
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "resource_type" : "skill",
       "target_type" : "organization_member",
-      "type" : "role_assignment_revoked",
-      "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+      "created_at" : "2026-05-21T20:47:11.194821Z",
+      "resource_id" : "skill_01EXAMPLESKILLID00000000",
+      "target_id" : "user_01EXAMPLEUSERID0000000000",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "role_assignment_revoked"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -2868,7 +2862,7 @@ tests:
           uid: "activity_01EXAMPLEACTIVITY0000000"
           version: "1.5.0"
         privileges:
-        - "skill:viewer"
+         - "skill:viewer"
         resources:
           type: "skill"
           uid: "skill_01EXAMPLESKILLID00000000"
@@ -2898,40 +2892,39 @@ tests:
       {
         "actor" : {
           "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
           "ip_address" : "192.0.2.1",
           "type" : "user_actor",
-          "user_agent" : "Mozilla/5.0 Claude/1.6259.0",
-          "user_id" : "user_01EXAMPLEUSERID0000000000"
+          "user_agent" : "Mozilla/5.0 Claude/1.6259.0"
         },
-        "created_at" : "2026-05-21T20:47:11.194821Z",
-        "id" : "activity_01EXAMPLEACTIVITY0000000",
-        "organization_id" : "org_01EXAMPLEORGID00000000000",
-        "resource_id" : "skill_01EXAMPLESKILLID00000000",
-        "resource_type" : "skill",
         "role" : "skill:viewer",
-        "target_id" : "user_01EXAMPLEUSERID0000000000",
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "resource_type" : "skill",
         "target_type" : "organization_member",
-        "type" : "role_assignment_revoked",
-        "organization_uuid" : "00000000-0000-0000-0000-000000000000"
+        "created_at" : "2026-05-21T20:47:11.194821Z",
+        "resource_id" : "skill_01EXAMPLESKILLID00000000",
+        "target_id" : "user_01EXAMPLEUSERID0000000000",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "role_assignment_revoked"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779396431194
+
  -
   sample: |-
     {
       "actor" : {
+        "unauthenticated_email_address" : "user@example.com",
         "ip_address" : "192.0.2.1",
         "type" : "unauthenticated_user_actor",
-        "unauthenticated_email_address" : "user@example.com",
         "user_agent" : "Mozilla/5.0"
       },
       "created_at" : "2026-05-22T15:19:09.946100Z",
       "id" : "activity_01EXAMPLEACTIVITY0000000",
-      "organization_id" : null,
-      "type" : "sso_login_initiated",
-      "organization_uuid" : null
+      "type" : "sso_login_initiated"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -2999,37 +2992,34 @@ tests:
     message: |-
       {
         "actor" : {
+          "unauthenticated_email_address" : "user@example.com",
           "ip_address" : "192.0.2.1",
           "type" : "unauthenticated_user_actor",
-          "unauthenticated_email_address" : "user@example.com",
           "user_agent" : "Mozilla/5.0"
         },
         "created_at" : "2026-05-22T15:19:09.946100Z",
         "id" : "activity_01EXAMPLEACTIVITY0000000",
-        "organization_id" : null,
-        "type" : "sso_login_initiated",
-        "organization_uuid" : null
+        "type" : "sso_login_initiated"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463149946
+
  -
   sample: |-
     {
       "actor" : {
         "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
         "ip_address" : "192.0.2.1",
         "type" : "user_actor",
-        "user_agent" : "Mozilla/5.0",
-        "user_id" : "user_01EXAMPLEUSERID0000000000"
+        "user_agent" : "Mozilla/5.0"
       },
       "auth_method" : "sso",
       "created_at" : "2026-05-22T15:19:14.445010Z",
       "id" : "activity_01EXAMPLEACTIVITY0000000",
-      "organization_id" : null,
-      "type" : "sso_login_succeeded",
-      "organization_uuid" : null
+      "type" : "sso_login_succeeded"
     }
   tags:
    - "source:LOGS_SOURCE"
@@ -3105,19 +3095,18 @@ tests:
       {
         "actor" : {
           "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
           "ip_address" : "192.0.2.1",
           "type" : "user_actor",
-          "user_agent" : "Mozilla/5.0",
-          "user_id" : "user_01EXAMPLEUSERID0000000000"
+          "user_agent" : "Mozilla/5.0"
         },
         "auth_method" : "sso",
         "created_at" : "2026-05-22T15:19:14.445010Z",
         "id" : "activity_01EXAMPLEACTIVITY0000000",
-        "organization_id" : null,
-        "type" : "sso_login_succeeded",
-        "organization_uuid" : null
+        "type" : "sso_login_succeeded"
       }
     tags:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463154445
+
