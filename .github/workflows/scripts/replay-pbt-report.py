@@ -697,7 +697,7 @@ def build_replay_flow_markdown(rows: list[dict[str, Any]], findings: list[dict[s
         "  B -->|cache miss and seeding enabled| S[\"Seed with compare-check<br/>start E2E env, record fixture\"] --> C",
         "  B -->|cache miss and seeding disabled| K[\"Skip target\"]",
         f"  C --> D[\"Property checks<br/>{counts['replay_passed']} passed / {counts['replay_failed']} failed\"]",
-        f"  D --> E[\"Lightweight findings only<br/>{counts['findings']} findings, {counts['coverage_reports']} coverage reports\"]",
+        f"  D --> E[\"Findings<br/>{counts['findings']} findings, {counts['coverage_reports']} coverage reports\"]",
         "  E --> R[\"Report\"]",
         "```",
         "",
