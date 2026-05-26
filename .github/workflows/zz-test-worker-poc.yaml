@@ -768,7 +768,20 @@ jobs:
           await core.summary
             .addHeading('Replay PBT auto-combine')
             .addRaw(`Dispatched combiner for run group \`${runGroup}\`.\n\n`)
-            .addRaw(`Shard run IDs: \`${runIds}\`\n`)
+            .addTable([
+              [
+                {data: 'Shard run', header: true},
+                {data: 'Conclusion', header: true},
+                {data: 'Link', header: true},
+              ],
+              ...matched
+                .sort((a, b) => a.display_title.localeCompare(b.display_title))
+                .map(run => [
+                  `\`${run.id}\` ${run.display_title}`,
+                  `\`${run.conclusion || run.status}\``,
+                  `<a href="${run.html_url}">Open shard</a>`,
+                ]),
+            ])
             .write();
 
   combine-reports:
