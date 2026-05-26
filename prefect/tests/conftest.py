@@ -60,7 +60,7 @@ def dd_environment(instance: Callable[[str], dict[str, str | dict[str, list[str]
         compose_file=str(COMPOSE_FILE_E2E),
         conditions=conditions,
         env_vars={"PREFECT_PORT": str(port)},
-        waith_for_health=True,
+        wait_for_health=True,
         mount_logs=True,
     ):
         yield (

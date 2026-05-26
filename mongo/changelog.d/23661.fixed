@@ -1,0 +1,1 @@
+Raise exceptions from the hostname property, so permission and connectivity errors surface as check failures.

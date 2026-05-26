@@ -1,0 +1,1 @@
+Add Application.annotate_error/annotate_warning/annotate_display_queue helpers that emit GitHub Actions workflow annotations on CI.

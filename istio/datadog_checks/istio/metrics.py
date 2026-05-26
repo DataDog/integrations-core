@@ -276,17 +276,16 @@ ZTUNNEL_METRICS = {
     'istio_dns_upstream_failures_total': 'dns.upstream_failures.total',
     'istio_dns_upstream_request_duration_seconds': 'dns.upstream_request_duration_seconds',
     'istio_on_demand_dns_total': 'on_demand_dns.total',
-    # In-pod proxy management metrics (unstable)
-    'istio_active_proxy_count_total': 'active_proxy_count.total',
-    'istio_pending_proxy_count_total': 'pending_proxy_count.total',
-    'istio_proxies_started_total': 'proxies_started.total',
-    'istio_proxies_stopped_total': 'proxies_stopped.total',
+    # In-pod proxy management metrics (unstable). Ztunnel exposes these under the
+    # workload_manager_* family, not istio_*.
+    'workload_manager_active_proxy_count': 'active_proxy_count',
+    'workload_manager_pending_proxy_count': 'pending_proxy_count',
+    'workload_manager_proxies_started_total': 'proxies_started.total',
+    'workload_manager_proxies_stopped_total': 'proxies_stopped.total',
     # XDS metrics (unstable)
     'istio_xds_connection_terminations_total': 'xds.connection_terminations.total',
-    # Connection metrics (unstable)
-    'istio_connection_opens_total': 'connection.opens.total',
-    'istio_connection_closes_total': 'connection.closes.total',
-    'istio_connection_termination_total': 'connection.termination.total',
+    'istio_xds_message_total': 'xds.message.total',
+    'istio_xds_message_bytes_total': 'xds.message_bytes.total',
 }
 
 

@@ -64,27 +64,6 @@ jobs:
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
 
-    - name: Install uv
-      uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
-      with:
-        enable-cache: false
-
-    - name: Restore cache
-      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
-      with:
-        path: |
-          ~/.cache/uv
-          ~/.cache/pip
-        key: >-
-          ${{ format(
-            'v02-uv-{0}-{1}-{2}-{3}',
-            env.pythonLocation,
-            hashFiles('datadog_checks_base/pyproject.toml'),
-            hashFiles('datadog_checks_dev/pyproject.toml'),
-            hashFiles('ddev/pyproject.toml')
-          )}}
-        restore-keys: |-
-          v02-uv-${{ env.pythonLocation }}
     - name: Get Datadog credentials
       id: dd-sts
       uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
@@ -92,8 +71,10 @@ jobs:
         policy: integrations-core-api-key
 
     - name: Install ddev from local folder
-      run: |-
-        uv pip install --system -e ./datadog_checks_dev[cli] -e ./ddev
+      uses: ./.github/actions/setup-ddev
+      with:
+        install-mode: local
+        cache-profile: local-ddev-base
 
     - name: Configure ddev
       run: |-

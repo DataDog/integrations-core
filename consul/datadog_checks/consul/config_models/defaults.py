@@ -48,6 +48,14 @@ def instance_enable_legacy_tags_normalization():
     return True
 
 
+def instance_health_checks_cache_size():
+    return 5000
+
+
+def instance_health_checks_cache_ttl():
+    return 3600
+
+
 def instance_kerberos_auth():
     return 'disabled'
 

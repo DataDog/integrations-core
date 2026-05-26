@@ -54,7 +54,7 @@ def dd_environment(e2e_instance):
     if os.environ.get('HARBOR_USE_SSL'):
         cert_dir = os.path.join(HERE, 'compose', 'common', 'cert')
         e2e_metadata['docker_volumes'] = ['{}:/home/harbor/tests/compose/common/cert'.format(cert_dir)]
-    with docker_run(compose_file, conditions=conditions, attempts=5, waith_for_health=True):
+    with docker_run(compose_file, conditions=conditions, attempts=5, wait_for_health=True):
         yield e2e_instance, e2e_metadata
 
 

@@ -147,13 +147,16 @@ class InstanceConfig(BaseModel):
     query_metrics: Optional[QueryMetrics] = None
     query_samples: Optional[QuerySamples] = None
     read_timeout: Optional[int] = None
+    reported_hostname: Optional[str] = None
     server: str
     service: Optional[str] = None
     single_endpoint_mode: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
     tls_ca_cert: Optional[str] = None
     tls_verify: Optional[bool] = None
+    use_advanced_queries: Optional[bool] = None
     use_global_custom_queries: Optional[str] = None
+    use_legacy_queries: Optional[bool] = None
     username: Optional[str] = None
     verify: Optional[bool] = None
 

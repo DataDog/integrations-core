@@ -207,6 +207,16 @@ class GitHubManager:
         data = response.json()
         return data['head']['sha'], data['head']['ref']
 
+    def get_pull_request_labels(self, pr_number: int) -> list[str] | None:
+        """Return the label names on the given PR, or None if it could not be fetched."""
+        from httpx import HTTPStatusError
+
+        try:
+            response = self.__api_get(self.PULL_REQUEST_API.format(repo_id=self.repo_id, pr_number=pr_number))
+        except HTTPStatusError:
+            return None
+        return [label['name'] for label in response.json().get('labels', [])]
+
     def dispatch_workflow(self, workflow_id: str, ref: str, inputs: dict[str, Any]) -> None:
         """Trigger a workflow_dispatch event."""
         self.__api_post(

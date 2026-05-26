@@ -24,6 +24,8 @@ from .common import (
     CONSUL_CHECK,
     HEALTH_CHECK,
     HEALTH_CHECK_METRIC,
+    HEALTH_CHECKS_CACHE_SIZE,
+    HEALTH_CHECKS_CACHE_TTL,
     MAX_CONFIG_TTL,
     MAX_SERVICES,
     SOURCE_TYPE_NAME,
@@ -133,7 +135,15 @@ class ConsulCheck(OpenMetricsBaseCheck):
         if 'acl_token' in self.instance:
             self.http.options['headers']['X-Consul-Token'] = self.instance['acl_token']
 
-        self.health_checks = TTLCache(ttl=3600, maxsize=5000)
+        cache_size = self.instance.get(
+            'health_checks_cache_size',
+            self.init_config.get('health_checks_cache_size', HEALTH_CHECKS_CACHE_SIZE),
+        )
+        cache_ttl = self.instance.get(
+            'health_checks_cache_ttl',
+            self.init_config.get('health_checks_cache_ttl', HEALTH_CHECKS_CACHE_TTL),
+        )
+        self.health_checks = TTLCache(ttl=cache_ttl, maxsize=cache_size)
 
     def _is_dogstatsd_configured(self):
         """Check if the agent has a consul dogstatsd profile configured"""
