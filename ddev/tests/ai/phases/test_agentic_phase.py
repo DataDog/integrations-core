@@ -464,3 +464,107 @@ async def test_spawn_subagent_wiring(flow_dir, message_queue):
     assert log_file.exists()
     events = {e["event"] for e in read_jsonl(log_file)}
     assert {"start", "finish"} <= events
+
+
+# ---------------------------------------------------------------------------
+# Goal validation integration tests
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "tasks,expect_builder",
+    [
+        ([TaskConfig(name="t1", prompt="x")], False),
+        ([TaskConfig(name="t1", prompt="x", goal="verify")], True),
+        ([TaskConfig(name="t1", prompt="x"), TaskConfig(name="t2", prompt="y", goal="verify")], True),
+    ],
+    ids=["no_goal", "single_goal", "mixed"],
+)
+def test_extra_init_kwargs_creates_goal_agent_builder_when_any_task_has_goal(
+    flow_dir,
+    tasks,
+    expect_builder,
+):
+    kwargs = AgenticPhase.extra_init_kwargs(
+        phase_id="p1",
+        phase_config=PhaseConfig(agent="writer", tasks=tasks),
+        agents={"writer": AgentConfig()},
+        agent_clients={},
+        file_registry=FileRegistry(policy=FileAccessPolicy(write_root=flow_dir)),
+    )
+    assert (kwargs["goal_agent_builder"] is not None) is expect_builder
+
+
+async def test_phase_with_goal_passes_first_attempt(flow_dir, monkeypatch, message_queue):
+    worker = MockAgent(
+        [
+            make_response("worker did the work", 100, 50),
+            make_response("phase summary", 10, 5),
+        ]
+    )
+    reviewer_responses = [make_response('{"valid": true, "reason": ""}', 7, 3)]
+
+    captured_builder_calls: list = []
+
+    def goal_builder(owner_id):
+        captured_builder_calls.append(owner_id)
+        agent = MockAgent(list(reviewer_responses))
+        return agent, ToolRegistry([])
+
+    phase, mgr = make_agent_phase(
+        flow_dir,
+        worker,
+        monkeypatch,
+        message_queue,
+        tasks=[TaskConfig(name="t1", prompt="Do it.", goal="verify it")],
+        goal_agent_builder=goal_builder,
+    )
+
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    cp = mgr.read()["p1"]
+    assert cp["status"] == "success"
+    assert cp["goal_validations"] == [{"task": "t1", "attempts": 1, "final_valid": True}]
+    assert worker.send_calls[0].startswith("Do it.")
+    assert "independent reviewer" in worker.send_calls[0]
+    assert cp["tokens"] == {"total_input": 100 + 7 + 10, "total_output": 50 + 3 + 5}
+    assert captured_builder_calls == ["p1.goal.t1"]
+
+    log_file = mgr.root / "goal_agent" / "p1" / "t1.jsonl"
+    assert log_file.exists()
+    events = {e["event"] for e in read_jsonl(log_file)}
+    assert {"start", "finish"} <= events
+
+
+async def test_phase_with_goal_exhausts_attempts_fails_phase(flow_dir, monkeypatch, message_queue):
+    worker = MockAgent(
+        [
+            make_response("attempt 1", 0, 0),
+            make_response("attempt 2", 0, 0),
+        ]
+    )
+
+    def goal_builder(owner_id):
+        agent = MockAgent(
+            [
+                make_response('{"valid": false, "reason": "first miss"}', 0, 0),
+                make_response('{"valid": false, "reason": "second miss"}', 0, 0),
+            ]
+        )
+        return agent, ToolRegistry([])
+
+    phase, mgr = make_agent_phase(
+        flow_dir,
+        worker,
+        monkeypatch,
+        message_queue,
+        tasks=[TaskConfig(name="t1", prompt="Do it.", goal="g", max_goal_attempts=2)],
+        goal_agent_builder=goal_builder,
+    )
+
+    from ddev.ai.phases.goal import GoalAttemptsExhausted
+
+    with pytest.raises(GoalAttemptsExhausted):
+        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert mgr.read() == {}

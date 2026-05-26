@@ -72,6 +72,18 @@ class OnPhaseFinishCallback(Protocol):
     async def __call__(self, phase_id: str) -> None: ...
 
 
+class OnBeforeGoalCheckCallback(Protocol):
+    """Called immediately before each reviewer agent run for a task with a goal."""
+
+    async def __call__(self, task_name: str, attempt: int) -> None: ...
+
+
+class OnAfterGoalCheckCallback(Protocol):
+    """Called after each reviewer agent run, with the parsed verdict."""
+
+    async def __call__(self, task_name: str, attempt: int, valid: bool, reason: str) -> None: ...
+
+
 # ---------------------------------------------------------------------------
 # CallbackSet and Callbacks
 # ---------------------------------------------------------------------------
@@ -103,6 +115,8 @@ class CallbackSet:
         self._on_before_agent_send: list[OnBeforeAgentSendCallback] = []
         self._on_phase_start: list[OnPhaseStartCallback] = []
         self._on_phase_finish: list[OnPhaseFinishCallback] = []
+        self._on_before_goal_check: list[OnBeforeGoalCheckCallback] = []
+        self._on_after_goal_check: list[OnAfterGoalCheckCallback] = []
 
     async def _fire(self, handlers: list[Any], *args: Any) -> None:
         for handler in handlers:
@@ -174,6 +188,20 @@ class CallbackSet:
     async def fire_phase_finish(self, phase_id: str) -> None:
         await self._fire(self._on_phase_finish, phase_id)
 
+    def on_before_goal_check(self, func: OnBeforeGoalCheckCallback) -> OnBeforeGoalCheckCallback:
+        self._on_before_goal_check.append(func)
+        return func
+
+    async def fire_before_goal_check(self, task_name: str, attempt: int) -> None:
+        await self._fire(self._on_before_goal_check, task_name, attempt)
+
+    def on_after_goal_check(self, func: OnAfterGoalCheckCallback) -> OnAfterGoalCheckCallback:
+        self._on_after_goal_check.append(func)
+        return func
+
+    async def fire_after_goal_check(self, task_name: str, attempt: int, valid: bool, reason: str) -> None:
+        await self._fire(self._on_after_goal_check, task_name, attempt, valid, reason)
+
 
 class Callbacks:
     """Container of CallbackSet instances. Dispatches each fire_* to all contained sets."""
@@ -216,3 +244,11 @@ class Callbacks:
     async def fire_phase_finish(self, phase_id: str) -> None:
         for s in self._sets:
             await s.fire_phase_finish(phase_id)
+
+    async def fire_before_goal_check(self, task_name: str, attempt: int) -> None:
+        for s in self._sets:
+            await s.fire_before_goal_check(task_name, attempt)
+
+    async def fire_after_goal_check(self, task_name: str, attempt: int, valid: bool, reason: str) -> None:
+        for s in self._sets:
+            await s.fire_after_goal_check(task_name, attempt, valid, reason)

@@ -2,21 +2,33 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from __future__ import annotations
+
 import logging
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from ddev.ai.agent.base import BaseAgent
-from ddev.ai.agent.build import AgentBuilder, SubagentBuilder, make_agent_builder, make_subagent_builder
+from ddev.ai.agent.build import (
+    make_agent_builder,
+    make_goal_agent_builder,
+    make_subagent_builder,
+)
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.base import Phase, PhaseOutcome
 from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
+from ddev.ai.phases.goal import GOAL_TASK_SUFFIX, render_goal_text, run_goal_loop
 from ddev.ai.phases.template import render_inline, render_prompt
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.registry import TOOL_MANIFEST
+
+if TYPE_CHECKING:
+    from ddev.ai.agent.base import BaseAgent
+    from ddev.ai.agent.build import AgentBuilder, GoalAgentBuilder, SubagentBuilder
+    from ddev.ai.phases.goal import GoalLoopOutcome
+    from ddev.ai.react.types import ReActResult
 
 
 def render_task_prompt(
@@ -61,6 +73,7 @@ class AgenticPhase(Phase):
         config_dir: Path,
         file_registry: FileRegistry,
         subagent_builder: SubagentBuilder | None = None,
+        goal_agent_builder: GoalAgentBuilder | None = None,
         callbacks: Callbacks | None = None,
         logger: logging.Logger | None = None,
     ) -> None:
@@ -78,6 +91,8 @@ class AgenticPhase(Phase):
         )
         self._agent_builder = agent_builder
         self._subagent_builder = subagent_builder
+        self._goal_agent_builder = goal_agent_builder
+        self._goal_attempt_log: list[dict[str, Any]] = []
         self._subagent_log_dir = (
             checkpoint_manager.root / "subagents" / phase_id if subagent_builder is not None else None
         )
@@ -124,6 +139,15 @@ class AgenticPhase(Phase):
                 file_registry=file_registry,
             )
 
+        any_goal = any((t.goal is not None or t.goal_path is not None) for t in phase_config.tasks)
+        goal_agent_builder = None
+        if any_goal:
+            goal_agent_builder = make_goal_agent_builder(
+                parent_agent_config=agent_config,
+                agent_clients=agent_clients,
+                file_registry=file_registry,
+            )
+
         return {
             "agent_builder": make_agent_builder(
                 agent_config=agent_config,
@@ -131,6 +155,7 @@ class AgenticPhase(Phase):
                 file_registry=file_registry,
             ),
             "subagent_builder": subagent_builder,
+            "goal_agent_builder": goal_agent_builder,
         }
 
     def before_react(self) -> None:
@@ -138,6 +163,17 @@ class AgenticPhase(Phase):
 
     def after_react(self) -> None:
         """Called once after all tasks complete. Override for phase-specific teardown."""
+
+    async def _compact_if_needed(
+        self,
+        process: ReActProcess,
+        last_result: ReActResult | None,
+    ) -> tuple[int, int]:
+        if last_result is None or last_result.context_usage is None:
+            return 0, 0
+        if last_result.context_usage.context_pct < self._config.context_compact_threshold_pct:
+            return 0, 0
+        return await process.compact()
 
     async def run_tasks(
         self,
@@ -150,17 +186,50 @@ class AgenticPhase(Phase):
         Default implementation iterates through config.tasks sequentially.
         """
         total_input = total_output = 0
-        last_result = None
+        last_result: ReActResult | None = None
+        goal_attempt_log: list[dict[str, Any]] = []
+
         for task in self._config.tasks:
-            if last_result is not None and last_result.context_usage is not None:
-                if last_result.context_usage.context_pct >= self._config.context_compact_threshold_pct:
-                    compact_in, compact_out = await process.compact()
-                    total_input += compact_in
-                    total_output += compact_out
+            cin, cout = await self._compact_if_needed(process, last_result)
+            total_input += cin
+            total_output += cout
+
+            has_goal = task.goal is not None or task.goal_path is not None
             prompt = render_task_prompt(task, self._config_dir, context, self._resolver)
+            if has_goal:
+                prompt = prompt + GOAL_TASK_SUFFIX
+
             last_result = await process.start(prompt)
             total_input += last_result.total_input_tokens
             total_output += last_result.total_output_tokens
+
+            if has_goal:
+                assert self._goal_agent_builder is not None
+                goal_text = render_goal_text(task, self._config_dir, context, self._resolver)
+                outcome: GoalLoopOutcome = await run_goal_loop(
+                    task=task,
+                    goal_text=goal_text,
+                    rendered_task_prompt=prompt,
+                    worker_process=process,
+                    initial_result=last_result,
+                    goal_agent_builder=self._goal_agent_builder,
+                    callbacks=self._callbacks,
+                    phase_id=self._phase_id,
+                    log_root=self._checkpoint_manager.root,
+                    compact_if_needed=lambda r: self._compact_if_needed(process, r),
+                )
+                last_result = outcome.final_result
+                total_input += outcome.total_input_tokens
+                total_output += outcome.total_output_tokens
+                goal_attempt_log.append(
+                    {
+                        "task": task.name,
+                        "attempts": outcome.attempts,
+                        "final_valid": True,
+                    }
+                )
+
+        self._goal_attempt_log = goal_attempt_log
         return total_input, total_output
 
     def _build_agent_and_process(self, context: dict[str, Any]) -> tuple[BaseAgent[Any], ReActProcess]:
@@ -207,8 +276,13 @@ class AgenticPhase(Phase):
 
         memory_text, mem_in, mem_out = await self._run_memory_step(agent, context)
 
+        extra: dict[str, Any] = {}
+        if self._goal_attempt_log:
+            extra["goal_validations"] = self._goal_attempt_log
+
         return PhaseOutcome(
             memory_text=memory_text,
             total_input_tokens=total_input + mem_in,
             total_output_tokens=total_output + mem_out,
+            extra_checkpoint=extra,
         )

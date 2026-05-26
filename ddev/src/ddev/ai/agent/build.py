@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any
 from ddev.ai.agent.anthropic_client import AnthropicAgent
 from ddev.ai.agent.base import BaseAgent
 from ddev.ai.tools.fs.file_registry import FileRegistry
-from ddev.ai.tools.registry import ToolRegistry
+from ddev.ai.tools.registry import ToolRegistry, filter_read_only
 
 if TYPE_CHECKING:
     from ddev.ai.phases.config import AgentConfig
@@ -22,6 +22,10 @@ SubagentBuilder = Callable[
 ]
 AgentBuilder = Callable[
     [str, str, SubagentBuilder | None, Path | None],  # system_prompt, owner_id, subagent_builder, log_dir
+    tuple[BaseAgent[Any], ToolRegistry],
+]
+GoalAgentBuilder = Callable[
+    [str],  # owner_id
     tuple[BaseAgent[Any], ToolRegistry],
 ]
 
@@ -156,6 +160,55 @@ def make_subagent_builder(
             system_prompt=system_prompt,
             owner_id=owner_id,
             tool_names=tool_names,
+        )
+
+    return builder
+
+
+def build_goal_agent(
+    parent_agent_config: AgentConfig,
+    agent_clients: dict[str, Any],
+    file_registry: FileRegistry,
+    owner_id: str,
+) -> tuple[BaseAgent[Any], ToolRegistry]:
+    """Build the reviewer agent + its ToolRegistry.
+
+    Uses the same provider as the parent agent. Model and max_tokens are left at
+    provider defaults — the parent's overrides are intentionally not forwarded.
+    Tools are filtered to the read-only subset of the parent's tool list.
+    """
+    from ddev.ai.phases.config import AgentConfig
+    from ddev.ai.phases.goal import GOAL_REVIEWER_SYSTEM_PROMPT
+
+    read_only_tool_names = filter_read_only(parent_agent_config.tools)
+    goal_agent_config = AgentConfig(
+        provider=parent_agent_config.provider,
+        tools=read_only_tool_names,
+    )
+
+    return _build_agent_and_registry(
+        agent_config=goal_agent_config,
+        agent_clients=agent_clients,
+        system_prompt=GOAL_REVIEWER_SYSTEM_PROMPT,
+        owner_id=owner_id,
+        tool_names=read_only_tool_names,
+        file_registry=file_registry,
+    )
+
+
+def make_goal_agent_builder(
+    parent_agent_config: AgentConfig,
+    agent_clients: dict[str, Any],
+    file_registry: FileRegistry,
+) -> GoalAgentBuilder:
+    """Return a closure that builds a (reviewer_agent, reviewer_registry) tuple."""
+
+    def builder(owner_id: str) -> tuple[BaseAgent[Any], ToolRegistry]:
+        return build_goal_agent(
+            parent_agent_config=parent_agent_config,
+            agent_clients=agent_clients,
+            file_registry=file_registry,
+            owner_id=owner_id,
         )
 
     return builder
