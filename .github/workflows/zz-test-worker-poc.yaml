@@ -612,6 +612,33 @@ jobs:
       if: always()
       run: python .github/workflows/scripts/replay-pbt-secret-scan.py /tmp/replay-pbt-findings /tmp/replay-pbt-result
 
+    - name: Build job report
+      if: always()
+      run: |
+        python .github/workflows/scripts/replay-pbt-report.py \
+          --results /tmp/replay-pbt-result \
+          --findings /tmp/replay-pbt-findings \
+          --out-dir /tmp/replay-pbt-job-report \
+          --zip /tmp/replay-pbt-job-report.zip \
+          --mode "${{ inputs.mode }}" \
+          --shard "${{ inputs.shard_index }} of ${{ inputs.shard_count }}" \
+          --target-count "1" \
+          --artifact-name "replay-pbt-job-report-${{ matrix.artifact_slug }}" \
+          | tee "$GITHUB_STEP_SUMMARY"
+
+    - name: Scan job report
+      if: always()
+      run: python .github/workflows/scripts/replay-pbt-secret-scan.py /tmp/replay-pbt-job-report /tmp/replay-pbt-job-report.zip
+
+    - name: Upload job report
+      if: always()
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      with:
+        name: replay-pbt-job-report-${{ matrix.artifact_slug }}
+        path: /tmp/replay-pbt-job-report.zip
+        if-no-files-found: warn
+        retention-days: 1
+
     - name: Upload property findings
       if: always()
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0

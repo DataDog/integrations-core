@@ -465,6 +465,7 @@ def build_markdown(
     shard: str,
     target_count: str,
     shard_runs: list[dict[str, Any]] | None = None,
+    artifact_name: str = "replay-pbt-report",
 ) -> str:
     status_counts = Counter(row["status"] for row in rows)
     category_counts = Counter(row["category"] for row in rows if row["category"] != "passed")
@@ -485,7 +486,7 @@ def build_markdown(
             f"**Shard:** `{shard}`  ",
             f"**Targets in this shard:** `{target_count}`  ",
             f"**Result files collected:** `{total}`  ",
-            f"**Rich dashboard:** download the `replay-pbt-report` artifact and open `report.html`.",
+            f"**Rich dashboard:** download the `{artifact_name}` artifact and open `report.html`.",
             "",
         ]
     )
@@ -757,6 +758,7 @@ def main() -> None:
     parser.add_argument("--mode", default="")
     parser.add_argument("--shard", default="")
     parser.add_argument("--target-count", default="")
+    parser.add_argument("--artifact-name", default="replay-pbt-report")
     args = parser.parse_args()
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
@@ -792,7 +794,15 @@ def main() -> None:
         for category, count in category_counts.most_common()
     ]
 
-    markdown = build_markdown(rows, findings, coverages, mode=args.mode, shard=args.shard, target_count=args.target_count)
+    markdown = build_markdown(
+        rows,
+        findings,
+        coverages,
+        mode=args.mode,
+        shard=args.shard,
+        target_count=args.target_count,
+        artifact_name=args.artifact_name,
+    )
     html_report = build_html(markdown, rows, findings, coverages)
 
     (args.out_dir / "report.md").write_text(markdown)
