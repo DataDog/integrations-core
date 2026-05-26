@@ -825,15 +825,22 @@ pipeline:
                 sources:
                   ocsf.activity_name:
                     - type
+            - type: schema-remapper
+              name: Map `provider` to `ocsf.actor.idp.name`
+              sources:
+                - provider
+              target: ocsf.actor.idp.name
+              preserveSource: true
+              overrideOnConflict: true
             - type: schema-category-mapper
               name: ocsf.auth_protocol_id
               categories:
                 - filter:
-                    query: "@ocsf.metadata.event_code:(sso_login_initiated OR sso_login_succeeded OR sso_login_failed OR sso_second_factor_magic_link)"
+                    query: "@auth_method:sso OR @ocsf.metadata.event_code:(sso_login_initiated OR sso_login_succeeded OR sso_login_failed OR sso_second_factor_magic_link)"
                   name: SAML
                   id: 5
                 - filter:
-                    query: "@ocsf.metadata.event_code:social_login_succeeded"
+                    query: "@auth_method:social OR @ocsf.metadata.event_code:social_login_succeeded"
                   name: OpenID
                   id: 4
                 - filter:
@@ -849,6 +856,7 @@ pipeline:
                   ocsf.auth_protocol_id: "99"
                 sources:
                   ocsf.auth_protocol:
+                    - auth_method
                     - type
             - type: schema-category-mapper
               name: ocsf.status_id
