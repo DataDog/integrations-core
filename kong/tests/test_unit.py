@@ -57,7 +57,7 @@ def test_check_v3(aggregator, dd_run_check, mock_http_response):
     instance = {
         'openmetrics_endpoint': METRICS_URL,
         'extra_metrics': [{'kong_memory_workers_lua_vms_bytes': 'memory.workers.lua.vms.bytes'}],
-        # Phase 2 MVP POC opt-in (see RFC 2026-02-11): exercise HTTPXWrapper end-to-end.
+        # kong is one of the first integrations migrated to the httpx-backed HTTP client.
         'use_httpx': True,
     }
 
@@ -81,7 +81,7 @@ def test_check(aggregator, dd_run_check, mock_http_response):
     instance = {
         'openmetrics_endpoint': METRICS_URL,
         'extra_metrics': [{'kong_memory_workers_lua_vms_bytes': 'memory.workers.lua.vms.bytes'}],
-        # Phase 2 MVP POC opt-in (see RFC 2026-02-11): exercise HTTPXWrapper end-to-end.
+        # kong is one of the first integrations migrated to the httpx-backed HTTP client.
         'use_httpx': True,
     }
     check = Kong('kong', {}, [instance])

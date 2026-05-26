@@ -73,7 +73,7 @@ def dd_environment(dd_save_state):
 
             metrics_endpoint = f'http://{kuma_metrics_url}:{kuma_metrics_port}/metrics'
 
-            # Phase 2 MVP POC opt-in: exercise HTTPXWrapper end-to-end.
+            # kuma is one of the first integrations migrated to the httpx-backed HTTP client.
             env_instance = {'openmetrics_endpoint': metrics_endpoint, 'use_httpx': True}
 
             dd_save_state("kuma_instance", env_instance)

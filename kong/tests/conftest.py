@@ -26,5 +26,5 @@ def dd_environment():
 
 @pytest.fixture
 def instance_openmetrics_v2():
-    # Phase 2 MVP POC opt-in (see RFC 2026-02-11): exercise HTTPXWrapper end-to-end.
+    # kong is one of the first integrations migrated to the httpx-backed HTTP client.
     return {**common.openmetrics_instance, 'use_httpx': True}
