@@ -191,15 +191,14 @@ jobs:
         path: .ddev/replay/${{ env.REPLAY_PBT_INTEGRATION }}/${{ env.REPLAY_PBT_ENVIRONMENT }}
         key: ${{ env.REPLAY_PBT_CACHE_KEY }}
 
-    - name: Upload replay artifacts
+    - name: Upload replay findings
       if: always()
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
-        name: replay-pbt-artifacts
-        path: |
-          .ddev/replay/${{ env.REPLAY_PBT_INTEGRATION }}/${{ env.REPLAY_PBT_ENVIRONMENT }}
-          ${{ runner.temp }}/replay-pbt
+        name: replay-pbt-findings
+        path: ${{ runner.temp }}/replay-pbt
         if-no-files-found: ignore
+        retention-days: 1
 
   save-event:
     needs:

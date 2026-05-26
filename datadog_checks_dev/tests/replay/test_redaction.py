@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.dev.replay.redaction import REDACTED, scrub_json, scrub_request_record, scrub_tag, scrub_url
+from datadog_checks.dev.replay.redaction import REDACTED, scrub_json, scrub_request_record, scrub_tag, scrub_text, scrub_url
 
 
 def test_scrub_json_redacts_sensitive_keys_recursively():
@@ -113,3 +113,30 @@ def test_scrub_tag_redacts_sensitive_tag_values():
     assert scrub_tag('session_id:abc123') == f'session_id:{REDACTED}'
     assert scrub_tag('session_die_active:12') == 'session_die_active:12'
     assert scrub_tag('env:test') == 'env:test'
+
+
+def test_scrub_text_redacts_prefixed_env_var_assignments():
+    text = '\n'.join(
+        [
+            'FOO_TOKEN=abc123456789',
+            'DD_API_KEY=abcdef0123456789',
+            'AWS_SECRET_ACCESS_KEY=secret-value',
+            'AUTHORIZATION=Bearer abcdefghijklmnop',
+            'authorization: Basic YWJjZGVmZ2hpamtsbW5vcA==',
+            'SAFE_VALUE=plain-value',
+        ]
+    )
+
+    scrubbed = scrub_text(text)
+
+    assert 'abc123456789' not in scrubbed
+    assert 'abcdef0123456789' not in scrubbed
+    assert 'secret-value' not in scrubbed
+    assert 'Bearer abcdefghijklmnop' not in scrubbed
+    assert 'Basic YWJjZGVmZ2hpamtsbW5vcA==' not in scrubbed
+    assert f'FOO_TOKEN={REDACTED}' in scrubbed
+    assert f'DD_API_KEY={REDACTED}' in scrubbed
+    assert f'AWS_SECRET_ACCESS_KEY={REDACTED}' in scrubbed
+    assert f'AUTHORIZATION={REDACTED}' in scrubbed
+    assert f'authorization:{REDACTED}' in scrubbed
+    assert 'SAFE_VALUE=plain-value' in scrubbed

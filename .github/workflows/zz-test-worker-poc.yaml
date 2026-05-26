@@ -394,6 +394,11 @@ jobs:
             except Exception:
                 continue
             for artifact in manifest.get('artifacts', []):
+                # Defense in depth: only collect schema-known lightweight JSON
+                # artifacts. Never copy arbitrary property artifact paths into
+                # the cross-job summary inputs.
+                if artifact.get('kind') not in {'findings', 'coverage'} or artifact.get('format') != 'json':
+                    continue
                 rel_path = artifact.get('path')
                 if not isinstance(rel_path, str) or rel_path.startswith('/') or '..' in Path(rel_path).parts:
                     continue
@@ -412,6 +417,7 @@ jobs:
         name: replay-pbt-findings-${{ matrix.artifact_slug }}
         path: /tmp/replay-pbt-findings
         if-no-files-found: ignore
+        retention-days: 1
 
     - name: Upload result
       if: always()
@@ -420,16 +426,8 @@ jobs:
         name: replay-pbt-result-${{ matrix.artifact_slug }}
         path: /tmp/replay-pbt-result
         if-no-files-found: warn
+        retention-days: 1
 
-    - name: Upload failure artifacts
-      if: failure()
-      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-      with:
-        name: replay-pbt-artifacts-${{ matrix.artifact_slug }}
-        path: |
-          /tmp/replay-pbt-artifacts
-          .ddev/replay/${{ matrix.integration }}/${{ matrix.environment }}
-        if-no-files-found: ignore
 
   summarize:
     name: Collect replay-PBT results
@@ -441,6 +439,10 @@ jobs:
     permissions:
       contents: read
     steps:
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        fetch-depth: 1
+
     - name: Download result artifacts
       uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
       with:
@@ -455,201 +457,22 @@ jobs:
         path: replay-pbt-findings
         merge-multiple: false
 
-    - name: Build result table
+    - name: Build Replay PBT report
       run: |
-        python - <<'PY' | tee "$GITHUB_STEP_SUMMARY"
-        import json
-        from collections import Counter
-        from pathlib import Path
+        python .github/workflows/scripts/replay-pbt-report.py \
+          --results replay-pbt-results \
+          --findings replay-pbt-findings \
+          --out-dir replay-pbt-report \
+          --zip replay-pbt-report.zip \
+          --mode "${{ inputs.mode }}" \
+          --shard "${{ inputs.shard_index }} of ${{ inputs.shard_count }}" \
+          --target-count "${{ needs.compute-matrix.outputs.count }}" \
+          | tee "$GITHUB_STEP_SUMMARY"
 
-        rows = []
-        for path in Path('replay-pbt-results').glob('**/result.json'):
-            rows.append(json.loads(path.read_text()))
-        rows.sort(
-            key=lambda row: (
-                row.get('status', ''),
-                row.get('integration', ''),
-                row.get('environment', ''),
-            )
-        )
-        counts = Counter(row.get('status', 'unknown') for row in rows)
-        Path('replay-pbt-summary.json').write_text(json.dumps(rows, indent=2, sort_keys=True) + '\n')
-        tsv_columns = (
-            'status',
-            'mode',
-            'integration',
-            'environment',
-            'fixture_ref',
-            'target_ref',
-            'readings',
-            'exit_code',
-            'failed_tests',
-            'short_errors',
-            'shard_index',
-            'shard_count',
-            'cache_key',
-        )
-        with Path('replay-pbt-summary.tsv').open('w') as f:
-            f.write('\t'.join(tsv_columns) + '\n')
-            for row in rows:
-                f.write('\t'.join(str(row.get(key, '')) for key in tsv_columns) + '\n')
-
-        print('# Replay PBT summary')
-        print()
-        print(f'- Mode: ${{ inputs.mode }}')
-        print(f'- Shard: ${{ inputs.shard_index }} of ${{ inputs.shard_count }}')
-        print(f'- Targets in matrix: ${{ needs.compute-matrix.outputs.count }}')
-        print(f'- Result files collected: {len(rows)}')
-        for status, count in sorted(counts.items()):
-            print(f'- {status}: {count}')
-        print()
-        print('## Results')
-        print()
-        print('| status | mode | integration | environment | fixture ref | target ref | failures |')
-        print('|---|---|---|---|---|---|---|')
-        for row in rows:
-            print(
-                f"| {row.get('status', '')} | {row.get('mode', '')} | "
-                f"{row.get('integration', '')} | {row.get('environment', '')} | "
-                f"{row.get('fixture_ref', '')} | {row.get('target_ref', '')} | "
-                f"{'<br>'.join(row.get('failed_tests') or row.get('short_errors') or [])[:1000]} |"
-            )
-        PY
-
-    - name: Build property findings table
-      run: |
-        python - <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
-        import csv
-        import json
-        from pathlib import Path
-
-        root = Path('replay-pbt-findings')
-
-        def load_json(path):
-            try:
-                return json.loads(path.read_text())
-            except Exception:
-                return None
-
-        def find_target(path):
-            for parent in [path, *path.parents]:
-                target_path = parent / 'target.json'
-                if target_path.is_file():
-                    target = load_json(target_path)
-                    if isinstance(target, dict):
-                        return target
-            return {}
-
-        property_results = []
-        findings = []
-        coverages = []
-
-        for manifest_path in sorted(root.glob('**/property-result.json')):
-            manifest = load_json(manifest_path)
-            if not isinstance(manifest, dict):
-                continue
-            target = find_target(manifest_path.parent)
-            property_name = manifest.get('property') or manifest_path.parent.name
-            property_results.append({**target, **manifest})
-            for artifact in manifest.get('artifacts', []):
-                if not isinstance(artifact, dict):
-                    continue
-                rel_path = artifact.get('path')
-                kind = artifact.get('kind')
-                if not isinstance(rel_path, str) or rel_path.startswith('/') or '..' in Path(rel_path).parts:
-                    continue
-                artifact_path = manifest_path.parent / rel_path
-                if not artifact_path.is_file():
-                    continue
-                data = load_json(artifact_path) if artifact.get('format') == 'json' else None
-                if kind == 'findings' and isinstance(data, list):
-                    for finding in data:
-                        if isinstance(finding, dict):
-                            findings.append({**target, 'property': property_name, **finding})
-                elif kind == 'coverage' and isinstance(data, dict):
-                    endpoint = data.get('endpoint_to_emitted') or data.get('observed_to_emitted') or {}
-                    metadata = data.get('metadata_to_emitted') or data.get('supported_to_emitted') or {}
-                    coverages.append(
-                        {
-                            **target,
-                            'property': property_name,
-                            'endpoint_count': endpoint.get('endpoint_count', endpoint.get('observed_count')),
-                            'endpoint_emitted_count': endpoint.get('covered_count'),
-                            'endpoint_missing_count': endpoint.get('missing_count'),
-                            'endpoint_to_emitted_coverage': endpoint.get('coverage'),
-                            'metadata_count': metadata.get('metadata_count', metadata.get('supported_count')),
-                            'metadata_emitted_count': metadata.get('emitted_count'),
-                            'metadata_unemitted_count': metadata.get('unemitted_count'),
-                            'metadata_to_emitted_coverage': metadata.get('coverage'),
-                        }
-                    )
-
-        Path('replay-pbt-property-results.json').write_text(json.dumps(property_results, indent=2, sort_keys=True) + '\n')
-        Path('replay-pbt-findings.json').write_text(json.dumps(findings, indent=2, sort_keys=True) + '\n')
-        Path('replay-pbt-coverage-summary.json').write_text(json.dumps(coverages, indent=2, sort_keys=True) + '\n')
-
-        finding_columns = ('level', 'property', 'check', 'integration', 'environment', 'metric', 'tag_key', 'path', 'message', 'query')
-        with Path('replay-pbt-findings.tsv').open('w', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=finding_columns, delimiter='\t', extrasaction='ignore')
-            writer.writeheader()
-            writer.writerows(findings)
-
-        coverage_columns = (
-            'property',
-            'integration',
-            'environment',
-            'endpoint_count',
-            'endpoint_emitted_count',
-            'endpoint_missing_count',
-            'endpoint_to_emitted_coverage',
-            'metadata_count',
-            'metadata_emitted_count',
-            'metadata_unemitted_count',
-            'metadata_to_emitted_coverage',
-        )
-        with Path('replay-pbt-coverage-summary.tsv').open('w', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=coverage_columns, delimiter='\t', extrasaction='ignore')
-            writer.writeheader()
-            writer.writerows(coverages)
-
-        lines = ['# Replay PBT property findings', '']
-        if not findings:
-            lines.append('No findings reported by property artifacts.')
-        else:
-            for finding in findings[:200]:
-                lines.append(
-                    f"- **{finding.get('level', '').upper()}** `{finding.get('property', '')}` "
-                    f"{finding.get('integration', '')}:{finding.get('environment', '')} — "
-                    f"{finding.get('message', '')}"
-                )
-                if finding.get('metric'):
-                    lines.append(f"  - metric: `{finding['metric']}`")
-                if finding.get('tag_key'):
-                    lines.append(f"  - tag key: `{finding['tag_key']}`")
-                if finding.get('path'):
-                    lines.append(f"  - path: `{finding['path']}`")
-            if len(findings) > 200:
-                lines.append(f"- ... {len(findings) - 200} more findings")
-        Path('replay-pbt-findings.md').write_text('\n'.join(lines) + '\n')
-
-        print('\n# Replay PBT property artifact summary')
-        print()
-        print(f'- Property result manifests collected: {len(property_results)}')
-        print(f'- Findings collected: {len(findings)}')
-        print(f'- Coverage reports collected: {len(coverages)}')
-        PY
-
-    - name: Upload summary artifacts
+    - name: Upload report bundle
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
-        name: replay-pbt-summary
-        path: |
-          replay-pbt-summary.json
-          replay-pbt-summary.tsv
-          replay-pbt-property-results.json
-          replay-pbt-findings.json
-          replay-pbt-findings.tsv
-          replay-pbt-findings.md
-          replay-pbt-coverage-summary.json
-          replay-pbt-coverage-summary.tsv
+        name: replay-pbt-report
+        path: replay-pbt-report.zip
         if-no-files-found: error
+        retention-days: 14

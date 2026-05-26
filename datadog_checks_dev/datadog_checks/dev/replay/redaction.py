@@ -30,8 +30,22 @@ SENSITIVE_TAG_KEY_RE = re.compile(
 )
 SENSITIVE_SESSION_KEY_RE = re.compile(r'(?i)(^|[_\-.])session(?:$|[_\-.]?id($|[_\-.]))')
 
+AUTH_HEADER_TEXT_RE = re.compile(
+    r'(?ix)\b(authorization|proxy-authorization)\s*([:=])\s*((?:bearer|basic)\s+[^\n\r,;}]+)'
+)
+
 KEY_VALUE_TEXT_RE = re.compile(
-    r'(?i)\b(api[_-]?key|app[_-]?key|application[_-]?key|access[_-]?token|refresh[_-]?token|id[_-]?token|token|secret|password|passwd|client[_-]?secret|signature|session)=("[^"\n]*"|[^&\s,}]+)'
+    r'(?ix)\b('
+    r'[A-Z0-9_.-]*'
+    r'(?:'
+    r'authorization|proxy-authorization|cookie|set-cookie|'
+    r'api[_-]?key|app[_-]?key|application[_-]?key|'
+    r'access[_-]?token|refresh[_-]?token|id[_-]?token|token|'
+    r'secret|password|passwd|passphrase|private[_-]?key|client[_-]?secret|'
+    r'credential|signature|session'
+    r')'
+    r'[A-Z0-9_.-]*'
+    r')=("[^"\n]*"|[^&\s,}]+)'
 )
 
 TEXT_REPLACEMENTS = (
@@ -58,6 +72,12 @@ def is_sensitive_tag_key(key: str) -> bool:
     return bool(SENSITIVE_TAG_KEY_RE.search(key) or SENSITIVE_SESSION_KEY_RE.search(key))
 
 
+def redact_auth_header_match(match: re.Match[str]) -> str:
+    key = match.group(1)
+    sep = match.group(2)
+    return f'{key}{sep}{REDACTED}'
+
+
 def redact_key_value_match(match: re.Match[str]) -> str:
     key = match.group(1)
     value = match.group(2)
@@ -67,7 +87,8 @@ def redact_key_value_match(match: re.Match[str]) -> str:
 
 
 def scrub_text(value: str) -> str:
-    scrubbed = KEY_VALUE_TEXT_RE.sub(redact_key_value_match, value)
+    scrubbed = AUTH_HEADER_TEXT_RE.sub(redact_auth_header_match, value)
+    scrubbed = KEY_VALUE_TEXT_RE.sub(redact_key_value_match, scrubbed)
     for pattern in TEXT_REPLACEMENTS:
         scrubbed = pattern.sub(REDACTED, scrubbed)
     return scrubbed
