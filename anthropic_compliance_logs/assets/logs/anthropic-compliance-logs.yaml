@@ -432,31 +432,14 @@ pipeline:
               target: ocsf.user.email_addr
               preserveSource: true
               overrideOnConflict: false
-            - type: schema-category-mapper
-              name: ocsf.actor.user.type_id
-              categories:
-                - filter:
-                    query: "@actor.type:user_actor"
-                  name: User
-                  id: 1
-                - filter:
-                    query: "@actor.type:(api_actor OR admin_api_key_actor OR scim_directory_sync_actor OR anthropic_actor)"
-                  name: Service
-                  id: 4
-                - filter:
-                    query: "@actor.type:*"
-                  name: Unknown
-                  id: 0
-              targets:
-                name: ocsf.actor.user.type
-                id: ocsf.actor.user.type_id
-              fallback:
-                values:
-                  ocsf.actor.user.type: Unknown
-                  ocsf.actor.user.type_id: "0"
-                sources:
-                  ocsf.actor.user.type:
-                    - actor.type
+            - type: schema-remapper
+              name: Map `deleted_user_email`, `invited_email` to `ocsf.user.name`
+              sources:
+                - deleted_user_email
+                - invited_email
+              target: ocsf.user.name
+              preserveSource: true
+              overrideOnConflict: false
             - type: schema-category-mapper
               name: ocsf.activity_id
               categories:
@@ -621,31 +604,6 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-category-mapper
-              name: ocsf.actor.user.type_id
-              categories:
-                - filter:
-                    query: "@actor.type:user_actor"
-                  name: User
-                  id: 1
-                - filter:
-                    query: "@actor.type:(api_actor OR admin_api_key_actor OR scim_directory_sync_actor OR anthropic_actor)"
-                  name: Service
-                  id: 4
-                - filter:
-                    query: "@actor.type:*"
-                  name: Unknown
-                  id: 0
-              targets:
-                name: ocsf.actor.user.type
-                id: ocsf.actor.user.type_id
-              fallback:
-                values:
-                  ocsf.actor.user.type: Unknown
-                  ocsf.actor.user.type_id: "0"
-                sources:
-                  ocsf.actor.user.type:
-                    - actor.type
-            - type: schema-category-mapper
               name: ocsf.activity_id
               categories:
                 - filter:
@@ -780,6 +738,14 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
+              name: Map `actor.email_address`, `actor.unauthenticated_email_address` to `ocsf.actor.user.name`
+              sources:
+                - actor.email_address
+                - actor.unauthenticated_email_address
+              target: ocsf.actor.user.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
               name: Map `actor.email_address`, `actor.unauthenticated_email_address` to `ocsf.user.email_addr`
               sources:
                 - actor.email_address
@@ -792,6 +758,14 @@ pipeline:
               sources:
                 - actor.user_id
               target: ocsf.user.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `actor.email_address`, `actor.unauthenticated_email_address` to `ocsf.user.name`
+              sources:
+                - actor.email_address
+                - actor.unauthenticated_email_address
+              target: ocsf.user.name
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
@@ -823,31 +797,6 @@ pipeline:
               target: ocsf.service.name
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-category-mapper
-              name: ocsf.actor.user.type_id
-              categories:
-                - filter:
-                    query: "@actor.type:user_actor"
-                  name: User
-                  id: 1
-                - filter:
-                    query: "@actor.type:(api_actor OR admin_api_key_actor OR scim_directory_sync_actor OR anthropic_actor)"
-                  name: Service
-                  id: 4
-                - filter:
-                    query: "@actor.type:*"
-                  name: Unknown
-                  id: 0
-              targets:
-                name: ocsf.actor.user.type
-                id: ocsf.actor.user.type_id
-              fallback:
-                values:
-                  ocsf.actor.user.type: Unknown
-                  ocsf.actor.user.type_id: "0"
-                sources:
-                  ocsf.actor.user.type:
-                    - actor.type
             - type: schema-category-mapper
               name: ocsf.activity_id
               categories:
@@ -1108,31 +1057,6 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-category-mapper
-              name: ocsf.actor.user.type_id
-              categories:
-                - filter:
-                    query: "@actor.type:user_actor"
-                  name: User
-                  id: 1
-                - filter:
-                    query: "@actor.type:(api_actor OR admin_api_key_actor OR scim_directory_sync_actor OR anthropic_actor)"
-                  name: Service
-                  id: 4
-                - filter:
-                    query: "@actor.type:*"
-                  name: Unknown
-                  id: 0
-              targets:
-                name: ocsf.actor.user.type
-                id: ocsf.actor.user.type_id
-              fallback:
-                values:
-                  ocsf.actor.user.type: Unknown
-                  ocsf.actor.user.type_id: "0"
-                sources:
-                  ocsf.actor.user.type:
-                    - actor.type
-            - type: schema-category-mapper
               name: ocsf.activity_id
               categories:
                 - filter:
@@ -1303,31 +1227,6 @@ pipeline:
               target: ocsf.web_resources.name
               preserveSource: true
               overrideOnConflict: false
-            - type: schema-category-mapper
-              name: ocsf.src_endpoint.owner.type_id
-              categories:
-                - filter:
-                    query: "@actor.type:user_actor"
-                  name: User
-                  id: 1
-                - filter:
-                    query: "@actor.type:(api_actor OR admin_api_key_actor OR scim_directory_sync_actor OR anthropic_actor)"
-                  name: Service
-                  id: 4
-                - filter:
-                    query: "@actor.type:*"
-                  name: Unknown
-                  id: 0
-              targets:
-                name: ocsf.src_endpoint.owner.type
-                id: ocsf.src_endpoint.owner.type_id
-              fallback:
-                values:
-                  ocsf.src_endpoint.owner.type: Unknown
-                  ocsf.src_endpoint.owner.type_id: "0"
-                sources:
-                  ocsf.src_endpoint.owner.type:
-                    - actor.type
             - type: schema-category-mapper
               name: ocsf.activity_id
               categories:
@@ -1528,31 +1427,6 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               targetFormat: integer
-            - type: schema-category-mapper
-              name: ocsf.actor.user.type_id
-              categories:
-                - filter:
-                    query: "@actor.type:user_actor"
-                  name: User
-                  id: 1
-                - filter:
-                    query: "@actor.type:(api_actor OR admin_api_key_actor OR scim_directory_sync_actor OR anthropic_actor)"
-                  name: Service
-                  id: 4
-                - filter:
-                    query: "@actor.type:*"
-                  name: Unknown
-                  id: 0
-              targets:
-                name: ocsf.actor.user.type
-                id: ocsf.actor.user.type_id
-              fallback:
-                values:
-                  ocsf.actor.user.type: Unknown
-                  ocsf.actor.user.type_id: "0"
-                sources:
-                  ocsf.actor.user.type:
-                    - actor.type
             - type: schema-category-mapper
               name: ocsf.activity_id
               categories:

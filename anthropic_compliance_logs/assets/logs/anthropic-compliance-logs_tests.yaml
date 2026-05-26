@@ -79,7 +79,7 @@ tests:
           owner:
             email_addr: "user@example.com"
             org:
-              uid: "00000000-0000-0000-0000-000000000000"
+              uid: "org_01EXAMPLEORGID00000000000"
             uid: "user_01EXAMPLEUSERID0000000000"
         status: "Success"
         status_id: 1
@@ -112,7 +112,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463513701
-
  -
   sample: |-
     {
@@ -183,7 +182,7 @@ tests:
           owner:
             email_addr: "user@example.com"
             org:
-              uid: "00000000-0000-0000-0000-000000000000"
+              uid: "org_01EXAMPLEORGID00000000000"
             uid: "user_01EXAMPLEUSERID0000000000"
         status: "Success"
         status_id: 1
@@ -216,7 +215,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463314358
-
  -
   sample: |-
     {
@@ -287,7 +285,7 @@ tests:
           owner:
             email_addr: "user@example.com"
             org:
-              uid: "00000000-0000-0000-0000-000000000000"
+              uid: "org_01EXAMPLEORGID00000000000"
             uid: "user_01EXAMPLEUSERID0000000000"
         status: "Success"
         status_id: 1
@@ -320,7 +318,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463263415
-
  -
   sample: |-
     {
@@ -393,7 +390,7 @@ tests:
           owner:
             email_addr: "user@example.com"
             org:
-              uid: "00000000-0000-0000-0000-000000000000"
+              uid: "org_01EXAMPLEORGID00000000000"
             uid: "user_01EXAMPLEUSERID0000000000"
         status: "Success"
         status_id: 1
@@ -427,7 +424,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463304621
-
  -
   sample: |-
     {
@@ -498,7 +494,7 @@ tests:
           owner:
             email_addr: "user@example.com"
             org:
-              uid: "00000000-0000-0000-0000-000000000000"
+              uid: "org_01EXAMPLEORGID00000000000"
             uid: "user_01EXAMPLEUSERID0000000000"
         status: "Success"
         status_id: 1
@@ -531,7 +527,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463313556
-
  -
   sample: |-
     {
@@ -604,7 +599,7 @@ tests:
           owner:
             email_addr: "user@example.com"
             org:
-              uid: "00000000-0000-0000-0000-000000000000"
+              uid: "org_01EXAMPLEORGID00000000000"
             uid: "user_01EXAMPLEUSERID0000000000"
         status: "Success"
         status_id: 1
@@ -639,7 +634,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463292702
-
  -
   sample: |-
     {
@@ -712,7 +706,7 @@ tests:
           owner:
             email_addr: "user@example.com"
             org:
-              uid: "00000000-0000-0000-0000-000000000000"
+              uid: "org_01EXAMPLEORGID00000000000"
             uid: "user_01EXAMPLEUSERID0000000000"
         status: "Success"
         status_id: 1
@@ -747,7 +741,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463310616
-
  -
   sample: |-
     {
@@ -818,7 +811,7 @@ tests:
           owner:
             email_addr: "user@example.com"
             org:
-              uid: "00000000-0000-0000-0000-000000000000"
+              uid: "org_01EXAMPLEORGID00000000000"
             uid: "user_01EXAMPLEUSERID0000000000"
         status: "Success"
         status_id: 1
@@ -851,7 +844,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463270594
-
  -
   sample: |-
     {
@@ -926,7 +918,7 @@ tests:
           owner:
             email_addr: "user@example.com"
             org:
-              uid: "00000000-0000-0000-0000-000000000000"
+              uid: "org_01EXAMPLEORGID00000000000"
             uid: "user_01EXAMPLEUSERID0000000000"
         status: "Success"
         status_id: 1
@@ -962,7 +954,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463385845
-
  -
   sample: |-
     {
@@ -1037,7 +1028,7 @@ tests:
           owner:
             email_addr: "user@example.com"
             org:
-              uid: "00000000-0000-0000-0000-000000000000"
+              uid: "org_01EXAMPLEORGID00000000000"
             uid: "user_01EXAMPLEUSERID0000000000"
         status: "Success"
         status_id: 1
@@ -1073,7 +1064,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463223462
-
  -
   sample: |-
     {
@@ -1145,7 +1135,7 @@ tests:
           owner:
             email_addr: "user@example.com"
             org:
-              uid: "00000000-0000-0000-0000-000000000000"
+              uid: "org_01EXAMPLEORGID00000000000"
             uid: "user_01EXAMPLEUSERID0000000000"
         status: "Success"
         status_id: 1
@@ -1180,7 +1170,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463308506
-
  -
   sample: |-
     {
@@ -1251,7 +1240,7 @@ tests:
           owner:
             email_addr: "user@example.com"
             org:
-              uid: "00000000-0000-0000-0000-000000000000"
+              uid: "org_01EXAMPLEORGID00000000000"
             uid: "user_01EXAMPLEUSERID0000000000"
         status: "Success"
         status_id: 1
@@ -1288,7 +1277,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463304267
-
  -
   sample: |-
     {
@@ -1359,7 +1347,7 @@ tests:
           owner:
             email_addr: "user@example.com"
             org:
-              uid: "00000000-0000-0000-0000-000000000000"
+              uid: "org_01EXAMPLEORGID00000000000"
             uid: "user_01EXAMPLEUSERID0000000000"
         status: "Success"
         status_id: 1
@@ -1396,7 +1384,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463277287
-
  -
   sample: |-
     {
@@ -1481,12 +1468,11 @@ tests:
           uid: "user_01EXAMPLEUSERID0000000000"
       type: "claude_user_settings_updated"
       updates:
-       -
-        previous_value:
-          example_tool: false
-        type: "mcp_tools_enabled"
-        current_value:
-          example_tool: true
+        - current_value:
+            example_tool: true
+          previous_value:
+            example_tool: false
+          type: "mcp_tools_enabled"
       usr:
         email: "user@example.com"
         id: "user_01EXAMPLEUSERID0000000000"
@@ -1516,7 +1502,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463310371
-
  -
   sample: |-
     {
@@ -1626,7 +1611,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463298920
-
  -
   sample: |-
     {
@@ -1679,8 +1663,7 @@ tests:
         actor:
           user:
             org:
-              name: "org_01EXAMPLEORGID00000000000"
-              uid: "00000000-0000-0000-0000-000000000000"
+              uid: "org_01EXAMPLEORGID00000000000"
             uid: "admin_api_key_01EXAMPLEADMIN0000"
         category_name: "Identity & Access Management"
         category_uid: 3
@@ -1727,7 +1710,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779462423419
-
  -
   sample: |-
     {
@@ -1783,8 +1765,7 @@ tests:
           user:
             email_addr: "user@example.com"
             org:
-              name: "org_01EXAMPLEORGID00000000000"
-              uid: "00000000-0000-0000-0000-000000000000"
+              uid: "org_01EXAMPLEORGID00000000000"
             uid: "user_01EXAMPLEUSERID0000000000"
         category_name: "Identity & Access Management"
         category_uid: 3
@@ -1809,6 +1790,7 @@ tests:
         time: 1776861538658
         user:
           email_addr: "user@example.com"
+          name: "user@example.com"
           uid: "user_01EXAMPLEUSERID0000000000"
       organization_id: "org_01EXAMPLEORGID00000000000"
       organization_uuid: "00000000-0000-0000-0000-000000000000"
@@ -1837,7 +1819,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1776861538658
-
  -
   sample: |-
     {
@@ -1891,8 +1872,7 @@ tests:
           user:
             email_addr: "user@example.com"
             org:
-              name: "org_01EXAMPLEORGID00000000000"
-              uid: "00000000-0000-0000-0000-000000000000"
+              uid: "org_01EXAMPLEORGID00000000000"
             uid: "user_01EXAMPLEUSERID0000000000"
         category_name: "Identity & Access Management"
         category_uid: 3
@@ -1944,7 +1924,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1778858557490
-
  -
   sample: |-
     {
@@ -2000,8 +1979,7 @@ tests:
           user:
             email_addr: "user@example.com"
             org:
-              name: "org_01EXAMPLEORGID00000000000"
-              uid: "00000000-0000-0000-0000-000000000000"
+              uid: "org_01EXAMPLEORGID00000000000"
             uid: "user_01EXAMPLEUSERID0000000000"
         category_name: "Identity & Access Management"
         category_uid: 3
@@ -2026,6 +2004,7 @@ tests:
         time: 1778858531738
         user:
           email_addr: "invitee@example.com"
+          name: "invitee@example.com"
       organization_id: "org_01EXAMPLEORGID00000000000"
       organization_uuid: "00000000-0000-0000-0000-000000000000"
       type: "org_user_invite_sent"
@@ -2118,7 +2097,7 @@ tests:
           ip: "192.0.2.1"
           owner:
             org:
-              uid: "00000000-0000-0000-0000-000000000000"
+              uid: "org_01EXAMPLEORGID00000000000"
             uid: "admin_api_key_01EXAMPLEADMIN0000"
         status: "Success"
         status_id: 1
@@ -2146,7 +2125,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463311118
-
  -
   sample: |-
     {
@@ -2215,7 +2193,7 @@ tests:
           owner:
             email_addr: "user@example.com"
             org:
-              uid: "00000000-0000-0000-0000-000000000000"
+              uid: "org_01EXAMPLEORGID00000000000"
             uid: "user_01EXAMPLEUSERID0000000000"
         status: "Success"
         status_id: 1
@@ -2247,7 +2225,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463255593
-
  -
   sample: |-
     {
@@ -2301,8 +2278,7 @@ tests:
           user:
             email_addr: "user@example.com"
             org:
-              name: "org_01EXAMPLEORGID00000000000"
-              uid: "00000000-0000-0000-0000-000000000000"
+              uid: "org_01EXAMPLEORGID00000000000"
             uid: "user_01EXAMPLEUSERID0000000000"
         category_name: "Identity & Access Management"
         category_uid: 3
@@ -2326,7 +2302,6 @@ tests:
         status_id: 1
         time: 1779463283115
         user:
-          credential_uid: "apikey_01EXAMPLEAPIKEY000000000"
           email_addr: "user@example.com"
           uid: "user_01EXAMPLEUSERID0000000000"
       organization_id: "org_01EXAMPLEORGID00000000000"
@@ -2355,7 +2330,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463283115
-
  -
   sample: |-
     {
@@ -2414,8 +2388,7 @@ tests:
           user:
             email_addr: "user@example.com"
             org:
-              name: "org_01EXAMPLEORGID00000000000"
-              uid: "00000000-0000-0000-0000-000000000000"
+              uid: "org_01EXAMPLEORGID00000000000"
             uid: "user_01EXAMPLEUSERID0000000000"
         category_name: "Identity & Access Management"
         category_uid: 3
@@ -2439,17 +2412,15 @@ tests:
         status_id: 1
         time: 1779463391707
         user:
-          credential_uid: "apikey_01EXAMPLEAPIKEY000000000"
           email_addr: "user@example.com"
           uid: "user_01EXAMPLEUSERID0000000000"
       organization_id: "org_01EXAMPLEORGID00000000000"
       organization_uuid: "00000000-0000-0000-0000-000000000000"
       type: "platform_api_key_updated"
       updates:
-       -
-        previous_value: "active"
-        type: "status"
-        current_value: "archived"
+        - current_value: "archived"
+          previous_value: "active"
+          type: "status"
       usr:
         email: "user@example.com"
         id: "user_01EXAMPLEUSERID0000000000"
@@ -2478,7 +2449,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463391707
-
  -
   sample: |-
     {
@@ -2544,7 +2514,7 @@ tests:
           ip: "192.0.2.1"
           owner:
             org:
-              uid: "00000000-0000-0000-0000-000000000000"
+              uid: "org_01EXAMPLEORGID00000000000"
             uid: "admin_api_key_01EXAMPLEADMIN0000"
         status: "Success"
         status_id: 1
@@ -2572,7 +2542,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463508967
-
  -
   sample: |-
     {
@@ -2638,7 +2607,7 @@ tests:
           ip: "192.0.2.1"
           owner:
             org:
-              uid: "00000000-0000-0000-0000-000000000000"
+              uid: "org_01EXAMPLEORGID00000000000"
             uid: "admin_api_key_01EXAMPLEADMIN0000"
         status: "Success"
         status_id: 1
@@ -2666,7 +2635,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463478318
-
  -
   sample: |-
     {
@@ -2788,7 +2756,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463270596
-
  -
   sample: |-
     {
@@ -2910,7 +2877,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779396431194
-
  -
   sample: |-
     {
@@ -2957,7 +2923,9 @@ tests:
         actor:
           user:
             email_addr: "user@example.com"
-            uid: "user@example.com"
+            name: "user@example.com"
+        auth_protocol: "SAML"
+        auth_protocol_id: 5
         category_name: "Identity & Access Management"
         category_uid: 3
         class_name: "Authentication"
@@ -2974,18 +2942,16 @@ tests:
           version: "1.5.0"
         service:
           name: "Claude SSO"
-        session:
-          uid: "activity_01EXAMPLEACTIVITY0000000"
         severity: "Informational"
         severity_id: 1
         src_endpoint:
           ip: "192.0.2.1"
-        status: "sso_login_initiated"
-        status_id: 99
+        status: "Unknown"
+        status_id: 0
         time: 1779463149946
         user:
           email_addr: "user@example.com"
-          uid: "user@example.com"
+          name: "user@example.com"
       type: "sso_login_initiated"
     message: |-
       {
@@ -3003,7 +2969,6 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463149946
-
  -
   sample: |-
     {
@@ -3054,6 +3019,7 @@ tests:
         actor:
           user:
             email_addr: "user@example.com"
+            name: "user@example.com"
             uid: "user_01EXAMPLEUSERID0000000000"
         auth_protocol: "SAML"
         auth_protocol_id: 5
@@ -3073,8 +3039,6 @@ tests:
           version: "1.5.0"
         service:
           name: "Claude SSO"
-        session:
-          uid: "activity_01EXAMPLEACTIVITY0000000"
         severity: "Informational"
         severity_id: 1
         src_endpoint:
@@ -3084,6 +3048,7 @@ tests:
         time: 1779463154445
         user:
           email_addr: "user@example.com"
+          name: "user@example.com"
           uid: "user_01EXAMPLEUSERID0000000000"
       type: "sso_login_succeeded"
       usr:
@@ -3107,5 +3072,3 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463154445
-
-
