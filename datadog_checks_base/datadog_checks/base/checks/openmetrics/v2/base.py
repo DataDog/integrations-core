@@ -41,12 +41,12 @@ class OpenMetricsBaseCheckV2(AgentCheck):
 
     DEFAULT_METRIC_LIMIT = 2000
 
-    METRICS_MAP: list[MetricsMapping] = []
+    METRICS_MAP: tuple[MetricsMapping, ...] = ()
     """YAML files with metric name mappings to load automatically.
 
-    When empty (default), looks for a ``metrics.yml`` file next to the check
-    module. When set, only the declared files are loaded (with predicates
-    controlling conditional loading).
+    When empty (default), looks for ``metrics.yaml`` next to the check module,
+    falling back to ``metrics.yml`` if the former is absent. When set, only the
+    declared files are loaded (with predicates controlling conditional loading).
     """
 
     # Allow tracing for openmetrics integrations
@@ -131,7 +131,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         otherwise the YAML mappings declared via ``METRICS_MAP`` (or discovered by convention) are
         silently skipped.
         """
-        defaults = self.get_default_config()
+        defaults = dict(self.get_default_config())
         if file_metrics := self._load_file_based_metrics(config):
             defaults['metrics'] = list(defaults.get('metrics', [])) + file_metrics
         return ChainMap(config, defaults)
@@ -189,11 +189,11 @@ class OpenMetricsBaseCheckV2(AgentCheck):
             with open(file_path) as f:
                 data = yaml.safe_load(f)
         except yaml.YAMLError as e:
-            raise ConfigurationError(f"Failed to parse metrics file {path}: {e}") from None
+            raise ConfigurationError(f"Failed to parse metrics file {file_path}: {e}") from None
         except OSError as e:
-            raise ConfigurationError(f"Failed to read metrics file {path}: {e}") from None
+            raise ConfigurationError(f"Failed to read metrics file {file_path}: {e}") from None
         if not isinstance(data, dict):
-            raise ConfigurationError(f"Metrics file {path} must contain a YAML mapping, got {type(data).__name__}")
+            raise ConfigurationError(f"Metrics file {file_path} must contain a YAML mapping, got {type(data).__name__}")
         return data
 
     @contextmanager

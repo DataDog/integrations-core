@@ -187,8 +187,10 @@ def test_load_metrics_file_missing(make_check: CheckFactory, tmp_path: Path):
 # ---------------------------------------------------------------------------
 
 
-def test_load_file_based_metrics_no_files(make_check: CheckFactory):
-    assert make_check()._load_file_based_metrics({}) == []
+def test_load_file_based_metrics_no_files(make_check: CheckFactory, tmp_path: Path):
+    check = make_check()
+    with patch.object(type(check), '_get_package_dir', return_value=tmp_path):
+        assert check._load_file_based_metrics({}) == []
 
 
 @pytest.mark.parametrize("filename", ["metrics.yaml", "metrics.yml"])
@@ -322,6 +324,26 @@ def test_load_file_based_metrics_does_not_mutate_get_default_config(make_check: 
     with patch.object(type(check), '_get_package_dir', return_value=tmp_path):
         check.get_config_with_defaults({'openmetrics_endpoint': 'http://test:9090/metrics'})
     assert SHARED_METRICS == [{"existing": "metric"}]
+
+
+def test_load_file_based_metrics_does_not_mutate_cached_default_dict(make_check: CheckFactory, tmp_path: Path):
+    """A subclass that caches its defaults dict at module level must not see file metrics accumulate."""
+    write_yaml(tmp_path, "metrics.yml", {"raw": "dd.raw"})
+    CACHED_DEFAULTS = {"metrics": [{"existing": "metric"}]}
+
+    class Check(OpenMetricsBaseCheckV2):
+        def get_default_config(self):
+            return CACHED_DEFAULTS
+
+    instance = {'openmetrics_endpoint': 'http://test:9090/metrics'}
+    first = make_check(cls=Check)
+    second = make_check(cls=Check)
+    with patch.object(Check, '_get_package_dir', return_value=tmp_path):
+        config_first = first.get_config_with_defaults(instance)
+        config_second = second.get_config_with_defaults(instance)
+    assert CACHED_DEFAULTS == {"metrics": [{"existing": "metric"}]}
+    assert config_first['metrics'] == config_second['metrics']
+    assert len(config_first['metrics']) == 2
 
 
 # ---------------------------------------------------------------------------
