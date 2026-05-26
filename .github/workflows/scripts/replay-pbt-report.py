@@ -153,6 +153,26 @@ def property_description(name: Any) -> str:
     return PROPERTY_DEFINITIONS.get(str(name or ""), ("", ""))[1]
 
 
+def property_display_md(name: Any) -> str:
+    raw_name = str(name or "")
+    label = property_label(raw_name)
+    if not raw_name:
+        return ""
+    if label == raw_name:
+        return f"`{md_escape(raw_name)}`"
+    return f"**{md_escape(label)}**<br/><sub>`{md_escape(raw_name)}`</sub>"
+
+
+def property_display_html(name: Any) -> str:
+    raw_name = str(name or "")
+    label = property_label(raw_name)
+    if not raw_name:
+        return ""
+    if label == raw_name:
+        return f"<code>{html.escape(raw_name)}</code>"
+    return f"<strong>{html.escape(label)}</strong><br><small><code>{html.escape(raw_name)}</code></small>"
+
+
 def sanitize_text(value: Any, *, max_len: int = MAX_TEXT) -> str:
     text = "" if value is None else str(value)
     text = text.replace("\r", " ").replace("\n", " ")
@@ -540,7 +560,7 @@ def build_individual_target_markdown(
         for prop in target_properties:
             prop_name = prop.get("property", "")
             lines.append(
-                f"| `{md_escape(prop_name)}` | `{md_escape(prop.get('status', ''))}` | {md_escape(property_description(prop_name))} |"
+                f"| {property_display_md(prop_name)} | `{md_escape(prop.get('status', ''))}` | {md_escape(property_description(prop_name))} |"
             )
     elif row.get("status") in {"failed-before-replay-pbt", "skipped-missing-cache"}:
         lines.append("Property tests did not run for this target. The job stopped before replay-PBT could produce per-property results.")
@@ -898,7 +918,7 @@ def build_html(
         category = row.get("category", "unknown")
         icon, label, description = CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS["unknown"])
         prop_rows = "".join(
-            f"<tr><td><code>{esc(prop.get('property'))}</code></td><td>{esc(prop.get('status'))}</td><td>{esc(property_description(prop.get('property')))}</td></tr>"
+            f"<tr><td>{property_display_html(prop.get('property'))}</td><td>{esc(prop.get('status'))}</td><td>{esc(property_description(prop.get('property')))}</td></tr>"
             for prop in property_results_for_target(property_results, str(row.get("target", "")))
         ) or "<tr><td colspan='3'>No per-property manifests were collected for this target.</td></tr>"
         command = esc(replay_reproduce_command(row))
