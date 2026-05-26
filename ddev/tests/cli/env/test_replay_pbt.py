@@ -304,6 +304,7 @@ class ReplayPBTFinding:
     query: str | None = None
     metric: str | None = None
     tag_key: str | None = None
+    asset_type: str | None = None
 
     def as_dict(self) -> dict[str, str | None]:
         return {
@@ -314,6 +315,7 @@ class ReplayPBTFinding:
             'query': self.query,
             'metric': self.metric,
             'tag_key': self.tag_key,
+            'asset_type': self.asset_type,
         }
 
 
@@ -711,6 +713,7 @@ def _asset_metric_metadata_findings(
                     path=asset_query.path,
                     query=asset_query.query,
                     metric=metric_name,
+                    asset_type=asset_query.asset_type,
                 )
             )
     return findings
@@ -755,6 +758,7 @@ def _asset_query_replay_tag_findings(
                         path=asset_query.path,
                         query=asset_query.query,
                         metric=metric_name,
+                        asset_type=asset_query.asset_type,
                     )
                 )
                 continue
@@ -773,6 +777,7 @@ def _asset_query_replay_tag_findings(
                         query=asset_query.query,
                         metric=metric_name,
                         tag_key=tag_key,
+                        asset_type=asset_query.asset_type,
                     )
                 )
     return findings
@@ -1297,9 +1302,9 @@ def test_asset_query_replay_tag_findings_warn_on_unemitted_metric_and_missing_ta
         metadata_rows={'example.request.count': {'metric_type': 'count'}, 'example.other': {'metric_type': 'gauge'}},
     )
 
-    assert {(finding.level, finding.metric, finding.tag_key) for finding in findings} == {
-        ('warning', 'example.request.count', 'endpoint'),
-        ('warning', 'example.request.count', 'status'),
+    assert {(finding.level, finding.metric, finding.tag_key, finding.asset_type) for finding in findings} == {
+        ('warning', 'example.request.count', 'endpoint', 'dashboards'),
+        ('warning', 'example.request.count', 'status', 'dashboards'),
     }
 
 

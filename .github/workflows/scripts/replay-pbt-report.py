@@ -403,21 +403,24 @@ def load_findings_and_coverages(root: Path) -> tuple[list[dict[str, Any]], list[
                 for finding in data:
                     if not isinstance(finding, dict):
                         continue
-                    findings.append(
-                        {
-                            "level": sanitize_text(finding.get("level", ""), max_len=50),
-                            "property": sanitize_text(property_name, max_len=100),
-                            "check": sanitize_text(finding.get("check", ""), max_len=100),
-                            "integration": target.get("integration", ""),
-                            "environment": target.get("environment", ""),
-                            "target": target_slug(target),
-                            "metric": sanitize_text(finding.get("metric", ""), max_len=160),
-                            "tag_key": sanitize_text(finding.get("tag_key", ""), max_len=120),
-                            "path": sanitize_text(finding.get("path", ""), max_len=220),
-                            "message": sanitize_text(finding.get("message", ""), max_len=400),
-                            "query": sanitize_text(finding.get("query", ""), max_len=300),
-                        }
-                    )
+                    path = sanitize_text(finding.get("path", ""), max_len=220)
+                    asset_type = sanitize_text(finding.get("asset_type") or infer_asset_type(path), max_len=80)
+                    finding_row = {
+                        "level": sanitize_text(finding.get("level", ""), max_len=50),
+                        "property": sanitize_text(property_name, max_len=100),
+                        "check": sanitize_text(finding.get("check", ""), max_len=100),
+                        "integration": target.get("integration", ""),
+                        "environment": target.get("environment", ""),
+                        "target": target_slug(target),
+                        "metric": sanitize_text(finding.get("metric", ""), max_len=160),
+                        "tag_key": sanitize_text(finding.get("tag_key", ""), max_len=120),
+                        "path": path,
+                        "asset_type": asset_type,
+                        "message": sanitize_text(finding.get("message", ""), max_len=400),
+                        "query": sanitize_text(finding.get("query", ""), max_len=300),
+                    }
+                    finding_row["display_message"] = sanitize_text(asset_finding_message(finding_row), max_len=400)
+                    findings.append(finding_row)
             elif kind == "coverage" and isinstance(data, dict):
                 endpoint = data.get("endpoint_to_emitted") or data.get("observed_to_emitted") or {}
                 metadata = data.get("metadata_to_emitted") or data.get("supported_to_emitted") or {}
@@ -505,6 +508,40 @@ def attach_current_run(rows: list[dict[str, Any]]) -> None:
         row.setdefault("run_url", run_url)
 
 
+
+ASSET_TYPE_LABELS = {
+    "dashboards": "Dashboard",
+    "monitors": "Monitor",
+    "service_checks": "Service check",
+}
+
+
+def infer_asset_type(path: Any) -> str:
+    text = str(path or "")
+    for asset_type in ASSET_TYPE_LABELS:
+        if f"/assets/{asset_type}/" in text or f"assets/{asset_type}/" in text:
+            return asset_type
+    return ""
+
+
+def asset_type_label(asset_type: Any) -> str:
+    text = str(asset_type or "")
+    return ASSET_TYPE_LABELS.get(text, text.replace("_", " ").replace("-", " ").title() if text else "Asset")
+
+
+def asset_finding_message(finding: dict[str, Any]) -> str:
+    message = str(finding.get("message") or "")
+    asset_type = str(finding.get("asset_type") or infer_asset_type(finding.get("path")))
+    source = asset_type_label(asset_type)
+    if message == "Integration asset query tag key was not seen on emitted replay metric.":
+        return f"{source} query tag key was not seen on the emitted replay metric."
+    if message == "Integration asset query metric was not emitted by this replay fixture.":
+        return f"{source} query metric was not emitted by this replay fixture."
+    if message == "Integration asset query references a metric missing from metadata.csv.":
+        return f"{source} query references a metric missing from metadata.csv."
+    return message
+
+
 def finding_subject(finding: dict[str, Any]) -> str:
     return str(finding.get("metric") or finding.get("tag_key") or finding.get("query") or "")
 
@@ -532,14 +569,15 @@ def target_link_html(row: dict[str, Any]) -> str:
 
 def group_actionable_findings(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
     actionable = [f for f in findings if (f.get("level") or "").lower() in {"error", "warning", "warn"}]
-    groups: dict[tuple[str, str, str, str, str], dict[str, Any]] = {}
+    groups: dict[tuple[str, str, str, str, str, str], dict[str, Any]] = {}
     for finding in actionable:
         key = (
             str(finding.get("target", "")),
             str(finding.get("property", "")),
             str(finding.get("check", "")),
             str(finding.get("path", "")),
-            str(finding.get("message", "")),
+            str(finding.get("asset_type", "")),
+            str(finding.get("display_message") or finding.get("message", "")),
         )
         group = groups.setdefault(
             key,
@@ -550,7 +588,9 @@ def group_actionable_findings(findings: list[dict[str, Any]]) -> list[dict[str, 
                 "property_description": property_description(finding.get("property", "")),
                 "check": finding.get("check", ""),
                 "path": finding.get("path", ""),
-                "message": finding.get("message", ""),
+                "asset_type": finding.get("asset_type", ""),
+                "asset_type_label": asset_type_label(finding.get("asset_type", "")),
+                "message": finding.get("display_message") or finding.get("message", ""),
                 "run_url": finding.get("run_url", ""),
                 "job_url": finding.get("job_url", ""),
                 "count": 0,
@@ -684,14 +724,14 @@ def build_individual_target_markdown(
 
     lines.extend(["### Collected findings", ""])
     if target_findings:
-        lines.extend(["| Level | Property | Subject | Message |", "|---|---|---|---|"])
+        lines.extend(["| Level | Source | Property | Subject | Message |", "|---|---|---|---|---|"])
         for finding in target_findings[:12]:
             subject = finding_subject(finding)
             lines.append(
-                f"| `{md_escape(finding.get('level', ''))}` | `{md_escape(finding.get('property', ''))}` | `{md_escape(subject)}` | {md_escape(finding.get('message', ''))} |"
+                f"| `{md_escape(finding.get('level', ''))}` | {md_escape(asset_type_label(finding.get('asset_type', '')))} | {property_display_md(finding.get('property', ''))} | `{md_escape(subject)}` | {md_escape(finding.get('display_message') or finding.get('message', ''))} |"
             )
         if len(target_findings) > 12:
-            lines.append(f"| _… {len(target_findings) - 12} more_ | | | See `findings.tsv`. |")
+            lines.append(f"| _… {len(target_findings) - 12} more_ | | | | See `findings.tsv`. |")
     else:
         lines.append("No allowlisted property findings were collected for this target.")
     lines.append("")
@@ -880,7 +920,7 @@ def build_markdown(
             if group["count"] > len(group["subjects"][:5]):
                 examples += f", +{group['count'] - len(group['subjects'][:5])} more"
             lines.append(
-                f"| {target_link_md(group)} | **{md_escape(group['property_label'])}**<br/><sub>`{md_escape(group['property'])}`</sub> | {group['count']} | {examples} | {md_escape(group['message'])} |"
+                f"| {target_link_md(group)} | **{md_escape(group['property_label'])}**<br/><sub>{md_escape(group.get('asset_type_label', 'Asset'))} · `{md_escape(group['property'])}`</sub> | {group['count']} | {examples} | {md_escape(group['message'])} |"
             )
         if len(groups) > 12:
             lines.append(f"\n_… {len(groups) - 12} more grouped finding rows in `report.html` and `findings.tsv`._")
@@ -1062,7 +1102,7 @@ def build_html(
     )
     finding_cards = "".join(
         "<article class='finding'>"
-        f"<div><strong>{esc(group['property_label'])}</strong> {target_link_html(group)}</div>"
+        f"<div><strong>{esc(group['property_label'])}</strong> <span class='badge'>{esc(group.get('asset_type_label', 'Asset'))}</span> {target_link_html(group)}</div>"
         f"<p>{esc(group['message'])}</p>"
         f"<p class='muted'>{esc(group['property_description'])}</p>"
         f"<p><span class='badge'>{group['count']} repeated row(s)</span> <code>{esc(group['path'])}</code></p>"
@@ -1224,7 +1264,7 @@ def main() -> None:
     write_tsv(args.out_dir / "summary.tsv", [summary], list(summary.keys()))
     write_tsv(args.out_dir / "targets.tsv", rows, ["status", "category", "category_label", "integration", "environment", "target", "fixture_ref", "target_ref", "failing_property_count", "summary"])
     write_tsv(args.out_dir / "failure-categories.tsv", categories, ["category", "label", "count", "description"])
-    write_tsv(args.out_dir / "findings.tsv", findings, ["level", "property", "check", "integration", "environment", "target", "metric", "tag_key", "path", "message", "query"])
+    write_tsv(args.out_dir / "findings.tsv", findings, ["level", "property", "check", "integration", "environment", "target", "asset_type", "metric", "tag_key", "path", "message", "display_message", "query"])
     write_tsv(args.out_dir / "coverage-summary.tsv", coverages, ["property", "integration", "environment", "target", "endpoint_count", "endpoint_emitted_count", "endpoint_missing_count", "endpoint_to_emitted_coverage", "metadata_count", "metadata_emitted_count", "metadata_unemitted_count", "metadata_to_emitted_coverage"])
 
     write_zip(args.zip, args.out_dir)
