@@ -1,0 +1,9 @@
+services:
+  powerflex-api:
+    image: caddy:2.7
+    container_name: powerflex-api
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ../fixtures/:/usr/share/caddy

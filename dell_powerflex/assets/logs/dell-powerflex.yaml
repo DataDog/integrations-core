@@ -1,0 +1,69 @@
+id: dell-powerflex
+metric_id: dell_powerflex
+backend_only: false
+facets: null
+pipeline:
+  type: pipeline
+  name: Dell PowerFlex
+  enabled: true
+  filter:
+    query: source:dell-powerflex
+  processors:
+    - type: grok-parser
+      name: Parsing Dell PowerFlex logs
+      enabled: true
+      source: message
+      samples:
+        - 2026-05-07 18:07:29,512 | INFO  | Connector openwire started |
+          org.apache.activemq.broker.TransportConnector | main
+        - 2026-05-07 18:25:24,885 INFO  Starting EventLogger at INFO level
+        - "2026/05/18 11:34:09.597437 LOW:71d0000073a6:ndctl_GetNdctlInfo:00887:
+          NDCTL lib not initialized"
+        - 2026-05-08 10:01:48,113 INFO  Waking up - Try to rotate-DB
+        - "2026/05/07 18:07:50.783317 LOW:000000000000:mosTrcLayer_Create:00210:
+          ---------- Process started. Version PowerFlex
+          R5Release, CodeBase , Feb 20 2025. PID 4522 ----------"
+      grok:
+        supportRules: |-
+          _timestamp_comma %{date("yyyy-MM-dd HH:mm:ss,SSS"):timestamp}
+          _timestamp_slash %{date("yyyy/MM/dd HH:mm:ss"):timestamp}.%{notSpace}
+        matchRules: >-
+          pipe_delimited_format
+          %{_timestamp_comma}\s+\|\s+%{word:level}\s+\|\s+%{regex("[^|]+"):msg}\s+\|\s+%{notSpace:logger.name}\s+\|\s+%{notSpace:logger.thread_name}
+
+
+          simple_format %{_timestamp_comma}\s+%{word:level}\s+%{data:msg}
+
+
+          sds_format %{_timestamp_slash}\s+%{word:level}:%{notSpace:powerflex.object_id}:%{notSpace:powerflex.function}:%{notSpace:powerflex.line_number}:\s+%{data:msg}
+    - type: category-processor
+      name: Normalize non-standard severity levels
+      enabled: true
+      categories:
+        - filter:
+            query: "@level:LOW"
+          name: info
+        - filter:
+            query: "@level:MEDIUM"
+          name: warn
+        - filter:
+            query: "@level:HIGH"
+          name: error
+      target: powerflex.normalized_level
+    - type: date-remapper
+      name: Define timestamp as the official date of the log
+      enabled: true
+      sources:
+        - timestamp
+    - type: status-remapper
+      name: Define powerflex.normalized_level or level as the official status of the
+        log
+      enabled: true
+      sources:
+        - powerflex.normalized_level
+        - level
+    - type: message-remapper
+      name: Define msg as the official message of the log
+      enabled: true
+      sources:
+        - msg
