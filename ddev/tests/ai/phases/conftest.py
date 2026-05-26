@@ -119,6 +119,7 @@ def make_agent_phase(
     context_compact_threshold_pct: int = 80,
     callbacks=None,
     captured_agent_kwargs: dict[str, Any] | None = None,
+    goal_agent_builder=None,
 ) -> tuple[AgenticPhase, CheckpointManager]:
     """Build an AgenticPhase ready for process_message-driven tests.
 
@@ -144,6 +145,7 @@ def make_agent_phase(
         config_dir=flow_dir,
         file_registry=FileRegistry(policy=FileAccessPolicy(write_root=flow_dir)),
         callbacks=callbacks,
+        goal_agent_builder=goal_agent_builder,
     )
     phase.queue = message_queue
     return phase, checkpoint_manager

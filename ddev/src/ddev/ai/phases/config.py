@@ -56,11 +56,25 @@ class TaskConfig(BaseModel):
     name: str
     prompt_path: Path | None = None
     prompt: str | None = None
+    goal: str | None = None
+    goal_path: Path | None = None
+    max_goal_attempts: int = 5
 
     @model_validator(mode="after")
-    def exactly_one_source(self) -> TaskConfig:
+    def exactly_one_prompt_source(self) -> TaskConfig:
         if (self.prompt_path is None) == (self.prompt is None):
             raise ValueError("Exactly one of 'prompt_path' or 'prompt' must be set")
+        return self
+
+    @model_validator(mode="after")
+    def goal_consistency(self) -> TaskConfig:
+        if self.goal is not None and self.goal_path is not None:
+            raise ValueError("At most one of 'goal' or 'goal_path' may be set")
+        has_goal = self.goal is not None or self.goal_path is not None
+        if not has_goal and "max_goal_attempts" in self.model_fields_set:
+            raise ValueError("'max_goal_attempts' may only be set when 'goal' or 'goal_path' is set")
+        if has_goal and self.max_goal_attempts < 1:
+            raise ValueError("'max_goal_attempts' must be at least 1")
         return self
 
 
@@ -176,6 +190,12 @@ class FlowConfig(BaseModel):
                     if not resolved.exists():
                         raise FlowConfigError(
                             f"Phase {phase_id!r} task {i} ({task.name!r}): prompt_path not found: {resolved}"
+                        )
+                if task.goal_path is not None:
+                    resolved = config_dir / task.goal_path
+                    if not resolved.exists():
+                        raise FlowConfigError(
+                            f"Phase {phase_id!r} task {i} ({task.name!r}): goal_path not found: {resolved}"
                         )
 
             if phase.checkpoint is not None and phase.checkpoint.memory_prompt_path is not None:
