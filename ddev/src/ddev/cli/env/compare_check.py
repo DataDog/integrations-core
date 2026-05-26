@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 # Manual cache invalidation knob for compare-check artifacts. Bump this whenever
 # replay fixture semantics or suitability criteria change in a way that should
 # make existing .ddev/replay caches ineligible for --replay-cache auto/latest.
-REPLAY_CACHE_VERSION = 4
+REPLAY_CACHE_VERSION = 5
 REPLAY_ADAPTER = 'all'
 OUTPUT_COLLECTIONS = (
     'metrics',
