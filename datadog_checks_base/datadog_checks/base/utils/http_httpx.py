@@ -1,24 +1,11 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""
-Minimum-viable httpx-backed HTTP client wrapper.
-
-Implements ``HTTPClientProtocol`` and ``HTTPResponseProtocol`` so a check that
-opts in via ``use_httpx=true`` in instance config can transparently swap from
-``RequestsWrapper``. Feature surface is intentionally narrow per the Phase 2
-MVP plan: basic auth, TLS verify/cert, headers, timeouts, common request
-options, and the exception mapping into ``datadog_checks.base.utils.http_exceptions``.
-
-Auth tokens, proxies, Unix-socket transports, Kerberos / NTLM / AWS / Digest
-auth, connection-pool tuning, HTTP/2 and multipart uploads are deferred to
-Phase 3.
-"""
-
 from __future__ import annotations
 
 import logging
 from collections.abc import Mapping
+from datetime import timedelta
 from typing import Any, Iterator
 
 import httpx
@@ -89,12 +76,7 @@ def _build_timeout(config: dict[str, Any]) -> tuple[float, float]:
 
 
 def _map_httpx_exception(exc: BaseException) -> HTTPError:
-    """Translate an httpx exception into the library-agnostic equivalent.
-
-    The mapping is symmetric with ``RequestsWrapper`` so that production
-    code which catches ``http_exceptions.HTTPTimeoutError`` (etc.) keeps
-    working when a check opts in to ``HTTPXWrapper``.
-    """
+    """Translate an httpx exception into the library-agnostic equivalent."""
     if isinstance(exc, httpx.TimeoutException):
         return HTTPTimeoutError(str(exc) or exc.__class__.__name__, request=getattr(exc, 'request', None))
     if isinstance(exc, httpx.ConnectError):
@@ -111,7 +93,7 @@ def _map_httpx_exception(exc: BaseException) -> HTTPError:
 
 
 class HTTPXResponseAdapter:
-    """Wraps an ``httpx.Response`` to satisfy ``HTTPResponseProtocol``."""
+    """Wraps an httpx.Response to satisfy HTTPResponseProtocol."""
 
     __slots__ = ('_response',)
 
@@ -140,10 +122,6 @@ class HTTPXResponseAdapter:
 
     @property
     def reason(self) -> str:
-        # The protocol field is ``reason``; ``httpx.Response`` calls the same
-        # field ``reason_phrase``, while ``MockHTTPResponse`` (used by the
-        # ``mock_http_response`` test fixture) exposes ``reason`` directly.
-        # Prefer the httpx name, fall back to the agnostic one.
         reason = getattr(self._response, 'reason_phrase', None)
         if reason is not None:
             return reason
@@ -155,8 +133,6 @@ class HTTPXResponseAdapter:
 
     @encoding.setter
     def encoding(self, value: str | None) -> None:
-        # OpenMetrics scrapers explicitly set ``encoding = 'utf-8'`` after the
-        # response is received; mirror that mutability.
         self._response.encoding = value
 
     @property
@@ -168,26 +144,17 @@ class HTTPXResponseAdapter:
         return self._response.cookies
 
     @property
-    def elapsed(self):
-        # httpx sets ``_elapsed`` via the bound stream's ``close()`` during the
-        # request lifecycle. Some transports (notably ``MockTransport`` used in
-        # tests) bypass that path because they construct a ``Response`` with
-        # buffered content from the start. Return a zero timedelta in that case
-        # so the attribute is always safe to read.
+    def elapsed(self) -> timedelta:
         try:
             return self._response.elapsed
         except RuntimeError:
-            from datetime import timedelta
-
             return timedelta(0)
 
     def json(self, **kwargs: Any) -> Any:
         return self._response.json(**kwargs)
 
     def raise_for_status(self) -> None:
-        # Mirror requests.Response.raise_for_status semantics (4xx/5xx only).
-        # httpx raises for any non-success including 3xx, but the migration
-        # target is requests behavior so existing checks keep working.
+        # Mirror requests semantics (4xx/5xx only); httpx also raises on 3xx.
         if self._response.status_code < 400:
             return
         try:
@@ -199,9 +166,6 @@ class HTTPXResponseAdapter:
         self._response.close()
 
     def iter_content(self, chunk_size: int | None = None, decode_unicode: bool = False) -> Iterator[bytes | str]:
-        # Always operate on the buffered ``.content`` so the behavior is identical
-        # regardless of whether the underlying object is a real ``httpx.Response``
-        # or a fake response object produced by a test fixture.
         content = self._response.content
         if chunk_size is None:
             yield content.decode('utf-8') if decode_unicode else content
@@ -235,13 +199,7 @@ class HTTPXResponseAdapter:
 
 
 class HTTPXWrapper:
-    """Implements ``HTTPClientProtocol`` using a single shared ``httpx.Client``.
-
-    Per the Phase 2 MVP plan (D3), one ``httpx.Client`` is created at
-    construction and reused across all requests for the lifetime of the
-    wrapper. Closing the wrapper (or letting it fall out of scope) closes
-    the underlying client.
-    """
+    """Implements HTTPClientProtocol using a single shared httpx.Client per wrapper."""
 
     __slots__ = (
         '_client',
@@ -276,10 +234,7 @@ class HTTPXWrapper:
         timeout = _build_timeout(config)
         allow_redirects = is_affirmative(config['allow_redirects'])
 
-        # ``proxies`` is included as ``None`` for shape-parity with
-        # ``RequestsWrapper.options`` so existing reads of
-        # ``check.http.options['proxies']`` do not KeyError on a check that
-        # opts into HTTPXWrapper. Proxy wiring itself is Phase 3.
+        # `proxies` is None for shape-parity with RequestsWrapper.options; proxy wiring is Phase 3.
         self.options: dict[str, Any] = {
             'auth': auth,
             'cert': cert,
@@ -391,21 +346,7 @@ class HTTPXWrapper:
         return HTTPXResponseAdapter(response)
 
     def _build_request_kwargs(self, options: dict[str, Any]) -> dict[str, Any]:
-        """Translate the call-site options to httpx.Client.request kwargs.
-
-        Honors per-request overrides for ``headers``, ``params``, ``json``,
-        ``data``, ``timeout``, and ``extra_headers``. ``allow_redirects`` and
-        ``verify`` / ``cert`` are client-level and not overridable per request
-        in the MVP.
-
-        Any kwarg not in the passthrough list below is silently dropped. This
-        is intentional — ``RequestsWrapper`` accepts a broader set of options
-        than the MVP supports, and silently dropping unknown kwargs lets
-        existing call sites (notably the OM v2 scraper, which passes
-        ``stream=True``) work without lib-specific branches at the call site.
-        Unsupported kwargs that materially affect behavior should be added to
-        the passthrough list in Phase 3.
-        """
+        """Translate call-site options to httpx.Client.request kwargs; unknown kwargs are dropped."""
         kwargs: dict[str, Any] = {}
         passthrough = ('params', 'json', 'data', 'content', 'files', 'cookies')
         for key in passthrough:
@@ -456,10 +397,7 @@ class HTTPXWrapper:
         return None
 
     def __del__(self) -> None:
-        # Match ``RequestsWrapper.__del__`` — narrow to ``AttributeError`` so
-        # genuine httpx-close failures still surface during teardown.
-        # ``AttributeError`` fires when ``__init__`` raised before ``_client``
-        # was assigned and Python still calls ``__del__``.
+        # AttributeError fires when __init__ raised before _client was assigned.
         try:
             self.close()
         except AttributeError:

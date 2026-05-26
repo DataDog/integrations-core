@@ -109,13 +109,10 @@ def test_response_encoding_default_is_utf8(status_transport_factory):
     transport = status_transport_factory(200, b'')
     http = HTTPXWrapper({}, {}, transport=transport)
     response = http.get('http://example.test/')
-    # httpx defaults to utf-8 when no charset is signalled. Pin the exact value
-    # so a future httpx change that returns ``None`` here surfaces immediately.
     assert response.encoding == 'utf-8'
 
 
 def test_response_encoding_setter_propagates_to_inner_response(status_transport_factory):
-    """OM v2 scraper does ``response.encoding = 'utf-8'`` after the request."""
     transport = status_transport_factory(200, b'')
     http = HTTPXWrapper({}, {}, transport=transport)
     response = http.get('http://example.test/')
@@ -148,20 +145,11 @@ def test_response_elapsed(status_transport_factory):
 
 
 def test_response_elapsed_returns_zero_on_runtime_error(status_transport_factory):
-    """Cover the RuntimeError fallback in HTTPXResponseAdapter.elapsed.
-
-    httpx 0.28 raises ``RuntimeError`` from ``.elapsed`` until the bound stream's
-    ``close()`` has finalized the timer. When MockTransport bypasses that path
-    by serving buffered content, the adapter should return ``timedelta(0)`` so
-    callers never see the RuntimeError.
-    """
     from datetime import timedelta
 
     transport = status_transport_factory(200, b'hello')
     http = HTTPXWrapper({}, {}, transport=transport)
     response = http.get('http://example.test/')
-    # Forge the MockTransport quirk explicitly: if ``_elapsed`` was set, drop it
-    # so the property has to take the except branch.
     if hasattr(response._response, '_elapsed'):
         delattr(response._response, '_elapsed')
     assert response.elapsed == timedelta(0)
@@ -184,7 +172,6 @@ def test_response_ok_property(status_transport_factory, status_code, expected_ok
 
 
 def test_response_reason_from_httpx_response(status_transport_factory):
-    """``reason`` reads from the underlying ``httpx.Response.reason_phrase``."""
     transport = status_transport_factory(200, b'')
     http = HTTPXWrapper({}, {}, transport=transport)
     response = http.get('http://example.test/')
@@ -192,7 +179,6 @@ def test_response_reason_from_httpx_response(status_transport_factory):
 
 
 def test_response_reason_falls_back_when_reason_phrase_missing():
-    """Mock fixtures expose ``.reason``, not ``.reason_phrase`` — the adapter handles that."""
     from datadog_checks.base.utils.http_httpx import HTTPXResponseAdapter
 
     class _FakeResponseExposingReason:

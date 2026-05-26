@@ -414,8 +414,6 @@ class AgentCheck(object):
         if not hasattr(self, '_http'):
             instance = self.instance or {}
             if is_affirmative(instance.get('use_httpx', False)):
-                # Per Phase 2 MVP D4: an ImportError surfaces at construction
-                # time if httpx is not installed.
                 from datadog_checks.base.utils.http_httpx import HTTPXWrapper
 
                 self._http = HTTPXWrapper(instance, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)

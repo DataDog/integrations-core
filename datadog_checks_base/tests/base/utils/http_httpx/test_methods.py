@@ -6,7 +6,6 @@ import pytest
 from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.base.utils.http_httpx import HTTPXWrapper
 
-METHODS = ['get', 'post', 'put', 'delete', 'head', 'patch', 'options_method']
 HTTP_VERBS = {
     'get': 'GET',
     'post': 'POST',
@@ -18,19 +17,19 @@ HTTP_VERBS = {
 }
 
 
-@pytest.mark.parametrize('method', METHODS)
-def test_method_happy_path(method, captured_requests, capturing_transport):
+@pytest.mark.parametrize('method,verb', HTTP_VERBS.items())
+def test_method_happy_path(method, verb, captured_requests, capturing_transport):
     http = HTTPXWrapper({}, {}, transport=capturing_transport)
     fn = getattr(http, method)
     response = fn('http://example.test/path', headers={'X-Test': '1'})
 
     assert response.status_code == 200
     assert len(captured_requests) == 1
-    assert captured_requests[0].method == HTTP_VERBS[method]
+    assert captured_requests[0].method == verb
     assert str(captured_requests[0].url) == 'http://example.test/path'
 
 
-@pytest.mark.parametrize('method', METHODS)
+@pytest.mark.parametrize('method', HTTP_VERBS)
 def test_method_5xx_does_not_raise_unless_asked(method, status_transport_factory):
     transport = status_transport_factory(500, b'oops')
     http = HTTPXWrapper({}, {}, transport=transport)
@@ -39,7 +38,7 @@ def test_method_5xx_does_not_raise_unless_asked(method, status_transport_factory
     assert response.status_code == 500
 
 
-@pytest.mark.parametrize('method', METHODS)
+@pytest.mark.parametrize('method', HTTP_VERBS)
 def test_method_raise_for_status_propagates(method, status_transport_factory):
     transport = status_transport_factory(503, b'server unavailable')
     http = HTTPXWrapper({}, {}, transport=transport)

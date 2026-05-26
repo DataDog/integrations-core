@@ -407,9 +407,6 @@ class OpenMetricsScraper:
                 for line in connection.iter_lines(decode_unicode=True):
                     yield line
         except (ConnectionError, HTTPConnectionError) as e:
-            # ``HTTPConnectionError`` is the library-agnostic equivalent surfaced
-            # by ``HTTPXWrapper``; ``requests.exceptions.ConnectionError`` is the
-            # default RequestsWrapper path.
             if self.ignore_connection_errors:
                 self.log.warning("OpenMetrics endpoint %s is not accessible", self.endpoint)
             else:
