@@ -672,7 +672,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: "@ocsf.metadata.event_code:(sso_login_initiated OR sso_login_succeeded OR sso_login_failed OR user_logged_out)"
+        query: "@ocsf.metadata.event_code:(sso_login_initiated OR sso_login_succeeded OR sso_login_failed OR sso_second_factor_magic_link OR magic_link_login_initiated OR magic_link_login_succeeded OR magic_link_login_failed OR social_login_succeeded OR anonymous_mobile_login_attempted OR user_logged_out)"
       processors:
         - type: string-builder-processor
           name: Add service name
@@ -811,7 +811,7 @@ pipeline:
               name: ocsf.activity_id
               categories:
                 - filter:
-                    query: "@ocsf.metadata.event_code:(sso_login_initiated OR sso_login_succeeded OR sso_login_failed)"
+                    query: "@ocsf.metadata.event_code:(sso_login_initiated OR sso_login_succeeded OR sso_login_failed OR sso_second_factor_magic_link OR magic_link_login_initiated OR magic_link_login_succeeded OR magic_link_login_failed OR social_login_succeeded OR anonymous_mobile_login_attempted)"
                   name: Logon
                   id: 1
                 - filter:
@@ -836,11 +836,15 @@ pipeline:
               name: ocsf.auth_protocol_id
               categories:
                 - filter:
-                    query: "@auth_method:sso"
+                    query: "@ocsf.metadata.event_code:(sso_login_initiated OR sso_login_succeeded OR sso_login_failed OR sso_second_factor_magic_link)"
                   name: SAML
                   id: 5
                 - filter:
-                    query: "@auth_method:*"
+                    query: "@ocsf.metadata.event_code:social_login_succeeded"
+                  name: OpenID
+                  id: 4
+                - filter:
+                    query: "@ocsf.metadata.event_code:*"
                   name: Other
                   id: 99
               targets:
@@ -852,18 +856,22 @@ pipeline:
                   ocsf.auth_protocol_id: "99"
                 sources:
                   ocsf.auth_protocol:
-                    - auth_method
+                    - type
             - type: schema-category-mapper
               name: ocsf.status_id
               categories:
                 - filter:
-                    query: "@ocsf.metadata.event_code:(sso_login_succeeded OR user_logged_out)"
+                    query: "@ocsf.metadata.event_code:(sso_login_succeeded OR magic_link_login_succeeded OR social_login_succeeded OR sso_second_factor_magic_link OR user_logged_out)"
                   name: Success
                   id: 1
                 - filter:
-                    query: "@ocsf.metadata.event_code:sso_login_failed"
+                    query: "@ocsf.metadata.event_code:(sso_login_failed OR magic_link_login_failed)"
                   name: Failure
                   id: 2
+                - filter:
+                    query: "@ocsf.metadata.event_code:(sso_login_initiated OR magic_link_login_initiated OR anonymous_mobile_login_attempted)"
+                  name: Unknown
+                  id: 0
                 - filter:
                     query: "@ocsf.metadata.event_code:*"
                   name: Other
