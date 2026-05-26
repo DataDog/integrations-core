@@ -6,13 +6,55 @@
 
 from __future__ import annotations
 
+import os
 import time
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Callable
 from urllib.parse import urlparse
 
+try:
+    import datadog_agent
+except ImportError:
+    datadog_agent = None
+
 if TYPE_CHECKING:
     from .check import ArgocdCheck
+
+
+def _instance_prefix(endpoint: str | None) -> str:
+    """Build a multi-part prefix that disambiguates resources across clusters and envs.
+
+    Order: kube_cluster_name : env. The argocd hostname is used only as a
+    last-resort fallback when neither cluster name nor env is available
+    (e.g. an out-of-k8s agent monitoring a remote argocd without DD_ENV set).
+    """
+    parts: list[str] = []
+    if datadog_agent is not None:
+        cluster = ""
+        try:
+            cluster = datadog_agent.get_clustername() or ""
+        except Exception:
+            pass
+        if not cluster:
+            try:
+                cluster = datadog_agent.get_config("cluster_name") or ""
+            except Exception:
+                pass
+        if cluster:
+            parts.append(cluster)
+        try:
+            tags = datadog_agent.get_config("tags") or []
+        except Exception:
+            tags = []
+        env = next((t.split(":", 1)[1] for t in tags if t.startswith("env:")), "") \
+              or os.environ.get("DD_ENV", "")
+        if env:
+            parts.append(env)
+    if not parts and endpoint:
+        host = urlparse(endpoint).hostname or ""
+        if host:
+            parts.append(host)
+    return ":".join(parts)
 
 GENRESOURCES_API_UP_METRIC = "argocd.genresources.api.up"
 
@@ -69,16 +111,22 @@ REPOSITORY_REDACTION_PATHS: tuple[str, ...] = (
 APPLICATION_ANNOTATION_KEYS: tuple[str, ...] = ("*.kubernetes.io/last-applied-configuration",)
 
 
+IN_CLUSTER_API = "https://kubernetes.default.svc"
+
+
 def _application_key(item: dict) -> str:
     metadata = item.get("metadata") or {}
     spec = item.get("spec") or {}
     destination = spec.get("destination") or {}
-    cluster = destination.get("server") or "in-cluster"
+    cluster = destination.get("server") or ""
     namespace = destination.get("namespace") or metadata.get("namespace") or "default"
     name = metadata.get("name")
     if not name:
         raise ValueError("argocd_application is missing metadata.name")
-    return f"{cluster}:{namespace}:{name}"
+    parts = [namespace, name]
+    if cluster and cluster != IN_CLUSTER_API:
+        parts.insert(0, cluster)
+    return ":".join(parts)
 
 
 def _cluster_key(item: dict) -> str:
@@ -131,7 +179,7 @@ class ArgocdResourceCollector:
         self._max_resources: int = instance.get("max_resources_per_cycle", 10000)
         self._extra_paths: list[str] = list(instance.get("extra_redaction_paths") or [])
         self._auth_token: str | None = instance.get("generic_resources_auth_token")
-        self._instance_prefix: str = urlparse(self._endpoint).hostname or "" if self._endpoint else ""
+        self._instance_prefix: str = _instance_prefix(self._endpoint)
 
     def collect(self) -> None:
         if not self._endpoint:
