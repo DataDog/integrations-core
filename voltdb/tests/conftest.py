@@ -91,8 +91,13 @@ def instance():
     ]
 
     if common.TLS_ENABLED:
-        instance['use_ssl'] = True
-        instance['ssl_config_file'] = common.TLS_CONFIG_FILE
+        if common.VOLTDB_TRANSPORT == 'http':
+            # HTTPSConnectionPool needs `tls_ca_cert` to trust the self-signed
+            # server cert under the framework's RequestsWrapper.
+            instance['tls_ca_cert'] = common.TLS_CONFIG_FILE
+        else:
+            instance['use_ssl'] = True
+            instance['ssl_config_file'] = common.TLS_CONFIG_FILE
 
     return instance
 
