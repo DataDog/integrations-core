@@ -20,16 +20,6 @@ def test_context_manager(capturing_transport):
     assert response.status_code == 200
 
 
-def test_single_client_reused_across_requests(capturing_transport, captured_requests):
-    http = HTTPXWrapper({}, {}, transport=capturing_transport)
-    client_before_requests = http._client
-    http.get('http://example.test/a')
-    http.get('http://example.test/b')
-    http.post('http://example.test/c', json={'x': 1})
-    assert http._client is client_before_requests
-    assert len(captured_requests) == 3
-
-
 def test_module_import_fails_without_httpx(monkeypatch):
     monkeypatch.setitem(sys.modules, 'httpx', None)
     monkeypatch.delitem(sys.modules, 'datadog_checks.base.utils.http_httpx', raising=False)

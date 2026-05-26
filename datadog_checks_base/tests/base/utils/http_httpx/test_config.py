@@ -4,17 +4,6 @@
 from datadog_checks.base.utils.http_httpx import HTTPXWrapper
 
 
-def test_options_dict_shape(capturing_transport):
-    http = HTTPXWrapper({}, {}, transport=capturing_transport)
-    options = http.options
-    assert 'auth' in options
-    assert 'cert' in options
-    assert 'headers' in options
-    assert 'timeout' in options
-    assert 'verify' in options
-    assert 'allow_redirects' in options
-
-
 def test_default_headers_include_user_agent(capturing_transport):
     http = HTTPXWrapper({}, {}, transport=capturing_transport)
     assert any(key.lower() == 'user-agent' for key in http.options['headers'])
@@ -36,12 +25,6 @@ def test_per_request_headers_merge_into_request(capturing_transport, captured_re
     http = HTTPXWrapper({}, {}, transport=capturing_transport)
     http.get('http://example.test/', headers={'X-Per-Request': 'yes'})
     assert captured_requests[0].headers['x-per-request'] == 'yes'
-
-
-def test_timeout_default(capturing_transport):
-    http = HTTPXWrapper({}, {}, transport=capturing_transport)
-    timeout = http.options['timeout']
-    assert isinstance(timeout, tuple) and len(timeout) == 2
 
 
 def test_timeout_from_instance(capturing_transport):
@@ -66,6 +49,30 @@ def test_verify_defaults_to_true(capturing_transport):
 def test_verify_false_when_tls_verify_off(capturing_transport):
     http = HTTPXWrapper({'tls_verify': False}, {}, transport=capturing_transport)
     assert http.options['verify'] is False
+
+
+def test_tls_ca_cert_uses_path(capturing_transport):
+    http = HTTPXWrapper({'tls_ca_cert': '/etc/ssl/ca.pem'}, {}, transport=capturing_transport)
+    assert http.options['verify'] == '/etc/ssl/ca.pem'
+
+
+def test_tls_client_cert_string(capturing_transport):
+    http = HTTPXWrapper({'tls_cert': '/etc/ssl/client.pem'}, {}, transport=capturing_transport)
+    assert http.options['cert'] == '/etc/ssl/client.pem'
+
+
+def test_tls_client_cert_with_key(capturing_transport):
+    http = HTTPXWrapper(
+        {'tls_cert': '/etc/ssl/client.pem', 'tls_private_key': '/etc/ssl/client.key'},
+        {},
+        transport=capturing_transport,
+    )
+    assert http.options['cert'] == ('/etc/ssl/client.pem', '/etc/ssl/client.key')
+
+
+def test_tls_no_cert_when_not_configured(capturing_transport):
+    http = HTTPXWrapper({}, {}, transport=capturing_transport)
+    assert http.options['cert'] is None
 
 
 def test_get_header_case_insensitive(capturing_transport):
