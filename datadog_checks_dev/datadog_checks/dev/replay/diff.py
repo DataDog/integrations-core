@@ -24,6 +24,11 @@ OUTPUT_COLLECTIONS = (
     'adapter_stats',
 )
 
+# Adapter stats are diagnostic metadata about how replay was captured/exercised,
+# not integration output. Keep their additions/removals in diff artifacts for
+# troubleshooting, but do not make otherwise-identical compare-check runs fail.
+NON_BLOCKING_COLLECTIONS = {'adapter_stats'}
+
 
 def diff_outputs(old: dict[str, Any], new: dict[str, Any]) -> dict[str, Any]:
     """Return multiset additions/removals for each top-level output collection."""
@@ -37,7 +42,7 @@ def diff_outputs(old: dict[str, Any], new: dict[str, Any]) -> dict[str, Any]:
             'removed': [json.loads(item) for item in removed],
             'added': [json.loads(item) for item in added],
         }
-        if removed or added:
+        if name not in NON_BLOCKING_COLLECTIONS and (removed or added):
             diff['changed'] = True
         diff['collections'][name] = collection_diff
     return diff

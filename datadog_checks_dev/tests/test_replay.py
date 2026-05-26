@@ -114,6 +114,26 @@ def test_diff_outputs_reports_added_and_removed_metric_records():
     assert diff['collections']['metrics']['added'] == new['metrics']
 
 
+def test_diff_outputs_reports_adapter_stats_without_marking_changed():
+    old = {
+        'metrics': [],
+        'service_checks': [],
+        'events': [],
+        'adapter_stats': [{'adapter': 'requests', 'operation': 'request', 'count': 2}],
+    }
+    new = {
+        'metrics': [],
+        'service_checks': [],
+        'events': [],
+        'adapter_stats': [],
+    }
+
+    diff = diff_outputs(old, new)
+
+    assert diff['changed'] is False
+    assert diff['collections']['adapter_stats']['removed'] == old['adapter_stats']
+
+
 def test_requests_replay_fixture_miss_on_wrong_url(monkeypatch, tmp_path):
     fixture_path = tmp_path / 'capture.json'
     fixture_path.write_text(json.dumps([build_get_record('http://example.test/metrics', 'metric 1\n')]) + '\n')
