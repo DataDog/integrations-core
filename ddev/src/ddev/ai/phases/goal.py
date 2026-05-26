@@ -34,8 +34,8 @@ How to work:
 - Read the relevant files yourself with the tools provided. Do not trust the
   worker summary blindly — verify it.
 - If the worker summary explains that an apparent gap is intentional and the
-  explanation is plausible and consistent with the task, accept the work as
-  valid.
+  explanation is plausible and consistent with the task, accept that specific
+  gap as valid.
 - Be specific in your reasoning. Vague rejections are useless to the worker.
 
 Output contract:
