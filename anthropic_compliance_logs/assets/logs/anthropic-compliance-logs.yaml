@@ -433,6 +433,35 @@ pipeline:
               preserveSource: true
               overrideOnConflict: false
             - type: schema-category-mapper
+              name: ocsf.actor.user.type_id
+              categories:
+                - filter:
+                    query: "@actor.type:user_actor"
+                  name: User
+                  id: 1
+                - filter:
+                    query: "@actor.type:(api_actor OR admin_api_key_actor)"
+                  name: Service
+                  id: 4
+                - filter:
+                    query: "@actor.type:unauthenticated_user_actor"
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: "@actor.type:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.actor.user.type
+                id: ocsf.actor.user.type_id
+              fallback:
+                values:
+                  ocsf.actor.user.type: Other
+                  ocsf.actor.user.type_id: "99"
+                sources:
+                  ocsf.actor.user.type:
+                    - actor.type
+            - type: schema-category-mapper
               name: ocsf.activity_id
               categories:
                 - filter:
@@ -595,13 +624,35 @@ pipeline:
               target: ocsf.user.email_addr
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `api_key_id` to `ocsf.user.credential_uid`
-              sources:
-                - api_key_id
-              target: ocsf.user.credential_uid
-              preserveSource: true
-              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.actor.user.type_id
+              categories:
+                - filter:
+                    query: "@actor.type:user_actor"
+                  name: User
+                  id: 1
+                - filter:
+                    query: "@actor.type:(api_actor OR admin_api_key_actor)"
+                  name: Service
+                  id: 4
+                - filter:
+                    query: "@actor.type:unauthenticated_user_actor"
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: "@actor.type:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.actor.user.type
+                id: ocsf.actor.user.type_id
+              fallback:
+                values:
+                  ocsf.actor.user.type: Other
+                  ocsf.actor.user.type_id: "99"
+                sources:
+                  ocsf.actor.user.type:
+                    - actor.type
             - type: schema-category-mapper
               name: ocsf.activity_id
               categories:
@@ -708,13 +759,6 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `id` to `ocsf.session.uid`
-              sources:
-                - id
-              target: ocsf.session.uid
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
               name: Map `ocsf.time` to `ocsf.time`
               sources:
                 - ocsf.time
@@ -787,6 +831,35 @@ pipeline:
               target: ocsf.service.name
               preserveSource: true
               overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.actor.user.type_id
+              categories:
+                - filter:
+                    query: "@actor.type:user_actor"
+                  name: User
+                  id: 1
+                - filter:
+                    query: "@actor.type:(api_actor OR admin_api_key_actor)"
+                  name: Service
+                  id: 4
+                - filter:
+                    query: "@actor.type:unauthenticated_user_actor"
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: "@actor.type:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.actor.user.type
+                id: ocsf.actor.user.type_id
+              fallback:
+                values:
+                  ocsf.actor.user.type: Other
+                  ocsf.actor.user.type_id: "99"
+                sources:
+                  ocsf.actor.user.type:
+                    - actor.type
             - type: schema-category-mapper
               name: ocsf.activity_id
               categories:
@@ -1047,6 +1120,35 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-category-mapper
+              name: ocsf.actor.user.type_id
+              categories:
+                - filter:
+                    query: "@actor.type:user_actor"
+                  name: User
+                  id: 1
+                - filter:
+                    query: "@actor.type:(api_actor OR admin_api_key_actor)"
+                  name: Service
+                  id: 4
+                - filter:
+                    query: "@actor.type:unauthenticated_user_actor"
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: "@actor.type:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.actor.user.type
+                id: ocsf.actor.user.type_id
+              fallback:
+                values:
+                  ocsf.actor.user.type: Other
+                  ocsf.actor.user.type_id: "99"
+                sources:
+                  ocsf.actor.user.type:
+                    - actor.type
+            - type: schema-category-mapper
               name: ocsf.activity_id
               categories:
                 - filter:
@@ -1217,6 +1319,35 @@ pipeline:
               target: ocsf.web_resources.name
               preserveSource: true
               overrideOnConflict: false
+            - type: schema-category-mapper
+              name: ocsf.src_endpoint.owner.type_id
+              categories:
+                - filter:
+                    query: "@actor.type:user_actor"
+                  name: User
+                  id: 1
+                - filter:
+                    query: "@actor.type:(api_actor OR admin_api_key_actor)"
+                  name: Service
+                  id: 4
+                - filter:
+                    query: "@actor.type:unauthenticated_user_actor"
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: "@actor.type:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.src_endpoint.owner.type
+                id: ocsf.src_endpoint.owner.type_id
+              fallback:
+                values:
+                  ocsf.src_endpoint.owner.type: Other
+                  ocsf.src_endpoint.owner.type_id: "99"
+                sources:
+                  ocsf.src_endpoint.owner.type:
+                    - actor.type
             - type: schema-category-mapper
               name: ocsf.activity_id
               categories:
@@ -1417,6 +1548,35 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               targetFormat: integer
+            - type: schema-category-mapper
+              name: ocsf.actor.user.type_id
+              categories:
+                - filter:
+                    query: "@actor.type:user_actor"
+                  name: User
+                  id: 1
+                - filter:
+                    query: "@actor.type:(api_actor OR admin_api_key_actor)"
+                  name: Service
+                  id: 4
+                - filter:
+                    query: "@actor.type:unauthenticated_user_actor"
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: "@actor.type:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.actor.user.type
+                id: ocsf.actor.user.type_id
+              fallback:
+                values:
+                  ocsf.actor.user.type: Other
+                  ocsf.actor.user.type_id: "99"
+                sources:
+                  ocsf.actor.user.type:
+                    - actor.type
             - type: schema-category-mapper
               name: ocsf.activity_id
               categories:
