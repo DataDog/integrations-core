@@ -21,6 +21,7 @@ OUTPUT_COLLECTIONS = (
     'persistent_cache',
     'agent_logs',
     'telemetry',
+    'adapter_stats',
 )
 
 

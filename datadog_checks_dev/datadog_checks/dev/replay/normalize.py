@@ -83,4 +83,5 @@ def normalize_output(output: dict[str, Any]) -> dict[str, Any]:
         'agent_logs': _normalize_collection(output, 'agent_logs'),
         'telemetry': _normalize_collection(output, 'telemetry'),
         'check_states': _normalize_check_states(output.get('check_states', [])),
+        'adapter_stats': _normalize_collection(output, 'adapter_stats'),
     }

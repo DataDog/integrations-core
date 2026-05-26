@@ -52,7 +52,17 @@ def test_replay_check_runner(monkeypatch, aggregator, datadog_agent, dd_run_chec
         current_time[0] = {args.replay_time!r} + index * {args.reading_interval!r}
         for check in checks:
             dd_run_check(check)
-        outputs.append({{'index': index, 'output': serialize_aggregator(aggregator, datadog_agent, checks=checks)}})
+        outputs.append(
+            {{
+                'index': index,
+                'output': serialize_aggregator(
+                    aggregator,
+                    datadog_agent,
+                    checks=checks,
+                    adapter_records=adapter_records,
+                ),
+            }}
+        )
         if index + 1 < readings:
             reset_serialized_output(aggregator, datadog_agent)
 

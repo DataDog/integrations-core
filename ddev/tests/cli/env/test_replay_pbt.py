@@ -170,6 +170,12 @@ def _assert_normalized_output_contract(output: dict[str, Any]) -> None:
         assert status in {0, 1, 2, 3}, f'service_check[{index}] has invalid status: {status!r}'
         _assert_stable_tags(service_check.get('tags'), f'service_check[{index}]')
 
+    for index, stat in enumerate(output.get('adapter_stats', [])):
+        assert isinstance(stat.get('adapter'), str) and stat['adapter'], f'adapter_stats[{index}] has no adapter'
+        assert isinstance(stat.get('operation'), str) and stat['operation'], f'adapter_stats[{index}] has no operation'
+        count = stat.get('count')
+        assert isinstance(count, int) and count >= 0, f'adapter_stats[{index}] has invalid count: {count!r}'
+
 
 def _assert_stable_tags(tags: Any, owner: str) -> None:
     if tags is None:

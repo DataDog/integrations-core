@@ -6,6 +6,8 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
+from datadog_checks.dev.replay.adapter_stats import summarize_adapter_records
+
 
 def _jsonify(value: Any) -> Any:
     if hasattr(value, '_asdict'):
@@ -101,7 +103,7 @@ def reset_serialized_output(aggregator, datadog_agent=None) -> None:
     datadog_agent._sent_telemetry.clear()
 
 
-def serialize_aggregator(aggregator, datadog_agent=None, checks=None) -> dict[str, Any]:
+def serialize_aggregator(aggregator, datadog_agent=None, checks=None, adapter_records=None) -> dict[str, Any]:
     """Serialize pytest stub output into a stable JSON-compatible shape."""
     output = {
         'metrics': [
@@ -125,6 +127,7 @@ def serialize_aggregator(aggregator, datadog_agent=None, checks=None) -> dict[st
         'agent_logs': [],
         'telemetry': [],
         'check_states': _serialize_check_states(checks),
+        'adapter_stats': summarize_adapter_records(adapter_records),
     }
     if datadog_agent is not None:
         output['metadata'] = _serialize_metadata(datadog_agent)
