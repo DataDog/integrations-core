@@ -749,10 +749,9 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `actor.user_id`, `actor.unauthenticated_email_address` to `ocsf.actor.user.uid`
+              name: Map `actor.user_id` to `ocsf.actor.user.uid`
               sources:
                 - actor.user_id
-                - actor.unauthenticated_email_address
               target: ocsf.actor.user.uid
               preserveSource: true
               overrideOnConflict: true
@@ -765,10 +764,9 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `actor.user_id`, `actor.unauthenticated_email_address` to `ocsf.user.uid`
+              name: Map `actor.user_id` to `ocsf.user.uid`
               sources:
                 - actor.user_id
-                - actor.unauthenticated_email_address
               target: ocsf.user.uid
               preserveSource: true
               overrideOnConflict: true
