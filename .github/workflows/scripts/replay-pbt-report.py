@@ -222,6 +222,48 @@ def short_test_name(test: str) -> str:
     test = test.split(" - ", 1)[0]
     return test.rsplit("::", 1)[-1]
 
+TEST_DEFINITIONS = {
+    "test_emitted_metrics_match_metadata": (
+        "Emitted metrics match metadata.csv",
+        "The check emitted a metric that is missing from metadata.csv or has a different type than metadata.csv declares.",
+    ),
+    "test_asset_query_metrics_match_metadata": (
+        "Asset query metrics exist in metadata.csv",
+        "A dashboard or monitor query references a metric that is not documented in metadata.csv.",
+    ),
+    "test_openmetrics_replay_coverage": (
+        "OpenMetrics replay coverage",
+        "The replay fixture did not cover enough of the observed OpenMetrics surface or metadata surface.",
+    ),
+    "test_cached_replay_is_deterministic_for_same_ref": (
+        "Replay is deterministic",
+        "Running the same check code against the same replay cache should produce the same normalized output.",
+    ),
+    "test_mutated_cache_matches_original_output": (
+        "OpenMetrics mutations preserve output",
+        "A semantically equivalent mutation of cached OpenMetrics input changed the check output.",
+    ),
+}
+
+
+def test_label(name: Any) -> str:
+    text = str(name or "")
+    return TEST_DEFINITIONS.get(text, (text.replace("test_", "").replace("_", " ").capitalize(), ""))[0]
+
+
+def test_description(name: Any) -> str:
+    return TEST_DEFINITIONS.get(str(name or ""), ("", ""))[1]
+
+
+def test_display_md(name: Any) -> str:
+    raw_name = str(name or "")
+    label = test_label(raw_name)
+    if not raw_name:
+        return ""
+    if label == raw_name:
+        return f"`{md_escape(raw_name)}`"
+    return f"**{md_escape(label)}**<br/><sub>`{md_escape(raw_name)}`</sub>"
+
 
 def classify(row: dict[str, Any]) -> str:
     status = row.get("status")
@@ -246,7 +288,12 @@ def classify(row: dict[str, Any]) -> str:
         return "openmetrics-mutation"
     if "asset-query" in haystack or "asset query" in haystack:
         return "asset-metadata-mismatch"
-    if "metadata.csv" in haystack or "metadata" in haystack and ("missing" in haystack or "unemitted" in haystack):
+    if (
+        "test_emitted_metrics_match_metadata" in haystack
+        or "test_asset_query_metrics_match_metadata" in haystack
+        or "metadata.csv" in haystack
+        or ("metadata" in haystack and ("missing" in haystack or "unemitted" in haystack))
+    ):
         return "metadata-contract"
     if "openmetrics-coverage" in haystack or "coverage" in haystack:
         return "coverage"
@@ -261,7 +308,7 @@ def summarize_failure(row: dict[str, Any]) -> str:
     failed_tests = row.get("failed_tests") or []
     short_errors = row.get("short_errors") or []
     if failed_tests:
-        names = [short_test_name(str(item)) for item in failed_tests[:3]]
+        names = [test_label(short_test_name(str(item))) for item in failed_tests[:3]]
         more = len(failed_tests) - len(names)
         suffix = f" (+{more} more)" if more > 0 else ""
         return sanitize_text(", ".join(names) + suffix)
@@ -623,9 +670,11 @@ def build_individual_target_markdown(
     if failed_tests or short_errors:
         lines.extend(["### Failure details from pytest", ""])
         if failed_tests:
-            lines.append("Failed tests/properties:")
+            lines.append("Failed checks:")
             for item in failed_tests[:12]:
-                lines.append(f"- `{md_escape(item)}`")
+                description = test_description(item)
+                suffix = f" — {md_escape(description)}" if description else ""
+                lines.append(f"- {test_display_md(item)}{suffix}")
             lines.append("")
         if short_errors:
             lines.append("Short error excerpts:")
