@@ -204,7 +204,8 @@ class AgenticPhase(Phase):
             total_output += last_result.total_output_tokens
 
             if has_goal:
-                assert self._goal_agent_builder is not None
+                if self._goal_agent_builder is None:
+                    raise ValueError("Goal agent builder is required when tasks specify a goal")
                 goal_text = render_goal_text(task, self._config_dir, context, self._resolver)
                 outcome: GoalLoopOutcome = await run_goal_loop(
                     task=task,
