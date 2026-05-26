@@ -567,20 +567,20 @@ jobs:
                         if isinstance(finding, dict):
                             findings.append({**target, 'property': property_name, **finding})
                 elif kind == 'coverage' and isinstance(data, dict):
-                    observed = data.get('observed_to_emitted') or {}
-                    supported = data.get('supported_to_emitted') or {}
+                    endpoint = data.get('endpoint_to_emitted') or data.get('observed_to_emitted') or {}
+                    metadata = data.get('metadata_to_emitted') or data.get('supported_to_emitted') or {}
                     coverages.append(
                         {
                             **target,
                             'property': property_name,
-                            'observed_count': observed.get('observed_count'),
-                            'observed_covered_count': observed.get('covered_count'),
-                            'observed_missing_count': observed.get('missing_count'),
-                            'observed_coverage': observed.get('coverage'),
-                            'supported_count': supported.get('supported_count'),
-                            'supported_emitted_count': supported.get('emitted_count'),
-                            'supported_unemitted_count': supported.get('unemitted_count'),
-                            'supported_coverage': supported.get('coverage'),
+                            'endpoint_count': endpoint.get('endpoint_count', endpoint.get('observed_count')),
+                            'endpoint_emitted_count': endpoint.get('covered_count'),
+                            'endpoint_missing_count': endpoint.get('missing_count'),
+                            'endpoint_to_emitted_coverage': endpoint.get('coverage'),
+                            'metadata_count': metadata.get('metadata_count', metadata.get('supported_count')),
+                            'metadata_emitted_count': metadata.get('emitted_count'),
+                            'metadata_unemitted_count': metadata.get('unemitted_count'),
+                            'metadata_to_emitted_coverage': metadata.get('coverage'),
                         }
                     )
 
@@ -598,14 +598,14 @@ jobs:
             'property',
             'integration',
             'environment',
-            'observed_count',
-            'observed_covered_count',
-            'observed_missing_count',
-            'observed_coverage',
-            'supported_count',
-            'supported_emitted_count',
-            'supported_unemitted_count',
-            'supported_coverage',
+            'endpoint_count',
+            'endpoint_emitted_count',
+            'endpoint_missing_count',
+            'endpoint_to_emitted_coverage',
+            'metadata_count',
+            'metadata_emitted_count',
+            'metadata_unemitted_count',
+            'metadata_to_emitted_coverage',
         )
         with Path('replay-pbt-coverage-summary.tsv').open('w', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=coverage_columns, delimiter='\t', extrasaction='ignore')

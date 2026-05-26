@@ -536,19 +536,19 @@ def _compute_openmetrics_coverage(
     return {
         'integration_prefix': metric_prefix,
         'raw_metric_prefixes': sorted(prefixes),
-        'observed_to_emitted': {
+        'endpoint_to_emitted': {
             'coverage': _coverage_ratio(len(observed_covered), len(observed_families)),
             'covered_count': len(observed_covered),
             'missing_count': len(observed_missing),
-            'observed_count': len(observed_families),
+            'endpoint_count': len(observed_families),
             'covered_families': sorted(observed_covered),
             'missing_families': sorted(observed_missing),
         },
-        'supported_to_emitted': {
+        'metadata_to_emitted': {
             'coverage': _coverage_ratio(len(metadata_emitted), len(metadata_names)),
             'emitted_count': len(metadata_emitted),
             'unemitted_count': len(metadata_unemitted),
-            'supported_count': len(metadata_names),
+            'metadata_count': len(metadata_names),
             'emitted_metrics': sorted(metadata_emitted),
             'unemitted_metrics': sorted(metadata_unemitted),
         },
@@ -560,33 +560,33 @@ def _write_openmetrics_coverage(property_dir: Path, coverage: dict[str, Any]) ->
     property_dir.mkdir(parents=True, exist_ok=True)
     (property_dir / 'coverage.json').write_text(json.dumps(coverage, indent=2, sort_keys=True) + '\n')
 
-    observed = coverage['observed_to_emitted']
-    supported = coverage['supported_to_emitted']
+    endpoint = coverage['endpoint_to_emitted']
+    metadata = coverage['metadata_to_emitted']
     lines = [
         '# OpenMetrics replay coverage',
         '',
-        'This is a generic, advisory coverage report. The observed-to-emitted direction uses a name-stem heuristic '
+        'This is a generic, advisory coverage report. Endpoint -> emitted uses a name-stem heuristic '
         'because integrations can rename upstream families in integration-specific ways.',
         '',
         '## Summary',
         '',
-        f'- Observed upstream families: {observed["observed_count"]}',
-        f'- Observed upstream families heuristically emitted: {observed["covered_count"]}',
-        f'- Observed -> emitted coverage: {_format_percent(observed["coverage"])}',
-        f'- Supported metadata metrics: {supported["supported_count"]}',
-        f'- Supported metadata metrics emitted by this replay: {supported["emitted_count"]}',
-        f'- Supported -> emitted coverage: {_format_percent(supported["coverage"])}',
+        f'- Endpoint metric families: {endpoint["endpoint_count"]}',
+        f'- Endpoint metric families heuristically emitted: {endpoint["covered_count"]}',
+        f'- Endpoint -> emitted coverage: {_format_percent(endpoint["coverage"])}',
+        f'- metadata.csv metrics: {metadata["metadata_count"]}',
+        f'- metadata.csv metrics emitted by this replay: {metadata["emitted_count"]}',
+        f'- metadata.csv -> emitted coverage: {_format_percent(metadata["coverage"])}',
         '',
-        '## Observed upstream families not heuristically emitted',
+        '## Endpoint metric families not heuristically emitted',
         '',
     ]
-    lines.extend(f'- `{family}`' for family in observed['missing_families'][:200])
-    if len(observed['missing_families']) > 200:
-        lines.append(f'- ... {len(observed["missing_families"]) - 200} more')
-    lines.extend(['', '## Supported metadata metrics not emitted by this replay', ''])
-    lines.extend(f'- `{metric}`' for metric in supported['unemitted_metrics'][:200])
-    if len(supported['unemitted_metrics']) > 200:
-        lines.append(f'- ... {len(supported["unemitted_metrics"]) - 200} more')
+    lines.extend(f'- `{family}`' for family in endpoint['missing_families'][:200])
+    if len(endpoint['missing_families']) > 200:
+        lines.append(f'- ... {len(endpoint["missing_families"]) - 200} more')
+    lines.extend(['', '## metadata.csv metrics not emitted by this replay', ''])
+    lines.extend(f'- `{metric}`' for metric in metadata['unemitted_metrics'][:200])
+    if len(metadata['unemitted_metrics']) > 200:
+        lines.append(f'- ... {len(metadata["unemitted_metrics"]) - 200} more')
     (property_dir / 'coverage.md').write_text('\n'.join(lines) + '\n')
     write_property_result(
         property_dir,
@@ -596,10 +596,10 @@ def _write_openmetrics_coverage(property_dir: Path, coverage: dict[str, Any]) ->
             {'kind': 'coverage-markdown', 'path': 'coverage.md', 'format': 'markdown'},
         ],
         counts={
-            'observed_families': observed['observed_count'],
-            'observed_families_covered': observed['covered_count'],
-            'supported_metrics': supported['supported_count'],
-            'supported_metrics_emitted': supported['emitted_count'],
+            'endpoint_families': endpoint['endpoint_count'],
+            'endpoint_families_emitted': endpoint['covered_count'],
+            'metadata_metrics': metadata['metadata_count'],
+            'metadata_metrics_emitted': metadata['emitted_count'],
         },
     )
 
@@ -1143,7 +1143,7 @@ def test_repeated_run_tag_stability_accepts_stable_check_tags():
     _assert_repeated_run_tag_stability(envelope)
 
 
-def test_openmetrics_coverage_counts_observed_and_supported_directions(tmp_path: Path):
+def test_openmetrics_coverage_counts_endpoint_and_metadata_directions(tmp_path: Path):
     cache = tmp_path / 'cache'
     cache.mkdir()
     (cache / 'config.json').write_text(json.dumps({'instances': [{'raw_metric_prefix': 'n8n_'}]}))
@@ -1184,27 +1184,27 @@ def test_openmetrics_coverage_counts_observed_and_supported_directions(tmp_path:
         metric_prefix='n8n.',
     )
 
-    assert coverage['observed_to_emitted']['observed_count'] == 2
-    assert coverage['observed_to_emitted']['covered_families'] == ['n8n_workflow_execution_duration_seconds']
-    assert coverage['observed_to_emitted']['missing_families'] == ['n8n_unmapped']
-    assert coverage['supported_to_emitted']['supported_count'] == 3
-    assert coverage['supported_to_emitted']['emitted_count'] == 2
+    assert coverage['endpoint_to_emitted']['endpoint_count'] == 2
+    assert coverage['endpoint_to_emitted']['covered_families'] == ['n8n_workflow_execution_duration_seconds']
+    assert coverage['endpoint_to_emitted']['missing_families'] == ['n8n_unmapped']
+    assert coverage['metadata_to_emitted']['metadata_count'] == 3
+    assert coverage['metadata_to_emitted']['emitted_count'] == 2
 
 
 def test_write_openmetrics_coverage_artifacts(tmp_path: Path):
     coverage = {
-        'observed_to_emitted': {
+        'endpoint_to_emitted': {
             'coverage': 0.5,
             'covered_count': 1,
             'missing_count': 1,
-            'observed_count': 2,
+            'endpoint_count': 2,
             'missing_families': ['missing_raw_family'],
         },
-        'supported_to_emitted': {
+        'metadata_to_emitted': {
             'coverage': 0.25,
             'emitted_count': 1,
             'unemitted_count': 3,
-            'supported_count': 4,
+            'metadata_count': 4,
             'unemitted_metrics': ['example.not_emitted'],
         },
         'emitted_metrics': ['example.emitted'],
@@ -1212,8 +1212,8 @@ def test_write_openmetrics_coverage_artifacts(tmp_path: Path):
 
     _write_openmetrics_coverage(tmp_path, coverage)
 
-    assert json.loads((tmp_path / 'coverage.json').read_text())['observed_to_emitted']['coverage'] == 0.5
-    assert 'Observed -> emitted coverage: 50.0%' in (tmp_path / 'coverage.md').read_text()
+    assert json.loads((tmp_path / 'coverage.json').read_text())['endpoint_to_emitted']['coverage'] == 0.5
+    assert 'Endpoint -> emitted coverage: 50.0%' in (tmp_path / 'coverage.md').read_text()
     result = json.loads((tmp_path / 'property-result.json').read_text())
     assert result['property'] == 'openmetrics-coverage'
     assert [artifact['path'] for artifact in result['artifacts']] == ['coverage.json', 'coverage.md']
