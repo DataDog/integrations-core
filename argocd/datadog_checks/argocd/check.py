@@ -15,6 +15,7 @@ from .metrics import (
     NOTIFICATIONS_CONTROLLER_METRICS,
     REPO_SERVER_METRICS,
 )
+from .resources import ArgocdResourceCollector
 
 (
     API_SERVER_NAMESPACE,
@@ -40,6 +41,12 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         super(ArgocdCheck, self).__init__(name, init_config, instances)
         self.check_initializations.appendleft(self.parse_config)
         self.check_initializations.append(self.configure_additional_transformers)
+        self._resource_collector = ArgocdResourceCollector(self)
+
+    def check(self, instance):
+        super().check(instance)
+        if self.instance.get("collect_genresources"):
+            self._resource_collector.collect()
 
     def parse_config(self):
         endpoint_configs = [
