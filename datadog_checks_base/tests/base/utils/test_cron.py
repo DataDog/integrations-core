@@ -150,171 +150,199 @@ def test_semantically_equivalent_expressions_compare_equal(left_expression: str,
 
 
 # ---------------------------------------------------------------------------
-# Tick math, table-driven; one table fuels next_tick and previous_tick.
-# Each row is (expression, anchor, expected_next, expected_prev).
+# Tick math, table-driven. Each row pins both bracketing ticks at the same
+# anchor so adding a case forces the (prev, next) pair to stay self-consistent
+# (prev < anchor <= next).
 # ---------------------------------------------------------------------------
 
 
-NEXT_PREV_CASES = [
-    pytest.param(
-        "* * * * *",
-        BASE_TIMESTAMP,
-        utc_timestamp(2026, 1, 1, 0, 1),
-        utc_timestamp(2025, 12, 31, 23, 59),
-        id="every-minute",
-    ),
-    pytest.param(
-        "0 * * * *", BASE_TIMESTAMP, utc_timestamp(2026, 1, 1, 1), utc_timestamp(2025, 12, 31, 23), id="hourly"
-    ),
-    pytest.param(
-        "0 9 * * *", BASE_TIMESTAMP, utc_timestamp(2026, 1, 1, 9), utc_timestamp(2025, 12, 31, 9), id="daily-at-9"
-    ),
-    pytest.param(
-        "0 9 * * *",
-        utc_timestamp(2026, 1, 1, 9),
-        utc_timestamp(2026, 1, 2, 9),
-        utc_timestamp(2025, 12, 31, 9),
-        id="on-9-boundary",
-    ),
-    pytest.param(
-        "0 9 * * *",
-        utc_timestamp(2026, 1, 1, 9, 1),
-        utc_timestamp(2026, 1, 2, 9),
-        utc_timestamp(2026, 1, 1, 9),
-        id="one-min-after-9",
-    ),
-    pytest.param(
-        "*/5 * * * *",
-        utc_timestamp(2026, 1, 1, 0, 3),
-        utc_timestamp(2026, 1, 1, 0, 5),
-        utc_timestamp(2026, 1, 1, 0, 0),
-        id="every-5-mid",
-    ),
-    pytest.param(
-        "0 9 * * 1", BASE_TIMESTAMP, utc_timestamp(2026, 1, 5, 9), utc_timestamp(2025, 12, 29, 9), id="weekly-monday-9"
-    ),
-    pytest.param(
-        "0 0 1 1 *", BASE_TIMESTAMP, utc_timestamp(2027, 1, 1), utc_timestamp(2025, 1, 1), id="new-year-from-new-year"
-    ),
-    pytest.param(
-        "0 0 29 2 *", utc_timestamp(2026, 3, 1), utc_timestamp(2028, 2, 29), utc_timestamp(2024, 2, 29), id="leap-day"
-    ),
-    pytest.param(
-        "0 0 1 * *",
-        utc_timestamp(2026, 1, 1, 12),
-        utc_timestamp(2026, 2, 1),
-        utc_timestamp(2026, 1, 1),
-        id="monthly-first",
-    ),
-    pytest.param(
-        "7-23/4 * * * *",
-        BASE_TIMESTAMP,
-        utc_timestamp(2026, 1, 1, 0, 7),
-        utc_timestamp(2025, 12, 31, 23, 23),
-        id="range-step-minutes",
-    ),
-    pytest.param(
-        "0 0 1 */3 *", BASE_TIMESTAMP, utc_timestamp(2026, 4, 1), utc_timestamp(2025, 10, 1), id="quarterly-first"
-    ),
-    pytest.param(
-        "0 0 1 * 1", BASE_TIMESTAMP, utc_timestamp(2026, 1, 5), utc_timestamp(2025, 12, 29), id="vixie-or-dom1-or-mon"
-    ),
-    pytest.param("0 0 * * 0", BASE_TIMESTAMP, utc_timestamp(2026, 1, 4), utc_timestamp(2025, 12, 28), id="sunday-as-0"),
-    pytest.param("0 0 * * 7", BASE_TIMESTAMP, utc_timestamp(2026, 1, 4), utc_timestamp(2025, 12, 28), id="sunday-as-7"),
-    pytest.param(
-        "0 0 31 * *",
-        utc_timestamp(2026, 3, 1),
-        utc_timestamp(2026, 3, 31),
-        utc_timestamp(2026, 1, 31),
-        id="31st-skips-feb",
-    ),
-    pytest.param(
-        "15,45 * * * *",
-        BASE_TIMESTAMP,
-        utc_timestamp(2026, 1, 1, 0, 15),
-        utc_timestamp(2025, 12, 31, 23, 45),
-        id="list-15-and-45",
-    ),
-    pytest.param(
-        "* * * * *",
-        utc_timestamp(2026, 1, 1) + 0.5,
-        utc_timestamp(2026, 1, 1, 0, 1),
-        utc_timestamp(2026, 1, 1, 0, 0),
-        id="every-minute-fractional",
-    ),
-    pytest.param(
-        "5/15 * * * *",
-        BASE_TIMESTAMP,
-        utc_timestamp(2026, 1, 1, 0, 5),
-        utc_timestamp(2025, 12, 31, 23, 50),
-        id="n-step-extends-to-high",
-    ),
-    pytest.param(
-        "1/2 * * * *",
-        BASE_TIMESTAMP,
-        utc_timestamp(2026, 1, 1, 0, 1),
-        utc_timestamp(2025, 12, 31, 23, 59),
-        id="odd-minutes-via-n-step",
-    ),
-    pytest.param(
-        "0 0 31 1 3",
-        utc_timestamp(2026, 2, 15),
-        utc_timestamp(2027, 1, 6),
-        utc_timestamp(2026, 1, 31),
-        id="vixie-or-with-month-boundary-cross",
-    ),
-    pytest.param(
-        "0 16 */2 * 6",
-        utc_timestamp(2023, 5, 2),
-        utc_timestamp(2023, 5, 3, 16),
-        utc_timestamp(2023, 5, 1, 16),
-        id="vixie-or-stepped-dom-with-saturday",
-    ),
-    pytest.param(
-        "5 0 */2 * *",
-        utc_timestamp(2012, 2, 24),
-        utc_timestamp(2012, 2, 25, 0, 5),
-        utc_timestamp(2012, 2, 23, 0, 5),
-        id="stepped-dom-previous-from-even-day",
-    ),
-    pytest.param(
-        "0 0 22 * *",
-        utc_timestamp(2012, 3, 15),
-        utc_timestamp(2012, 3, 22),
-        utc_timestamp(2012, 2, 22),
-        id="dom-prev-crosses-into-previous-month",
-    ),
-    pytest.param(
-        "0 0 * * 0,6",
-        utc_timestamp(2010, 8, 25, 15, 56),
-        utc_timestamp(2010, 8, 28),
-        utc_timestamp(2010, 8, 22),
-        id="weekend-dow-list-both-directions",
-    ),
-    pytest.param(
-        "0 0 1 1,3,6,9,12 *",
-        utc_timestamp(2026, 1, 15),
-        utc_timestamp(2026, 3, 1),
-        utc_timestamp(2026, 1, 1),
-        id="quarterly-via-month-comma-list",
-    ),
-]
+@pytest.mark.parametrize(
+    "expression,anchor,expected_next,expected_prev",
+    [
+        pytest.param(
+            "* * * * *",
+            BASE_TIMESTAMP,
+            utc_timestamp(2026, 1, 1, 0, 1),
+            utc_timestamp(2025, 12, 31, 23, 59),
+            id="every-minute",
+        ),
+        pytest.param(
+            "0 * * * *", BASE_TIMESTAMP, utc_timestamp(2026, 1, 1, 1), utc_timestamp(2025, 12, 31, 23), id="hourly"
+        ),
+        pytest.param(
+            "0 9 * * *", BASE_TIMESTAMP, utc_timestamp(2026, 1, 1, 9), utc_timestamp(2025, 12, 31, 9), id="daily-at-9"
+        ),
+        pytest.param(
+            "0 9 * * *",
+            utc_timestamp(2026, 1, 1, 9),
+            utc_timestamp(2026, 1, 2, 9),
+            utc_timestamp(2025, 12, 31, 9),
+            id="on-9-boundary",
+        ),
+        pytest.param(
+            "0 9 * * *",
+            utc_timestamp(2026, 1, 1, 9, 1),
+            utc_timestamp(2026, 1, 2, 9),
+            utc_timestamp(2026, 1, 1, 9),
+            id="one-min-after-9",
+        ),
+        pytest.param(
+            "*/5 * * * *",
+            utc_timestamp(2026, 1, 1, 0, 3),
+            utc_timestamp(2026, 1, 1, 0, 5),
+            utc_timestamp(2026, 1, 1, 0, 0),
+            id="every-5-mid",
+        ),
+        pytest.param(
+            "0 9 * * 1",
+            BASE_TIMESTAMP,
+            utc_timestamp(2026, 1, 5, 9),
+            utc_timestamp(2025, 12, 29, 9),
+            id="weekly-monday-9",
+        ),
+        pytest.param(
+            "0 0 1 1 *",
+            BASE_TIMESTAMP,
+            utc_timestamp(2027, 1, 1),
+            utc_timestamp(2025, 1, 1),
+            id="new-year-from-new-year",
+        ),
+        pytest.param(
+            "0 0 29 2 *",
+            utc_timestamp(2026, 3, 1),
+            utc_timestamp(2028, 2, 29),
+            utc_timestamp(2024, 2, 29),
+            id="leap-day",
+        ),
+        pytest.param(
+            "0 0 1 * *",
+            utc_timestamp(2026, 1, 1, 12),
+            utc_timestamp(2026, 2, 1),
+            utc_timestamp(2026, 1, 1),
+            id="monthly-first",
+        ),
+        pytest.param(
+            "7-23/4 * * * *",
+            BASE_TIMESTAMP,
+            utc_timestamp(2026, 1, 1, 0, 7),
+            utc_timestamp(2025, 12, 31, 23, 23),
+            id="range-step-minutes",
+        ),
+        pytest.param(
+            "0 0 1 */3 *",
+            BASE_TIMESTAMP,
+            utc_timestamp(2026, 4, 1),
+            utc_timestamp(2025, 10, 1),
+            id="quarterly-first",
+        ),
+        pytest.param(
+            "0 0 1 * 1",
+            BASE_TIMESTAMP,
+            utc_timestamp(2026, 1, 5),
+            utc_timestamp(2025, 12, 29),
+            id="vixie-or-dom1-or-mon",
+        ),
+        pytest.param(
+            "0 0 * * 0", BASE_TIMESTAMP, utc_timestamp(2026, 1, 4), utc_timestamp(2025, 12, 28), id="sunday-as-0"
+        ),
+        pytest.param(
+            "0 0 * * 7", BASE_TIMESTAMP, utc_timestamp(2026, 1, 4), utc_timestamp(2025, 12, 28), id="sunday-as-7"
+        ),
+        pytest.param(
+            "0 0 31 * *",
+            utc_timestamp(2026, 3, 1),
+            utc_timestamp(2026, 3, 31),
+            utc_timestamp(2026, 1, 31),
+            id="31st-skips-feb",
+        ),
+        pytest.param(
+            "15,45 * * * *",
+            BASE_TIMESTAMP,
+            utc_timestamp(2026, 1, 1, 0, 15),
+            utc_timestamp(2025, 12, 31, 23, 45),
+            id="list-15-and-45",
+        ),
+        pytest.param(
+            "* * * * *",
+            utc_timestamp(2026, 1, 1) + 0.5,
+            utc_timestamp(2026, 1, 1, 0, 1),
+            utc_timestamp(2026, 1, 1, 0, 0),
+            id="every-minute-fractional",
+        ),
+        pytest.param(
+            "5/15 * * * *",
+            BASE_TIMESTAMP,
+            utc_timestamp(2026, 1, 1, 0, 5),
+            utc_timestamp(2025, 12, 31, 23, 50),
+            id="n-step-extends-to-high",
+        ),
+        pytest.param(
+            "1/2 * * * *",
+            BASE_TIMESTAMP,
+            utc_timestamp(2026, 1, 1, 0, 1),
+            utc_timestamp(2025, 12, 31, 23, 59),
+            id="odd-minutes-via-n-step",
+        ),
+        pytest.param(
+            "0 0 31 1 3",
+            utc_timestamp(2026, 2, 15),
+            utc_timestamp(2027, 1, 6),
+            utc_timestamp(2026, 1, 31),
+            id="vixie-or-with-month-boundary-cross",
+        ),
+        pytest.param(
+            "0 16 */2 * 6",
+            utc_timestamp(2023, 5, 2),
+            utc_timestamp(2023, 5, 3, 16),
+            utc_timestamp(2023, 5, 1, 16),
+            id="vixie-or-stepped-dom-with-saturday",
+        ),
+        pytest.param(
+            "5 0 */2 * *",
+            utc_timestamp(2012, 2, 24),
+            utc_timestamp(2012, 2, 25, 0, 5),
+            utc_timestamp(2012, 2, 23, 0, 5),
+            id="stepped-dom-previous-from-even-day",
+        ),
+        pytest.param(
+            "0 0 22 * *",
+            utc_timestamp(2012, 3, 15),
+            utc_timestamp(2012, 3, 22),
+            utc_timestamp(2012, 2, 22),
+            id="dom-prev-crosses-into-previous-month",
+        ),
+        pytest.param(
+            "0 0 * * 0,6",
+            utc_timestamp(2010, 8, 25, 15, 56),
+            utc_timestamp(2010, 8, 28),
+            utc_timestamp(2010, 8, 22),
+            id="weekend-dow-list-both-directions",
+        ),
+        pytest.param(
+            "0 0 1 1,3,6,9,12 *",
+            utc_timestamp(2026, 1, 15),
+            utc_timestamp(2026, 3, 1),
+            utc_timestamp(2026, 1, 1),
+            id="quarterly-via-month-comma-list",
+        ),
+    ],
+)
+def test_bracketing_ticks(expression: str, anchor: float, expected_next: float, expected_prev: float) -> None:
+    expr = CronExpression(expression)
+    got_next = expr.next_tick(after=anchor)
+    got_prev = expr.previous_tick(before=anchor)
 
-
-@pytest.mark.parametrize("expression,anchor,expected_next,_expected_prev", NEXT_PREV_CASES)
-def test_next_tick(expression: str, anchor: float, expected_next: float, _expected_prev: float) -> None:
-    got = CronExpression(expression).next_tick(after=anchor)
-    assert got == expected_next, (
-        f"{expression} from {iso_format(anchor)}: got {iso_format(got)}, expected {iso_format(expected_next)}"
-    )
-
-
-@pytest.mark.parametrize("expression,anchor,_expected_next,expected_prev", NEXT_PREV_CASES)
-def test_previous_tick(expression: str, anchor: float, _expected_next: float, expected_prev: float) -> None:
-    got = CronExpression(expression).previous_tick(before=anchor)
-    assert got == expected_prev, (
-        f"{expression} before {iso_format(anchor)}: got {iso_format(got)}, expected {iso_format(expected_prev)}"
-    )
+    failures: list[str] = []
+    if got_next != expected_next:
+        failures.append(
+            f"next_tick from {iso_format(anchor)}: got {iso_format(got_next)}, expected {iso_format(expected_next)}"
+        )
+    if got_prev != expected_prev:
+        failures.append(
+            f"previous_tick before {iso_format(anchor)}: "
+            f"got {iso_format(got_prev)}, expected {iso_format(expected_prev)}"
+        )
+    assert not failures, f"{expression}:\n" + "\n".join(failures)
 
 
 @pytest.mark.parametrize(

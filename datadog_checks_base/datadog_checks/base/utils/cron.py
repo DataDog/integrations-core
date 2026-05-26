@@ -27,7 +27,10 @@ DOM_RANGE = (1, 31)
 MONTH_RANGE = (1, 12)
 DOW_RANGE = (0, 7)
 
-MAX_DAYS_PER_MONTH = {1: 31, 2: 29, 3: 31, 4: 30, 5: 31, 6: 30, 7: 31, 8: 31, 9: 30, 10: 31, 11: 30, 12: 31}
+# Months not listed default to 31. February is 29 because the parser has no
+# year context, so any expression that wants to fire on the 29th in a leap year
+# must be accepted.
+MAX_DAYS_PER_MONTH = {2: 29, 4: 30, 6: 30, 9: 30, 11: 30}
 
 WALK_ITERATION_BUDGET = 366 * 8
 
@@ -143,7 +146,7 @@ class CronExpression:
         if self._dow_restricted or not self._dom_restricted:
             return
         for month in self._months:
-            if any(day <= MAX_DAYS_PER_MONTH[month] for day in self._doms):
+            if any(day <= MAX_DAYS_PER_MONTH.get(month, 31) for day in self._doms):
                 return
         raise ValueError(
             f"cron expression {self._expression!r} can never fire: "
