@@ -903,8 +903,18 @@ def build_markdown(
             lines.append(
                 f"| {target_link_md(coverage)} | {coverage_bar_md(coverage.get('endpoint_to_emitted_coverage'))} | {coverage_bar_md(coverage.get('metadata_to_emitted_coverage'))} | {coverage.get('endpoint_count') or ''} | {coverage.get('metadata_count') or ''} |"
             )
-        if len(coverages) > 20:
-            lines.append(f"\n_… {len(coverages) - 20} more coverage rows in the report bundle._")
+        if len(sorted_coverages) > 20:
+            remaining = sorted_coverages[20:]
+            lines.append("")
+            lines.append(f"<details><summary>📈 More OpenMetrics coverage rows ({len(remaining)})</summary>")
+            lines.append("")
+            lines.extend(["| Target | Endpoint → emitted | metadata.csv → emitted | Endpoint count | Metadata count |", "|---|---|---|---:|---:|"])
+            for coverage in remaining:
+                lines.append(
+                    f"| {target_link_md(coverage)} | {coverage_bar_md(coverage.get('endpoint_to_emitted_coverage'))} | {coverage_bar_md(coverage.get('metadata_to_emitted_coverage'))} | {coverage.get('endpoint_count') or ''} | {coverage.get('metadata_count') or ''} |"
+                )
+            lines.append("")
+            lines.append("</details>")
     else:
         lines.append("No OpenMetrics coverage reports collected.")
     lines.append("")
