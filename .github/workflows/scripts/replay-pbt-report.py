@@ -375,12 +375,43 @@ def load_findings_and_coverages(root: Path) -> tuple[list[dict[str, Any]], list[
     return property_results, findings, coverages
 
 
-def pct(value: Any) -> str:
+def coverage_number(value: Any) -> float | None:
     try:
         number = float(value)
     except (TypeError, ValueError):
+        return None
+    if math.isnan(number) or math.isinf(number):
+        return None
+    return max(0.0, min(1.0, number))
+
+
+def pct(value: Any) -> str:
+    number = coverage_number(value)
+    if number is None:
         return ""
     return f"{number * 100:.1f}%"
+
+
+def coverage_bar_md(value: Any, width: int = 18) -> str:
+    number = coverage_number(value)
+    if number is None:
+        return ""
+    filled = int(round(width * number))
+    return f"`{'█' * filled}{'░' * (width - filled)}` {number * 100:.1f}%"
+
+
+def coverage_bar_html(value: Any) -> str:
+    number = coverage_number(value)
+    if number is None:
+        return ""
+    percent = number * 100
+    color = "var(--ok)" if percent >= 80 else "var(--warn)" if percent >= 40 else "var(--fail)"
+    return (
+        "<div class='coverage-bar' "
+        f"aria-label='{percent:.1f}% coverage'>"
+        f"<i style='width:{percent:.1f}%;background:{color}'></i>"
+        f"<span>{percent:.1f}%</span></div>"
+    )
 
 
 def current_run_url() -> str:
@@ -599,10 +630,10 @@ def build_individual_target_markdown(
 
     if target_coverages:
         lines.extend(["### Coverage reported for this target", ""])
-        lines.extend(["| Property | Endpoint → emitted | metadata.csv → emitted | Endpoint count | Metadata count |", "|---|---:|---:|---:|---:|"])
+        lines.extend(["| Property | Endpoint → emitted | metadata.csv → emitted | Endpoint count | Metadata count |", "|---|---|---|---:|---:|"])
         for coverage in target_coverages:
             lines.append(
-                f"| `{md_escape(coverage.get('property', ''))}` | {pct(coverage.get('endpoint_to_emitted_coverage'))} | {pct(coverage.get('metadata_to_emitted_coverage'))} | {coverage.get('endpoint_count') or ''} | {coverage.get('metadata_count') or ''} |"
+                f"| {property_display_md(coverage.get('property', ''))} | {coverage_bar_md(coverage.get('endpoint_to_emitted_coverage'))} | {coverage_bar_md(coverage.get('metadata_to_emitted_coverage'))} | {coverage.get('endpoint_count') or ''} | {coverage.get('metadata_count') or ''} |"
             )
         lines.append("")
 
@@ -796,7 +827,7 @@ def build_markdown(
 
     lines.extend(["## OpenMetrics coverage", ""])
     if coverages:
-        lines.extend(["| Target | Endpoint → emitted | metadata.csv → emitted | Endpoint count | Metadata count |", "|---|---:|---:|---:|---:|"])
+        lines.extend(["| Target | Endpoint → emitted | metadata.csv → emitted | Endpoint count | Metadata count |", "|---|---|---|---:|---:|"])
         sorted_coverages = sorted(
             coverages,
             key=lambda c: (
@@ -807,7 +838,7 @@ def build_markdown(
         )
         for coverage in sorted_coverages[:20]:
             lines.append(
-                f"| {target_link_md(coverage)} | {pct(coverage.get('endpoint_to_emitted_coverage'))} | {pct(coverage.get('metadata_to_emitted_coverage'))} | {coverage.get('endpoint_count') or ''} | {coverage.get('metadata_count') or ''} |"
+                f"| {target_link_md(coverage)} | {coverage_bar_md(coverage.get('endpoint_to_emitted_coverage'))} | {coverage_bar_md(coverage.get('metadata_to_emitted_coverage'))} | {coverage.get('endpoint_count') or ''} | {coverage.get('metadata_count') or ''} |"
             )
         if len(coverages) > 20:
             lines.append(f"\n_… {len(coverages) - 20} more coverage rows in the report bundle._")
@@ -917,10 +948,15 @@ def build_html(
         row = rows[0]
         category = row.get("category", "unknown")
         icon, label, description = CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS["unknown"])
+        target_name = str(row.get("target", ""))
         prop_rows = "".join(
             f"<tr><td>{property_display_html(prop.get('property'))}</td><td>{esc(prop.get('status'))}</td><td>{esc(property_description(prop.get('property')))}</td></tr>"
-            for prop in property_results_for_target(property_results, str(row.get("target", "")))
+            for prop in property_results_for_target(property_results, target_name)
         ) or "<tr><td colspan='3'>No per-property manifests were collected for this target.</td></tr>"
+        target_coverage_rows = "".join(
+            f"<tr><td>{property_display_html(coverage.get('property'))}</td><td>{coverage_bar_html(coverage.get('endpoint_to_emitted_coverage'))}</td><td>{coverage_bar_html(coverage.get('metadata_to_emitted_coverage'))}</td><td>{esc(coverage.get('endpoint_count'))}</td><td>{esc(coverage.get('metadata_count'))}</td></tr>"
+            for coverage in coverages_for_target(coverages, target_name)
+        ) or "<tr><td colspan='5'>No coverage reports collected for this target.</td></tr>"
         command = esc(replay_reproduce_command(row))
         individual_section = f"""
 <section class='card'>
@@ -940,6 +976,9 @@ def build_html(
   <p><strong>Suggested next step:</strong> {esc(CATEGORY_NEXT_STEPS.get(str(category), CATEGORY_NEXT_STEPS['unknown']))}</p>
   <h3>Property results</h3>
   <table><thead><tr><th>Property</th><th>Status</th><th>What it checks</th></tr></thead><tbody>{prop_rows}</tbody></table>
+  <h3>Coverage chart</h3>
+  <p class='muted'>Coverage is a signal about how much this replay fixture exercises, not a pass/fail grade by itself.</p>
+  <table><thead><tr><th>Property</th><th>Endpoint → emitted</th><th>metadata.csv → emitted</th><th>Endpoint count</th><th>Metadata count</th></tr></thead><tbody>{target_coverage_rows}</tbody></table>
   <h3>Reproduce locally</h3>
   <pre><code>{command}</code></pre>
 </section>
@@ -977,7 +1016,7 @@ def build_html(
         )
     target_rows = ''.join(target_row_parts)
     coverage_rows = "".join(
-        f"<tr><td>{target_link_html(c)}</td><td>{esc(pct(c.get('endpoint_to_emitted_coverage')))}</td><td>{esc(pct(c.get('metadata_to_emitted_coverage')))}</td><td>{esc(c.get('endpoint_count'))}</td><td>{esc(c.get('metadata_count'))}</td></tr>"
+        f"<tr><td>{target_link_html(c)}</td><td>{coverage_bar_html(c.get('endpoint_to_emitted_coverage'))}</td><td>{coverage_bar_html(c.get('metadata_to_emitted_coverage'))}</td><td>{esc(c.get('endpoint_count'))}</td><td>{esc(c.get('metadata_count'))}</td></tr>"
         for c in sorted(coverages, key=lambda item: str(item.get('target', '')))[:80]
     ) or "<tr><td colspan='5'>No coverage reports collected.</td></tr>"
     return f"""<!doctype html>
@@ -989,6 +1028,7 @@ main{{max-width:1280px;margin:0 auto;padding:2rem}} .hero{{background:linear-gra
 .hero h1{{margin:.2rem 0;font-size:2.2rem}} .hero p{{max-width:820px;color:#eef2ff}} .hero .result{{display:inline-flex;gap:.5rem;align-items:center;background:{'#dafbe1' if failed == 0 and rows else '#ffebe9'};color:{'#116329' if failed == 0 and rows else '#82071e'};padding:.35rem .7rem;border-radius:999px;font-weight:700}}
 .grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem}} .card{{background:white;border:1px solid var(--line);border-radius:16px;padding:1rem;margin:1rem 0;box-shadow:0 1px 2px rgba(31,35,40,.06)}}
 .stat{{background:white;border:1px solid var(--line);border-radius:14px;padding:1rem}} .stat span{{display:block;color:var(--muted)}} .stat strong{{font-size:2rem}} .bar{{height:10px;background:#eaeef2;border-radius:999px;overflow:hidden}} .bar i{{display:block;height:100%;background:var(--purple)}}
+.coverage-bar{{position:relative;min-width:150px;height:22px;background:#eaeef2;border-radius:999px;overflow:hidden}} .coverage-bar i{{display:block;height:100%;min-width:2px}} .coverage-bar span{{position:absolute;inset:0;display:grid;place-items:center;font-size:12px;font-weight:700;color:#1f2328;text-shadow:0 1px 0 rgba(255,255,255,.7)}}
 .flow{{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:.75rem}} .step{{background:white;border:1px solid var(--line);border-radius:16px;padding:1rem;position:relative}} .step b{{display:grid;place-items:center;background:#eef2ff;color:var(--purple);width:2rem;height:2rem;border-radius:999px}} .step h3{{margin:.6rem 0 .2rem}} .step-metric{{font-weight:700;color:#24292f}}
 .seed svg{{width:100%;height:auto}} .box{{fill:white;stroke:#8c959f;stroke-width:2}} .box.ok{{stroke:var(--ok)}} .box.warn{{stroke:var(--warn)}} .arrow{{stroke:#57606a;stroke-width:2;marker-end:url(#arrow)}} text{{font-size:15px;fill:#24292f}} text.small{{font-size:12px;fill:#57606a}}
 table{{border-collapse:collapse;width:100%;font-size:13px;background:white}}td,th{{border:1px solid var(--line);padding:.5rem;text-align:left;vertical-align:top}}th{{background:var(--bg)}} code{{background:var(--bg);padding:.1rem .25rem;border-radius:4px}} a{{color:var(--blue)}}
