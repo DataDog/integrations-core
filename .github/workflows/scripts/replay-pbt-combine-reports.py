@@ -186,8 +186,17 @@ def main() -> None:
         for category, count in category_counts.most_common()
     ]
 
-    markdown = report.build_markdown(targets, findings, coverages, mode=args.mode, shard=f'combined {len(shard_runs)} shard runs', target_count=str(len(targets)), shard_runs=shard_runs)
-    html_report = report.build_html(markdown, targets, findings, coverages, shard_runs=shard_runs)
+    markdown = report.build_markdown(
+        targets,
+        findings,
+        coverages,
+        mode=args.mode,
+        shard=f'combined {len(shard_runs)} shard runs',
+        target_count=str(len(targets)),
+        shard_runs=shard_runs,
+        property_results=property_results,
+    )
+    html_report = report.build_html(markdown, targets, findings, coverages, shard_runs=shard_runs, property_results=property_results)
 
     (args.out_dir / 'report.md').write_text(markdown)
     (args.out_dir / 'report.html').write_text(html_report)

@@ -53,26 +53,94 @@ CATEGORY_DEFINITIONS = {
 }
 
 PROPERTY_DEFINITIONS = {
-    "asset-query-tags-seen-in-replay": (
-        "Asset query coverage",
-        "A dashboard or monitor query references a metric/tag that this replay fixture did not emit. This is usually a coverage signal, not necessarily a product bug.",
+    "deterministic": (
+        "Determinism",
+        "Replay the same cached input twice. The check should emit the same normalized output both times.",
+    ),
+    "openmetrics-label-order": (
+        "OpenMetrics label order",
+        "Sort labels inside captured OpenMetrics samples. Label order should not change the emitted metrics.",
+    ),
+    "openmetrics-comments-blank-lines": (
+        "OpenMetrics comments and blank lines",
+        "Add harmless comments and blank lines to captured Prometheus text. The emitted metrics should stay the same.",
+    ),
+    "openmetrics-final-newline": (
+        "OpenMetrics final newline",
+        "Add or remove a final newline in captured Prometheus text. The emitted metrics should stay the same.",
+    ),
+    "openmetrics-help-text": (
+        "OpenMetrics HELP text",
+        "Change only HELP documentation text in captured Prometheus output. Metric output should not change.",
+    ),
+    "openmetrics-help-removal": (
+        "OpenMetrics HELP removal",
+        "Remove HELP documentation lines from captured Prometheus output. Metric output should not change.",
+    ),
+    "json-object-key-order": (
+        "JSON object key order",
+        "Reorder JSON object keys in captured responses. JSON key order should not change emitted output.",
+    ),
+    "json-whitespace": (
+        "JSON whitespace",
+        "Change insignificant JSON whitespace in captured responses. Emitted output should not change.",
+    ),
+    "json-string-escapes": (
+        "JSON string escapes",
+        "Change equivalent JSON string escaping in captured responses. Emitted output should not change.",
     ),
     "metadata-emitted-metrics": (
         "metadata.csv contract",
-        "Compare emitted metrics and tags with the integration metadata contract.",
+        "Every emitted metric should have a matching metadata.csv row with a compatible metric type.",
     ),
-    "deterministic": (
-        "Determinism",
-        "Replay the same cached input twice and verify the check emits the same output.",
+    "repeated-run-tag-stability": (
+        "Repeated-run tag stability",
+        "Run multiple readings with the same check instance. Tags should not duplicate or grow between readings.",
     ),
+    "openmetrics-coverage": (
+        "OpenMetrics coverage",
+        "Report how much observed OpenMetrics input appears to be represented in emitted Datadog metrics and metadata.",
+    ),
+    "asset-query-metrics-in-metadata": (
+        "Asset query metrics in metadata",
+        "Dashboard and monitor queries for this integration should reference metrics documented in metadata.csv.",
+    ),
+    "asset-query-tags-seen-in-replay": (
+        "Asset query tags seen in replay",
+        "Report dashboard or monitor tag keys that were not seen in this replay fixture. This is usually a coverage signal, not automatically a product bug.",
+    ),
+    "output-finite-values": (
+        "Finite metric values",
+        "Every emitted metric value should be a real finite number, not NaN or infinity.",
+    ),
+    "rate-finite-values": (
+        "Finite rate values",
+        "Every emitted RATE value should be a real finite number, not NaN or infinity.",
+    ),
+    "monotonic-count-nonnegative": (
+        "Non-negative monotonic counts",
+        "Every emitted MONOTONIC_COUNT value should be non-negative, except explicitly ignored sum-style metrics.",
+    ),
+    # Backward-compatible grouping name used by older reports.
     "openmetrics-cache-mutation": (
         "OpenMetrics mutation",
         "Mutate cached OpenMetrics payloads and verify output stays stable when semantics are unchanged.",
     ),
-    "openmetrics-coverage": (
-        "OpenMetrics coverage",
-        "Estimate how much of the observed OpenMetrics surface is represented in emitted Datadog metrics and metadata.",
-    ),
+}
+
+CATEGORY_NEXT_STEPS = {
+    "passed": "No action needed for this target.",
+    "failed-before-replay-pbt": "Start with the setup or cache-seeding logs. The property tests did not get a clean chance to run.",
+    "skipped-missing-cache": "Seed or restore a replay cache for this target, then rerun Replay PBT.",
+    "replay-nondeterminism": "Check for time, ordering, random IDs, process state, or other values that the normalizer does not control yet.",
+    "openmetrics-mutation": "Compare the original and mutated normalized outputs. If the mutation is valid, this may be a parser or integration bug.",
+    "asset-metadata-mismatch": "Inspect the listed dashboard/monitor metric or tag. Usually this means metadata.csv or the asset query needs cleanup.",
+    "metadata-contract": "Check metadata.csv against the emitted metric name/type. Add or fix metadata rows when the emitted metric is valid.",
+    "coverage": "Use this as a coverage signal first. Check whether the fixture is sparse before treating it as a product bug.",
+    "unsupported-negative": "Confirm whether this target is intentionally unsupported for replay or uses an error-path fixture. If yes, mark it out of scope.",
+    "replay-harness": "This likely needs replay harness work: adapter coverage, cache matching, fixture selection, or environment mirroring.",
+    "other-failed": "Open the failed test names and short errors below, then classify the failure before treating it as an integration bug.",
+    "unknown": "The job did not report enough information. Check the workflow logs first.",
 }
 
 
@@ -219,13 +287,19 @@ def load_findings_and_coverages(root: Path) -> tuple[list[dict[str, Any]], list[
             continue
         target = find_target(manifest_path.parent)
         property_name = manifest.get("property") or manifest_path.parent.name
+        counts = manifest.get("counts") if isinstance(manifest.get("counts"), dict) else {}
+        property_status = manifest.get("status", "")
+        if counts.get("errors"):
+            property_status = "failed"
+        elif counts.get("warnings") and property_status == "passed":
+            property_status = "warning"
         property_results.append(
             {
                 "target": target_slug(target),
                 "integration": target.get("integration", ""),
                 "environment": target.get("environment", ""),
                 "property": property_name,
-                "status": manifest.get("status", ""),
+                "status": property_status,
             }
         )
         for artifact in manifest.get("artifacts", []):
@@ -384,6 +458,153 @@ def md_escape(text: Any) -> str:
     return sanitize_text(text, max_len=MAX_DETAIL_TEXT).replace("|", "\\|")
 
 
+def property_results_for_target(property_results: list[dict[str, Any]], target: str) -> list[dict[str, Any]]:
+    return sorted(
+        [row for row in property_results if row.get("target") == target],
+        key=lambda row: (str(row.get("property", "")), str(row.get("status", ""))),
+    )
+
+
+def findings_for_target(findings: list[dict[str, Any]], target: str) -> list[dict[str, Any]]:
+    return [finding for finding in findings if finding.get("target") == target]
+
+
+def coverages_for_target(coverages: list[dict[str, Any]], target: str) -> list[dict[str, Any]]:
+    return [coverage for coverage in coverages if coverage.get("target") == target]
+
+
+def replay_reproduce_command(row: dict[str, Any]) -> str:
+    integration = str(row.get("integration") or "<integration>")
+    environment = str(row.get("environment") or "<environment>")
+    fixture_ref = str(row.get("fixture_ref") or "<fixture-ref>")
+    target_ref = str(row.get("target_ref") or "<target-ref>")
+    readings = str(row.get("readings") or "2")
+    return " \\\n  ".join(
+        [
+            f"ddev env replay-pbt {integration} {environment}",
+            f"--fixture-ref {fixture_ref}",
+            f"--target-ref {target_ref}",
+            "--replay-cache latest",
+            f"--readings {readings}",
+            "--adapters requests,subprocess,process,psycopg,clickhouse-connect",
+            "--artifacts /tmp/replay-pbt-repro",
+            "--overwrite",
+        ]
+    )
+
+
+def build_individual_target_markdown(
+    row: dict[str, Any],
+    property_results: list[dict[str, Any]],
+    findings: list[dict[str, Any]],
+    coverages: list[dict[str, Any]],
+) -> list[str]:
+    category = row.get("category", "unknown")
+    icon, label, description = CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS["unknown"])
+    target = row.get("target", "")
+    target_properties = property_results_for_target(property_results, str(target))
+    target_findings = findings_for_target(findings, str(target))
+    target_coverages = coverages_for_target(coverages, str(target))
+
+    lines = [
+        "## Individual target report",
+        "",
+        "This section is meant to be readable on its own. It explains what was tested for this integration, what failed or passed, and what to try next.",
+        "",
+        "### Target",
+        "",
+        "| Field | Value |",
+        "|---|---|",
+        f"| Integration | `{md_escape(row.get('integration', ''))}` |",
+        f"| Environment | `{md_escape(row.get('environment', ''))}` |",
+        f"| Fixture ref | `{md_escape(row.get('fixture_ref', ''))}` |",
+        f"| Target ref | `{md_escape(row.get('target_ref', ''))}` |",
+        f"| Readings | `{md_escape(row.get('readings', ''))}` |",
+        f"| Replay cache key | `{md_escape(row.get('cache_key', ''))}` |",
+        f"| Status | `{md_escape(row.get('status', 'unknown'))}` |",
+        f"| Category | {icon} **{md_escape(label)}** |",
+        "",
+        "### What this means",
+        "",
+        f"{description}",
+        "",
+        f"**Short summary:** {md_escape(row.get('summary', ''))}",
+        "",
+        f"**Suggested next step:** {md_escape(CATEGORY_NEXT_STEPS.get(str(category), CATEGORY_NEXT_STEPS['unknown']))}",
+        "",
+    ]
+
+    lines.extend(["### Property results", ""])
+    if target_properties:
+        lines.extend(["| Property | Status | What it checks |", "|---|---|---|"])
+        for prop in target_properties:
+            prop_name = prop.get("property", "")
+            lines.append(
+                f"| `{md_escape(prop_name)}` | `{md_escape(prop.get('status', ''))}` | {md_escape(property_description(prop_name))} |"
+            )
+    elif row.get("status") in {"failed-before-replay-pbt", "skipped-missing-cache"}:
+        lines.append("Property tests did not run for this target. The job stopped before replay-PBT could produce per-property results.")
+    else:
+        lines.append("No per-property manifests were collected for this target. Check the workflow log if this was unexpected.")
+    lines.append("")
+
+    failed_tests = row.get("failing_properties") or []
+    short_errors = row.get("short_errors") or []
+    if failed_tests or short_errors:
+        lines.extend(["### Failure details from pytest", ""])
+        if failed_tests:
+            lines.append("Failed tests/properties:")
+            for item in failed_tests[:12]:
+                lines.append(f"- `{md_escape(item)}`")
+            lines.append("")
+        if short_errors:
+            lines.append("Short error excerpts:")
+            for item in short_errors[:6]:
+                lines.append(f"- {md_escape(item)}")
+            lines.append("")
+
+    lines.extend(["### Collected findings", ""])
+    if target_findings:
+        lines.extend(["| Level | Property | Subject | Message |", "|---|---|---|---|"])
+        for finding in target_findings[:12]:
+            subject = finding_subject(finding)
+            lines.append(
+                f"| `{md_escape(finding.get('level', ''))}` | `{md_escape(finding.get('property', ''))}` | `{md_escape(subject)}` | {md_escape(finding.get('message', ''))} |"
+            )
+        if len(target_findings) > 12:
+            lines.append(f"| _… {len(target_findings) - 12} more_ | | | See `findings.tsv`. |")
+    else:
+        lines.append("No allowlisted property findings were collected for this target.")
+    lines.append("")
+
+    if target_coverages:
+        lines.extend(["### Coverage reported for this target", ""])
+        lines.extend(["| Property | Endpoint → emitted | metadata.csv → emitted | Endpoint count | Metadata count |", "|---|---:|---:|---:|---:|"])
+        for coverage in target_coverages:
+            lines.append(
+                f"| `{md_escape(coverage.get('property', ''))}` | {pct(coverage.get('endpoint_to_emitted_coverage'))} | {pct(coverage.get('metadata_to_emitted_coverage'))} | {coverage.get('endpoint_count') or ''} | {coverage.get('metadata_count') or ''} |"
+            )
+        lines.append("")
+
+    lines.extend(
+        [
+            "### Reproduce locally",
+            "",
+            "This uses the latest replay cache for this integration/environment. If the cache is missing locally, seed or restore it first.",
+            "",
+            "```bash",
+            replay_reproduce_command(row),
+            "```",
+            "",
+            "### What is intentionally not in this report",
+            "",
+            "Raw replay caches, captured responses, full configs, and full logs are not uploaded in the report artifact. The report only includes small allowlisted summaries so it is safe to share in CI artifacts.",
+            "",
+        ]
+    )
+    return lines
+
+
 def replay_step_counts(rows: list[dict[str, Any]], findings: list[dict[str, Any]], coverages: list[dict[str, Any]]) -> dict[str, int]:
     status_counts = Counter(row["status"] for row in rows)
     artifact_targets = {finding.get("target") for finding in findings if finding.get("target")}
@@ -466,6 +687,7 @@ def build_markdown(
     target_count: str,
     shard_runs: list[dict[str, Any]] | None = None,
     artifact_name: str = "replay-pbt-report",
+    property_results: list[dict[str, Any]] | None = None,
 ) -> str:
     status_counts = Counter(row["status"] for row in rows)
     category_counts = Counter(row["category"] for row in rows if row["category"] != "passed")
@@ -475,6 +697,7 @@ def build_markdown(
     current_url = current_run_url()
     current_id = current_run_id()
     groups = group_actionable_findings(findings)
+    property_results = property_results or []
 
     lines: list[str] = []
     lines.extend(
@@ -503,6 +726,8 @@ def build_markdown(
         lines.append("")
 
     lines.extend(build_replay_flow_markdown(rows, findings, coverages))
+    if len(rows) == 1:
+        lines.extend(build_individual_target_markdown(rows[0], property_results, findings, coverages))
     lines.extend(
         [
             "## Outcome summary",
@@ -602,11 +827,13 @@ def build_html(
     findings: list[dict[str, Any]],
     coverages: list[dict[str, Any]],
     shard_runs: list[dict[str, Any]] | None = None,
+    property_results: list[dict[str, Any]] | None = None,
 ) -> str:
     status_counts = Counter(row["status"] for row in rows)
     category_counts = Counter(row["category"] for row in rows if row["category"] != "passed")
     counts = replay_step_counts(rows, findings, coverages)
     groups = group_actionable_findings(findings)
+    property_results = property_results or []
     artifact_targets = {finding.get("target") for finding in findings if finding.get("target")}
     artifact_targets.update(coverage.get("target") for coverage in coverages if coverage.get("target"))
     total = len(rows) or 1
@@ -655,11 +882,48 @@ def build_html(
         for run in (shard_runs or [])
     )
     current_link = current_run_url()
+    current_run_html = (
+        '<a href="{}">Open the GitHub Actions run</a>'.format(esc(current_link))
+        if current_link
+        else 'This report was generated for a single shard run.'
+    )
     shard_section = (
         f"<section class='card'><h2>Shard runs</h2><p>Use these links to jump from the combined report to the original shard runs.</p><table><thead><tr><th>Run ID</th><th>Title</th><th>Conclusion</th><th>Link</th></tr></thead><tbody>{shard_rows}</tbody></table></section>"
         if shard_rows
-        else f"<section class='card'><h2>This shard</h2><p>{f'<a href="{esc(current_link)}">Open the GitHub Actions run</a>' if current_link else 'This report was generated for a single shard run.'}</p></section>"
+        else f"<section class='card'><h2>This shard</h2><p>{current_run_html}</p></section>"
     )
+    individual_section = ""
+    if len(rows) == 1:
+        row = rows[0]
+        category = row.get("category", "unknown")
+        icon, label, description = CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS["unknown"])
+        prop_rows = "".join(
+            f"<tr><td><code>{esc(prop.get('property'))}</code></td><td>{esc(prop.get('status'))}</td><td>{esc(property_description(prop.get('property')))}</td></tr>"
+            for prop in property_results_for_target(property_results, str(row.get("target", "")))
+        ) or "<tr><td colspan='3'>No per-property manifests were collected for this target.</td></tr>"
+        command = esc(replay_reproduce_command(row))
+        individual_section = f"""
+<section class='card'>
+  <h2>Individual target report</h2>
+  <p>This section is meant to be readable on its own. It explains what was tested for this integration, what failed or passed, and what to try next.</p>
+  <table><tbody>
+    <tr><th>Integration</th><td><code>{esc(row.get('integration'))}</code></td></tr>
+    <tr><th>Environment</th><td><code>{esc(row.get('environment'))}</code></td></tr>
+    <tr><th>Fixture ref</th><td><code>{esc(row.get('fixture_ref'))}</code></td></tr>
+    <tr><th>Target ref</th><td><code>{esc(row.get('target_ref'))}</code></td></tr>
+    <tr><th>Status</th><td><code>{esc(row.get('status'))}</code></td></tr>
+    <tr><th>Category</th><td>{esc(icon)} <strong>{esc(label)}</strong></td></tr>
+  </tbody></table>
+  <h3>What this means</h3>
+  <p>{esc(description)}</p>
+  <p><strong>Short summary:</strong> {esc(row.get('summary'))}</p>
+  <p><strong>Suggested next step:</strong> {esc(CATEGORY_NEXT_STEPS.get(str(category), CATEGORY_NEXT_STEPS['unknown']))}</p>
+  <h3>Property results</h3>
+  <table><thead><tr><th>Property</th><th>Status</th><th>What it checks</th></tr></thead><tbody>{prop_rows}</tbody></table>
+  <h3>Reproduce locally</h3>
+  <pre><code>{command}</code></pre>
+</section>
+"""
     category_rows = "".join(
         f"<tr><td>{esc(CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS['unknown'])[0])} {esc(CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS['unknown'])[1])}</td><td>{count}</td><td>{esc(CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS['unknown'])[2])}</td></tr>"
         for category, count in category_counts.most_common()
@@ -674,17 +938,24 @@ def build_html(
         "</article>"
         for group in groups[:30]
     ) or "<p>No actionable finding groups collected.</p>"
-    target_rows = "".join(
-        "<tr>"
-        f"<td>{target_link_html(row)}</td>"
-        f"<td>{''.join(f'<span class="pill {state}">{esc(label)}: {esc(state)}</span>' for label, state in target_step_state(row, artifact_targets))}</td>"
-        f"<td>{esc(row['status'])}</td>"
-        f"<td>{esc(row['category_label'])}</td>"
-        f"<td>{esc(row['summary'])}</td>"
-        f"<td>{f'<a href="{esc(row.get("run_url"))}">run</a>' if row.get('run_url') else ''}</td>"
-        "</tr>"
-        for row in rows
-    )
+    target_row_parts = []
+    for row in rows:
+        pipeline_html = ''.join(
+            '<span class="pill {}">{}: {}</span>'.format(esc(state), esc(label), esc(state))
+            for label, state in target_step_state(row, artifact_targets)
+        )
+        run_link = '<a href="{}">run</a>'.format(esc(row.get('run_url'))) if row.get('run_url') else ''
+        target_row_parts.append(
+            "<tr>"
+            f"<td>{target_link_html(row)}</td>"
+            f"<td>{pipeline_html}</td>"
+            f"<td>{esc(row['status'])}</td>"
+            f"<td>{esc(row['category_label'])}</td>"
+            f"<td>{esc(row['summary'])}</td>"
+            f"<td>{run_link}</td>"
+            "</tr>"
+        )
+    target_rows = ''.join(target_row_parts)
     coverage_rows = "".join(
         f"<tr><td>{target_link_html(c)}</td><td>{esc(pct(c.get('endpoint_to_emitted_coverage')))}</td><td>{esc(pct(c.get('metadata_to_emitted_coverage')))}</td><td>{esc(c.get('endpoint_count'))}</td><td>{esc(c.get('metadata_count'))}</td></tr>"
         for c in sorted(coverages, key=lambda item: str(item.get('target', '')))[:80]
@@ -709,6 +980,7 @@ table{{border-collapse:collapse;width:100%;font-size:13px;background:white}}td,t
 <section class='card'><h2>How the concept works</h2><div class='flow'>{step_cards}</div></section>
 <section class='card seed'><h2>Cache seeding flow</h2><p>Seeding is only used when the replay cache is missing and the workflow input permits it. The generated cache stays in GitHub Actions cache; the report uploads only lightweight findings/results.</p>{seed_diagram}</section>
 {shard_section}
+{individual_section}
 <section class='card'><h2>Failure categories</h2><table><thead><tr><th>Category</th><th>Count</th><th>Meaning</th></tr></thead><tbody>{category_rows or '<tr><td colspan="3">No failures</td></tr>'}</tbody></table></section>
 <section class='card'><h2>Actionable finding groups</h2><p>Repeated metric/tag rows are collapsed. Use the examples to see the shape of the issue, then open <code>findings.tsv</code> for raw rows if needed.</p>{finding_cards}</section>
 <section class='card'><h2>Targets by workflow step</h2><table><thead><tr><th>Target</th><th>Pipeline state</th><th>Status</th><th>Category</th><th>Summary</th><th>Shard</th></tr></thead><tbody>{target_rows}</tbody></table></section>
@@ -802,8 +1074,9 @@ def main() -> None:
         shard=args.shard,
         target_count=args.target_count,
         artifact_name=args.artifact_name,
+        property_results=property_results,
     )
-    html_report = build_html(markdown, rows, findings, coverages)
+    html_report = build_html(markdown, rows, findings, coverages, property_results=property_results)
 
     (args.out_dir / "report.md").write_text(markdown)
     (args.out_dir / "report.html").write_text(html_report)
