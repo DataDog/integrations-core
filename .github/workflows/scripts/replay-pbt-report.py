@@ -676,7 +676,7 @@ def build_replay_flow_markdown(rows: list[dict[str, Any]], findings: list[dict[s
         "",
         "### Conceptual model",
         "",
-        "| Piece | Plain-English meaning |",
+        "| Piece | Description |",
         "|---|---|",
         "| Replay cache | Sanitized input/output fixture for one integration environment and fixture ref. It is stored in GitHub Actions cache, not uploaded as a report artifact. |",
         "| Seeding | If a cache is missing and `seed_missing_caches=true`, the job starts the E2E environment and runs compare-check once to create a replay cache. |",
