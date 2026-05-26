@@ -241,6 +241,14 @@ def _normalized_reading_outputs(output: dict[str, Any]) -> list[dict[str, Any]]:
     return [output]
 
 
+def _order_insensitive(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {key: _order_insensitive(value[key]) for key in sorted(value)}
+    if isinstance(value, list):
+        return sorted((_order_insensitive(item) for item in value), key=lambda item: json.dumps(item, sort_keys=True))
+    return value
+
+
 def _assert_normalized_outputs_match(original: dict[str, Any], mutated: dict[str, Any]) -> None:
     original_readings = _normalized_reading_outputs(original)
     mutated_readings = _normalized_reading_outputs(mutated)
@@ -251,7 +259,13 @@ def _assert_normalized_outputs_match(original: dict[str, Any], mutated: dict[str
         _assert_normalized_output_contract(original_output)
         _assert_normalized_output_contract(mutated_output)
         _assert_same_context_coverage(original_output, mutated_output)
-        assert original_output == mutated_output, f'normalized output differs at reading {index}'
+        if original_output != mutated_output:
+            if _order_insensitive(original_output) == _order_insensitive(mutated_output):
+                raise AssertionError(
+                    f'normalized output differs only by ordering at reading {index}; '
+                    'normalize/sort this output in replay normalization or in the check output'
+                )
+            raise AssertionError(f'normalized output differs at reading {index}')
 
 
 AGGREGATOR_TYPE_NAMES = {
@@ -944,6 +958,20 @@ def test_same_context_coverage_rejects_added_metric_contexts():
     }
 
     with pytest.raises(AssertionError, match='contexts added'):
+        _assert_normalized_outputs_match(original, mutated)
+
+
+def test_normalized_output_match_identifies_order_only_differences():
+    original = {
+        'metrics': [
+            {'name': 'example.a', 'type': 0, 'value': 1.0, 'tags': []},
+            {'name': 'example.b', 'type': 0, 'value': 1.0, 'tags': []},
+        ],
+        'service_checks': [],
+    }
+    mutated = {'metrics': list(reversed(original['metrics'])), 'service_checks': []}
+
+    with pytest.raises(AssertionError, match='differs only by ordering'):
         _assert_normalized_outputs_match(original, mutated)
 
 

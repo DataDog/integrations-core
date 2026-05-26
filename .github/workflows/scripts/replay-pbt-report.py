@@ -41,11 +41,16 @@ CATEGORY_DEFINITIONS = {
     "passed": ("✅", "Passed", "All replay-PBT properties passed."),
     "failed-before-replay-pbt": ("🧱", "Failed before replay-PBT", "Setup, cache probing/seeding, compare-check, or orchestration failed before property tests ran."),
     "skipped-missing-cache": ("⏭️", "Skipped missing cache", "No suitable replay cache was restored and seeding was disabled."),
-    "replay-nondeterminism": ("🧬", "Replay nondeterminism", "Same fixture/ref did not replay deterministically."),
-    "openmetrics-mutation": ("🔀", "OpenMetrics mutation mismatch", "A mutated OpenMetrics cache did not preserve check output."),
-    "asset-metadata-mismatch": ("📊", "Asset / metadata mismatch", "Dashboard/monitor/service-check assets reference metrics or tags missing from metadata."),
+    "ordering-only-nondeterminism": ("🔢", "Ordering-only nondeterminism", "Same content was emitted in a different order."),
+    "replay-nondeterminism": ("🧬", "Replay output changed", "Same fixture/ref produced genuinely different normalized outputs across repeated replay runs."),
+    "openmetrics-input-invariance": ("🔀", "OpenMetrics input invariance", "Changing semantically irrelevant Prometheus/OpenMetrics text changed emitted output."),
+    "json-input-invariance": ("🧾", "JSON input invariance", "Changing semantically irrelevant JSON formatting or key order changed emitted output."),
     "metadata-contract": ("📋", "Metadata contract", "metadata.csv and emitted metrics/tags disagree."),
-    "coverage": ("📈", "OpenMetrics coverage", "OpenMetrics coverage property failed."),
+    "asset-query-metadata": ("📊", "Asset query metadata", "Dashboard or monitor queries reference metrics missing from metadata.csv."),
+    "asset-query-replay-coverage": ("🧭", "Asset query replay coverage", "Dashboard or monitor query metrics/tags were not observed in this replay fixture."),
+    "openmetrics-coverage": ("📈", "OpenMetrics fixture coverage", "The replay fixture covers only part of the observed OpenMetrics or metadata surface."),
+    "tag-state-stability": ("🏷️", "Tag state stability", "Check-level tag state changed or grew across repeated readings."),
+    "invalid-metric-values": ("🧮", "Invalid metric values", "The check emitted non-finite or invalid metric values."),
     "unsupported-negative": ("🚧", "Unsupported or negative fixture", "The target appears intentionally unsupported or uses a negative/error-path fixture."),
     "replay-harness": ("🛠️", "Replay harness", "Replay framework or adapter behavior likely needs work."),
     "other-failed": ("❓", "Other replay-PBT failure", "Failed during replay-PBT but did not match a known category."),
@@ -151,11 +156,16 @@ CATEGORY_NEXT_STEPS = {
     "passed": "No action needed for this target.",
     "failed-before-replay-pbt": "Start with the setup or cache-seeding logs. The property tests did not get a clean chance to run.",
     "skipped-missing-cache": "Seed or restore a replay cache for this target, then rerun Replay PBT.",
-    "replay-nondeterminism": "Check for time, ordering, random IDs, process state, or other values that the normalizer does not control yet.",
-    "openmetrics-mutation": "Compare the original and mutated normalized outputs. If the mutation is valid, this may be a parser or integration bug.",
-    "asset-metadata-mismatch": "Inspect the listed dashboard/monitor metric or tag. Usually this means metadata.csv or the asset query needs cleanup.",
+    "ordering-only-nondeterminism": "Normalize or sort the reported output collection, either in replay normalization or in the check output if the order has no semantic meaning.",
+    "replay-nondeterminism": "Inspect time, random values, state accumulation, process output, or replay adapter behavior.",
+    "openmetrics-input-invariance": "Compare the original and mutated OpenMetrics fixtures. If the mutation is semantically equivalent, inspect parser or integration assumptions about text formatting.",
+    "json-input-invariance": "Compare original and mutated JSON fixtures. If decoded JSON is equivalent, inspect code that may depend on formatting or key order.",
     "metadata-contract": "Check metadata.csv against the emitted metric name/type. Add or fix metadata rows when the emitted metric is valid.",
-    "coverage": "Use this as a coverage signal first. Check whether the fixture is sparse before treating it as a product bug.",
+    "asset-query-metadata": "Inspect the listed dashboard/monitor query. Add missing metadata.csv rows or update the asset query if it references stale metrics.",
+    "asset-query-replay-coverage": "Treat this as a fixture coverage signal first. Check whether the replay fixture exercises the dashboard/monitor metric and tags.",
+    "openmetrics-coverage": "Use this as a coverage signal first. Check whether the fixture is sparse before treating it as a product bug.",
+    "tag-state-stability": "Look for checks that append to tag lists or mutable state on every reading instead of rebuilding tags per run.",
+    "invalid-metric-values": "Find the metric that emitted NaN, infinity, or an invalid count/rate value and guard or normalize the calculation.",
     "unsupported-negative": "Confirm whether this target is intentionally unsupported for replay or uses an error-path fixture. If yes, mark it out of scope.",
     "replay-harness": "This likely needs replay harness work: adapter coverage, cache matching, fixture selection, or environment mirroring.",
     "other-failed": "Open the failed test names and short errors below, then classify the failure before treating it as an integration bug.",
@@ -237,11 +247,59 @@ TEST_DEFINITIONS = {
     ),
     "test_cached_replay_is_deterministic_for_same_ref": (
         "Replay is deterministic",
-        "Running the same check code against the same replay cache should produce the same normalized output.",
+        "Running the same check code against the same replay cache should produce the same normalized output. If an order-insensitive comparison passes, the report calls that out as ordering-only nondeterminism.",
     ),
     "test_mutated_cache_matches_original_output": (
-        "OpenMetrics mutations preserve output",
-        "A semantically equivalent mutation of cached OpenMetrics input changed the check output.",
+        "Replay input mutation preserves output",
+        "A semantically equivalent mutation of cached input changed the check output.",
+    ),
+    "test_label_order_mutated_cache_matches_original_output": (
+        "OpenMetrics label order does not matter",
+        "Sorting labels inside OpenMetrics samples should not change emitted metrics.",
+    ),
+    "test_comment_and_blank_line_mutated_cache_matches_original_output": (
+        "OpenMetrics comments and blank lines do not matter",
+        "Adding harmless comments or blank lines to Prometheus/OpenMetrics text should not change emitted metrics.",
+    ),
+    "test_final_newline_mutated_cache_matches_original_output": (
+        "OpenMetrics final newline does not matter",
+        "Adding or removing one final newline should not change emitted metrics.",
+    ),
+    "test_help_text_mutated_cache_matches_original_output": (
+        "OpenMetrics HELP text does not affect metrics",
+        "Changing HELP documentation text should not change emitted metrics.",
+    ),
+    "test_help_removal_mutated_cache_matches_original_output": (
+        "OpenMetrics HELP lines are optional",
+        "Removing HELP documentation lines should not change emitted metrics.",
+    ),
+    "test_json_object_key_order_mutated_cache_matches_original_output": (
+        "JSON object key order does not matter",
+        "Reordering JSON object keys should not change emitted metrics.",
+    ),
+    "test_json_whitespace_mutated_cache_matches_original_output": (
+        "JSON whitespace does not matter",
+        "Changing insignificant JSON whitespace should not change emitted metrics.",
+    ),
+    "test_json_string_escape_mutated_cache_matches_original_output": (
+        "JSON string escaping does not matter",
+        "Equivalent JSON string escaping should not change emitted metrics.",
+    ),
+    "test_repeated_run_tags_are_stable": (
+        "Tags are stable across readings",
+        "Check tag state should not grow or duplicate across repeated readings.",
+    ),
+    "test_output_values_are_finite": (
+        "Metric values are finite",
+        "Emitted metric values should not be NaN or infinity.",
+    ),
+    "test_rate_values_are_finite": (
+        "Rate values are finite",
+        "Emitted RATE values should not be NaN or infinity.",
+    ),
+    "test_monotonic_count_values_are_nonnegative": (
+        "Monotonic counts are non-negative",
+        "Emitted MONOTONIC_COUNT values should not be negative.",
     ),
 }
 
@@ -282,27 +340,60 @@ def classify(row: dict[str, Any]) -> str:
     ).lower()
     if not haystack:
         return "unknown" if not status else "other-failed"
+
+    if "differs only by ordering" in haystack:
+        return "ordering-only-nondeterminism"
     if "test_cached_replay_is_deterministic_for_same_ref" in haystack:
         return "replay-nondeterminism"
-    if "mutated_cache_matches_original_output" in haystack:
-        return "openmetrics-mutation"
-    if "asset-query" in haystack or "asset query" in haystack:
-        return "asset-metadata-mismatch"
     if (
-        "test_emitted_metrics_match_metadata" in haystack
-        or "test_asset_query_metrics_match_metadata" in haystack
-        or "metadata.csv" in haystack
-        or ("metadata" in haystack and ("missing" in haystack or "unemitted" in haystack))
+        "test_label_order_mutated_cache_matches_original_output" in haystack
+        or "test_comment_and_blank_line_mutated_cache_matches_original_output" in haystack
+        or "test_final_newline_mutated_cache_matches_original_output" in haystack
+        or "test_help_text_mutated_cache_matches_original_output" in haystack
+        or "test_help_removal_mutated_cache_matches_original_output" in haystack
+        or "openmetrics-label-order" in haystack
+        or "openmetrics-comments-blank-lines" in haystack
+        or "openmetrics-final-newline" in haystack
+        or "openmetrics-help" in haystack
     ):
+        return "openmetrics-input-invariance"
+    if (
+        "test_json_object_key_order_mutated_cache_matches_original_output" in haystack
+        or "test_json_whitespace_mutated_cache_matches_original_output" in haystack
+        or "test_json_string_escape_mutated_cache_matches_original_output" in haystack
+        or "json-object-key-order" in haystack
+        or "json-whitespace" in haystack
+        or "json-string-escapes" in haystack
+    ):
+        return "json-input-invariance"
+    if "mutated_cache_matches_original_output" in haystack:
+        return "openmetrics-input-invariance"
+    if "test_asset_query_metrics_match_metadata" in haystack or "asset-query-metrics-in-metadata" in haystack:
+        return "asset-query-metadata"
+    if "test_asset_query_tags_are_seen_in_replay" in haystack or "asset-query-tags-seen-in-replay" in haystack:
+        return "asset-query-replay-coverage"
+    if "test_emitted_metrics_match_metadata" in haystack or "metadata-emitted-metrics" in haystack or "metadata.csv" in haystack:
         return "metadata-contract"
-    if "openmetrics-coverage" in haystack or "coverage" in haystack:
-        return "coverage"
+    if "test_openmetrics_replay_coverage" in haystack or "openmetrics-coverage" in haystack:
+        return "openmetrics-coverage"
+    if "test_repeated_run_tags_are_stable" in haystack or "repeated-run-tag-stability" in haystack:
+        return "tag-state-stability"
+    if (
+        "test_output_values_are_finite" in haystack
+        or "test_rate_values_are_finite" in haystack
+        or "test_monotonic_count_values_are_nonnegative" in haystack
+        or "finite-values" in haystack
+        or "rate-values-finite" in haystack
+        or "monotonic-count-nonnegative" in haystack
+        or "not finite" in haystack
+        or "negative" in haystack and "monotonic" in haystack
+    ):
+        return "invalid-metric-values"
     if "negative" in haystack or "unsupported" in haystack or "does not support" in haystack:
         return "unsupported-negative"
     if "adapter" in haystack or "replay" in haystack or "cache" in haystack or "fixture" in haystack:
         return "replay-harness"
     return "other-failed"
-
 
 def summarize_failure(row: dict[str, Any]) -> str:
     failed_tests = row.get("failed_tests") or []
