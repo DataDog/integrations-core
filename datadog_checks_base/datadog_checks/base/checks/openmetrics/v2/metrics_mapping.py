@@ -14,11 +14,14 @@ if TYPE_CHECKING:
 
     from datadog_checks.base.types import InstanceType
 
-RawMetricsConfig = dict[str, str | dict[str, str]]
+_RawMetricsConfig = dict[str, str | dict[str, str]]
 """Metric name mapping loaded from a YAML file.
 
 Keys are raw Prometheus metric names, values are either Datadog metric names
 (simple renaming) or dicts with ``name``, ``type``, etc. (full config).
+
+Internal: the type the loader returns; integration authors should not need to
+reference this directly. Annotate against ``dict[str, Any]`` if you must.
 """
 
 
@@ -51,6 +54,9 @@ class ConfigOptionTruthy:
 class ConfigOptionEquals:
     """
     Load metrics only if a configuration option equals a specific value.
+
+    A missing key compares equal to ``None``: ``ConfigOptionEquals("flag", None)``
+    matches both ``{"flag": None}`` and instances that omit the key entirely.
     """
 
     def __init__(self, option: str, value: Any) -> None:

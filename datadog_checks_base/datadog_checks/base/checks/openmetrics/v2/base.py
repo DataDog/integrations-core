@@ -8,6 +8,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import yaml
 from requests.exceptions import RequestException
 
 from datadog_checks.base.checks import AgentCheck
@@ -19,7 +20,7 @@ from .scraper import OpenMetricsScraper
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from .metrics_mapping import MetricsMapping, RawMetricsConfig
+    from .metrics_mapping import MetricsMapping, _RawMetricsConfig
 
 
 class OpenMetricsBaseCheckV2(AgentCheck):
@@ -70,7 +71,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         self.scrapers = {}
 
         # Cache for file-based metrics loaded from METRICS_MAP; None means not yet loaded
-        self._file_metrics: list[RawMetricsConfig] | None = None
+        self._file_metrics: list[_RawMetricsConfig] | None = None
 
         self.check_initializations.append(self.configure_scrapers)
 
@@ -148,7 +149,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
     def refresh_scrapers(self):
         pass
 
-    def _load_file_based_metrics(self, config: Mapping) -> list[RawMetricsConfig]:
+    def _load_file_based_metrics(self, config: Mapping) -> list[_RawMetricsConfig]:
         """Load metric mappings from YAML files declared in ``METRICS_MAP``.
 
         Results are cached for the lifetime of the check instance. Predicates
@@ -162,7 +163,10 @@ class OpenMetricsBaseCheckV2(AgentCheck):
 
         Permanent load failures (malformed YAML, unreadable files) are raised
         once on the first call; the cache is sealed beforehand so subsequent
-        scrapes do not retry and re-raise the same error.
+        scrapes do not retry and re-raise the same error. A failure on any
+        single file in a multi-file ``METRICS_MAP`` discards results from
+        files loaded earlier in the same call — the cache lands as ``[]``,
+        not as a partial mapping.
         """
         if self._file_metrics is not None:
             return self._file_metrics
@@ -181,17 +185,15 @@ class OpenMetricsBaseCheckV2(AgentCheck):
 
         return self._file_metrics
 
-    def _load_metrics_file(self, path: Path) -> RawMetricsConfig:
-        import yaml
-
+    def _load_metrics_file(self, path: Path) -> _RawMetricsConfig:
         file_path = self._get_package_dir() / path
         try:
             with open(file_path) as f:
                 data = yaml.safe_load(f)
         except yaml.YAMLError as e:
-            raise ConfigurationError(f"Failed to parse metrics file {file_path}: {e}") from None
+            raise ConfigurationError(f"Failed to parse metrics file {file_path}: {e}") from e
         except OSError as e:
-            raise ConfigurationError(f"Failed to read metrics file {file_path}: {e}") from None
+            raise ConfigurationError(f"Failed to read metrics file {file_path}: {e}") from e
         if not isinstance(data, dict):
             raise ConfigurationError(f"Metrics file {file_path} must contain a YAML mapping, got {type(data).__name__}")
         return data

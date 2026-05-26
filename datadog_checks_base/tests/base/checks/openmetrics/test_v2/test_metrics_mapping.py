@@ -298,6 +298,26 @@ def test_load_file_based_metrics_permanent_failure_fails_once(make_check: CheckF
         assert check._load_file_based_metrics({}) == []
 
 
+def test_load_file_based_metrics_multi_file_failure_seals_empty(make_check: CheckFactory, tmp_path: Path):
+    """A mid-comprehension load failure discards earlier successes; the cache lands as []."""
+    write_yaml(tmp_path, "metrics/a.yaml", {"a": "dd.a"})
+    (tmp_path / "metrics" / "b.yaml").write_text("foo: [bar")
+    write_yaml(tmp_path, "metrics/c.yaml", {"c": "dd.c"})
+
+    class Check(OpenMetricsBaseCheckV2):
+        METRICS_MAP = [
+            MetricsMapping(Path("metrics/a.yaml")),
+            MetricsMapping(Path("metrics/b.yaml")),
+            MetricsMapping(Path("metrics/c.yaml")),
+        ]
+
+    check = make_check(cls=Check)
+    with patch.object(Check, '_get_package_dir', return_value=tmp_path):
+        with pytest.raises(ConfigurationError, match="Failed to parse"):
+            check._load_file_based_metrics({})
+        assert check._load_file_based_metrics({}) == []
+
+
 def test_load_file_based_metrics_does_not_accumulate_on_repeated_scraper_creation(
     make_check: CheckFactory, tmp_path: Path
 ):
@@ -372,3 +392,34 @@ def test_get_config_with_defaults_combines_with_existing(make_check: CheckFactor
     assert {"existing": "metric"} in config["metrics"]
     assert {"file_metric": "dd.file_metric"} in config["metrics"]
     assert config["extra_option"] is True
+
+
+# ---------------------------------------------------------------------------
+# Public re-exports (lazy_loader stub)
+# ---------------------------------------------------------------------------
+
+
+def test_public_reexports_resolve():
+    """The lazy_loader stub at v2/__init__.pyi must expose the documented public surface."""
+    from datadog_checks.base.checks.openmetrics.v2 import (
+        AllOf,
+        AnyOf,
+        ConfigOptionEquals,
+        ConfigOptionTruthy,
+        MetricsMapping,
+        MetricsPredicate,
+        OpenMetricsBaseCheckV2,
+    )
+
+    assert all(
+        symbol is not None
+        for symbol in (
+            AllOf,
+            AnyOf,
+            ConfigOptionEquals,
+            ConfigOptionTruthy,
+            MetricsMapping,
+            MetricsPredicate,
+            OpenMetricsBaseCheckV2,
+        )
+    )
