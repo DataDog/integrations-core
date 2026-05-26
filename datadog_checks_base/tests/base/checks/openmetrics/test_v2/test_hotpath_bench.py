@@ -105,6 +105,23 @@ def run_parsed_metrics_cold(metrics):
     run_parsed_metrics(check, metrics)
 
 
+def run_parsed_metrics_cold_scrapers(metrics, scraper_count=25):
+    for _ in range(scraper_count):
+        check = check_for_payload()
+        run_parsed_metrics(check, metrics)
+
+
+def run_transformer_get(check, metrics):
+    scraper = check.scrapers['foo']
+    for metric in metrics:
+        scraper.metric_transformer.get(metric)
+
+
+def run_transformer_get_cold(metrics):
+    check = check_for_payload()
+    run_transformer_get(check, metrics)
+
+
 def bench_full_check(benchmark, dd_run_check, mock_http_response, payload, metrics=None):
     mock_http_response(payload)
     check = OpenMetricsBaseCheckV2(
@@ -121,6 +138,11 @@ def bench_full_check(benchmark, dd_run_check, mock_http_response, payload, metri
     )
     dd_run_check(check)
     benchmark(check.check, None)
+
+
+def test_hotpath_parse_one_family_two_labels(benchmark):
+    payload = make_payload(samples=962, families=1, label_shape='two')
+    benchmark(parse_payload, payload)
 
 
 def test_hotpath_parse_current_labels(benchmark):
@@ -159,6 +181,26 @@ def test_hotpath_transform_many_families(benchmark):
     benchmark(run_parsed_metrics, check, metrics)
 
 
+def test_hotpath_transformer_get_cold_many_families(benchmark):
+    payload = make_payload(samples=962, families=960, label_shape='two')
+    metrics = parse_payload(payload)
+    benchmark(run_transformer_get_cold, metrics)
+
+
+def test_hotpath_transformer_get_warm_many_families(benchmark):
+    payload = make_payload(samples=962, families=960, label_shape='two')
+    metrics = parse_payload(payload)
+    check = check_for_payload()
+    run_transformer_get(check, metrics)
+    benchmark(run_transformer_get, check, metrics)
+
+
+def test_hotpath_transform_cold_one_family_two_labels(benchmark):
+    payload = make_payload(samples=962, families=1, label_shape='two')
+    metrics = parse_payload(payload)
+    benchmark(run_parsed_metrics_cold, metrics)
+
+
 def test_hotpath_transform_cold_current_labels(benchmark):
     payload = make_payload(samples=962, families=1, label_shape='current')
     metrics = parse_payload(payload)
@@ -169,6 +211,17 @@ def test_hotpath_transform_cold_many_families(benchmark):
     payload = make_payload(samples=962, families=960, label_shape='two')
     metrics = parse_payload(payload)
     benchmark(run_parsed_metrics_cold, metrics)
+
+
+def test_hotpath_transform_cold_many_families_multi_scraper(benchmark):
+    payload = make_payload(samples=962, families=960, label_shape='two')
+    metrics = parse_payload(payload)
+    benchmark(run_parsed_metrics_cold_scrapers, metrics)
+
+
+def test_hotpath_full_one_family_two_labels(benchmark, dd_run_check, mock_http_response):
+    payload = make_payload(samples=962, families=1, label_shape='two')
+    bench_full_check(benchmark, dd_run_check, mock_http_response, payload)
 
 
 def test_hotpath_full_current_labels(benchmark, dd_run_check, mock_http_response):
