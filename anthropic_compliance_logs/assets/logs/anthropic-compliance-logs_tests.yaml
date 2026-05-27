@@ -2610,7 +2610,7 @@ tests:
           uid: "activity_01EXAMPLEACTIVITY0000000"
           version: "1.5.0"
         service:
-          name: "Claude SSO"
+          name: "Claude"
         severity: "Informational"
         severity_id: 1
         src_endpoint:
@@ -2709,7 +2709,7 @@ tests:
           uid: "activity_01EXAMPLEACTIVITY0000000"
           version: "1.5.0"
         service:
-          name: "Claude SSO"
+          name: "Claude"
         severity: "Informational"
         severity_id: 1
         src_endpoint:
@@ -2743,4 +2743,3 @@ tests:
      - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
     timestamp: 1779463154445
-

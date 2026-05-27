@@ -281,12 +281,6 @@ pipeline:
           template: "Anthropic"
           target: ocsf.metadata.product.vendor_name
           replaceMissing: false
-        - type: string-builder-processor
-          name: Add OCSF metadata version
-          enabled: true
-          template: "1.5.0"
-          target: ocsf.metadata.version
-          replaceMissing: false
         - type: attribute-remapper
           name: Map `type` to `ocsf.metadata.event_code`
           enabled: true
@@ -343,13 +337,6 @@ pipeline:
               sources:
                 - ocsf.metadata.product.vendor_name
               target: ocsf.metadata.product.vendor_name
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.version` to `ocsf.metadata.version`
-              sources:
-                - ocsf.metadata.version
-              target: ocsf.metadata.version
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
@@ -548,13 +535,6 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `ocsf.metadata.version` to `ocsf.metadata.version`
-              sources:
-                - ocsf.metadata.version
-              target: ocsf.metadata.version
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
               name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
               sources:
                 - ocsf.metadata.event_code
@@ -723,12 +703,12 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: "@ocsf.metadata.event_code:(sso_login_initiated OR sso_login_succeeded OR sso_login_failed OR sso_second_factor_magic_link OR magic_link_login_initiated OR magic_link_login_succeeded OR magic_link_login_failed OR social_login_succeeded OR anonymous_mobile_login_attempted OR user_logged_out)"
+        query: "@ocsf.metadata.event_code:(sso_* OR magic_link_* OR social_login_* OR anonymous_mobile_login_* OR user_logged_out)"
       processors:
         - type: string-builder-processor
           name: Add service name
           enabled: true
-          template: "Claude SSO"
+          template: "Claude"
           target: ocsf.service.name
           replaceMissing: false
         - type: schema-processor
@@ -747,13 +727,6 @@ pipeline:
               sources:
                 - ocsf.metadata.product.vendor_name
               target: ocsf.metadata.product.vendor_name
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.version` to `ocsf.metadata.version`
-              sources:
-                - ocsf.metadata.version
-              target: ocsf.metadata.version
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
@@ -892,7 +865,7 @@ pipeline:
               name: ocsf.activity_id
               categories:
                 - filter:
-                    query: "@ocsf.metadata.event_code:(sso_login_initiated OR sso_login_succeeded OR sso_login_failed OR sso_second_factor_magic_link OR magic_link_login_initiated OR magic_link_login_succeeded OR magic_link_login_failed OR social_login_succeeded OR anonymous_mobile_login_attempted)"
+                    query: "@ocsf.metadata.event_code:(sso_* OR magic_link_* OR social_login_* OR anonymous_mobile_login_*)"
                   name: Logon
                   id: 1
                 - filter:
@@ -924,7 +897,7 @@ pipeline:
               name: ocsf.auth_protocol_id
               categories:
                 - filter:
-                    query: "@auth_method:sso OR @ocsf.metadata.event_code:(sso_login_initiated OR sso_login_succeeded OR sso_login_failed OR sso_second_factor_magic_link)"
+                    query: "@auth_method:sso OR @ocsf.metadata.event_code:sso_*"
                   name: SAML
                   id: 5
                 - filter:
@@ -1074,13 +1047,6 @@ pipeline:
               sources:
                 - ocsf.metadata.product.vendor_name
               target: ocsf.metadata.product.vendor_name
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.version` to `ocsf.metadata.version`
-              sources:
-                - ocsf.metadata.version
-              target: ocsf.metadata.version
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
@@ -1310,13 +1276,6 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `ocsf.metadata.version` to `ocsf.metadata.version`
-              sources:
-                - ocsf.metadata.version
-              target: ocsf.metadata.version
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
               name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
               sources:
                 - ocsf.metadata.event_code
@@ -1421,19 +1380,19 @@ pipeline:
               name: ocsf.activity_id
               categories:
                 - filter:
-                    query: "@ocsf.metadata.event_code:(claude_chat_created OR claude_project_created OR claude_file_uploaded OR claude_project_document_uploaded OR claude_project_file_uploaded OR claude_skill_created)"
+                    query: "@ocsf.metadata.event_code:(*_created OR *_uploaded)"
                   name: Create
                   id: 1
                 - filter:
-                    query: "@ocsf.metadata.event_code:(claude_chat_viewed OR claude_file_viewed OR claude_project_viewed OR claude_artifact_viewed)"
+                    query: "@ocsf.metadata.event_code:*_viewed"
                   name: Read
                   id: 2
                 - filter:
-                    query: "@ocsf.metadata.event_code:(claude_chat_updated OR claude_skill_replaced)"
+                    query: "@ocsf.metadata.event_code:(*_updated OR *_replaced)"
                   name: Update
                   id: 3
                 - filter:
-                    query: "@ocsf.metadata.event_code:claude_chat_deleted"
+                    query: "@ocsf.metadata.event_code:*_deleted"
                   name: Delete
                   id: 4
                 - filter:
@@ -1501,13 +1460,6 @@ pipeline:
               sources:
                 - ocsf.metadata.product.vendor_name
               target: ocsf.metadata.product.vendor_name
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.version` to `ocsf.metadata.version`
-              sources:
-                - ocsf.metadata.version
-              target: ocsf.metadata.version
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
@@ -1691,12 +1643,23 @@ pipeline:
                   name: Failure
                   id: 2
                 - filter:
-                    query: "@status_code:*"
+                    query: "-@status_code:*"
                   name: Unknown
                   id: 0
+                - filter:
+                    query: "@status_code:*"
+                  name: Other
+                  id: 99
               targets:
                 name: ocsf.status
                 id: ocsf.status_id
+              fallback:
+                values:
+                  ocsf.status: Other
+                  ocsf.status_id: "99"
+                sources:
+                  ocsf.status:
+                    - status_code
             - type: schema-category-mapper
               name: ocsf.severity_id
               categories:
@@ -1713,12 +1676,23 @@ pipeline:
                   name: High
                   id: 4
                 - filter:
-                    query: "@status_code:*"
+                    query: "-@status_code:*"
                   name: Unknown
                   id: 0
+                - filter:
+                    query: "@status_code:*"
+                  name: Other
+                  id: 99
               targets:
                 name: ocsf.severity
                 id: ocsf.severity_id
+              fallback:
+                values:
+                  ocsf.severity: Other
+                  ocsf.severity_id: "99"
+                sources:
+                  ocsf.severity:
+                    - status_code
           schema:
             schemaType: ocsf
             version: 1.5.0
