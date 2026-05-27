@@ -579,6 +579,7 @@ def check(instance):
     inst = instance('localhost:8443', appliance_ips=['10.0.0.1'], max_backfill_minutes=10)
     c = HpeArubaEdgeconnectCheck('hpe_aruba_edgeconnect', {}, [inst])
     c.load_configuration_models()
+    c._parse_config()
     return c
 
 

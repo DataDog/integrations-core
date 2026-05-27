@@ -18,6 +18,18 @@ instances:
     #
   - orch_ip: 10.0.0.1
 
+    ## @param orch_username - string - required
+    ## Username for the Orchestrator. If no appliance-specific credentials are provided,
+    ## this username will be used as the default for appliances.
+    #
+    orch_username: <ORCH_USERNAME>
+
+    ## @param orch_password - string - required
+    ## Password for the Orchestrator. If no appliance-specific credentials are provided,
+    ## this password will be used as the default for appliances.
+    #
+    orch_password: <ORCH_PASSWORD>
+
     ## @param namespace - string - optional - default: default
     ## Namespace to use for NDM device metadata. Defaults to "default".
     #
@@ -128,17 +140,15 @@ instances:
     #
     # use_legacy_auth_encoding: true
 
-    ## @param username - string - required
-    ## Username for the Orchestrator. If no appliance-specific credentials are provided,
-    ## this username will be used as the default.
+    ## @param username - string - optional
+    ## The username to use if services are behind basic or digest auth.
     #
-    username: <USERNAME>
+    # username: <USERNAME>
 
-    ## @param password - string - required
-    ## Password for the Orchestrator. If no appliance-specific credentials are provided,
-    ## this password will be used as the default.
+    ## @param password - string - optional
+    ## The password to use if services are behind basic or NTLM auth.
     #
-    password: <PASSWORD>
+    # password: <PASSWORD>
 
     ## @param ntlm_domain - string - optional
     ## If your services use NTLM authentication, specify

@@ -14,6 +14,23 @@ files:
         type: string
         example: 10.0.0.1
 
+    - name: orch_username
+      required: true
+      description: |
+        Username for the Orchestrator. If no appliance-specific credentials are provided,
+        this username will be used as the default for appliances.
+      value:
+        type: string
+
+    - name: orch_password
+      required: true
+      secret: true
+      description: |
+        Password for the Orchestrator. If no appliance-specific credentials are provided,
+        this password will be used as the default for appliances.
+      value:
+        type: string
+
     - name: namespace
       description: Namespace to use for NDM device metadata. Defaults to "default".
       value:
@@ -90,15 +107,6 @@ files:
             username: admin
             password: secret
     - template: instances/http
-      overrides:
-        username.required: true
-        username.description: |
-          Username for the Orchestrator. If no appliance-specific credentials are provided,
-          this username will be used as the default.
-        password.required: true
-        password.description: |
-          Password for the Orchestrator. If no appliance-specific credentials are provided,
-          this password will be used as the default.
     - template: instances/default
       overrides:
         min_collection_interval.value.example: 60

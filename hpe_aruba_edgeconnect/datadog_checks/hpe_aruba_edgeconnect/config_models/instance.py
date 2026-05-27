@@ -108,7 +108,9 @@ class InstanceConfig(BaseModel):
     namespace: Optional[str] = None
     ntlm_domain: Optional[str] = None
     orch_ip: str
-    password: str
+    orch_password: str
+    orch_username: str
+    password: Optional[str] = None
     persist_connections: Optional[bool] = None
     proxy: Optional[Proxy] = None
     read_timeout: Optional[float] = None
@@ -127,7 +129,7 @@ class InstanceConfig(BaseModel):
     tls_use_host_header: Optional[bool] = None
     tls_verify: Optional[bool] = None
     use_legacy_auth_encoding: Optional[bool] = None
-    username: str
+    username: Optional[str] = None
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):

@@ -29,17 +29,17 @@ EXCLUDED_APPLIANCE_IP = '10.0.0.3'
 def dd_environment(instance, dd_save_state):
     if USE_EDGECONNECT_LAB:
         orch_ip = os.environ['EDGECONNECT_ORCH_IP']
-        username = os.environ['EDGECONNECT_ORCH_USERNAME']
-        password = os.environ['EDGECONNECT_ORCH_PASSWORD']
-        appliance_username = os.environ.get('EDGECONNECT_APPLIANCE_USERNAME', username)
-        appliance_password = os.environ.get('EDGECONNECT_APPLIANCE_PASSWORD', password)
+        orch_username = os.environ['EDGECONNECT_ORCH_USERNAME']
+        orch_password = os.environ['EDGECONNECT_ORCH_PASSWORD']
+        appliance_username = os.environ.get('EDGECONNECT_APPLIANCE_USERNAME', orch_username)
+        appliance_password = os.environ.get('EDGECONNECT_APPLIANCE_PASSWORD', orch_password)
         appliance_credentials = [
             {'cidr': '0.0.0.0/0', 'username': appliance_username, 'password': appliance_password},
         ]
         inst = instance(
             orch_ip,
-            username=username,
-            password=password,
+            orch_username=orch_username,
+            orch_password=orch_password,
             appliance_credentials=appliance_credentials,
             send_ndm_metadata=True,
         )
@@ -95,8 +95,8 @@ def dd_environment(instance, dd_save_state):
 def instance():
     def builder(
         orch_ip: str,
-        username: str = 'admin',
-        password: str = '',
+        orch_username: str = 'admin',
+        orch_password: str = '',
         appliance_ips=None,
         appliance_credentials=None,
         send_ndm_metadata: bool = False,
@@ -104,8 +104,8 @@ def instance():
     ) -> dict:
         inst = {
             'orch_ip': orch_ip,
-            'username': username,
-            'password': password,
+            'orch_username': orch_username,
+            'orch_password': orch_password,
             'tls_verify': False,
             'send_ndm_metadata': send_ndm_metadata,
             **kwargs,
