@@ -1196,50 +1196,60 @@ def build_markdown(
     lines.append("")
 
     lines.extend(["## Actionable finding groups", ""])
-    lines.append("These are both errors and warnings emitted by Replay PBT properties. Errors are blocking property failures. Warnings are suspicious or coverage-related findings that are useful to review but may not fail the job unless warnings-as-errors is enabled.")
-    lines.append("")
-    if groups:
-        lines.extend(["| Target | Severity | Finding type | Count | Examples | Message |", "|---|---|---|---:|---|---|"])
-        for group in groups[:12]:
+    error_groups = [group for group in groups if int(group.get("error_count") or 0) > 0]
+    warning_groups = [group for group in groups if int(group.get("error_count") or 0) == 0 and int(group.get("warning_count") or 0) > 0]
+
+    def append_finding_group_table(title: str, section_groups: list[dict[str, Any]], *, initially_open: bool) -> None:
+        if not section_groups:
+            lines.append(f"### {title}")
+            lines.append("")
+            lines.append("None.")
+            lines.append("")
+            return
+        if initially_open:
+            lines.append(f"### {title} ({len(section_groups)})")
+        else:
+            lines.append(f"<details><summary>{title} ({len(section_groups)})</summary>")
+        lines.append("")
+        lines.extend(["| Target | Finding type | Count | Examples | Message |", "|---|---|---:|---|---|"])
+        for group in section_groups:
             lines.append(
-                f"| {target_link_md(group)} | {finding_severity_md(group)} | **{md_escape(group['property_label'])}**<br/><sub>{group_context_md(group)}</sub> | {group['count']} | {examples_md(group['subjects'])} | {md_escape(group['message'])} |"
+                f"| {target_link_md(group)} | **{md_escape(group['property_label'])}**<br/><sub>{group_context_md(group)}</sub> | {group['count']} | {examples_md(group['subjects'])} | {md_escape(group['message'])} |"
             )
-        if len(groups) > 12:
-            remaining = groups[12:]
-            lines.append("")
-            lines.append(f"<details><summary>🔎 More actionable finding groups ({len(remaining)})</summary>")
-            lines.append("")
-            lines.extend(["| Target | Severity | Finding type | Count | Examples | Message |", "|---|---|---|---:|---|---|"])
-            for group in remaining:
-                lines.append(
-                    f"| {target_link_md(group)} | {finding_severity_md(group)} | **{md_escape(group['property_label'])}**<br/><sub>{group_context_md(group)}</sub> | {group['count']} | {examples_md(group['subjects'])} | {md_escape(group['message'])} |"
-                )
-            lines.append("")
+        lines.append("")
+        if not initially_open:
             lines.append("</details>")
-    else:
-        lines.append("No actionable property findings collected.")
+            lines.append("")
+
+    lines.append("Errors are blocking property failures. Warnings are suspicious or coverage-related findings that are useful to review but may not fail the job unless warnings-as-errors is enabled.")
     lines.append("")
+    append_finding_group_table("Errors", error_groups, initially_open=True)
+    append_finding_group_table("Warnings", warning_groups, initially_open=False)
 
     lines.extend(["## Latest release differential", ""])
     if release_diffs:
-        lines.extend(["| Target | Record ref | Target ref | Changed | Collections |", "|---|---|---|---|---|"])
-        for diff in release_diffs[:30]:
-            changed = "Yes" if diff.get("changed") else "No"
-            collections = md_escape(diff.get("changed_collections") or "No output differences")
-            lines.append(
-                f"| {target_link_md(diff)} | `{md_escape(diff.get('record_ref', ''))}` | `{md_escape(diff.get('target_ref', ''))}` | {changed} | {collections} |"
-            )
-        if len(release_diffs) > 30:
-            remaining = release_diffs[30:]
-            lines.append("")
-            lines.append(f"<details><summary>🔁 More release differential rows ({len(remaining)})</summary>")
-            lines.append("")
-            lines.extend(["| Target | Record ref | Target ref | Changed | Collections |", "|---|---|---|---|---|"])
-            for diff in remaining:
-                changed = "Yes" if diff.get("changed") else "No"
-                collections = md_escape(diff.get("changed_collections") or "No output differences")
+        changed_diffs = [diff for diff in release_diffs if diff.get("changed")]
+        unchanged_diffs = [diff for diff in release_diffs if not diff.get("changed")]
+        lines.append("This section compares `HEAD` with the latest released integration tag using the same replay fixture. `Output changed since latest release` is the failure category for rows where `Changed` is **Yes**; this section shows both changed and unchanged comparisons.")
+        lines.append("")
+        lines.extend(["### Changed outputs", ""])
+        if changed_diffs:
+            lines.extend(["| Target | Record ref | Target ref | Collections |", "|---|---|---|---|"])
+            for diff in changed_diffs:
+                collections = md_escape(diff.get("changed_collections") or "Changed output; no collection summary available")
                 lines.append(
-                    f"| {target_link_md(diff)} | `{md_escape(diff.get('record_ref', ''))}` | `{md_escape(diff.get('target_ref', ''))}` | {changed} | {collections} |"
+                    f"| {target_link_md(diff)} | `{md_escape(diff.get('record_ref', ''))}` | `{md_escape(diff.get('target_ref', ''))}` | {collections} |"
+                )
+        else:
+            lines.append("No changed outputs reported.")
+        lines.append("")
+        if unchanged_diffs:
+            lines.append(f"<details><summary>✅ Unchanged outputs ({len(unchanged_diffs)})</summary>")
+            lines.append("")
+            lines.extend(["| Target | Record ref | Target ref |", "|---|---|---|"])
+            for diff in unchanged_diffs:
+                lines.append(
+                    f"| {target_link_md(diff)} | `{md_escape(diff.get('record_ref', ''))}` | `{md_escape(diff.get('target_ref', ''))}` |"
                 )
             lines.append("")
             lines.append("</details>")
@@ -1249,40 +1259,67 @@ def build_markdown(
 
     lines.extend(["## OpenMetrics coverage", ""])
     if coverages:
-        lines.extend(["| Target | Endpoint → emitted | metadata.csv → emitted | Endpoint count | Metadata count |", "|---|---|---|---:|---:|"])
+        lines.append("Sorted by lowest `metadata.csv → emitted` coverage first, so the sparsest fixtures are easiest to spot.")
+        lines.append("")
+        lines.extend(["| Target | metadata.csv → emitted | Endpoint → emitted | Endpoint count | Metadata count |", "|---|---|---|---:|---:|"])
         sorted_coverages = sorted(
             coverages,
             key=lambda c: (
-                -1 if c.get("endpoint_to_emitted_coverage") is None else float(c.get("endpoint_to_emitted_coverage") or 0),
+                2.0 if c.get("metadata_to_emitted_coverage") is None else float(c.get("metadata_to_emitted_coverage") or 0),
+                2.0 if c.get("endpoint_to_emitted_coverage") is None else float(c.get("endpoint_to_emitted_coverage") or 0),
                 c.get("target", ""),
             ),
-            reverse=True,
         )
-        for coverage in sorted_coverages[:20]:
+        for coverage in sorted_coverages:
             lines.append(
-                f"| {target_link_md(coverage)} | {coverage_bar_md(coverage.get('endpoint_to_emitted_coverage'))} | {coverage_bar_md(coverage.get('metadata_to_emitted_coverage'))} | {coverage.get('endpoint_count') or ''} | {coverage.get('metadata_count') or ''} |"
+                f"| {target_link_md(coverage)} | {coverage_bar_md(coverage.get('metadata_to_emitted_coverage'))} | {coverage_bar_md(coverage.get('endpoint_to_emitted_coverage'))} | {coverage.get('endpoint_count') or ''} | {coverage.get('metadata_count') or ''} |"
             )
-        if len(sorted_coverages) > 20:
-            remaining = sorted_coverages[20:]
-            lines.append("")
-            lines.append(f"<details><summary>📈 More OpenMetrics coverage rows ({len(remaining)})</summary>")
-            lines.append("")
-            lines.extend(["| Target | Endpoint → emitted | metadata.csv → emitted | Endpoint count | Metadata count |", "|---|---|---|---:|---:|"])
-            for coverage in remaining:
-                lines.append(
-                    f"| {target_link_md(coverage)} | {coverage_bar_md(coverage.get('endpoint_to_emitted_coverage'))} | {coverage_bar_md(coverage.get('metadata_to_emitted_coverage'))} | {coverage.get('endpoint_count') or ''} | {coverage.get('metadata_count') or ''} |"
-                )
-            lines.append("")
-            lines.append("</details>")
     else:
         lines.append("No OpenMetrics coverage reports collected.")
     lines.append("")
 
-    lines.extend(["## Failed target details", ""])
-    failed_rows = [row for row in rows if row["status"] != "passed"]
-    if failed_rows:
+    actionable_failed_rows = [
+        row for row in rows if row["status"] != "passed" and row["category"] not in {"failed-before-replay-pbt", "skipped-missing-cache"}
+    ]
+    setup_failed_rows = [
+        row for row in rows if row["status"] != "passed" and row["category"] in {"failed-before-replay-pbt", "skipped-missing-cache"}
+    ]
+
+    lines.extend(["## Actionable failed targets", ""])
+    if actionable_failed_rows:
+        actionable_categories = Counter(row["category"] for row in actionable_failed_rows)
         for category, grouped_rows in sorted(
-            ((category, [row for row in failed_rows if row["category"] == category]) for category in category_counts),
+            ((category, [row for row in actionable_failed_rows if row["category"] == category]) for category in actionable_categories),
+            key=lambda item: (-len(item[1]), item[0]),
+        ):
+            icon, label, description = CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS["unknown"])
+            lines.append(f"<details open><summary>{icon} {label} ({len(grouped_rows)})</summary>")
+            lines.append("")
+            lines.append(md_escape(description))
+            next_step = CATEGORY_NEXT_STEPS.get(category)
+            if next_step:
+                lines.append("")
+                lines.append(f"Suggested next step: {md_escape(next_step)}")
+            lines.append("")
+            lines.append("| Target | Fixture | Failing properties | Failed checks | Shard |")
+            lines.append("|---|---|---:|---|---|")
+            for row in grouped_rows:
+                shard_link = f"[run]({row.get('run_url')})" if row.get("run_url") else ""
+                lines.append(
+                    f"| {target_link_md(row)} | `{md_escape(row.get('fixture_ref', ''))}` | {row.get('failing_property_count', 0)} | {failed_checks_cell_md(row)} | {shard_link} |"
+                )
+            lines.append("")
+            lines.append("</details>")
+            lines.append("")
+    else:
+        lines.append("No non-setup target failures.")
+        lines.append("")
+
+    lines.extend(["## Setup/cache target details", ""])
+    if setup_failed_rows:
+        setup_categories = Counter(row["category"] for row in setup_failed_rows)
+        for category, grouped_rows in sorted(
+            ((category, [row for row in setup_failed_rows if row["category"] == category]) for category in setup_categories),
             key=lambda item: (-len(item[1]), item[0]),
         ):
             icon, label, description = CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS["unknown"])
@@ -1294,20 +1331,19 @@ def build_markdown(
                 lines.append("")
                 lines.append(f"Suggested next step: {md_escape(next_step)}")
             lines.append("")
-            lines.append("| Target | Fixture | Failing properties | Failed checks | Shard |")
-            lines.append("|---|---|---:|---|---|")
-            for row in grouped_rows[:50]:
+            lines.append("| Target | Fixture | Short error | Shard |")
+            lines.append("|---|---|---|---|")
+            for row in grouped_rows:
                 shard_link = f"[run]({row.get('run_url')})" if row.get("run_url") else ""
                 lines.append(
-                    f"| {target_link_md(row)} | `{md_escape(row.get('fixture_ref', ''))}` | {row.get('failing_property_count', 0)} | {failed_checks_cell_md(row)} | {shard_link} |"
+                    f"| {target_link_md(row)} | `{md_escape(row.get('fixture_ref', ''))}` | {md_escape(row.get('summary', ''))} | {shard_link} |"
                 )
-            if len(grouped_rows) > 50:
-                lines.append(f"| _… {len(grouped_rows) - 50} more_ | | | | |")
             lines.append("")
             lines.append("</details>")
             lines.append("")
     else:
-        lines.append("No failed targets.")
+        lines.append("No setup/cache target failures.")
+        lines.append("")
     return "\n".join(lines) + "\n"
 
 def build_html(
@@ -1440,16 +1476,25 @@ def build_html(
         f"<tr><td>{esc(CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS['unknown'])[0])} {esc(CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS['unknown'])[1])}</td><td>{count}</td><td>{esc(CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS['unknown'])[2])}</td></tr>"
         for category, count in category_counts.most_common()
     )
-    finding_cards = "".join(
-        "<article class='finding'>"
-        f"<div><strong>{esc(group['property_label'])}</strong> {group_context_html(group)} {target_link_html(group)}</div>"
-        f"<p>{esc(group['message'])}</p>"
-        f"<p class='muted'>{esc(group['property_description'])}</p>"
-        f"<p><span class='badge'>{group['count']} repeated row(s)</span> <code>{esc(group['path'])}</code></p>"
-        f"<p class='examples'>{', '.join(f'<code>{esc(item)}</code>' for item in group['subjects'][:8])}</p>"
-        "</article>"
-        for group in groups[:30]
-    ) or "<p>No actionable finding groups collected.</p>"
+    error_groups = [group for group in groups if int(group.get("error_count") or 0) > 0]
+    warning_groups = [group for group in groups if int(group.get("error_count") or 0) == 0 and int(group.get("warning_count") or 0) > 0]
+
+    def finding_cards_for(section_groups: list[dict[str, Any]]) -> str:
+        return "".join(
+            "<article class='finding'>"
+            f"<div><strong>{esc(group['property_label'])}</strong> {group_context_html(group)} {finding_severity_html(group)} {target_link_html(group)}</div>"
+            f"<p>{esc(group['message'])}</p>"
+            f"<p class='muted'>{esc(group['property_description'])}</p>"
+            f"<p><span class='badge'>{group['count']} repeated row(s)</span> <code>{esc(group['path'])}</code></p>"
+            f"<p class='examples'>{', '.join(f'<code>{esc(item)}</code>' for item in group['subjects'][:12])}</p>"
+            "</article>"
+            for group in section_groups
+        ) or "<p>None.</p>"
+
+    finding_cards = (
+        "<h3>Errors</h3>" + finding_cards_for(error_groups) +
+        "<h3>Warnings</h3>" + finding_cards_for(warning_groups)
+    )
     target_row_parts = []
     for row in rows:
         pipeline_html = ''.join(
@@ -1468,13 +1513,24 @@ def build_html(
             "</tr>"
         )
     target_rows = ''.join(target_row_parts)
-    release_diff_rows = "".join(
-        f"<tr><td>{target_link_html(diff)}</td><td><code>{esc(diff.get('record_ref'))}</code></td><td><code>{esc(diff.get('target_ref'))}</code></td><td>{'Yes' if diff.get('changed') else 'No'}</td><td>{esc(diff.get('changed_collections') or 'No output differences')}</td></tr>"
-        for diff in sorted(release_diffs, key=lambda item: str(item.get('target', '')))[:80]
-    ) or "<tr><td colspan='5'>No latest-release differential summaries collected.</td></tr>"
+    changed_release_diff_rows = "".join(
+        f"<tr><td>{target_link_html(diff)}</td><td><code>{esc(diff.get('record_ref'))}</code></td><td><code>{esc(diff.get('target_ref'))}</code></td><td>{esc(diff.get('changed_collections') or 'Changed output; no collection summary available')}</td></tr>"
+        for diff in sorted((item for item in release_diffs if item.get('changed')), key=lambda item: str(item.get('target', '')))
+    ) or "<tr><td colspan='4'>No changed outputs reported.</td></tr>"
+    unchanged_release_diff_rows = "".join(
+        f"<tr><td>{target_link_html(diff)}</td><td><code>{esc(diff.get('record_ref'))}</code></td><td><code>{esc(diff.get('target_ref'))}</code></td></tr>"
+        for diff in sorted((item for item in release_diffs if not item.get('changed')), key=lambda item: str(item.get('target', '')))
+    ) or "<tr><td colspan='3'>No unchanged outputs reported.</td></tr>"
     coverage_rows = "".join(
-        f"<tr><td>{target_link_html(c)}</td><td>{coverage_bar_html(c.get('endpoint_to_emitted_coverage'))}</td><td>{coverage_bar_html(c.get('metadata_to_emitted_coverage'))}</td><td>{esc(c.get('endpoint_count'))}</td><td>{esc(c.get('metadata_count'))}</td></tr>"
-        for c in sorted(coverages, key=lambda item: str(item.get('target', '')))[:80]
+        f"<tr><td>{target_link_html(c)}</td><td>{coverage_bar_html(c.get('metadata_to_emitted_coverage'))}</td><td>{coverage_bar_html(c.get('endpoint_to_emitted_coverage'))}</td><td>{esc(c.get('endpoint_count'))}</td><td>{esc(c.get('metadata_count'))}</td></tr>"
+        for c in sorted(
+            coverages,
+            key=lambda item: (
+                2.0 if item.get('metadata_to_emitted_coverage') is None else float(item.get('metadata_to_emitted_coverage') or 0),
+                2.0 if item.get('endpoint_to_emitted_coverage') is None else float(item.get('endpoint_to_emitted_coverage') or 0),
+                str(item.get('target', '')),
+            ),
+        )
     ) or "<tr><td colspan='5'>No coverage reports collected.</td></tr>"
     return f"""<!doctype html>
 <html><head><meta charset='utf-8'><title>Replay PBT dashboard</title>
@@ -1500,10 +1556,10 @@ table{{border-collapse:collapse;width:100%;font-size:13px;background:white}}td,t
 {individual_section}
 <section class='card'><h2>Triage view</h2><div class='grid'>{triage_cards}</div></section>
 <section class='card'><h2>Failure categories</h2><table><thead><tr><th>Category</th><th>Count</th><th>Meaning</th></tr></thead><tbody>{category_rows or '<tr><td colspan="3">No failures</td></tr>'}</tbody></table></section>
-<section class='card'><h2>Actionable finding groups</h2><p>Repeated metric/tag rows are collapsed. Use the examples to see the shape of the issue, then open <code>findings.tsv</code> for raw rows if needed.</p>{finding_cards}</section>
+<section class='card'><h2>Actionable finding groups</h2><p>Errors are blocking property failures. Warnings are suspicious or coverage-related findings that are useful to review but may not fail the job unless warnings-as-errors is enabled.</p>{finding_cards}</section>
 <section class='card'><h2>Targets by workflow step</h2><table><thead><tr><th>Target</th><th>Pipeline state</th><th>Status</th><th>Category</th><th>Summary</th><th>Shard</th></tr></thead><tbody>{target_rows}</tbody></table></section>
-<section class='card'><h2>Latest release differential</h2><table><thead><tr><th>Target</th><th>Record ref</th><th>Target ref</th><th>Changed</th><th>Collections</th></tr></thead><tbody>{release_diff_rows}</tbody></table></section>
-<section class='card'><h2>OpenMetrics coverage</h2><table><thead><tr><th>Target</th><th>Endpoint → emitted</th><th>metadata.csv → emitted</th><th>Endpoint count</th><th>Metadata count</th></tr></thead><tbody>{coverage_rows}</tbody></table></section>
+<section class='card'><h2>Latest release differential</h2><p><strong>Changed outputs</strong></p><table><thead><tr><th>Target</th><th>Record ref</th><th>Target ref</th><th>Collections</th></tr></thead><tbody>{changed_release_diff_rows}</tbody></table><details><summary>✅ Unchanged outputs</summary><table><thead><tr><th>Target</th><th>Record ref</th><th>Target ref</th></tr></thead><tbody>{unchanged_release_diff_rows}</tbody></table></details></section>
+<section class='card'><h2>OpenMetrics coverage</h2><p>Sorted by lowest metadata.csv → emitted coverage first.</p><table><thead><tr><th>Target</th><th>metadata.csv → emitted</th><th>Endpoint → emitted</th><th>Endpoint count</th><th>Metadata count</th></tr></thead><tbody>{coverage_rows}</tbody></table></section>
 </main></body></html>"""
 
 def write_json(path: Path, data: Any) -> None:
