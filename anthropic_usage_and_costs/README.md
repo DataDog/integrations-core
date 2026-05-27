@@ -27,7 +27,7 @@ Your Anthropic organization is either a **Platform** plan or an **Enterprise** p
 | Anthropic plan | API key type | Data ingested |
 | --- | --- | --- |
 | **Platform** | **Admin API key** | Organization-wide usage and cost, broken down by model, workspace, API key, and service tier. |
-| **Enterprise** | **Analytics API key** | Per-user usage and cost, broken down by user, product (API, Claude Code, Claude.ai), model, context window, inference geography, and speed. Usage metrics are emitted in **1-hour buckets** once the hour has settled upstream, with a typical end-to-end latency of **1–3 hours**. Per-user cost data is available starting **January 1, 2026**. |
+| **Enterprise** | **Analytics API key** | Per-user usage and cost, broken down by user, product (API, Claude Code, Claude.ai), model, context window, inference geography, and speed. Usage metrics are emitted in **1-hour buckets** once the hour has settled upstream, with a typical end-to-end latency of **1-3 hours**. Per-user cost data is available starting **January 1, 2026**. |
 
 Each Anthropic organization issues only one of these key types based on its plan, so most customers will configure exactly one key. If your company operates more than one Anthropic organization (for example, a Platform org and an Enterprise org), configure each one as a separate Datadog account.
 
