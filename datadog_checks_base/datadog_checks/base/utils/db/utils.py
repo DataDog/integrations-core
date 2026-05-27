@@ -179,11 +179,11 @@ def _try_parse_db_host_ip(db_host: str) -> IPv4Address | IPv6Address | None:
 
 
 def _is_local_db_host(db_host: str | None) -> bool:
-    """Return True when the DB is reached via localhost, a unix socket, or loopback/link-local IP."""
+    """Return True when the DB is reached via localhost, a unix socket, or a loopback IP."""
     if not db_host or db_host == 'localhost' or db_host.startswith('/'):
         return True
     addr = _try_parse_db_host_ip(db_host)
-    return addr is not None and (addr.is_loopback or addr.is_link_local)
+    return addr is not None and addr.is_loopback
 
 
 def resolve_db_host(db_host):
