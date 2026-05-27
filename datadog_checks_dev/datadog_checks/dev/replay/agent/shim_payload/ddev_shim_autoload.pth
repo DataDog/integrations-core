@@ -1,0 +1,1 @@
+import sys; exec("try:\n import ddev_shim.bootstrap; ddev_shim.bootstrap.activate()\nexcept Exception:\n import traceback; traceback.print_exc()")
