@@ -54,6 +54,16 @@ if TYPE_CHECKING:
 @click.option('--overwrite', is_flag=True, help='Remove existing run directory before writing.')
 @click.option('--recreate', '-r', is_flag=True, help='Recreate the integration env before running.')
 @click.option('--no-environment', is_flag=True, help='Do not start a dd_environment; use stored env config only.')
+@click.option(
+    '--replay-cache',
+    default=None,
+    help=(
+        'Reuse a seeded fixture instead of recording fresh. Pass an explicit cache directory, '
+        'or "latest"/"auto" to pick the newest run under '
+        '.ddev/replay/<integration>/<environment>/. When set, both Agent images run in replay '
+        'mode against the same fixture (no dd_environment startup needed).'
+    ),
+)
 @click.option('--fail-on-diff', is_flag=True, help='Exit non-zero when any probe diff is non-empty.')
 @click.pass_context
 def compare_agent(
@@ -73,6 +83,7 @@ def compare_agent(
     recreate: bool,
     no_environment: bool,
     fail_on_diff: bool,
+    replay_cache: str | None,
 ) -> None:
     app: Application = ctx.obj
     repo_path = StdPath(str(app.repo.path))
@@ -98,6 +109,14 @@ def compare_agent(
 
     probe_tuple = tuple(p.strip() for p in probes.split(',') if p.strip())
     adapter_tuple = tuple(a.strip() for a in adapters.split(',') if a.strip())
+
+    cached_fixture_dir = _resolve_replay_cache_for_agent(
+        repo_path, integration.name, environment, replay_cache
+    ) if replay_cache else None
+    # In cache-reuse mode the runner does NOT start a dd_environment because
+    # both Agent images replay against the seeded fixture.
+    if cached_fixture_dir is not None:
+        no_environment = True
 
     # Resolve artifacts directory.
     root = StdPath(artifacts) if artifacts else (repo_path / '.ddev' / 'replay-agent')
@@ -134,10 +153,15 @@ def compare_agent(
         env_data = storage.get(integration.name, environment)
         config = env_data.read_config()
         if not config:
-            raise click.ClickException(
-                f'No stored config for {integration.name}:{environment}. '
-                f'Run `ddev env start {integration.name} {environment}` first.'
-            )
+            if cached_fixture_dir is not None:
+                # In cache mode we still need *some* check config so the Agent
+                # can load the integration. Fall back to a minimal stub.
+                config = {'instances': [{}]}
+            else:
+                raise click.ClickException(
+                    f'No stored config for {integration.name}:{environment}. '
+                    f'Run `ddev env start {integration.name} {environment}` first.'
+                )
 
         # Persist the inputs to the run directory for triage.
         (run_dir / 'config.json').write_text(json.dumps(config, indent=2, sort_keys=True) + '\n')
@@ -167,6 +191,7 @@ def compare_agent(
             replay_time=replay_time,
             probes=probe_tuple,
             adapters=adapter_tuple,
+            cached_fixture_dir=cached_fixture_dir,
         )
 
         diffs = write_diffs(StdPath(str(run_dir)), summary)
@@ -233,3 +258,65 @@ def compare_agent(
 
     if fail_on_diff and nonempty:
         raise click.ClickException('compare-agent: diff detected (use --fail-on-diff to suppress)')
+
+
+def _resolve_replay_cache_for_agent(
+    repo_path: StdPath,
+    integration: str,
+    environment: str,
+    replay_cache: str,
+) -> StdPath | None:
+    """Pick a replay-cache directory for the agent runner.
+
+    Honours the same conventions as ``compare-check --replay-cache``:
+
+    - explicit path: used directly after sanity-checks.
+    - ``latest``/``auto``: pick the newest run under
+      ``.ddev/replay/<integration>/<environment>/`` that contains a
+      ``capture.json`` fixture manifest and at least one component file.
+    """
+    if replay_cache not in ('latest', 'auto'):
+        cache_dir = StdPath(replay_cache).resolve()
+        if not cache_dir.is_dir():
+            raise click.ClickException(f'Replay cache directory does not exist: {cache_dir}')
+        return _agent_fixture_root(cache_dir)
+
+    cache_root = repo_path / '.ddev' / 'replay' / integration / environment
+    if not cache_root.is_dir():
+        raise click.ClickException(
+            f'No replay cache root at {cache_root}. '
+            f'Run compare-check once to seed a fixture, then retry with --replay-cache latest.'
+        )
+
+    # Newest-mtime-first.
+    candidates = sorted(
+        (p for p in cache_root.iterdir() if p.is_dir()),
+        key=lambda p: p.stat().st_mtime,
+        reverse=True,
+    )
+    for candidate in candidates:
+        fixture_root = _agent_fixture_root(candidate)
+        if fixture_root is not None:
+            return fixture_root
+
+    raise click.ClickException(
+        f'No usable cache under {cache_root}. '
+        f'Expected a child directory containing capture.json + capture.<adapter>.json files.'
+    )
+
+
+def _agent_fixture_root(candidate: StdPath) -> StdPath | None:
+    """Return the directory that holds capture.json for an agent run, or None.
+
+    compare-check writes its fixtures at the run-dir root
+    (``<run>/capture.json`` etc.). compare-agent in record mode writes
+    them under ``<run>/fixture/capture.json``. Detect both layouts.
+    """
+    if (candidate / 'capture.json').is_file():
+        if any(candidate.glob('capture.*.json')):
+            return candidate
+    nested = candidate / 'fixture'
+    if (nested / 'capture.json').is_file():
+        if any(nested.glob('capture.*.json')):
+            return nested
+    return None

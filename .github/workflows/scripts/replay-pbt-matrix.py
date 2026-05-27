@@ -198,8 +198,12 @@ def main() -> None:
             'target_head': target_head,
             'readings': args.readings,
             'runner': args.runner,
+            # Artifact slug is runner-prefixed so per-job artifacts stay
+            # distinct across runners; the underlying replay-cache key is
+            # runner-agnostic so agent and no-agent runs can share seeded
+            # fixtures.
             'artifact_slug': slug(f'{args.runner}-{integration}-{environment}'),
-            'cache_key': f'replay-pbt-v{cache_version}-{args.runner}-'
+            'cache_key': f'replay-pbt-v{cache_version}-'
             f'{slug(integration)}-{slug(environment)}-readings{slug(args.readings)}-fixture-{slug(fixture_ref)}'
             '-adapters-notcp',
         }

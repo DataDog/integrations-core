@@ -296,11 +296,25 @@ def run_compare_agent(
     probes: tuple[str, ...] = DEFAULT_PROBES,
     adapters: tuple[str, ...] = DEFAULT_ADAPTERS,
     extra_env: dict[str, str] | None = None,
+    cached_fixture_dir: Path | None = None,
 ) -> dict[str, Any]:
-    """End-to-end: record with the old image, replay with the new image.
+    """End-to-end Agent-vs-Agent comparison.
 
-    Returns a dict describing the run; artifacts are on disk under
-    ``artifacts_dir``.
+    Two modes:
+
+    - ``cached_fixture_dir=None``: record + replay in this run. The
+      ``record_image`` runs with the shim in record mode, captures HTTP
+      / subprocess records into ``artifacts_dir/fixture/``, then the
+      ``replay_image`` runs with the shim in replay mode against that
+      fixture.
+
+    - ``cached_fixture_dir=<dir>``: reuse a previously seeded fixture.
+      Both Agent images run in replay mode against the same fixture.
+      This is the preferred mode for the dispatcher because it gives a
+      pure behavioural diff without depending on an upstream service.
+      The cache is expected to contain ``capture.json`` plus per-adapter
+      ``capture.<adapter>.json`` component files (the format written by
+      ``compare-check`` or by a previous ``compare-agent`` record run).
     """
 
     extra_env = extra_env or {}
@@ -309,9 +323,13 @@ def run_compare_agent(
     fixture_dir.mkdir(exist_ok=True)
     fixture_basename = 'capture.json'
 
-    # Initialise an empty manifest the record run will overwrite.
-    # The shim's record-mode adapters write per-adapter component files
-    # and the runner's post-record step assembles the manifest.
+    if cached_fixture_dir is not None:
+        _stage_fixture_from_cache(cached_fixture_dir, fixture_dir, fixture_basename)
+        record_mode = 'replay'
+        skip_record_phase = True
+    else:
+        record_mode = 'record'
+        skip_record_phase = False
 
     record_args = AgentRunArgs(
         image=record_image,
@@ -320,7 +338,7 @@ def run_compare_agent(
         config=config,
         fixture_dir=fixture_dir,
         fixture_basename=fixture_basename,
-        mode='record',
+        mode=record_mode,
         artifacts_dir=artifacts_dir,
         probes=probes,
         adapters=adapters,
@@ -331,9 +349,11 @@ def run_compare_agent(
     )
     record_result = run_agent_once(record_args)
 
-    # After record run: assemble a fixture manifest from per-adapter
-    # component files the shim wrote into fixture_dir.
-    _assemble_fixture_manifest(fixture_dir / fixture_basename, adapters, readings)
+    # After a real record run, assemble a fixture manifest from per-adapter
+    # component files the shim wrote into ``fixture_dir``. In cached mode
+    # the manifest is already present.
+    if not skip_record_phase:
+        _assemble_fixture_manifest(fixture_dir / fixture_basename, adapters, readings)
 
     replay_args = AgentRunArgs(
         image=replay_image,
@@ -356,6 +376,8 @@ def run_compare_agent(
     summary = {
         'integration': integration,
         'environment': environment,
+        'cached_fixture_dir': str(cached_fixture_dir) if cached_fixture_dir else None,
+        'fixture_source': 'cache' if cached_fixture_dir else 'live-recorded',
         'record': {
             'image': record_image,
             'agent_version': record_result.agent_version,
@@ -379,6 +401,47 @@ def run_compare_agent(
     (artifacts_dir / 'run_summary.json').write_text(json.dumps(summary, indent=2, sort_keys=True) + '\n')
 
     return summary
+
+
+def _stage_fixture_from_cache(cache_dir: Path, fixture_dir: Path, fixture_basename: str) -> None:
+    """Copy a seeded fixture (capture.json + per-adapter files) into the run dir.
+
+    Accepts either:
+
+    - the path of the directory containing ``capture.json`` directly, or
+    - a sibling cache layout written by ``compare-check`` where the
+      fixture lives at ``<dir>/capture.json`` plus
+      ``<dir>/capture.<adapter>.json``.
+    """
+    import shutil
+
+    cache_dir = cache_dir.resolve()
+    if not cache_dir.is_dir():
+        raise FileNotFoundError(f'replay cache directory does not exist: {cache_dir}')
+
+    manifest = cache_dir / fixture_basename
+    if not manifest.is_file():
+        raise FileNotFoundError(
+            f'replay cache missing required fixture manifest {fixture_basename} under {cache_dir}'
+        )
+
+    fixture_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(manifest, fixture_dir / fixture_basename)
+
+    # Pull every sibling component file matching the manifest stem.
+    stem = manifest.stem
+    suffix = manifest.suffix or '.json'
+    copied = 0
+    for src in cache_dir.glob(f'{stem}.*{suffix}'):
+        if src.name == manifest.name:
+            continue
+        shutil.copy2(src, fixture_dir / src.name)
+        copied += 1
+    if copied == 0:
+        raise FileNotFoundError(
+            f'replay cache at {cache_dir} contains a manifest but no '
+            f'{stem}.<adapter>{suffix} component files'
+        )
 
 
 def _assemble_fixture_manifest(manifest_path: Path, adapters: tuple[str, ...], readings: int) -> None:

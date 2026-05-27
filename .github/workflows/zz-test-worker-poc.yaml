@@ -438,6 +438,33 @@ jobs:
           docker pull "$REPLAY_PBT_REPLAY_IMAGE"
         fi
 
+    - name: Restore replay cache (agent runner only)
+      if: env.REPLAY_PBT_RUNNER == 'agent'
+      id: replay-cache-agent
+      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      with:
+        path: .ddev/replay/${{ matrix.integration }}/${{ matrix.environment }}
+        key: ${{ matrix.cache_key }}
+
+    - name: Seed cache if missing (agent runner only)
+      if: env.REPLAY_PBT_RUNNER == 'agent' && steps.replay-cache-agent.outputs.cache-hit != 'true'
+      id: seed-agent
+      run: |
+        set -euo pipefail
+        bash .github/workflows/scripts/ensure-docker.sh
+        if [[ "${{ inputs.seed_missing_caches }}" != "true" ]]; then
+          echo "No suitable cache and seed_missing_caches=false; will run compare-agent in fresh record mode."
+          echo "seeded=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        echo "Seeding cache from $REPLAY_PBT_FIXTURE_REF via compare-check."
+        ddev env compare-check "$REPLAY_PBT_INTEGRATION" "$REPLAY_PBT_ENVIRONMENT" \
+          --record-ref "$REPLAY_PBT_FIXTURE_REF" \
+          --replay-ref "$REPLAY_PBT_TARGET_REF" \
+          --readings "$REPLAY_PBT_READINGS" \
+          --adapters "$REPLAY_PBT_ADAPTERS"
+        echo "seeded=true" >> "$GITHUB_OUTPUT"
+
     - name: Run compare-agent (agent runner only)
       if: env.REPLAY_PBT_RUNNER == 'agent'
       run: |
@@ -445,18 +472,40 @@ jobs:
         set -uo pipefail
         bash .github/workflows/scripts/ensure-docker.sh
         mkdir -p "$REPLAY_PBT_RESULT_DIR"
-        ddev env start "$REPLAY_PBT_INTEGRATION" "$REPLAY_PBT_ENVIRONMENT" || true
+
+        # Decide whether to pass --replay-cache. Cache is present if the
+        # restore step hit OR the seed step produced one.
+        use_cache="false"
+        if [[ "${{ steps.replay-cache-agent.outputs.cache-hit }}" == "true" ]]; then
+          use_cache="true"
+        elif [[ "${{ steps.seed-agent.outputs.seeded }}" == "true" ]]; then
+          use_cache="true"
+        fi
+
+        compare_args=(
+          "$REPLAY_PBT_INTEGRATION" "$REPLAY_PBT_ENVIRONMENT"
+          --record-image "$REPLAY_PBT_RECORD_IMAGE"
+          --replay-image "$REPLAY_PBT_REPLAY_IMAGE"
+          --readings "$REPLAY_PBT_READINGS"
+          --probes freeze,inventory,check
+          --adapters "$REPLAY_PBT_ADAPTERS"
+          --artifacts "$REPLAY_PBT_ARTIFACTS"
+          --overwrite
+        )
+
+        if [[ "$use_cache" == "true" ]]; then
+          compare_args+=(--replay-cache latest --no-environment)
+        else
+          # Fall back to fresh record mode: start dd_environment first.
+          ddev env start "$REPLAY_PBT_INTEGRATION" "$REPLAY_PBT_ENVIRONMENT" || true
+        fi
+
         log_path="$REPLAY_PBT_RESULT_DIR/compare_agent.log"
-        ddev env compare-agent "$REPLAY_PBT_INTEGRATION" "$REPLAY_PBT_ENVIRONMENT" \
-          --record-image "$REPLAY_PBT_RECORD_IMAGE" \
-          --replay-image "$REPLAY_PBT_REPLAY_IMAGE" \
-          --readings "$REPLAY_PBT_READINGS" \
-          --probes freeze,inventory,check \
-          --adapters "$REPLAY_PBT_ADAPTERS" \
-          --artifacts "$REPLAY_PBT_ARTIFACTS" \
-          --overwrite 2>&1 | tee "$log_path"
+        ddev env compare-agent "${compare_args[@]}" 2>&1 | tee "$log_path"
         rc=${PIPESTATUS[0]}
-        ddev env stop "$REPLAY_PBT_INTEGRATION" "$REPLAY_PBT_ENVIRONMENT" || true
+        if [[ "$use_cache" != "true" ]]; then
+          ddev env stop "$REPLAY_PBT_INTEGRATION" "$REPLAY_PBT_ENVIRONMENT" || true
+        fi
         python - <<PY > "$REPLAY_PBT_RESULT_DIR/result.json"
         import json, os
         print(json.dumps({
@@ -475,6 +524,13 @@ jobs:
         }, sort_keys=True))
         PY
         exit "$rc"
+
+    - name: Save replay cache (agent runner only)
+      if: success() && env.REPLAY_PBT_RUNNER == 'agent' && steps.seed-agent.outputs.seeded == 'true'
+      uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      with:
+        path: .ddev/replay/${{ matrix.integration }}/${{ matrix.environment }}
+        key: ${{ matrix.cache_key }}
 
     - name: Restore replay cache
       if: env.REPLAY_PBT_RUNNER != 'agent'
