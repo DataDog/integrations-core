@@ -216,6 +216,10 @@ def load_sample_bucket():
         if task["sample"] == "gamesim-sample":
             task_id = task["taskId"]
 
+    # No matching task in the install response — the bucket is likely loading
+    # under a task we can't observe. WaitFor will retry; on the retry the install
+    # POST takes the already-loaded shortcut, and gamesim_primary_index_ready is
+    # the authoritative gate that blocks until the bundled GSI is online.
     if task_id is None:
         return False
 
@@ -245,16 +249,18 @@ def gamesim_primary_index_ready():
     )
     r.raise_for_status()
 
-    found = False
-    for keyspace, stats in r.json().items():
-        if keyspace == "indexer":
-            continue
-        parts = keyspace.split(":")
-        if parts[0] == "gamesim-sample" and parts[-1] == "gamesim_primary":
-            if stats.get("initial_build_progress") != 100:
-                return False
-            found = True
-    return found
+    data = r.json()
+    matches = [
+        stats
+        for keyspace, stats in data.items()
+        if keyspace != "indexer"
+        and keyspace.split(":")[0] == "gamesim-sample"
+        and keyspace.split(":")[-1] == "gamesim_primary"
+    ]
+    if not matches:
+        print("gamesim_primary not yet visible; keyspaces seen: {}".format(list(data.keys())))
+        return False
+    return all(s.get("initial_build_progress") == 100 for s in matches)
 
 
 def create_syncgw_database():
