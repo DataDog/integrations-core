@@ -6,7 +6,7 @@ Datadog's Anthropic Usage and Costs integration allows you to get visibility int
 
 - **Monitor LLM token consumption** (input, output, cache usage) in near real-time
 - **Track costs** by model, workspace, and service tier, supporting accurate attribution and budgeting
-- **Attribute usage and spend to individual users** (Enterprise plans) — break down token consumption and dollar cost by user, product (API, Claude Code, Claude.ai), context window, inference geography, and speed
+- **Attribute usage and spend to individual users** (Enterprise plans) - break down token consumption and dollar cost by user, product (API, Claude Code, Claude.ai), context window, inference geography, and speed
 - **Understand usage trends** across teams, API keys, or users to optimize model usage
 - **Set up alerting and dashboards** that highlight anomalies in usage or unexpected cost spikes
 
@@ -31,12 +31,14 @@ Your Anthropic organization is either a **Platform** plan or an **Enterprise** p
 
 Each Anthropic organization issues only one of these key types based on its plan, so most customers will configure exactly one key. If your company operates more than one Anthropic organization (for example, a Platform org and an Enterprise org), configure each one as a separate Datadog account.
 
+All metrics and Cloud Cost Management line items emitted from an Enterprise (Analytics) account carry the `org_type:enterprise` tag. Platform (Admin) data is emitted without an `org_type` tag, so you can isolate or separate the two data sources in dashboards, monitors, and CCM filters using the presence (or absence) of `org_type:enterprise`.
+
 ### 2. Generate your Anthropic API key
 
 Follow the path that matches your Anthropic plan:
 
-- **Platform plan** — Generate an [Admin API key][5] from your Anthropic organization's settings, or ask your Anthropic account admin to create one for you.
-- **Enterprise plan** — Generate an Analytics API key (with the `read:analytics` scope) at [claude.ai/analytics/api-keys][7]. Analytics API keys must be provisioned by your organization's **Primary Owner**.
+- **Platform plan** - Generate an [Admin API key][5] from your Anthropic organization's settings, or ask your Anthropic account admin to create one for you.
+- **Enterprise plan** - Generate an Analytics API key (with the `read:analytics` scope) at [claude.ai/analytics/api-keys][7]. Analytics API keys must be provisioned by your organization's **Primary Owner**.
 
 Copy the API key to a secure location once generated.
 
