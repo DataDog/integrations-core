@@ -211,6 +211,7 @@ def main() -> None:
         batch_runs=batch_runs,
         property_results=property_results,
         release_diffs=release_diffs,
+        artifact_name='replay-pbt-combined-report',
     )
     html_report = report.build_html(
         markdown,

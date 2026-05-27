@@ -1,112 +1,130 @@
-# Replay validation report — readability plan
+# Replay validation report — readability plan (round 2)
 
-## Problem
+The first round moved the headline to the top, collapsed the fake setup
+sub-buckets, and merged the duplicated count tables. A re-read of the
+re-rendered run 26517548642 surfaced a new set of issues. This plan
+addresses them.
 
-The job summary produced by `replay-pbt-combine-reports.py` (which calls
-`replay-pbt-report.build_markdown`) was meant to be more readable, but in
-practice it is harder to read than the raw data:
+## Issues found in round 1 output
 
-- The first ~100 lines are meta ("How to read this report", "What this job
-  is doing", a Mermaid diagram, a glossary, and a 19-row Check inventory).
-  Headline information is pushed below the fold.
-- The same counts appear in five sections (At a glance / Validation
-  families / Outcome summary / Triage view / Failure categories) and they
-  disagree (Validation families said "134 failed targets" while only 31
-  actually failed).
-- The same failed targets appear in four sections (Validation status by
-  target / Triage view / Failure categories / Actionable failed targets).
-- Setup/cache target details splits 124 failures into five sub-buckets
-  ("Service unavailable during seeding", "Configuration error during
-  seeding", etc.) whose `Short error` column is byte-for-byte identical —
-  fake precision.
-- The vocabulary (target, fixture, replay cache, seeding, compare-check,
-  property, finding, family, batch, harness) is internal-only.
+1. **"Failures to fix" and "Failed checks" are the same data twice.**
+   Both sections list the same 31 actionable failures, the first
+   per-target and the second per-(target, check, path). A reviewer hits
+   `airflow:py3.13-2.11` twice with different counts and has to figure
+   out which is canonical. Pick one.
 
-If a reader needs the "How to read this report" section, the report has
-already failed.
+2. **"Blocking errors" double-counts the same target+check.**
+   `group_actionable_findings` keys on `(target, property, check, path,
+   asset_type, message)`. Including `path` splits one logical finding
+   into N rows. The output shows `calico:py3.13` four times for the
+   same monitor check, and `kong:py3.13-1.5.0 | kong.http.status.count`
+   twice byte-for-byte identically.
 
-## Goal
+3. **"Failures to fix" rows don't show what was wrong.**
+   A row says "Asset query metrics exist in metadata.csv" but not which
+   metric. To act, the reader has to scroll to "Failed checks". That is
+   why we keep both sections — each one alone is incomplete.
 
-A colleague unfamiliar with the system should answer "what broke and who
-fixes it?" inside the first screen, with no glossary.
+4. **"Review warnings (296)" duplicates fixture-coverage data.**
+   Every row is a "Dashboard query tag key was not seen on the emitted
+   replay metric" warning. The next section, "OpenMetrics fixture
+   coverage (68)", covers the same fixture-quality story for the same
+   owner.
+
+5. **cassandra appears three times under three labels.**
+   The "Replay harness issue" bucket already correctly identifies the
+   3 cassandra targets as one root cause. The "Latest release
+   comparison → Changed outputs" section then lists them again as
+   "Changed output; no collection summary available", which is just a
+   downstream effect of the harness failure.
+
+6. **"Detailed dashboard" links the wrong artifact name in combined
+   mode.** The combined run uploads `replay-pbt-combined-report`, but
+   the header hardcodes `replay-pbt-report`.
+
+7. **"100 unchanged outputs" collapsed table is pure noise** — the
+   only useful piece of information is the count.
+
+8. **Check inventory in the appendix is static configuration** that
+   does not change run-to-run.
 
 ## Changes
 
-All changes are in `.github/workflows/scripts/replay-pbt-report.py`,
-inside `build_markdown` and the helper `failed_checks_cell_md`. No JSON or
-TSV schema changes. `build_html`, `replay-pbt-combine-reports.py`, and
-the per-target HTML dashboard are untouched.
+All Python edits in `.github/workflows/scripts/replay-pbt-report.py` and
+one one-line change in `replay-pbt-combine-reports.py`.
 
-### 1. New headline table
+### 1. Fix `group_actionable_findings` grouping key
 
-Right after the metadata block, emit one table that is the only source of
-truth for counts. Buckets come from the existing failure-category data:
+Drop `path` from the key. New key:
+`(target, property, check, asset_type, level, display_message)`. A
+single (target, check) emits one row, with metrics aggregated into
+`subjects`. This eliminates the calico ×4 / kong ×2 duplicates.
 
-| Status | Count | Owner |
-|---|---:|---|
-| ✅ Passed | N | — |
-| 📊 Dashboard/monitor metric not in metadata.csv | N | integration owner |
-| 📋 Emitted metric does not match metadata.csv | N | integration owner |
-| 🛠️ Replay harness issue | N | replay harness team |
-| 🧱 Never ran (no replay cache) | N | needs cache seeding |
-| … other non-empty categories … | N | … |
+### 2. Merge "Failed checks" into "Failures to fix"
 
-The exact owner column reuses `property_typical_owner` /
-`CATEGORY_NEXT_STEPS`. Empty buckets are skipped.
+`_build_failures_to_fix` takes `findings` as well as the actionable
+rows. For each row, look up the finding groups for that target +
+matching the row's category, and render the offending metrics inline:
 
-### 2. Sections removed from headline path
+```
+| airflow:py3.13-2.11 | Dashboard query → `airflow.dag.task.duration.avg`, `airflow.dagrun.duration.failed.avg`, … | [run] |
+```
 
-- `## How to read this report`
-- `build_replay_flow_markdown(...)` (mermaid + glossary + "at a glance")
-- `build_check_inventory_markdown()`
-- `## Validation families`
-- `## Validation status by target`
-- `## Outcome summary`
-- `## Triage view`
-- `## Failure categories`
+Delete `_build_failed_checks_section` and its call site.
 
-### 3. Renamed sections
+### 3. Drop "Review warnings"
 
-- `## Property findings` → `## Failed checks`
-- `## Actionable failed targets` → `## Failures to fix`
-- `## Setup/cache target details` → `## Targets that did not run`
+Fold the count into the OpenMetrics fixture coverage section header
+("296 dashboard-query tags not seen in current fixtures").
 
-### 4. Slim "Failures to fix"
+### 4. Suppress release-diff rows for targets already in the harness bucket
 
-When N≥2 targets in the same category have an identical failing-check
-set, render the set once at the top of the bucket and drop the per-row
-"Show N more failed checks" expander. Today this manifests as three
-`cassandra_nodetool` rows each duplicating the same 16-check list.
+In the changed-outputs table, skip any target whose category is
+`replay-harness`, and add a one-line note "N targets were excluded
+because they failed in the harness bucket above."
 
-### 5. Collapse "Targets that did not run"
+### 5. Collapse "100 unchanged outputs" to a sentence
 
-The five 🧱 sub-buckets all carry the same `Short error`. Replace with
-one collapsed `<details>` containing a single flat table and one sentence
-explaining that the real seeding error is in the upstream batch run
-logs.
+Just emit `N targets produced unchanged output vs the latest release.`
 
-### 6. Default-collapse OpenMetrics coverage
+### 6. Pass `artifact_name="replay-pbt-combined-report"` from combine
 
-Warnings only. Keep the table but wrap in `<details>`.
+Add the kwarg in `replay-pbt-combine-reports.py::main` where it calls
+`report.build_markdown`.
 
-### 7. Slim `failed_checks_cell_md`
+### 7. Externalise "Check inventory"
 
-Stop nesting `<details>` inside table cells. Show the first three checks
-plus a `+N more` text suffix; full detail is in `report.html`.
+Replace the in-report table with a link to a static doc. The taxonomy
+itself stays as Python data structures, but the rendered table no
+longer ships in every job summary.
 
-### 8. Move all explanatory content to the bottom
+### 8. Minor: headline sentence
 
-Wrap glossary + flow diagram + check inventory + validation-family
-taxonomy in a single `<details><summary>About this report</summary>` block
-at the end of `build_markdown`. Anyone who genuinely wants the framing
-can still find it.
+Replace "Out of `227` total targets. See **Failures to fix** below for
+the actionable items." with "Of `227` targets, **N need attention**
+and **M never ran**."
+
+### 9. Minor: setup-section disclaimer
+
+The current wording undersells the per-job links that are already in
+each row. Reword to call them out.
 
 ## Files touched
 
 - `.github/workflows/scripts/replay-pbt-report.py`
+- `.github/workflows/scripts/replay-pbt-combine-reports.py`
 
 ## Validation
 
-- `python -m unittest .github/workflows/scripts/test_replay_pbt_report.py`
-- Render against the saved 26513908784 numbers (227 / 72 / 31 / 124, plus
-  21 / 7 / 3 sub-buckets) and eyeball that the headline matches.
+- `python -m unittest test_replay_pbt_report`
+- Local render against the saved batch artifacts via the combine script.
+- Re-dispatch the combiner against runs 26512143408 and 26512144312;
+  no shard re-execution needed.
+
+## Expected outcome
+
+- ~860 lines → ~300 lines of summary markdown.
+- "Failures to fix" is the single, complete actionable section.
+- No duplicate rows in any bucket.
+- Fixture-coverage warnings live in exactly one place.
+- Cassandra appears once.

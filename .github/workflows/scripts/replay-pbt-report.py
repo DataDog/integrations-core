@@ -955,13 +955,12 @@ def group_context_html(group: dict[str, Any]) -> str:
 
 def group_actionable_findings(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
     actionable = [f for f in findings if (f.get("level") or "").lower() in {"error", "warning", "warn"}]
-    groups: dict[tuple[str, str, str, str, str, str], dict[str, Any]] = {}
+    groups: dict[tuple[str, str, str, str, str], dict[str, Any]] = {}
     for finding in actionable:
         key = (
             str(finding.get("target", "")),
             str(finding.get("property", "")),
             str(finding.get("check", "")),
-            str(finding.get("path", "")),
             str(finding.get("asset_type", "")),
             str(finding.get("display_message") or finding.get("message", "")),
         )
@@ -1482,17 +1481,91 @@ def _build_headline_table(
     for icon, label, count, owner in rows:
         lines.append(f"| {icon} {md_escape(label)} | {count} | {md_escape(owner)} |")
     lines.append("")
-    lines.append(f"Out of `{total}` total targets. See **Failures to fix** below for the actionable items.")
+    actionable = sum(
+        count for category, count in category_counts.items()
+        if category not in {"failed-before-replay-pbt", "skipped-missing-cache"}
+    )
+    not_run = sum(
+        count for category, count in category_counts.items()
+        if category in {"failed-before-replay-pbt", "skipped-missing-cache"}
+    )
+    parts: list[str] = []
+    if actionable:
+        parts.append(f"**{actionable} need attention**")
+    if not_run:
+        parts.append(f"**{not_run} never ran**")
+    if parts:
+        lines.append(f"Of `{total}` targets, " + " and ".join(parts) + ". See **Failures to fix** below.")
+    else:
+        lines.append(f"All `{total}` targets passed.")
     lines.append("")
     return lines
 
 
-def _build_failures_to_fix(actionable_failed_rows: list[dict[str, Any]]) -> list[str]:
+METRIC_DICT_RE = re.compile(r"'metric'\s*:\s*'([^']+)'")
+QUOTED_DOTTED_NAME_RE = re.compile(r"'([a-zA-Z_][\w]*\.[\w.\-]+)'")
+
+
+def _metrics_from_short_errors(row: dict[str, Any]) -> list[str]:
+    seen: list[str] = []
+    def add(name: str) -> None:
+        if name and name not in seen:
+            seen.append(name)
+    for err in row.get("short_errors") or []:
+        text = str(err)
+        for match in METRIC_DICT_RE.findall(text):
+            add(match)
+        if not seen:
+            for match in QUOTED_DOTTED_NAME_RE.findall(text):
+                add(match)
+    return seen
+
+
+def _evidence_cell_for_target(
+    row: dict[str, Any], error_groups_by_target: dict[str, list[dict[str, Any]]]
+) -> str:
+    target = str(row.get("target", ""))
+    groups = error_groups_by_target.get(target) or []
+    fragments: list[str] = []
+    for group in groups:
+        subjects = [f"`{md_escape(s)}`" for s in (group.get("subjects") or [])]
+        source = group.get("asset_type_label") or asset_type_label(group.get("asset_type", "")) or "Output"
+        if subjects:
+            shown = ", ".join(subjects[:5])
+            if len(subjects) > 5:
+                shown += f" (+{len(subjects) - 5} more)"
+            fragments.append(f"{md_escape(source)}: {shown}")
+        else:
+            fragments.append(md_escape(group.get("message", "") or group.get("property_label", "")))
+    if not fragments:
+        # Fall back to metrics scraped from short_errors (metadata-contract
+        # failures carry their evidence in an assertion message, not in a
+        # structured finding).
+        metrics = _metrics_from_short_errors(row)
+        if metrics:
+            shown = ", ".join(f"`{md_escape(m)}`" for m in metrics[:5])
+            if len(metrics) > 5:
+                shown += f" (+{len(metrics) - 5} more)"
+            fragments.append(f"Emitted: {shown}")
+    if not fragments:
+        return "—"
+    return "<br/>".join(fragments)
+
+
+def _build_failures_to_fix(
+    actionable_failed_rows: list[dict[str, Any]],
+    findings: list[dict[str, Any]],
+) -> list[str]:
     lines = ["## Failures to fix", ""]
     if not actionable_failed_rows:
         lines.append("None. All non-setup targets passed.")
         lines.append("")
         return lines
+
+    error_groups = [g for g in group_actionable_findings(findings) if int(g.get("error_count") or 0) > 0]
+    error_groups_by_target: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for group in error_groups:
+        error_groups_by_target[str(group.get("target", ""))].append(group)
 
     actionable_categories = Counter(row["category"] for row in actionable_failed_rows)
     for category, grouped_rows in sorted(
@@ -1510,21 +1583,18 @@ def _build_failures_to_fix(actionable_failed_rows: list[dict[str, Any]]) -> list
             lines.append(f"**Next step:** {md_escape(next_step)}")
         lines.append("")
 
-        # Collapse rows that share the exact same failing-check set so the
-        # cassandra_nodetool-style "3 identical 16-check failures" stops
-        # repeating the check list three times.
+        # Collapse rows that share the exact same failing-check set so a
+        # multi-target single-root-cause failure (cassandra_nodetool x3 with
+        # the same 16 checks) does not list the same check explosion N times.
         check_signatures: dict[tuple[str, ...], list[dict[str, Any]]] = defaultdict(list)
         for row in grouped_rows:
             signature = tuple(sorted(row.get("failing_properties") or []))
             check_signatures[signature].append(row)
 
-        repeated_groups = [
-            (signature, rows_in_group)
-            for signature, rows_in_group in check_signatures.items()
-            if len(rows_in_group) >= 2 and len(signature) >= 2
-        ]
         repeated_targets: set[str] = set()
-        for signature, rows_in_group in repeated_groups:
+        for signature, rows_in_group in check_signatures.items():
+            if len(rows_in_group) < 2 or len(signature) < 2:
+                continue
             targets = [target_link_md(row) for row in rows_in_group]
             checks = ", ".join(test_display_md(name) for name in signature[:3])
             if len(signature) > 3:
@@ -1541,63 +1611,94 @@ def _build_failures_to_fix(actionable_failed_rows: list[dict[str, Any]]) -> list
 
         remaining_rows = [row for row in grouped_rows if str(row.get("target", "")) not in repeated_targets]
         if remaining_rows:
-            lines.append("| Target | Fixture | Failed checks | Batch |")
-            lines.append("|---|---|---|---|")
+            row_evidence: list[tuple[dict[str, Any], str]] = []
             for row in remaining_rows:
-                batch_link = f"[run]({row.get('run_url')})" if row.get("run_url") else ""
-                lines.append(
-                    f"| {target_link_md(row)} | `{md_escape(row.get('fixture_ref', ''))}` | {failed_checks_cell_md(row)} | {batch_link} |"
-                )
+                evidence = _evidence_cell_for_target(row, error_groups_by_target)
+                if evidence == "—":
+                    evidence = failed_checks_cell_md(row)
+                row_evidence.append((row, evidence))
+            evidence_groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
+            for row, evidence in row_evidence:
+                evidence_groups[evidence].append(row)
+            lines.append("| Target(s) | Evidence | Batch |")
+            lines.append("|---|---|---|")
+            for evidence, rows_with_evidence in evidence_groups.items():
+                targets_cell = "<br/>".join(target_link_md(row) for row in rows_with_evidence)
+                batch_links = sorted({
+                    f"[run]({row.get('run_url')})"
+                    for row in rows_with_evidence if row.get("run_url")
+                })
+                batch_cell = "<br/>".join(batch_links)
+                lines.append(f"| {targets_cell} | {evidence} | {batch_cell} |")
             lines.append("")
         lines.append("</details>")
         lines.append("")
     return lines
 
 
-def _build_failed_checks_section(
-    error_groups: list[dict[str, Any]], warning_groups: list[dict[str, Any]]
+def _build_release_diff_section(
+    release_diffs: list[dict[str, Any]], harness_targets: set[str]
 ) -> list[str]:
-    lines = ["## Failed checks", ""]
-    lines.append(
-        "Failed checks, grouped by target and issue shape. Errors block the job; warnings are coverage/review signals."
-    )
-    lines.append("")
-
-    def append_table(title: str, groups: list[dict[str, Any]], *, initially_open: bool) -> None:
-        count = len(groups)
-        if not count:
-            return
-        open_attr = " open" if initially_open else ""
-        lines.append(f"<details{open_attr}><summary>{title} ({count})</summary>")
-        lines.append("")
-        lines.extend(["| Target | Check | Count | Examples | Message |", "|---|---|---:|---|---|"])
-        for group in groups:
-            lines.append(
-                f"| {target_link_md(group)} | **{md_escape(group['property_label'])}**<br/><sub>{group_context_md(group)}</sub> | {group['count']} | {examples_md(group['subjects'])} | {md_escape(group['message'])} |"
-            )
-        lines.append("")
-        lines.append("</details>")
-        lines.append("")
-
-    if not error_groups and not warning_groups:
-        lines.append("None.")
+    lines = ["## Latest release comparison", ""]
+    if not release_diffs:
+        lines.append("No latest-release differential summaries collected.")
         lines.append("")
         return lines
+    changed = [diff for diff in release_diffs if diff.get("changed")]
+    unchanged = [diff for diff in release_diffs if not diff.get("changed")]
+    harness_changed = [diff for diff in changed if str(diff.get("target", "")) in harness_targets]
+    real_changed = [diff for diff in changed if str(diff.get("target", "")) not in harness_targets]
 
-    append_table("Blocking errors", error_groups, initially_open=True)
-    append_table("Review warnings", warning_groups, initially_open=False)
+    lines.append(
+        "Differences between the fixture-producing integration version and HEAD. Targets that already failed in the harness bucket above are excluded because their 'change' is a downstream effect of the harness failure, not a real output diff."
+    )
+    lines.append("")
+    if real_changed:
+        lines.append(f"**{len(real_changed)} target(s) emit different output vs the latest release.**")
+        lines.append("")
+        lines.extend(["| Target | Record ref | Target ref | Collections |", "|---|---|---|---|"])
+        for diff in real_changed:
+            collections = md_escape(diff.get("changed_collections") or "Changed output; no collection summary available")
+            lines.append(
+                f"| {target_link_md(diff)} | `{md_escape(diff.get('record_ref', ''))}` | `{md_escape(diff.get('target_ref', ''))}` | {collections} |"
+            )
+        lines.append("")
+    else:
+        lines.append("No real output differences vs the latest release.")
+        lines.append("")
+    notes: list[str] = []
+    if harness_changed:
+        notes.append(f"{len(harness_changed)} target(s) excluded (harness failure).")
+    if unchanged:
+        notes.append(f"{len(unchanged)} target(s) produced unchanged output.")
+    if notes:
+        lines.append(" ".join(notes))
+        lines.append("")
     return lines
 
 
-def _build_openmetrics_coverage_section(coverages: list[dict[str, Any]]) -> list[str]:
+def _build_openmetrics_coverage_section(
+    coverages: list[dict[str, Any]], asset_warning_count: int = 0
+) -> list[str]:
     lines: list[str] = []
-    if not coverages:
+    if not coverages and not asset_warning_count:
         return lines
-    lines.append(f"<details><summary>OpenMetrics fixture coverage ({len(coverages)}) — fixture/replay owner</summary>")
+    pieces: list[str] = []
+    if coverages:
+        pieces.append(f"{len(coverages)} OpenMetrics coverage report(s)")
+    if asset_warning_count:
+        pieces.append(f"{asset_warning_count} dashboard-query tag(s) not seen in current fixtures")
+    summary = " · ".join(pieces) if pieces else "Fixture coverage"
+    lines.append(f"<details><summary>Fixture coverage — {summary} — fixture/replay owner</summary>")
     lines.append("")
     lines.append(
-        "Coverage rows are replay fixture quality signals. Low coverage means the fixture may not exercise enough endpoint or metadata surface; it is not automatically an integration bug. Sorted by lowest `metadata.csv → emitted` coverage first."
+        "Fixture coverage signals do not block the job. Low coverage means the fixture may not exercise enough endpoint or metadata surface; that is fixture work, not automatically an integration bug. Sorted by lowest `metadata.csv → emitted` coverage first."
     )
+    if not coverages:
+        lines.append("")
+        lines.append("</details>")
+        lines.append("")
+        return lines
     lines.append("")
     lines.extend(
         [
@@ -1635,7 +1736,7 @@ def _build_targets_not_run_section(setup_failed_rows: list[dict[str, Any]]) -> l
         lines.append("")
         return lines
     lines.append(
-        f"{len(setup_failed_rows)} target(s) never reached the replay-backed checks because cache restore, cache seeding, or setup failed. The summarised `Short error` here is usually the same generic `Unable to find a suitable replay cache…` message; for the real cause, open the upstream batch run logs."
+        f"{len(setup_failed_rows)} target(s) never reached the replay-backed checks because cache restore, cache seeding, or setup failed. Each row links to its specific shard job; the `Short error` column is the generic `Unable to find a suitable replay cache…` summary by design — click through for the real cause."
     )
     lines.append("")
     lines.append(f"<details><summary>Show {len(setup_failed_rows)} target(s)</summary>")
@@ -1675,7 +1776,7 @@ def _build_about_section(
         "| Batch | One of the parallel GitHub Actions runs whose results were combined here. |",
         "",
     ]
-    nested = build_replay_flow_markdown(rows, findings, coverages) + build_check_inventory_markdown()
+    nested = build_replay_flow_markdown(rows, findings, coverages)
     for line in nested:
         if line.startswith("### "):
             lines.append("#### " + line[4:])
@@ -1683,6 +1784,12 @@ def _build_about_section(
             lines.append("### " + line[3:])
         else:
             lines.append(line)
+    lines.extend([
+        "### Check inventory",
+        "",
+        "The list of configured checks (replay-backed and static) is documented in [`replay-validation-README.md`](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/scripts/replay-validation-README.md). It does not change run-to-run.",
+        "",
+    ])
 
     lines.extend(["### Validation families", ""])
     lines.append(
@@ -1762,46 +1869,16 @@ def build_markdown(
         row for row in rows if row["status"] != "passed" and row["category"] in {"failed-before-replay-pbt", "skipped-missing-cache"}
     ]
 
-    lines.extend(_build_failures_to_fix(actionable_failed_rows))
+    lines.extend(_build_failures_to_fix(actionable_failed_rows, findings))
 
-    error_groups = [group for group in groups if int(group.get("error_count") or 0) > 0]
-    warning_groups = [group for group in groups if int(group.get("error_count") or 0) == 0 and int(group.get("warning_count") or 0) > 0]
-    lines.extend(_build_failed_checks_section(error_groups, warning_groups))
+    warning_group_count = sum(
+        1 for group in groups
+        if int(group.get("error_count") or 0) == 0 and int(group.get("warning_count") or 0) > 0
+    )
 
-    lines.extend(["## Latest release comparison", ""])
-    lines.append("This section shows replay-backed comparisons between the fixture-producing integration version and the target ref. Differences should be reviewed as intentional or accidental behavior changes.")
-    lines.append("")
-    if release_diffs:
-        changed_diffs = [diff for diff in release_diffs if diff.get("changed")]
-        unchanged_diffs = [diff for diff in release_diffs if not diff.get("changed")]
-        lines.extend(["### Changed outputs", ""])
-        lines.append("These targets emitted different normalized output between the fixture-producing ref and the target ref.")
-        lines.append("")
-        if changed_diffs:
-            lines.extend(["| Target | Record ref | Target ref | Collections |", "|---|---|---|---|"])
-            for diff in changed_diffs:
-                collections = md_escape(diff.get("changed_collections") or "Changed output; no collection summary available")
-                lines.append(
-                    f"| {target_link_md(diff)} | `{md_escape(diff.get('record_ref', ''))}` | `{md_escape(diff.get('target_ref', ''))}` | {collections} |"
-                )
-        else:
-            lines.append("No changed outputs reported.")
-        lines.append("")
-        if unchanged_diffs:
-            lines.append(f"<details><summary>✅ Unchanged outputs ({len(unchanged_diffs)})</summary>")
-            lines.append("")
-            lines.extend(["| Target | Record ref | Target ref |", "|---|---|---|"])
-            for diff in unchanged_diffs:
-                lines.append(
-                    f"| {target_link_md(diff)} | `{md_escape(diff.get('record_ref', ''))}` | `{md_escape(diff.get('target_ref', ''))}` |"
-                )
-            lines.append("")
-            lines.append("</details>")
-    else:
-        lines.append("No latest-release differential summaries collected.")
-    lines.append("")
-
-    lines.extend(_build_openmetrics_coverage_section(coverages))
+    harness_targets = {str(row.get("target", "")) for row in rows if row.get("category") == "replay-harness"}
+    lines.extend(_build_release_diff_section(release_diffs, harness_targets))
+    lines.extend(_build_openmetrics_coverage_section(coverages, warning_group_count))
     lines.extend(_build_targets_not_run_section(setup_failed_rows))
     lines.extend(_build_about_section(rows, findings, coverages, property_results))
     return "\n".join(lines) + "\n"
