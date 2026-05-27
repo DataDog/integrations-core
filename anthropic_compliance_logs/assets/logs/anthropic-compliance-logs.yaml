@@ -1255,10 +1255,10 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: "@ocsf.metadata.event_code:(claude_chat_created OR claude_chat_viewed OR claude_chat_updated OR claude_chat_deleted OR claude_project_created OR claude_project_viewed OR claude_file_uploaded OR claude_file_viewed OR claude_project_document_uploaded OR claude_project_file_uploaded OR claude_artifact_viewed OR claude_skill_created OR claude_skill_replaced OR org_users_listed OR platform_usage_report_messages_viewed OR platform_usage_report_claude_code_viewed)"
+        query: "@ocsf.metadata.event_code:(claude_chat_created OR claude_chat_viewed OR claude_chat_updated OR claude_chat_deleted OR claude_project_created OR claude_project_viewed OR claude_file_uploaded OR claude_file_viewed OR claude_project_document_uploaded OR claude_project_file_uploaded OR claude_artifact_viewed OR claude_skill_created OR claude_skill_replaced)"
       processors:
         - type: attribute-remapper
-          name: Map `claude_chat_id`, `claude_file_id`, `claude_project_document_id`, `claude_artifact_id`, `skill_id`, `claude_project_id`, `id` to `ocsf.web_resource.uid`
+          name: Map `claude_chat_id`, `claude_file_id`, `claude_project_document_id`, `claude_artifact_id`, `skill_id`, `claude_project_id` to `ocsf.web_resource.uid`
           enabled: true
           sources:
             - claude_chat_id
@@ -1267,7 +1267,6 @@ pipeline:
             - claude_artifact_id
             - skill_id
             - claude_project_id
-            - id
           sourceType: attribute
           target: ocsf.web_resource.uid
           targetType: attribute
@@ -1426,7 +1425,7 @@ pipeline:
                   name: Create
                   id: 1
                 - filter:
-                    query: "@ocsf.metadata.event_code:(claude_chat_viewed OR claude_file_viewed OR claude_project_viewed OR claude_artifact_viewed OR org_users_listed OR platform_usage_report_messages_viewed OR platform_usage_report_claude_code_viewed)"
+                    query: "@ocsf.metadata.event_code:(claude_chat_viewed OR claude_file_viewed OR claude_project_viewed OR claude_artifact_viewed)"
                   name: Read
                   id: 2
                 - filter:
