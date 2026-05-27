@@ -279,6 +279,16 @@ class TestCliDownloadFallback:
         cli.download()
         v1.assert_called_once_with('d', 'n', 'v', False)
 
+    def test_default_unsafe_disable_verification_without_version_falls_back_to_v1(self, monkeypatch):
+        monkeypatch.setattr('sys.argv', ['downloader', 'datadog-postgres', '--unsafe-disable-verification'])
+        monkeypatch.setattr(cli, 'run_v2_downloader', MagicMock(side_effect=MissingVersion('missing')))
+        v1 = MagicMock()
+        monkeypatch.setattr(cli, 'run_downloader', v1)
+        monkeypatch.setattr(cli, 'instantiate_downloader', MagicMock(return_value=('d', 'n', None, False)))
+
+        cli.download()
+        v1.assert_called_once_with('d', 'n', None, False)
+
     def test_non_datadog_package_does_not_fall_back_to_v1(self, monkeypatch):
         monkeypatch.setattr('sys.argv', ['downloader', 'requests'])
         v1 = MagicMock()
