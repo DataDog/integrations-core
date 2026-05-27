@@ -1012,7 +1012,6 @@ omv2_count_metrics = [
     'scylla.reactor.aio_writes',
     'scylla.reactor.cpp_exceptions',
     'scylla.reactor.cpu_busy_ms',
-    'scylla.reactor.cpu_steal_time_ms',
     'scylla.reactor.fstream_read_bytes',
     'scylla.reactor.fstream_read_bytes_blocked',
     'scylla.reactor.fstream_reads',

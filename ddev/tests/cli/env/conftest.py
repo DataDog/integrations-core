@@ -12,6 +12,15 @@ from ddev.utils.fs import Path
 from ddev.utils.structures import EnvVars
 
 
+def pytest_addoption(parser):
+    group = parser.getgroup('replay-pbt')
+    group.addoption(
+        '--replay-pbt-config',
+        action='store',
+        help='Path to a replay-PBT JSON config file written by `ddev env replay-pbt`.',
+    )
+
+
 @pytest.fixture(autouse=True)
 def data_dir(temp_dir):
     d = temp_dir / 'data'

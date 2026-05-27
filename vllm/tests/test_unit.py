@@ -23,8 +23,10 @@ def test_check_vllm(dd_run_check, aggregator, datadog_agent, instance):
         MockResponse(file_path=get_fixture_path("vllm_version.json")),
     ]
 
-    with mock.patch('requests.Session.get', side_effect=mock_responses):
+    with mock.patch('requests.Session.get', side_effect=mock_responses) as get:
         dd_run_check(check)
+
+    assert get.call_args_list[1].args[0] == instance['openmetrics_endpoint'].replace('/metrics', '/version')
 
     for metric in METRICS_MOCK:
         aggregator.assert_metric(metric)
@@ -47,8 +49,11 @@ def test_check_vllm_w_ray_prefix(dd_run_check, aggregator, datadog_agent, ray_in
         MockResponse(file_path=get_fixture_path("vllm_version.json")),
     ]
 
-    with mock.patch('requests.Session.get', side_effect=mock_responses):
+    with mock.patch('requests.Session.get', side_effect=mock_responses) as get:
         dd_run_check(check)
+
+    assert get.call_args_list[1].args[0].endswith('/version')
+    assert not get.call_args_list[1].args[0].endswith('/version_prefix')
 
     for metric in METRICS_MOCK:
         aggregator.assert_metric(metric)

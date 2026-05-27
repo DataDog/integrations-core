@@ -10,6 +10,7 @@ from copy import deepcopy
 import pytest
 
 from datadog_checks.dev import get_here
+from datadog_checks.dev.conditions import CheckEndpoints
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
@@ -200,6 +201,10 @@ def dd_environment(dd_save_state):
                     "istiod_endpoint": "http://{}:{}/metrics".format(istiod_host, istiod_port),
                     "use_openmetrics": "true",
                 }
+                CheckEndpoints(
+                    [instance[endpoint] for endpoint in ("ztunnel_endpoint", "waypoint_endpoint", "istiod_endpoint")],
+                    attempts=30,
+                )()
                 dd_save_state("istio_instance", instance)
                 yield instance
             else:
@@ -208,5 +213,6 @@ def dd_environment(dd_save_state):
                 )
                 istiod_endpoint = 'http://{}:{}/metrics'.format(istiod_host, istiod_port)
                 instance = {'istiod_endpoint': istiod_endpoint, 'use_openmetrics': 'false'}
+                CheckEndpoints([istiod_endpoint], attempts=30)()
                 dd_save_state("istio_instance", instance)
                 yield instance

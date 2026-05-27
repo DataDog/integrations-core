@@ -31,6 +31,8 @@ def test_instance_default_check_omv2(aggregator, mock_db_data, dd_run_check, ins
             aggregator.assert_metric(m, at_least=0)
         else:
             aggregator.assert_metric(m)
+
+    aggregator.assert_metric('scylla.reactor.cpu_steal_time_ms', metric_type=aggregator.GAUGE)
     aggregator.assert_all_metrics_covered()
 
 

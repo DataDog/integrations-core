@@ -658,6 +658,10 @@ NON_CONFORMING_LIST = [
     'cache.bytes_total',
 ]
 
+GAUGE_METRICS = {
+    'reactor.cpu_steal_time_ms',
+}
+
 
 def construct_metrics_config(metrics):
     # turns the metrics from a list of dicts to a flat dict
@@ -673,6 +677,10 @@ def construct_metrics_config(metrics):
                 metric_name = metric_name[:-6]
             raw_metric_name = raw_metric_name[:-6]
 
-        config = {raw_metric_name: {'name': metric_name}}
+        metric_config = {'name': metric_name}
+        if metric_name in GAUGE_METRICS:
+            metric_config['type'] = 'gauge'
+
+        config = {raw_metric_name: metric_config}
         metrics.append(config)
     return metrics

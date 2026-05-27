@@ -9,7 +9,7 @@ import pytest
 from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.cilium import CiliumCheck
 from datadog_checks.dev import run_command
-from datadog_checks.dev.conditions import WaitFor
+from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.utils import get_active_env
@@ -219,8 +219,17 @@ def dd_environment():
                 instances = get_instances(
                     ip_ports[0][0], ip_ports[0][1], ip_ports[1][0], ip_ports[1][1], use_openmetrics
                 )
+                CheckEndpoints(
+                    [
+                        instance[endpoint]
+                        for instance in instances["instances"]
+                        for endpoint in ("agent_endpoint", "operator_endpoint")
+                        if endpoint in instance
+                    ],
+                    attempts=30,
+                )()
 
-            yield instances
+                yield instances
 
 
 @pytest.fixture(scope="session")

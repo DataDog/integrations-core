@@ -5,8 +5,10 @@ import click
 
 from ddev.cli.env.agent import agent
 from ddev.cli.env.check import check
+from ddev.cli.env.compare_check import compare_check
 from ddev.cli.env.config import config
 from ddev.cli.env.reload import reload_command
+from ddev.cli.env.replay_pbt import replay_pbt
 from ddev.cli.env.shell import shell
 from ddev.cli.env.show import show
 from ddev.cli.env.start import start
@@ -23,8 +25,10 @@ def env():
 
 env.add_command(agent)
 env.add_command(check)
+env.add_command(compare_check)
 env.add_command(config)
 env.add_command(reload_command)
+env.add_command(replay_pbt)
 env.add_command(shell)
 env.add_command(show)
 env.add_command(start)

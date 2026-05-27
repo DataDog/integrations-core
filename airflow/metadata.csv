@@ -1,5 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
-airflow.can_connect,count,,,,"1 if can connect to Airflow, otherwise 0",0,airflow,can_connect,
+airflow.can_connect,gauge,,,,"1 if can connect to Airflow, otherwise 0",0,airflow,can_connect,
 airflow.celery.execute_command.failure,count,,,,Number of non-zero exit code from Celery task.,0,airflow,celery.execute_command.failure,
 airflow.celery.task_timeout_error,count,,error,,Number of `AirflowTaskTimeout` errors raised when publishing Task to Celery Broker.,0,airflow,celery.task_timeout_error,
 airflow.collect_db_dags,gauge,,millisecond,,Milliseconds taken for fetching all Serialized Dags from DB,0,airflow,collect_db_dags,
@@ -40,7 +40,7 @@ airflow.dataset.updates,count,,,,Number of updated datasets.,0,airflow,dataset.u
 airflow.executor.open_slots,gauge,,,,Number of open slots on executor,0,airflow,executor.open_slots,
 airflow.executor.queued_tasks,gauge,,task,,Number of queued tasks on executor,-1,airflow,executor.queued_tasks,
 airflow.executor.running_tasks,gauge,,task,,Number of running tasks on executor,0,airflow,executor.running_tasks,
-airflow.healthy,count,,,,"1 if Airflow is healthy, otherwise 0",0,airflow,healthy,
+airflow.healthy,gauge,,,,"1 if Airflow is healthy, otherwise 0",0,airflow,healthy,
 airflow.job.end,count,,job,,"Number of ended `<job_name>` job, ex. `SchedulerJob`, `LocalTaskJob`",0,airflow,job.end,
 airflow.job.heartbeat.failure,count,,error,,"Number of failed Heartbeats for a `<job_name>` job, ex. `SchedulerJob`, `LocalTaskJob`",0,airflow,job heartbeat failure,
 airflow.job.start,count,,job,,"Number of started `<job_name>` job, ex. `SchedulerJob`, `LocalTaskJob`",0,airflow,job.start,
