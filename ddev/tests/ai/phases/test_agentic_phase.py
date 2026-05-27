@@ -568,3 +568,53 @@ async def test_phase_with_goal_exhausts_attempts_fails_phase(flow_dir, monkeypat
         await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     assert mgr.read() == {}
+    assert phase._goal_attempt_log == [{"task": "t1", "attempts": 2, "final_valid": False}]
+
+
+async def test_phase_goal_partial_progress_preserved_on_exhaustion(flow_dir, monkeypatch, message_queue):
+    """When task 1 passes goal validation and task 2 exhausts attempts, both entries are logged."""
+    worker = MockAgent(
+        [
+            make_response("t1 done", 0, 0),
+            make_response("t2 attempt 1", 0, 0),
+            make_response("t2 attempt 2", 0, 0),
+        ]
+    )
+
+    call_count = 0
+
+    def goal_builder(owner_id):
+        nonlocal call_count
+        call_count += 1
+        if call_count == 1:
+            agent = MockAgent([make_response('{"valid": true, "reason": ""}', 0, 0)])
+        else:
+            agent = MockAgent(
+                [
+                    make_response('{"valid": false, "reason": "miss 1"}', 0, 0),
+                    make_response('{"valid": false, "reason": "miss 2"}', 0, 0),
+                ]
+            )
+        return agent, ToolRegistry([])
+
+    phase, _ = make_agent_phase(
+        flow_dir,
+        worker,
+        monkeypatch,
+        message_queue,
+        tasks=[
+            TaskConfig(name="t1", prompt="First.", goal="check t1", max_goal_attempts=2),
+            TaskConfig(name="t2", prompt="Second.", goal="check t2", max_goal_attempts=2),
+        ],
+        goal_agent_builder=goal_builder,
+    )
+
+    from ddev.ai.phases.goal import GoalAttemptsExhausted
+
+    with pytest.raises(GoalAttemptsExhausted):
+        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert phase._goal_attempt_log == [
+        {"task": "t1", "attempts": 1, "final_valid": True},
+        {"task": "t2", "attempts": 2, "final_valid": False},
+    ]
