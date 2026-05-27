@@ -76,6 +76,8 @@ def dd_environment():
         WaitFor(load_sample_bucket),
         WaitFor(create_syncgw_database),
     ]
+    if COUCHBASE_MAJOR_VERSION >= 7:
+        conditions.append(WaitFor(gamesim_primary_index_ready))
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'docker-compose.yaml'),
         env_vars={
@@ -217,8 +219,6 @@ def load_sample_bucket():
 
     while True:
         # Loop until the task ID is gone, meaning the task is done.
-        task_is_done = False
-
         r = requests.get(
             '{}/pools/default/tasks'.format(URL),
             auth=(USER, PASSWORD),
@@ -226,16 +226,38 @@ def load_sample_bucket():
         r.raise_for_status()
         result = r.json()
 
-        for task in result:
-            if task.get("task_id", "") == task_id:
-                task_is_done = True
-
-        if task_is_done:
+        task_still_running = any(task.get("task_id") == task_id for task in result)
+        if not task_still_running:
             break
 
         time.sleep(1)
 
     return True
+
+
+def gamesim_primary_index_ready():
+    """
+    Wait until the indexer reports stats for the gamesim_primary GSI index.
+
+    The /sampleBuckets/install task completing only guarantees the sample data
+    has been loaded; the indexer may still be building the bundled GSI indexes.
+    test_index_stats_metrics asserts metrics for gamesim_primary, so wait for
+    the indexer to report a keyspace for it before yielding the environment.
+    """
+    r = requests.get(
+        '{}/api/v1/stats'.format(INDEX_STATS_URL),
+        auth=(USER, PASSWORD),
+    )
+    if r.status_code != requests.codes.ok:
+        return False
+
+    for keyspace in r.json():
+        if keyspace == "indexer":
+            continue
+        parts = keyspace.split(":")
+        if parts[0] == "gamesim-sample" and parts[-1] == "gamesim_primary":
+            return True
+    return False
 
 
 def create_syncgw_database():
