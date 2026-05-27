@@ -1039,15 +1039,10 @@ def failed_checks_cell_md(row: dict[str, Any]) -> str:
     if not checks:
         return md_escape(row.get("summary", ""))
     shown = [test_display_md(item) for item in checks[:3]]
-    if len(checks) <= 3:
-        return ", ".join(shown)
-    remaining = checks[3:]
-    return (
-        ", ".join(shown)
-        + f"<details><summary>Show {len(remaining)} more failed checks</summary>"
-        + "<br/>".join(test_display_md(item) for item in remaining)
-        + "</details>"
-    )
+    text = ", ".join(shown)
+    if len(checks) > 3:
+        text += f" (+{len(checks) - 3} more, see the HTML dashboard)"
+    return text
 
 def bar(count: int, total: int, width: int = 24) -> str:
     if total <= 0:
@@ -1396,6 +1391,317 @@ def build_check_inventory_markdown() -> list[str]:
     return lines
 
 
+CATEGORY_OWNERS = {
+    "passed": "—",
+    "failed-before-replay-pbt": "needs cache seeding",
+    "skipped-missing-cache": "needs cache seeding",
+    "asset-query-metadata": "integration owner",
+    "metadata-contract": "integration owner",
+    "release-differential": "integration owner",
+    "invalid-metric-values": "integration owner",
+    "replay-nondeterminism": "integration owner",
+    "ordering-only-nondeterminism": "integration owner",
+    "tag-state-stability": "integration owner",
+    "openmetrics-input-invariance": "integration owner or replay harness team",
+    "json-input-invariance": "integration owner or replay harness team",
+    "replay-harness": "replay harness team",
+    "asset-query-replay-coverage": "fixture/replay owner",
+    "openmetrics-coverage": "fixture/replay owner",
+    "unsupported-negative": "fixture/replay owner",
+    "other-failed": "triage",
+    "unknown": "triage",
+}
+
+CATEGORY_HEADLINE_LABELS = {
+    "failed-before-replay-pbt": "Never ran (no replay cache)",
+    "skipped-missing-cache": "Never ran (no replay cache)",
+    "asset-query-metadata": "Dashboard/monitor metric not in metadata.csv",
+    "metadata-contract": "Emitted metric does not match metadata.csv",
+    "release-differential": "Output changed vs latest release",
+    "invalid-metric-values": "Invalid metric value (NaN/inf/negative)",
+    "replay-nondeterminism": "Replay output not deterministic",
+    "ordering-only-nondeterminism": "Same output, different order",
+    "tag-state-stability": "Tags changed between readings",
+    "openmetrics-input-invariance": "OpenMetrics formatting changed output",
+    "json-input-invariance": "JSON formatting changed output",
+    "replay-harness": "Replay harness issue",
+    "asset-query-replay-coverage": "Asset query not covered by fixture",
+    "openmetrics-coverage": "Sparse OpenMetrics fixture",
+    "unsupported-negative": "Unsupported or negative fixture",
+    "other-failed": "Unclassified failure",
+    "unknown": "Unknown",
+}
+
+
+def _category_owner(category: str) -> str:
+    return CATEGORY_OWNERS.get(category, "triage")
+
+
+def _headline_label(category: str) -> str:
+    if category in CATEGORY_HEADLINE_LABELS:
+        return CATEGORY_HEADLINE_LABELS[category]
+    return CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS["unknown"])[1]
+
+
+def _build_headline_table(
+    status_counts: Counter, category_counts: Counter, total: int
+) -> list[str]:
+    lines = ["## Summary", ""]
+    if total == 0:
+        lines.extend(["No targets reported.", ""])
+        return lines
+
+    passed = status_counts.get("passed", 0)
+    rows = []
+    if passed:
+        rows.append(("✅", "Passed", passed, _category_owner("passed")))
+
+    setup_blocked = sum(
+        count for category, count in category_counts.items()
+        if category in {"failed-before-replay-pbt", "skipped-missing-cache"}
+    )
+
+    other_categories = [
+        (category, count) for category, count in category_counts.most_common()
+        if category not in {"failed-before-replay-pbt", "skipped-missing-cache"}
+    ]
+    for category, count in other_categories:
+        icon = CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS["unknown"])[0]
+        rows.append((icon, _headline_label(category), count, _category_owner(category)))
+
+    if setup_blocked:
+        rows.append((
+            CATEGORY_DEFINITIONS["failed-before-replay-pbt"][0],
+            _headline_label("failed-before-replay-pbt"),
+            setup_blocked,
+            _category_owner("failed-before-replay-pbt"),
+        ))
+
+    lines.append("| Status | Count | Who looks at this |")
+    lines.append("|---|---:|---|")
+    for icon, label, count, owner in rows:
+        lines.append(f"| {icon} {md_escape(label)} | {count} | {md_escape(owner)} |")
+    lines.append("")
+    lines.append(f"Out of `{total}` total targets. See **Failures to fix** below for the actionable items.")
+    lines.append("")
+    return lines
+
+
+def _build_failures_to_fix(actionable_failed_rows: list[dict[str, Any]]) -> list[str]:
+    lines = ["## Failures to fix", ""]
+    if not actionable_failed_rows:
+        lines.append("None. All non-setup targets passed.")
+        lines.append("")
+        return lines
+
+    actionable_categories = Counter(row["category"] for row in actionable_failed_rows)
+    for category, grouped_rows in sorted(
+        ((category, [row for row in actionable_failed_rows if row["category"] == category]) for category in actionable_categories),
+        key=lambda item: (-len(item[1]), item[0]),
+    ):
+        icon, label, description = CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS["unknown"])
+        owner = _category_owner(category)
+        lines.append(f"<details open><summary>{icon} {md_escape(label)} ({len(grouped_rows)}) — {md_escape(owner)}</summary>")
+        lines.append("")
+        lines.append(md_escape(description))
+        next_step = CATEGORY_NEXT_STEPS.get(category)
+        if next_step:
+            lines.append("")
+            lines.append(f"**Next step:** {md_escape(next_step)}")
+        lines.append("")
+
+        # Collapse rows that share the exact same failing-check set so the
+        # cassandra_nodetool-style "3 identical 16-check failures" stops
+        # repeating the check list three times.
+        check_signatures: dict[tuple[str, ...], list[dict[str, Any]]] = defaultdict(list)
+        for row in grouped_rows:
+            signature = tuple(sorted(row.get("failing_properties") or []))
+            check_signatures[signature].append(row)
+
+        repeated_groups = [
+            (signature, rows_in_group)
+            for signature, rows_in_group in check_signatures.items()
+            if len(rows_in_group) >= 2 and len(signature) >= 2
+        ]
+        repeated_targets: set[str] = set()
+        for signature, rows_in_group in repeated_groups:
+            targets = [target_link_md(row) for row in rows_in_group]
+            checks = ", ".join(test_display_md(name) for name in signature[:3])
+            if len(signature) > 3:
+                checks += f" (+{len(signature) - 3} more)"
+            lines.append(
+                f"⚠️ {len(rows_in_group)} targets failed the same {len(signature)} checks — likely one root cause, not {len(rows_in_group)} independent bugs."
+            )
+            lines.append("")
+            lines.append(f"- Targets: {', '.join(targets)}")
+            lines.append(f"- Failed checks: {checks}")
+            lines.append("")
+            for row in rows_in_group:
+                repeated_targets.add(str(row.get("target", "")))
+
+        remaining_rows = [row for row in grouped_rows if str(row.get("target", "")) not in repeated_targets]
+        if remaining_rows:
+            lines.append("| Target | Fixture | Failed checks | Batch |")
+            lines.append("|---|---|---|---|")
+            for row in remaining_rows:
+                batch_link = f"[run]({row.get('run_url')})" if row.get("run_url") else ""
+                lines.append(
+                    f"| {target_link_md(row)} | `{md_escape(row.get('fixture_ref', ''))}` | {failed_checks_cell_md(row)} | {batch_link} |"
+                )
+            lines.append("")
+        lines.append("</details>")
+        lines.append("")
+    return lines
+
+
+def _build_failed_checks_section(
+    error_groups: list[dict[str, Any]], warning_groups: list[dict[str, Any]]
+) -> list[str]:
+    lines = ["## Failed checks", ""]
+    lines.append(
+        "Failed checks, grouped by target and issue shape. Errors block the job; warnings are coverage/review signals."
+    )
+    lines.append("")
+
+    def append_table(title: str, groups: list[dict[str, Any]], *, initially_open: bool) -> None:
+        count = len(groups)
+        if not count:
+            return
+        open_attr = " open" if initially_open else ""
+        lines.append(f"<details{open_attr}><summary>{title} ({count})</summary>")
+        lines.append("")
+        lines.extend(["| Target | Check | Count | Examples | Message |", "|---|---|---:|---|---|"])
+        for group in groups:
+            lines.append(
+                f"| {target_link_md(group)} | **{md_escape(group['property_label'])}**<br/><sub>{group_context_md(group)}</sub> | {group['count']} | {examples_md(group['subjects'])} | {md_escape(group['message'])} |"
+            )
+        lines.append("")
+        lines.append("</details>")
+        lines.append("")
+
+    if not error_groups and not warning_groups:
+        lines.append("None.")
+        lines.append("")
+        return lines
+
+    append_table("Blocking errors", error_groups, initially_open=True)
+    append_table("Review warnings", warning_groups, initially_open=False)
+    return lines
+
+
+def _build_openmetrics_coverage_section(coverages: list[dict[str, Any]]) -> list[str]:
+    lines: list[str] = []
+    if not coverages:
+        return lines
+    lines.append(f"<details><summary>OpenMetrics fixture coverage ({len(coverages)}) — fixture/replay owner</summary>")
+    lines.append("")
+    lines.append(
+        "Coverage rows are replay fixture quality signals. Low coverage means the fixture may not exercise enough endpoint or metadata surface; it is not automatically an integration bug. Sorted by lowest `metadata.csv → emitted` coverage first."
+    )
+    lines.append("")
+    lines.extend(
+        [
+            "| Target | metadata.csv → emitted | Endpoint → emitted | Endpoint count | Method | Metadata count |",
+            "|---|---|---|---:|---|---:|",
+        ]
+    )
+    sorted_coverages = sorted(
+        coverages,
+        key=lambda c: (
+            2.0 if c.get("metadata_to_emitted_coverage") is None else float(c.get("metadata_to_emitted_coverage") or 0),
+            2.0 if c.get("endpoint_to_emitted_coverage") is None else float(c.get("endpoint_to_emitted_coverage") or 0),
+            c.get("target", ""),
+        ),
+    )
+    for coverage in sorted_coverages:
+        lines.append(
+            f"| {target_link_md(coverage)} "
+            f"| {coverage_bar_md(coverage.get('metadata_to_emitted_coverage'))} "
+            f"| {coverage_bar_md(coverage.get('endpoint_to_emitted_coverage'))} "
+            f"| {coverage.get('endpoint_count') or ''} "
+            f"| `{coverage.get('endpoint_mapping_method') or ''}` "
+            f"| {coverage.get('metadata_count') or ''} |"
+        )
+    lines.append("")
+    lines.append("</details>")
+    lines.append("")
+    return lines
+
+
+def _build_targets_not_run_section(setup_failed_rows: list[dict[str, Any]]) -> list[str]:
+    lines = ["## Targets that did not run", ""]
+    if not setup_failed_rows:
+        lines.append("None.")
+        lines.append("")
+        return lines
+    lines.append(
+        f"{len(setup_failed_rows)} target(s) never reached the replay-backed checks because cache restore, cache seeding, or setup failed. The summarised `Short error` here is usually the same generic `Unable to find a suitable replay cache…` message; for the real cause, open the upstream batch run logs."
+    )
+    lines.append("")
+    lines.append(f"<details><summary>Show {len(setup_failed_rows)} target(s)</summary>")
+    lines.append("")
+    lines.append("| Target | Fixture | Short error | Batch |")
+    lines.append("|---|---|---|---|")
+    for row in sorted(setup_failed_rows, key=lambda r: str(r.get("target", ""))):
+        batch_link = f"[run]({row.get('run_url')})" if row.get("run_url") else ""
+        lines.append(
+            f"| {target_link_md(row)} | `{md_escape(row.get('fixture_ref', ''))}` | {md_escape(row.get('summary', ''))} | {batch_link} |"
+        )
+    lines.append("")
+    lines.append("</details>")
+    lines.append("")
+    return lines
+
+
+def _build_about_section(
+    rows: list[dict[str, Any]],
+    findings: list[dict[str, Any]],
+    coverages: list[dict[str, Any]],
+    property_results: list[dict[str, Any]],
+) -> list[str]:
+    lines = [
+        "<details><summary>About this report</summary>",
+        "",
+        "### Vocabulary",
+        "",
+        "| Term | Meaning |",
+        "|---|---|",
+        "| Target | One (integration, environment) pair, e.g. `airflow` on Python 3.13 + Airflow 2.11. |",
+        "| Fixture | A previously recorded sample of what the integration saw during a real run. |",
+        "| Replay cache | The on-disk copy of that fixture, stored in GitHub Actions cache. |",
+        "| Seeding | Recording a fresh fixture by actually starting the test service (uses `compare-check`). |",
+        "| Property / check | One assertion, e.g. \"metric values are finite\" or \"metadata.csv matches\". |",
+        "| Finding | One assertion that failed. |",
+        "| Batch | One of the parallel GitHub Actions runs whose results were combined here. |",
+        "",
+    ]
+    nested = build_replay_flow_markdown(rows, findings, coverages) + build_check_inventory_markdown()
+    for line in nested:
+        if line.startswith("### "):
+            lines.append("#### " + line[4:])
+        elif line.startswith("## "):
+            lines.append("### " + line[3:])
+        else:
+            lines.append(line)
+
+    lines.extend(["### Validation families", ""])
+    lines.append(
+        "Replay-backed vs static-asset checks are tracked separately so a missing cache cannot hide a real metadata/dashboard finding."
+    )
+    lines.append("")
+    lines.extend(["| Family | Property runs | Targets | Failed targets | Findings | What it means |", "|---|---:|---:|---:|---:|---|"])
+    family_summary = validation_family_summary(rows, findings, property_results)
+    for family, definition in VALIDATION_FAMILIES.items():
+        entry = family_summary.get(family, {})
+        lines.append(
+            f"| **{md_escape(definition['label'])}**<br/><sub>`{md_escape(family)}`</sub> | {entry.get('properties', 0)} | {len(entry.get('targets', set()))} | {entry.get('failed_targets', 0)} | {entry.get('findings', 0)} | {md_escape(definition['description'])} |"
+        )
+    lines.append("")
+    lines.append("</details>")
+    lines.append("")
+    return lines
+
+
 def build_markdown(
     rows: list[dict[str, Any]],
     findings: list[dict[str, Any]],
@@ -1426,33 +1732,16 @@ def build_markdown(
             "# Replay validation report",
             "",
             f"**Result:** {'✅ Passed' if failed == 0 and total else '❌ Needs attention'}  ",
-            f"**Mode:** `{mode}`  ",
-            f"**Batch:** `{batch}`  ",
-            f"**Targets in this batch:** `{target_count}`  ",
-            f"**Result files collected:** `{total}`  ",
-            f"**Rich dashboard:** download the `{artifact_name}` artifact and open `report.html`.  ",
-            "**Replay validation:** replay-based property checks for integration behavior.",
+            f"**Targets:** `{target_count}` (mode `{mode}`, {batch})  ",
+            f"**Detailed dashboard:** download the `{artifact_name}` artifact and open `report.html`.",
             "",
         ]
     )
     if current_url and not batch_runs:
         lines.extend([f"**This batch run:** [{current_id or 'current run'}]({current_url})", ""])
-    lines.extend(
-        [
-            "## How to read this report",
-            "",
-            "Start with the validation-family and check-inventory sections before investigating individual failures. A target can have replay-backed checks blocked by a missing cache while static asset checks still run and report real metadata/dashboard issues.",
-            "",
-            "- **Replay-backed behavior checks** ran the integration against cached input and indicate behavior or contract regressions.",
-            "- **Replay-backed input invariance checks** mutated cached JSON/OpenMetrics input in semantically neutral ways and expect equivalent output.",
-            "- **Replay fixture coverage signals** describe gaps in what the current fixture exercises; they are usually fixture/replay work, not immediate product bugs.",
-            "- **Static integration asset checks** inspect repository metadata/assets without replay; they can fail even when replay did not run.",
-            "",
-        ]
-    )
 
     if batch_runs:
-        lines.extend(["## Batch runs", "", "Batch runs are the parallel workflow runs that were combined into this report. Use these links to jump back to the original GitHub Actions logs for a target.", "", "| Batch | Conclusion | Link |", "|---|---|---|"])
+        lines.extend(["## Batch runs", "", "| Batch | Conclusion | Link |", "|---|---|---|"])
         for run in batch_runs:
             run_id = md_escape(run.get("run_id", ""))
             title = md_escape(run.get("display_title", ""))
@@ -1461,122 +1750,23 @@ def build_markdown(
             lines.append(f"| `{run_id}` {title} | `{conclusion}` | [Open run]({url}) |")
         lines.append("")
 
-    lines.extend(build_replay_flow_markdown(rows, findings, coverages))
-    lines.extend(build_check_inventory_markdown())
-
-    lines.extend(["## Validation families", ""])
-    lines.append(
-        "The report intentionally separates replay-backed checks from repository-only checks so reviewers can tell whether a finding came from replayed integration behavior, replay fixture coverage, or static metadata/assets."
-    )
-    lines.append("")
-    lines.extend(["| Family | Property runs | Targets | Failed targets | Findings | What it means |", "|---|---:|---:|---:|---:|---|"])
-    family_summary = validation_family_summary(rows, findings, property_results)
-    for family, definition in VALIDATION_FAMILIES.items():
-        entry = family_summary.get(family, {})
-        lines.append(
-            f"| **{md_escape(definition['label'])}**<br/><sub>`{md_escape(family)}`</sub> | {entry.get('properties', 0)} | {len(entry.get('targets', set()))} | {entry.get('failed_targets', 0)} | {entry.get('findings', 0)} | {md_escape(definition['description'])} |"
-        )
-    lines.append("")
-
-    lines.extend(["## Validation status by target", ""])
-    lines.append("This section separates replay-backed status from static asset status, which prevents cache misses from hiding static metadata or dashboard findings.")
-    lines.append("")
-    if rows:
-        lines.extend(["| Target | Replay-backed status | Static asset status |", "|---|---|---|"])
-        for row in rows:
-            lines.append(
-                f"| {target_link_md(row)} | {md_escape(status_label(validation_lane_status(row, property_results, 'replay-regression')))} | {md_escape(status_label(validation_lane_status(row, property_results, 'static-contract')))} |"
-            )
-    else:
-        lines.append("No targets were reported.")
-    lines.append("")
+    lines.extend(_build_headline_table(status_counts, category_counts, total))
 
     if len(rows) == 1:
         lines.extend(build_individual_target_markdown(rows[0], property_results, findings, coverages, release_diffs))
-    lines.extend(
-        [
-            "## Outcome summary",
-            "",
-            "This section counts target-level workflow outcomes. Use it to see whether targets passed, failed after replay ran, or were blocked before replay-backed checks could execute.",
-            "",
-            "| Status | Count | Distribution |",
-            "|---|---:|---|",
-        ]
-    )
-    for status, count in sorted(status_counts.items(), key=lambda item: (-item[1], item[0])):
-        lines.append(f"| {status_icon(status)} **{md_escape(status_label(status))}**<br/><sub>`{md_escape(status)}`</sub> | {count} | `{bar(count, total)}` |")
-    lines.append("")
 
+    actionable_failed_rows = [
+        row for row in rows if row["status"] != "passed" and row["category"] not in {"failed-before-replay-pbt", "skipped-missing-cache"}
+    ]
+    setup_failed_rows = [
+        row for row in rows if row["status"] != "passed" and row["category"] in {"failed-before-replay-pbt", "skipped-missing-cache"}
+    ]
 
-    lines.extend(["## Triage view", ""])
-    lines.append("This section groups failed targets by likely next owner: integration behavior/contract, test setup, or replay harness/fixture work.")
-    lines.append("")
-    if category_counts:
-        lines.extend(["| Group | Count | Description | Categories |", "|---|---:|---|---|"])
-        for group_key, definition in TRIAGE_GROUPS.items():
-            group_categories = [category for category in category_counts if triage_group_for_category(category) == group_key]
-            group_count = sum(category_counts[category] for category in group_categories)
-            if not group_count:
-                continue
-            category_labels = ", ".join(
-                f"{CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS['unknown'])[0]} {md_escape(CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS['unknown'])[1])} ({category_counts[category]})"
-                for category in group_categories
-            )
-            lines.append(
-                f"| **{md_escape(definition['label'])}** | {group_count} | {md_escape(definition['description'])} | {category_labels} |"
-            )
-    else:
-        lines.append("No failed targets to triage.")
-    lines.append("")
+    lines.extend(_build_failures_to_fix(actionable_failed_rows))
 
-    lines.extend(["## Failure categories", ""])
-    lines.append("Failure categories explain the concrete symptom that put a target into the triage view. Categories are more specific than validation families.")
-    lines.append("")
-    if category_counts:
-        lines.extend(["| Category | Count | What it means | Example targets |", "|---|---:|---|---|"])
-        examples_by_category: dict[str, list[str]] = defaultdict(list)
-        for row in rows:
-            if row["category"] != "passed" and len(examples_by_category[row["category"]]) < 4:
-                examples_by_category[row["category"]].append(target_link_md(row))
-        for category, count in category_counts.most_common():
-            icon, label, description = CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS["unknown"])
-            examples = ", ".join(examples_by_category[category])
-            lines.append(f"| {icon} {label} | {count} | {description} | {examples} |")
-    else:
-        lines.append("No failures reported.")
-    lines.append("")
-
-    lines.extend(["## Property findings", ""])
     error_groups = [group for group in groups if int(group.get("error_count") or 0) > 0]
     warning_groups = [group for group in groups if int(group.get("error_count") or 0) == 0 and int(group.get("warning_count") or 0) > 0]
-
-    def append_finding_group_table(title: str, section_groups: list[dict[str, Any]], *, initially_open: bool) -> None:
-        if not section_groups:
-            lines.append(f"### {title}")
-            lines.append("")
-            lines.append("None.")
-            lines.append("")
-            return
-        if initially_open:
-            lines.append(f"### {title} ({len(section_groups)})")
-        else:
-            lines.append(f"<details><summary>{title} ({len(section_groups)})</summary>")
-        lines.append("")
-        lines.extend(["| Target | Family | Finding type | Count | Examples | Message |", "|---|---|---|---:|---|---|"])
-        for group in section_groups:
-            family = validation_family_for_property(group.get("property"))
-            lines.append(
-                f"| {target_link_md(group)} | {md_escape(validation_family_label(family))} | **{md_escape(group['property_label'])}**<br/><sub>{group_context_md(group)}</sub> | {group['count']} | {examples_md(group['subjects'])} | {md_escape(group['message'])} |"
-            )
-        lines.append("")
-        if not initially_open:
-            lines.append("</details>")
-            lines.append("")
-
-    lines.append("Property findings are grouped by target and issue shape. Errors are blocking property failures. Warnings are review or coverage signals that may not fail the job unless warnings-as-errors is enabled.")
-    lines.append("")
-    append_finding_group_table("Blocking errors", error_groups, initially_open=True)
-    append_finding_group_table("Review warnings", warning_groups, initially_open=False)
+    lines.extend(_build_failed_checks_section(error_groups, warning_groups))
 
     lines.extend(["## Latest release comparison", ""])
     lines.append("This section shows replay-backed comparisons between the fixture-producing integration version and the target ref. Differences should be reviewed as intentional or accidental behavior changes.")
@@ -1611,103 +1801,9 @@ def build_markdown(
         lines.append("No latest-release differential summaries collected.")
     lines.append("")
 
-    lines.extend(["## OpenMetrics coverage", ""])
-    lines.append("Coverage rows are replay fixture quality signals. Low coverage means the fixture may not exercise enough endpoint or metadata surface; it is not automatically an integration bug.")
-    lines.append("")
-    if coverages:
-        lines.append("Sorted by lowest `metadata.csv → emitted` coverage first, so the sparsest fixtures are easiest to spot.")
-        lines.append("")
-        lines.extend(
-            [
-                "| Target | metadata.csv → emitted | Endpoint → emitted | Endpoint count | Method | Metadata count |",
-                "|---|---|---|---:|---|---:|",
-            ]
-        )
-        sorted_coverages = sorted(
-            coverages,
-            key=lambda c: (
-                2.0 if c.get("metadata_to_emitted_coverage") is None else float(c.get("metadata_to_emitted_coverage") or 0),
-                2.0 if c.get("endpoint_to_emitted_coverage") is None else float(c.get("endpoint_to_emitted_coverage") or 0),
-                c.get("target", ""),
-            ),
-        )
-        for coverage in sorted_coverages:
-            lines.append(
-                f"| {target_link_md(coverage)} "
-                f"| {coverage_bar_md(coverage.get('metadata_to_emitted_coverage'))} "
-                f"| {coverage_bar_md(coverage.get('endpoint_to_emitted_coverage'))} "
-                f"| {coverage.get('endpoint_count') or ''} "
-                f"| `{coverage.get('endpoint_mapping_method') or ''}` "
-                f"| {coverage.get('metadata_count') or ''} |"
-            )
-    else:
-        lines.append("No OpenMetrics coverage reports collected.")
-    lines.append("")
-
-    actionable_failed_rows = [
-        row for row in rows if row["status"] != "passed" and row["category"] not in {"failed-before-replay-pbt", "skipped-missing-cache"}
-    ]
-    setup_failed_rows = [
-        row for row in rows if row["status"] != "passed" and row["category"] in {"failed-before-replay-pbt", "skipped-missing-cache"}
-    ]
-
-    lines.extend(["## Actionable failed targets", ""])
-    lines.append("These targets reached a non-setup failure. Review the category description and suggested next step before opening raw logs.")
-    lines.append("")
-    if actionable_failed_rows:
-        actionable_categories = Counter(row["category"] for row in actionable_failed_rows)
-        for category, grouped_rows in sorted(
-            ((category, [row for row in actionable_failed_rows if row["category"] == category]) for category in actionable_categories),
-            key=lambda item: (-len(item[1]), item[0]),
-        ):
-            icon, label, description = CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS["unknown"])
-            lines.append(f"<details open><summary>{icon} {label} ({len(grouped_rows)})</summary>")
-            lines.append("")
-            lines.append(md_escape(description))
-            next_step = CATEGORY_NEXT_STEPS.get(category)
-            if next_step:
-                lines.append("")
-                lines.append(f"Suggested next step: {md_escape(next_step)}")
-            lines.append("")
-            lines.append("| Target | Fixture | Failing properties | Failed checks | Batch |")
-            lines.append("|---|---|---:|---|---|")
-            for row in grouped_rows:
-                batch_link = f"[run]({row.get('run_url')})" if row.get("run_url") else ""
-                lines.append(
-                    f"| {target_link_md(row)} | `{md_escape(row.get('fixture_ref', ''))}` | {row.get('failing_property_count', 0)} | {failed_checks_cell_md(row)} | {batch_link} |"
-                )
-            lines.append("")
-            lines.append("</details>")
-            lines.append("")
-    else:
-        lines.append("No non-setup target failures.")
-        lines.append("")
-
-    lines.extend(["## Setup/cache target details", ""])
-    lines.append("These targets did not get a clean replay-backed run because cache restore, cache seeding, or setup failed or was skipped.")
-    lines.append("")
-    if setup_failed_rows:
-        setup_groups = defaultdict(list)
-        for row in setup_failed_rows:
-            setup_groups[row.get("setup_failure_kind") or setup_failure_kind(row)].append(row)
-        for kind, grouped_rows in sorted(setup_groups.items(), key=lambda item: (-len(item[1]), setup_failure_label(item[0]))):
-            lines.append(f"<details><summary>🧱 {md_escape(setup_failure_label(kind))} ({len(grouped_rows)})</summary>")
-            lines.append("")
-            lines.append(md_escape(setup_failure_description(kind)))
-            lines.append("")
-            lines.append("| Target | Fixture | Short error | Batch |")
-            lines.append("|---|---|---|---|")
-            for row in grouped_rows:
-                batch_link = f"[run]({row.get('run_url')})" if row.get("run_url") else ""
-                lines.append(
-                    f"| {target_link_md(row)} | `{md_escape(row.get('fixture_ref', ''))}` | {md_escape(row.get('summary', ''))} | {batch_link} |"
-                )
-            lines.append("")
-            lines.append("</details>")
-            lines.append("")
-    else:
-        lines.append("No setup/cache target failures.")
-        lines.append("")
+    lines.extend(_build_openmetrics_coverage_section(coverages))
+    lines.extend(_build_targets_not_run_section(setup_failed_rows))
+    lines.extend(_build_about_section(rows, findings, coverages, property_results))
     return "\n".join(lines) + "\n"
 
 def build_html(
