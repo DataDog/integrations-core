@@ -75,9 +75,8 @@ def dd_environment():
         WaitFor(bucket_stats),
         WaitFor(load_sample_bucket),
         WaitFor(create_syncgw_database),
+        WaitFor(gamesim_primary_index_ready),
     ]
-    if COUCHBASE_MAJOR_VERSION >= 7:
-        conditions.append(WaitFor(gamesim_primary_index_ready))
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'docker-compose.yaml'),
         env_vars={
@@ -217,6 +216,9 @@ def load_sample_bucket():
         if task["sample"] == "gamesim-sample":
             task_id = task["taskId"]
 
+    if task_id is None:
+        return False
+
     while True:
         # Loop until the task ID is gone, meaning the task is done.
         r = requests.get(
@@ -237,26 +239,25 @@ def load_sample_bucket():
 
 def gamesim_primary_index_ready():
     """
-    Wait until the indexer reports stats for the gamesim_primary GSI index.
+    Wait until the indexer reports gamesim_primary as fully built.
 
     The /sampleBuckets/install task completing only guarantees the sample data
     has been loaded; the indexer may still be building the bundled GSI indexes.
-    test_index_stats_metrics asserts metrics for gamesim_primary, so wait for
-    the indexer to report a keyspace for it before yielding the environment.
+    The indexer publishes per-keyspace stats during the build too, so we have
+    to check `initial_build_progress == 100` to confirm the index is online.
     """
     r = requests.get(
         '{}/api/v1/stats'.format(INDEX_STATS_URL),
         auth=(USER, PASSWORD),
     )
-    if r.status_code != requests.codes.ok:
-        return False
+    r.raise_for_status()
 
-    for keyspace in r.json():
+    for keyspace, stats in r.json().items():
         if keyspace == "indexer":
             continue
         parts = keyspace.split(":")
         if parts[0] == "gamesim-sample" and parts[-1] == "gamesim_primary":
-            return True
+            return stats.get("initial_build_progress") == 100
     return False
 
 
