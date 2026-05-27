@@ -18,7 +18,7 @@ from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.base import Phase, PhaseOutcome
 from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
-from ddev.ai.phases.goal import GOAL_TASK_SUFFIX, render_goal_text, run_goal_loop
+from ddev.ai.phases.goal import GOAL_TASK_SUFFIX, GoalAttemptsExhausted, render_goal_text, run_goal_loop
 from ddev.ai.phases.template import render_inline, render_prompt
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.tools.fs.file_registry import FileRegistry
@@ -187,7 +187,6 @@ class AgenticPhase(Phase):
         """
         total_input = total_output = 0
         last_result: ReActResult | None = None
-        goal_attempt_log: list[dict[str, Any]] = []
 
         for task in self._config.tasks:
             cin, cout = await self._compact_if_needed(process, last_result)
@@ -207,22 +206,32 @@ class AgenticPhase(Phase):
                 if self._goal_agent_builder is None:
                     raise ValueError("Goal agent builder is required when tasks specify a goal")
                 goal_text = render_goal_text(task, self._config_dir, context, self._resolver)
-                outcome: GoalLoopOutcome = await run_goal_loop(
-                    task=task,
-                    goal_text=goal_text,
-                    rendered_task_prompt=prompt,
-                    worker_process=process,
-                    initial_result=last_result,
-                    goal_agent_builder=self._goal_agent_builder,
-                    callbacks=self._callbacks,
-                    phase_id=self._phase_id,
-                    log_root=self._checkpoint_manager.root,
-                    compact_if_needed=lambda r: self._compact_if_needed(process, r),
-                )
+                try:
+                    outcome: GoalLoopOutcome = await run_goal_loop(
+                        task=task,
+                        goal_text=goal_text,
+                        rendered_task_prompt=prompt,
+                        worker_process=process,
+                        initial_result=last_result,
+                        goal_agent_builder=self._goal_agent_builder,
+                        callbacks=self._callbacks,
+                        phase_id=self._phase_id,
+                        log_root=self._checkpoint_manager.root,
+                        compact_if_needed=lambda r: self._compact_if_needed(process, r),
+                    )
+                except GoalAttemptsExhausted:
+                    self._goal_attempt_log.append(
+                        {
+                            "task": task.name,
+                            "attempts": task.max_goal_attempts,
+                            "final_valid": False,
+                        }
+                    )
+                    raise
                 last_result = outcome.final_result
                 total_input += outcome.total_input_tokens
                 total_output += outcome.total_output_tokens
-                goal_attempt_log.append(
+                self._goal_attempt_log.append(
                     {
                         "task": task.name,
                         "attempts": outcome.attempts,
@@ -230,7 +239,6 @@ class AgenticPhase(Phase):
                     }
                 )
 
-        self._goal_attempt_log = goal_attempt_log
         return total_input, total_output
 
     def _build_agent_and_process(self, context: dict[str, Any]) -> tuple[BaseAgent[Any], ReActProcess]:
