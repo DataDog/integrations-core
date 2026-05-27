@@ -7,7 +7,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import yaml
-from pydantic import BaseModel, ConfigDict, ValidationError, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 
 from ddev.ai.tools.registry import ToolRegistry
 
@@ -53,7 +53,7 @@ def _detect_cycles(
 
 class TaskConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    name: str
+    name: str = Field(pattern=r"^[A-Za-z0-9._-]{1,64}$")
     prompt_path: Path | None = None
     prompt: str | None = None
     goal: str | None = None
