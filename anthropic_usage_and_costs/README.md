@@ -6,7 +6,7 @@ Datadog's Anthropic Usage and Costs integration allows you to get visibility int
 
 - **Monitor LLM token consumption** (input, output, cache usage) in near real-time
 - **Track costs** by model, workspace, and service tier, supporting accurate attribution and budgeting
-- **Attribute usage and spend to individual users** (Enterprise plans) - break down token consumption and dollar cost by user, product (API, Claude Code, Claude.ai), context window, inference geography, and speed
+- **Attribute usage and spend to individual users** (Enterprise plans): break down token consumption and dollar cost by user, product (API, Claude Code, Claude.ai), context window, inference geography, and speed
 - **Understand usage trends** across teams, API keys, or users to optimize model usage
 - **Set up alerting and dashboards** that highlight anomalies in usage or unexpected cost spikes
 
