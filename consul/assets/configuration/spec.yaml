@@ -107,6 +107,7 @@ files:
         example:
           - <SERVICE_1>
           - <SERVICE_2>
+      fleet_configurable: false
 
     - name: services_exclude
       description: |
@@ -120,6 +121,7 @@ files:
         example:
           - <SERVICE_1>
           - <SERVICE_2>
+      fleet_configurable: false
 
     - name: max_services
       description: |
@@ -135,6 +137,7 @@ files:
       value:
         type: number
         example: 1
+      fleet_configurable: false
 
     - name: disable_legacy_service_tag
       fleet_configurable: true
@@ -156,6 +159,7 @@ files:
         type: boolean
         display_default: false
         example: true
+      fleet_configurable: false
 
     - name: health_checks_cache_size
       fleet_configurable: true

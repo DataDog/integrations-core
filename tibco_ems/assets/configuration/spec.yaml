@@ -63,4 +63,5 @@ files:
       value:
         type: string
         require_trusted_provider: true
+      fleet_configurable: false
     - template: instances/default
