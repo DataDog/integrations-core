@@ -40,12 +40,12 @@ def resolve_version(app: Application, target: ReleaseTarget) -> str:
     major_str, minor_str, _ = target.name.split('.')
     major, minor = int(major_str), int(minor_str)
 
-    app.display_waiting(f'Looking up latest {major}.{minor}.0-rc.* in registry.datadoghq.com...')
+    app.display_waiting(f'Looking up latest {major}.{minor}.*-rc.* in registry.datadoghq.com...')
     with registry_errors(app, 'tags'):
         tags = registry.list_agent_rc_tags(major, minor)
     if not tags:
         app.abort(
-            f'No `{major}.{minor}.0-rc.*` tags found in registry.datadoghq.com/agent. '
+            f'No `{major}.{minor}.*-rc.*` tags found in registry.datadoghq.com/agent. '
             'Pass --tag explicitly once the first RC is published.'
         )
     latest = tags[-1]

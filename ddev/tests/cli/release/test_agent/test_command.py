@@ -174,7 +174,7 @@ def test_branch_with_no_rcs_aborts(
     result = ddev('release', 'test-agent', '--branch', '7.99.x', '--yes')
 
     assert result.exit_code != 0, result.output
-    assert 'No `7.99.0-rc.*` tags found' in result.output
+    assert 'No `7.99.*-rc.*` tags found' in result.output
     fake_async_github.assert_not_called('create_workflow_dispatch')
 
 

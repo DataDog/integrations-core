@@ -48,7 +48,7 @@ def test_agent(
     """Trigger `test-agent.yml` and `test-agent-windows.yml` against the resolved Agent image.
 
     Exactly one of `--branch` or `--tag` must be provided. When `--branch` is given, the latest
-    `MAJ.MIN.0-rc.N` published to `registry.datadoghq.com/agent` is used as the Agent image.
+    `MAJ.MIN.PATCH-rc.N` published to `registry.datadoghq.com/agent` is used as the Agent image.
     When `--tag` is given, that exact tag is used. Linux and Windows (servercore) variants are
     both validated against the registry before either workflow is dispatched.
     """

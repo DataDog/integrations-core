@@ -6,7 +6,7 @@
 The Datadog Agent image is served by `registry.datadoghq.com/agent`. This
 module fixes that repository name and exposes the only agent-specific
 operation we need today: filtering the published tag list down to the
-`MAJ.MIN.0-rc.N` RCs for a given release line.
+`MAJ.MIN.PATCH-rc.N` RCs for a given release line.
 """
 
 from __future__ import annotations
@@ -26,8 +26,8 @@ def manifest_exists(tag: str, *, timeout: float = 10.0) -> bool:
 
 
 def list_agent_rc_tags(major: int, minor: int, *, timeout: float = 10.0) -> list[str]:
-    """Return all `<major>.<minor>.0-rc.N` tags published to the Agent registry, sorted ascending by version."""
-    pattern = re.compile(rf'^{major}\.{minor}\.0-rc\.\d+$')
+    """Return all `<major>.<minor>.<patch>-rc.N` tags published to the Agent registry, sorted ascending by version."""
+    pattern = re.compile(rf'^{major}\.{minor}\.\d+-rc\.\d+$')
     raw_tags = docker_registry.list_tags(AGENT_REPOSITORY, timeout=timeout)
     matches: list[tuple[Version, str]] = []
     for tag in raw_tags:

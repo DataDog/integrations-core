@@ -41,6 +41,28 @@ def test_list_agent_rc_tags_filters_and_sorts(mocker: MockerFixture) -> None:
     assert list_agent_rc_tags(7, 80) == ['7.80.0-rc.1', '7.80.0-rc.2', '7.80.0-rc.10']
 
 
+def test_list_agent_rc_tags_includes_later_patch_rcs(mocker: MockerFixture) -> None:
+    mocker.patch(
+        'ddev.utils.docker_registry.list_tags',
+        return_value=[
+            '7.79.0-rc.1',
+            '7.79.0-rc.8',
+            '7.79.1-rc.1',
+            '7.79.1-rc.2',
+            '7.79.0',
+            '7.79.1-rc.1-servercore',
+            '7.80.0-rc.1',
+        ],
+    )
+
+    assert list_agent_rc_tags(7, 79) == [
+        '7.79.0-rc.1',
+        '7.79.0-rc.8',
+        '7.79.1-rc.1',
+        '7.79.1-rc.2',
+    ]
+
+
 @pytest.mark.parametrize(
     'all_tags',
     [
