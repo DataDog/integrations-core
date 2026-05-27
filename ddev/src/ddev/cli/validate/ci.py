@@ -24,7 +24,7 @@ def code_coverage_enabled(check_name: str, app: Application) -> bool:
 def get_coverage_sources(check_name: str, app: Application) -> list[str]:
     package_path = app.repo.integrations.get(check_name).package_directory
     package_dir = package_path.relative_to(app.repo.path)
-    return sorted([f'{package_dir.as_posix()}/', f'{check_name}/tests/'])
+    return [f'{package_dir.as_posix()}/']
 
 
 @click.command()
