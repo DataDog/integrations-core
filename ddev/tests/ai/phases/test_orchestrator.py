@@ -274,6 +274,31 @@ async def test_on_initialize_unknown_phase_type_raises_flow_config_error(tmp_pat
         await orchestrator.on_initialize()
 
 
+async def test_on_initialize_flow_phases_dir_outside_ai_root_raises(tmp_path, make_orchestrator):
+    """phases/ directory outside the ddev.ai package tree raises FlowConfigError."""
+    (tmp_path / "phases").mkdir()
+    (tmp_path / "prompts").mkdir()
+    (tmp_path / "prompts" / "writer.md").write_text("system prompt")
+    (tmp_path / "flow.yaml").write_text(
+        dedent("""\
+        agents:
+          writer:
+            tools: []
+        phases:
+          a:
+            agent: writer
+            tasks:
+              - name: t1
+                prompt: do it
+        flow:
+          - phase: a
+        """)
+    )
+    orchestrator = make_orchestrator(tmp_path)
+    with pytest.raises(FlowConfigError, match="ddev.ai package tree"):
+        await orchestrator.on_initialize()
+
+
 async def test_on_initialize_missing_agent_raises(tmp_path, make_orchestrator):
     (tmp_path / "prompts").mkdir()
     (tmp_path / "flow.yaml").write_text(

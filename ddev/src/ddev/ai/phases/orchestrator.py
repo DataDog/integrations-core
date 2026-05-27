@@ -87,7 +87,12 @@ class PhaseOrchestrator(EventBusOrchestrator):
         flow_phases_dir = config_dir / "phases"
         if flow_phases_dir.is_dir():
             ai_root = Path(__file__).parent.parent
-            rel = flow_phases_dir.relative_to(ai_root)
+            try:
+                rel = flow_phases_dir.relative_to(ai_root)
+            except ValueError:
+                raise FlowConfigError(
+                    f"Flow phases directory {flow_phases_dir} must be inside the ddev.ai package tree ({ai_root})"
+                ) from None
             flow_import_prefix = "ddev.ai." + ".".join(rel.parts)
             _discover_and_register_phases(
                 self._phase_registry,
