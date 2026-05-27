@@ -6,15 +6,14 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from ddev.ai.agent.anthropic_client import AnthropicAgent
 from ddev.ai.agent.base import BaseAgent
+from ddev.ai.phases.config import AgentConfig
+from ddev.ai.phases.goal import GOAL_REVIEWER_SYSTEM_PROMPT
 from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.registry import ToolRegistry, filter_read_only
-
-if TYPE_CHECKING:
-    from ddev.ai.phases.config import AgentConfig
 
 SubagentBuilder = Callable[
     [str, str, list[str]],  # (system_prompt, owner_id, tool_names)
@@ -177,9 +176,6 @@ def build_goal_agent(
     provider defaults — the parent's overrides are intentionally not forwarded.
     Tools are filtered to the read-only subset of the parent's tool list.
     """
-    from ddev.ai.phases.config import AgentConfig
-    from ddev.ai.phases.goal import GOAL_REVIEWER_SYSTEM_PROMPT
-
     read_only_tool_names = filter_read_only(parent_agent_config.tools)
     goal_agent_config = AgentConfig(
         provider=parent_agent_config.provider,
