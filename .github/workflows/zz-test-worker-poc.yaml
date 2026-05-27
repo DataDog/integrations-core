@@ -197,6 +197,9 @@ jobs:
         DRY_RUN: ${{ inputs.dry_run }}
         BATCH_INDICES: ${{ inputs.batch_indices }}
         RUN_GROUP: ${{ inputs.run_group }}
+        RUNNER: ${{ inputs.runner }}
+        RECORD_IMAGE: ${{ inputs.record_image }}
+        REPLAY_IMAGE: ${{ inputs.replay_image }}
       with:
         script: |
           const batchCount = Number(process.env.BATCH_COUNT);
@@ -231,6 +234,9 @@ jobs:
             auto_combine: 'false',
             combine_reports: 'false',
             report_run_ids: '',
+            runner: process.env.RUNNER,
+            record_image: process.env.RECORD_IMAGE,
+            replay_image: process.env.REPLAY_IMAGE,
           };
 
           const rows = [];
