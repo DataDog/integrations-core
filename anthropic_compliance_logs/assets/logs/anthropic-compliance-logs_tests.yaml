@@ -1694,8 +1694,8 @@ tests:
           user:
             org:
               uid: "org_01EXAMPLEORGID00000000000"
-            type: "admin_api_key_actor"
-            type_id: 99
+            type: "Admin"
+            type_id: 2
             uid: "admin_api_key_01EXAMPLEADMIN0000"
         category_name: "Identity & Access Management"
         category_uid: 3
@@ -2136,8 +2136,8 @@ tests:
           owner:
             org:
               uid: "org_01EXAMPLEORGID00000000000"
-            type: "admin_api_key_actor"
-            type_id: 99
+            type: "Admin"
+            type_id: 2
             uid: "admin_api_key_01EXAMPLEADMIN0000"
         status: "Success"
         status_id: 1
@@ -2561,8 +2561,8 @@ tests:
           owner:
             org:
               uid: "org_01EXAMPLEORGID00000000000"
-            type: "admin_api_key_actor"
-            type_id: 99
+            type: "Admin"
+            type_id: 2
             uid: "admin_api_key_01EXAMPLEADMIN0000"
         status: "Success"
         status_id: 1
@@ -2656,8 +2656,8 @@ tests:
           owner:
             org:
               uid: "org_01EXAMPLEORGID00000000000"
-            type: "admin_api_key_actor"
-            type_id: 99
+            type: "Admin"
+            type_id: 2
             uid: "admin_api_key_01EXAMPLEADMIN0000"
         status: "Success"
         status_id: 1

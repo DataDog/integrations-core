@@ -448,6 +448,10 @@ pipeline:
                   name: User
                   id: 1
                 - filter:
+                    query: "@actor.type:admin_api_key_actor"
+                  name: Admin
+                  id: 2
+                - filter:
                     query: "-@actor.type:*"
                   name: Unknown
                   id: 0
@@ -636,6 +640,10 @@ pipeline:
                   name: User
                   id: 1
                 - filter:
+                    query: "@actor.type:admin_api_key_actor"
+                  name: Admin
+                  id: 2
+                - filter:
                     query: "-@actor.type:*"
                   name: Unknown
                   id: 0
@@ -661,7 +669,11 @@ pipeline:
                   name: Create
                   id: 1
                 - filter:
-                    query: "@ocsf.metadata.event_code:platform_api_key_updated"
+                    query: "@ocsf.metadata.event_code:platform_api_key_updated AND @updates.current_value:active"
+                  name: Enable
+                  id: 2
+                - filter:
+                    query: "@ocsf.metadata.event_code:platform_api_key_updated AND @updates.current_value:archived"
                   name: Disable
                   id: 5
                 - filter:
@@ -854,6 +866,10 @@ pipeline:
                     query: "@actor.type:user_actor"
                   name: User
                   id: 1
+                - filter:
+                    query: "@actor.type:admin_api_key_actor"
+                  name: Admin
+                  id: 2
                 - filter:
                     query: "-@actor.type:*"
                   name: Unknown
@@ -1139,6 +1155,10 @@ pipeline:
                   name: User
                   id: 1
                 - filter:
+                    query: "@actor.type:admin_api_key_actor"
+                  name: Admin
+                  id: 2
+                - filter:
                     query: "-@actor.type:*"
                   name: Unknown
                   id: 0
@@ -1334,6 +1354,10 @@ pipeline:
                     query: "@actor.type:user_actor"
                   name: User
                   id: 1
+                - filter:
+                    query: "@actor.type:admin_api_key_actor"
+                  name: Admin
+                  id: 2
                 - filter:
                     query: "-@actor.type:*"
                   name: Unknown
@@ -1559,6 +1583,10 @@ pipeline:
                     query: "@actor.type:user_actor"
                   name: User
                   id: 1
+                - filter:
+                    query: "@actor.type:admin_api_key_actor"
+                  name: Admin
+                  id: 2
                 - filter:
                     query: "-@actor.type:*"
                   name: Unknown
