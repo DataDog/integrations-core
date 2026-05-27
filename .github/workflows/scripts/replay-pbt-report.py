@@ -45,7 +45,7 @@ CATEGORY_DEFINITIONS = {
     "replay-nondeterminism": ("🧬", "Replay output changed", "The same fixture and code emitted different normalized data between runs."),
     "openmetrics-input-invariance": ("🔀", "OpenMetrics formatting changed output", "A semantically equivalent Prometheus/OpenMetrics text change affected emitted metrics."),
     "json-input-invariance": ("🧾", "JSON formatting changed output", "A semantically equivalent JSON formatting or key-order change affected emitted metrics."),
-    "release-differential": ("🔁", "Output changed since latest release", "HEAD emits different normalized output than the latest released integration for the same replay fixture."),
+    "release-differential": ("🔁", "Changed vs latest release", "HEAD emits different normalized output than the latest released integration for the same replay fixture."),
     "metadata-contract": ("📋", "Emitted metric metadata mismatch", "A metric emitted by the check is missing from metadata.csv or has a different declared type."),
     "asset-query-metadata": ("📊", "Asset query references undocumented metric", "A dashboard or monitor query references a metric that is not documented in metadata.csv."),
     "asset-query-replay-coverage": ("🧭", "Asset query not covered by fixture", "A dashboard or monitor query uses metrics or tags that this replay fixture did not emit."),
@@ -100,6 +100,72 @@ def triage_group_for_category(category: str) -> str:
             return group
     return "replay"
 
+
+SETUP_FAILURE_DEFINITIONS = {
+    "cache-miss-seed-failed": (
+        "Cache miss, seeding failed",
+        "No suitable replay cache was restored, and the attempt to seed a new cache did not complete successfully.",
+    ),
+    "no-replay-records": (
+        "No replay records captured",
+        "The check ran, but none of the enabled replay adapters captured usable input records.",
+    ),
+    "service-unavailable": (
+        "Service unavailable during seeding",
+        "The check could not reach its expected local test service while compare-check was trying to seed a cache.",
+    ),
+    "configuration-error": (
+        "Configuration error during seeding",
+        "The check configuration was invalid or incomplete in the seeding environment.",
+    ),
+    "missing-file": (
+        "Missing file or certificate",
+        "The check expected a file, certificate, or path that was not available in the seeding environment.",
+    ),
+    "fixture-mismatch": (
+        "Replay fixture mismatch during seeding",
+        "Record/replay did not consume the same adapter records while compare-check was validating the seeded cache.",
+    ),
+    "compare-check-incomplete": (
+        "compare-check incomplete",
+        "compare-check finished with incomplete or changed artifacts, but the report could not identify a narrower cause.",
+    ),
+    "unknown-setup-failure": (
+        "Unknown setup/cache failure",
+        "The target failed before Replay PBT ran, but no known setup/cache failure pattern was detected.",
+    ),
+}
+
+
+def setup_failure_kind(row: dict[str, Any]) -> str:
+    text = "\n".join(str(item) for item in (row.get("short_errors") or []))
+    lowered = text.lower()
+    if "captured zero records" in lowered or "fixture has zero records" in lowered:
+        return "no-replay-records"
+    if "connection refused" in lowered or "failed to establish a new connection" in lowered or "404 client error" in lowered:
+        return "service-unavailable"
+    if "configurationerror" in lowered or " is required" in lowered or "requires '" in lowered:
+        return "configuration-error"
+    if "certificate bundle" in lowered or "invalid path" in lowered or "no such file" in lowered:
+        return "missing-file"
+    if "did not consume all" in lowered or "recorded http request" in lowered:
+        return "fixture-mismatch"
+    if "unable to find a suitable replay cache" in lowered and (
+        "compare-check detected" in lowered or "did not produce capture.json" in lowered or "failed" in lowered
+    ):
+        return "cache-miss-seed-failed"
+    if "compare-check detected differences or incomplete runs" in lowered or "did not produce capture.json" in lowered:
+        return "compare-check-incomplete"
+    return "unknown-setup-failure"
+
+
+def setup_failure_label(kind: str) -> str:
+    return SETUP_FAILURE_DEFINITIONS.get(kind, SETUP_FAILURE_DEFINITIONS["unknown-setup-failure"])[0]
+
+
+def setup_failure_description(kind: str) -> str:
+    return SETUP_FAILURE_DEFINITIONS.get(kind, SETUP_FAILURE_DEFINITIONS["unknown-setup-failure"])[1]
+
 STATUS_DEFINITIONS = {
     "passed": ("✅", "Passed"),
     "failed": ("❌", "Property failure"),
@@ -125,7 +191,7 @@ PROPERTY_DEFINITIONS = {
         "Replay the same cached input twice. The check should emit the same normalized output both times.",
     ),
     "latest-release-diff": (
-        "Latest release differential",
+        "Latest release comparison",
         "Compare HEAD with the latest released integration tag using the same replay fixture. Output changes should be reviewed as intentional or not.",
     ),
     "openmetrics-label-order": (
@@ -177,8 +243,8 @@ PROPERTY_DEFINITIONS = {
         "Dashboard and monitor queries for this integration should reference metrics documented in metadata.csv.",
     ),
     "asset-query-tags-seen-in-replay": (
-        "Asset query tags seen in replay",
-        "Report dashboard or monitor tag keys that were not seen in this replay fixture. This is usually a coverage signal, not automatically a product bug.",
+        "Asset query fixture coverage",
+        "Report dashboard or monitor metrics/tags that this replay fixture did not exercise. This is usually a coverage signal, not automatically a product bug.",
     ),
     "output-finite-values": (
         "Finite metric values",
@@ -484,6 +550,7 @@ def compact_row(row: dict[str, Any]) -> dict[str, Any]:
         "failing_properties": failed_tests[:20],
         "short_errors": short_errors,
         "summary": summarize_failure(row),
+        "setup_failure_kind": setup_failure_kind(row) if row.get("status") in {"failed-before-replay-pbt", "skipped-missing-cache"} else "",
     }
 
 
@@ -998,7 +1065,7 @@ def build_individual_target_markdown(
         lines.append("")
 
     if target_release_diffs:
-        lines.extend(["### Latest release differential", ""])
+        lines.extend(["### Latest release comparison", ""])
         lines.extend(["| Record ref | Target ref | Changed | Collections |", "|---|---|---|---|"])
         for diff in target_release_diffs:
             changed = "Yes" if diff.get("changed") else "No"
@@ -1122,14 +1189,15 @@ def build_markdown(
     lines: list[str] = []
     lines.extend(
         [
-            "# Replay PBT report",
+            "# Replay-based property testing report",
             "",
             f"**Result:** {'✅ Passed' if failed == 0 and total else '❌ Needs attention'}  ",
             f"**Mode:** `{mode}`  ",
             f"**Shard:** `{shard}`  ",
             f"**Targets in this shard:** `{target_count}`  ",
             f"**Result files collected:** `{total}`  ",
-            f"**Rich dashboard:** download the `{artifact_name}` artifact and open `report.html`.",
+            f"**Rich dashboard:** download the `{artifact_name}` artifact and open `report.html`.  ",
+            "**Replay PBT:** replay-based property checks for integration behavior.",
             "",
         ]
     )
@@ -1195,7 +1263,7 @@ def build_markdown(
         lines.append("No failures reported.")
     lines.append("")
 
-    lines.extend(["## Actionable finding groups", ""])
+    lines.extend(["## Property findings", ""])
     error_groups = [group for group in groups if int(group.get("error_count") or 0) > 0]
     warning_groups = [group for group in groups if int(group.get("error_count") or 0) == 0 and int(group.get("warning_count") or 0) > 0]
 
@@ -1221,16 +1289,16 @@ def build_markdown(
             lines.append("</details>")
             lines.append("")
 
-    lines.append("Errors are blocking property failures. Warnings are suspicious or coverage-related findings that are useful to review but may not fail the job unless warnings-as-errors is enabled.")
+    lines.append("Property findings are grouped by target and issue shape. Errors are blocking property failures. Warnings are review or coverage signals that may not fail the job unless warnings-as-errors is enabled.")
     lines.append("")
-    append_finding_group_table("Errors", error_groups, initially_open=True)
-    append_finding_group_table("Warnings", warning_groups, initially_open=False)
+    append_finding_group_table("Blocking errors", error_groups, initially_open=True)
+    append_finding_group_table("Review warnings", warning_groups, initially_open=False)
 
-    lines.extend(["## Latest release differential", ""])
+    lines.extend(["## Latest release comparison", ""])
     if release_diffs:
         changed_diffs = [diff for diff in release_diffs if diff.get("changed")]
         unchanged_diffs = [diff for diff in release_diffs if not diff.get("changed")]
-        lines.append("This section compares `HEAD` with the latest released integration tag using the same replay fixture. `Output changed since latest release` is the failure category for rows where `Changed` is **Yes**; this section shows both changed and unchanged comparisons.")
+        lines.append("This section compares `HEAD` with the latest released integration tag using the same replay fixture. `Changed vs latest release` is the failure category for rows where `Changed` is **Yes**; this section shows both changed and unchanged comparisons.")
         lines.append("")
         lines.extend(["### Changed outputs", ""])
         if changed_diffs:
@@ -1317,19 +1385,13 @@ def build_markdown(
 
     lines.extend(["## Setup/cache target details", ""])
     if setup_failed_rows:
-        setup_categories = Counter(row["category"] for row in setup_failed_rows)
-        for category, grouped_rows in sorted(
-            ((category, [row for row in setup_failed_rows if row["category"] == category]) for category in setup_categories),
-            key=lambda item: (-len(item[1]), item[0]),
-        ):
-            icon, label, description = CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS["unknown"])
-            lines.append(f"<details><summary>{icon} {label} ({len(grouped_rows)})</summary>")
+        setup_groups = defaultdict(list)
+        for row in setup_failed_rows:
+            setup_groups[row.get("setup_failure_kind") or setup_failure_kind(row)].append(row)
+        for kind, grouped_rows in sorted(setup_groups.items(), key=lambda item: (-len(item[1]), setup_failure_label(item[0]))):
+            lines.append(f"<details><summary>🧱 {md_escape(setup_failure_label(kind))} ({len(grouped_rows)})</summary>")
             lines.append("")
-            lines.append(md_escape(description))
-            next_step = CATEGORY_NEXT_STEPS.get(category)
-            if next_step:
-                lines.append("")
-                lines.append(f"Suggested next step: {md_escape(next_step)}")
+            lines.append(md_escape(setup_failure_description(kind)))
             lines.append("")
             lines.append("| Target | Fixture | Short error | Shard |")
             lines.append("|---|---|---|---|")
@@ -1456,7 +1518,7 @@ def build_html(
   <p><strong>Suggested next step:</strong> {esc(CATEGORY_NEXT_STEPS.get(str(category), CATEGORY_NEXT_STEPS['unknown']))}</p>
   <h3>Property results</h3>
   <table><thead><tr><th>Property</th><th>Status</th><th>What it checks</th></tr></thead><tbody>{prop_rows}</tbody></table>
-  <h3>Latest release differential</h3>
+  <h3>Latest release comparison</h3>
   <table><thead><tr><th>Record ref</th><th>Target ref</th><th>Changed</th><th>Collections</th></tr></thead><tbody>{target_release_diff_rows}</tbody></table>
   <h3>Coverage chart</h3>
   <p class='muted'>Coverage is a signal about how much this replay fixture exercises, not a pass/fail grade by itself.</p>
@@ -1548,7 +1610,7 @@ table{{border-collapse:collapse;width:100%;font-size:13px;background:white}}td,t
 .finding{{border:1px solid var(--line);border-left:5px solid var(--warn);border-radius:14px;padding:1rem;background:white;margin:.75rem 0}} .muted{{color:var(--muted)}} .badge{{background:#fff8c5;color:#633c01;border:1px solid #fae17d;border-radius:999px;padding:.1rem .45rem;display:inline-block;margin:.1rem}} .badge.error{{background:#ffebe9;color:#82071e;border-color:#ffcecb}} .badge.warn{{background:#fff8c5;color:#633c01;border-color:#fae17d}} .examples code{{margin:.12rem;display:inline-block}} .triage{{background:white;border:1px solid var(--line);border-radius:14px;padding:1rem}} .triage strong{{font-size:2rem}}
 .pill{{display:inline-block;border-radius:999px;padding:.12rem .45rem;margin:.1rem;font-size:12px;border:1px solid var(--line)}} .pill.ok{{background:#dafbe1;color:#116329;border-color:#aceebb}}.pill.fail{{background:#ffebe9;color:#82071e;border-color:#ffcecb}}.pill.warn,.pill.blocked{{background:#fff8c5;color:#633c01;border-color:#fae17d}}.pill.skipped,.pill.none{{background:#f6f8fa;color:#57606a}}
 </style></head><body><main>
-<section class='hero'><span class='result'>{'✅ Passed' if failed == 0 and rows else '❌ Needs attention'}</span><h1>Replay PBT dashboard</h1><p>A view of replay-based property testing for Agent integrations. It explains the cache/seeding flow, links shards, and groups repeated findings.</p></section>
+<section class='hero'><span class='result'>{'✅ Passed' if failed == 0 and rows else '❌ Needs attention'}</span><h1>Replay-based property testing dashboard</h1><p>A view of replay-based property checks for Agent integrations. It explains the cache/seeding flow, links shards, and groups repeated findings.</p></section>
 <section class='grid'>{status_cards}<div class='stat'><span>Finding groups</span><strong>{len(groups)}</strong></div><div class='stat'><span>Coverage reports</span><strong>{len(coverages)}</strong></div></section>
 <section class='card'><h2>How the concept works</h2><div class='flow'>{step_cards}</div></section>
 <section class='card seed'><h2>Cache seeding flow</h2><p>Seeding is only used when the replay cache is missing and the workflow input permits it. The generated cache stays in GitHub Actions cache; the report uploads only lightweight findings/results.</p>{seed_diagram}</section>
@@ -1556,9 +1618,9 @@ table{{border-collapse:collapse;width:100%;font-size:13px;background:white}}td,t
 {individual_section}
 <section class='card'><h2>Triage view</h2><div class='grid'>{triage_cards}</div></section>
 <section class='card'><h2>Failure categories</h2><table><thead><tr><th>Category</th><th>Count</th><th>Meaning</th></tr></thead><tbody>{category_rows or '<tr><td colspan="3">No failures</td></tr>'}</tbody></table></section>
-<section class='card'><h2>Actionable finding groups</h2><p>Errors are blocking property failures. Warnings are suspicious or coverage-related findings that are useful to review but may not fail the job unless warnings-as-errors is enabled.</p>{finding_cards}</section>
+<section class='card'><h2>Property findings</h2><p>Errors are blocking property failures. Warnings are review or coverage signals. Repeated metric/tag rows are collapsed; use <code>findings.tsv</code> for raw rows.</p>{finding_cards}</section>
 <section class='card'><h2>Targets by workflow step</h2><table><thead><tr><th>Target</th><th>Pipeline state</th><th>Status</th><th>Category</th><th>Summary</th><th>Shard</th></tr></thead><tbody>{target_rows}</tbody></table></section>
-<section class='card'><h2>Latest release differential</h2><p><strong>Changed outputs</strong></p><table><thead><tr><th>Target</th><th>Record ref</th><th>Target ref</th><th>Collections</th></tr></thead><tbody>{changed_release_diff_rows}</tbody></table><details><summary>✅ Unchanged outputs</summary><table><thead><tr><th>Target</th><th>Record ref</th><th>Target ref</th></tr></thead><tbody>{unchanged_release_diff_rows}</tbody></table></details></section>
+<section class='card'><h2>Latest release comparison</h2><p><strong>Changed outputs</strong></p><table><thead><tr><th>Target</th><th>Record ref</th><th>Target ref</th><th>Collections</th></tr></thead><tbody>{changed_release_diff_rows}</tbody></table><details><summary>✅ Unchanged outputs</summary><table><thead><tr><th>Target</th><th>Record ref</th><th>Target ref</th></tr></thead><tbody>{unchanged_release_diff_rows}</tbody></table></details></section>
 <section class='card'><h2>OpenMetrics coverage</h2><p>Sorted by lowest metadata.csv → emitted coverage first.</p><table><thead><tr><th>Target</th><th>metadata.csv → emitted</th><th>Endpoint → emitted</th><th>Endpoint count</th><th>Metadata count</th></tr></thead><tbody>{coverage_rows}</tbody></table></section>
 </main></body></html>"""
 
