@@ -20,24 +20,25 @@ You can also see your Anthropic costs in Datadog [Cloud Cost Management][6], all
 
 To get started with the Anthropic integration in Datadog, follow the steps below:
 
-### 1. Choose the right API key for your needs
+### 1. Identify your Anthropic plan and the key type you'll use
 
-This integration supports two types of Anthropic API keys. Pick the one that matches the data you want to ingest:
+Your Anthropic organization is either a **Platform** plan or an **Enterprise** plan, and the plan determines which API key type you'll use to authenticate this integration:
 
-| Key type | Data ingested | Best for |
+| Anthropic plan | API key type | Data ingested |
 | --- | --- | --- |
-| **Admin API key** | Organization-wide usage and cost, broken down by model, workspace, API key, and service tier. | All Anthropic organizations that want org-level visibility into spend and token consumption. |
-| **Analytics API key** (Enterprise) | Per-user usage and cost, broken down by user, product (API, Claude Code, Claude.ai), model, context window, inference geography, and speed. | Enterprise organizations that need user-level attribution of usage and spend, including chargeback and team-level reporting. |
+| **Platform** | **Admin API key** | Organization-wide usage and cost, broken down by model, workspace, API key, and service tier. |
+| **Enterprise** | **Analytics API key** | Per-user usage and cost, broken down by user, product (API, Claude Code, Claude.ai), model, context window, inference geography, and speed. Usage metrics are emitted in **1-hour buckets** once the hour has settled upstream, with a typical end-to-end latency of **1–3 hours**. Per-user cost data is available starting **January 1, 2026**. |
 
-You can configure either key type — or one of each on separate accounts — depending on the level of granularity your teams require. Per-user cost data from the Analytics API is available starting **January 1, 2026**.
+Each Anthropic organization issues only one of these key types based on its plan, so most customers will configure exactly one key. If your company operates more than one Anthropic organization (for example, a Platform org and an Enterprise org), configure each one as a separate Datadog account.
 
 ### 2. Generate your Anthropic API key
 
-You will need either an [Admin API key][5] or an [Analytics API key][7] from Anthropic. Both are created from your Anthropic organization settings.
+Follow the path that matches your Anthropic plan:
 
-1. Navigate to your organization's settings in the Anthropic Console, or reach out to your Anthropic account admin.
-2. Create a new **Admin API key** for org-wide reporting, or a new **Analytics API key** (with the `read:analytics` scope) for per-user reporting. Analytics keys are available on Enterprise plans and must be provisioned by your organization's **Primary Owner** at [claude.ai/analytics/api-keys][7].
-3. Copy the API key to a secure location.
+- **Platform plan** — Generate an [Admin API key][5] from your Anthropic organization's settings, or ask your Anthropic account admin to create one for you.
+- **Enterprise plan** — Generate an Analytics API key (with the `read:analytics` scope) at [claude.ai/analytics/api-keys][7]. Analytics API keys must be provisioned by your organization's **Primary Owner**.
+
+Copy the API key to a secure location once generated.
 
 ### 3. Configure the Datadog Integration
 
