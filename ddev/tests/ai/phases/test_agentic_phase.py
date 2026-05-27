@@ -570,6 +570,12 @@ async def test_phase_with_goal_exhausts_attempts_fails_phase(flow_dir, monkeypat
     assert mgr.read() == {}
     assert phase._goal_attempt_log == [{"task": "t1", "attempts": 2, "final_valid": False}]
 
+    log_file = mgr.root / "goal_agent" / "p1" / "t1.jsonl"
+    assert log_file.exists()
+    finish_events = [e for e in read_jsonl(log_file) if e["event"] == "finish"]
+    assert len(finish_events) == 1
+    assert finish_events[0]["success"] is False
+
 
 async def test_phase_goal_partial_progress_preserved_on_exhaustion(flow_dir, monkeypatch, message_queue):
     """When task 1 passes goal validation and task 2 exhausts attempts, both entries are logged."""
