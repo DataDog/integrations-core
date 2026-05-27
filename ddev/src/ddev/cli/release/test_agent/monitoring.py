@@ -17,11 +17,11 @@ from rich.spinner import Spinner
 from rich.text import Text
 from rich.tree import Tree
 
-from ddev.cli.release.test_agent.dispatch import REPO_NAME, REPO_OWNER, DispatchedWorkflow
+from ddev.cli.release.test_agent.dispatch import DispatchedWorkflow
+from ddev.cli.release.test_agent.validation import REPO_NAME, REPO_OWNER
 from ddev.utils.github_async import async_github_client
 
 if TYPE_CHECKING:
-    from ddev.cli.application import Application
     from ddev.cli.terminal import Terminal
     from ddev.utils.github_async.client import AsyncGitHubClient
 
@@ -123,7 +123,7 @@ async def collect_workflow_state(client: AsyncGitHubClient, workflow: Dispatched
 
 
 def monitor_dispatched_workflows(
-    app: Application,
+    terminal: Terminal,
     token: str,
     *,
     ref: str,
@@ -134,13 +134,13 @@ def monitor_dispatched_workflows(
 
     async def run() -> None:
         async with async_github_client(token=token) as client:
-            await monitor_workflows(app, client, ref=ref, workflows=workflows, poll_interval=poll_interval)
+            await monitor_workflows(terminal, client, ref=ref, workflows=workflows, poll_interval=poll_interval)
 
     asyncio.run(run())
 
 
 async def monitor_workflows(
-    app: Application,
+    terminal: Terminal,
     client: AsyncGitHubClient,
     *,
     ref: str,
@@ -157,20 +157,22 @@ async def monitor_workflows(
     )
     completed_state: MonitorState | None = None
 
-    if not (app.interactive and app.console.is_terminal):
+    if not (terminal.interactive and terminal.console.is_terminal):
         while True:
             state = await collect_monitor_state(client, workflows)
-            app.output(render_monitor_panel(app, ref=ref, poll_interval=poll_interval, state=state), stderr=True)
+            terminal.output(
+                render_monitor_panel(terminal, ref=ref, poll_interval=poll_interval, state=state), stderr=True
+            )
             if state.is_complete:
                 return
             await sleep(poll_interval)
 
-    original_stderr = app.console.stderr
-    app.console.stderr = True
+    original_stderr = terminal.console.stderr
+    terminal.console.stderr = True
     try:
         with Live(
-            render_monitor_panel(app, ref=ref, poll_interval=poll_interval, state=state),
-            console=app.console,
+            render_monitor_panel(terminal, ref=ref, poll_interval=poll_interval, state=state),
+            console=terminal.console,
             auto_refresh=True,
             refresh_per_second=10,
             redirect_stderr=False,
@@ -180,16 +182,20 @@ async def monitor_workflows(
         ) as live:
             while True:
                 state = await collect_monitor_state(client, workflows)
-                live.update(render_monitor_panel(app, ref=ref, poll_interval=poll_interval, state=state), refresh=True)
+                live.update(
+                    render_monitor_panel(terminal, ref=ref, poll_interval=poll_interval, state=state), refresh=True
+                )
                 if state.is_complete:
                     completed_state = state
                     break
                 await sleep(poll_interval)
     finally:
-        app.console.stderr = original_stderr
+        terminal.console.stderr = original_stderr
 
     if completed_state is not None:
-        app.output(render_monitor_panel(app, ref=ref, poll_interval=poll_interval, state=completed_state), stderr=True)
+        terminal.output(
+            render_monitor_panel(terminal, ref=ref, poll_interval=poll_interval, state=completed_state), stderr=True
+        )
 
 
 def render_monitor_panel(

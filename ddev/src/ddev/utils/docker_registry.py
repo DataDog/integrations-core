@@ -70,7 +70,11 @@ def list_tags(
     while url is not None:
         response = httpx.get(url, timeout=timeout)
         response.raise_for_status()
-        page = response.json().get('tags') or []
+        try:
+            payload = response.json()
+        except ValueError as e:
+            raise httpx.HTTPError(f'Registry returned non-JSON body for tag list: {e}') from e
+        page = payload.get('tags') or []
         tags.extend(page)
         next_url = response.links.get('next', {}).get('url')
         if next_url and next_url.startswith('/'):

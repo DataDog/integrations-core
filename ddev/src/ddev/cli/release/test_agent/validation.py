@@ -23,6 +23,13 @@ if TYPE_CHECKING:
 BRANCH_PATTERN = r'^\d+\.\d+\.x$'
 TAG_PATTERN = r'^\d+\.\d+\.\d+(-rc\.\d+)?$'
 
+# Hard-coded: the two test workflows only live on DataDog/integrations-core. Forks and other
+# integrations repos (extras, marketplace) have nothing to dispatch even if the branch/tag exists,
+# so deferring either component to repo metadata would just hide misconfiguration. If we ever
+# ship the workflows elsewhere, plumb the target through here.
+REPO_OWNER = 'DataDog'
+REPO_NAME = 'integrations-core'
+
 # The two workflow filenames the command targets. Defined here (the layer that runs first)
 # rather than in `dispatch.py`, so the import graph flows validation -> dispatch and validation
 # does not pull in dispatch's async/HTTP machinery at module-load time.

@@ -123,7 +123,7 @@ def test_agent(
                 workflows=workflows,
                 poll_interval=poll_interval,
             )
-        except RuntimeError as e:
+        except Exception as e:
             app.abort(f'Failed to monitor workflows: {e}')
 
 

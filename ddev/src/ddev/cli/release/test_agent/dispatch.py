@@ -9,22 +9,13 @@ import asyncio
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from ddev.cli.release.test_agent.validation import WORKFLOW_LINUX, WORKFLOW_WINDOWS
+from ddev.cli.release.test_agent.validation import REPO_NAME, REPO_OWNER, WORKFLOW_LINUX, WORKFLOW_WINDOWS
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
     from ddev.utils.github_async import GitHubResponse
     from ddev.utils.github_async.models import WorkflowDispatchResult
 
 type DispatchOutcome = GitHubResponse[WorkflowDispatchResult] | BaseException
-
-# Hard-coded: the two test workflows only live on DataDog/integrations-core. Forks and other
-# integrations repos (extras, marketplace) have nothing to dispatch even if the branch/tag exists,
-# so deferring either component to repo metadata would just hide misconfiguration. If we ever
-# ship the workflows elsewhere, plumb the target through here.
-REPO_OWNER = 'DataDog'
-REPO_NAME = 'integrations-core'
 
 
 @dataclass(frozen=True)
@@ -41,7 +32,7 @@ def dispatch_both(token: str, *, ref: str, inputs: dict[str, str]) -> tuple[Disp
     """Dispatch both workflows in parallel via the async GitHub client."""
     from ddev.utils.github_async import async_github_client
 
-    async def run_dispatches() -> Sequence[DispatchOutcome]:
+    async def run_dispatches() -> tuple[DispatchOutcome, DispatchOutcome]:
         async with async_github_client(token=token) as client:
             return await asyncio.gather(
                 client.create_workflow_dispatch(
@@ -66,7 +57,9 @@ def dispatch_both(token: str, *, ref: str, inputs: dict[str, str]) -> tuple[Disp
     return extract_dispatched_workflows(asyncio.run(run_dispatches()))
 
 
-def extract_dispatched_workflows(results: Sequence[DispatchOutcome]) -> tuple[DispatchedWorkflow, DispatchedWorkflow]:
+def extract_dispatched_workflows(
+    results: tuple[DispatchOutcome, DispatchOutcome],
+) -> tuple[DispatchedWorkflow, DispatchedWorkflow]:
     """Pull workflow runs out of two gather results, raising on any exception with a partial-success hint.
 
     `asyncio.gather(return_exceptions=True)` captures `CancelledError`/`KeyboardInterrupt`
