@@ -7,7 +7,14 @@ from tomlkit.toml_document import TOMLDocument
 from ddev.utils.fs import Path
 
 SCRUBBED_VALUE = '*****'
-SCRUBBED_GLOBS = ('github.token', 'pypi.auth', 'trello.token', 'orgs.*.api_key', 'orgs.*.app_key')
+SCRUBBED_GLOBS = (
+    'github.token',
+    'pypi.auth',
+    'trello.token',
+    'orgs.*.api_key',
+    'orgs.*.app_key',
+    'ai.anthropic_api_key',
+)
 
 
 def save_toml_document(document: TOMLDocument, path: Path):
@@ -37,3 +44,6 @@ def scrub_config(config: dict):
         for key in ('api_key', 'app_key'):
             if key in data:
                 data[key] = SCRUBBED_VALUE
+
+    if 'anthropic_api_key' in config.get('ai', {}):
+        config['ai']['anthropic_api_key'] = SCRUBBED_VALUE
