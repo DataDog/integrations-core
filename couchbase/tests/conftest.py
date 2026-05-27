@@ -252,13 +252,16 @@ def gamesim_primary_index_ready():
     )
     r.raise_for_status()
 
+    found = False
     for keyspace, stats in r.json().items():
         if keyspace == "indexer":
             continue
         parts = keyspace.split(":")
         if parts[0] == "gamesim-sample" and parts[-1] == "gamesim_primary":
-            return stats.get("initial_build_progress") == 100
-    return False
+            if stats.get("initial_build_progress") != 100:
+                return False
+            found = True
+    return found
 
 
 def create_syncgw_database():
