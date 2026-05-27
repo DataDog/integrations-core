@@ -490,6 +490,49 @@ def _observed_openmetrics_families(cache_dir: Path) -> set[str]:
     return families
 
 
+def _run_empirical_openmetrics_mapping(context: ReplayPBTContext, cache_dir: Path) -> dict[str, Any]:
+    output_path = cache_dir / 'empirical-openmetrics-mapping.json'
+    integration_dir = context.repo / context.integration
+    hatch_env = context.replay_env or context.environment
+    env = os.environ.copy()
+    env['DDEV_SKIP_GENERIC_TAGS_CHECK'] = 'true'
+    env.pop('PYTHONPATH', None)
+    env.pop('VIRTUAL_ENV', None)
+
+    hatch = [sys.executable, '-m', 'hatch', '--no-color', '--no-interactive', 'run', f'{hatch_env}:python']
+    install_result = subprocess.run(
+        [*hatch, '-m', 'pip', 'install', '-q', '-e', str(context.repo / 'datadog_checks_dev')],
+        cwd=integration_dir,
+        env=env,
+        check=False,
+    )
+    assert install_result.returncode == 0, f'Unable to install local datadog_checks_dev in {hatch_env}'
+
+    command = [
+        *hatch,
+        '-m',
+        'datadog_checks.dev.replay.openmetrics_mapper',
+        '--cache',
+        str(cache_dir),
+        '--config',
+        str(cache_dir / 'config.json'),
+        '--output',
+        str(output_path),
+        '--check-name',
+        context.integration,
+        '--readings',
+        str(context.readings),
+        '--adapters',
+        context.adapters,
+    ]
+    if context.check_class:
+        command.extend(('--check-class', context.check_class))
+
+    result = subprocess.run(command, cwd=integration_dir, env=env, text=True, capture_output=True, check=False)
+    assert result.returncode == 0, _format_compare_check_output(result)
+    return json.loads(output_path.read_text())
+
+
 def _load_replay_config(cache_dir: Path) -> dict[str, Any]:
     config_path = cache_dir / 'config.json'
     if not config_path.is_file():
@@ -607,7 +650,12 @@ def _format_percent(value: float | None) -> str:
 
 
 def _compute_openmetrics_coverage(
-    *, cache_dir: Path, output: dict[str, Any], metadata_rows: dict[str, dict[str, str]], metric_prefix: str | None
+    *,
+    cache_dir: Path,
+    output: dict[str, Any],
+    metadata_rows: dict[str, dict[str, str]],
+    metric_prefix: str | None,
+    empirical_mapping: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     observed_families = _observed_openmetrics_families(cache_dir)
     emitted_names = _emitted_metric_names(output)
@@ -617,12 +665,22 @@ def _compute_openmetrics_coverage(
         prefixes.add(metric_prefix)
         prefixes.add(metric_prefix.replace('.', '_'))
 
-    observed_covered = {
+    heuristic_covered = {
         family
         for family in observed_families
         if _family_is_heuristically_emitted(family, emitted_names, prefixes=prefixes)
     }
-    observed_missing = observed_families - observed_covered
+    heuristic_missing = observed_families - heuristic_covered
+    if empirical_mapping is None:
+        endpoint_covered = heuristic_covered
+        endpoint_missing = heuristic_missing
+        endpoint_method = 'name-stem-heuristic'
+    else:
+        endpoint_covered = {
+            result['family'] for result in empirical_mapping['family_mappings'] if result['emitted_metrics']
+        }
+        endpoint_missing = observed_families - endpoint_covered
+        endpoint_method = empirical_mapping.get('method') or 'isolated-family-replay'
     metadata_emitted = metadata_names & emitted_names
     metadata_unemitted = metadata_names - emitted_names
 
@@ -630,13 +688,24 @@ def _compute_openmetrics_coverage(
         'integration_prefix': metric_prefix,
         'raw_metric_prefixes': sorted(prefixes),
         'endpoint_to_emitted': {
-            'coverage': _coverage_ratio(len(observed_covered), len(observed_families)),
-            'covered_count': len(observed_covered),
-            'missing_count': len(observed_missing),
+            'method': endpoint_method,
+            'coverage': _coverage_ratio(len(endpoint_covered), len(observed_families)),
+            'covered_count': len(endpoint_covered),
+            'missing_count': len(endpoint_missing),
             'endpoint_count': len(observed_families),
-            'covered_families': sorted(observed_covered),
-            'missing_families': sorted(observed_missing),
+            'covered_families': sorted(endpoint_covered),
+            'missing_families': sorted(endpoint_missing),
         },
+        'heuristic_endpoint_to_emitted': {
+            'method': 'name-stem-heuristic',
+            'coverage': _coverage_ratio(len(heuristic_covered), len(observed_families)),
+            'covered_count': len(heuristic_covered),
+            'missing_count': len(heuristic_missing),
+            'endpoint_count': len(observed_families),
+            'covered_families': sorted(heuristic_covered),
+            'missing_families': sorted(heuristic_missing),
+        },
+        'empirical_endpoint_to_emitted': empirical_mapping,
         'metadata_to_emitted': {
             'coverage': _coverage_ratio(len(metadata_emitted), len(metadata_names)),
             'emitted_count': len(metadata_emitted),
@@ -655,27 +724,42 @@ def _write_openmetrics_coverage(property_dir: Path, coverage: dict[str, Any]) ->
 
     endpoint = coverage['endpoint_to_emitted']
     metadata = coverage['metadata_to_emitted']
+    heuristic = coverage.get('heuristic_endpoint_to_emitted') or {}
+    empirical = coverage.get('empirical_endpoint_to_emitted') or {}
+    method = endpoint.get('method') or 'unknown'
     lines = [
         '# OpenMetrics replay coverage',
         '',
-        'This is a generic, advisory coverage report. Endpoint -> emitted uses a name-stem heuristic '
-        'because integrations can rename upstream families in integration-specific ways.',
+        'This is a generic, advisory coverage report. Endpoint -> emitted is measured by replaying each '
+        'observed OpenMetrics family in isolation when empirical mapping is available, otherwise by a '
+        'name-stem heuristic.',
         '',
         '## Summary',
         '',
+        f'- Endpoint mapping method: `{method}`',
         f'- Endpoint metric families: {endpoint["endpoint_count"]}',
-        f'- Endpoint metric families heuristically emitted: {endpoint["covered_count"]}',
+        f'- Endpoint metric families emitted: {endpoint["covered_count"]}',
         f'- Endpoint -> emitted coverage: {_format_percent(endpoint["coverage"])}',
+        f'- Heuristic endpoint -> emitted coverage: {_format_percent(heuristic.get("coverage"))}',
+        f'- Empirical mapping loop time: {empirical.get("elapsed_s", "n/a")}',
         f'- metadata.csv metrics: {metadata["metadata_count"]}',
         f'- metadata.csv metrics emitted by this replay: {metadata["emitted_count"]}',
         f'- metadata.csv -> emitted coverage: {_format_percent(metadata["coverage"])}',
         '',
-        '## Endpoint metric families not heuristically emitted',
+        '## Endpoint metric families not emitted',
         '',
     ]
     lines.extend(f'- `{family}`' for family in endpoint['missing_families'][:200])
     if len(endpoint['missing_families']) > 200:
         lines.append(f'- ... {len(endpoint["missing_families"]) - 200} more')
+    family_mappings = empirical.get('family_mappings') if isinstance(empirical, dict) else None
+    if isinstance(family_mappings, list):
+        lines.extend(['', '## Empirical endpoint family mappings', ''])
+        for mapping in family_mappings[:200]:
+            if not isinstance(mapping, dict) or not mapping.get('emitted_metrics'):
+                continue
+            metrics = ', '.join(f'`{metric}`' for metric in mapping.get('emitted_metrics', [])[:10])
+            lines.append(f'- `{mapping.get("family")}` -> {metrics}')
     lines.extend(['', '## metadata.csv metrics not emitted by this replay', ''])
     lines.extend(f'- `{metric}`' for metric in metadata['unemitted_metrics'][:200])
     if len(metadata['unemitted_metrics']) > 200:
@@ -1720,15 +1804,18 @@ def test_openmetrics_replay_coverage(replay_pbt_context: ReplayPBTContext, valid
     property_dir = replay_pbt_context.artifacts / property_name
     diff = _run_compare_check_cache(context=replay_pbt_context, cache=replay_pbt_context.cache, artifacts=property_dir)
     assert diff['changed'] is False
-    if not _observed_openmetrics_families(property_dir):
+    observed_families = _observed_openmetrics_families(property_dir)
+    if not observed_families:
         pytest.skip('Replay cache has no request records with OpenMetrics samples.')
 
+    empirical_mapping = _run_empirical_openmetrics_mapping(replay_pbt_context, property_dir)
     metadata_rows = _load_metadata_rows(replay_pbt_context.repo, replay_pbt_context.integration)
     coverage = _compute_openmetrics_coverage(
         cache_dir=property_dir,
         output=_read_normalized(property_dir),
         metadata_rows=metadata_rows,
         metric_prefix=_load_manifest_metric_prefix(replay_pbt_context.repo, replay_pbt_context.integration),
+        empirical_mapping=empirical_mapping,
     )
     _write_openmetrics_coverage(property_dir, coverage)
 

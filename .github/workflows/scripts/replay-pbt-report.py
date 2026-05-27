@@ -782,6 +782,10 @@ def load_findings_and_coverages(root: Path) -> tuple[list[dict[str, Any]], list[
                         "endpoint_emitted_count": endpoint.get("covered_count"),
                         "endpoint_missing_count": endpoint.get("missing_count"),
                         "endpoint_to_emitted_coverage": endpoint.get("coverage"),
+                        "endpoint_mapping_method": endpoint.get("method", ""),
+                        "empirical_mapping_elapsed_s": (data.get("empirical_endpoint_to_emitted") or {}).get(
+                            "elapsed_s"
+                        ),
                         "metadata_count": metadata.get("metadata_count", metadata.get("supported_count")),
                         "metadata_emitted_count": metadata.get("emitted_count"),
                         "metadata_unemitted_count": metadata.get("unemitted_count"),
@@ -1605,7 +1609,12 @@ def build_markdown(
     if coverages:
         lines.append("Sorted by lowest `metadata.csv → emitted` coverage first, so the sparsest fixtures are easiest to spot.")
         lines.append("")
-        lines.extend(["| Target | metadata.csv → emitted | Endpoint → emitted | Endpoint count | Metadata count |", "|---|---|---|---:|---:|"])
+        lines.extend(
+            [
+                "| Target | metadata.csv → emitted | Endpoint → emitted | Endpoint count | Method | Metadata count |",
+                "|---|---|---|---:|---|---:|",
+            ]
+        )
         sorted_coverages = sorted(
             coverages,
             key=lambda c: (
@@ -1616,7 +1625,12 @@ def build_markdown(
         )
         for coverage in sorted_coverages:
             lines.append(
-                f"| {target_link_md(coverage)} | {coverage_bar_md(coverage.get('metadata_to_emitted_coverage'))} | {coverage_bar_md(coverage.get('endpoint_to_emitted_coverage'))} | {coverage.get('endpoint_count') or ''} | {coverage.get('metadata_count') or ''} |"
+                f"| {target_link_md(coverage)} "
+                f"| {coverage_bar_md(coverage.get('metadata_to_emitted_coverage'))} "
+                f"| {coverage_bar_md(coverage.get('endpoint_to_emitted_coverage'))} "
+                f"| {coverage.get('endpoint_count') or ''} "
+                f"| `{coverage.get('endpoint_mapping_method') or ''}` "
+                f"| {coverage.get('metadata_count') or ''} |"
             )
     else:
         lines.append("No OpenMetrics coverage reports collected.")
@@ -1876,7 +1890,12 @@ def build_html(
         for diff in sorted((item for item in release_diffs if not item.get('changed')), key=lambda item: str(item.get('target', '')))
     ) or "<tr><td colspan='3'>No unchanged outputs reported.</td></tr>"
     coverage_rows = "".join(
-        f"<tr><td>{target_link_html(c)}</td><td>{coverage_bar_html(c.get('metadata_to_emitted_coverage'))}</td><td>{coverage_bar_html(c.get('endpoint_to_emitted_coverage'))}</td><td>{esc(c.get('endpoint_count'))}</td><td>{esc(c.get('metadata_count'))}</td></tr>"
+        f"<tr><td>{target_link_html(c)}</td>"
+        f"<td>{coverage_bar_html(c.get('metadata_to_emitted_coverage'))}</td>"
+        f"<td>{coverage_bar_html(c.get('endpoint_to_emitted_coverage'))}</td>"
+        f"<td>{esc(c.get('endpoint_count'))}</td>"
+        f"<td><code>{esc(c.get('endpoint_mapping_method') or '')}</code></td>"
+        f"<td>{esc(c.get('metadata_count'))}</td></tr>"
         for c in sorted(
             coverages,
             key=lambda item: (
@@ -1885,7 +1904,7 @@ def build_html(
                 str(item.get('target', '')),
             ),
         )
-    ) or "<tr><td colspan='5'>No coverage reports collected.</td></tr>"
+    ) or "<tr><td colspan='6'>No coverage reports collected.</td></tr>"
     return f"""<!doctype html>
 <html><head><meta charset='utf-8'><title>Replay validation dashboard</title>
 <style>
@@ -1916,7 +1935,7 @@ table{{border-collapse:collapse;width:100%;font-size:13px;background:white}}td,t
 <section class='card'><h2>Property findings</h2><p>Errors are blocking property failures. Warnings are review or coverage signals. Repeated metric/tag rows are collapsed; use <code>findings.tsv</code> for raw rows.</p>{finding_cards}</section>
 <section class='card'><h2>Targets by workflow step</h2><p>This table shows both the mechanical workflow state and the separate replay/static validation statuses for each target.</p><table><thead><tr><th>Target</th><th>Pipeline state</th><th>Validation lanes</th><th>Status</th><th>Category</th><th>Summary</th><th>Batch</th></tr></thead><tbody>{target_rows}</tbody></table></section>
 <section class='card'><h2>Latest release comparison</h2><p>This section shows replay-backed comparisons between the fixture-producing integration version and the target ref. Differences should be reviewed as intentional or accidental behavior changes.</p><p><strong>Changed outputs</strong></p><table><thead><tr><th>Target</th><th>Record ref</th><th>Target ref</th><th>Collections</th></tr></thead><tbody>{changed_release_diff_rows}</tbody></table><details><summary>✅ Unchanged outputs</summary><table><thead><tr><th>Target</th><th>Record ref</th><th>Target ref</th></tr></thead><tbody>{unchanged_release_diff_rows}</tbody></table></details></section>
-<section class='card'><h2>OpenMetrics coverage</h2><p>Coverage rows are replay fixture quality signals sorted by lowest metadata.csv → emitted coverage first. Low coverage is not automatically an integration bug.</p><table><thead><tr><th>Target</th><th>metadata.csv → emitted</th><th>Endpoint → emitted</th><th>Endpoint count</th><th>Metadata count</th></tr></thead><tbody>{coverage_rows}</tbody></table></section>
+<section class='card'><h2>OpenMetrics coverage</h2><p>Coverage rows are replay fixture quality signals sorted by lowest metadata.csv → emitted coverage first. Low coverage is not automatically an integration bug.</p><table><thead><tr><th>Target</th><th>metadata.csv → emitted</th><th>Endpoint → emitted</th><th>Endpoint count</th><th>Method</th><th>Metadata count</th></tr></thead><tbody>{coverage_rows}</tbody></table></section>
 </main></body></html>"""
 
 def write_json(path: Path, data: Any) -> None:
@@ -2032,7 +2051,28 @@ def main() -> None:
     write_tsv(args.out_dir / "failure-categories.tsv", categories, ["category", "label", "count", "description"])
     write_tsv(args.out_dir / "property-results.tsv", property_results, ["status", "property", "validation_family", "requires_replay_cache", "integration", "environment", "target"])
     write_tsv(args.out_dir / "findings.tsv", findings, ["level", "property", "validation_family", "check", "integration", "environment", "target", "asset_type", "collection", "metric", "tag_key", "path", "message", "display_message", "query"])
-    write_tsv(args.out_dir / "coverage-summary.tsv", coverages, ["property", "validation_family", "requires_replay_cache", "integration", "environment", "target", "endpoint_count", "endpoint_emitted_count", "endpoint_missing_count", "endpoint_to_emitted_coverage", "metadata_count", "metadata_emitted_count", "metadata_unemitted_count", "metadata_to_emitted_coverage"])
+    write_tsv(
+        args.out_dir / "coverage-summary.tsv",
+        coverages,
+        [
+            "property",
+            "validation_family",
+            "requires_replay_cache",
+            "integration",
+            "environment",
+            "target",
+            "endpoint_count",
+            "endpoint_emitted_count",
+            "endpoint_missing_count",
+            "endpoint_to_emitted_coverage",
+            "endpoint_mapping_method",
+            "empirical_mapping_elapsed_s",
+            "metadata_count",
+            "metadata_emitted_count",
+            "metadata_unemitted_count",
+            "metadata_to_emitted_coverage",
+        ],
+    )
     write_tsv(args.out_dir / "release-diffs.tsv", release_diffs, ["integration", "environment", "target", "record_ref", "target_ref", "changed", "incomplete", "changed_collections", "run_id", "run_url", "job_url"])
 
     write_zip(args.zip, args.out_dir)

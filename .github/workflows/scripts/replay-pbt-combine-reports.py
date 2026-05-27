@@ -237,7 +237,31 @@ def main() -> None:
     report.write_tsv(args.out_dir / 'failure-categories.tsv', categories, ['category', 'label', 'count', 'description'])
     report.write_tsv(args.out_dir / 'property-results.tsv', property_results, ['status', 'property', 'validation_family', 'requires_replay_cache', 'integration', 'environment', 'target', 'run_id', 'run_url', 'job_url'])
     report.write_tsv(args.out_dir / 'findings.tsv', findings, ['level', 'property', 'validation_family', 'check', 'integration', 'environment', 'target', 'asset_type', 'collection', 'metric', 'tag_key', 'path', 'message', 'display_message', 'query', 'run_id', 'run_url', 'job_url'])
-    report.write_tsv(args.out_dir / 'coverage-summary.tsv', coverages, ['property', 'validation_family', 'requires_replay_cache', 'integration', 'environment', 'target', 'endpoint_count', 'endpoint_emitted_count', 'endpoint_missing_count', 'endpoint_to_emitted_coverage', 'metadata_count', 'metadata_emitted_count', 'metadata_unemitted_count', 'metadata_to_emitted_coverage', 'run_id', 'run_url', 'job_url'])
+    report.write_tsv(
+        args.out_dir / 'coverage-summary.tsv',
+        coverages,
+        [
+            'property',
+            'validation_family',
+            'requires_replay_cache',
+            'integration',
+            'environment',
+            'target',
+            'endpoint_count',
+            'endpoint_emitted_count',
+            'endpoint_missing_count',
+            'endpoint_to_emitted_coverage',
+            'endpoint_mapping_method',
+            'empirical_mapping_elapsed_s',
+            'metadata_count',
+            'metadata_emitted_count',
+            'metadata_unemitted_count',
+            'metadata_to_emitted_coverage',
+            'run_id',
+            'run_url',
+            'job_url',
+        ],
+    )
     report.write_tsv(args.out_dir / 'release-diffs.tsv', release_diffs, ['integration', 'environment', 'target', 'record_ref', 'target_ref', 'changed', 'incomplete', 'changed_collections', 'run_id', 'run_url', 'job_url'])
     report.write_zip(args.zip, args.out_dir)
     print(markdown)
