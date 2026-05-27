@@ -2,7 +2,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Combine sanitized Replay PBT report bundles from multiple shard runs."""
+"""Combine sanitized Replay validation report bundles from multiple batch runs."""
 
 from __future__ import annotations
 
@@ -98,7 +98,7 @@ def extract_inner_report(artifact_archive: Path, destination: Path) -> Path:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument('--run-ids', required=True, help='Comma-separated shard workflow run IDs')
+    parser.add_argument('--run-ids', required=True, help='Comma-separated batch workflow run IDs')
     parser.add_argument('--out-dir', type=Path, required=True)
     parser.add_argument('--zip', type=Path, required=True)
     parser.add_argument('--mode', default='combined')
@@ -118,17 +118,18 @@ def main() -> None:
     coverages: list[dict[str, Any]] = []
     property_results: list[dict[str, Any]] = []
     release_diffs: list[dict[str, Any]] = []
-    shard_runs: list[dict[str, Any]] = []
+    batch_runs: list[dict[str, Any]] = []
 
     with tempfile.TemporaryDirectory() as tmpdir_str:
         tmpdir = Path(tmpdir_str)
         for run_id in run_ids:
             run_info = download_artifact(run_id, tmpdir)
-            shard_runs.append({k: v for k, v in run_info.items() if k not in {'artifact_archive', 'job_urls'}})
+            batch_runs.append({k: v for k, v in run_info.items() if k not in {'artifact_archive', 'job_urls'}})
             report_dir = extract_inner_report(run_info['artifact_archive'], tmpdir / run_id)
             job_urls = run_info.get('job_urls', {})
             for row in read_json(report_dir / 'targets.json'):
                 if isinstance(row, dict):
+                    row.setdefault('validation_family', report.validation_family_for_category(row.get('category')))
                     row.setdefault('run_id', run_id)
                     row.setdefault('run_url', run_info.get('url', ''))
                     row.setdefault('run_title', run_info.get('display_title', ''))
@@ -136,18 +137,23 @@ def main() -> None:
                     targets.append(row)
             for row in read_json(report_dir / 'findings.json'):
                 if isinstance(row, dict):
+                    row.setdefault('validation_family', report.validation_family_for_property(row.get('property')))
                     row.setdefault('run_id', run_id)
                     row.setdefault('run_url', run_info.get('url', ''))
                     row.setdefault('job_url', job_urls.get(str(row.get('target', '')), ''))
                     findings.append(row)
             for row in read_json(report_dir / 'coverage-summary.json'):
                 if isinstance(row, dict):
+                    row.setdefault('validation_family', report.validation_family_for_property(row.get('property')))
+                    row.setdefault('requires_replay_cache', report.property_requires_replay_cache(row.get('property')))
                     row.setdefault('run_id', run_id)
                     row.setdefault('run_url', run_info.get('url', ''))
                     row.setdefault('job_url', job_urls.get(str(row.get('target', '')), ''))
                     coverages.append(row)
             for row in read_json(report_dir / 'property-results.json'):
                 if isinstance(row, dict):
+                    row.setdefault('validation_family', report.validation_family_for_property(row.get('property')))
+                    row.setdefault('requires_replay_cache', report.property_requires_replay_cache(row.get('property')))
                     row.setdefault('run_id', run_id)
                     row.setdefault('run_url', run_info.get('url', ''))
                     row.setdefault('job_url', job_urls.get(str(row.get('target', '')), ''))
@@ -176,7 +182,7 @@ def main() -> None:
         'generated_at': datetime.now(timezone.utc).isoformat(),
         'mode': args.mode,
         'run_group': args.run_group,
-        'shard_runs': shard_runs,
+        'batch_runs': batch_runs,
         'result_files_collected': len(targets),
         'status_counts': dict(status_counts),
         'failure_category_counts': dict(category_counts),
@@ -200,9 +206,9 @@ def main() -> None:
         findings,
         coverages,
         mode=args.mode,
-        shard=f'combined {len(shard_runs)} shard runs',
+        batch=f'combined {len(batch_runs)} batch runs',
         target_count=str(len(targets)),
-        shard_runs=shard_runs,
+        batch_runs=batch_runs,
         property_results=property_results,
         release_diffs=release_diffs,
     )
@@ -211,7 +217,7 @@ def main() -> None:
         targets,
         findings,
         coverages,
-        shard_runs=shard_runs,
+        batch_runs=batch_runs,
         property_results=property_results,
         release_diffs=release_diffs,
     )
@@ -226,11 +232,12 @@ def main() -> None:
     report.write_json(args.out_dir / 'findings.json', findings)
     report.write_json(args.out_dir / 'coverage-summary.json', coverages)
     report.write_json(args.out_dir / 'release-diffs.json', release_diffs)
-    report.write_tsv(args.out_dir / 'summary.tsv', [summary], [k for k in summary if k != 'shard_runs'])
-    report.write_tsv(args.out_dir / 'targets.tsv', targets, ['status', 'category', 'category_label', 'integration', 'environment', 'target', 'fixture_ref', 'target_ref', 'failing_property_count', 'summary', 'run_id', 'run_url', 'job_url'])
+    report.write_tsv(args.out_dir / 'summary.tsv', [summary], [k for k in summary if k != 'batch_runs'])
+    report.write_tsv(args.out_dir / 'targets.tsv', targets, ['status', 'category', 'category_label', 'validation_family', 'integration', 'environment', 'target', 'fixture_ref', 'target_ref', 'failing_property_count', 'summary', 'run_id', 'run_url', 'job_url'])
     report.write_tsv(args.out_dir / 'failure-categories.tsv', categories, ['category', 'label', 'count', 'description'])
-    report.write_tsv(args.out_dir / 'findings.tsv', findings, ['level', 'property', 'check', 'integration', 'environment', 'target', 'asset_type', 'collection', 'metric', 'tag_key', 'path', 'message', 'display_message', 'query', 'run_id', 'run_url', 'job_url'])
-    report.write_tsv(args.out_dir / 'coverage-summary.tsv', coverages, ['property', 'integration', 'environment', 'target', 'endpoint_count', 'endpoint_emitted_count', 'endpoint_missing_count', 'endpoint_to_emitted_coverage', 'metadata_count', 'metadata_emitted_count', 'metadata_unemitted_count', 'metadata_to_emitted_coverage', 'run_id', 'run_url', 'job_url'])
+    report.write_tsv(args.out_dir / 'property-results.tsv', property_results, ['status', 'property', 'validation_family', 'requires_replay_cache', 'integration', 'environment', 'target', 'run_id', 'run_url', 'job_url'])
+    report.write_tsv(args.out_dir / 'findings.tsv', findings, ['level', 'property', 'validation_family', 'check', 'integration', 'environment', 'target', 'asset_type', 'collection', 'metric', 'tag_key', 'path', 'message', 'display_message', 'query', 'run_id', 'run_url', 'job_url'])
+    report.write_tsv(args.out_dir / 'coverage-summary.tsv', coverages, ['property', 'validation_family', 'requires_replay_cache', 'integration', 'environment', 'target', 'endpoint_count', 'endpoint_emitted_count', 'endpoint_missing_count', 'endpoint_to_emitted_coverage', 'metadata_count', 'metadata_emitted_count', 'metadata_unemitted_count', 'metadata_to_emitted_coverage', 'run_id', 'run_url', 'job_url'])
     report.write_tsv(args.out_dir / 'release-diffs.tsv', release_diffs, ['integration', 'environment', 'target', 'record_ref', 'target_ref', 'changed', 'incomplete', 'changed_collections', 'run_id', 'run_url', 'job_url'])
     report.write_zip(args.zip, args.out_dir)
     print(markdown)

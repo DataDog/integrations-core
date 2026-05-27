@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Integration-level replay PBT driven by `ddev env replay-pbt`.
+"""Integration-level replay validation driven by `ddev env replay-pbt`.
 
-These tests are the real integration checks for replay-PBT: they take an
+These tests are the real integration checks for replay validation: they take an
 adapter-saved compare-check cache, run the target integration through cached
 replay, optionally mutate the cache, and assert properties over normalized check
 output. The CLI command supplies the target/cache through a JSON config file
@@ -39,9 +39,14 @@ from datadog_checks.dev.replay.pbt.cache import (
     mutate_request_capture_label_order,
 )
 from datadog_checks.dev.replay.pbt.openmetrics import parse_sample_line
-from datadog_checks.dev.replay.pbt.properties import PROPERTIES
+from datadog_checks.dev.replay.pbt.properties import (
+    PROPERTIES,
+    property_requires_replay_cache,
+    validation_family_for_property,
+)
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
+
 
 class ReplayPBTContext:
     def __init__(self, config: dict) -> None:
@@ -73,7 +78,7 @@ def replay_pbt_context(pytestconfig) -> ReplayPBTContext:
 
 def _skip_unselected(context: ReplayPBTContext, property_name: str) -> None:
     if property_name not in context.properties:
-        pytest.skip(f'{property_name} was not selected for this replay-pbt run.')
+        pytest.skip(f'{property_name} was not selected for this replay validation run.')
 
 
 def _run_compare_check_cache(
@@ -183,6 +188,8 @@ def _write_release_diff_artifacts(property_dir: Path, diff: dict, *, context: Re
             'errors': sum(1 for finding in findings if finding.level == 'error'),
             'warnings': sum(1 for finding in findings if finding.level == 'warning'),
         },
+        validation_family=validation_family_for_property('latest-release-diff'),
+        requires_replay_cache=property_requires_replay_cache('latest-release-diff'),
     )
 
 
@@ -687,6 +694,8 @@ def _write_openmetrics_coverage(property_dir: Path, coverage: dict[str, Any]) ->
             'metadata_metrics': metadata['metadata_count'],
             'metadata_metrics_emitted': metadata['emitted_count'],
         },
+        validation_family=validation_family_for_property('openmetrics-coverage'),
+        requires_replay_cache=property_requires_replay_cache('openmetrics-coverage'),
     )
 
 
@@ -872,7 +881,7 @@ def _write_findings(property_dir: Path, findings: list[ReplayPBTFinding]) -> Non
     serialized = [finding.as_dict() for finding in findings]
     (property_dir / 'findings.json').write_text(json.dumps(serialized, indent=2, sort_keys=True) + '\n')
 
-    lines = ['# Replay PBT findings', '']
+    lines = ['# Replay validation findings', '']
     if not findings:
         lines.append('No findings.')
     for finding in findings:
@@ -886,9 +895,10 @@ def _write_findings(property_dir: Path, findings: list[ReplayPBTFinding]) -> Non
             ]
         )
     (property_dir / 'warnings.md').write_text('\n'.join(line for line in lines if line) + '\n')
+    property_name = findings[0].check if findings else property_dir.name
     write_property_result(
         property_dir,
-        property_name=findings[0].check if findings else property_dir.name,
+        property_name=property_name,
         artifacts=[
             {'kind': 'findings', 'path': 'findings.json', 'format': 'json'},
             {'kind': 'findings-markdown', 'path': 'warnings.md', 'format': 'markdown'},
@@ -897,6 +907,8 @@ def _write_findings(property_dir: Path, findings: list[ReplayPBTFinding]) -> Non
             'errors': sum(1 for finding in findings if finding.level == 'error'),
             'warnings': sum(1 for finding in findings if finding.level == 'warning'),
         },
+        validation_family=validation_family_for_property(property_name),
+        requires_replay_cache=property_requires_replay_cache(property_name),
     )
 
 
@@ -1722,28 +1734,10 @@ def test_openmetrics_replay_coverage(replay_pbt_context: ReplayPBTContext, valid
 
 
 @settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
-@given(validation=st.sampled_from(['asset-query-metrics-in-metadata']))
-def test_asset_query_metrics_match_metadata(replay_pbt_context: ReplayPBTContext, validation: str):
-    property_name = 'asset-query-metrics-in-metadata'
-    _skip_unselected(replay_pbt_context, property_name)
-    assert validation == 'asset-query-metrics-in-metadata'
-
-    metadata_rows = _load_metadata_rows(replay_pbt_context.repo, replay_pbt_context.integration)
-    asset_queries = _load_asset_queries(replay_pbt_context.repo, replay_pbt_context.integration)
-    if not asset_queries:
-        pytest.skip('Integration has no dashboard or monitor metric queries to validate against metadata.csv.')
-
-    findings = _asset_metric_metadata_findings(
-        repo_root=replay_pbt_context.repo,
-        integration=replay_pbt_context.integration,
-        metadata_rows=metadata_rows,
-    )
-    _handle_findings(replay_pbt_context, property_name, findings)
-
-
-@settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @given(validation=st.sampled_from(['asset-query-tags-seen-in-replay']))
 def test_asset_query_tags_are_seen_in_replay(replay_pbt_context: ReplayPBTContext, validation: str):
+    # Replay coverage signal: asset metrics/tags can be valid globally while the
+    # current fixture still fails to exercise them.
     property_name = 'asset-query-tags-seen-in-replay'
     _skip_unselected(replay_pbt_context, property_name)
     assert validation == 'asset-query-tags-seen-in-replay'

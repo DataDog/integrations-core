@@ -1,12 +1,11 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Thin CLI wrapper for cached integration replay property tests.
+"""Thin CLI wrapper for cached integration replay validation.
 
-The actual replay-PBT assertions live in pytest so they get normal test output,
+The actual replay validation assertions live in pytest so they get normal test output,
 Hypothesis integration, and focused failure reporting. This command only turns a
-user-friendly `ddev env replay-pbt ...` invocation into a configured pytest run
-against the integration replay-PBT test module.
+user-friendly `ddev env replay-pbt ...` invocation into a configured pytest run.
 """
 
 from __future__ import annotations
@@ -27,7 +26,7 @@ if TYPE_CHECKING:
     from ddev.cli.application import Application
 
 
-@click.command('replay-pbt', short_help='Run cached replay property checks for an integration')
+@click.command('replay-pbt', short_help='Run cached replay validations for an integration')
 @click.argument('intg_name', metavar='INTEGRATION')
 @click.argument('environment')
 @click.option(
@@ -81,14 +80,14 @@ if TYPE_CHECKING:
 @click.option(
     '--artifacts',
     type=click.Path(file_okay=False, path_type=StdPath),
-    help='Exact artifact root for this replay-pbt run. Defaults to .ddev/replay-pbt under the repository root.',
+    help='Exact artifact root for this replay validation run. Defaults to .ddev/replay-pbt under the repository root.',
 )
 @click.option('--overwrite', is_flag=True, help='Remove an existing --artifacts directory before writing.')
 @click.option(
     '--check-cache-only', is_flag=True, help='Validate replay-cache suitability and exit without running tests.'
 )
 @click.option('--adapters', default='all', show_default=True, help='Comma-separated replay adapters, or "all".')
-@click.option('--warnings-as-errors', is_flag=True, help='Promote replay-PBT advisory warnings to test failures.')
+@click.option('--warnings-as-errors', is_flag=True, help='Promote replay validation advisory warnings to test failures.')
 @click.pass_context
 def replay_pbt(
     ctx: click.Context,
@@ -109,7 +108,7 @@ def replay_pbt(
     adapters: str,
     warnings_as_errors: bool,
 ) -> None:
-    """Run cached replay PBT/metamorphic checks for one integration environment."""
+    """Run cached replay validation and metamorphic checks for one integration environment."""
     app: Application = ctx.obj
     selected_properties = properties or PROPERTIES
     effective_fixture_ref = fixture_ref or _latest_integration_release_tag(app.repo.path, intg_name) or target_ref
@@ -135,8 +134,8 @@ def replay_pbt(
     run_root = _resolve_replay_pbt_root(app.repo.path, artifacts, intg_name, environment, target_ref, overwrite)
     ddev_dir = StdPath(str(app.repo.path)) / 'ddev'
 
-    app.display_header(f'Replay PBT: {intg_name}:{environment}')
-    app.display_info(f'Writing replay-pbt artifacts to {run_root}')
+    app.display_header(f'Replay validation: {intg_name}:{environment}')
+    app.display_info(f'Writing replay validation artifacts to {run_root}')
 
     config_path = run_root / 'replay-pbt-config.json'
     config = {
@@ -170,6 +169,7 @@ def replay_pbt(
             'pytest',
             '--noconftest',
             'tests/cli/env/test_replay_pbt.py',
+            'tests/cli/env/test_replay_static_contracts.py',
         ],
         cwd=ddev_dir,
         env=env,

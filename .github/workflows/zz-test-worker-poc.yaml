@@ -1,7 +1,7 @@
-name: Replay PBT POC
+name: Replay validation POC
 run-name: >-
-  Replay PBT POC / ${{ inputs.mode }} /
-  ${{ inputs.combine_reports && format('combine {0}', inputs.run_group) || inputs.dispatch_shards && (inputs.shard_indices != '' && format('dispatch shards {0} of {1}', inputs.shard_indices, inputs.shard_count) || format('dispatch {0} shards', inputs.shard_count)) || format('shard {0} of {1} / {2}', inputs.shard_index, inputs.shard_count, inputs.run_group) }}
+  Replay validation POC / ${{ inputs.mode }} /
+  ${{ inputs.combine_reports && format('combine {0}', inputs.run_group) || inputs.dispatch_batches && (inputs.batch_indices != '' && format('dispatch batches {0} of {1}', inputs.batch_indices, inputs.batch_count) || format('dispatch {0} batches', inputs.batch_count)) || format('batch {0} of {1} / {2}', inputs.batch_index, inputs.batch_count, inputs.run_group) }}
 
 on:
   workflow_dispatch:
@@ -31,7 +31,7 @@ on:
         default: origin/master
         type: string
       max_targets:
-        description: Maximum targets in this dispatch after sharding
+        description: Maximum targets in this dispatch after batching
         required: true
         default: 200
         type: number
@@ -40,13 +40,13 @@ on:
         required: true
         default: false
         type: boolean
-      shard_index:
-        description: Zero-based shard index
+      batch_index:
+        description: Zero-based batch index
         required: true
         default: 0
         type: number
-      shard_count:
-        description: Total shard count
+      batch_count:
+        description: Total batch count
         required: true
         default: 1
         type: number
@@ -55,8 +55,8 @@ on:
         required: true
         default: 2
         type: number
-      dispatch_shards:
-        description: Dispatch every shard from this existing master-visible worker workflow instead of running one shard
+      dispatch_batches:
+        description: Dispatch every batch from this existing master-visible worker workflow instead of running one batch
         required: true
         default: false
         type: boolean
@@ -66,32 +66,32 @@ on:
         default: ""
         type: string
       dry_run:
-        description: Print worker dispatches without starting them; only used when dispatch_shards=true
+        description: Print worker dispatches without starting them; only used when dispatch_batches=true
         required: true
         default: false
         type: boolean
-      shard_indices:
-        description: Optional comma-separated shard indices to dispatch. Empty means every shard.
+      batch_indices:
+        description: Optional comma-separated batch indices to dispatch. Empty means every batch.
         required: false
         default: ""
         type: string
       run_group:
-        description: Shared identifier linking shard worker runs and the combined report. Dispatcher generates one when empty.
+        description: Shared identifier linking batch worker runs and the combined report. Dispatcher generates one when empty.
         required: false
         default: ""
         type: string
-      run_group_expected_shards:
-        description: Number of shard runs expected in run_group. Dispatcher sets this automatically.
+      run_group_expected_batches:
+        description: Number of batch runs expected in run_group. Dispatcher sets this automatically.
         required: false
         default: 0
         type: number
       auto_combine:
-        description: Coordinator worker waits for sibling shards in run_group and dispatches combine mode.
+        description: Coordinator worker waits for sibling batches in run_group and dispatches combine mode.
         required: true
         default: false
         type: boolean
       combine_reports:
-        description: Combine completed shard report artifacts from report_run_ids.
+        description: Combine completed batch report artifacts from report_run_ids.
         required: true
         default: false
         type: boolean
@@ -102,7 +102,7 @@ on:
         type: string
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.mode }}-${{ inputs.dispatch_shards }}-${{ inputs.shard_index }}-${{ inputs.shard_count }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.mode }}-${{ inputs.dispatch_batches }}-${{ inputs.batch_index }}-${{ inputs.batch_count }}
   cancel-in-progress: false
 
 defaults:
@@ -113,9 +113,9 @@ permissions:
   contents: read
 
 jobs:
-  dispatch-shards:
-    name: Dispatch Replay PBT worker shards
-    if: ${{ inputs.dispatch_shards }}
+  dispatch-batches:
+    name: Dispatch Replay validation worker batches
+    if: ${{ inputs.dispatch_batches }}
     runs-on: ubuntu-22.04
     permissions:
       actions: write
@@ -129,7 +129,7 @@ jobs:
         import sys
 
         int_values = {
-            'shard_count': os.environ['SHARD_COUNT'],
+            'batch_count': os.environ['BATCH_COUNT'],
             'max_targets': os.environ['MAX_TARGETS'],
             'readings': os.environ['READINGS'],
         }
@@ -160,11 +160,11 @@ jobs:
         BASE_REF: ${{ inputs.base_ref }}
         TARGET_REF: ${{ inputs.target_ref }}
         WORKER_REF: ${{ inputs.worker_ref || github.ref_name }}
-        SHARD_COUNT: ${{ inputs.shard_count }}
+        BATCH_COUNT: ${{ inputs.batch_count }}
         MAX_TARGETS: ${{ inputs.max_targets }}
         READINGS: ${{ inputs.readings }}
 
-    - name: Dispatch worker shards
+    - name: Dispatch worker batches
       uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
       env:
         MODE: ${{ inputs.mode }}
@@ -173,27 +173,27 @@ jobs:
         BASE_REF: ${{ inputs.base_ref }}
         MAX_TARGETS: ${{ inputs.max_targets }}
         ALLOW_TRUNCATION: ${{ inputs.allow_truncation }}
-        SHARD_COUNT: ${{ inputs.shard_count }}
+        BATCH_COUNT: ${{ inputs.batch_count }}
         READINGS: ${{ inputs.readings }}
         WORKER_REF: ${{ inputs.worker_ref || github.ref_name }}
         DRY_RUN: ${{ inputs.dry_run }}
-        SHARD_INDICES: ${{ inputs.shard_indices }}
+        BATCH_INDICES: ${{ inputs.batch_indices }}
         RUN_GROUP: ${{ inputs.run_group }}
       with:
         script: |
-          const shardCount = Number(process.env.SHARD_COUNT);
+          const batchCount = Number(process.env.BATCH_COUNT);
           const workerRef = process.env.WORKER_REF;
           const dryRun = process.env.DRY_RUN === 'true';
           const runGroup = process.env.RUN_GROUP || `replay-pbt-${context.runId}`;
-          const shardIndices = process.env.SHARD_INDICES.trim()
-            ? process.env.SHARD_INDICES.split(',').map(value => Number(value.trim()))
-            : Array.from({length: shardCount}, (_, index) => index);
-          for (const shardIndex of shardIndices) {
-            if (!Number.isInteger(shardIndex) || shardIndex < 0 || shardIndex >= shardCount) {
-              throw new Error(`Invalid shard index ${shardIndex}; expected 0 <= index < ${shardCount}`);
+          const batchIndices = process.env.BATCH_INDICES.trim()
+            ? process.env.BATCH_INDICES.split(',').map(value => Number(value.trim()))
+            : Array.from({length: batchCount}, (_, index) => index);
+          for (const batchIndex of batchIndices) {
+            if (!Number.isInteger(batchIndex) || batchIndex < 0 || batchIndex >= batchCount) {
+              throw new Error(`Invalid batch index ${batchIndex}; expected 0 <= index < ${batchCount}`);
             }
           }
-          const coordinatorShard = shardIndices[shardIndices.length - 1];
+          const coordinatorBatch = batchIndices[batchIndices.length - 1];
           const workflow_id = 'zz-test-worker-poc.yaml';
           const baseInputs = {
             mode: process.env.MODE,
@@ -202,48 +202,48 @@ jobs:
             base_ref: process.env.BASE_REF,
             max_targets: process.env.MAX_TARGETS,
             allow_truncation: process.env.ALLOW_TRUNCATION,
-            shard_count: process.env.SHARD_COUNT,
+            batch_count: process.env.BATCH_COUNT,
             readings: process.env.READINGS,
-            dispatch_shards: 'false',
+            dispatch_batches: 'false',
             worker_ref: '',
             dry_run: 'false',
-            shard_indices: '',
+            batch_indices: '',
             run_group: runGroup,
-            run_group_expected_shards: String(shardIndices.length),
+            run_group_expected_batches: String(batchIndices.length),
             auto_combine: 'false',
             combine_reports: 'false',
             report_run_ids: '',
           };
 
           const rows = [];
-          for (const shardIndex of shardIndices) {
-            const shardInputs = {...baseInputs, shard_index: String(shardIndex), auto_combine: String(shardIndex === coordinatorShard)};
-            rows.push({shardIndex, ref: workerRef, inputs: shardInputs});
+          for (const batchIndex of batchIndices) {
+            const batchInputs = {...baseInputs, batch_index: String(batchIndex), auto_combine: String(batchIndex === coordinatorBatch)};
+            rows.push({batchIndex, ref: workerRef, inputs: batchInputs});
             if (!dryRun) {
               await github.rest.actions.createWorkflowDispatch({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 workflow_id,
                 ref: workerRef,
-                inputs: shardInputs,
+                inputs: batchInputs,
               });
             }
           }
 
           const mode = dryRun ? 'Would dispatch' : 'Dispatched';
           await core.summary
-            .addHeading('Replay PBT shard dispatcher')
-            .addRaw(`**${mode} ${rows.length} worker shard(s).**\n\n`)
+            .addHeading('Replay validation batch dispatcher')
+            .addRaw(`**${mode} ${rows.length} worker batch(s).**\n\n`)
             .addTable([
               [
-                {data: 'Shard', header: true},
+                {data: 'Batch', header: true},
                 {data: 'Worker ref', header: true},
                 {data: 'Mode', header: true},
                 {data: 'Max targets', header: true},
                 {data: 'Seed caches', header: true},
               ],
               ...rows.map(row => [
-                `${row.shardIndex} of ${shardCount}`,
+                `${row.batchIndex} of ${batchCount}`,
                 `\`${row.ref}\``,
                 `\`${row.inputs.mode}\``,
                 `\`${row.inputs.max_targets}\``,
@@ -252,15 +252,15 @@ jobs:
             ])
             .addRaw('\n')
             .addRaw(`Run group: \`${runGroup}\`\n`)
-            .addRaw(`Coordinator shard: \`${coordinatorShard}\`\n`)
+            .addRaw(`Coordinator batch: \`${coordinatorBatch}\`\n`)
             .addRaw(`Worker workflow: \`${workflow_id}\`\n`)
             .write();
 
           return rows;
 
   compute-matrix:
-    name: Compute replay-PBT matrix
-    if: ${{ !inputs.dispatch_shards && !inputs.combine_reports }}
+    name: Compute replay validation matrix
+    if: ${{ !inputs.dispatch_batches && !inputs.combine_reports }}
     runs-on: ubuntu-22.04
     permissions:
       contents: read
@@ -318,8 +318,8 @@ jobs:
           --target-ref "${{ inputs.target_ref }}" \
           --readings "${{ inputs.readings }}" \
           --max-targets "${{ inputs.max_targets }}" \
-          --shard-index "${{ inputs.shard_index }}" \
-          --shard-count "${{ inputs.shard_count }}" \
+          --batch-index "${{ inputs.batch_index }}" \
+          --batch-count "${{ inputs.batch_count }}" \
           "${extra_args[@]}" \
           > /tmp/replay-pbt-matrix.json
         cat /tmp/replay-pbt-matrix.json
@@ -334,7 +334,7 @@ jobs:
         PY
         )
         echo "count=$count" >> "$GITHUB_OUTPUT"
-        echo "Replay PBT target count: $count"
+        echo "Replay validation target count: $count"
 
     - name: Scan matrix artifact
       run: python .github/workflows/scripts/replay-pbt-secret-scan.py /tmp/replay-pbt-matrix.json
@@ -349,7 +349,7 @@ jobs:
   replay-pbt:
     name: ${{ matrix.name }}
     needs: compute-matrix
-    if: ${{ !inputs.dispatch_shards && !inputs.combine_reports && needs.compute-matrix.outputs.matrix != '[]' }}
+    if: ${{ !inputs.dispatch_batches && !inputs.combine_reports && needs.compute-matrix.outputs.matrix != '[]' }}
     runs-on: ubuntu-22.04
     timeout-minutes: 120
     strategy:
@@ -367,8 +367,8 @@ jobs:
       REPLAY_PBT_CACHE_KEY: ${{ matrix.cache_key }}
       REPLAY_PBT_ARTIFACT_SLUG: ${{ matrix.artifact_slug }}
       REPLAY_PBT_MODE: ${{ inputs.mode }}
-      REPLAY_PBT_SHARD_INDEX: ${{ inputs.shard_index }}
-      REPLAY_PBT_SHARD_COUNT: ${{ inputs.shard_count }}
+      REPLAY_PBT_BATCH_INDEX: ${{ inputs.batch_index }}
+      REPLAY_PBT_BATCH_COUNT: ${{ inputs.batch_count }}
       REPLAY_PBT_RESULT_DIR: /tmp/replay-pbt-result
       REPLAY_PBT_ARTIFACTS: /tmp/replay-pbt-artifacts
       REPLAY_PBT_ADAPTERS: requests,subprocess,process,psycopg,clickhouse-connect
@@ -426,7 +426,15 @@ jobs:
         fi
 
         if [[ "${{ inputs.seed_missing_caches }}" != "true" ]]; then
-          echo "No suitable replay cache restored; skipping target because seed_missing_caches=false"
+          echo "No suitable replay cache restored; skipping replay-backed validations because seed_missing_caches=false"
+          echo "Running static asset/metadata validations that do not require a replay cache"
+          ddev env replay-pbt "$REPLAY_PBT_INTEGRATION" "$REPLAY_PBT_ENVIRONMENT" \
+            --fixture-ref "$REPLAY_PBT_FIXTURE_REF" \
+            --target-ref "$REPLAY_PBT_TARGET_REF" \
+            --replay-cache latest \
+            --property asset-query-metrics-in-metadata \
+            --artifacts "$REPLAY_PBT_ARTIFACTS" \
+            --overwrite || true
           echo "run_pbt=false" >> "$GITHUB_OUTPUT"
           echo "cache_ready=false" >> "$GITHUB_OUTPUT"
           python - <<PY > "$result"
@@ -440,8 +448,8 @@ jobs:
             "mode": os.environ["REPLAY_PBT_MODE"],
             "readings": os.environ["REPLAY_PBT_READINGS"],
             "target_ref": os.environ["REPLAY_PBT_TARGET_REF"],
-            "shard_index": os.environ["REPLAY_PBT_SHARD_INDEX"],
-            "shard_count": os.environ["REPLAY_PBT_SHARD_COUNT"],
+            "batch_index": os.environ["REPLAY_PBT_BATCH_INDEX"],
+            "batch_count": os.environ["REPLAY_PBT_BATCH_COUNT"],
         }, sort_keys=True))
         PY
           exit 0
@@ -465,7 +473,7 @@ jobs:
       run: |
         set +e
         set -uo pipefail
-        log_path="$REPLAY_PBT_RESULT_DIR/replay-pbt.log"
+        log_path="$REPLAY_PBT_RESULT_DIR/replay_pbt.log"
         ddev env replay-pbt "$REPLAY_PBT_INTEGRATION" "$REPLAY_PBT_ENVIRONMENT" \
           --fixture-ref "$REPLAY_PBT_FIXTURE_REF" \
           --target-ref "$REPLAY_PBT_TARGET_REF" \
@@ -485,7 +493,7 @@ jobs:
         from pathlib import Path
 
         rc = int(os.environ['REPLAY_PBT_EXIT_CODE'])
-        log_path = Path(os.environ['REPLAY_PBT_RESULT_DIR']) / 'replay-pbt.log'
+        log_path = Path(os.environ['REPLAY_PBT_RESULT_DIR']) / 'replay_pbt.log'
         text = log_path.read_text(errors='replace') if log_path.is_file() else ''
         failed_tests = []
         short_errors = []
@@ -509,8 +517,8 @@ jobs:
             "mode": os.environ["REPLAY_PBT_MODE"],
             "readings": os.environ["REPLAY_PBT_READINGS"],
             "target_ref": os.environ["REPLAY_PBT_TARGET_REF"],
-            "shard_index": os.environ["REPLAY_PBT_SHARD_INDEX"],
-            "shard_count": os.environ["REPLAY_PBT_SHARD_COUNT"],
+            "batch_index": os.environ["REPLAY_PBT_BATCH_INDEX"],
+            "batch_count": os.environ["REPLAY_PBT_BATCH_COUNT"],
         }, sort_keys=True))
         PY
         exit "$rc"
@@ -536,7 +544,7 @@ jobs:
         raise SystemExit(0 if status not in {'cache-hit', 'seeded-cache'} else 1)
         PY
         then
-          echo "Preserving replay-PBT result written by failed command"
+          echo "Preserving replay validation result written by failed command"
           exit 0
         fi
         python - <<'PY' > "$REPLAY_PBT_RESULT_DIR/result.json"
@@ -574,8 +582,8 @@ jobs:
             "mode": os.environ["REPLAY_PBT_MODE"],
             "readings": os.environ["REPLAY_PBT_READINGS"],
             "target_ref": os.environ["REPLAY_PBT_TARGET_REF"],
-            "shard_index": os.environ["REPLAY_PBT_SHARD_INDEX"],
-            "shard_count": os.environ["REPLAY_PBT_SHARD_COUNT"],
+            "batch_index": os.environ["REPLAY_PBT_BATCH_INDEX"],
+            "batch_count": os.environ["REPLAY_PBT_BATCH_COUNT"],
         }, sort_keys=True))
         PY
 
@@ -599,8 +607,8 @@ jobs:
             'mode': os.environ['REPLAY_PBT_MODE'],
             'readings': os.environ['REPLAY_PBT_READINGS'],
             'target_ref': os.environ['REPLAY_PBT_TARGET_REF'],
-            'shard_index': os.environ['REPLAY_PBT_SHARD_INDEX'],
-            'shard_count': os.environ['REPLAY_PBT_SHARD_COUNT'],
+            'batch_index': os.environ['REPLAY_PBT_BATCH_INDEX'],
+            'batch_count': os.environ['REPLAY_PBT_BATCH_COUNT'],
         }
         (output_root / 'target.json').write_text(json.dumps(target, indent=2, sort_keys=True) + '\n')
 
@@ -646,7 +654,7 @@ jobs:
           --out-dir /tmp/replay-pbt-job-report \
           --zip /tmp/replay-pbt-job-report.zip \
           --mode "${{ inputs.mode }}" \
-          --shard "${{ inputs.shard_index }} of ${{ inputs.shard_count }}" \
+          --batch "${{ inputs.batch_index }} of ${{ inputs.batch_count }}" \
           --target-count "1" \
           --artifact-name "replay-pbt-job-report-${{ matrix.artifact_slug }}" \
           | tee "$GITHUB_STEP_SUMMARY"
@@ -684,11 +692,11 @@ jobs:
 
 
   summarize:
-    name: Collect replay-PBT results
+    name: Collect replay validation results
     needs:
     - compute-matrix
     - replay-pbt
-    if: ${{ !inputs.dispatch_shards && !inputs.combine_reports && always() && needs.compute-matrix.outputs.matrix != '[]' }}
+    if: ${{ !inputs.dispatch_batches && !inputs.combine_reports && always() && needs.compute-matrix.outputs.matrix != '[]' }}
     runs-on: ubuntu-22.04
     permissions:
       contents: read
@@ -711,7 +719,7 @@ jobs:
         path: replay-pbt-findings
         merge-multiple: false
 
-    - name: Build Replay PBT report
+    - name: Build Replay validation report
       run: |
         python .github/workflows/scripts/replay-pbt-report.py \
           --results replay-pbt-results \
@@ -719,7 +727,7 @@ jobs:
           --out-dir replay-pbt-report \
           --zip replay-pbt-report.zip \
           --mode "${{ inputs.mode }}" \
-          --shard "${{ inputs.shard_index }} of ${{ inputs.shard_count }}" \
+          --batch "${{ inputs.batch_index }} of ${{ inputs.batch_count }}" \
           --target-count "${{ needs.compute-matrix.outputs.count }}" \
           | tee "$GITHUB_STEP_SUMMARY"
 
@@ -735,27 +743,27 @@ jobs:
         retention-days: 1
 
   auto-combine:
-    name: Dispatch combined Replay PBT report
+    name: Dispatch combined Replay validation report
     needs:
     - summarize
-    if: ${{ !inputs.dispatch_shards && !inputs.combine_reports && inputs.auto_combine && always() }}
+    if: ${{ !inputs.dispatch_batches && !inputs.combine_reports && inputs.auto_combine && always() }}
     runs-on: ubuntu-22.04
     permissions:
       actions: write
       contents: read
     steps:
-    - name: Wait for sibling shards and dispatch combiner
+    - name: Wait for sibling batches and dispatch combiner
       uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
       env:
         RUN_GROUP: ${{ inputs.run_group }}
-        EXPECTED_SHARDS: ${{ inputs.run_group_expected_shards }}
+        EXPECTED_BATCHES: ${{ inputs.run_group_expected_batches }}
         WORKER_REF: ${{ github.ref_name }}
       with:
         script: |
           const runGroup = process.env.RUN_GROUP;
-          const expected = Number(process.env.EXPECTED_SHARDS || '0');
+          const expected = Number(process.env.EXPECTED_BATCHES || '0');
           if (!runGroup || expected < 1) {
-            core.info('No run_group or expected shard count; skipping auto-combine.');
+            core.info('No run_group or expected batch count; skipping auto-combine.');
             return;
           }
           const workflow_id = 'zz-test-worker-poc.yaml';
@@ -773,11 +781,11 @@ jobs:
             matched = response.data.workflow_runs.filter(run =>
               run.display_title &&
               run.display_title.includes(runGroup) &&
-              run.display_title.includes('shard ') &&
+              run.display_title.includes('batch ') &&
               !run.display_title.includes('dispatch') &&
               !run.display_title.includes('combine')
             );
-            core.info(`Found ${matched.length}/${expected} shard run(s) for ${runGroup}: ${matched.map(run => `${run.id}:${run.status}`).join(', ')}`);
+            core.info(`Found ${matched.length}/${expected} batch run(s) for ${runGroup}: ${matched.map(run => `${run.id}:${run.status}`).join(', ')}`);
             const completeEnough = matched.every(run => run.status === 'completed' || run.id === context.runId);
             if (matched.length >= expected && completeEnough) {
               break;
@@ -785,7 +793,7 @@ jobs:
             await sleep(60_000);
           }
           if (matched.length < expected || !matched.every(run => run.status === 'completed' || run.id === context.runId)) {
-            throw new Error(`Timed out waiting for ${expected} completed shard runs for ${runGroup}`);
+            throw new Error(`Timed out waiting for ${expected} completed batch runs for ${runGroup}`);
           }
           const runIds = matched
             .sort((a, b) => a.display_title.localeCompare(b.display_title))
@@ -803,26 +811,26 @@ jobs:
               base_ref: 'origin/master',
               max_targets: '1',
               allow_truncation: 'true',
-              shard_index: '0',
-              shard_count: '1',
+              batch_index: '0',
+              batch_count: '1',
               readings: '2',
-              dispatch_shards: 'false',
+              dispatch_batches: 'false',
               worker_ref: '',
               dry_run: 'false',
-              shard_indices: '',
+              batch_indices: '',
               run_group: runGroup,
-              run_group_expected_shards: String(expected),
+              run_group_expected_batches: String(expected),
               auto_combine: 'false',
               combine_reports: 'true',
               report_run_ids: runIds,
             },
           });
           await core.summary
-            .addHeading('Replay PBT auto-combine')
+            .addHeading('Replay validation auto-combine')
             .addRaw(`Dispatched combiner for run group \`${runGroup}\`.\n\n`)
             .addTable([
               [
-                {data: 'Shard run', header: true},
+                {data: 'Batch run', header: true},
                 {data: 'Conclusion', header: true},
                 {data: 'Link', header: true},
               ],
@@ -831,13 +839,13 @@ jobs:
                 .map(run => [
                   `\`${run.id}\` ${run.display_title}`,
                   `\`${run.conclusion || run.status}\``,
-                  `<a href="${run.html_url}">Open shard</a>`,
+                  `<a href="${run.html_url}">Open batch</a>`,
                 ]),
             ])
             .write();
 
   combine-reports:
-    name: Combine Replay PBT shard reports
+    name: Combine Replay validation batch reports
     if: ${{ inputs.combine_reports }}
     runs-on: ubuntu-22.04
     permissions:
@@ -848,7 +856,7 @@ jobs:
       with:
         fetch-depth: 1
 
-    - name: Build combined Replay PBT report
+    - name: Build combined Replay validation report
       env:
         GH_TOKEN: ${{ github.token }}
       run: |

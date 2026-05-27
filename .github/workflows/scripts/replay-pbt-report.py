@@ -2,10 +2,10 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Build sanitized Replay PBT human and machine reports.
+"""Build sanitized Replay validation human and machine reports.
 
 This script intentionally emits an allowlisted report bundle. It parses the
-small result/finding artifacts produced by Replay PBT jobs, classifies and
+small result/finding artifacts produced by Replay validation jobs, classifies and
 summarizes them, and writes a single zip containing only curated report files.
 It must not copy arbitrary replay cache, capture, config, or log artifacts.
 """
@@ -38,8 +38,8 @@ PRIVATE_KEY_TEXT_RE = re.compile(r"(?is)-----BEGIN [A-Z ]*PRIVATE KEY-----.*?---
 URL_CREDENTIAL_TEXT_RE = re.compile(r"(?i)(https?://)[^\s/@:]+:[^\s/@]+@")
 
 CATEGORY_DEFINITIONS = {
-    "passed": ("✅", "Passed", "All Replay PBT checks passed."),
-    "failed-before-replay-pbt": ("🧱", "Setup or cache failed", "The job failed while preparing the target, restoring/seeding the cache, or running compare-check. Replay PBT did not run cleanly."),
+    "passed": ("✅", "Passed", "All Replay validation checks passed."),
+    "failed-before-replay-pbt": ("🧱", "Setup or cache failed", "The job failed while preparing the target, restoring/seeding the cache, or running compare-check. Replay validation did not run cleanly."),
     "skipped-missing-cache": ("⏭️", "Not tested: missing cache", "No replay cache was available and cache seeding was disabled for this run."),
     "ordering-only-nondeterminism": ("🔢", "Same output, different order", "The replay emitted the same data, but list ordering changed between runs."),
     "replay-nondeterminism": ("🧬", "Replay output changed", "The same fixture and code emitted different normalized data between runs."),
@@ -54,7 +54,7 @@ CATEGORY_DEFINITIONS = {
     "invalid-metric-values": ("🧮", "Invalid metric value", "The check emitted NaN, infinity, a negative monotonic count, or another invalid value."),
     "unsupported-negative": ("🚧", "Unsupported or negative fixture", "The target appears intentionally unsupported for replay or uses an expected error-path fixture."),
     "replay-harness": ("🛠️", "Replay harness issue", "The failure likely comes from adapter coverage, cache matching, fixture selection, or environment mirroring."),
-    "other-failed": ("❓", "Unclassified Replay PBT failure", "Replay PBT failed, but the report could not map it to a known category yet."),
+    "other-failed": ("❓", "Unclassified Replay validation failure", "Replay validation failed, but the report could not map it to a known category yet."),
     "unknown": ("❔", "Unknown", "The job did not report enough information to classify the result."),
 }
 
@@ -132,7 +132,7 @@ SETUP_FAILURE_DEFINITIONS = {
     ),
     "unknown-setup-failure": (
         "Unknown setup/cache failure",
-        "The target failed before Replay PBT ran, but no known setup/cache failure pattern was detected.",
+        "The target failed before Replay validation ran, but no known setup/cache failure pattern was detected.",
     ),
 }
 
@@ -173,6 +173,9 @@ STATUS_DEFINITIONS = {
     "skipped-missing-cache": ("⏭️", "Skipped: missing cache"),
     "cache-hit": ("✅", "Cache ready"),
     "seeded-cache": ("✅", "Cache seeded"),
+    "not-run": ("⏭️", "Not run"),
+    "blocked": ("🧱", "Blocked"),
+    "warning": ("⚠️", "Warning"),
 }
 
 
@@ -265,10 +268,103 @@ PROPERTY_DEFINITIONS = {
     ),
 }
 
+VALIDATION_FAMILIES = {
+    "replay-regression": {
+        "label": "Replay-backed behavior checks",
+        "description": "Runs the integration against a restored or seeded replay cache and checks emitted output, determinism, release diffs, metadata contracts, and metric values.",
+    },
+    "replay-metamorphic": {
+        "label": "Replay-backed input invariance checks",
+        "description": "Copies the replay cache, applies semantically neutral JSON/OpenMetrics mutations, and verifies the check emits the same normalized output.",
+    },
+    "replay-coverage": {
+        "label": "Replay fixture coverage signals",
+        "description": "Uses replay output as evidence for fixture quality. These findings usually mean the fixture needs to cover more of the integration surface.",
+    },
+    "static-contract": {
+        "label": "Static integration asset checks",
+        "description": "Inspects repository metadata/assets without needing a replay cache. These are global integration contract checks that happen to be reported with the replay run.",
+    },
+}
+
+PROPERTY_VALIDATION_FAMILIES = {
+    "deterministic": "replay-regression",
+    "latest-release-diff": "replay-regression",
+    "metadata-emitted-metrics": "replay-regression",
+    "repeated-run-tag-stability": "replay-regression",
+    "output-finite-values": "replay-regression",
+    "rate-finite-values": "replay-regression",
+    "monotonic-count-nonnegative": "replay-regression",
+    "openmetrics-label-order": "replay-metamorphic",
+    "openmetrics-comments-blank-lines": "replay-metamorphic",
+    "openmetrics-final-newline": "replay-metamorphic",
+    "openmetrics-help-text": "replay-metamorphic",
+    "openmetrics-help-removal": "replay-metamorphic",
+    "json-object-key-order": "replay-metamorphic",
+    "json-whitespace": "replay-metamorphic",
+    "json-string-escapes": "replay-metamorphic",
+    "openmetrics-cache-mutation": "replay-metamorphic",
+    "openmetrics-coverage": "replay-coverage",
+    "asset-query-tags-seen-in-replay": "replay-coverage",
+    "asset-query-metrics-in-metadata": "static-contract",
+}
+
+PROPERTY_BLOCKING_BEHAVIOR = {
+    "openmetrics-coverage": "warning",
+    "asset-query-tags-seen-in-replay": "warning",
+}
+
+PROPERTY_TYPICAL_OWNER = {
+    "replay-regression": "integration author",
+    "replay-metamorphic": "integration author or replay harness owner",
+    "replay-coverage": "fixture/replay owner",
+    "static-contract": "integration author",
+}
+
+CATEGORY_VALIDATION_FAMILIES = {
+    "asset-query-metadata": "static-contract",
+    "asset-query-replay-coverage": "replay-coverage",
+    "openmetrics-coverage": "replay-coverage",
+    "openmetrics-input-invariance": "replay-metamorphic",
+    "json-input-invariance": "replay-metamorphic",
+}
+
+
+def validation_family_for_property(property_name: Any) -> str:
+    return PROPERTY_VALIDATION_FAMILIES.get(str(property_name or ""), "replay-regression")
+
+
+def property_requires_replay_cache(property_name: Any) -> bool:
+    return validation_family_for_property(property_name) != "static-contract"
+
+
+def validation_family_for_category(category: Any) -> str:
+    return CATEGORY_VALIDATION_FAMILIES.get(str(category or ""), "replay-regression")
+
+
+def validation_family_label(family: Any) -> str:
+    key = str(family or "replay-regression")
+    return VALIDATION_FAMILIES.get(key, VALIDATION_FAMILIES["replay-regression"])["label"]
+
+
+def validation_family_description(family: Any) -> str:
+    key = str(family or "replay-regression")
+    return VALIDATION_FAMILIES.get(key, VALIDATION_FAMILIES["replay-regression"])["description"]
+
+
+def property_blocking_behavior(property_name: Any) -> str:
+    return PROPERTY_BLOCKING_BEHAVIOR.get(str(property_name or ""), "blocking")
+
+
+def property_typical_owner(property_name: Any) -> str:
+    family = validation_family_for_property(property_name)
+    return PROPERTY_TYPICAL_OWNER.get(family, "integration author")
+
+
 CATEGORY_NEXT_STEPS = {
     "passed": "No action needed for this target.",
     "failed-before-replay-pbt": "Open the setup/cache logs first. Fix the environment, cache restore, cache seeding, or compare-check failure before investigating properties.",
-    "skipped-missing-cache": "Seed or restore a replay cache for this target, then rerun Replay PBT.",
+    "skipped-missing-cache": "Seed or restore a replay cache for this target, then rerun Replay validation.",
     "ordering-only-nondeterminism": "Sort or canonicalize the affected output collection if order has no semantic meaning.",
     "replay-nondeterminism": "Look for time, random values, process state, accumulated check state, or adapter output that changes between identical replays.",
     "openmetrics-input-invariance": "Compare the original and mutated OpenMetrics fixtures. If the mutation is semantically equivalent, inspect parser or check assumptions about text formatting.",
@@ -314,6 +410,16 @@ def property_display_html(name: Any) -> str:
     if label == raw_name:
         return f"<code>{html.escape(raw_name)}</code>"
     return f"<strong>{html.escape(label)}</strong><br><small><code>{html.escape(raw_name)}</code></small>"
+
+
+def property_family_display_md(name: Any) -> str:
+    family = validation_family_for_property(name)
+    return f"{md_escape(validation_family_label(family))}<br/>{property_display_md(name)}"
+
+
+def property_family_display_html(name: Any) -> str:
+    family = validation_family_for_property(name)
+    return f"<span class='muted'>{html.escape(validation_family_label(family))}</span><br>{property_display_html(name)}"
 
 
 def sanitize_text(value: Any, *, max_len: int = MAX_TEXT) -> str:
@@ -537,6 +643,7 @@ def compact_row(row: dict[str, Any]) -> dict[str, Any]:
         "status": row.get("status", "unknown"),
         "category": category,
         "category_label": CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS["unknown"])[1],
+        "validation_family": validation_family_for_category(category),
         "integration": row.get("integration", ""),
         "environment": row.get("environment", ""),
         "target": target_slug(row),
@@ -544,8 +651,8 @@ def compact_row(row: dict[str, Any]) -> dict[str, Any]:
         "target_ref": row.get("target_ref", ""),
         "mode": row.get("mode", ""),
         "readings": row.get("readings", ""),
-        "shard_index": row.get("shard_index", ""),
-        "shard_count": row.get("shard_count", ""),
+        "batch_index": row.get("batch_index", ""),
+        "batch_count": row.get("batch_count", ""),
         "failing_property_count": len(failed_tests),
         "failing_properties": failed_tests[:20],
         "short_errors": short_errors,
@@ -592,12 +699,18 @@ def load_findings_and_coverages(root: Path) -> tuple[list[dict[str, Any]], list[
             property_status = "failed"
         elif counts.get("warnings") and property_status == "passed":
             property_status = "warning"
+        validation_family = str(manifest.get("validation_family") or validation_family_for_property(property_name))
+        requires_replay_cache = manifest.get("requires_replay_cache")
+        if not isinstance(requires_replay_cache, bool):
+            requires_replay_cache = property_requires_replay_cache(property_name)
         property_results.append(
             {
                 "target": target_slug(target),
                 "integration": target.get("integration", ""),
                 "environment": target.get("environment", ""),
                 "property": property_name,
+                "validation_family": validation_family,
+                "requires_replay_cache": requires_replay_cache,
                 "status": property_status,
             }
         )
@@ -621,6 +734,7 @@ def load_findings_and_coverages(root: Path) -> tuple[list[dict[str, Any]], list[
                     finding_row = {
                         "level": sanitize_text(finding.get("level", ""), max_len=50),
                         "property": sanitize_text(property_name, max_len=100),
+                        "validation_family": validation_family,
                         "check": sanitize_text(finding.get("check", ""), max_len=100),
                         "integration": target.get("integration", ""),
                         "environment": target.get("environment", ""),
@@ -659,6 +773,8 @@ def load_findings_and_coverages(root: Path) -> tuple[list[dict[str, Any]], list[
                 coverages.append(
                     {
                         "property": property_name,
+                        "validation_family": validation_family,
+                        "requires_replay_cache": requires_replay_cache,
                         "integration": target.get("integration", ""),
                         "environment": target.get("environment", ""),
                         "target": target_slug(target),
@@ -989,6 +1105,8 @@ def build_individual_target_markdown(
         "",
         "### Target",
         "",
+        "This table identifies the integration environment, fixture ref, target ref, and target-level outcome for the individual report.",
+        "",
         "| Field | Value |",
         "|---|---|",
         f"| Integration | `{md_escape(row.get('integration', ''))}` |",
@@ -1011,15 +1129,17 @@ def build_individual_target_markdown(
     ]
 
     lines.extend(["### Property results", ""])
+    lines.append("This section lists per-validation manifests collected for this target and shows each check's family and status.")
+    lines.append("")
     if target_properties:
         lines.extend(["| Property | Status | What it checks |", "|---|---|---|"])
         for prop in target_properties:
             prop_name = prop.get("property", "")
             lines.append(
-                f"| {property_display_md(prop_name)} | {status_icon(prop.get('status'))} {md_escape(status_label(prop.get('status')))} | {md_escape(property_description(prop_name))} |"
+                f"| {property_family_display_md(prop_name)} | {status_icon(prop.get('status'))} {md_escape(status_label(prop.get('status')))} | {md_escape(property_description(prop_name))} |"
             )
     elif row.get("status") in {"failed-before-replay-pbt", "skipped-missing-cache"}:
-        lines.append("Property tests did not run for this target. The job stopped before replay-PBT could produce per-property results.")
+        lines.append("Replay-backed validations did not run for this target. The job stopped before replay execution could produce per-property results.")
     else:
         lines.append("No per-property manifests were collected for this target. Check the workflow log if this was unexpected.")
     lines.append("")
@@ -1028,6 +1148,8 @@ def build_individual_target_markdown(
     short_errors = row.get("short_errors") or []
     if failed_tests or short_errors:
         lines.extend(["### Failure details from pytest", ""])
+        lines.append("These are compact pytest failure names and short error excerpts to orient the first investigation before opening full logs.")
+        lines.append("")
         if failed_tests:
             lines.append("Failed checks:")
             for item in failed_tests[:12]:
@@ -1042,12 +1164,14 @@ def build_individual_target_markdown(
             lines.append("")
 
     lines.extend(["### Collected findings", ""])
+    lines.append("Findings are allowlisted, sanitized records emitted by validations. They are grouped here for this target only.")
+    lines.append("")
     if target_findings:
         lines.extend(["| Level | Source | Property | Subject | Message |", "|---|---|---|---|---|"])
         for finding in target_findings[:12]:
             subject = finding_subject(finding)
             lines.append(
-                f"| `{md_escape(finding.get('level', ''))}` | {md_escape(finding_source_label(finding))} | {property_display_md(finding.get('property', ''))} | `{md_escape(subject)}` | {md_escape(finding.get('display_message') or finding.get('message', ''))} |"
+                f"| `{md_escape(finding.get('level', ''))}` | {md_escape(finding_source_label(finding))} | {property_family_display_md(finding.get('property', ''))} | `{md_escape(subject)}` | {md_escape(finding.get('display_message') or finding.get('message', ''))} |"
             )
         if len(target_findings) > 12:
             lines.append(f"| _… {len(target_findings) - 12} more_ | | | | See `findings.tsv`. |")
@@ -1057,15 +1181,19 @@ def build_individual_target_markdown(
 
     if target_coverages:
         lines.extend(["### Coverage reported for this target", ""])
+        lines.append("Coverage is a fixture-quality signal for this target; low values usually mean replay input should be broadened.")
+        lines.append("")
         lines.extend(["| Property | Endpoint → emitted | metadata.csv → emitted | Endpoint count | Metadata count |", "|---|---|---|---:|---:|"])
         for coverage in target_coverages:
             lines.append(
-                f"| {property_display_md(coverage.get('property', ''))} | {coverage_bar_md(coverage.get('endpoint_to_emitted_coverage'))} | {coverage_bar_md(coverage.get('metadata_to_emitted_coverage'))} | {coverage.get('endpoint_count') or ''} | {coverage.get('metadata_count') or ''} |"
+                f"| {property_family_display_md(coverage.get('property', ''))} | {coverage_bar_md(coverage.get('endpoint_to_emitted_coverage'))} | {coverage_bar_md(coverage.get('metadata_to_emitted_coverage'))} | {coverage.get('endpoint_count') or ''} | {coverage.get('metadata_count') or ''} |"
             )
         lines.append("")
 
     if target_release_diffs:
         lines.extend(["### Latest release comparison", ""])
+        lines.append("This target-specific diff compares the fixture-producing ref with the target ref using the same replay input.")
+        lines.append("")
         lines.extend(["| Record ref | Target ref | Changed | Collections |", "|---|---|---|---|"])
         for diff in target_release_diffs:
             changed = "Yes" if diff.get("changed") else "No"
@@ -1126,14 +1254,14 @@ def build_replay_flow_markdown(rows: list[dict[str, Any]], findings: list[dict[s
     return [
         "## What this job is doing",
         "",
-        "Replay PBT is a coverage and regression experiment for Agent integrations. Instead of starting every vendor service for every property check, it records a small fixture once, replays that fixture against the check code, and asks targeted questions about the output.",
+        "Replay validation is a coverage and regression experiment for Agent integrations. Instead of starting every vendor service for every property check, it records a small fixture once, replays that fixture against the check code, and asks targeted questions about the output.",
         "",
         "```mermaid",
         "flowchart LR",
-        f"  A[\"Pick targets<br/>{counts['targets']} in this shard\"] --> B[\"Restore replay cache\"]",
+        f"  A[\"Pick targets<br/>{counts['targets']} in this batch\"] --> B[\"Restore replay cache\"]",
         "  B -->|cache hit| C[\"Run replay PBT\"]",
         "  B -->|cache miss and seeding enabled| S[\"Seed with compare-check<br/>start E2E env, record fixture\"] --> C",
-        "  B -->|cache miss and seeding disabled| K[\"Skip target\"]",
+        "  B -->|cache miss and seeding disabled| K[\"Skip replay-backed checks<br/>run static asset checks\"]",
         f"  C --> D[\"Property checks<br/>{counts['replay_passed']} passed / {counts['replay_failed']} failed\"]",
         f"  D --> E[\"Findings<br/>{counts['findings']} findings, {counts['coverage_reports']} coverage reports\"]",
         "  E --> R[\"Report\"]",
@@ -1145,22 +1273,116 @@ def build_replay_flow_markdown(rows: list[dict[str, Any]], findings: list[dict[s
         "|---|---|",
         "| Replay cache | Sanitized input/output fixture for one integration environment and fixture ref. It is stored in GitHub Actions cache, not uploaded as a report artifact. |",
         "| Seeding | If a cache is missing and `seed_missing_caches=true`, the job starts the E2E environment and runs compare-check once to create a replay cache. |",
-        "| Replay PBT | Runs the check against cached inputs, mutates safe replay inputs, and verifies properties such as determinism, metadata consistency, and OpenMetrics coverage. |",
-        "| Findings | Small, allowlisted JSON records explaining what property failed. Raw replay caches, configs, captures, and logs are excluded from report artifacts. |",
+        "| Replay-backed validations | Run the check against cached inputs, mutate safe replay inputs, or inspect replay output for behavior and fixture-coverage signals. |",
+        "| Static asset validations | Inspect repository metadata/assets without needing a replay cache, for example dashboard or monitor metrics that must exist in metadata.csv. |",
+        "| Findings | Small, allowlisted JSON records explaining what validation failed. Raw replay caches, configs, captures, and logs are excluded from report artifacts. |",
         "",
-        "### This shard at a glance",
+        "### This batch at a glance",
         "",
-        "| Step | Result in this shard | Description |",
+        "| Step | Result in this batch | Description |",
         "|---|---:|---|",
-        f"| Targets selected | {counts['targets']} | Integration/environment pairs selected for this shard after filtering and sharding. |",
+        f"| Targets selected | {counts['targets']} | Integration/environment pairs selected for this batch after filtering and batching. |",
         f"| Cache ready | {counts['cache_ready']} | Targets with a usable replay cache, either restored from Actions cache or seeded during this run. |",
         f"| Cache blocked/skipped | {counts['cache_blocked']} | Targets that could not get a usable replay cache or were intentionally skipped because a cache was missing. |",
-        f"| Replay passed | {counts['replay_passed']} | Targets where all blocking Replay PBT properties passed. |",
-        f"| Replay failed | {counts['replay_failed']} | Targets where Replay PBT ran and at least one blocking property failed. |",
-        f"| Replay not run | {counts['replay_not_run']} | Targets that did not reach property execution because setup/cache preparation failed or was skipped. |",
+        f"| Replay passed | {counts['replay_passed']} | Targets where all blocking Replay validation properties passed. |",
+        f"| Replay failed | {counts['replay_failed']} | Targets where Replay validation ran and at least one blocking property failed. |",
+        f"| Replay not run | {counts['replay_not_run']} | Targets that did not reach replay-backed property execution because setup/cache preparation failed or was skipped. Static asset validations may still have run. |",
         f"| Finding groups | {len(group_actionable_findings(findings))} | Related findings grouped by target, property, asset source, path, and message. |",
         "",
     ]
+
+def validation_lane_status(row: dict[str, Any], property_results: list[dict[str, Any]], family: str) -> str:
+    target = row.get("target")
+    family_results = [
+        result
+        for result in property_results
+        if result.get("target") == target
+        and (result.get("validation_family") or validation_family_for_property(result.get("property"))) == family
+    ]
+    if family == "static-contract":
+        if not family_results:
+            return "not-run"
+        statuses = {str(result.get("status") or "unknown") for result in family_results}
+        if "failed" in statuses:
+            return "failed"
+        if "warning" in statuses:
+            return "warning"
+        if statuses <= {"passed"}:
+            return "passed"
+        return "unknown"
+
+    status = str(row.get("status") or "unknown")
+    if status == "passed":
+        return "passed"
+    if status == "failed":
+        return "failed"
+    if status == "failed-before-replay-pbt":
+        return "blocked"
+    if status == "skipped-missing-cache":
+        return "not-run"
+    return "unknown"
+
+
+def validation_lane_status_md(row: dict[str, Any], property_results: list[dict[str, Any]]) -> str:
+    replay_status = validation_lane_status(row, property_results, "replay-regression")
+    static_status = validation_lane_status(row, property_results, "static-contract")
+    return (
+        f"**Replay-backed:** {md_escape(status_label(replay_status))}<br/>"
+        f"**Static assets:** {md_escape(status_label(static_status))}"
+    )
+
+
+def validation_lane_status_html(row: dict[str, Any], property_results: list[dict[str, Any]]) -> str:
+    replay_status = validation_lane_status(row, property_results, "replay-regression")
+    static_status = validation_lane_status(row, property_results, "static-contract")
+    return (
+        f"<span class='pill {html.escape(replay_status)}'>Replay-backed: {html.escape(status_label(replay_status))}</span>"
+        f"<span class='pill {html.escape(static_status)}'>Static assets: {html.escape(status_label(static_status))}</span>"
+    )
+
+
+def validation_family_summary(
+    rows: list[dict[str, Any]], findings: list[dict[str, Any]], property_results: list[dict[str, Any]]
+) -> dict[str, dict[str, Any]]:
+    summary: dict[str, dict[str, Any]] = {
+        family: {"targets": set(), "properties": 0, "findings": 0, "failed_targets": 0}
+        for family in VALIDATION_FAMILIES
+    }
+    for result in property_results:
+        family = str(result.get("validation_family") or validation_family_for_property(result.get("property")))
+        entry = summary.setdefault(family, {"targets": set(), "properties": 0, "findings": 0, "failed_targets": 0})
+        entry["properties"] += 1
+        if result.get("target"):
+            entry["targets"].add(result["target"])
+    for finding in findings:
+        family = str(finding.get("validation_family") or validation_family_for_property(finding.get("property")))
+        summary.setdefault(family, {"targets": set(), "properties": 0, "findings": 0, "failed_targets": 0})["findings"] += 1
+    for row in rows:
+        if row.get("status") == "passed":
+            continue
+        family = str(row.get("validation_family") or validation_family_for_category(row.get("category")))
+        summary.setdefault(family, {"targets": set(), "properties": 0, "findings": 0, "failed_targets": 0})[
+            "failed_targets"
+        ] += 1
+    return summary
+
+
+def build_check_inventory_markdown() -> list[str]:
+    lines = [
+        "## Check inventory",
+        "",
+        "This table lists every configured validation, whether it needs a replay cache, how it affects the run, and who usually owns the next action.",
+        "",
+        "| Check | Family | Needs replay cache? | Job impact | Typical owner |",
+        "|---|---|---:|---|---|",
+    ]
+    for property_name, family in PROPERTY_VALIDATION_FAMILIES.items():
+        lines.append(
+            f"| {property_display_md(property_name)} | {md_escape(validation_family_label(family))} | {'yes' if property_requires_replay_cache(property_name) else 'no'} | {md_escape(property_blocking_behavior(property_name))} | {md_escape(property_typical_owner(property_name))} |"
+        )
+    lines.append("")
+    return lines
+
 
 def build_markdown(
     rows: list[dict[str, Any]],
@@ -1168,9 +1390,9 @@ def build_markdown(
     coverages: list[dict[str, Any]],
     *,
     mode: str,
-    shard: str,
+    batch: str,
     target_count: str,
-    shard_runs: list[dict[str, Any]] | None = None,
+    batch_runs: list[dict[str, Any]] | None = None,
     artifact_name: str = "replay-pbt-report",
     property_results: list[dict[str, Any]] | None = None,
     release_diffs: list[dict[str, Any]] | None = None,
@@ -1189,23 +1411,37 @@ def build_markdown(
     lines: list[str] = []
     lines.extend(
         [
-            "# Replay-based property testing report",
+            "# Replay validation report",
             "",
             f"**Result:** {'✅ Passed' if failed == 0 and total else '❌ Needs attention'}  ",
             f"**Mode:** `{mode}`  ",
-            f"**Shard:** `{shard}`  ",
-            f"**Targets in this shard:** `{target_count}`  ",
+            f"**Batch:** `{batch}`  ",
+            f"**Targets in this batch:** `{target_count}`  ",
             f"**Result files collected:** `{total}`  ",
             f"**Rich dashboard:** download the `{artifact_name}` artifact and open `report.html`.  ",
-            "**Replay PBT:** replay-based property checks for integration behavior.",
+            "**Replay validation:** replay-based property checks for integration behavior.",
             "",
         ]
     )
-    if current_url and not shard_runs:
-        lines.extend([f"**This shard run:** [{current_id or 'current run'}]({current_url})", ""])
-    if shard_runs:
-        lines.extend(["## Shard runs", "", "| Shard | Conclusion | Link |", "|---|---|---|"])
-        for run in shard_runs:
+    if current_url and not batch_runs:
+        lines.extend([f"**This batch run:** [{current_id or 'current run'}]({current_url})", ""])
+    lines.extend(
+        [
+            "## How to read this report",
+            "",
+            "Start with the validation-family and check-inventory sections before investigating individual failures. A target can have replay-backed checks blocked by a missing cache while static asset checks still run and report real metadata/dashboard issues.",
+            "",
+            "- **Replay-backed behavior checks** ran the integration against cached input and indicate behavior or contract regressions.",
+            "- **Replay-backed input invariance checks** mutated cached JSON/OpenMetrics input in semantically neutral ways and expect equivalent output.",
+            "- **Replay fixture coverage signals** describe gaps in what the current fixture exercises; they are usually fixture/replay work, not immediate product bugs.",
+            "- **Static integration asset checks** inspect repository metadata/assets without replay; they can fail even when replay did not run.",
+            "",
+        ]
+    )
+
+    if batch_runs:
+        lines.extend(["## Batch runs", "", "Batch runs are the parallel workflow runs that were combined into this report. Use these links to jump back to the original GitHub Actions logs for a target.", "", "| Batch | Conclusion | Link |", "|---|---|---|"])
+        for run in batch_runs:
             run_id = md_escape(run.get("run_id", ""))
             title = md_escape(run.get("display_title", ""))
             conclusion = md_escape(run.get("conclusion", ""))
@@ -1214,11 +1450,42 @@ def build_markdown(
         lines.append("")
 
     lines.extend(build_replay_flow_markdown(rows, findings, coverages))
+    lines.extend(build_check_inventory_markdown())
+
+    lines.extend(["## Validation families", ""])
+    lines.append(
+        "The report intentionally separates replay-backed checks from repository-only checks so reviewers can tell whether a finding came from replayed integration behavior, replay fixture coverage, or static metadata/assets."
+    )
+    lines.append("")
+    lines.extend(["| Family | Property runs | Targets | Failed targets | Findings | What it means |", "|---|---:|---:|---:|---:|---|"])
+    family_summary = validation_family_summary(rows, findings, property_results)
+    for family, definition in VALIDATION_FAMILIES.items():
+        entry = family_summary.get(family, {})
+        lines.append(
+            f"| **{md_escape(definition['label'])}**<br/><sub>`{md_escape(family)}`</sub> | {entry.get('properties', 0)} | {len(entry.get('targets', set()))} | {entry.get('failed_targets', 0)} | {entry.get('findings', 0)} | {md_escape(definition['description'])} |"
+        )
+    lines.append("")
+
+    lines.extend(["## Validation status by target", ""])
+    lines.append("This section separates replay-backed status from static asset status, which prevents cache misses from hiding static metadata or dashboard findings.")
+    lines.append("")
+    if rows:
+        lines.extend(["| Target | Replay-backed status | Static asset status |", "|---|---|---|"])
+        for row in rows:
+            lines.append(
+                f"| {target_link_md(row)} | {md_escape(status_label(validation_lane_status(row, property_results, 'replay-regression')))} | {md_escape(status_label(validation_lane_status(row, property_results, 'static-contract')))} |"
+            )
+    else:
+        lines.append("No targets were reported.")
+    lines.append("")
+
     if len(rows) == 1:
         lines.extend(build_individual_target_markdown(rows[0], property_results, findings, coverages, release_diffs))
     lines.extend(
         [
             "## Outcome summary",
+            "",
+            "This section counts target-level workflow outcomes. Use it to see whether targets passed, failed after replay ran, or were blocked before replay-backed checks could execute.",
             "",
             "| Status | Count | Distribution |",
             "|---|---:|---|",
@@ -1230,6 +1497,8 @@ def build_markdown(
 
 
     lines.extend(["## Triage view", ""])
+    lines.append("This section groups failed targets by likely next owner: integration behavior/contract, test setup, or replay harness/fixture work.")
+    lines.append("")
     if category_counts:
         lines.extend(["| Group | Count | Description | Categories |", "|---|---:|---|---|"])
         for group_key, definition in TRIAGE_GROUPS.items():
@@ -1249,6 +1518,8 @@ def build_markdown(
     lines.append("")
 
     lines.extend(["## Failure categories", ""])
+    lines.append("Failure categories explain the concrete symptom that put a target into the triage view. Categories are more specific than validation families.")
+    lines.append("")
     if category_counts:
         lines.extend(["| Category | Count | What it means | Example targets |", "|---|---:|---|---|"])
         examples_by_category: dict[str, list[str]] = defaultdict(list)
@@ -1279,10 +1550,11 @@ def build_markdown(
         else:
             lines.append(f"<details><summary>{title} ({len(section_groups)})</summary>")
         lines.append("")
-        lines.extend(["| Target | Finding type | Count | Examples | Message |", "|---|---|---:|---|---|"])
+        lines.extend(["| Target | Family | Finding type | Count | Examples | Message |", "|---|---|---|---:|---|---|"])
         for group in section_groups:
+            family = validation_family_for_property(group.get("property"))
             lines.append(
-                f"| {target_link_md(group)} | **{md_escape(group['property_label'])}**<br/><sub>{group_context_md(group)}</sub> | {group['count']} | {examples_md(group['subjects'])} | {md_escape(group['message'])} |"
+                f"| {target_link_md(group)} | {md_escape(validation_family_label(family))} | **{md_escape(group['property_label'])}**<br/><sub>{group_context_md(group)}</sub> | {group['count']} | {examples_md(group['subjects'])} | {md_escape(group['message'])} |"
             )
         lines.append("")
         if not initially_open:
@@ -1295,12 +1567,14 @@ def build_markdown(
     append_finding_group_table("Review warnings", warning_groups, initially_open=False)
 
     lines.extend(["## Latest release comparison", ""])
+    lines.append("This section shows replay-backed comparisons between the fixture-producing integration version and the target ref. Differences should be reviewed as intentional or accidental behavior changes.")
+    lines.append("")
     if release_diffs:
         changed_diffs = [diff for diff in release_diffs if diff.get("changed")]
         unchanged_diffs = [diff for diff in release_diffs if not diff.get("changed")]
-        lines.append("This section compares `HEAD` with the latest released integration tag using the same replay fixture. `Changed vs latest release` is the failure category for rows where `Changed` is **Yes**; this section shows both changed and unchanged comparisons.")
-        lines.append("")
         lines.extend(["### Changed outputs", ""])
+        lines.append("These targets emitted different normalized output between the fixture-producing ref and the target ref.")
+        lines.append("")
         if changed_diffs:
             lines.extend(["| Target | Record ref | Target ref | Collections |", "|---|---|---|---|"])
             for diff in changed_diffs:
@@ -1326,6 +1600,8 @@ def build_markdown(
     lines.append("")
 
     lines.extend(["## OpenMetrics coverage", ""])
+    lines.append("Coverage rows are replay fixture quality signals. Low coverage means the fixture may not exercise enough endpoint or metadata surface; it is not automatically an integration bug.")
+    lines.append("")
     if coverages:
         lines.append("Sorted by lowest `metadata.csv → emitted` coverage first, so the sparsest fixtures are easiest to spot.")
         lines.append("")
@@ -1354,6 +1630,8 @@ def build_markdown(
     ]
 
     lines.extend(["## Actionable failed targets", ""])
+    lines.append("These targets reached a non-setup failure. Review the category description and suggested next step before opening raw logs.")
+    lines.append("")
     if actionable_failed_rows:
         actionable_categories = Counter(row["category"] for row in actionable_failed_rows)
         for category, grouped_rows in sorted(
@@ -1369,12 +1647,12 @@ def build_markdown(
                 lines.append("")
                 lines.append(f"Suggested next step: {md_escape(next_step)}")
             lines.append("")
-            lines.append("| Target | Fixture | Failing properties | Failed checks | Shard |")
+            lines.append("| Target | Fixture | Failing properties | Failed checks | Batch |")
             lines.append("|---|---|---:|---|---|")
             for row in grouped_rows:
-                shard_link = f"[run]({row.get('run_url')})" if row.get("run_url") else ""
+                batch_link = f"[run]({row.get('run_url')})" if row.get("run_url") else ""
                 lines.append(
-                    f"| {target_link_md(row)} | `{md_escape(row.get('fixture_ref', ''))}` | {row.get('failing_property_count', 0)} | {failed_checks_cell_md(row)} | {shard_link} |"
+                    f"| {target_link_md(row)} | `{md_escape(row.get('fixture_ref', ''))}` | {row.get('failing_property_count', 0)} | {failed_checks_cell_md(row)} | {batch_link} |"
                 )
             lines.append("")
             lines.append("</details>")
@@ -1384,6 +1662,8 @@ def build_markdown(
         lines.append("")
 
     lines.extend(["## Setup/cache target details", ""])
+    lines.append("These targets did not get a clean replay-backed run because cache restore, cache seeding, or setup failed or was skipped.")
+    lines.append("")
     if setup_failed_rows:
         setup_groups = defaultdict(list)
         for row in setup_failed_rows:
@@ -1393,12 +1673,12 @@ def build_markdown(
             lines.append("")
             lines.append(md_escape(setup_failure_description(kind)))
             lines.append("")
-            lines.append("| Target | Fixture | Short error | Shard |")
+            lines.append("| Target | Fixture | Short error | Batch |")
             lines.append("|---|---|---|---|")
             for row in grouped_rows:
-                shard_link = f"[run]({row.get('run_url')})" if row.get("run_url") else ""
+                batch_link = f"[run]({row.get('run_url')})" if row.get("run_url") else ""
                 lines.append(
-                    f"| {target_link_md(row)} | `{md_escape(row.get('fixture_ref', ''))}` | {md_escape(row.get('summary', ''))} | {shard_link} |"
+                    f"| {target_link_md(row)} | `{md_escape(row.get('fixture_ref', ''))}` | {md_escape(row.get('summary', ''))} | {batch_link} |"
                 )
             lines.append("")
             lines.append("</details>")
@@ -1413,7 +1693,7 @@ def build_html(
     rows: list[dict[str, Any]],
     findings: list[dict[str, Any]],
     coverages: list[dict[str, Any]],
-    shard_runs: list[dict[str, Any]] | None = None,
+    batch_runs: list[dict[str, Any]] | None = None,
     property_results: list[dict[str, Any]] | None = None,
     release_diffs: list[dict[str, Any]] | None = None,
 ) -> str:
@@ -1437,10 +1717,10 @@ def build_html(
         for status, count in status_counts.most_common()
     )
     steps = [
-        ("1", "Select shard targets", f"{counts['targets']} target result(s)", "The dispatcher splits all declared integration/env pairs into shards so each workflow run stays small."),
+        ("1", "Select batch targets", f"{counts['targets']} target result(s)", "The dispatcher splits all declared integration/env pairs into batches so each workflow run stays small."),
         ("2", "Restore replay cache", f"{counts['cache_ready']} ready · {counts['cache_blocked']} blocked", "The job restores `.ddev/replay/<integration>/<env>` from GitHub Actions cache. This cache is not uploaded as a report artifact."),
         ("3", "Seed if allowed", "cache miss → compare-check", "When `seed_missing_caches=true`, the job starts the E2E env once and records a sanitized fixture for future replay."),
-        ("4", "Run Replay PBT", f"{counts['replay_passed']} passed · {counts['replay_failed']} failed", "The check runs without a live Agent against cached input, then properties mutate or inspect replay output."),
+        ("4", "Run Replay validation", f"{counts['replay_passed']} passed · {counts['replay_failed']} failed", "The check runs without a live Agent against cached input, then properties mutate or inspect replay output."),
         ("5", "Collect findings", f"{len(groups)} grouped findings", "Only lightweight allowlisted findings/results/coverage are uploaded. Raw captures, configs, logs, and replay caches are excluded."),
         ("6", "Read this report", "HTML dashboard + machine files", "The dashboard groups repeated findings for humans; JSON/TSV files remain available for deeper analysis."),
     ]
@@ -1449,13 +1729,13 @@ def build_html(
         for num, title, metric, desc in steps
     )
     seed_diagram = """
-    <svg viewBox='0 0 980 250' role='img' aria-label='Replay PBT cache seeding flow'>
+    <svg viewBox='0 0 980 250' role='img' aria-label='Replay validation cache seeding flow'>
       <defs><marker id='arrow' markerWidth='10' markerHeight='10' refX='8' refY='3' orient='auto'><path d='M0,0 L0,6 L9,3 z' fill='#57606a'/></marker></defs>
-      <rect class='box' x='20' y='80' width='145' height='70' rx='14'/><text x='92' y='108' text-anchor='middle'>Shard target</text><text x='92' y='130' text-anchor='middle' class='small'>integration + env</text>
+      <rect class='box' x='20' y='80' width='145' height='70' rx='14'/><text x='92' y='108' text-anchor='middle'>Batch target</text><text x='92' y='130' text-anchor='middle' class='small'>integration + env</text>
       <line class='arrow' x1='165' y1='115' x2='245' y2='115'/>
       <rect class='box' x='245' y='80' width='150' height='70' rx='14'/><text x='320' y='108' text-anchor='middle'>Restore cache</text><text x='320' y='130' text-anchor='middle' class='small'>GitHub Actions cache</text>
       <line class='arrow' x1='395' y1='115' x2='475' y2='80'/><text x='430' y='84' class='small'>hit</text>
-      <rect class='box ok' x='475' y='35' width='145' height='70' rx='14'/><text x='548' y='63' text-anchor='middle'>Replay PBT</text><text x='548' y='85' text-anchor='middle' class='small'>property checks</text>
+      <rect class='box ok' x='475' y='35' width='145' height='70' rx='14'/><text x='548' y='63' text-anchor='middle'>Replay validation</text><text x='548' y='85' text-anchor='middle' class='small'>property checks</text>
       <line class='arrow' x1='395' y1='130' x2='475' y2='170'/><text x='420' y='166' class='small'>miss + seed</text>
       <rect class='box warn' x='475' y='145' width='145' height='70' rx='14'/><text x='548' y='173' text-anchor='middle'>Seed cache</text><text x='548' y='195' text-anchor='middle' class='small'>start E2E + compare-check</text>
       <line class='arrow' x1='620' y1='180' x2='690' y2='95'/>
@@ -1463,23 +1743,23 @@ def build_html(
       <rect class='box' x='690' y='35' width='130' height='70' rx='14'/><text x='755' y='63' text-anchor='middle'>Findings</text><text x='755' y='85' text-anchor='middle' class='small'>allowlisted JSON</text>
       <line class='arrow' x1='820' y1='70' x2='885' y2='70'/>
       <rect class='box' x='885' y='35' width='80' height='70' rx='14'/><text x='925' y='63' text-anchor='middle'>Report</text><text x='925' y='85' text-anchor='middle' class='small'>HTML</text>
-      <line class='arrow' x1='395' y1='150' x2='690' y2='210'/><text x='475' y='232' class='small'>miss + no seeding → skipped target</text>
+      <line class='arrow' x1='395' y1='150' x2='690' y2='210'/><text x='475' y='232' class='small'>miss + no seeding → skip replay checks, run static asset checks</text>
     </svg>
     """
-    shard_rows = "".join(
-        f"<tr><td><code>{esc(run.get('run_id'))}</code></td><td>{esc(run.get('display_title'))}</td><td>{esc(run.get('conclusion'))}</td><td><a href='{esc(run.get('url'))}'>Open shard</a></td></tr>"
-        for run in (shard_runs or [])
+    batch_rows = "".join(
+        f"<tr><td><code>{esc(run.get('run_id'))}</code></td><td>{esc(run.get('display_title'))}</td><td>{esc(run.get('conclusion'))}</td><td><a href='{esc(run.get('url'))}'>Open batch</a></td></tr>"
+        for run in (batch_runs or [])
     )
     current_link = current_run_url()
     current_run_html = (
         '<a href="{}">Open the GitHub Actions run</a>'.format(esc(current_link))
         if current_link
-        else 'This report was generated for a single shard run.'
+        else 'This report was generated for a single batch run.'
     )
-    shard_section = (
-        f"<section class='card'><h2>Shard runs</h2><p>Use these links to jump from the combined report to the original shard runs.</p><table><thead><tr><th>Run ID</th><th>Title</th><th>Conclusion</th><th>Link</th></tr></thead><tbody>{shard_rows}</tbody></table></section>"
-        if shard_rows
-        else f"<section class='card'><h2>This shard</h2><p>{current_run_html}</p></section>"
+    batch_section = (
+        f"<section class='card'><h2>Batch runs</h2><p>Use these links to jump from the combined report to the original batch runs.</p><table><thead><tr><th>Run ID</th><th>Title</th><th>Conclusion</th><th>Link</th></tr></thead><tbody>{batch_rows}</tbody></table></section>"
+        if batch_rows
+        else f"<section class='card'><h2>This batch</h2><p>This report was generated for one workflow batch. Use this link to inspect the original GitHub Actions logs when a target needs more detail: {current_run_html}</p></section>"
     )
     individual_section = ""
     if len(rows) == 1:
@@ -1488,7 +1768,7 @@ def build_html(
         icon, label, description = CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS["unknown"])
         target_name = str(row.get("target", ""))
         prop_rows = "".join(
-            f"<tr><td>{property_display_html(prop.get('property'))}</td><td>{esc(status_icon(prop.get('status')))} {esc(status_label(prop.get('status')))}</td><td>{esc(property_description(prop.get('property')))}</td></tr>"
+            f"<tr><td>{property_family_display_html(prop.get('property'))}</td><td>{esc(status_icon(prop.get('status')))} {esc(status_label(prop.get('status')))}</td><td>{esc(property_description(prop.get('property')))}</td></tr>"
             for prop in property_results_for_target(property_results, target_name)
         ) or "<tr><td colspan='3'>No per-property manifests were collected for this target.</td></tr>"
         target_release_diff_rows = "".join(
@@ -1496,7 +1776,7 @@ def build_html(
             for diff in release_diffs if diff.get('target') == target_name
         ) or "<tr><td colspan='4'>No latest-release differential summary collected for this target.</td></tr>"
         target_coverage_rows = "".join(
-            f"<tr><td>{property_display_html(coverage.get('property'))}</td><td>{coverage_bar_html(coverage.get('endpoint_to_emitted_coverage'))}</td><td>{coverage_bar_html(coverage.get('metadata_to_emitted_coverage'))}</td><td>{esc(coverage.get('endpoint_count'))}</td><td>{esc(coverage.get('metadata_count'))}</td></tr>"
+            f"<tr><td>{property_family_display_html(coverage.get('property'))}</td><td>{coverage_bar_html(coverage.get('endpoint_to_emitted_coverage'))}</td><td>{coverage_bar_html(coverage.get('metadata_to_emitted_coverage'))}</td><td>{esc(coverage.get('endpoint_count'))}</td><td>{esc(coverage.get('metadata_count'))}</td></tr>"
             for coverage in coverages_for_target(coverages, target_name)
         ) or "<tr><td colspan='5'>No coverage reports collected for this target.</td></tr>"
         command = esc(replay_reproduce_command(row))
@@ -1527,6 +1807,17 @@ def build_html(
   <pre><code>{command}</code></pre>
 </section>
 """
+
+    check_inventory_rows = "".join(
+        f"<tr><td>{property_display_html(property_name)}</td><td>{esc(validation_family_label(family))}</td><td>{'yes' if property_requires_replay_cache(property_name) else 'no'}</td><td>{esc(property_blocking_behavior(property_name))}</td><td>{esc(property_typical_owner(property_name))}</td></tr>"
+        for property_name, family in PROPERTY_VALIDATION_FAMILIES.items()
+    )
+    family_summary = validation_family_summary(rows, findings, property_results)
+    family_cards = "".join(
+        f"<article class='triage'><h3>{esc(definition['label'])}</h3><strong>{entry.get('properties', 0)} property runs</strong><p>{esc(definition['description'])}</p><p class='muted'>{len(entry.get('targets', set()))} targets · {entry.get('failed_targets', 0)} failed targets · {entry.get('findings', 0)} findings</p></article>"
+        for family, definition in VALIDATION_FAMILIES.items()
+        for entry in [family_summary.get(family, {})]
+    )
 
     triage_cards = "".join(
         f"<article class='triage'><h3>{esc(definition['label'])}</h3><strong>{sum(category_counts[category] for category in category_counts if triage_group_for_category(category) == group_key)}</strong><p>{esc(definition['description'])}</p></article>"
@@ -1568,6 +1859,7 @@ def build_html(
             "<tr>"
             f"<td>{target_link_html(row)}</td>"
             f"<td>{pipeline_html}</td>"
+            f"<td>{validation_lane_status_html(row, property_results)}</td>"
             f"<td>{esc(status_icon(row['status']))} {esc(status_label(row['status']))}<br><small><code>{esc(row['status'])}</code></small></td>"
             f"<td>{esc(row['category_label'])}</td>"
             f"<td>{esc(row['summary'])}</td>"
@@ -1595,7 +1887,7 @@ def build_html(
         )
     ) or "<tr><td colspan='5'>No coverage reports collected.</td></tr>"
     return f"""<!doctype html>
-<html><head><meta charset='utf-8'><title>Replay PBT dashboard</title>
+<html><head><meta charset='utf-8'><title>Replay validation dashboard</title>
 <style>
 :root{{--ok:#1f883d;--fail:#cf222e;--warn:#bf8700;--muted:#6e7781;--line:#d0d7de;--bg:#f6f8fa;--purple:#8250df;--blue:#0969da}}
 body{{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:0;line-height:1.45;color:#1f2328;background:#f6f8fa}}
@@ -1608,20 +1900,23 @@ main{{max-width:1280px;margin:0 auto;padding:2rem}} .hero{{background:linear-gra
 .seed svg{{width:100%;height:auto}} .box{{fill:white;stroke:#8c959f;stroke-width:2}} .box.ok{{stroke:var(--ok)}} .box.warn{{stroke:var(--warn)}} .arrow{{stroke:#57606a;stroke-width:2;marker-end:url(#arrow)}} text{{font-size:15px;fill:#24292f}} text.small{{font-size:12px;fill:#57606a}}
 table{{border-collapse:collapse;width:100%;font-size:13px;background:white}}td,th{{border:1px solid var(--line);padding:.5rem;text-align:left;vertical-align:top}}th{{background:var(--bg)}} code{{background:var(--bg);padding:.1rem .25rem;border-radius:4px}} a{{color:var(--blue)}}
 .finding{{border:1px solid var(--line);border-left:5px solid var(--warn);border-radius:14px;padding:1rem;background:white;margin:.75rem 0}} .muted{{color:var(--muted)}} .badge{{background:#fff8c5;color:#633c01;border:1px solid #fae17d;border-radius:999px;padding:.1rem .45rem;display:inline-block;margin:.1rem}} .badge.error{{background:#ffebe9;color:#82071e;border-color:#ffcecb}} .badge.warn{{background:#fff8c5;color:#633c01;border-color:#fae17d}} .examples code{{margin:.12rem;display:inline-block}} .triage{{background:white;border:1px solid var(--line);border-radius:14px;padding:1rem}} .triage strong{{font-size:2rem}}
-.pill{{display:inline-block;border-radius:999px;padding:.12rem .45rem;margin:.1rem;font-size:12px;border:1px solid var(--line)}} .pill.ok{{background:#dafbe1;color:#116329;border-color:#aceebb}}.pill.fail{{background:#ffebe9;color:#82071e;border-color:#ffcecb}}.pill.warn,.pill.blocked{{background:#fff8c5;color:#633c01;border-color:#fae17d}}.pill.skipped,.pill.none{{background:#f6f8fa;color:#57606a}}
+.pill{{display:inline-block;border-radius:999px;padding:.12rem .45rem;margin:.1rem;font-size:12px;border:1px solid var(--line)}} .pill.ok,.pill.passed{{background:#dafbe1;color:#116329;border-color:#aceebb}}.pill.fail,.pill.failed{{background:#ffebe9;color:#82071e;border-color:#ffcecb}}.pill.warn,.pill.warning,.pill.blocked{{background:#fff8c5;color:#633c01;border-color:#fae17d}}.pill.skipped,.pill.none,.pill.not-run{{background:#f6f8fa;color:#57606a}}
 </style></head><body><main>
-<section class='hero'><span class='result'>{'✅ Passed' if failed == 0 and rows else '❌ Needs attention'}</span><h1>Replay-based property testing dashboard</h1><p>A view of replay-based property checks for Agent integrations. It explains the cache/seeding flow, links shards, and groups repeated findings.</p></section>
+<section class='hero'><span class='result'>{'✅ Passed' if failed == 0 and rows else '❌ Needs attention'}</span><h1>Replay validation dashboard</h1><p>A view of replay-based property checks for Agent integrations. It explains the cache/seeding flow, links batches, and groups repeated findings.</p></section>
 <section class='grid'>{status_cards}<div class='stat'><span>Finding groups</span><strong>{len(groups)}</strong></div><div class='stat'><span>Coverage reports</span><strong>{len(coverages)}</strong></div></section>
-<section class='card'><h2>How the concept works</h2><div class='flow'>{step_cards}</div></section>
-<section class='card seed'><h2>Cache seeding flow</h2><p>Seeding is only used when the replay cache is missing and the workflow input permits it. The generated cache stays in GitHub Actions cache; the report uploads only lightweight findings/results.</p>{seed_diagram}</section>
-{shard_section}
+<section class='card'><h2>How to read this report</h2><p>Start with validation families and the check inventory. Replay-backed checks need a usable cache; static asset checks can still run and fail without one.</p><ul><li>Behavior and input-invariance failures usually need integration or replay-harness investigation.</li><li>Coverage signals usually mean the fixture needs more representative input.</li><li>Static asset findings are repository metadata/dashboard contract issues.</li></ul></section>
+<section class='card'><h2>How the concept works</h2><p>The workflow selects integration/environment targets, prepares replay input when possible, runs validation families, then uploads only lightweight report artifacts.</p><div class='flow'>{step_cards}</div></section>
+<section class='card seed'><h2>Cache seeding flow</h2><p>Seeding is only used when the replay cache is missing and the workflow input permits it. Static asset/metadata checks can still run without a cache. The generated cache stays in GitHub Actions cache; the report uploads only lightweight findings/results.</p>{seed_diagram}</section>
+<section class='card'><h2>Check inventory</h2><p>This table lists every configured validation, whether it needs a replay cache, how it affects the run, and who usually owns the next action.</p><table><thead><tr><th>Check</th><th>Family</th><th>Needs replay cache?</th><th>Job impact</th><th>Typical owner</th></tr></thead><tbody>{check_inventory_rows}</tbody></table></section>
+{batch_section}
 {individual_section}
-<section class='card'><h2>Triage view</h2><div class='grid'>{triage_cards}</div></section>
-<section class='card'><h2>Failure categories</h2><table><thead><tr><th>Category</th><th>Count</th><th>Meaning</th></tr></thead><tbody>{category_rows or '<tr><td colspan="3">No failures</td></tr>'}</tbody></table></section>
+<section class='card'><h2>Validation families</h2><p>Replay-backed behavior checks, replay fixture coverage signals, and static metadata/assets checks are separated here so reviewers know what evidence each finding used.</p><div class='grid'>{family_cards}</div></section>
+<section class='card'><h2>Triage view</h2><p>This section groups failed targets by likely next owner: integration behavior/contract, setup, or replay harness/fixture work.</p><div class='grid'>{triage_cards}</div></section>
+<section class='card'><h2>Failure categories</h2><p>Failure categories explain the concrete symptom that put a target into the triage view. Categories are more specific than validation families.</p><table><thead><tr><th>Category</th><th>Count</th><th>Meaning</th></tr></thead><tbody>{category_rows or '<tr><td colspan="3">No failures</td></tr>'}</tbody></table></section>
 <section class='card'><h2>Property findings</h2><p>Errors are blocking property failures. Warnings are review or coverage signals. Repeated metric/tag rows are collapsed; use <code>findings.tsv</code> for raw rows.</p>{finding_cards}</section>
-<section class='card'><h2>Targets by workflow step</h2><table><thead><tr><th>Target</th><th>Pipeline state</th><th>Status</th><th>Category</th><th>Summary</th><th>Shard</th></tr></thead><tbody>{target_rows}</tbody></table></section>
-<section class='card'><h2>Latest release comparison</h2><p><strong>Changed outputs</strong></p><table><thead><tr><th>Target</th><th>Record ref</th><th>Target ref</th><th>Collections</th></tr></thead><tbody>{changed_release_diff_rows}</tbody></table><details><summary>✅ Unchanged outputs</summary><table><thead><tr><th>Target</th><th>Record ref</th><th>Target ref</th></tr></thead><tbody>{unchanged_release_diff_rows}</tbody></table></details></section>
-<section class='card'><h2>OpenMetrics coverage</h2><p>Sorted by lowest metadata.csv → emitted coverage first.</p><table><thead><tr><th>Target</th><th>metadata.csv → emitted</th><th>Endpoint → emitted</th><th>Endpoint count</th><th>Metadata count</th></tr></thead><tbody>{coverage_rows}</tbody></table></section>
+<section class='card'><h2>Targets by workflow step</h2><p>This table shows both the mechanical workflow state and the separate replay/static validation statuses for each target.</p><table><thead><tr><th>Target</th><th>Pipeline state</th><th>Validation lanes</th><th>Status</th><th>Category</th><th>Summary</th><th>Batch</th></tr></thead><tbody>{target_rows}</tbody></table></section>
+<section class='card'><h2>Latest release comparison</h2><p>This section shows replay-backed comparisons between the fixture-producing integration version and the target ref. Differences should be reviewed as intentional or accidental behavior changes.</p><p><strong>Changed outputs</strong></p><table><thead><tr><th>Target</th><th>Record ref</th><th>Target ref</th><th>Collections</th></tr></thead><tbody>{changed_release_diff_rows}</tbody></table><details><summary>✅ Unchanged outputs</summary><table><thead><tr><th>Target</th><th>Record ref</th><th>Target ref</th></tr></thead><tbody>{unchanged_release_diff_rows}</tbody></table></details></section>
+<section class='card'><h2>OpenMetrics coverage</h2><p>Coverage rows are replay fixture quality signals sorted by lowest metadata.csv → emitted coverage first. Low coverage is not automatically an integration bug.</p><table><thead><tr><th>Target</th><th>metadata.csv → emitted</th><th>Endpoint → emitted</th><th>Endpoint count</th><th>Metadata count</th></tr></thead><tbody>{coverage_rows}</tbody></table></section>
 </main></body></html>"""
 
 def write_json(path: Path, data: Any) -> None:
@@ -1647,6 +1942,7 @@ def write_zip(zip_path: Path, report_dir: Path) -> None:
         "failure-categories.json",
         "failure-categories.tsv",
         "property-results.json",
+        "property-results.tsv",
         "findings.json",
         "findings.tsv",
         "coverage-summary.json",
@@ -1667,7 +1963,7 @@ def main() -> None:
     parser.add_argument("--out-dir", type=Path, required=True)
     parser.add_argument("--zip", type=Path, required=True)
     parser.add_argument("--mode", default="")
-    parser.add_argument("--shard", default="")
+    parser.add_argument("--batch", default="")
     parser.add_argument("--target-count", default="")
     parser.add_argument("--artifact-name", default="replay-pbt-report")
     args = parser.parse_args()
@@ -1687,7 +1983,7 @@ def main() -> None:
         "schema_version": 1,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "mode": args.mode,
-        "shard": args.shard,
+        "batch": args.batch,
         "target_count": args.target_count,
         "result_files_collected": len(rows),
         "status_counts": dict(status_counts),
@@ -1712,7 +2008,7 @@ def main() -> None:
         findings,
         coverages,
         mode=args.mode,
-        shard=args.shard,
+        batch=args.batch,
         target_count=args.target_count,
         artifact_name=args.artifact_name,
         property_results=property_results,
@@ -1732,10 +2028,11 @@ def main() -> None:
     write_json(args.out_dir / "release-diffs.json", release_diffs)
 
     write_tsv(args.out_dir / "summary.tsv", [summary], list(summary.keys()))
-    write_tsv(args.out_dir / "targets.tsv", rows, ["status", "category", "category_label", "integration", "environment", "target", "fixture_ref", "target_ref", "failing_property_count", "summary"])
+    write_tsv(args.out_dir / "targets.tsv", rows, ["status", "category", "category_label", "validation_family", "integration", "environment", "target", "fixture_ref", "target_ref", "failing_property_count", "summary"])
     write_tsv(args.out_dir / "failure-categories.tsv", categories, ["category", "label", "count", "description"])
-    write_tsv(args.out_dir / "findings.tsv", findings, ["level", "property", "check", "integration", "environment", "target", "asset_type", "collection", "metric", "tag_key", "path", "message", "display_message", "query"])
-    write_tsv(args.out_dir / "coverage-summary.tsv", coverages, ["property", "integration", "environment", "target", "endpoint_count", "endpoint_emitted_count", "endpoint_missing_count", "endpoint_to_emitted_coverage", "metadata_count", "metadata_emitted_count", "metadata_unemitted_count", "metadata_to_emitted_coverage"])
+    write_tsv(args.out_dir / "property-results.tsv", property_results, ["status", "property", "validation_family", "requires_replay_cache", "integration", "environment", "target"])
+    write_tsv(args.out_dir / "findings.tsv", findings, ["level", "property", "validation_family", "check", "integration", "environment", "target", "asset_type", "collection", "metric", "tag_key", "path", "message", "display_message", "query"])
+    write_tsv(args.out_dir / "coverage-summary.tsv", coverages, ["property", "validation_family", "requires_replay_cache", "integration", "environment", "target", "endpoint_count", "endpoint_emitted_count", "endpoint_missing_count", "endpoint_to_emitted_coverage", "metadata_count", "metadata_emitted_count", "metadata_unemitted_count", "metadata_to_emitted_coverage"])
     write_tsv(args.out_dir / "release-diffs.tsv", release_diffs, ["integration", "environment", "target", "record_ref", "target_ref", "changed", "incomplete", "changed_collections", "run_id", "run_url", "job_url"])
 
     write_zip(args.zip, args.out_dir)

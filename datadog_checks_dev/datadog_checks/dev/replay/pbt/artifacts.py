@@ -15,8 +15,10 @@ def write_property_result(
     artifacts: list[dict[str, str]],
     status: str = 'passed',
     counts: dict[str, Any] | None = None,
+    validation_family: str | None = None,
+    requires_replay_cache: bool | None = None,
 ) -> None:
-    """Write a small manifest describing artifacts emitted by one replay-PBT property.
+    """Write a small manifest describing artifacts emitted by one replay validation property.
 
     CI aggregation consumes this manifest instead of maintaining hard-coded lists
     of property-specific output filenames. Artifact paths are relative to
@@ -30,6 +32,8 @@ def write_property_result(
                 'status': status,
                 'artifacts': artifacts,
                 'counts': counts or {},
+                **({} if validation_family is None else {'validation_family': validation_family}),
+                **({} if requires_replay_cache is None else {'requires_replay_cache': requires_replay_cache}),
             },
             indent=2,
             sort_keys=True,

@@ -2,9 +2,9 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Build a replay-PBT GitHub Actions matrix.
+"""Build a replay validation GitHub Actions matrix.
 
-This intentionally reuses the existing CI matrix script so replay-PBT targets
+This intentionally reuses the existing CI matrix script so replay validation targets
 match the integration E2E envs that normal CI knows how to run. The output is a
 JSON list suitable for `matrix.include`.
 """
@@ -110,8 +110,8 @@ def main() -> None:
     parser.add_argument('--readings', default='2')
     parser.add_argument('--max-targets', type=int, default=200)
     parser.add_argument('--allow-truncation', action='store_true')
-    parser.add_argument('--shard-index', type=int, default=0)
-    parser.add_argument('--shard-count', type=int, default=1)
+    parser.add_argument('--batch-index', type=int, default=0)
+    parser.add_argument('--batch-count', type=int, default=1)
     parser.add_argument('--platform', default='linux')
     args = parser.parse_args()
 
@@ -129,7 +129,7 @@ def main() -> None:
         if not integration or not environment:
             continue
         if not is_safe_path_component(integration) or not is_safe_path_component(environment):
-            raise ValueError(f'Unsafe replay-PBT target path component: {integration!r}:{environment!r}')
+            raise ValueError(f'Unsafe replay validation target path component: {integration!r}:{environment!r}')
         if platform != args.platform:
             continue
         if integration in {'ddev', 'datadog_checks_base', 'datadog_checks_dev', 'datadog_checks_downloader'}:
@@ -156,31 +156,31 @@ def main() -> None:
             }
         )
 
-    if args.shard_count < 1:
-        raise ValueError('--shard-count must be >= 1')
-    if args.shard_index < 0 or args.shard_index >= args.shard_count:
-        raise ValueError('--shard-index must satisfy 0 <= index < count')
+    if args.batch_count < 1:
+        raise ValueError('--batch-count must be >= 1')
+    if args.batch_index < 0 or args.batch_index >= args.batch_count:
+        raise ValueError('--batch-index must satisfy 0 <= index < count')
 
-    replay_matrix = [row for index, row in enumerate(replay_matrix) if index % args.shard_count == args.shard_index]
+    replay_matrix = [row for index, row in enumerate(replay_matrix) if index % args.batch_count == args.batch_index]
     total = len(replay_matrix)
     if total > args.max_targets and not args.allow_truncation:
-        required_shards = math.ceil(total / args.max_targets)
+        required_batches = math.ceil(total / args.max_targets)
         raise SystemExit(
-            f'Replay PBT selected {total} targets after sharding, but max_targets={args.max_targets}. '\
+            f'Replay validation selected {total} targets after batching, but max_targets={args.max_targets}. '\
             'No matrix was emitted because truncation is disabled. '\
-            f'Use shard_count>={required_shards} and dispatch every shard_index, increase max_targets, '\
+            f'Use batch_count>={required_batches} and dispatch every batch_index, increase max_targets, '\
             'or pass --allow-truncation for an intentional partial run.'
         )
 
     if total > args.max_targets:
         print(
-            f'WARNING: truncating replay-PBT matrix from {total} to {args.max_targets} targets', file=sys.stderr
+            f'WARNING: truncating replay validation matrix from {total} to {args.max_targets} targets', file=sys.stderr
         )
         replay_matrix = replay_matrix[: args.max_targets]
 
     print(json.dumps(replay_matrix, separators=(',', ':')))
-    print(f'Replay PBT targets after sharding before cap: {total}', file=sys.stderr)
-    print(f'Replay PBT targets emitted: {len(replay_matrix)}', file=sys.stderr)
+    print(f'Replay validation targets after batching before cap: {total}', file=sys.stderr)
+    print(f'Replay validation targets emitted: {len(replay_matrix)}', file=sys.stderr)
 
 
 if __name__ == '__main__':

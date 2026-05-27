@@ -28,7 +28,7 @@ combine = load_module('replay_pbt_combine_under_test', 'replay-pbt-combine-repor
 
 
 class ReplayPbtReportTests(unittest.TestCase):
-    def test_html_links_shard_runs_without_nested_fstring_syntax(self):
+    def test_html_links_batch_runs_without_nested_fstring_syntax(self):
         rows = [
             {
                 'target': 'argocd:py3.13-2.4.7',
@@ -41,11 +41,11 @@ class ReplayPbtReportTests(unittest.TestCase):
                 'run_url': 'https://github.com/DataDog/integrations-core/actions/runs/1',
             }
         ]
-        shard_runs = [
+        batch_runs = [
             {
                 'run_id': '1',
                 'url': 'https://github.com/DataDog/integrations-core/actions/runs/1',
-                'display_title': 'Replay PBT POC / all-declared / shard 11 of 227 / test-group',
+                'display_title': 'Replay validation POC / all-declared / batch 11 of 227 / test-group',
                 'conclusion': 'success',
             }
         ]
@@ -55,15 +55,15 @@ class ReplayPbtReportTests(unittest.TestCase):
             [],
             [],
             mode='all-declared',
-            shard='combined 1 shard runs',
+            batch='combined 1 batch runs',
             target_count='1',
-            shard_runs=shard_runs,
+            batch_runs=batch_runs,
         )
-        html = report.build_html(markdown, rows, [], [], shard_runs=shard_runs)
+        html = report.build_html(markdown, rows, [], [], batch_runs=batch_runs)
 
-        self.assertIn('## Shard runs', markdown)
+        self.assertIn('## Batch runs', markdown)
         self.assertIn('https://github.com/DataDog/integrations-core/actions/runs/1', markdown)
-        self.assertIn('Shard runs', html)
+        self.assertIn('Batch runs', html)
         self.assertIn('Targets by workflow step', html)
         self.assertIn('href="https://github.com/DataDog/integrations-core/actions/runs/1"', html)
 

@@ -2,7 +2,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Fail if Replay PBT artifacts contain high-confidence secret patterns."""
+"""Fail if replay validation artifacts contain high-confidence secret patterns."""
 
 from __future__ import annotations
 
@@ -138,14 +138,14 @@ def main() -> int:
         findings.extend(scan_text(path, data))
 
     if findings:
-        print('Replay PBT artifact secret scan failed:', file=sys.stderr)
+        print('Replay validation artifact secret scan failed:', file=sys.stderr)
         for finding in findings[:100]:
             print(f'- {finding.path}: {finding.kind}: {finding.detail}', file=sys.stderr)
         if len(findings) > 100:
             print(f'- ... {len(findings) - 100} more findings', file=sys.stderr)
         return 1
 
-    print('Replay PBT artifact secret scan passed')
+    print('Replay validation artifact secret scan passed')
     return 0
 
 
