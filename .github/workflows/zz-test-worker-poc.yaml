@@ -409,6 +409,7 @@ jobs:
       run: |
         set -euo pipefail
         mkdir -p "$REPLAY_PBT_RESULT_DIR"
+        exec > >(tee "$REPLAY_PBT_RESULT_DIR/prepare.log") 2>&1
         result="$REPLAY_PBT_RESULT_DIR/result.json"
 
         if ddev env replay-pbt "$REPLAY_PBT_INTEGRATION" "$REPLAY_PBT_ENVIRONMENT" \
@@ -539,9 +540,33 @@ jobs:
           exit 0
         fi
         python - <<'PY' > "$REPLAY_PBT_RESULT_DIR/result.json"
-        import json, os
+        import json
+        import os
+        import re
+        from pathlib import Path
+
+        log_path = Path(os.environ["REPLAY_PBT_RESULT_DIR"]) / "prepare.log"
+        text = log_path.read_text(errors="replace") if log_path.is_file() else ""
+        short_errors = []
+        for line in text.splitlines():
+            clean = re.sub(r'\x1b\[[0-9;]*m', '', line).strip()
+            if not clean:
+                continue
+            lowered = clean.lower()
+            if (
+                "error:" in lowered
+                or "traceback" in lowered
+                or "failed" in lowered
+                or "did not produce capture.json" in lowered
+                or "unable to find a suitable replay cache" in lowered
+            ):
+                short_errors.append(clean[:500])
+            if len(short_errors) >= 12:
+                break
+
         print(json.dumps({
             "status": "failed-before-replay-pbt",
+            "short_errors": short_errors,
             "integration": os.environ["REPLAY_PBT_INTEGRATION"],
             "environment": os.environ["REPLAY_PBT_ENVIRONMENT"],
             "fixture_ref": os.environ["REPLAY_PBT_FIXTURE_REF"],

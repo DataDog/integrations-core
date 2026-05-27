@@ -58,6 +58,48 @@ CATEGORY_DEFINITIONS = {
     "unknown": ("❔", "Unknown", "The job did not report enough information to classify the result."),
 }
 
+
+TRIAGE_GROUPS = {
+    "functional": {
+        "label": "Likely functional or contract issue",
+        "description": "The check or integration assets appear to emit, document, or preserve behavior differently than expected.",
+        "categories": {
+            "release-differential",
+            "metadata-contract",
+            "asset-query-metadata",
+            "invalid-metric-values",
+            "openmetrics-input-invariance",
+            "json-input-invariance",
+        },
+    },
+    "testing": {
+        "label": "Likely integration test setup issue",
+        "description": "The target did not get a clean replay run because setup, cache restore, cache seeding, or the fixture environment failed.",
+        "categories": {"failed-before-replay-pbt", "skipped-missing-cache", "unsupported-negative"},
+    },
+    "replay": {
+        "label": "Likely replay coverage or harness issue",
+        "description": "The replay fixture or harness likely needs broader coverage, more normalization, or adapter support before this should be treated as an integration bug.",
+        "categories": {
+            "ordering-only-nondeterminism",
+            "replay-nondeterminism",
+            "asset-query-replay-coverage",
+            "openmetrics-coverage",
+            "tag-state-stability",
+            "replay-harness",
+            "other-failed",
+            "unknown",
+        },
+    },
+}
+
+
+def triage_group_for_category(category: str) -> str:
+    for group, definition in TRIAGE_GROUPS.items():
+        if category in definition["categories"]:
+            return group
+    return "replay"
+
 STATUS_DEFINITIONS = {
     "passed": ("✅", "Passed"),
     "failed": ("❌", "Property failure"),
@@ -743,15 +785,74 @@ def group_actionable_findings(findings: list[dict[str, Any]]) -> list[dict[str, 
                 "run_url": finding.get("run_url", ""),
                 "job_url": finding.get("job_url", ""),
                 "count": 0,
+                "error_count": 0,
+                "warning_count": 0,
                 "subjects": [],
             },
         )
         group["count"] += 1
+        level = str(finding.get("level", "")).lower()
+        if level == "error":
+            group["error_count"] += 1
+        elif level in {"warning", "warn"}:
+            group["warning_count"] += 1
         subject = finding_subject(finding)
         if subject and subject not in group["subjects"] and len(group["subjects"]) < 8:
             group["subjects"].append(subject)
     return sorted(groups.values(), key=lambda g: (-int(g["count"]), str(g["target"]), str(g["property"])))
 
+
+
+
+def finding_severity_md(group: dict[str, Any]) -> str:
+    errors = int(group.get("error_count") or 0)
+    warnings = int(group.get("warning_count") or 0)
+    parts = []
+    if errors:
+        parts.append(f"❌ {errors} error{'s' if errors != 1 else ''}")
+    if warnings:
+        parts.append(f"⚠️ {warnings} warning{'s' if warnings != 1 else ''}")
+    return "<br/>".join(parts) or "—"
+
+
+def finding_severity_html(group: dict[str, Any]) -> str:
+    errors = int(group.get("error_count") or 0)
+    warnings = int(group.get("warning_count") or 0)
+    parts = []
+    if errors:
+        parts.append(f"<span class='badge error'>❌ {errors} error{'s' if errors != 1 else ''}</span>")
+    if warnings:
+        parts.append(f"<span class='badge warn'>⚠️ {warnings} warning{'s' if warnings != 1 else ''}</span>")
+    return " ".join(parts) or ""
+
+
+def examples_md(subjects: list[Any], *, limit: int = 5) -> str:
+    shown = [f"`{md_escape(item)}`" for item in subjects[:limit]]
+    if len(subjects) > limit:
+        remaining = subjects[limit:]
+        shown.append(
+            "<details><summary>Show "
+            f"{len(remaining)} more</summary>"
+            + "<br/>".join(f"`{md_escape(item)}`" for item in remaining)
+            + "</details>"
+        )
+    return ", ".join(shown)
+
+
+def failed_checks_cell_md(row: dict[str, Any]) -> str:
+    checks = row.get("failing_properties") or []
+    if not checks:
+        return md_escape(row.get("summary", ""))
+    shown = [test_display_md(item) for item in checks[:3]]
+    if len(checks) <= 3:
+        return ", ".join(shown)
+    remaining = checks[3:]
+    return (
+        ", ".join(shown)
+        + f"<details><summary>Show {len(remaining)} more failed checks</summary>"
+        + "<br/>".join(test_display_md(item) for item in remaining)
+        + "</details>"
+    )
 
 def bar(count: int, total: int, width: int = 24) -> str:
     if total <= 0:
@@ -982,15 +1083,15 @@ def build_replay_flow_markdown(rows: list[dict[str, Any]], findings: list[dict[s
         "",
         "### This shard at a glance",
         "",
-        "| Step | Result in this shard |",
-        "|---|---:|",
-        f"| Targets selected | {counts['targets']} |",
-        f"| Cache ready | {counts['cache_ready']} |",
-        f"| Cache blocked/skipped | {counts['cache_blocked']} |",
-        f"| Replay passed | {counts['replay_passed']} |",
-        f"| Replay failed | {counts['replay_failed']} |",
-        f"| Replay not run | {counts['replay_not_run']} |",
-        f"| Finding groups | {len(group_actionable_findings(findings))} |",
+        "| Step | Result in this shard | Description |",
+        "|---|---:|---|",
+        f"| Targets selected | {counts['targets']} | Integration/environment pairs selected for this shard after filtering and sharding. |",
+        f"| Cache ready | {counts['cache_ready']} | Targets with a usable replay cache, either restored from Actions cache or seeded during this run. |",
+        f"| Cache blocked/skipped | {counts['cache_blocked']} | Targets that could not get a usable replay cache or were intentionally skipped because a cache was missing. |",
+        f"| Replay passed | {counts['replay_passed']} | Targets where all blocking Replay PBT properties passed. |",
+        f"| Replay failed | {counts['replay_failed']} | Targets where Replay PBT ran and at least one blocking property failed. |",
+        f"| Replay not run | {counts['replay_not_run']} | Targets that did not reach property execution because setup/cache preparation failed or was skipped. |",
+        f"| Finding groups | {len(group_actionable_findings(findings))} | Related findings grouped by target, property, asset source, path, and message. |",
         "",
     ]
 
@@ -1059,6 +1160,26 @@ def build_markdown(
         lines.append(f"| {status_icon(status)} **{md_escape(status_label(status))}**<br/><sub>`{md_escape(status)}`</sub> | {count} | `{bar(count, total)}` |")
     lines.append("")
 
+
+    lines.extend(["## Triage view", ""])
+    if category_counts:
+        lines.extend(["| Group | Count | Description | Categories |", "|---|---:|---|---|"])
+        for group_key, definition in TRIAGE_GROUPS.items():
+            group_categories = [category for category in category_counts if triage_group_for_category(category) == group_key]
+            group_count = sum(category_counts[category] for category in group_categories)
+            if not group_count:
+                continue
+            category_labels = ", ".join(
+                f"{CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS['unknown'])[0]} {md_escape(CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS['unknown'])[1])} ({category_counts[category]})"
+                for category in group_categories
+            )
+            lines.append(
+                f"| **{md_escape(definition['label'])}** | {group_count} | {md_escape(definition['description'])} | {category_labels} |"
+            )
+    else:
+        lines.append("No failed targets to triage.")
+    lines.append("")
+
     lines.extend(["## Failure categories", ""])
     if category_counts:
         lines.extend(["| Category | Count | What it means | Example targets |", "|---|---:|---|---|"])
@@ -1075,19 +1196,26 @@ def build_markdown(
     lines.append("")
 
     lines.extend(["## Actionable finding groups", ""])
+    lines.append("These are both errors and warnings emitted by Replay PBT properties. Errors are blocking property failures. Warnings are suspicious or coverage-related findings that are useful to review but may not fail the job unless warnings-as-errors is enabled.")
+    lines.append("")
     if groups:
-        lines.append("Findings are grouped for humans. Repeated metric/tag rows are collapsed into one line with examples.")
-        lines.append("")
-        lines.extend(["| Target | Finding type | Count | Examples | Message |", "|---|---|---:|---|---|"])
+        lines.extend(["| Target | Severity | Finding type | Count | Examples | Message |", "|---|---|---|---:|---|---|"])
         for group in groups[:12]:
-            examples = ", ".join(f"`{md_escape(item)}`" for item in group["subjects"][:5])
-            if group["count"] > len(group["subjects"][:5]):
-                examples += f", +{group['count'] - len(group['subjects'][:5])} more"
             lines.append(
-                f"| {target_link_md(group)} | **{md_escape(group['property_label'])}**<br/><sub>{group_context_md(group)}</sub> | {group['count']} | {examples} | {md_escape(group['message'])} |"
+                f"| {target_link_md(group)} | {finding_severity_md(group)} | **{md_escape(group['property_label'])}**<br/><sub>{group_context_md(group)}</sub> | {group['count']} | {examples_md(group['subjects'])} | {md_escape(group['message'])} |"
             )
         if len(groups) > 12:
-            lines.append(f"\n_… {len(groups) - 12} more grouped finding rows in `report.html` and `findings.tsv`._")
+            remaining = groups[12:]
+            lines.append("")
+            lines.append(f"<details><summary>🔎 More actionable finding groups ({len(remaining)})</summary>")
+            lines.append("")
+            lines.extend(["| Target | Severity | Finding type | Count | Examples | Message |", "|---|---|---|---:|---|---|"])
+            for group in remaining:
+                lines.append(
+                    f"| {target_link_md(group)} | {finding_severity_md(group)} | **{md_escape(group['property_label'])}**<br/><sub>{group_context_md(group)}</sub> | {group['count']} | {examples_md(group['subjects'])} | {md_escape(group['message'])} |"
+                )
+            lines.append("")
+            lines.append("</details>")
     else:
         lines.append("No actionable property findings collected.")
     lines.append("")
@@ -1157,15 +1285,21 @@ def build_markdown(
             ((category, [row for row in failed_rows if row["category"] == category]) for category in category_counts),
             key=lambda item: (-len(item[1]), item[0]),
         ):
-            icon, label, _ = CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS["unknown"])
+            icon, label, description = CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS["unknown"])
             lines.append(f"<details><summary>{icon} {label} ({len(grouped_rows)})</summary>")
             lines.append("")
-            lines.append("| Target | Fixture | Failing properties | Summary | Shard |")
+            lines.append(md_escape(description))
+            next_step = CATEGORY_NEXT_STEPS.get(category)
+            if next_step:
+                lines.append("")
+                lines.append(f"Suggested next step: {md_escape(next_step)}")
+            lines.append("")
+            lines.append("| Target | Fixture | Failing properties | Failed checks | Shard |")
             lines.append("|---|---|---:|---|---|")
             for row in grouped_rows[:50]:
                 shard_link = f"[run]({row.get('run_url')})" if row.get("run_url") else ""
                 lines.append(
-                    f"| {target_link_md(row)} | `{md_escape(row.get('fixture_ref', ''))}` | {row.get('failing_property_count', 0)} | {md_escape(row.get('summary', ''))} | {shard_link} |"
+                    f"| {target_link_md(row)} | `{md_escape(row.get('fixture_ref', ''))}` | {row.get('failing_property_count', 0)} | {failed_checks_cell_md(row)} | {shard_link} |"
                 )
             if len(grouped_rows) > 50:
                 lines.append(f"| _… {len(grouped_rows) - 50} more_ | | | | |")
@@ -1295,6 +1429,13 @@ def build_html(
   <pre><code>{command}</code></pre>
 </section>
 """
+
+    triage_cards = "".join(
+        f"<article class='triage'><h3>{esc(definition['label'])}</h3><strong>{sum(category_counts[category] for category in category_counts if triage_group_for_category(category) == group_key)}</strong><p>{esc(definition['description'])}</p></article>"
+        for group_key, definition in TRIAGE_GROUPS.items()
+        if sum(category_counts[category] for category in category_counts if triage_group_for_category(category) == group_key)
+    ) or "<p>No failed targets to triage.</p>"
+
     category_rows = "".join(
         f"<tr><td>{esc(CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS['unknown'])[0])} {esc(CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS['unknown'])[1])}</td><td>{count}</td><td>{esc(CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS['unknown'])[2])}</td></tr>"
         for category, count in category_counts.most_common()
@@ -1348,7 +1489,7 @@ main{{max-width:1280px;margin:0 auto;padding:2rem}} .hero{{background:linear-gra
 .flow{{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:.75rem}} .step{{background:white;border:1px solid var(--line);border-radius:16px;padding:1rem;position:relative}} .step b{{display:grid;place-items:center;background:#eef2ff;color:var(--purple);width:2rem;height:2rem;border-radius:999px}} .step h3{{margin:.6rem 0 .2rem}} .step-metric{{font-weight:700;color:#24292f}}
 .seed svg{{width:100%;height:auto}} .box{{fill:white;stroke:#8c959f;stroke-width:2}} .box.ok{{stroke:var(--ok)}} .box.warn{{stroke:var(--warn)}} .arrow{{stroke:#57606a;stroke-width:2;marker-end:url(#arrow)}} text{{font-size:15px;fill:#24292f}} text.small{{font-size:12px;fill:#57606a}}
 table{{border-collapse:collapse;width:100%;font-size:13px;background:white}}td,th{{border:1px solid var(--line);padding:.5rem;text-align:left;vertical-align:top}}th{{background:var(--bg)}} code{{background:var(--bg);padding:.1rem .25rem;border-radius:4px}} a{{color:var(--blue)}}
-.finding{{border:1px solid var(--line);border-left:5px solid var(--warn);border-radius:14px;padding:1rem;background:white;margin:.75rem 0}} .muted{{color:var(--muted)}} .badge{{background:#fff8c5;color:#633c01;border:1px solid #fae17d;border-radius:999px;padding:.1rem .45rem}} .examples code{{margin:.12rem;display:inline-block}}
+.finding{{border:1px solid var(--line);border-left:5px solid var(--warn);border-radius:14px;padding:1rem;background:white;margin:.75rem 0}} .muted{{color:var(--muted)}} .badge{{background:#fff8c5;color:#633c01;border:1px solid #fae17d;border-radius:999px;padding:.1rem .45rem;display:inline-block;margin:.1rem}} .badge.error{{background:#ffebe9;color:#82071e;border-color:#ffcecb}} .badge.warn{{background:#fff8c5;color:#633c01;border-color:#fae17d}} .examples code{{margin:.12rem;display:inline-block}} .triage{{background:white;border:1px solid var(--line);border-radius:14px;padding:1rem}} .triage strong{{font-size:2rem}}
 .pill{{display:inline-block;border-radius:999px;padding:.12rem .45rem;margin:.1rem;font-size:12px;border:1px solid var(--line)}} .pill.ok{{background:#dafbe1;color:#116329;border-color:#aceebb}}.pill.fail{{background:#ffebe9;color:#82071e;border-color:#ffcecb}}.pill.warn,.pill.blocked{{background:#fff8c5;color:#633c01;border-color:#fae17d}}.pill.skipped,.pill.none{{background:#f6f8fa;color:#57606a}}
 </style></head><body><main>
 <section class='hero'><span class='result'>{'✅ Passed' if failed == 0 and rows else '❌ Needs attention'}</span><h1>Replay PBT dashboard</h1><p>A view of replay-based property testing for Agent integrations. It explains the cache/seeding flow, links shards, and groups repeated findings.</p></section>
@@ -1357,6 +1498,7 @@ table{{border-collapse:collapse;width:100%;font-size:13px;background:white}}td,t
 <section class='card seed'><h2>Cache seeding flow</h2><p>Seeding is only used when the replay cache is missing and the workflow input permits it. The generated cache stays in GitHub Actions cache; the report uploads only lightweight findings/results.</p>{seed_diagram}</section>
 {shard_section}
 {individual_section}
+<section class='card'><h2>Triage view</h2><div class='grid'>{triage_cards}</div></section>
 <section class='card'><h2>Failure categories</h2><table><thead><tr><th>Category</th><th>Count</th><th>Meaning</th></tr></thead><tbody>{category_rows or '<tr><td colspan="3">No failures</td></tr>'}</tbody></table></section>
 <section class='card'><h2>Actionable finding groups</h2><p>Repeated metric/tag rows are collapsed. Use the examples to see the shape of the issue, then open <code>findings.tsv</code> for raw rows if needed.</p>{finding_cards}</section>
 <section class='card'><h2>Targets by workflow step</h2><table><thead><tr><th>Target</th><th>Pipeline state</th><th>Status</th><th>Category</th><th>Summary</th><th>Shard</th></tr></thead><tbody>{target_rows}</tbody></table></section>
