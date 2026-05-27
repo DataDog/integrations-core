@@ -148,6 +148,15 @@ def _read_jsonl(path) -> list[dict]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
 
 
+class _Sample:
+    """Minimal Sample stand-in for the label-union unit test."""
+
+    def __init__(self, name: str, labels: dict[str, str], value: float):
+        self.name = name
+        self.labels = labels
+        self.value = value
+
+
 # ---------------------------------------------------------------------------
 # Phase happy paths
 # ---------------------------------------------------------------------------
@@ -198,14 +207,10 @@ async def test_success_with_openmetrics_body(flow_dir, message_queue, monkeypatc
 
 
 async def _assert_phase_fails(phase, mgr, message_queue, *, error_contains: str):
-    """Run execute, expect failure, drive on_error like the framework would."""
+    """Run process_message, expect failure, drive on_error like the framework would."""
     trigger = PhaseTrigger(id="start", phase_id=None)
-    context = {
-        "endpoint_url": phase._runtime_variables.get("endpoint_url"),
-        "phase_name": phase._phase_id,
-    }
     try:
-        await phase.execute(context)
+        await phase.process_message(trigger)
     except Exception as raised:
         wrapped = MessageProcessingError(phase._phase_id, trigger, raised)
         await phase.on_error(wrapped)
@@ -216,7 +221,7 @@ async def _assert_phase_fails(phase, mgr, message_queue, *, error_contains: str)
         assert isinstance(msg, PhaseFailedMessage)
         assert error_contains.lower() in msg.error.lower()
         return raised
-    pytest.fail(f"Expected execute() to raise; error should contain {error_contains!r}")
+    pytest.fail(f"Expected process_message() to raise; error should contain {error_contains!r}")
 
 
 async def test_failure_non_200_status(flow_dir, message_queue, monkeypatch):
@@ -583,12 +588,3 @@ async def test_jsonl_failure_propagates_as_phase_failure(flow_dir, message_queue
     blocker.mkdir()
 
     await _assert_phase_fails(phase, mgr, message_queue, error_contains="Failed to write metrics catalog")
-
-
-class _Sample:
-    """Minimal Sample stand-in for the label-union unit test."""
-
-    def __init__(self, name: str, labels: dict[str, str], value: float):
-        self.name = name
-        self.labels = labels
-        self.value = value
