@@ -12,7 +12,7 @@ import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from enum import Enum, auto
-from ipaddress import IPv4Address
+from ipaddress import IPv4Address, IPv6Address, IPv6Interface, ip_address
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union  # noqa: F401
 
 from cachetools import TTLCache
@@ -162,12 +162,36 @@ class RateLimitingTTLCache(TTLCache):
         return True
 
 
+def _try_parse_db_host_ip(db_host: str) -> IPv4Address | IPv6Address | None:
+    """Try to parse db_host as an IP address"""
+    host = db_host.strip()
+    if host.startswith('[') and host.endswith(']'):
+        host = host[1:-1]
+    if '%' in host:
+        try:
+            return IPv6Interface(host).ip
+        except ValueError:
+            return None
+    try:
+        return ip_address(host)
+    except ValueError:
+        return None
+
+
+def _is_local_db_host(db_host: str | None) -> bool:
+    """Return True when the DB is reached via localhost, a unix socket, or loopback/link-local IP."""
+    if not db_host or db_host == 'localhost' or db_host.startswith('/'):
+        return True
+    addr = _try_parse_db_host_ip(db_host)
+    return addr is not None and (addr.is_loopback or addr.is_link_local)
+
+
 def resolve_db_host(db_host):
     if db_host and db_host.endswith('.local'):
         return db_host
 
     agent_hostname = datadog_agent.get_hostname()
-    if not db_host or db_host in {'localhost', '127.0.0.1'} or db_host.startswith('/'):
+    if _is_local_db_host(db_host):
         return agent_hostname
 
     try:

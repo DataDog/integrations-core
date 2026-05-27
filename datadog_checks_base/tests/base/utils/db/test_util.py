@@ -32,10 +32,27 @@ from datadog_checks.base.utils.format import json
 @pytest.mark.parametrize(
     "db_host, agent_hostname, want",
     [
+        # Unset host or local hostname
         (None, "agent_hostname", "agent_hostname"),
         ("localhost", "agent_hostname", "agent_hostname"),
+        # Unix socket
+        ("/var/run/mysqld.sock", "agent_hostname", "agent_hostname"),
+        # IPv4 loopback and link-local literals
         ("127.0.0.1", "agent_hostname", "agent_hostname"),
+        ("169.254.169.254", "agent_hostname", "agent_hostname"),
+        # IPv6 loopback and link-local literals (incl. bracketed and zone-scoped forms)
+        ("::1", "agent_hostname", "agent_hostname"),
+        ("[::1]", "agent_hostname", "agent_hostname"),
+        ("fe80::1", "agent_hostname", "agent_hostname"),
+        ("[fe80::1]", "agent_hostname", "agent_hostname"),
+        ("fe80::1%lo0", "agent_hostname", "agent_hostname"),
+        # Remote IP literals
         ("192.0.2.1", "agent_hostname", "192.0.2.1"),
+        ("2001:db8::1", "agent_hostname", "2001:db8::1"),
+        # Resolved DB host shares the agent host IP
+        ("192.0.2.1", "192.0.2.1", "192.0.2.1"),
+        ("192.0.2.1", "192.0.2.254", "192.0.2.1"),
+        # Hostname resolution failures fall back to the configured db_host
         ("socket.gaierror", "agent_hostname", "socket.gaierror"),
         (
             "greater-than-or-equal-to-64-characters-causes-unicode-error-----",
@@ -44,8 +61,7 @@ from datadog_checks.base.utils.format import json
         ),
         ("192.0.2.1", "socket.gaierror", "192.0.2.1"),
         ("192.0.2.1", "greater-than-or-equal-to-64-characters-causes-unicode-error-----", "192.0.2.1"),
-        ("192.0.2.1", "192.0.2.1", "192.0.2.1"),
-        ("192.0.2.1", "192.0.2.254", "192.0.2.1"),
+        # mDNS .local names are passed through unchanged
         ("postgres.svc.local", "some-pod", "postgres.svc.local"),
     ],
 )
