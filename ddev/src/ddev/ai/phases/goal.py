@@ -187,6 +187,70 @@ async def _run_reviewer_once(
     return GoalCheckResult(valid=valid, reason=reason, input_tokens=in_tokens, output_tokens=out_tokens)
 
 
+async def _drive_goal_loop(
+    *,
+    task: TaskConfig,
+    goal_text: str,
+    rendered_task_prompt: str,
+    worker_process: ReActProcess,
+    initial_result: ReActResult,
+    reviewer_process: ReActProcess,
+    callbacks: Callbacks,
+    compact_if_needed: Callable[[ReActResult], Awaitable[tuple[int, int]]],
+) -> GoalLoopOutcome:
+    total_in = total_out = 0
+    attempts = 0
+    worker_result = initial_result
+
+    try:
+        while True:
+            attempts += 1
+            await callbacks.fire_before_goal_check(task.name, attempts)
+
+            user_message = build_reviewer_user_message(
+                rendered_task_prompt=rendered_task_prompt,
+                goal_text=goal_text,
+                worker_summary=worker_result.final_response.text or "(no summary provided)",
+            )
+
+            if attempts > 1:
+                reviewer_process.reset()
+
+            check = await _run_reviewer_once(reviewer_process, user_message)
+            total_in += check.input_tokens
+            total_out += check.output_tokens
+
+            await callbacks.fire_after_goal_check(task.name, attempts, check.valid, check.reason)
+
+            if check.valid:
+                return GoalLoopOutcome(
+                    final_result=worker_result,
+                    attempts=attempts,
+                    total_input_tokens=total_in,
+                    total_output_tokens=total_out,
+                )
+
+            if attempts >= task.max_goal_attempts:
+                raise GoalAttemptsExhausted(
+                    f"Task {task.name!r} failed goal validation after "
+                    f"{attempts} attempts. Last reviewer reason: {check.reason}"
+                )
+
+            compact_in, compact_out = await compact_if_needed(worker_result)
+            total_in += compact_in
+            total_out += compact_out
+
+            retry_prompt = GOAL_RETRY_PROMPT_TEMPLATE.format(goal=goal_text, reason=check.reason)
+            worker_result = await worker_process.start(retry_prompt)
+            total_in += worker_result.total_input_tokens
+            total_out += worker_result.total_output_tokens
+    except GoalValidationError as e:
+        e.input_tokens += total_in
+        e.output_tokens += total_out
+        e.attempts = attempts
+        raise
+
+
 async def run_goal_loop(
     *,
     task: TaskConfig,
@@ -227,76 +291,37 @@ async def run_goal_loop(
             prompt=f"<goal loop for task {task.name!r}>",
             tools=[d["name"] for d in reviewer_registry.definitions],
         )
-
         reviewer_process = ReActProcess(
             agent=reviewer_agent,
             tool_registry=reviewer_registry,
             callbacks=agent_logger.build_callbacks(),
         )
 
-        total_in = total_out = 0
-        attempts = 0
-        worker_result = initial_result
-
-        try:
-            while True:
-                attempts += 1
-                await callbacks.fire_before_goal_check(task.name, attempts)
-
-                user_message = build_reviewer_user_message(
-                    rendered_task_prompt=rendered_task_prompt,
-                    goal_text=goal_text,
-                    worker_summary=worker_result.final_response.text or "(no summary provided)",
-                )
-
-                if attempts > 1:
-                    reviewer_process.reset()
-
-                check = await _run_reviewer_once(reviewer_process, user_message)
-                total_in += check.input_tokens
-                total_out += check.output_tokens
-
-                await callbacks.fire_after_goal_check(task.name, attempts, check.valid, check.reason)
-
-                if check.valid:
-                    agent_logger.log_finish(
-                        success=True,
-                        attempts=attempts,
-                        total_input_tokens=total_in,
-                        total_output_tokens=total_out,
-                    )
-                    return GoalLoopOutcome(
-                        final_result=worker_result,
-                        attempts=attempts,
-                        total_input_tokens=total_in,
-                        total_output_tokens=total_out,
-                    )
-
-                if attempts >= task.max_goal_attempts:
-                    raise GoalAttemptsExhausted(
-                        f"Task {task.name!r} failed goal validation after "
-                        f"{attempts} attempts. Last reviewer reason: {check.reason}"
-                    )
-
-                compact_in, compact_out = await compact_if_needed(worker_result)
-                total_in += compact_in
-                total_out += compact_out
-
-                retry_prompt = GOAL_RETRY_PROMPT_TEMPLATE.format(goal=goal_text, reason=check.reason)
-                worker_result = await worker_process.start(retry_prompt)
-                total_in += worker_result.total_input_tokens
-                total_out += worker_result.total_output_tokens
-        except GoalValidationError as e:
-            e.input_tokens += total_in
-            e.output_tokens += total_out
-            e.attempts = attempts
-            agent_logger.log_finish(
-                success=False,
-                attempts=attempts,
-                total_input_tokens=e.input_tokens,
-                total_output_tokens=e.output_tokens,
-                error=f"{type(e).__name__}: {e}",
-            )
-            raise
+        outcome = await _drive_goal_loop(
+            task=task,
+            goal_text=goal_text,
+            rendered_task_prompt=rendered_task_prompt,
+            worker_process=worker_process,
+            initial_result=initial_result,
+            reviewer_process=reviewer_process,
+            callbacks=callbacks,
+            compact_if_needed=compact_if_needed,
+        )
+        agent_logger.log_finish(
+            success=True,
+            attempts=outcome.attempts,
+            total_input_tokens=outcome.total_input_tokens,
+            total_output_tokens=outcome.total_output_tokens,
+        )
+        return outcome
+    except GoalValidationError as e:
+        agent_logger.log_finish(
+            success=False,
+            attempts=e.attempts,
+            total_input_tokens=e.input_tokens,
+            total_output_tokens=e.output_tokens,
+            error=f"{type(e).__name__}: {e}",
+        )
+        raise
     finally:
         agent_logger.close()
