@@ -73,6 +73,34 @@ def has_python_check(integration: str) -> bool:
     return False
 
 
+def is_jmx_check(integration: str) -> bool:
+    """True if the integration ships only a JMX configuration.
+
+    The Tier 3 in-Agent shim runs inside the embedded CPython sub-interpreter
+    that hosts the integration's check class. JMX integrations are driven
+    by JMXFetch (a separate Java process) instead, so the shim has no
+    insertion point for them. We exclude JMX integrations from agent-runner
+    matrix rows; the no-agent runner is unaffected.
+    """
+    base = REPO_ROOT / integration
+    if not base.is_dir():
+        return False
+    manifest = base / 'manifest.json'
+    if manifest.is_file():
+        try:
+            data = json.loads(manifest.read_text())
+        except Exception:
+            data = {}
+        # In manifests, JMX integrations declare "is_jmx": true (older) or
+        # have type "jmx" under tile.classifier_tags.
+        if data.get('is_jmx') is True:
+            return True
+    # Heuristic fallback: a metrics.yaml/config alongside but no Python
+    # check class. ``has_python_check`` is already required upstream, so
+    # we only need to flag the explicit JMX manifest case.
+    return False
+
+
 def load_cached_targets() -> set[tuple[str, str]]:
     cached: set[tuple[str, str]] = set()
     replay_root = REPO_ROOT / '.ddev' / 'replay'
@@ -113,6 +141,22 @@ def main() -> None:
     parser.add_argument('--batch-index', type=int, default=0)
     parser.add_argument('--batch-count', type=int, default=1)
     parser.add_argument('--platform', default='linux')
+    parser.add_argument(
+        '--runner',
+        choices=['no-agent', 'agent'],
+        default='no-agent',
+        help='Which runner each row will be executed with: pytest stub (no-agent) or real Datadog Agent (agent).',
+    )
+    parser.add_argument(
+        '--record-image',
+        default='',
+        help='Agent image used for the record run when --runner agent. Empty defaults to the dispatcher input.',
+    )
+    parser.add_argument(
+        '--replay-image',
+        default='',
+        help='Agent image used for the replay run when --runner agent. Empty defaults to the dispatcher input.',
+    )
     args = parser.parse_args()
 
     targets = build_targets(args.mode, args.ref)
@@ -140,21 +184,29 @@ def main() -> None:
             continue
 
         fixture_ref = latest_integration_tag(integration) or args.target_ref
-        replay_matrix.append(
-            {
-                'name': f'{integration}:{environment}',
-                'integration': integration,
-                'environment': environment,
-                'fixture_ref': fixture_ref,
-                'target_ref': args.target_ref,
-                'target_head': target_head,
-                'readings': args.readings,
-                'artifact_slug': slug(f'{integration}-{environment}'),
-                'cache_key': f'replay-pbt-v{cache_version}-'
-                f'{slug(integration)}-{slug(environment)}-readings{slug(args.readings)}-fixture-{slug(fixture_ref)}'
-                '-adapters-notcp',
-            }
-        )
+        # JMX checks go through agent jmx list, not embedded Python.
+        # Tier 3 shim cannot intercept their data plane, so they are
+        # excluded from agent-runner runs but kept for no-agent.
+        if args.runner == 'agent' and is_jmx_check(integration):
+            continue
+        row = {
+            'name': f'{integration}:{environment}',
+            'integration': integration,
+            'environment': environment,
+            'fixture_ref': fixture_ref,
+            'target_ref': args.target_ref,
+            'target_head': target_head,
+            'readings': args.readings,
+            'runner': args.runner,
+            'artifact_slug': slug(f'{args.runner}-{integration}-{environment}'),
+            'cache_key': f'replay-pbt-v{cache_version}-{args.runner}-'
+            f'{slug(integration)}-{slug(environment)}-readings{slug(args.readings)}-fixture-{slug(fixture_ref)}'
+            '-adapters-notcp',
+        }
+        if args.runner == 'agent':
+            row['record_image'] = args.record_image
+            row['replay_image'] = args.replay_image or args.record_image
+        replay_matrix.append(row)
 
     if args.batch_count < 1:
         raise ValueError('--batch-count must be >= 1')

@@ -15,6 +15,24 @@ on:
         - changed
         - all-cached
         - all-declared
+      runner:
+        description: Which runner to drive each target with
+        required: true
+        default: no-agent
+        type: choice
+        options:
+        - no-agent
+        - agent
+      record_image:
+        description: Agent image used for the record run when runner=agent
+        required: false
+        default: datadog/agent:7.78.0
+        type: string
+      replay_image:
+        description: Agent image used for the replay run when runner=agent (defaults to record_image)
+        required: false
+        default: datadog/agent:7.78.1
+        type: string
       seed_missing_caches:
         description: Start E2E envs and seed compare-check caches when no suitable cache is restored
         required: true
@@ -320,6 +338,9 @@ jobs:
           --max-targets "${{ inputs.max_targets }}" \
           --batch-index "${{ inputs.batch_index }}" \
           --batch-count "${{ inputs.batch_count }}" \
+          --runner "${{ inputs.runner }}" \
+          --record-image "${{ inputs.record_image }}" \
+          --replay-image "${{ inputs.replay_image }}" \
           "${extra_args[@]}" \
           > /tmp/replay-pbt-matrix.json
         cat /tmp/replay-pbt-matrix.json
@@ -372,6 +393,9 @@ jobs:
       REPLAY_PBT_RESULT_DIR: /tmp/replay-pbt-result
       REPLAY_PBT_ARTIFACTS: /tmp/replay-pbt-artifacts
       REPLAY_PBT_ADAPTERS: requests,subprocess,process,psycopg,clickhouse-connect
+      REPLAY_PBT_RUNNER: ${{ matrix.runner }}
+      REPLAY_PBT_RECORD_IMAGE: ${{ matrix.record_image }}
+      REPLAY_PBT_REPLAY_IMAGE: ${{ matrix.replay_image }}
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
@@ -400,7 +424,54 @@ jobs:
     - name: Prepare integration test dependencies
       run: ddev ci setup "$REPLAY_PBT_INTEGRATION:$REPLAY_PBT_ENVIRONMENT"
 
+    - name: Pull Agent images (agent runner only)
+      if: env.REPLAY_PBT_RUNNER == 'agent'
+      run: |
+        docker pull "$REPLAY_PBT_RECORD_IMAGE"
+        if [[ "$REPLAY_PBT_REPLAY_IMAGE" != "$REPLAY_PBT_RECORD_IMAGE" ]]; then
+          docker pull "$REPLAY_PBT_REPLAY_IMAGE"
+        fi
+
+    - name: Run compare-agent (agent runner only)
+      if: env.REPLAY_PBT_RUNNER == 'agent'
+      run: |
+        set +e
+        set -uo pipefail
+        bash .github/workflows/scripts/ensure-docker.sh
+        mkdir -p "$REPLAY_PBT_RESULT_DIR"
+        ddev env start "$REPLAY_PBT_INTEGRATION" "$REPLAY_PBT_ENVIRONMENT" || true
+        log_path="$REPLAY_PBT_RESULT_DIR/compare_agent.log"
+        ddev env compare-agent "$REPLAY_PBT_INTEGRATION" "$REPLAY_PBT_ENVIRONMENT" \
+          --record-image "$REPLAY_PBT_RECORD_IMAGE" \
+          --replay-image "$REPLAY_PBT_REPLAY_IMAGE" \
+          --readings "$REPLAY_PBT_READINGS" \
+          --probes freeze,inventory,check \
+          --adapters "$REPLAY_PBT_ADAPTERS" \
+          --artifacts "$REPLAY_PBT_ARTIFACTS" \
+          --overwrite 2>&1 | tee "$log_path"
+        rc=${PIPESTATUS[0]}
+        ddev env stop "$REPLAY_PBT_INTEGRATION" "$REPLAY_PBT_ENVIRONMENT" || true
+        python - <<PY > "$REPLAY_PBT_RESULT_DIR/result.json"
+        import json, os
+        print(json.dumps({
+            'runner': 'agent',
+            'status': 'passed' if $rc == 0 else 'failed',
+            'exit_code': $rc,
+            'integration': os.environ['REPLAY_PBT_INTEGRATION'],
+            'environment': os.environ['REPLAY_PBT_ENVIRONMENT'],
+            'record_image': os.environ['REPLAY_PBT_RECORD_IMAGE'],
+            'replay_image': os.environ['REPLAY_PBT_REPLAY_IMAGE'],
+            'readings': os.environ['REPLAY_PBT_READINGS'],
+            'target_ref': os.environ['REPLAY_PBT_TARGET_REF'],
+            'batch_index': os.environ['REPLAY_PBT_BATCH_INDEX'],
+            'batch_count': os.environ['REPLAY_PBT_BATCH_COUNT'],
+            'cache_key': os.environ['REPLAY_PBT_CACHE_KEY'],
+        }, sort_keys=True))
+        PY
+        exit "$rc"
+
     - name: Restore replay cache
+      if: env.REPLAY_PBT_RUNNER != 'agent'
       id: replay-cache
       uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       with:
@@ -408,6 +479,7 @@ jobs:
         key: ${{ matrix.cache_key }}
 
     - name: Probe or seed replay cache
+      if: env.REPLAY_PBT_RUNNER != 'agent'
       id: prepare
       run: |
         set -euo pipefail
@@ -471,7 +543,7 @@ jobs:
         echo '{"status":"seeded-cache"}' > "$result"
 
     - name: Run replay PBT
-      if: steps.prepare.outputs.run_pbt == 'true'
+      if: env.REPLAY_PBT_RUNNER != 'agent' && steps.prepare.outputs.run_pbt == 'true'
       run: |
         set +e
         set -uo pipefail
