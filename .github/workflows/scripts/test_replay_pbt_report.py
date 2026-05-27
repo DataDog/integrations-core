@@ -67,6 +67,19 @@ class ReplayPbtReportTests(unittest.TestCase):
         self.assertIn('Targets by workflow step', html)
         self.assertIn('href="https://github.com/DataDog/integrations-core/actions/runs/1"', html)
 
+    def test_compare_check_setup_errors_are_replay_harness(self):
+        row = {
+            'status': 'failed',
+            'failed_tests': [
+                'tests/cli/env/test_replay_pbt.py::test_latest_release_output_matches_target',
+            ],
+            'short_errors': [
+                'AssertionError: compare-check did not write /tmp/replay-pbt-artifacts/deterministic/first/diff.json',
+            ],
+        }
+
+        self.assertEqual(report.classify(row), 'replay-harness')
+
     def test_report_zip_is_allowlisted(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)

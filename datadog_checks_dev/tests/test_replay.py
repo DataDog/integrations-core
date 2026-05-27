@@ -8,6 +8,8 @@ import types
 
 import pytest
 import requests
+import urllib3
+from urllib3.response import HTTPResponse
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils import subprocess_output
@@ -165,6 +167,25 @@ def test_install_replay_adapters_dispatches_requests_replay(monkeypatch, tmp_pat
     assert response.text == 'metric 1\n'
 
 
+def test_urllib3_poolmanager_record_and_replay(monkeypatch, tmp_path):
+    fixture_path = tmp_path / 'capture.json'
+
+    def fake_request(pool_manager, method, url, **kwargs):
+        return HTTPResponse(body=b'{"items": []}', status=200, headers={'Content-Type': 'application/json'})
+
+    monkeypatch.setattr(urllib3.PoolManager, 'request', fake_request)
+    install_replay_adapters(monkeypatch, 'record', fixture_path, adapters=('requests',))
+
+    response = urllib3.PoolManager().request('GET', 'https://example.test/apis', fields={'limit': '1'})
+    assert response.data == b'{"items": []}'
+
+    write_fixture_manifest(fixture_path, {'requests': []})
+    install_replay_adapters(monkeypatch, 'replay', fixture_path, adapters=('requests',))
+
+    response = urllib3.PoolManager().request('GET', 'https://example.test/apis', fields={'limit': '1'})
+    assert response.data == b'{"items": []}'
+
+
 def test_subprocess_record_and_replay(monkeypatch, tmp_path):
     fixture_path = tmp_path / 'capture.json'
 
@@ -198,7 +219,7 @@ def test_subprocess_replay_fixture_miss_on_wrong_command(monkeypatch, tmp_path):
     )
     install_replay_get_subprocess_output(monkeypatch, fixture_path)
 
-    with pytest.raises(AssertionError, match='does not match'):
+    with pytest.raises(AssertionError, match='(?s)recorded:.*expected.*replayed:.*actual'):
         subprocess_output.get_subprocess_output(['actual'], None)
 
 

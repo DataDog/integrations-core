@@ -169,7 +169,10 @@ def compare_check(
     else:
         env_names = _select_env_names(ctx, integration, storage, environment)
         if not env_names:
-            app.display_info(f"Selected target {integration.name!r} has no matching E2E environments.")
+            message = f"Selected target {integration.name!r} has no matching E2E environments."
+            if environment is not None:
+                raise click.ClickException(message)
+            app.display_info(message)
             return
 
     replay_cache_auto = replay_cache in ('auto', 'latest')

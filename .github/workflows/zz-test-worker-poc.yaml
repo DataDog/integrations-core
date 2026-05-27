@@ -397,6 +397,9 @@ jobs:
         ddev config set repos.core .
         ddev config set repo core
 
+    - name: Prepare integration test dependencies
+      run: ddev ci setup "$REPLAY_PBT_INTEGRATION:$REPLAY_PBT_ENVIRONMENT"
+
     - name: Restore replay cache
       id: replay-cache
       uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
@@ -457,7 +460,6 @@ jobs:
 
         echo "No suitable replay cache restored; seeding from $REPLAY_PBT_FIXTURE_REF"
         bash .github/workflows/scripts/ensure-docker.sh
-        ddev ci setup "$REPLAY_PBT_INTEGRATION:$REPLAY_PBT_ENVIRONMENT"
         ddev env compare-check "$REPLAY_PBT_INTEGRATION" "$REPLAY_PBT_ENVIRONMENT" \
           --record-ref "$REPLAY_PBT_FIXTURE_REF" \
           --replay-ref "$REPLAY_PBT_TARGET_REF" \

@@ -39,6 +39,16 @@ def _raise_recorded_exception(record: dict[str, Any]) -> None:
     raise Exception(message)
 
 
+def _format_command_mismatch(recorded: list[str], replayed: list[str]) -> str:
+    return '\n'.join(
+        [
+            'Recorded subprocess command does not match replay command',
+            f'recorded: {json.dumps(recorded, sort_keys=True)}',
+            f'replayed: {json.dumps(replayed, sort_keys=True)}',
+        ]
+    )
+
+
 def _record_success(cmd: Any, stdout: str, stderr: str, returncode: int) -> dict[str, Any]:
     return {
         'argv': _normalize_cmd(cmd),
@@ -98,7 +108,7 @@ def install_replay_get_subprocess_output(monkeypatch: pytest.MonkeyPatch, fixtur
         record = records[len(replayed)]
         argv = _normalize_cmd(cmd)
         if record['argv'] != argv:
-            raise AssertionError('Recorded subprocess command does not match replay command')
+            raise AssertionError(_format_command_mismatch(record['argv'], argv))
 
         replayed.append(record)
         if record.get('exception'):

@@ -7,7 +7,9 @@ from typing import Any
 
 import pytest
 import requests
+import urllib3
 from requests.structures import CaseInsensitiveDict
+from urllib3.response import HTTPResponse
 
 from datadog_checks.dev.replay.redaction import scrub_json, scrub_request_record, scrub_text, scrub_url
 
@@ -130,6 +132,23 @@ def record_from_response(
     )
 
 
+def record_from_urllib3_response(
+    method: str, url: str, response: HTTPResponse, request_kwargs: dict[str, Any] | None = None
+) -> dict[str, Any]:
+    """Create a fixture record from a live urllib3 response."""
+    body = response.data.decode('utf-8', errors='replace')
+    return scrub_request_record(
+        build_request_record(
+            method,
+            url,
+            body,
+            status=response.status,
+            headers=dict(response.headers),
+            request_kwargs=request_kwargs,
+        )
+    )
+
+
 def install_recording_session_request(
     monkeypatch: pytest.MonkeyPatch, fixture_path: Path, responses_by_request: dict[tuple[str, str], dict[str, Any]]
 ) -> list[dict[str, Any]]:
@@ -159,6 +178,7 @@ def install_live_recording_session_request(monkeypatch: pytest.MonkeyPatch, fixt
     """Record real HTTP requests while still returning live responses to the check."""
     records: list[dict[str, Any]] = []
     original_request = requests.Session.request
+    original_poolmanager_request = urllib3.PoolManager.request
 
     def recorded_request(session: requests.Session, method: str, url: str, **kwargs: Any) -> requests.Response:
         response = original_request(session, method, url, **kwargs)
@@ -166,7 +186,19 @@ def install_live_recording_session_request(monkeypatch: pytest.MonkeyPatch, fixt
         fixture_path.write_text(json.dumps(records, indent=2, sort_keys=True) + "\n")
         return response
 
+    def recorded_poolmanager_request(
+        pool_manager: urllib3.PoolManager, method: str, url: str, **kwargs: Any
+    ) -> HTTPResponse:
+        response = original_poolmanager_request(pool_manager, method, url, **kwargs)
+        request_kwargs = dict(kwargs)
+        if 'fields' in request_kwargs and 'params' not in request_kwargs:
+            request_kwargs['params'] = request_kwargs['fields']
+        records.append(record_from_urllib3_response(method, url, response, request_kwargs=request_kwargs))
+        fixture_path.write_text(json.dumps(records, indent=2, sort_keys=True) + "\n")
+        return response
+
     monkeypatch.setattr(requests.Session, "request", recorded_request)
+    monkeypatch.setattr(urllib3.PoolManager, "request", recorded_poolmanager_request)
     return records
 
 
@@ -204,17 +236,35 @@ def install_replay_session_request(monkeypatch: pytest.MonkeyPatch, fixture_path
     records = json.loads(fixture_path.read_text())
     replayed: list[dict[str, Any]] = []
 
-    def replayed_request(_session: requests.Session, method: str, url: str, **kwargs: Any) -> FixtureResponse:
+    def next_record(method: str, url: str, kwargs: dict[str, Any]) -> dict[str, Any]:
         if len(replayed) >= len(records):
             raise AssertionError("No recorded HTTP response available for replay")
 
         record = records[len(replayed)]
         _assert_record_matches_request(record, method, url, kwargs)
-
         replayed.append(record)
-        return FixtureResponse(record)
+        return record
+
+    def replayed_request(_session: requests.Session, method: str, url: str, **kwargs: Any) -> FixtureResponse:
+        return FixtureResponse(next_record(method, url, kwargs))
+
+    def replayed_poolmanager_request(
+        _pool_manager: urllib3.PoolManager, method: str, url: str, **kwargs: Any
+    ) -> HTTPResponse:
+        request_kwargs = dict(kwargs)
+        if 'fields' in request_kwargs and 'params' not in request_kwargs:
+            request_kwargs['params'] = request_kwargs['fields']
+        record = next_record(method, url, request_kwargs)
+        return HTTPResponse(
+            body=record['body'].encode('utf-8'),
+            status=record['status'],
+            headers=record['headers'],
+            reason='OK',
+            preload_content=True,
+        )
 
     monkeypatch.setattr(requests.Session, "request", replayed_request)
+    monkeypatch.setattr(urllib3.PoolManager, "request", replayed_poolmanager_request)
     return replayed
 
 

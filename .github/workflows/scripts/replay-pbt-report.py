@@ -565,6 +565,14 @@ def classify(row: dict[str, Any]) -> str:
     if not haystack:
         return "unknown" if not status else "other-failed"
 
+    if (
+        "compare-check did not write" in haystack
+        or "no matching e2e environments" in haystack
+        or "krb5-config" in haystack
+        or "recorded subprocess command does not match replay command" in haystack
+        or "connectionrefusederror" in haystack
+    ):
+        return "replay-harness"
     if "latest-release-diff" in haystack or "latest release" in haystack or "output changed compared to the latest release" in haystack:
         return "release-differential"
     if "differs only by ordering" in haystack:

@@ -4,6 +4,10 @@ services:
     image: aerospike/aerospike-server:${AEROSPIKE_VERSION}
     ports:
       - "3000:3000"
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
   aerospike-prometheus-exporter:
     container_name: aerospike-prometheus-exporter
     image: aerospike/aerospike-prometheus-exporter:${AEROSPIKE_EXPORTER_VERSION}
