@@ -11,6 +11,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+from tuf.api.exceptions import DownloadError
 
 from datadog_checks.downloader import cli
 from datadog_checks.downloader.download_v2 import TUFPointerDownloader
@@ -135,6 +136,7 @@ class TestDigestMismatch:
         downloader = TUFPointerDownloader(repository_url=REPO_URL)
         with pytest.raises(DigestMismatch, match=PROJECT):
             downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
+        assert not (tmp_path / f'datadog_postgres-{VERSION}-py3-none-any.whl').exists()
 
 
 class TestLengthMismatch:
@@ -147,6 +149,7 @@ class TestLengthMismatch:
             downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
         assert exc_info.value.expected == WHEEL_LENGTH + 1
         assert exc_info.value.actual == WHEEL_LENGTH
+        assert not (tmp_path / f'datadog_postgres-{VERSION}-py3-none-any.whl').exists()
 
 
 class TestMalformedPointer:
@@ -255,25 +258,25 @@ class TestCliDownloadFallback:
             cli.download()
         v1.assert_not_called()
 
-    def test_default_falls_back_to_v1_on_v2_download_failure(self, monkeypatch):
+    @pytest.mark.parametrize(
+        'fallback_exc',
+        [
+            pytest.param(MissingVersion('missing'), id='missing-version'),
+            pytest.param(TargetNotFoundError('missing'), id='target-not-found'),
+            pytest.param(DownloadError('unreachable'), id='download-error'),
+            pytest.param(TimeoutError('slow'), id='timeout-error'),
+            pytest.param(urllib.error.URLError('unreachable'), id='url-error'),
+        ],
+    )
+    def test_default_falls_back_to_v1_on_expected_v2_failures(self, monkeypatch, fallback_exc):
         monkeypatch.setattr('sys.argv', ['downloader', 'datadog-postgres'])
-        monkeypatch.setattr(cli, 'run_v2_downloader', MagicMock(side_effect=TargetNotFoundError('missing')))
+        monkeypatch.setattr(cli, 'run_v2_downloader', MagicMock(side_effect=fallback_exc))
         v1 = MagicMock()
         monkeypatch.setattr(cli, 'run_downloader', v1)
         monkeypatch.setattr(cli, 'instantiate_downloader', MagicMock(return_value=('d', 'n', 'v', False)))
 
         cli.download()
         v1.assert_called_once_with('d', 'n', 'v', False)
-
-    def test_default_falls_back_to_v1_when_v2_unsafe_download_requires_version(self, monkeypatch):
-        monkeypatch.setattr('sys.argv', ['downloader', 'datadog-postgres', '--unsafe-disable-verification'])
-        monkeypatch.setattr(cli, 'run_v2_downloader', MagicMock(side_effect=MissingVersion('missing')))
-        v1 = MagicMock()
-        monkeypatch.setattr(cli, 'run_downloader', v1)
-        monkeypatch.setattr(cli, 'instantiate_downloader', MagicMock(return_value=('d', 'n', None, False)))
-
-        cli.download()
-        v1.assert_called_once_with('d', 'n', None, False)
 
     def test_non_datadog_package_does_not_fall_back_to_v1(self, monkeypatch):
         monkeypatch.setattr('sys.argv', ['downloader', 'requests'])
