@@ -238,14 +238,7 @@ def load_sample_bucket():
 
 
 def gamesim_primary_index_ready():
-    """
-    Wait until the indexer reports gamesim_primary as fully built.
-
-    The /sampleBuckets/install task completing only guarantees the sample data
-    has been loaded; the indexer may still be building the bundled GSI indexes.
-    The indexer publishes per-keyspace stats during the build too, so we have
-    to check `initial_build_progress == 100` to confirm the index is online.
-    """
+    """Wait until every gamesim_primary keyspace reports initial_build_progress == 100."""
     r = requests.get(
         '{}/api/v1/stats'.format(INDEX_STATS_URL),
         auth=(USER, PASSWORD),
