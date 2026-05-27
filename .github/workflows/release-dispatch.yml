@@ -21,7 +21,7 @@ on:
         required: false
         type: string
       source-repo-branch:
-        description: "Branch that contains source-repo-ref"
+        description: "Branch that contains source-repo-ref, used to determine stable vs pre-release behavior"
         required: false
         type: string
       dry-run:
