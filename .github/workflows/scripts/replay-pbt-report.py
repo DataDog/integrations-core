@@ -217,6 +217,26 @@ PROPERTY_DEFINITIONS = {
         "OpenMetrics HELP removal",
         "Remove HELP documentation lines from captured Prometheus output. Metric output should not change.",
     ),
+    "openmetrics-line-endings": (
+        "OpenMetrics line endings",
+        "Toggle LF/CRLF in captured Prometheus text. Record separators should not change emitted metrics.",
+    ),
+    "openmetrics-sample-whitespace": (
+        "OpenMetrics sample whitespace",
+        "Widen or collapse whitespace between name/labels and value in Prometheus samples. Should not change emitted metrics.",
+    ),
+    "http-response-header-casing": (
+        "HTTP response header casing",
+        "Flip case of HTTP response header names in request captures. HTTP/1.1 field names are case-insensitive; output should not change.",
+    ),
+    "histogram-bucket-monotonicity": (
+        "Histogram bucket monotonicity",
+        "For each Prometheus cumulative histogram series, .bucket values should be non-decreasing as upper_bound grows.",
+    ),
+    "histogram-inf-equals-count": (
+        "Histogram +Inf bucket equals count",
+        "The +Inf bucket count must equal the histogram's total observation count for the same series.",
+    ),
     "json-object-key-order": (
         "JSON object key order",
         "Reorder JSON object keys in captured responses. JSON key order should not change emitted output.",
@@ -300,6 +320,11 @@ PROPERTY_VALIDATION_FAMILIES = {
     "openmetrics-final-newline": "replay-metamorphic",
     "openmetrics-help-text": "replay-metamorphic",
     "openmetrics-help-removal": "replay-metamorphic",
+    "openmetrics-line-endings": "replay-metamorphic",
+    "openmetrics-sample-whitespace": "replay-metamorphic",
+    "http-response-header-casing": "replay-metamorphic",
+    "histogram-bucket-monotonicity": "replay-regression",
+    "histogram-inf-equals-count": "replay-regression",
     "json-object-key-order": "replay-metamorphic",
     "json-whitespace": "replay-metamorphic",
     "json-string-escapes": "replay-metamorphic",
@@ -525,6 +550,26 @@ TEST_DEFINITIONS = {
         "Monotonic counts are non-negative",
         "Emitted MONOTONIC_COUNT values should not be negative.",
     ),
+    "test_histogram_buckets_are_monotonic": (
+        "Histogram buckets are monotonic",
+        "Prometheus histogram .bucket values must not decrease as upper_bound grows within the same series.",
+    ),
+    "test_histogram_inf_bucket_equals_count": (
+        "Histogram +Inf bucket equals count",
+        "The +Inf bucket count must equal the histogram's total observation count for the same series.",
+    ),
+    "test_line_endings_mutated_cache_matches_original_output": (
+        "OpenMetrics line endings do not matter",
+        "Toggling LF/CRLF in OpenMetrics text should not change emitted metrics.",
+    ),
+    "test_sample_whitespace_mutated_cache_matches_original_output": (
+        "OpenMetrics sample whitespace does not matter",
+        "Widening or collapsing whitespace between sample name/labels and value should not change emitted metrics.",
+    ),
+    "test_http_header_casing_mutated_cache_matches_original_output": (
+        "HTTP response header casing does not matter",
+        "Flipping case of HTTP response header names should not change emitted metrics.",
+    ),
 }
 
 
@@ -585,10 +630,16 @@ def classify(row: dict[str, Any]) -> str:
         or "test_final_newline_mutated_cache_matches_original_output" in haystack
         or "test_help_text_mutated_cache_matches_original_output" in haystack
         or "test_help_removal_mutated_cache_matches_original_output" in haystack
+        or "test_line_endings_mutated_cache_matches_original_output" in haystack
+        or "test_sample_whitespace_mutated_cache_matches_original_output" in haystack
+        or "test_http_header_casing_mutated_cache_matches_original_output" in haystack
         or "openmetrics-label-order" in haystack
         or "openmetrics-comments-blank-lines" in haystack
         or "openmetrics-final-newline" in haystack
         or "openmetrics-help" in haystack
+        or "openmetrics-line-endings" in haystack
+        or "openmetrics-sample-whitespace" in haystack
+        or "http-response-header-casing" in haystack
     ):
         return "openmetrics-input-invariance"
     if (
@@ -616,9 +667,13 @@ def classify(row: dict[str, Any]) -> str:
         "test_output_values_are_finite" in haystack
         or "test_rate_values_are_finite" in haystack
         or "test_monotonic_count_values_are_nonnegative" in haystack
+        or "test_histogram_buckets_are_monotonic" in haystack
+        or "test_histogram_inf_bucket_equals_count" in haystack
         or "finite-values" in haystack
         or "rate-values-finite" in haystack
         or "monotonic-count-nonnegative" in haystack
+        or "histogram-bucket-monotonicity" in haystack
+        or "histogram-inf-equals-count" in haystack
         or "not finite" in haystack
         or "negative" in haystack and "monotonic" in haystack
     ):
