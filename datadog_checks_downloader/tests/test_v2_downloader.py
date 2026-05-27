@@ -29,6 +29,7 @@ pytestmark = pytest.mark.offline
 
 PROJECT = 'datadog-postgres'
 VERSION = '14.0.0'
+WHEEL_NAME = f'datadog_postgres-{VERSION}-py3-none-any.whl'
 WHEEL_CONTENT = b'fake wheel bytes for testing'
 WHEEL_DIGEST = hashlib.sha256(WHEEL_CONTENT).hexdigest()
 WHEEL_LENGTH = len(WHEEL_CONTENT)
@@ -39,7 +40,7 @@ POINTER = {
     'length': WHEEL_LENGTH,
     'version': VERSION,
     'repository': REPO_URL,
-    'wheel_path': f'/wheels/{PROJECT}/datadog_postgres-{VERSION}-py3-none-any.whl',
+    'wheel_path': f'/wheels/{PROJECT}/{WHEEL_NAME}',
     'attestation_path': f'/attestations/{PROJECT}/{VERSION}.sigstore.json',
 }
 
@@ -102,7 +103,7 @@ class TestHappyPath:
 
         assert wheel_path.exists()
         assert wheel_path.read_bytes() == WHEEL_CONTENT
-        assert wheel_path.name == f'datadog_postgres-{VERSION}-py3-none-any.whl'
+        assert wheel_path.name == WHEEL_NAME
 
     def test_repository_flag_overrides_pointer_repository(self, mock_urlopen, mock_updater_cls, tmp_path):
         prod_pointer = {**POINTER, 'repository': 'https://agent-integration-wheels-prod.s3.amazonaws.com'}
@@ -112,7 +113,7 @@ class TestHappyPath:
         downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
 
         mock_urlopen.assert_called_once_with(
-            f'{REPO_URL}/wheels/{PROJECT}/datadog_postgres-{VERSION}-py3-none-any.whl',
+            f'{REPO_URL}/wheels/{PROJECT}/{WHEEL_NAME}',
             timeout=60,
         )
 
@@ -136,7 +137,7 @@ class TestDigestMismatch:
         downloader = TUFPointerDownloader(repository_url=REPO_URL)
         with pytest.raises(DigestMismatch, match=PROJECT):
             downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
-        assert not (tmp_path / f'datadog_postgres-{VERSION}-py3-none-any.whl').exists()
+        assert not (tmp_path / WHEEL_NAME).exists()
 
 
 class TestLengthMismatch:
@@ -149,7 +150,7 @@ class TestLengthMismatch:
             downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
         assert exc_info.value.expected == WHEEL_LENGTH + 1
         assert exc_info.value.actual == WHEEL_LENGTH
-        assert not (tmp_path / f'datadog_postgres-{VERSION}-py3-none-any.whl').exists()
+        assert not (tmp_path / WHEEL_NAME).exists()
 
 
 class TestMalformedPointer:
@@ -163,7 +164,7 @@ class TestMalformedPointer:
             downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
 
     def test_raises_when_wheel_path_missing_leading_slash(self, mock_urlopen, mock_updater_cls, tmp_path):
-        no_slash_pointer = {**POINTER, 'wheel_path': f'wheels/{PROJECT}/datadog_postgres-{VERSION}-py3-none-any.whl'}
+        no_slash_pointer = {**POINTER, 'wheel_path': f'wheels/{PROJECT}/{WHEEL_NAME}'}
         mock_updater_cls.return_value = _mock_tuf_updater(no_slash_pointer)
 
         downloader = TUFPointerDownloader(repository_url=REPO_URL)
@@ -199,10 +200,10 @@ class TestDisableVerification:
         wheel_path = downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
 
         mock_urlopen.assert_called_once_with(
-            f'{REPO_URL}/wheels/{PROJECT}/datadog_postgres-{VERSION}-py3-none-any.whl',
+            f'{REPO_URL}/wheels/{PROJECT}/{WHEEL_NAME}',
             timeout=60,
         )
-        assert wheel_path.name == f'datadog_postgres-{VERSION}-py3-none-any.whl'
+        assert wheel_path.name == WHEEL_NAME
         assert wheel_path.read_bytes() == content
         mock_updater_cls.assert_not_called()
 
