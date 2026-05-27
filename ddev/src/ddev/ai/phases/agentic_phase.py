@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Callable
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -18,11 +19,13 @@ from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.base import Phase, PhaseOutcome
 from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
-from ddev.ai.phases.goal import GOAL_TASK_SUFFIX, GoalAttemptsExhausted, render_goal_text, run_goal_loop
+from ddev.ai.phases.goal import GOAL_TASK_SUFFIX, GoalValidationError, render_goal_text, run_goal_loop
+from ddev.ai.phases.messages import PhaseFailedMessage
 from ddev.ai.phases.template import render_inline, render_prompt
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.registry import TOOL_MANIFEST
+from ddev.event_bus.exceptions import MessageProcessingError, ProcessorHookError
 
 if TYPE_CHECKING:
     from ddev.ai.agent.base import BaseAgent
@@ -93,6 +96,8 @@ class AgenticPhase(Phase):
         self._subagent_builder = subagent_builder
         self._goal_agent_builder = goal_agent_builder
         self._goal_attempt_log: list[dict[str, Any]] = []
+        self._total_input_tokens: int = 0
+        self._total_output_tokens: int = 0
         self._subagent_log_dir = (
             checkpoint_manager.root / "subagents" / phase_id if subagent_builder is not None else None
         )
@@ -179,19 +184,18 @@ class AgenticPhase(Phase):
         self,
         process: ReActProcess,
         context: dict[str, Any],
-    ) -> tuple[int, int]:
-        """Run the task loop. Returns (total_input_tokens, total_output_tokens).
+    ) -> None:
+        """Run the task loop, accumulating tokens into self._total_input/output_tokens.
 
         Override to customize task execution — e.g. add retries, change ordering, etc.
         Default implementation iterates through config.tasks sequentially.
         """
-        total_input = total_output = 0
         last_result: ReActResult | None = None
 
         for task in self._config.tasks:
             cin, cout = await self._compact_if_needed(process, last_result)
-            total_input += cin
-            total_output += cout
+            self._total_input_tokens += cin
+            self._total_output_tokens += cout
 
             has_goal = task.goal is not None or task.goal_path is not None
             prompt = render_task_prompt(task, self._config_dir, context, self._resolver)
@@ -199,8 +203,8 @@ class AgenticPhase(Phase):
                 prompt = prompt + GOAL_TASK_SUFFIX
 
             last_result = await process.start(prompt)
-            total_input += last_result.total_input_tokens
-            total_output += last_result.total_output_tokens
+            self._total_input_tokens += last_result.total_input_tokens
+            self._total_output_tokens += last_result.total_output_tokens
 
             if has_goal:
                 if self._goal_agent_builder is None:
@@ -219,18 +223,20 @@ class AgenticPhase(Phase):
                         log_root=self._checkpoint_manager.root,
                         compact_if_needed=lambda r: self._compact_if_needed(process, r),
                     )
-                except GoalAttemptsExhausted:
+                except GoalValidationError as e:
                     self._goal_attempt_log.append(
                         {
                             "task": task.name,
-                            "attempts": task.max_goal_attempts,
+                            "attempts": e.attempts,
                             "final_valid": False,
                         }
                     )
+                    self._total_input_tokens += e.input_tokens
+                    self._total_output_tokens += e.output_tokens
                     raise
                 last_result = outcome.final_result
-                total_input += outcome.total_input_tokens
-                total_output += outcome.total_output_tokens
+                self._total_input_tokens += outcome.total_input_tokens
+                self._total_output_tokens += outcome.total_output_tokens
                 self._goal_attempt_log.append(
                     {
                         "task": task.name,
@@ -238,8 +244,6 @@ class AgenticPhase(Phase):
                         "final_valid": True,
                     }
                 )
-
-        return total_input, total_output
 
     def _build_agent_and_process(self, context: dict[str, Any]) -> tuple[BaseAgent[Any], ReActProcess]:
         """Build the agent and ReAct process used to drive task execution."""
@@ -280,7 +284,7 @@ class AgenticPhase(Phase):
     async def execute(self, context: dict[str, Any]) -> PhaseOutcome:
         self.before_react()
         agent, process = self._build_agent_and_process(context)
-        total_input, total_output = await self.run_tasks(process, context)
+        await self.run_tasks(process, context)
         self.after_react()
 
         memory_text, mem_in, mem_out = await self._run_memory_step(agent, context)
@@ -291,7 +295,33 @@ class AgenticPhase(Phase):
 
         return PhaseOutcome(
             memory_text=memory_text,
-            total_input_tokens=total_input + mem_in,
-            total_output_tokens=total_output + mem_out,
+            total_input_tokens=self._total_input_tokens + mem_in,
+            total_output_tokens=self._total_output_tokens + mem_out,
             extra_checkpoint=extra,
         )
+
+    async def on_error(self, error: MessageProcessingError | ProcessorHookError) -> None:
+        payload: dict[str, Any] = {
+            "status": "failed",
+            "started_at": self._started_at.isoformat() if self._started_at else None,
+            "finished_at": datetime.now(UTC).isoformat(),
+            "error": str(error.original_exception),
+            "tokens": {
+                "total_input": self._total_input_tokens,
+                "total_output": self._total_output_tokens,
+            },
+        }
+        if self._goal_attempt_log:
+            payload["goal_validations"] = self._goal_attempt_log
+        try:
+            self._checkpoint_manager.write_phase_checkpoint(self._phase_id, payload)
+        except Exception:
+            self._logger.exception("Failed to write failure checkpoint for phase %s", self._phase_id)
+        finally:
+            self.submit_message(
+                PhaseFailedMessage(
+                    id=f"{self._phase_id}_failed",
+                    phase_id=self._phase_id,
+                    error=str(error.original_exception),
+                )
+            )

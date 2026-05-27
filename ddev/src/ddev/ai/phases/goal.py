@@ -76,16 +76,17 @@ GOAL_PARSE_RETRY_PROMPT = (
 
 
 class GoalValidationError(Exception):
-    """Base class for goal-validation failures."""
-
-
-class GoalParseError(GoalValidationError):
-    """Reviewer failed to return valid JSON after the parse-retry."""
+    """Base class for goal-validation failures. Carries the token cost and attempt count."""
 
     def __init__(self, message: str, input_tokens: int = 0, output_tokens: int = 0) -> None:
         super().__init__(message)
         self.input_tokens = input_tokens
         self.output_tokens = output_tokens
+        self.attempts: int = 0
+
+
+class GoalParseError(GoalValidationError):
+    """Reviewer failed to return valid JSON after the parse-retry."""
 
 
 class GoalAttemptsExhausted(GoalValidationError):
@@ -286,14 +287,14 @@ async def run_goal_loop(
                 total_in += worker_result.total_input_tokens
                 total_out += worker_result.total_output_tokens
         except GoalValidationError as e:
-            if isinstance(e, GoalParseError):
-                total_in += e.input_tokens
-                total_out += e.output_tokens
+            e.input_tokens += total_in
+            e.output_tokens += total_out
+            e.attempts = attempts
             agent_logger.log_finish(
                 success=False,
                 attempts=attempts,
-                total_input_tokens=total_in,
-                total_output_tokens=total_out,
+                total_input_tokens=e.input_tokens,
+                total_output_tokens=e.output_tokens,
                 error=f"{type(e).__name__}: {e}",
             )
             raise
