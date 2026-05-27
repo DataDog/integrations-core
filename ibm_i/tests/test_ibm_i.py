@@ -325,9 +325,7 @@ def test_connection_failure(aggregator, instance):
     check.log = mock.MagicMock()
     check.load_configuration_models()
 
-    with (
-        mock.patch('datadog_checks.ibm_i.IbmICheck.set_up_query_manager')
-    ):
+    with mock.patch('datadog_checks.ibm_i.IbmICheck.set_up_query_manager'):
         check.check(instance)
         assert check._query_manager is None
     aggregator.assert_service_check("ibm_i.can_connect", count=1, status=AgentCheck.CRITICAL)
