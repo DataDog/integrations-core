@@ -31,12 +31,15 @@ from datadog_checks.dev.replay.pbt.cache import (
     copy_replay_cache,
     mutate_request_capture_comments_and_blank_lines,
     mutate_request_capture_final_newline,
+    mutate_request_capture_header_casing,
     mutate_request_capture_help_removal,
     mutate_request_capture_help_text,
     mutate_request_capture_json_object_key_order,
     mutate_request_capture_json_string_escapes,
     mutate_request_capture_json_whitespace,
     mutate_request_capture_label_order,
+    mutate_request_capture_line_endings,
+    mutate_request_capture_sample_whitespace,
 )
 from datadog_checks.dev.replay.pbt.openmetrics import parse_sample_line
 from datadog_checks.dev.replay.pbt.properties import (
@@ -1025,6 +1028,132 @@ def _assert_rate_values_finite(output: dict[str, Any]) -> None:
         pytest.skip('No rate metrics emitted by this replay cache.')
 
 
+UPPER_BOUND_TAG_PREFIX = 'upper_bound:'
+BUCKET_METRIC_SUFFIX = '.bucket'
+COUNT_METRIC_SUFFIX = '.count'
+
+
+def _parse_upper_bound(raw: str) -> float | None:
+    text = raw.strip()
+    if not text:
+        return None
+    lowered = text.lower().lstrip('+')
+    if lowered in ('inf', 'infinity'):
+        return math.inf
+    try:
+        return float(text)
+    except ValueError:
+        return None
+
+
+def _split_upper_bound_tag(tags: list[str]) -> tuple[str | None, tuple[str, ...]]:
+    upper_bound: str | None = None
+    other_tags: list[str] = []
+    for tag in tags or []:
+        if upper_bound is None and tag.startswith(UPPER_BOUND_TAG_PREFIX):
+            upper_bound = tag[len(UPPER_BOUND_TAG_PREFIX) :]
+            continue
+        other_tags.append(tag)
+    return upper_bound, tuple(sorted(other_tags))
+
+
+def _bucket_series_groups(
+    output: dict[str, Any],
+) -> dict[tuple[str, tuple[str, ...], Any, Any], list[tuple[float, float, str]]]:
+    groups: dict[tuple[str, tuple[str, ...], Any, Any], list[tuple[float, float, str]]] = {}
+    for metric in output.get('metrics', []):
+        name = metric.get('name')
+        if not isinstance(name, str) or not name.endswith(BUCKET_METRIC_SUFFIX):
+            continue
+        upper_bound_raw, other_tags = _split_upper_bound_tag(metric.get('tags') or [])
+        if upper_bound_raw is None:
+            continue
+        upper_bound = _parse_upper_bound(upper_bound_raw)
+        if upper_bound is None:
+            continue
+        value = metric.get('value')
+        if not isinstance(value, int | float):
+            continue
+        float_value = float(value)
+        if math.isnan(float_value):
+            continue
+        key = (name, other_tags, metric.get('hostname'), metric.get('device'))
+        groups.setdefault(key, []).append((upper_bound, float_value, upper_bound_raw))
+    return groups
+
+
+def _assert_histogram_buckets_monotonic(output: dict[str, Any]) -> None:
+    asserted_groups = 0
+    for reading_output in _normalized_reading_outputs(output):
+        _assert_normalized_output_contract(reading_output)
+        for key, items in _bucket_series_groups(reading_output).items():
+            if len(items) < 2:
+                continue
+            asserted_groups += 1
+            items.sort(key=lambda entry: entry[0])
+            previous_upper, previous_value, _ = items[0]
+            for upper_bound, value, raw_upper in items[1:]:
+                assert value >= previous_value, (
+                    f'Histogram bucket non-monotonic for {key[0]} tags={list(key[1])} '
+                    f'hostname={key[2]!r}: value {value} at upper_bound={raw_upper} '
+                    f'is below {previous_value} at upper_bound<={previous_upper}'
+                )
+                previous_upper, previous_value = upper_bound, value
+    if asserted_groups == 0:
+        pytest.skip('No histogram bucket series with at least 2 buckets in replay output.')
+
+
+def _count_series_index(output: dict[str, Any]) -> dict[tuple[str, tuple[str, ...], Any, Any], float]:
+    index: dict[tuple[str, tuple[str, ...], Any, Any], float] = {}
+    for metric in output.get('metrics', []):
+        name = metric.get('name')
+        if not isinstance(name, str) or not name.endswith(COUNT_METRIC_SUFFIX):
+            continue
+        value = metric.get('value')
+        if not isinstance(value, int | float):
+            continue
+        base = name[: -len(COUNT_METRIC_SUFFIX)]
+        tags = tuple(sorted(metric.get('tags') or []))
+        index[(base, tags, metric.get('hostname'), metric.get('device'))] = float(value)
+    return index
+
+
+def _assert_histogram_inf_equals_count(output: dict[str, Any]) -> None:
+    matched = 0
+    mismatches: list[str] = []
+    for reading_output in _normalized_reading_outputs(output):
+        _assert_normalized_output_contract(reading_output)
+        count_index = _count_series_index(reading_output)
+        for metric in reading_output.get('metrics', []):
+            name = metric.get('name')
+            if not isinstance(name, str) or not name.endswith(BUCKET_METRIC_SUFFIX):
+                continue
+            upper_bound_raw, other_tags = _split_upper_bound_tag(metric.get('tags') or [])
+            if upper_bound_raw is None:
+                continue
+            parsed = _parse_upper_bound(upper_bound_raw)
+            if parsed != math.inf:
+                continue
+            base = name[: -len(BUCKET_METRIC_SUFFIX)]
+            count_value = count_index.get((base, other_tags, metric.get('hostname'), metric.get('device')))
+            if count_value is None:
+                continue
+            bucket_value = metric.get('value')
+            if not isinstance(bucket_value, int | float):
+                continue
+            matched += 1
+            if float(bucket_value) != count_value:
+                mismatches.append(
+                    f'{base}: +Inf bucket={bucket_value} but {base}{COUNT_METRIC_SUFFIX}={count_value} '
+                    f'(tags={list(other_tags)}, hostname={metric.get("hostname")!r})'
+                )
+    if matched == 0:
+        pytest.skip(
+            'No histogram series with both +Inf bucket and a matching .count metric were emitted by this replay cache.'
+        )
+    assert not mismatches, f'Histogram +Inf bucket does not equal .count: {mismatches[:10]!r}'
+
+
 def _assert_monotonic_count_values_nonnegative(output: dict[str, Any]) -> None:
     seen = 0
     for reading_output in _normalized_reading_outputs(output):
@@ -1551,6 +1680,116 @@ def test_monotonic_count_values_nonnegative_rejects_negative_count():
         _assert_monotonic_count_values_nonnegative(output)
 
 
+def _histogram_bucket_metric(
+    name: str, upper_bound: str, value: float, tags: list[str] | None = None
+) -> dict[str, Any]:
+    return {
+        'name': name,
+        'type': MONOTONIC_COUNT,
+        'value': value,
+        'tags': sorted([f'{UPPER_BOUND_TAG_PREFIX}{upper_bound}', *(tags or [])]),
+    }
+
+
+def test_histogram_buckets_monotonic_accepts_cumulative_buckets():
+    output = {
+        'metrics': [
+            _histogram_bucket_metric('example.request.duration.bucket', '0.5', 1.0),
+            _histogram_bucket_metric('example.request.duration.bucket', '1', 3.0),
+            _histogram_bucket_metric('example.request.duration.bucket', '5', 7.0),
+            _histogram_bucket_metric('example.request.duration.bucket', '+Inf', 7.0),
+        ],
+        'service_checks': [],
+    }
+
+    _assert_histogram_buckets_monotonic(output)
+
+
+def test_histogram_buckets_monotonic_rejects_decreasing_bucket():
+    output = {
+        'metrics': [
+            _histogram_bucket_metric('example.request.duration.bucket', '0.5', 5.0),
+            _histogram_bucket_metric('example.request.duration.bucket', '1', 3.0),
+        ],
+        'service_checks': [],
+    }
+
+    with pytest.raises(AssertionError, match='non-monotonic'):
+        _assert_histogram_buckets_monotonic(output)
+
+
+def test_histogram_buckets_monotonic_groups_by_other_tags():
+    output = {
+        'metrics': [
+            _histogram_bucket_metric('example.bucket', '1', 1.0, tags=['endpoint:a']),
+            _histogram_bucket_metric('example.bucket', '5', 2.0, tags=['endpoint:a']),
+            _histogram_bucket_metric('example.bucket', '1', 9.0, tags=['endpoint:b']),
+            _histogram_bucket_metric('example.bucket', '5', 10.0, tags=['endpoint:b']),
+        ],
+        'service_checks': [],
+    }
+
+    _assert_histogram_buckets_monotonic(output)
+
+
+def test_histogram_buckets_monotonic_skips_when_no_buckets():
+    output = {
+        'metrics': [{'name': 'example.gauge', 'type': 0, 'value': 1.0, 'tags': []}],
+        'service_checks': [],
+    }
+
+    with pytest.raises(pytest.skip.Exception, match='No histogram bucket series'):
+        _assert_histogram_buckets_monotonic(output)
+
+
+def test_histogram_inf_equals_count_accepts_matching_pair():
+    output = {
+        'metrics': [
+            _histogram_bucket_metric('example.request.duration.bucket', '+Inf', 7.0),
+            {'name': 'example.request.duration.count', 'type': MONOTONIC_COUNT, 'value': 7.0, 'tags': []},
+        ],
+        'service_checks': [],
+    }
+
+    _assert_histogram_inf_equals_count(output)
+
+
+def test_histogram_inf_equals_count_rejects_mismatched_pair():
+    output = {
+        'metrics': [
+            _histogram_bucket_metric('example.request.duration.bucket', '+Inf', 5.0),
+            {'name': 'example.request.duration.count', 'type': MONOTONIC_COUNT, 'value': 7.0, 'tags': []},
+        ],
+        'service_checks': [],
+    }
+
+    with pytest.raises(AssertionError, match='\\+Inf bucket does not equal'):
+        _assert_histogram_inf_equals_count(output)
+
+
+def test_histogram_inf_equals_count_skips_when_count_missing():
+    output = {
+        'metrics': [_histogram_bucket_metric('example.bucket', '+Inf', 1.0)],
+        'service_checks': [],
+    }
+
+    with pytest.raises(pytest.skip.Exception, match='No histogram series'):
+        _assert_histogram_inf_equals_count(output)
+
+
+def test_histogram_inf_equals_count_skips_when_no_inf_bucket():
+    output = {
+        'metrics': [
+            _histogram_bucket_metric('example.bucket', '1', 1.0),
+            {'name': 'example.count', 'type': MONOTONIC_COUNT, 'value': 1.0, 'tags': []},
+        ],
+        'service_checks': [],
+    }
+
+    with pytest.raises(pytest.skip.Exception, match='No histogram series'):
+        _assert_histogram_inf_equals_count(output)
+
+
 def test_cached_replay_is_deterministic_for_same_ref(replay_pbt_context: ReplayPBTContext):
     # Determinism property: replaying the same cached fixture through the same
     # integration ref twice should produce identical normalized output. The
@@ -1884,6 +2123,98 @@ def test_monotonic_count_values_are_nonnegative(replay_pbt_context: ReplayPBTCon
     diff = _run_compare_check_cache(context=replay_pbt_context, cache=replay_pbt_context.cache, artifacts=property_dir)
     assert diff['changed'] is False
     _assert_monotonic_count_values_nonnegative(_read_normalized(property_dir))
+
+
+@settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@given(validation=st.sampled_from(['histogram-bucket-monotonicity']))
+def test_histogram_buckets_are_monotonic(replay_pbt_context: ReplayPBTContext, validation: str):
+    # Cumulative-histogram invariant: a Prometheus/OpenMetrics histogram's
+    # bucket counts are cumulative, so for each series grouped by tags other
+    # than `upper_bound:` the submitted bucket values must be non-decreasing as
+    # `upper_bound` grows. Non-cumulative integrations have no eligible series
+    # and will skip via the no-buckets path.
+    property_name = 'histogram-bucket-monotonicity'
+    _skip_unselected(replay_pbt_context, property_name)
+    assert validation == 'histogram-bucket-monotonicity'
+
+    property_dir = replay_pbt_context.artifacts / property_name
+    diff = _run_compare_check_cache(context=replay_pbt_context, cache=replay_pbt_context.cache, artifacts=property_dir)
+    assert diff['changed'] is False
+    _assert_histogram_buckets_monotonic(_read_normalized(property_dir))
+
+
+@settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@given(validation=st.sampled_from(['histogram-inf-equals-count']))
+def test_histogram_inf_bucket_equals_count(replay_pbt_context: ReplayPBTContext, validation: str):
+    # Cumulative-histogram invariant: by definition the `+Inf` bucket count
+    # equals the histogram's total observation count, so the emitted `.bucket`
+    # value with `upper_bound:+Inf` must equal the corresponding `.count`
+    # metric value for the same series.
+    property_name = 'histogram-inf-equals-count'
+    _skip_unselected(replay_pbt_context, property_name)
+    assert validation == 'histogram-inf-equals-count'
+
+    property_dir = replay_pbt_context.artifacts / property_name
+    diff = _run_compare_check_cache(context=replay_pbt_context, cache=replay_pbt_context.cache, artifacts=property_dir)
+    assert diff['changed'] is False
+    _assert_histogram_inf_equals_count(_read_normalized(property_dir))
+
+
+@settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@given(mutation=st.sampled_from(['toggle-openmetrics-line-endings']))
+def test_line_endings_mutated_cache_matches_original_output(replay_pbt_context: ReplayPBTContext, mutation: str):
+    # Metamorphic Prometheus text property: ``\r\n`` and ``\n`` are equivalent
+    # record separators in Prometheus exposition, so flipping between them in
+    # captured request bodies should not change normalized Datadog check
+    # output. Strict OpenMetrics content-type records are skipped by the cache
+    # mutator.
+    property_name = 'openmetrics-line-endings'
+    _skip_unselected(replay_pbt_context, property_name)
+    assert mutation == 'toggle-openmetrics-line-endings'
+
+    _assert_mutated_cache_matches_original_output(
+        context=replay_pbt_context,
+        property_name=property_name,
+        mutate_cache=mutate_request_capture_line_endings,
+        no_change_reason='Replay cache has no OpenMetrics request bodies with line terminators to toggle.',
+    )
+
+
+@settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@given(mutation=st.sampled_from(['toggle-openmetrics-sample-whitespace']))
+def test_sample_whitespace_mutated_cache_matches_original_output(replay_pbt_context: ReplayPBTContext, mutation: str):
+    # Metamorphic Prometheus text property: the whitespace separating sample
+    # name and value can be any run of spaces/tabs, so widening or collapsing
+    # it in captured bodies should not change normalized Datadog check output.
+    property_name = 'openmetrics-sample-whitespace'
+    _skip_unselected(replay_pbt_context, property_name)
+    assert mutation == 'toggle-openmetrics-sample-whitespace'
+
+    _assert_mutated_cache_matches_original_output(
+        context=replay_pbt_context,
+        property_name=property_name,
+        mutate_cache=mutate_request_capture_sample_whitespace,
+        no_change_reason='Replay cache has no OpenMetrics sample lines with toggleable inner whitespace.',
+    )
+
+
+@settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@given(mutation=st.sampled_from(['flip-http-response-header-casing']))
+def test_http_header_casing_mutated_cache_matches_original_output(replay_pbt_context: ReplayPBTContext, mutation: str):
+    # Metamorphic HTTP property: HTTP/1.1 field names are case-insensitive
+    # (RFC 7230 §3.2), so flipping the case of captured response header names
+    # should not change normalized Datadog check output. Catches checks that
+    # look up response headers using exact-case keys.
+    property_name = 'http-response-header-casing'
+    _skip_unselected(replay_pbt_context, property_name)
+    assert mutation == 'flip-http-response-header-casing'
+
+    _assert_mutated_cache_matches_original_output(
+        context=replay_pbt_context,
+        property_name=property_name,
+        mutate_cache=mutate_request_capture_header_casing,
+        no_change_reason='Replay cache has no request records with case-mixed HTTP response headers.',
+    )
 
 
 def _assert_mutated_cache_matches_original_output(

@@ -3,7 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from hypothesis import given, strategies as st
+from hypothesis import given
+from hypothesis import strategies as st
 
 from datadog_checks.dev.replay.adapter_stats import adapter_operation_name, summarize_adapter_records
 

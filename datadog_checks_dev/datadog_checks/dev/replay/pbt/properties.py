@@ -11,6 +11,9 @@ PROPERTIES = (
     'openmetrics-final-newline',
     'openmetrics-help-text',
     'openmetrics-help-removal',
+    'openmetrics-line-endings',
+    'openmetrics-sample-whitespace',
+    'http-response-header-casing',
     'json-object-key-order',
     'json-whitespace',
     'json-string-escapes',
@@ -22,6 +25,8 @@ PROPERTIES = (
     'output-finite-values',
     'rate-finite-values',
     'monotonic-count-nonnegative',
+    'histogram-bucket-monotonicity',
+    'histogram-inf-equals-count',
 )
 
 PROPERTY_VALIDATION_FAMILIES = {
@@ -32,11 +37,16 @@ PROPERTY_VALIDATION_FAMILIES = {
     'output-finite-values': 'replay-regression',
     'rate-finite-values': 'replay-regression',
     'monotonic-count-nonnegative': 'replay-regression',
+    'histogram-bucket-monotonicity': 'replay-regression',
+    'histogram-inf-equals-count': 'replay-regression',
     'openmetrics-label-order': 'replay-metamorphic',
     'openmetrics-comments-blank-lines': 'replay-metamorphic',
     'openmetrics-final-newline': 'replay-metamorphic',
     'openmetrics-help-text': 'replay-metamorphic',
     'openmetrics-help-removal': 'replay-metamorphic',
+    'openmetrics-line-endings': 'replay-metamorphic',
+    'openmetrics-sample-whitespace': 'replay-metamorphic',
+    'http-response-header-casing': 'replay-metamorphic',
     'json-object-key-order': 'replay-metamorphic',
     'json-whitespace': 'replay-metamorphic',
     'json-string-escapes': 'replay-metamorphic',
@@ -47,8 +57,7 @@ PROPERTY_VALIDATION_FAMILIES = {
 }
 
 PROPERTY_REQUIRES_REPLAY_CACHE = {
-    property_name: family != 'static-contract'
-    for property_name, family in PROPERTY_VALIDATION_FAMILIES.items()
+    property_name: family != 'static-contract' for property_name, family in PROPERTY_VALIDATION_FAMILIES.items()
 }
 
 

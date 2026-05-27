@@ -87,7 +87,9 @@ if TYPE_CHECKING:
     '--check-cache-only', is_flag=True, help='Validate replay-cache suitability and exit without running tests.'
 )
 @click.option('--adapters', default='all', show_default=True, help='Comma-separated replay adapters, or "all".')
-@click.option('--warnings-as-errors', is_flag=True, help='Promote replay validation advisory warnings to test failures.')
+@click.option(
+    '--warnings-as-errors', is_flag=True, help='Promote replay validation advisory warnings to test failures.'
+)
 @click.pass_context
 def replay_pbt(
     ctx: click.Context,

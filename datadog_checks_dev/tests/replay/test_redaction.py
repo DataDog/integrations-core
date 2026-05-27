@@ -2,7 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.dev.replay.redaction import REDACTED, scrub_json, scrub_request_record, scrub_tag, scrub_text, scrub_url
+from datadog_checks.dev.replay.redaction import (
+    REDACTED,
+    scrub_json,
+    scrub_request_record,
+    scrub_tag,
+    scrub_text,
+    scrub_url,
+)
 
 
 def test_scrub_json_redacts_sensitive_keys_recursively():

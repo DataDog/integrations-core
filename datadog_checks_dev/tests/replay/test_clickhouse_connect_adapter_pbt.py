@@ -24,7 +24,9 @@ safe_text = st.text(
 non_empty_safe_text = safe_text.filter(bool)
 json_scalars = st.one_of(st.none(), st.booleans(), st.integers(min_value=-10_000, max_value=10_000), safe_text)
 rows = st.lists(st.lists(json_scalars, max_size=5), max_size=8)
-kwargs = st.dictionaries(st.sampled_from(['host', 'port', 'username', 'password', 'database']), json_scalars, max_size=5)
+kwargs = st.dictionaries(
+    st.sampled_from(['host', 'port', 'username', 'password', 'database']), json_scalars, max_size=5
+)
 
 pbt_settings = settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
 

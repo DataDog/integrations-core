@@ -19,11 +19,13 @@ from typing import Any
 
 from datadog_checks.dev.replay.pbt.json import mutate_json_whitespace, mutate_object_key_order, mutate_string_escapes
 from datadog_checks.dev.replay.pbt.openmetrics import (
+    expand_sample_whitespace,
     insert_comment_and_blank_lines,
     mutate_body_label_order,
     mutate_help_text,
     remove_help_lines,
     toggle_final_newline,
+    toggle_line_endings,
 )
 
 
@@ -144,3 +146,65 @@ def mutate_request_capture_json_whitespace(cache_dir: Path) -> int:
 def mutate_request_capture_json_string_escapes(cache_dir: Path) -> int:
     """Toggle JSON string escaping in request capture response bodies."""
     return _mutate_request_capture_bodies(cache_dir, mutate_string_escapes, should_mutate_record=_is_json_record)
+
+
+def mutate_request_capture_line_endings(cache_dir: Path) -> int:
+    """Convert between LF and CRLF line endings in OpenMetrics request capture bodies."""
+    return _mutate_request_capture_bodies(
+        cache_dir, toggle_line_endings, should_mutate_record=_is_not_strict_openmetrics_record
+    )
+
+
+def mutate_request_capture_sample_whitespace(cache_dir: Path) -> int:
+    """Toggle whitespace separating sample name/labels from value in OpenMetrics bodies."""
+    return _mutate_request_capture_bodies(
+        cache_dir, expand_sample_whitespace, should_mutate_record=_is_not_strict_openmetrics_record
+    )
+
+
+def _flip_header_case(headers: dict[str, Any]) -> dict[str, Any] | None:
+    if not headers:
+        return None
+    any_upper = any(any(char.isupper() for char in str(name)) for name in headers)
+    new_headers: dict[str, Any] = {}
+    changed = False
+    for name, value in headers.items():
+        original = str(name)
+        flipped = original.lower() if any_upper else original.upper()
+        if flipped != original:
+            changed = True
+        new_headers[flipped] = value
+    if not changed or len(new_headers) != len(headers):
+        return None
+    return new_headers
+
+
+def mutate_request_capture_header_casing(cache_dir: Path) -> int:
+    """Flip the case of HTTP response header names in request capture records.
+
+    HTTP/1.1 field names are case-insensitive (RFC 7230 §3.2), so a check that
+    looks up captured response headers must not depend on the recorded casing.
+    Returns the number of records whose headers changed. Records without a
+    headers dictionary or whose header names are already all single-case are
+    preserved unchanged.
+    """
+    changed_records = 0
+    for capture_file in _request_capture_files(cache_dir):
+        records: Any = json.loads(capture_file.read_text())
+        if not isinstance(records, list):
+            continue
+
+        for record in records:
+            if not isinstance(record, dict):
+                continue
+            headers = record.get('headers')
+            if not isinstance(headers, dict):
+                continue
+            new_headers = _flip_header_case(headers)
+            if new_headers is None:
+                continue
+            record['headers'] = new_headers
+            changed_records += 1
+
+        capture_file.write_text(json.dumps(records, indent=2, sort_keys=True) + '\n')
+    return changed_records

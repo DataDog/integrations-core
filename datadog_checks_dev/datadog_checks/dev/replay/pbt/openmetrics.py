@@ -25,6 +25,9 @@ _SAMPLE_RE = re.compile(
 )
 _LABEL_NAME_RE = re.compile(r'^[A-Za-z_][A-Za-z0-9_]*$')
 _HELP_RE = re.compile(r'^(?P<prefix>#\s+HELP\s+)(?P<name>[A-Za-z_:][A-Za-z0-9_:]*)(?:\s+.*)?$')
+_SAMPLE_SEPARATOR_RE = re.compile(
+    r'^(?P<prefix>[A-Za-z_:][A-Za-z0-9_:]*(?:\{[^{}]*\})?)(?P<separator>[ \t]+)(?P<rest>\S.*)$'
+)
 
 
 @dataclass(frozen=True)
@@ -178,6 +181,51 @@ def remove_help_lines(body: str) -> str:
     if not semantic_samples(body):
         return body
     return '\n'.join(line for line in body.split('\n') if _HELP_RE.match(line) is None)
+
+
+def toggle_line_endings(body: str) -> str:
+    """Convert between LF and CRLF line endings while preserving samples.
+
+    Prometheus/OpenMetrics exposition treats ``\\r\\n`` and ``\\n`` line terminators
+    as equivalent record separators, so flipping between them must not change
+    the parsed sample set.
+    """
+    if not semantic_samples(body):
+        return body
+    if '\r\n' in body:
+        return body.replace('\r\n', '\n')
+    if '\n' in body:
+        return body.replace('\n', '\r\n')
+    return body
+
+
+def expand_sample_whitespace(body: str) -> str:
+    """Toggle inner whitespace separating name/labels from value on sample lines.
+
+    Prometheus exposition allows any run of spaces and tabs between the metric
+    name (with optional labels) and the sample value, so widening or collapsing
+    that separator must not change the parsed sample set. Lines that are not
+    parseable as samples are preserved unchanged.
+    """
+    if not semantic_samples(body):
+        return body
+    lines = body.split('\n')
+    changed = False
+    for index, line in enumerate(lines):
+        if parse_sample_line(line) is None:
+            continue
+        match = _SAMPLE_SEPARATOR_RE.match(line)
+        if match is None:
+            continue
+        prefix = match.group('prefix')
+        separator = match.group('separator')
+        rest = match.group('rest')
+        new_separator = ' ' if len(separator) > 1 else '  '
+        new_line = f'{prefix}{new_separator}{rest}'
+        if new_line != line:
+            lines[index] = new_line
+            changed = True
+    return '\n'.join(lines) if changed else body
 
 
 def semantic_samples(body: str) -> list[tuple[str, tuple[tuple[str, str], ...], str, str | None]]:
