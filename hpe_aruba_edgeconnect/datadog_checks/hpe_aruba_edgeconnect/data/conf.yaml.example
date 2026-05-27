@@ -20,13 +20,13 @@ instances:
 
     ## @param orch_username - string - required
     ## Username for the Orchestrator. If no appliance-specific credentials are provided,
-    ## this username will be used as the default for appliances.
+    ## this username is used as the default for appliances.
     #
     orch_username: <ORCH_USERNAME>
 
     ## @param orch_password - string - required
     ## Password for the Orchestrator. If no appliance-specific credentials are provided,
-    ## this password will be used as the default for appliances.
+    ## this password is used as the default for appliances.
     #
     orch_password: <ORCH_PASSWORD>
 
@@ -55,9 +55,9 @@ instances:
     ## @param max_backfill_minutes - integer - optional - default: 5
     ## How many minutes of historical data to recover for each appliance after the Agent has been
     ## offline. If the Agent stops collecting for a while (for example, during a restart or an
-    ## outage), this controls how far back in time it will look when it starts up again.
+    ## outage), this controls how far back in time it looks when it starts up again.
     ##
-    ## For example, with the default of 5, the Agent will collect at most the last 5 minutes
+    ## For example, with the default of 5, the Agent collects at most the last 5 minutes
     ## of data per appliance after coming back online. Anything older than that is skipped, and
     ## collection resumes normally from the most recent point.
     #
