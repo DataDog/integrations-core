@@ -33,21 +33,32 @@ The check also uses eBPF probes to assign GPU usage and performance metrics to p
 
 #### Host
 
-The agent needs to be configured to enable GPU-related features. Add the following parameters to the `/etc/datadog-agent/datadog.yaml` configuration file and then restart the Agent:
+GPU monitoring requires configuration in **both** `/etc/datadog-agent/datadog.yaml` and `/etc/datadog-agent/system-probe.yaml`. Configuring only one of these files results in incomplete metrics collection.
+
+**Step 1**: Add the following parameters to `/etc/datadog-agent/datadog.yaml`:
 
 ```yaml
+gpu:
+  enabled: true
 collect_gpu_tags: true
 enable_nvml_detection: true
 ```
 
-Enabling the `gpu` integration requires `system-probe` to have the configuration option enabled for collecting per-process metrics. Inside the `/etc/datadog-agent/system-probe.yaml` configuration file, the following parameters must be set:
+**Step 2**: Add the following parameters to `/etc/datadog-agent/system-probe.yaml`. This flag loads the eBPF module responsible for per-process GPU metrics and is required even for non-containerized hosts:
 
 ```yaml
 gpu_monitoring:
   enabled: true
 ```
 
-The check in the Agent configuration file is enabled by default whenever NVIDIA GPUs and their drivers are detected in the system, as long as the `enable_nvml_detection` parameter is set to `true`. However, it can also be configured manually following these steps:
+**Step 3**: Restart both the Agent and system-probe:
+
+```shell
+sudo systemctl restart datadog-agent
+sudo systemctl restart datadog-agent-sysprobe
+```
+
+The check in the Agent configuration file is also enabled by default whenever NVIDIA GPUs and their drivers are detected in the system, as long as the `enable_nvml_detection` parameter is set to `true`. However, it can also be configured manually following these steps:
 
 1. Edit the `gpu.d/conf.yaml` file, in the `conf.d/` folder at the root of your
    Agent's configuration directory, to start collecting your GPU performance data.
