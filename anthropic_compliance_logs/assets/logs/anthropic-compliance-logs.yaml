@@ -514,7 +514,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: "@ocsf.metadata.event_code:(org_user_invite_accepted OR claude_user_settings_updated OR platform_api_key_created OR platform_api_key_updated)"
+        query: "@ocsf.metadata.event_code:(org_user_invite_accepted OR claude_user_settings_updated OR *_api_key_*)"
       processors:
         - type: schema-processor
           name: Apply OCSF schema for 3001
@@ -570,9 +570,10 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `actor.user_id` to `ocsf.actor.user.uid`
+              name: Map `actor.user_id`, `actor.admin_api_key_id` to `ocsf.actor.user.uid`
               sources:
                 - actor.user_id
+                - actor.admin_api_key_id
               target: ocsf.actor.user.uid
               preserveSource: true
               overrideOnConflict: true
@@ -599,9 +600,10 @@ pipeline:
               preserveSource: true
               overrideOnConflict: false
             - type: schema-remapper
-              name: Map `actor.user_id` to `ocsf.user.uid`
+              name: Map `actor.user_id`, `actor.admin_api_key_id` to `ocsf.user.uid`
               sources:
                 - actor.user_id
+                - actor.admin_api_key_id
               target: ocsf.user.uid
               preserveSource: true
               overrideOnConflict: true
@@ -645,17 +647,21 @@ pipeline:
               name: ocsf.activity_id
               categories:
                 - filter:
-                    query: "@ocsf.metadata.event_code:(platform_api_key_created OR org_user_invite_accepted)"
+                    query: "@ocsf.metadata.event_code:(*_api_key_created OR org_user_invite_accepted)"
                   name: Create
                   id: 1
                 - filter:
-                    query: "@ocsf.metadata.event_code:platform_api_key_updated AND @updates.current_value:active"
+                    query: "@ocsf.metadata.event_code:*_api_key_updated AND @updates.current_value:active"
                   name: Enable
                   id: 2
                 - filter:
-                    query: "@ocsf.metadata.event_code:platform_api_key_updated AND @updates.current_value:archived"
+                    query: "@ocsf.metadata.event_code:*_api_key_updated AND @updates.current_value:archived"
                   name: Disable
                   id: 5
+                - filter:
+                    query: "@ocsf.metadata.event_code:*_api_key_deleted"
+                  name: Delete
+                  id: 6
                 - filter:
                     query: "@ocsf.metadata.event_code:*"
                   name: Other
