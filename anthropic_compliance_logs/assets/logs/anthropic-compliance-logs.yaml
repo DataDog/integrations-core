@@ -435,7 +435,7 @@ pipeline:
                   name: User
                   id: 1
                 - filter:
-                    query: "@actor.type:admin_api_key_actor"
+                    query: "@actor.type:admin*"
                   name: Admin
                   id: 2
                 - filter:
@@ -620,7 +620,7 @@ pipeline:
                   name: User
                   id: 1
                 - filter:
-                    query: "@actor.type:admin_api_key_actor"
+                    query: "@actor.type:admin*"
                   name: Admin
                   id: 2
                 - filter:
@@ -840,7 +840,7 @@ pipeline:
                   name: User
                   id: 1
                 - filter:
-                    query: "@actor.type:admin_api_key_actor"
+                    query: "@actor.type:admin*"
                   name: Admin
                   id: 2
                 - filter:
@@ -1142,7 +1142,7 @@ pipeline:
                   name: User
                   id: 1
                 - filter:
-                    query: "@actor.type:admin_api_key_actor"
+                    query: "@actor.type:admin*"
                   name: Admin
                   id: 2
                 - filter:
@@ -1221,7 +1221,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: "@ocsf.metadata.event_code:(claude_chat_created OR claude_chat_viewed OR claude_chat_updated OR claude_chat_deleted OR claude_project_created OR claude_project_viewed OR claude_file_uploaded OR claude_file_viewed OR claude_project_document_uploaded OR claude_project_file_uploaded OR claude_artifact_viewed OR claude_skill_created OR claude_skill_replaced)"
+        query: "@ocsf.metadata.event_code:(claude_chat_* OR claude_project_* OR claude_file_* OR claude_artifact_* OR claude_skill_*)"
       processors:
         - type: attribute-remapper
           name: Map `claude_chat_id`, `claude_file_id`, `claude_project_document_id`, `claude_artifact_id`, `skill_id`, `claude_project_id` to `ocsf.web_resource.uid`
@@ -1355,7 +1355,7 @@ pipeline:
                   name: User
                   id: 1
                 - filter:
-                    query: "@actor.type:admin_api_key_actor"
+                    query: "@actor.type:admin*"
                   name: Admin
                   id: 2
                 - filter:
@@ -1577,7 +1577,7 @@ pipeline:
                   name: User
                   id: 1
                 - filter:
-                    query: "@actor.type:admin_api_key_actor"
+                    query: "@actor.type:admin*"
                   name: Admin
                   id: 2
                 - filter:
@@ -1698,5 +1698,164 @@ pipeline:
             version: 1.5.0
             className: API Activity
             classUid: 6003
+            extensions: []
+            profiles: []
+    - type: pipeline
+      name: OCSF sub pipeline for class Base Event [0]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "-@ocsf.class_uid:*"
+      processors:
+        - type: schema-processor
+          name: Apply OCSF schema for 0
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+              sources:
+                - ocsf.metadata.event_code
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `id` to `ocsf.metadata.uid`
+              sources:
+                - id
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
+              sources:
+                - ocsf.metadata.original_time
+              target: ocsf.metadata.original_time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `actor.email_address`, `actor.unauthenticated_email_address` to `ocsf.actor.user.email_addr`
+              sources:
+                - actor.email_address
+                - actor.unauthenticated_email_address
+              target: ocsf.actor.user.email_addr
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `actor.user_id`, `actor.admin_api_key_id`, `actor.api_key_id` to `ocsf.actor.user.uid`
+              sources:
+                - actor.user_id
+                - actor.admin_api_key_id
+                - actor.api_key_id
+              target: ocsf.actor.user.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `actor.ip_address` to `ocsf.src_endpoint.ip`
+              sources:
+                - actor.ip_address
+              target: ocsf.src_endpoint.ip
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `actor.user_agent` to `ocsf.http_request.user_agent`
+              sources:
+                - actor.user_agent
+              target: ocsf.http_request.user_agent
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `organization_id`, `organization_uuid` to `ocsf.actor.user.org.uid`
+              sources:
+                - organization_id
+                - organization_uuid
+              target: ocsf.actor.user.org.uid
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-category-mapper
+              name: ocsf.actor.user.type_id
+              categories:
+                - filter:
+                    query: "@actor.type:user_actor"
+                  name: User
+                  id: 1
+                - filter:
+                    query: "@actor.type:admin*"
+                  name: Admin
+                  id: 2
+                - filter:
+                    query: "-@actor.type:*"
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: "@actor.type:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.actor.user.type
+                id: ocsf.actor.user.type_id
+              fallback:
+                values:
+                  ocsf.actor.user.type: Other
+                  ocsf.actor.user.type_id: "99"
+                sources:
+                  ocsf.actor.user.type:
+                    - actor.type
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Base Event
+            classUid: 0
             extensions: []
             profiles: []
