@@ -292,12 +292,12 @@ async def test_run_goal_loop_parse_retry_fails_raises(tmp_path):
     )
     builder, _, _ = _reviewer_builder(
         [
-            make_response("not json", 5, 5),
-            make_response("still not json", 5, 5),
+            make_response("not json", 5, 3),
+            make_response("still not json", 7, 4),
         ]
     )
 
-    with pytest.raises(GoalParseError):
+    with pytest.raises(GoalParseError) as exc_info:
         await run_goal_loop(
             task=TaskConfig(name="t1", prompt="x", goal="g"),
             goal_text="g",
@@ -310,6 +310,18 @@ async def test_run_goal_loop_parse_retry_fails_raises(tmp_path):
             log_root=tmp_path,
             compact_if_needed=_noop_compact,
         )
+
+    err = exc_info.value
+    assert err.input_tokens == 5 + 7
+    assert err.output_tokens == 3 + 4
+
+    log_path = tmp_path / "goal_agent" / "p1" / "t1.jsonl"
+    finish = next(
+        json.loads(line) for line in log_path.read_text().splitlines() if json.loads(line)["event"] == "finish"
+    )
+    assert finish["total_input_tokens"] == 5 + 7
+    assert finish["total_output_tokens"] == 3 + 4
+    assert finish["success"] is False
 
 
 async def test_run_goal_loop_fires_callbacks(tmp_path):
