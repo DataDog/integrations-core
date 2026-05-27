@@ -447,10 +447,16 @@ jobs:
         key: ${{ matrix.cache_key }}
 
     - name: Seed cache if missing (agent runner only)
+      # ``continue-on-error: true`` is intentional: a failed seed must not
+      # skip the ``Run compare-agent`` step, which has a record-mode
+      # fallback when the cache is unavailable. The seed step's exit code
+      # is captured via the ``seeded`` output and consumed by the
+      # compare-agent step's branching logic.
       if: env.REPLAY_PBT_RUNNER == 'agent' && steps.replay-cache-agent.outputs.cache-hit != 'true'
       id: seed-agent
+      continue-on-error: true
       run: |
-        set -euo pipefail
+        set -uo pipefail
         bash .github/workflows/scripts/ensure-docker.sh
         if [[ "${{ inputs.seed_missing_caches }}" != "true" ]]; then
           echo "No suitable cache and seed_missing_caches=false; will run compare-agent in fresh record mode."
@@ -458,15 +464,23 @@ jobs:
           exit 0
         fi
         echo "Seeding cache from $REPLAY_PBT_FIXTURE_REF via compare-check."
-        ddev env compare-check "$REPLAY_PBT_INTEGRATION" "$REPLAY_PBT_ENVIRONMENT" \
+        if ddev env compare-check "$REPLAY_PBT_INTEGRATION" "$REPLAY_PBT_ENVIRONMENT" \
           --record-ref "$REPLAY_PBT_FIXTURE_REF" \
           --replay-ref "$REPLAY_PBT_TARGET_REF" \
           --readings "$REPLAY_PBT_READINGS" \
-          --adapters "$REPLAY_PBT_ADAPTERS"
-        echo "seeded=true" >> "$GITHUB_OUTPUT"
+          --adapters "$REPLAY_PBT_ADAPTERS"; then
+          echo "seeded=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "compare-check seed failed; compare-agent will fall back to fresh record mode."
+          echo "seeded=false" >> "$GITHUB_OUTPUT"
+          exit 1
+        fi
 
     - name: Run compare-agent (agent runner only)
-      if: env.REPLAY_PBT_RUNNER == 'agent'
+      # Use ``always()`` so this step runs even when the seed step
+      # ``continue-on-error``'d. The branching inside the script decides
+      # whether to use the cache or fall back to fresh record mode.
+      if: env.REPLAY_PBT_RUNNER == 'agent' && always() && (steps.replay-cache-agent.conclusion == 'success' || steps.seed-agent.conclusion == 'success' || steps.seed-agent.conclusion == 'failure')
       run: |
         set +e
         set -uo pipefail
