@@ -27,6 +27,7 @@ class _SafeDict(dict):
 class ActivityMonitor:
     def __init__(self, check: NutanixCheck):
         self.check = check
+        self._pc_label = f"PC:{self.check.pc_ip}:{self.check.pc_port}"
         self.last_event_collection_time = self.check.read_persistent_cache("last_event_collection_time")
         self.last_task_collection_time = self.check.read_persistent_cache("last_task_collection_time")
         self.last_audit_collection_time = self.check.read_persistent_cache("last_audit_collection_time")
@@ -36,6 +37,11 @@ class ActivityMonitor:
         self.audits: dict[str, dict] = {}
         self.alerts: dict[str, dict] = {}
         self.tasks: dict[str, dict] = {}
+        # Entity counters
+        self.events_count = 0
+        self.tasks_count = 0
+        self.audits_count = 0
+        self.alerts_count = 0
         # Read boolean flag from cache (stored as string)
         cached_value = self.check.read_persistent_cache("alerts_v42_supported")
         if cached_value == "True":
@@ -46,11 +52,15 @@ class ActivityMonitor:
             self.alerts_v42_supported = None
 
     def reset_state(self) -> None:
-        """Reset in-memory caches for a new collection run."""
+        """Reset in-memory caches and counters for a new collection run."""
         self.events = {}
         self.audits = {}
         self.alerts = {}
         self.tasks = {}
+        self.events_count = 0
+        self.tasks_count = 0
+        self.audits_count = 0
+        self.alerts_count = 0
 
     def _collect(
         self,
@@ -66,26 +76,22 @@ class ActivityMonitor:
         start_time = last_time
         if not start_time:
             now = get_current_datetime()
-            start_time = (now - timedelta(seconds=self.check.sampling_interval)).isoformat().replace("+00:00", "Z")
+            start_time = (
+                (now - timedelta(seconds=self.check.config.min_collection_interval)).isoformat().replace("+00:00", "Z")
+            )
 
-        self.check.log.debug(
-            "[PC:%s:%s] Collecting %ss since: %s", self.check.pc_ip, self.check.pc_port, activity_kind, start_time
-        )
+        self.check.log.debug("[%s] Collecting %ss since: %s", self._pc_label, activity_kind, start_time)
 
         items = list_fn(start_time)
         if not items:
-            self.check.log.debug("[PC:%s:%s] No %ss found", self.check.pc_ip, self.check.pc_port, activity_kind)
+            self.check.log.debug("[%s] No %ss found", self._pc_label, activity_kind)
             return 0
 
-        self.check.log.debug(
-            "[PC:%s:%s] Fetched %d %ss from API", self.check.pc_ip, self.check.pc_port, len(items), activity_kind
-        )
+        self.check.log.debug("[%s] Fetched %d %ss from API", self._pc_label, len(items), activity_kind)
 
         items = self._filter_after_time(items, last_time, time_field)
         if not items:
-            self.check.log.debug(
-                "[PC:%s:%s] No new %ss after filtering", self.check.pc_ip, self.check.pc_port, activity_kind
-            )
+            self.check.log.debug("[%s] No new %ss after filtering", self._pc_label, activity_kind)
             return 0
 
         # Advance past all fetched items before applying resource filters
@@ -103,9 +109,8 @@ class ActivityMonitor:
                 cache[ext_id] = item
 
         self.check.log.debug(
-            "[PC:%s:%s] Processing %d %ss after filtering",
-            self.check.pc_ip,
-            self.check.pc_port,
+            "[%s] Processing %d %ss after filtering",
+            self._pc_label,
             len(items),
             activity_kind,
         )
@@ -117,9 +122,8 @@ class ActivityMonitor:
             setattr(self, cache_key, most_recent_time_str)
             self.check.write_persistent_cache(cache_key, most_recent_time_str)
             self.check.log.debug(
-                "[PC:%s:%s] Updated %s to: %s",
-                self.check.pc_ip,
-                self.check.pc_port,
+                "[%s] Updated %s to: %s",
+                self._pc_label,
                 cache_key,
                 most_recent_time_str,
             )
@@ -132,24 +136,22 @@ class ActivityMonitor:
             return collect_fn()
         except HTTPError as e:
             self.check.log.error(
-                "[PC:%s:%s] Failed to collect %ss: HTTP %s",
-                self.check.pc_ip,
-                self.check.pc_port,
+                "[%s] Failed to collect %ss: HTTP %s",
+                self._pc_label,
                 activity_kind,
                 e.response.status_code if e.response else "error",
             )
             return 0
         except Exception:
             self.check.log.exception(
-                "[PC:%s:%s] Unexpected error collecting %ss",
-                self.check.pc_ip,
-                self.check.pc_port,
+                "[%s] Unexpected error collecting %ss",
+                self._pc_label,
                 activity_kind,
             )
             return 0
 
-    def collect_events(self) -> int:
-        return self._safe_collect(
+    def collect_events(self) -> None:
+        self.events_count = self._safe_collect(
             "event",
             lambda: self._collect(
                 activity_kind="event",
@@ -160,13 +162,13 @@ class ActivityMonitor:
             ),
         )
 
-    def collect_tasks(self) -> int:
+    def collect_tasks(self) -> None:
         def _filter_subtasks(tasks: list[dict]) -> list[dict]:
-            if not self.check.collect_subtasks_enabled:
+            if not self.check.config.collect_subtasks:
                 return [t for t in tasks if not t.get("parentTask")]
             return tasks
 
-        return self._safe_collect(
+        self.tasks_count = self._safe_collect(
             "task",
             lambda: self._collect(
                 activity_kind="task",
@@ -178,8 +180,8 @@ class ActivityMonitor:
             ),
         )
 
-    def collect_audits(self) -> int:
-        return self._safe_collect(
+    def collect_audits(self) -> None:
+        self.audits_count = self._safe_collect(
             "audit",
             lambda: self._collect(
                 activity_kind="audit",
@@ -190,8 +192,8 @@ class ActivityMonitor:
             ),
         )
 
-    def collect_alerts(self) -> int:
-        return self._safe_collect(
+    def collect_alerts(self) -> None:
+        self.alerts_count = self._safe_collect(
             "alert",
             lambda: self._collect(
                 activity_kind="alert",
@@ -218,20 +220,17 @@ class ActivityMonitor:
         }
 
         if self.alerts_v42_supported is False:
-            self.check.log.debug(
-                "[PC:%s:%s] Using alerts API v4.0 (v4.2 not supported)", self.check.pc_ip, self.check.pc_port
-            )
+            self.check.log.debug("[%s] Using alerts API v4.0 (v4.2 not supported)", self._pc_label)
             del params["$filter"]
             return self.check._get_paginated_request_data("api/monitoring/v4.0/serviceability/alerts", params=params)
 
         try:
-            self.check.log.debug("[PC:%s:%s] Attempting to use alerts API v4.2", self.check.pc_ip, self.check.pc_port)
+            self.check.log.debug("[%s] Attempting to use alerts API v4.2", self._pc_label)
             result = self.check._get_paginated_request_data("api/monitoring/v4.2/serviceability/alerts", params=params)
             if self.alerts_v42_supported is None:
                 self.check.log.debug(
-                    "[PC:%s:%s] Alerts API v4.2 is supported, caching for future use",
-                    self.check.pc_ip,
-                    self.check.pc_port,
+                    "[%s] Alerts API v4.2 is supported, caching for future use",
+                    self._pc_label,
                 )
                 self.alerts_v42_supported = True
                 self.check.write_persistent_cache("alerts_v42_supported", "True")
@@ -239,9 +238,8 @@ class ActivityMonitor:
         except HTTPError as e:
             if e.response is not None and e.response.status_code == 404:
                 self.check.log.debug(
-                    "[PC:%s:%s] Alerts API v4.2 not supported, falling back to v4.0 permanently",
-                    self.check.pc_ip,
-                    self.check.pc_port,
+                    "[%s] Alerts API v4.2 not supported, falling back to v4.0 permanently",
+                    self._pc_label,
                 )
                 self.alerts_v42_supported = False
                 self.check.write_persistent_cache("alerts_v42_supported", "False")
@@ -261,9 +259,8 @@ class ActivityMonitor:
             endpoint = "api/monitoring/v4.2/serviceability/alerts"
 
         self.check.log.debug(
-            "[PC:%s:%s] Alert %s not in cache, fetching from API",
-            self.check.pc_ip,
-            self.check.pc_port,
+            "[%s] Alert %s not in cache, fetching from API",
+            self._pc_label,
             alert_ext_id,
         )
         try:
@@ -271,18 +268,16 @@ class ActivityMonitor:
             if alert:
                 self.alerts[alert_ext_id] = alert
                 self.check.log.debug(
-                    "[PC:%s:%s] Fetched alert %s: %s",
-                    self.check.pc_ip,
-                    self.check.pc_port,
+                    "[%s] Fetched alert %s: %s",
+                    self._pc_label,
                     alert_ext_id,
                     alert.get("title", ""),
                 )
             return alert
         except Exception as e:
             self.check.log.debug(
-                "[PC:%s:%s] Failed to fetch alert %s: %s",
-                self.check.pc_ip,
-                self.check.pc_port,
+                "[%s] Failed to fetch alert %s: %s",
+                self._pc_label,
                 alert_ext_id,
                 e,
             )
@@ -341,9 +336,8 @@ class ActivityMonitor:
 
         # Log audit submission for duplicate debugging
         self.check.log.debug(
-            "[PC:%s:%s]%s Submitting audit - ID: %s, CreationTime: %s",
-            self.check.pc_ip,
-            self.check.pc_port,
+            "[%s]%s Submitting audit - ID: %s, CreationTime: %s",
+            self._pc_label,
             cluster_label,
             audit_id,
             audit.get("creationTime", "unknown"),
@@ -547,9 +541,7 @@ class ActivityMonitor:
         try:
             return datetime.fromisoformat(timestamp_str.replace("Z", "+00:00"))
         except (ValueError, AttributeError):
-            self.check.log.warning(
-                "[PC:%s:%s] Failed to parse timestamp: %s", self.check.pc_ip, self.check.pc_port, timestamp_str
-            )
+            self.check.log.warning("[%s] Failed to parse timestamp: %s", self._pc_label, timestamp_str)
             return None
 
     def _parse_timestamp(self, timestamp_str: str) -> int | None:

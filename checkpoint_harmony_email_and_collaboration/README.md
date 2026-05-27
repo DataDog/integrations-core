@@ -12,14 +12,12 @@ Get detailed visibility into these events with out-of-the-box dashboards, and st
 
 Follow the instructions below to configure this integration for your Check Point Harmony Email & Collaboration account.
 
-### Configuration
-
-#### Webhook Configuration
+### Webhook Configuration
 
 Configure the Datadog endpoint to forward Check Point Harmony Email & Collaboration events as logs to Datadog.
 
-1. Copy the generated URL inside the **Configuration** tab on the Datadog [Check Point Harmony Email & Collaboration integration tile][4].
-2. Sign in to [Check Point Infinity Portal][5].
+1. {{< integration-api-key-picker >}}
+2. Sign in to [Check Point Infinity Portal][3].
 3. If you are not already in the **Harmony Email & Collaboration** Administrator Portal:
    - Click the **Menu** icon in the top-left corner.
    - In the **Harmony** section, click **Email & Collaboration**.
@@ -51,10 +49,8 @@ The Check Point Harmony Email & Collaboration integration does not include any e
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][3].
+Need help? Contact [Datadog support][2].
 
 [1]: https://www.checkpoint.com/harmony/email-security/
-[2]: https://app.datadoghq.com/account/settings/agent/latest
-[3]: https://docs.datadoghq.com/help/
-[4]: https://app.datadoghq.com/integrations/checkpoint_harmony_email_and_collaboration
-[5]: https://portal.checkpoint.com/
+[2]: https://docs.datadoghq.com/help/
+[3]: https://portal.checkpoint.com/

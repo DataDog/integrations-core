@@ -296,11 +296,11 @@ class MongoDb(AgentCheck):
                 self._schemas.run_job_loop(tags=self._get_tags(include_internal_resource_tags=True))
                 self._query_metrics.run_job_loop(tags=self._get_tags(include_internal_resource_tags=True))
         except CRITICAL_FAILURE as e:
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._get_service_check_tags())
             self._unset_metadata()
             raise e  # Let exception bubble up to global handler and show full error in the logs.
         else:
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._get_service_check_tags())
 
     def _refresh_metadata(self):
         if self._mongo_version is None or self._mongo_modules is None:
@@ -323,7 +323,6 @@ class MongoDb(AgentCheck):
     def _unset_metadata(self):
         self.log.debug('Due to connection failure we will need to reset the metadata.')
         self._mongo_version = None
-        self._resolved_hostname = None
 
     def _collect_metrics(self):
         deployment = self.deployment_type

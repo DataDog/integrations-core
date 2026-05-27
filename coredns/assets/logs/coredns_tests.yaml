@@ -6,8 +6,8 @@ tests:
     custom:
       dns:
         answer:
-          size: 174.0
-        buffer: 512.0
+          size: 174
+        buffer: 512
         dnssec: "false"
         flags:
           list:
@@ -16,21 +16,54 @@ tests:
            - "rd"
            - "ra"
           rcode: "NXDOMAIN"
-        id: 21628.0
+        id: 21628
         protocol: "udp"
         question:
           class: "IN"
           name: "trace-k8s.agent.datadoghq.com.apm1.cluster.local."
-          size: 66.0
+          size: 66
           type: "AAAA"
-      duration: 78493.0
+      duration: 78493
       level: "INFO"
       network:
         client:
           ip: "10.145.105.176"
           port: "36008"
+      ocsf:
+        activity_id: 6
+        activity_name: "Traffic"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "DNS Activity"
+        class_uid: 4003
+        connection_info:
+          direction: "Inbound"
+          direction_id: 1
+          protocol_name: "udp"
+        metadata:
+          log_level: "INFO"
+          product:
+            name: "CoreDNS"
+            vendor_name: "CoreDNS"
+          version: "1.5.0"
+        query:
+          class: "IN"
+          hostname: "trace-k8s.agent.datadoghq.com.apm1.cluster.local."
+          type: "AAAA"
+        rcode: "NXDomain"
+        rcode_id: 3
+        response_time: 0
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "10.145.105.176"
+          port: 36008
+        status: "Failure"
+        status_code: "NXDOMAIN"
+        status_id: 2
+        time: 1574952440550
       timestamp: 1574952440550
-    message: "2019-11-28T14:47:20.55Z [INFO] 10.145.105.176:36008 - 21628 \"AAAA IN trace-k8s.agent.datadoghq.com.apm1.cluster.local. udp 66 false 512\" NXDOMAIN qr,aa,rd,ra 174 0.000078493s"
+    message: '2019-11-28T14:47:20.55Z [INFO] 10.145.105.176:36008 - 21628 "AAAA IN trace-k8s.agent.datadoghq.com.apm1.cluster.local. udp 66 false 512" NXDOMAIN qr,aa,rd,ra 174 0.000078493s'
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
@@ -41,8 +74,8 @@ tests:
     custom:
       dns:
         answer:
-          size: 68.0
-        buffer: 4096.0
+          size: 68
+        buffer: 4096
         dnssec: "false"
         flags:
           list:
@@ -51,22 +84,53 @@ tests:
            - "ra"
            - "ad"
           rcode: "NOERROR"
-        id: 29008.0
+        id: 29008
         protocol: "udp"
         question:
           class: "IN"
           name: "example.org."
-          size: 41.0
+          size: 41
           type: "A"
-      duration: 3.7990251E7
+      duration: 37990251
       level: "INFO"
       network:
         client:
           ip: "127.0.0.1"
           port: "50759"
-    message: "[INFO] 127.0.0.1:50759 - 29008 \"A IN example.org. udp 41 false 4096\" NOERROR qr,rd,ra,ad 68 0.037990251s"
+      ocsf:
+        activity_id: 6
+        activity_name: "Traffic"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "DNS Activity"
+        class_uid: 4003
+        connection_info:
+          direction: "Inbound"
+          direction_id: 1
+          protocol_name: "udp"
+        metadata:
+          log_level: "INFO"
+          product:
+            name: "CoreDNS"
+            vendor_name: "CoreDNS"
+          version: "1.5.0"
+        query:
+          class: "IN"
+          hostname: "example.org."
+          type: "A"
+        rcode: "NoError"
+        rcode_id: 0
+        response_time: 37
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "127.0.0.1"
+          port: 50759
+        status: "Success"
+        status_code: "NOERROR"
+        status_id: 1
+    message: '[INFO] 127.0.0.1:50759 - 29008 "A IN example.org. udp 41 false 4096" NOERROR qr,rd,ra,ad 68 0.037990251s'
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1
-

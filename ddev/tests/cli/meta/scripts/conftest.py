@@ -108,6 +108,19 @@ env:
     )
 
     write_file(
+        repo_path / '.github' / 'workflows',
+        'claim-pypi-name.yaml',
+        f"""name: claim pypi name
+jobs:
+  claim:
+    steps:
+    - uses: actions/setup-python@v6
+      with:
+        python-version: "{OLD_PYTHON_VERSION}"
+""",
+    )
+
+    write_file(
         repo_path / 'ddev',
         'pyproject.toml',
         f"""[tool.black]

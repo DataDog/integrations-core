@@ -1,0 +1,1 @@
+Require a changelog entry when an integration's `conf.yaml.example` is modified, and expose the expected path through the new `Integration.example_config` property.

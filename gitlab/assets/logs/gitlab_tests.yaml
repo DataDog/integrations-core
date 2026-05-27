@@ -10,6 +10,7 @@ tests:
       gitlab_date: 1560846559197
       level: "info"
     message: "gossip settled; proceeding"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1
@@ -39,6 +40,7 @@ tests:
       system: "grpc"
       time: "2019-06-17T17:20:03Z"
     message: "finished unary call with code OK"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560792003000
@@ -579,6 +581,7 @@ tests:
         jobid: "ca8a29fc8d6a1d933812e510"
       timestamp: 1560767410793
     message: "2019-06-17_10:30:10.79384 2019-06-17T10:30:10.793Z 1332 TID-oujf7ktz4 PagesDomainVerificationCronWorker JID-ca8a29fc8d6a1d933812e510 INFO: start"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1
@@ -597,6 +600,7 @@ tests:
         jobid: "ca8a29fc8d6a1d933812e510"
       timestamp: 1560767410802
     message: "2019-06-17_10:30:10.80225 2019-06-17T10:30:10.802Z 1332 TID-oujf7ktz4 PagesDomainVerificationCronWorker JID-ca8a29fc8d6a1d933812e510 INFO: done: 0.008 sec"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1
@@ -611,6 +615,7 @@ tests:
       pid: 1332
       timestamp: 1560767626568
     message: "2019-06-17_10:33:46.56889 2019-06-17T10:33:46.568Z 1332 TID-oujf7ktz4 INFO: Cleaning working queues"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1
@@ -786,6 +791,7 @@ tests:
       time: "2019-06-18T00:20:10+00:00"
       url: "http://127.0.0.1:8080/api/v4/internal/pre_receive"
     message: "finished HTTP request"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560817210000
@@ -798,6 +804,7 @@ tests:
       time: "2019-06-18T08:28:31Z"
       version: "gitlab-workhorse v8.7.0-20190610.161452"
     message: "Starting"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560846511000
@@ -810,6 +817,7 @@ tests:
       logger:
         thread_id: "9047"
     message: "I, [2015-02-13T06:14:46.680381 #9047]  INFO -- : Refreshing Gem list"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1423808086680
@@ -840,6 +848,7 @@ tests:
           ip: "123.123.123.123"
       views: 0.2
     message: "I, [1999-03-03T02:34:24.895701 #19074]  INFO -- : Started GET \"/api/v1/example/query\" for 123.123.123.123 at 1999-03-03 02:34:24 +0000 Processing by MyCheck::CheckController#index as JSON Completed 200 OK in 41ms (Views: 0.2ms | ActiveRecord: 6.2ms)"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 920428464895
@@ -853,6 +862,7 @@ tests:
         name: "Main"
         thread_id: "19074"
     message: "I, [1999-03-03T02:34:24.895701 #19074]  INFO -- Main: Some error."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 920428464895
@@ -893,6 +903,7 @@ tests:
         thread_id: "19074"
       views: 0.2
     message: "I, [1999-03-03T02:34:24.895701 #19074]  INFO -- : Completed 200 OK in 41ms (Views: 0.2ms | ActiveRecord: 6.2ms)"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 920428464895
@@ -907,6 +918,7 @@ tests:
       logger:
         thread_id: "648"
     message: "I, [2019-06-18T15:18:18.173873 #648]  INFO -- : listening on addr=127.0.0.1:8080 fd=21"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560871098173
@@ -928,6 +940,7 @@ tests:
         client:
           ip: "123.123.123.123"
     message: "I, [1999-03-03T02:34:24.895701 #19074]  INFO -- : Started GET \"/api/v1/example/query\" for 123.123.123.123 at 1999-03-03 02:34:24+0000"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 920428464895
@@ -943,6 +956,7 @@ tests:
         thread_id: "19074"
       processor: "MyCheck::CheckController#index"
     message: "I, [1999-03-03T02:34:24.895701 #19074]  INFO -- : Processing by MyCheck::CheckController#index as JSON"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 920428464895
@@ -959,6 +973,7 @@ tests:
         id: 1234567
         timestamp: 153012312
     message: "I, [2018-06-27T08:01:52.991728 #1]  INFO -- : Received: {\"action\":\"cancel\",\"order\":{\"id\":1234567,\"timestamp\":153012312}}"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1530086512991
@@ -974,6 +989,7 @@ tests:
         thread_id: "50"
       worker: 2
     message: "E, [2015-10-21T22:12:52.402356 #50] ERROR -- : reaped #<Process::Status: pid 305 SIGKILL (signal 9)> worker=2"
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1445465572402
@@ -986,6 +1002,7 @@ tests:
       logger:
         thread_id: "1310"
     message: "D, [2019-06-18T00:13:22.160544 #1310] DEBUG -- : waiting 31.0s after suspend/hibernation"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560816802160
@@ -999,6 +1016,7 @@ tests:
         thread_id: "819"
       worker: 0
     message: "I, [2019-06-18T15:18:18.345105 #819]  INFO -- : worker=0 ready"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560871098345
@@ -1016,6 +1034,7 @@ tests:
         jobid: "39a3193a8e0f66844f802029"
       timestamp: 1664956770904
     message: "2022-10-05T07:59:30.904Z pid=64 tid=a0tc class=Ci::RefDeleteUnlockArtifactsWorker jid=39a3193a8e0f66844f802029 elapsed=0.012 INFO: done"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1
@@ -1032,7 +1051,69 @@ tests:
         jobid: "21b448f228c0a5cc1152d144"
       timestamp: 1664886475010
     message: "2022-10-04T12:27:55.010Z pid=65 tid=s5cg9 class=BuildHooksWorker jid=21b448f228c0a5cc1152d144 INFO: start"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1
-
+ -
+  sample: "2026-03-08T15:08:33.635990Z 01E {\"event\": \"pikepdf C++ to Python logger bridge initialized\", \"level\": \"info\", \"timestamp\": \"2026-03-08T15:08:33.628330Z\", \"logger\": \"pikepdf._core\", \"file\": \"<frozen importlib._bootstrap>:488\", \"TraceId\": \"0\", \"SpanId\": \"0\", \"service_environment\": \"test-docker\"}"
+  result:
+    custom:
+      SpanId: "0"
+      TraceId: "0"
+      date: 1772982513635
+      event: "pikepdf C++ to Python logger bridge initialized"
+      file: "<frozen importlib._bootstrap>:488"
+      level: "info"
+      logger: "pikepdf._core"
+      service_environment: "test-docker"
+      stream_number: "01"
+      stream_type: "E"
+      timestamp: "2026-03-08T15:08:33.628330Z"
+    message: "2026-03-08T15:08:33.635990Z 01E {\"event\": \"pikepdf C++ to Python logger bridge initialized\", \"level\": \"info\", \"timestamp\": \"2026-03-08T15:08:33.628330Z\", \"logger\": \"pikepdf._core\", \"file\": \"<frozen importlib._bootstrap>:488\", \"TraceId\": \"0\", \"SpanId\": \"0\", \"service_environment\": \"test-docker\"}"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1772982513635
+ -
+  sample: "2026-03-08T15:08:37.699056Z 01E {\"event\": \"Creating database. Use `-v/--verbose` to see all logs\", \"logger\": \"app.cli\", \"level\": \"info\", \"timestamp\": \"2026-03-08T15:08:37.698374Z\", \"TraceId\": \"0\", \"SpanId\": \"0\", \"service_environment\": \"test-docker\"}"
+  result:
+    custom:
+      SpanId: "0"
+      TraceId: "0"
+      date: 1772982517699
+      event: "Creating database. Use `-v/--verbose` to see all logs"
+      level: "info"
+      logger: "app.cli"
+      service_environment: "test-docker"
+      stream_number: "01"
+      stream_type: "E"
+      timestamp: "2026-03-08T15:08:37.698374Z"
+    message: "2026-03-08T15:08:37.699056Z 01E {\"event\": \"Creating database. Use `-v/--verbose` to see all logs\", \"logger\": \"app.cli\", \"level\": \"info\", \"timestamp\": \"2026-03-08T15:08:37.698374Z\", \"TraceId\": \"0\", \"SpanId\": \"0\", \"service_environment\": \"test-docker\"}"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1772982517699
+ -
+  sample: "2026-03-08T15:08:47.505749Z 01E {\"customer_fk_count\": 73, \"customer_col_count\": 49, \"customer_endpoint_count\": 251, \"event\": \"shared money stats\", \"pg_backend_pid\": 71, \"logger\": \"__main__\", \"level\": \"info\", \"timestamp\": \"2026-03-08T15:08:47.505258Z\", \"TraceId\": \"0\", \"SpanId\": \"0\", \"service_environment\": \"test-docker\"}"
+  result:
+    custom:
+      SpanId: "0"
+      TraceId: "0"
+      customer_col_count: 49
+      customer_endpoint_count: 251
+      customer_fk_count: 73
+      date: 1772982527505
+      event: "shared money stats"
+      level: "info"
+      logger: "__main__"
+      pg_backend_pid: 71
+      service_environment: "test-docker"
+      stream_number: "01"
+      stream_type: "E"
+      timestamp: "2026-03-08T15:08:47.505258Z"
+    message: "2026-03-08T15:08:47.505749Z 01E {\"customer_fk_count\": 73, \"customer_col_count\": 49, \"customer_endpoint_count\": 251, \"event\": \"shared money stats\", \"pg_backend_pid\": 71, \"logger\": \"__main__\", \"level\": \"info\", \"timestamp\": \"2026-03-08T15:08:47.505258Z\", \"TraceId\": \"0\", \"SpanId\": \"0\", \"service_environment\": \"test-docker\"}"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1772982527505

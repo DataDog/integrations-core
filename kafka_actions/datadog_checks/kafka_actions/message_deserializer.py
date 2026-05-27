@@ -14,10 +14,57 @@ from io import BytesIO
 from bson import decode as bson_decode
 from bson.json_util import dumps as bson_dumps
 from fastavro import schemaless_reader
-from google.protobuf import descriptor_pb2, descriptor_pool, message_factory
+from google.protobuf import (
+    any_pb2,
+    api_pb2,
+    descriptor_pb2,
+    descriptor_pool,
+    duration_pb2,
+    empty_pb2,
+    field_mask_pb2,
+    message_factory,
+    source_context_pb2,
+    struct_pb2,
+    timestamp_pb2,
+    type_pb2,
+    wrappers_pb2,
+)
 from google.protobuf.json_format import MessageToJson
 
 SCHEMA_REGISTRY_MAGIC_BYTE = 0x00
+
+_WELL_KNOWN_TYPE_MODULES = (
+    any_pb2,
+    duration_pb2,
+    empty_pb2,
+    field_mask_pb2,
+    source_context_pb2,
+    struct_pb2,
+    timestamp_pb2,
+    wrappers_pb2,
+    type_pb2,
+    api_pb2,
+)
+
+
+def _preload_well_known_types(pool):
+    """Add google/protobuf/*.proto well-known types to a fresh DescriptorPool.
+
+    Registry-provided FileDescriptorProtos may depend on well-known types
+    (e.g. google/protobuf/timestamp.proto) without listing them as references.
+    A custom DescriptorPool doesn't have them by default, so we copy them from
+    the generated modules before adding user schemas.
+    """
+    for module in _WELL_KNOWN_TYPE_MODULES:
+        file_name = module.DESCRIPTOR.name
+        try:
+            pool.FindFileByName(file_name)
+            continue
+        except KeyError:
+            pass
+        fd_proto = descriptor_pb2.FileDescriptorProto()
+        module.DESCRIPTOR.CopyToProto(fd_proto)
+        pool.Add(fd_proto)
 
 
 class _AvroJSONEncoder(json.JSONEncoder):
@@ -136,6 +183,7 @@ class MessageDeserializer:
         format_type: str = 'json',
         schema_str: str | None = None,
         uses_schema_registry: bool = False,
+        skip_bytes: int = 0,
     ) -> tuple[str | None, int | None]:
         """Deserialize a message (key or value).
 
@@ -144,6 +192,13 @@ class MessageDeserializer:
             format_type: 'json', 'bson', 'protobuf', 'avro', or 'raw'
             schema_str: Schema definition (for protobuf/avro)
             uses_schema_registry: Whether to expect Schema Registry format
+            skip_bytes: Number of bytes to drop from the start of raw_bytes
+                before any further processing. Useful for stripping a custom
+                producer-side prefix (e.g. a 1-byte version flag, a 4-byte
+                tenant id, a non-Confluent schema registry envelope) so the
+                remaining bytes can be fed to one of the standard format
+                paths. Applied before raw/json/bson/protobuf/avro and before
+                Schema Registry magic-byte detection.
 
         Returns:
             Tuple of (deserialized_string, schema_id)
@@ -152,6 +207,20 @@ class MessageDeserializer:
         """
         if not raw_bytes:
             return None, None
+
+        if skip_bytes:
+            if skip_bytes < 0:
+                self.log.warning("skip_bytes must be non-negative, got %d", skip_bytes)
+                return f"<deserialization error: skip_bytes must be non-negative, got {skip_bytes}>", None
+            if skip_bytes > len(raw_bytes):
+                self.log.warning("skip_bytes=%d exceeds message length %d", skip_bytes, len(raw_bytes))
+                return (
+                    f"<deserialization error: skip_bytes={skip_bytes} exceeds message length {len(raw_bytes)}>",
+                    None,
+                )
+            raw_bytes = raw_bytes[skip_bytes:]
+            if not raw_bytes:
+                return None, None
 
         if format_type == 'raw':
             return json.dumps(base64.b64encode(raw_bytes).decode('ascii')), None
@@ -432,6 +501,7 @@ class MessageDeserializer:
         descriptor_set.ParseFromString(schema_bytes)
 
         pool = descriptor_pool.DescriptorPool()
+        _preload_well_known_types(pool)
         for fd_proto in descriptor_set.file:
             pool.Add(fd_proto)
 
@@ -460,10 +530,16 @@ class MessageDeserializer:
             _get_protobuf_message_class to select the correct message type.
         """
         pool = descriptor_pool.DescriptorPool()
+        _preload_well_known_types(pool)
         descriptor_set = descriptor_pb2.FileDescriptorSet()
 
         # Add dependencies first (in dependency order), fixing names
         for dep_name, dep_b64 in dep_schemas:
+            try:
+                pool.FindFileByName(dep_name)
+                continue
+            except KeyError:
+                pass
             dep_bytes = base64.b64decode(dep_b64)
             dep_proto = descriptor_pb2.FileDescriptorProto()
             dep_proto.ParseFromString(dep_bytes)
@@ -551,7 +627,6 @@ class DeserializedMessage:
         try:
             return json.loads(deserialized)
         except (json.JSONDecodeError, ValueError):
-            # Error strings from deserialize_message are not valid JSON
             return deserialized
 
     @property
@@ -561,9 +636,10 @@ class DeserializedMessage:
             key_format = self.config.get('key_format', 'json')
             key_schema = self.config.get('key_schema')
             key_uses_sr = self.config.get('key_uses_schema_registry', False)
+            key_skip_bytes = self.config.get('key_skip_bytes', 0)
 
             deserialized, schema_id = self.deserializer.deserialize_message(
-                self.kafka_msg.key(), key_format, key_schema, key_uses_sr
+                self.kafka_msg.key(), key_format, key_schema, key_uses_sr, skip_bytes=key_skip_bytes
             )
 
             self._key_deserialized = self._parse_deserialized(deserialized)
@@ -578,9 +654,10 @@ class DeserializedMessage:
             value_format = self.config.get('value_format', 'json')
             value_schema = self.config.get('value_schema')
             value_uses_sr = self.config.get('value_uses_schema_registry', False)
+            value_skip_bytes = self.config.get('value_skip_bytes', 0)
 
             deserialized, schema_id = self.deserializer.deserialize_message(
-                self.kafka_msg.value(), value_format, value_schema, value_uses_sr
+                self.kafka_msg.value(), value_format, value_schema, value_uses_sr, skip_bytes=value_skip_bytes
             )
 
             self._value_deserialized = self._parse_deserialized(deserialized)

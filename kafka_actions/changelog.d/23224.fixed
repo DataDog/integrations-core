@@ -1,1 +1,0 @@
-Fix Avro deserialization for schemas with logical types (decimal, uuid, date, time, timestamp) that caused "Object of type ... is not JSON serializable" errors.

@@ -2,6 +2,31 @@
 
 <!-- towncrier release notes start -->
 
+## 38.0.0 / 2026-04-29
+
+***Changed***:
+
+* Legacy migration: remove the legacy `clean`, `config`, `test`, `validate all`, `validate licenses`, and `agent requirements` commands from `python -m datadog_checks.dev`. ddev provides native equivalents for the first five; `agent requirements` is unreachable and unsupported. ([#23478](https://github.com/DataDog/integrations-core/pull/23478))
+
+***Added***:
+
+* Suppress "already exists" noise in `ddev release tag` output. ([#22883](https://github.com/DataDog/integrations-core/pull/22883))
+
+***Fixed***:
+
+* Fix `apply_overrides` to support nested template references in spec.yaml overrides. ([#23348](https://github.com/DataDog/integrations-core/pull/23348))
+* Bump minimum virtualenv to 20.26.1 in the cli extras for compatibility with modern hatch. ([#23497](https://github.com/DataDog/integrations-core/pull/23497))
+
+## 37.0.0 / 2026-04-15
+
+***Changed***:
+
+* Bump pytest to 9.0.3 and update pytest plugins to latest versions. ([#23306](https://github.com/DataDog/integrations-core/pull/23306))
+
+***Fixed***:
+
+* Bump `requests` to `>=2.33.0` (CVE-2026-25645 / VULN-59770). ([#23223](https://github.com/DataDog/integrations-core/pull/23223))
+
 ## 36.1.0 / 2026-04-06
 
 ***Added***:

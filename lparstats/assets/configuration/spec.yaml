@@ -1,0 +1,61 @@
+name: LPARStats
+files:
+- name: lparstats.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: name
+      description: A name for this instance.
+      required: false
+      value:
+        type: string
+        example: lparstats
+    - name: sudo
+      description: |
+        Run lparstat with sudo. Requires adding dd-agent to the sudoers file:
+
+          dd-agent ALL=(ALL) NOPASSWD: /usr/bin/lparstat
+
+        When running as root, sudo is not needed.
+      required: false
+      value:
+        type: boolean
+        example: false
+    - name: memory_stats
+      description: Collect physical memory and page statistics (lparstat -m).
+      required: false
+      value:
+        type: boolean
+        example: true
+    - name: page_stats
+      description: Include page-level statistics (-pw flag). Requires memory_stats to be true.
+      required: false
+      value:
+        type: boolean
+        example: true
+    - name: memory_entitlements
+      description: |
+        Collect per-I/O-memory-pool entitlement stats (lparstat -m -eR).
+        Requires root or sudo.
+      required: false
+      value:
+        type: boolean
+        example: true
+    - name: hypervisor
+      description: |
+        Collect hypervisor call statistics (lparstat -H).
+        Requires root or sudo.
+      required: false
+      value:
+        type: boolean
+        example: true
+    - name: spurr_utilization
+      description: Collect SPURR physical processor utilization (lparstat -E).
+      required: false
+      value:
+        type: boolean
+        example: true
+    - template: instances/default
