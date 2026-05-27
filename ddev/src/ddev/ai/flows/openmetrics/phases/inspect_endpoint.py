@@ -16,6 +16,7 @@ from ddev.ai.phases.base import Phase, PhaseOutcome
 from ddev.ai.phases.config import AgentConfig, FlowConfigError, PhaseConfig
 
 REQUEST_TIMEOUT_SECONDS = 10.0
+RESPONSE_BODY_LIMIT_BYTES = 10 * 1024 * 1024  # 10 MB
 JSONL_FILENAME_SUFFIX = "_metrics.jsonl"
 
 
@@ -40,7 +41,9 @@ def _parse_exposition(body: str, content_type: str) -> tuple[list[Metric], str]:
     try:
         families = list(parser(body))
     except Exception as e:
-        raise EndpointInspectionError(f"Body is not valid {exposition_format} exposition: {e}") from e
+        raise EndpointInspectionError(
+            f"Body is not valid {exposition_format} exposition ({type(e).__name__}): {e}"
+        ) from e
 
     if not families:
         raise EndpointInspectionError(f"Body parsed as {exposition_format} but contained zero metric families")
@@ -68,6 +71,13 @@ def _build_jsonl_rows(families: list[Metric]) -> list[dict[str, Any]]:
     return rows
 
 
+def _remove_if_exists(path: Path) -> None:
+    try:
+        path.unlink(missing_ok=True)
+    except OSError:
+        pass
+
+
 def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
     """Atomically write rows as JSON Lines to path."""
     tmp_path = path.with_suffix(path.suffix + ".tmp")
@@ -82,18 +92,10 @@ def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
                 fh.write("\n")
         os.replace(tmp_path, path)
     except EndpointInspectionError:
-        if tmp_path.exists():
-            try:
-                tmp_path.unlink()
-            except OSError:
-                pass
+        _remove_if_exists(tmp_path)
         raise
     except OSError as e:
-        if tmp_path.exists():
-            try:
-                tmp_path.unlink()
-            except OSError:
-                pass
+        _remove_if_exists(tmp_path)
         raise EndpointInspectionError(f"Failed to write metrics catalog at {path}: {e}") from e
 
 
@@ -156,22 +158,32 @@ class InspectEndpointPhase(Phase):
         if not endpoint_url:
             raise FlowConfigError(f"Phase {self._phase_id!r}: 'endpoint_url' runtime variable is required")
 
+        limit_mb = RESPONSE_BODY_LIMIT_BYTES // (1024 * 1024)
         try:
             async with httpx.AsyncClient(timeout=REQUEST_TIMEOUT_SECONDS, follow_redirects=True) as client:
-                response = await client.get(endpoint_url)
+                async with client.stream("GET", endpoint_url) as response:
+                    if response.status_code != 200:
+                        raise EndpointInspectionError(
+                            f"Endpoint returned HTTP {response.status_code} (expected 200): {endpoint_url}"
+                        )
+                    chunks: list[bytes] = []
+                    received = 0
+                    async for chunk in response.aiter_bytes():
+                        received += len(chunk)
+                        if received > RESPONSE_BODY_LIMIT_BYTES:
+                            raise EndpointInspectionError(f"Response body exceeds {limit_mb} MB limit: {endpoint_url}")
+                        chunks.append(chunk)
+                    body = b"".join(chunks).decode("utf-8", errors="replace")
+                    content_type = response.headers.get("Content-Type", "")
+        except EndpointInspectionError:
+            raise
         except httpx.TimeoutException as e:
             raise EndpointInspectionError(f"Endpoint timed out after {REQUEST_TIMEOUT_SECONDS}s: {endpoint_url}") from e
         except httpx.RequestError as e:
             raise EndpointInspectionError(f"Request failed for {endpoint_url}: {e}") from e
 
-        if response.status_code != 200:
-            raise EndpointInspectionError(
-                f"Endpoint returned HTTP {response.status_code} (expected 200): {endpoint_url}"
-            )
-
-        content_type = response.headers.get("Content-Type", "")
         try:
-            families, exposition_format = _parse_exposition(response.text, content_type)
+            families, exposition_format = _parse_exposition(body, content_type)
         except EndpointInspectionError as e:
             raise EndpointInspectionError(f"{e} ({endpoint_url})") from e
 
