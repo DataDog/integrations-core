@@ -1030,6 +1030,34 @@ pipeline:
             target: ocsf.privileges
             preserveSource: false
             type: append
+        - type: attribute-remapper
+          name: Map `resource_id` to `ocsf.resource.uid`
+          enabled: true
+          sources:
+            - resource_id
+          sourceType: attribute
+          target: ocsf.resource.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `resource_type` to `ocsf.resource.type`
+          enabled: true
+          sources:
+            - resource_type
+          sourceType: attribute
+          target: ocsf.resource.type
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: array-processor
+          name: Move resource into resources array
+          enabled: true
+          operation:
+            source: ocsf.resource
+            target: ocsf.resources
+            preserveSource: false
+            type: append
         - type: schema-processor
           name: Apply OCSF schema for 3005
           enabled: true
@@ -1134,17 +1162,10 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `resource_id` to `ocsf.resources.uid`
+              name: Map `ocsf.resources` to `ocsf.resources`
               sources:
-                - resource_id
-              target: ocsf.resources.uid
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `resource_type` to `ocsf.resources.type`
-              sources:
-                - resource_type
-              target: ocsf.resources.type
+                - ocsf.resources
+              target: ocsf.resources
               preserveSource: true
               overrideOnConflict: true
             - type: schema-category-mapper
@@ -1236,6 +1257,41 @@ pipeline:
       filter:
         query: "@ocsf.metadata.event_code:(claude_chat_created OR claude_chat_viewed OR claude_chat_updated OR claude_chat_deleted OR claude_project_created OR claude_project_viewed OR claude_file_uploaded OR claude_file_viewed OR claude_project_document_uploaded OR claude_project_file_uploaded OR claude_artifact_viewed OR claude_skill_created OR claude_skill_replaced OR org_users_listed OR platform_usage_report_messages_viewed OR platform_usage_report_claude_code_viewed)"
       processors:
+        - type: attribute-remapper
+          name: Map `claude_chat_id`, `claude_file_id`, `claude_project_document_id`, `claude_artifact_id`, `skill_id`, `claude_project_id`, `id` to `ocsf.web_resource.uid`
+          enabled: true
+          sources:
+            - claude_chat_id
+            - claude_file_id
+            - claude_project_document_id
+            - claude_artifact_id
+            - skill_id
+            - claude_project_id
+            - id
+          sourceType: attribute
+          target: ocsf.web_resource.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `filename`, `skill_name` to `ocsf.web_resource.name`
+          enabled: true
+          sources:
+            - filename
+            - skill_name
+          sourceType: attribute
+          target: ocsf.web_resource.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: array-processor
+          name: Move web_resource into web_resources array
+          enabled: true
+          operation:
+            source: ocsf.web_resource
+            target: ocsf.web_resources
+            preserveSource: false
+            type: append
         - type: schema-processor
           name: Apply OCSF schema for 6001
           enabled: true
@@ -1327,26 +1383,12 @@ pipeline:
               preserveSource: true
               overrideOnConflict: false
             - type: schema-remapper
-              name: Map `claude_chat_id`, `claude_file_id`, `claude_project_document_id`, `claude_artifact_id`, `skill_id`, `claude_project_id`, `id` to `ocsf.web_resources.uid`
+              name: Map `ocsf.web_resources` to `ocsf.web_resources`
               sources:
-                - claude_chat_id
-                - claude_file_id
-                - claude_project_document_id
-                - claude_artifact_id
-                - skill_id
-                - claude_project_id
-                - id
-              target: ocsf.web_resources.uid
+                - ocsf.web_resources
+              target: ocsf.web_resources
               preserveSource: true
-              overrideOnConflict: false
-            - type: schema-remapper
-              name: Map `filename`, `skill_name` to `ocsf.web_resources.name`
-              sources:
-                - filename
-                - skill_name
-              target: ocsf.web_resources.name
-              preserveSource: true
-              overrideOnConflict: false
+              overrideOnConflict: true
             - type: schema-category-mapper
               name: ocsf.src_endpoint.owner.type_id
               categories:

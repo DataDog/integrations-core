@@ -87,7 +87,7 @@ tests:
         status_id: 1
         time: 1779463513701
         web_resources:
-          uid: "claude_artifact_01EXAMPLEARTIFACT0"
+          - uid: "claude_artifact_01EXAMPLEARTIFACT0"
       organization_id: "org_01EXAMPLEORGID00000000000"
       organization_uuid: "00000000-0000-0000-0000-000000000000"
       type: "claude_artifact_viewed"
@@ -192,7 +192,7 @@ tests:
         status_id: 1
         time: 1779463314358
         web_resources:
-          uid: "claude_chat_01EXAMPLECHATID000000"
+          - uid: "claude_chat_01EXAMPLECHATID000000"
       organization_id: "org_01EXAMPLEORGID00000000000"
       organization_uuid: "00000000-0000-0000-0000-000000000000"
       type: "claude_chat_created"
@@ -297,7 +297,7 @@ tests:
         status_id: 1
         time: 1779463263415
         web_resources:
-          uid: "claude_chat_01EXAMPLECHATID000000"
+          - uid: "claude_chat_01EXAMPLECHATID000000"
       organization_id: "org_01EXAMPLEORGID00000000000"
       organization_uuid: "00000000-0000-0000-0000-000000000000"
       type: "claude_chat_deleted"
@@ -404,7 +404,7 @@ tests:
         status_id: 1
         time: 1779463304621
         web_resources:
-          uid: "claude_chat_01EXAMPLECHATID000000"
+          - uid: "claude_chat_01EXAMPLECHATID000000"
       organization_id: "org_01EXAMPLEORGID00000000000"
       organization_uuid: "00000000-0000-0000-0000-000000000000"
       type: "claude_chat_updated"
@@ -510,7 +510,7 @@ tests:
         status_id: 1
         time: 1779463313556
         web_resources:
-          uid: "claude_chat_01EXAMPLECHATID000000"
+          - uid: "claude_chat_01EXAMPLECHATID000000"
       organization_id: "org_01EXAMPLEORGID00000000000"
       organization_uuid: "00000000-0000-0000-0000-000000000000"
       type: "claude_chat_viewed"
@@ -617,8 +617,8 @@ tests:
         status_id: 1
         time: 1779463292702
         web_resources:
-          name: "example-image.png"
-          uid: "claude_file_01EXAMPLEFILEID000000"
+          - name: "example-image.png"
+            uid: "claude_file_01EXAMPLEFILEID000000"
       organization_id: "org_01EXAMPLEORGID00000000000"
       organization_uuid: "00000000-0000-0000-0000-000000000000"
       type: "claude_file_uploaded"
@@ -726,8 +726,8 @@ tests:
         status_id: 1
         time: 1779463310616
         web_resources:
-          name: "example-screenshot.png"
-          uid: "claude_file_01EXAMPLEFILEID000000"
+          - name: "example-screenshot.png"
+            uid: "claude_file_01EXAMPLEFILEID000000"
       organization_id: "org_01EXAMPLEORGID00000000000"
       organization_uuid: "00000000-0000-0000-0000-000000000000"
       type: "claude_file_viewed"
@@ -833,7 +833,7 @@ tests:
         status_id: 1
         time: 1779463270594
         web_resources:
-          uid: "claude_proj_01EXAMPLEPROJECT00000"
+          - uid: "claude_proj_01EXAMPLEPROJECT00000"
       organization_id: "org_01EXAMPLEORGID00000000000"
       organization_uuid: "00000000-0000-0000-0000-000000000000"
       type: "claude_project_created"
@@ -942,8 +942,8 @@ tests:
         status_id: 1
         time: 1779463385845
         web_resources:
-          name: "example-document.pdf"
-          uid: "claude_proj_doc_01EXAMPLEDOC0000000000"
+          - name: "example-document.pdf"
+            uid: "claude_proj_doc_01EXAMPLEDOC0000000000"
       organization_id: "org_01EXAMPLEORGID00000000000"
       organization_uuid: "00000000-0000-0000-0000-000000000000"
       type: "claude_project_document_uploaded"
@@ -1054,8 +1054,8 @@ tests:
         status_id: 1
         time: 1779463223462
         web_resources:
-          name: "example-file.txt"
-          uid: "claude_file_01EXAMPLEFILEID000000"
+          - name: "example-file.txt"
+            uid: "claude_file_01EXAMPLEFILEID000000"
       organization_id: "org_01EXAMPLEORGID00000000000"
       organization_uuid: "00000000-0000-0000-0000-000000000000"
       type: "claude_project_file_uploaded"
@@ -1163,7 +1163,7 @@ tests:
         status_id: 1
         time: 1779463308506
         web_resources:
-          uid: "claude_proj_01EXAMPLEPROJECT00000"
+          - uid: "claude_proj_01EXAMPLEPROJECT00000"
       organization_id: "org_01EXAMPLEORGID00000000000"
       organization_uuid: "00000000-0000-0000-0000-000000000000"
       preview_only: false
@@ -1270,8 +1270,8 @@ tests:
         status_id: 1
         time: 1779463304267
         web_resources:
-          name: "example-skill-name"
-          uid: "skill_01EXAMPLESKILLID00000000"
+          - name: "example-skill-name"
+            uid: "skill_01EXAMPLESKILLID00000000"
       organization_id: "org_01EXAMPLEORGID00000000000"
       organization_uuid: "00000000-0000-0000-0000-000000000000"
       skill_id: "skill_01EXAMPLESKILLID00000000"
@@ -1379,8 +1379,8 @@ tests:
         status_id: 1
         time: 1779463277287
         web_resources:
-          name: "example-skill-name"
-          uid: "skill_01EXAMPLESKILLID00000000"
+          - name: "example-skill-name"
+            uid: "skill_01EXAMPLESKILLID00000000"
       organization_id: "org_01EXAMPLEORGID00000000000"
       organization_uuid: "00000000-0000-0000-0000-000000000000"
       skill_id: "skill_01EXAMPLESKILLID00000000"
@@ -2143,7 +2143,7 @@ tests:
         status_id: 1
         time: 1779463311118
         web_resources:
-          uid: "activity_01EXAMPLEACTIVITY0000000"
+          - uid: "activity_01EXAMPLEACTIVITY0000000"
       organization_id: "org_01EXAMPLEORGID00000000000"
       organization_uuid: "00000000-0000-0000-0000-000000000000"
       type: "org_users_listed"
@@ -2241,7 +2241,7 @@ tests:
         status_id: 1
         time: 1779463255593
         web_resources:
-          uid: "activity_01EXAMPLEACTIVITY0000000"
+          - uid: "activity_01EXAMPLEACTIVITY0000000"
       organization_id: "org_01EXAMPLEORGID00000000000"
       organization_uuid: "00000000-0000-0000-0000-000000000000"
       type: "org_users_listed"
@@ -2568,7 +2568,7 @@ tests:
         status_id: 1
         time: 1779463508967
         web_resources:
-          uid: "activity_01EXAMPLEACTIVITY0000000"
+          - uid: "activity_01EXAMPLEACTIVITY0000000"
       organization_id: "org_01EXAMPLEORGID00000000000"
       organization_uuid: "00000000-0000-0000-0000-000000000000"
       type: "platform_usage_report_claude_code_viewed"
@@ -2663,7 +2663,7 @@ tests:
         status_id: 1
         time: 1779463478318
         web_resources:
-          uid: "activity_01EXAMPLEACTIVITY0000000"
+          - uid: "activity_01EXAMPLEACTIVITY0000000"
       organization_id: "org_01EXAMPLEORGID00000000000"
       organization_uuid: "00000000-0000-0000-0000-000000000000"
       type: "platform_usage_report_messages_viewed"
@@ -2760,8 +2760,8 @@ tests:
         privileges:
          - "chat_project:owner"
         resources:
-          type: "chat_project"
-          uid: "claude_proj_01EXAMPLEPROJECT00000"
+          - type: "chat_project"
+            uid: "claude_proj_01EXAMPLEPROJECT00000"
         severity: "Informational"
         severity_id: 1
         src_endpoint:
@@ -2883,8 +2883,8 @@ tests:
         privileges:
          - "skill:viewer"
         resources:
-          type: "skill"
-          uid: "skill_01EXAMPLESKILLID00000000"
+          - type: "skill"
+            uid: "skill_01EXAMPLESKILLID00000000"
         severity: "Informational"
         severity_id: 1
         src_endpoint:
