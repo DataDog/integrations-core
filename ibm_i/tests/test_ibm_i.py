@@ -320,6 +320,7 @@ def test_check_query_error(aggregator, instance):
     aggregator.assert_service_check("ibm_i.can_connect", count=2, status=AgentCheck.OK)
     aggregator.assert_all_metrics_covered()
 
+
 def test_connection_failure(aggregator, instance):
     check = IbmICheck('ibm_i', {}, [instance])
     check.log = mock.MagicMock()
