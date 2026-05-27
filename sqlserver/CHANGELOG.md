@@ -18,7 +18,7 @@
 * Reuse the auxiliary SQL Server schema collection connection for legacy table detail queries. ([#23544](https://github.com/DataDog/integrations-core/pull/23544))
 * Report Always On secondary lag metrics on Azure SQL Managed Instance when ProductMajorVersion reports 12. ([#23558](https://github.com/DataDog/integrations-core/pull/23558))
 
-## 23.0.1 / 2026-04-28
+## 23.0.1 / 2026-04-28 / Agent 7.79.0
 
 ***Fixed***:
 
