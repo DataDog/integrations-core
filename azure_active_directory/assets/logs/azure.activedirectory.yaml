@@ -84,6 +84,11 @@ facets:
     path: network.client.ip
     source: log
   - groups:
+      - Web Access
+    name: Client Port
+    path: network.client.port
+    source: log
+  - groups:
       - User
     name: User Email
     path: usr.email
