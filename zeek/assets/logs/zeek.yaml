@@ -2035,16 +2035,10 @@ pipeline:
             target: ocsf.finding_info.types
             preserveSource: true
             type: append
-        - type: string-builder-processor
-          name: Stringify alert.metadata into ocsf.finding_info.attack_raw
-          enabled: true
-          template: "%{alert.metadata}"
-          target: ocsf.finding_info.attack_raw
-          replaceMissing: false
         - type: grok-parser
-          name: Parse ocsf.finding_info.attack_raw to ocsf.finding_info.attack
+          name: Parse alert.metadata to ocsf.finding_info.attack
           enabled: true
-          source: ocsf.finding_info.attack_raw
+          source: alert.metadata
           samples:
             - "[attack_target:Client_Endpoint, confidence:High, created_at:2026_04_01, deployment:Internal, deployment:Perimeter, mitre_tactic_id:TA0011, mitre_tactic_name:Command_And_Control, mitre_technique_id:T1071, mitre_technique_name:Application_Layer_Protocol, performance_impact:Low, signature_severity:Major, updated_at:2026_04_09]"
           grok:
