@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
+
 from datadog_checks.base.utils.http_httpx import HTTPXWrapper
 
 
@@ -75,12 +77,18 @@ def test_tls_no_cert_when_not_configured(capturing_transport):
     assert http.options['cert'] is None
 
 
-def test_get_header_case_insensitive(capturing_transport):
+@pytest.mark.parametrize(
+    'lookup_name,default,expected',
+    [
+        pytest.param('x-foo', None, 'bar', id='lowercase-lookup'),
+        pytest.param('X-FOO', None, 'bar', id='uppercase-lookup'),
+        pytest.param('missing', None, None, id='missing-no-default'),
+        pytest.param('missing', 'fallback', 'fallback', id='missing-with-default'),
+    ],
+)
+def test_get_header(capturing_transport, lookup_name, default, expected):
     http = HTTPXWrapper({'extra_headers': {'X-Foo': 'bar'}}, {}, transport=capturing_transport)
-    assert http.get_header('x-foo') == 'bar'
-    assert http.get_header('X-FOO') == 'bar'
-    assert http.get_header('missing') is None
-    assert http.get_header('missing', default='fallback') == 'fallback'
+    assert http.get_header(lookup_name, default=default) == expected
 
 
 def test_set_header_overrides_existing(capturing_transport):
@@ -93,3 +101,9 @@ def test_remapper_renames_field(capturing_transport):
     remapper = {'ssl_validation': {'name': 'tls_verify'}}
     http = HTTPXWrapper({'ssl_validation': False}, {}, remapper=remapper, transport=capturing_transport)
     assert http.options['verify'] is False
+
+
+def test_request_rejects_unknown_kwarg(capturing_transport):
+    http = HTTPXWrapper({}, {}, transport=capturing_transport)
+    with pytest.raises(TypeError, match='proxies'):
+        http.get('http://example.test/', proxies={'http': 'http://proxy:8080'})

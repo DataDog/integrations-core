@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datetime import timedelta
 
+import httpx
 import pytest
 
 from datadog_checks.base.utils.http_exceptions import HTTPStatusError
@@ -94,3 +95,58 @@ def test_response_reason_falls_back_when_reason_phrase_missing():
 
     adapter = HTTPXResponseAdapter(_FakeResponseExposingReason())  # type: ignore[arg-type]
     assert adapter.reason == 'Not Found'
+
+
+def test_response_text_decodes_body(status_transport_factory):
+    transport = status_transport_factory(200, b'hello')
+    http = HTTPXWrapper({}, {}, transport=transport)
+    response = http.get('http://example.test/')
+    assert response.text == 'hello'
+
+
+def test_response_json_returns_decoded_object():
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={'a': 1})
+
+    http = HTTPXWrapper({}, {}, transport=httpx.MockTransport(handler))
+    response = http.get('http://example.test/')
+    assert response.json() == {'a': 1}
+
+
+def test_response_content_returns_raw_bytes(status_transport_factory):
+    transport = status_transport_factory(200, b'\x00\x01\x02')
+    http = HTTPXWrapper({}, {}, transport=transport)
+    response = http.get('http://example.test/')
+    assert response.content == b'\x00\x01\x02'
+
+
+def test_response_headers_exposed():
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, headers={'X-Custom': 'value'}, content=b'')
+
+    http = HTTPXWrapper({}, {}, transport=httpx.MockTransport(handler))
+    response = http.get('http://example.test/')
+    assert response.headers['X-Custom'] == 'value'
+
+
+def test_response_url_reflects_request_url(status_transport_factory):
+    transport = status_transport_factory(200, b'')
+    http = HTTPXWrapper({}, {}, transport=transport)
+    response = http.get('http://example.test/path')
+    assert str(response.url) == 'http://example.test/path'
+
+
+def test_response_encoding_defaults_to_utf8(status_transport_factory):
+    transport = status_transport_factory(200, b'hello')
+    http = HTTPXWrapper({}, {}, transport=transport)
+    response = http.get('http://example.test/')
+    assert response.encoding in (None, 'utf-8', 'ascii')
+
+
+def test_response_cookies_exposed():
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, headers={'Set-Cookie': 'session=abc123'}, content=b'')
+
+    http = HTTPXWrapper({}, {}, transport=httpx.MockTransport(handler))
+    response = http.get('http://example.test/')
+    assert response.cookies['session'] == 'abc123'

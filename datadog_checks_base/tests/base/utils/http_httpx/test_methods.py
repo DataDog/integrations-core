@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+
 import pytest
 
 from datadog_checks.base.utils.http_httpx import HTTPXWrapper
@@ -31,5 +33,4 @@ def test_post_json_body_is_serialized(capturing_transport, captured_requests):
     http.post('http://example.test/path', json={'a': 1, 'b': 'two'})
     req = captured_requests[0]
     assert req.headers['content-type'] == 'application/json'
-    assert b'"a":' in req.content
-    assert b'"b":' in req.content
+    assert json.loads(req.content) == {'a': 1, 'b': 'two'}

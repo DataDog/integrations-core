@@ -4,7 +4,11 @@
 import httpx
 import pytest
 
-from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPError, HTTPTimeoutError
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPConnectionError,
+    HTTPRequestError,
+    HTTPTimeoutError,
+)
 from datadog_checks.base.utils.http_httpx import HTTPXWrapper
 
 
@@ -15,8 +19,8 @@ from datadog_checks.base.utils.http_httpx import HTTPXWrapper
         pytest.param(httpx.ReadTimeout('slow'), HTTPTimeoutError, id='read-timeout'),
         pytest.param(httpx.PoolTimeout('pool'), HTTPTimeoutError, id='pool-timeout'),
         pytest.param(httpx.ConnectError('refused'), HTTPConnectionError, id='connect-error'),
-        pytest.param(httpx.LocalProtocolError('bad'), HTTPError, id='local-protocol-error'),
-        pytest.param(httpx.RequestError('generic'), HTTPError, id='request-error'),
+        pytest.param(httpx.LocalProtocolError('bad'), HTTPRequestError, id='local-protocol-error'),
+        pytest.param(httpx.RequestError('generic'), HTTPRequestError, id='request-error'),
     ],
 )
 def test_request_exception_mapping(raising_transport_factory, raised, expected):
