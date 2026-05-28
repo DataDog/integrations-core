@@ -6,11 +6,83 @@ gates:
     threshold: 75
     services:
     - '*'
+    - '!couchbase'
+    - '!datadog_checks_base'
+    - '!datadog_checks_dev'
+    - '!fluentd'
+    - '!foundationdb'
+    - '!gearmand'
+    - '!glusterfs'
+    - '!hdfs_namenode'
+    - '!ibm_i'
+    - '!istio'
+    - '!kafka_actions'
+    - '!mapr'
+    - '!mapreduce'
     - '!openstack'
+    - '!silverstripe_cms'
     - '!snmp'
+    - '!varnish'
+# New custom gates for services whose thresholds had to be lowered when migrating to Datadog Code Coverage.
 - type: total_coverage_percentage
   config:
-    threshold: 50
+    threshold: 74
+    services:
+    - couchbase
+- type: total_coverage_percentage
+  config:
+    threshold: 73
+    services:
+    - foundationdb
+    - varnish
+- type: total_coverage_percentage
+  config:
+    threshold: 72
+    services:
+    - datadog_checks_base
+- type: total_coverage_percentage
+  config:
+    threshold: 71
+    services:
+    - fluentd
+    - hdfs_namenode
+    - mapr
+- type: total_coverage_percentage
+  config:
+    threshold: 70
+    services:
+    - glusterfs
+    - istio
+- type: total_coverage_percentage
+  config:
+    threshold: 69
+    services:
+    - mapreduce
+- type: total_coverage_percentage
+  config:
+    threshold: 67
+    services:
+    - ibm_i
+    - silverstripe_cms
+- type: total_coverage_percentage
+  config:
+    threshold: 61
+    services:
+    - gearmand
+- type: total_coverage_percentage
+  config:
+    threshold: 58
+    services:
+    - kafka_actions
+- type: total_coverage_percentage
+  config:
+    threshold: 52
+    services:
+    - datadog_checks_dev
+# Existing custom gates.
+- type: total_coverage_percentage
+  config:
+    threshold: 45
     services:
     - openstack
 - type: total_coverage_percentage
