@@ -1586,10 +1586,10 @@ class TestAI:
             _ = config.ai.anthropic_api_key
 
     def test_flow_dirs(self):
-        config = RootConfig({'ai': {'flow_dirs': ['/foo', '/bar']}})
+        config = RootConfig({'ai': {'flow_dirs': ['~/foo', './bar', '../baz']}})
 
-        assert config.ai.flow_dirs == ['/foo', '/bar']
-        assert config.raw_data == {'ai': {'flow_dirs': ['/foo', '/bar']}}
+        assert config.ai.flow_dirs == ['~/foo', './bar', '../baz']
+        assert config.raw_data == {'ai': {'flow_dirs': ['~/foo', './bar', '../baz']}}
 
     def test_flow_dirs_not_list(self, helpers):
         config = RootConfig({'ai': {'flow_dirs': 9000}})
