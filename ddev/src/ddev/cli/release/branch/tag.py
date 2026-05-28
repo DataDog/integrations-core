@@ -126,106 +126,29 @@ def tag(
     if final and rc is not None:
         raise click.UsageError('`--final` and `--rc` are mutually exclusive.')
     is_rc = not final
-
     pinned_rc = _parse_rc_value(rc) if is_rc else None
 
     current_branch = app.repo.git.current_branch()
     target_branch = _resolve_target_branch(app, release, yes, current_branch)
-    use_worktree = current_branch != target_branch
     worktree_path = app.repo.path / WORKTREE_BASE / target_branch
 
     app.display_waiting('Fetching from origin...')
     app.repo.git.fetch_tags()
-
     _ensure_branch_on_origin(app, target_branch)
 
-    teardown_worktree = False
     worktree_created = False
+    teardown_worktree = False
     try:
-        if use_worktree:
-            _create_worktree(app, worktree_path, target_branch)
-            worktree_created = True
-            git: GitRepository = GitRepository(worktree_path)
-            working_dir = worktree_path
-        else:
-            click.echo(app.repo.git.pull(target_branch))
-            git = app.repo.git
-            working_dir = app.repo.path
-
+        git, working_dir, worktree_created = _prepare_working_dir(app, current_branch, target_branch, worktree_path)
         tag_ref = _resolve_tag_ref(app, git, target_branch, ref)
+        build_agent_yaml_needs_update = _warn_if_build_agent_yaml_stale(app, working_dir)
 
-        build_agent_yaml_needs_update = _build_agent_yaml_points_to_main(working_dir)
-        # Recovery path for release branches cut before build_agent.yaml was updated.
-        if build_agent_yaml_needs_update:
-            app.display_warning(
-                "`.gitlab/build_agent.yaml` still points to `main`.\n"
-                "The update PR may not have been created or merged yet.\n"
-                "Will trigger the workflow after the tag is pushed.\n"
-                "Tagging will continue."
-            )
+        new_tag = _compute_new_tag(app, git, target_branch, is_rc, pinned_rc, yes)
+        _confirm_and_push_tag(app, git, target_branch, new_tag, tag_ref, yes, skip_open_pr_check)
 
-        major_minor_version = target_branch.replace('.x', '')
-        this_release_tags = sorted(
-            (
-                Version(t)
-                for t in set(git.tags(glob_pattern=major_minor_version + '.*'))
-                # We take 'major.minor.x' as the branch name pattern and replace 'x' with 'patch-rc.number'.
-                # We make the RC component optional so that final tags also match our filter.
-                if re.match(BRANCH_NAME_REGEX.pattern.replace('x', r'\d+(\-rc\.\d+)?'), t)
-            ),
-            reverse=True,
-        )
-        last_patch, last_rc = _extract_patch_and_rc(this_release_tags)
-        last_tag_was_final = last_rc is None
-        new_patch = last_patch + 1 if last_tag_was_final else last_patch
-        new_tag = f'{major_minor_version}.{new_patch}'
-        if is_rc:
-            new_rc_guess = 1 if last_tag_was_final else last_rc + 1
-            if pinned_rc is not None:
-                next_rc = pinned_rc
-            elif yes:
-                next_rc = new_rc_guess
-                click.echo(f'Using auto-suggested RC number: {next_rc}')
-            else:
-                next_rc = click.prompt(
-                    'What RC number are we tagging? (hit ENTER to accept suggestion)',
-                    type=int,
-                    default=new_rc_guess,
-                )
-            if next_rc < 1:
-                app.abort('RC number must be at least 1.')
-            new_tag += f'-rc.{next_rc}'
-            if Version(new_tag) in this_release_tags:
-                app.abort(f'Tag {new_tag} already exists. Switch to git to overwrite it.')
-            _warn_on_rc_gap(app, next_rc, new_rc_guess, target_branch)
-            if not last_tag_was_final and next_rc < last_rc:
-                click.secho('!!! WARNING !!!')
-                if not _confirm(
-                    yes,
-                    f'The latest RC is {last_rc}. '
-                    'You are about to go back in time by creating an RC with a number less than that. Are you sure? '
-                    '[y/N]',
-                ):
-                    app.abort('Did not get confirmation, aborting. Did not create or push the tag.')
-
-        prs = _check_open_prs(app, target_branch, skip_open_pr_check)
-
-        prompt = f'Create and push this tag: {new_tag}?'
-        if prs:
-            prompt = f'Open PRs found targeting {target_branch}. Create and push this tag anyway: {new_tag}?'
-        if tag_ref is not None:
-            prompt = prompt.rstrip('?') + f' at {tag_ref}?'
-
-        if not _confirm(yes, prompt):
-            app.abort('Did not get confirmation, aborting. Did not create or push the tag.')
-        try:
-            click.echo(git.tag(new_tag, message=new_tag, ref=tag_ref))
-            click.echo(git.push(new_tag))
-        except OSError as e:
-            app.abort(f'Failed to create or push tag `{new_tag}`: {e}')
         if build_agent_yaml_needs_update:
             _trigger_build_agent_yaml_update_workflow(app, target_branch)
-        teardown_worktree = use_worktree
+        teardown_worktree = worktree_created
     finally:
         if worktree_created:
             if teardown_worktree:
@@ -235,6 +158,123 @@ def tag(
                     f'Worktree left at `{worktree_path}` for inspection. '
                     f'Run `git worktree remove --force {worktree_path}` to clean it up manually.'
                 )
+
+
+def _prepare_working_dir(
+    app: Application,
+    current_branch: str,
+    target_branch: str,
+    worktree_path: Path,
+) -> tuple[GitRepository, Path, bool]:
+    """Return `(git, working_dir, worktree_created)` for the tagging operation.
+
+    If the user is not already on the target branch, a worktree is created from
+    `origin/<target_branch>` so the tag is built on an up-to-date copy. Otherwise the existing
+    repo is refreshed in place via `git pull`.
+    """
+    if current_branch == target_branch:
+        click.echo(app.repo.git.pull(target_branch))
+        return app.repo.git, app.repo.path, False
+    _create_worktree(app, worktree_path, target_branch)
+    return GitRepository(worktree_path), worktree_path, True
+
+
+def _warn_if_build_agent_yaml_stale(app: Application, working_dir: Path) -> bool:
+    """Warn (and return True) if `.gitlab/build_agent.yaml` still points to `main`."""
+    if not _build_agent_yaml_points_to_main(working_dir):
+        return False
+    # Recovery path for release branches cut before build_agent.yaml was updated.
+    app.display_warning(
+        "`.gitlab/build_agent.yaml` still points to `main`.\n"
+        "The update PR may not have been created or merged yet.\n"
+        "Will trigger the workflow after the tag is pushed.\n"
+        "Tagging will continue."
+    )
+    return True
+
+
+def _compute_new_tag(
+    app: Application,
+    git: GitRepository,
+    target_branch: str,
+    is_rc: bool,
+    pinned_rc: int | None,
+    yes: bool,
+) -> str:
+    """Compute the new tag string, validating RC bounds, existence, gaps, and backward moves."""
+    major_minor_version = target_branch.replace('.x', '')
+    this_release_tags = sorted(
+        (
+            Version(t)
+            for t in set(git.tags(glob_pattern=major_minor_version + '.*'))
+            # We take 'major.minor.x' as the branch name pattern and replace 'x' with 'patch-rc.number'.
+            # We make the RC component optional so that final tags also match our filter.
+            if re.match(BRANCH_NAME_REGEX.pattern.replace('x', r'\d+(\-rc\.\d+)?'), t)
+        ),
+        reverse=True,
+    )
+    last_patch, last_rc = _extract_patch_and_rc(this_release_tags)
+    last_tag_was_final = last_rc is None
+    new_patch = last_patch + 1 if last_tag_was_final else last_patch
+    new_tag = f'{major_minor_version}.{new_patch}'
+    if not is_rc:
+        return new_tag
+
+    new_rc_guess = 1 if last_tag_was_final else last_rc + 1
+    if pinned_rc is not None:
+        next_rc = pinned_rc
+    elif yes:
+        next_rc = new_rc_guess
+        click.echo(f'Using auto-suggested RC number: {next_rc}')
+    else:
+        next_rc = click.prompt(
+            'What RC number are we tagging? (hit ENTER to accept suggestion)',
+            type=int,
+            default=new_rc_guess,
+        )
+    if next_rc < 1:
+        app.abort('RC number must be at least 1.')
+    new_tag += f'-rc.{next_rc}'
+    if Version(new_tag) in this_release_tags:
+        app.abort(f'Tag {new_tag} already exists. Switch to git to overwrite it.')
+    _warn_on_rc_gap(app, next_rc, new_rc_guess, target_branch)
+    if not last_tag_was_final and next_rc < last_rc:
+        click.secho('!!! WARNING !!!')
+        if not _confirm(
+            yes,
+            f'The latest RC is {last_rc}. '
+            'You are about to go back in time by creating an RC with a number less than that. Are you sure? '
+            '[y/N]',
+        ):
+            app.abort('Did not get confirmation, aborting. Did not create or push the tag.')
+    return new_tag
+
+
+def _confirm_and_push_tag(
+    app: Application,
+    git: GitRepository,
+    target_branch: str,
+    new_tag: str,
+    tag_ref: str | None,
+    yes: bool,
+    skip_open_pr_check: bool,
+) -> None:
+    """Surface open-PR warnings, get final confirmation, then create and push the tag."""
+    prs = _check_open_prs(app, target_branch, skip_open_pr_check)
+
+    prompt = f'Create and push this tag: {new_tag}?'
+    if prs:
+        prompt = f'Open PRs found targeting {target_branch}. Create and push this tag anyway: {new_tag}?'
+    if tag_ref is not None:
+        prompt = prompt.rstrip('?') + f' at {tag_ref}?'
+
+    if not _confirm(yes, prompt):
+        app.abort('Did not get confirmation, aborting. Did not create or push the tag.')
+    try:
+        click.echo(git.tag(new_tag, message=new_tag, ref=tag_ref))
+        click.echo(git.push(new_tag))
+    except OSError as e:
+        app.abort(f'Failed to create or push tag `{new_tag}`: {e}')
 
 
 def _parse_rc_value(rc: str | None) -> int | None:
