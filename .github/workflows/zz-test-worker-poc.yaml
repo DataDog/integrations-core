@@ -526,14 +526,18 @@ jobs:
         import os
 
         latest = None
-        candidates = sorted(glob.glob(os.path.join(
+        base = os.path.join(
             os.environ['REPLAY_PBT_ARTIFACTS'],
             os.environ['REPLAY_PBT_INTEGRATION'],
             os.environ['REPLAY_PBT_ENVIRONMENT'],
-            '*',
-        )))
-        if candidates:
-            latest = candidates[-1]
+        )
+        diff_files = sorted(glob.glob(os.path.join(base, '*', 'freeze.diff.json')))
+        if diff_files:
+            latest = os.path.dirname(diff_files[-1])
+        else:
+            candidates = sorted(path for path in glob.glob(os.path.join(base, '*')) if os.path.isdir(path))
+            if candidates:
+                latest = candidates[-1]
 
         diff_summary = {}
         if latest:
