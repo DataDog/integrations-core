@@ -1,0 +1,1 @@
+Add `--release`, `--ref`, `--rc N`, and `--yes/-y` options to `ddev release branch tag` so the command can target any release branch from a worktree, tag an arbitrary commit, pin or auto-suggest the RC number, and skip confirmation prompts.
