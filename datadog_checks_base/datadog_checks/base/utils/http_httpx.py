@@ -4,9 +4,9 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
 from datetime import timedelta
-from typing import Any, Iterator
+from typing import Any
 
 import httpx
 
@@ -42,6 +42,22 @@ STANDARD_FIELDS = {
 }
 
 DEFAULT_REMAPPED_FIELDS: dict[str, dict[str, Any]] = {}
+
+REQUEST_KWARGS = frozenset(
+    {
+        'params',
+        'json',
+        'data',
+        'content',
+        'files',
+        'cookies',
+        'headers',
+        'extra_headers',
+        'timeout',
+        'follow_redirects',
+        'allow_redirects',
+    }
+)
 
 
 def _build_basic_auth(config: dict[str, Any]) -> httpx.BasicAuth | None:
@@ -234,7 +250,7 @@ class HTTPXWrapper:
         timeout = _build_timeout(config)
         allow_redirects = is_affirmative(config['allow_redirects'])
 
-        # `proxies` is None for shape-parity with RequestsWrapper.options; proxy wiring is Phase 3.
+        # TODO(httpx-migration): proxies wiring deferred to Phase 3.
         self.options: dict[str, Any] = {
             'auth': auth,
             'cert': cert,
@@ -305,6 +321,7 @@ class HTTPXWrapper:
         return default
 
     def set_header(self, name: str, value: str) -> None:
+        # Mirror into both stores: options['headers'] is the public shape, _client.headers is what httpx sends.
         for key in list(self.options['headers']):
             if key.lower() == name.lower():
                 self.options['headers'][key] = value
@@ -346,7 +363,10 @@ class HTTPXWrapper:
         return HTTPXResponseAdapter(response)
 
     def _build_request_kwargs(self, options: dict[str, Any]) -> dict[str, Any]:
-        """Translate call-site options to httpx.Client.request kwargs; unknown kwargs are dropped."""
+        """Translate call-site options to httpx.Client.request kwargs."""
+        unknown = set(options) - REQUEST_KWARGS
+        if unknown:
+            raise TypeError(f"HTTPXWrapper does not support per-request kwargs: {sorted(unknown)}")
         kwargs: dict[str, Any] = {}
         passthrough = ('params', 'json', 'data', 'content', 'files', 'cookies')
         for key in passthrough:
@@ -397,8 +417,4 @@ class HTTPXWrapper:
         return None
 
     def __del__(self) -> None:
-        # AttributeError fires when __init__ raised before _client was assigned.
-        try:
-            self.close()
-        except AttributeError:
-            pass
+        self.close()

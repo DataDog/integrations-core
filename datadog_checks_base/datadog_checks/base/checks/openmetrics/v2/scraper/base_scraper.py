@@ -408,9 +408,9 @@ class OpenMetricsScraper:
                     yield line
         except (ConnectionError, HTTPConnectionError) as e:
             if self.ignore_connection_errors:
-                self.log.warning("OpenMetrics endpoint %s is not accessible", self.endpoint)
+                self.log.warning("OpenMetrics endpoint %s is not accessible: %s", self.endpoint, e)
             else:
-                raise e
+                raise
 
     def filter_connection_lines(self, line_streamer):
         """
