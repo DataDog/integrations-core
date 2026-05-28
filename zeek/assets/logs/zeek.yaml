@@ -1737,6 +1737,7 @@ pipeline:
             - ocsf.evidence.connection_info.direction_id
           sourceType: attribute
           target: ocsf.evidence.connection_info.direction_id
+          targetType: attribute
           preserveSource: false
           overrideOnConflict: false
           targetFormat: integer
@@ -2048,9 +2049,10 @@ pipeline:
           source: alert.metadata_str
           samples:
             - "[attack_target:Client_Endpoint, confidence:High, created_at:2026_04_01, deployment:Internal, deployment:Perimeter, mitre_tactic_id:TA0011, mitre_tactic_name:Command_And_Control, mitre_technique_id:T1071, mitre_technique_name:Application_Layer_Protocol, performance_impact:Low, signature_severity:Major, updated_at:2026_04_09]"
+            - "[attack_target:Client_Endpoint, mitre_tactic_id:TA0002, mitre_tactic_name:Execution, mitre_technique_id:T1059.001, mitre_technique_name:Command_And_Scripting_Interpreter_PowerShell, signature_severity:Major]"
           grok:
             supportRules: ""
-            matchRules: 'rule .*?mitre_tactic_id:%{word:mitre_tactic_uid},\s*mitre_tactic_name:%{word:mitre_tactic_name},\s*mitre_technique_id:%{word:mitre_technique_uid},\s*mitre_technique_name:%{word:mitre_technique_name}%{data}'
+            matchRules: 'rule .*?mitre_tactic_id:%{regex("[^,\\]]+"):mitre_tactic_uid},\s*mitre_tactic_name:%{regex("[^,\\]]+"):mitre_tactic_name},\s*mitre_technique_id:%{regex("[^,\\]]+"):mitre_technique_uid},\s*mitre_technique_name:%{regex("[^,\\]]+"):mitre_technique_name}%{data}'
         - type: attribute-remapper
           name: Map `mitre_tactic_uid` to `ocsf.finding_info.attack.tactic.uid`
           enabled: true
@@ -3703,6 +3705,7 @@ pipeline:
             - ocsf.file.hash_sha1.algorithm_id
           sourceType: attribute
           target: ocsf.file.hash_sha1.algorithm_id
+          targetType: attribute
           preserveSource: false
           overrideOnConflict: false
           targetFormat: integer
@@ -3713,6 +3716,7 @@ pipeline:
             - ocsf.file.hash_sha256.algorithm_id
           sourceType: attribute
           target: ocsf.file.hash_sha256.algorithm_id
+          targetType: attribute
           preserveSource: false
           overrideOnConflict: false
           targetFormat: integer
