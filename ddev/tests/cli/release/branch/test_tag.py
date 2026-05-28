@@ -446,13 +446,14 @@ def test_worktree_created_and_torn_down(ddev, git, mocker):
     add_args = add_calls[0].args
     assert add_args[:4] == ('worktree', 'add', '-B', '7.56.x')
     assert add_args[-1] == 'origin/7.56.x'
-    assert add_args[4].endswith('.worktrees/release-tag/7.56.x')
+    # Normalize path separators so the same assertion passes on Windows.
+    assert add_args[4].replace('\\', '/').endswith('.worktrees/release-tag/7.56.x')
 
     remove_calls = _worktree_subcommands(git, 'remove')
     assert len(remove_calls) == 1
     remove_args = remove_calls[0].args
     assert remove_args[:3] == ('worktree', 'remove', '--force')
-    assert remove_args[3].endswith('.worktrees/release-tag/7.56.x')
+    assert remove_args[3].replace('\\', '/').endswith('.worktrees/release-tag/7.56.x')
 
 
 def test_worktree_left_on_failure(ddev, git, mocker):
