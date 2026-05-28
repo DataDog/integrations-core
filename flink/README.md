@@ -6,7 +6,7 @@ This check monitors [Flink][1]. Metrics can be collected in one of two ways:
 
 - **Agent-side collection** via Flink's [Prometheus reporter][15], scraped by
   the Datadog Agent over OpenMetrics. The Datadog API key lives in the Agent,
-  so no secret needs to be set on the Flink side — well suited to
+  so no secret needs to be set on the Flink side - well suited to
   Kubernetes/GitOps deployments.
 - **Push collection** via Flink's [Datadog HTTP Reporter][2], where Flink
   pushes metrics directly to [Datadog's HTTP API][3]. This requires the
@@ -23,7 +23,7 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-#### Metric collection — OpenMetrics (recommended for Kubernetes)
+#### Metric collection - OpenMetrics (recommended for Kubernetes)
 
 1. Configure the [Prometheus reporter][15] in Flink. In your
    `<FLINK_HOME>/conf/flink-conf.yaml`:
@@ -67,7 +67,7 @@ No additional installation is needed on your server.
 
 4. Restart Flink and the Agent.
 
-#### Metric collection — Datadog HTTP Reporter (legacy)
+#### Metric collection - Datadog HTTP Reporter (legacy)
 
 <!-- partial
 {{< site-region region="gov,gov2" >}}

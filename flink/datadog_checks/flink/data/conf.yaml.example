@@ -46,11 +46,9 @@ init_config:
 instances:
 
     ## @param openmetrics_endpoint - string - required
-    ## The URL exposing metrics in the OpenMetrics format.
-    ##
     ## The URL exposing metrics in the OpenMetrics/Prometheus format,
     ## served by Flink's flink-metrics-prometheus reporter. By default
-    ## the reporter listens on <host>:9249/metrics.
+    ## the reporter listens on `<host>:9249/metrics`.
     ##
     ## See https://nightlies.apache.org/flink/flink-docs-stable/docs/deployment/metric_reporters/#prometheus
     ## for configuration of the reporter on the Flink side.
