@@ -117,15 +117,6 @@ def test_type_shim_dispatches_to_subcommand(ddev, empty_repo):
     assert 'Will create' in result.output
 
 
-def test_missing_required_flags_non_tty_abort(ddev, empty_repo, monkeypatch):
-    # CliRunner has no real TTY, so stdin is non-interactive by default.
-    result = ddev('create', 'check', 'my_integration')
-    assert result.exit_code != 0
-    assert '--display-name' in result.output
-    assert '--metrics-prefix' in result.output
-    assert '--platforms' in result.output
-
-
 def test_dry_run_does_not_write_anything(ddev, empty_repo):
     result = ddev(
         'create',
@@ -253,8 +244,7 @@ def test_check_only_requires_existing_manifest(ddev, empty_repo):
     assert 'manifest.json' in result.output
 
 
-def test_check_only_with_prefilled_manifest(ddev, empty_repo):
-    integration_dir = empty_repo.path / 'partner_thing'
+def _write_partner_manifest(integration_dir):
     integration_dir.mkdir()
     (integration_dir / 'manifest.json').write_text(
         json.dumps(
@@ -268,11 +258,82 @@ def test_check_only_with_prefilled_manifest(ddev, empty_repo):
             }
         )
     )
+
+
+def test_check_only_with_prefilled_manifest(ddev, empty_repo):
+    _write_partner_manifest(empty_repo.path / 'partner_thing')
     result = ddev(
         'create',
         'check-only',
         'partner_thing',
         '--include-manifest',
     )
-    # check-only takes the existing manifest dir as input; --include-manifest is required to keep behaviour.
     assert result.exit_code == 0, result.output
+
+
+def test_check_only_writes_into_existing_author_prefixed_directory(ddev, empty_repo):
+    """Regression for finding #1: scaffolded files must land in the manifest's directory."""
+    integration_dir = empty_repo.path / 'partner_thing'
+    _write_partner_manifest(integration_dir)
+
+    result = ddev(
+        'create',
+        'check-only',
+        'partner_thing',
+        '--include-manifest',
+    )
+    assert result.exit_code == 0, result.output
+
+    # Files must land in the manifest's directory, not a sibling stripped-name directory.
+    assert (integration_dir / 'pyproject.toml').is_file()
+    assert (integration_dir / 'datadog_checks' / 'partner_thing' / '__about__.py').is_file()
+    assert not (empty_repo.path / 'thing').exists()
+
+
+def test_check_only_manifestless_writes_overrides_for_stripped_name(ddev, empty_repo):
+    """Regression for finding #14: manifest-less check-only writes overrides keyed by the stripped name."""
+    integration_dir = empty_repo.path / 'partner_thing'
+    _write_partner_manifest(integration_dir)
+
+    result = ddev(
+        'create',
+        'check-only',
+        'partner_thing',
+        '--display-name',
+        'Partner Thing',
+        '--metrics-prefix',
+        'partner_thing.',
+        '--platforms',
+        'linux,windows,mac_os',
+    )
+    assert result.exit_code == 0, result.output
+
+    # Files must land in the existing partner_thing directory (finding #1).
+    assert (integration_dir / 'pyproject.toml').is_file()
+    assert not (empty_repo.path / 'thing').exists()
+
+    overrides_path = empty_repo.path / '.ddev' / 'config.toml'
+    assert overrides_path.is_file()
+    data = tomli.loads(overrides_path.read_text())
+    assert data['overrides']['display-name']['partner_thing'] == 'Partner Thing'
+    assert data['overrides']['metrics-prefix']['partner_thing'] == 'partner_thing.'
+    assert data['overrides']['manifest']['platforms']['partner_thing'] == ['linux', 'windows', 'mac_os']
+
+
+def test_bare_positional_aborts_with_subcommand_hint(ddev, empty_repo):
+    """Regression for finding #4: legacy `ddev create NAME` must point at the new subcommand surface."""
+    result = ddev('create', 'ACME')
+    assert result.exit_code != 0
+    # The error must mention at least one of the new subcommands so users have something to copy.
+    output = result.output.lower()
+    assert 'ddev create check' in output or 'ddev create logs' in output
+    assert 'acme' in output.lower()
+
+
+def test_global_no_interactive_flag_aborts_when_required_flags_missing(ddev, empty_repo):
+    """Regression for finding #3: `--no-interactive` at the root must surface in `create`."""
+    result = ddev('--no-interactive', 'create', 'check', 'my_integration')
+    assert result.exit_code != 0
+    assert '--display-name' in result.output
+    assert '--metrics-prefix' in result.output
+    assert '--platforms' in result.output

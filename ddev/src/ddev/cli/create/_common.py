@@ -12,8 +12,9 @@ imports. All real work lives here, behind a lazy import.
 from __future__ import annotations
 
 import json
-import sys
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable
+
+import click
 
 from ddev.cli.create._naming import normalize_package_name
 
@@ -21,6 +22,39 @@ if TYPE_CHECKING:
     from ddev.cli.application import Application
 
 SUPPORTED_PLATFORMS = ('linux', 'windows', 'mac_os')
+
+
+def create_options(f: Callable[..., Any]) -> Callable[..., Any]:
+    """Apply the full set of shared options (and the ``name`` argument) to a subcommand."""
+    f = click.option(
+        '--skip-manifest',
+        is_flag=True,
+        help='[DEPRECATED] No-op; manifest-less is now the default. Use `--include-manifest` to opt back in.',
+    )(f)
+    f = click.option(
+        '--include-manifest',
+        is_flag=True,
+        help='Generate a `manifest.json` (legacy behaviour).',
+    )(f)
+    f = click.option('--dry-run', '-n', is_flag=True, help='Only show what would be created.')(f)
+    f = click.option('--quiet', '-q', is_flag=True, help='Show less output.')(f)
+    f = click.option('--location', '-l', default=None, help='The directory where files will be written.')(f)
+    f = click.option('--platforms', default=None, help='Comma-separated list of `linux,windows,mac_os`.')(f)
+    f = click.option('--metrics-prefix', default=None, help='Metric namespace (e.g. `myintegration.`).')(f)
+    f = click.option('--display-name', default=None, help='Human-readable display name for the integration.')(f)
+    return click.argument('name')(f)
+
+
+def dispatch(app: Application, *, integration_type: str, **options: Any) -> None:
+    """Translate click kwargs to ``run_subcommand`` parameters and execute.
+
+    The factory binds the click flag ``--platforms`` to a kwarg named ``platforms``;
+    ``run_subcommand`` takes it as ``platforms_csv``. This wrapper does that one
+    rename so the per-subcommand files can ``**options``-through without thinking
+    about parameter names.
+    """
+    platforms_csv = options.pop('platforms', None)
+    run_subcommand(app, integration_type=integration_type, platforms_csv=platforms_csv, **options)
 
 
 def run_subcommand(
@@ -51,26 +85,23 @@ def run_subcommand(
             '`--skip-manifest` will be removed in the next major release.'
         )
 
-    is_interactive = sys.stdin.isatty()
-
     extra_fields: dict[str, object] = {}
-    override_integration_dir_name: str | None = None
+    target_integration_dir: str | None = None
+    check_name_override: str | None = None
     if integration_type == 'check_only':
-        extra_fields, override_integration_dir_name = _resolve_check_only_inputs(
-            app, name, location, include_manifest=include_manifest
-        )
+        extra_fields, target_integration_dir, check_name_override = _resolve_check_only_inputs(app, name, location)
 
-    resolved_display_name: str | None = None
-    resolved_metrics_prefix: str | None = None
-    resolved_platforms: list[str] | None = None
     if not include_manifest:
+        # Probe `.ddev/config.toml` writability before scaffolding so a malformed file
+        # aborts cleanly instead of leaving a half-finished integration on disk.
+        _probe_repo_config_readable(app)
+
         resolved_display_name, resolved_metrics_prefix, resolved_platforms = _resolve_manifestless_inputs(
             app,
             name=name,
             display_name=display_name,
             metrics_prefix=metrics_prefix,
             platforms_csv=platforms_csv,
-            is_interactive=is_interactive,
         )
 
     from ddev.cli.create._scaffold import render
@@ -84,27 +115,47 @@ def run_subcommand(
         quiet=quiet,
         include_manifest=include_manifest,
         extra_fields=extra_fields,
-        override_integration_dir_name=override_integration_dir_name,
+        target_integration_dir=target_integration_dir,
+        check_name_override=check_name_override,
     )
 
     if dry_run or include_manifest:
         return
 
-    if not include_manifest:
-        from ddev.cli.create._config_overrides import apply_manifestless_overrides
+    from ddev.cli.create._config_overrides import apply_manifestless_overrides
 
-        # mypy: these are non-None because _resolve_manifestless_inputs aborts otherwise.
-        assert resolved_display_name is not None
-        assert resolved_metrics_prefix is not None
-        assert resolved_platforms is not None
-
+    override_dir_name = target_integration_dir or result.integration_dir.name
+    try:
         apply_manifestless_overrides(
             app,
-            dir_name=result.integration_dir.name,
+            dir_name=override_dir_name,
             display_name=resolved_display_name,
             metrics_prefix=resolved_metrics_prefix,
             platforms=resolved_platforms,
         )
+    except OSError as exc:
+        app.abort(
+            f'Failed to update `.ddev/config.toml`: {exc}\n'
+            f'The integration was scaffolded at `{result.integration_dir}` but the '
+            f'overrides were not recorded. Add these entries by hand:\n'
+            f'  [overrides.display-name]\n'
+            f'  {override_dir_name} = "{resolved_display_name}"\n'
+            f'  [overrides.metrics-prefix]\n'
+            f'  {override_dir_name} = "{resolved_metrics_prefix}"\n'
+            f'  [overrides.manifest.platforms]\n'
+            f'  {override_dir_name} = {resolved_platforms!r}'
+        )
+
+
+def _probe_repo_config_readable(app: Application) -> None:
+    """Ensure ``.ddev/config.toml`` can be loaded before we start scaffolding."""
+    config_file = app.repo.config
+    if not config_file.path.is_file():
+        return
+    try:
+        config_file.load_data()
+    except (OSError, ValueError) as exc:
+        app.abort(f'Failed to read `{config_file.path}`: {exc}. Fix or remove the file before creating an integration.')
 
 
 def _resolve_manifestless_inputs(
@@ -114,7 +165,6 @@ def _resolve_manifestless_inputs(
     display_name: str | None,
     metrics_prefix: str | None,
     platforms_csv: str | None,
-    is_interactive: bool,
 ) -> tuple[str, str, list[str]]:
     suggested_display = name
     suggested_prefix = f'{normalize_package_name(name)}.'
@@ -122,23 +172,26 @@ def _resolve_manifestless_inputs(
 
     missing: list[str] = []
     if display_name is None:
-        if is_interactive:
+        if app.interactive:
             display_name = app.prompt('Display name', default=suggested_display)
         else:
             missing.append('--display-name')
     if metrics_prefix is None:
-        if is_interactive:
+        if app.interactive:
             metrics_prefix = app.prompt('Metrics prefix', default=suggested_prefix)
         else:
             missing.append('--metrics-prefix')
     if platforms_csv is None:
-        if is_interactive:
+        if app.interactive:
             platforms_csv = app.prompt('Platforms (comma-separated)', default=suggested_platforms_csv)
         else:
             missing.append('--platforms')
 
     if missing:
-        app.abort('Missing required flags for non-interactive mode: ' + ', '.join(missing))
+        app.abort(
+            'Missing required flag(s) while running with `--no-interactive` (or in a non-TTY '
+            'environment): ' + ', '.join(missing)
+        )
 
     assert display_name is not None
     assert metrics_prefix is not None
@@ -161,20 +214,24 @@ def _resolve_check_only_inputs(
     app: Application,
     name: str,
     location: str | None,
-    *,
-    include_manifest: bool,
-) -> tuple[dict[str, object], str | None]:
-    """For ``check_only`` integrations we expect the directory to already exist with a manifest.
+) -> tuple[dict[str, object], str, str]:
+    """For ``check_only`` integrations the directory must already exist with a manifest.
 
-    Returns the extra template fields prefilled from the existing manifest, plus
-    the override directory name (with the author prefix stripped).
+    Returns:
+        - extra template fields prefilled from the existing manifest
+        - the *target* integration directory name (the on-disk dir that holds the manifest;
+          e.g. ``partner_thing`` for a ``partner_`` author prefix)
+        - the *check_name* template substitution value (the stripped short name;
+          e.g. ``thing``). Used to populate the Python package name template variable
+          when the prefill helper did not provide a ``check_name``.
     """
+    from ddev.cli.create._naming import normalize_display_name
     from ddev.cli.create._scaffold import prefill_check_only_fields
     from ddev.utils.fs import Path
 
-    integration_dir_name = normalize_package_name(name)
+    target_integration_dir = normalize_package_name(name)
     root = Path(location).resolve() if location else app.repo.path
-    integration_dir = root / integration_dir_name
+    integration_dir = root / target_integration_dir
     manifest_path = integration_dir / 'manifest.json'
 
     if not manifest_path.is_file():
@@ -185,10 +242,8 @@ def _resolve_check_only_inputs(
     if author is None:
         app.abort('Unable to determine author from manifest')
 
-    from ddev.cli.create._naming import normalize_display_name
-
     author_normalized = normalize_display_name(author)
-    stripped = integration_dir_name.removeprefix(f'{author_normalized}_')
+    stripped = target_integration_dir.removeprefix(f'{author_normalized}_')
 
     fields = prefill_check_only_fields(manifest_data, stripped)
-    return fields, stripped
+    return fields, target_integration_dir, stripped

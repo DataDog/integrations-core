@@ -41,77 +41,90 @@ class _CreateGroup(click.Group):
     def resolve_command(  # type: ignore[override]
         self, ctx: click.Context, args: list[str]
     ) -> tuple[str | None, click.Command | None, list[str]]:
+        from ddev.cli.application import Application
+
         if not args:
             return super().resolve_command(ctx, args)
 
         first = args[0]
-        # If the first token matches a registered subcommand, use the normal flow.
         if self.get_command(ctx, first) is not None:
             return super().resolve_command(ctx, args)
 
-        # If the user passes `--type=X` as a flag among `args`, we're in legacy mode.
+        app: Application = ctx.obj
         legacy_type = _extract_legacy_type(args)
+
+        # No `--type`: the user passed a bare positional (the legacy `ddev create NAME` shape
+        # that is now ambiguous). Point them at the new subcommand surface before click's
+        # default "No such command" message lands.
         if legacy_type is None:
-            return super().resolve_command(ctx, args)
+            app.abort(
+                f'`ddev create {first}` is no longer supported. '
+                f'Use a subcommand: `ddev create check {first}`, `ddev create logs {first}`, '
+                f'etc. Run `ddev create --help` to see the full list.'
+            )
 
         if legacy_type in DROPPED_LEGACY_TYPES:
-            from ddev.cli.application import Application
-
-            app: Application = ctx.obj
             app.abort(
                 f'`--type={legacy_type}` is no longer supported. '
                 f'Use the manifest-less workflow described at {CONFLUENCE_NO_MANIFEST_URL}.'
             )
 
+        assert legacy_type is not None  # narrowed by the `is None` branch above
         target = LEGACY_TYPE_TO_SUBCOMMAND.get(legacy_type)
         if target is None:
-            ctx.fail(f'Unknown integration type: `{legacy_type}`.')
+            app.abort(f'Unknown integration type: `{legacy_type}`.')
 
         subcommand = self.get_command(ctx, target)
         if subcommand is None:
-            ctx.fail(f'Internal error: subcommand `{target}` not registered.')
+            app.abort(f'Internal error: subcommand `{target}` not registered.')
+        assert subcommand is not None  # for the type checker; abort above is NoReturn
 
-        click.echo(
-            f'WARNING: `--type={legacy_type}` is deprecated. '
-            f'Use `ddev create {target} NAME` instead. The flag will be removed in a future release.',
-            err=True,
+        app.display_warning(
+            f'`--type={legacy_type}` is deprecated. '
+            f'Use `ddev create {target} NAME` instead. The flag will be removed in a future release.'
         )
 
-        # Strip the --type / -t flag out of args before handing back to click.
         cleaned = _strip_type_flag(args)
         return subcommand.name, subcommand, cleaned
 
 
 def _extract_legacy_type(args: list[str]) -> str | None:
     """Return the `--type` / `-t` value from ``args`` if present, else None."""
-    iterator = iter(enumerate(args))
-    for _, token in iterator:
-        if token == '--type' or token == '-t':
-            try:
-                _, value = next(iterator)
-            except StopIteration:
-                return None
-            return value
+    iterator = iter(args)
+    for token in iterator:
+        if token in ('--type', '-t'):
+            return next(iterator, None)
         if token.startswith('--type='):
             return token.split('=', 1)[1]
-        if token.startswith('-t=') or (token.startswith('-t') and len(token) > 2):
-            return token[3:] if token.startswith('-t=') else token[2:]
+        if token.startswith('-t='):
+            return token[3:]
+        if _is_concatenated_short_type(token):
+            return token[2:]
     return None
 
 
+def _is_concatenated_short_type(token: str) -> bool:
+    """Match the legacy ``-tcheck`` short-flag form without swallowing future ``-tXxx`` options."""
+    if not token.startswith('-t') or len(token) <= 2 or token.startswith('--'):
+        return False
+    candidate = token[2:]
+    return candidate in LEGACY_TYPE_TO_SUBCOMMAND or candidate in DROPPED_LEGACY_TYPES
+
+
 def _strip_type_flag(args: list[str]) -> list[str]:
+    """Remove the legacy ``--type`` / ``-t`` flag from ``args`` (allow-listed forms only)."""
     cleaned: list[str] = []
     skip_next = False
     for token in args:
         if skip_next:
             skip_next = False
             continue
-        if token == '--type' or token == '-t':
+        if token in ('--type', '-t'):
             skip_next = True
             continue
-        if token.startswith(('--type=', '-t=')) or (
-            token.startswith('-t') and len(token) > 2 and not token.startswith('--')
-        ):
+        if token.startswith(('--type=', '-t=')):
+            continue
+        if _is_concatenated_short_type(token):
             continue
         cleaned.append(token)
     return cleaned

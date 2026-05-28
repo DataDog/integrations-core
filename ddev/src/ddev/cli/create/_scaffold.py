@@ -119,17 +119,21 @@ class TemplateFile:
     def read(self, config: dict[str, Any]) -> None:
         if self.binary:
             self.contents = self.source_path.read_bytes()
-        else:
-            self.contents = self.source_path.read_text().format(**config)
+            return
+        raw = self.source_path.read_text()
+        try:
+            self.contents = raw.format(**config)
+        except (KeyError, IndexError, ValueError) as exc:
+            raise RuntimeError(f'Failed to render template {self.source_path}: {exc}') from exc
 
     def write(self) -> None:
+        if self.contents is None:
+            raise RuntimeError(f'read() must be called before write() (target: {self.target_path})')
         self.target_path.ensure_parent_dir_exists()
         if self.binary:
-            assert isinstance(self.contents, bytes)
-            self.target_path.write_bytes(self.contents)
+            self.target_path.write_bytes(self.contents)  # type: ignore[arg-type]
         else:
-            assert isinstance(self.contents, str)
-            self.target_path.write_text(self.contents)
+            self.target_path.write_text(self.contents)  # type: ignore[arg-type]
 
 
 @dataclass
@@ -257,16 +261,24 @@ def collect_template_files(
     target_root: Path,
     config: dict[str, Any],
     *,
+    target_integration_dir: str,
     include_manifest: bool,
     read: bool,
 ) -> list[TemplateFile]:
-    """Walk the template directory for `integration_type` and produce the file list."""
+    """Walk the template directory for `integration_type` and produce the file list.
+
+    ``target_integration_dir`` is the on-disk directory name that should hold the
+    rendered files. Template paths are formatted with ``config`` first; when the
+    resulting top-level segment is the template ``{check_name}`` value we rewrite it
+    to ``target_integration_dir`` so callers can keep the Python package name (which
+    drives ``{check_name}``) distinct from the integration's directory name.
+    """
     template_root = TEMPLATES_ROOT / integration_type
     if not template_root.is_dir():
         return []
 
     files: list[TemplateFile] = []
-    integration_dir_name = config['check_name']
+    template_check_name = config['check_name']
     for source in _walk_template(template_root):
         rel = source.relative_to(template_root)
         rel_str = str(rel)
@@ -277,11 +289,12 @@ def collect_template_files(
         if source.name.endswith(('.pyc', '.pyo')):
             continue
 
-        target_rel = rel_str.format(**config)
+        formatted_rel = rel_str.format(**config)
+        target_rel = _retarget_top_segment(formatted_rel, template_check_name, target_integration_dir)
         target_path = target_root / target_rel
 
         # Default behaviour drops the integration's manifest.json.
-        if not include_manifest and _is_manifest_path(_StdPath(target_rel), integration_dir_name):
+        if not include_manifest and _is_manifest_path(_StdPath(target_rel), target_integration_dir):
             continue
 
         binary = source.name.endswith(BINARY_EXTENSIONS)
@@ -291,6 +304,16 @@ def collect_template_files(
         files.append(tf)
 
     return files
+
+
+def _retarget_top_segment(formatted_rel: str, template_check_name: str, target_dir: str) -> str:
+    """Rewrite the leading path segment from ``template_check_name`` to ``target_dir``."""
+    if not template_check_name or template_check_name == target_dir:
+        return formatted_rel
+    parts = _StdPath(formatted_rel).parts
+    if parts and parts[0] == template_check_name:
+        return str(_StdPath(target_dir, *parts[1:]))
+    return formatted_rel
 
 
 def _walk_template(root: Path) -> Iterator[Path]:
@@ -315,25 +338,34 @@ def render(
     quiet: bool,
     include_manifest: bool,
     extra_fields: dict[str, Any] | None = None,
-    override_integration_dir_name: str | None = None,
+    target_integration_dir: str | None = None,
+    check_name_override: str | None = None,
 ) -> ScaffoldResult:
-    """Resolve target paths, render templates in memory (or just enumerate for dry-run)."""
+    """Resolve target paths, render templates in memory (or just enumerate for dry-run).
+
+    ``target_integration_dir`` selects the on-disk directory that receives the rendered
+    files (the directory whose name appears as the top-level segment of every output
+    path). ``check_name_override`` substitutes the ``{check_name}`` template variable
+    independently — used by `check_only` to keep the Python package name distinct from
+    the on-disk integration directory when the manifest carries an author prefix.
+    """
     extra_fields = extra_fields or {}
     root = Path(location).resolve() if location else app.repo.path
-    integration_dir_name = override_integration_dir_name or normalize_package_name(name)
+    integration_dir_name = target_integration_dir or normalize_package_name(name)
     integration_dir = root / integration_dir_name
 
     if integration_type != 'check_only' and integration_dir.exists():
         app.abort(f'Path `{integration_dir}` already exists!')
 
     config = construct_template_fields(name, integration_type, **extra_fields)
-    if override_integration_dir_name is not None:
-        config['check_name'] = override_integration_dir_name
+    if check_name_override is not None and 'check_name' not in extra_fields:
+        config['check_name'] = check_name_override
 
     files = collect_template_files(
         integration_type,
         root,
         config,
+        target_integration_dir=integration_dir_name,
         include_manifest=include_manifest,
         read=not dry_run,
     )
@@ -345,8 +377,7 @@ def render(
             app.display_info(f'Will create in `{root}`:')
             _display_tree(app, root, files)
     else:
-        for f in files:
-            f.write()
+        _write_files_with_cleanup_hint(app, files, integration_dir)
         if quiet:
             app.display_info(f'Created `{integration_dir}`')
         else:
@@ -354,6 +385,23 @@ def render(
             _display_tree(app, root, files)
 
     return ScaffoldResult(integration_dir=integration_dir, files=files, config=config)
+
+
+def _write_files_with_cleanup_hint(
+    app: Application,
+    files: list[TemplateFile],
+    integration_dir: Path,
+) -> None:
+    """Write files and, on failure, tell the user where the partial write happened."""
+    total = len(files)
+    for index, f in enumerate(files, 1):
+        try:
+            f.write()
+        except OSError as exc:
+            app.abort(
+                f'Wrote {index - 1}/{total} files; failed at `{f.target_path}`: {exc}. '
+                f'Remove `{integration_dir}` and retry.'
+            )
 
 
 def _display_tree(app: Application, root: Path, files: list[TemplateFile]) -> None:
