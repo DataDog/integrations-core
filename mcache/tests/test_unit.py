@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from contextlib import contextmanager
 from unittest import mock
 
 import pytest
@@ -17,6 +18,20 @@ def make_check():
     # mcache/tests/conftest.py imports Docker-only helpers, which makes it
     # unusable in env-agnostic unit tests.
     return Memcache('mcache', None, {}, [{}])
+
+
+@contextmanager
+def optional_stats_handlers(items_fn=None, slabs_fn=None):
+    # OPTIONAL_STATS["items"][2] and ["slabs"][2] are None at class definition
+    # time and only set inside check() as a side-effect. Tests that exercise
+    # _get_optional_metrics directly must set and restore these slots explicitly.
+    try:
+        Memcache.OPTIONAL_STATS["items"][2] = items_fn
+        Memcache.OPTIONAL_STATS["slabs"][2] = slabs_fn
+        yield
+    finally:
+        Memcache.OPTIONAL_STATS["items"][2] = None
+        Memcache.OPTIONAL_STATS["slabs"][2] = None
 
 
 def build_stats_response(**overrides):
@@ -281,75 +296,45 @@ def test_get_metrics_emits_gauges_rates_and_percentages(aggregator):
     aggregator.assert_service_check(Memcache.SERVICE_CHECK, status=AgentCheck.OK, tags=['host:host'])
 
 
-def test_get_metrics_skips_get_hit_percent_when_cmd_get_zero(aggregator):
+@pytest.mark.parametrize(
+    'stats_overrides, metric_name',
+    [
+        pytest.param({'cmd_get': b'0', 'get_hits': b'5'}, 'memcache.get_hit_percent', id='cmd_get_zero'),
+        pytest.param({'limit_maxbytes': b'0', 'bytes': b'5'}, 'memcache.fill_percent', id='limit_maxbytes_zero'),
+        pytest.param({'curr_items': b'0', 'bytes': b'5'}, 'memcache.avg_item_size', id='curr_items_zero'),
+    ],
+)
+def test_get_metrics_skips_derived_metric_when_denominator_zero(aggregator, stats_overrides, metric_name):
     check = make_check()
     client = mock.Mock()
-    client.stats.return_value = build_stats_response(cmd_get=b'0', get_hits=b'5')
+    client.stats.return_value = build_stats_response(**stats_overrides)
 
     with mock.patch.object(check.log, 'warning') as mock_warning:
         check._get_metrics(client, tags=['t'], service_check_tags=['t'])
 
     warning_messages = [call.args[0] for call in mock_warning.call_args_list]
-    assert any('memcache.get_hit_percent' in msg for msg in warning_messages)
-    aggregator.assert_metric('memcache.get_hit_percent', count=0)
+    assert any(metric_name in msg for msg in warning_messages)
+    aggregator.assert_metric(metric_name, count=0)
 
 
-def test_get_metrics_skips_fill_percent_when_limit_maxbytes_zero(aggregator):
+@pytest.mark.parametrize(
+    'stats_overrides, metric_name, expected_value',
+    [
+        # `float(denominator) != 0` is True for negative values; `> 0` would be
+        # False. Mutants that flip != to > are killed by these negative cases.
+        pytest.param({'cmd_get': b'-2', 'get_hits': b'1'}, 'memcache.get_hit_percent', -50.0, id='cmd_get_negative'),
+        pytest.param({'bytes': b'1', 'limit_maxbytes': b'-2'}, 'memcache.fill_percent', -50.0, id='limit_maxbytes_negative'),
+        pytest.param({'bytes': b'1', 'curr_items': b'-2'}, 'memcache.avg_item_size', -0.5, id='curr_items_negative'),
+    ],
+)
+def test_get_metrics_emits_derived_metric_when_denominator_negative(aggregator, stats_overrides, metric_name, expected_value):
     check = make_check()
     client = mock.Mock()
-    client.stats.return_value = build_stats_response(limit_maxbytes=b'0', bytes=b'5')
-
-    with mock.patch.object(check.log, 'warning') as mock_warning:
-        check._get_metrics(client, tags=['t'], service_check_tags=['t'])
-
-    warning_messages = [call.args[0] for call in mock_warning.call_args_list]
-    assert any('memcache.fill_percent' in msg for msg in warning_messages)
-    aggregator.assert_metric('memcache.fill_percent', count=0)
-
-
-def test_get_metrics_skips_avg_item_size_when_curr_items_zero(aggregator):
-    check = make_check()
-    client = mock.Mock()
-    client.stats.return_value = build_stats_response(curr_items=b'0', bytes=b'5')
-
-    with mock.patch.object(check.log, 'warning') as mock_warning:
-        check._get_metrics(client, tags=['t'], service_check_tags=['t'])
-
-    warning_messages = [call.args[0] for call in mock_warning.call_args_list]
-    assert any('memcache.avg_item_size' in msg for msg in warning_messages)
-    aggregator.assert_metric('memcache.avg_item_size', count=0)
-
-
-def test_get_metrics_emits_get_hit_percent_when_cmd_get_negative(aggregator):
-    # `float(cmd_get) != 0` is True for negative values; `> 0` would be False.
-    # Mutants that flip != to > should be killed by this asymmetry.
-    check = make_check()
-    client = mock.Mock()
-    client.stats.return_value = build_stats_response(cmd_get=b'-2', get_hits=b'1')
+    client.stats.return_value = build_stats_response(**stats_overrides)
 
     check._get_metrics(client, tags=['url:t'], service_check_tags=['t'])
 
-    aggregator.assert_metric('memcache.get_hit_percent', value=-50.0, tags=['url:t'])
-
-
-def test_get_metrics_emits_fill_percent_when_limit_maxbytes_negative(aggregator):
-    check = make_check()
-    client = mock.Mock()
-    client.stats.return_value = build_stats_response(bytes=b'1', limit_maxbytes=b'-2')
-
-    check._get_metrics(client, tags=['url:t'], service_check_tags=['t'])
-
-    aggregator.assert_metric('memcache.fill_percent', value=-50.0, tags=['url:t'])
-
-
-def test_get_metrics_emits_avg_item_size_when_curr_items_negative(aggregator):
-    check = make_check()
-    client = mock.Mock()
-    client.stats.return_value = build_stats_response(bytes=b'1', curr_items=b'-2')
-
-    check._get_metrics(client, tags=['url:t'], service_check_tags=['t'])
-
-    aggregator.assert_metric('memcache.avg_item_size', value=-0.5, tags=['url:t'])
+    aggregator.assert_metric(metric_name, value=expected_value, tags=['url:t'])
 
 
 def test_get_metrics_skips_get_hit_percent_when_get_hits_missing(aggregator):
@@ -373,40 +358,30 @@ def test_get_metrics_propagates_bad_response_error(aggregator):
         check._get_metrics(client, tags=['t'], service_check_tags=['t'])
 
 
-def test_get_metrics_get_hit_percent_uses_true_division(aggregator):
-    # cmd_get=3, get_hits=1 → 100.0 * 1 / 3 = 33.333... With // it would be 33.0.
+@pytest.mark.parametrize(
+    'stats_overrides, metric_name, expected_value',
+    [
+        # Non-integer result confirms `/` not `//`: e.g. 100.0 * 1 / 3 = 33.333...
+        pytest.param({'cmd_get': b'3', 'get_hits': b'1'}, 'memcache.get_hit_percent', 100.0 / 3, id='get_hit_percent'),
+        pytest.param({'bytes': b'1', 'limit_maxbytes': b'3'}, 'memcache.fill_percent', 100.0 / 3, id='fill_percent'),
+        pytest.param({'bytes': b'10', 'curr_items': b'3'}, 'memcache.avg_item_size', 10.0 / 3, id='avg_item_size'),
+    ],
+)
+def test_get_metrics_derived_metric_uses_true_division(aggregator, stats_overrides, metric_name, expected_value):
     check = make_check()
     client = mock.Mock()
-    client.stats.return_value = build_stats_response(cmd_get=b'3', get_hits=b'1')
+    client.stats.return_value = build_stats_response(**stats_overrides)
 
     check._get_metrics(client, tags=['url:t'], service_check_tags=['t'])
 
-    aggregator.assert_metric('memcache.get_hit_percent', value=100.0 / 3, tags=['url:t'])
-
-
-def test_get_metrics_fill_percent_uses_true_division(aggregator):
-    # bytes=1, limit=3 → 100.0 * 1 / 3 = 33.333... With // it would be 33.0.
-    check = make_check()
-    client = mock.Mock()
-    client.stats.return_value = build_stats_response(bytes=b'1', limit_maxbytes=b'3')
-
-    check._get_metrics(client, tags=['url:t'], service_check_tags=['t'])
-
-    aggregator.assert_metric('memcache.fill_percent', value=100.0 / 3, tags=['url:t'])
-
-
-def test_get_metrics_avg_item_size_uses_true_division(aggregator):
-    # bytes=10, curr_items=3 → 10 / 3 = 3.333... With // it would be 3.0.
-    check = make_check()
-    client = mock.Mock()
-    client.stats.return_value = build_stats_response(bytes=b'10', curr_items=b'3')
-
-    check._get_metrics(client, tags=['url:t'], service_check_tags=['t'])
-
-    aggregator.assert_metric('memcache.avg_item_size', value=10.0 / 3, tags=['url:t'])
+    aggregator.assert_metric(metric_name, value=expected_value, tags=['url:t'])
 
 
 def test_get_optional_metrics_skipped_when_option_disabled(aggregator):
+    # Note: `_get_optional_metrics` uses `if not options or options.get(arg, False)`,
+    # so passing options={} would *enable* all stats (not {}` is True). The check()
+    # caller guards this with `if options:` at mcache.py:291, but callers that bypass
+    # check() should pass explicit False values rather than an empty dict.
     check = make_check()
     client = mock.Mock()
     client.stats.return_value = {'host': {'evicted': b'1'}}
@@ -414,6 +389,8 @@ def test_get_optional_metrics_skipped_when_option_disabled(aggregator):
     check._get_optional_metrics(client, tags=['t'], options={'items': False, 'slabs': False})
 
     client.stats.assert_not_called()
+    aggregator.assert_metric('memcache.items.evicted', count=0)
+    aggregator.assert_metric('memcache.items.evicted_rate', count=0)
 
 
 def test_get_optional_metrics_missing_key_defaults_to_disabled():
@@ -438,12 +415,8 @@ def test_get_optional_metrics_skips_metrics_not_in_gauges_or_rates_list(aggregat
     client = mock.Mock()
     client.stats.return_value = {'h': {'items:1:unknown_metric_name': b'7'}}
 
-    try:
-        Memcache.OPTIONAL_STATS["items"][2] = Memcache.get_items_stats
-
+    with optional_stats_handlers(items_fn=Memcache.get_items_stats):
         check._get_optional_metrics(client, tags=['url:t'], options={'items': True, 'slabs': False})
-    finally:
-        Memcache.OPTIONAL_STATS["items"][2] = None
 
     aggregator.assert_metric('memcache.items.unknown_metric_name', count=0)
     aggregator.assert_metric('memcache.items.unknown_metric_name_rate', count=0)
@@ -456,14 +429,9 @@ def test_get_optional_metrics_calls_stats_for_each_enabled_arg():
         {'h': {'items:1:evicted': b'5', 'items:1:number': b'9'}},
         {'h': {'1:chunk_size': b'80'}},
     ]
-    try:
-        Memcache.OPTIONAL_STATS["items"][2] = Memcache.get_items_stats
-        Memcache.OPTIONAL_STATS["slabs"][2] = Memcache.get_slabs_stats
 
+    with optional_stats_handlers(items_fn=Memcache.get_items_stats, slabs_fn=Memcache.get_slabs_stats):
         check._get_optional_metrics(client, tags=['url:t'], options={'items': True, 'slabs': True})
-    finally:
-        Memcache.OPTIONAL_STATS["items"][2] = None
-        Memcache.OPTIONAL_STATS["slabs"][2] = None
 
     assert client.stats.call_args_list == [mock.call('items'), mock.call('slabs')]
 
@@ -473,12 +441,8 @@ def test_get_optional_metrics_emits_gauges_and_rates_with_slab_tags(aggregator):
     client = mock.Mock()
     client.stats.return_value = {'h': {'items:3:evicted': b'7', 'items:3:number': b'4'}}
 
-    try:
-        Memcache.OPTIONAL_STATS["items"][2] = Memcache.get_items_stats
-
+    with optional_stats_handlers(items_fn=Memcache.get_items_stats):
         check._get_optional_metrics(client, tags=['url:t'], options={'items': True, 'slabs': False})
-    finally:
-        Memcache.OPTIONAL_STATS["items"][2] = None
 
     aggregator.assert_metric('memcache.items.number', value=4.0, tags=['url:t', 'slab:3'], metric_type=aggregator.GAUGE)
     aggregator.assert_metric('memcache.items.evicted_rate', tags=['url:t', 'slab:3'], metric_type=aggregator.RATE)
@@ -598,15 +562,12 @@ def test_check_calls_optional_handlers_when_options_provided(aggregator):
         {'h': {'1:chunk_size': b'80'}},
     ]
 
-    try:
+    with optional_stats_handlers(items_fn=Memcache.get_items_stats, slabs_fn=Memcache.get_slabs_stats):
         with mock.patch('datadog_checks.mcache.mcache.bmemcached.Client', return_value=fake_client):
             check.check({'url': 'host', 'options': {'items': True, 'slabs': True}})
 
-        aggregator.assert_metric('memcache.items.number', value=9.0, tags=['url:host:11211', 'slab:1'])
-        aggregator.assert_metric('memcache.slabs.chunk_size', value=80.0, tags=['url:host:11211', 'slab:1'])
-    finally:
-        Memcache.OPTIONAL_STATS["items"][2] = None
-        Memcache.OPTIONAL_STATS["slabs"][2] = None
+    aggregator.assert_metric('memcache.items.number', value=9.0, tags=['url:host:11211', 'slab:1'])
+    aggregator.assert_metric('memcache.slabs.chunk_size', value=80.0, tags=['url:host:11211', 'slab:1'])
 
 
 def test_check_translates_bad_response_into_critical_and_configuration_error(aggregator):
