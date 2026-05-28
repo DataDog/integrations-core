@@ -122,10 +122,11 @@ class HTTPXResponseAdapter:
 
     @property
     def content(self) -> bytes:
-        return self._response.content
+        return self._response.read()
 
     @property
     def text(self) -> str:
+        self._response.read()
         return self._response.text
 
     @property
@@ -167,6 +168,7 @@ class HTTPXResponseAdapter:
             return timedelta(0)
 
     def json(self, **kwargs: Any) -> Any:
+        self._response.read()
         return self._response.json(**kwargs)
 
     def raise_for_status(self) -> None:
@@ -182,12 +184,13 @@ class HTTPXResponseAdapter:
         self._response.close()
 
     def iter_content(self, chunk_size: int | None = None, decode_unicode: bool = False) -> Iterator[bytes | str]:
-        content = self._response.content
         if chunk_size is None:
+            content = self._response.read()
+            if not content:
+                return
             yield content.decode('utf-8') if decode_unicode else content
             return
-        for i in range(0, len(content), max(chunk_size, 1)):
-            chunk = content[i : i + chunk_size]
+        for chunk in self._response.iter_bytes(chunk_size=chunk_size):
             yield chunk.decode('utf-8') if decode_unicode else chunk
 
     def iter_lines(
@@ -196,15 +199,11 @@ class HTTPXResponseAdapter:
         decode_unicode: bool = False,
         delimiter: bytes | str | None = None,
     ) -> Iterator[bytes | str]:
-        if isinstance(delimiter, str):
-            delimiter = delimiter.encode('utf-8')
-        sep = delimiter or b'\n'
-        content = self._response.content
-        lines = content.split(sep)
-        if lines and not lines[-1]:
-            lines.pop()
-        for line in lines:
-            yield line.decode('utf-8') if decode_unicode else line
+        if delimiter is not None:
+            raise NotImplementedError("HTTPXResponseAdapter.iter_lines does not support custom delimiters")
+        for line in self._response.iter_lines():
+            # httpx.Response.iter_lines yields str; encode when caller wants bytes.
+            yield line if decode_unicode else line.encode('utf-8')
 
     def __enter__(self) -> 'HTTPXResponseAdapter':
         return self
@@ -356,8 +355,10 @@ class HTTPXWrapper:
             self.logger.debug('Sending %s request to %s', method, url)
 
         request_kwargs = self._build_request_kwargs(options)
+        follow_redirects = request_kwargs.pop('follow_redirects', httpx.USE_CLIENT_DEFAULT)
         try:
-            response = self._client.request(method, url, **request_kwargs)
+            request = self._client.build_request(method, url, **request_kwargs)
+            response = self._client.send(request, stream=True, follow_redirects=follow_redirects)
         except httpx.HTTPError as exc:
             raise _map_httpx_exception(exc) from exc
         return HTTPXResponseAdapter(response)

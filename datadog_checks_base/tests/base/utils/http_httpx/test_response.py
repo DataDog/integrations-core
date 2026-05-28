@@ -48,6 +48,21 @@ def test_response_iter_lines(status_transport_factory, decode_unicode, expected)
     assert list(response.iter_lines(decode_unicode=decode_unicode)) == expected
 
 
+def test_response_iter_content_empty_body_yields_nothing(status_transport_factory):
+    transport = status_transport_factory(200, b'')
+    http = HTTPXWrapper({}, {}, transport=transport)
+    response = http.get('http://example.test/')
+    assert list(response.iter_content()) == []
+
+
+def test_response_iter_lines_rejects_delimiter(status_transport_factory):
+    transport = status_transport_factory(200, b'a\nb\n')
+    http = HTTPXWrapper({}, {}, transport=transport)
+    response = http.get('http://example.test/')
+    with pytest.raises(NotImplementedError):
+        list(response.iter_lines(delimiter=b'|'))
+
+
 def test_response_elapsed_returns_zero_on_runtime_error():
     class _FakeResponse:
         @property
