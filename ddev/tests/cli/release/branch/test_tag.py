@@ -343,8 +343,9 @@ def test_rc_explicit_value_no_gap_no_warning(ddev, git):
     assert 'skips ahead' not in result.output
 
 
-def test_rc_invalid_value_aborts(ddev, git):
-    result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--rc', 'banana')
+@pytest.mark.parametrize('rc_arg', ['--rc=banana', '--rc=0'])
+def test_rc_invalid_value_aborts(ddev, git, rc_arg):
+    result = ddev('release', 'branch', 'tag', '--release', '7.56.x', rc_arg)
     assert result.exit_code != 0, result.output
     assert '`--rc` value must be a positive integer' in result.output
 
@@ -374,12 +375,14 @@ def test_yes_with_pinned_rc(ddev, git):
 
 
 def _make_ref_dispatcher(rev_parse=None, is_ancestor=None):
-    """Build a `capture` side_effect that dispatches by subcommand for --ref tests."""
+    """Build a `capture` side_effect that dispatches by subcommand for --ref tests.
+
+    Delegates to `_capture_dispatch` for any subcommand it doesn't explicitly handle so the
+    default `ls-remote` payload stays defined in exactly one place.
+    """
 
     def dispatch(*args):
         sub = args[0] if args else ''
-        if sub == 'ls-remote':
-            return LS_REMOTE_OK
         if sub == 'rev-parse':
             if isinstance(rev_parse, BaseException):
                 raise rev_parse
@@ -388,7 +391,7 @@ def _make_ref_dispatcher(rev_parse=None, is_ancestor=None):
             if isinstance(is_ancestor, BaseException):
                 raise is_ancestor
             return is_ancestor
-        return ''
+        return _capture_dispatch(*args)
 
     return dispatch
 
@@ -425,14 +428,15 @@ def test_ref_not_ancestor_aborts(ddev, git):
 def test_no_worktree_subprocess_invoked(ddev, git):
     """
     The command must never touch `git worktree`. Previously it created a worktree to check out
-    `origin/<branch>` for tagging; now it operates against the ref directly.
+    `origin/<branch>` for tagging; now it operates against the ref directly. Worktree ops can
+    go through either `run` (add/remove) or `capture` (list), so both are filtered.
     """
     git.current_branch.return_value = 'master'
     result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', input='y\n')
 
     assert result.exit_code == 0, result.output
     worktree_calls = [
-        call for call in git.method_calls if call[0] == 'run' and len(call.args) >= 1 and call.args[0] == 'worktree'
+        call for call in git.method_calls if call[0] in ('run', 'capture') and call.args and call.args[0] == 'worktree'
     ]
     assert worktree_calls == []
 

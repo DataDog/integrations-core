@@ -127,11 +127,11 @@ def tag(
     current_branch = app.repo.git.current_branch()
     target_branch = _resolve_target_branch(app, release, yes, current_branch)
 
-    app.display_waiting('Fetching from origin...')
-    app.repo.git.fetch_tags()
-    _ensure_branch_on_origin(app, target_branch)
-
     git = app.repo.git
+    app.display_waiting('Fetching from origin...')
+    git.fetch_tags()
+    _ensure_branch_on_origin(app, git, target_branch)
+
     tag_ref = _resolve_tag_ref(app, git, target_branch, ref)
     effective_ref = tag_ref if tag_ref is not None else f'origin/{target_branch}'
 
@@ -197,6 +197,8 @@ def _compute_new_tag(
             default=new_rc_guess,
         )
     if next_rc < 1:
+        # Only reachable for the interactive prompt — `--rc N` is validated up-front in
+        # `_parse_rc_value`.
         app.abort('RC number must be at least 1.')
     new_tag += f'-rc.{next_rc}'
     if Version(new_tag) in this_release_tags:
@@ -251,9 +253,12 @@ def _parse_rc_value(rc: str | None) -> int | None:
     if rc is None or rc == RC_AUTO:
         return None
     try:
-        return int(rc)
+        value = int(rc)
     except ValueError as e:
         raise click.UsageError(f'`--rc` value must be a positive integer, got `{rc}`.') from e
+    if value < 1:
+        raise click.UsageError(f'`--rc` value must be a positive integer, got `{rc}`.')
+    return value
 
 
 def _resolve_target_branch(app: Application, release: str | None, yes: bool, current_branch: str) -> str:
@@ -274,9 +279,9 @@ def _resolve_target_branch(app: Application, release: str | None, yes: bool, cur
     return current_branch
 
 
-def _ensure_branch_on_origin(app: Application, branch: str) -> None:
+def _ensure_branch_on_origin(app: Application, git: GitRepository, branch: str) -> None:
     try:
-        output = app.repo.git.capture('ls-remote', '--heads', 'origin', branch)
+        output = git.capture('ls-remote', '--heads', 'origin', branch)
     except OSError as e:
         app.abort(f'Failed to query `origin` for branch `{branch}`: {e}')
     if not any(line.strip() for line in output.splitlines()):
