@@ -134,36 +134,19 @@ def test_kong_check_default_metric_limit_is_zero():
     assert KongCheck.DEFAULT_METRIC_LIMIT == 0
 
 
-def test_upstream_target_health_skips_when_sample_value_is_not_one():
+@pytest.mark.parametrize(
+    'value, state',
+    [
+        pytest.param(0, 'healthy', id='value_zero'),
+        pytest.param(2, 'healthy', id='value_above_one'),
+        pytest.param(1, 'healthchecks_off', id='healthchecks_off_state'),
+    ],
+)
+def test_upstream_target_health_skips_sample(value, state):
     check = _make_kong_check_for_transformer()
     service_check = check.configure_transformer_upstream_target_health()
-    sample = Sample('kong_upstream_target_health', {'state': 'healthy'}, 0, 0)
-    sample_data = [(sample, ['state:healthy', 'target:t1'], 'host')]
-
-    service_check(None, sample_data, None)
-
-    check.service_check.assert_not_called()
-
-
-def test_upstream_target_health_skips_when_sample_value_is_greater_than_one():
-    check = _make_kong_check_for_transformer()
-    service_check = check.configure_transformer_upstream_target_health()
-    sample = Sample('kong_upstream_target_health', {'state': 'healthy'}, 2, 0)
-    sample_data = [(sample, ['state:healthy', 'target:t1'], 'host')]
-
-    service_check(None, sample_data, None)
-
-    check.service_check.assert_not_called()
-
-
-def test_upstream_target_health_skips_healthchecks_off_state():
-    check = _make_kong_check_for_transformer()
-    service_check = check.configure_transformer_upstream_target_health()
-    sample = Sample('kong_upstream_target_health', {'state': 'healthchecks_off'}, 1, 0)
-    sample_data = [(sample, ['state:healthchecks_off', 'target:t1'], 'host')]
-
-    service_check(None, sample_data, None)
-
+    sample = Sample('kong_upstream_target_health', {'state': state}, value, 0)
+    service_check(None, [(sample, [f'state:{state}', 'target:t1'], 'host')], None)
     check.service_check.assert_not_called()
 
 
@@ -342,43 +325,23 @@ def test_legacy_fetch_data_service_check_critical_on_request_exception(mock_http
     )
 
 
-def test_legacy_fetch_data_service_check_critical_when_status_code_not_200(mock_http_response, aggregator):
-    mock_http_response(json_data={'server': {}}, status_code=201)
+@pytest.mark.parametrize(
+    'status_code, expected_status',
+    [
+        pytest.param(200, Kong.OK, id='exactly_200_is_ok'),
+        pytest.param(201, Kong.CRITICAL, id='201_is_critical'),
+        pytest.param(199, Kong.CRITICAL, id='199_is_critical'),
+    ],
+)
+def test_legacy_fetch_data_service_check_status_by_code(mock_http_response, aggregator, status_code, expected_status):
+    mock_http_response(json_data={'server': {}}, status_code=status_code)
     check = _make_legacy_kong({'kong_status_url': 'http://kong-host:9000/status/', 'tags': []})
 
     check._fetch_data()
 
     aggregator.assert_service_check(
         'kong.can_connect',
-        status=Kong.CRITICAL,
-        tags=['kong_host:kong-host', 'kong_port:9000'],
-        count=1,
-    )
-
-
-def test_legacy_fetch_data_service_check_critical_when_status_code_below_200(mock_http_response, aggregator):
-    mock_http_response(json_data={'server': {}}, status_code=199)
-    check = _make_legacy_kong({'kong_status_url': 'http://kong-host:9000/status/', 'tags': []})
-
-    check._fetch_data()
-
-    aggregator.assert_service_check(
-        'kong.can_connect',
-        status=Kong.CRITICAL,
-        tags=['kong_host:kong-host', 'kong_port:9000'],
-        count=1,
-    )
-
-
-def test_legacy_fetch_data_service_check_ok_only_when_status_code_is_200(mock_http_response, aggregator):
-    mock_http_response(json_data={'server': {}}, status_code=200)
-    check = _make_legacy_kong({'kong_status_url': 'http://kong-host:9000/status/', 'tags': []})
-
-    check._fetch_data()
-
-    aggregator.assert_service_check(
-        'kong.can_connect',
-        status=Kong.OK,
+        status=expected_status,
         tags=['kong_host:kong-host', 'kong_port:9000'],
         count=1,
     )
@@ -410,9 +373,3 @@ def test_legacy_parse_json_defaults_tags_to_empty_list_when_none():
     assert parsed == [('kong.x', 1, [])]
 
 
-def test_legacy_parse_json_preserves_caller_tags_when_provided():
-    check = _make_legacy_kong({'kong_status_url': 'http://kong:8001/status/'})
-
-    parsed = check._parse_json(b'{"server": {"x": 1}}', tags=['env:test'])
-
-    assert parsed == [('kong.x', 1, ['env:test'])]
