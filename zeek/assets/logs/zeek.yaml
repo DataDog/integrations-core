@@ -1730,25 +1730,16 @@ pipeline:
           template: "0"
           target: ocsf.evidence.connection_info.direction_id
           replaceMissing: false
-        - type: schema-processor
-          name: Apply OCSF schema for 2004
+        - type: attribute-remapper
+          name: Coerce evidence direction_id to integer
           enabled: true
-          mappers:
-            - type: schema-remapper
-              name: Map `ocsf.evidence.connection_info.direction_id` to `ocsf.evidence.connection_info.direction_id`
-              sources:
-                - ocsf.evidence.connection_info.direction_id
-              target: ocsf.evidence.connection_info.direction_id
-              preserveSource: false
-              overrideOnConflict: true
-              targetFormat: integer
-          schema:
-            schemaType: ocsf
-            version: 1.5.0
-            className: Detection Finding
-            classUid: 2004
-            extensions: []
-            profiles: []
+          sources:
+            - ocsf.evidence.connection_info.direction_id
+          sourceType: attribute
+          target: ocsf.evidence.connection_info.direction_id
+          preserveSource: false
+          overrideOnConflict: false
+          targetFormat: integer
         - type: attribute-remapper
           name: Map `id.orig_h` to `ocsf.evidence.src_endpoint.ip`
           enabled: true
@@ -1980,25 +1971,15 @@ pipeline:
           template: "0"
           target: ocsf.evidence.connection_info.direction_id
           replaceMissing: false
-        - type: schema-processor
-          name: Apply OCSF schema for 2004
+        - type: grok-parser
+          name: Coerce evidence direction_id to integer
           enabled: true
-          mappers:
-            - type: schema-remapper
-              name: Map `ocsf.evidence.connection_info.direction_id` to `ocsf.evidence.connection_info.direction_id`
-              sources:
-                - ocsf.evidence.connection_info.direction_id
-              target: ocsf.evidence.connection_info.direction_id
-              preserveSource: false
-              overrideOnConflict: true
-              targetFormat: integer
-          schema:
-            schemaType: ocsf
-            version: 1.5.0
-            className: Detection Finding
-            classUid: 2004
-            extensions: []
-            profiles: []
+          source: ocsf.evidence.connection_info.direction_id
+          samples:
+            - "0"
+          grok:
+            supportRules: ""
+            matchRules: "to_int %{integer:ocsf.evidence.connection_info.direction_id}"
         - type: attribute-remapper
           name: Map `id.orig_h` to `ocsf.evidence.src_endpoint.ip`
           enabled: true
