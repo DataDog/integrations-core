@@ -1319,6 +1319,7 @@ tests:
          - "performance_impact:Low"
          - "signature_severity:Major"
          - "updated_at:2026_04_09"
+        metadata_str: "attack_target:Client_Endpoint,confidence:High,created_at:2026_04_01,deployment:Internal,deployment:Perimeter,mitre_tactic_id:TA0011,mitre_tactic_name:Command_And_Control,mitre_technique_id:T1071,mitre_technique_name:Application_Layer_Protocol,performance_i"
         rev: 17
         severity: 1
         signature: "ET POLICY Outgoing Basic Auth Base64 HTTP Password detected unencrypted"
@@ -1364,13 +1365,6 @@ tests:
             type: "Rule"
             type_id: 1
             uid: "2006380"
-          attacks:
-            - tactic:
-                name: "Command_And_Control"
-                uid: "TA0011"
-              technique:
-                name: "Application_Layer_Protocol"
-                uid: "T1071"
           title: "ET POLICY Outgoing Basic Auth Base64 HTTP Password detected unencrypted"
           types:
            - "Potential Corporate Privacy Violation"
@@ -1395,7 +1389,6 @@ tests:
       service: "http"
       severity: 1
       suri_id: "SOHaIDWJ5dBe"
-      tmp_attack_str: "attack_target:Client_Endpoint,confidence:High,created_at:2026_04_01,deployment:Internal,deployment:Perimeter,mitre_tactic_id:TA0011,mitre_tactic_name:Command_And_Control,mitre_technique_id:T1071,mitre_technique_name:Application_Layer_Protocol,performance_i"
       ts: "2026-05-11T17:59:59.358114Z"
       tx_id: 0
       uid: "CN4bklsrGiWMsQhg3"
@@ -1410,90 +1403,90 @@ tests:
   service: "corelight"
   result:
     custom:
-      timedout: false
-      sha256: a7d5f44561e9707b3faf6ca1cdec4823e6625dd1c3aba2b7395697d65b47dc8f
-      source: HTTP
-      duration: 0.2072269916534424
-      uid: CjTuQU17IDvaVa8Nq2
+      _path: "files"
+      _system_name: "ndr-dub-stryker-DC-1"
+      _write_ts: "2026-05-11T19:26:26.082433Z"
       analyzers:
-        - SHA1
-        - MD5
-        - SHA256
-        - DATA_EVENT
-      ocsf:
-        severity: Informational
-        activity_name: Download
-        metadata:
-          uid: CjTuQU17IDvaVa8Nq2
-          product:
-            name: Zeek
-            vendor_name: Corelight
-          version: 1.5.0
-        category_uid: 6
-        category_name: Application Activity
-        actor:
-          session:
-            uid: CjTuQU17IDvaVa8Nq2
-        file:
-          uid: FOPDsn3PdkiZsljcj2
-          size: 253109
-          mime_type: text/json
-          type_id: 1
-          name: FOPDsn3PdkiZsljcj2
-          hashes:
-            - algorithm_id: 1
-              value: 6e6ae0ed19f595687684faafae5499e13
-              algorithm: MD5
-            - algorithm_id: 2
-              value: f6578daa6d398c91398888b91a96d4c0e099c79c
-              algorithm: SHA-1
-            - algorithm_id: 3
-              value: a7d5f44561e9707b3faf6ca1cdec4823e6625dd1c3aba2b7395697d65b47dc8f
-              algorithm: SHA-256
-        status_id: 1
-        class_uid: 6006
-        activity_id: 2
-        time: 1778527585875
-        severity_id: 1
-        class_name: File Hosting Activity
-        status: Success
-        src_endpoint:
-          ip: 10.104.10.60
-        dst_endpoint:
-          ip: 10.104.10.65
-      fuid: FOPDsn3PdkiZsljcj2
+       - "SHA1"
+       - "MD5"
+       - "SHA256"
+       - "DATA_EVENT"
+      conn_uids:
+       - "CjTuQU17IDvaGb8Nq2"
+      depth: 0
+      dest_host:
+       - "10.104.10.60"
+      duration: 0.2072269916534424
+      fuid: "FOPDsn3PdkiZsljcj2"
       id:
         vlan: 1010
+      is_orig: false
       local_orig: true
-      _write_ts: '2026-05-11T19:26:26.082433Z'
+      md5: "6e6ae0ed19f595687684faafae5499e13"
+      mime_type: "text/json"
+      missing_bytes: 0
+      ocsf:
+        activity_id: 2
+        activity_name: "Download"
+        actor:
+          session:
+            uid: "CjTuQU17IDvaVa8Nq2"
+        category_name: "Application Activity"
+        category_uid: 6
+        class_name: "File Hosting Activity"
+        class_uid: 6006
+        dst_endpoint:
+          ip: "10.104.10.65"
+        file:
+          hashes:
+            - algorithm: "MD5"
+              algorithm_id: 1
+              value: "6e6ae0ed19f595687684faafae5499e13"
+            - algorithm: "SHA-1"
+              algorithm_id: 2
+              value: "f6578daa6d398c91398888b91a96d4c0e099c79c"
+            - algorithm: "SHA-256"
+              algorithm_id: 3
+              value: "a7d5f44561e9707b3faf6ca1cdec4823e6625dd1c3aba2b7395697d65b47dc8f"
+          mime_type: "text/json"
+          name: "FOPDsn3PdkiZsljcj2"
+          size: 253109
+          type_id: 1
+          uid: "FOPDsn3PdkiZsljcj2"
+        metadata:
+          product:
+            name: "Zeek"
+            vendor_name: "Corelight"
+          uid: "CjTuQU17IDvaVa8Nq2"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "10.104.10.60"
+        status: "Success"
+        status_id: 1
+        time: 1778527585875
+      orig_host:
+       - "10.104.10.65"
       rx_hosts:
-        - 10.104.10.65
+       - "10.104.10.65"
+      seen_bytes: 253109
+      sha1: "f6578daa6d398c91398888b91a96d4c0e099c79c"
+      sha256: "a7d5f44561e9707b3faf6ca1cdec4823e6625dd1c3aba2b7395697d65b47dc8f"
+      source: "HTTP"
+      timedout: false
+      total_bytes: 253109
+      ts: "2026-05-11T19:26:25.875206Z"
+      tx_hosts:
+       - "10.104.10.60"
+      uid: "CjTuQU17IDvaVa8Nq2"
       zeek:
-        total_bytes: 253109
-        seen_bytes: 253109
         missing_bytes: 0
         overflow_bytes: 0
-      orig_host:
-        - 10.104.10.65
-      _path: files
-      is_orig: false
-      tx_hosts:
-        - 10.104.10.60
-      sha1: f6578daa6d398c91398888b91a96d4c0e099c79c
-      depth: 0
-      _system_name: ndr-dub-stryker-DC-1
-      mime_type: text/json
-      dest_host:
-        - 10.104.10.60
-      conn_uids:
-        - CjTuQU17IDvaGb8Nq2
-      ts: '2026-05-11T19:26:25.875206Z'
-      md5: 6e6ae0ed19f595687684faafae5499e13
-      total_bytes: 253109
-      seen_bytes: 253109
-      missing_bytes: 0
-    service: files
-    message: <134>May 11 19:26:26 ndr-dub-stryker-DC-1 {"_path":"files","_system_name":"ndr-dub-stryker-DC-1","_write_ts":"2026-05-11T19:26:26.082433Z","ts":"2026-05-11T19:26:25.875206Z","uid":"CjTuQU17IDvaVa8Nq2","fuid":"FOPDsn3PdkiZsljcj2","tx_hosts":["10.104.10.60"],"rx_hosts":["10.104.10.65"],"conn_uids":["CjTuQU17IDvaGb8Nq2"],"source":"HTTP","depth":0,"analyzers":["SHA1","MD5","SHA256","DATA_EVENT"],"local_orig":true,"is_orig":false,"seen_bytes":253109,"total_bytes":253109,"missing_bytes":0,"overflow_bytes":0,"timedout":false,"duration":0.2072269916534424,"mime_type":"text/json","md5":"6e6ae0ed19f595687684faafae5499e13","sha1":"f6578daa6d398c91398888b91a96d4c0e099c79c","sha256":"a7d5f44561e9707b3faf6ca1cdec4823e6625dd1c3aba2b7395697d65b47dc8f","id.vlan":1010}
+        seen_bytes: 253109
+        total_bytes: 253109
+    message: '<134>May 11 19:26:26 ndr-dub-stryker-DC-1 {"_path":"files","_system_name":"ndr-dub-stryker-DC-1","_write_ts":"2026-05-11T19:26:26.082433Z","ts":"2026-05-11T19:26:25.875206Z","uid":"CjTuQU17IDvaVa8Nq2","fuid":"FOPDsn3PdkiZsljcj2","tx_hosts":["10.104.10.60"],"rx_hosts":["10.104.10.65"],"conn_uids":["CjTuQU17IDvaGb8Nq2"],"source":"HTTP","depth":0,"analyzers":["SHA1","MD5","SHA256","DATA_EVENT"],"local_orig":true,"is_orig":false,"seen_bytes":253109,"total_bytes":253109,"missing_bytes":0,"overflow_bytes":0,"timedout":false,"duration":0.2072269916534424,"mime_type":"text/json","md5":"6e6ae0ed19f595687684faafae5499e13","sha1":"f6578daa6d398c91398888b91a96d4c0e099c79c","sha256":"a7d5f44561e9707b3faf6ca1cdec4823e6625dd1c3aba2b7395697d65b47dc8f","id.vlan":1010}'
+    service: "files"
     tags:
-      - source:LOGS_SOURCE
+     - "source:LOGS_SOURCE"
     timestamp: 1778527585875

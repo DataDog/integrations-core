@@ -2035,10 +2035,16 @@ pipeline:
             target: ocsf.finding_info.types
             preserveSource: true
             type: append
-        - type: grok-parser
-          name: Parse alert.metadata to ocsf.finding_info.attack
+        - type: string-builder-processor
+          name: Add alert.metadata_str
           enabled: true
-          source: alert.metadata
+          template: "%{alert.metadata}"
+          target: alert.metadata_str
+          replaceMissing: false
+        - type: grok-parser
+          name: Parse alert.metadata_str to ocsf.finding_info.attack
+          enabled: true
+          source: alert.metadata_str
           samples:
             - "[attack_target:Client_Endpoint, confidence:High, created_at:2026_04_01, deployment:Internal, deployment:Perimeter, mitre_tactic_id:TA0011, mitre_tactic_name:Command_And_Control, mitre_technique_id:T1071, mitre_technique_name:Application_Layer_Protocol, performance_impact:Low, signature_severity:Major, updated_at:2026_04_09]"
           grok:
@@ -3578,89 +3584,124 @@ pipeline:
           name: Add MD5 algorithm name
           enabled: true
           template: MD5
-          target: ocsf.file.hash.algorithm
+          target: ocsf.file.hash_md5.algorithm
           replaceMissing: false
         - type: string-builder-processor
           name: Add MD5 algorithm id
           enabled: true
           template: "1"
-          target: ocsf.file.hash.algorithm_id
+          target: ocsf.file.hash_md5.algorithm_id
           replaceMissing: false
         - type: attribute-remapper
-          name: Map `md5` to `ocsf.file.hash.value`
+          name: Map `md5` to `ocsf.file.hash_md5.value`
           enabled: true
           sources:
             - md5
           sourceType: attribute
-          target: ocsf.file.hash.value
+          target: ocsf.file.hash_md5.value
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
-        - type: array-processor
-          name: Append ocsf.file.hash to ocsf.file.hashes
-          enabled: true
-          operation:
-            source: ocsf.file.hash
-            target: ocsf.file.hashes
-            preserveSource: false
-            type: append
         - type: string-builder-processor
           name: Add SHA1 algorithm name
           enabled: true
           template: SHA-1
-          target: ocsf.file.hash.algorithm
+          target: ocsf.file.hash_sha1.algorithm
           replaceMissing: false
         - type: string-builder-processor
           name: Add SHA1 algorithm id
           enabled: true
           template: "2"
-          target: ocsf.file.hash.algorithm_id
+          target: ocsf.file.hash_sha1.algorithm_id
           replaceMissing: false
         - type: attribute-remapper
-          name: Map `sha1` to `ocsf.file.hash.value`
+          name: Map `sha1` to `ocsf.file.hash_sha1.value`
           enabled: true
           sources:
             - sha1
           sourceType: attribute
-          target: ocsf.file.hash.value
+          target: ocsf.file.hash_sha1.value
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
-        - type: array-processor
-          name: Append ocsf.file.hash to ocsf.file.hashes
-          enabled: true
-          operation:
-            source: ocsf.file.hash
-            target: ocsf.file.hashes
-            preserveSource: false
-            type: append
         - type: string-builder-processor
           name: Add SHA256 algorithm name
           enabled: true
           template: SHA-256
-          target: ocsf.file.hash.algorithm
+          target: ocsf.file.hash_sha256.algorithm
           replaceMissing: false
         - type: string-builder-processor
           name: Add SHA256 algorithm id
           enabled: true
           template: "3"
-          target: ocsf.file.hash.algorithm_id
+          target: ocsf.file.hash_sha256.algorithm_id
           replaceMissing: false
         - type: attribute-remapper
-          name: Map `sha256` to `ocsf.file.hash.value`
+          name: Map `sha256` to `ocsf.file.hash_sha256.value`
           enabled: true
           sources:
             - sha256
           sourceType: attribute
-          target: ocsf.file.hash.value
+          target: ocsf.file.hash_sha256.value
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
+        - type: schema-processor
+          name: Apply OCSF schema for hash algorithm_id coercion
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.file.hash_md5.algorithm_id` to `ocsf.file.hash_md5.algorithm_id`
+              sources:
+                - ocsf.file.hash_md5.algorithm_id
+              target: ocsf.file.hash_md5.algorithm_id
+              preserveSource: false
+              overrideOnConflict: true
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.file.hash_sha1.algorithm_id` to `ocsf.file.hash_sha1.algorithm_id`
+              sources:
+                - ocsf.file.hash_sha1.algorithm_id
+              target: ocsf.file.hash_sha1.algorithm_id
+              preserveSource: false
+              overrideOnConflict: true
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.file.hash_sha256.algorithm_id` to `ocsf.file.hash_sha256.algorithm_id`
+              sources:
+                - ocsf.file.hash_sha256.algorithm_id
+              target: ocsf.file.hash_sha256.algorithm_id
+              preserveSource: false
+              overrideOnConflict: true
+              targetFormat: integer
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: File Hosting Activity
+            classUid: 6006
+            extensions: []
+            profiles: []
         - type: array-processor
-          name: Append ocsf.file.hash to ocsf.file.hashes
+          name: Append ocsf.file.hash_md5 to ocsf.file.hashes
           enabled: true
           operation:
-            source: ocsf.file.hash
+            source: ocsf.file.hash_md5
+            target: ocsf.file.hashes
+            preserveSource: false
+            type: append
+        - type: array-processor
+          name: Append ocsf.file.hash_sha1 to ocsf.file.hashes
+          enabled: true
+          operation:
+            source: ocsf.file.hash_sha1
+            target: ocsf.file.hashes
+            preserveSource: false
+            type: append
+        - type: array-processor
+          name: Append ocsf.file.hash_sha256 to ocsf.file.hashes
+          enabled: true
+          operation:
+            source: ocsf.file.hash_sha256
             target: ocsf.file.hashes
             preserveSource: false
             type: append
