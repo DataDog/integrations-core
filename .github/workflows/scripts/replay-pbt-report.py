@@ -702,7 +702,7 @@ def compact_row(row: dict[str, Any]) -> dict[str, Any]:
     category = classify(row)
     failed_tests = [short_test_name(str(item)) for item in (row.get("failed_tests") or [])]
     short_errors = [sanitize_text(item, max_len=MAX_TEXT) for item in (row.get("short_errors") or [])[:3]]
-    return {
+    compact = {
         "status": row.get("status", "unknown"),
         "category": category,
         "category_label": CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS["unknown"])[1],
@@ -722,6 +722,13 @@ def compact_row(row: dict[str, Any]) -> dict[str, Any]:
         "summary": summarize_failure(row),
         "setup_failure_kind": setup_failure_kind(row) if row.get("status") in {"failed-before-replay-pbt", "skipped-missing-cache"} else "",
     }
+    if row.get("runner") == "agent":
+        compact["runner"] = "agent"
+        compact["record_image"] = row.get("record_image", "")
+        compact["replay_image"] = row.get("replay_image", "")
+        if isinstance(row.get("diff_summary"), dict):
+            compact["diff_summary"] = row["diff_summary"]
+    return compact
 
 
 def find_target(path: Path) -> dict[str, Any]:
@@ -1732,6 +1739,128 @@ def _build_release_diff_section(
     return lines
 
 
+def _agent_value_list(values: Any, limit: int = 8) -> str:
+    if not isinstance(values, list):
+        return "—"
+    escaped = [f"`{md_escape(value)}`" for value in values[:limit]]
+    if len(values) > limit:
+        escaped.append(f"+{len(values) - limit} more")
+    return ", ".join(escaped) or "—"
+
+
+def _agent_probe(results: list[dict[str, Any]], probe: str) -> list[dict[str, Any]]:
+    output: list[dict[str, Any]] = []
+    for row in results:
+        diff_summary = row.get("diff_summary")
+        if not isinstance(diff_summary, dict):
+            continue
+        value = diff_summary.get(probe)
+        if isinstance(value, dict):
+            output.append(row)
+    return output
+
+
+def _build_compare_agent_sections(rows: list[dict[str, Any]]) -> list[str]:
+    agent_results = [row for row in rows if row.get("runner") == "agent"]
+    if not agent_results:
+        return []
+
+    lines: list[str] = []
+    with_summary = [row for row in agent_results if isinstance(row.get("diff_summary"), dict)]
+    image_pairs = Counter(
+        (row.get("record_image", ""), row.get("replay_image", ""))
+        for row in agent_results
+    )
+    pair_text = ", ".join(
+        f"`{md_escape(record)}` → `{md_escape(replay)}` ({count})"
+        for (record, replay), count in image_pairs.most_common(3)
+    )
+
+    lines.extend([
+        "## Agent package-membership deltas",
+        "",
+        f"Collected compare-agent summaries for {len(with_summary)} of {len(agent_results)} agent target(s). Image pair(s): {pair_text or 'unknown'}.",
+        "",
+    ])
+
+    freeze_rows = _agent_probe(agent_results, "freeze")
+    freeze_signal = [row for row in freeze_rows if row.get("diff_summary", {}).get("freeze", {}).get("equal") is False]
+    if freeze_signal:
+        lines.append(
+            f"{len(freeze_signal)} of {len(agent_results)} agent target(s) showed a non-empty `agent integration freeze` diff. These targets can still be ✅ passed; the pass status means compare-agent ran successfully, not that outputs were identical."
+        )
+        lines.append("")
+        clusters: Counter[tuple[tuple[Any, ...], tuple[Any, ...], int]] = Counter()
+        examples: dict[tuple[tuple[Any, ...], tuple[Any, ...], int], str] = {}
+        for row in freeze_signal:
+            freeze = row.get("diff_summary", {}).get("freeze", {})
+            key = (
+                tuple(freeze.get("added") or []),
+                tuple(freeze.get("removed") or []),
+                int(freeze.get("changed_count") or 0),
+            )
+            clusters[key] += 1
+            examples.setdefault(key, target_link_md(row))
+        lines.extend(["| Added | Removed | Version changes | Targets | Example |", "|---|---|---:|---:|---|"])
+        for (added, removed, changed_count), count in clusters.most_common(10):
+            key = (added, removed, changed_count)
+            lines.append(
+                f"| {_agent_value_list(list(added))} | {_agent_value_list(list(removed))} | {changed_count} | {count} | {examples[key]} |"
+            )
+        lines.append("")
+    else:
+        lines.append("No package-membership diffs were reported by compare-agent.")
+        lines.append("")
+
+    lines.extend(["## Agent inventory deltas", ""])
+    inventory_rows = _agent_probe(agent_results, "inventory")
+    inventory_signal = [row for row in inventory_rows if row.get("diff_summary", {}).get("inventory", {}).get("equal") is False]
+    if inventory_signal:
+        lines.append(f"{len(inventory_signal)} agent target(s) reported inventory-check metadata deltas.")
+        lines.append("")
+        clusters: Counter[str] = Counter()
+        examples: dict[str, str] = {}
+        for row in inventory_signal:
+            changed = row.get("diff_summary", {}).get("inventory", {}).get("changed_check_names", {})
+            key = json.dumps(changed, sort_keys=True)
+            clusters[key] += 1
+            examples.setdefault(key, target_link_md(row))
+        lines.extend(["| Inventory check-name delta | Targets | Example |", "|---|---:|---|"])
+        for key, count in clusters.most_common(10):
+            label = md_escape(key if len(key) <= 220 else key[:217] + "...")
+            lines.append(f"| `{label}` | {count} | {examples[key]} |")
+        lines.append("")
+    else:
+        lines.append("No inventory deltas were reported by compare-agent.")
+        lines.append("")
+
+    lines.extend(["## Agent check-output deltas", ""])
+    check_rows = _agent_probe(agent_results, "check")
+    check_signal = [row for row in check_rows if row.get("diff_summary", {}).get("check", {}).get("equal") is False]
+    if check_signal:
+        lines.append(f"{len(check_signal)} agent target(s) reported metric or service-check output deltas.")
+        lines.append("")
+        lines.extend(["| Target | Metrics + / - | Service checks + / - | Batch |", "|---|---:|---:|---|"])
+        for row in sorted(check_signal, key=lambda r: str(r.get("target", "")))[:50]:
+            check = row.get("diff_summary", {}).get("check", {})
+            batch_link = f"[run]({row.get('run_url')})" if row.get("run_url") else ""
+            lines.append(
+                f"| {target_link_md(row)} | +{check.get('metrics_added', 0)} / -{check.get('metrics_removed', 0)} | +{check.get('service_checks_added', 0)} / -{check.get('service_checks_removed', 0)} | {batch_link} |"
+            )
+        if len(check_signal) > 50:
+            lines.append(f"| … | … | … | {len(check_signal) - 50} more target(s) omitted |")
+        lines.append("")
+    else:
+        lines.append("No metric or service-check output deltas were reported by compare-agent.")
+        lines.append("")
+
+    missing_summary = len(agent_results) - len(with_summary)
+    if missing_summary:
+        lines.append(f"_{missing_summary} agent target(s) did not include `diff_summary`; inspect their job logs or result artifacts._")
+        lines.append("")
+    return lines
+
+
 def _build_openmetrics_coverage_section(
     coverages: list[dict[str, Any]], asset_warning_count: int = 0
 ) -> list[str]:
@@ -1933,6 +2062,7 @@ def build_markdown(
 
     harness_targets = {str(row.get("target", "")) for row in rows if row.get("category") == "replay-harness"}
     lines.extend(_build_release_diff_section(release_diffs, harness_targets))
+    lines.extend(_build_compare_agent_sections(rows))
     lines.extend(_build_openmetrics_coverage_section(coverages, warning_group_count))
     lines.extend(_build_targets_not_run_section(setup_failed_rows))
     lines.extend(_build_about_section(rows, findings, coverages, property_results))

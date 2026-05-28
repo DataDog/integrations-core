@@ -521,8 +521,59 @@ jobs:
           ddev env stop "$REPLAY_PBT_INTEGRATION" "$REPLAY_PBT_ENVIRONMENT" || true
         fi
         python - <<PY > "$REPLAY_PBT_RESULT_DIR/result.json"
-        import json, os
-        print(json.dumps({
+        import glob
+        import json
+        import os
+
+        latest = None
+        candidates = sorted(glob.glob(os.path.join(
+            os.environ['REPLAY_PBT_ARTIFACTS'],
+            os.environ['REPLAY_PBT_INTEGRATION'],
+            os.environ['REPLAY_PBT_ENVIRONMENT'],
+            '*',
+        )))
+        if candidates:
+            latest = candidates[-1]
+
+        diff_summary = {}
+        if latest:
+            for probe, fname in (
+                ('freeze', 'freeze.diff.json'),
+                ('inventory', 'inventory.diff.json'),
+                ('check', 'check.diff.json'),
+            ):
+                path = os.path.join(latest, fname)
+                if not os.path.isfile(path):
+                    continue
+                try:
+                    with open(path) as f:
+                        data = json.load(f)
+                except Exception:
+                    continue
+                if probe == 'freeze':
+                    diff_summary[probe] = {
+                        'equal': data.get('equal'),
+                        'added': data.get('added', []),
+                        'removed': data.get('removed', []),
+                        'changed_count': len(data.get('changed') or []),
+                    }
+                elif probe == 'inventory':
+                    diff_summary[probe] = {
+                        'equal': data.get('equal'),
+                        'changed_check_names': data.get('changed_check_names', {}),
+                    }
+                elif probe == 'check':
+                    metrics = data.get('metrics', {}) or {}
+                    service_checks = data.get('service_checks', {}) or {}
+                    diff_summary[probe] = {
+                        'equal': data.get('equal'),
+                        'metrics_added': metrics.get('added_total', 0),
+                        'metrics_removed': metrics.get('removed_total', 0),
+                        'service_checks_added': len(service_checks.get('added') or []),
+                        'service_checks_removed': len(service_checks.get('removed') or []),
+                    }
+
+        result = {
             'runner': 'agent',
             'status': 'passed' if $rc == 0 else 'failed',
             'exit_code': $rc,
@@ -535,7 +586,10 @@ jobs:
             'batch_index': os.environ['REPLAY_PBT_BATCH_INDEX'],
             'batch_count': os.environ['REPLAY_PBT_BATCH_COUNT'],
             'cache_key': os.environ['REPLAY_PBT_CACHE_KEY'],
-        }, sort_keys=True))
+        }
+        if diff_summary:
+            result['diff_summary'] = diff_summary
+        print(json.dumps(result, sort_keys=True))
         PY
         exit "$rc"
 
@@ -790,6 +844,21 @@ jobs:
                 destination.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(source, destination)
         PY
+
+    - name: Stage compare-agent diff bundle (agent runner only)
+      if: env.REPLAY_PBT_RUNNER == 'agent' && always()
+      run: |
+        set -uo pipefail
+        bundle="$REPLAY_PBT_RESULT_DIR/diffs"
+        mkdir -p "$bundle"
+        latest=$(find "$REPLAY_PBT_ARTIFACTS" -mindepth 3 -maxdepth 3 -type d 2>/dev/null | sort | tail -1 || true)
+        if [[ -n "$latest" ]]; then
+          for name in summary.md freeze.diff.json inventory.diff.json check.diff.json refs.json run_summary.json; do
+            [[ -f "$latest/$name" ]] && cp "$latest/$name" "$bundle/" || true
+          done
+          [[ -f "$latest/record/freeze.txt" ]] && cp "$latest/record/freeze.txt" "$bundle/record.freeze.txt" || true
+          [[ -f "$latest/replay/freeze.txt" ]] && cp "$latest/replay/freeze.txt" "$bundle/replay.freeze.txt" || true
+        fi
 
     - name: Scan lightweight artifacts
       if: always()
