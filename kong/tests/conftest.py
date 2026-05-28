@@ -26,5 +26,4 @@ def dd_environment():
 
 @pytest.fixture
 def instance_openmetrics_v2():
-    # kong is one of the first integrations migrated to the httpx-backed HTTP client.
-    return {**common.openmetrics_instance, 'use_httpx': True}
+    return common.openmetrics_instance

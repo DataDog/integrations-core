@@ -297,20 +297,9 @@ def mock_response():
 
 @pytest.fixture
 def mock_http_response(mocker, mock_response):
-    """Patch the default HTTP entry-point (and httpx.Client.request) to return a MockHTTPResponse."""
-
-    def _patch(*args, **kwargs):
-        method = kwargs.pop('method', _DEFAULT_MOCK_METHOD)
-        response = mock_response(*args, **kwargs)
-        primary = mocker.patch(method, return_value=response)
-        if method == _DEFAULT_MOCK_METHOD:
-            try:
-                mocker.patch('httpx.Client.request', return_value=response)
-            except ImportError:
-                pass
-        return primary
-
-    yield _patch
+    yield lambda *args, **kwargs: mocker.patch(
+        kwargs.pop('method', _DEFAULT_MOCK_METHOD), return_value=mock_response(*args, **kwargs)
+    )
 
 
 @pytest.fixture
