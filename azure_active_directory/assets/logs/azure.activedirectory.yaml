@@ -2249,6 +2249,16 @@ pipeline:
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `ocsf.src_endpoint.port` to `network.client.port`
+          enabled: true
+          sources:
+            - ocsf.src_endpoint.port
+          sourceType: attribute
+          target: callerIpAddress
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
     - type: pipeline
       name: OCSF post transformations
       enabled: true
