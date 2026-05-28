@@ -1365,6 +1365,13 @@ tests:
             type: "Rule"
             type_id: 1
             uid: "2006380"
+          attacks:
+            - tactic:
+                name: "Command_And_Control"
+                uid: "TA0011"
+              technique:
+                name: "Application_Layer_Protocol"
+                uid: "T1071"
           title: "ET POLICY Outgoing Basic Auth Base64 HTTP Password detected unencrypted"
           types:
            - "Potential Corporate Privacy Violation"

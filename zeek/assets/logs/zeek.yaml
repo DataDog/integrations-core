@@ -2042,14 +2042,54 @@ pipeline:
           target: alert.metadata_str
           replaceMissing: false
         - type: grok-parser
-          name: Parse alert.metadata_str to ocsf.finding_info.attack
+          name: Parse alert.metadata_str to MITRE tactic and technique fields
           enabled: true
           source: alert.metadata_str
           samples:
-            - "[attack_target:Client_Endpoint, confidence:High, created_at:2026_04_01, deployment:Internal, deployment:Perimeter, mitre_tactic_id:TA0011, mitre_tactic_name:Command_And_Control, mitre_technique_id:T1071, mitre_technique_name:Application_Layer_Protocol, performance_impact:Low, signature_severity:Major, updated_at:2026_04_09]"
+            - "attack_target:Client_Endpoint,confidence:High,created_at:2026_04_01,deployment:Internal,deployment:Perimeter,mitre_tactic_id:TA0011,mitre_tactic_name:Command_And_Control,mitre_technique_id:T1071,mitre_technique_name:Application_Layer_Protocol,performance_impact:Low,signature_severity:Major,updated_at:2026_04_09"
           grok:
             supportRules: ""
-            matchRules: 'mitre %{data}mitre_tactic_id:%{word:ocsf.finding_info.attack.tactic.uid},\s*mitre_tactic_name:%{word:ocsf.finding_info.attack.tactic.name},\s*mitre_technique_id:%{word:ocsf.finding_info.attack.technique.uid},\s*mitre_technique_name:%{word:ocsf.finding_info.attack.technique.name}'
+            matchRules: 'rule %{data}mitre_tactic_id:%{word:mitre_tactic_uid},\s*mitre_tactic_name:%{word:mitre_tactic_name},\s*mitre_technique_id:%{word:mitre_technique_uid},\s*mitre_technique_name:%{word:mitre_technique_name}%{data}'
+        - type: attribute-remapper
+          name: Map `mitre_tactic_uid` to `ocsf.finding_info.attack.tactic.uid`
+          enabled: true
+          sources:
+            - mitre_tactic_uid
+          sourceType: attribute
+          target: ocsf.finding_info.attack.tactic.uid
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `mitre_tactic_name` to `ocsf.finding_info.attack.tactic.name`
+          enabled: true
+          sources:
+            - mitre_tactic_name
+          sourceType: attribute
+          target: ocsf.finding_info.attack.tactic.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `mitre_technique_uid` to `ocsf.finding_info.attack.technique.uid`
+          enabled: true
+          sources:
+            - mitre_technique_uid
+          sourceType: attribute
+          target: ocsf.finding_info.attack.technique.uid
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `mitre_technique_name` to `ocsf.finding_info.attack.technique.name`
+          enabled: true
+          sources:
+            - mitre_technique_name
+          sourceType: attribute
+          target: ocsf.finding_info.attack.technique.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: true
         - type: array-processor
           name: Move ocsf.finding_info.attack into ocsf.finding_info.attacks array
           enabled: true
