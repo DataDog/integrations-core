@@ -180,16 +180,16 @@ def test_legacy_init_uses_first_instance_for_endpoint_choice():
 def test_legacy_operator_endpoint_selects_operator_metric_set():
     check = CiliumCheck("cilium", {}, [{"operator_endpoint": "http://op/metrics"}])
     assert check.instance["prometheus_url"] == "http://op/metrics"
-    rendered = repr(check.instance["metrics"])
-    assert "cilium_operator_process_cpu_seconds_total" in rendered
+    metric_keys = {key for m in check.instance["metrics"] for key in m}
+    assert "cilium_operator_process_cpu_seconds_total" in metric_keys
 
 
 def test_legacy_agent_endpoint_selects_agent_metric_set():
     check = CiliumCheck("cilium", {}, [{"agent_endpoint": "http://agent/metrics"}])
     assert check.instance["prometheus_url"] == "http://agent/metrics"
-    rendered = repr(check.instance["metrics"])
-    assert "cilium_drop_count_total" in rendered
-    assert "cilium_operator_eni_available" not in rendered
+    metric_keys = {key for m in check.instance["metrics"] for key in m}
+    assert "cilium_drop_count_total" in metric_keys
+    assert "cilium_operator_eni_available" not in metric_keys
 
 
 def test_legacy_default_prometheus_timeout_is_10():
