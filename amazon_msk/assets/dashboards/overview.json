@@ -54,12 +54,13 @@
                         "definition": {
                             "check": "aws.msk.can_connect",
                             "group_by": [
-                                "$cluster_arn",
-                                "$region_name"
+                                "cluster_arn",
+                                "region_name"
                             ],
                             "grouping": "cluster",
                             "tags": [
-                                "*"
+                                "$cluster_arn",
+                                "$region_name"
                             ],
                             "title": "Brokers",
                             "title_align": "left",
