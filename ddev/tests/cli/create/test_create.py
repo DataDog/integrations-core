@@ -310,6 +310,36 @@ def test_check_only_writes_into_existing_author_prefixed_directory(ddev, empty_r
     assert not (empty_repo.path / 'thing').exists()
 
 
+def test_check_only_hyphenated_author_does_not_double_segment(ddev, empty_repo):
+    """A hyphenated author (e.g. `My-Partner`) must match the underscored directory and strip cleanly."""
+    integration_dir = empty_repo.path / 'my_partner_thing'
+    integration_dir.mkdir()
+    (integration_dir / 'manifest.json').write_text(
+        json.dumps(
+            {
+                'author': {
+                    'name': 'My-Partner',
+                    'support_email': 'support@my-partner.com',
+                    'homepage': 'https://my-partner.com',
+                    'sales_email': 'sales@my-partner.com',
+                }
+            }
+        )
+    )
+
+    result = ddev(
+        'create',
+        'check-only',
+        'my_partner_thing',
+        '--include-manifest',
+    )
+    assert result.exit_code == 0, result.output
+
+    # The package path must be `my_partner_thing`, NOT `my_partner_my_partner_thing`.
+    assert (integration_dir / 'datadog_checks' / 'my_partner_thing' / '__about__.py').is_file()
+    assert not (integration_dir / 'datadog_checks' / 'my_partner_my_partner_thing').exists()
+
+
 def test_check_only_manifestless_writes_overrides_for_integration_dir(ddev, empty_repo, read_config):
     """Manifest-less check-only writes overrides keyed by the on-disk integration directory."""
     integration_dir = empty_repo.path / 'partner_thing'
@@ -355,6 +385,70 @@ def test_global_no_interactive_flag_aborts_when_required_flags_missing(ddev, emp
     assert '--display-name' in result.output
     assert '--metrics-prefix' in result.output
     assert '--platforms' in result.output
+
+
+def test_interactive_prompts_accept_default_values(ddev, empty_repo, read_config):
+    """Under `--interactive`, missing flags prompt with computed defaults; pressing enter accepts each one."""
+    result = ddev(
+        '--interactive',
+        'create',
+        'check',
+        'my_integration',
+        input='\n\n\n',  # accept defaults for display-name, metrics-prefix, platforms
+    )
+    assert result.exit_code == 0, result.output
+
+    data = read_config()
+    assert data['overrides']['display-name']['my_integration'] == 'my_integration'
+    assert data['overrides']['metrics-prefix']['my_integration'] == 'my_integration.'
+    assert data['overrides']['manifest']['platforms']['my_integration'] == ['linux', 'windows', 'mac_os']
+
+
+def test_location_flag_writes_outside_repo(ddev, empty_repo, tmp_path):
+    """`--location <path>` scaffolds into <path>/NAME/ instead of <repo>/NAME/."""
+    target = tmp_path / 'outside_repo'
+    target.mkdir()
+
+    result = ddev(
+        'create',
+        'check',
+        'my_integration',
+        '--display-name',
+        'My Integration',
+        '--metrics-prefix',
+        'my_integration.',
+        '--platforms',
+        'linux',
+        '--include-manifest',
+        '--location',
+        str(target),
+    )
+    assert result.exit_code == 0, result.output
+    assert (target / 'my_integration' / 'pyproject.toml').is_file()
+    assert not (empty_repo.path / 'my_integration').exists()
+
+
+def test_location_flag_accepts_relative_path(ddev, empty_repo, tmp_path, monkeypatch):
+    """`--location` accepts a relative path and resolves it against the current working directory."""
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / 'relative_target').mkdir()
+
+    result = ddev(
+        'create',
+        'check',
+        'my_integration',
+        '--display-name',
+        'My Integration',
+        '--metrics-prefix',
+        'my_integration.',
+        '--platforms',
+        'linux',
+        '--include-manifest',
+        '--location',
+        'relative_target',
+    )
+    assert result.exit_code == 0, result.output
+    assert (tmp_path / 'relative_target' / 'my_integration' / 'pyproject.toml').is_file()
 
 
 def test_type_flag_without_value_aborts_with_targeted_message(ddev, empty_repo):

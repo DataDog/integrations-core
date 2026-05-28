@@ -120,6 +120,8 @@ class TemplateFile:
             self.contents = self.source_path.read_bytes()
             return
         raw = self.source_path.read_text()
+        # Templates are trusted; a RuntimeError here indicates a broken shipped template, not user error.
+        # User-supplied `name` is validated upstream by `is_valid_integration_name` before scaffolding starts.
         try:
             self.contents = raw.format(**config)
         except (KeyError, IndexError, ValueError) as exc:

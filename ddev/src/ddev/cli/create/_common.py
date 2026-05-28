@@ -266,7 +266,13 @@ def _resolve_check_only_inputs(
     if not author_normalized:
         app.abort('Unable to determine author from manifest')
 
-    stripped = target_integration_dir.removeprefix(f'{author_normalized}_')
+    # `target_integration_dir` runs through `normalize_package_name`, which converts
+    # hyphens to underscores. The author prefix must use the same normalization, or
+    # a hyphenated author (e.g. "My-Partner") wouldn't match the underscore form in
+    # the directory name, leaving the prefix in place and causing
+    # `prefill_check_only_fields` to double the author segment downstream.
+    author_pkg = normalize_package_name(author_normalized)
+    stripped = target_integration_dir.removeprefix(f'{author_pkg}_')
 
     fields = prefill_check_only_fields(manifest_data, stripped)
     return fields, target_integration_dir
