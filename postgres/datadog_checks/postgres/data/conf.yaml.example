@@ -465,6 +465,47 @@ instances:
         #
         # collection_interval: 10
 
+    ## DEMO ONLY. Periodically scans the configured tables (either a full
+    ## SELECT or a TABLESAMPLE-based sampling) and submits the resulting rows
+    ## as a Datadog event titled "Data security analysis". Do not enable in
+    ## production.
+    #
+    # data_security:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable the data security analysis scan.
+        #
+        # enabled: false
+
+        ## @param interval - integer - optional - default: 15
+        ## How often (in seconds) the scan pass runs. Each pass walks the
+        ## full `tables` list once.
+        #
+        # interval: 15
+
+        ## @param send_samples - boolean - optional - default: false
+        ## When true, the submitted event also includes the raw
+        ## `sampled_events` (the actual scanned rows). When false (the
+        ## default), only the `sensitive_data` summary (row/column-level PII
+        ## hit counts) is sent.
+        #
+        # send_samples: false
+
+        ## @param tables - list of mappings - optional
+        ## List of tables to scan on every interval. Each entry pairs a
+        ## qualified `schema.table` name (defaults to the `public` schema if
+        ## unqualified) with a `scan_type` ("full" or "sampling"), a
+        ## `max_rows` cap on returned rows, and a `min_rows` floor. The
+        ## `max_rows` / `min_rows` values only apply to `sampling`: they feed
+        ## the TABLESAMPLE pct formula so the expected row count lands between
+        ## them. `scan_type: full` reads the entire relation and ignores both.
+        #
+        # tables:
+        #   - table_name: public.users
+        #     scan_type: sampling
+        #     max_rows: 1000
+        #     min_rows: 0
+
     ## @param pg_stat_statements_view - string - optional - default: pg_stat_statements
     ## Set this value if you want to define a custom view or function to allow the datadog user to query the
     ## `pg_stat_statements` table, which is useful for restricting the permissions given to the datadog agent.

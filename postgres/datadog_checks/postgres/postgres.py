@@ -4,13 +4,16 @@
 import contextlib
 import copy
 import functools
+import json as _stdlib_json
 import os
+import re
 import threading
 from string import Template
 from time import time
 
 import psycopg
 from cachetools import TTLCache
+from psycopg import sql as psycopg_sql
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.db import DatabaseCheck
@@ -103,6 +106,114 @@ MAX_CUSTOM_RESULTS = 100
 
 PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s, %s, %s)"
 
+# --- Data security analysis (DEMO ONLY) ---------------------------------------
+# Tunables for the TABLESAMPLE-based scan used by `data_security.scan_type=sampling`.
+DATA_SECURITY_DEFAULT_INTERVAL = 15  # seconds between scan passes
+DATA_SECURITY_DEFAULT_MAX_ROWS = 1000  # default per-table LIMIT when entry omits max_rows
+DATA_SECURITY_DEFAULT_MIN_ROWS = 0  # default per-table minimum guaranteed rows
+DATA_SECURITY_SAMPLING_MIN_PCT_FLOOR = 0.0001  # never below this TABLESAMPLE pct
+DATA_SECURITY_SAMPLING_MAX_PCT_CAP = 100.0  # never above this TABLESAMPLE pct
+DATA_SECURITY_SAMPLING_BUFFER_MULTIPLIER = 2  # over-sample by Nx then LIMIT
+# REPEATABLE seed is generated per scan from time() so each pass gets a fresh
+# (but still self-consistent within one query) random draw.
+
+# DEMO ONLY: very loose email matcher. We only need to demo PII detection on
+# scanned rows; this is intentionally not a strict RFC 5322 matcher.
+_DATA_SECURITY_PII_DETECTORS = (("email", re.compile(r"[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}")),)
+
+
+def _detect_sensitive_data(rows):
+    """
+    Walk a list of dict rows and return a (rows_affected, columns_affected,
+    matched_kinds) tuple. A row is "affected" if any column value matched any
+    of the configured PII detectors; a column is "affected" if it matched at
+    least once across the sample. `matched_kinds` is the set of detector
+    names (e.g. {"email"}) that fired at least once on the sample.
+    """
+    rows_affected = 0
+    columns_affected = set()
+    matched_kinds = set()
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        row_has_match = False
+        for column, value in row.items():
+            if value is None:
+                continue
+            text = value if isinstance(value, str) else str(value)
+            for kind, regex in _DATA_SECURITY_PII_DETECTORS:
+                if regex.search(text):
+                    columns_affected.add(column)
+                    matched_kinds.add(kind)
+                    row_has_match = True
+                    break
+        if row_has_match:
+            rows_affected += 1
+    return rows_affected, columns_affected, matched_kinds
+
+
+# Composed via psycopg.sql so `qualified_table` is a safely quoted Identifier;
+# floor/cap/buffer/min_rows/max_rows are inlined as SQL literals, while
+# `schema`, `table` and `seed` flow through as %(name)s parameters.
+#
+# The sample pct is bounded above by max_cap and below by three lower bounds,
+# whichever is largest:
+#   * a hard floor (min_floor),
+#   * one-block-on-average  ->  100 / relpages, so SYSTEM (which samples at
+#     page granularity) reliably picks at least one block on a wide table,
+#   * min_rows in expectation  ->  min_rows * 100 / reltuples,
+#   * max_rows oversample     ->  max_rows * BUFFER * 100 / reltuples.
+# GREATEST(_, 1) on pages/reltuples handles tables that were never ANALYZE'd
+# (where relpages/reltuples may be 0 or -1).
+DATA_SECURITY_SAMPLING_QUERY_TEMPLATE = """
+WITH stats AS (
+    SELECT
+        GREATEST(COALESCE(c.relpages::bigint, 0), 1)   AS pages,
+        GREATEST(COALESCE(c.reltuples::bigint, 0), 1)  AS estimated_rows,
+        GREATEST(COALESCE(c.reltuples::bigint, 0), 0)  AS estimated_rows_reported
+    FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE c.relname = %(table)s AND n.nspname = %(schema)s
+),
+pct AS (
+    SELECT LEAST(
+        {max_cap}::float,
+        GREATEST(
+            {min_floor}::float,
+            100.0 / pages,
+            ({min_rows}::float * 100.0 / estimated_rows),
+            ({max_rows}::float * {buffer_multiplier} * 100.0 / estimated_rows)
+        )
+    ) AS sample_pct
+    FROM stats
+)
+SELECT
+    (SELECT estimated_rows_reported FROM stats) AS estimated_rows,
+    COALESCE(json_agg(row_to_json(t)), '[]'::json)::text AS rows_json
+FROM (
+    SELECT * FROM {qualified_table} TABLESAMPLE SYSTEM(
+        (SELECT sample_pct FROM pct)
+    ) REPEATABLE(%(seed)s)
+    LIMIT {max_rows}
+) AS t;
+"""
+
+# Full scan ignores min_rows / max_rows on purpose — it's an unbounded read of
+# the entire relation, intended for tables small enough that a full dump is OK.
+# `estimated_rows` is taken from pg_class.reltuples and clamped at 0 to handle
+# tables that were never ANALYZE'd (reltuples may be -1).
+DATA_SECURITY_FULL_QUERY_TEMPLATE = """
+SELECT
+    (
+        SELECT GREATEST(COALESCE(c.reltuples::bigint, 0), 0)
+        FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE c.relname = %(table)s AND n.nspname = %(schema)s
+    ) AS estimated_rows,
+    COALESCE(json_agg(row_to_json(t)), '[]'::json)::text AS rows_json
+FROM {qualified_table} AS t;
+"""
+
 
 class PostgreSql(DatabaseCheck):
     """Collects per-database, and optionally per-relation metrics, custom metrics"""
@@ -131,6 +242,7 @@ class PostgreSql(DatabaseCheck):
         self.is_aurora = None
         self.wal_level = None
         self._version_utils = VersionUtils()
+        self._last_data_security_run = 0.0
 
         config, validation_result = build_config(self)
         self._config = config
@@ -201,17 +313,186 @@ class PostgreSql(DatabaseCheck):
     def database_monitoring_column_statistics(self, raw_event: str):
         self.event_platform_event(raw_event, "dbm-column-statistics")
 
+    @staticmethod
+    def _split_qualified_table(table_name):
+        # Accepts "schema.table" or "table" (defaults to public schema).
+        if "." in table_name:
+            schema, table = table_name.split(".", 1)
+        else:
+            schema, table = "public", table_name
+        return schema, table
+
+    def _build_data_security_query(self, schema, table, scan_type, max_rows, min_rows):
+        qualified_table = psycopg_sql.Identifier(schema, table)
+        if scan_type == "full":
+            # Full scan deliberately ignores min_rows / max_rows. We still bind
+            # schema/table as params so the query can look up reltuples for the
+            # `estimated_rows` column.
+            query = psycopg_sql.SQL(DATA_SECURITY_FULL_QUERY_TEMPLATE).format(
+                qualified_table=qualified_table,
+            )
+            return query, {"schema": schema, "table": table}
+        if scan_type == "sampling":
+            query = psycopg_sql.SQL(DATA_SECURITY_SAMPLING_QUERY_TEMPLATE).format(
+                qualified_table=qualified_table,
+                min_floor=psycopg_sql.Literal(DATA_SECURITY_SAMPLING_MIN_PCT_FLOOR),
+                max_cap=psycopg_sql.Literal(DATA_SECURITY_SAMPLING_MAX_PCT_CAP),
+                buffer_multiplier=psycopg_sql.Literal(DATA_SECURITY_SAMPLING_BUFFER_MULTIPLIER),
+                min_rows=psycopg_sql.Literal(min_rows),
+                max_rows=psycopg_sql.Literal(max_rows),
+            )
+            params = {"schema": schema, "table": table, "seed": time()}
+            return query, params
+        return None, None
+
+    def _scan_table_for_data_security(self, table_name, scan_type, max_rows, min_rows, send_samples):
+        schema, table = self._split_qualified_table(table_name)
+        query, params = self._build_data_security_query(schema, table, scan_type, max_rows, min_rows)
+        if query is None:
+            self.log.warning("data_security: unknown scan_type=%r for table=%s, skipping", scan_type, table_name)
+            return
+
+        try:
+            with self.db() as conn:
+                with conn.cursor() as cursor:
+                    # The check's CommenterCursor.execute() assumes `query` is a
+                    # str and calls .strip() on it, so we have to render the
+                    # psycopg.sql.Composable to text ourselves first. Runtime
+                    # `%(name)s` placeholders are preserved through as_string
+                    # and bound by the cursor as usual.
+                    cursor.execute(query.as_string(cursor), params)
+                    row = cursor.fetchone()
+                    estimated_rows = int(row[0]) if row and row[0] is not None else None
+                    rows_json = row[1] if row and row[1] is not None else '[]'
+        except psycopg.Error as e:
+            self.log.warning("data_security: failed to scan table=%s (%s): %s", table_name, scan_type, e)
+            return
+
+        try:
+            parsed_rows = json.loads(rows_json) if rows_json else []
+        except (TypeError, ValueError):
+            parsed_rows = []
+        if not isinstance(parsed_rows, list):
+            parsed_rows = []
+
+        sample_size = len(parsed_rows)
+        rows_affected, columns_affected, matched_kinds = _detect_sensitive_data(parsed_rows)
+        sensitive_data = {
+            "estimated_row_count": estimated_rows,
+            "sample_size": sample_size,
+            "rows_affected": rows_affected,
+            "rows_affected_ratio": (rows_affected / sample_size) if sample_size else 0.0,
+            "columns_affected": sorted(columns_affected),
+            "columns_affected_count": len(columns_affected),
+            "matched_kinds": sorted(matched_kinds),
+        }
+
+        event_body = {"sensitive_data": sensitive_data}
+        if send_samples:
+            event_body["sampled_events"] = parsed_rows
+
+        try:
+            pretty_json = _stdlib_json.dumps(event_body, indent=2, default=str)
+        except (TypeError, ValueError):
+            pretty_json = rows_json
+
+        title_parts = [
+            "Data security analysis",
+            "db={}".format(self.database_identifier),
+            "table={}".format(table_name),
+            "scan={}".format(scan_type),
+        ]
+        if scan_type == "sampling":
+            title_parts.append("max_rows={}".format(max_rows))
+        msg_title = " | ".join(title_parts)
+
+        event_tags = [t for t in self._non_internal_tags if not t.startswith("db:")] + [
+            "kind:data_security_analysis",
+            "scan_kind:{}".format(scan_type),
+            "table:{}".format(table_name),
+            "database_instance:{}".format(self.database_identifier),
+        ]
+        if scan_type == "sampling":
+            event_tags.append("max_rows:{}".format(max_rows))
+            event_tags.append("min_rows:{}".format(min_rows))
+
+        self.log.info(
+            "data_security: scanned table=%s scan_kind=%s estimated_row_count=%s sample_size=%s "
+            "rows_affected=%s columns_affected=%s matched_kinds=%s database_instance=%s",
+            table_name,
+            scan_type,
+            estimated_rows,
+            sample_size,
+            rows_affected,
+            sorted(columns_affected),
+            sorted(matched_kinds),
+            self.database_identifier,
+        )
+        self.event(
+            {
+                "timestamp": int(time()),
+                "event_type": "postgres.data_security_analysis",
+                "source_type_name": self.SOURCE_TYPE_NAME,
+                "msg_title": msg_title,
+                "msg_text": "%%%\n```json\n{}\n```\n%%%".format(pretty_json),
+                "aggregation_key": "postgres-data-security:{}:{}".format(self.database_identifier, table_name),
+                "alert_type": "info",
+                "priority": "low",
+                "host": self.reported_hostname,
+                "tags": event_tags,
+            }
+        )
+
+    def _data_security_scan(self):
+        # DEMO ONLY: walks the `data_security.tables` list, runs either a full
+        # SELECT or a TABLESAMPLE sampling scan against each one, and emits a
+        # single Datadog event per table. Each event always carries the
+        # `sensitive_data` summary (row/column-level PII hit counts); raw row
+        # contents are only included as `sampled_events` when the
+        # `data_security.send_samples` flag is enabled.
+        cfg = self.instance.get("data_security") or {}
+        if not cfg.get("enabled"):
+            return
+        interval = cfg.get("interval", DATA_SECURITY_DEFAULT_INTERVAL)
+        now = time()
+        if now - self._last_data_security_run < interval:
+            return
+        self._last_data_security_run = now
+
+        send_samples = bool(cfg.get("send_samples"))
+
+        for entry in cfg.get("tables") or []:
+            table_name = entry.get("table_name")
+            scan_type = entry.get("scan_type", "sampling")
+            max_rows = entry.get("max_rows", DATA_SECURITY_DEFAULT_MAX_ROWS)
+            min_rows = entry.get("min_rows", DATA_SECURITY_DEFAULT_MIN_ROWS)
+            if not table_name:
+                self.log.warning("data_security: skipping entry without table_name: %s", entry)
+                continue
+            try:
+                self._scan_table_for_data_security(table_name, scan_type, max_rows, min_rows, send_samples)
+            except Exception:
+                self.log.exception(
+                    "data_security: unexpected error scanning table=%s scan_type=%s max_rows=%s min_rows=%s",
+                    table_name,
+                    scan_type,
+                    max_rows,
+                    min_rows,
+                )
+
     def _submit_initialization_health_event(self):
         try:
             # Handle the config validation result after we've set tags so those tags are included in the health event
             # TODO: Use the submission debouncer to only send this every 6 hours
             self.health.submit_health_event(
                 name=HealthEvent.INITIALIZATION,
-                status=HealthStatus.ERROR
-                if not self._validation_result.valid
-                else HealthStatus.WARNING
-                if self._validation_result.warnings
-                else HealthStatus.OK,
+                status=(
+                    HealthStatus.ERROR
+                    if not self._validation_result.valid
+                    else HealthStatus.WARNING
+                    if self._validation_result.warnings
+                    else HealthStatus.OK
+                ),
                 cooldown_time=60 * 60 * 6,  # 6 hours
                 data={
                     "errors": [str(error) for error in self._validation_result.errors],
@@ -1261,6 +1542,8 @@ class PostgreSql(DatabaseCheck):
             if self._query_manager.queries:
                 self._query_manager.executor = functools.partial(self.execute_query_raw, db=self.db)
                 self._query_manager.execute(extra_tags=tags)
+
+            self._data_security_scan()
 
         except Exception as e:
             self.log.exception("Unable to collect postgres metrics.")

@@ -190,6 +190,28 @@ class DataObservability(BaseModel):
     run_sync: Optional[bool] = None
 
 
+class DataSecurityTable(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    max_rows: Optional[int] = None
+    min_rows: Optional[int] = None
+    scan_type: Optional[str] = None
+    table_name: str
+
+
+class DataSecurity(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = None
+    interval: Optional[int] = None
+    send_samples: Optional[bool] = None
+    tables: Optional[tuple[DataSecurityTable, ...]] = None
+
+
 class DatabaseAutodiscovery(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -344,6 +366,7 @@ class InstanceConfig(BaseModel):
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
     data_directory: Optional[str] = None
     data_observability: Optional[DataObservability] = None
+    data_security: Optional[DataSecurity] = None
     database_autodiscovery: Optional[DatabaseAutodiscovery] = None
     database_identifier: Optional[DatabaseIdentifier] = None
     database_instance_collection_interval: Optional[float] = None

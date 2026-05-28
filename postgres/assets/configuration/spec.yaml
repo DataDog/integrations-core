@@ -668,6 +668,62 @@ files:
                   type: integer
                 - name: entity_id
                   type: string
+    - name: data_security
+      display_priority: 0
+      hidden: true
+      description: |
+        DEMO ONLY. Periodically scans the configured tables (either a full
+        SELECT or a TABLESAMPLE-based sampling) and submits the resulting rows
+        as a Datadog event titled "Data security analysis". Do not enable in
+        production.
+      options:
+        - name: enabled
+          description: Enable the data security analysis scan.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: interval
+          description: |
+            How often (in seconds) the scan pass runs. Each pass walks the
+            full `tables` list once.
+          value:
+            type: integer
+            example: 15
+            display_default: 15
+        - name: send_samples
+          description: |
+            When true, the submitted event also includes the raw `sampled_events`
+            (the actual scanned rows). When false (the default), only the
+            `sensitive_data` summary (row/column-level PII hit counts) is sent.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: tables
+          description: |
+            List of tables to scan on every interval. Each entry pairs a
+            qualified `schema.table` name (defaults to the `public` schema if
+            unqualified) with a `scan_type`, a `max_rows` cap, and a `min_rows`
+            floor. `max_rows` and `min_rows` only apply to `sampling`: they
+            feed the TABLESAMPLE pct formula so the expected row count lands
+            between them. `scan_type: full` reads the entire relation and
+            ignores both caps.
+          value:
+            type: array
+            items:
+              type: object
+              required:
+                - table_name
+              properties:
+                - name: table_name
+                  type: string
+                - name: scan_type
+                  type: string
+                - name: max_rows
+                  type: integer
+                - name: min_rows
+                  type: integer
     - name: pg_stat_statements_view
       display_priority: 0
       description: |
