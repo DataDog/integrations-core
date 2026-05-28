@@ -1731,7 +1731,7 @@ pipeline:
           target: ocsf.evidence.connection_info.direction_id
           replaceMissing: false
         - type: schema-processor
-          name: Apply OCSF schema for evidence direction_id coercion
+          name: Apply OCSF schema for 2004
           enabled: true
           mappers:
             - type: schema-remapper
@@ -1981,7 +1981,7 @@ pipeline:
           target: ocsf.evidence.connection_info.direction_id
           replaceMissing: false
         - type: schema-processor
-          name: Apply OCSF schema for evidence direction_id coercion
+          name: Apply OCSF schema for 2004
           enabled: true
           mappers:
             - type: schema-remapper
@@ -3707,7 +3707,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: schema-processor
-          name: Apply OCSF schema for hash algorithm_id coercion
+          name: Apply OCSF schema for 6006
           enabled: true
           mappers:
             - type: schema-remapper
