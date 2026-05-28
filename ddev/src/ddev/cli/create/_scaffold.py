@@ -14,7 +14,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import date, datetime, timezone
 from pathlib import Path as _StdPath
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypedDict, cast
 from uuid import uuid4
 
 from ddev.cli.create._naming import (
@@ -98,7 +98,17 @@ HYPHEN = '──'
 
 @dataclass
 class TemplateFile:
-    """A single rendered template file ready to be written to disk."""
+    """A single rendered template file ready to be written to disk.
+
+    Invariant on ``contents`` (mirrored by the ``# type: ignore`` lines in ``write()``):
+      - ``binary=True``  => ``contents`` is ``bytes`` after ``read()``.
+      - ``binary=False`` => ``contents`` is ``str``   after ``read()``.
+      - ``contents`` is ``None`` only before ``read()`` has run.
+
+    A discriminated union (one dataclass per branch) was considered but the
+    structural overhead — two classes, two ``isinstance`` branches at every call
+    site — outweighed the type-system clarity gain.
+    """
 
     target_path: Path
     source_path: Path
@@ -132,19 +142,33 @@ class ScaffoldResult:
     config: dict[str, Any] = field(default_factory=dict)
 
 
-def prefill_check_only_fields(manifest: dict[str, Any], normalized_name: str) -> dict[str, Any]:
+class CheckOnlyPrefillFields(TypedDict, total=False):
+    """Fields prefilled from a `check_only` integration's existing ``manifest.json``.
+
+    All keys are optional: only the entries whose source field was present in the
+    manifest are populated (legacy behaviour).
+    """
+
+    author_name: str
+    check_name: str
+    email: str
+    homepage: str
+    sales_email: str
+
+
+def prefill_check_only_fields(manifest: dict[str, Any], normalized_name: str) -> CheckOnlyPrefillFields:
     """Extract reusable fields from a pre-existing `manifest.json` for a `check_only` integration."""
     author_name_raw = (manifest.get('author') or {}).get('name')
     author = normalize_display_name(author_name_raw) if author_name_raw else None
     check_name = normalize_package_name(f'{author}_{normalized_name}') if author is not None else None
-    candidates: dict[str, Any] = {
+    candidates: dict[str, str | None] = {
         'author_name': author,
         'check_name': check_name,
         'email': (manifest.get('author') or {}).get('support_email'),
         'homepage': (manifest.get('author') or {}).get('homepage'),
         'sales_email': (manifest.get('author') or {}).get('sales_email'),
     }
-    return {k: v for k, v in candidates.items() if v is not None}
+    return cast(CheckOnlyPrefillFields, {k: v for k, v in candidates.items() if v is not None})
 
 
 def construct_template_fields(
@@ -180,7 +204,8 @@ def construct_template_fields(
         )
         license_header = get_license_header()
         support_type = 'core'
-        integration_links = INTEGRATION_TYPE_LINKS[integration_type].format(
+        integration_links_template = INTEGRATION_TYPE_LINKS.get(integration_type, '')
+        integration_links = integration_links_template.format(
             name=normalized_name,
             repository='integrations-core',
         )
@@ -328,15 +353,14 @@ def render(
     include_manifest: bool,
     extra_fields: dict[str, Any] | None = None,
     target_integration_dir: str | None = None,
-    check_name_override: str | None = None,
 ) -> ScaffoldResult:
     """Resolve target paths, render templates in memory (or just enumerate for dry-run).
 
     ``target_integration_dir`` selects the on-disk directory that receives the rendered
     files (the directory whose name appears as the top-level segment of every output
-    path). ``check_name_override`` substitutes the ``{check_name}`` template variable
-    independently — used by `check_only` to keep the Python package name distinct from
-    the on-disk integration directory when the manifest carries an author prefix.
+    path). For ``check_only``, the ``check_name`` template variable comes from the
+    prefilled manifest fields in ``extra_fields``; for every other type, both default
+    to ``normalize_package_name(name)``.
     """
     extra_fields = extra_fields or {}
     root = Path(location).resolve() if location else app.repo.path
@@ -347,8 +371,6 @@ def render(
         app.abort(f'Path `{integration_dir}` already exists!')
 
     config = construct_template_fields(name, integration_type, **extra_fields)
-    if check_name_override is not None and 'check_name' not in extra_fields:
-        config['check_name'] = check_name_override
 
     files = collect_template_files(
         integration_type,
@@ -366,7 +388,7 @@ def render(
             app.display_info(f'Will create in `{root}`:')
             _display_tree(app, root, files)
     else:
-        _write_files_with_cleanup_hint(app, files, integration_dir)
+        _write_files_with_cleanup_hint(app, files, integration_dir, integration_type)
         if quiet:
             app.display_info(f'Created `{integration_dir}`')
         else:
@@ -380,17 +402,36 @@ def _write_files_with_cleanup_hint(
     app: Application,
     files: list[TemplateFile],
     integration_dir: Path,
+    integration_type: str,
 ) -> None:
-    """Write files and, on failure, tell the user where the partial write happened."""
+    """Write files and, on failure, tell the user how to recover.
+
+    For most types, the entire integration directory was created by this run and
+    is safe to delete. For ``check_only`` the directory pre-exists with the
+    user's ``manifest.json`` — tell them which scaffolded files to clean up
+    instead so they don't lose existing work.
+    """
     total = len(files)
+    written: list[Path] = []
     for index, f in enumerate(files, 1):
         try:
             f.write()
         except OSError as exc:
-            app.abort(
-                f'Wrote {index - 1}/{total} files; failed at `{f.target_path}`: {exc}. '
-                f'Remove `{integration_dir}` and retry.'
-            )
+            base = f'Wrote {index - 1}/{total} files; failed at `{f.target_path}`: {exc}.'
+            if integration_type == 'check_only':
+                if written:
+                    listing = '\n  - '.join(str(p) for p in written)
+                    cleanup = (
+                        'Remove the scaffolded files listed below (your `manifest.json` and any '
+                        'other pre-existing files in the directory must be preserved) and retry:\n'
+                        f'  - {listing}'
+                    )
+                else:
+                    cleanup = 'No files were written before the failure; safe to retry directly.'
+            else:
+                cleanup = f'Remove `{integration_dir}` and retry.'
+            app.abort(f'{base} {cleanup}')
+        written.append(f.target_path)
 
 
 def _display_tree(app: Application, root: Path, files: list[TemplateFile]) -> None:

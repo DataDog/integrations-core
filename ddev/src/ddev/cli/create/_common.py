@@ -20,6 +20,8 @@ from ddev.cli.create._naming import normalize_package_name
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
+    from ddev.cli.create._scaffold import CheckOnlyPrefillFields
+    from ddev.utils.fs import Path
 
 SUPPORTED_PLATFORMS = ('linux', 'windows', 'mac_os')
 
@@ -85,11 +87,10 @@ def run_subcommand(
             '`--skip-manifest` will be removed in the next major release.'
         )
 
-    extra_fields: dict[str, object] = {}
+    extra_fields: CheckOnlyPrefillFields | dict[str, object] = {}
     target_integration_dir: str | None = None
-    check_name_override: str | None = None
     if integration_type == 'check_only':
-        extra_fields, target_integration_dir, check_name_override = _resolve_check_only_inputs(app, name, location)
+        extra_fields, target_integration_dir = _resolve_check_only_inputs(app, name, location)
 
     from ddev.cli.create._scaffold import render
 
@@ -100,7 +101,6 @@ def run_subcommand(
         'include_manifest': include_manifest,
         'extra_fields': extra_fields,
         'target_integration_dir': target_integration_dir,
-        'check_name_override': check_name_override,
     }
 
     if include_manifest:
@@ -136,7 +136,7 @@ def run_subcommand(
 def _write_manifestless_overrides(
     app: Application,
     *,
-    integration_dir: Any,
+    integration_dir: Path,
     override_dir_name: str,
     display_name: str,
     metrics_prefix: str,
@@ -233,16 +233,14 @@ def _resolve_check_only_inputs(
     app: Application,
     name: str,
     location: str | None,
-) -> tuple[dict[str, object], str, str]:
+) -> tuple[CheckOnlyPrefillFields, str]:
     """For ``check_only`` integrations the directory must already exist with a manifest.
 
     Returns:
         - extra template fields prefilled from the existing manifest
         - the *target* integration directory name (the on-disk dir that holds the manifest;
-          e.g. ``partner_thing`` for a ``partner_`` author prefix)
-        - the *check_name* template substitution value (the stripped short name;
-          e.g. ``thing``). Used to populate the Python package name template variable
-          when the prefill helper did not provide a ``check_name``.
+          e.g. ``partner_thing`` for a ``partner_`` author prefix). The Python package
+          name (``{check_name}``) comes from the prefilled fields, not from this value.
     """
     from ddev.cli.create._naming import normalize_display_name
     from ddev.cli.create._scaffold import prefill_check_only_fields
@@ -261,6 +259,9 @@ def _resolve_check_only_inputs(
     except (OSError, json.JSONDecodeError) as exc:
         app.abort(f'Failed to read `{manifest_path}`: {exc}')
 
+    if not isinstance(manifest_data, dict):
+        app.abort(f'`{manifest_path}` does not contain a JSON object')
+
     author = (manifest_data.get('author') or {}).get('name')
     if author is None:
         app.abort('Unable to determine author from manifest')
@@ -269,4 +270,4 @@ def _resolve_check_only_inputs(
     stripped = target_integration_dir.removeprefix(f'{author_normalized}_')
 
     fields = prefill_check_only_fields(manifest_data, stripped)
-    return fields, target_integration_dir, stripped
+    return fields, target_integration_dir

@@ -118,6 +118,11 @@ def _extract_legacy_type(args: list[str]) -> str | _MissingTypeValue | None:
     for token in iterator:
         if token in ('--type', '-t'):
             value = next(iterator, _MISSING_TYPE_VALUE)
+            # If the next token is itself a flag (e.g. `--type --dry-run`), treat the
+            # value as missing — the user clearly didn't intend to pass `--dry-run`
+            # as the type name.
+            if isinstance(value, str) and value.startswith('-'):
+                return _MISSING_TYPE_VALUE
             return value
         if token.startswith('--type='):
             return token.split('=', 1)[1]

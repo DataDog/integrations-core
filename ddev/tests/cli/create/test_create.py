@@ -361,3 +361,137 @@ def test_dry_run_tree_uses_pipe_middle_for_non_last_directory(ddev, empty_repo):
     # The `assets/` subtree has both `configuration/` and `dashboards/`; the non-last
     # of the two must use the middle connector. Prior bug always rendered `└──`.
     assert '├── configuration' in result.output or '├── dashboards' in result.output
+
+
+def test_jmx_template_defaults_take_no_arguments(ddev, empty_repo, tmp_path):
+    """Regression for round-3 finding #1: the scaffolded JMX `defaults.py` must define zero-arg functions.
+
+    `instance.py` calls them as `getattr(defaults, ...)()` with no arguments; the old template's
+    `(field, value)` signatures crashed every JMX-scaffolded integration at runtime.
+    """
+    import importlib.util
+    import inspect
+
+    result = ddev(
+        'create',
+        'jmx',
+        'smoke_jmx',
+        '--display-name',
+        'Smoke JMX',
+        '--metrics-prefix',
+        'smoke_jmx.',
+        '--platforms',
+        'linux,windows,mac_os',
+        '--include-manifest',
+    )
+    assert result.exit_code == 0, result.output
+
+    defaults_path = empty_repo.path / 'smoke_jmx' / 'datadog_checks' / 'smoke_jmx' / 'config_models' / 'defaults.py'
+    assert defaults_path.is_file(), defaults_path
+
+    spec = importlib.util.spec_from_file_location('smoke_jmx_defaults', str(defaults_path))
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    public_callables = [
+        getattr(module, name) for name in dir(module) if not name.startswith('_') and callable(getattr(module, name))
+    ]
+    assert public_callables, 'defaults.py exposed no callables'
+    for fn in public_callables:
+        sig = inspect.signature(fn)
+        assert len(sig.parameters) == 0, f'{fn.__name__}{sig} should take no arguments'
+        fn()  # raises TypeError if it doesn't
+
+
+def test_type_flag_consumes_flag_shaped_value_as_missing(ddev, empty_repo):
+    """Regression for round-3 finding #2: `--type --dry-run` must report the missing value, not parse `--dry-run`."""
+    result = ddev('create', 'my_integration', '--type', '--dry-run')
+    assert result.exit_code != 0
+    # The targeted "requires a value" message must fire, not the generic "Unknown integration type".
+    assert 'requires a value' in result.output
+    assert 'Unknown integration type' not in result.output
+
+
+def test_check_only_non_object_manifest_aborts(ddev, empty_repo):
+    """Regression for round-3 finding #5: a JSON manifest that is not an object must abort cleanly."""
+    integration_dir = empty_repo.path / 'partner_thing'
+    integration_dir.mkdir()
+    (integration_dir / 'manifest.json').write_text('["not", "an", "object"]')
+
+    result = ddev(
+        'create',
+        'check-only',
+        'partner_thing',
+        '--include-manifest',
+    )
+    assert result.exit_code != 0
+    assert 'does not contain a JSON object' in result.output
+
+
+def test_check_only_partial_write_failure_does_not_recommend_deleting_directory(
+    ddev, empty_repo, monkeypatch, tmp_path
+):
+    """Regression for round-3 finding #7: a partial-write failure on `check_only` must list scaffolded files, not the directory."""
+    integration_dir = empty_repo.path / 'partner_thing'
+    integration_dir.mkdir()
+    (integration_dir / 'manifest.json').write_text(
+        json.dumps({'author': {'name': 'Partner', 'support_email': 'p@p.com'}})
+    )
+
+    from ddev.cli.create import _scaffold as scaffold_module
+
+    original_write = scaffold_module.TemplateFile.write
+    call_count = {'n': 0}
+
+    def flaky_write(self):
+        call_count['n'] += 1
+        if call_count['n'] == 2:
+            raise PermissionError(13, 'simulated mid-write failure')
+        return original_write(self)
+
+    monkeypatch.setattr(scaffold_module.TemplateFile, 'write', flaky_write)
+
+    result = ddev(
+        'create',
+        'check-only',
+        'partner_thing',
+        '--include-manifest',
+    )
+    assert result.exit_code != 0
+    # The message must NOT tell the user to remove the directory (it holds their manifest).
+    assert 'Remove `' not in result.output or str(integration_dir) not in result.output
+    # The message MUST point at the scaffolded files specifically.
+    assert 'scaffolded files' in result.output or 'No files were written' in result.output
+
+
+def test_non_check_only_partial_write_failure_recommends_deleting_directory(ddev, empty_repo, monkeypatch):
+    """Sanity: for `check` (and other types where the dir was freshly created), the message stays directory-scoped."""
+    from ddev.cli.create import _scaffold as scaffold_module
+
+    original_write = scaffold_module.TemplateFile.write
+    call_count = {'n': 0}
+
+    def flaky_write(self):
+        call_count['n'] += 1
+        if call_count['n'] == 2:
+            raise PermissionError(13, 'simulated mid-write failure')
+        return original_write(self)
+
+    monkeypatch.setattr(scaffold_module.TemplateFile, 'write', flaky_write)
+
+    result = ddev(
+        'create',
+        'check',
+        'my_integration',
+        '--display-name',
+        'My Integration',
+        '--metrics-prefix',
+        'my_integration.',
+        '--platforms',
+        'linux',
+        '--include-manifest',
+    )
+    assert result.exit_code != 0
+    assert 'Remove `' in result.output
+    assert 'my_integration' in result.output
