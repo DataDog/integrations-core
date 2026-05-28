@@ -6,8 +6,8 @@ from __future__ import annotations
 import importlib
 from typing import Any
 
+from ddev.cli.release.test_agent.dispatch import DispatchedWorkflow
 from ddev.cli.release.test_agent.monitoring import (
-    DispatchedWorkflow,
     JobState,
     MonitorState,
     WorkflowState,

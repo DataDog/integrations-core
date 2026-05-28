@@ -10,6 +10,7 @@ from collections.abc import Awaitable, Callable, Sequence
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+import httpx
 from rich.console import Group
 from rich.live import Live
 from rich.panel import Panel
@@ -17,11 +18,11 @@ from rich.spinner import Spinner
 from rich.text import Text
 from rich.tree import Tree
 
-from ddev.cli.release.test_agent.dispatch import DispatchedWorkflow
 from ddev.cli.release.test_agent.validation import REPO_NAME, REPO_OWNER
 from ddev.utils.github_async import async_github_client
 
 if TYPE_CHECKING:
+    from ddev.cli.release.test_agent.dispatch import DispatchedWorkflow
     from ddev.cli.terminal import Terminal
     from ddev.utils.github_async.client import AsyncGitHubClient
 
@@ -155,47 +156,48 @@ async def monitor_workflows(
             for workflow in workflows
         ]
     )
-    completed_state: MonitorState | None = None
 
-    if not (terminal.interactive and terminal.console.is_terminal):
-        while True:
+    async def poll() -> MonitorState:
+        nonlocal state
+        try:
             state = await collect_monitor_state(client, workflows)
-            terminal.output(
-                render_monitor_panel(terminal, ref=ref, poll_interval=poll_interval, state=state), stderr=True
-            )
+        except httpx.HTTPError:
+            pass
+        return state
+
+    if terminal.interactive and terminal.console.is_terminal:
+        original_stderr = terminal.console.stderr
+        terminal.console.stderr = True
+        try:
+            with Live(
+                render_monitor_panel(terminal, ref=ref, poll_interval=poll_interval, state=state),
+                console=terminal.console,
+                auto_refresh=True,
+                refresh_per_second=10,
+                redirect_stderr=False,
+                redirect_stdout=False,
+                transient=True,
+                vertical_overflow='crop',
+            ) as live:
+                while True:
+                    state = await poll()
+                    live.update(
+                        render_monitor_panel(terminal, ref=ref, poll_interval=poll_interval, state=state),
+                        refresh=True,
+                    )
+                    if state.is_complete:
+                        break
+                    await sleep(poll_interval)
+        finally:
+            terminal.console.stderr = original_stderr
+    else:
+        while True:
+            state = await poll()
             if state.is_complete:
-                return
+                break
             await sleep(poll_interval)
 
-    original_stderr = terminal.console.stderr
-    terminal.console.stderr = True
-    try:
-        with Live(
-            render_monitor_panel(terminal, ref=ref, poll_interval=poll_interval, state=state),
-            console=terminal.console,
-            auto_refresh=True,
-            refresh_per_second=10,
-            redirect_stderr=False,
-            redirect_stdout=False,
-            transient=True,
-            vertical_overflow='crop',
-        ) as live:
-            while True:
-                state = await collect_monitor_state(client, workflows)
-                live.update(
-                    render_monitor_panel(terminal, ref=ref, poll_interval=poll_interval, state=state), refresh=True
-                )
-                if state.is_complete:
-                    completed_state = state
-                    break
-                await sleep(poll_interval)
-    finally:
-        terminal.console.stderr = original_stderr
-
-    if completed_state is not None:
-        terminal.output(
-            render_monitor_panel(terminal, ref=ref, poll_interval=poll_interval, state=completed_state), stderr=True
-        )
+    terminal.output(render_monitor_panel(terminal, ref=ref, poll_interval=poll_interval, state=state), stderr=True)
 
 
 def render_monitor_panel(

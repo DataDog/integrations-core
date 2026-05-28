@@ -35,7 +35,7 @@ Quick reference:
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import AsyncIterator, Callable
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -264,7 +264,7 @@ class FakeAsyncGitHubClient:
         run_id: int,
         per_page: int = 30,
         timeout: float | None = None,
-    ):
+    ) -> AsyncIterator[GitHubResponse[Any]]:
         yield self._call(
             'list_workflow_run_jobs',
             owner=owner,

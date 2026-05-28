@@ -33,7 +33,7 @@ def _ok(run_id: int, html_url: str) -> GitHubResponse[WorkflowDispatchResult]:
 
 
 def test_extract_dispatched_workflows_returns_both_runs() -> None:
-    results = [_ok(1, 'https://github.com/x/runs/1'), _ok(2, 'https://github.com/x/runs/2')]
+    results = (_ok(1, 'https://github.com/x/runs/1'), _ok(2, 'https://github.com/x/runs/2'))
 
     linux, windows = extract_dispatched_workflows(results)
     assert linux.label == 'Linux'
@@ -65,10 +65,7 @@ def test_extract_dispatched_workflows_reraises_flow_control_exceptions(
 ) -> None:
     """`CancelledError` / `KeyboardInterrupt` in either slot must propagate verbatim, not be wrapped."""
     other = _ok(1, 'https://github.com/x/runs/sibling')
-    if position == 'linux':
-        results: list[Any] = [flow_control_exc, other]
-    else:
-        results = [other, flow_control_exc]
+    results: tuple[Any, Any] = (flow_control_exc, other) if position == 'linux' else (other, flow_control_exc)
 
     with pytest.raises(type(flow_control_exc)):
         extract_dispatched_workflows(results)
@@ -77,7 +74,7 @@ def test_extract_dispatched_workflows_reraises_flow_control_exceptions(
 def test_extract_dispatched_workflows_wraps_regular_exception_failure_as_runtime_error() -> None:
     """Sanity check that the `Exception` branch still produces a wrapped RuntimeError."""
     err = RuntimeError('forbidden')
-    results = [err, _ok(2, 'https://github.com/x/runs/2')]
+    results = (err, _ok(2, 'https://github.com/x/runs/2'))
 
     with pytest.raises(RuntimeError, match=r'Linux dispatch failed:.*forbidden.*runs/2'):
         extract_dispatched_workflows(results)
@@ -89,7 +86,7 @@ def test_extract_dispatched_workflows_both_failures_includes_both_reprs() -> Non
     windows_err = RuntimeError('windows-side detail')
 
     with pytest.raises(RuntimeError) as excinfo:
-        extract_dispatched_workflows([linux_err, windows_err])
+        extract_dispatched_workflows((linux_err, windows_err))
 
     message = str(excinfo.value)
     assert 'Both dispatches failed' in message

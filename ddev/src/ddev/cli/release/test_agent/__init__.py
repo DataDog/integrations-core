@@ -124,7 +124,8 @@ def test_agent(
                 poll_interval=poll_interval,
             )
         except Exception as e:
-            app.abort(f'Failed to monitor workflows: {e}')
+            urls = ', '.join(w.html_url for w in workflows)
+            app.abort(f'Failed to monitor workflows: {e}. Runs are still in flight: {urls}')
 
 
 def _print_plan(
