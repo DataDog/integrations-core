@@ -20,6 +20,12 @@ class FlinkCheck(OpenMetricsBaseCheckV2):
     DEFAULT_METRIC_LIMIT = 0
 
     def get_default_config(self):
+        # Flink's Prometheus reporter labels every series with `host` to
+        # identify the source JobManager/TaskManager. That label collides
+        # with Datadog's reserved hostname tag, so we promote it to the
+        # metric's hostname and exclude it from the tag set.
         return {
+            'hostname_label': 'host',
+            'exclude_labels': ['host'],
             'metrics': [METRIC_MAP],
         }

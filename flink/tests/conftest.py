@@ -7,21 +7,40 @@ from unittest import mock
 
 import pytest
 
+from datadog_checks.dev import docker_run, get_docker_hostname, get_here
+from datadog_checks.dev.conditions import CheckEndpoints
 from datadog_checks.flink import FlinkCheck
 
-INSTANCE = {
-    "openmetrics_endpoint": "http://localhost:9249/metrics",
-}
+JOBMANAGER_PORT = 9249
+TASKMANAGER_PORT = 9250
+
+
+@pytest.fixture(scope='session')
+def dd_environment():
+    compose_file = os.path.join(get_here(), 'compose', 'docker-compose.yaml')
+    with docker_run(
+        compose_file=compose_file,
+        conditions=(
+            CheckEndpoints(f"http://{get_docker_hostname()}:{JOBMANAGER_PORT}/metrics"),
+            CheckEndpoints(f"http://{get_docker_hostname()}:{TASKMANAGER_PORT}/metrics"),
+        ),
+        sleep=15,
+    ):
+        yield {
+            "openmetrics_endpoint": f"http://{get_docker_hostname()}:{JOBMANAGER_PORT}/metrics",
+        }
 
 
 @pytest.fixture
 def instance():
-    return copy.deepcopy(INSTANCE)
+    return {
+        "openmetrics_endpoint": "http://localhost:9249/metrics",
+    }
 
 
 @pytest.fixture
 def check(instance):
-    return FlinkCheck('flink', {}, [instance])
+    return FlinkCheck('flink', {}, [copy.deepcopy(instance)])
 
 
 @pytest.fixture()
