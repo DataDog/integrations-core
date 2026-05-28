@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+# flake8: noqa: E501
+
 # Mapping from raw Prometheus metric names emitted by Flink's
 # flink-metrics-prometheus reporter to the namespaced Datadog metric
 # names already documented in metadata.csv.
