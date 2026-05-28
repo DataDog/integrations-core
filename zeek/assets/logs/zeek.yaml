@@ -2049,18 +2049,9 @@ pipeline:
           source: alert.metadata_str
           samples:
             - "[attack_target:Client_Endpoint, confidence:High, created_at:2026_04_01, deployment:Internal, deployment:Perimeter, mitre_tactic_id:TA0011, mitre_tactic_name:Command_And_Control, mitre_technique_id:T1071, mitre_technique_name:Application_Layer_Protocol, performance_impact:Low, signature_severity:Major, updated_at:2026_04_09]"
-            - "[attack_target:Client_Endpoint, mitre_tactic_id:TA0002, mitre_tactic_name:Execution, mitre_technique_id:T1059.001, mitre_technique_name:Command_And_Scripting_Interpreter_PowerShell, signature_severity:Major]"
           grok:
             supportRules: ""
-            matchRules: |
-              sub_technique .*?mitre_tactic_id:%{regex("[^,\\]]+"):mitre_tactic_uid},\s*mitre_tactic_name:%{regex("[^,\\]]+"):mitre_tactic_name},\s*mitre_technique_id:%{regex("[^.]+"):mitre_technique_base_uid}\.%{regex("[^,\\]]+"):mitre_subtechnique_suffix},\s*mitre_technique_name:%{regex("[^,\\]]+"):mitre_subtechnique_name}%{data}
-              base_technique .*?mitre_tactic_id:%{regex("[^,\\]]+"):mitre_tactic_uid},\s*mitre_tactic_name:%{regex("[^,\\]]+"):mitre_tactic_name},\s*mitre_technique_id:%{regex("[^,\\]]+"):mitre_technique_uid},\s*mitre_technique_name:%{regex("[^,\\]]+"):mitre_technique_name}%{data}
-        - type: string-builder-processor
-          name: Add mitre_subtechnique_uid
-          enabled: true
-          template: "%{mitre_technique_base_uid}.%{mitre_subtechnique_suffix}"
-          target: mitre_subtechnique_uid
-          replaceMissing: false
+            matchRules: 'rule .*?mitre_tactic_id:%{regex("[^,\\]]+"):mitre_tactic_uid},\s*mitre_tactic_name:%{regex("[^,\\]]+"):mitre_tactic_name},\s*mitre_technique_id:%{regex("[^,\\]]+"):mitre_technique_uid},\s*mitre_technique_name:%{regex("[^,\\]]+"):mitre_technique_name}%{data}'
         - type: attribute-remapper
           name: Map `mitre_tactic_uid` to `ocsf.finding_info.attack.tactic.uid`
           enabled: true
@@ -2082,10 +2073,9 @@ pipeline:
           preserveSource: false
           overrideOnConflict: true
         - type: attribute-remapper
-          name: Map `mitre_technique_base_uid`, `mitre_technique_uid` to `ocsf.finding_info.attack.technique.uid`
+          name: Map `mitre_technique_uid` to `ocsf.finding_info.attack.technique.uid`
           enabled: true
           sources:
-            - mitre_technique_base_uid
             - mitre_technique_uid
           sourceType: attribute
           target: ocsf.finding_info.attack.technique.uid
@@ -2099,26 +2089,6 @@ pipeline:
             - mitre_technique_name
           sourceType: attribute
           target: ocsf.finding_info.attack.technique.name
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: true
-        - type: attribute-remapper
-          name: Map `mitre_subtechnique_uid` to `ocsf.finding_info.attack.sub_technique.uid`
-          enabled: true
-          sources:
-            - mitre_subtechnique_uid
-          sourceType: attribute
-          target: ocsf.finding_info.attack.sub_technique.uid
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: true
-        - type: attribute-remapper
-          name: Map `mitre_subtechnique_name` to `ocsf.finding_info.attack.sub_technique.name`
-          enabled: true
-          sources:
-            - mitre_subtechnique_name
-          sourceType: attribute
-          target: ocsf.finding_info.attack.sub_technique.name
           targetType: attribute
           preserveSource: false
           overrideOnConflict: true
