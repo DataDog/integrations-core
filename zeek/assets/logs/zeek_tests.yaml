@@ -1366,7 +1366,9 @@ tests:
             type_id: 1
             uid: "2006380"
           attacks:
-            - tactic:
+            - sub_technique:
+                name: "Application_Layer_Protocol"
+              tactic:
                 name: "Command_And_Control"
                 uid: "TA0011"
               technique:
