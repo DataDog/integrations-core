@@ -8,7 +8,6 @@ import click
 from httpx import HTTPStatusError
 from packaging.version import Version
 
-from ddev.utils.fs import Path
 from ddev.utils.git import GitRepository
 
 from .create import BRANCH_NAME_REGEX, BUILD_AGENT_YAML_PATH, find_build_agent_template_main_branch_matches
@@ -20,7 +19,6 @@ if TYPE_CHECKING:
 UPDATE_BUILD_AGENT_YAML_WORKFLOW = 'update-build-agent-yaml.yml'
 # The dd-octo-sts policy grants PR-writing credentials only to this workflow on master.
 UPDATE_BUILD_AGENT_YAML_WORKFLOW_REF = 'master'
-WORKTREE_BASE = '.worktrees/release-tag'
 RELEASE_INPUT_REGEX = re.compile(r'^(\d+\.\d+)(\.x)?$')
 # Sentinel used by `--rc` when the user provides the flag without a value.
 # Chosen so that `--rc auto` (which users could plausibly type) is rejected by `_parse_rc_value`
@@ -94,13 +92,11 @@ def tag(
     """
     Tag a release branch with a release-candidate or final-release tag.
 
-    By default the command tags the tip of the resolved release branch. The release branch is
-    determined as follows:
+    The command always operates against `origin/<release-branch>` after fetching: it does not
+    check out or modify any local branch. The release branch is determined as follows:
 
     \b
-    - If `--release` is given (e.g. `7.56` or `7.56.x`), that branch is used. If you are not
-      already on it, a worktree is created at `.worktrees/release-tag/<branch>` and refreshed
-      from `origin/<branch>` so the tag is created on an up-to-date copy.
+    - If `--release` is given (e.g. `7.56` or `7.56.x`), that branch is used.
     - If `--release` is omitted and you are on a release branch, you are prompted to confirm
       tagging that branch (use `--yes` to skip the prompt).
     - If `--release` is omitted and you are not on a release branch, the command aborts and
@@ -130,58 +126,26 @@ def tag(
 
     current_branch = app.repo.git.current_branch()
     target_branch = _resolve_target_branch(app, release, yes, current_branch)
-    worktree_path = app.repo.path / WORKTREE_BASE / target_branch
 
     app.display_waiting('Fetching from origin...')
     app.repo.git.fetch_tags()
     _ensure_branch_on_origin(app, target_branch)
 
-    worktree_created = False
-    teardown_worktree = False
-    try:
-        git, working_dir, worktree_created = _prepare_working_dir(app, current_branch, target_branch, worktree_path)
-        tag_ref = _resolve_tag_ref(app, git, target_branch, ref)
-        build_agent_yaml_needs_update = _warn_if_build_agent_yaml_stale(app, working_dir)
+    git = app.repo.git
+    tag_ref = _resolve_tag_ref(app, git, target_branch, ref)
+    effective_ref = tag_ref if tag_ref is not None else f'origin/{target_branch}'
 
-        new_tag = _compute_new_tag(app, git, target_branch, is_rc, pinned_rc, yes)
-        _confirm_and_push_tag(app, git, target_branch, new_tag, tag_ref, yes, skip_open_pr_check)
+    build_agent_yaml_needs_update = _warn_if_build_agent_yaml_stale(app, git, effective_ref)
+    new_tag = _compute_new_tag(app, git, target_branch, is_rc, pinned_rc, yes)
+    _confirm_and_push_tag(app, git, target_branch, new_tag, tag_ref, effective_ref, yes, skip_open_pr_check)
 
-        if build_agent_yaml_needs_update:
-            _trigger_build_agent_yaml_update_workflow(app, target_branch)
-        teardown_worktree = worktree_created
-    finally:
-        if worktree_created:
-            if teardown_worktree:
-                _remove_worktree(app, worktree_path)
-            else:
-                app.display_warning(
-                    f'Worktree left at `{worktree_path}` for inspection. '
-                    f'Run `git worktree remove --force {worktree_path}` to clean it up manually.'
-                )
+    if build_agent_yaml_needs_update:
+        _trigger_build_agent_yaml_update_workflow(app, target_branch)
 
 
-def _prepare_working_dir(
-    app: Application,
-    current_branch: str,
-    target_branch: str,
-    worktree_path: Path,
-) -> tuple[GitRepository, Path, bool]:
-    """Return `(git, working_dir, worktree_created)` for the tagging operation.
-
-    If the user is not already on the target branch, a worktree is created from
-    `origin/<target_branch>` so the tag is built on an up-to-date copy. Otherwise the existing
-    repo is refreshed in place via `git pull`.
-    """
-    if current_branch == target_branch:
-        click.echo(app.repo.git.pull(target_branch))
-        return app.repo.git, app.repo.path, False
-    _create_worktree(app, worktree_path, target_branch)
-    return GitRepository(worktree_path), worktree_path, True
-
-
-def _warn_if_build_agent_yaml_stale(app: Application, working_dir: Path) -> bool:
-    """Warn (and return True) if `.gitlab/build_agent.yaml` still points to `main`."""
-    if not _build_agent_yaml_points_to_main(working_dir):
+def _warn_if_build_agent_yaml_stale(app: Application, git: GitRepository, ref: str) -> bool:
+    """Warn (and return True) if `.gitlab/build_agent.yaml` at `ref` still points to `main`."""
+    if not _build_agent_yaml_points_to_main(git, ref):
         return False
     # Recovery path for release branches cut before build_agent.yaml was updated.
     app.display_warning(
@@ -256,10 +220,16 @@ def _confirm_and_push_tag(
     target_branch: str,
     new_tag: str,
     tag_ref: str | None,
+    effective_ref: str,
     yes: bool,
     skip_open_pr_check: bool,
 ) -> None:
-    """Surface open-PR warnings, get final confirmation, then create and push the tag."""
+    """Surface open-PR warnings, get final confirmation, then create and push the tag.
+
+    `tag_ref` is the user-resolved commit when `--ref` was explicitly provided (used for the
+    "at <sha>?" prompt suffix). `effective_ref` is what `git tag` actually keys off — either
+    that same commit, or `origin/<target_branch>` when `--ref` was not supplied.
+    """
     prs = _check_open_prs(app, target_branch, skip_open_pr_check)
 
     prompt = f'Create and push this tag: {new_tag}?'
@@ -271,7 +241,7 @@ def _confirm_and_push_tag(
     if not _confirm(yes, prompt):
         app.abort('Did not get confirmation, aborting. Did not create or push the tag.')
     try:
-        click.echo(git.tag(new_tag, message=new_tag, ref=tag_ref))
+        click.echo(git.tag(new_tag, message=new_tag, ref=effective_ref))
         click.echo(git.push(new_tag))
     except OSError as e:
         app.abort(f'Failed to create or push tag `{new_tag}`: {e}')
@@ -311,28 +281,6 @@ def _ensure_branch_on_origin(app: Application, branch: str) -> None:
         app.abort(f'Failed to query `origin` for branch `{branch}`: {e}')
     if not any(line.strip() for line in output.splitlines()):
         app.abort(f'Release branch `{branch}` does not exist on `origin`.')
-
-
-def _create_worktree(app: Application, worktree_path: Path, branch: str) -> None:
-    app.display_waiting(f'Creating worktree at `{worktree_path}` from `origin/{branch}`...')
-    worktree_path.parent.ensure_dir_exists()
-    try:
-        app.repo.git.run('worktree', 'add', '-B', branch, str(worktree_path), f'origin/{branch}')
-    except OSError as e:
-        app.abort(
-            f'Failed to create worktree at `{worktree_path}`: {e}\n'
-            f'If a stale worktree is still on disk, remove it with: '
-            f'git worktree remove --force {worktree_path}'
-        )
-    app.display_success('Done.')
-
-
-def _remove_worktree(app: Application, worktree_path: Path) -> None:
-    try:
-        app.repo.git.run('worktree', 'remove', '--force', str(worktree_path))
-    except OSError as e:
-        app.display_warning(f'Could not remove worktree at `{worktree_path}`: {e}')
-        app.display_warning(f'Run `git worktree remove --force {worktree_path}` to clean it up manually.')
 
 
 def _resolve_tag_ref(app: Application, git: GitRepository, target_branch: str, ref: str | None) -> str | None:
@@ -397,9 +345,12 @@ def _confirm(yes: bool, prompt: str) -> bool:
     return click.confirm(prompt)
 
 
-def _build_agent_yaml_points_to_main(working_dir: Path) -> bool:
-    path = working_dir / BUILD_AGENT_YAML_PATH
-    return path.exists() and bool(find_build_agent_template_main_branch_matches(path.read_text()))
+def _build_agent_yaml_points_to_main(git: GitRepository, ref: str) -> bool:
+    try:
+        content = git.show_file(BUILD_AGENT_YAML_PATH, ref)
+    except OSError:
+        return False
+    return bool(find_build_agent_template_main_branch_matches(content))
 
 
 def _trigger_build_agent_yaml_update_workflow(app: Application, branch_name: str) -> None:

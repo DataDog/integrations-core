@@ -8,6 +8,8 @@ from httpx import HTTPStatusError, Request, Response
 
 from ddev.utils.git import GitRepository
 
+ORIGIN_REF = 'origin/7.56.x'
+
 
 def test_tag_check_open_prs_warns_and_allows_continue(ddev, git, mocker, config_file):
     config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
@@ -26,7 +28,7 @@ def test_tag_check_open_prs_warns_and_allows_continue(ddev, git, mocker, config_
 
     assert result.exit_code == 0, result.output
     assert git.method_calls[-2:] == [
-        c.tag('7.56.0', message='7.56.0', ref=None),
+        c.tag('7.56.0', message='7.56.0', ref=ORIGIN_REF),
         c.push('7.56.0'),
     ]
     assert 'Found 1 open PR(s) targeting base branch 7.56.x' in result.output
@@ -86,9 +88,9 @@ EXAMPLE_TAGS = [
 def _capture_dispatch(*args):
     """Dispatch `git.capture(...)` mock calls by their first argument.
 
-    Tests can override individual subcommands via attributes on this function or by replacing
-    `git.capture.side_effect` outright. Defaulting to a per-subcommand mapping (instead of one
-    global return_value) keeps unrelated tests from silently masking new code paths.
+    Tests can override individual subcommands by replacing `git.capture.side_effect` outright.
+    Defaulting to a per-subcommand mapping (instead of one global return_value) keeps unrelated
+    tests from silently masking new code paths.
     """
     if not args:
         return ''
@@ -104,18 +106,8 @@ def basic_git(mocker):
     # We're patching the creation of the GitRepository class.
     # That's why we need a function that returns the mock.
     mocker.patch('ddev.repo.core.GitRepository', lambda _: mock_git)
-    mocker.patch('ddev.cli.release.branch.tag.GitRepository', lambda _: mock_git)
     mock_git.capture.side_effect = _capture_dispatch
     return mock_git
-
-
-def _worktree_subcommands(git, sub):
-    """Return the `git.run('worktree', <sub>, ...)` calls captured on the mock."""
-    return [
-        call
-        for call in git.method_calls
-        if call[0] == 'run' and len(call.args) >= 2 and call.args[0] == 'worktree' and call.args[1] == sub
-    ]
 
 
 @pytest.fixture
@@ -126,7 +118,7 @@ def git(basic_git, mocker):
     return basic_git
 
 
-def _assert_tag_pushed(git, result, tag, ref=None):
+def _assert_tag_pushed(git, result, tag, ref=ORIGIN_REF):
     assert result.exit_code == 0, result.output
     assert git.method_calls[-2:] == [
         c.tag(tag, message=tag, ref=ref),
@@ -430,70 +422,28 @@ def test_ref_not_ancestor_aborts(ddev, git):
     assert 'is not an ancestor of' in result.output
 
 
-def test_worktree_created_and_torn_down(ddev, git, mocker):
+def test_no_worktree_subprocess_invoked(ddev, git):
     """
-    When --release names a branch other than the current branch, we create a worktree, work in
-    it, and tear it down on success.
+    The command must never touch `git worktree`. Previously it created a worktree to check out
+    `origin/<branch>` for tagging; now it operates against the ref directly.
     """
     git.current_branch.return_value = 'master'
     result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', input='y\n')
 
     assert result.exit_code == 0, result.output
-    add_calls = _worktree_subcommands(git, 'add')
-    assert len(add_calls) == 1
-    # Full call shape: a regression that dropped the `origin/` prefix or swapped the path would
-    # otherwise pass silently.
-    add_args = add_calls[0].args
-    assert add_args[:4] == ('worktree', 'add', '-B', '7.56.x')
-    assert add_args[-1] == 'origin/7.56.x'
-    # Normalize path separators so the same assertion passes on Windows.
-    assert add_args[4].replace('\\', '/').endswith('.worktrees/release-tag/7.56.x')
-
-    remove_calls = _worktree_subcommands(git, 'remove')
-    assert len(remove_calls) == 1
-    remove_args = remove_calls[0].args
-    assert remove_args[:3] == ('worktree', 'remove', '--force')
-    assert remove_args[3].replace('\\', '/').endswith('.worktrees/release-tag/7.56.x')
+    worktree_calls = [
+        call for call in git.method_calls if call[0] == 'run' and len(call.args) >= 1 and call.args[0] == 'worktree'
+    ]
+    assert worktree_calls == []
 
 
-def test_worktree_left_on_failure(ddev, git, mocker):
+def test_local_release_branch_not_pulled(ddev, git):
     """
-    On failure, the worktree is left in place so the user can inspect it.
+    The command must never pull the user's local release branch. Tagging operates against
+    `origin/<branch>` only, so the user's local checkout state is irrelevant.
     """
-    git.current_branch.return_value = 'master'
-    git.push.side_effect = OSError('push failed')
-
-    result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', input='y\n')
-
-    assert result.exit_code != 0
-    assert 'Worktree left at' in result.output
-    assert _worktree_subcommands(git, 'remove') == []
-
-
-def test_worktree_creation_failure_aborts_with_hint(ddev, git):
-    """
-    If `git worktree add` fails, the abort message includes the manual-cleanup hint and no
-    remove is attempted.
-    """
-    git.current_branch.return_value = 'master'
-    git.run.side_effect = OSError('add failed')
-
-    result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', input='y\n')
-
-    assert result.exit_code != 0, result.output
-    assert 'Failed to create worktree' in result.output
-    assert 'git worktree remove --force' in result.output
-    assert _worktree_subcommands(git, 'remove') == []
-
-
-def test_no_worktree_when_already_on_target_branch(ddev, git):
-    """
-    When the target branch matches the current branch, no worktree is created.
-    """
-    result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', input='y\n')
-
-    assert result.exit_code == 0, result.output
-    assert _worktree_subcommands(git, 'add') == []
+    ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', input='y\n')
+    git.pull.assert_not_called()
 
 
 def test_build_agent_yaml_already_updated_does_not_dispatch_workflow(ddev, git, mocker):
@@ -518,7 +468,7 @@ def test_build_agent_yaml_points_to_main_warns_and_continues(ddev, basic_git, mo
     assert 'Dispatched `update-build-agent-yaml.yml`' in result.output
     assert 'Tagging will continue.' in result.output
     dispatch_workflow.assert_called_once_with('update-build-agent-yaml.yml', 'master', {'branch': '7.56.x'})
-    basic_git.tag.assert_called_once_with('7.56.0-rc.1', message='7.56.0-rc.1', ref=None)
+    basic_git.tag.assert_called_once_with('7.56.0-rc.1', message='7.56.0-rc.1', ref=ORIGIN_REF)
     basic_git.push.assert_called_once_with('7.56.0-rc.1')
 
 
@@ -554,5 +504,5 @@ def test_build_agent_yaml_workflow_dispatch_failure_warns_and_continues(ddev, ba
     assert 'gh workflow run update-build-agent-yaml.yml -f branch=7.56.x' in result.output
     assert 'Dispatched `update-build-agent-yaml.yml`' not in result.output
     dispatch_workflow.assert_called_once_with('update-build-agent-yaml.yml', 'master', {'branch': '7.56.x'})
-    basic_git.tag.assert_called_once_with('7.56.0', message='7.56.0', ref=None)
+    basic_git.tag.assert_called_once_with('7.56.0', message='7.56.0', ref=ORIGIN_REF)
     basic_git.push.assert_called_once_with('7.56.0')
