@@ -33,19 +33,12 @@ No additional installation is needed on your server.
    metrics.reporter.prom.port: 9249
    ```
 
-2. Re-map system scopes so the metric names match the integration's
-   [metadata.csv][11]:
+   Unlike the Datadog HTTP Reporter, the Prometheus reporter ignores
+   `metrics.scope.*` overrides -- it uses Flink's internal scope names
+   directly. No extra Flink configuration is required for this
+   integration to recognize the metrics.
 
-   ```yaml
-   metrics.scope.jm: flink.jobmanager
-   metrics.scope.jm.job: flink.jobmanager.job
-   metrics.scope.tm: flink.taskmanager
-   metrics.scope.tm.job: flink.taskmanager.job
-   metrics.scope.task: flink.task
-   metrics.scope.operator: flink.operator
-   ```
-
-3. Edit `flink.d/conf.yaml` (in the Agent's `conf.d/` directory) and set
+2. Edit `flink.d/conf.yaml` (in the Agent's `conf.d/` directory) and set
    `openmetrics_endpoint` to point at the reporter:
 
    ```yaml
@@ -65,7 +58,7 @@ No additional installation is needed on your server.
      }
    ```
 
-4. Restart Flink and the Agent.
+3. Restart Flink and the Agent.
 
 #### Metric collection - Datadog HTTP Reporter (legacy)
 

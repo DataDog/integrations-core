@@ -10,10 +10,14 @@
 #
 # Flink's Prometheus reporter formats names as:
 #   flink_<logical_scope>_<metric_name>
-# where '_' is the scope separator and any character not matching
-# [a-zA-Z0-9:_] is replaced with '_'. Concretely, each dot in a
-# Datadog metric name corresponds to an underscore in the raw name
-# emitted by Flink, so the mapping is mechanical.
+# where `<logical_scope>` is one of Flink's hardcoded internal scopes
+# (`jobmanager`, `jobmanager_job`, `taskmanager`, `taskmanager_job`,
+# `taskmanager_job_task`, `taskmanager_job_task_operator`) and is
+# *not* affected by the `metrics.scope.*` configuration overrides --
+# those only apply to non-Prometheus reporters. Tasks and operators
+# therefore land under the long `taskmanager_job_task[_operator]_*`
+# prefix on the raw side, even though metadata.csv historically
+# documents the DD-side as the shorter `flink.task.*` / `flink.operator.*`.
 #
 # Keys are the raw Prometheus names; values are the DD metric names
 # with the `flink.` namespace stripped -- the OpenMetricsBaseCheckV2
@@ -74,43 +78,42 @@ METRIC_MAP = {
     'flink_taskmanager_Status_Shuffle_Netty_AvailableMemorySegments': 'taskmanager.Status.Shuffle.Netty.AvailableMemorySegments',
     'flink_taskmanager_Status_Shuffle_Netty_TotalMemorySegments': 'taskmanager.Status.Shuffle.Netty.TotalMemorySegments',
     # Task
-    'flink_task_Shuffle_Netty_Input_Buffers_inPoolUsage': 'task.Shuffle.Netty.Input.Buffers.inPoolUsage',
-    'flink_task_Shuffle_Netty_Input_Buffers_inputQueueLength': 'task.Shuffle.Netty.Input.Buffers.inputQueueLength',
-    'flink_task_Shuffle_Netty_Input_numBuffersInLocal': 'task.Shuffle.Netty.Input.numBuffersInLocal',
-    'flink_task_Shuffle_Netty_Input_numBuffersInLocalPerSecond': 'task.Shuffle.Netty.Input.numBuffersInLocalPerSecond',
-    'flink_task_Shuffle_Netty_Input_numBuffersInRemote': 'task.Shuffle.Netty.Input.numBuffersInRemote',
-    'flink_task_Shuffle_Netty_Input_numBuffersInRemotePerSecond': 'task.Shuffle.Netty.Input.numBuffersInRemotePerSecond',
-    'flink_task_Shuffle_Netty_Input_numBytesInLocal': 'task.Shuffle.Netty.Input.numBytesInLocal',
-    'flink_task_Shuffle_Netty_Input_numBytesInLocalPerSecond': 'task.Shuffle.Netty.Input.numBytesInLocalPerSecond',
-    'flink_task_Shuffle_Netty_Input_numBytesInRemote': 'task.Shuffle.Netty.Input.numBytesInRemote',
-    'flink_task_Shuffle_Netty_Input_numBytesInRemotePerSecond': 'task.Shuffle.Netty.Input.numBytesInRemotePerSecond',
-    'flink_task_Shuffle_Netty_Output_Buffers_outPoolUsage': 'task.Shuffle.Netty.Output.Buffers.outPoolUsage',
-    'flink_task_Shuffle_Netty_Output_Buffers_outputQueueLength': 'task.Shuffle.Netty.Output.Buffers.outputQueueLength',
-    'flink_task_checkpointAlignmentTime': 'task.checkpointAlignmentTime',
-    'flink_task_currentInputWatermark': 'task.currentInputWatermark',
-    'flink_task_numBuffersOut': 'task.numBuffersOut',
-    'flink_task_numBuffersOutPerSecond': 'task.numBuffersOutPerSecond',
-    'flink_task_numBytesOut': 'task.numBytesOut',
-    'flink_task_numBytesOutPerSecond': 'task.numBytesOutPerSecond',
-    'flink_task_numLateRecordsDropped': 'task.numLateRecordsDropped',
-    'flink_task_numRecordsIn': 'task.numRecordsIn',
-    'flink_task_numRecordsInPerSecond': 'task.numRecordsInPerSecond',
-    'flink_task_numRecordsOut': 'task.numRecordsOut',
-    # Flink emits this rate metric as `numRecordsOutPerSecond` in the raw
-    # Prometheus output; metadata.csv historically documents the DD-side
-    # name with the truncated `PerSec` suffix, so map between the two.
-    'flink_task_numRecordsOutPerSecond': 'task.numRecordsOutPerSec',
+    'flink_taskmanager_job_task_Shuffle_Netty_Input_Buffers_inPoolUsage': 'task.Shuffle.Netty.Input.Buffers.inPoolUsage',
+    'flink_taskmanager_job_task_Shuffle_Netty_Input_Buffers_inputQueueLength': 'task.Shuffle.Netty.Input.Buffers.inputQueueLength',
+    'flink_taskmanager_job_task_Shuffle_Netty_Input_numBuffersInLocal': 'task.Shuffle.Netty.Input.numBuffersInLocal',
+    'flink_taskmanager_job_task_Shuffle_Netty_Input_numBuffersInLocalPerSecond': 'task.Shuffle.Netty.Input.numBuffersInLocalPerSecond',
+    'flink_taskmanager_job_task_Shuffle_Netty_Input_numBuffersInRemote': 'task.Shuffle.Netty.Input.numBuffersInRemote',
+    'flink_taskmanager_job_task_Shuffle_Netty_Input_numBuffersInRemotePerSecond': 'task.Shuffle.Netty.Input.numBuffersInRemotePerSecond',
+    'flink_taskmanager_job_task_Shuffle_Netty_Input_numBytesInLocal': 'task.Shuffle.Netty.Input.numBytesInLocal',
+    'flink_taskmanager_job_task_Shuffle_Netty_Input_numBytesInLocalPerSecond': 'task.Shuffle.Netty.Input.numBytesInLocalPerSecond',
+    'flink_taskmanager_job_task_Shuffle_Netty_Input_numBytesInRemote': 'task.Shuffle.Netty.Input.numBytesInRemote',
+    'flink_taskmanager_job_task_Shuffle_Netty_Input_numBytesInRemotePerSecond': 'task.Shuffle.Netty.Input.numBytesInRemotePerSecond',
+    'flink_taskmanager_job_task_Shuffle_Netty_Output_Buffers_outPoolUsage': 'task.Shuffle.Netty.Output.Buffers.outPoolUsage',
+    'flink_taskmanager_job_task_Shuffle_Netty_Output_Buffers_outputQueueLength': 'task.Shuffle.Netty.Output.Buffers.outputQueueLength',
+    'flink_taskmanager_job_task_checkpointAlignmentTime': 'task.checkpointAlignmentTime',
+    'flink_taskmanager_job_task_currentInputWatermark': 'task.currentInputWatermark',
+    'flink_taskmanager_job_task_numBuffersOut': 'task.numBuffersOut',
+    'flink_taskmanager_job_task_numBuffersOutPerSecond': 'task.numBuffersOutPerSecond',
+    'flink_taskmanager_job_task_numBytesOut': 'task.numBytesOut',
+    'flink_taskmanager_job_task_numBytesOutPerSecond': 'task.numBytesOutPerSecond',
+    'flink_taskmanager_job_task_numLateRecordsDropped': 'task.numLateRecordsDropped',
+    'flink_taskmanager_job_task_numRecordsIn': 'task.numRecordsIn',
+    'flink_taskmanager_job_task_numRecordsInPerSecond': 'task.numRecordsInPerSecond',
+    'flink_taskmanager_job_task_numRecordsOut': 'task.numRecordsOut',
+    # `numRecordsOutPerSec` (truncated suffix) is a pre-existing asymmetry in
+    # metadata.csv; the raw Prometheus name uses the full word `PerSecond`.
+    'flink_taskmanager_job_task_numRecordsOutPerSecond': 'task.numRecordsOutPerSec',
     # Operator
-    'flink_operator_commitsFailed': 'operator.commitsFailed',
-    'flink_operator_commitsSucceeded': 'operator.commitsSucceeded',
-    'flink_operator_currentInput1Watermark': 'operator.currentInput1Watermark',
-    'flink_operator_currentInput2Watermark': 'operator.currentInput2Watermark',
-    'flink_operator_currentInputWatermark': 'operator.currentInputWatermark',
-    'flink_operator_currentOutputWatermark': 'operator.currentOutputWatermark',
-    'flink_operator_numLateRecordsDropped': 'operator.numLateRecordsDropped',
-    'flink_operator_numRecordsIn': 'operator.numRecordsIn',
-    'flink_operator_numRecordsInPerSecond': 'operator.numRecordsInPerSecond',
-    'flink_operator_numRecordsOut': 'operator.numRecordsOut',
-    'flink_operator_numRecordsOutPerSecond': 'operator.numRecordsOutPerSec',
-    'flink_operator_numSplitsProcessed': 'operator.numSplitsProcessed',
+    'flink_taskmanager_job_task_operator_commitsFailed': 'operator.commitsFailed',
+    'flink_taskmanager_job_task_operator_commitsSucceeded': 'operator.commitsSucceeded',
+    'flink_taskmanager_job_task_operator_currentInput1Watermark': 'operator.currentInput1Watermark',
+    'flink_taskmanager_job_task_operator_currentInput2Watermark': 'operator.currentInput2Watermark',
+    'flink_taskmanager_job_task_operator_currentInputWatermark': 'operator.currentInputWatermark',
+    'flink_taskmanager_job_task_operator_currentOutputWatermark': 'operator.currentOutputWatermark',
+    'flink_taskmanager_job_task_operator_numLateRecordsDropped': 'operator.numLateRecordsDropped',
+    'flink_taskmanager_job_task_operator_numRecordsIn': 'operator.numRecordsIn',
+    'flink_taskmanager_job_task_operator_numRecordsInPerSecond': 'operator.numRecordsInPerSecond',
+    'flink_taskmanager_job_task_operator_numRecordsOut': 'operator.numRecordsOut',
+    'flink_taskmanager_job_task_operator_numRecordsOutPerSecond': 'operator.numRecordsOutPerSec',
+    'flink_taskmanager_job_task_operator_numSplitsProcessed': 'operator.numSplitsProcessed',
 }

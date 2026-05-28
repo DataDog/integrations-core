@@ -12,12 +12,6 @@ services:
         jobmanager.rpc.address: jobmanager
         metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
         metrics.reporter.prom.port: 9249
-        metrics.scope.jm: flink.jobmanager
-        metrics.scope.jm.job: flink.jobmanager.job
-        metrics.scope.tm: flink.taskmanager
-        metrics.scope.tm.job: flink.taskmanager.job
-        metrics.scope.task: flink.task
-        metrics.scope.operator: flink.operator
     healthcheck:
       test: ["CMD-SHELL", "curl -sf http://localhost:9249/metrics > /dev/null"]
       interval: 5s
@@ -41,12 +35,6 @@ services:
         taskmanager.numberOfTaskSlots: 2
         metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
         metrics.reporter.prom.port: 9249
-        metrics.scope.jm: flink.jobmanager
-        metrics.scope.jm.job: flink.jobmanager.job
-        metrics.scope.tm: flink.taskmanager
-        metrics.scope.tm.job: flink.taskmanager.job
-        metrics.scope.task: flink.task
-        metrics.scope.operator: flink.operator
 
 networks:
   flink-network:

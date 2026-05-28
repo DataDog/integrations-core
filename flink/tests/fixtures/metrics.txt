@@ -43,18 +43,18 @@ flink_taskmanager_Status_JVM_Memory_Heap_Used{host="taskmanager-0",tm_id="tm-1",
 # HELP flink_taskmanager_Status_JVM_Threads_Count Threads_Count (scope: taskmanager)
 # TYPE flink_taskmanager_Status_JVM_Threads_Count gauge
 flink_taskmanager_Status_JVM_Threads_Count{host="taskmanager-0",tm_id="tm-1",} 64.0
-# HELP flink_task_numRecordsIn numRecordsIn (scope: taskmanager_job_task)
-# TYPE flink_task_numRecordsIn gauge
-flink_task_numRecordsIn{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",task_name="Source: KafkaSource",subtask_index="0",} 12345.0
-# HELP flink_task_numRecordsOut numRecordsOut (scope: taskmanager_job_task)
-# TYPE flink_task_numRecordsOut gauge
-flink_task_numRecordsOut{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",task_name="Source: KafkaSource",subtask_index="0",} 12345.0
-# HELP flink_task_numRecordsOutPerSecond numRecordsOutPerSecond (scope: taskmanager_job_task)
-# TYPE flink_task_numRecordsOutPerSecond gauge
-flink_task_numRecordsOutPerSecond{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",task_name="Source: KafkaSource",subtask_index="0",} 42.5
-# HELP flink_operator_numRecordsIn numRecordsIn (scope: taskmanager_job_task_operator)
-# TYPE flink_operator_numRecordsIn gauge
-flink_operator_numRecordsIn{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",operator_name="Source",subtask_index="0",} 12345.0
-# HELP flink_operator_currentInputWatermark currentInputWatermark (scope: taskmanager_job_task_operator)
-# TYPE flink_operator_currentInputWatermark gauge
-flink_operator_currentInputWatermark{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",operator_name="Source",subtask_index="0",} 1735689600000.0
+# HELP flink_taskmanager_job_task_numRecordsIn numRecordsIn (scope: taskmanager_job_task)
+# TYPE flink_taskmanager_job_task_numRecordsIn gauge
+flink_taskmanager_job_task_numRecordsIn{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",task_name="Source: KafkaSource",subtask_index="0",} 12345.0
+# HELP flink_taskmanager_job_task_numRecordsOut numRecordsOut (scope: taskmanager_job_task)
+# TYPE flink_taskmanager_job_task_numRecordsOut gauge
+flink_taskmanager_job_task_numRecordsOut{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",task_name="Source: KafkaSource",subtask_index="0",} 12345.0
+# HELP flink_taskmanager_job_task_numRecordsOutPerSecond numRecordsOutPerSecond (scope: taskmanager_job_task)
+# TYPE flink_taskmanager_job_task_numRecordsOutPerSecond gauge
+flink_taskmanager_job_task_numRecordsOutPerSecond{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",task_name="Source: KafkaSource",subtask_index="0",} 42.5
+# HELP flink_taskmanager_job_task_operator_numRecordsIn numRecordsIn (scope: taskmanager_job_task_operator)
+# TYPE flink_taskmanager_job_task_operator_numRecordsIn gauge
+flink_taskmanager_job_task_operator_numRecordsIn{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",operator_name="Source",subtask_index="0",} 12345.0
+# HELP flink_taskmanager_job_task_operator_currentInputWatermark currentInputWatermark (scope: taskmanager_job_task_operator)
+# TYPE flink_taskmanager_job_task_operator_currentInputWatermark gauge
+flink_taskmanager_job_task_operator_currentInputWatermark{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",operator_name="Source",subtask_index="0",} 1735689600000.0
