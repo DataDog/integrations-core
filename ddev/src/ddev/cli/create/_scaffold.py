@@ -48,16 +48,6 @@ CHECK_LINKS = """\
 [9]: https://docs.datadoghq.com/help/
 """
 
-CHECK_ONLY_LINKS = """\
-[1]: **LINK_TO_INTEGRATION_SITE**
-[2]: https://app.datadoghq.com/account/settings/agent/latest
-[3]: https://docs.datadoghq.com/containers/kubernetes/integrations/
-[4]: https://github.com/DataDog/{repository}/blob/master/{name}/datadog_checks/{name}/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/configuration/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/configuration/agent-commands/#agent-status-and-information
-[9]: https://docs.datadoghq.com/help/
-"""
-
 LOGS_LINKS = """\
 [1]: https://docs.datadoghq.com/help/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -90,7 +80,6 @@ EVENT_TILE_LINKS = """\
 
 INTEGRATION_TYPE_LINKS: dict[str, str] = {
     'check': CHECK_LINKS,
-    'check_only': CHECK_ONLY_LINKS,
     'logs': LOGS_LINKS,
     'jmx': JMX_LINKS,
     'metrics_crawler': TILE_LINKS,
@@ -449,7 +438,7 @@ def _format_line(name: str, depth: int, *, last: bool, is_dir: bool) -> tuple[st
     if depth == 1:
         return f'{PIPE_END if last else PIPE_MIDDLE}{HYPHEN} ', name, is_dir
     return (
-        f"{PIPE}   {' ' * 4 * (depth - 2)}{PIPE_END if last or is_dir else PIPE_MIDDLE}{HYPHEN} ",
+        f"{PIPE}   {' ' * 4 * (depth - 2)}{PIPE_END if last else PIPE_MIDDLE}{HYPHEN} ",
         name,
         is_dir,
     )

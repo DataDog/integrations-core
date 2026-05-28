@@ -8,14 +8,13 @@ from __future__ import annotations
 import json
 
 import pytest
-import tomli
 
 
 @pytest.mark.parametrize(
     'subcommand',
     ['check', 'jmx', 'logs', 'event', 'metrics-crawler'],
 )
-def test_default_manifestless_writes_overrides_and_skips_manifest(ddev, empty_repo, subcommand):
+def test_default_manifestless_writes_overrides_and_skips_manifest(ddev, empty_repo, read_config, subcommand):
     result = ddev(
         'create',
         subcommand,
@@ -33,9 +32,7 @@ def test_default_manifestless_writes_overrides_and_skips_manifest(ddev, empty_re
     assert integration_dir.is_dir()
     assert not (integration_dir / 'manifest.json').exists()
 
-    config_toml = empty_repo.path / '.ddev' / 'config.toml'
-    assert config_toml.is_file()
-    data = tomli.loads(config_toml.read_text())
+    data = read_config()
     assert data['overrides']['display-name']['my_integration'] == 'My Integration'
     assert data['overrides']['metrics-prefix']['my_integration'] == 'my_integration.'
     assert data['overrides']['manifest']['platforms']['my_integration'] == ['linux', 'windows', 'mac_os']
@@ -168,7 +165,7 @@ def test_existing_directory_aborts(ddev, empty_repo):
     assert 'already exists' in result.output
 
 
-def test_overrides_accumulate_across_creates(ddev, empty_repo):
+def test_overrides_accumulate_across_creates(ddev, empty_repo, read_config):
     for name in ('first_integration', 'second_integration'):
         result = ddev(
             'create',
@@ -183,7 +180,7 @@ def test_overrides_accumulate_across_creates(ddev, empty_repo):
         )
         assert result.exit_code == 0, result.output
 
-    data = tomli.loads((empty_repo.path / '.ddev' / 'config.toml').read_text())
+    data = read_config()
     assert 'first_integration' in data['overrides']['display-name']
     assert 'second_integration' in data['overrides']['display-name']
 
@@ -290,8 +287,8 @@ def test_check_only_writes_into_existing_author_prefixed_directory(ddev, empty_r
     assert not (empty_repo.path / 'thing').exists()
 
 
-def test_check_only_manifestless_writes_overrides_for_stripped_name(ddev, empty_repo):
-    """Regression for finding #14: manifest-less check-only writes overrides keyed by the stripped name."""
+def test_check_only_manifestless_writes_overrides_for_integration_dir(ddev, empty_repo, read_config):
+    """Manifest-less check-only writes overrides keyed by the on-disk integration directory."""
     integration_dir = empty_repo.path / 'partner_thing'
     _write_partner_manifest(integration_dir)
 
@@ -308,13 +305,11 @@ def test_check_only_manifestless_writes_overrides_for_stripped_name(ddev, empty_
     )
     assert result.exit_code == 0, result.output
 
-    # Files must land in the existing partner_thing directory (finding #1).
+    # Files must land in the existing partner_thing directory (round-1 finding #1).
     assert (integration_dir / 'pyproject.toml').is_file()
     assert not (empty_repo.path / 'thing').exists()
 
-    overrides_path = empty_repo.path / '.ddev' / 'config.toml'
-    assert overrides_path.is_file()
-    data = tomli.loads(overrides_path.read_text())
+    data = read_config()
     assert data['overrides']['display-name']['partner_thing'] == 'Partner Thing'
     assert data['overrides']['metrics-prefix']['partner_thing'] == 'partner_thing.'
     assert data['overrides']['manifest']['platforms']['partner_thing'] == ['linux', 'windows', 'mac_os']
@@ -337,3 +332,32 @@ def test_global_no_interactive_flag_aborts_when_required_flags_missing(ddev, emp
     assert '--display-name' in result.output
     assert '--metrics-prefix' in result.output
     assert '--platforms' in result.output
+
+
+def test_type_flag_without_value_aborts_with_targeted_message(ddev, empty_repo):
+    """`ddev create NAME --type` (no value) must name the missing value, not the generic 'use a subcommand' message."""
+    result = ddev('create', 'my_integration', '--type')
+    assert result.exit_code != 0
+    assert '--type' in result.output
+    assert 'requires a value' in result.output
+
+
+def test_dry_run_tree_uses_pipe_middle_for_non_last_directory(ddev, empty_repo):
+    """Regression for round-2 finding #3: non-last directories at depth >= 2 must use `├──`, not `└──`."""
+    result = ddev(
+        'create',
+        'check',
+        'my_integration',
+        '--display-name',
+        'My Integration',
+        '--metrics-prefix',
+        'my_integration.',
+        '--platforms',
+        'linux',
+        '--include-manifest',
+        '--dry-run',
+    )
+    assert result.exit_code == 0, result.output
+    # The `assets/` subtree has both `configuration/` and `dashboards/`; the non-last
+    # of the two must use the middle connector. Prior bug always rendered `└──`.
+    assert '├── configuration' in result.output or '├── dashboards' in result.output

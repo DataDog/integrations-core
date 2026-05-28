@@ -53,6 +53,9 @@ class _CreateGroup(click.Group):
         app: Application = ctx.obj
         legacy_type = _extract_legacy_type(args)
 
+        if legacy_type is _MISSING_TYPE_VALUE:
+            app.abort('`--type` / `-t` requires a value (e.g. `--type=check`).')
+
         # No `--type`: the user passed a bare positional (the legacy `ddev create NAME` shape
         # that is now ambiguous). Point them at the new subcommand surface before click's
         # default "No such command" message lands.
@@ -69,7 +72,8 @@ class _CreateGroup(click.Group):
                 f'Use the manifest-less workflow described at {CONFLUENCE_NO_MANIFEST_URL}.'
             )
 
-        assert legacy_type is not None  # narrowed by the `is None` branch above
+        # Narrowed by the two preceding `is` / `is None` branches; both call NoReturn `app.abort`.
+        assert isinstance(legacy_type, str)
         target = LEGACY_TYPE_TO_SUBCOMMAND.get(legacy_type)
         if target is None:
             app.abort(f'Unknown integration type: `{legacy_type}`.')
@@ -88,12 +92,33 @@ class _CreateGroup(click.Group):
         return subcommand.name, subcommand, cleaned
 
 
-def _extract_legacy_type(args: list[str]) -> str | None:
-    """Return the `--type` / `-t` value from ``args`` if present, else None."""
+class _MissingTypeValue:
+    """Sentinel: ``--type``/``-t`` was passed without a value (e.g. trailing ``--type``)."""
+
+    _instance: _MissingTypeValue | None = None
+
+    def __new__(cls) -> _MissingTypeValue:
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+
+_MISSING_TYPE_VALUE = _MissingTypeValue()
+
+
+def _extract_legacy_type(args: list[str]) -> str | _MissingTypeValue | None:
+    """Return the `--type` / `-t` value from ``args``.
+
+    Distinguishes three outcomes:
+      - ``None``: no `--type` / `-t` flag present at all.
+      - ``_MISSING_TYPE_VALUE``: the flag is present but has no following value.
+      - ``str``: the flag is present with a value.
+    """
     iterator = iter(args)
     for token in iterator:
         if token in ('--type', '-t'):
-            return next(iterator, None)
+            value = next(iterator, _MISSING_TYPE_VALUE)
+            return value
         if token.startswith('--type='):
             return token.split('=', 1)[1]
         if token.startswith('-t='):

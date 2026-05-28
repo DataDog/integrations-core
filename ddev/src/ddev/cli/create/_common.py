@@ -91,59 +91,78 @@ def run_subcommand(
     if integration_type == 'check_only':
         extra_fields, target_integration_dir, check_name_override = _resolve_check_only_inputs(app, name, location)
 
-    if not include_manifest:
-        # Probe `.ddev/config.toml` writability before scaffolding so a malformed file
-        # aborts cleanly instead of leaving a half-finished integration on disk.
-        _probe_repo_config_readable(app)
-
-        resolved_display_name, resolved_metrics_prefix, resolved_platforms = _resolve_manifestless_inputs(
-            app,
-            name=name,
-            display_name=display_name,
-            metrics_prefix=metrics_prefix,
-            platforms_csv=platforms_csv,
-        )
-
     from ddev.cli.create._scaffold import render
 
-    result = render(
-        app,
-        integration_type,
-        name,
-        location=location,
-        dry_run=dry_run,
-        quiet=quiet,
-        include_manifest=include_manifest,
-        extra_fields=extra_fields,
-        target_integration_dir=target_integration_dir,
-        check_name_override=check_name_override,
-    )
+    render_kwargs: dict[str, Any] = {
+        'location': location,
+        'dry_run': dry_run,
+        'quiet': quiet,
+        'include_manifest': include_manifest,
+        'extra_fields': extra_fields,
+        'target_integration_dir': target_integration_dir,
+        'check_name_override': check_name_override,
+    }
 
-    if dry_run or include_manifest:
+    if include_manifest:
+        render(app, integration_type, name, **render_kwargs)
         return
 
+    # Manifest-less path: resolve overrides and probe config writability before scaffolding
+    # so a malformed config aborts cleanly instead of leaving a half-finished integration on disk.
+    _probe_repo_config_readable(app)
+    resolved_display_name, resolved_metrics_prefix, resolved_platforms = _resolve_manifestless_inputs(
+        app,
+        name=name,
+        display_name=display_name,
+        metrics_prefix=metrics_prefix,
+        platforms_csv=platforms_csv,
+    )
+
+    result = render(app, integration_type, name, **render_kwargs)
+
+    if dry_run:
+        return
+
+    _write_manifestless_overrides(
+        app,
+        integration_dir=result.integration_dir,
+        override_dir_name=target_integration_dir or result.integration_dir.name,
+        display_name=resolved_display_name,
+        metrics_prefix=resolved_metrics_prefix,
+        platforms=resolved_platforms,
+    )
+
+
+def _write_manifestless_overrides(
+    app: Application,
+    *,
+    integration_dir: Any,
+    override_dir_name: str,
+    display_name: str,
+    metrics_prefix: str,
+    platforms: list[str],
+) -> None:
     from ddev.cli.create._config_overrides import apply_manifestless_overrides
 
-    override_dir_name = target_integration_dir or result.integration_dir.name
     try:
         apply_manifestless_overrides(
             app,
             dir_name=override_dir_name,
-            display_name=resolved_display_name,
-            metrics_prefix=resolved_metrics_prefix,
-            platforms=resolved_platforms,
+            display_name=display_name,
+            metrics_prefix=metrics_prefix,
+            platforms=platforms,
         )
     except OSError as exc:
         app.abort(
             f'Failed to update `.ddev/config.toml`: {exc}\n'
-            f'The integration was scaffolded at `{result.integration_dir}` but the '
+            f'The integration was scaffolded at `{integration_dir}` but the '
             f'overrides were not recorded. Add these entries by hand:\n'
             f'  [overrides.display-name]\n'
-            f'  {override_dir_name} = "{resolved_display_name}"\n'
+            f'  {override_dir_name} = "{display_name}"\n'
             f'  [overrides.metrics-prefix]\n'
-            f'  {override_dir_name} = "{resolved_metrics_prefix}"\n'
+            f'  {override_dir_name} = "{metrics_prefix}"\n'
             f'  [overrides.manifest.platforms]\n'
-            f'  {override_dir_name} = {resolved_platforms!r}'
+            f'  {override_dir_name} = {platforms!r}'
         )
 
 
@@ -237,7 +256,11 @@ def _resolve_check_only_inputs(
     if not manifest_path.is_file():
         app.abort(f'Expected {manifest_path} to exist')
 
-    manifest_data = json.loads(manifest_path.read_text())
+    try:
+        manifest_data = json.loads(manifest_path.read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        app.abort(f'Failed to read `{manifest_path}`: {exc}')
+
     author = (manifest_data.get('author') or {}).get('name')
     if author is None:
         app.abort('Unable to determine author from manifest')

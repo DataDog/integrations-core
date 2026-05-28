@@ -3,6 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import tomllib
+from typing import Callable
+
 import pytest
 
 from ddev.repo.core import Repository
@@ -18,3 +21,13 @@ def empty_repo(tmp_path_factory, config_file):
     config_file.save()
 
     return repo
+
+
+@pytest.fixture
+def read_config(empty_repo) -> Callable[[], dict]:
+    """Return a callable that loads ``<repo>/.ddev/config.toml`` and returns its parsed contents."""
+
+    def _read() -> dict:
+        return tomllib.loads((empty_repo.path / '.ddev' / 'config.toml').read_text())
+
+    return _read
