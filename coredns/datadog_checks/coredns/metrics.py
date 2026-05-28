@@ -35,6 +35,7 @@ DEFAULT_METRICS = {
     'coredns_grpc_response_rcode_count_total': 'grpc.response_rcode_count',
     # health: https://github.com/coredns/coredns/tree/v1.6.9/plugin/health
     'coredns_health_request_duration_seconds': 'health_request_duration',
+    'coredns_health_request_failures_total': 'health_request_failures_count',
     # hosts: https://github.com/coredns/coredns/tree/v1.6.9/plugin/hosts
     'coredns_hosts_entries_count': 'hosts.entries_count',
     'coredns_hosts_reload_timestamp_seconds': 'hosts.reload_timestamp',
