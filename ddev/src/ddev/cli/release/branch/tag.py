@@ -126,29 +126,29 @@ def tag(
 
     pinned_rc = _parse_rc_value(app, rc) if is_rc else None
 
-    target_branch = _resolve_target_branch(app, release, yes)
-
     current_branch = app.repo.git.current_branch()
+    target_branch = _resolve_target_branch(app, release, yes, current_branch)
     use_worktree = current_branch != target_branch
     worktree_path = app.repo.path / WORKTREE_BASE / target_branch
 
     app.display_waiting('Fetching from origin...')
     app.repo.git.fetch_tags()
 
-    if not _branch_exists_on_origin(app.repo.git, target_branch):
-        app.abort(f'Release branch `{target_branch}` does not exist on `origin`.')
-
-    if use_worktree:
-        _create_or_refresh_worktree(app, worktree_path, target_branch)
-        git: GitRepository = GitRepository(worktree_path)
-        working_dir = worktree_path
-    else:
-        click.echo(app.repo.git.pull(target_branch))
-        git = app.repo.git
-        working_dir = app.repo.path
+    _ensure_branch_on_origin(app, target_branch)
 
     teardown_worktree = False
+    worktree_created = False
     try:
+        if use_worktree:
+            _create_worktree(app, worktree_path, target_branch)
+            worktree_created = True
+            git: GitRepository = GitRepository(worktree_path)
+            working_dir = worktree_path
+        else:
+            click.echo(app.repo.git.pull(target_branch))
+            git = app.repo.git
+            working_dir = app.repo.path
+
         tag_ref = _resolve_tag_ref(app, git, target_branch, ref)
 
         build_agent_yaml_needs_update = _build_agent_yaml_points_to_main(working_dir)
@@ -211,20 +211,20 @@ def tag(
         if prs:
             prompt = f'Open PRs found targeting {target_branch}. Create and push this tag anyway: {new_tag}?'
         if tag_ref is not None:
-            prompt = prompt.rstrip('?') + f' at {ref}?'
+            prompt = prompt.rstrip('?') + f' at {tag_ref}?'
 
         if not _confirm(yes, prompt):
             app.abort('Did not get confirmation, aborting. Did not create or push the tag.')
-        click.echo(git.tag(new_tag, message=new_tag, ref=tag_ref))
-        click.echo(git.push(new_tag))
+        try:
+            click.echo(git.tag(new_tag, message=new_tag, ref=tag_ref))
+            click.echo(git.push(new_tag))
+        except OSError as e:
+            app.abort(f'Failed to create or push tag `{new_tag}`: {e}')
         if build_agent_yaml_needs_update:
             _trigger_build_agent_yaml_update_workflow(app, target_branch)
         teardown_worktree = use_worktree
-    except OSError as e:
-        app.display_error(f'Tag operation failed: {e}')
-        app.abort()
     finally:
-        if use_worktree:
+        if worktree_created:
             if teardown_worktree:
                 _remove_worktree(app, worktree_path)
             else:
@@ -239,18 +239,17 @@ def _parse_rc_value(app: Application, rc: str | None) -> int | None:
         return None
     try:
         return int(rc)
-    except ValueError:
-        app.abort(f'`--rc` value must be a positive integer, got `{rc}`.')
+    except ValueError as e:
+        raise click.UsageError(f'`--rc` value must be a positive integer, got `{rc}`.') from e
 
 
-def _resolve_target_branch(app: Application, release: str | None, yes: bool) -> str:
+def _resolve_target_branch(app: Application, release: str | None, yes: bool, current_branch: str) -> str:
     if release is not None:
         match = RELEASE_INPUT_REGEX.match(release)
         if match is None:
-            app.abort(f'Invalid `--release` value: `{release}`. Must look like `7.56` or `7.56.x`.')
+            raise click.UsageError(f'Invalid `--release` value: `{release}`. Must look like `7.56` or `7.56.x`.')
         return f'{match.group(1)}.x'
 
-    current_branch = app.repo.git.current_branch()
     if BRANCH_NAME_REGEX.match(current_branch) is None:
         app.abort(
             f'Current branch `{current_branch}` is not a release branch. '
@@ -262,21 +261,26 @@ def _resolve_target_branch(app: Application, release: str | None, yes: bool) -> 
     return current_branch
 
 
-def _branch_exists_on_origin(git: GitRepository, branch: str) -> bool:
+def _ensure_branch_on_origin(app: Application, branch: str) -> None:
     try:
-        output = git.capture('ls-remote', '--heads', 'origin', branch)
-    except OSError:
-        return False
-    return any(line.strip() for line in output.splitlines())
+        output = app.repo.git.capture('ls-remote', '--heads', 'origin', branch)
+    except OSError as e:
+        app.abort(f'Failed to query `origin` for branch `{branch}`: {e}')
+    if not any(line.strip() for line in output.splitlines()):
+        app.abort(f'Release branch `{branch}` does not exist on `origin`.')
 
 
-def _create_or_refresh_worktree(app: Application, worktree_path: Path, branch: str) -> None:
+def _create_worktree(app: Application, worktree_path: Path, branch: str) -> None:
     app.display_waiting(f'Creating worktree at `{worktree_path}` from `origin/{branch}`...')
     worktree_path.parent.ensure_dir_exists()
     try:
         app.repo.git.run('worktree', 'add', '-B', branch, str(worktree_path), f'origin/{branch}')
     except OSError as e:
-        app.abort(f'Failed to create worktree at `{worktree_path}`: {e}')
+        app.abort(
+            f'Failed to create worktree at `{worktree_path}`: {e}\n'
+            f'If a stale worktree is still on disk, remove it with: '
+            f'git worktree remove --force {worktree_path}'
+        )
     app.display_success('Done.')
 
 

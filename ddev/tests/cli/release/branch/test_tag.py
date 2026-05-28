@@ -129,7 +129,7 @@ def test_wrong_branch_no_release_aborts(ddev, basic_git):
 
 def test_invalid_release_value_aborts(ddev, git):
     result = ddev('release', 'branch', 'tag', '--release', 'not-a-release')
-    assert result.exit_code == 1, result.output
+    assert result.exit_code != 0, result.output
     assert 'Invalid `--release` value' in result.output
 
 
@@ -330,7 +330,7 @@ def test_rc_explicit_value_no_gap_no_warning(ddev, git):
 
 def test_rc_invalid_value_aborts(ddev, git):
     result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--rc', 'banana')
-    assert result.exit_code == 1, result.output
+    assert result.exit_code != 0, result.output
     assert '`--rc` value must be a positive integer' in result.output
 
 
@@ -441,8 +441,9 @@ def test_no_worktree_when_already_on_target_branch(ddev, git):
     """
     When the target branch matches the current branch, no worktree is created.
     """
-    ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', input='y\n')
+    result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', input='y\n')
 
+    assert result.exit_code == 0, result.output
     worktree_add_calls = [
         call
         for call in git.method_calls

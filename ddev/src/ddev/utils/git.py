@@ -130,7 +130,7 @@ class GitRepository:
         """
         cmd = ['tag', value]
         if message is not None:
-            cmd.extend(['--message', value])
+            cmd.extend(['--message', message])
         if ref is not None:
             cmd.append(ref)
         return self.capture(*cmd)
