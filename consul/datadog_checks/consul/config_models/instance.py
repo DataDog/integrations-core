@@ -78,6 +78,7 @@ class InstanceConfig(BaseModel):
     headers: Optional[MappingProxyType[str, Any]] = None
     health_checks_cache_size: Optional[int] = Field(None, ge=1)
     health_checks_cache_ttl: Optional[int] = Field(None, ge=1)
+    include_health_check_output: Optional[bool] = None
     kerberos_auth: Optional[Literal['required', 'optional', 'disabled']] = None
     kerberos_cache: Optional[str] = None
     kerberos_delegate: Optional[bool] = None

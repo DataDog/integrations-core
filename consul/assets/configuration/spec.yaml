@@ -157,6 +157,18 @@ files:
         display_default: false
         example: true
 
+    - name: include_health_check_output
+      fleet_configurable: true
+      description: |
+        Whether to include the Consul health check `Output` field (the script/HTTP response
+        output from Consul's health check API) in the body of emitted failure events.
+        This surfaces the check output directly in Datadog alerts to speed up root-cause
+        analysis. Only takes effect when `collect_health_checks` is enabled. The output is
+        truncated to 2000 characters to keep event payloads small.
+      value:
+        type: boolean
+        example: true
+
     - name: health_checks_cache_size
       fleet_configurable: true
       description: |

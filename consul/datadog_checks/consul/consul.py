@@ -44,6 +44,11 @@ except ImportError:
 
 NodeStatus = namedtuple('NodeStatus', ['node_id', 'service_name', 'service_tags_set', 'status'])
 
+# Max characters of Consul health check `Output` to include in alert event payloads.
+# Consul check outputs can be large (script stdout, full HTTP responses), so we truncate
+# to keep events small while still surfacing enough text for RCA.
+HEALTH_CHECK_OUTPUT_MAX_LEN = 2000
+
 
 class ConsulCheck(OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
@@ -115,6 +120,14 @@ class ConsulCheck(OpenMetricsBaseCheck):
         self.threads_count = self.instance.get('threads_count', self.init_config.get('threads_count', THREADS_COUNT))
         self.collect_health_checks = self.instance.get(
             'collect_health_checks', self.init_config.get('collect_health_checks', False)
+        )
+        # Whether to include the Consul health check `Output` field in emitted events.
+        # Enabled by default so that alerts include the check output text for RCA.
+        self.include_health_check_output = is_affirmative(
+            self.instance.get(
+                'include_health_check_output',
+                self.init_config.get('include_health_check_output', True),
+            )
         )
 
         if self.threads_count > 1:
@@ -407,19 +420,36 @@ class ConsulCheck(OpenMetricsBaseCheck):
                         self.gauge(HEALTH_CHECK_METRIC, status_value, tags=main_tags + node_tags)
                         self.health_checks[hc_id] = status_value
 
-                        if last_hc_value != status_value and status_value == 3:
+                        # Emit an event whenever a health check transitions into a non-OK state
+                        # (warning or critical). The Consul `Output` field is included in the
+                        # event body so that responders have the script/HTTP output available
+                        # directly in the alert, which speeds up root-cause analysis.
+                        if last_hc_value != status_value and status_value in (2, 3):
                             check_name = check.get("Name", "Consul Health Check")
-                            check_output = check.get("Output", "")
+                            check_output = check.get("Output", "") or ""
+                            if self.include_health_check_output:
+                                truncated_output = check_output[:HEALTH_CHECK_OUTPUT_MAX_LEN]
+                                if len(check_output) > HEALTH_CHECK_OUTPUT_MAX_LEN:
+                                    truncated_output += "... [truncated]"
+                            else:
+                                truncated_output = ""
+                            alert_type = "error" if status_value == 3 else "warning"
+                            msg_title = f"{check_name} {check_status.capitalize()}"
+                            msg_text = (
+                                f"Check {check_id} for service {service_name}, id: {service_id} "
+                                f"is {check_status} on node {node_name}."
+                            )
+                            if truncated_output:
+                                msg_text += f"\n\nOutput:\n```\n{truncated_output}\n```"
                             self.event(
                                 {
                                     "timestamp": timestamp(),
                                     "event_type": "consul.check_failed",
-                                    "alert_type": "error",
+                                    "alert_type": alert_type,
                                     "source_type_name": SOURCE_TYPE_NAME,
-                                    "msg_title": f"{check_name} Failed",
+                                    "msg_title": msg_title,
                                     "aggregation_key": "consul.status_check",
-                                    "msg_text": f"Check {check_id} for service {service_name}, id: {service_id}"
-                                    f"failed on node {node_name}: {check_output}",
+                                    "msg_text": msg_text,
                                     "tags": node_tags,
                                 }
                             )
