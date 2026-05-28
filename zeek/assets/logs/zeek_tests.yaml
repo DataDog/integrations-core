@@ -1366,9 +1366,7 @@ tests:
             type_id: 1
             uid: "2006380"
           attacks:
-            - sub_technique:
-                name: "Application_Layer_Protocol"
-              tactic:
+            - tactic:
                 name: "Command_And_Control"
                 uid: "TA0011"
               technique:
@@ -1404,6 +1402,112 @@ tests:
     message: '<134>May 11 17:59:59 test-system {"_path":"suricata_corelight","_system_name":"test-system","_write_ts":"2026-05-11T17:59:59.359532Z","ts":"2026-05-11T17:59:59.358114Z","uid":"CN4bklsrGiWMsQhg3","id.orig_h":"10.215.3.8","id.orig_p":65196,"id.resp_h":"10.69.5.8","id.resp_p":80,"id.vlan":1123,"proto":"tcp","service":"http","suri_id":"SOHaIDWJ5dBe","flow_id":2093130069465879,"tx_id":0,"community_id":"1:Y4yC2kKf1Cm0QUkA/aBLSDxepcY=","severity":1,"alert":{"action":"allowed","gid":1,"signature_id":2006380,"rev":17,"signature":"ET POLICY Outgoing Basic Auth Base64 HTTP Password detected unencrypted","category":"Potential Corporate Privacy Violation","severity":1,"metadata":["attack_target:Client_Endpoint","confidence:High","created_at:2026_04_01","deployment:Internal","deployment:Perimeter","mitre_tactic_id:TA0011","mitre_tactic_name:Command_And_Control","mitre_technique_id:T1071","mitre_technique_name:Application_Layer_Protocol","performance_impact:Low","signature_severity:Major","updated_at:2026_04_09"]}}'
     service: "suricata_corelight"
     status: "alert"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1778522399358
+ -
+  sample: "<134>May 11 17:59:59 test-system {\"_path\":\"suricata_corelight\",\"_system_name\":\"test-system\",\"_write_ts\":\"2026-05-11T17:59:59.359532Z\",\"ts\":\"2026-05-11T17:59:59.358114Z\",\"uid\":\"Dabc1234xyz\",\"id.orig_h\":\"10.215.3.8\",\"id.orig_p\":54321,\"id.resp_h\":\"10.69.5.9\",\"id.resp_p\":443,\"id.vlan\":1123,\"proto\":\"tcp\",\"service\":\"ssl\",\"suri_id\":\"SubtechTest01\",\"flow_id\":1111111111111111,\"tx_id\":0,\"community_id\":\"1:AAABBBCCCDDDEEE=\",\"severity\":2,\"alert\":{\"action\":\"allowed\",\"gid\":1,\"signature_id\":9999999,\"rev\":1,\"signature\":\"ET POLICY PowerShell Download\",\"category\":\"Potential Corporate Privacy Violation\",\"severity\":2,\"metadata\":[\"attack_target:Client_Endpoint\",\"mitre_tactic_id:TA0002\",\"mitre_tactic_name:Execution\",\"mitre_technique_id:T1059.001\",\"mitre_technique_name:Command_And_Scripting_Interpreter_PowerShell\",\"signature_severity:Major\"]}}"
+  service: "corelight"
+  result:
+    custom:
+      _path: "suricata_corelight"
+      _system_name: "test-system"
+      _write_ts: "2026-05-11T17:59:59.359532Z"
+      alert:
+        action: "allowed"
+        category: "Potential Corporate Privacy Violation"
+        gid: 1
+        metadata:
+         - "attack_target:Client_Endpoint"
+         - "mitre_tactic_id:TA0002"
+         - "mitre_tactic_name:Execution"
+         - "mitre_technique_id:T1059.001"
+         - "mitre_technique_name:Command_And_Scripting_Interpreter_PowerShell"
+         - "signature_severity:Major"
+        metadata_str: "attack_target:Client_Endpoint,mitre_tactic_id:TA0002,mitre_tactic_name:Execution,mitre_technique_id:T1059.001,mitre_technique_name:Command_And_Scripting_Interpreter_PowerShell,signature_severity:Major"
+        rev: 1
+        severity: 2
+        signature: "ET POLICY PowerShell Download"
+        signature_id: 9999999
+      alert_severity: "Medium"
+      community_id: "1:AAABBBCCCDDDEEE="
+      flow_id: 1111111111111111
+      id:
+        orig_h: "10.215.3.8"
+        orig_p: 54321
+        resp_h: "10.69.5.9"
+        resp_p: 443
+        vlan: 1123
+      mitre_subtechnique_suffix: "001"
+      network:
+        client:
+          ip: "10.215.3.8"
+          port: 54321
+        destination:
+          ip: "10.69.5.9"
+          port: 443
+      ocsf:
+        activity_id: 1
+        activity_name: "Create"
+        category_name: "Findings"
+        category_uid: 2
+        class_name: "Detection Finding"
+        class_uid: 2004
+        evidences:
+          - connection_info:
+              direction_id: 0
+              protocol_name: "ssl"
+            dst_endpoint:
+              ip: "10.69.5.9"
+              port: 443
+            src_endpoint:
+              ip: "10.215.3.8"
+              port: 54321
+        finding_info:
+          analytic:
+            name: "ET POLICY PowerShell Download"
+            type: "Rule"
+            type_id: 1
+            uid: "9999999"
+          attacks:
+            - sub_technique:
+                name: "Command_And_Scripting_Interpreter_PowerShell"
+                uid: "T1059.001"
+              tactic:
+                name: "Execution"
+                uid: "TA0002"
+              technique:
+                uid: "T1059"
+          title: "ET POLICY PowerShell Download"
+          types:
+           - "Potential Corporate Privacy Violation"
+          uid: "Dabc1234xyz"
+          uid_alt: "SubtechTest01"
+        is_alert: true
+        metadata:
+          event_code: "9999999"
+          log_provider: "Corelight"
+          product:
+            name: "Suricata"
+            vendor_name: "Corelight"
+          uid: "Dabc1234xyz"
+          version: "1.5.0"
+        risk_level: "High"
+        risk_level_id: 3
+        severity: "Medium"
+        severity_id: 3
+        status_detail: "allowed"
+        time: 1778522399358
+      proto: "tcp"
+      service: "ssl"
+      severity: 2
+      suri_id: "SubtechTest01"
+      ts: "2026-05-11T17:59:59.358114Z"
+      tx_id: 0
+      uid: "Dabc1234xyz"
+    message: '<134>May 11 17:59:59 test-system {"_path":"suricata_corelight","_system_name":"test-system","_write_ts":"2026-05-11T17:59:59.359532Z","ts":"2026-05-11T17:59:59.358114Z","uid":"Dabc1234xyz","id.orig_h":"10.215.3.8","id.orig_p":54321,"id.resp_h":"10.69.5.9","id.resp_p":443,"id.vlan":1123,"proto":"tcp","service":"ssl","suri_id":"SubtechTest01","flow_id":1111111111111111,"tx_id":0,"community_id":"1:AAABBBCCCDDDEEE=","severity":2,"alert":{"action":"allowed","gid":1,"signature_id":9999999,"rev":1,"signature":"ET POLICY PowerShell Download","category":"Potential Corporate Privacy Violation","severity":2,"metadata":["attack_target:Client_Endpoint","mitre_tactic_id:TA0002","mitre_tactic_name:Execution","mitre_technique_id:T1059.001","mitre_technique_name:Command_And_Scripting_Interpreter_PowerShell","signature_severity:Major"]}}'
+    service: "suricata_corelight"
+    status: "critical"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1778522399358

@@ -2052,7 +2052,15 @@ pipeline:
             - "[attack_target:Client_Endpoint, mitre_tactic_id:TA0002, mitre_tactic_name:Execution, mitre_technique_id:T1059.001, mitre_technique_name:Command_And_Scripting_Interpreter_PowerShell, signature_severity:Major]"
           grok:
             supportRules: ""
-            matchRules: 'rule .*?mitre_tactic_id:%{regex("[^,\\]]+"):mitre_tactic_uid},\s*mitre_tactic_name:%{regex("[^,\\]]+"):mitre_tactic_name},\s*mitre_technique_id:%{regex("[^,\\]]+"):mitre_technique_uid},\s*mitre_technique_name:%{regex("[^,\\]]+"):mitre_technique_name}%{data}'
+            matchRules: |
+              sub_technique .*?mitre_tactic_id:%{regex("[^,\\]]+"):mitre_tactic_uid},\s*mitre_tactic_name:%{regex("[^,\\]]+"):mitre_tactic_name},\s*mitre_technique_id:%{regex("[^.]+"):mitre_technique_base_uid}\.%{regex("[^,\\]]+"):mitre_subtechnique_suffix},\s*mitre_technique_name:%{regex("[^,\\]]+"):mitre_subtechnique_name}%{data}
+              base_technique .*?mitre_tactic_id:%{regex("[^,\\]]+"):mitre_tactic_uid},\s*mitre_tactic_name:%{regex("[^,\\]]+"):mitre_tactic_name},\s*mitre_technique_id:%{regex("[^,\\]]+"):mitre_technique_uid},\s*mitre_technique_name:%{regex("[^,\\]]+"):mitre_technique_name}%{data}
+        - type: string-builder-processor
+          name: Add mitre_subtechnique_uid
+          enabled: true
+          template: "%{mitre_technique_base_uid}.%{mitre_subtechnique_suffix}"
+          target: mitre_subtechnique_uid
+          replaceMissing: false
         - type: attribute-remapper
           name: Map `mitre_tactic_uid` to `ocsf.finding_info.attack.tactic.uid`
           enabled: true
@@ -2073,21 +2081,6 @@ pipeline:
           targetType: attribute
           preserveSource: false
           overrideOnConflict: true
-        - type: grok-parser
-          name: Split mitre_technique_uid into base technique and subtechnique parts
-          enabled: true
-          source: mitre_technique_uid
-          samples:
-            - "T1059.001"
-          grok:
-            supportRules: ""
-            matchRules: 'sub_technique %{regex("[^.]+"):mitre_technique_base_uid}\.%{data:mitre_subtechnique_suffix}'
-        - type: string-builder-processor
-          name: Add mitre_subtechnique_uid
-          enabled: true
-          template: "%{mitre_technique_base_uid}.%{mitre_subtechnique_suffix}"
-          target: mitre_subtechnique_uid
-          replaceMissing: false
         - type: attribute-remapper
           name: Map `mitre_technique_base_uid`, `mitre_technique_uid` to `ocsf.finding_info.attack.technique.uid`
           enabled: true
@@ -2107,7 +2100,7 @@ pipeline:
           sourceType: attribute
           target: ocsf.finding_info.attack.technique.name
           targetType: attribute
-          preserveSource: true
+          preserveSource: false
           overrideOnConflict: true
         - type: attribute-remapper
           name: Map `mitre_subtechnique_uid` to `ocsf.finding_info.attack.sub_technique.uid`
@@ -2120,10 +2113,10 @@ pipeline:
           preserveSource: false
           overrideOnConflict: true
         - type: attribute-remapper
-          name: Map `mitre_technique_name` to `ocsf.finding_info.attack.sub_technique.name`
+          name: Map `mitre_subtechnique_name` to `ocsf.finding_info.attack.sub_technique.name`
           enabled: true
           sources:
-            - mitre_technique_name
+            - mitre_subtechnique_name
           sourceType: attribute
           target: ocsf.finding_info.attack.sub_technique.name
           targetType: attribute
