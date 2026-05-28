@@ -10,7 +10,7 @@ import pytest
 from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolResultMessage
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.agentic_phase import AgenticPhase
-from ddev.ai.phases.base import PipelineContext
+from ddev.ai.phases.base import FlowServices
 from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import PhaseConfig, TaskConfig
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
@@ -135,7 +135,7 @@ def make_agent_phase(
         context_compact_threshold_pct=context_compact_threshold_pct,
     )
     checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
-    ctx = PipelineContext(
+    services = FlowServices(
         checkpoint_manager=checkpoint_manager,
         runtime_variables=runtime_variables or {},
         flow_variables=flow_variables or {},
@@ -148,7 +148,7 @@ def make_agent_phase(
         phase_id=phase_id,
         dependencies=dependencies or [],
         config=config,
-        ctx=ctx,
+        services=services,
         agent_builder=make_agent_builder(mock_agent, captured_agent_kwargs),
         goal_agent_builder=goal_agent_builder,
     )

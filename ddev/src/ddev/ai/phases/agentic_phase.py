@@ -14,7 +14,7 @@ from ddev.ai.agent.build import (
     make_goal_agent_builder,
     make_subagent_builder,
 )
-from ddev.ai.phases.base import Phase, PhaseOutcome, PipelineContext
+from ddev.ai.phases.base import FlowServices, Phase, PhaseOutcome
 from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
 from ddev.ai.phases.goal import GOAL_TASK_SUFFIX, GoalValidationError, render_goal_text, run_goal_loop
 from ddev.ai.phases.messages import PhaseFailedMessage
@@ -65,7 +65,7 @@ class AgenticPhase(Phase):
         phase_id: str,
         dependencies: list[str],
         config: PhaseConfig,
-        ctx: PipelineContext,
+        services: FlowServices,
         agent_builder: AgentBuilder,
         subagent_builder: SubagentBuilder | None = None,
         goal_agent_builder: GoalAgentBuilder | None = None,
@@ -74,7 +74,7 @@ class AgenticPhase(Phase):
             phase_id=phase_id,
             dependencies=dependencies,
             config=config,
-            ctx=ctx,
+            services=services,
         )
         self._agent_builder = agent_builder
         self._subagent_builder = subagent_builder
@@ -83,7 +83,7 @@ class AgenticPhase(Phase):
         self._total_input_tokens: int = 0
         self._total_output_tokens: int = 0
         self._subagent_log_dir = (
-            ctx.checkpoint_manager.root / "subagents" / phase_id if subagent_builder is not None else None
+            services.checkpoint_manager.root / "subagents" / phase_id if subagent_builder is not None else None
         )
 
     @classmethod
@@ -108,13 +108,13 @@ class AgenticPhase(Phase):
         phase_config: PhaseConfig,
         agents: dict[str, AgentConfig],
         agent_clients: dict[str, Any],
-        ctx: PipelineContext,
+        services: FlowServices,
         **_: Any,
     ) -> dict[str, Any]:
         if phase_config.agent is None:
             raise FlowConfigError(f"Phase {phase_id!r} (AgenticPhase) requires 'agent'")
         agent_config = agents[phase_config.agent]
-        file_registry = ctx.file_registry
+        file_registry = services.file_registry
 
         subagent_builder = None
         requires_subagent_builder = any(

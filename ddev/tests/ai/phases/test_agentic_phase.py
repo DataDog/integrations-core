@@ -375,10 +375,10 @@ def test_extra_init_kwargs_creates_subagent_builder_from_tool_metadata(
     tools: list[str],
     expected: bool,
 ) -> None:
-    from ddev.ai.phases.base import PipelineContext
+    from ddev.ai.phases.base import FlowServices
     from ddev.ai.phases.checkpoint import CheckpointManager
 
-    ctx = PipelineContext(
+    services = FlowServices(
         checkpoint_manager=CheckpointManager(flow_dir / "checkpoints.yaml"),
         runtime_variables={},
         flow_variables={},
@@ -390,7 +390,7 @@ def test_extra_init_kwargs_creates_subagent_builder_from_tool_metadata(
         phase_config=PhaseConfig(agent="writer", tasks=[TaskConfig(name="t1", prompt="Do the work.")]),
         agents={"writer": AgentConfig(tools=tools)},
         agent_clients={},
-        ctx=ctx,
+        services=services,
     )
 
     assert (kwargs["subagent_builder"] is not None) is expected
@@ -448,10 +448,10 @@ async def test_spawn_subagent_wiring(flow_dir, message_queue):
             ]
         )
 
-    from ddev.ai.phases.base import PipelineContext
+    from ddev.ai.phases.base import FlowServices
 
     checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
-    ctx = PipelineContext(
+    services = FlowServices(
         checkpoint_manager=checkpoint_manager,
         runtime_variables={},
         flow_variables={},
@@ -462,7 +462,7 @@ async def test_spawn_subagent_wiring(flow_dir, message_queue):
         phase_id="p1",
         dependencies=[],
         config=PhaseConfig(agent="writer", tasks=[TaskConfig(name="t1", prompt="Do the work.")]),
-        ctx=ctx,
+        services=services,
         agent_builder=agent_builder_fn,
         subagent_builder=mock_subagent_builder,
     )
@@ -500,10 +500,10 @@ def test_extra_init_kwargs_creates_goal_agent_builder_when_any_task_has_goal(
     tasks,
     expect_builder,
 ):
-    from ddev.ai.phases.base import PipelineContext
+    from ddev.ai.phases.base import FlowServices
     from ddev.ai.phases.checkpoint import CheckpointManager
 
-    ctx = PipelineContext(
+    services = FlowServices(
         checkpoint_manager=CheckpointManager(flow_dir / "checkpoints.yaml"),
         runtime_variables={},
         flow_variables={},
@@ -515,7 +515,7 @@ def test_extra_init_kwargs_creates_goal_agent_builder_when_any_task_has_goal(
         phase_config=PhaseConfig(agent="writer", tasks=tasks),
         agents={"writer": AgentConfig()},
         agent_clients={},
-        ctx=ctx,
+        services=services,
     )
     assert (kwargs["goal_agent_builder"] is not None) is expect_builder
 

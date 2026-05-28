@@ -20,7 +20,7 @@ from ddev.event_bus.orchestrator import AsyncProcessor, BaseMessage
 
 
 @dataclass(frozen=True)
-class PipelineContext:
+class FlowServices:
     """Shared pipeline-level infrastructure passed to every phase."""
 
     checkpoint_manager: CheckpointManager
@@ -69,20 +69,20 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         phase_id: str,
         dependencies: list[str],
         config: PhaseConfig,
-        ctx: PipelineContext,
+        services: FlowServices,
     ) -> None:
         super().__init__(name=phase_id)
         self._phase_id = phase_id
         self._dependencies = set(dependencies)
         self._remaining_dependencies = set(dependencies)
         self._config = config
-        self._checkpoint_manager = ctx.checkpoint_manager
-        self._runtime_variables = ctx.runtime_variables
-        self._flow_variables = ctx.flow_variables
-        self._config_dir = ctx.config_dir
-        self._file_registry = ctx.file_registry
-        self._callbacks = ctx.callbacks
-        self._logger = ctx.logger
+        self._checkpoint_manager = services.checkpoint_manager
+        self._runtime_variables = services.runtime_variables
+        self._flow_variables = services.flow_variables
+        self._config_dir = services.config_dir
+        self._file_registry = services.file_registry
+        self._callbacks = services.callbacks
+        self._logger = services.logger
         self._started_at: datetime | None = None
         self._resolver: Callable[[str], str] | None = None
         self._executed = False
@@ -119,8 +119,8 @@ class Phase(AsyncProcessor[PhaseTrigger]):
     def extra_init_kwargs(cls, **kwargs: Any) -> dict[str, Any]:
         """Override to inject subclass-specific kwargs into __init__ at construction time.
 
-        The orchestrator passes phase_id, phase_config, agents, agent_clients, and ctx
-        (PipelineContext) as keyword arguments. Subclasses declare the ones they need
+        The orchestrator passes phase_id, phase_config, agents, agent_clients, and services
+        (FlowServices) as keyword arguments. Subclasses declare the ones they need
         explicitly and accept the rest via **kwargs.
         """
         return {}

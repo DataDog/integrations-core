@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.phases.base import Phase, PhaseRegistry, PipelineContext
+from ddev.ai.phases.base import FlowServices, Phase, PhaseRegistry
 from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import FlowConfig, FlowConfigError
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
@@ -94,7 +94,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
 
         dependency_map: dict[str, list[str]] = {entry.phase: entry.dependencies for entry in config.flow}
 
-        ctx = PipelineContext(
+        services = FlowServices(
             checkpoint_manager=checkpoint_manager,
             runtime_variables=self._runtime_variables,
             flow_variables=config.variables,
@@ -114,7 +114,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
                 "phase_id": phase_id,
                 "dependencies": dependencies,
                 "config": phase_config,
-                "ctx": ctx,
+                "services": services,
             }
             phase_kwargs.update(
                 phase_cls.extra_init_kwargs(
@@ -122,7 +122,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
                     phase_config=phase_config,
                     agents=config.agents,
                     agent_clients=self._agent_clients,
-                    ctx=ctx,
+                    services=services,
                 )
             )
 
