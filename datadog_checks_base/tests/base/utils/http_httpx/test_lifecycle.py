@@ -31,4 +31,6 @@ def test_agentcheck_http_dispatch_returns_httpx_wrapper():
     from datadog_checks.base import AgentCheck
 
     check = AgentCheck('test', {}, [{'use_httpx': True}])
-    assert isinstance(check.http, HTTPXWrapper)
+    http = check.http
+    assert isinstance(http, HTTPXWrapper)
+    http.close()
