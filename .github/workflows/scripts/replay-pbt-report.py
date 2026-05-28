@@ -46,6 +46,8 @@ CATEGORY_DEFINITIONS = {
     "openmetrics-input-invariance": ("🔀", "OpenMetrics formatting changed output", "A semantically equivalent Prometheus/OpenMetrics text change affected emitted metrics."),
     "json-input-invariance": ("🧾", "JSON formatting changed output", "A semantically equivalent JSON formatting or key-order change affected emitted metrics."),
     "release-differential": ("🔁", "Changed vs latest release", "HEAD emits different normalized output than the latest released integration for the same replay fixture."),
+    "metadata-contract-missing": ("📋", "Emitted metric missing from metadata.csv", "A metric emitted by the check is missing from metadata.csv."),
+    "metadata-contract-type": ("📋", "Emitted metric metadata type mismatch", "A metric emitted by the check has a different type than metadata.csv declares."),
     "metadata-contract": ("📋", "Emitted metric metadata mismatch", "A metric emitted by the check is missing from metadata.csv or has a different declared type."),
     "asset-query-metadata": ("📊", "Asset query references undocumented metric", "A dashboard or monitor query references a metric that is not documented in metadata.csv."),
     "asset-query-replay-coverage": ("🧭", "Asset query not covered by fixture", "A dashboard or monitor query uses metrics or tags that this replay fixture did not emit."),
@@ -65,6 +67,8 @@ TRIAGE_GROUPS = {
         "description": "The check or integration assets appear to emit, document, or preserve behavior differently than expected.",
         "categories": {
             "release-differential",
+            "metadata-contract-missing",
+            "metadata-contract-type",
             "metadata-contract",
             "asset-query-metadata",
             "invalid-metric-values",
@@ -395,6 +399,8 @@ CATEGORY_NEXT_STEPS = {
     "openmetrics-input-invariance": "Compare the original and mutated OpenMetrics fixtures. If the mutation is semantically equivalent, inspect parser or check assumptions about text formatting.",
     "json-input-invariance": "Compare original and mutated JSON fixtures. If decoded JSON is equivalent, inspect code that depends on key order, whitespace, or string escaping.",
     "release-differential": "Decide whether the output change is intentional. If yes, update metadata/assets/tests or note it in the PR; if not, inspect the added/removed output collections.",
+    "metadata-contract-missing": "Add metadata.csv rows for emitted metrics that are valid, or stop emitting stale metrics.",
+    "metadata-contract-type": "Align the metadata.csv type with the emitted submission type, or fix the check to emit the documented type.",
     "metadata-contract": "Check metadata.csv for the emitted metric name and type. Add/fix metadata when the emitted metric is valid.",
     "asset-query-metadata": "Check the listed dashboard or monitor query. Add metadata.csv rows for valid metrics, or update stale asset queries.",
     "asset-query-replay-coverage": "Treat this as fixture coverage first. Check whether the replay fixture should exercise the listed dashboard/monitor metric and tags.",
@@ -657,6 +663,10 @@ def classify(row: dict[str, Any]) -> str:
         return "asset-query-metadata"
     if "test_asset_query_tags_are_seen_in_replay" in haystack or "asset-query-tags-seen-in-replay" in haystack:
         return "asset-query-replay-coverage"
+    if "metric type mismatches" in haystack or "metadata_type" in haystack:
+        return "metadata-contract-type"
+    if "emitted metrics missing from metadata.csv" in haystack:
+        return "metadata-contract-missing"
     if "test_emitted_metrics_match_metadata" in haystack or "metadata-emitted-metrics" in haystack or "metadata.csv" in haystack:
         return "metadata-contract"
     if "test_openmetrics_replay_coverage" in haystack or "openmetrics-coverage" in haystack:
@@ -1456,8 +1466,10 @@ CATEGORY_OWNERS = {
     "passed": "—",
     "failed-before-replay-pbt": "needs cache seeding",
     "skipped-missing-cache": "needs cache seeding",
-    "asset-query-metadata": "integration owner",
+    "metadata-contract-missing": "integration owner",
+    "metadata-contract-type": "integration owner",
     "metadata-contract": "integration owner",
+    "asset-query-metadata": "integration owner",
     "release-differential": "integration owner",
     "invalid-metric-values": "integration owner",
     "replay-nondeterminism": "integration owner",
@@ -1476,8 +1488,10 @@ CATEGORY_OWNERS = {
 CATEGORY_HEADLINE_LABELS = {
     "failed-before-replay-pbt": "Never ran (no replay cache)",
     "skipped-missing-cache": "Never ran (no replay cache)",
-    "asset-query-metadata": "Dashboard/monitor metric not in metadata.csv",
+    "metadata-contract-missing": "Emitted metric missing from metadata.csv",
+    "metadata-contract-type": "Emitted metric type differs from metadata.csv",
     "metadata-contract": "Emitted metric does not match metadata.csv",
+    "asset-query-metadata": "Dashboard/monitor metric not in metadata.csv",
     "release-differential": "Output changed vs latest release",
     "invalid-metric-values": "Invalid metric value (NaN/inf/negative)",
     "replay-nondeterminism": "Replay output not deterministic",
@@ -1492,6 +1506,30 @@ CATEGORY_HEADLINE_LABELS = {
     "other-failed": "Unclassified failure",
     "unknown": "Unknown",
 }
+
+CATEGORY_REPORT_ORDER = {
+    "metadata-contract-missing": 10,
+    "metadata-contract-type": 11,
+    "metadata-contract": 12,
+    "asset-query-metadata": 20,
+    "release-differential": 30,
+    "invalid-metric-values": 40,
+    "openmetrics-input-invariance": 50,
+    "json-input-invariance": 51,
+    "replay-nondeterminism": 60,
+    "ordering-only-nondeterminism": 61,
+    "tag-state-stability": 62,
+    "replay-harness": 70,
+    "asset-query-replay-coverage": 80,
+    "openmetrics-coverage": 81,
+    "unsupported-negative": 90,
+    "other-failed": 100,
+    "unknown": 101,
+}
+
+
+def _category_sort_key(category: str, count: int) -> tuple[int, int, str]:
+    return (CATEGORY_REPORT_ORDER.get(category, 1000), -count, category)
 
 
 def _category_owner(category: str) -> str:
@@ -1522,10 +1560,13 @@ def _build_headline_table(
         if category in {"failed-before-replay-pbt", "skipped-missing-cache"}
     )
 
-    other_categories = [
-        (category, count) for category, count in category_counts.most_common()
-        if category not in {"failed-before-replay-pbt", "skipped-missing-cache"}
-    ]
+    other_categories = sorted(
+        (
+            (category, count) for category, count in category_counts.items()
+            if category not in {"failed-before-replay-pbt", "skipped-missing-cache"}
+        ),
+        key=lambda item: _category_sort_key(item[0], item[1]),
+    )
     for category, count in other_categories:
         icon = CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS["unknown"])[0]
         rows.append((icon, _headline_label(category), count, _category_owner(category)))
@@ -1583,6 +1624,21 @@ def _metrics_from_short_errors(row: dict[str, Any]) -> list[str]:
     return seen
 
 
+def _metadata_contract_category(row: dict[str, Any]) -> str:
+    text = "\n".join(str(item).lower() for item in row.get("short_errors") or [])
+    if "metric type mismatches" in text or "metadata_type" in text:
+        return "metadata-contract-type"
+    if "emitted metrics missing from metadata.csv" in text:
+        return "metadata-contract-missing"
+    return "metadata-contract"
+
+
+def _failure_display_category(row: dict[str, Any]) -> str:
+    if row.get("category") == "metadata-contract":
+        return _metadata_contract_category(row)
+    return str(row.get("category", "unknown"))
+
+
 def _evidence_cell_for_target(
     row: dict[str, Any], error_groups_by_target: dict[str, list[dict[str, Any]]]
 ) -> str:
@@ -1629,10 +1685,12 @@ def _build_failures_to_fix(
     for group in error_groups:
         error_groups_by_target[str(group.get("target", ""))].append(group)
 
-    actionable_categories = Counter(row["category"] for row in actionable_failed_rows)
+    rows_by_category: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for row in actionable_failed_rows:
+        rows_by_category[_failure_display_category(row)].append(row)
     for category, grouped_rows in sorted(
-        ((category, [row for row in actionable_failed_rows if row["category"] == category]) for category in actionable_categories),
-        key=lambda item: (-len(item[1]), item[0]),
+        rows_by_category.items(),
+        key=lambda item: _category_sort_key(item[0], len(item[1])),
     ):
         icon, label, description = CATEGORY_DEFINITIONS.get(category, CATEGORY_DEFINITIONS["unknown"])
         owner = _category_owner(category)
@@ -1682,7 +1740,7 @@ def _build_failures_to_fix(
             evidence_groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
             for row, evidence in row_evidence:
                 evidence_groups[evidence].append(row)
-            lines.append("| Target(s) | Evidence | Batch |")
+            lines.append("| Target(s) | Failed Assertion | Batch |")
             lines.append("|---|---|---|")
             for evidence, rows_with_evidence in evidence_groups.items():
                 targets_cell = "<br/>".join(target_link_md(row) for row in rows_with_evidence)
@@ -1886,8 +1944,8 @@ def _build_openmetrics_coverage_section(
     lines.append("")
     lines.extend(
         [
-            "| Target | metadata.csv → emitted | Endpoint → emitted | Endpoint count | Method | Metadata count |",
-            "|---|---|---|---:|---|---:|",
+            "| Target | metadata.csv → emitted | Endpoint → emitted | Endpoint count | Metadata count |",
+            "|---|---|---|---:|---:|",
         ]
     )
     sorted_coverages = sorted(
@@ -1904,7 +1962,6 @@ def _build_openmetrics_coverage_section(
             f"| {coverage_bar_md(coverage.get('metadata_to_emitted_coverage'))} "
             f"| {coverage_bar_md(coverage.get('endpoint_to_emitted_coverage'))} "
             f"| {coverage.get('endpoint_count') or ''} "
-            f"| `{coverage.get('endpoint_mapping_method') or ''}` "
             f"| {coverage.get('metadata_count') or ''} |"
         )
     lines.append("")
@@ -2031,16 +2088,6 @@ def build_markdown(
     if current_url and not batch_runs:
         lines.extend([f"**This batch run:** [{current_id or 'current run'}]({current_url})", ""])
 
-    if batch_runs:
-        lines.extend(["## Batch runs", "", "| Batch | Conclusion | Link |", "|---|---|---|"])
-        for run in batch_runs:
-            run_id = md_escape(run.get("run_id", ""))
-            title = md_escape(run.get("display_title", ""))
-            conclusion = md_escape(run.get("conclusion", ""))
-            url = md_escape(run.get("url", ""))
-            lines.append(f"| `{run_id}` {title} | `{conclusion}` | [Open run]({url}) |")
-        lines.append("")
-
     lines.extend(_build_headline_table(status_counts, category_counts, total))
 
     if len(rows) == 1:
@@ -2065,6 +2112,15 @@ def build_markdown(
     lines.extend(_build_compare_agent_sections(rows))
     lines.extend(_build_openmetrics_coverage_section(coverages, warning_group_count))
     lines.extend(_build_targets_not_run_section(setup_failed_rows))
+    if batch_runs:
+        lines.extend(["## Batch runs", "", "| Batch | Conclusion | Link |", "|---|---|---|"])
+        for run in batch_runs:
+            run_id = md_escape(run.get("run_id", ""))
+            title = md_escape(run.get("display_title", ""))
+            conclusion = md_escape(run.get("conclusion", ""))
+            url = md_escape(run.get("url", ""))
+            lines.append(f"| `{run_id}` {title} | `{conclusion}` | [Open run]({url}) |")
+        lines.append("")
     lines.extend(_build_about_section(rows, findings, coverages, property_results))
     return "\n".join(lines) + "\n"
 
@@ -2260,7 +2316,6 @@ def build_html(
         f"<td>{coverage_bar_html(c.get('metadata_to_emitted_coverage'))}</td>"
         f"<td>{coverage_bar_html(c.get('endpoint_to_emitted_coverage'))}</td>"
         f"<td>{esc(c.get('endpoint_count'))}</td>"
-        f"<td><code>{esc(c.get('endpoint_mapping_method') or '')}</code></td>"
         f"<td>{esc(c.get('metadata_count'))}</td></tr>"
         for c in sorted(
             coverages,
@@ -2301,7 +2356,7 @@ table{{border-collapse:collapse;width:100%;font-size:13px;background:white}}td,t
 <section class='card'><h2>Property findings</h2><p>Errors are blocking property failures. Warnings are review or coverage signals. Repeated metric/tag rows are collapsed; use <code>findings.tsv</code> for raw rows.</p>{finding_cards}</section>
 <section class='card'><h2>Targets by workflow step</h2><p>This table shows both the mechanical workflow state and the separate replay/static validation statuses for each target.</p><table><thead><tr><th>Target</th><th>Pipeline state</th><th>Validation lanes</th><th>Status</th><th>Category</th><th>Summary</th><th>Batch</th></tr></thead><tbody>{target_rows}</tbody></table></section>
 <section class='card'><h2>Latest release comparison</h2><p>This section shows replay-backed comparisons between the fixture-producing integration version and the target ref. Differences should be reviewed as intentional or accidental behavior changes.</p><p><strong>Changed outputs</strong></p><table><thead><tr><th>Target</th><th>Record ref</th><th>Target ref</th><th>Collections</th></tr></thead><tbody>{changed_release_diff_rows}</tbody></table><details><summary>✅ Unchanged outputs</summary><table><thead><tr><th>Target</th><th>Record ref</th><th>Target ref</th></tr></thead><tbody>{unchanged_release_diff_rows}</tbody></table></details></section>
-<section class='card'><h2>OpenMetrics coverage</h2><p>Coverage rows are replay fixture quality signals sorted by lowest metadata.csv → emitted coverage first. Low coverage is not automatically an integration bug.</p><table><thead><tr><th>Target</th><th>metadata.csv → emitted</th><th>Endpoint → emitted</th><th>Endpoint count</th><th>Method</th><th>Metadata count</th></tr></thead><tbody>{coverage_rows}</tbody></table></section>
+<section class='card'><h2>OpenMetrics coverage</h2><p>Coverage rows are replay fixture quality signals sorted by lowest metadata.csv → emitted coverage first. Low coverage is not automatically an integration bug.</p><table><thead><tr><th>Target</th><th>metadata.csv → emitted</th><th>Endpoint → emitted</th><th>Endpoint count</th><th>Metadata count</th></tr></thead><tbody>{coverage_rows}</tbody></table></section>
 </main></body></html>"""
 
 def write_json(path: Path, data: Any) -> None:
