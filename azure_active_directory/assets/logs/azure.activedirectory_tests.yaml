@@ -397,7 +397,7 @@ tests:
           client:
             geoip: {}
             ip: "192.182.149.21"
-            port: 43210
+            port: "43210"
         ocsf:
           activity_id: 6
           activity_name: "Delete"
@@ -428,7 +428,7 @@ tests:
           severity_id: 1
           src_endpoint:
             ip: "192.182.149.21"
-            port: 43210
+            port: "43210"
           status: "Success"
           status_code: ""
           status_id: 1
