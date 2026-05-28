@@ -83,6 +83,21 @@ EXAMPLE_TAGS = [
 ]
 
 
+def _capture_dispatch(*args):
+    """Dispatch `git.capture(...)` mock calls by their first argument.
+
+    Tests can override individual subcommands via attributes on this function or by replacing
+    `git.capture.side_effect` outright. Defaulting to a per-subcommand mapping (instead of one
+    global return_value) keeps unrelated tests from silently masking new code paths.
+    """
+    if not args:
+        return ''
+    sub = args[0]
+    if sub == 'ls-remote':
+        return LS_REMOTE_OK
+    return ''
+
+
 @pytest.fixture
 def basic_git(mocker):
     mock_git = mocker.create_autospec(GitRepository)
@@ -90,9 +105,17 @@ def basic_git(mocker):
     # That's why we need a function that returns the mock.
     mocker.patch('ddev.repo.core.GitRepository', lambda _: mock_git)
     mocker.patch('ddev.cli.release.branch.tag.GitRepository', lambda _: mock_git)
-    # Default: branch exists on origin and ref-resolution succeeds.
-    mock_git.capture.return_value = LS_REMOTE_OK
+    mock_git.capture.side_effect = _capture_dispatch
     return mock_git
+
+
+def _worktree_subcommands(git, sub):
+    """Return the `git.run('worktree', <sub>, ...)` calls captured on the mock."""
+    return [
+        call
+        for call in git.method_calls
+        if call[0] == 'run' and len(call.args) >= 2 and call.args[0] == 'worktree' and call.args[1] == sub
+    ]
 
 
 @pytest.fixture
@@ -153,7 +176,7 @@ def test_release_branch_not_on_origin_aborts(ddev, git):
     """
     If the release branch is missing from origin, the command aborts.
     """
-    git.capture.return_value = ''
+    git.capture.side_effect = lambda *args: ''
     result = ddev('release', 'branch', 'tag', '--release', '7.99.x', '--final', input='y\n')
 
     assert result.exit_code == 1, result.output
@@ -358,16 +381,31 @@ def test_yes_with_pinned_rc(ddev, git):
     assert 'skips ahead' in result.output
 
 
+def _make_ref_dispatcher(rev_parse=None, is_ancestor=None):
+    """Build a `capture` side_effect that dispatches by subcommand for --ref tests."""
+
+    def dispatch(*args):
+        sub = args[0] if args else ''
+        if sub == 'ls-remote':
+            return LS_REMOTE_OK
+        if sub == 'rev-parse':
+            if isinstance(rev_parse, BaseException):
+                raise rev_parse
+            return rev_parse
+        if sub == 'merge-base':
+            if isinstance(is_ancestor, BaseException):
+                raise is_ancestor
+            return is_ancestor
+        return ''
+
+    return dispatch
+
+
 def test_ref_validates_and_tags_at_commit(ddev, git):
     """
     `--ref <commit>` tags that commit instead of the branch tip.
     """
-    # ls-remote, rev-parse, merge-base — all use capture; we side_effect them in order.
-    git.capture.side_effect = [
-        LS_REMOTE_OK,  # branch exists
-        'cafef00d\n',  # rev-parse --verify <ref>^{commit}
-        '',  # merge-base --is-ancestor (success = empty output)
-    ]
+    git.capture.side_effect = _make_ref_dispatcher(rev_parse='cafef00d\n', is_ancestor='')
     result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', '--ref', 'cafef00d', input='y\n')
 
     assert result.exit_code == 0, result.output
@@ -379,14 +417,14 @@ def test_ref_validates_and_tags_at_commit(ddev, git):
 
 
 def test_ref_does_not_resolve_aborts(ddev, git):
-    git.capture.side_effect = [LS_REMOTE_OK, OSError('bad ref')]
+    git.capture.side_effect = _make_ref_dispatcher(rev_parse=OSError('bad ref'))
     result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', '--ref', 'nope', input='y\n')
     assert result.exit_code == 1, result.output
     assert 'does not resolve to a commit' in result.output
 
 
 def test_ref_not_ancestor_aborts(ddev, git):
-    git.capture.side_effect = [LS_REMOTE_OK, 'badf00d\n', OSError('not ancestor')]
+    git.capture.side_effect = _make_ref_dispatcher(rev_parse='badf00d\n', is_ancestor=OSError('not ancestor'))
     result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', '--ref', 'badf00d', input='y\n')
     assert result.exit_code == 1, result.output
     assert 'is not an ancestor of' in result.output
@@ -401,20 +439,8 @@ def test_worktree_created_and_torn_down(ddev, git, mocker):
     result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', input='y\n')
 
     assert result.exit_code == 0, result.output
-
-    worktree_add_calls = [
-        call
-        for call in git.method_calls
-        if call[0] == 'run' and len(call.args) >= 2 and call.args[0] == 'worktree' and call.args[1] == 'add'
-    ]
-    assert len(worktree_add_calls) == 1, f'Expected exactly one worktree add, got: {worktree_add_calls}'
-
-    worktree_remove_calls = [
-        call
-        for call in git.method_calls
-        if call[0] == 'run' and len(call.args) >= 2 and call.args[0] == 'worktree' and call.args[1] == 'remove'
-    ]
-    assert len(worktree_remove_calls) == 1, f'Expected exactly one worktree remove, got: {worktree_remove_calls}'
+    assert len(_worktree_subcommands(git, 'add')) == 1
+    assert len(_worktree_subcommands(git, 'remove')) == 1
 
 
 def test_worktree_left_on_failure(ddev, git, mocker):
@@ -428,13 +454,7 @@ def test_worktree_left_on_failure(ddev, git, mocker):
 
     assert result.exit_code != 0
     assert 'Worktree left at' in result.output
-
-    worktree_remove_calls = [
-        call
-        for call in git.method_calls
-        if call[0] == 'run' and len(call.args) >= 2 and call.args[0] == 'worktree' and call.args[1] == 'remove'
-    ]
-    assert worktree_remove_calls == []
+    assert _worktree_subcommands(git, 'remove') == []
 
 
 def test_no_worktree_when_already_on_target_branch(ddev, git):
@@ -444,12 +464,7 @@ def test_no_worktree_when_already_on_target_branch(ddev, git):
     result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', input='y\n')
 
     assert result.exit_code == 0, result.output
-    worktree_add_calls = [
-        call
-        for call in git.method_calls
-        if call[0] == 'run' and len(call.args) >= 2 and call.args[0] == 'worktree' and call.args[1] == 'add'
-    ]
-    assert worktree_add_calls == []
+    assert _worktree_subcommands(git, 'add') == []
 
 
 def test_build_agent_yaml_already_updated_does_not_dispatch_workflow(ddev, git, mocker):

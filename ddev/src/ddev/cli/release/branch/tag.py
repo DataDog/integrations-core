@@ -15,6 +15,7 @@ from .create import BRANCH_NAME_REGEX, BUILD_AGENT_YAML_PATH, find_build_agent_t
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
+    from ddev.utils.github import PullRequest
 
 UPDATE_BUILD_AGENT_YAML_WORKFLOW = 'update-build-agent-yaml.yml'
 # The dd-octo-sts policy grants PR-writing credentials only to this workflow on master.
@@ -124,7 +125,7 @@ def tag(
         app.abort('`--final` and `--rc` are mutually exclusive.')
     is_rc = not final
 
-    pinned_rc = _parse_rc_value(app, rc) if is_rc else None
+    pinned_rc = _parse_rc_value(rc) if is_rc else None
 
     current_branch = app.repo.git.current_branch()
     target_branch = _resolve_target_branch(app, release, yes, current_branch)
@@ -234,7 +235,7 @@ def tag(
                 )
 
 
-def _parse_rc_value(app: Application, rc: str | None) -> int | None:
+def _parse_rc_value(rc: str | None) -> int | None:
     if rc is None or rc == RC_AUTO:
         return None
     try:
@@ -297,14 +298,14 @@ def _resolve_tag_ref(app: Application, git: GitRepository, target_branch: str, r
         return None
     try:
         commit_sha = git.capture('rev-parse', '--verify', f'{ref}^{{commit}}').strip()
-    except OSError:
-        app.abort(f'`--ref` value `{ref}` does not resolve to a commit.')
+    except OSError as e:
+        app.abort(f'`--ref` value `{ref}` does not resolve to a commit: {e}')
     try:
         git.capture('merge-base', '--is-ancestor', commit_sha, f'origin/{target_branch}')
-    except OSError:
+    except OSError as e:
         app.abort(
             f'`--ref` value `{ref}` (resolved to `{commit_sha}`) is not an ancestor of '
-            f'`origin/{target_branch}`. Refusing to tag a commit that is not on the release branch.'
+            f'`origin/{target_branch}` (or `git merge-base` itself failed): {e}'
         )
     return commit_sha
 
@@ -313,8 +314,6 @@ def _warn_on_rc_gap(next_rc: int, expected_rc: int, branch: str) -> None:
     if next_rc <= expected_rc:
         return
     missing = list(range(expected_rc, next_rc))
-    if not missing:
-        return
     missing_list = ', '.join(str(n) for n in missing)
     click.secho('!!! WARNING !!!', fg='yellow')
     click.secho(
@@ -329,7 +328,7 @@ def _warn_on_rc_gap(next_rc: int, expected_rc: int, branch: str) -> None:
     )
 
 
-def _check_open_prs(app: Application, target_branch: str, skip_open_pr_check: bool) -> list:
+def _check_open_prs(app: Application, target_branch: str, skip_open_pr_check: bool) -> list[PullRequest]:
     if skip_open_pr_check:
         return []
     httpx_logger = logging.getLogger('httpx')
