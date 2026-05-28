@@ -269,7 +269,7 @@ def test_check_only_with_prefilled_manifest(ddev, empty_repo):
 
 
 def test_check_only_writes_into_existing_author_prefixed_directory(ddev, empty_repo):
-    """Regression for finding #1: scaffolded files must land in the manifest's directory."""
+    """`check_only` scaffolded files land in the directory that holds the existing manifest."""
     integration_dir = empty_repo.path / 'partner_thing'
     _write_partner_manifest(integration_dir)
 
@@ -305,7 +305,7 @@ def test_check_only_manifestless_writes_overrides_for_integration_dir(ddev, empt
     )
     assert result.exit_code == 0, result.output
 
-    # Files must land in the existing partner_thing directory (round-1 finding #1).
+    # Files must land in the existing partner_thing directory, not a sibling stripped-name directory.
     assert (integration_dir / 'pyproject.toml').is_file()
     assert not (empty_repo.path / 'thing').exists()
 
@@ -316,7 +316,7 @@ def test_check_only_manifestless_writes_overrides_for_integration_dir(ddev, empt
 
 
 def test_bare_positional_aborts_with_subcommand_hint(ddev, empty_repo):
-    """Regression for finding #4: legacy `ddev create NAME` must point at the new subcommand surface."""
+    """A bare-positional `ddev create NAME` points the user at the new subcommand surface."""
     result = ddev('create', 'ACME')
     assert result.exit_code != 0
     # The error must mention at least one of the new subcommands so users have something to copy.
@@ -326,7 +326,7 @@ def test_bare_positional_aborts_with_subcommand_hint(ddev, empty_repo):
 
 
 def test_global_no_interactive_flag_aborts_when_required_flags_missing(ddev, empty_repo):
-    """Regression for finding #3: `--no-interactive` at the root must surface in `create`."""
+    """The root-group `--no-interactive` flag aborts `create` when required flags are missing."""
     result = ddev('--no-interactive', 'create', 'check', 'my_integration')
     assert result.exit_code != 0
     assert '--display-name' in result.output
@@ -343,7 +343,7 @@ def test_type_flag_without_value_aborts_with_targeted_message(ddev, empty_repo):
 
 
 def test_dry_run_tree_uses_pipe_middle_for_non_last_directory(ddev, empty_repo):
-    """Regression for round-2 finding #3: non-last directories at depth >= 2 must use `├──`, not `└──`."""
+    """Non-last directories at depth >= 2 in the dry-run tree use `├──`, not `└──`."""
     result = ddev(
         'create',
         'check',
@@ -364,10 +364,10 @@ def test_dry_run_tree_uses_pipe_middle_for_non_last_directory(ddev, empty_repo):
 
 
 def test_jmx_template_defaults_take_no_arguments(ddev, empty_repo, tmp_path):
-    """Regression for round-3 finding #1: the scaffolded JMX `defaults.py` must define zero-arg functions.
+    """The scaffolded JMX `defaults.py` defines zero-argument functions.
 
-    `instance.py` calls them as `getattr(defaults, ...)()` with no arguments; the old template's
-    `(field, value)` signatures crashed every JMX-scaffolded integration at runtime.
+    `instance.py` invokes them as `getattr(defaults, ...)()` with no arguments; a `(field, value)`
+    signature would crash every JMX-scaffolded integration at runtime with `TypeError`.
     """
     import importlib.util
     import inspect
@@ -405,7 +405,7 @@ def test_jmx_template_defaults_take_no_arguments(ddev, empty_repo, tmp_path):
 
 
 def test_type_flag_consumes_flag_shaped_value_as_missing(ddev, empty_repo):
-    """Regression for round-3 finding #2: `--type --dry-run` must report the missing value, not parse `--dry-run`."""
+    """A flag-shaped token following `--type` is treated as a missing value, not parsed as the type."""
     result = ddev('create', 'my_integration', '--type', '--dry-run')
     assert result.exit_code != 0
     # The targeted "requires a value" message must fire, not the generic "Unknown integration type".
@@ -414,7 +414,7 @@ def test_type_flag_consumes_flag_shaped_value_as_missing(ddev, empty_repo):
 
 
 def test_check_only_non_object_manifest_aborts(ddev, empty_repo):
-    """Regression for round-3 finding #5: a JSON manifest that is not an object must abort cleanly."""
+    """A `manifest.json` whose top-level JSON is not an object aborts with a clear message."""
     integration_dir = empty_repo.path / 'partner_thing'
     integration_dir.mkdir()
     (integration_dir / 'manifest.json').write_text('["not", "an", "object"]')
@@ -432,7 +432,7 @@ def test_check_only_non_object_manifest_aborts(ddev, empty_repo):
 def test_check_only_partial_write_failure_does_not_recommend_deleting_directory(
     ddev, empty_repo, monkeypatch, tmp_path
 ):
-    """Regression for round-3 finding #7: a partial-write failure on `check_only` must list scaffolded files, not the directory."""
+    """`check_only` partial-write errors list scaffolded files instead of recommending directory deletion."""
     integration_dir = empty_repo.path / 'partner_thing'
     integration_dir.mkdir()
     (integration_dir / 'manifest.json').write_text(
