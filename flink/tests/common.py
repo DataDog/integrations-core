@@ -45,4 +45,13 @@ METRICS = [
         "type": AggregatorStub.GAUGE,
         "tags": TAGS + ["tm_id:tm-1"],
     },
+    # Locks in the raw `PerSecond` → DD-side `PerSec` rename so the
+    # asymmetry between Flink's emitted name and metadata.csv doesn't
+    # silently drop the throughput metric.
+    {
+        "name": "task.numRecordsOutPerSec",
+        "value": 42.5,
+        "type": AggregatorStub.GAUGE,
+        "tags": TAGS + ["tm_id:tm-1", "job_name:wordcount", "task_name:Source: KafkaSource", "subtask_index:0"],
+    },
 ]

@@ -96,7 +96,10 @@ METRIC_MAP = {
     'flink_task_numRecordsIn': 'task.numRecordsIn',
     'flink_task_numRecordsInPerSecond': 'task.numRecordsInPerSecond',
     'flink_task_numRecordsOut': 'task.numRecordsOut',
-    'flink_task_numRecordsOutPerSec': 'task.numRecordsOutPerSec',
+    # Flink emits this rate metric as `numRecordsOutPerSecond` in the raw
+    # Prometheus output; metadata.csv historically documents the DD-side
+    # name with the truncated `PerSec` suffix, so map between the two.
+    'flink_task_numRecordsOutPerSecond': 'task.numRecordsOutPerSec',
     # Operator
     'flink_operator_commitsFailed': 'operator.commitsFailed',
     'flink_operator_commitsSucceeded': 'operator.commitsSucceeded',
@@ -108,6 +111,6 @@ METRIC_MAP = {
     'flink_operator_numRecordsIn': 'operator.numRecordsIn',
     'flink_operator_numRecordsInPerSecond': 'operator.numRecordsInPerSecond',
     'flink_operator_numRecordsOut': 'operator.numRecordsOut',
-    'flink_operator_numRecordsOutPerSec': 'operator.numRecordsOutPerSec',
+    'flink_operator_numRecordsOutPerSecond': 'operator.numRecordsOutPerSec',
     'flink_operator_numSplitsProcessed': 'operator.numSplitsProcessed',
 }
