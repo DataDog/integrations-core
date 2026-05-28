@@ -2049,7 +2049,7 @@ pipeline:
             - "[attack_target:Client_Endpoint, confidence:High, created_at:2026_04_01, deployment:Internal, deployment:Perimeter, mitre_tactic_id:TA0011, mitre_tactic_name:Command_And_Control, mitre_technique_id:T1071, mitre_technique_name:Application_Layer_Protocol, performance_impact:Low, signature_severity:Major, updated_at:2026_04_09]"
           grok:
             supportRules: ""
-            matchRules: 'rule %{data}mitre_tactic_id:%{word:mitre_tactic_uid},\s*mitre_tactic_name:%{word:mitre_tactic_name},\s*mitre_technique_id:%{word:mitre_technique_uid},\s*mitre_technique_name:%{word:mitre_technique_name}%{data}'
+            matchRules: 'rule .*?mitre_tactic_id:%{word:mitre_tactic_uid},\s*mitre_tactic_name:%{word:mitre_tactic_name},\s*mitre_technique_id:%{word:mitre_technique_uid},\s*mitre_technique_name:%{word:mitre_technique_name}%{data}'
         - type: attribute-remapper
           name: Map `mitre_tactic_uid` to `ocsf.finding_info.attack.tactic.uid`
           enabled: true
