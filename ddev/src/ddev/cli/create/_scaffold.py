@@ -349,7 +349,6 @@ def render(
     *,
     location: str | None,
     dry_run: bool,
-    quiet: bool,
     include_manifest: bool,
     extra_fields: dict[str, Any] | None = None,
     target_integration_dir: str | None = None,
@@ -382,15 +381,15 @@ def render(
     )
 
     if dry_run:
-        if quiet:
-            app.display_info(f'Will create `{integration_dir}`')
+        if app.quiet:
+            app.display(f'Will create `{integration_dir}`')
         else:
             app.display_info(f'Will create in `{root}`:')
             _display_tree(app, root, files)
     else:
         _write_files_with_cleanup_hint(app, files, integration_dir, integration_type)
-        if quiet:
-            app.display_info(f'Created `{integration_dir}`')
+        if app.quiet:
+            app.display(f'Created `{integration_dir}`')
         else:
             app.display_info(f'Created in `{root}`:')
             _display_tree(app, root, files)

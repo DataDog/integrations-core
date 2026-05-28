@@ -6,6 +6,17 @@ from __future__ import annotations
 import re
 from datetime import datetime, timezone
 
+VALID_INTEGRATION_NAME = re.compile(r'^[A-Z0-9](?:[A-Z0-9._\- ]*[A-Z0-9])?$', re.IGNORECASE)
+
+
+def is_valid_integration_name(name: str) -> bool:
+    """Return True iff `name` is acceptable to `normalize_project_name` / scaffold path templating.
+
+    Must contain only ASCII letters/digits, dots, hyphens, underscores, or spaces, and must
+    begin and end with an alphanumeric character.
+    """
+    return bool(VALID_INTEGRATION_NAME.match(name))
+
 
 def normalize_package_name(name: str) -> str:
     """Lowercase and collapse separators to underscore (used for directory and Python package names)."""

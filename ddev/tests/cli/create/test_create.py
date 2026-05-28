@@ -148,6 +148,29 @@ def test_datadog_prefix_rejected(ddev, empty_repo):
     assert 'cannot start with' in result.output
 
 
+@pytest.mark.parametrize('bad_name', ['_my_thing', 'my_thing_', 'foo-', '.bar', 'baz.', 'a@b', 'a/b'])
+def test_invalid_integration_name_aborts(ddev, empty_repo, bad_name):
+    """Names with leading/trailing non-alphanumerics or disallowed characters abort before any scaffolding.
+
+    Names starting with a dash are blocked earlier by click's option parser; this test covers the
+    full surface our own validator owns.
+    """
+    result = ddev(
+        'create',
+        'check',
+        bad_name,
+        '--display-name',
+        'My Integration',
+        '--metrics-prefix',
+        'my_integration.',
+        '--platforms',
+        'linux',
+    )
+    assert result.exit_code != 0
+    assert 'Invalid integration name' in result.output
+    assert bad_name in result.output
+
+
 def test_existing_directory_aborts(ddev, empty_repo):
     (empty_repo.path / 'my_integration').mkdir()
     result = ddev(
@@ -342,6 +365,26 @@ def test_type_flag_without_value_aborts_with_targeted_message(ddev, empty_repo):
     assert 'requires a value' in result.output
 
 
+def test_global_quiet_suppresses_tree_and_keeps_headline(ddev, empty_repo):
+    """`ddev -q create ...` suppresses the file-tree printout but still emits the one-line `Created` headline."""
+    result = ddev(
+        '-q',
+        'create',
+        'check',
+        'my_integration',
+        '--display-name',
+        'My Integration',
+        '--metrics-prefix',
+        'my_integration.',
+        '--platforms',
+        'linux',
+    )
+    assert result.exit_code == 0, result.output
+    assert 'my_integration' in result.output
+    # The full tree must NOT appear in quiet mode.
+    assert '└──' not in result.output and '├──' not in result.output
+
+
 def test_dry_run_tree_uses_pipe_middle_for_non_last_directory(ddev, empty_repo):
     """Non-last directories at depth >= 2 in the dry-run tree use `├──`, not `└──`."""
     result = ddev(
@@ -429,12 +472,20 @@ def test_check_only_non_object_manifest_aborts(ddev, empty_repo):
     assert 'does not contain a JSON object' in result.output
 
 
-@pytest.mark.parametrize('empty_name', ['""', '"   "'])
-def test_check_only_empty_author_name_aborts(ddev, empty_repo, empty_name):
-    """An empty or whitespace-only `author.name` aborts before any path computation."""
+@pytest.mark.parametrize(
+    'json_author_name',
+    [
+        '""',  # empty
+        '"   "',  # whitespace-only
+        '"!@#$"',  # all-symbol -> normalize_display_name collapses to ""
+        '"   !!!  "',  # whitespace + all-symbol
+    ],
+)
+def test_check_only_rejects_unusable_author_name(ddev, empty_repo, json_author_name):
+    """Author names that normalize to an empty value abort before any path computation."""
     integration_dir = empty_repo.path / 'partner_thing'
     integration_dir.mkdir()
-    (integration_dir / 'manifest.json').write_text(f'{{"author": {{"name": {empty_name}}}}}')
+    (integration_dir / 'manifest.json').write_text(f'{{"author": {{"name": {json_author_name}}}}}')
 
     result = ddev(
         'create',
@@ -448,28 +499,13 @@ def test_check_only_empty_author_name_aborts(ddev, empty_repo, empty_name):
     assert not (integration_dir / 'pyproject.toml').exists()
 
 
-def test_check_only_partial_write_failure_does_not_recommend_deleting_directory(
-    ddev, empty_repo, monkeypatch, tmp_path
-):
+def test_check_only_partial_write_failure_does_not_recommend_deleting_directory(ddev, empty_repo, fail_on_second_write):
     """`check_only` partial-write errors list scaffolded files instead of recommending directory deletion."""
     integration_dir = empty_repo.path / 'partner_thing'
     integration_dir.mkdir()
     (integration_dir / 'manifest.json').write_text(
         json.dumps({'author': {'name': 'Partner', 'support_email': 'p@p.com'}})
     )
-
-    from ddev.cli.create import _scaffold as scaffold_module
-
-    original_write = scaffold_module.TemplateFile.write
-    call_count = {'n': 0}
-
-    def flaky_write(self):
-        call_count['n'] += 1
-        if call_count['n'] == 2:
-            raise PermissionError(13, 'simulated mid-write failure')
-        return original_write(self)
-
-    monkeypatch.setattr(scaffold_module.TemplateFile, 'write', flaky_write)
 
     result = ddev(
         'create',
@@ -484,21 +520,8 @@ def test_check_only_partial_write_failure_does_not_recommend_deleting_directory(
     assert 'scaffolded files' in result.output or 'No files were written' in result.output
 
 
-def test_non_check_only_partial_write_failure_recommends_deleting_directory(ddev, empty_repo, monkeypatch):
-    """Sanity: for `check` (and other types where the dir was freshly created), the message stays directory-scoped."""
-    from ddev.cli.create import _scaffold as scaffold_module
-
-    original_write = scaffold_module.TemplateFile.write
-    call_count = {'n': 0}
-
-    def flaky_write(self):
-        call_count['n'] += 1
-        if call_count['n'] == 2:
-            raise PermissionError(13, 'simulated mid-write failure')
-        return original_write(self)
-
-    monkeypatch.setattr(scaffold_module.TemplateFile, 'write', flaky_write)
-
+def test_non_check_only_partial_write_failure_recommends_deleting_directory(ddev, empty_repo, fail_on_second_write):
+    """For `check` (and other types where the dir was freshly created), the message stays directory-scoped."""
     result = ddev(
         'create',
         'check',

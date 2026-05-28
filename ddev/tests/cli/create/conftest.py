@@ -31,3 +31,24 @@ def read_config(empty_repo) -> Callable[[], dict]:
         return tomllib.loads((empty_repo.path / '.ddev' / 'config.toml').read_text())
 
     return _read
+
+
+@pytest.fixture
+def fail_on_second_write(monkeypatch):
+    """Make `TemplateFile.write` raise `PermissionError` on its second invocation per test.
+
+    Lets a test exercise the partial-write failure path without depending on a real
+    filesystem permission flip mid-scaffold.
+    """
+    from ddev.cli.create import _scaffold as scaffold_module
+
+    original_write = scaffold_module.TemplateFile.write
+    call_count = {'n': 0}
+
+    def flaky_write(self):
+        call_count['n'] += 1
+        if call_count['n'] == 2:
+            raise PermissionError(13, 'simulated mid-write failure')
+        return original_write(self)
+
+    monkeypatch.setattr(scaffold_module.TemplateFile, 'write', flaky_write)

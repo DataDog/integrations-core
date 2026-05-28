@@ -12,6 +12,8 @@ bodies so ``ddev create --help`` stays fast.
 
 from __future__ import annotations
 
+import enum
+
 import click
 
 from ddev.cli.create.check import check
@@ -72,7 +74,8 @@ class _CreateGroup(click.Group):
                 f'Use the manifest-less workflow described at {CONFLUENCE_NO_MANIFEST_URL}.'
             )
 
-        # Narrowed by the two preceding `is` / `is None` branches; both call NoReturn `app.abort`.
+        # mypy doesn't propagate `app.abort`'s NoReturn through the typed `ctx.obj`
+        # assignment, so narrow explicitly here.
         assert isinstance(legacy_type, str)
         target = LEGACY_TYPE_TO_SUBCOMMAND.get(legacy_type)
         if target is None:
@@ -92,8 +95,14 @@ class _CreateGroup(click.Group):
         return subcommand.name, subcommand, cleaned
 
 
-# Sentinel: ``--type``/``-t`` was passed but no value followed (e.g. trailing ``--type``).
-_MISSING_TYPE_VALUE: object = object()
+class _TypeFlagSentinel(enum.Enum):
+    """Nominal sentinel type so mypy can narrow ``_extract_legacy_type``'s return value."""
+
+    MISSING = 'missing'
+
+
+# Sentinel: ``--type`` / ``-t`` was passed but no value followed (e.g. trailing ``--type``).
+_MISSING_TYPE_VALUE: _TypeFlagSentinel = _TypeFlagSentinel.MISSING
 
 # Recognised spellings of the deprecated ``--type`` / ``-t`` flag.
 # Used by both ``_extract_legacy_type`` and ``_strip_type_flag``; update once if a
@@ -102,7 +111,7 @@ _TYPE_FLAG_LITERALS: tuple[str, ...] = ('--type', '-t')
 _TYPE_FLAG_EQUALS_PREFIXES: tuple[str, ...] = ('--type=', '-t=')
 
 
-def _extract_legacy_type(args: list[str]) -> str | object | None:
+def _extract_legacy_type(args: list[str]) -> str | _TypeFlagSentinel | None:
     """Return the `--type` / `-t` value from ``args``.
 
     Distinguishes three outcomes:

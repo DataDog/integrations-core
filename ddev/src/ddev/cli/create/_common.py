@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, Any, Callable
 
 import click
 
-from ddev.cli.create._naming import normalize_package_name
+from ddev.cli.create._naming import is_valid_integration_name, normalize_package_name
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
@@ -39,7 +39,6 @@ def create_options(f: Callable[..., Any]) -> Callable[..., Any]:
         help='Generate a `manifest.json` (legacy behaviour).',
     )(f)
     f = click.option('--dry-run', '-n', is_flag=True, help='Only show what would be created.')(f)
-    f = click.option('--quiet', '-q', is_flag=True, help='Show less output.')(f)
     f = click.option('--location', '-l', default=None, help='The directory where files will be written.')(f)
     f = click.option('--platforms', default=None, help='Comma-separated list of `linux,windows,mac_os`.')(f)
     f = click.option('--metrics-prefix', default=None, help='Metric namespace (e.g. `myintegration.`).')(f)
@@ -68,14 +67,12 @@ def run_subcommand(
     metrics_prefix: str | None,
     platforms_csv: str | None,
     location: str | None,
-    quiet: bool,
     dry_run: bool,
     include_manifest: bool,
     skip_manifest: bool,
 ) -> None:
     """Single entry point shared by all per-type subcommands."""
-    if name.lower().startswith('datadog'):
-        app.abort('Integration names cannot start with `datadog`.')
+    _validate_integration_name(app, name)
 
     if skip_manifest and include_manifest:
         app.abort('`--skip-manifest` and `--include-manifest` are mutually exclusive.')
@@ -97,7 +94,6 @@ def run_subcommand(
     render_kwargs: dict[str, Any] = {
         'location': location,
         'dry_run': dry_run,
-        'quiet': quiet,
         'include_manifest': include_manifest,
         'extra_fields': extra_fields,
         'target_integration_dir': target_integration_dir,
@@ -263,12 +259,27 @@ def _resolve_check_only_inputs(
         app.abort(f'`{manifest_path}` does not contain a JSON object')
 
     author_raw = (manifest_data.get('author') or {}).get('name')
-    author = author_raw.strip() if isinstance(author_raw, str) else None
-    if not author:
+    author = (author_raw or '').strip() if isinstance(author_raw, str) else ''
+    # Normalize first so an all-symbol author (e.g. "!@#$") collapses to "" and is rejected
+    # by the same guard as a truly empty name. A passing value is non-empty and underscore-safe.
+    author_normalized = normalize_display_name(author)
+    if not author_normalized:
         app.abort('Unable to determine author from manifest')
 
-    author_normalized = normalize_display_name(author)
     stripped = target_integration_dir.removeprefix(f'{author_normalized}_')
 
     fields = prefill_check_only_fields(manifest_data, stripped)
     return fields, target_integration_dir
+
+
+def _validate_integration_name(app: Application, name: str) -> None:
+    """Reject names that would break path templating, package name normalization, or policy."""
+    if not name:
+        app.abort('Integration name must not be empty.')
+    if not is_valid_integration_name(name):
+        app.abort(
+            f'Invalid integration name {name!r}. Names must contain only ASCII letters, digits, '
+            "dots, hyphens, underscores, or spaces, and must begin and end with an alphanumeric character."
+        )
+    if name.lower().startswith('datadog'):
+        app.abort('Integration names cannot start with `datadog`.')
