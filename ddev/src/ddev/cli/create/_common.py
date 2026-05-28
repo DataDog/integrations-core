@@ -262,8 +262,9 @@ def _resolve_check_only_inputs(
     if not isinstance(manifest_data, dict):
         app.abort(f'`{manifest_path}` does not contain a JSON object')
 
-    author = (manifest_data.get('author') or {}).get('name')
-    if author is None:
+    author_raw = (manifest_data.get('author') or {}).get('name')
+    author = author_raw.strip() if isinstance(author_raw, str) else None
+    if not author:
         app.abort('Unable to determine author from manifest')
 
     author_normalized = normalize_display_name(author)

@@ -92,21 +92,17 @@ class _CreateGroup(click.Group):
         return subcommand.name, subcommand, cleaned
 
 
-class _MissingTypeValue:
-    """Sentinel: ``--type``/``-t`` was passed without a value (e.g. trailing ``--type``)."""
+# Sentinel: ``--type``/``-t`` was passed but no value followed (e.g. trailing ``--type``).
+_MISSING_TYPE_VALUE: object = object()
 
-    _instance: _MissingTypeValue | None = None
-
-    def __new__(cls) -> _MissingTypeValue:
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
-
-
-_MISSING_TYPE_VALUE = _MissingTypeValue()
+# Recognised spellings of the deprecated ``--type`` / ``-t`` flag.
+# Used by both ``_extract_legacy_type`` and ``_strip_type_flag``; update once if a
+# new spelling is ever added.
+_TYPE_FLAG_LITERALS: tuple[str, ...] = ('--type', '-t')
+_TYPE_FLAG_EQUALS_PREFIXES: tuple[str, ...] = ('--type=', '-t=')
 
 
-def _extract_legacy_type(args: list[str]) -> str | _MissingTypeValue | None:
+def _extract_legacy_type(args: list[str]) -> str | object | None:
     """Return the `--type` / `-t` value from ``args``.
 
     Distinguishes three outcomes:
@@ -116,7 +112,7 @@ def _extract_legacy_type(args: list[str]) -> str | _MissingTypeValue | None:
     """
     iterator = iter(args)
     for token in iterator:
-        if token in ('--type', '-t'):
+        if token in _TYPE_FLAG_LITERALS:
             value = next(iterator, _MISSING_TYPE_VALUE)
             # If the next token is itself a flag (e.g. `--type --dry-run`), treat the
             # value as missing — the user clearly didn't intend to pass `--dry-run`
@@ -124,10 +120,9 @@ def _extract_legacy_type(args: list[str]) -> str | _MissingTypeValue | None:
             if isinstance(value, str) and value.startswith('-'):
                 return _MISSING_TYPE_VALUE
             return value
-        if token.startswith('--type='):
-            return token.split('=', 1)[1]
-        if token.startswith('-t='):
-            return token[3:]
+        for prefix in _TYPE_FLAG_EQUALS_PREFIXES:
+            if token.startswith(prefix):
+                return token[len(prefix) :]
         if _is_concatenated_short_type(token):
             return token[2:]
     return None
@@ -149,10 +144,10 @@ def _strip_type_flag(args: list[str]) -> list[str]:
         if skip_next:
             skip_next = False
             continue
-        if token in ('--type', '-t'):
+        if token in _TYPE_FLAG_LITERALS:
             skip_next = True
             continue
-        if token.startswith(('--type=', '-t=')):
+        if token.startswith(_TYPE_FLAG_EQUALS_PREFIXES):
             continue
         if _is_concatenated_short_type(token):
             continue

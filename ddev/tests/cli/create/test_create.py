@@ -429,6 +429,25 @@ def test_check_only_non_object_manifest_aborts(ddev, empty_repo):
     assert 'does not contain a JSON object' in result.output
 
 
+@pytest.mark.parametrize('empty_name', ['""', '"   "'])
+def test_check_only_empty_author_name_aborts(ddev, empty_repo, empty_name):
+    """An empty or whitespace-only `author.name` aborts before any path computation."""
+    integration_dir = empty_repo.path / 'partner_thing'
+    integration_dir.mkdir()
+    (integration_dir / 'manifest.json').write_text(f'{{"author": {{"name": {empty_name}}}}}')
+
+    result = ddev(
+        'create',
+        'check-only',
+        'partner_thing',
+        '--include-manifest',
+    )
+    assert result.exit_code != 0
+    assert 'Unable to determine author from manifest' in result.output
+    # No scaffolded files must have escaped to the filesystem root or anywhere outside the integration.
+    assert not (integration_dir / 'pyproject.toml').exists()
+
+
 def test_check_only_partial_write_failure_does_not_recommend_deleting_directory(
     ddev, empty_repo, monkeypatch, tmp_path
 ):
