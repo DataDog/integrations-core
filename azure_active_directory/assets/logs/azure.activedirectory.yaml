@@ -596,17 +596,6 @@ pipeline:
             - 15.113.255.209
             - 15.113.255.209:21341
         - type: attribute-remapper
-          name: Map `ocsf.src_endpoint.port` to `ocsf.src_endpoint.port`
-          enabled: true
-          sources:
-            - ocsf.src_endpoint.port
-          sourceType: attribute
-          target: ocsf.src_endpoint.port
-          targetType: attribute
-          targetFormat: integer
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
           name: Map `properties.resultReason` to `ocsf.status_code`
           enabled: true
           sources:
@@ -1089,17 +1078,6 @@ pipeline:
           samples:
             - 15.113.255.209
             - 15.113.255.209:21341
-        - type: attribute-remapper
-          name: Map `ocsf.src_endpoint.port` to `ocsf.src_endpoint.port`
-          enabled: true
-          sources:
-            - ocsf.src_endpoint.port
-          sourceType: attribute
-          target: ocsf.src_endpoint.port
-          targetType: attribute
-          targetFormat: integer
-          preserveSource: false
-          overrideOnConflict: false
         - type: attribute-remapper
           name: Map `properties.deviceDetail.operatingSystem` to `ocsf.src_endpoint.os.name`
           enabled: true
@@ -1970,17 +1948,6 @@ pipeline:
           samples:
             - 15.113.255.209
             - 15.113.255.209:21341
-        - type: attribute-remapper
-          name: Map `ocsf.src_endpoint.port` to `ocsf.src_endpoint.port`
-          enabled: true
-          sources:
-            - ocsf.src_endpoint.port
-          sourceType: attribute
-          target: ocsf.src_endpoint.port
-          targetType: attribute
-          targetFormat: integer
-          preserveSource: false
-          overrideOnConflict: false
         - type: string-builder-processor
           name: Add dst_endpoint.hostname
           enabled: true
@@ -2406,6 +2373,17 @@ pipeline:
             - ocsf.user.type_id
           sourceType: attribute
           target: ocsf.user.type_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `ocsf.src_endpoint.port` to `ocsf.src_endpoint.port`
+          enabled: true
+          sources:
+            - ocsf.src_endpoint.port
+          sourceType: attribute
+          target: ocsf.src_endpoint.port
           targetType: attribute
           targetFormat: integer
           preserveSource: false
