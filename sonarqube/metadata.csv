@@ -28,6 +28,7 @@ sonarqube.duplications.new_duplicated_blocks,gauge,,,,Duplicated blocks on new c
 sonarqube.duplications.new_duplicated_lines,gauge,,,,Duplicated Lines on New Code,-1,sonarqube,,
 sonarqube.duplications.new_duplicated_lines_density,gauge,,percent,,Duplicated lines (%) on new code balanced by statements,-1,sonarqube,,
 sonarqube.issues.blocker_violations,gauge,,,,Blocker issues,-1,sonarqube,,
+sonarqube.issues.by_tag,gauge,,,,Number of issues grouped by SonarQube issue tag,-1,sonarqube,,
 sonarqube.issues.confirmed_issues,gauge,,,,Confirmed issues,-1,sonarqube,,
 sonarqube.issues.critical_violations,gauge,,,,Critical issues,-1,sonarqube,,
 sonarqube.issues.false_positive_issues,gauge,,,,False positive issues,-1,sonarqube,,
