@@ -2049,7 +2049,7 @@ pipeline:
             - "[attack_target:Client_Endpoint, confidence:High, created_at:2026_04_01, deployment:Internal, deployment:Perimeter, mitre_tactic_id:TA0011, mitre_tactic_name:Command_And_Control, mitre_technique_id:T1071, mitre_technique_name:Application_Layer_Protocol, performance_impact:Low, signature_severity:Major, updated_at:2026_04_09]"
           grok:
             supportRules: ""
-            matchRules: 'mitre %{data}mitre_tactic_id:%{data:tmp_attack.tactic.uid},\s*mitre_tactic_name:%{data:tmp_attack.tactic.name},\s*mitre_technique_id:%{data:tmp_attack.technique.uid},\s*mitre_technique_name:%{data:tmp_attack.technique.name}[,\s]%{data}'
+            matchRules: 'mitre %{data}mitre_tactic_id:%{word:tmp_attack.tactic.uid},\s*mitre_tactic_name:%{word:tmp_attack.tactic.name},\s*mitre_technique_id:%{word:tmp_attack.technique.uid},\s*mitre_technique_name:%{word:tmp_attack.technique.name}'
         - type: array-processor
           name: Move tmp_attack into ocsf.finding_info.attacks array
           enabled: true
