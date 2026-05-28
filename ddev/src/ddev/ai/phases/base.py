@@ -19,6 +19,19 @@ from ddev.event_bus.exceptions import MessageProcessingError, ProcessorHookError
 from ddev.event_bus.orchestrator import AsyncProcessor, BaseMessage
 
 
+@dataclass(frozen=True)
+class PipelineContext:
+    """Shared pipeline-level infrastructure passed to every phase."""
+
+    checkpoint_manager: CheckpointManager
+    runtime_variables: dict[str, str]
+    flow_variables: dict[str, str]
+    config_dir: Path
+    file_registry: FileRegistry
+    callbacks: Callbacks = field(default_factory=Callbacks)
+    logger: logging.Logger = field(default_factory=lambda: logging.getLogger(__name__))
+
+
 @dataclass
 class PhaseOutcome:
     memory_text: str
@@ -56,26 +69,20 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         phase_id: str,
         dependencies: list[str],
         config: PhaseConfig,
-        checkpoint_manager: CheckpointManager,
-        runtime_variables: dict[str, str],
-        flow_variables: dict[str, str],
-        config_dir: Path,
-        file_registry: FileRegistry,
-        callbacks: Callbacks | None = None,
-        logger: logging.Logger | None = None,
+        ctx: PipelineContext,
     ) -> None:
         super().__init__(name=phase_id)
         self._phase_id = phase_id
         self._dependencies = set(dependencies)
         self._remaining_dependencies = set(dependencies)
         self._config = config
-        self._checkpoint_manager = checkpoint_manager
-        self._runtime_variables = runtime_variables
-        self._flow_variables = flow_variables
-        self._config_dir = config_dir
-        self._callbacks: Callbacks = callbacks or Callbacks()
-        self._file_registry = file_registry
-        self._logger = logger or logging.getLogger(__name__)
+        self._checkpoint_manager = ctx.checkpoint_manager
+        self._runtime_variables = ctx.runtime_variables
+        self._flow_variables = ctx.flow_variables
+        self._config_dir = ctx.config_dir
+        self._file_registry = ctx.file_registry
+        self._callbacks = ctx.callbacks
+        self._logger = ctx.logger
         self._started_at: datetime | None = None
         self._resolver: Callable[[str], str] | None = None
         self._executed = False
@@ -112,10 +119,9 @@ class Phase(AsyncProcessor[PhaseTrigger]):
     def extra_init_kwargs(cls, **kwargs: Any) -> dict[str, Any]:
         """Override to inject subclass-specific kwargs into __init__ at construction time.
 
-        The orchestrator passes every framework-level dep (phase_id, phase_config, agents,
-        agent_clients, file_registry, checkpoint_manager, ...) as keyword arguments.
-        Subclasses pick the ones they need by declaring them explicitly and accept the
-        rest via **kwargs.
+        The orchestrator passes phase_id, phase_config, agents, agent_clients, and ctx
+        (PipelineContext) as keyword arguments. Subclasses declare the ones they need
+        explicitly and accept the rest via **kwargs.
         """
         return {}
 

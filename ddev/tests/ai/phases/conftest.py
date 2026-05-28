@@ -8,7 +8,9 @@ from typing import Any
 import pytest
 
 from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolResultMessage
+from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.agentic_phase import AgenticPhase
+from ddev.ai.phases.base import PipelineContext
 from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import PhaseConfig, TaskConfig
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
@@ -133,18 +135,21 @@ def make_agent_phase(
         context_compact_threshold_pct=context_compact_threshold_pct,
     )
     checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
-
-    phase = AgenticPhase(
-        phase_id=phase_id,
-        dependencies=dependencies or [],
-        config=config,
-        agent_builder=make_agent_builder(mock_agent, captured_agent_kwargs),
+    ctx = PipelineContext(
         checkpoint_manager=checkpoint_manager,
         runtime_variables=runtime_variables or {},
         flow_variables=flow_variables or {},
         config_dir=flow_dir,
         file_registry=FileRegistry(policy=FileAccessPolicy(write_root=flow_dir)),
-        callbacks=callbacks,
+        callbacks=callbacks or Callbacks(),
+    )
+
+    phase = AgenticPhase(
+        phase_id=phase_id,
+        dependencies=dependencies or [],
+        config=config,
+        ctx=ctx,
+        agent_builder=make_agent_builder(mock_agent, captured_agent_kwargs),
         goal_agent_builder=goal_agent_builder,
     )
     phase.queue = message_queue
