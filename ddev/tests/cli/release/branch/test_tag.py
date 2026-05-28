@@ -359,7 +359,7 @@ def test_rc_invalid_value_aborts(ddev, git):
 
 def test_final_and_rc_mutually_exclusive(ddev, git):
     result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', '--rc', '3')
-    assert result.exit_code == 1, result.output
+    assert result.exit_code != 0, result.output
     assert 'mutually exclusive' in result.output
 
 
@@ -439,8 +439,20 @@ def test_worktree_created_and_torn_down(ddev, git, mocker):
     result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', input='y\n')
 
     assert result.exit_code == 0, result.output
-    assert len(_worktree_subcommands(git, 'add')) == 1
-    assert len(_worktree_subcommands(git, 'remove')) == 1
+    add_calls = _worktree_subcommands(git, 'add')
+    assert len(add_calls) == 1
+    # Full call shape: a regression that dropped the `origin/` prefix or swapped the path would
+    # otherwise pass silently.
+    add_args = add_calls[0].args
+    assert add_args[:4] == ('worktree', 'add', '-B', '7.56.x')
+    assert add_args[-1] == 'origin/7.56.x'
+    assert add_args[4].endswith('.worktrees/release-tag/7.56.x')
+
+    remove_calls = _worktree_subcommands(git, 'remove')
+    assert len(remove_calls) == 1
+    remove_args = remove_calls[0].args
+    assert remove_args[:3] == ('worktree', 'remove', '--force')
+    assert remove_args[3].endswith('.worktrees/release-tag/7.56.x')
 
 
 def test_worktree_left_on_failure(ddev, git, mocker):
@@ -454,6 +466,22 @@ def test_worktree_left_on_failure(ddev, git, mocker):
 
     assert result.exit_code != 0
     assert 'Worktree left at' in result.output
+    assert _worktree_subcommands(git, 'remove') == []
+
+
+def test_worktree_creation_failure_aborts_with_hint(ddev, git):
+    """
+    If `git worktree add` fails, the abort message includes the manual-cleanup hint and no
+    remove is attempted.
+    """
+    git.current_branch.return_value = 'master'
+    git.run.side_effect = OSError('add failed')
+
+    result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', input='y\n')
+
+    assert result.exit_code != 0, result.output
+    assert 'Failed to create worktree' in result.output
+    assert 'git worktree remove --force' in result.output
     assert _worktree_subcommands(git, 'remove') == []
 
 

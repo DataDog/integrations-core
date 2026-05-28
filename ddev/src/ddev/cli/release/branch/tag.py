@@ -23,7 +23,9 @@ UPDATE_BUILD_AGENT_YAML_WORKFLOW_REF = 'master'
 WORKTREE_BASE = '.worktrees/release-tag'
 RELEASE_INPUT_REGEX = re.compile(r'^(\d+\.\d+)(\.x)?$')
 # Sentinel used by `--rc` when the user provides the flag without a value.
-RC_AUTO = 'auto'
+# Chosen so that `--rc auto` (which users could plausibly type) is rejected by `_parse_rc_value`
+# rather than silently treated as bare `--rc`.
+RC_AUTO = '__rc_auto_sentinel__'
 
 
 @click.command
@@ -122,7 +124,7 @@ def tag(
     - `--skip-open-pr-check` skips the GitHub query for open PRs targeting the branch.
     """
     if final and rc is not None:
-        app.abort('`--final` and `--rc` are mutually exclusive.')
+        raise click.UsageError('`--final` and `--rc` are mutually exclusive.')
     is_rc = not final
 
     pinned_rc = _parse_rc_value(rc) if is_rc else None
@@ -195,7 +197,7 @@ def tag(
             new_tag += f'-rc.{next_rc}'
             if Version(new_tag) in this_release_tags:
                 app.abort(f'Tag {new_tag} already exists. Switch to git to overwrite it.')
-            _warn_on_rc_gap(next_rc, new_rc_guess, target_branch)
+            _warn_on_rc_gap(app, next_rc, new_rc_guess, target_branch)
             if not last_tag_was_final and next_rc < last_rc:
                 click.secho('!!! WARNING !!!')
                 if not _confirm(
@@ -296,13 +298,13 @@ def _remove_worktree(app: Application, worktree_path: Path) -> None:
 def _resolve_tag_ref(app: Application, git: GitRepository, target_branch: str, ref: str | None) -> str | None:
     if ref is None:
         return None
+    commit_sha: str | None = None
     try:
         commit_sha = git.capture('rev-parse', '--verify', f'{ref}^{{commit}}').strip()
-    except OSError as e:
-        app.abort(f'`--ref` value `{ref}` does not resolve to a commit: {e}')
-    try:
         git.capture('merge-base', '--is-ancestor', commit_sha, f'origin/{target_branch}')
     except OSError as e:
+        if commit_sha is None:
+            app.abort(f'`--ref` value `{ref}` does not resolve to a commit: {e}')
         app.abort(
             f'`--ref` value `{ref}` (resolved to `{commit_sha}`) is not an ancestor of '
             f'`origin/{target_branch}` (or `git merge-base` itself failed): {e}'
@@ -310,21 +312,17 @@ def _resolve_tag_ref(app: Application, git: GitRepository, target_branch: str, r
     return commit_sha
 
 
-def _warn_on_rc_gap(next_rc: int, expected_rc: int, branch: str) -> None:
+def _warn_on_rc_gap(app: Application, next_rc: int, expected_rc: int, branch: str) -> None:
     if next_rc <= expected_rc:
         return
     missing = list(range(expected_rc, next_rc))
     missing_list = ', '.join(str(n) for n in missing)
-    click.secho('!!! WARNING !!!', fg='yellow')
-    click.secho(
-        f'Requested RC {next_rc} skips ahead of the next available RC ({expected_rc}). '
-        f'Missing RC number(s): {missing_list}.',
-        fg='yellow',
-    )
     suggested_rc = missing[0]
-    click.secho(
-        f'To fill the gap later, run: ddev release branch tag --release {branch} --rc {suggested_rc} --ref <commit>',
-        fg='yellow',
+    app.display_warning(
+        f'Requested RC {next_rc} skips ahead of the next available RC ({expected_rc}). '
+        f'Missing RC number(s): {missing_list}.\n'
+        f'To fill the gap later, run: '
+        f'ddev release branch tag --release {branch} --rc {suggested_rc} --ref <commit>'
     )
 
 
