@@ -1096,11 +1096,10 @@ def test_schema_registry_compatibility_flip_triggers_reemission(check, dd_run_ch
 
     # The compatibility flip should have triggered re-emission.
     ds_calls = kafka_consumer_check.event_platform_event.call_args_list
-    schema_events = [
-        json.loads(call[0][0])
-        for call in ds_calls
-        if len(call[0]) > 1 and call[0][1] == 'data-streams-message' and json.loads(call[0][0]).get('config_type') == 'schema'
+    ds_payloads = [
+        json.loads(call[0][0]) for call in ds_calls if len(call[0]) > 1 and call[0][1] == 'data-streams-message'
     ]
+    schema_events = [p for p in ds_payloads if p.get('config_type') == 'schema']
     assert len(schema_events) == 1, f"Expected exactly 1 schema re-emission, got {len(schema_events)}"
     assert schema_events[0]['compatibility'] == 'FULL'
     assert schema_events[0]['global_compatibility'] == 'BACKWARD'
