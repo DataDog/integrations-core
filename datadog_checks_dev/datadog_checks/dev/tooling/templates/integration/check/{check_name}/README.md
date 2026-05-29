@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [{integration_name}][1] through the Datadog Agent. 
+This check monitors [{integration_name}][1] through the Datadog Agent.
 
 Include a high level overview of what this integration does:
 - What does your product do (in 1-2 sentences)?
@@ -11,7 +11,7 @@ Include a high level overview of what this integration does:
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery integration templates][3] for guidance on applying these instructions.
 
 ### Installation
 
@@ -27,7 +27,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 [Run the Agent's status subcommand][6] and look for `{check_name}` under the Checks section.
 
-## Data Collected
+## Data collected
 
 ### Metrics
 
@@ -37,7 +37,7 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 The {integration_name} integration does not include any events.
 
-### Service Checks
+### Service checks
 
 The {integration_name} integration does not include any service checks.
 

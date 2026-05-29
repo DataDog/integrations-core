@@ -1,10 +1,21 @@
+from __future__ import annotations
+
 import logging
 import re
+from typing import TYPE_CHECKING
 
 import click
+from httpx import HTTPStatusError
 from packaging.version import Version
 
-from .create import BRANCH_NAME_REGEX
+from .create import BRANCH_NAME_REGEX, BUILD_AGENT_YAML_PATH, find_build_agent_template_main_branch_matches
+
+if TYPE_CHECKING:
+    from ddev.cli.application import Application
+
+UPDATE_BUILD_AGENT_YAML_WORKFLOW = 'update-build-agent-yaml.yml'
+# The dd-octo-sts policy grants PR-writing credentials only to this workflow on master.
+UPDATE_BUILD_AGENT_YAML_WORKFLOW_REF = 'master'
 
 
 @click.command
@@ -36,12 +47,14 @@ def tag(app, final: bool, skip_open_pr_check: bool):
     click.echo(app.repo.git.pull(branch_name))
     click.echo(app.repo.git.fetch_tags())
 
-    if _build_agent_yaml_points_to_main():
-        app.abort(
+    build_agent_yaml_needs_update = _build_agent_yaml_points_to_main()
+    # Recovery path for release branches cut before build_agent.yaml was updated.
+    if build_agent_yaml_needs_update:
+        app.display_warning(
             "`.gitlab/build_agent.yaml` still points to `main`.\n"
-            "The agent branch may not exist yet in datadog-agent, or the update PR hasn't been merged.\n"
-            f"To trigger the workflow manually: gh workflow run update-build-agent-yaml.yml -f branch={branch_name}\n"
-            "Once the PR is merged, re-run this command."
+            "The update PR may not have been created or merged yet.\n"
+            "Will trigger the workflow after the tag is pushed.\n"
+            "Tagging will continue."
         )
 
     major_minor_version = branch_name.replace('.x', '')
@@ -105,13 +118,33 @@ def tag(app, final: bool, skip_open_pr_check: bool):
         app.abort('Did not get confirmation, aborting. Did not create or push the tag.')
     click.echo(app.repo.git.tag(new_tag, message=new_tag))
     click.echo(app.repo.git.push(new_tag))
+    if build_agent_yaml_needs_update:
+        _trigger_build_agent_yaml_update_workflow(app, branch_name)
 
 
 def _build_agent_yaml_points_to_main() -> bool:
     from ddev.utils.fs import Path
 
-    path = Path('.gitlab/build_agent.yaml')
-    return path.exists() and bool(re.search(r'\s+branch:\s+main$', path.read_text(), re.MULTILINE))
+    path = Path(BUILD_AGENT_YAML_PATH)
+    return path.exists() and bool(find_build_agent_template_main_branch_matches(path.read_text()))
+
+
+def _trigger_build_agent_yaml_update_workflow(app: Application, branch_name: str) -> None:
+    try:
+        app.github.dispatch_workflow(
+            UPDATE_BUILD_AGENT_YAML_WORKFLOW,
+            UPDATE_BUILD_AGENT_YAML_WORKFLOW_REF,
+            {'branch': branch_name},
+        )
+    except HTTPStatusError as e:
+        app.display_warning(
+            f'Warning: unable to trigger `{UPDATE_BUILD_AGENT_YAML_WORKFLOW}`: {e}\n'
+            f'To trigger it manually: gh workflow run {UPDATE_BUILD_AGENT_YAML_WORKFLOW} -f branch={branch_name}'
+        )
+    else:
+        app.display_success(
+            f'Dispatched `{UPDATE_BUILD_AGENT_YAML_WORKFLOW}`; check the workflow run for PR creation status.'
+        )
 
 
 def _extract_patch_and_rc(version_tags):

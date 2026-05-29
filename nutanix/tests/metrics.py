@@ -2,8 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from datadog_checks.nutanix.metrics import HOST_STATS_METRICS, HOST_STORAGE_STAT_KEYS
 
 HEALTH_METRICS = ["nutanix.health.up"]
+
+# Host storage_* metric names — derived so test guards stay in sync with the production map.
+HOST_STORAGE_METRICS: frozenset[str] = frozenset(f"nutanix.{HOST_STATS_METRICS[k]}" for k in HOST_STORAGE_STAT_KEYS)
 
 CLUSTER_STATS_METRICS_REQUIRED = [
     "nutanix.cluster.aggregate_hypervisor.memory_usage",
@@ -60,7 +64,7 @@ HOST_STATS_METRICS_REQUIRED = [
 HOST_STATS_METRICS_OPTIONAL = [
     "nutanix.host.cpu_usage",
     "nutanix.host.overall_memory_usage",
-    "nutanix.host.power.consumption.instant_watt",
+    "nutanix.host.power_consumption_instant_watt",
 ]
 
 VM_STATS_METRICS_REQUIRED = [
@@ -144,7 +148,6 @@ VM_STATS_METRICS_OPTIONAL = [
     "nutanix.vm.hypervisor.swap_in_rate_kbps",
     "nutanix.vm.hypervisor.swap_out_rate_kbps",
     "nutanix.vm.memory_usage_bytes",
-    "nutanix.vm.disk_capacity_bytes",
     "nutanix.vm.disk_usage_ppm",
     "nutanix.vm.hypervisor.vm_running_time_usecs",
 ]
@@ -190,6 +193,7 @@ VM_CAPACITY_METRICS = [
     "nutanix.vm.cpu.threads_per_core",
     "nutanix.vm.cpu.vcpus_allocated",
     "nutanix.vm.memory.allocated_bytes",
+    "nutanix.vm.disk_capacity_bytes",
 ]
 
 ALL_METRICS = (

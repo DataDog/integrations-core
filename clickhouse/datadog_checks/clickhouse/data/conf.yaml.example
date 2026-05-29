@@ -29,6 +29,13 @@ instances:
     #
   - server: <SERVER>
 
+    ## @param reported_hostname - string - optional
+    ## Set the reported hostname for this instance. Overrides the default hostname resolution,
+    ## which uses the `server` value. Useful when the agent connects via localhost or 127.0.0.1
+    ## (e.g., co-located with ClickHouse in the same pod) to avoid reporting a non-unique hostname.
+    #
+    # reported_hostname: <REPORTED_HOSTNAME>
+
     ## @param port - integer - optional - default: 8123
     ## The port used to connect to the system.
     ## This integration uses the HTTP interface, so the default is 8123 (HTTP port).
@@ -116,6 +123,16 @@ instances:
     ## Set to `true` when connecting through a single endpoint for ClickHouse Cloud.
     #
     # single_endpoint_mode: false
+
+    ## @param use_legacy_queries - boolean - optional - default: true
+    ## Enable the legacy query set for collecting metrics. Set to `false` to disable.
+    #
+    # use_legacy_queries: true
+
+    ## @param use_advanced_queries - boolean - optional - default: true
+    ## Enable the advanced query set for collecting metrics. Set to `false` to disable.
+    #
+    # use_advanced_queries: true
 
     ## Configure collection of database samples snapshots from system.processes
     #
@@ -406,16 +423,42 @@ instances:
 #
 # logs:
 #   - source: clickhouse
+#     service: clickhouse
 #     type: file
 #     path: /var/log/clickhouse-server/clickhouse-server.log
+#     tags:
+#     - format:plain
 #     log_processing_rules:
 #     - type: multi_line
-#       name: log_start_with_date
+#       name: new_log_start_with_date
 #       pattern: \d{4}\.\d{2}\.\d{2}
 #   - source: clickhouse
+#     service: clickhouse
 #     type: file
 #     path: /var/log/clickhouse-server/clickhouse-server.err.log
+#     tags:
+#     - format:plain
 #     log_processing_rules:
 #     - type: multi_line
-#       name: log_start_with_date
+#       name: new_log_start_with_date
 #       pattern: \d{4}\.\d{2}\.\d{2}
+#   - source: clickhouse
+#     service: clickhouse
+#     type: file
+#     path: /var/log/clickhouse-server/clickhouse-server.log
+#     tags:
+#     - format:json
+#     log_processing_rules:
+#     - type: multi_line
+#       name: new_log_start_with_json
+#       pattern: \{
+#   - source: clickhouse
+#     service: clickhouse
+#     type: file
+#     path: /var/log/clickhouse-server/clickhouse-server.err.log
+#     tags:
+#     - format:json
+#     log_processing_rules:
+#     - type: multi_line
+#       name: new_log_start_with_json
+#       pattern: \{

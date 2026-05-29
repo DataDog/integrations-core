@@ -155,6 +155,18 @@ def seed_mock_kafka_client(cluster_id='test-cluster-id'):
             return [(topic, partition, 10 if partition == 0 else 20) for topic, partition in partitions]
 
     client.consumer_offsets_for_times = mock_offsets_for_times
+
+    def mock_list_offsets(requests, **_kwargs):
+        result = {}
+        for tp in requests:
+            info = mock.MagicMock()
+            info.offset = 10 if tp.partition == 0 else 20
+            future = mock.MagicMock()
+            future.result.return_value = info
+            result[tp] = future
+        return result
+
+    mock_admin_client.list_offsets.side_effect = mock_list_offsets
     client.consumer_get_cluster_id_and_list_topics.return_value = (cluster_id, [('test-topic', [0, 1])])
     client.list_consumer_group_offsets.return_value = []
     client.open_consumer.return_value = None

@@ -8,15 +8,19 @@ This script connects to the AWS_INSTANCE defined in conftest.py and records
 all API responses as JSON fixtures for testing.
 
 Usage:
-    python record_fixtures.py
+    python record_fixtures.py                          # record all resources
+    python record_fixtures.py -r disks,hosts           # record only disks and hosts
+    python record_fixtures.py --resources host_stats   # record host_stats (auto-fetches deps in memory)
+    python record_fixtures.py --list                   # list available resources
 
-The script will:
-1. Connect to the Nutanix instance using AWS_INSTANCE credentials
-2. Fetch data from all relevant API endpoints
-3. Save responses as JSON files in the fixtures/ directory
-4. For paginated endpoints, consolidate all pages into a single array
+Dependency resolution:
+    Resources like ``hosts``, ``cluster_stats``, ``host_stats`` depend on the
+    cluster list. When you request only a dependent resource, its dependencies
+    are fetched in memory so the request can be fulfilled, but their fixtures
+    are not overwritten unless they are also requested.
 """
 
+import argparse
 import json
 import sys
 from datetime import datetime, timedelta, timezone
@@ -27,6 +31,21 @@ import requests
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from conftest import AWS_INSTANCE  # noqa: E402
 from requests.auth import HTTPBasicAuth  # noqa: E402
+
+RESOURCES = (
+    "clusters",
+    "categories",
+    "hosts",
+    "cluster_stats",
+    "host_stats",
+    "vms",
+    "vm_stats",
+    "disks",
+    "events",
+    "audits",
+    "alerts",
+    "tasks",
+)
 
 FIXTURES_DIR = Path(__file__).parent.parent / "fixtures"
 FIXTURES_DIR.mkdir(exist_ok=True)
@@ -142,14 +161,15 @@ def save_fixture(filename: str, data: list | dict) -> None:
     print(f"✓ Saved {filepath}")
 
 
-def record_clusters() -> list[dict]:
+def record_clusters(save: bool = True) -> list[dict]:
     """Record clusters fixture.
 
     Returns:
         List of cluster objects (for further processing)
     """
     pages = fetch_paginated_endpoint("api/clustermgmt/v4.0/config/clusters")
-    save_fixture("clusters.json", pages)
+    if save:
+        save_fixture("clusters.json", pages)
 
     # Extract cluster data for return
     clusters = []
@@ -164,11 +184,13 @@ def record_categories() -> None:
     save_fixture("categories.json", pages)
 
 
-def record_hosts(clusters: list[dict]) -> list[tuple[str, str]]:
+def record_hosts(clusters: list[dict], save: bool = True) -> list[tuple[str, str]]:
     """Record hosts fixtures for each cluster.
 
     Args:
         clusters: List of cluster objects
+        save: Persist the fixtures to disk. When False, hosts are still fetched
+            (for the returned cluster/host id pairs) but no fixture is written.
 
     Returns:
         List of (cluster_id, host_id) tuples for further processing
@@ -188,9 +210,10 @@ def record_hosts(clusters: list[dict]) -> list[tuple[str, str]]:
             # Fetch hosts for this cluster
             pages = fetch_paginated_endpoint(f"api/clustermgmt/v4.0/config/clusters/{cluster_id}/hosts")
 
-            # Use shortened cluster ID (first 8 chars) for filename
-            short_cluster_id = cluster_id.split("-")[0]
-            save_fixture(f"hosts_{short_cluster_id}.json", pages)
+            if save:
+                # Use shortened cluster ID (first 8 chars) for filename
+                short_cluster_id = cluster_id.split("-")[0]
+                save_fixture(f"hosts_{short_cluster_id}.json", pages)
 
             # Collect host IDs
             for page in pages:
@@ -319,6 +342,16 @@ def record_vm_stats() -> None:
         print(f"  ⚠ Failed to fetch VM stats: {e}")
 
 
+def record_disks() -> None:
+    """Record disks fixture from the cluster-wide /config/disks endpoint."""
+    print("\nRecording disks (all clusters)")
+    try:
+        pages = fetch_paginated_endpoint("api/clustermgmt/v4.0/config/disks")
+        save_fixture("disks.json", pages)
+    except requests.exceptions.HTTPError as e:
+        print(f"  ⚠ Failed to fetch disks: {e}")
+
+
 def record_events() -> None:
     """Record events fixture."""
     # Get events from last 24 hours
@@ -413,8 +446,115 @@ def record_tasks() -> None:
         print(f"  ⚠ Failed to fetch tasks: {e}")
 
 
-def main() -> None:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """Parse CLI arguments.
+
+    ``--resources`` accepts a comma-separated list or repeated flags. The default
+    is every known resource. ``--list`` prints the available names and exits.
+    """
+    parser = argparse.ArgumentParser(
+        description="Record Nutanix fixtures for testing.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=f"Available resources: {', '.join(RESOURCES)}",
+    )
+    parser.add_argument(
+        "-r",
+        "--resources",
+        action="append",
+        help="Resources to refresh (comma-separated or repeated). Default: all.",
+    )
+    parser.add_argument(
+        "--list",
+        action="store_true",
+        help="List available resources and exit.",
+    )
+    return parser.parse_args(argv)
+
+
+def resolve_requested_resources(args: argparse.Namespace) -> set[str]:
+    """Flatten ``--resources`` values, validate against ``RESOURCES``."""
+    if not args.resources:
+        return set(RESOURCES)
+
+    requested: set[str] = set()
+    for entry in args.resources:
+        for name in entry.split(","):
+            name = name.strip()
+            if name:
+                requested.add(name)
+
+    invalid = requested - set(RESOURCES)
+    if invalid:
+        raise SystemExit(f"Unknown resource(s): {', '.join(sorted(invalid))}. Available: {', '.join(RESOURCES)}")
+    return requested
+
+
+def record_selected(requested: set[str]) -> None:
+    """Run the recorders for ``requested``, fetching dependencies in memory as needed."""
+    needs_clusters = requested & {"clusters", "hosts", "cluster_stats", "host_stats"}
+    needs_hosts = requested & {"hosts", "host_stats"}
+
+    clusters: list[dict] = []
+    cluster_host_pairs: list[tuple[str, str]] = []
+
+    if needs_clusters:
+        print("\n" + "=" * 80)
+        print("INFRASTRUCTURE CONFIG")
+        print("=" * 80)
+        clusters = record_clusters(save="clusters" in requested)
+
+    if "categories" in requested:
+        record_categories()
+
+    if needs_hosts:
+        cluster_host_pairs = record_hosts(clusters, save="hosts" in requested)
+
+    if requested & {"cluster_stats", "host_stats"}:
+        print("\n" + "=" * 80)
+        print("INFRASTRUCTURE STATS")
+        print("=" * 80)
+        if "cluster_stats" in requested:
+            record_cluster_stats(clusters)
+        if "host_stats" in requested:
+            record_host_stats(cluster_host_pairs)
+
+    if requested & {"vms", "vm_stats", "disks"}:
+        print("\n" + "=" * 80)
+        print("VIRTUAL MACHINES & DISKS")
+        print("=" * 80)
+        if "vms" in requested:
+            record_vms()
+        if "vm_stats" in requested:
+            record_vm_stats()
+        if "disks" in requested:
+            record_disks()
+
+    if requested & {"events", "audits", "alerts", "tasks"}:
+        print("\n" + "=" * 80)
+        print("ACTIVITY & EVENTS")
+        print("=" * 80)
+        if "events" in requested:
+            record_events()
+        if "audits" in requested:
+            record_audits()
+        if "alerts" in requested:
+            record_alerts()
+        if "tasks" in requested:
+            record_tasks()
+
+
+def main(argv: list[str] | None = None) -> None:
     """Main entry point for fixture recording."""
+    args = parse_args(argv)
+
+    if args.list:
+        print("Available resources:")
+        for name in RESOURCES:
+            print(f"  - {name}")
+        return
+
+    requested = resolve_requested_resources(args)
+
     print("=" * 80)
     print("Nutanix Fixture Recording Script")
     print("=" * 80)
@@ -423,6 +563,7 @@ def main() -> None:
     print(f"TLS Verify: {TLS_VERIFY}")
     print(f"Page Limit: {PAGE_LIMIT}")
     print(f"\nFixtures directory: {FIXTURES_DIR}")
+    print(f"Resources to record: {', '.join(sorted(requested))}")
     print("=" * 80)
 
     # Test connectivity
@@ -435,47 +576,11 @@ def main() -> None:
         print(f"✗ Connection failed: {e}")
         return
 
-    # Record all fixtures in order (some depend on others)
     try:
-        # 1. Infrastructure config
+        record_selected(requested)
         print("\n" + "=" * 80)
-        print("INFRASTRUCTURE CONFIG")
+        print("✓ Fixtures recorded successfully!")
         print("=" * 80)
-
-        clusters = record_clusters()
-        record_categories()
-        cluster_host_pairs = record_hosts(clusters)
-
-        # 2. Infrastructure stats
-        print("\n" + "=" * 80)
-        print("INFRASTRUCTURE STATS")
-        print("=" * 80)
-
-        record_cluster_stats(clusters)
-        record_host_stats(cluster_host_pairs)
-
-        # 3. VMs
-        print("\n" + "=" * 80)
-        print("VIRTUAL MACHINES")
-        print("=" * 80)
-
-        record_vms()
-        record_vm_stats()
-
-        # 4. Activity/Events
-        print("\n" + "=" * 80)
-        print("ACTIVITY & EVENTS")
-        print("=" * 80)
-
-        record_events()
-        record_audits()
-        record_alerts()
-        record_tasks()
-
-        print("\n" + "=" * 80)
-        print("✓ All fixtures recorded successfully!")
-        print("=" * 80)
-
     except Exception as e:
         print(f"\n✗ Error during fixture recording: {e}")
         raise
