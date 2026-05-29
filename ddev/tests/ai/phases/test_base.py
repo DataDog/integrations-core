@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from ddev.ai.phases.base import Phase, PhaseOutcome
+from ddev.ai.phases.base import FlowServices, Phase, PhaseOutcome
 from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import PhaseConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
@@ -35,15 +35,18 @@ def _make_stub_phase(
     outcome=None,
 ):
     checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
-    phase = _StubPhase(
-        phase_id=phase_id,
-        dependencies=dependencies or [],
-        config=PhaseConfig(),
+    services = FlowServices(
         checkpoint_manager=checkpoint_manager,
         runtime_variables={},
         flow_variables={},
         config_dir=flow_dir,
         file_registry=FileRegistry(policy=FileAccessPolicy(write_root=flow_dir)),
+    )
+    phase = _StubPhase(
+        phase_id=phase_id,
+        dependencies=dependencies or [],
+        config=PhaseConfig(),
+        services=services,
         outcome=outcome,
     )
     phase.queue = message_queue

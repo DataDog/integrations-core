@@ -4,7 +4,6 @@
 
 from __future__ import annotations
 
-import logging
 from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
@@ -15,15 +14,12 @@ from ddev.ai.agent.build import (
     make_goal_agent_builder,
     make_subagent_builder,
 )
-from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.phases.base import Phase, PhaseOutcome
-from ddev.ai.phases.checkpoint import CheckpointManager
+from ddev.ai.phases.base import FlowServices, Phase, PhaseOutcome
 from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
 from ddev.ai.phases.goal import GOAL_TASK_SUFFIX, GoalValidationError, render_goal_text, run_goal_loop
 from ddev.ai.phases.messages import PhaseFailedMessage
 from ddev.ai.phases.template import render_inline, render_prompt
 from ddev.ai.react.process import ReActProcess
-from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.registry import TOOL_MANIFEST
 from ddev.event_bus.exceptions import MessageProcessingError, ProcessorHookError
 
@@ -69,28 +65,16 @@ class AgenticPhase(Phase):
         phase_id: str,
         dependencies: list[str],
         config: PhaseConfig,
+        services: FlowServices,
         agent_builder: AgentBuilder,
-        checkpoint_manager: CheckpointManager,
-        runtime_variables: dict[str, str],
-        flow_variables: dict[str, str],
-        config_dir: Path,
-        file_registry: FileRegistry,
         subagent_builder: SubagentBuilder | None = None,
         goal_agent_builder: GoalAgentBuilder | None = None,
-        callbacks: Callbacks | None = None,
-        logger: logging.Logger | None = None,
     ) -> None:
         super().__init__(
             phase_id=phase_id,
             dependencies=dependencies,
             config=config,
-            checkpoint_manager=checkpoint_manager,
-            runtime_variables=runtime_variables,
-            flow_variables=flow_variables,
-            config_dir=config_dir,
-            file_registry=file_registry,
-            callbacks=callbacks,
-            logger=logger,
+            services=services,
         )
         self._agent_builder = agent_builder
         self._subagent_builder = subagent_builder
@@ -99,7 +83,7 @@ class AgenticPhase(Phase):
         self._total_input_tokens: int = 0
         self._total_output_tokens: int = 0
         self._subagent_log_dir = (
-            checkpoint_manager.root / "subagents" / phase_id if subagent_builder is not None else None
+            services.checkpoint_manager.root / "subagents" / phase_id if subagent_builder is not None else None
         )
 
     @classmethod
@@ -124,12 +108,13 @@ class AgenticPhase(Phase):
         phase_config: PhaseConfig,
         agents: dict[str, AgentConfig],
         agent_clients: dict[str, Any],
-        file_registry: FileRegistry,
+        services: FlowServices,
         **_: Any,
     ) -> dict[str, Any]:
         if phase_config.agent is None:
             raise FlowConfigError(f"Phase {phase_id!r} (AgenticPhase) requires 'agent'")
         agent_config = agents[phase_config.agent]
+        file_registry = services.file_registry
 
         subagent_builder = None
         requires_subagent_builder = any(

@@ -375,12 +375,22 @@ def test_extra_init_kwargs_creates_subagent_builder_from_tool_metadata(
     tools: list[str],
     expected: bool,
 ) -> None:
+    from ddev.ai.phases.base import FlowServices
+    from ddev.ai.phases.checkpoint import CheckpointManager
+
+    services = FlowServices(
+        checkpoint_manager=CheckpointManager(flow_dir / "checkpoints.yaml"),
+        runtime_variables={},
+        flow_variables={},
+        config_dir=flow_dir,
+        file_registry=FileRegistry(policy=FileAccessPolicy(write_root=flow_dir)),
+    )
     kwargs = AgenticPhase.extra_init_kwargs(
         phase_id="p1",
         phase_config=PhaseConfig(agent="writer", tasks=[TaskConfig(name="t1", prompt="Do the work.")]),
         agents={"writer": AgentConfig(tools=tools)},
         agent_clients={},
-        file_registry=FileRegistry(policy=FileAccessPolicy(write_root=flow_dir)),
+        services=services,
     )
 
     assert (kwargs["subagent_builder"] is not None) is expected
@@ -438,17 +448,22 @@ async def test_spawn_subagent_wiring(flow_dir, message_queue):
             ]
         )
 
+    from ddev.ai.phases.base import FlowServices
+
     checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
-    phase = AgenticPhase(
-        phase_id="p1",
-        dependencies=[],
-        config=PhaseConfig(agent="writer", tasks=[TaskConfig(name="t1", prompt="Do the work.")]),
-        agent_builder=agent_builder_fn,
+    services = FlowServices(
         checkpoint_manager=checkpoint_manager,
         runtime_variables={},
         flow_variables={},
         config_dir=flow_dir,
         file_registry=FileRegistry(policy=FileAccessPolicy(write_root=flow_dir)),
+    )
+    phase = AgenticPhase(
+        phase_id="p1",
+        dependencies=[],
+        config=PhaseConfig(agent="writer", tasks=[TaskConfig(name="t1", prompt="Do the work.")]),
+        services=services,
+        agent_builder=agent_builder_fn,
         subagent_builder=mock_subagent_builder,
     )
     phase.queue = message_queue
@@ -485,12 +500,22 @@ def test_extra_init_kwargs_creates_goal_agent_builder_when_any_task_has_goal(
     tasks,
     expect_builder,
 ):
+    from ddev.ai.phases.base import FlowServices
+    from ddev.ai.phases.checkpoint import CheckpointManager
+
+    services = FlowServices(
+        checkpoint_manager=CheckpointManager(flow_dir / "checkpoints.yaml"),
+        runtime_variables={},
+        flow_variables={},
+        config_dir=flow_dir,
+        file_registry=FileRegistry(policy=FileAccessPolicy(write_root=flow_dir)),
+    )
     kwargs = AgenticPhase.extra_init_kwargs(
         phase_id="p1",
         phase_config=PhaseConfig(agent="writer", tasks=tasks),
         agents={"writer": AgentConfig()},
         agent_clients={},
-        file_registry=FileRegistry(policy=FileAccessPolicy(write_root=flow_dir)),
+        services=services,
     )
     assert (kwargs["goal_agent_builder"] is not None) is expect_builder
 
