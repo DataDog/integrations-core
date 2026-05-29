@@ -32,7 +32,7 @@ The Datadog Terraform provider is available through the [Terraform Registry][1].
     ```
 
     **Notes**:
-    - The `api_key` and `app_key` values are your Datadog API key and application key. See [API and application keys][8] to create these credentials. To avoid storing credentials in your configuration files, set them as Terraform environment variables (`TF_VAR_datadog_api_key` and `TF_VAR_datadog_app_key`) before running any Terraform commands.
+    - The `api_key` and `app_key` values are your Datadog API key and application key. See [API and application keys][8] to create these credentials. To avoid storing credentials in your configuration files, set `DD_API_KEY` and `DD_APP_KEY` environment variables before running any Terraform commands. The Datadog provider reads these automatically.
     - If you are not using the Datadog US1 site, you must set the `api_url` [optional parameter][7] with your [Datadog site][6]. Ensure the documentation site selector on the right of the page is set to your correct Datadog site, then use the following URL as the value of the `api_url` parameter:
 
 <!-- partial
