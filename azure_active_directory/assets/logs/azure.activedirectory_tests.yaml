@@ -328,7 +328,7 @@ tests:
         "tenantId": "4d3bac44-0230-4732-9e70-cc00736f0a97",
         "resultSignature": "None",
         "durationMs": 0,
-        "callerIpAddress": "192.182.149.21",
+        "callerIpAddress": "192.182.149.21:43210",
         "correlationId": "a13bd0fa-70d0-4e60-ae23-b687377b4695",
         "Level": 4,
         "properties": {
@@ -353,7 +353,7 @@ tests:
               "id": "018af091-5465-4aed-9d6f-8c40981b2375",
               "displayName": null,
               "userPrincipalName": "test.test@datadoghq.com",
-              "ipAddress": "192.182.149.21",
+              "ipAddress": "192.182.149.21:43210",
               "roles": []
             }
           },
@@ -384,7 +384,7 @@ tests:
     result:
       custom:
         Level: 4
-        callerIpAddress: "192.182.149.21"
+        callerIpAddress: "192.182.149.21:43210"
         category: "AuditLogs"
         correlationId: "a13bd0fa-70d0-4e60-ae23-b687377b4695"
         duration: 0.0
@@ -397,6 +397,7 @@ tests:
           client:
             geoip: {}
             ip: "192.182.149.21"
+            port: 43210
         ocsf:
           activity_id: 6
           activity_name: "Delete"
@@ -427,6 +428,7 @@ tests:
           severity_id: 1
           src_endpoint:
             ip: "192.182.149.21"
+            port: 43210
           status: "Success"
           status_code: ""
           status_id: 1
@@ -453,7 +455,7 @@ tests:
           initiatedBy:
             user:
               id: "018af091-5465-4aed-9d6f-8c40981b2375"
-              ipAddress: "192.182.149.21"
+              ipAddress: "192.182.149.21:43210"
               userPrincipalName: "test.test@datadoghq.com"
           loggedByService: "Core Directory"
           operationName: "Delete user"
@@ -481,7 +483,7 @@ tests:
           name: "test.test@datadoghq.com"
       message: |-
         {
-          "callerIpAddress" : "192.182.149.21",
+          "callerIpAddress" : "192.182.149.21:43210",
           "resourceId" : "/tenants/4d3bac44-0230-4732-9e70-cc00736f0a97/providers/Microsoft.aadiam",
           "operationVersion" : "1.0",
           "tenantId" : "4d3bac44-0230-4732-9e70-cc00736f0a97",
@@ -522,7 +524,7 @@ tests:
             "resultType" : "",
             "initiatedBy" : {
               "user" : {
-                "ipAddress" : "192.182.149.21",
+                "ipAddress" : "192.182.149.21:43210",
                 "id" : "018af091-5465-4aed-9d6f-8c40981b2375",
                 "userPrincipalName" : "test.test@datadoghq.com"
               }

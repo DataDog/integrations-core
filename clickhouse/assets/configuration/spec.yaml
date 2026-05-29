@@ -20,6 +20,13 @@ files:
       description: The hostname used to connect to the system.
       value:
         type: string
+    - name: reported_hostname
+      description: |
+        Set the reported hostname for this instance. Overrides the default hostname resolution,
+        which uses the `server` value. Useful when the agent connects via localhost or 127.0.0.1
+        (e.g., co-located with ClickHouse in the same pod) to avoid reporting a non-unique hostname.
+      value:
+        type: string
     - name: port
       description: |
         The port used to connect to the system.

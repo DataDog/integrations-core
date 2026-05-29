@@ -13,15 +13,19 @@ On top you get:
 
 ### Datadog credentials
 
-The lab uses a `.ddev.toml` in this directory (already committed) to point at an `n8nlab` ddev org. Add the matching entry to your global `~/.ddev/config.toml`:
+To run the lab, create a `.ddev.toml` in this directory selecting which org should land in:
 
 ```toml
-[orgs.n8nlab]
-api_key = "<your real Datadog API key>"
-site = "datadoghq.com"
+org = "<org-to-send-telemetry>"
 ```
 
-Use any org name you like; just keep `org = "n8nlab"` in `tests/lab/.ddev.toml` aligned with what you put in your global config.
+Choose whichever Datadog org makes sense (dogfood, staging, pubplat, a personal org, …). The selected name must match an `[orgs.<name>]` block in your global ddev config. If you want to use a custom org that isn't there yet, add it — run `ddev config find` to locate the file, then append:
+
+```toml
+[orgs.<your-org-name>]
+api_key = "<your Datadog API key>"
+site = "datadoghq.com"
+```
 
 ### Traffic configuration
 
