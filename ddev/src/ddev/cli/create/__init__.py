@@ -170,7 +170,11 @@ def _strip_type_flag(args: list[str]) -> list[str]:
 @click.group(
     cls=_CreateGroup,
     short_help='Scaffold a new integration',
-    context_settings={'help_option_names': ['-h', '--help']},
+    # ignore_unknown_options lets the legacy `--type` / `-t` flag survive the group's
+    # option parser when it appears before the positional name (e.g. the previously
+    # documented `ddev create --type jmx NAME`). Without it, click rejects `--type`
+    # with "No such option" before resolve_command's deprecation shim ever runs.
+    context_settings={'help_option_names': ['-h', '--help'], 'ignore_unknown_options': True},
 )
 def create() -> None:
     """Scaffold a new integration.

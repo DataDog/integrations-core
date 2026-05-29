@@ -468,6 +468,46 @@ def test_type_flag_empty_after_equals_aborts_with_targeted_message(ddev, empty_r
     assert 'Unknown integration type' not in result.output
 
 
+@pytest.mark.parametrize(
+    'type_args',
+    [
+        pytest.param(['--type', 'jmx'], id='long-space'),
+        pytest.param(['--type=jmx'], id='long-equals'),
+        pytest.param(['-t', 'jmx'], id='short-space'),
+    ],
+)
+def test_type_shim_accepts_legacy_prefix_position(ddev, empty_repo, type_args):
+    """The legacy `ddev create --type jmx NAME` form (flag before the name) still dispatches.
+
+    The shim resolves `--type` inside the group's command resolution, which click only reaches
+    if its option parser does not reject the unknown flag first; this covers the flag appearing
+    before the positional name, the form the pre-migration docs used.
+    """
+    result = ddev(
+        'create',
+        *type_args,
+        'my_integration',
+        '--display-name',
+        'My Integration',
+        '--metrics-prefix',
+        'my_integration.',
+        '--platforms',
+        'linux',
+        '--dry-run',
+    )
+    assert result.exit_code == 0, result.output
+    assert 'deprecated' in result.output
+    assert 'No such option' not in result.output
+
+
+def test_type_shim_prefix_position_aborts_for_dropped_type(ddev, empty_repo):
+    """A dropped type in the legacy prefix position still aborts with the manifest-less pointer."""
+    result = ddev('create', '--type', 'tile', 'my_integration')
+    assert result.exit_code != 0
+    assert 'no longer supported' in result.output
+    assert 'No such option' not in result.output
+
+
 def test_global_quiet_suppresses_tree_and_keeps_headline(ddev, empty_repo):
     """`ddev -q create ...` suppresses the file-tree printout but still emits the one-line `Created` headline."""
     result = ddev(
