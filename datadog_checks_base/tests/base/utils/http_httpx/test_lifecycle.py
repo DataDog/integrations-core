@@ -27,10 +27,16 @@ def test_module_import_fails_without_httpx(monkeypatch):
         import datadog_checks.base.utils.http_httpx  # noqa: F401
 
 
-def test_agentcheck_http_dispatch_returns_httpx_wrapper():
+@pytest.mark.parametrize(
+    'instance,expected_cls_name',
+    [
+        pytest.param({'use_httpx': True}, 'HTTPXWrapper', id='opt-in'),
+        pytest.param({'use_httpx': False}, 'RequestsWrapper', id='explicit-default'),
+        pytest.param({}, 'RequestsWrapper', id='unset-default'),
+    ],
+)
+def test_agentcheck_http_dispatch(instance, expected_cls_name):
     from datadog_checks.base import AgentCheck
 
-    check = AgentCheck('test', {}, [{'use_httpx': True}])
-    http = check.http
-    assert isinstance(http, HTTPXWrapper)
-    http.close()
+    check = AgentCheck('test', {}, [instance])
+    assert type(check.http).__name__ == expected_cls_name
