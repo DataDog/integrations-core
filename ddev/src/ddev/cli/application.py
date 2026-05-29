@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import logging
 import os
+from collections import defaultdict
+from collections.abc import Iterable
 from functools import cached_property
 from typing import TYPE_CHECKING, cast
 
@@ -12,6 +14,7 @@ from ddev.cli.terminal import Terminal
 from ddev.config.constants import AppEnvVars, ConfigEnvVars, VerbosityLevels
 from ddev.config.file import ConfigFileWithOverrides, RootConfig
 from ddev.repo.core import Repository
+from ddev.utils.ci import AnnotationLevel, escape_workflow_data, escape_workflow_property, running_in_ci
 from ddev.utils.fs import Path
 from ddev.utils.github import GitHubManager
 from ddev.utils.platform import Platform
@@ -112,6 +115,38 @@ class Application(Terminal):
         if text:
             self.display_error(text, **kwargs)
         self.__exit_func(code)
+
+    def annotate_error(self, file: str, message: str, line: int = 1) -> None:
+        """Emit a GitHub Actions ``error`` workflow annotation; no-op outside CI."""
+        self._emit_github_annotation(AnnotationLevel.ERROR, file, message, line)
+
+    def annotate_warning(self, file: str, message: str, line: int = 1) -> None:
+        """Emit a GitHub Actions ``warning`` workflow annotation; no-op outside CI."""
+        self._emit_github_annotation(AnnotationLevel.WARNING, file, message, line)
+
+    def annotate_display_queue(
+        self, file: str, display_queue: Iterable[tuple[AnnotationLevel, str]], line: int = 1
+    ) -> None:
+        """Emit one annotation per level from a queue of ``(level, message)`` tuples.
+
+        Messages at the same level are joined with a newline so they render as a single
+        multi-line annotation (``escape_workflow_data`` rewrites it to ``%0A``).
+        """
+        grouped: defaultdict[AnnotationLevel, list[str]] = defaultdict(list)
+        for level, message in display_queue:
+            grouped[level].append(message)
+
+        for level in AnnotationLevel:
+            if messages := grouped.get(level):
+                self._emit_github_annotation(level, file, '\n'.join(messages), line)
+
+    def _emit_github_annotation(self, level: AnnotationLevel, file: str, message: str, line: int) -> None:
+        if not running_in_ci():
+            return
+        # `print` avoids shell injection; escapers match @actions/core's escapeData/escapeProperty - do not remove.
+        escaped_file = escape_workflow_property(file)
+        escaped_message = escape_workflow_data(message)
+        print(f'::{level} file={escaped_file},line={line}::{escaped_message}')
 
     # TODO: remove everything below when the old CLI is gone
     def initialize_old_cli(self):

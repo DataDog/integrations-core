@@ -147,6 +147,7 @@ class InstanceConfig(BaseModel):
     query_metrics: Optional[QueryMetrics] = None
     query_samples: Optional[QuerySamples] = None
     read_timeout: Optional[int] = None
+    reported_hostname: Optional[str] = None
     server: str
     service: Optional[str] = None
     single_endpoint_mode: Optional[bool] = None
