@@ -55,7 +55,6 @@ BASE_TIMESTAMP = utc_timestamp(2026, 1, 1)
     ],
 )
 def test_cron_expression_accepts_valid(expression: str) -> None:
-    assert CronExpression.is_valid(expression)
     CronExpression(expression)
 
 
@@ -95,14 +94,8 @@ def test_cron_expression_accepts_valid(expression: str) -> None:
     ],
 )
 def test_cron_expression_rejects_invalid(expression: str) -> None:
-    assert not CronExpression.is_valid(expression)
     with pytest.raises(ValueError):
         CronExpression(expression)
-
-
-@pytest.mark.parametrize("bad", [None, 123, 1.5, object(), [], {}])
-def test_is_valid_returns_false_for_non_string(bad: object) -> None:
-    assert not CronExpression.is_valid(bad)  # type: ignore[arg-type]
 
 
 @pytest.mark.parametrize("bad", [None, 123, 1.5, object(), [], {}])
@@ -121,13 +114,12 @@ def test_cron_expression_raises_type_error_for_non_string(bad: object) -> None:
     ],
 )
 def test_unsatisfiable_dom_month_combo_rejected_at_parse_time(expression: str) -> None:
-    assert not CronExpression.is_valid(expression)
     with pytest.raises(ValueError):
         CronExpression(expression)
 
 
 def test_unsatisfiable_combo_allowed_when_dow_provides_or_match() -> None:
-    assert CronExpression.is_valid("0 0 31 2 1")
+    CronExpression("0 0 31 2 1")
 
 
 @pytest.mark.parametrize(

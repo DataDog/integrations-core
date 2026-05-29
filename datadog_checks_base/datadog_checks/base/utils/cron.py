@@ -33,6 +33,9 @@ DOW_RANGE = (0, 7)
 # must be accepted.
 MAX_DAYS_PER_MONTH = {2: 29, 4: 30, 6: 30, 9: 30, 11: 30}
 
+# Safety cap on the coarse jumps _walk takes before giving up, so a search that
+# never matches raises instead of looping forever. 366 * 8 is well above what
+# any satisfiable expression needs, including rare ones like Feb 29.
 WALK_ITERATION_BUDGET = 366 * 8
 
 
@@ -159,7 +162,11 @@ def _reject_unsatisfiable_dom_month(parsed: _ParsedCron) -> None:
 
 
 class CronExpression:
-    """A parsed standard 5-field cron expression evaluated in UTC."""
+    """A parsed standard 5-field cron expression evaluated in UTC.
+
+    Raises ``ValueError`` if the expression is malformed or can never fire, and
+    ``TypeError`` if it is not a string.
+    """
 
     __slots__ = (
         "_dom_restricted",
@@ -209,15 +216,6 @@ class CronExpression:
     def expression(self) -> str:
         """The normalized cron expression string."""
         return self._expression
-
-    @staticmethod
-    def is_valid(expression: str) -> bool:
-        """Whether the given string parses as a supported cron expression, without building one."""
-        try:
-            _parse(expression)
-        except (ValueError, TypeError):
-            return False
-        return True
 
     def next_tick(self, after: float) -> float:
         """First scheduled tick strictly greater than ``after`` (epoch seconds, UTC)."""
