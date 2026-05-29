@@ -18,6 +18,7 @@ from __future__ import annotations
 import time
 from calendar import monthrange
 from datetime import datetime, timedelta, timezone
+from typing import NamedTuple
 
 UTC = timezone.utc
 
@@ -101,6 +102,62 @@ def _parse_range(base: str) -> tuple[int, int]:
     return start, end
 
 
+class _ParsedCron(NamedTuple):
+    minutes: tuple[int, ...]
+    hours: tuple[int, ...]
+    doms: tuple[int, ...]
+    dom_restricted: bool
+    months: tuple[int, ...]
+    dows: tuple[int, ...]
+    dow_restricted: bool
+    expression: str
+
+
+def _parse(expression: str) -> _ParsedCron:
+    """Parse and validate a 5-field cron string into its allowed value sets."""
+    if not isinstance(expression, str):
+        raise TypeError("cron expression must be a string")
+
+    stripped = expression.strip()
+    if not stripped:
+        raise ValueError("cron expression is empty")
+    if stripped.startswith("@"):
+        raise ValueError(f"shortcut expressions are not supported: {expression!r}")
+
+    fields = stripped.split()
+    if len(fields) != 5:
+        raise ValueError(f"expected 5 cron fields, got {len(fields)}: {expression!r}")
+
+    minute_field, hour_field, dom_field, month_field, dow_field = fields
+    raw_dows = _parse_field(dow_field, *DOW_RANGE)
+
+    parsed = _ParsedCron(
+        minutes=_parse_field(minute_field, *MINUTE_RANGE),
+        hours=_parse_field(hour_field, *HOUR_RANGE),
+        doms=_parse_field(dom_field, *DOM_RANGE),
+        dom_restricted=dom_field != "*",
+        months=_parse_field(month_field, *MONTH_RANGE),
+        dows=tuple(sorted({0 if v == 7 else v for v in raw_dows})),
+        dow_restricted=dow_field != "*",
+        expression=" ".join(fields),
+    )
+    _reject_unsatisfiable_dom_month(parsed)
+    return parsed
+
+
+def _reject_unsatisfiable_dom_month(parsed: _ParsedCron) -> None:
+    """Reject a restricted day-of-month that never occurs in the restricted months."""
+    if parsed.dow_restricted or not parsed.dom_restricted:
+        return
+    for month in parsed.months:
+        if any(day <= MAX_DAYS_PER_MONTH.get(month, 31) for day in parsed.doms):
+            return
+    raise ValueError(
+        f"cron expression {parsed.expression!r} can never fire: "
+        f"day-of-month {list(parsed.doms)} does not occur in months {list(parsed.months)}"
+    )
+
+
 class CronExpression:
     """A parsed standard 5-field cron expression evaluated in UTC."""
 
@@ -116,42 +173,15 @@ class CronExpression:
     )
 
     def __init__(self, expression: str) -> None:
-        if not isinstance(expression, str):
-            raise TypeError("cron expression must be a string")
-
-        stripped = expression.strip()
-        if not stripped:
-            raise ValueError("cron expression is empty")
-        if stripped.startswith("@"):
-            raise ValueError(f"shortcut expressions are not supported: {expression!r}")
-
-        fields = stripped.split()
-        if len(fields) != 5:
-            raise ValueError(f"expected 5 cron fields, got {len(fields)}: {expression!r}")
-
-        minute_field, hour_field, dom_field, month_field, dow_field = fields
-
-        self._minutes = _parse_field(minute_field, *MINUTE_RANGE)
-        self._hours = _parse_field(hour_field, *HOUR_RANGE)
-        self._doms = _parse_field(dom_field, *DOM_RANGE)
-        self._dom_restricted = dom_field != "*"
-        self._months = _parse_field(month_field, *MONTH_RANGE)
-        raw_dows = _parse_field(dow_field, *DOW_RANGE)
-        self._dow_restricted = dow_field != "*"
-        self._dows = tuple(sorted({0 if v == 7 else v for v in raw_dows}))
-        self._expression = " ".join(fields)
-        self._reject_unsatisfiable_dom_month()
-
-    def _reject_unsatisfiable_dom_month(self) -> None:
-        if self._dow_restricted or not self._dom_restricted:
-            return
-        for month in self._months:
-            if any(day <= MAX_DAYS_PER_MONTH.get(month, 31) for day in self._doms):
-                return
-        raise ValueError(
-            f"cron expression {self._expression!r} can never fire: "
-            f"day-of-month {list(self._doms)} does not occur in months {list(self._months)}"
-        )
+        parsed = _parse(expression)
+        self._minutes = parsed.minutes
+        self._hours = parsed.hours
+        self._doms = parsed.doms
+        self._dom_restricted = parsed.dom_restricted
+        self._months = parsed.months
+        self._dows = parsed.dows
+        self._dow_restricted = parsed.dow_restricted
+        self._expression = parsed.expression
 
     def _canonical_key(self) -> tuple:
         return (
@@ -180,11 +210,11 @@ class CronExpression:
         """The normalized cron expression string."""
         return self._expression
 
-    @classmethod
-    def is_valid(cls, expression: str) -> bool:
-        """Whether the given string parses as a supported cron expression."""
+    @staticmethod
+    def is_valid(expression: str) -> bool:
+        """Whether the given string parses as a supported cron expression, without building one."""
         try:
-            cls(expression)
+            _parse(expression)
         except (ValueError, TypeError):
             return False
         return True
@@ -320,7 +350,12 @@ class CronScheduler:
         return self._next_tick_cached
 
     def due_ticks(self, now: float | None = None) -> list[float]:
-        """Return scheduled ticks that have elapsed by ``now``."""
+        """Return scheduled ticks that have come due by ``now``.
+
+        "Due" is the scheduling sense: the tick's scheduled moment is at or
+        before ``now``. It does not imply the work for that tick ran or
+        completed.
+        """
         if now is None:
             now = time.time()
 
