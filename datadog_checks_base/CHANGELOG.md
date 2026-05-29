@@ -2,17 +2,6 @@
 
 <!-- towncrier release notes start -->
 
-## 37.38.0 / 2026-05-29
-
-***Security***:
-
-* Bump urllib3 to 2.7.0 to address CVE-2026-44431 and CVE-2026-44432. ([#23767](https://github.com/DataDog/integrations-core/pull/23767))
-
-***Added***:
-
-* Add file-based YAML metrics loading for OpenMetrics V2 checks with composable predicates ([#22750](https://github.com/DataDog/integrations-core/pull/22750))
-* Add ``CronExpression`` and ``CronScheduler`` utilities for cron-style scheduling inside check methods. ([#23741](https://github.com/DataDog/integrations-core/pull/23741))
-
 ## 37.37.0 / 2026-05-14
 
 ***Added***:
