@@ -15,6 +15,7 @@ from .metrics import (
     NOTIFICATIONS_CONTROLLER_METRICS,
     REPO_SERVER_METRICS,
 )
+from .resources import ArgocdResourceCollector
 
 (
     API_SERVER_NAMESPACE,
@@ -40,6 +41,12 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         super(ArgocdCheck, self).__init__(name, init_config, instances)
         self.check_initializations.appendleft(self.parse_config)
         self.check_initializations.append(self.configure_additional_transformers)
+        self._resource_collector = ArgocdResourceCollector(self)
+
+    def check(self, instance):
+        if self.instance.get("collect_genresources"):
+            self._resource_collector.collect()
+        super().check(instance)
 
     def parse_config(self):
         endpoint_configs = [
@@ -97,7 +104,7 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         return argocd_cluster_connection_status_transformer
 
     def configure_additional_transformers(self):
-        endpoints = [key for key in self.instance.keys() if "_endpoint" in key]
+        endpoints = [key for key in self.instance.keys() if "_endpoint" in key and self.instance[key] in self.scrapers]
         for endpoint in endpoints:
             if endpoint == "app_controller_endpoint":
                 self.scrapers[self.instance[endpoint]].metric_transformer.add_custom_transformer(
