@@ -177,7 +177,7 @@ def seed_mock_kafka_client(cluster_id='test-cluster-id'):
     return client
 
 
-def mock_schema_registry_methods(metadata_collector):
+def mock_schema_registry_methods(metadata_collector, global_compat='BACKWARD', subject_compat='BACKWARD'):
     """Mock Schema Registry methods on the metadata collector."""
     metadata_collector._get_schema_registry_subjects = mock.Mock(return_value=['test-topic-value'])
 
@@ -208,8 +208,8 @@ def mock_schema_registry_methods(metadata_collector):
         }
     )
 
-    metadata_collector._get_schema_registry_global_compatibility = mock.Mock(return_value='BACKWARD')
-    metadata_collector._get_schema_registry_subject_compatibility = mock.Mock(return_value='BACKWARD')
+    metadata_collector._get_schema_registry_global_compatibility = mock.Mock(return_value=global_compat)
+    metadata_collector._get_schema_registry_subject_compatibility = mock.Mock(return_value=subject_compat)
 
 
 @pytest.fixture
@@ -248,11 +248,7 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
     kafka_consumer_check.metadata_collector.client = mock_kafka_client
 
     # Mock schema registry methods on metadata collector
-    mock_schema_registry_methods(kafka_consumer_check.metadata_collector)
-    kafka_consumer_check.metadata_collector._get_schema_registry_global_compatibility = mock.Mock(
-        return_value='BACKWARD'
-    )
-    kafka_consumer_check.metadata_collector._get_schema_registry_subject_compatibility = mock.Mock(return_value='FULL')
+    mock_schema_registry_methods(kafka_consumer_check.metadata_collector, subject_compat='FULL')
 
     # Mock persistent cache for throughput calculation and schema registry events
     # Using per-partition format: partition 0 was at 75, partition 1 was at 175
@@ -487,35 +483,6 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
         tags=['test_tag:test_value', 'kafka_cluster_id:test-cluster-id'],
     )
 
-    expected_broker_config = {
-        'log.retention.bytes': '1073741824',
-        'log.retention.ms': '604800000',
-        'log.segment.bytes': '1073741824',
-        'num.partitions': '3',
-        'num.network.threads': '3',
-        'num.io.threads': '8',
-        'default.replication.factor': '2',
-        'min.insync.replicas': '1',
-        'compression.type': 'producer',
-    }
-    expected_topic_config = {
-        'retention.ms': '604800000',
-        'retention.bytes': '-1',
-        'max.message.bytes': '1048588',
-        'compression.type': 'producer',
-        'cleanup.policy': 'delete',
-    }
-    expected_schema = {
-        "type": "record",
-        "name": "User",
-        "namespace": "com.example",
-        "fields": [
-            {"name": "id", "type": "long"},
-            {"name": "username", "type": "string"},
-            {"name": "email", "type": ["null", "string"], "default": None},
-        ],
-    }
-
     # Broker, topic, and schema configs are emitted only to the Data Streams intake.
     assert not [e for e in aggregator.events if 'event_type:broker_config' in e.get('tags', [])]
     assert not [e for e in aggregator.events if 'event_type:topic_config' in e.get('tags', [])]
@@ -538,6 +505,17 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
     assert broker_ds['broker_host'] == 'broker1'
     assert broker_ds['broker_port'] == 9092
     assert 'collection_timestamp' in broker_ds
+    expected_broker_config = {
+        'log.retention.bytes': '1073741824',
+        'log.retention.ms': '604800000',
+        'log.segment.bytes': '1073741824',
+        'num.partitions': '3',
+        'num.network.threads': '3',
+        'num.io.threads': '8',
+        'default.replication.factor': '2',
+        'min.insync.replicas': '1',
+        'compression.type': 'producer',
+    }
     assert broker_ds['config'] == expected_broker_config
 
     topic_ds_events = [e for e in ds_events if e.get('config_type') == 'topic']
@@ -546,6 +524,13 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
     assert topic_ds['kafka_cluster_id'] == 'test-cluster-id'
     assert topic_ds['topic'] == 'test-topic'
     assert 'collection_timestamp' in topic_ds
+    expected_topic_config = {
+        'retention.ms': '604800000',
+        'retention.bytes': '-1',
+        'max.message.bytes': '1048588',
+        'compression.type': 'producer',
+        'cleanup.policy': 'delete',
+    }
     assert topic_ds['config'] == expected_topic_config
 
     schema_ds_events = [e for e in ds_events if e.get('config_type') == 'schema']
@@ -560,6 +545,16 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
     assert 'schema' in schema_ds
     assert schema_ds['compatibility'] == 'FULL'
     assert schema_ds['global_compatibility'] == 'BACKWARD'
+    expected_schema = {
+        "type": "record",
+        "name": "User",
+        "namespace": "com.example",
+        "fields": [
+            {"name": "id", "type": "long"},
+            {"name": "username", "type": "string"},
+            {"name": "email", "type": ["null", "string"], "default": None},
+        ],
+    }
     assert json.loads(schema_ds['schema']) == expected_schema
 
 
@@ -1475,3 +1470,152 @@ def test_heartbeat_brokers_empty_when_no_metadata(check):
     hb_events = [e for e in hb_events if e.get('config_type') == 'heartbeat']
     assert len(hb_events) == 1
     assert hb_events[0]['brokers'] == []
+
+
+def _make_schema_registry_check(check, instance_overrides=None):
+    """Return a check instance wired with a mock Kafka client and persistent cache mocks."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+        'schema_registry_url': 'http://localhost:8081',
+        'monitor_unlisted_consumer_groups': True,
+    }
+    if instance_overrides:
+        instance.update(instance_overrides)
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+    return kafka_consumer_check
+
+
+def test_schema_registry_subject_compat_failure_on_version_bump_preserves_cached_compat(
+    check, dd_run_check, aggregator
+):
+    """When compat fetch raises for a version-bumped subject, the previous cached value is preserved."""
+    kafka_consumer_check = _make_schema_registry_check(check)
+
+    subject = 'my-topic-value'
+    avro_schema = json.dumps({"type": "string"})
+    schema_id = 42
+
+    collector = kafka_consumer_check.metadata_collector
+    collector._get_schema_registry_subjects = mock.Mock(return_value=[subject])
+    collector._get_schema_registry_versions = mock.Mock(return_value=[1, 2, 3])
+    collector._get_schema_registry_latest_version = mock.Mock(
+        return_value={'id': schema_id, 'version': 3, 'schema': avro_schema, 'schemaType': 'AVRO'}
+    )
+    collector._get_schema_registry_global_compatibility = mock.Mock(return_value='BACKWARD')
+    collector._get_schema_registry_subject_compatibility = mock.Mock(side_effect=Exception("registry down"))
+
+    # Previous run had version 2 with FULL compatibility cached.
+    latest_version_cache = {subject: {'version': 2, 'schema_id': 10, 'compatibility': 'FULL'}}
+    schema_id_cache = {}
+    cache_storage = {
+        'kafka_schema_latest_version_cache': json.dumps(latest_version_cache),
+        'kafka_schema_id_cache': json.dumps(schema_id_cache),
+    }
+
+    def mock_read(key):
+        return cache_storage.get(key)
+
+    def mock_write(key, value):
+        cache_storage[key] = value
+
+    kafka_consumer_check.read_persistent_cache = mock.Mock(side_effect=mock_read)
+    kafka_consumer_check.write_persistent_cache = mock.Mock(side_effect=mock_write)
+    kafka_consumer_check.event_platform_event = mock.Mock()
+
+    dd_run_check(kafka_consumer_check)
+
+    # The new cache entry must preserve the previously known compatibility, not write None.
+    saved_cache = json.loads(cache_storage.get('kafka_schema_latest_version_cache', '{}'))
+    assert saved_cache[subject]['compatibility'] == 'FULL'
+
+    # The emitted payload must also carry the preserved compatibility.
+    ds_calls = kafka_consumer_check.event_platform_event.call_args_list
+    schema_events = [
+        json.loads(c[0][0])
+        for c in ds_calls
+        if len(c[0]) > 1 and c[0][1] == 'data-streams-message' and json.loads(c[0][0]).get('config_type') == 'schema'
+    ]
+    assert len(schema_events) == 1
+    assert schema_events[0]['compatibility'] == 'FULL'
+
+
+def test_schema_registry_global_compat_failure_uses_last_known_value(check, dd_run_check, aggregator):
+    """When the global compatibility fetch fails, the last successfully fetched value is used."""
+    kafka_consumer_check = _make_schema_registry_check(check)
+
+    subject = 'my-topic-value'
+    avro_schema = json.dumps({"type": "string"})
+    schema_id = 77
+
+    collector = kafka_consumer_check.metadata_collector
+    collector._get_schema_registry_subjects = mock.Mock(return_value=[subject])
+    collector._get_schema_registry_versions = mock.Mock(return_value=[1])
+    collector._get_schema_registry_latest_version = mock.Mock(
+        return_value={'id': schema_id, 'version': 1, 'schema': avro_schema, 'schemaType': 'AVRO'}
+    )
+    collector._get_schema_registry_global_compatibility = mock.Mock(side_effect=Exception("registry down"))
+    collector._get_schema_registry_subject_compatibility = mock.Mock(return_value='BACKWARD')
+
+    # Simulate a previously cached global compatibility of 'FULL'.
+    cache_storage = {
+        'kafka_schema_global_compatibility_cache': 'FULL',
+    }
+
+    def mock_read(key):
+        return cache_storage.get(key)
+
+    def mock_write(key, value):
+        cache_storage[key] = value
+
+    kafka_consumer_check.read_persistent_cache = mock.Mock(side_effect=mock_read)
+    kafka_consumer_check.write_persistent_cache = mock.Mock(side_effect=mock_write)
+    kafka_consumer_check.event_platform_event = mock.Mock()
+
+    dd_run_check(kafka_consumer_check)
+
+    ds_calls = kafka_consumer_check.event_platform_event.call_args_list
+    schema_events = [
+        json.loads(c[0][0])
+        for c in ds_calls
+        if len(c[0]) > 1 and c[0][1] == 'data-streams-message' and json.loads(c[0][0]).get('config_type') == 'schema'
+    ]
+    assert len(schema_events) == 1
+    assert schema_events[0]['global_compatibility'] == 'FULL'
+
+
+def test_schema_registry_none_compat_in_cache_omits_field(check, dd_run_check, aggregator):
+    """A cached entry with compatibility=None must not include the field in the DS payload."""
+    kafka_consumer_check = _make_schema_registry_check(check)
+
+    subject = 'my-topic-value'
+    avro_schema = json.dumps({"type": "string"})
+    schema_id = 99
+
+    collector = kafka_consumer_check.metadata_collector
+    collector._get_schema_registry_subjects = mock.Mock(return_value=[subject])
+    collector._get_schema_registry_versions = mock.Mock(return_value=[1, 2])
+    collector._get_schema_registry_latest_version = mock.Mock(
+        return_value={'id': schema_id, 'version': 2, 'schema': avro_schema, 'schemaType': 'AVRO'}
+    )
+    collector._get_schema_registry_global_compatibility = mock.Mock(return_value=None)
+    collector._get_schema_registry_subject_compatibility = mock.Mock(return_value=None)
+
+    kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=None)
+    kafka_consumer_check.write_persistent_cache = mock.Mock()
+    kafka_consumer_check.event_platform_event = mock.Mock()
+
+    dd_run_check(kafka_consumer_check)
+
+    ds_calls = kafka_consumer_check.event_platform_event.call_args_list
+    schema_events = [
+        json.loads(c[0][0])
+        for c in ds_calls
+        if len(c[0]) > 1 and c[0][1] == 'data-streams-message' and json.loads(c[0][0]).get('config_type') == 'schema'
+    ]
+    assert len(schema_events) == 1
+    assert 'compatibility' not in schema_events[0]
+    assert 'global_compatibility' not in schema_events[0]

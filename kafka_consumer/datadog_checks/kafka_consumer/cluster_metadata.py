@@ -69,6 +69,7 @@ class ClusterMetadataCollector:
         self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY = 'kafka_schema_compatibility_fetch_cache'
         self.SCHEMA_LATEST_VERSION_CACHE_KEY = 'kafka_schema_latest_version_cache'
         self.SCHEMA_ID_CACHE_KEY = 'kafka_schema_id_cache'
+        self.GLOBAL_COMPATIBILITY_CACHE_KEY = 'kafka_schema_global_compatibility_cache'
 
         self._schema_registry_oauth_token = None
         self._schema_registry_oauth_token_expiry = 0
@@ -160,44 +161,36 @@ class ClusterMetadataCollector:
 
         return access_token, expires_at
 
-    def _get_schema_registry_subjects(self):
-        base_url = self.config._collect_schema_registry
-        response = self.http.get(f"{base_url}/subjects")
+    def _schema_registry_get(self, path: str, **kwargs):
+        """GET a Schema Registry path and return the parsed JSON body."""
+        url = f"{self.config._collect_schema_registry}{path}"
+        response = self.http.get(url, **kwargs)
         response.raise_for_status()
         return response.json()
+
+    def _get_schema_registry_subjects(self):
+        return self._schema_registry_get('/subjects')
 
     def _get_schema_registry_versions(self, subject: str) -> list[int]:
         """Fetch the list of version numbers for a subject (lightweight call)."""
-        base_url = self.config._collect_schema_registry
         encoded_subject = quote(subject, safe='')
-        response = self.http.get(f"{base_url}/subjects/{encoded_subject}/versions")
-        response.raise_for_status()
-        return response.json()
+        return self._schema_registry_get(f'/subjects/{encoded_subject}/versions')
 
     def _get_schema_registry_latest_version(self, subject):
-        base_url = self.config._collect_schema_registry
         encoded_subject = quote(subject, safe='')
-        response = self.http.get(f"{base_url}/subjects/{encoded_subject}/versions/latest")
-        response.raise_for_status()
-        return response.json()
+        return self._schema_registry_get(f'/subjects/{encoded_subject}/versions/latest')
 
     def _get_schema_registry_global_compatibility(self) -> str | None:
         """Return the global compatibility level from the Schema Registry."""
-        base_url = self.config._collect_schema_registry
-        response = self.http.get(f"{base_url}/config")
-        response.raise_for_status()
-        return response.json().get('compatibilityLevel')
+        return self._schema_registry_get('/config').get('compatibilityLevel')
 
     def _get_schema_registry_subject_compatibility(self, subject: str) -> str | None:
         """Return the effective compatibility for a subject, falling back to global."""
-        base_url = self.config._collect_schema_registry
         encoded_subject = quote(subject, safe='')
-        response = self.http.get(
-            f"{base_url}/config/{encoded_subject}",
+        return self._schema_registry_get(
+            f'/config/{encoded_subject}',
             params={'defaultToGlobal': 'true'},
-        )
-        response.raise_for_status()
-        return response.json().get('compatibilityLevel')
+        ).get('compatibilityLevel')
 
     def collect_all_metadata(self, highwater_offsets):
         try:
@@ -910,6 +903,21 @@ class ClusterMetadataCollector:
         except Exception as e:
             self.log.debug("Could not write schema latest version cache: %s", e)
 
+    def _load_global_compatibility_cache(self) -> str | None:
+        """Return the last successfully fetched global compatibility level."""
+        try:
+            return self.check.read_persistent_cache(self.GLOBAL_COMPATIBILITY_CACHE_KEY) or None
+        except Exception as e:
+            self.log.debug("Could not read global compatibility cache: %s", e)
+            return None
+
+    def _save_global_compatibility_cache(self, value: str) -> None:
+        """Persist the last known global compatibility level."""
+        try:
+            self.check.write_persistent_cache(self.GLOBAL_COMPATIBILITY_CACHE_KEY, value)
+        except Exception as e:
+            self.log.debug("Could not write global compatibility cache: %s", e)
+
     def _collect_schema_registry_info(self, metadata):
         if not self.config._collect_schema_registry:
             return
@@ -939,8 +947,11 @@ class ClusterMetadataCollector:
         global_compatibility = None
         try:
             global_compatibility = self._get_schema_registry_global_compatibility()
+            if global_compatibility is not None:
+                self._save_global_compatibility_cache(global_compatibility)
         except Exception as e:
             self.log.warning("Failed to fetch global compatibility from Schema Registry: %s", e)
+            global_compatibility = self._load_global_compatibility_cache()
 
         # --- Tier 1: Lightweight version checks ---
         # GET /subjects/{subject}/versions returns just [1, 2, 3] — very cheap.
@@ -1017,7 +1028,8 @@ class ClusterMetadataCollector:
 
         # Per-subject compatibility refresh — cadence-driven so a flip without a version bump is still picked up.
         compat_due = self._get_items_to_fetch(self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY, subjects)
-        compat_due = compat_due[: self.SCHEMA_COMPATIBILITY_BATCH_SIZE]
+        remaining_slots = max(0, self.SCHEMA_COMPATIBILITY_BATCH_SIZE - len(subjects_needing_full_fetch))
+        compat_due = compat_due[:remaining_slots]
         compat_subjects_to_fetch = list(set(subjects_needing_full_fetch) | set(compat_due))
 
         compatibility_responses: dict[str, str | None] = {}
@@ -1032,7 +1044,7 @@ class ClusterMetadataCollector:
                     try:
                         compatibility_responses[subject] = future.result()
                     except Exception as e:
-                        self.log.debug("Error getting compatibility for %s: %s", subject, e)
+                        self.log.warning("Error getting compatibility for %s: %s", subject, e)
 
             self._mark_items_fetched(
                 self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY,
@@ -1046,7 +1058,7 @@ class ClusterMetadataCollector:
         # a compatibility flip alone (without a version bump) flows into the next
         # schema emission via the cache_content key.
         for subject, compatibility in compatibility_responses.items():
-            if compatibility is None or subject in subjects_needing_full_fetch:
+            if compatibility is None or subject in schema_responses:
                 continue
             entry = latest_version_cache.get(subject)
             if isinstance(entry, dict):
@@ -1064,6 +1076,8 @@ class ClusterMetadataCollector:
                 continue
 
             compatibility = compatibility_responses.get(subject)
+            if compatibility is None:
+                compatibility = (latest_version_cache.get(subject) or {}).get('compatibility')
 
             latest_version_cache[subject] = {
                 'version': schema_version,
