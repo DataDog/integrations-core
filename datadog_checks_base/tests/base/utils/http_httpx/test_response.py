@@ -89,14 +89,6 @@ def test_response_reason_from_httpx_response(status_transport_factory):
     assert response.reason == 'OK'
 
 
-def test_response_reason_falls_back_when_reason_phrase_missing():
-    class _FakeResponseExposingReason:
-        reason = 'Not Found'
-
-    adapter = HTTPXResponseAdapter(_FakeResponseExposingReason())  # type: ignore[arg-type]
-    assert adapter.reason == 'Not Found'
-
-
 def test_response_text_decodes_body(status_transport_factory):
     transport = status_transport_factory(200, b'hello')
     http = HTTPXWrapper({}, {}, transport=transport)

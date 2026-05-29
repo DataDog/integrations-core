@@ -139,10 +139,7 @@ class HTTPXResponseAdapter:
 
     @property
     def reason(self) -> str:
-        reason = getattr(self._response, 'reason_phrase', None)
-        if reason is not None:
-            return reason
-        return getattr(self._response, 'reason', '') or ''
+        return self._response.reason_phrase
 
     @property
     def encoding(self) -> str | None:
