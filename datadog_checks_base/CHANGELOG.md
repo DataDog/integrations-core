@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 37.38.0 / 2026-05-22
+
+***Security***:
+
+* Bump urllib3 to 2.7.0 to address CVE-2026-44431 and CVE-2026-44432. ([#23767](https://github.com/DataDog/integrations-core/pull/23767))
+
 ## 37.37.0 / 2026-05-14
 
 ***Added***:
