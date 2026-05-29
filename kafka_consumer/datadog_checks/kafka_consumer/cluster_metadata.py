@@ -1024,6 +1024,8 @@ class ClusterMetadataCollector:
         )
 
         # Per-subject compatibility refresh — cadence-driven so a flip without a version bump is still picked up.
+        # A per-subject flip therefore surfaces only on the next compat-fetch cadence (up to
+        # CONFIGS_REFRESH_INTERVAL + jitter later); a global flip re-emits immediately via global_compatibility.
         compat_due = self._get_items_to_fetch(self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY, subjects)
         remaining_slots = max(0, self.SCHEMA_COMPATIBILITY_BATCH_SIZE - len(subjects_needing_full_fetch))
         compat_due = compat_due[:remaining_slots]
@@ -1047,6 +1049,12 @@ class ClusterMetadataCollector:
         # Apply standalone compatibility updates to existing cache entries so that
         # a compatibility flip alone (without a version bump) flows into the next
         # schema emission via the cache_content key.
+        #
+        # This must precede the schema_responses loop below, which fully replaces
+        # latest_version_cache[subject] for version-bumped subjects. The
+        # `subject in schema_responses` guard makes the two write sites mutually
+        # exclusive per subject: version-bumped subjects get their compatibility
+        # set in that loop, everyone else is updated in place here.
         for subject, compatibility in compatibility_responses.items():
             if compatibility is None or subject in schema_responses:
                 continue

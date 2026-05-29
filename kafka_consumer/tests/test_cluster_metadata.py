@@ -229,6 +229,37 @@ def schema_ds_events(check):
     return events
 
 
+def _make_schema_registry_check(check, instance_overrides=None):
+    """Return a check instance wired with a mock Kafka client and persistent cache mocks."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+        'schema_registry_url': 'http://localhost:8081',
+        'monitor_unlisted_consumer_groups': True,
+    }
+    if instance_overrides:
+        instance.update(instance_overrides)
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+    return kafka_consumer_check
+
+
+def _wire_cache(kafka_consumer_check, seed=None):
+    """Wire persistent-cache and event mocks on the check, returning the backing cache_storage dict.
+
+    Each test only declares its seed cache entries; reads and writes go through this in-memory dict.
+    """
+    cache_storage = dict(seed or {})
+    kafka_consumer_check.read_persistent_cache = mock.Mock(side_effect=cache_storage.get)
+    kafka_consumer_check.write_persistent_cache = mock.Mock(
+        side_effect=lambda key, value: cache_storage.__setitem__(key, value)
+    )
+    kafka_consumer_check.event_platform_event = mock.Mock()
+    return cache_storage
+
+
 @pytest.fixture
 def cluster_config():
     """Base configuration for cluster monitoring tests."""
@@ -744,17 +775,7 @@ def test_schema_registry_batching(check, dd_run_check, aggregator):
     With thousands of subjects, only a limited batch should be checked per check run
     to avoid overwhelming the registry.
     """
-    instance = {
-        'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
-        'schema_registry_url': 'http://localhost:8081',
-        'monitor_unlisted_consumer_groups': True,
-    }
-
-    kafka_consumer_check = check(instance)
-    mock_kafka_client = seed_mock_kafka_client()
-    kafka_consumer_check.client = mock_kafka_client
-    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+    kafka_consumer_check = _make_schema_registry_check(check)
 
     collector = kafka_consumer_check.metadata_collector
     # Set a small batch size for testing
@@ -772,17 +793,7 @@ def test_schema_registry_batching(check, dd_run_check, aggregator):
         return_value={'id': 1, 'version': 1, 'schema': avro_schema, 'schemaType': 'AVRO'}
     )
 
-    cache_storage = {}
-
-    def mock_read(key):
-        return cache_storage.get(key)
-
-    def mock_write(key, value):
-        cache_storage[key] = value
-
-    kafka_consumer_check.read_persistent_cache = mock.Mock(side_effect=mock_read)
-    kafka_consumer_check.write_persistent_cache = mock.Mock(side_effect=mock_write)
-    kafka_consumer_check.event_platform_event = mock.Mock()
+    _wire_cache(kafka_consumer_check)
 
     mock_compatibility_methods(collector)
 
@@ -833,17 +844,7 @@ def test_schema_registry_schema_id_cache(check, dd_run_check, aggregator):
     Schema IDs in the registry are immutable, so once we fetch the content for a
     given ID we should never need to fetch it again.
     """
-    instance = {
-        'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
-        'schema_registry_url': 'http://localhost:8081',
-        'monitor_unlisted_consumer_groups': True,
-    }
-
-    kafka_consumer_check = check(instance)
-    mock_kafka_client = seed_mock_kafka_client()
-    kafka_consumer_check.client = mock_kafka_client
-    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+    kafka_consumer_check = _make_schema_registry_check(check)
 
     collector = kafka_consumer_check.metadata_collector
 
@@ -857,17 +858,7 @@ def test_schema_registry_schema_id_cache(check, dd_run_check, aggregator):
         return_value={'id': 42, 'version': 3, 'schema': avro_schema, 'schemaType': 'AVRO'}
     )
 
-    cache_storage = {}
-
-    def mock_read(key):
-        return cache_storage.get(key)
-
-    def mock_write(key, value):
-        cache_storage[key] = value
-
-    kafka_consumer_check.read_persistent_cache = mock.Mock(side_effect=mock_read)
-    kafka_consumer_check.write_persistent_cache = mock.Mock(side_effect=mock_write)
-    kafka_consumer_check.event_platform_event = mock.Mock()
+    cache_storage = _wire_cache(kafka_consumer_check)
 
     mock_compatibility_methods(collector)
 
@@ -911,17 +902,7 @@ def test_schema_registry_two_tier_no_fetch_when_unchanged(check, dd_run_check, a
     The two-tier approach checks version numbers first (lightweight). If the max version
     matches what's cached, no full fetch (/versions/latest) should be made.
     """
-    instance = {
-        'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
-        'schema_registry_url': 'http://localhost:8081',
-        'monitor_unlisted_consumer_groups': True,
-    }
-
-    kafka_consumer_check = check(instance)
-    mock_kafka_client = seed_mock_kafka_client()
-    kafka_consumer_check.client = mock_kafka_client
-    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+    kafka_consumer_check = _make_schema_registry_check(check)
 
     collector = kafka_consumer_check.metadata_collector
 
@@ -940,19 +921,7 @@ def test_schema_registry_two_tier_no_fetch_when_unchanged(check, dd_run_check, a
         'other-topic-key': {'version': 2, 'schema_id': 11},
     }
 
-    cache_storage = {
-        'kafka_schema_latest_version_cache': json.dumps(latest_version_cache),
-    }
-
-    def mock_read(key):
-        return cache_storage.get(key)
-
-    def mock_write(key, value):
-        cache_storage[key] = value
-
-    kafka_consumer_check.read_persistent_cache = mock.Mock(side_effect=mock_read)
-    kafka_consumer_check.write_persistent_cache = mock.Mock(side_effect=mock_write)
-    kafka_consumer_check.event_platform_event = mock.Mock()
+    _wire_cache(kafka_consumer_check, {'kafka_schema_latest_version_cache': json.dumps(latest_version_cache)})
 
     mock_compatibility_methods(collector)
 
@@ -974,17 +943,7 @@ def test_schema_registry_two_tier_fetch_on_new_version(check, dd_run_check, aggr
     When a subject has a new version (e.g., max goes from 2 to 3), only that subject
     should trigger a full /versions/latest fetch.
     """
-    instance = {
-        'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
-        'schema_registry_url': 'http://localhost:8081',
-        'monitor_unlisted_consumer_groups': True,
-    }
-
-    kafka_consumer_check = check(instance)
-    mock_kafka_client = seed_mock_kafka_client()
-    kafka_consumer_check.client = mock_kafka_client
-    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+    kafka_consumer_check = _make_schema_registry_check(check)
 
     collector = kafka_consumer_check.metadata_collector
 
@@ -1011,19 +970,9 @@ def test_schema_registry_two_tier_fetch_on_new_version(check, dd_run_check, aggr
         'changed-topic-value': {'version': 2, 'schema_id': 50},
     }
 
-    cache_storage = {
-        'kafka_schema_latest_version_cache': json.dumps(latest_version_cache),
-    }
-
-    def mock_read(key):
-        return cache_storage.get(key)
-
-    def mock_write(key, value):
-        cache_storage[key] = value
-
-    kafka_consumer_check.read_persistent_cache = mock.Mock(side_effect=mock_read)
-    kafka_consumer_check.write_persistent_cache = mock.Mock(side_effect=mock_write)
-    kafka_consumer_check.event_platform_event = mock.Mock()
+    cache_storage = _wire_cache(
+        kafka_consumer_check, {'kafka_schema_latest_version_cache': json.dumps(latest_version_cache)}
+    )
 
     dd_run_check(kafka_consumer_check)
 
@@ -1047,17 +996,7 @@ def test_schema_registry_compatibility_flip_triggers_reemission(check, dd_run_ch
     The cache_content key includes compatibility, so flipping BACKWARD→FULL causes re-emission
     even when the schema version and content are identical.
     """
-    instance = {
-        'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
-        'schema_registry_url': 'http://localhost:8081',
-        'monitor_unlisted_consumer_groups': True,
-    }
-
-    kafka_consumer_check = check(instance)
-    mock_kafka_client = seed_mock_kafka_client()
-    kafka_consumer_check.client = mock_kafka_client
-    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+    kafka_consumer_check = _make_schema_registry_check(check)
 
     collector = kafka_consumer_check.metadata_collector
 
@@ -1080,21 +1019,14 @@ def test_schema_registry_compatibility_flip_triggers_reemission(check, dd_run_ch
     schema_id_cache = {str(schema_id): {'schema': avro_schema, 'schema_type': 'AVRO'}}
     schema_emit_cache = {subject: {'hash': old_hash, 'expire_at': time.time() + 3600}}
 
-    cache_storage = {
-        'kafka_schema_latest_version_cache': json.dumps(latest_version_cache),
-        'kafka_schema_id_cache': json.dumps(schema_id_cache),
-        'kafka_schema_cache': json.dumps(schema_emit_cache),
-    }
-
-    def mock_read(key):
-        return cache_storage.get(key)
-
-    def mock_write(key, value):
-        cache_storage[key] = value
-
-    kafka_consumer_check.read_persistent_cache = mock.Mock(side_effect=mock_read)
-    kafka_consumer_check.write_persistent_cache = mock.Mock(side_effect=mock_write)
-    kafka_consumer_check.event_platform_event = mock.Mock()
+    _wire_cache(
+        kafka_consumer_check,
+        {
+            'kafka_schema_latest_version_cache': json.dumps(latest_version_cache),
+            'kafka_schema_id_cache': json.dumps(schema_id_cache),
+            'kafka_schema_cache': json.dumps(schema_emit_cache),
+        },
+    )
 
     dd_run_check(kafka_consumer_check)
 
@@ -1480,22 +1412,6 @@ def test_heartbeat_brokers_empty_when_no_metadata(check):
     assert hb_events[0]['brokers'] == []
 
 
-def _make_schema_registry_check(check, instance_overrides=None):
-    """Return a check instance wired with a mock Kafka client and persistent cache mocks."""
-    instance = {
-        'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
-        'schema_registry_url': 'http://localhost:8081',
-        'monitor_unlisted_consumer_groups': True,
-    }
-    if instance_overrides:
-        instance.update(instance_overrides)
-    kafka_consumer_check = check(instance)
-    mock_kafka_client = seed_mock_kafka_client()
-    kafka_consumer_check.client = mock_kafka_client
-    kafka_consumer_check.metadata_collector.client = mock_kafka_client
-    return kafka_consumer_check
-
 
 def test_schema_registry_subject_compat_failure_on_version_bump_preserves_cached_compat(
     check, dd_run_check, aggregator
@@ -1518,21 +1434,13 @@ def test_schema_registry_subject_compat_failure_on_version_bump_preserves_cached
 
     # Previous run had version 2 with FULL compatibility cached.
     latest_version_cache = {subject: {'version': 2, 'schema_id': 10, 'compatibility': 'FULL'}}
-    schema_id_cache = {}
-    cache_storage = {
-        'kafka_schema_latest_version_cache': json.dumps(latest_version_cache),
-        'kafka_schema_id_cache': json.dumps(schema_id_cache),
-    }
-
-    def mock_read(key):
-        return cache_storage.get(key)
-
-    def mock_write(key, value):
-        cache_storage[key] = value
-
-    kafka_consumer_check.read_persistent_cache = mock.Mock(side_effect=mock_read)
-    kafka_consumer_check.write_persistent_cache = mock.Mock(side_effect=mock_write)
-    kafka_consumer_check.event_platform_event = mock.Mock()
+    cache_storage = _wire_cache(
+        kafka_consumer_check,
+        {
+            'kafka_schema_latest_version_cache': json.dumps(latest_version_cache),
+            'kafka_schema_id_cache': json.dumps({}),
+        },
+    )
 
     dd_run_check(kafka_consumer_check)
 
@@ -1564,19 +1472,7 @@ def test_schema_registry_global_compat_failure_uses_last_known_value(check, dd_r
     collector._get_schema_registry_subject_compatibility = mock.Mock(return_value='BACKWARD')
 
     # Simulate a previously cached global compatibility of 'FULL'.
-    cache_storage = {
-        'kafka_schema_global_compatibility_cache': 'FULL',
-    }
-
-    def mock_read(key):
-        return cache_storage.get(key)
-
-    def mock_write(key, value):
-        cache_storage[key] = value
-
-    kafka_consumer_check.read_persistent_cache = mock.Mock(side_effect=mock_read)
-    kafka_consumer_check.write_persistent_cache = mock.Mock(side_effect=mock_write)
-    kafka_consumer_check.event_platform_event = mock.Mock()
+    _wire_cache(kafka_consumer_check, {'kafka_schema_global_compatibility_cache': 'FULL'})
 
     dd_run_check(kafka_consumer_check)
 
@@ -1602,9 +1498,7 @@ def test_schema_registry_none_compat_in_cache_omits_field(check, dd_run_check, a
     collector._get_schema_registry_global_compatibility = mock.Mock(return_value=None)
     collector._get_schema_registry_subject_compatibility = mock.Mock(return_value=None)
 
-    kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=None)
-    kafka_consumer_check.write_persistent_cache = mock.Mock()
-    kafka_consumer_check.event_platform_event = mock.Mock()
+    _wire_cache(kafka_consumer_check)
 
     dd_run_check(kafka_consumer_check)
 
@@ -1639,21 +1533,14 @@ def test_schema_registry_global_compatibility_flip_triggers_reemission(check, dd
     schema_id_cache = {str(schema_id): {'schema': avro_schema, 'schema_type': 'AVRO'}}
     schema_emit_cache = {subject: {'hash': old_hash, 'expire_at': time.time() + 3600}}
 
-    cache_storage = {
-        'kafka_schema_latest_version_cache': json.dumps(latest_version_cache),
-        'kafka_schema_id_cache': json.dumps(schema_id_cache),
-        'kafka_schema_cache': json.dumps(schema_emit_cache),
-    }
-
-    def mock_read(key):
-        return cache_storage.get(key)
-
-    def mock_write(key, value):
-        cache_storage[key] = value
-
-    kafka_consumer_check.read_persistent_cache = mock.Mock(side_effect=mock_read)
-    kafka_consumer_check.write_persistent_cache = mock.Mock(side_effect=mock_write)
-    kafka_consumer_check.event_platform_event = mock.Mock()
+    _wire_cache(
+        kafka_consumer_check,
+        {
+            'kafka_schema_latest_version_cache': json.dumps(latest_version_cache),
+            'kafka_schema_id_cache': json.dumps(schema_id_cache),
+            'kafka_schema_cache': json.dumps(schema_emit_cache),
+        },
+    )
 
     dd_run_check(kafka_consumer_check)
 
