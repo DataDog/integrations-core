@@ -182,6 +182,7 @@ class ClusterMetadataCollector:
         return response.json()
 
     def _get_schema_registry_global_compatibility(self) -> str | None:
+        """Return the global compatibility level from the Schema Registry."""
         base_url = self.config._collect_schema_registry
         response = self.http.get(f"{base_url}/config")
         response.raise_for_status()
@@ -1173,7 +1174,7 @@ class ClusterMetadataCollector:
             subject_compat = info.get('compatibility')
             if subject_compat is not None:
                 ds_payload['compatibility'] = subject_compat
-            if global_compatibility:
+            if global_compatibility is not None:
                 ds_payload['global_compatibility'] = global_compatibility
 
             self.check.event_platform_event(json.dumps(ds_payload), "data-streams-message")
