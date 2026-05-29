@@ -1,13 +1,14 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
 from datetime import timedelta
 
 import httpx
 import pytest
 
 from datadog_checks.base.utils.http_exceptions import HTTPStatusError
-from datadog_checks.base.utils.http_httpx import HTTPXResponseAdapter, HTTPXWrapper
+from datadog_checks.base.utils.http_httpx import DEFAULT_CHUNK_SIZE, HTTPXResponseAdapter, HTTPXWrapper
 
 
 @pytest.mark.parametrize('status_code', [404, 500])
@@ -56,6 +57,34 @@ def test_response_iter_content_empty_body_yields_nothing(status_transport_factor
     assert list(response.iter_content()) == []
 
 
+def test_response_iter_content_default_chunk_size_uses_default(status_transport_factory):
+    body = b'X' * (DEFAULT_CHUNK_SIZE * 3 + 5)
+    transport = status_transport_factory(200, body)
+    http = HTTPXWrapper({}, {}, transport=transport)
+    response = http.get('http://example.test/')
+    chunks = list(response.iter_content())
+    assert b''.join(chunks) == body
+    assert all(len(chunk) <= DEFAULT_CHUNK_SIZE for chunk in chunks)
+    assert any(len(chunk) == DEFAULT_CHUNK_SIZE for chunk in chunks)
+
+
+@pytest.mark.parametrize(
+    'charset,raw,expected',
+    [
+        pytest.param('utf-8', 'café'.encode('utf-8'), 'café', id='utf-8'),
+        pytest.param('iso-8859-1', 'café'.encode('iso-8859-1'), 'café', id='iso-8859-1'),
+    ],
+)
+def test_response_iter_content_decode_uses_response_encoding(charset, raw, expected):
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, content=raw, headers={'Content-Type': f'text/plain; charset={charset}'})
+
+    http = HTTPXWrapper({}, {}, transport=httpx.MockTransport(handler))
+    response = http.get('http://example.test/')
+    chunks = list(response.iter_content(chunk_size=64, decode_unicode=True))
+    assert ''.join(chunks) == expected
+
+
 def test_response_iter_lines_rejects_delimiter(status_transport_factory):
     transport = status_transport_factory(200, b'a\nb\n')
     http = HTTPXWrapper({}, {}, transport=transport)
@@ -64,14 +93,18 @@ def test_response_iter_lines_rejects_delimiter(status_transport_factory):
         list(response.iter_lines(delimiter=b'|'))
 
 
-def test_response_elapsed_returns_zero_on_runtime_error():
+def test_response_elapsed_returns_zero_on_runtime_error(caplog):
     class _FakeResponse:
+        url = 'http://example.test/'
+
         @property
         def elapsed(self):
             raise RuntimeError('not measured')
 
     adapter = HTTPXResponseAdapter(_FakeResponse())  # type: ignore[arg-type]
-    assert adapter.elapsed == timedelta(0)
+    with caplog.at_level(logging.DEBUG, logger='datadog_checks.base.utils.http_httpx'):
+        assert adapter.elapsed == timedelta(0)
+    assert any('elapsed unavailable' in record.message for record in caplog.records)
 
 
 @pytest.mark.parametrize('status_code,expected_ok', [(200, True), (204, True), (301, True), (400, False), (500, False)])

@@ -25,6 +25,8 @@ from .http_exceptions import (
 LOGGER = logging.getLogger(__name__)
 
 DEFAULT_TIMEOUT = 10
+# Matches DEFAULT_CHUNK_SIZE in http.py to preserve iter_content/iter_lines parity with RequestsWrapper.
+DEFAULT_CHUNK_SIZE = 16
 
 STANDARD_FIELDS = {
     'allow_redirects': True,
@@ -164,6 +166,7 @@ class HTTPXResponseAdapter:
         try:
             return self._response.elapsed
         except RuntimeError:
+            LOGGER.debug('elapsed unavailable for response from %s', self._response.url)
             return timedelta(0)
 
     def json(self, **kwargs: Any) -> Any:
@@ -183,18 +186,14 @@ class HTTPXResponseAdapter:
         self._response.close()
 
     def iter_content(self, chunk_size: int | None = None, decode_unicode: bool = False) -> Iterator[bytes | str]:
-        if chunk_size is None:
-            content = self._response.read()
-            if not content:
-                return
-            yield content.decode('utf-8') if decode_unicode else content
-            return
-        for chunk in self._response.iter_bytes(chunk_size=chunk_size):
-            yield chunk.decode('utf-8') if decode_unicode else chunk
+        effective_size = chunk_size if chunk_size is not None else DEFAULT_CHUNK_SIZE
+        encoding = self._response.encoding or 'utf-8'
+        for chunk in self._response.iter_bytes(chunk_size=effective_size):
+            yield chunk.decode(encoding) if decode_unicode else chunk
 
     def iter_lines(
         self,
-        chunk_size: int | None = None,
+        chunk_size: int | None = None,  # noqa: ARG002 - httpx buffers lines internally; kept for HTTPResponseProtocol parity
         decode_unicode: bool = False,
         delimiter: bytes | str | None = None,
     ) -> Iterator[bytes | str]:
@@ -414,5 +413,8 @@ class HTTPXWrapper:
         self.close()
         return None
 
-    def __del__(self) -> None:
-        self.close()
+    def __del__(self) -> None:  # no cov
+        try:
+            self.close()
+        except AttributeError:
+            pass
