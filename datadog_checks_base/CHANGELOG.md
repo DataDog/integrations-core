@@ -14,7 +14,7 @@
 
 * Add parameterized query support to QueryExecutor. ([#23469](https://github.com/DataDog/integrations-core/pull/23469))
 
-## 37.35.1 / 2026-04-28
+## 37.35.1 / 2026-04-28 / Agent 7.79.0
 
 ***Fixed***:
 
