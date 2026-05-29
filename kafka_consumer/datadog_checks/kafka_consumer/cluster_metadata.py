@@ -8,8 +8,9 @@ import hashlib
 import json
 import random
 import time
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import NotRequired, TypedDict
+from typing import Any, NotRequired, TypedDict
 from urllib.parse import quote
 
 from confluent_kafka import IsolationLevel, TopicPartition
@@ -191,6 +192,21 @@ class ClusterMetadataCollector:
             f'/config/{encoded_subject}',
             params={'defaultToGlobal': 'true'},
         ).get('compatibilityLevel')
+
+    def _parallel_fetch(self, fn: Callable[[str], Any], subjects: list[str], error_label: str) -> dict[str, Any]:
+        """Run fn(subject) for each subject concurrently; drop and log individual failures."""
+        results: dict[str, Any] = {}
+        if not subjects:
+            return results
+        with ThreadPoolExecutor(max_workers=self.SCHEMA_FETCH_CONCURRENCY) as executor:
+            future_to_subject = {executor.submit(fn, subject): subject for subject in subjects}
+            for future in as_completed(future_to_subject):
+                subject = future_to_subject[future]
+                try:
+                    results[subject] = future.result()
+                except Exception as e:
+                    self.log.warning("Error fetching %s for %s: %s", error_label, subject, e)
+        return results
 
     def collect_all_metadata(self, highwater_offsets):
         try:
@@ -944,11 +960,14 @@ class ClusterMetadataCollector:
 
         self.check.gauge('schema_registry.subjects', len(subjects), tags=self._get_tags(cluster_id))
 
-        global_compatibility = None
         try:
             global_compatibility = self._get_schema_registry_global_compatibility()
             if global_compatibility is not None:
                 self._save_global_compatibility_cache(global_compatibility)
+            else:
+                # A transient empty /config response shouldn't drop global_compatibility from
+                # this cycle's payloads — fall back to the last known value, same as the error path.
+                global_compatibility = self._load_global_compatibility_cache()
         except Exception as e:
             self.log.warning("Failed to fetch global compatibility from Schema Registry: %s", e)
             global_compatibility = self._load_global_compatibility_cache()
@@ -966,19 +985,7 @@ class ClusterMetadataCollector:
         latest_version_cache = self._load_latest_version_cache()
 
         # Fetch version lists in parallel (lightweight calls)
-        version_responses = {}
-        if subjects_to_check:
-            with ThreadPoolExecutor(max_workers=self.SCHEMA_FETCH_CONCURRENCY) as executor:
-                future_to_subject = {
-                    executor.submit(self._get_schema_registry_versions, subject): subject
-                    for subject in subjects_to_check
-                }
-                for future in as_completed(future_to_subject):
-                    subject = future_to_subject[future]
-                    try:
-                        version_responses[subject] = future.result()
-                    except Exception as e:
-                        self.log.warning("Error getting version list for %s: %s", subject, e)
+        version_responses = self._parallel_fetch(self._get_schema_registry_versions, subjects_to_check, "version list")
 
         # Mark all checked subjects as fetched (even if they errored)
         self._mark_items_fetched(
@@ -1012,19 +1019,9 @@ class ClusterMetadataCollector:
         schema_id_cache_updated = False
 
         # Fetch latest versions in parallel for subjects that changed
-        schema_responses = {}
-        if subjects_needing_full_fetch:
-            with ThreadPoolExecutor(max_workers=self.SCHEMA_FETCH_CONCURRENCY) as executor:
-                future_to_subject = {
-                    executor.submit(self._get_schema_registry_latest_version, subject): subject
-                    for subject in subjects_needing_full_fetch
-                }
-                for future in as_completed(future_to_subject):
-                    subject = future_to_subject[future]
-                    try:
-                        schema_responses[subject] = future.result()
-                    except Exception as e:
-                        self.log.warning("Error getting schema details for %s: %s", subject, e)
+        schema_responses = self._parallel_fetch(
+            self._get_schema_registry_latest_version, subjects_needing_full_fetch, "schema details"
+        )
 
         # Per-subject compatibility refresh — cadence-driven so a flip without a version bump is still picked up.
         compat_due = self._get_items_to_fetch(self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY, subjects)
@@ -1032,20 +1029,13 @@ class ClusterMetadataCollector:
         compat_due = compat_due[:remaining_slots]
         compat_subjects_to_fetch = list(set(subjects_needing_full_fetch) | set(compat_due))
 
-        compatibility_responses: dict[str, str | None] = {}
+        compatibility_responses: dict[str, str | None] = self._parallel_fetch(
+            self._get_schema_registry_subject_compatibility, compat_subjects_to_fetch, "compatibility"
+        )
         if compat_subjects_to_fetch:
-            with ThreadPoolExecutor(max_workers=self.SCHEMA_FETCH_CONCURRENCY) as executor:
-                future_to_subject = {
-                    executor.submit(self._get_schema_registry_subject_compatibility, subject): subject
-                    for subject in compat_subjects_to_fetch
-                }
-                for future in as_completed(future_to_subject):
-                    subject = future_to_subject[future]
-                    try:
-                        compatibility_responses[subject] = future.result()
-                    except Exception as e:
-                        self.log.warning("Error getting compatibility for %s: %s", subject, e)
-
+            # Mark all attempted subjects as fetched (even if they errored), mirroring the version
+            # tier above: a subject that fails this run isn't retried until the next configs cadence
+            # rather than hammered every check, at the cost of holding stale compatibility until then.
             self._mark_items_fetched(
                 self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY,
                 compat_subjects_to_fetch,
@@ -1075,6 +1065,10 @@ class ClusterMetadataCollector:
                 self.log.warning("Schema Registry returned incomplete data for %s: %s", subject, latest_schema)
                 continue
 
+            # A None here means either the fetch failed or the response carried no
+            # compatibilityLevel. With defaultToGlobal=true the registry returns the effective
+            # level for any existing subject, so in practice None signals a fetch failure — fall
+            # back to the cached value rather than overwriting it with None.
             compatibility = compatibility_responses.get(subject)
             if compatibility is None:
                 compatibility = (latest_version_cache.get(subject) or {}).get('compatibility')
@@ -1121,6 +1115,9 @@ class ClusterMetadataCollector:
 
         # Build lightweight cache_content strings for all known subjects (from cache, no extra HTTP calls).
         # This allows re-emission of unchanged schemas when the event cache TTL expires.
+        # Note: changing the cache_content format (e.g. adding the compatibility fields) makes every
+        # cached subject hash differently on the first run after an upgrade, so all known schemas
+        # re-emit once. This is self-healing and bounded to a single collection cycle.
         all_schema_cache_contents = {subject: info['cache_content'] for subject, info in fetched_schemas.items()}
         for subject in subjects:
             if subject in all_schema_cache_contents:
@@ -1148,8 +1145,26 @@ class ClusterMetadataCollector:
         # Determine which subjects need event emission (changed or TTL expired)
         schemas_to_emit = self._get_events_to_send(self.SCHEMA_CACHE_KEY, all_schema_cache_contents)
 
-        # Build full payloads only for subjects that need emission
-        for subject in schemas_to_emit:
+        self._emit_schema_registry_events(
+            schemas_to_emit,
+            fetched_schemas,
+            latest_version_cache,
+            schema_id_cache,
+            cluster_id,
+            global_compatibility,
+        )
+
+    def _emit_schema_registry_events(
+        self,
+        subjects_to_emit: list[str],
+        fetched_schemas: dict[str, dict],
+        latest_version_cache: dict[str, SubjectVersionInfo],
+        schema_id_cache: dict[str, SchemaDefinition],
+        cluster_id: str,
+        global_compatibility: str | None,
+    ):
+        """Emit a data-streams-message payload for each subject that changed or whose event TTL expired."""
+        for subject in subjects_to_emit:
             if subject in fetched_schemas:
                 info = fetched_schemas[subject]
             else:

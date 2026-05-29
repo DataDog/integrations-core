@@ -208,8 +208,25 @@ def mock_schema_registry_methods(metadata_collector, global_compat='BACKWARD', s
         }
     )
 
-    metadata_collector._get_schema_registry_global_compatibility = mock.Mock(return_value=global_compat)
-    metadata_collector._get_schema_registry_subject_compatibility = mock.Mock(return_value=subject_compat)
+    mock_compatibility_methods(metadata_collector, global_compat=global_compat, subject_compat=subject_compat)
+
+
+def mock_compatibility_methods(collector, global_compat='BACKWARD', subject_compat='BACKWARD'):
+    """Mock the global and per-subject compatibility fetches on the collector."""
+    collector._get_schema_registry_global_compatibility = mock.Mock(return_value=global_compat)
+    collector._get_schema_registry_subject_compatibility = mock.Mock(return_value=subject_compat)
+
+
+def schema_ds_events(check):
+    """Return the parsed data-streams-message payloads with config_type 'schema' emitted by the check."""
+    events = []
+    for call in check.event_platform_event.call_args_list:
+        args = call[0]
+        if len(args) > 1 and args[1] == 'data-streams-message':
+            payload = json.loads(args[0])
+            if payload.get('config_type') == 'schema':
+                events.append(payload)
+    return events
 
 
 @pytest.fixture
@@ -533,9 +550,9 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
     }
     assert topic_ds['config'] == expected_topic_config
 
-    schema_ds_events = [e for e in ds_events if e.get('config_type') == 'schema']
-    assert len(schema_ds_events) >= 1, "Expected at least 1 schema Data Streams event"
-    schema_ds = schema_ds_events[0]
+    schema_events = [e for e in ds_events if e.get('config_type') == 'schema']
+    assert len(schema_events) >= 1, "Expected at least 1 schema Data Streams event"
+    schema_ds = schema_events[0]
     assert schema_ds['kafka_cluster_id'] == 'test-cluster-id'
     assert schema_ds['subject'] == 'test-topic-value'
     assert schema_ds['schema_id'] == 1
@@ -767,8 +784,7 @@ def test_schema_registry_batching(check, dd_run_check, aggregator):
     kafka_consumer_check.write_persistent_cache = mock.Mock(side_effect=mock_write)
     kafka_consumer_check.event_platform_event = mock.Mock()
 
-    collector._get_schema_registry_global_compatibility = mock.Mock(return_value='BACKWARD')
-    collector._get_schema_registry_subject_compatibility = mock.Mock(return_value='BACKWARD')
+    mock_compatibility_methods(collector)
 
     # Run 1: first batch of 2 subjects
     dd_run_check(kafka_consumer_check)
@@ -853,8 +869,7 @@ def test_schema_registry_schema_id_cache(check, dd_run_check, aggregator):
     kafka_consumer_check.write_persistent_cache = mock.Mock(side_effect=mock_write)
     kafka_consumer_check.event_platform_event = mock.Mock()
 
-    collector._get_schema_registry_global_compatibility = mock.Mock(return_value='BACKWARD')
-    collector._get_schema_registry_subject_compatibility = mock.Mock(return_value='BACKWARD')
+    mock_compatibility_methods(collector)
 
     dd_run_check(kafka_consumer_check)
 
@@ -939,8 +954,7 @@ def test_schema_registry_two_tier_no_fetch_when_unchanged(check, dd_run_check, a
     kafka_consumer_check.write_persistent_cache = mock.Mock(side_effect=mock_write)
     kafka_consumer_check.event_platform_event = mock.Mock()
 
-    collector._get_schema_registry_global_compatibility = mock.Mock(return_value='BACKWARD')
-    collector._get_schema_registry_subject_compatibility = mock.Mock(return_value='BACKWARD')
+    mock_compatibility_methods(collector)
 
     dd_run_check(kafka_consumer_check)
 
@@ -989,8 +1003,7 @@ def test_schema_registry_two_tier_fetch_on_new_version(check, dd_run_check, aggr
         return_value={'id': 99, 'version': 3, 'schema': avro_schema, 'schemaType': 'AVRO'}
     )
 
-    collector._get_schema_registry_global_compatibility = mock.Mock(return_value='BACKWARD')
-    collector._get_schema_registry_subject_compatibility = mock.Mock(return_value='BACKWARD')
+    mock_compatibility_methods(collector)
 
     # Pre-populate: both subjects were last seen at version 2
     latest_version_cache = {
@@ -1057,8 +1070,7 @@ def test_schema_registry_compatibility_flip_triggers_reemission(check, dd_run_ch
     collector._get_schema_registry_latest_version = mock.Mock(
         return_value={'id': schema_id, 'version': 2, 'schema': avro_schema, 'schemaType': 'AVRO'}
     )
-    collector._get_schema_registry_global_compatibility = mock.Mock(return_value='BACKWARD')
-    collector._get_schema_registry_subject_compatibility = mock.Mock(return_value='FULL')
+    mock_compatibility_methods(collector, global_compat='BACKWARD', subject_compat='FULL')
 
     # Pre-populate caches as if a previous run emitted this subject with BACKWARD compatibility.
     old_cache_content = f"{schema_id}:2:BACKWARD:BACKWARD:{avro_schema}"
@@ -1090,11 +1102,7 @@ def test_schema_registry_compatibility_flip_triggers_reemission(check, dd_run_ch
     collector._get_schema_registry_latest_version.assert_not_called()
 
     # The compatibility flip should have triggered re-emission.
-    ds_calls = kafka_consumer_check.event_platform_event.call_args_list
-    ds_payloads = [
-        json.loads(call[0][0]) for call in ds_calls if len(call[0]) > 1 and call[0][1] == 'data-streams-message'
-    ]
-    schema_events = [p for p in ds_payloads if p.get('config_type') == 'schema']
+    schema_events = schema_ds_events(kafka_consumer_check)
     assert len(schema_events) == 1, f"Expected exactly 1 schema re-emission, got {len(schema_events)}"
     assert schema_events[0]['compatibility'] == 'FULL'
     assert schema_events[0]['global_compatibility'] == 'BACKWARD'
@@ -1533,12 +1541,7 @@ def test_schema_registry_subject_compat_failure_on_version_bump_preserves_cached
     assert saved_cache[subject]['compatibility'] == 'FULL'
 
     # The emitted payload must also carry the preserved compatibility.
-    ds_calls = kafka_consumer_check.event_platform_event.call_args_list
-    schema_events = [
-        json.loads(c[0][0])
-        for c in ds_calls
-        if len(c[0]) > 1 and c[0][1] == 'data-streams-message' and json.loads(c[0][0]).get('config_type') == 'schema'
-    ]
+    schema_events = schema_ds_events(kafka_consumer_check)
     assert len(schema_events) == 1
     assert schema_events[0]['compatibility'] == 'FULL'
 
@@ -1577,12 +1580,7 @@ def test_schema_registry_global_compat_failure_uses_last_known_value(check, dd_r
 
     dd_run_check(kafka_consumer_check)
 
-    ds_calls = kafka_consumer_check.event_platform_event.call_args_list
-    schema_events = [
-        json.loads(c[0][0])
-        for c in ds_calls
-        if len(c[0]) > 1 and c[0][1] == 'data-streams-message' and json.loads(c[0][0]).get('config_type') == 'schema'
-    ]
+    schema_events = schema_ds_events(kafka_consumer_check)
     assert len(schema_events) == 1
     assert schema_events[0]['global_compatibility'] == 'FULL'
 
@@ -1610,12 +1608,61 @@ def test_schema_registry_none_compat_in_cache_omits_field(check, dd_run_check, a
 
     dd_run_check(kafka_consumer_check)
 
-    ds_calls = kafka_consumer_check.event_platform_event.call_args_list
-    schema_events = [
-        json.loads(c[0][0])
-        for c in ds_calls
-        if len(c[0]) > 1 and c[0][1] == 'data-streams-message' and json.loads(c[0][0]).get('config_type') == 'schema'
-    ]
+    schema_events = schema_ds_events(kafka_consumer_check)
     assert len(schema_events) == 1
     assert 'compatibility' not in schema_events[0]
     assert 'global_compatibility' not in schema_events[0]
+
+
+def test_schema_registry_global_compatibility_flip_triggers_reemission(check, dd_run_check, aggregator):
+    """A global compatibility change alone (subject unchanged, served from cache) triggers re-emission."""
+    kafka_consumer_check = _make_schema_registry_check(check)
+    collector = kafka_consumer_check.metadata_collector
+
+    subject = 'my-topic-value'
+    avro_schema = json.dumps({"type": "string"})
+    schema_id = 60
+
+    collector._get_schema_registry_subjects = mock.Mock(return_value=[subject])
+    collector._get_schema_registry_versions = mock.Mock(return_value=[1, 2])
+    collector._get_schema_registry_latest_version = mock.Mock(
+        return_value={'id': schema_id, 'version': 2, 'schema': avro_schema, 'schemaType': 'AVRO'}
+    )
+    # Global flips BACKWARD -> FULL; the subject's own compatibility is unchanged.
+    mock_compatibility_methods(collector, global_compat='FULL', subject_compat='BACKWARD')
+
+    # Pre-populate caches as if a previous run emitted this subject under global BACKWARD.
+    old_cache_content = f"{schema_id}:2:BACKWARD:BACKWARD:{avro_schema}"
+    old_hash = hashlib.sha256(old_cache_content.encode()).hexdigest()
+
+    latest_version_cache = {subject: {'version': 2, 'schema_id': schema_id, 'compatibility': 'BACKWARD'}}
+    schema_id_cache = {str(schema_id): {'schema': avro_schema, 'schema_type': 'AVRO'}}
+    schema_emit_cache = {subject: {'hash': old_hash, 'expire_at': time.time() + 3600}}
+
+    cache_storage = {
+        'kafka_schema_latest_version_cache': json.dumps(latest_version_cache),
+        'kafka_schema_id_cache': json.dumps(schema_id_cache),
+        'kafka_schema_cache': json.dumps(schema_emit_cache),
+    }
+
+    def mock_read(key):
+        return cache_storage.get(key)
+
+    def mock_write(key, value):
+        cache_storage[key] = value
+
+    kafka_consumer_check.read_persistent_cache = mock.Mock(side_effect=mock_read)
+    kafka_consumer_check.write_persistent_cache = mock.Mock(side_effect=mock_write)
+    kafka_consumer_check.event_platform_event = mock.Mock()
+
+    dd_run_check(kafka_consumer_check)
+
+    # No version bump — the subject is served entirely from cache.
+    collector._get_schema_registry_latest_version.assert_not_called()
+
+    # The global flip alone should have triggered re-emission.
+    schema_events = schema_ds_events(kafka_consumer_check)
+    assert len(schema_events) == 1, f"Expected exactly 1 schema re-emission, got {len(schema_events)}"
+    assert schema_events[0]['subject'] == subject
+    assert schema_events[0]['compatibility'] == 'BACKWARD'
+    assert schema_events[0]['global_compatibility'] == 'FULL'
