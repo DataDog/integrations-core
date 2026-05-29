@@ -487,6 +487,35 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
         tags=['test_tag:test_value', 'kafka_cluster_id:test-cluster-id'],
     )
 
+    expected_broker_config = {
+        'log.retention.bytes': '1073741824',
+        'log.retention.ms': '604800000',
+        'log.segment.bytes': '1073741824',
+        'num.partitions': '3',
+        'num.network.threads': '3',
+        'num.io.threads': '8',
+        'default.replication.factor': '2',
+        'min.insync.replicas': '1',
+        'compression.type': 'producer',
+    }
+    expected_topic_config = {
+        'retention.ms': '604800000',
+        'retention.bytes': '-1',
+        'max.message.bytes': '1048588',
+        'compression.type': 'producer',
+        'cleanup.policy': 'delete',
+    }
+    expected_schema = {
+        "type": "record",
+        "name": "User",
+        "namespace": "com.example",
+        "fields": [
+            {"name": "id", "type": "long"},
+            {"name": "username", "type": "string"},
+            {"name": "email", "type": ["null", "string"], "default": None},
+        ],
+    }
+
     # Broker, topic, and schema configs are emitted only to the Data Streams intake.
     assert not [e for e in aggregator.events if 'event_type:broker_config' in e.get('tags', [])]
     assert not [e for e in aggregator.events if 'event_type:topic_config' in e.get('tags', [])]
