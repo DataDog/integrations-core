@@ -9,7 +9,7 @@ import json
 import random
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import TypedDict
+from typing import NotRequired, TypedDict
 from urllib.parse import quote
 
 from confluent_kafka import IsolationLevel, TopicPartition
@@ -26,6 +26,7 @@ class SchemaDefinition(TypedDict):
 class SubjectVersionInfo(TypedDict):
     version: int
     schema_id: int
+    compatibility: NotRequired[str | None]
 
 
 class ClusterMetadataCollector:
@@ -187,11 +188,7 @@ class ClusterMetadataCollector:
         return response.json().get('compatibilityLevel')
 
     def _get_schema_registry_subject_compatibility(self, subject: str) -> str | None:
-        """Return the effective compatibility level for a subject.
-
-        Uses defaultToGlobal=true so subjects without an explicit override
-        return the global setting in a single call.
-        """
+        """Return the effective compatibility for a subject, falling back to global."""
         base_url = self.config._collect_schema_registry
         encoded_subject = quote(subject, safe='')
         response = self.http.get(
@@ -1017,9 +1014,7 @@ class ClusterMetadataCollector:
                     except Exception as e:
                         self.log.warning("Error getting schema details for %s: %s", subject, e)
 
-        # Per-subject compatibility refresh — runs on the broker/topic configs cadence,
-        # so a compatibility flip without a version bump still gets picked up.
-        # Subjects with a new version are always included in this run.
+        # Per-subject compatibility refresh — cadence-driven so a flip without a version bump is still picked up.
         compat_due = self._get_items_to_fetch(self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY, subjects)
         compat_due = compat_due[: self.SCHEMA_COMPATIBILITY_BATCH_SIZE]
         compat_subjects_to_fetch = list(set(subjects_needing_full_fetch) | set(compat_due))
@@ -1176,7 +1171,7 @@ class ClusterMetadataCollector:
                 'schema': info['schema_content'],
             }
             subject_compat = info.get('compatibility')
-            if subject_compat:
+            if subject_compat is not None:
                 ds_payload['compatibility'] = subject_compat
             if global_compatibility:
                 ds_payload['global_compatibility'] = global_compatibility
