@@ -170,6 +170,8 @@ def test_tables(dbm_instance, integration_check):
         'personsdup12',
         'personsdup13',
         'persons_indexed',
+        'persons_view',
+        'persons_matview',
         'pgtable',
         'pg_newtable',
         'cities',
@@ -208,6 +210,8 @@ def test_tables_include_and_exclude_filter(dbm_instance, integration_check):
     expected = {
         'persons',
         'persons_indexed',
+        'persons_view',
+        'persons_matview',
         'personsdup10',
         'personsdup11',
         'personsdup12',

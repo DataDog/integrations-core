@@ -42,6 +42,8 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     CREATE TABLE public2.cities (city VARCHAR(255), country VARCHAR(255), PRIMARY KEY(city));
     GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO bob;
     GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO blocking_bob;
+    CREATE VIEW persons_view AS SELECT personid, lastname, firstname FROM persons;
+    CREATE MATERIALIZED VIEW persons_matview AS SELECT personid, lastname, city FROM persons;
 EOSQL
 
 # Create a foreign table
