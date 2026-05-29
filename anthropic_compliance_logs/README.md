@@ -41,7 +41,7 @@ The Compliance API is available to Anthropic Enterprise plan customers with the 
 
 1. Wait up to 5 minutes for the first crawl.
 2. Open [Log Explorer][3] and filter on `source:claude-compliance-logs`.
-3. Confirm logs appear with `evt.name` values such as `claude_chat_viewed`, `admin_api_key_created`, or `user_signed_in_sso`.
+3. Confirm logs appear with `evt.name` values such as `claude_chat_viewed`, `admin_api_key_created`, or `sso_login_succeeded`.
 
 ## Data Collected
 
@@ -51,7 +51,7 @@ The integration collects audit activity logs from `GET /v1/compliance/activities
 
 - A timestamp (`created_at`) with microsecond precision
 - An actor (user, API key, SCIM, or system) with email, user ID, IP address, and User-Agent when applicable
-- An activity `type` such as `user_signed_in_sso`, `admin_api_key_created`, `org_user_invite_accepted`, or `claude_chat_viewed` (150+ activity types across 35+ categories)
+- An activity `type` such as `sso_login_succeeded`, `admin_api_key_created`, `org_user_invite_accepted`, or `claude_chat_viewed` (150+ activity types across 35+ categories)
 - Organization and workspace context
 
 Logs are tagged `source:claude-compliance-logs` and processed by a Datadog log pipeline that flattens the actor object into standard `usr.*` and `network.client.*` attributes and enriches the source IP with GeoIP and the User-Agent string.

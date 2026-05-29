@@ -7,11 +7,12 @@ import argparse
 import collections
 import csv
 import itertools
+import json
 import os
 import pprint
 import re
 from dataclasses import dataclass
-from enum import Enum, StrEnum
+from enum import StrEnum
 from typing import Iterable
 
 import requests
@@ -21,7 +22,7 @@ stats = collections.Counter()
 HERE = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(HERE, 'templates')
 INTEGRATION_DIR = os.path.join(HERE, '..')
-QUERIES_DIR = os.path.join(INTEGRATION_DIR, 'datadog_checks', 'clickhouse', 'advanced_queries')
+DATA_DIR = os.path.join(INTEGRATION_DIR, 'datadog_checks', 'clickhouse', 'data')
 TESTS_DIR = os.path.join(INTEGRATION_DIR, 'tests')
 METADATAFILE_PATH = os.path.join(INTEGRATION_DIR, 'metadata.csv')
 METADATAFILE_LEGACY_PATH = os.path.join(INTEGRATION_DIR, 'metadata-legacy.csv')
@@ -74,35 +75,56 @@ class MetricKind(StrEnum):
 
 
 @dataclass
-class Template:
+class FileTemplate:
     source_path: str
     target_path: str
 
 
 @dataclass
+class QuerySpec:
+    """Per-system-table parameters for the compact JSON output."""
+
+    name: str
+    query: str
+    prefix: str
+    target_path: str
+    match_column: str = 'metric_name'
+    value_column: str = 'metric_value'
+
+
+@dataclass
 class MetricsGenerator:
     kind: MetricKind
-    template: Template
+    query_spec: QuerySpec
     is_optional: bool = False
 
 
-class Templates(Enum):
-    QUERY_ASYNC_METRICS = Template(
-        source_path='system_async_metrics.tpl',
-        target_path=os.path.join(QUERIES_DIR, 'system_async_metrics.py'),
-    )
-    QUERY_EVENTS = Template(
-        source_path='system_events.tpl',
-        target_path=os.path.join(QUERIES_DIR, 'system_events.py'),
-    )
-    QUERY_METRICS = Template(
-        source_path='system_metrics.tpl',
-        target_path=os.path.join(QUERIES_DIR, 'system_metrics.py'),
-    )
-    TESTS_METRICS = Template(
-        source_path='tests_metrics.tpl',
-        target_path=os.path.join(TESTS_DIR, 'advanced_metrics.py'),
-    )
+QUERY_SPECS = {
+    MetricKind.ASYNC_METRICS: QuerySpec(
+        name='system_asynchronous_metrics',
+        query='SELECT value, metric FROM system.asynchronous_metrics',
+        prefix='asynchronous_metrics',
+        target_path=os.path.join(DATA_DIR, 'system_async_metrics.json'),
+    ),
+    MetricKind.EVENTS: QuerySpec(
+        name='system_events',
+        query='SELECT value, event FROM system.events',
+        prefix='events',
+        target_path=os.path.join(DATA_DIR, 'system_events.json'),
+    ),
+    MetricKind.METRICS: QuerySpec(
+        name='system_metrics',
+        query='SELECT value, metric FROM system.metrics',
+        prefix='metrics',
+        target_path=os.path.join(DATA_DIR, 'system_metrics.json'),
+    ),
+}
+
+
+TESTS_METRICS_TEMPLATE = FileTemplate(
+    source_path='tests_metrics.tpl',
+    target_path=os.path.join(TESTS_DIR, 'advanced_metrics.py'),
+)
 
 
 def versions() -> list[str]:
@@ -128,7 +150,7 @@ def write_file(file, contents, encoding='utf-8'):
         f.write(contents)
 
 
-def generate_queries_file(template: Template, config: dict):
+def generate_queries_file(template: FileTemplate, config: dict):
     source_path = os.path.join(TEMPLATES_DIR, template.source_path)
     if not os.path.exists(source_path):
         print(f'Unknown template file: {source_path}')
@@ -176,20 +198,6 @@ class ClickhouseMetric:
 
     def scale(self) -> str | None:
         return self.metric_type_info()[1]
-
-    def get_query_item(self) -> str:
-        metric_type, scale = self.metric_type_info()
-
-        metric_scale = ''
-        if scale is not None:
-            metric_scale = ", 'scale': '{scale}'".format(scale=scale)
-
-        return "'{metric}': {{'name': '{metric_name}', 'type': '{metric_type}'{metric_scale}}}".format(
-            metric=self.name,
-            metric_name=self.metric_name(),
-            metric_type=metric_type,
-            metric_scale=metric_scale,
-        )
 
 
 def fetch_current_metrics(version: str) -> dict[str, ClickhouseMetric]:
@@ -262,11 +270,55 @@ def fetch_async_metrics(version: str) -> dict[str, ClickhouseMetric]:
     return result
 
 
-def generate_queries(template: Template, metrics: Iterable[ClickhouseMetric]):
-    config = {
-        'items': ',\n'.join(indent_line(metric.get_query_item(), 16) for metric in sorted(metrics)),
+def generate_queries(query_spec: QuerySpec, metrics: Iterable[ClickhouseMetric]):
+    """Emit the compact JSON for ``query_spec`` from the sorted ``metrics``."""
+    items: dict[str, list[str] | dict[str, str]] = {}
+    for metric in sorted(metrics):
+        metric_type, scale = metric.metric_type_info()
+        existing = items.get(metric_type)
+        if scale is None:
+            if existing is None:
+                items[metric_type] = [metric.name]
+            elif isinstance(existing, list):
+                existing.append(metric.name)
+            else:
+                raise ValueError(
+                    f"metric type {metric_type!r} mixes scaled and unscaled entries; "
+                    f"{metric.name!r} has no scale but earlier entries did"
+                )
+        else:
+            if existing is None:
+                items[metric_type] = {metric.name: scale}
+            elif isinstance(existing, dict):
+                existing[metric.name] = scale
+            else:
+                raise ValueError(
+                    f"metric type {metric_type!r} mixes scaled and unscaled entries; "
+                    f"{metric.name!r} has scale {scale!r} but earlier entries had none"
+                )
+    items_sorted: dict[str, list[str] | dict[str, str]] = {}
+    for type_name in sorted(items):
+        group = items[type_name]
+        if isinstance(group, dict):
+            items_sorted[type_name] = {key: group[key] for key in sorted(group)}
+        else:
+            items_sorted[type_name] = sorted(group)
+    spec = {
+        'name': query_spec.name,
+        'query': query_spec.query,
+        'value_column': query_spec.value_column,
+        'match_column': query_spec.match_column,
+        'prefix': query_spec.prefix,
+        'items': items_sorted,
     }
-    generate_queries_file(template, config)
+    write_json(query_spec.target_path, spec)
+
+
+def write_json(target_path: str, spec: dict) -> None:
+    target_dir = os.path.dirname(target_path)
+    if not os.path.exists(target_dir):
+        os.makedirs(target_dir)
+    write_file(target_path, json.dumps(spec, indent=2) + '\n')
 
 
 def generate_metadata_file(metrics: Iterable[ClickhouseMetric]):
@@ -458,24 +510,24 @@ def generate_test_data(metrics_data: list[CalculatedMetrics]):
         'base_version_mapper': printable_consts_mapper(versioned_base_metrics),
         'optional_version_mapper': printable_consts_mapper(versioned_optional_metrics, optional=True),
     }
-    generate_queries_file(Templates.TESTS_METRICS.value, config)
+    generate_queries_file(TESTS_METRICS_TEMPLATE, config)
 
 
 def generate():
     METRIC_GENERATORS = [
         MetricsGenerator(
             kind=MetricKind.ASYNC_METRICS,
-            template=Templates.QUERY_ASYNC_METRICS.value,
+            query_spec=QUERY_SPECS[MetricKind.ASYNC_METRICS],
             is_optional=True,
         ),
         MetricsGenerator(
             kind=MetricKind.EVENTS,
-            template=Templates.QUERY_EVENTS.value,
+            query_spec=QUERY_SPECS[MetricKind.EVENTS],
             is_optional=True,
         ),
         MetricsGenerator(
             kind=MetricKind.METRICS,
-            template=Templates.QUERY_METRICS.value,
+            query_spec=QUERY_SPECS[MetricKind.METRICS],
             is_optional=False,
         ),
     ]
@@ -483,11 +535,11 @@ def generate():
     all: dict[str, ClickhouseMetric] = {}
     calculated: list[CalculatedMetrics] = []
 
-    # generate query modules
+    # generate per-system-table JSON data files
     for generator in METRIC_GENERATORS:
         metrics = calculate_metrics(generator)
         stats[generator.kind] = len(metrics.all)
-        generate_queries(generator.template, metrics.all.values())
+        generate_queries(generator.query_spec, metrics.all.values())
         all.update(metrics.all)
         calculated.append(metrics)
 
