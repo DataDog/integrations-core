@@ -459,6 +459,15 @@ def test_type_flag_without_value_aborts_with_targeted_message(ddev, empty_repo):
     assert 'requires a value' in result.output
 
 
+def test_type_flag_empty_after_equals_aborts_with_targeted_message(ddev, empty_repo):
+    """`ddev create NAME --type=` (empty value after the equals) is a missing value, not the type name ``."""
+    result = ddev('create', 'my_integration', '--type=')
+    assert result.exit_code != 0
+    assert '--type' in result.output
+    assert 'requires a value' in result.output
+    assert 'Unknown integration type' not in result.output
+
+
 def test_global_quiet_suppresses_tree_and_keeps_headline(ddev, empty_repo):
     """`ddev -q create ...` suppresses the file-tree printout but still emits the one-line `Created` headline."""
     result = ddev(
