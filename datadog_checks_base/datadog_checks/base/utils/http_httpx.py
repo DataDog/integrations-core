@@ -55,7 +55,6 @@ REQUEST_KWARGS = frozenset(
         'extra_headers',
         'timeout',
         'follow_redirects',
-        'allow_redirects',
     }
 )
 
@@ -246,7 +245,7 @@ class HTTPXWrapper:
         timeout = _build_timeout(config)
         allow_redirects = is_affirmative(config['allow_redirects'])
 
-        # TODO(httpx-migration): proxies wiring deferred to Phase 3.
+        # proxies=None mirrors RequestsWrapper.options for consumers (e.g. http_check). Wiring is Phase 3.
         self.options: dict[str, Any] = {
             'auth': auth,
             'cert': cert,
@@ -397,8 +396,6 @@ class HTTPXWrapper:
 
         if 'follow_redirects' in options:
             kwargs['follow_redirects'] = bool(options['follow_redirects'])
-        elif 'allow_redirects' in options:
-            kwargs['follow_redirects'] = bool(options['allow_redirects'])
 
         return kwargs
 

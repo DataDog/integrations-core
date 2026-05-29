@@ -103,7 +103,14 @@ def test_remapper_renames_field(capturing_transport):
     assert http.options['verify'] is False
 
 
-def test_request_rejects_unknown_kwarg(capturing_transport):
+@pytest.mark.parametrize(
+    'kwarg,value',
+    [
+        pytest.param('proxies', {'http': 'http://proxy:8080'}, id='proxies'),
+        pytest.param('allow_redirects', False, id='allow-redirects-uses-httpx-name'),
+    ],
+)
+def test_request_rejects_unknown_kwarg(capturing_transport, kwarg, value):
     http = HTTPXWrapper({}, {}, transport=capturing_transport)
-    with pytest.raises(TypeError, match='proxies'):
-        http.get('http://example.test/', proxies={'http': 'http://proxy:8080'})
+    with pytest.raises(TypeError, match=kwarg):
+        http.get('http://example.test/', **{kwarg: value})
