@@ -1863,23 +1863,23 @@ pipeline:
               name: ocsf.severity_id
               categories:
                 - filter:
-                    query: "@severity.level:1"
+                    query: "@severity.level:1 OR @severity.id:1"
                   name: Informational
                   id: 1
                 - filter:
-                    query: "@severity.level:2"
+                    query: "@severity.level:2 OR @severity.id:2"
                   name: Low
                   id: 2
                 - filter:
-                    query: "@severity.level:3"
+                    query: "@severity.level:3 OR @severity.id:3"
                   name: Medium
                   id: 3
                 - filter:
-                    query: "@severity.level:4"
+                    query: "@severity.level:4 OR @severity.id:4"
                   name: High
                   id: 4
                 - filter:
-                    query: "@severity.level:5"
+                    query: "@severity.level:5 OR @severity.id:5"
                   name: Critical
                   id: 5
                 - filter:
@@ -1972,15 +1972,17 @@ pipeline:
           template: "0"
           target: ocsf.evidence.connection_info.direction_id
           replaceMissing: false
-        - type: grok-parser
+        - type: attribute-remapper
           name: Coerce evidence direction_id to integer
           enabled: true
-          source: ocsf.evidence.connection_info.direction_id
-          samples:
-            - "0"
-          grok:
-            supportRules: ""
-            matchRules: "to_int %{integer:ocsf.evidence.connection_info.direction_id}"
+          sources:
+            - ocsf.evidence.connection_info.direction_id
+          sourceType: attribute
+          target: ocsf.evidence.connection_info.direction_id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+          targetFormat: integer
         - type: attribute-remapper
           name: Map `id.orig_h` to `ocsf.evidence.src_endpoint.ip`
           enabled: true
@@ -2038,60 +2040,20 @@ pipeline:
             preserveSource: true
             type: append
         - type: string-builder-processor
-          name: Add alert.metadata_str
+          name: Add ocsf.metadata.event_code from alert.metadata
           enabled: true
           template: "%{alert.metadata}"
-          target: alert.metadata_str
+          target: ocsf.metadata.event_code
           replaceMissing: false
         - type: grok-parser
-          name: Parse alert.metadata_str to MITRE tactic and technique fields
+          name: Parse ocsf.metadata.event_code to MITRE tactic and technique fields
           enabled: true
-          source: alert.metadata_str
+          source: ocsf.metadata.event_code
           samples:
             - "[attack_target:Client_Endpoint, confidence:High, created_at:2026_04_01, deployment:Internal, deployment:Perimeter, mitre_tactic_id:TA0011, mitre_tactic_name:Command_And_Control, mitre_technique_id:T1071, mitre_technique_name:Application_Layer_Protocol, performance_impact:Low, signature_severity:Major, updated_at:2026_04_09]"
           grok:
             supportRules: ""
-            matchRules: 'rule .*?mitre_tactic_id:%{regex("[^,\\]]+"):mitre_tactic_uid},\s*mitre_tactic_name:%{regex("[^,\\]]+"):mitre_tactic_name},\s*mitre_technique_id:%{regex("[^,\\]]+"):mitre_technique_uid},\s*mitre_technique_name:%{regex("[^,\\]]+"):mitre_technique_name}%{data}'
-        - type: attribute-remapper
-          name: Map `mitre_tactic_uid` to `ocsf.finding_info.attack.tactic.uid`
-          enabled: true
-          sources:
-            - mitre_tactic_uid
-          sourceType: attribute
-          target: ocsf.finding_info.attack.tactic.uid
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: true
-        - type: attribute-remapper
-          name: Map `mitre_tactic_name` to `ocsf.finding_info.attack.tactic.name`
-          enabled: true
-          sources:
-            - mitre_tactic_name
-          sourceType: attribute
-          target: ocsf.finding_info.attack.tactic.name
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: true
-        - type: attribute-remapper
-          name: Map `mitre_technique_uid` to `ocsf.finding_info.attack.technique.uid`
-          enabled: true
-          sources:
-            - mitre_technique_uid
-          sourceType: attribute
-          target: ocsf.finding_info.attack.technique.uid
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: true
-        - type: attribute-remapper
-          name: Map `mitre_technique_name` to `ocsf.finding_info.attack.technique.name`
-          enabled: true
-          sources:
-            - mitre_technique_name
-          sourceType: attribute
-          target: ocsf.finding_info.attack.technique.name
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: true
+            matchRules: 'rule .*?mitre_tactic_id:%{regex("[^,\\]]+"):ocsf.finding_info.attack.tactic.uid},\s*mitre_tactic_name:%{regex("[^,\\]]+"):ocsf.finding_info.attack.tactic.name},\s*mitre_technique_id:%{regex("[^,\\]]+"):ocsf.finding_info.attack.technique.uid},\s*mitre_technique_name:%{regex("[^,\\]]+"):ocsf.finding_info.attack.technique.name}%{data}'
         - type: array-processor
           name: Move ocsf.finding_info.attack into ocsf.finding_info.attacks array
           enabled: true
