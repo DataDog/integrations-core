@@ -16,6 +16,7 @@ from .headers import get_default_headers, update_headers
 from .http_exceptions import (
     HTTPConnectionError,
     HTTPError,
+    HTTPInvalidURLError,
     HTTPRequestError,
     HTTPStatusError,
     HTTPTimeoutError,
@@ -90,7 +91,7 @@ def _build_timeout(config: dict[str, Any]) -> tuple[float, float]:
     return connect, read
 
 
-def _map_httpx_exception(exc: BaseException) -> HTTPError:
+def _map_httpx_exception(exc: httpx.HTTPError | httpx.InvalidURL) -> HTTPError:
     """Translate an httpx exception into the library-agnostic equivalent."""
     if isinstance(exc, httpx.TimeoutException):
         return HTTPTimeoutError(str(exc) or exc.__class__.__name__, request=getattr(exc, 'request', None))
@@ -102,6 +103,8 @@ def _map_httpx_exception(exc: BaseException) -> HTTPError:
             request=getattr(exc, 'request', None),
             response=getattr(exc, 'response', None),
         )
+    if isinstance(exc, httpx.InvalidURL):
+        return HTTPInvalidURLError(str(exc) or exc.__class__.__name__, request=getattr(exc, 'request', None))
     if isinstance(exc, httpx.RequestError):
         return HTTPRequestError(str(exc) or exc.__class__.__name__, request=getattr(exc, 'request', None))
     return HTTPError(str(exc) or exc.__class__.__name__)
@@ -355,7 +358,7 @@ class HTTPXWrapper:
         try:
             request = self._client.build_request(method, url, **request_kwargs)
             response = self._client.send(request, stream=True, follow_redirects=follow_redirects)
-        except httpx.HTTPError as exc:
+        except (httpx.HTTPError, httpx.InvalidURL) as exc:
             raise _map_httpx_exception(exc) from exc
         return HTTPXResponseAdapter(response)
 
