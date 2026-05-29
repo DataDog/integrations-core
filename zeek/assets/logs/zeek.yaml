@@ -1731,7 +1731,7 @@ pipeline:
           target: ocsf.evidence.connection_info.direction_id
           replaceMissing: false
         - type: attribute-remapper
-          name: Coerce evidence direction_id to integer
+          name: Map `ocsf.evidence.connection_info.direction_id` to `ocsf.evidence.connection_info.direction_id`
           enabled: true
           sources:
             - ocsf.evidence.connection_info.direction_id
@@ -1973,7 +1973,7 @@ pipeline:
           target: ocsf.evidence.connection_info.direction_id
           replaceMissing: false
         - type: attribute-remapper
-          name: Coerce evidence direction_id to integer
+          name: Map `ocsf.evidence.connection_info.direction_id` to `ocsf.evidence.connection_info.direction_id`
           enabled: true
           sources:
             - ocsf.evidence.connection_info.direction_id
@@ -3650,17 +3650,19 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
-        - type: grok-parser
-          name: Coerce hash_md5 algorithm_id to integer
-          enabled: true
-          source: ocsf.file.hash_md5.algorithm_id
-          samples:
-            - "1"
-          grok:
-            supportRules: ""
-            matchRules: "to_int %{integer:ocsf.file.hash_md5.algorithm_id}"
         - type: attribute-remapper
-          name: Coerce hash_sha1 algorithm_id to integer
+          name: Map `ocsf.file.hash_md5.algorithm_id` to `ocsf.file.hash_md5.algorithm_id`
+          enabled: true
+          sources:
+            - ocsf.file.hash_md5.algorithm_id
+          sourceType: attribute
+          target: ocsf.file.hash_md5.algorithm_id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+          targetFormat: integer
+        - type: attribute-remapper
+          name: Map `ocsf.file.hash_sha1.algorithm_id` to `ocsf.file.hash_sha1.algorithm_id`
           enabled: true
           sources:
             - ocsf.file.hash_sha1.algorithm_id
@@ -3671,7 +3673,7 @@ pipeline:
           overrideOnConflict: false
           targetFormat: integer
         - type: attribute-remapper
-          name: Coerce hash_sha256 algorithm_id to integer
+          name: Map `ocsf.file.hash_sha256.algorithm_id` to `ocsf.file.hash_sha256.algorithm_id`
           enabled: true
           sources:
             - ocsf.file.hash_sha256.algorithm_id
