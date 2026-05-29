@@ -1,9 +1,19 @@
 import os
 import re
+import shlex
+import sys
 from functools import cached_property
 from typing import Any
 
 from hatch.env.collectors.plugin.interface import EnvironmentCollectorInterface
+
+
+def shell_quote(token: str) -> str:
+    """Quote a token for the shell Hatch runs commands through: cmd.exe on Windows, POSIX sh elsewhere."""
+    # Mypy has special recognition for sys.platform, not os.name.
+    if sys.platform == 'win32':
+        return f'"{token}"'
+    return shlex.quote(token)
 
 
 class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
@@ -79,7 +89,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
         if not self.in_core_repo:
             return self.uv_install_command('datadog-checks-dev')
         elif not (self.is_test_package or self.is_dev_package):
-            return self.uv_install_command('-e', str(self.root.parent / 'datadog_checks_dev'))
+            return self.uv_install_command('-e', shell_quote(str(self.root.parent / 'datadog_checks_dev')))
 
     def base_package_install_command(self, features):
         from ddev.testing.constants import TestEnvVars
@@ -98,7 +108,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
         if not features:
             features = ['deps']
 
-        base_package = str(local_path) if local_path is not None else 'datadog-checks-base'
+        base_package = shell_quote(str(local_path)) if local_path is not None else 'datadog-checks-base'
         formatted = f'{base_package}[{",".join(sorted(features))}]'
         if version:
             formatted += f'=={version}'
@@ -162,17 +172,19 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             scripts.setdefault('benchmark', '_dd-benchmark')
 
     def lint_command(self, options: str, settings_dir: str) -> str:
+        config = shell_quote(f'{settings_dir}/pyproject.toml')
         return self.on_config(
             'disable-linter',
             "echo 'Linter is disabled for this environment'",
-            f'ruff check {options} --config {settings_dir}/pyproject.toml .',
+            f'ruff check {options} --config {config} .',
         )
 
     def formatter_command(self, options: str, settings_dir: str) -> str:
+        config = shell_quote(f'{settings_dir}/pyproject.toml')
         return self.on_config(
             'disable-formatter',
             "echo 'Formatter is disabled for this environment'",
-            f'ruff format {options} --config {settings_dir}/pyproject.toml .',
+            f'ruff format {options} --config {config} .',
         )
 
     def inject_ddtrace_dependency(self, env_config):
@@ -235,10 +247,10 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
         config = {'lint': lint_env}
 
         if self.check_types:
-            mypy_config = self.root.parent / 'pyproject.toml'
+            mypy_config = shell_quote(f'--config-file={self.root.parent / "pyproject.toml"}')
             mypy_args = ' '.join(self.mypy_args)
             mypy_files = ' '.join(self.mypy_files)
-            lint_env['scripts']['typing'] = [f'mypy --config-file={mypy_config} {mypy_args} {mypy_files}'.rstrip()]
+            lint_env['scripts']['typing'] = [f'mypy {mypy_config} {mypy_args} {mypy_files}'.rstrip()]
             lint_env['scripts']['all'].append('typing')
             lint_env['dependencies'].extend(self.mypy_deps)
 
