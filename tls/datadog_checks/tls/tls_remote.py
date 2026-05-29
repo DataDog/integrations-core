@@ -155,6 +155,24 @@ class TLSRemoteCheck(object):
             # Read Mysql welcome message
             data = self._read_n_bytes_from_socket(sock, bytes_to_read)
             sock.sendall(packet)
+        elif protocol == "smtp":
+            self.log.debug('Switching connection to encrypted for %s protocol', protocol)
+
+            # read & check server hello
+            initial_banner = sock.recv(4096)
+            if not initial_banner.startswith(b'220'):
+                raise Exception('SMTP server did not greet correctly')
+
+            # send client hello
+            sock.sendall(f'EHLO {self.agent_check._server_hostname}\r\n'.encode('ascii'))
+            # drain EHLO response
+            sock.recv(4096)
+
+            # upgrade connection
+            sock.sendall(b'STARTTLS\r\n')
+            data = sock.recv(1024)
+            if not data.startswith(b'220'):
+                raise Exception('SMTP endpoint does not support STARTTLS')
         else:
             raise Exception('Unsupported starttls protocol: ' + protocol)
 

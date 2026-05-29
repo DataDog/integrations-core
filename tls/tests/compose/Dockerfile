@@ -42,3 +42,6 @@ RUN for file in valid.mock.key valid.mock.crt; do cp $file postgres.$file; chown
 ENV MYSQL_UID=999
 ENV MYSQL_GUID=999
 RUN for file in valid.mock.key valid.mock.crt; do cp $file mysql.$file; chown $MYSQL_UID:$MYSQL_GUID mysql.$file; done
+
+## Prepare smtp certificates
+RUN for file in valid.mock.key valid.mock.crt; do cp $file smtp.$file; done
