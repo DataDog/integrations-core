@@ -7,6 +7,7 @@ from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
 from datadog_checks.base.utils.db.utils import get_agent_host_tags
+from datadog_checks.mysql.config_models.instance import DataObservability
 
 DEFAULT_MAX_CUSTOM_QUERIES = 20
 
@@ -54,6 +55,7 @@ class MySQLConfig(object):
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
         self.settings_config = instance.get('collect_settings', {}) or {}
         self.activity_config = instance.get('query_activity', {}) or {}
+        self.data_observability = DataObservability.model_validate(instance.get('data_observability') or {})
         # Backward compatibility: check new names first, then fall back to old names
         self.schemas_config: dict = instance.get('collect_schemas', instance.get('schemas_collection', {})) or {}
         self.index_config: dict = instance.get('index_metrics', {}) or {}

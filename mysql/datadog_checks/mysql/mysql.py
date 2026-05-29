@@ -59,6 +59,7 @@ from .const import (
     TABLE_VARS,
     VARIABLES_VARS,
 )
+from .data_observability import MySQLDataObservability
 from .global_variables import GlobalVariables
 from .index_metrics import MySqlIndexMetrics
 from .innodb_metrics import InnoDBMetrics
@@ -161,6 +162,9 @@ class MySql(DatabaseCheck):
         )
         self._mysql_metadata = MySQLMetadata(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
         self._query_activity = MySQLActivity(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
+        self._data_observability = MySQLDataObservability(
+            self, self._config, self._get_connection_args, self._uses_aws_managed_auth
+        )
         self._index_metrics = MySqlIndexMetrics(self._config)
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
         self._database_instance_emitted = TTLCache(
@@ -427,6 +431,9 @@ class MySql(DatabaseCheck):
                     self._query_activity.run_job_loop(dbm_tags)
                     self._mysql_metadata.run_job_loop(dbm_tags)
 
+                if self._config.data_observability.enabled:
+                    self._data_observability.run_job_loop(tags)
+
                 # keeping track of these:
                 self._put_qcache_stats()
 
@@ -445,6 +452,7 @@ class MySql(DatabaseCheck):
         self._statement_metrics.cancel()
         self._query_activity.cancel()
         self._mysql_metadata.cancel()
+        self._data_observability.cancel()
 
     def _new_query_executor(self, queries):
         return QueryExecutor(
