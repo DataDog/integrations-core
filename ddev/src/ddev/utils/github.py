@@ -6,9 +6,11 @@ from __future__ import annotations
 import json
 from functools import cached_property
 from time import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, overload
 
 if TYPE_CHECKING:
+    from typing import Any, Literal
+
     from httpx import Client
 
     from ddev.cli.terminal import BorrowedStatus
@@ -207,12 +209,58 @@ class GitHubManager:
         data = response.json()
         return data['head']['sha'], data['head']['ref']
 
-    def dispatch_workflow(self, workflow_id: str, ref: str, inputs: dict[str, Any]) -> None:
-        """Trigger a workflow_dispatch event."""
-        self.__api_post(
+    def get_pull_request_labels(self, pr_number: int) -> list[str] | None:
+        """Return the label names on the given PR, or None if it could not be fetched."""
+        from httpx import HTTPStatusError
+
+        try:
+            response = self.__api_get(self.PULL_REQUEST_API.format(repo_id=self.repo_id, pr_number=pr_number))
+        except HTTPStatusError:
+            return None
+        return [label['name'] for label in response.json().get('labels', [])]
+
+    @overload
+    def dispatch_workflow(
+        self,
+        workflow_id: str,
+        ref: str,
+        inputs: dict[str, Any],
+        return_run_details: Literal[False] = False,
+    ) -> None: ...
+
+    @overload
+    def dispatch_workflow(
+        self,
+        workflow_id: str,
+        ref: str,
+        inputs: dict[str, Any],
+        return_run_details: Literal[True],
+    ) -> dict[str, Any]: ...
+
+    def dispatch_workflow(
+        self,
+        workflow_id: str,
+        ref: str,
+        inputs: dict[str, Any],
+        return_run_details: bool = False,
+    ) -> dict[str, Any] | None:
+        """Trigger a workflow_dispatch event.
+
+        When ``return_run_details`` is true, request the new run's details from
+        the API and return the parsed JSON response (``workflow_run_id``,
+        ``run_url``, ``html_url``). The default keeps the prior fire-and-forget
+        behavior and returns ``None``.
+        """
+        payload: dict[str, Any] = {'ref': ref, 'inputs': inputs}
+        if return_run_details:
+            payload['return_run_details'] = True
+        response = self.__api_post(
             self.WORKFLOW_DISPATCH_API.format(repo_id=self.repo_id, workflow_id=workflow_id),
-            content=json.dumps({'ref': ref, 'inputs': inputs}),
+            content=json.dumps(payload),
         )
+        if not return_run_details:
+            return None
+        return response.json()
 
     def get_pull_request_comments(self, pr_number: int) -> list[dict]:
         response = self.__api_get(

@@ -1,1 +1,0 @@
-Fix a crash caused by cancel closing database connections while the check is still running.
