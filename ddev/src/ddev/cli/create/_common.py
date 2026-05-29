@@ -87,6 +87,8 @@ def run_subcommand(
     extra_fields: CheckOnlyPrefillFields | dict[str, object] = {}
     target_integration_dir: str | None = None
     if integration_type == 'check_only':
+        # Read unconditionally (even with --include-manifest): the manifest supplies check_name,
+        # the Python package name consumed by both the manifest-less and manifest paths.
         extra_fields, target_integration_dir = _resolve_check_only_inputs(app, name, location)
 
     from ddev.cli.create._scaffold import render
@@ -149,6 +151,9 @@ def _write_manifestless_overrides(
             platforms=platforms,
         )
     except OSError as exc:
+        # markup=False: the TOML section headers ([overrides.display-name], ...) would
+        # otherwise be parsed by Rich as style tags and stripped from the output, leaving
+        # the user with copy-paste instructions missing their section headers.
         app.abort(
             f'Failed to update `.ddev/config.toml`: {exc}\n'
             f'The integration was scaffolded at `{integration_dir}` but the '
@@ -158,7 +163,8 @@ def _write_manifestless_overrides(
             f'  [overrides.metrics-prefix]\n'
             f'  {override_dir_name} = "{metrics_prefix}"\n'
             f'  [overrides.manifest.platforms]\n'
-            f'  {override_dir_name} = {platforms!r}'
+            f'  {override_dir_name} = {platforms!r}',
+            markup=False,
         )
 
 
@@ -274,7 +280,7 @@ def _resolve_check_only_inputs(
     author_pkg = normalize_package_name(author_normalized)
     stripped = target_integration_dir.removeprefix(f'{author_pkg}_')
 
-    fields = prefill_check_only_fields(manifest_data, stripped)
+    fields = prefill_check_only_fields(manifest_data, stripped, author_normalized)
     return fields, target_integration_dir
 
 

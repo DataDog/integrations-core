@@ -631,3 +631,56 @@ def test_non_check_only_partial_write_failure_recommends_deleting_directory(ddev
     assert result.exit_code != 0
     assert 'Remove `' in result.output
     assert 'my_integration' in result.output
+
+
+def test_malformed_repo_config_aborts_before_scaffolding(ddev, empty_repo):
+    """A malformed `.ddev/config.toml` aborts a manifest-less create before any files are written."""
+    config_toml = empty_repo.path / '.ddev' / 'config.toml'
+    config_toml.ensure_parent_dir_exists()
+    config_toml.write_text('this is = not ][ valid toml')
+
+    result = ddev(
+        'create',
+        'check',
+        'my_integration',
+        '--display-name',
+        'My Integration',
+        '--metrics-prefix',
+        'my_integration.',
+        '--platforms',
+        'linux',
+    )
+    assert result.exit_code != 0
+    assert 'Fix or remove' in result.output
+    assert not (empty_repo.path / 'my_integration').exists()
+
+
+def test_config_write_failure_prints_manual_override_instructions(ddev, empty_repo, monkeypatch):
+    """When `.ddev/config.toml` can't be written, the abort lists the three overrides to add by hand."""
+    from ddev.repo.config import RepositoryConfig
+
+    def boom(self, data):
+        raise OSError(28, 'No space left on device')
+
+    monkeypatch.setattr(RepositoryConfig, 'save_data', boom)
+
+    result = ddev(
+        'create',
+        'check',
+        'my_integration',
+        '--display-name',
+        'My Integration',
+        '--metrics-prefix',
+        'my_integration.',
+        '--platforms',
+        'linux,windows',
+    )
+    assert result.exit_code != 0
+    output = result.output
+    assert 'config.toml' in output
+    assert '[overrides.display-name]' in output
+    assert '[overrides.metrics-prefix]' in output
+    assert '[overrides.manifest.platforms]' in output
+    assert 'my_integration = "My Integration"' in output
+    assert 'my_integration = "my_integration."' in output
+    assert "my_integration = ['linux', 'windows']" in output

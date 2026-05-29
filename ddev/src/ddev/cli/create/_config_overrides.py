@@ -17,6 +17,10 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ddev.cli.application import Application
 
+# An override entry maps a directory name to its value: a string (display name,
+# metrics prefix) or a list of strings (platforms).
+OverrideValue = str | list[str]
+
 
 def apply_manifestless_overrides(
     app: Application,
@@ -44,6 +48,6 @@ def apply_manifestless_overrides(
     config_file.save_data(data)
 
 
-def _set_entry(table: dict, key: str, dir_name: str, value: object) -> None:
+def _set_entry(table: dict[str, dict[str, OverrideValue]], key: str, dir_name: str, value: OverrideValue) -> None:
     section = table.setdefault(key, {})
     section[dir_name] = value

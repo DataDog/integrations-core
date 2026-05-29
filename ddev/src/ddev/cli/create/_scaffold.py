@@ -21,7 +21,6 @@ from ddev.cli.create._naming import (
     get_config_models_documentation,
     get_license_header,
     kebab_case_name,
-    normalize_display_name,
     normalize_package_name,
     normalize_project_name,
 )
@@ -158,13 +157,19 @@ class CheckOnlyPrefillFields(TypedDict, total=False):
     sales_email: str
 
 
-def prefill_check_only_fields(manifest: dict[str, Any], normalized_name: str) -> CheckOnlyPrefillFields:
-    """Extract reusable fields from a pre-existing `manifest.json` for a `check_only` integration."""
-    author_name_raw = (manifest.get('author') or {}).get('name')
-    author = normalize_display_name(author_name_raw) if author_name_raw else None
-    check_name = normalize_package_name(f'{author}_{normalized_name}') if author is not None else None
+def prefill_check_only_fields(
+    manifest: dict[str, Any],
+    normalized_name: str,
+    author_normalized: str,
+) -> CheckOnlyPrefillFields:
+    """Extract reusable fields from a pre-existing `manifest.json` for a `check_only` integration.
+
+    ``author_normalized`` is the already-validated, normalized author name resolved by the
+    caller; we reuse it for the package name instead of re-deriving it from the raw manifest.
+    """
+    check_name = normalize_package_name(f'{author_normalized}_{normalized_name}')
     candidates: dict[str, str | None] = {
-        'author_name': author,
+        'author_name': author_normalized,
         'check_name': check_name,
         'email': (manifest.get('author') or {}).get('support_email'),
         'homepage': (manifest.get('author') or {}).get('homepage'),
@@ -215,7 +220,6 @@ def construct_template_fields(
     config: dict[str, Any] = {
         'author': author,
         'auto_install': 'false' if integration_type == 'metrics_crawler' else 'true',
-        'check_class': f"{''.join(part.capitalize() for part in normalized_name.split('_'))}Check",
         'check_name': check_name,
         'project_name': normalize_project_name(normalized_name),
         'documentation': get_config_models_documentation(),
@@ -255,6 +259,16 @@ def construct_template_fields(
         ),
     }
     config.update(kwargs)
+
+    # Derive check_class from the final check_name: for check_only, prefilled fields
+    # may supply a check_name that differs from normalized_name.
+    package_name = config['check_name'] or normalized_name
+    config['check_class'] = f"{''.join(part.capitalize() for part in package_name.split('_'))}Check"
+
+    # An empty check_name would let template paths like '{check_name}/...' collapse to an
+    # absolute '/...', discarding the target root and scaffolding to the filesystem root.
+    # Upstream validation guarantees a non-empty name; assert it locally so a regression fails loudly.
+    assert config['check_name'], 'check_name must be populated before scaffolding'
     return config
 
 

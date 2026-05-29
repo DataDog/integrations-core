@@ -131,7 +131,10 @@ def _extract_legacy_type(args: list[str]) -> str | _TypeFlagSentinel | None:
             return value
         for prefix in _TYPE_FLAG_EQUALS_PREFIXES:
             if token.startswith(prefix):
-                return token[len(prefix) :]
+                value = token[len(prefix) :]
+                # `--type=` with nothing after the equals sign is a missing value, not the
+                # empty-string type name `''` (which would abort with a confusing message).
+                return value if value else _MISSING_TYPE_VALUE
         if _is_concatenated_short_type(token):
             return token[2:]
     return None
