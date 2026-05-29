@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import os
+import struct
 
 from datadog_checks.dev import get_here
 
@@ -159,3 +160,86 @@ ETHTOOL_IOCTL_INPUTS_OUTPUTS = {
 
 def decode_string(s):
     return s.decode('unicode-escape')
+
+
+MLX5_DRIVER_NAME = 'mlx5_core'
+MLX5_DRIVER_VERSION = '25.04-0.1.2.0'
+
+MLX5_STATS_BY_NAME = {
+    'rx0_arfs_err': 0,
+    'tx0_dropped': 1,
+    'rx0_packets': 5000,
+    'rx0_bytes': 500000,
+    'tx0_packets': 4000,
+    'tx0_bytes': 400000,
+    'rx_prio0_packets': 1000,
+    'rx_prio0_bytes': 100000,
+    'rx_prio0_pause': 10,
+    'rx_prio0_pause_duration': 500,
+    'rx_prio0_buf_discard': 2,
+    'rx_prio0_cong_discard': 3,
+    'rx_prio0_marked': 50,
+    'tx_prio0_packets': 800,
+    'tx_prio0_pause': 8,
+    'rx_prio7_packets': 2000,
+    'rx_prio7_marked': 100,
+    'tx_prio7_pause': 20,
+    'rx_prio8_packets': 6666,
+    'rx_global_pause': 7,
+    'rx_global_pause_duration': 300,
+    'tx_global_pause': 6,
+    'tx_global_pause_duration': 250,
+    'rx_pci_signal_integrity': 0,
+    'outbound_pci_stalled_rd_events': 5,
+    'tx_pause_storm_error_events': 0,
+    'rx_corrected_bits_phy': 42,
+    'rx_bits_phy': 123456789,
+    'rx_packets': 999999,
+    'tx_packets': 888888,
+    'not_in_any_allowlist': 12345,
+}
+
+
+def _pack_ioctl_responses(iface, driver_name, driver_version, stats_by_name):
+    """
+    Build the four ioctl request/response pairs that the network check will issue
+    for an interface: GDRVINFO, GSSET_INFO, GSTRINGS, GSTATS. Returns a dict keyed
+    by (iface, input_bytes) -> response_bytes, suitable for merging into
+    ETHTOOL_IOCTL_INPUTS_OUTPUTS.
+    """
+    n = len(stats_by_name)
+
+    drvinfo_input = struct.pack('I', 0x03) + b'\x00' * 196
+    drvinfo_output = (
+        struct.pack('I', 0x03)
+        + driver_name.encode().ljust(32, b'\x00')
+        + driver_version.encode().ljust(32, b'\x00')
+        + b'\x00' * 32
+        + b'\x00' * 32
+        + b'\x00' * 32
+        + b'\x00' * 12
+        + struct.pack('IIIII', 0, n, 0, 0, 0)
+    )
+
+    gssetinfo_input = struct.pack('IIQI', 0x37, 0, 1 << 1, 0)
+    gssetinfo_output = struct.pack('IIQI', 0x37, 0, 1 << 1, n)
+
+    gstrings_input = struct.pack('III', 0x1B, 1, n) + b'\x00' * (n * 32)
+    gstrings_output = struct.pack('III', 0x1B, 1, n) + b''.join(
+        name.encode().ljust(32, b'\x00') for name in stats_by_name
+    )
+
+    gstats_input = struct.pack('II', 0x1D, n) + b'\x00' * (n * 8)
+    gstats_output = struct.pack('II', 0x1D, n) + b''.join(struct.pack('Q', v) for v in stats_by_name.values())
+
+    return {
+        (iface, drvinfo_input): drvinfo_output,
+        (iface, gssetinfo_input): gssetinfo_output,
+        (iface, gstrings_input): gstrings_output,
+        (iface, gstats_input): gstats_output,
+    }
+
+
+ETHTOOL_IOCTL_INPUTS_OUTPUTS.update(
+    _pack_ioctl_responses(MLX5_DRIVER_NAME, MLX5_DRIVER_NAME, MLX5_DRIVER_VERSION, MLX5_STATS_BY_NAME)
+)

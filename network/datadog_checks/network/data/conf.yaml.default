@@ -134,6 +134,7 @@ instances:
     ## - virtio_net
     ## - hv_netvsc
     ## - gve
+    ## - mlx5_core (including RoCE/PFC per-priority counters and PCIe/FEC/pause Layer 1 globals)
     #
     # collect_ethtool_metrics: false
 

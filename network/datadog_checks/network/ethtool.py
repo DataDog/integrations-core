@@ -166,6 +166,24 @@ def _parse_ethtool_cpu_num(stat_name):
     return 'cpu:{}'.format(cpu_num), '_'.join(parts)
 
 
+def _parse_ethtool_prio_num(stat_name):
+    """
+    Extract the priority and the metric name from ethtool stat name:
+    rx_prio3_packets -> (prio:3, rx_packets)
+    tx_prio0_pause_duration -> (prio:0, tx_pause_duration)
+    Restricted to the 802.1p priority range 0..7.
+    """
+    parts = stat_name.split('_')
+    for i, part in enumerate(parts):
+        if len(part) > 4 and part.startswith('prio') and part[4:].isdigit():
+            prio_num = part[4:]
+            if not 0 <= int(prio_num) <= 7:
+                return None, None
+            parts.pop(i)
+            return 'prio:{}'.format(prio_num), '_'.join(parts)
+    return None, None
+
+
 def _get_stat_value(stats, index):
     offset = 8 + 8 * index
     value = struct.unpack('Q', stats[offset : offset + 8])[0]
@@ -192,6 +210,9 @@ def get_ethtool_metrics(driver_name, stats_names, stats):
         if not tag:
             tag, metric_name = _parse_ethtool_cpu_num(stat_name)
             metric_prefix = '.cpu.'
+        if not tag:
+            tag, metric_name = _parse_ethtool_prio_num(stat_name)
+            metric_prefix = '.prio.'
         if not tag:
             tag, metric_name = _parse_ethtool_queue_array(stat_name)
             metric_prefix = '.queue.'
