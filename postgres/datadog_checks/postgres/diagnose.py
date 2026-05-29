@@ -110,7 +110,11 @@ class PostgresDiagnose:
 
     def _needs_per_database_probing(self):
         """True when the running check fans out connections across multiple DBs."""
-        return self._needs_autodiscovery_connectivity_probing() or self._needs_query_sample_setup_probing()
+        return (
+            self._needs_autodiscovery_connectivity_probing()
+            or self._needs_query_sample_setup_probing()
+            or self._needs_column_statistics_probing()
+        )
 
     def _needs_autodiscovery_connectivity_probing(self):
         """True when runtime autodiscovery opens per-database connections."""
@@ -122,12 +126,19 @@ class PostgresDiagnose:
         config = self._check._config
         return config.dbm and config.query_samples.enabled
 
+    def _needs_column_statistics_probing(self):
+        """True when column-statistics will read `datadog.column_statistics()` per database."""
+        config = self._check._config
+        return config.dbm and config.collect_column_statistics.enabled
+
     def _run_per_database_probes(self, main_conn):
         """Run per-database probes along the same fan-out paths as runtime collection."""
         if self._needs_autodiscovery_connectivity_probing():
             self._run_autodiscovery_connectivity_probes(main_conn)
         if self._needs_query_sample_setup_probing():
             self._run_query_sample_setup_probes(main_conn)
+        if self._needs_column_statistics_probing():
+            self._run_column_statistics_probes(main_conn)
 
     def _run_autodiscovery_connectivity_probes(self, main_conn):
         """Validate connectivity to databases selected by runtime autodiscovery."""
@@ -155,6 +166,22 @@ class PostgresDiagnose:
                 for schema in schemas:
                     self._diagnose_schema_usage(probe_conn, dbname, schema, failed)
                 self._diagnose_explain_function(probe_conn, dbname, failed)
+            finally:
+                if probe_conn is not main_conn:
+                    _safe_close(probe_conn)
+
+    def _run_column_statistics_probes(self, main_conn):
+        """Validate `datadog.column_statistics()` in every database the collector scans."""
+        dbnames = self._get_autodiscovered_probe_databases()
+        if dbnames is None:
+            dbnames = [self._check._config.dbname]
+        for dbname in dbnames:
+            probe_conn = self._probe_connection_for_db(main_conn, dbname)
+            if probe_conn is None:
+                continue
+            try:
+                failed = set()
+                self._diagnose_column_statistics_function(probe_conn, dbname, failed)
             finally:
                 if probe_conn is not main_conn:
                     _safe_close(probe_conn)
@@ -687,6 +714,72 @@ class PostgresDiagnose:
             description=build_description(code, explain_function=explain_function),
             remediation=build_remediation(code, explain_function=explain_function),
             failed_codes=failed,
+        )
+
+    def _diagnose_column_statistics_function(self, conn, dbname=None, failed=None):
+        exists_code = DatabaseConfigurationError.column_statistics_function_undefined
+        priv_code = DatabaseConfigurationError.column_statistics_function_insufficient_privilege
+        dbname = dbname or self._check._config.dbname
+        failed = self._failed if failed is None else failed
+        if not _schema_exists(conn, "datadog"):
+            if DatabaseConfigurationError.missing_datadog_schema.value not in failed:
+                self._diagnose_datadog_schema(conn, dbname, failed)
+            return
+        if _schema_usage_failed_key("datadog") in failed:
+            return
+
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute('SELECT 1 FROM "datadog"."column_statistics"() LIMIT 1')
+                cursor.fetchone()
+        except psycopg.errors.UndefinedFunction as e:
+            self._fail(
+                exists_code,
+                diagnosis="datadog.column_statistics() does not exist in {}: {}".format(dbname, e),
+                category=self._category,
+                description=DIAGNOSTIC_METADATA[exists_code]["description"],
+                remediation=build_remediation(exists_code),
+                rawerror=str(e),
+                failed_codes=failed,
+            )
+            return
+        except psycopg.errors.InsufficientPrivilege as e:
+            self._check.diagnosis.success(
+                name=exists_code.value,
+                diagnosis="datadog.column_statistics() exists in {}.".format(dbname),
+                category=self._category,
+            )
+            self._fail(
+                priv_code,
+                diagnosis="datadog user lacks EXECUTE on datadog.column_statistics() in {}: {}".format(dbname, e),
+                category=self._category,
+                description=DIAGNOSTIC_METADATA[priv_code]["description"],
+                remediation=build_remediation(priv_code),
+                rawerror=str(e),
+                failed_codes=failed,
+            )
+            return
+        except psycopg.Error as e:
+            self._fail(
+                exists_code,
+                diagnosis="datadog.column_statistics() in {} returned an error: {}".format(dbname, e),
+                category=self._category,
+                description=DIAGNOSTIC_METADATA[exists_code]["description"],
+                remediation=build_remediation(exists_code),
+                rawerror=str(e),
+                failed_codes=failed,
+            )
+            return
+
+        self._check.diagnosis.success(
+            name=exists_code.value,
+            diagnosis="datadog.column_statistics() exists in {}.".format(dbname),
+            category=self._category,
+        )
+        self._check.diagnosis.success(
+            name=priv_code.value,
+            diagnosis="datadog user can execute datadog.column_statistics() in {}.".format(dbname),
+            category=self._category,
         )
 
     def _diagnose_config_validation(self):

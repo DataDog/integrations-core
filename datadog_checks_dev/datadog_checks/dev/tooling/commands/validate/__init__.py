@@ -13,6 +13,7 @@ from .dep import dep
 from .eula import eula
 from .imports import imports
 from .integration_style import integration_style
+from .jmx_metrics import jmx_metrics
 from .license_headers import license_headers
 from .models import models
 from .package import package
@@ -30,6 +31,7 @@ ALL_COMMANDS = (
     eula,
     imports,
     integration_style,
+    jmx_metrics,
     legacy_signature,
     license_headers,
     models,

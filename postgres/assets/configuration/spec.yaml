@@ -1065,6 +1065,97 @@ files:
             example:
               - "customer.*"
 
+    - name: collect_column_statistics
+      description: |
+        Enable collection of column statistics from pg_stats.
+        Requires the `datadog.column_statistics()` function to be created in the database.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of column statistics. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: false
+        - name: collection_interval
+          description: |
+            Set the column statistics collection interval (in seconds).
+          value:
+            type: number
+            example: 3600
+            display_default: 3600
+        - name: max_tables
+          description: |
+            Maximum number of tables to collect column statistics for.
+          value:
+            type: number
+            example: 500
+            display_default: 500
+        - name: include_databases
+          description: |
+            A list of regex patterns to include databases.
+            Any database whose name matches any one of these patterns will be included.
+            If empty, all databases matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "mydb"
+        - name: exclude_databases
+          description: |
+            A list of regex patterns to exclude databases.
+            Any database whose name matches any one of these patterns will be excluded.
+            If empty, all databases matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "privatedb.*"
+        - name: include_schemas
+          description: |
+            A list of regex patterns to include schemas.
+            Any schema whose name matches any one of these patterns will be included.
+            If empty, all schemas matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "myschema"
+        - name: exclude_schemas
+          description: |
+            A list of regex patterns to exclude schemas.
+            Any schema whose name matches any one of these patterns will be excluded.
+            If empty, all schemas matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "privateschema.*"
+        - name: include_tables
+          description: |
+            A list of regex patterns to include tables.
+            Any table whose name matches any one of these patterns will be included.
+            If empty, all tables matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "users.*"
+        - name: exclude_tables
+          description: |
+            A list of regex patterns to exclude tables.
+            Any table whose name matches any one of these patterns will be excluded.
+            If empty, all tables matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "temp_.*"
     - name: aws
       display_priority: 0
       description: |
