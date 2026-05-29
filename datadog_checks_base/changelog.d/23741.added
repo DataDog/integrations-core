@@ -1,1 +1,0 @@
-Add ``CronExpression`` and ``CronScheduler`` utilities for cron-style scheduling inside check methods.
