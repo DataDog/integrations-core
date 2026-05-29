@@ -371,7 +371,7 @@ def assert_kafka_version_matches() -> None:
         abort(f'CONFLUENT_KAFKA_VERSION is set but {requirements} is missing — is the build mount configured?')
     pin = None
     for raw in requirements.read_text(encoding='utf-8').splitlines():
-        match = KAFKA_PIN_RE.match(raw.split('#', 1)[0])
+        match = KAFKA_PIN_RE.match(raw)
         if match:
             pin = match.group(1)
             break
