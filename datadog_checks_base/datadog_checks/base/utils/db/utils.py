@@ -12,7 +12,7 @@ import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from enum import Enum, auto
-from ipaddress import IPv4Address, IPv6Address, IPv6Interface, ip_address
+from ipaddress import IPv4Address, IPv6Address, ip_address
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union  # noqa: F401
 
 from cachetools import TTLCache
@@ -163,17 +163,9 @@ class RateLimitingTTLCache(TTLCache):
 
 
 def _try_parse_db_host_ip(db_host: str) -> IPv4Address | IPv6Address | None:
-    """Try to parse db_host as an IP address"""
-    host = db_host.strip()
-    if host.startswith('[') and host.endswith(']'):
-        host = host[1:-1]
-    if '%' in host:
-        try:
-            return IPv6Interface(host).ip
-        except ValueError:
-            return None
+    """Try to parse db_host as an IP address."""
     try:
-        return ip_address(host)
+        return ip_address(db_host.strip())
     except ValueError:
         return None
 

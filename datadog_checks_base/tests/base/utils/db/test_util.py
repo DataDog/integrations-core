@@ -37,13 +37,14 @@ from datadog_checks.base.utils.format import json
         ("localhost", "agent_hostname", "agent_hostname"),
         # Unix socket
         ("/var/run/mysqld.sock", "agent_hostname", "agent_hostname"),
-        # Loopback IP literals (incl. bracketed IPv6)
+        # Loopback IP literals (incl. zone-scoped IPv6)
         ("127.0.0.1", "agent_hostname", "agent_hostname"),
         ("::1", "agent_hostname", "agent_hostname"),
-        ("[::1]", "agent_hostname", "agent_hostname"),
-        # Link-local and remote IP literals keep the configured host
+        ("::1%lo0", "agent_hostname", "agent_hostname"),
+        # Non-loopback IP literals keep the configured host
         ("169.254.169.254", "agent_hostname", "169.254.169.254"),
         ("fe80::1", "agent_hostname", "fe80::1"),
+        ("fe80::1%eth0", "agent_hostname", "fe80::1%eth0"),
         ("192.0.2.1", "agent_hostname", "192.0.2.1"),
         ("2001:db8::1", "agent_hostname", "2001:db8::1"),
         # Resolved DB host shares the agent host IP
