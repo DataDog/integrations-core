@@ -52,6 +52,10 @@ def instance_send_cert_duration():
     return False
 
 
+def instance_smtp_ehlo_hostname():
+    return 'datadog-agent'
+
+
 def instance_timeout():
     return 10
 
