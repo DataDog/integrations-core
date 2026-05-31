@@ -279,19 +279,20 @@ def test_collect_payload_tables_list_includes_views(check):
     )
     dbs = payloads[0]['metadata']
     table_names = {t['name'] for db in dbs for t in db['tables']}
+    view_names = {v['name'] for db in dbs for v in db.get('views', [])}
     assert 'events' in table_names
-    assert 'events_mv' in table_names
-    refreshable_view = next(t for db in dbs for t in db['tables'] if t['name'] == 'events_mv')
+    assert 'events_mv' in view_names
+    refreshable_view = next(v for db in dbs for v in db.get('views', []) if v['name'] == 'events_mv')
     assert refreshable_view['is_refreshable'] is True
 
 
 @pytest.mark.parametrize('engine', ['View', 'LiveView', 'WindowView'])
-def test_collect_view_engines_appear_in_tables(check, engine):
+def test_collect_view_engines_appear_in_views(check, engine):
     payloads = _run_collect(check, table_rows=[_view_row(name='some_view', engine=engine)])
     dbs = payloads[0]['metadata']
-    tables = [t for db in dbs for t in db['tables']]
-    assert [t['name'] for t in tables] == ['some_view']
-    assert tables[0]['engine'] == engine
+    views = [v for db in dbs for v in db.get('views', [])]
+    assert [v['name'] for v in views] == ['some_view']
+    assert views[0]['engine'] == engine
 
 
 def test_collect_dedupes_replica_rows_via_sql(check):
@@ -329,7 +330,7 @@ def test_collect_marks_view_refreshable_based_on_create_query(check):
             ),
         ],
     )
-    by_name = {t['name']: t for db in payloads[0]['metadata'] for t in db['tables']}
+    by_name = {v['name']: v for db in payloads[0]['metadata'] for v in db.get('views', [])}
     assert by_name['refreshable_mv']['is_refreshable'] is True
     assert by_name['vanilla_view']['is_refreshable'] is False
 
@@ -344,7 +345,7 @@ def test_collect_columns_attached_to_correct_parent(check):
     )
     dbs = payloads[0]['metadata']
     table = next(t for db in dbs for t in db['tables'] if t['name'] == 'events')
-    view = next(t for db in dbs for t in db['tables'] if t['name'] == 'events_mv')
+    view = next(v for db in dbs for v in db.get('views', []) if v['name'] == 'events_mv')
     assert [c['name'] for c in table['columns']] == ['id']
     assert [c['name'] for c in view['columns']] == ['count']
 
