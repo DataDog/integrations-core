@@ -203,7 +203,6 @@ class ClickhouseSchemaCollector(SchemaCollector):
         }
 
 
-
 def _build_match_clauses(
     column: str,
     include_patterns: tuple[str, ...],

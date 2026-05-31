@@ -98,4 +98,3 @@ class ClickhouseTableMetrics(DBMAsyncJob):
             entity_tags = base_tags + [f'db:{database}', f'table:{name}']
             self._check.gauge('table.rows', int(total_rows or 0), tags=entity_tags)
             self._check.gauge('table.bytes', int(total_bytes or 0), tags=entity_tags)
-

@@ -269,7 +269,11 @@ def test_collect_payload_tables_list_includes_views(check):
             _table_row(name='events'),
             _view_row(
                 name='events_mv',
-                create_query='CREATE MATERIALIZED VIEW default.events_mv REFRESH EVERY 1 HOUR TO default.events_target AS SELECT * FROM default.events',
+                create_query=(
+                    'CREATE MATERIALIZED VIEW default.events_mv'
+                    ' REFRESH EVERY 1 HOUR TO default.events_target'
+                    ' AS SELECT * FROM default.events'
+                ),
             ),
         ],
     )
@@ -312,7 +316,11 @@ def test_collect_marks_view_refreshable_based_on_create_query(check):
         table_rows=[
             _view_row(
                 name='refreshable_mv',
-                create_query='CREATE MATERIALIZED VIEW default.refreshable_mv REFRESH EVERY 1 HOUR TO default.target AS SELECT * FROM default.src',
+                create_query=(
+                    'CREATE MATERIALIZED VIEW default.refreshable_mv'
+                    ' REFRESH EVERY 1 HOUR TO default.target'
+                    ' AS SELECT * FROM default.src'
+                ),
             ),
             _view_row(
                 name='vanilla_view',
@@ -371,7 +379,6 @@ def test_collect_all_chunks_share_collection_started_at(check):
 
     started_ats = {p['collection_started_at'] for p in payloads}
     assert len(started_ats) == 1
-
 
 
 def test_cancel_closes_db_client(check):
@@ -568,10 +575,7 @@ def test_payload_chunking(check, collector):
 
     # Every table appears exactly once across all payloads
     all_names = [
-        entry['tables'][0]['name']
-        for payload in captured
-        for entry in payload['metadata']
-        if entry.get('tables')
+        entry['tables'][0]['name'] for payload in captured for entry in payload['metadata'] if entry.get('tables')
     ]
     assert sorted(all_names) == sorted(f'tbl_{i}' for i in range(7))
 
