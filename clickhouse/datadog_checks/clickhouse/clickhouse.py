@@ -40,6 +40,7 @@ SELECT
     database,
     view,
     status,
+    exception,
     toInt64(toUnixTimestamp(last_success_time)) AS last_refresh_time,
     toInt64(toUnixTimestamp(next_refresh_time)) AS next_refresh_time,
     toInt64(written_rows) AS written_rows,
@@ -399,13 +400,14 @@ class ClickhouseCheck(DatabaseCheck):
 
         base_tags = list(self.tags)
         seen: set[tuple[str, str]] = set()
-        for database, view_name, status, last_time, next_time, written_rows, written_bytes in rows:
+        for database, view_name, status, exception, last_time, next_time, written_rows, written_bytes in rows:
             if (database, view_name) in seen:
                 continue
             seen.add((database, view_name))
             view_tags = base_tags + [f'db:{database}', f'view:{view_name}']
             sc_status = _VIEW_REFRESH_STATUS_MAP.get(status, AgentCheck.UNKNOWN)
-            self.service_check(self.SERVICE_CHECK_VIEW_REFRESH, sc_status, tags=view_tags, message=status)
+            sc_msg = (exception or '').split('\n')[0] or status
+            self.service_check(self.SERVICE_CHECK_VIEW_REFRESH, sc_status, tags=view_tags, message=sc_msg)
             self.gauge('view.refresh.last_time', int(last_time or 0), tags=view_tags)
             self.gauge('view.refresh.next_time', int(next_time or 0), tags=view_tags)
             self.gauge('view.refresh.rows', int(written_rows or 0), tags=view_tags)

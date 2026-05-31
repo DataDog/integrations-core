@@ -71,17 +71,6 @@ GROUP BY
 ORDER BY t.database, t.name
 """
 
-_VIEW_REFRESHES_QUERY = """\
-SELECT
-    database,
-    view,
-    exception
-FROM {view_refreshes_table}
-WHERE database NOT IN ({system_dbs})
-  {db_filters}
-LIMIT 1 BY (database, view)
-"""
-
 
 class ClickhouseSchemaCollectorConfig(SchemaCollectorConfig):
     max_tables: int
@@ -113,10 +102,6 @@ class ClickhouseSchemaCollector(SchemaCollector):
         super().__init__(check, config)
         self._db_client = None
         self._cancel_event = None
-        self._view_refreshes_unsupported_logged = False
-        self._view_refreshes_permission_logged = False
-        self._view_refreshes_skip = False
-        self._refreshable_views: set[tuple[str, str]] = set()
 
     @property
     def kind(self) -> str:
@@ -140,10 +125,6 @@ class ClickhouseSchemaCollector(SchemaCollector):
         if self._cancel_event is not None and self._cancel_event.is_set():
             raise Exception("Job loop cancelled. Aborting query.")
 
-    def _execute_query(self, query: str) -> list:
-        self._check_cancelled()
-        return self._db_client.query(query).result_rows
-
     def _get_databases(self) -> list[dict[str, str]]:
         return [_CLUSTER_STUB]
 
@@ -156,9 +137,6 @@ class ClickhouseSchemaCollector(SchemaCollector):
                 'database', self._config.include_databases, self._config.exclude_databases
             )
             table_filters = _build_match_clauses('name', self._config.include_tables, self._config.exclude_tables)
-
-            refresh_rows = self._collect_view_refreshes(db_filters)
-            self._refreshable_views = {(row[0], row[1]) for row in refresh_rows}
 
             fmt = {
                 'tables_table': self._check.get_system_table('tables'),
@@ -174,7 +152,6 @@ class ClickhouseSchemaCollector(SchemaCollector):
             with self._db_client.query_rows_stream(_TABLES_COLUMNS_QUERY.format(**fmt)) as stream:
                 yield stream
         finally:
-            self._refreshable_views = set()
             self.close()
 
     def _get_next(self, cursor) -> tuple | None:
@@ -222,40 +199,9 @@ class ClickhouseSchemaCollector(SchemaCollector):
             'create_query': create_query,
             'columns': cols,
             'metadata_modified_at': int(metadata_modified_at or 0),
-            'is_refreshable': (database, name) in self._refreshable_views,
+            'is_refreshable': 'REFRESH' in (create_query or '').upper(),
         }
 
-    def _collect_view_refreshes(self, db_filters: str) -> list:
-        if self._view_refreshes_skip:
-            return []
-        try:
-            return self._execute_query(
-                _VIEW_REFRESHES_QUERY.format(
-                    view_refreshes_table=self._check.get_system_table('view_refreshes'),
-                    system_dbs=", ".join(_SYSTEM_DATABASE_NAMES),
-                    db_filters=db_filters,
-                )
-            )
-        except Exception as e:
-            lowered = str(e).lower()
-            if 'unknown table' in lowered or 'unknowntable' in lowered:
-                if not self._view_refreshes_unsupported_logged:
-                    self._log.info(
-                        "system.view_refreshes not present (ClickHouse < 24.3); refresh status will not be populated."
-                    )
-                    self._view_refreshes_unsupported_logged = True
-                self._view_refreshes_skip = True
-            elif 'not enough privileges' in lowered or 'access_denied' in lowered:
-                if not self._view_refreshes_permission_logged:
-                    self._log.warning(
-                        "Agent user lacks SELECT on system.view_refreshes; refresh status will not be populated. "
-                        "Grant with: GRANT SELECT ON system.view_refreshes TO <agent_user>"
-                    )
-                    self._view_refreshes_permission_logged = True
-                self._view_refreshes_skip = True
-            else:
-                self._log.exception("Unexpected error querying system.view_refreshes")
-            return []
 
 
 def _build_match_clauses(

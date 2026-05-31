@@ -75,10 +75,6 @@ def _view_row(
     )
 
 
-def _refresh_row(database='default', view='events_mv', exception=''):
-    return (database, view, exception)
-
-
 @pytest.fixture
 def collect_schemas_instance():
     return {
@@ -121,26 +117,15 @@ def _make_query_result(rows):
 
 
 @contextlib.contextmanager
-def _patch_query(collector, table_rows=None, refresh_rows=None):
-    """Mocks the DBM client for the two cluster-wide queries.
-
-    - view_refreshes goes through client.query() → result_rows
-    - combined tables+columns CTE goes through client.query_rows_stream()
-    """
+def _patch_query(collector, table_rows=None):
+    """Mocks the DBM client for the combined tables+columns CTE query."""
     table_rows = table_rows or []
-    refresh_rows = refresh_rows or []
-
-    def fake_client_query(query, *args, **kwargs):
-        if 'view_refreshes' in query:
-            return _make_query_result(refresh_rows)
-        return _make_query_result([])
 
     @contextlib.contextmanager
     def fake_stream(query, *args, **kwargs):
         yield iter(table_rows)
 
     mock_client = mock.MagicMock()
-    mock_client.query.side_effect = fake_client_query
     mock_client.query_rows_stream.side_effect = fake_stream
 
     with mock.patch.object(collector._check, 'create_dbm_client', return_value=mock_client):
@@ -154,9 +139,9 @@ def _capture_payloads(check):
     return captured
 
 
-def _run_collect(check, table_rows=None, refresh_rows=None):
+def _run_collect(check, table_rows=None):
     captured = _capture_payloads(check)
-    with _patch_query(check.metadata._schema_collector, table_rows, refresh_rows):
+    with _patch_query(check.metadata._schema_collector, table_rows):
         check.metadata._schema_collector.collect_schemas()
     return captured
 
@@ -266,7 +251,6 @@ def test_collect_emits_single_payload_when_small(check):
             _table_row(name='events', columns=[_column_row(name='id')]),
             _view_row(name='events_mv'),
         ],
-        refresh_rows=[_refresh_row(view='events_mv')],
     )
     assert len(payloads) == 1
     p = payloads[0]
@@ -281,8 +265,13 @@ def test_collect_emits_single_payload_when_small(check):
 def test_collect_payload_tables_list_includes_views(check):
     payloads = _run_collect(
         check,
-        table_rows=[_table_row(name='events'), _view_row(name='events_mv')],
-        refresh_rows=[_refresh_row(view='events_mv')],
+        table_rows=[
+            _table_row(name='events'),
+            _view_row(
+                name='events_mv',
+                create_query='CREATE MATERIALIZED VIEW default.events_mv REFRESH EVERY 1 HOUR TO default.events_target AS SELECT * FROM default.events',
+            ),
+        ],
     )
     dbs = payloads[0]['metadata']
     table_names = {t['name'] for db in dbs for t in db['tables']}
@@ -317,18 +306,20 @@ def test_collect_emits_empty_snapshot_marker_when_no_tables(check):
     assert payloads[0]['collection_payloads_count'] == 1
 
 
-def test_collect_marks_view_refreshable_only_when_refresh_row_present(check):
+def test_collect_marks_view_refreshable_based_on_create_query(check):
     payloads = _run_collect(
         check,
         table_rows=[
-            _view_row(name='refreshable_mv'),
+            _view_row(
+                name='refreshable_mv',
+                create_query='CREATE MATERIALIZED VIEW default.refreshable_mv REFRESH EVERY 1 HOUR TO default.target AS SELECT * FROM default.src',
+            ),
             _view_row(
                 name='vanilla_view',
                 engine='View',
                 create_query='CREATE VIEW default.vanilla_view AS SELECT 1',
             ),
         ],
-        refresh_rows=[_refresh_row(view='refreshable_mv')],
     )
     by_name = {t['name']: t for db in payloads[0]['metadata'] for t in db['tables']}
     assert by_name['refreshable_mv']['is_refreshable'] is True
@@ -382,30 +373,6 @@ def test_collect_all_chunks_share_collection_started_at(check):
     assert len(started_ats) == 1
 
 
-def test_collect_view_refreshes_unknown_table_logs_once(collector):
-    collector._log = mock.MagicMock()
-    with mock.patch.object(collector, '_execute_query', side_effect=Exception('Unknown table system.view_refreshes')):
-        assert collector._collect_view_refreshes('') == []
-        assert collector._collect_view_refreshes('') == []
-    assert len(collector._log.info.call_args_list) == 1
-
-
-def test_collect_view_refreshes_permission_denied_logs_once(collector):
-    collector._log = mock.MagicMock()
-    with mock.patch.object(
-        collector, '_execute_query', side_effect=Exception('Not enough privileges to access system.view_refreshes')
-    ):
-        assert collector._collect_view_refreshes('') == []
-        assert collector._collect_view_refreshes('') == []
-    assert len(collector._log.warning.call_args_list) == 1
-
-
-def test_collect_view_refreshes_unexpected_error_logs_exception(collector):
-    collector._log = mock.MagicMock()
-    with mock.patch.object(collector, '_execute_query', side_effect=Exception('boom')):
-        assert collector._collect_view_refreshes('') == []
-    collector._log.exception.assert_called_once()
-
 
 def test_cancel_closes_db_client(check):
     fake_client = mock.MagicMock()
@@ -456,7 +423,6 @@ def test_collect_routes_through_cluster_all_replicas_in_single_endpoint_mode(col
     joined = '\n'.join(seen_queries)
     assert "clusterAllReplicas('default', system.tables)" in joined
     assert "clusterAllReplicas('default', system.columns)" in joined
-    assert "clusterAllReplicas('default', system.view_refreshes)" in joined
 
 
 def test_build_match_clauses_empty_returns_empty_string():
@@ -531,10 +497,8 @@ def test_all_cluster_fanout_queries_dedupe_replica_rows(check):
     with _capture_all_queries(check.metadata._schema_collector) as seen_queries:
         check.metadata._schema_collector.collect_schemas()
 
-    refreshes_query = next(q for q in seen_queries if 'system.view_refreshes' in q)
     combined_query = next(q for q in seen_queries if 'FROM system.tables' in q)
 
-    assert 'LIMIT 1 BY (database, view)' in refreshes_query
     assert 'LIMIT 1 BY (database, name)' in combined_query
     assert 'LIMIT 1 BY (database, table, name)' in combined_query
 
@@ -546,7 +510,7 @@ def test_system_databases_excluded_from_all_queries(collect_schemas_instance):
     with _capture_all_queries(check.metadata._schema_collector) as seen_queries:
         check.metadata._schema_collector.collect_schemas()
 
-    for kw in ('system.tables', 'system.columns', 'system.view_refreshes'):
+    for kw in ('system.tables', 'system.columns'):
         q = next(q for q in seen_queries if kw in q)
         assert "database NOT IN (" in q
 
@@ -560,7 +524,6 @@ def test_collect_uses_local_system_tables_in_direct_mode(check):
     assert 'clusterAllReplicas' not in joined
     assert 'FROM system.tables' in joined
     assert 'FROM system.columns' in joined
-    assert 'FROM system.view_refreshes' in joined
 
 
 def test_max_execution_time_set_on_client(collector):
@@ -572,13 +535,7 @@ def test_max_execution_time_set_on_client(collector):
 
 
 def test_main_query_failure_closes_client(collector):
-    def fake_query(query, *args, **kwargs):
-        if 'view_refreshes' in query:
-            return _make_query_result([])
-        return _make_query_result([])
-
     mock_client = mock.MagicMock()
-    mock_client.query.side_effect = fake_query
     mock_client.query_rows_stream.return_value.__enter__.side_effect = Exception("main query failed")
 
     _capture_payloads(collector._check)
@@ -627,9 +584,5 @@ def test_cancel_event_aborts_before_query(collector):
     collector._cancel_event = cancel_event
     cancel_event.set()
 
-    collector._db_client = mock.MagicMock()
-
     with pytest.raises(Exception, match="cancelled"):
-        collector._execute_query("SELECT 1")
-
-    collector._db_client.query.assert_not_called()
+        collector._check_cancelled()
