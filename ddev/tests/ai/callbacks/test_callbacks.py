@@ -450,6 +450,52 @@ async def test_before_agent_send_exception_is_swallowed() -> None:
 
 
 # ---------------------------------------------------------------------------
+# on_before_goal_check and on_after_goal_check
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("event", ["before", "after"], ids=["before", "after"])
+async def test_goal_check_callbacks_register_fire_and_swallow_exceptions(event):
+    cb = CallbackSet()
+    fired: list = []
+
+    decorator = cb.on_before_goal_check if event == "before" else cb.on_after_goal_check
+
+    @decorator
+    async def bad(*args):
+        raise RuntimeError("boom")
+
+    @decorator
+    async def good(*args):
+        fired.append(args)
+
+    if event == "before":
+        await cb.fire_before_goal_check("task-x", 3)
+        assert fired == [("task-x", 3)]
+    else:
+        await cb.fire_after_goal_check("task-x", 3, False, "missing y")
+        assert fired == [("task-x", 3, False, "missing y")]
+
+
+async def test_callbacks_dispatches_goal_check_to_all_sets():
+    s1, s2 = CallbackSet(), CallbackSet()
+    fired: list = []
+
+    @s1.on_before_goal_check
+    async def h1(name, attempt):
+        fired.append(("s1", name, attempt))
+
+    @s2.on_after_goal_check
+    async def h2(name, attempt, valid, reason):
+        fired.append(("s2", name, attempt, valid, reason))
+
+    cb = Callbacks([s1, s2])
+    await cb.fire_before_goal_check("t", 1)
+    await cb.fire_after_goal_check("t", 1, True, "")
+    assert fired == [("s1", "t", 1), ("s2", "t", 1, True, "")]
+
+
+# ---------------------------------------------------------------------------
 # Callbacks container
 # ---------------------------------------------------------------------------
 

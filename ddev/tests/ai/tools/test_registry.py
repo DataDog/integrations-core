@@ -7,7 +7,7 @@ import pytest
 from ddev.ai.tools.core.types import ToolResult
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
-from ddev.ai.tools.registry import ToolRegistry
+from ddev.ai.tools.registry import ToolRegistry, filter_read_only
 
 # ---------------------------------------------------------------------------
 # Fake tools — implement ToolProtocol without depending on BaseTool
@@ -208,6 +208,30 @@ def test_from_names_fs_tools_share_file_registry(tmp_path):
         pytest.skip("Need at least 2 fs tools to test shared registry")
     registries = [t._registry for t in fs_tools]
     assert all(r is registries[0] for r in registries)
+
+
+# ---------------------------------------------------------------------------
+# read_only manifest annotations and filter_read_only
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "input_names,expected",
+    [
+        (["read_file", "edit_file", "grep", "create_file"], ["read_file", "grep"]),
+        (["edit_file", "create_file"], []),
+        ([], []),
+        (["read_file", "list_files"], ["read_file", "list_files"]),
+    ],
+    ids=["mixed", "all_writes", "empty", "all_reads"],
+)
+def test_filter_read_only(input_names, expected):
+    assert filter_read_only(input_names) == expected
+
+
+def test_filter_read_only_unknown_name_raises():
+    with pytest.raises(ValueError, match="Unknown tool name"):
+        filter_read_only(["read_file", "teleport"])
 
 
 def test_from_names_reuses_supplied_file_registry(tmp_path):
