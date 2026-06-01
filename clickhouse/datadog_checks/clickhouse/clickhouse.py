@@ -313,8 +313,8 @@ class ClickhouseCheck(DatabaseCheck):
         if self.parts_and_merges:
             self.parts_and_merges.run_job_loop(self.tags)
 
-        # Collect view refresh metrics inline if DBM is enabled
-        if self._config.dbm:
+        # Collect view refresh metrics only when schema_metrics is enabled
+        if self.table_metrics:
             self._collect_view_refresh_metrics()
 
     def get_queries(self) -> list[dict]:
