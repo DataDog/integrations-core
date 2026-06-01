@@ -6,7 +6,14 @@ import pytest
 pytestmark = [pytest.mark.unit]
 
 
-def test_apply_called_queries_base_case(pg_instance, integration_check):
+@pytest.fixture
+def pg_instance_v1_statement_metrics(pg_instance):
+    pg_instance.setdefault('query_metrics', {})['use_v2'] = False
+    return pg_instance
+
+
+def test_apply_called_queries_base_case(pg_instance_v1_statement_metrics, integration_check):
+    pg_instance = pg_instance_v1_statement_metrics
     check = integration_check(pg_instance)
 
     rows = [
@@ -22,7 +29,8 @@ def test_apply_called_queries_base_case(pg_instance, integration_check):
     ]
 
 
-def test_apply_called_queries_multiple_runs(pg_instance, integration_check):
+def test_apply_called_queries_multiple_runs(pg_instance_v1_statement_metrics, integration_check):
+    pg_instance = pg_instance_v1_statement_metrics
     check = integration_check(pg_instance)
 
     rows = [
@@ -43,7 +51,8 @@ def test_apply_called_queries_multiple_runs(pg_instance, integration_check):
     ]
 
 
-def test_apply_called_queries_multiple_dbs(pg_instance, integration_check):
+def test_apply_called_queries_multiple_dbs(pg_instance_v1_statement_metrics, integration_check):
+    pg_instance = pg_instance_v1_statement_metrics
     check = integration_check(pg_instance)
 
     db1 = 'db1'
