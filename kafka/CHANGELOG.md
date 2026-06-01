@@ -8,7 +8,7 @@
 
 * Add KRaft (Kafka Raft) metrics for Kafka clusters running without ZooKeeper. ([#23105](https://github.com/DataDog/integrations-core/pull/23105))
 
-## 4.5.0 / 2026-04-15
+## 4.5.0 / 2026-04-15 / Agent 7.79.0
 
 ***Added***:
 
