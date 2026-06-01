@@ -1,0 +1,14 @@
+# HELP go_goroutines Number of goroutines that currently exist.
+# TYPE go_goroutines gauge
+go_goroutines 42
+
+# HELP kueue_resource_flavor_quota_reserved_workloads Number of reserved workloads.
+# TYPE kueue_resource_flavor_quota_reserved_workloads gauge
+kueue_resource_flavor_quota_reserved_workloads{cluster_queue="default",flavor="on-demand"} 3
+# HELP go_goroutines Number of goroutines that currently exist.
+# TYPE go_goroutines gauge
+go_goroutines 42
+
+# HELP kueue_resource_flavor_quota_reserved_workloads Number of reserved workloads.
+# TYPE kueue_resource_flavor_quota_reserved_workloads gauge
+kueue_resource_flavor_quota_reserved_workloads{cluster_queue="default",flavor="on-demand"} 3
