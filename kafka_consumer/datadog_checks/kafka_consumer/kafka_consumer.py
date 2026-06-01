@@ -151,11 +151,13 @@ class KafkaCheck(AgentCheck):
         self.event_platform_event(json.dumps(payload), "data-streams-message")
 
     def _send_cluster_monitoring_connection_error(self, reason: str) -> None:
-        self._emit_cluster_monitoring_event({
-            'kafka_cluster_id': self.config._kafka_cluster_id_override or '',
-            'config_type': 'connection_error',
-            'reason': reason,
-        })
+        self._emit_cluster_monitoring_event(
+            {
+                'kafka_cluster_id': self.config._kafka_cluster_id_override or '',
+                'config_type': 'connection_error',
+                'reason': reason,
+            }
+        )
 
     def _send_cluster_monitoring_heartbeat(self, total_contexts: int, cluster_id: str) -> None:
         payload = {

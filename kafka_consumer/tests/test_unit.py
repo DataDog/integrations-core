@@ -715,8 +715,7 @@ def _connection_error_events(check_instance):
     return [
         json.loads(c[0][0])
         for c in check_instance.event_platform_event.call_args_list
-        if c[0][1] == 'data-streams-message'
-        and json.loads(c[0][0]).get('config_type') == 'connection_error'
+        if c[0][1] == 'data-streams-message' and json.loads(c[0][0]).get('config_type') == 'connection_error'
     ]
 
 
