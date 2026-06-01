@@ -30,6 +30,16 @@ class SubjectVersionInfo(TypedDict):
     compatibility: NotRequired[str | None]
 
 
+class SchemaInfo(TypedDict):
+    schema_content: str
+    topic_name: str
+    schema_for: str
+    schema_version: int | None
+    schema_id: int | None
+    schema_type: str
+    compatibility: str | None
+
+
 class ClusterMetadataCollector:
     """Collects Kafka cluster metadata (brokers, topics, consumer groups, schemas)."""
 
@@ -1023,9 +1033,19 @@ class ClusterMetadataCollector:
             self._get_schema_registry_latest_version, subjects_needing_full_fetch, "schema details"
         )
 
-        compatibility_responses = self._collect_subject_compatibilities(
-            subjects, subjects_needing_full_fetch, schema_responses, latest_version_cache
-        )
+        compatibility_responses = self._collect_subject_compatibilities(subjects, subjects_needing_full_fetch)
+
+        # Apply standalone compatibility updates to existing cache entries so a flip alone (without a
+        # version bump) flows into the next schema emission via the cache_content key. This must run
+        # before the schema_responses loop below replaces latest_version_cache[subject] for
+        # version-bumped subjects; the `subject in schema_responses` guard keeps the two write sites
+        # mutually exclusive per subject.
+        for subject, compatibility in compatibility_responses.items():
+            if compatibility is None or subject in schema_responses:
+                continue
+            entry = latest_version_cache.get(subject)
+            if isinstance(entry, dict):
+                entry['compatibility'] = compatibility
 
         fetched_schemas = {}
 
@@ -1125,10 +1145,8 @@ class ClusterMetadataCollector:
         self,
         subjects: list[str],
         subjects_needing_full_fetch: list[str],
-        schema_responses: dict[str, dict],
-        latest_version_cache: dict[str, SubjectVersionInfo],
     ) -> dict[str, str | None]:
-        """Fetch per-subject compatibility on a cadence and merge standalone flips into the cache.
+        """Fetch per-subject compatibility on a cadence and return the raw results.
 
         Compatibility is refreshed on its own cadence so a flip without a version bump is still picked
         up; a per-subject flip therefore surfaces only on the next compat-fetch cadence (up to
@@ -1161,18 +1179,6 @@ class ClusterMetadataCollector:
                 max_cache_size=self.SCHEMA_COMPATIBILITY_FETCH_CACHE_MAX_SIZE,
             )
 
-        # Apply standalone compatibility updates to existing cache entries so a flip alone (without a
-        # version bump) flows into the next schema emission via the cache_content key. This must run
-        # before the caller's schema_responses loop replaces latest_version_cache[subject] for
-        # version-bumped subjects; the `subject in schema_responses` guard keeps the two write sites
-        # mutually exclusive per subject.
-        for subject, compatibility in compatibility_responses.items():
-            if compatibility is None or subject in schema_responses:
-                continue
-            entry = latest_version_cache.get(subject)
-            if isinstance(entry, dict):
-                entry['compatibility'] = compatibility
-
         return compatibility_responses
 
     def _build_schema_info(
@@ -1183,7 +1189,7 @@ class ClusterMetadataCollector:
         schema_version: int | None,
         schema_id: int | None,
         compatibility: str | None,
-    ) -> dict:
+    ) -> SchemaInfo:
         """Assemble the canonical schema info dict used to build a data-streams schema payload."""
         topic_name, schema_for = self._parse_subject(subject)
         return {

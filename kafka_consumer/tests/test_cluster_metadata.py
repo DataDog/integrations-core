@@ -1023,14 +1023,23 @@ def test_schema_registry_compat_not_refetched_when_cache_fresh(check, dd_run_che
     collector._get_schema_registry_subject_compatibility.assert_not_called()
 
 
-def test_schema_registry_compatibility_flip_triggers_reemission(check, dd_run_check, aggregator):
-    """Test that a compatibility change without a version bump still triggers schema re-emission.
+@pytest.mark.parametrize(
+    "global_compat, subject_compat, expected_compat, expected_global",
+    [
+        pytest.param('BACKWARD', 'FULL', 'FULL', 'BACKWARD', id='subject_flip'),
+        pytest.param('FULL', 'BACKWARD', 'BACKWARD', 'FULL', id='global_flip'),
+    ],
+)
+def test_schema_registry_compatibility_flip_triggers_reemission(
+    check, dd_run_check, aggregator, global_compat, subject_compat, expected_compat, expected_global
+):
+    """A compatibility change without a version bump (subject or global) triggers schema re-emission.
 
-    The cache_content key includes compatibility, so flipping BACKWARD→FULL causes re-emission
-    even when the schema version and content are identical.
+    The cache_content key includes both compatibility fields, so flipping either one causes
+    re-emission even when the schema version and content are identical and the subject is served
+    entirely from cache.
     """
     kafka_consumer_check = _make_schema_registry_check(check)
-
     collector = kafka_consumer_check.metadata_collector
 
     subject = 'my-topic-value'
@@ -1042,9 +1051,9 @@ def test_schema_registry_compatibility_flip_triggers_reemission(check, dd_run_ch
     collector._get_schema_registry_latest_version = mock.Mock(
         return_value={'id': schema_id, 'version': 2, 'schema': avro_schema, 'schemaType': 'AVRO'}
     )
-    mock_compatibility_methods(collector, global_compat='BACKWARD', subject_compat='FULL')
+    mock_compatibility_methods(collector, global_compat=global_compat, subject_compat=subject_compat)
 
-    # Pre-populate caches as if a previous run emitted this subject with BACKWARD compatibility.
+    # Pre-populate caches as if a previous run emitted this subject under BACKWARD/BACKWARD.
     old_cache_content = f"{schema_id}:2:BACKWARD:BACKWARD:{avro_schema}"
     old_hash = hashlib.sha256(old_cache_content.encode()).hexdigest()
 
@@ -1063,15 +1072,15 @@ def test_schema_registry_compatibility_flip_triggers_reemission(check, dd_run_ch
 
     dd_run_check(kafka_consumer_check)
 
-    # No version bump — full schema fetch should be skipped.
+    # No version bump — full schema fetch should be skipped (subject served from cache).
     collector._get_schema_registry_latest_version.assert_not_called()
 
-    # The compatibility flip should have triggered re-emission.
+    # Flipping either compatibility field should have triggered exactly one re-emission.
     schema_events = schema_ds_events(kafka_consumer_check)
     assert len(schema_events) == 1, f"Expected exactly 1 schema re-emission, got {len(schema_events)}"
-    assert schema_events[0]['compatibility'] == 'FULL'
-    assert schema_events[0]['global_compatibility'] == 'BACKWARD'
     assert schema_events[0]['subject'] == subject
+    assert schema_events[0]['compatibility'] == expected_compat
+    assert schema_events[0]['global_compatibility'] == expected_global
 
 
 @pytest.mark.parametrize(
@@ -1539,50 +1548,3 @@ def test_schema_registry_none_compat_in_cache_omits_field(check, dd_run_check, a
     assert len(schema_events) == 1
     assert 'compatibility' not in schema_events[0]
     assert 'global_compatibility' not in schema_events[0]
-
-
-def test_schema_registry_global_compatibility_flip_triggers_reemission(check, dd_run_check, aggregator):
-    """A global compatibility change alone (subject unchanged, served from cache) triggers re-emission."""
-    kafka_consumer_check = _make_schema_registry_check(check)
-    collector = kafka_consumer_check.metadata_collector
-
-    subject = 'my-topic-value'
-    avro_schema = json.dumps({"type": "string"})
-    schema_id = 60
-
-    collector._get_schema_registry_subjects = mock.Mock(return_value=[subject])
-    collector._get_schema_registry_versions = mock.Mock(return_value=[1, 2])
-    collector._get_schema_registry_latest_version = mock.Mock(
-        return_value={'id': schema_id, 'version': 2, 'schema': avro_schema, 'schemaType': 'AVRO'}
-    )
-    # Global flips BACKWARD -> FULL; the subject's own compatibility is unchanged.
-    mock_compatibility_methods(collector, global_compat='FULL', subject_compat='BACKWARD')
-
-    # Pre-populate caches as if a previous run emitted this subject under global BACKWARD.
-    old_cache_content = f"{schema_id}:2:BACKWARD:BACKWARD:{avro_schema}"
-    old_hash = hashlib.sha256(old_cache_content.encode()).hexdigest()
-
-    latest_version_cache = {subject: {'version': 2, 'schema_id': schema_id, 'compatibility': 'BACKWARD'}}
-    schema_id_cache = {str(schema_id): {'schema': avro_schema, 'schema_type': 'AVRO'}}
-    schema_emit_cache = {subject: {'hash': old_hash, 'expire_at': time.time() + 3600}}
-
-    _wire_cache(
-        kafka_consumer_check,
-        {
-            'kafka_schema_latest_version_cache': json.dumps(latest_version_cache),
-            'kafka_schema_id_cache': json.dumps(schema_id_cache),
-            'kafka_schema_cache': json.dumps(schema_emit_cache),
-        },
-    )
-
-    dd_run_check(kafka_consumer_check)
-
-    # No version bump — the subject is served entirely from cache.
-    collector._get_schema_registry_latest_version.assert_not_called()
-
-    # The global flip alone should have triggered re-emission.
-    schema_events = schema_ds_events(kafka_consumer_check)
-    assert len(schema_events) == 1, f"Expected exactly 1 schema re-emission, got {len(schema_events)}"
-    assert schema_events[0]['subject'] == subject
-    assert schema_events[0]['compatibility'] == 'BACKWARD'
-    assert schema_events[0]['global_compatibility'] == 'FULL'
