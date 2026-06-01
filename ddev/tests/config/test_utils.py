@@ -20,6 +20,7 @@ from ddev.config.utils import _walk_config
             id='wildcard-multiple-orgs',
         ),
         pytest.param({'orgs': {}}, 'orgs.*.api_key', [], id='wildcard-empty-section'),
+        pytest.param({'orgs': {'a': 1, 'b': 2}}, 'orgs.*', [('a', 1), ('b', 2)], id='trailing-wildcard'),
     ],
 )
 def test_walk_config(config, glob, expected):
