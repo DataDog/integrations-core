@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: "Skip committing the test-results badge; used to validate action bumps without moving the public badge."
+        description: "Skip committing the test-results badge."
         required: false
         default: false
         type: boolean

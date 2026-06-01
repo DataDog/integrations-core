@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       dry_run:
-        description: "Run the badge step but skip committing to the badges branch; used to validate action bumps without moving the public badge."
+        description: "Run the badge step but skip committing to the badges branch."
         required: false
         default: false
         type: boolean
