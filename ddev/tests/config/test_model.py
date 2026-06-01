@@ -5,12 +5,7 @@ import os
 
 import pytest
 
-from ddev.config.model import (
-    ConfigurationError,
-    RootConfig,
-    get_github_token,
-    get_github_user,
-)
+from ddev.config.model import ConfigurationError, RootConfig, get_github_token, get_github_user
 
 
 def test_default():
@@ -1485,9 +1480,12 @@ class TestGitHubConfig:
 
 
 class TestAI:
-    def test_default(self, monkeypatch):
+    @pytest.fixture(autouse=True)
+    def clear_anthropic_env(self, monkeypatch):
         monkeypatch.delenv('DD_ANTHROPIC_API_KEY', raising=False)
         monkeypatch.delenv('ANTHROPIC_API_KEY', raising=False)
+
+    def test_default(self):
         config = RootConfig({})
 
         assert config.ai.anthropic_api_key == config.ai.anthropic_api_key == ''
@@ -1533,14 +1531,12 @@ class TestAI:
 
     def test_anthropic_api_key_dd_env_var(self, monkeypatch):
         monkeypatch.setenv('DD_ANTHROPIC_API_KEY', 'dd-key')
-        monkeypatch.delenv('ANTHROPIC_API_KEY', raising=False)
         config = RootConfig({})
 
         assert config.ai.anthropic_api_key == 'dd-key'
         assert config.raw_data == {'ai': {}}
 
     def test_anthropic_api_key_env_var(self, monkeypatch):
-        monkeypatch.delenv('DD_ANTHROPIC_API_KEY', raising=False)
         monkeypatch.setenv('ANTHROPIC_API_KEY', 'anth-key')
         config = RootConfig({})
 
@@ -1553,6 +1549,7 @@ class TestAI:
         config = RootConfig({})
 
         assert config.ai.anthropic_api_key == 'dd-key'
+        assert config.raw_data == {'ai': {}}
 
     def test_anthropic_api_key_not_string(self, helpers):
         config = RootConfig({'ai': {'anthropic_api_key': 9000}})

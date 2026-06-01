@@ -30,20 +30,30 @@ def load_toml_data(path: Path) -> dict:
     return tomlkit.loads(path.read_text())
 
 
+def _walk_config(config: dict, glob: str):
+    """Yield (parent_dict, leaf_key) pairs matching a dotted glob path."""
+    parts = glob.split('.')
+
+    def recurse(node, remaining):
+        if not remaining or not isinstance(node, dict):
+            return
+        head, *tail = remaining
+        if head == '*':
+            for key, child in node.items():
+                if not tail:
+                    yield node, key
+                else:
+                    yield from recurse(child, tail)
+        elif head in node:
+            if not tail:
+                yield node, head
+            else:
+                yield from recurse(node[head], tail)
+
+    yield from recurse(config, parts)
+
+
 def scrub_config(config: dict):
-    if 'token' in config.get('github', {}):
-        config['github']['token'] = SCRUBBED_VALUE
-
-    if 'auth' in config.get('pypi', {}):
-        config['pypi']['auth'] = SCRUBBED_VALUE
-
-    if 'token' in config.get('trello', {}):
-        config['trello']['token'] = SCRUBBED_VALUE
-
-    for data in config.get('orgs', {}).values():
-        for key in ('api_key', 'app_key'):
-            if key in data:
-                data[key] = SCRUBBED_VALUE
-
-    if 'anthropic_api_key' in config.get('ai', {}):
-        config['ai']['anthropic_api_key'] = SCRUBBED_VALUE
+    for glob in SCRUBBED_GLOBS:
+        for parent, key in _walk_config(config, glob):
+            parent[key] = SCRUBBED_VALUE

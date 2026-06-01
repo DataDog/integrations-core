@@ -19,6 +19,10 @@ def get_github_token():
     return os.environ.get('DD_GITHUB_TOKEN', '') or os.environ.get('GH_TOKEN', '') or os.environ.get('GITHUB_TOKEN', '')
 
 
+def get_anthropic_api_key():
+    return os.environ.get('DD_ANTHROPIC_API_KEY', '') or os.environ.get('ANTHROPIC_API_KEY', '')
+
+
 class ConfigurationError(Exception):
     def __init__(self, *args, location):
         self.location = location
@@ -802,10 +806,6 @@ class StylesConfig(LazilyParsedConfig):
     def spinner(self, value):
         self.raw_data['spinner'] = value
         self._field_spinner = FIELD_TO_PARSE
-
-
-def get_anthropic_api_key():
-    return os.environ.get('DD_ANTHROPIC_API_KEY', '') or os.environ.get('ANTHROPIC_API_KEY', '')
 
 
 class AIConfig(LazilyParsedConfig):

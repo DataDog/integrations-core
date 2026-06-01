@@ -19,6 +19,7 @@ from ddev.ai.flows.openmetrics.phases.inspect_endpoint import (
     _build_memory_text,
     _parse_exposition,
 )
+from ddev.ai.phases.base import FlowServices
 from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
@@ -105,15 +106,18 @@ def _make_phase(
     runtime_variables: dict[str, str] | None = None,
 ) -> tuple[InspectEndpointPhase, CheckpointManager]:
     checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
-    phase = InspectEndpointPhase(
-        phase_id=phase_id,
-        dependencies=[],
-        config=PhaseConfig(),
+    services = FlowServices(
         checkpoint_manager=checkpoint_manager,
         runtime_variables=runtime_variables if runtime_variables is not None else {"endpoint_url": ENDPOINT_URL},
         flow_variables={},
         config_dir=flow_dir,
         file_registry=FileRegistry(policy=FileAccessPolicy(write_root=flow_dir)),
+    )
+    phase = InspectEndpointPhase(
+        phase_id=phase_id,
+        dependencies=[],
+        config=PhaseConfig(),
+        services=services,
     )
     phase.queue = message_queue
     return phase, checkpoint_manager

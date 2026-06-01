@@ -122,6 +122,7 @@ def valid_config_file(config_file):
     config_file.model.orgs['default']['api_key'] = 'foo'
     config_file.model.orgs['default']['app_key'] = 'bar'
     config_file.model.github = {'user': '', 'token': ''}
+    config_file.model.ai.flow_dirs = []
     config_file.model.ai.anthropic_api_key = 'sk-test'
     config_file.save()
 

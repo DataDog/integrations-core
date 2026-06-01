@@ -87,7 +87,7 @@ def upgrade_check(
             app.display_debug(f'Upgrade check failed: {e}')
             # Record the attempt to prevent even if failed
             with suppress(OSError):
-                version_to_cache = last_version if last_run is not None else current_version
+                version_to_cache = last_version if last_version is not None else current_version
                 write_last_run(version_to_cache, date_now, cache_file)
     else:
         assert last_run is not None
