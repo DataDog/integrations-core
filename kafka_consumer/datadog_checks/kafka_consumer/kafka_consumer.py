@@ -42,10 +42,12 @@ class KafkaCheck(AgentCheck):
 
         try:
             self.client.request_metadata_update()
-        except:
+        except Exception as e:
+            if self.config._cluster_monitoring_enabled:
+                self._send_cluster_monitoring_connection_error(str(e))
             raise Exception(
                 "Unable to connect to the AdminClient. This is likely due to an error in the configuration."
-            )
+            ) from e
 
         try:
             # Fetch consumer offsets
@@ -139,6 +141,16 @@ class KafkaCheck(AgentCheck):
             {'id': str(broker_meta.id), 'host': broker_meta.host, 'port': broker_meta.port}
             for broker_meta in cluster_metadata.brokers.values()
         ]
+
+    def _send_cluster_monitoring_connection_error(self, reason: str) -> None:
+        payload = {
+            'collection_timestamp': int(time() * 1000),
+            'kafka_cluster_id': self.config._kafka_cluster_id_override or '',
+            'config_type': 'connection_error',
+            'bootstrap_servers': self.config._kafka_connect_str,
+            'reason': reason,
+        }
+        self.event_platform_event(json.dumps(payload), "data-streams-message")
 
     def _send_cluster_monitoring_heartbeat(self, total_contexts: int, cluster_id: str) -> None:
         payload = {
