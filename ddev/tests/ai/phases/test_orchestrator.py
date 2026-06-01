@@ -11,10 +11,10 @@ from unittest.mock import MagicMock
 import pytest
 
 from ddev.ai.phases.agentic_phase import AgenticPhase
-from ddev.ai.phases.base import Phase, PhaseRegistry
+from ddev.ai.phases.base import Phase
 from ddev.ai.phases.config import FlowConfigError
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
-from ddev.ai.phases.orchestrator import PhaseOrchestrator, _discover_and_register_phases
+from ddev.ai.phases.orchestrator import PhaseOrchestrator, PhaseRegistry, _discover_and_register_phases
 from ddev.event_bus.exceptions import FatalProcessingError
 
 
@@ -236,8 +236,8 @@ async def test_on_initialize_wires_dependencies(minimal_flow, make_orchestrator)
 
     processors = orchestrator._subscribers.get(PhaseTrigger, [])
     phases_by_name = {p.name: p for p in processors}
-    assert phases_by_name["a"]._dependencies == set()
-    assert phases_by_name["b"]._dependencies == {"a"}
+    assert phases_by_name["a"]._remaining_dependencies == set()
+    assert phases_by_name["b"]._remaining_dependencies == {"a"}
 
 
 async def test_on_initialize_submits_initial_phase_trigger(minimal_flow, make_orchestrator):
@@ -324,9 +324,9 @@ async def test_on_initialize_missing_agent_raises(tmp_path, make_orchestrator):
 async def test_on_initialize_phases_share_file_registry(minimal_flow, make_orchestrator):
     orchestrator = make_orchestrator(minimal_flow)
     await orchestrator.on_initialize()
-    phases = orchestrator._subscribers.get(PhaseTrigger, [])
-    assert len(phases) >= 2
-    assert all(p._file_registry is phases[0]._file_registry for p in phases[1:])
+    # The ResourceProvider is the run-wide singleton — file_registry() is idempotent
+    assert orchestrator._resources is not None
+    assert orchestrator._resources.file_registry() is orchestrator._resources.file_registry()
 
 
 # ---------------------------------------------------------------------------
