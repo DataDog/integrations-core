@@ -95,8 +95,23 @@ def test_submit_generic_resource_applies_caller_provided_deny_list(aggregator, c
             "fields": {"metadata": {}, "spec": {"ts": datetime(2026, 1, 1)}, "status": {}, "operation": None},
             "redact": NO_REDACT,
         },
+        {
+            "type": "argocd_application",
+            "key": "k",
+            "fields": {"metadata": {}, "spec": {"ratio": float("nan")}, "status": {}, "operation": None},
+            "redact": NO_REDACT,
+        },
+        {"type": "argocd_application", "key": "k", "fields": _valid_fields(), "redact": None},
     ],
-    ids=["fields_none", "empty_key", "non_dict_fields", "oversize_payload", "non_serializable_value"],
+    ids=[
+        "fields_none",
+        "empty_key",
+        "non_dict_fields",
+        "oversize_payload",
+        "non_serializable_value",
+        "nan_value",
+        "non_dict_redact",
+    ],
 )
 def test_submit_generic_resource_drops_invalid_input(aggregator, check, kwargs):
     check.submit_generic_resource(**kwargs)

@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import builtins
 import copy
 import functools
 import importlib
@@ -828,8 +827,10 @@ class AgentCheck(object):
         if fields is None:
             return
 
+        # stdlib json on purpose: module-level json is the orjson wrapper, which coerces datetime instead of failing.
         import json as _json
 
+        # Lazy import: avoids loading the protobuf runtime for every check that imports base.py.
         from datadog_checks.base.utils.genresources import (
             GENRESOURCES_TRACK,
             INTEGRATIONS_CORE_SOURCE,
@@ -854,7 +855,17 @@ class AgentCheck(object):
                 "genresources: dropping resource with non-dict fields type=%s key=%s actual_type=%s",
                 type,
                 key,
-                builtins.type(fields).__name__,
+                fields.__class__.__name__,
+            )
+            _emit_dropped()
+            return
+
+        if not isinstance(redact, dict):
+            self.log.warning(
+                "genresources: dropping resource with non-dict redact type=%s key=%s actual_type=%s",
+                type,
+                key,
+                redact.__class__.__name__,
             )
             _emit_dropped()
             return
@@ -866,7 +877,9 @@ class AgentCheck(object):
         )
 
         try:
-            fields_json = _json.dumps(redacted_fields, sort_keys=True, separators=(",", ":")).encode("utf-8")
+            fields_json = _json.dumps(redacted_fields, sort_keys=True, separators=(",", ":"), allow_nan=False).encode(
+                "utf-8"
+            )
         except (TypeError, ValueError):
             self.log.exception("genresources: failed to encode fields for type=%s key=%s", type, key)
             _emit_dropped()
@@ -883,27 +896,19 @@ class AgentCheck(object):
             return
 
         resource = GenericResource(type=type, key=key, fields_json=fields_json)
-        if seen_at is not None:
-            if isinstance(seen_at, int) and not isinstance(seen_at, bool):
-                resource.seen_at.seconds = seen_at
+
+        def _set_seconds(ts, value, label):
+            if value is None:
+                return
+            if isinstance(value, int) and not isinstance(value, bool):
+                ts.seconds = value
             else:
                 self.log.warning(
-                    "genresources: ignoring non-int seen_at for type=%s key=%s value=%r",
-                    type,
-                    key,
-                    seen_at,
+                    "genresources: ignoring non-int %s for type=%s key=%s value=%r", label, type, key, value
                 )
 
-        if expire_at is not None:
-            if isinstance(expire_at, int) and not isinstance(expire_at, bool):
-                resource.expire_at.seconds = expire_at
-            else:
-                self.log.warning(
-                    "genresources: ignoring non-int expire_at for type=%s key=%s value=%r",
-                    type,
-                    key,
-                    expire_at,
-                )
+        _set_seconds(resource.seen_at, seen_at, "seen_at")
+        _set_seconds(resource.expire_at, expire_at, "expire_at")
 
         event = GenericResourceEvent(source=INTEGRATIONS_CORE_SOURCE, resource=resource)
         try:

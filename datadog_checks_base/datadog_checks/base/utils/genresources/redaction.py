@@ -25,8 +25,9 @@ def apply_deny_list(
     at this segment." Paths that don't exist in the input are silently skipped.
     ``annotation_keys`` apply fnmatch globs to keys of ``metadata.annotations``.
 
-    The input is never mutated. Failures during traversal do not raise — secrets
-    must not leak because a deny-list path is malformed.
+    The input is never mutated. A well-formed string path that does not match the
+    payload is a silent no-op, not an exception. This is fail-open: an unmatched
+    path redacts nothing, so callers own deny-list correctness.
     """
     result = copy.deepcopy(dict(fields))
 
