@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.base.utils.discovery import Port, Service
 
 from .utils import get_check
 
@@ -29,6 +30,23 @@ def test_default_config(aggregator, dd_run_check, mock_http_response):
     )
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_generate_configs():
+    class Check(OpenMetricsBaseCheckV2):
+        DISCOVERY_PORT_HINTS = [9090]
+        DISCOVERY_METRICS_PATH = '/custom'
+
+    service = Service(
+        id='svc',
+        host='10.0.0.1',
+        ports=(Port(number=8080, name='http'), Port(number=9090, name='metrics')),
+    )
+
+    assert list(Check.generate_configs(service)) == [
+        {'openmetrics_endpoint': 'http://10.0.0.1:9090/custom'},
+        {'openmetrics_endpoint': 'http://10.0.0.1:8080/custom'},
+    ]
 
 
 def test_tag_by_endpoint(aggregator, dd_run_check, mock_http_response):
