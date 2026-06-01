@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from collections.abc import Iterator
+
 import tomlkit
 from tomlkit.toml_document import TOMLDocument
 
@@ -30,11 +32,14 @@ def load_toml_data(path: Path) -> dict:
     return tomlkit.loads(path.read_text())
 
 
-def _walk_config(config: dict, glob: str):
-    """Yield (parent_dict, leaf_key) pairs matching a dotted glob path."""
+def _walk_config(config: dict[str, object], glob: str) -> Iterator[tuple[dict[str, object], str]]:
+    """Yield (parent_dict, leaf_key) pairs matching a dotted glob path.
+
+    Silently yields nothing on type mismatch or missing keys.
+    """
     parts = glob.split('.')
 
-    def recurse(node, remaining):
+    def recurse(node: object, remaining: list[str]) -> Iterator[tuple[dict[str, object], str]]:
         if not remaining or not isinstance(node, dict):
             return
         head, *tail = remaining

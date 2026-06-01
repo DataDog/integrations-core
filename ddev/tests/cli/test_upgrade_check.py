@@ -149,5 +149,7 @@ def test_upgrade_handles_request_exception_gracefully(app, tmp_path, mock_atexit
     upgrade_check(app, "1.0.0", cache_file=cache_file)
 
     mock_atexit_call.assert_not_called()
-    # Cache was still written to prevent repeated failures
-    assert cache_file.exists()
+    last_run = read_last_run(cache_file)
+    assert last_run is not None
+    cached_version, _ = last_run
+    assert str(cached_version) == '1.0.0'
