@@ -1,6 +1,9 @@
 name: Days Since Last Pin
 
 on:
+  pull_request:
+    paths:
+      - .github/workflows/days-since-last-pin.yml
   schedule:
     - cron: "42 9 * * *"
   workflow_dispatch:
