@@ -44,6 +44,46 @@ def test_check_version():
     assert check.check_version == base_package_version
 
 
+def test_discover_config_accepts_successful_candidate_only():
+    class DiscoveryCheck(AgentCheck):
+        @classmethod
+        def generate_configs(cls, service):
+            assert service.id == 'svc'
+            assert service.host == '10.0.0.1'
+            for port in service.ports:
+                yield {'port': port.number, 'accept': port.number == 9090}
+
+        def check(self, instance):
+            self.gauge('trial_metric', 1)
+            self.service_check('trial_service', AgentCheck.OK)
+            self.set_metadata('version', '1')
+            if not instance['accept']:
+                raise Exception('candidate failed')
+
+    payload = json.dumps(
+        {
+            'id': 'svc',
+            'host': '10.0.0.1',
+            'ports': [
+                {'number': 8080, 'name': 'http'},
+                {'number': 9090, 'name': 'metrics'},
+            ],
+        }
+    )
+
+    with mock.patch('datadog_checks.base.checks.base.aggregator.submit_metric') as submit_metric:
+        configs = json.loads(DiscoveryCheck.discover_config(payload))
+
+    assert configs == [{'port': 9090, 'accept': True}]
+    submit_metric.assert_not_called()
+
+
+def test_discover_config_returns_empty_for_base_check():
+    payload = json.dumps({'id': 'svc', 'host': '10.0.0.1', 'ports': []})
+
+    assert json.loads(AgentCheck.discover_config(payload)) == []
+
+
 @pytest.fixture
 def fresh_check():
     """Return an AgentCheck with no cached _package_dir."""
