@@ -406,7 +406,7 @@ class ClickhouseCheck(DatabaseCheck):
             seen.add((database, view_name))
             view_tags = base_tags + [f'db:{database}', f'view:{view_name}']
             sc_status = _VIEW_REFRESH_STATUS_MAP.get(status, AgentCheck.UNKNOWN)
-            sc_msg = (exception or '').split('\n')[0] or status
+            sc_msg = '' if sc_status == AgentCheck.OK else ((exception or '').split('\n')[0] or status)
             self.service_check(self.SERVICE_CHECK_VIEW_REFRESH, sc_status, tags=view_tags, message=sc_msg)
             self.gauge('view.refresh.last_time', int(last_time or 0), tags=view_tags)
             self.gauge('view.refresh.next_time', int(next_time or 0), tags=view_tags)
