@@ -41,12 +41,12 @@ SELECT c.oid                 AS table_id,
        c.relnamespace        AS schema_id,
        c.relname             AS table_name,
        c.relowner :: regrole :: text AS table_owner,
-       c.relkind             AS relkind,
+       c.relkind::text       AS relkind,
        t.relname             AS toast_table
 FROM   pg_class c
        left join pg_class t
               ON c.reltoastrelid = t.oid
-WHERE  c.relkind IN ( 'r', 'p', 'f', 'v', 'm' )
+WHERE  c.relkind IN ( 'r', 'p', 'f' )
        AND c.relispartition != 't'
 """
 
@@ -55,12 +55,12 @@ SELECT c.oid                 AS table_id,
        c.relnamespace        AS schema_id,
        c.relname             AS table_name,
        c.relowner :: regrole :: text AS table_owner,
-       c.relkind             AS relkind,
+       c.relkind::text       AS relkind,
        t.relname             AS toast_table
 FROM   pg_class c
        left join pg_class t
               ON c.reltoastrelid = t.oid
-WHERE  c.relkind IN ( 'r', 'f', 'v', 'm' )
+WHERE  c.relkind IN ( 'r', 'f' )
 """
 
 

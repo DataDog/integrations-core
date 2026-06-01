@@ -128,8 +128,6 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
         "pg_newtable",
         "cities",
         "sample_foreign_d73a8c",
-        "persons_view",
-        "persons_matview",
     }
     # if version isn't 9 or 10, check that partition master is in tables
     if float(POSTGRES_VERSION) >= 11:
@@ -229,10 +227,6 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
                                 'is_partial',
                             ],
                         )
-                    if table['name'] == "persons_view":
-                        assert table['relkind'] == 'v'
-                    if table['name'] == "persons_matview":
-                        assert table['relkind'] == 'm'
                     if float(POSTGRES_VERSION) >= 11:
                         if table['name'] in ('test_part', 'test_part_no_activity'):
                             keys = list(table.keys())
