@@ -92,7 +92,9 @@ def make_agent_builder(mock_agent: MockAgent, captured_kwargs: dict[str, Any] | 
     owner_id passed in — useful for asserting on prompt rendering.
     """
 
-    def builder(system_prompt: str, owner_id: str) -> tuple[MockAgent, ToolRegistry]:
+    def builder(
+        system_prompt: str, owner_id: str, subagent_builder=None, log_dir=None
+    ) -> tuple[MockAgent, ToolRegistry]:
         if captured_kwargs is not None:
             captured_kwargs["system_prompt"] = system_prompt
             captured_kwargs["owner_id"] = owner_id

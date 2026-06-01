@@ -18,8 +18,13 @@ class CheckpointManager:
     def __init__(self, path: Path) -> None:
         self._path = path
 
+    @property
+    def root(self) -> Path:
+        """Directory that holds checkpoints.yaml, per-phase memory files, and any side artifacts."""
+        return self._path.parent
+
     def _ensure_dir(self) -> None:
-        self._path.parent.mkdir(parents=True, exist_ok=True)
+        self.root.mkdir(parents=True, exist_ok=True)
 
     def read(self) -> dict[str, Any]:
         """Return full checkpoint data, keyed by phase_id. Empty dict if file absent."""
@@ -44,7 +49,7 @@ class CheckpointManager:
 
     def memory_path(self, phase_id: str) -> Path:
         """Return the resolved path to a phase's memory file."""
-        return (self._path.parent / f"{phase_id}_memory.md").resolve()
+        return (self.root / f"{phase_id}_memory.md").resolve()
 
     def write_memory(self, phase_id: str, text: str) -> None:
         """Write agent-authored text to this phase's memory file."""

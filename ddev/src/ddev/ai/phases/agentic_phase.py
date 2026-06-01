@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from ddev.ai.agent.base import BaseAgent
-from ddev.ai.agent.build import AgentBuilder, make_agent_builder
+from ddev.ai.agent.build import AgentBuilder, SubagentBuilder, make_agent_builder, make_subagent_builder
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.base import Phase, PhaseOutcome
 from ddev.ai.phases.checkpoint import CheckpointManager
@@ -16,6 +16,7 @@ from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError
 from ddev.ai.phases.template import render_inline, render_prompt
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.tools.fs.file_registry import FileRegistry
+from ddev.ai.tools.registry import TOOL_MANIFEST
 
 
 def render_task_prompt(
@@ -59,6 +60,7 @@ class AgenticPhase(Phase):
         flow_variables: dict[str, str],
         config_dir: Path,
         file_registry: FileRegistry,
+        subagent_builder: SubagentBuilder | None = None,
         callbacks: Callbacks | None = None,
         logger: logging.Logger | None = None,
     ) -> None:
@@ -75,6 +77,10 @@ class AgenticPhase(Phase):
             logger=logger,
         )
         self._agent_builder = agent_builder
+        self._subagent_builder = subagent_builder
+        self._subagent_log_dir = (
+            checkpoint_manager.root / "subagents" / phase_id if subagent_builder is not None else None
+        )
 
     @classmethod
     def validate_config(
@@ -91,22 +97,40 @@ class AgenticPhase(Phase):
             raise FlowConfigError(f"Phase {phase_id!r} (AgenticPhase) must have at least one task")
 
     @classmethod
-    def extra_init_kwargs(
+    def extra_init_kwargs(  # type: ignore[override]
         cls,
+        *,
         phase_id: str,
         phase_config: PhaseConfig,
         agents: dict[str, AgentConfig],
         agent_clients: dict[str, Any],
         file_registry: FileRegistry,
+        **_: Any,
     ) -> dict[str, Any]:
         if phase_config.agent is None:
             raise FlowConfigError(f"Phase {phase_id!r} (AgenticPhase) requires 'agent'")
-        return {
-            "agent_builder": make_agent_builder(
-                agent_config=agents[phase_config.agent],
+        agent_config = agents[phase_config.agent]
+
+        subagent_builder = None
+        requires_subagent_builder = any(
+            spec.requires_subagent_builder
+            for name in agent_config.tools
+            if (spec := TOOL_MANIFEST.get(name)) is not None
+        )
+        if requires_subagent_builder:
+            subagent_builder = make_subagent_builder(
+                parent_agent_config=agent_config,
                 agent_clients=agent_clients,
                 file_registry=file_registry,
             )
+
+        return {
+            "agent_builder": make_agent_builder(
+                agent_config=agent_config,
+                agent_clients=agent_clients,
+                file_registry=file_registry,
+            ),
+            "subagent_builder": subagent_builder,
         }
 
     def before_react(self) -> None:
@@ -146,7 +170,12 @@ class AgenticPhase(Phase):
             context,
             self._resolver,
         )
-        agent, tool_registry = self._agent_builder(system_prompt, self._phase_id)
+        agent, tool_registry = self._agent_builder(
+            system_prompt,
+            self._phase_id,
+            self._subagent_builder,
+            self._subagent_log_dir,
+        )
         process = ReActProcess(
             agent=agent,
             tool_registry=tool_registry,

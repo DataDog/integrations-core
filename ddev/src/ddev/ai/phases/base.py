@@ -109,15 +109,14 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         return None
 
     @classmethod
-    def extra_init_kwargs(
-        cls,
-        phase_id: str,
-        phase_config: PhaseConfig,
-        agents: dict[str, AgentConfig],
-        agent_clients: dict[str, Any],
-        file_registry: FileRegistry,
-    ) -> dict[str, Any]:
-        """Override to inject subclass-specific kwargs into __init__ at construction time."""
+    def extra_init_kwargs(cls, **kwargs: Any) -> dict[str, Any]:
+        """Override to inject subclass-specific kwargs into __init__ at construction time.
+
+        The orchestrator passes every framework-level dep (phase_id, phase_config, agents,
+        agent_clients, file_registry, checkpoint_manager, ...) as keyword arguments.
+        Subclasses pick the ones they need by declaring them explicitly and accept the
+        rest via **kwargs.
+        """
         return {}
 
     @abstractmethod
