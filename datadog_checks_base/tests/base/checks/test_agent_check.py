@@ -46,14 +46,22 @@ def test_check_version():
 
 def test_discover_config_accepts_successful_candidate_only():
     class DiscoveryCheck(AgentCheck):
+        calls = []
+
         @classmethod
         def generate_configs(cls, service):
             assert service.id == 'svc'
             assert service.host == '10.0.0.1'
             for port in service.ports:
-                yield {'port': port.number, 'accept': port.number == 9090}
+                yield {
+                    'init_config': {'selected_port': port.number},
+                    'instances': [{'port': port.number, 'accept': port.number == 9090}],
+                    'logs': [{'source': 'discovered'}],
+                }
 
         def check(self, instance):
+            self.calls.append(instance['port'])
+            assert self.init_config == {'selected_port': instance['port']}
             self.gauge('trial_metric', 1)
             self.service_check('trial_service', AgentCheck.OK)
             self.set_metadata('version', '1')
@@ -67,6 +75,7 @@ def test_discover_config_accepts_successful_candidate_only():
             'ports': [
                 {'number': 8080, 'name': 'http'},
                 {'number': 9090, 'name': 'metrics'},
+                {'number': 9443, 'name': 'metrics-tls'},
             ],
         }
     )
@@ -74,7 +83,14 @@ def test_discover_config_accepts_successful_candidate_only():
     with mock.patch('datadog_checks.base.checks.base.aggregator.submit_metric') as submit_metric:
         configs = json.loads(DiscoveryCheck.discover_config(payload))
 
-    assert configs == [{'port': 9090, 'accept': True}]
+    assert configs == [
+        {
+            'init_config': {'selected_port': 9090},
+            'instances': [{'port': 9090, 'accept': True}],
+            'logs': [{'source': 'discovered'}],
+        }
+    ]
+    assert DiscoveryCheck.calls == [8080, 9090]
     submit_metric.assert_not_called()
 
 
