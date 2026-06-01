@@ -1,0 +1,1 @@
+Fix parsing of AWS China region RDS endpoints in rds_parse_tags_from_endpoint.
