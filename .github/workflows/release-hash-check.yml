@@ -7,6 +7,8 @@ on:
       - '7.[0-9]+.x'
     paths:
       - .in-toto/*.link
+      # Also run when this workflow changes so action bumps are exercised on the PR that introduces them.
+      - .github/workflows/release-hash-check.yml
 
 jobs:
   build:
@@ -29,4 +31,7 @@ jobs:
       with:
         files: .in-toto/*.link
 
-    - run: python .github/workflows/release-hash-check.py ${{ steps.changed-files.outputs.all_changed_files }}
+    # Only validate hashes when a link file actually changed; on a workflow-only change the
+    # step above still exercises the action, but there is nothing to hash-check.
+    - if: steps.changed-files.outputs.any_changed == 'true'
+      run: python .github/workflows/release-hash-check.py ${{ steps.changed-files.outputs.all_changed_files }}
