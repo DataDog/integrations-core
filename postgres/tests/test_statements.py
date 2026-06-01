@@ -1775,6 +1775,7 @@ def test_statement_metrics_database_errors(
     # don't need samples for this test
     dbm_instance['query_samples']['enabled'] = False
     dbm_instance['query_activity']['enabled'] = False
+    dbm_instance.setdefault('query_metrics', {})['use_v2'] = False
     check = integration_check(dbm_instance)
 
     with mock.patch(
@@ -1850,6 +1851,7 @@ def test_statement_metrics_attributes_undefined_table_to_not_loaded_when_spl_mis
     that fails until SPL is fixed and the server restarted)."""
     dbm_instance['query_samples']['enabled'] = False
     dbm_instance['query_activity']['enabled'] = False
+    dbm_instance.setdefault('query_metrics', {})['use_v2'] = False
     check = integration_check(dbm_instance)
 
     # Override _load_pg_settings so the test-postgres (which has pg_stat_statements in SPL) doesn't
