@@ -132,6 +132,12 @@ class KafkaCheck(AgentCheck):
         return sum(len(offsets) for offsets in consumer_offsets.values())
 
     def _send_cluster_monitoring_heartbeat(self, total_contexts: int, cluster_id: str) -> None:
+        brokers = []
+        cluster_metadata = self.client._cluster_metadata
+        if cluster_metadata and hasattr(cluster_metadata, 'brokers'):
+            for broker_id, broker_meta in cluster_metadata.brokers.items():
+                brokers.append({'id': broker_id, 'host': broker_meta.host, 'port': broker_meta.port})
+
         payload = {
             'collection_timestamp': int(time() * 1000),
             'kafka_cluster_id': cluster_id,
@@ -139,6 +145,7 @@ class KafkaCheck(AgentCheck):
             'contexts': total_contexts,
             'contexts_limit': self._context_limit,
             'bootstrap_servers': self.config._kafka_connect_str,
+            'brokers': brokers,
         }
         if self.config._kafka_cluster_id_override:
             payload['original_kafka_cluster_id'] = self.config._auto_detected_cluster_id
