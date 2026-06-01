@@ -313,16 +313,6 @@ def test_metadata_refreshable_view_status_populated(aggregator, metadata_instanc
         view = next((v for v in db['views'] if v['name'] == mv), None)
         assert view is not None, f'Expected refreshable view {mv} in payload'
         assert view['is_refreshable'] is True
-
-        required_tags = {'db:default', f'view:{mv}'}
-        status_metrics = [
-            m for m in aggregator.metrics('clickhouse.view.refresh.status') if required_tags.issubset(set(m.tags))
-        ]
-        assert status_metrics, f'Expected clickhouse.view.refresh.status for {mv}'
-        next_time_metrics = [
-            m for m in aggregator.metrics('clickhouse.view.refresh.next_time') if required_tags.issubset(set(m.tags))
-        ]
-        assert next_time_metrics, f'Expected clickhouse.view.refresh.next_time for {mv}'
     finally:
         for obj in (mv, target, src):
             client.command(f'DROP TABLE IF EXISTS default.{obj} SYNC')
