@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
+
 from datadog_checks.infiniband import InfinibandCheck
 
 from .common import (
