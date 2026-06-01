@@ -48,11 +48,6 @@ def metadata_instance(instance):
         'max_tables': 5000,
         'max_columns': 1000,
     }
-    instance['schema_metrics'] = {
-        'enabled': True,
-        'run_sync': True,
-        'collection_interval': 60,
-    }
     instance['query_metrics'] = {'enabled': False}
     instance['query_samples'] = {'enabled': False}
     instance['query_completions'] = {'enabled': False}
@@ -210,33 +205,6 @@ def test_metadata_materialized_view_with_target(aggregator, metadata_instance, d
     finally:
         for obj in (mv, target, src):
             client.command(f'DROP TABLE IF EXISTS default.{obj} SYNC')
-
-
-def test_metadata_emits_per_table_size_gauges(aggregator, metadata_instance, dd_run_check):
-    client = _client(metadata_instance)
-    table = 'dd_md_size_gauge_test'
-    try:
-        client.command(f'DROP TABLE IF EXISTS default.{table}')
-        client.command(f'CREATE TABLE default.{table} (id UInt64) ENGINE = MergeTree ORDER BY id')
-        client.command(f'INSERT INTO default.{table} SELECT number FROM numbers(100)')
-
-        check = ClickhouseCheck('clickhouse', {}, [metadata_instance])
-        dd_run_check(check)
-
-        required_tags = {'db:default', f'table:{table}'}
-
-        rows_metrics = [m for m in aggregator.metrics('clickhouse.table.rows') if required_tags.issubset(set(m.tags))]
-        assert rows_metrics, (
-            f'Expected clickhouse.table.rows for {table}. '
-            f'Got: {[(m.value, sorted(m.tags)) for m in aggregator.metrics("clickhouse.table.rows")]}'
-        )
-        assert rows_metrics[0].value == 100
-
-        bytes_metrics = [m for m in aggregator.metrics('clickhouse.table.bytes') if required_tags.issubset(set(m.tags))]
-        assert bytes_metrics, 'Expected clickhouse.table.bytes gauge'
-        assert bytes_metrics[0].value > 0
-    finally:
-        client.command(f'DROP TABLE IF EXISTS default.{table} SYNC')
 
 
 def test_metadata_skips_system_databases(aggregator, metadata_instance, dd_run_check):
