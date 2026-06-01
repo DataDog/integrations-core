@@ -34,10 +34,14 @@ def rds_parse_tags_from_endpoint(endpoint):
     parts = endpoint.split('.', 3)
     if len(parts) != 4:
         return tags
-    if parts[3] != 'rds.amazonaws.com':
+    if parts[3] == 'rds.amazonaws.com':
+        identifier, cluster, region, _ = parts
+    elif parts[3].endswith('.amazonaws.com.cn'):
+        # AWS China: structure is {id}.{cluster-hash}.rds.{region}.amazonaws.com.cn
+        identifier, cluster, _, rest = parts
+        region = rest.split('.')[0]
+    else:
         return tags
-
-    identifier, cluster, region, _ = parts
     if cluster.startswith('cluster-'):
         tags.append('dbclusteridentifier:' + identifier)
     else:
