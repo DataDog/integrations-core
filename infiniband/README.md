@@ -88,6 +88,16 @@ instances:
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
+All metrics are tagged with `device` and `port`. When the kernel exposes the
+corresponding sysfs files, metrics are also tagged with:
+
+- `link_layer`, for example `link_layer:infiniband` or `link_layer:ethernet`
+- `netdev` and `gid_type` from `gid_attrs`, for example `netdev:ens5f0` and `gid_type:roce_v2`
+- `firmware_version`, `hca_type`, `board_id`, and `node_type` from device metadata
+
+The check also submits `infiniband.port.rate` from each port's negotiated link
+rate.
+
 ### Events
 
 The InfiniBand integration does not include any events.

@@ -18,6 +18,7 @@ infiniband.port_multicast_rcv_packets.count,count,,packet,,Number of new multica
 infiniband.port_multicast_xmit_packets,gauge,,packet,,Number of multicast packets transmitted on all Virtual Lanes from the port,0,infiniband,,,
 infiniband.port_multicast_xmit_packets.count,count,,packet,,Number of new multicast packets transmitted since the last metric submission,0,infiniband,,,
 infiniband.port_phys_state,gauge,,,,Physical link state,0,infiniband,,,
+infiniband.port.rate,gauge,,bit,second,Negotiated port data rate in bits per second,0,infiniband,port rate,,
 infiniband.port_rcv_constraint_errors,gauge,,error,,Number of packets received on the switch physical port that are discarded,0,infiniband,,,
 infiniband.port_rcv_constraint_errors.count,count,,error,,Number of new packets discarded on receive since the last metric submission,0,infiniband,,,
 infiniband.port_rcv_data,gauge,,byte,,"Number of data octets,divided by 4,received on all Virtual Lanes from the port",0,infiniband,,,
