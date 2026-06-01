@@ -408,6 +408,7 @@ class ClickhouseCheck(DatabaseCheck):
             sc_status = _VIEW_REFRESH_STATUS_MAP.get(status, AgentCheck.UNKNOWN)
             sc_msg = '' if sc_status == AgentCheck.OK else ((exception or '').split('\n')[0] or status)
             self.service_check(self.SERVICE_CHECK_VIEW_REFRESH, sc_status, tags=view_tags, message=sc_msg)
+            self.gauge('view.refresh.status', sc_status, tags=view_tags)
             self.gauge('view.refresh.last_time', int(last_time or 0), tags=view_tags)
             self.gauge('view.refresh.next_time', int(next_time or 0), tags=view_tags)
             self.gauge('view.refresh.rows', int(written_rows or 0), tags=view_tags)
