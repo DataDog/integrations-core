@@ -19,7 +19,6 @@ jobs:
 
       - uses: DataDog/dd-octo-sts-action@acaa02eee7e3bb0839e4272dacb37b8f3b58ba80 # v1.0.3
         id: octo-sts
-        if: github.event_name != 'pull_request'
         with:
           scope: DataDog/datadog-agent
           policy: integrations-core.github.read-release-json.schedule
@@ -27,11 +26,10 @@ jobs:
       - name: Compute days since last pin
         id: compute
         env:
-          GITHUB_TOKEN: ${{ github.event_name == 'pull_request' && github.token || steps.octo-sts.outputs.token }}
+          GITHUB_TOKEN: ${{ steps.octo-sts.outputs.token }}
         run: python3 .github/workflows/scripts/days_since_last_pin.py
 
       - name: Submit metric to Datadog
-        if: github.event_name != 'pull_request'
         env:
           DD_API_KEY: ${{ secrets.DD_API_KEY }}
           DAYS: ${{ steps.compute.outputs.days }}
