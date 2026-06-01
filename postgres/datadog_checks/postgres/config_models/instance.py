@@ -182,6 +182,7 @@ class Query(BaseModel):
         None,
         description='A standard 5-field cron expression (minute hour dom month dow) specifying\nwhen to run this query. When both schedule and interval_seconds are set,\nschedule wins and interval_seconds is ignored. If neither is set, the\nquery is skipped at runtime with a warning.\n',
     )
+    timeout_seconds: Optional[int] = None
     type: Optional[str] = None
 
 

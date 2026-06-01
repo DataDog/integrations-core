@@ -665,6 +665,8 @@ files:
                   schedule wins and interval_seconds is ignored. If neither is set, the
                   query is skipped at runtime with a warning.
                 type: string
+              - name: timeout_seconds
+                type: integer
               - name: entity
                 type: object
                 required:

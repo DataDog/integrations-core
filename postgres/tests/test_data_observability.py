@@ -279,15 +279,47 @@ def test_query_failure_does_not_block_subsequent(aggregator, pg_instance):
     assert len(status_metrics) == 2
 
 
+def _set_local_timeout_ms(mock_cursor):
+    """Return the statement_timeout (ms) passed to the SET LOCAL execute, or None."""
+    for call in mock_cursor.execute.call_args_list:
+        sql = call.args[0]
+        if sql.strip().upper().startswith('SET LOCAL STATEMENT_TIMEOUT'):
+            return call.args[1][0]
+    return None
+
+
+def test_default_timeout_applied_in_transaction(pg_instance):
+    """A query without timeout_seconds runs SET LOCAL with the 60s default inside a transaction."""
+    mock_conn, mock_cursor = _make_mock_conn()
+
+    _setup_and_run(pg_instance, mock_conn=mock_conn, mock_cursor=mock_cursor)
+
+    mock_conn.transaction.assert_called_once()
+    assert _set_local_timeout_ms(mock_cursor) == 60_000
+
+
+def test_query_timeout_seconds_overrides_default(pg_instance):
+    """timeout_seconds from the query payload sets the per-query statement_timeout."""
+    query = deepcopy(BASE_QUERY)
+    query['timeout_seconds'] = 180
+    mock_conn, mock_cursor = _make_mock_conn()
+
+    _setup_and_run(pg_instance, queries=[query], mock_conn=mock_conn, mock_cursor=mock_cursor)
+
+    assert _set_local_timeout_ms(mock_cursor) == 180_000
+
+
 def test_no_description_does_not_block_subsequent(aggregator, pg_instance):
     """First query returns None description (non-SELECT), second query still runs."""
     mock_conn, mock_cursor = _make_mock_conn()
-    call_count = 0
+    query_count = 0
 
     def execute_side_effect(sql, *args, **kwargs):
-        nonlocal call_count
-        call_count += 1
-        mock_cursor.description = None if call_count == 1 else [('count',)]
+        nonlocal query_count
+        if sql.strip().upper().startswith('SET LOCAL'):
+            return
+        query_count += 1
+        mock_cursor.description = None if query_count == 1 else [('count',)]
 
     mock_cursor.execute = MagicMock(side_effect=execute_side_effect)
 
