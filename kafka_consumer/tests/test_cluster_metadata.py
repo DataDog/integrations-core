@@ -990,6 +990,39 @@ def test_schema_registry_two_tier_fetch_on_new_version(check, dd_run_check, aggr
     assert updated_cache['unchanged-topic-value'] == {'version': 2, 'schema_id': 50, 'compatibility': 'BACKWARD'}
 
 
+def test_schema_registry_compat_not_refetched_when_cache_fresh(check, dd_run_check, aggregator):
+    """A subject with a fresh compat-fetch cache and no version bump must not refetch compatibility.
+
+    This guards the cadence-skip path: SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY + remaining_slots logic
+    should keep _get_schema_registry_subject_compatibility from being called every run.
+    """
+    kafka_consumer_check = _make_schema_registry_check(check)
+    collector = kafka_consumer_check.metadata_collector
+
+    subject = 'my-topic-value'
+    collector._get_schema_registry_subjects = mock.Mock(return_value=[subject])
+    collector._get_schema_registry_versions = mock.Mock(return_value=[1, 2])
+    collector._get_schema_registry_latest_version = mock.Mock()
+    mock_compatibility_methods(collector)
+
+    # Subject is already at version 2 (no bump) and its compat fetch cache is unexpired.
+    latest_version_cache = {subject: {'version': 2, 'schema_id': 50, 'compatibility': 'BACKWARD'}}
+    compat_fetch_cache = {subject: time.time() + 3600}
+    _wire_cache(
+        kafka_consumer_check,
+        {
+            'kafka_schema_latest_version_cache': json.dumps(latest_version_cache),
+            'kafka_schema_compatibility_fetch_cache': json.dumps(compat_fetch_cache),
+        },
+    )
+
+    dd_run_check(kafka_consumer_check)
+
+    # No version bump → no full fetch, and a fresh compat cache → no compat fetch.
+    collector._get_schema_registry_latest_version.assert_not_called()
+    collector._get_schema_registry_subject_compatibility.assert_not_called()
+
+
 def test_schema_registry_compatibility_flip_triggers_reemission(check, dd_run_check, aggregator):
     """Test that a compatibility change without a version bump still triggers schema re-emission.
 

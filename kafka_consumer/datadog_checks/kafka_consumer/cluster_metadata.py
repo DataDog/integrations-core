@@ -162,7 +162,7 @@ class ClusterMetadataCollector:
 
         return access_token, expires_at
 
-    def _schema_registry_get(self, path: str, **kwargs):
+    def _schema_registry_get(self, path: str, **kwargs: Any) -> Any:
         """GET a Schema Registry path and return the parsed JSON body."""
         url = f"{self.config._collect_schema_registry}{path}"
         response = self.http.get(url, **kwargs)
@@ -1023,44 +1023,9 @@ class ClusterMetadataCollector:
             self._get_schema_registry_latest_version, subjects_needing_full_fetch, "schema details"
         )
 
-        # Per-subject compatibility refresh — cadence-driven so a flip without a version bump is still picked up.
-        # A per-subject flip therefore surfaces only on the next compat-fetch cadence (up to
-        # CONFIGS_REFRESH_INTERVAL + jitter later); a global flip re-emits immediately via global_compatibility.
-        compat_due = self._get_items_to_fetch(self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY, subjects)
-        remaining_slots = max(0, self.SCHEMA_COMPATIBILITY_BATCH_SIZE - len(subjects_needing_full_fetch))
-        compat_due = compat_due[:remaining_slots]
-        compat_subjects_to_fetch = list(set(subjects_needing_full_fetch) | set(compat_due))
-
-        compatibility_responses: dict[str, str | None] = self._parallel_fetch(
-            self._get_schema_registry_subject_compatibility, compat_subjects_to_fetch, "compatibility"
+        compatibility_responses = self._collect_subject_compatibilities(
+            subjects, subjects_needing_full_fetch, schema_responses, latest_version_cache
         )
-        if compat_subjects_to_fetch:
-            # Mark all attempted subjects as fetched (even if they errored), mirroring the version
-            # tier above: a subject that fails this run isn't retried until the next configs cadence
-            # rather than hammered every check, at the cost of holding stale compatibility until then.
-            self._mark_items_fetched(
-                self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY,
-                compat_subjects_to_fetch,
-                ttl_base=self.CONFIGS_REFRESH_INTERVAL,
-                ttl_jitter=self.CONFIGS_REFRESH_JITTER,
-                max_cache_size=self.SCHEMA_COMPATIBILITY_FETCH_CACHE_MAX_SIZE,
-            )
-
-        # Apply standalone compatibility updates to existing cache entries so that
-        # a compatibility flip alone (without a version bump) flows into the next
-        # schema emission via the cache_content key.
-        #
-        # This must precede the schema_responses loop below, which fully replaces
-        # latest_version_cache[subject] for version-bumped subjects. The
-        # `subject in schema_responses` guard makes the two write sites mutually
-        # exclusive per subject: version-bumped subjects get their compatibility
-        # set in that loop, everyone else is updated in place here.
-        for subject, compatibility in compatibility_responses.items():
-            if compatibility is None or subject in schema_responses:
-                continue
-            entry = latest_version_cache.get(subject)
-            if isinstance(entry, dict):
-                entry['compatibility'] = compatibility
 
         fetched_schemas = {}
 
@@ -1101,19 +1066,13 @@ class ClusterMetadataCollector:
                 }
                 schema_id_cache_updated = True
 
-            topic_name, schema_for = self._parse_subject(subject)
-
             cache_content = f"{schema_id}:{schema_version}:{compatibility}:{global_compatibility}:{schema_content}"
 
             fetched_schemas[subject] = {
                 'cache_content': cache_content,
-                'schema_content': schema_content,
-                'topic_name': topic_name,
-                'schema_for': schema_for,
-                'schema_version': schema_version,
-                'schema_id': schema_id,
-                'schema_type': schema_type,
-                'compatibility': compatibility,
+                **self._build_schema_info(
+                    subject, schema_content, schema_type, schema_version, schema_id, compatibility
+                ),
             }
 
         # Persist caches
@@ -1162,6 +1121,81 @@ class ClusterMetadataCollector:
             global_compatibility,
         )
 
+    def _collect_subject_compatibilities(
+        self,
+        subjects: list[str],
+        subjects_needing_full_fetch: list[str],
+        schema_responses: dict[str, dict],
+        latest_version_cache: dict[str, SubjectVersionInfo],
+    ) -> dict[str, str | None]:
+        """Fetch per-subject compatibility on a cadence and merge standalone flips into the cache.
+
+        Compatibility is refreshed on its own cadence so a flip without a version bump is still picked
+        up; a per-subject flip therefore surfaces only on the next compat-fetch cadence (up to
+        CONFIGS_REFRESH_INTERVAL + jitter later), while a global flip re-emits immediately via
+        global_compatibility.
+
+        The SCHEMA_COMPATIBILITY_BATCH_SIZE clamp bounds only the cadence-driven `compat_due` list;
+        version-bumped subjects are always fetched on top of that budget, so the effective ceiling on
+        /config/{subject} calls is SCHEMA_VERSION_CHECK_BATCH_SIZE (which bounds
+        subjects_needing_full_fetch), not SCHEMA_COMPATIBILITY_BATCH_SIZE. They are equal today, so
+        there is no over-fetch.
+        """
+        compat_due = self._get_items_to_fetch(self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY, subjects)
+        remaining_slots = max(0, self.SCHEMA_COMPATIBILITY_BATCH_SIZE - len(subjects_needing_full_fetch))
+        compat_due = compat_due[:remaining_slots]
+        compat_subjects_to_fetch = list(set(subjects_needing_full_fetch) | set(compat_due))
+
+        compatibility_responses: dict[str, str | None] = self._parallel_fetch(
+            self._get_schema_registry_subject_compatibility, compat_subjects_to_fetch, "compatibility"
+        )
+        if compat_subjects_to_fetch:
+            # Mark all attempted subjects as fetched (even if they errored), mirroring the version
+            # tier: a subject that fails this run isn't retried until the next configs cadence rather
+            # than hammered every check, at the cost of holding stale compatibility until then.
+            self._mark_items_fetched(
+                self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY,
+                compat_subjects_to_fetch,
+                ttl_base=self.CONFIGS_REFRESH_INTERVAL,
+                ttl_jitter=self.CONFIGS_REFRESH_JITTER,
+                max_cache_size=self.SCHEMA_COMPATIBILITY_FETCH_CACHE_MAX_SIZE,
+            )
+
+        # Apply standalone compatibility updates to existing cache entries so a flip alone (without a
+        # version bump) flows into the next schema emission via the cache_content key. This must run
+        # before the caller's schema_responses loop replaces latest_version_cache[subject] for
+        # version-bumped subjects; the `subject in schema_responses` guard keeps the two write sites
+        # mutually exclusive per subject.
+        for subject, compatibility in compatibility_responses.items():
+            if compatibility is None or subject in schema_responses:
+                continue
+            entry = latest_version_cache.get(subject)
+            if isinstance(entry, dict):
+                entry['compatibility'] = compatibility
+
+        return compatibility_responses
+
+    def _build_schema_info(
+        self,
+        subject: str,
+        schema_content: str,
+        schema_type: str,
+        schema_version: int | None,
+        schema_id: int | None,
+        compatibility: str | None,
+    ) -> dict:
+        """Assemble the canonical schema info dict used to build a data-streams schema payload."""
+        topic_name, schema_for = self._parse_subject(subject)
+        return {
+            'schema_content': schema_content,
+            'topic_name': topic_name,
+            'schema_for': schema_for,
+            'schema_version': schema_version,
+            'schema_id': schema_id,
+            'schema_type': schema_type,
+            'compatibility': compatibility,
+        }
+
     def _emit_schema_registry_events(
         self,
         subjects_to_emit: list[str],
@@ -1177,23 +1211,16 @@ class ClusterMetadataCollector:
                 info = fetched_schemas[subject]
             else:
                 cached_info = latest_version_cache.get(subject, {})
-                version = cached_info.get('version')
                 schema_id = cached_info.get('schema_id')
                 id_entry = schema_id_cache.get(str(schema_id), {})
-                schema_content = id_entry.get('schema', '')
-                schema_type = id_entry.get('schema_type', 'AVRO')
-
-                topic_name, schema_for = self._parse_subject(subject)
-
-                info = {
-                    'schema_content': schema_content,
-                    'topic_name': topic_name,
-                    'schema_for': schema_for,
-                    'schema_version': version,
-                    'schema_id': schema_id,
-                    'schema_type': schema_type,
-                    'compatibility': cached_info.get('compatibility'),
-                }
+                info = self._build_schema_info(
+                    subject,
+                    id_entry.get('schema', ''),
+                    id_entry.get('schema_type', 'AVRO'),
+                    cached_info.get('version'),
+                    schema_id,
+                    cached_info.get('compatibility'),
+                )
 
             ds_payload = {
                 'collection_timestamp': int(time.time() * 1000),
