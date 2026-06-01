@@ -20,12 +20,7 @@ To create a new trigger action in SolarWinds:
 6. Fill in the Action Pane with the following details:
 
         a. **Name of Action**: Send Alert to Datadog (or whatever you prefer)
-        b. **URL**: https://<YOUR-DC-INTAKE-URL>/intake/webhook/solarwinds?api_key=<DATADOG_API_KEY>
-        c. **Select**: Use HTTP/S POST
-        d. **Body to Post**: Copy and paste from alert template below
-        e. **Time of Day**: Leave as is
-        f. **Execution Settings**: Leave as is
-        b. **URL**: https://app.datadoghq.com/intake/webhook/solarwinds?api_key=<DATADOG_API_KEY>
+        b. **URL**: https://{{< region-param key="dd_full_site" >}}/intake/webhook/solarwinds?api_key=<DATADOG_API_KEY>
         c. **Select**: Use HTTP/S POST
         d. **Body to Post**: Copy and paste from alert template below
         e. **Time of Day**: Leave as is
