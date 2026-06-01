@@ -40,6 +40,19 @@ class TestRDS:
                 'dd-metrics.cluster-cfxdfe8cpixl.ap-east-1.rds.amazonaws.com',
                 ['dbclusteridentifier:dd-metrics', 'region:ap-east-1'],
             ),
+            (
+                'my_db.c7yk0gqwsqfl.rds.cn-northwest-1.amazonaws.com.cn',
+                [
+                    'dbinstanceidentifier:my_db',
+                    'hostname:my_db.c7yk0gqwsqfl.rds.cn-northwest-1.amazonaws.com.cn',
+                    'host:my_db.c7yk0gqwsqfl.rds.cn-northwest-1.amazonaws.com.cn',
+                    'region:cn-northwest-1',
+                ],
+            ),
+            (
+                'my_cluster.cluster-c7yk0gqwsqfl.rds.cn-northwest-1.amazonaws.com.cn',
+                ['dbclusteridentifier:my_cluster', 'region:cn-northwest-1'],
+            ),
         ],
     )
     def test_parse_tags_from_endpoint(self, test_case, expected):
