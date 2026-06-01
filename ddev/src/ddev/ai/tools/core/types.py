@@ -15,3 +15,5 @@ class ToolResult(BaseModel):
     total_size: int | None = None
     shown_size: int | None = None
     hint: str | None = None
+    total_input_tokens: int = 0
+    total_output_tokens: int = 0
