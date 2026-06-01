@@ -109,8 +109,11 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         checkpoint_manager: CheckpointManager,
         context: FlowContext,
     ) -> Phase:
-        """Uniform polymorphic factory. Subclasses with a richer __init__
-        override this to assemble their extras."""
+        """Uniform polymorphic factory called by the orchestrator for every phase.
+
+        Subclasses that need infrastructure (agent builders, file registry)
+        pull it from ``resources`` inside their own ``build()`` override.
+        """
         return cls(
             phase_id=phase_id,
             dependencies=deps,
