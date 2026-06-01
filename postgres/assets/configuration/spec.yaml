@@ -700,6 +700,16 @@ files:
             type: boolean
             example: false
             display_default: false
+        - name: send_sds_results
+          description: |
+            When true, sensitive-data findings are also forwarded to the
+            Sensitive Data Scanner (DSPM) intake as a protobuf `SdsResultPayload`,
+            in addition to the Datadog event emitted per table. When false (the
+            default), no SDS result is sent.
+          value:
+            type: boolean
+            example: false
+            display_default: false
         - name: tables
           description: |
             List of tables to scan on every interval. Each entry pairs a

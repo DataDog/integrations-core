@@ -46,6 +46,7 @@ from datadog_checks.postgres.relationsmanager import (
     TABLE_BLOAT,
     RelationsManager,
 )
+from datadog_checks.postgres.sds.sds_emitter import build_payload, emit_sds_results
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
 
@@ -119,7 +120,9 @@ DATA_SECURITY_SAMPLING_BUFFER_MULTIPLIER = 2  # over-sample by Nx then LIMIT
 
 # DEMO ONLY: very loose email matcher. We only need to demo PII detection on
 # scanned rows; this is intentionally not a strict RFC 5322 matcher.
-_DATA_SECURITY_PII_DETECTORS = (("email", re.compile(r"[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}")),)
+_DATA_SECURITY_PII_DETECTORS = (
+    ("PuXiVTCkTHOtj0Yad1ppsw", re.compile(r"[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}")),
+)
 
 
 def _detect_sensitive_data(rows):
@@ -345,7 +348,9 @@ class PostgreSql(DatabaseCheck):
             return query, params
         return None, None
 
-    def _scan_table_for_data_security(self, table_name, scan_type, max_rows, min_rows, send_samples):
+    def _scan_table_for_data_security(
+        self, table_name, scan_type, max_rows, min_rows, send_samples, send_sds_results=False
+    ):
         schema, table = self._split_qualified_table(table_name)
         query, params = self._build_data_security_query(schema, table, scan_type, max_rows, min_rows)
         if query is None:
@@ -377,6 +382,19 @@ class PostgreSql(DatabaseCheck):
 
         sample_size = len(parsed_rows)
         rows_affected, columns_affected, matched_kinds = _detect_sensitive_data(parsed_rows)
+
+        if send_sds_results:
+            self._emit_sds_results(
+                table_name=table_name,
+                schema=schema,
+                table=table,
+                scan_type=scan_type,
+                sample_size=sample_size,
+                rows_affected=rows_affected,
+                columns_affected=columns_affected,
+                matched_kinds=matched_kinds,
+            )
+
         sensitive_data = {
             "estimated_row_count": estimated_rows,
             "sample_size": sample_size,
@@ -443,6 +461,90 @@ class PostgreSql(DatabaseCheck):
             }
         )
 
+    def _rds_instance_metadata(self):
+        # Derive the RDS DB instance identifier and region from the configured AWS endpoint
+        # (e.g. "customers-04.cfxdfe8cpixl.us-west-2.rds.amazonaws.com" -> "customers-04",
+        # "us-west-2"). Falls back to the resolved hostname / configured host when the endpoint
+        # is not an RDS endpoint, so resource_name is always populated (required by the intake).
+        aws = getattr(self._config, "aws", None)
+        endpoint = (
+            (getattr(aws, "instance_endpoint", None) if aws else None) or self.resolved_hostname or self._config.host
+        )
+        region = getattr(aws, "region", None) if aws else None
+        instance_identifier = endpoint
+        if endpoint and AWS_RDS_HOSTNAME_SUFFIX in endpoint:
+            parts = endpoint.split(".", 3)
+            if len(parts) == 4:
+                instance_identifier = parts[0]
+                if not region:
+                    region = parts[2]
+        return instance_identifier, region
+
+    def _emit_sds_results(
+        self,
+        *,
+        table_name,
+        schema,
+        table,
+        scan_type,
+        sample_size,
+        rows_affected,
+        columns_affected,
+        matched_kinds,
+    ):
+        # Map the demo PII detection output onto the shared SdsResultPayload schema and forward it
+        # to the sds-intake. This must never break the data_security scan, so all failures are
+        # swallowed with a log line.
+        try:
+            rule_id = ",".join(sorted(matched_kinds)) if matched_kinds else "unknown"
+            db_matches = [
+                {
+                    "rule_id": rule_id,
+                    "column_name": column,
+                    # The demo detector only tracks aggregate counts, not per-column counts, so we
+                    # report the sample-wide affected/total rows for every matched column.
+                    "count_matched_rows": rows_affected,
+                    "count_total_rows": sample_size,
+                }
+                for column in sorted(columns_affected)
+            ]
+            # Nothing sensitive found: skip emitting an empty result.
+            if not db_matches:
+                return
+
+            # Mimic an agentless RDS-instance scan so the backend routes this through the
+            # RdsExtractor: the resource type must be "aws_rds_instance" and the location must
+            # be carried in the `rds_table` oneof (the flat database/table fields are ignored
+            # for RDS). The scan source defaults to AGENTLESS in build_payload.
+            instance_identifier, region = self._rds_instance_metadata()
+            # instance_arn is intentionally left unset: we can't build a valid ARN without the AWS
+            # account id, and the backend identifies the resource via resource.name (RedAPL lookup),
+            # not the ARN. database_name/table_name carry the meaningful location for RDS.
+            rds_table = {"database_name": self._config.dbname, "table_name": table}
+            scan_result = {
+                "duration": 0,
+                "db_matches": db_matches,
+                "location": {"rds_table": rds_table},
+            }
+            payload = build_payload(
+                resource_type="aws_rds_instance",
+                resource_name=instance_identifier,
+                scan_results=[scan_result],
+                scanner_version=__version__,
+                region=region,
+                stats={"files_scanned": 1},
+            )
+            emit_sds_results(self, payload)
+            self.log.info(
+                "data_security: emitted sds-result for table=%s schema=%s scan_kind=%s matched_columns=%d",
+                table_name,
+                schema,
+                scan_type,
+                len(db_matches),
+            )
+        except Exception:
+            self.log.exception("data_security: failed to emit sds-result for table=%s", table_name)
+
     def _data_security_scan(self):
         # DEMO ONLY: walks the `data_security.tables` list, runs either a full
         # SELECT or a TABLESAMPLE sampling scan against each one, and emits a
@@ -460,6 +562,9 @@ class PostgreSql(DatabaseCheck):
         self._last_data_security_run = now
 
         send_samples = bool(cfg.get("send_samples"))
+        # When enabled, also forward findings to the sds-intake as a protobuf SdsResultPayload
+        # (DSPM), in addition to the Datadog event emitted per table.
+        send_sds_results = bool(cfg.get("send_sds_results"))
 
         for entry in cfg.get("tables") or []:
             table_name = entry.get("table_name")
@@ -470,7 +575,9 @@ class PostgreSql(DatabaseCheck):
                 self.log.warning("data_security: skipping entry without table_name: %s", entry)
                 continue
             try:
-                self._scan_table_for_data_security(table_name, scan_type, max_rows, min_rows, send_samples)
+                self._scan_table_for_data_security(
+                    table_name, scan_type, max_rows, min_rows, send_samples, send_sds_results
+                )
             except Exception:
                 self.log.exception(
                     "data_security: unexpected error scanning table=%s scan_type=%s max_rows=%s min_rows=%s",
