@@ -777,8 +777,8 @@ files:
             obfuscation call on cache hit. Raw query text is never cached.
           value:
             type: boolean
-            display_default: false
-            example: false
+            display_default: true
+            example: true
         - name: run_sync
           hidden: true
           description: |
