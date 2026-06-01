@@ -139,7 +139,10 @@ class QuerySamples(BaseModel):
 
 
 class SchemaMetrics(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True, frozen=True)
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
     run_sync: Optional[bool] = None
