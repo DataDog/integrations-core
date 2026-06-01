@@ -232,6 +232,8 @@ def test_statement_metrics(
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['query_metrics']['use_v2'] = False
+    dbm_instance['collect_schemas'] = {'enabled': False}
     connections = {}
 
     def _run_queries():
@@ -830,6 +832,8 @@ def test_statement_metadata(
     """Tests for metadata in both samples and metrics"""
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
     dbm_instance['query_metrics']['run_sync'] = True
+    dbm_instance['query_metrics']['use_v2'] = False
+    dbm_instance['collect_schemas'] = {'enabled': False}
 
     # If query or normalized_query changes, the query_signatures for both will need to be updated as well.
     query = '''
@@ -1026,6 +1030,7 @@ def test_activity_snapshot_collection(
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     # No need for query metrics here
     dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['query_metrics']['use_v2'] = False
     dbm_instance['query_samples']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
@@ -1762,7 +1767,7 @@ def test_statement_metrics_database_errors(
     # don't need samples for this test
     dbm_instance['query_samples']['enabled'] = False
     dbm_instance['query_activity']['enabled'] = False
-    dbm_instance.setdefault('query_metrics', {})['use_v2'] = False
+    dbm_instance['query_metrics']['use_v2'] = False
     check = integration_check(dbm_instance)
 
     with mock.patch(
