@@ -27,6 +27,8 @@ from ddev.utils.github_async.models import PullRequest
 from tests.helpers.github_async import FakeAsyncGitHubClient
 from tests.helpers.runner import CliRunner
 
+FULL_SHA_FOR_TESTS = '1234567890abcdef001234567890abcdef00abcd'
+
 
 @pytest.fixture
 def app_mock(mocker: MockerFixture) -> MagicMock:
@@ -219,7 +221,7 @@ def test_cherry_pick_only_in_toto_conflict_is_resolved(app_mock, git_mock):
     assert git_mock.run.call_args_list == [
         call('cherry-pick', '--no-commit', '1234567890'),
         call('checkout', '--ours', 'path/file.in-toto.link'),
-        call('add', 'path/file.in-toto.link'),
+        call('add', '--force', 'path/file.in-toto.link'),
     ]
 
 
@@ -363,12 +365,22 @@ def test_create_pull_request_step_skips_label_call_when_no_labels(
     fake_async_github.assert_not_called('add_labels_to_issue')
 
 
-def _setup_command_mocks(mocker, *, commit_sha='1234567890abcdef00', subject='Fix bug (#100)', in_toto=''):
+def _setup_command_mocks(
+    mocker,
+    *,
+    commit_sha='1234567890abcdef00',
+    subject='Fix bug (#100)',
+    in_toto='',
+    parents=('parent_sha',),
+):
+    """Patch git so the workflow sees a resolvable commit. `parents` controls the merge-parent check."""
     run_mock = mocker.patch('ddev.utils.git.GitRepository.run')
     capture_mock = mocker.patch('ddev.utils.git.GitRepository.capture')
+    rev_list_output = ' '.join([commit_sha, *parents]) + '\n'
     capture_mock.side_effect = lambda *args: {
         ('rev-parse', '--verify', f'{commit_sha}^{{commit}}'): commit_sha + '\n',
         ('diff-tree', '--no-commit-id', '--name-only', '-r', commit_sha): in_toto,
+        ('rev-list', '--parents', '-n1', commit_sha): rev_list_output,
     }.get(args, '')
     mocker.patch(
         'ddev.utils.git.GitRepository.log',
@@ -379,6 +391,16 @@ def _setup_command_mocks(mocker, *, commit_sha='1234567890abcdef00', subject='Fi
         return_value=GitCommit(commit_sha, subject=subject),
     )
     return run_mock
+
+
+def _merged_pr(number=23703, merge_commit_sha=None):
+    """Build a PullRequest model for a squash-merged PR."""
+    return PullRequest(
+        number=number,
+        html_url=f'https://github.com/DataDog/integrations-core/pull/{number}',
+        merged=True,
+        merge_commit_sha=merge_commit_sha or FULL_SHA_FOR_TESTS,
+    )
 
 
 def test_command_happy_path(ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient) -> None:
@@ -601,18 +623,271 @@ def test_command_token_guard(
     fake_async_github.assert_not_called('create_pull_request')
 
 
-def test_command_aborts_when_commit_does_not_exist(
+def test_command_aborts_when_commit_missing_after_fetch(
     ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
 ) -> None:
+    """Fetch succeeds but rev-parse still cannot resolve the commit (edge case)."""
+    run_mock = mocker.patch('ddev.utils.git.GitRepository.run')
+    mocker.patch('ddev.utils.git.GitRepository.capture', side_effect=OSError('bad object'))
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', FULL_SHA_FOR_TESTS)
+
+    assert result.exit_code == 1, result.output
+    assert 'does not exist locally or on origin' in result.output
+    assert ('fetch', 'origin', FULL_SHA_FOR_TESTS) in [c.args for c in run_mock.call_args_list]
+    fake_async_github.assert_not_called('create_pull_request')
+
+
+def test_command_aborts_when_fetch_fails(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    def run_side_effect(*args):
+        if args[:2] == ('fetch', 'origin'):
+            raise OSError("couldn't find remote ref")
+        return None
+
+    mocker.patch('ddev.utils.git.GitRepository.run', side_effect=run_side_effect)
+    mocker.patch('ddev.utils.git.GitRepository.capture', side_effect=OSError('bad object'))
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', FULL_SHA_FOR_TESTS)
+
+    assert result.exit_code == 1, result.output
+    assert 'does not exist locally or on origin' in result.output
+    fake_async_github.assert_not_called('create_pull_request')
+
+
+def test_command_aborts_in_dry_run_when_commit_not_local(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    """Dry-run must not mutate local state, so don't fetch when the commit is missing."""
+    run_mock = mocker.patch('ddev.utils.git.GitRepository.run')
+    mocker.patch('ddev.utils.git.GitRepository.capture', side_effect=OSError('bad object'))
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', '--dry-run', FULL_SHA_FOR_TESTS)
+
+    assert result.exit_code == 1, result.output
+    assert 'is not in the local repository' in result.output
+    assert 'Re-run without `--dry-run`' in result.output
+    assert not any(c.args[:2] == ('fetch', 'origin') for c in run_mock.call_args_list)
+    fake_async_github.assert_not_called('create_pull_request')
+
+
+def test_command_aborts_on_abbreviated_sha_not_local(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    """Abbreviated SHAs cannot be fetched from origin, so abort early with a clear hint."""
+    run_mock = mocker.patch('ddev.utils.git.GitRepository.run')
+    mocker.patch('ddev.utils.git.GitRepository.capture', side_effect=OSError('bad object'))
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', '1234567890')
+
+    assert result.exit_code == 1, result.output
+    assert 'full 40-character SHA' in result.output
+    assert not any(c.args[:2] == ('fetch', 'origin') for c in run_mock.call_args_list)
+    fake_async_github.assert_not_called('create_pull_request')
+
+
+def test_command_fetches_commit_when_not_local(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    commit_sha = FULL_SHA_FOR_TESTS
+    subject = 'Fix bug (#100)'
+    rev_parse_calls = {'count': 0}
+
+    def capture_side_effect(*args):
+        if args == ('rev-parse', '--verify', f'{commit_sha}^{{commit}}'):
+            rev_parse_calls['count'] += 1
+            if rev_parse_calls['count'] == 1:
+                raise OSError('bad object')
+            return commit_sha + '\n'
+        if args == ('diff-tree', '--no-commit-id', '--name-only', '-r', commit_sha):
+            return ''
+        return ''
+
+    run_mock = mocker.patch('ddev.utils.git.GitRepository.run')
+    mocker.patch('ddev.utils.git.GitRepository.capture', side_effect=capture_side_effect)
+    mocker.patch(
+        'ddev.utils.git.GitRepository.log',
+        return_value=[{'hash': commit_sha, 'subject': subject}],
+    )
+    fake_async_github.mock_response(
+        'create_pull_request',
+        PullRequest(number=1, html_url='https://github.com/x/pr/1'),
+    )
+    mocker.patch('click.confirm', return_value=True)
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', commit_sha)
+
+    assert result.exit_code == 0, result.output
+    assert 'not found locally; fetching from origin' in result.output
+    assert rev_parse_calls['count'] == 2
+    git_calls = [c.args for c in run_mock.call_args_list]
+    assert ('fetch', 'origin', commit_sha) in git_calls
+    fake_async_github.assert_called_once_with(
+        'create_pull_request',
+        owner='DataDog',
+        repo='integrations-core',
+        title='[Backport] Fix bug',
+        head=f'alice/port-{commit_sha[:10]}-to-master',
+        base='master',
+        body=mocker.ANY,
+        draft=False,
+        timeout=None,
+    )
+
+
+@pytest.mark.parametrize(
+    'input_arg',
+    [
+        pytest.param('PR-23703', id='PR-prefix'),
+        pytest.param('pr-23703', id='PR-prefix-lowercase'),
+        pytest.param('PR-23703 ', id='PR-prefix-trailing-whitespace'),
+        pytest.param('https://github.com/DataDog/integrations-core/pull/23703', id='URL-https'),
+        pytest.param('http://github.com/DataDog/integrations-core/pull/23703', id='URL-http'),
+        pytest.param('https://github.com/DataDog/integrations-core/pull/23703#discussion_r1', id='URL-with-fragment'),
+        pytest.param('23703', id='pure-digit-auto-detect'),
+        pytest.param(' 23703 ', id='pure-digit-with-whitespace'),
+    ],
+)
+def test_command_resolves_pr_input(
+    input_arg: str,
+    ddev: CliRunner,
+    mocker: MockerFixture,
+    fake_async_github: FakeAsyncGitHubClient,
+) -> None:
+    _setup_command_mocks(mocker, commit_sha=FULL_SHA_FOR_TESTS)
+    fake_async_github.mock_response('get_pull_request', _merged_pr(number=23703))
+    fake_async_github.mock_response(
+        'create_pull_request',
+        PullRequest(number=1, html_url='https://github.com/x/pr/1'),
+    )
+    mocker.patch('click.confirm', return_value=True)
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', input_arg)
+
+    assert result.exit_code == 0, result.output
+    pr_call = fake_async_github.last_call('get_pull_request')
+    assert pr_call.kwargs['owner'] == 'DataDog'
+    assert pr_call.kwargs['repo'] == 'integrations-core'
+    assert pr_call.kwargs['pull_number'] == 23703
+
+
+def test_command_aborts_when_pr_not_merged(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    _setup_command_mocks(mocker, commit_sha=FULL_SHA_FOR_TESTS)
+    fake_async_github.mock_response(
+        'get_pull_request',
+        PullRequest(
+            number=23703,
+            html_url='https://github.com/DataDog/integrations-core/pull/23703',
+            merged=False,
+            merge_commit_sha=None,
+        ),
+    )
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', 'PR-23703')
+
+    assert result.exit_code == 1, result.output
+    assert 'PR #23703 is not merged' in result.output
+
+
+def test_command_aborts_when_pr_is_merge_commit(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    _setup_command_mocks(mocker, commit_sha=FULL_SHA_FOR_TESTS, parents=('parent1', 'parent2'))
+    fake_async_github.mock_response('get_pull_request', _merged_pr(number=23703))
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', 'PR-23703')
+
+    assert result.exit_code == 1, result.output
+    assert 'not squash-merged' in result.output
+    assert 'specific commit' in result.output.lower()
+
+
+def test_command_emits_pr_context_when_pure_digit_pr_merge_commit_missing(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    """Pure-digit PR input + PR found + non-resolvable merge commit -> abort names the PR, not the SHA."""
+    fake_async_github.mock_response('get_pull_request', _merged_pr(number=23703))
     mocker.patch('ddev.utils.git.GitRepository.run')
     mocker.patch('ddev.utils.git.GitRepository.capture', side_effect=OSError('bad object'))
     mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
 
-    result = ddev('release', 'port-commit', '1234567890abcdef00')
+    result = ddev('release', 'port-commit', '--dry-run', '23703')
 
     assert result.exit_code == 1, result.output
-    assert 'does not exist' in result.output
-    fake_async_github.assert_not_called('create_pull_request')
+    assert 'PR #23703 was found but its merge commit' in result.output
+    assert FULL_SHA_FOR_TESTS in result.output
+
+
+def test_command_aborts_when_pr_input_has_no_token(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    """Explicit PR form requires a GitHub token even with --no-pr."""
+    mocker.patch.dict(
+        'os.environ',
+        {'DD_GITHUB_USER': 'alice', 'DD_GITHUB_TOKEN': '', 'GH_TOKEN': '', 'GITHUB_TOKEN': ''},
+    )
+
+    result = ddev('release', 'port-commit', '--no-pr', 'PR-23703')
+
+    assert result.exit_code == 1, result.output
+    assert 'GitHub token required to resolve a PR reference' in result.output
+    assert '--no-pr does not skip this lookup' in result.output
+    fake_async_github.assert_not_called('get_pull_request')
+
+
+def test_command_falls_back_to_commit_on_pr_not_found(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    """Pure-digit input that isn't a PR resolves as a commit when it's local (PR 404 from default mock)."""
+    short_input = '1234'
+    full_sha = FULL_SHA_FOR_TESTS
+    run_mock = mocker.patch('ddev.utils.git.GitRepository.run')
+    capture_mock = mocker.patch('ddev.utils.git.GitRepository.capture')
+    capture_mock.side_effect = lambda *args: {
+        ('rev-parse', '--verify', f'{short_input}^{{commit}}'): full_sha + '\n',
+        ('diff-tree', '--no-commit-id', '--name-only', '-r', full_sha): '',
+    }.get(args, '')
+    mocker.patch('ddev.utils.git.GitRepository.log', return_value=[{'hash': full_sha, 'subject': 'Fix bug'}])
+    fake_async_github.mock_response(
+        'create_pull_request',
+        PullRequest(number=1, html_url='https://github.com/x/pr/1'),
+    )
+    mocker.patch('click.confirm', return_value=True)
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', short_input)
+
+    assert result.exit_code == 0, result.output
+    assert fake_async_github.last_call('get_pull_request').kwargs['pull_number'] == int(short_input)
+    git_calls = [c.args for c in run_mock.call_args_list]
+    # No SHA-targeted fetch (3 args): commit was resolvable locally.
+    assert not any(len(args) == 3 and args[:2] == ('fetch', 'origin') for args in git_calls)
+
+
+def test_command_aborts_with_unified_message_when_pr_and_commit_both_fail(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    """Pure-digit input: PR 404 (default mock) + commit unresolvable -> unified message."""
+    mocker.patch('ddev.utils.git.GitRepository.run')
+    mocker.patch('ddev.utils.git.GitRepository.capture', side_effect=OSError('bad object'))
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', '1234567')
+
+    assert result.exit_code == 1, result.output
+    assert 'Could not resolve `1234567` as a PR or a commit' in result.output
+    assert '`PR-xxxxx`' in result.output
 
 
 def test_command_aborts_when_commit_log_is_empty(

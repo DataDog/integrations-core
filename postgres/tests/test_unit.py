@@ -443,6 +443,80 @@ def test_check_gc_after_cancel(pg_instance):
         gc.enable()
 
 
+def test_cancel_during_running_check_defers_finalize(pg_instance):
+    """Verify that cancel() during an in-flight check() does not close connections.
+
+    Destructive cleanup (_finalize) must be deferred until run() completes so
+    that check() never accesses a closed psycopg connection, which would cause
+    a SIGSEGV in libpq.
+    """
+    import threading
+
+    check = PostgreSql('postgres', {}, [pg_instance])
+    conn = mock.MagicMock()
+    check._db = conn
+
+    check_started = threading.Event()
+    cancel_done = threading.Event()
+
+    def slow_run(self_arg):
+        check_started.set()
+        cancel_done.wait(timeout=5)
+        return ''
+
+    run_result = [None]
+
+    def run_check():
+        with mock.patch.object(type(check).__mro__[1], 'run', slow_run):
+            run_result[0] = check.run()
+
+    run_thread = threading.Thread(target=run_check)
+    run_thread.start()
+
+    check_started.wait(timeout=5)
+
+    check.cancel()
+    # cancel() should have signaled but NOT finalized since run() is in-flight
+    assert not conn.close.called, "_close_db() ran while check() was still executing"
+    assert check._cancelled is True
+
+    cancel_done.set()
+    run_thread.join(timeout=5)
+
+    # After run() completes, _finalize() should have been called
+    conn.close.assert_called_once()
+    assert check._db is None
+    assert check._query_manager is None
+    assert check.health is None
+
+
+def test_cancel_on_idle_check_finalizes_immediately(pg_instance):
+    """Verify that cancel() on an idle check runs _finalize() inline."""
+    check = PostgreSql('postgres', {}, [pg_instance])
+    conn = mock.MagicMock()
+    check._db = conn
+
+    assert not check._is_running
+
+    check.cancel()
+
+    conn.close.assert_called_once()
+    assert check._db is None
+    assert check._query_manager is None
+    assert check.health is None
+
+
+def test_run_after_cancel_returns_immediately(pg_instance):
+    """Verify that run() returns '' without executing check() if already cancelled."""
+    check = PostgreSql('postgres', {}, [pg_instance])
+    check.cancel()
+
+    with mock.patch.object(check, 'check', side_effect=AssertionError("check() should not be called")):
+        result = check.run()
+
+    assert result == ''
+
+
 def test_collect_column_statistics_updates_timestamp_on_failure(pg_instance):
     pg_instance['dbm'] = True
     pg_instance['collect_column_statistics'] = {'enabled': True, 'collection_interval': 60}

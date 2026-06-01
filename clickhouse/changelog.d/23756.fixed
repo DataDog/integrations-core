@@ -1,0 +1,1 @@
+Fix ClickHouse check to honor the reported_hostname config option and fall back to the agent hostname when connecting via localhost or 127.0.0.1.
