@@ -71,36 +71,39 @@ class ToolSpec:
     ``factory`` receives the already-imported class and the shared ToolContext
     and returns a constructed tool instance.
     ``requires_subagent_builder`` marks agentic tools that need subagent wiring.
+    ``read_only`` marks tools that only inspect state and never mutate it.
     """
 
     module: str
     cls: str
     factory: Callable[[type, ToolContext], ToolProtocol] = _plain_factory
     requires_subagent_builder: bool = False
+    read_only: bool = False
 
 
 TOOL_MANIFEST: dict[str, ToolSpec] = {
-    "read_file": ToolSpec("fs.read_file", "ReadFileTool", factory=_file_registry_factory),
-    "create_file": ToolSpec("fs.create_file", "CreateFileTool", factory=_file_registry_factory),
-    "edit_file": ToolSpec("fs.edit_file", "EditFileTool", factory=_file_registry_factory),
-    "append_file": ToolSpec("fs.append_file", "AppendFileTool", factory=_file_registry_factory),
-    "grep": ToolSpec("shell.grep", "GrepTool", factory=_file_policy_factory),
-    "list_files": ToolSpec("shell.list_files", "ListFilesTool"),
-    "mkdir": ToolSpec("fs.mkdir", "MkdirTool", factory=_file_policy_factory),
-    "http_get": ToolSpec("http.http_get", "HttpGetTool"),
-    "ddev_create": ToolSpec("shell.ddev.create", "DdevCreateTool"),
-    "ddev_test": ToolSpec("shell.ddev.ddev_test", "DdevTestTool"),
-    "ddev_env_show": ToolSpec("shell.ddev.env_show", "DdevEnvShowTool"),
-    "ddev_env_start": ToolSpec("shell.ddev.env_start", "DdevEnvStartTool"),
-    "ddev_env_stop": ToolSpec("shell.ddev.env_stop", "DdevEnvStopTool"),
-    "ddev_env_test": ToolSpec("shell.ddev.env_test", "DdevEnvTestTool"),
-    "ddev_release_changelog": ToolSpec("shell.ddev.release_changelog", "DdevReleaseChangelogTool"),
-    "ddev_validate": ToolSpec("shell.ddev.validate", "DdevValidateTool"),
+    "read_file": ToolSpec("fs.read_file", "ReadFileTool", factory=_file_registry_factory, read_only=True),
+    "create_file": ToolSpec("fs.create_file", "CreateFileTool", factory=_file_registry_factory, read_only=False),
+    "edit_file": ToolSpec("fs.edit_file", "EditFileTool", factory=_file_registry_factory, read_only=False),
+    "append_file": ToolSpec("fs.append_file", "AppendFileTool", factory=_file_registry_factory, read_only=False),
+    "grep": ToolSpec("shell.grep", "GrepTool", factory=_file_policy_factory, read_only=True),
+    "list_files": ToolSpec("shell.list_files", "ListFilesTool", read_only=True),
+    "mkdir": ToolSpec("fs.mkdir", "MkdirTool", factory=_file_policy_factory, read_only=False),
+    "http_get": ToolSpec("http.http_get", "HttpGetTool", read_only=True),
+    "ddev_create": ToolSpec("shell.ddev.create", "DdevCreateTool", read_only=False),
+    "ddev_test": ToolSpec("shell.ddev.ddev_test", "DdevTestTool", read_only=False),
+    "ddev_env_show": ToolSpec("shell.ddev.env_show", "DdevEnvShowTool", read_only=False),
+    "ddev_env_start": ToolSpec("shell.ddev.env_start", "DdevEnvStartTool", read_only=False),
+    "ddev_env_stop": ToolSpec("shell.ddev.env_stop", "DdevEnvStopTool", read_only=False),
+    "ddev_env_test": ToolSpec("shell.ddev.env_test", "DdevEnvTestTool", read_only=False),
+    "ddev_release_changelog": ToolSpec("shell.ddev.release_changelog", "DdevReleaseChangelogTool", read_only=False),
+    "ddev_validate": ToolSpec("shell.ddev.validate", "DdevValidateTool", read_only=False),
     "spawn_subagent": ToolSpec(
         "agents.spawn_subagent",
         "SpawnSubagentTool",
         factory=_spawn_subagent_factory,
         requires_subagent_builder=True,
+        read_only=False,
     ),
 }
 
@@ -159,3 +162,15 @@ class ToolRegistry:
         if tool is None:
             return ToolResult(success=False, error=f"Unknown tool: {name!r}")
         return await tool.run(raw)
+
+
+def filter_read_only(tool_names: list[str]) -> list[str]:
+    """Return only the names whose ToolSpec has read_only=True. Unknown names raise."""
+    out: list[str] = []
+    for name in tool_names:
+        spec = TOOL_MANIFEST.get(name)
+        if spec is None:
+            raise ValueError(f"Unknown tool name: {name!r}")
+        if spec.read_only:
+            out.append(name)
+    return out

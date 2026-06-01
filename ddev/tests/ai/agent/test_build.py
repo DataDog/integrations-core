@@ -6,9 +6,16 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from ddev.ai.agent.anthropic_client import AnthropicAgent
-from ddev.ai.agent.build import build_agent, build_subagent, make_agent_builder, make_subagent_builder
+from ddev.ai.agent.anthropic_client import DEFAULT_MAX_TOKENS, DEFAULT_MODEL, AnthropicAgent
+from ddev.ai.agent.build import (
+    build_agent,
+    build_subagent,
+    make_agent_builder,
+    make_goal_agent_builder,
+    make_subagent_builder,
+)
 from ddev.ai.phases.config import AgentConfig
+from ddev.ai.phases.goal import GOAL_REVIEWER_SYSTEM_PROMPT
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.registry import ToolRegistry
@@ -128,3 +135,50 @@ def test_make_subagent_builder(file_registry, clients):
     agent, registry = builder("sys", "sub-1", [])
     assert isinstance(agent, AnthropicAgent)
     assert agent.name == "sub-1"
+
+
+# ---------------------------------------------------------------------------
+# make_goal_agent_builder
+# ---------------------------------------------------------------------------
+
+
+def test_goal_agent_builder_unknown_provider_raises(file_registry, clients):
+    config = AgentConfig.model_construct(provider="bad_provider", tools=[])
+    builder = make_goal_agent_builder(config, clients, file_registry)
+    with pytest.raises(ValueError, match="Unknown agent provider: 'bad_provider'"):
+        builder("phase.goal.task")
+
+
+def test_make_goal_agent_builder_filters_read_only_tools(file_registry, clients):
+    config = AgentConfig(
+        provider="anthropic",
+        tools=["read_file", "edit_file", "grep", "create_file"],
+    )
+    builder = make_goal_agent_builder(config, clients, file_registry)
+    agent, registry = builder("phase.goal.task")
+
+    assert isinstance(agent, AnthropicAgent)
+    assert agent.name == "phase.goal.task"
+    tool_names = {d["name"] for d in registry.definitions}
+    assert tool_names == {"read_file", "grep"}
+
+
+def test_make_goal_agent_builder_uses_default_model(file_registry, clients):
+    config = AgentConfig(
+        provider="anthropic",
+        tools=["read_file"],
+        model="claude-opus-4-7",
+        max_tokens=999,
+    )
+    builder = make_goal_agent_builder(config, clients, file_registry)
+    agent, _ = builder("phase.goal.task")
+
+    assert agent._model == DEFAULT_MODEL
+    assert agent._max_tokens == DEFAULT_MAX_TOKENS
+
+
+def test_make_goal_agent_builder_uses_reviewer_system_prompt(file_registry, clients):
+    config = AgentConfig(provider="anthropic", tools=["read_file"])
+    builder = make_goal_agent_builder(config, clients, file_registry)
+    agent, _ = builder("phase.goal.task")
+    assert agent._system_prompt == GOAL_REVIEWER_SYSTEM_PROMPT
