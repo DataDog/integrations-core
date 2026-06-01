@@ -146,6 +146,7 @@ def seed_mock_kafka_client(cluster_id='test-cluster-id'):
 
     # Set kafka_client as an attribute (not a property mock)
     client.kafka_client = mock_admin_client
+    client._cluster_metadata = metadata
     client.get_topic_partitions.return_value = {'test-topic': [0, 1]}
 
     def mock_offsets_for_times(partitions, offset=-1):
@@ -1426,7 +1427,6 @@ def test_heartbeat_brokers_populated(check):
     instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
     kafka_consumer_check = check(instance)
     mock_kafka_client = seed_mock_kafka_client()
-    mock_kafka_client._cluster_metadata = mock_kafka_client.kafka_client.list_topics.return_value
     kafka_consumer_check.client = mock_kafka_client
     kafka_consumer_check.event_platform_event = mock.Mock()
 
