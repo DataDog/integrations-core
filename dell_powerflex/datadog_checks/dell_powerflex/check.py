@@ -354,7 +354,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             self.log.warning('Failed to collect events: %s', e)
             return False
         for event in events:
-            self.event(self._build_dd_event(event, 'powerflex_event_name', 'service_name'))
+            self.event(self._build_dd_event(event, 'powerflex_event_name', 'service_name', 'dell_powerflex.event'))
         return True
 
     def _collect_alerts(self, since: str) -> bool:
@@ -364,10 +364,10 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             self.log.warning('Failed to collect alerts: %s', e)
             return False
         for alert in alerts:
-            self.event(self._build_dd_event(alert, 'powerflex_alert_name', 'service'))
+            self.event(self._build_dd_event(alert, 'powerflex_alert_name', 'service', 'dell_powerflex.alert'))
         return True
 
-    def _build_dd_event(self, raw: dict, name_tag_key: str, service_key: str) -> dict:
+    def _build_dd_event(self, raw: dict, name_tag_key: str, service_key: str, event_type: str) -> dict:
         raw_ts = raw.get('timestamp')
         timestamp = datetime.fromisoformat(raw_ts).timestamp() if raw_ts else datetime.now(tz=timezone.utc).timestamp()
 
@@ -391,7 +391,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
 
         return {
             'timestamp': timestamp,
-            'event_type': self.__NAMESPACE__,
+            'event_type': event_type,
             'msg_title': title,
             'msg_text': msg_text,
             'alert_type': alert_type,

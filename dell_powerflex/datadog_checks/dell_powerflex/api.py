@@ -1,10 +1,10 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import logging
 from time import time
 from typing import Any
 
+from datadog_checks.base.log import CheckLoggingAdapter
 from datadog_checks.base.utils.http import RequestsWrapper
 
 TOKEN_PATH = '/auth/realms/powerflex/protocol/openid-connect/token'
@@ -15,7 +15,7 @@ class PowerFlexAPI:
         self,
         http: RequestsWrapper,
         gateway_url: str,
-        logger: logging.Logger,
+        logger: CheckLoggingAdapter,
         username: str | None = None,
         password: str | None = None,
         client_id: str = 'powerflexUI',
@@ -52,7 +52,7 @@ class PowerFlexAPI:
         )
         response.raise_for_status()
         data = response.json()
-        self._token = data['access_token']
+        self._token = data.get('access_token')
         expires_in = data.get('expires_in', 300)
         self._token_expiry = time() + expires_in
         self._http.options['headers']['Authorization'] = f'Bearer {self._token}'

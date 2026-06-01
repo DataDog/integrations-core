@@ -12,7 +12,9 @@ import requests
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
+from datadog_checks.dev.docker import get_docker_hostname
 from datadog_checks.dev.fs import get_here
+from datadog_checks.dev.utils import find_free_port
 
 USE_POWERFLEX_LAB = os.environ.get('USE_POWERFLEX_LAB')
 POWERFLEX_GATEWAY_URL = os.environ.get('POWERFLEX_GATEWAY_URL')
@@ -20,17 +22,6 @@ POWERFLEX_USERNAME = os.environ.get('POWERFLEX_USERNAME')
 POWERFLEX_PASSWORD = os.environ.get('POWERFLEX_PASSWORD')
 
 COMPOSE_FILE = os.path.join(get_here(), 'docker', 'docker-compose.yaml')
-
-CADDY_INSTANCE = {
-    'powerflex_gateway_url': 'http://localhost:8080',
-    'powerflex_username': 'admin',
-    'powerflex_password': 'password',
-    'collect_events': True,
-    'collect_alerts': True,
-    'resource_filters': [
-        {'resource': 'device', 'property': 'name', 'patterns': ['.*'], 'collect_statistics': True},
-    ],
-}
 
 LAB_INSTANCE = {
     'powerflex_gateway_url': POWERFLEX_GATEWAY_URL,
@@ -49,12 +40,23 @@ def dd_environment():
     if USE_POWERFLEX_LAB:
         yield LAB_INSTANCE
     else:
+        port = find_free_port(get_docker_hostname())
+        caddy_instance = {
+            'powerflex_gateway_url': f'http://{get_docker_hostname()}:{port}',
+            'powerflex_username': 'admin',
+            'powerflex_password': 'password',
+            'collect_events': True,
+            'collect_alerts': True,
+            'resource_filters': [
+                {'resource': 'device', 'property': 'name', 'patterns': ['.*'], 'collect_statistics': True},
+            ],
+        }
         conditions = [
             CheckDockerLogs(identifier='powerflex-api', patterns=['server running']),
-            CheckEndpoints('http://localhost:8080/api/version'),
+            CheckEndpoints(f'http://{get_docker_hostname()}:{port}/api/version'),
         ]
-        with docker_run(COMPOSE_FILE, conditions=conditions):
-            yield CADDY_INSTANCE
+        with docker_run(COMPOSE_FILE, conditions=conditions, env_vars={'POWERFLEX_PORT': str(port)}):
+            yield caddy_instance
 
 
 @pytest.fixture

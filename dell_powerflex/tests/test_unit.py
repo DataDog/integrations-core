@@ -798,8 +798,8 @@ def test_collect_events(dd_run_check, aggregator, instance, mock_http_get):
     assert len(events) == 4
     for event in events:
         assert event['alert_type'] == 'error'
-        assert event['event_type'] == 'dell_powerflex'
-        assert event['source_type_name'] == 'dell_powerflex'
+        assert event['event_type'] == 'dell_powerflex.event'
+        assert event['source_type_name'] == 'dell-powerflex'
         assert 'powerflex_gateway_url:https://localhost:443' in event['tags']
 
     severities = {tag for e in events for tag in e['tags'] if tag.startswith('severity:')}
@@ -872,8 +872,8 @@ def test_collect_alerts(dd_run_check, aggregator, instance, mock_http_get):
     alerts = aggregator.events
     assert len(alerts) == 2
     for alert in alerts:
-        assert alert['event_type'] == 'dell_powerflex'
-        assert alert['source_type_name'] == 'dell_powerflex'
+        assert alert['event_type'] == 'dell_powerflex.alert'
+        assert alert['source_type_name'] == 'dell-powerflex'
         assert 'powerflex_gateway_url:https://localhost:443' in alert['tags']
 
     mdm_alert = next(a for a in alerts if a['msg_title'] == 'Unable To Receive Mdm Events')
