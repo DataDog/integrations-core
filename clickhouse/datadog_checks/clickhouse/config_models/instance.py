@@ -24,7 +24,10 @@ SECURE_FIELD_NAMES = frozenset(['tls_ca_cert'])
 
 
 class CollectSchemas(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True, frozen=True)
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
     exclude_databases: Optional[tuple[str, ...]] = None
