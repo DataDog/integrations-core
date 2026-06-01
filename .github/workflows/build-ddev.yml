@@ -89,7 +89,7 @@ jobs:
 
     - name: Get Datadog credentials
       id: dd-sts
-      uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+      uses: DataDog/dd-sts-action@1f350ca511be980515cf08b0bd64182b9c6e5d32 # v1.0.3
       with:
         policy: integrations-core-api-key
 
@@ -107,7 +107,7 @@ jobs:
       run: python -m build
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: python-artifacts
         path: ddev/dist/*
@@ -168,7 +168,7 @@ jobs:
 
     - name: Get Datadog credentials
       id: dd-sts
-      uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+      uses: DataDog/dd-sts-action@1f350ca511be980515cf08b0bd64182b9c6e5d32 # v1.0.3
       with:
         policy: integrations-core-api-key
 
@@ -221,7 +221,7 @@ jobs:
 
     - name: Set up cross compiling
       if: matrix.job.cross
-      uses: taiki-e/install-action@d6e286fa45544157a02d45a43742857ebbc25d12 # v2.68.16
+      uses: taiki-e/install-action@d9be7d8cda89035c9c843f78bd44d4f72d8403d4 # v2.79.7
       with:
         tool: cross
 
@@ -238,7 +238,7 @@ jobs:
 
     - name: Download Python artifacts
       if: ${{ !startsWith(github.event.ref, 'refs/tags') }}
-      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
       with:
         name: python-artifacts
         path: ddev/dist
@@ -310,7 +310,7 @@ jobs:
 
     - name: Upload staged managed archive
       if: runner.os != 'Linux'
-      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: staged-managed-${{ runner.os }}-${{ matrix.job.target }}
         path: ddev/packaging/*
@@ -331,7 +331,7 @@ jobs:
 
     - name: Upload staged standalone archive
       if: runner.os != 'Linux'
-      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: staged-standalone-${{ runner.os }}-${{ matrix.job.target }}
         path: ddev/packaging/*
@@ -341,7 +341,7 @@ jobs:
     # can upload directly at this point
     - name: Upload standalone archive
       if: runner.os == 'Linux'
-      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: standalone-${{ matrix.job.target }}
         path: ddev/packaging/*
@@ -366,7 +366,7 @@ jobs:
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Get Datadog credentials
       id: dd-sts
-      uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+      uses: DataDog/dd-sts-action@1f350ca511be980515cf08b0bd64182b9c6e5d32 # v1.0.3
       with:
         policy: integrations-core-api-key 
 
@@ -417,7 +417,7 @@ jobs:
         OUTER
 
     - name: Download staged standalone binaries
-      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
       with:
         pattern: staged-standalone-${{ runner.os }}-*
         path: ddev/archives
@@ -430,7 +430,7 @@ jobs:
       run: ${{ steps.script-prepare.outputs.script }}
 
     - name: Upload standalone binaries
-      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: standalone-${{ matrix.job.target }}
         path: ddev/archives/*
@@ -440,7 +440,7 @@ jobs:
       run: rm -rf archives bin targets
 
     - name: Download staged managed binaries
-      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
       with:
         pattern: staged-managed-${{ runner.os }}-*
         path: ddev/archives
@@ -465,7 +465,7 @@ jobs:
 
     - name: Upload installers
       if: needs.should-sign-and-upload.outputs.result == 'true'
-      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: installers-${{ runner.os }}
         path: ddev/installers/*
@@ -491,7 +491,7 @@ jobs:
 
     - name: Get Datadog credentials
       id: dd-sts
-      uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+      uses: DataDog/dd-sts-action@1f350ca511be980515cf08b0bd64182b9c6e5d32 # v1.0.3
       with:
         policy: integrations-core-api-key
 
@@ -589,7 +589,7 @@ jobs:
         OUTER
 
     - name: Download staged standalone binaries
-      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
       with:
         pattern: staged-standalone-${{ runner.os }}-*
         path: ddev/archives
@@ -616,7 +616,7 @@ jobs:
         done
 
     - name: Upload standalone binaries
-      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: standalone-${{ runner.os }}
         path: ddev/archives/*
@@ -626,7 +626,7 @@ jobs:
       run: rm -rf archives bin notarize-bin
 
     - name: Download staged managed binaries
-      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
       with:
         pattern: staged-managed-${{ runner.os }}-*
         path: ddev/archives
@@ -701,7 +701,7 @@ jobs:
 
     - name: Upload installer
       if: needs.should-sign-and-upload.outputs.result == 'true'
-      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: installers-${{ runner.os }}
         path: ddev/signed/${{ steps.pkg.outputs.path }}
@@ -764,7 +764,7 @@ jobs:
 
     - name: Upload release notes
       if: always()
-      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: release-notes
         path: release-notes.md
@@ -794,7 +794,7 @@ jobs:
 
     - name: Get Datadog credentials
       id: dd-sts
-      uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+      uses: DataDog/dd-sts-action@1f350ca511be980515cf08b0bd64182b9c6e5d32 # v1.0.3
       with:
         policy: integrations-core-api-key
 
@@ -806,20 +806,20 @@ jobs:
         dd_api_key: ${{ steps.dd-sts.outputs.api_key }}
 
     - name: Download Python artifacts
-      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
       with:
         name: python-artifacts
         path: dist
 
     - name: Download binaries
-      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
       with:
         pattern: standalone*
         path: archives
         merge-multiple: true
 
     - name: Download installers
-      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
       with:
         pattern: installers-*
         path: installers
@@ -828,7 +828,7 @@ jobs:
     # Downloaded by exact name (not pattern) so this step cannot pull in artifacts
     # uploaded by other jobs.
     - name: Download release notes
-      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
       with:
         name: release-notes
         path: release-notes
@@ -839,12 +839,12 @@ jobs:
     # workflow file name, environment and repository the request is comming from to
     # provide the valid JWT token.
     - name: Push Python artifacts to PyPI
-      uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
+      uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
       with:
         skip-existing: true
 
     - name: Add assets to current release
-      uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
+      uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
       with:
         body_path: release-notes/release-notes.md
         files: |-
