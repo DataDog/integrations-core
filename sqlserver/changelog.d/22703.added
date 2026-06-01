@@ -1,0 +1,1 @@
+Add missing index recommendation metrics from sys.dm_db_missing_index_group_stats.

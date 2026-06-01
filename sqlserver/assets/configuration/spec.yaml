@@ -451,7 +451,7 @@ files:
           description: |
             Configure collection of table size metrics.
 
-            Set `table_size_metrics.enabled` to true to enable collection of table size metrics. 
+            Set `table_size_metrics.enabled` to true to enable collection of table size metrics.
             Does not collect tempdb metrics.
             Defaults to false.
           value:
@@ -460,6 +460,23 @@ files:
             - name: enabled
               type: boolean
               example: false
+            - name: collection_interval
+              type: integer
+              example: 600
+              display_default: 600
+        - name: missing_index_metrics
+          description: |
+            Configure collection of missing index recommendation metrics from
+            sys.dm_db_missing_index_group_stats. Includes user_seeks, user_scans,
+            avg_user_impact, and avg_total_user_cost per recommended index.
+
+            Defaults to true. Set `missing_index_metrics.enabled` to false to disable.
+          value:
+            type: object
+            properties:
+            - name: enabled
+              type: boolean
+              example: true
             - name: collection_interval
               type: integer
               example: 600

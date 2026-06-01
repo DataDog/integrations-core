@@ -295,11 +295,20 @@ instances:
         ## @param table_size_metrics - mapping - optional
         ## Configure collection of table size metrics.
         ##
-        ## Set `table_size_metrics.enabled` to true to enable collection of table size metrics. 
+        ## Set `table_size_metrics.enabled` to true to enable collection of table size metrics.
         ## Does not collect tempdb metrics.
         ## Defaults to false.
         #
         # table_size_metrics: {}
+
+        ## @param missing_index_metrics - mapping - optional
+        ## Configure collection of missing index recommendation metrics from
+        ## sys.dm_db_missing_index_group_stats. Includes user_seeks, user_scans,
+        ## avg_user_impact, and avg_total_user_cost per recommended index.
+        ##
+        ## Defaults to true. Set `missing_index_metrics.enabled` to false to disable.
+        #
+        # missing_index_metrics: {}
 
     ## Configure collection of SQL Server Agent jobs events and metrics
     #
