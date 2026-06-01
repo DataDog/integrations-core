@@ -128,6 +128,10 @@ def build_config(check: ClickhouseCheck) -> Tuple[InstanceConfig, ValidationResu
                 **dict_defaults.instance_parts_and_merges().model_dump(),
                 **(instance.get('parts_and_merges', {})),
             },
+            "collect_schemas": {
+                **dict_defaults.instance_collect_schemas().model_dump(),
+                **(instance.get('collect_schemas', {})),
+            },
             # Tags - ensure we have a list, not None
             "tags": list(instance.get('tags', [])),
             # Other settings

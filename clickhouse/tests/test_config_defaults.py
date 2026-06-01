@@ -70,6 +70,19 @@ EXPECTED_DEFAULTS = {
         'max_samples_per_collection': 1000,
         'run_sync': False,
     },
+    # === DBM: Schema collector ===
+    'collect_schemas': {
+        'enabled': False,
+        'collection_interval': 600,
+        'max_tables': 300,
+        'max_columns': 1000,
+        'max_query_duration': 60,
+        'include_databases': (),
+        'exclude_databases': (),
+        'include_tables': (),
+        'exclude_tables': (),
+        'run_sync': False,
+    },
     # === DBM: Parts and merges ===
     'parts_and_merges': {
         'enabled': True,
