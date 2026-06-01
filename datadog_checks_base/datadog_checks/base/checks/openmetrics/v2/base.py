@@ -124,7 +124,12 @@ class OpenMetricsBaseCheckV2(AgentCheck):
 
         for port in candidate_ports(service, cls.DISCOVERY_PORT_HINTS):
             yield {
-                "openmetrics_endpoint": f"http://{service.host}:{port.number}{cls.DISCOVERY_METRICS_PATH}",
+                "init_config": {},
+                "instances": [
+                    {
+                        "openmetrics_endpoint": f"http://{service.host}:{port.number}{cls.DISCOVERY_METRICS_PATH}",
+                    }
+                ],
             }
 
     def create_scraper(self, config):
