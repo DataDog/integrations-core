@@ -168,8 +168,10 @@ class PostgreSql(DatabaseCheck):
         )
         self.metrics_cache = PostgresMetricsCache(self._config)
         if self._config.query_metrics.use_v2:
+            self.log.info("Using v2 statement metrics")
             self.statement_metrics = PostgresStatementMetricsV2(self, self._config)
         else:
+            self.log.info("Using v1 statement metrics")
             self.statement_metrics = PostgresStatementMetrics(self, self._config)
         self.statement_samples = PostgresStatementSamples(self, self._config)
         self.metadata_samples = PostgresMetadata(self, self._config)
