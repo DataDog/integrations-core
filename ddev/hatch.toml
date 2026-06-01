@@ -7,6 +7,7 @@ mypy-files = [
 [envs.default]
 python = "3.13"
 e2e-env = false
+features = ["ai"]
 dependencies = [
   "pyyaml",
   "pytest-asyncio",

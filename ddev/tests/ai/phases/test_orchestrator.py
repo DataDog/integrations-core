@@ -46,9 +46,13 @@ def make_orchestrator(file_access_policy):
 # ---------------------------------------------------------------------------
 
 
+FRAMEWORK_PHASES_DIR = Path(__file__).resolve().parents[3] / "src" / "ddev" / "ai" / "phases"
+FRAMEWORK_IMPORT_PREFIX = "ddev.ai.phases"
+
+
 def test_discover_registers_agentic_phase():
     registry = PhaseRegistry()
-    _discover_and_register_phases(registry)
+    _discover_and_register_phases(registry, FRAMEWORK_PHASES_DIR, FRAMEWORK_IMPORT_PREFIX)
     assert "AgenticPhase" in registry.known_names()
     assert registry.get("AgenticPhase") is AgenticPhase
 
@@ -119,9 +123,9 @@ def test_discover_skips_underscore_prefixed_files(tmp_path, monkeypatch):
 
 def test_discover_idempotent():
     registry = PhaseRegistry()
-    _discover_and_register_phases(registry)
+    _discover_and_register_phases(registry, FRAMEWORK_PHASES_DIR, FRAMEWORK_IMPORT_PREFIX)
     first = registry.known_names()
-    _discover_and_register_phases(registry)
+    _discover_and_register_phases(registry, FRAMEWORK_PHASES_DIR, FRAMEWORK_IMPORT_PREFIX)
     second = registry.known_names()
     assert first == second
 
@@ -135,7 +139,7 @@ def test_registry_get_unknown_raises():
 def test_imported_class_not_registered():
     """A class imported into a phases module but defined elsewhere should not be registered."""
     registry = PhaseRegistry()
-    _discover_and_register_phases(registry)
+    _discover_and_register_phases(registry, FRAMEWORK_PHASES_DIR, FRAMEWORK_IMPORT_PREFIX)
     # BaseMessage is imported in messages.py but defined in event_bus — it should NOT be registered
     assert "BaseMessage" not in registry.known_names()
 
@@ -156,7 +160,7 @@ def test_two_orchestrators_have_independent_registries(tmp_path, make_orchestrat
 def test_discover_does_not_mutate_global_state():
     """_discover_and_register_phases only touches the registry passed to it."""
     registry = PhaseRegistry()
-    _discover_and_register_phases(registry)
+    _discover_and_register_phases(registry, FRAMEWORK_PHASES_DIR, FRAMEWORK_IMPORT_PREFIX)
     # No module-level / class-level container should have been touched.
     # Verify by checking there is no class-level _registry attribute on PhaseRegistry.
     assert not hasattr(PhaseRegistry, "_registry")
@@ -267,6 +271,31 @@ async def test_on_initialize_unknown_phase_type_raises_flow_config_error(tmp_pat
     )
     orchestrator = make_orchestrator(tmp_path)
     with pytest.raises(FlowConfigError, match="Unknown phase type"):
+        await orchestrator.on_initialize()
+
+
+async def test_on_initialize_flow_phases_dir_outside_ai_root_raises(tmp_path, make_orchestrator):
+    """phases/ directory outside the ddev.ai package tree raises FlowConfigError."""
+    (tmp_path / "phases").mkdir()
+    (tmp_path / "prompts").mkdir()
+    (tmp_path / "prompts" / "writer.md").write_text("system prompt")
+    (tmp_path / "flow.yaml").write_text(
+        dedent("""\
+        agents:
+          writer:
+            tools: []
+        phases:
+          a:
+            agent: writer
+            tasks:
+              - name: t1
+                prompt: do it
+        flow:
+          - phase: a
+        """)
+    )
+    orchestrator = make_orchestrator(tmp_path)
+    with pytest.raises(FlowConfigError, match="ddev.ai package tree"):
         await orchestrator.on_initialize()
 
 
