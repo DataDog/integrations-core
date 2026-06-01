@@ -494,6 +494,20 @@ async def test_total_tokens_summed_across_iterations() -> None:
     assert result.iterations == 2
 
 
+async def test_tool_result_tokens_included_in_total_tokens() -> None:
+    responses = [
+        make_response(StopReason.TOOL_USE, tool_calls=[make_tool_call()], input_tokens=100, output_tokens=50),
+        make_response(StopReason.END_TURN, input_tokens=200, output_tokens=80),
+    ]
+    agent = MockAgent(responses)
+    registry = MockToolRegistry(ToolResult(success=True, data="ok", total_input_tokens=30, total_output_tokens=10))
+
+    result = await make_process(agent, registry=registry).start("Task")
+
+    assert result.total_input_tokens == 330
+    assert result.total_output_tokens == 140
+
+
 # ---------------------------------------------------------------------------
 # Context usage propagation — parametrized None vs present
 # ---------------------------------------------------------------------------
