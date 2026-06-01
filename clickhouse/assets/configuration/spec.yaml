@@ -345,6 +345,34 @@ files:
             type: boolean
             example: false
           fleet_configurable: false
+    - name: schema_metrics
+      description: |
+        Configure per-table size and per-view refresh gauges derived from
+        `system.tables` and `system.view_refreshes`. Independent of
+        `collect_schemas` (which controls catalog structure collection)
+        so users can dashboard table sizes without enabling Schema Explorer.
+        Requires `dbm: true`.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of per-table size and per-view refresh gauges.
+          value:
+            type: boolean
+            example: false
+        - name: collection_interval
+          description: |
+            Set the schema metrics collection interval (in seconds). These
+            gauges change continuously, so 60s is a reasonable default.
+          value:
+            type: number
+            example: 60
+        - name: run_sync
+          hidden: true
+          description: |
+            Run the schema metrics collection synchronously. For testing only.
+          value:
+            type: boolean
+            example: false
     - name: collect_schemas
       description: |
         Configure collection of ClickHouse catalog metadata (databases,

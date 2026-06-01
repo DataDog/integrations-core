@@ -48,7 +48,7 @@ instances:
     #
     # username: default
 
-    ## @param password - string - optional - default: 
+    ## @param password - string - optional - default:
     ## The password of `username`.
     #
     # password: <PASSWORD>
@@ -213,6 +213,25 @@ instances:
         ## Set the maximum number of error samples to collect per hour per unique query signature.
         #
         # samples_per_hour_per_query: 60
+
+    ## Configure per-table size and per-view refresh gauges derived from
+    ## `system.tables` and `system.view_refreshes`. Independent of
+    ## `collect_schemas` (which controls catalog structure collection)
+    ## so users can dashboard table sizes without enabling Schema Explorer.
+    ## Requires `dbm: true`.
+    #
+    # schema_metrics:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of per-table size and per-view refresh gauges.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 60
+        ## Set the schema metrics collection interval (in seconds). These
+        ## gauges change continuously, so 60s is a reasonable default.
+        #
+        # collection_interval: 60
 
     ## Configure collection of ClickHouse catalog metadata (databases,
     ## tables, views, columns) for Database Monitoring's Schema Explorer.
@@ -390,7 +409,7 @@ instances:
     ##           This can also be set to the following `tag` types to tag each metric in the row with the name
     ##           and value of the item in this column:
     ##             1. tag - This is the default tag type
-    ##             2. tag_list - This allows multiple values to be attached to the tag name. For example: 
+    ##             2. tag_list - This allows multiple values to be attached to the tag name. For example:
     ##                 ```
     ##                 query = {
     ##                   "name": "example",

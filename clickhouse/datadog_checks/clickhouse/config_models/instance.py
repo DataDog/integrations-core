@@ -138,6 +138,13 @@ class QuerySamples(BaseModel):
     run_sync: Optional[bool] = None
 
 
+class SchemaMetrics(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True, frozen=True)
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    run_sync: Optional[bool] = None
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
@@ -166,6 +173,7 @@ class InstanceConfig(BaseModel):
     query_samples: Optional[QuerySamples] = None
     read_timeout: Optional[int] = None
     reported_hostname: Optional[str] = None
+    schema_metrics: Optional[SchemaMetrics] = None
     server: str
     service: Optional[str] = None
     single_endpoint_mode: Optional[bool] = None
