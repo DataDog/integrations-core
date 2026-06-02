@@ -139,6 +139,26 @@ class TestSchemaCollectorWithInaccessibleDb(TestSchemaCollector):
         return None
 
 
+class TestSchemaCollectorMidIterationFailure(TestSchemaCollector):
+    """Simulates a database that fails mid-iteration after at least one chunk has been flushed."""
+
+    __test__ = False
+
+    def _get_databases(self):
+        return [{'name': 'db_partial_fail'}, {'name': 'db_ok'}]
+
+    @contextmanager
+    def _get_cursor(self, database: str):
+        self._rows = [{'table_name': 'first'}, {'table_name': 'second'}]
+        self._row_index = 0
+        yield {}
+
+    def _map_row(self, database, cursor_row):
+        if database['name'] == 'db_partial_fail' and cursor_row.get('table_name') == 'second':
+            raise RuntimeError("mid-iteration error after first chunk flushed")
+        return super()._map_row(database, cursor_row)
+
+
 @pytest.mark.unit
 def test_schema_collector(aggregator):
     check = TestDatabaseCheck()
@@ -193,6 +213,31 @@ def test_schema_collector_chunk_size_flush(aggregator):
     assert len(events) == 2
     assert 'collection_payloads_count' not in events[0]
     assert events[-1]['collection_payloads_count'] == len(events)
+
+
+@pytest.mark.unit
+def test_schema_collector_mid_iteration_failure(aggregator):
+    """Verify chunk payloads sent before a mid-iteration failure are counted correctly."""
+    check = TestDatabaseCheck()
+    config = SchemaCollectorConfig()
+    config.payload_chunk_size = 1
+    collector = TestSchemaCollectorMidIterationFailure(check, config)
+    result = collector.collect_schemas()
+
+    assert result is True
+    events = aggregator.get_event_platform_events("dbm-metadata")
+    # db_partial_fail: 1 orphaned chunk (no terminal), db_ok: 2 chunks + 1 terminal
+    assert len(events) == 4
+
+    partial_fail_events = [e for e in events if any(r.get('name') == 'db_partial_fail' for r in e['metadata'])]
+    ok_events = [e for e in events if any(r.get('name') == 'db_ok' for r in e['metadata'])]
+    terminal_events = [e for e in events if 'collection_payloads_count' in e]
+
+    assert len(partial_fail_events) == 1
+    assert 'collection_payloads_count' not in partial_fail_events[0]
+    assert len(ok_events) == 2
+    assert len(terminal_events) == 1
+    assert terminal_events[0]['collection_payloads_count'] == 3
 
 
 @pytest.mark.unit

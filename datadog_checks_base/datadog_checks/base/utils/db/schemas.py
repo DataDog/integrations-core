@@ -92,7 +92,10 @@ class SchemaCollector(ABC):
                     self.maybe_flush(is_last_payload=True)
                     total_payloads_count += self._collection_payloads_count
                 except Exception as e:
+                    unsent_rows = len(self._queued_rows) - rows_start
                     del self._queued_rows[rows_start:]
+                    self._total_rows_count -= unsent_rows
+                    total_payloads_count += self._collection_payloads_count
                     self._log.warning("Skipping database %s due to error: %s", database_name, e, exc_info=True)
                     continue
         except Exception as e:
