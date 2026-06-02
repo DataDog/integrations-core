@@ -64,7 +64,7 @@ When `enable_cluster_monitoring` is enabled, the integration collects cluster-wi
 
 - **Brokers**: Configuration and health metrics
 - **Topics and partitions**: Sizes, offsets, and replication status
-- **Consumer groups**: Member details and group state
+- **Consumer groups**: Member details, group state, rebalance and empty-group detection, and metadata such as the partition assignor and group type
 - **Schema registry**: Schema metadata (requires `schema_registry_url`)
 
 #### Batched collection

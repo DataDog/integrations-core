@@ -120,11 +120,20 @@ def seed_mock_kafka_client(cluster_id='test-cluster-id'):
     state_mock.name = 'STABLE'
     describe_result.state = state_mock
 
+    # Group-level metadata used for dimensional tags
+    describe_result.partition_assignor = 'range'
+    describe_result.is_simple_consumer_group = False
+    type_mock = mock.MagicMock()
+    type_mock.name = 'CLASSIC'
+    describe_result.type = type_mock
+
     # Mock member
     member = mock.MagicMock()
     member.member_id = 'm1'
     member.client_id = 'c1'
     member.host = 'h1'
+    member.group_instance_id = None
+    member.target_assignment = None
 
     # Mock assignment with topic_partitions
     assignment = mock.MagicMock()
@@ -501,6 +510,33 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
     aggregator.assert_metric(
         'kafka.consumer_group.members',
         value=1,
+        tags=[
+            'test_tag:test_value',
+            'kafka_cluster_id:test-cluster-id',
+            'consumer_group:test-group',
+            'consumer_group_state:STABLE',
+            'coordinator:1',
+            'partition_assignor:range',
+            'consumer_group_type:CLASSIC',
+            'is_simple_consumer_group:false',
+        ],
+    )
+
+    aggregator.assert_metric(
+        'kafka.consumer_group.rebalancing',
+        value=0,
+        tags=[
+            'test_tag:test_value',
+            'kafka_cluster_id:test-cluster-id',
+            'consumer_group:test-group',
+            'consumer_group_state:STABLE',
+            'coordinator:1',
+        ],
+    )
+
+    aggregator.assert_metric(
+        'kafka.consumer_group.empty',
+        value=0,
         tags=[
             'test_tag:test_value',
             'kafka_cluster_id:test-cluster-id',
@@ -1547,3 +1583,182 @@ def test_schema_registry_none_compat_in_cache_omits_field(check, dd_run_check, a
     assert len(schema_events) == 1
     assert 'compatibility' not in schema_events[0]
     assert 'global_compatibility' not in schema_events[0]
+
+
+def _tp(topic, partition):
+    tp = mock.MagicMock()
+    tp.topic = topic
+    tp.partition = partition
+    return tp
+
+
+def _make_assignment(tps):
+    if tps is None:
+        return None
+    assignment = mock.MagicMock()
+    assignment.topic_partitions = [_tp(t, p) for t, p in tps]
+    return assignment
+
+
+def _make_member(
+    client_id='c1', host='h1', assignment_tps=(('test-topic', 0),), target_tps=None, group_instance_id=None
+):
+    member = mock.MagicMock()
+    member.member_id = f'm-{client_id}'
+    member.client_id = client_id
+    member.host = host
+    member.group_instance_id = group_instance_id
+    member.assignment = _make_assignment(assignment_tps)
+    member.target_assignment = _make_assignment(target_tps)
+    return member
+
+
+def _make_group_describe(
+    state_name='STABLE', assignor='range', is_simple=False, group_type='CONSUMER', members=(), coordinator_id=1
+):
+    describe_result = mock.MagicMock()
+    state_mock = mock.MagicMock()
+    state_mock.name = state_name
+    describe_result.state = state_mock
+    describe_result.partition_assignor = assignor
+    describe_result.is_simple_consumer_group = is_simple
+    type_mock = mock.MagicMock()
+    type_mock.name = group_type
+    describe_result.type = type_mock
+    coordinator_mock = mock.MagicMock()
+    coordinator_mock.id = coordinator_id
+    describe_result.coordinator = coordinator_mock
+    describe_result.members = list(members)
+    return describe_result
+
+
+def _collect_groups(check, describe_result, group_id='test-group'):
+    """Run _collect_consumer_group_metadata against a single mocked consumer group."""
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
+    kafka_consumer_check = check(instance)
+
+    metadata = mock.MagicMock()
+    metadata.cluster_id = 'test-cluster-id'
+
+    admin = mock.MagicMock()
+    list_result = mock.MagicMock()
+    list_result.errors = []
+    group_obj = mock.MagicMock()
+    group_obj.group_id = group_id
+    list_result.valid = [group_obj]
+    list_future = mock.MagicMock()
+    list_future.result.return_value = list_result
+    admin.list_consumer_groups.return_value = list_future
+
+    describe_future = mock.MagicMock()
+    describe_future.result.return_value = describe_result
+    admin.describe_consumer_groups.return_value = {group_id: describe_future}
+
+    mock_client = mock.MagicMock()
+    mock_client.kafka_client = admin
+    kafka_consumer_check.metadata_collector.client = mock_client
+
+    kafka_consumer_check.metadata_collector._collect_consumer_group_metadata(metadata)
+    return kafka_consumer_check
+
+
+def test_consumer_group_rebalancing_state_based(check, aggregator):
+    """A group in a rebalancing state reports rebalancing=1 (classic protocol)."""
+    describe_result = _make_group_describe(state_name='PREPARING_REBALANCING', members=[_make_member()])
+    _collect_groups(check, describe_result)
+    aggregator.assert_metric(
+        'kafka.consumer_group.rebalancing',
+        value=1,
+        tags=[
+            'kafka_cluster_id:test-cluster-id',
+            'consumer_group:test-group',
+            'consumer_group_state:PREPARING_REBALANCING',
+            'coordinator:1',
+        ],
+    )
+
+
+def test_consumer_group_rebalancing_target_assignment(check, aggregator):
+    """A stable group whose assignment != target_assignment reports rebalancing=1 (KIP-848)."""
+    member = _make_member(assignment_tps=[('test-topic', 0)], target_tps=[('test-topic', 0), ('test-topic', 1)])
+    describe_result = _make_group_describe(state_name='STABLE', members=[member])
+    _collect_groups(check, describe_result)
+    aggregator.assert_metric('kafka.consumer_group.rebalancing', value=1)
+
+
+def test_consumer_group_not_rebalancing_when_assignment_matches_target(check, aggregator):
+    """A stable group whose assignment == target_assignment reports rebalancing=0."""
+    member = _make_member(assignment_tps=[('test-topic', 0)], target_tps=[('test-topic', 0)])
+    describe_result = _make_group_describe(state_name='STABLE', members=[member])
+    _collect_groups(check, describe_result)
+    aggregator.assert_metric('kafka.consumer_group.rebalancing', value=0)
+
+
+def test_consumer_group_empty(check, aggregator):
+    """A group in the EMPTY state (offsets but no members) reports empty=1 and members=0."""
+    describe_result = _make_group_describe(state_name='EMPTY', members=[])
+    _collect_groups(check, describe_result)
+    aggregator.assert_metric(
+        'kafka.consumer_group.empty',
+        value=1,
+        tags=[
+            'kafka_cluster_id:test-cluster-id',
+            'consumer_group:test-group',
+            'consumer_group_state:EMPTY',
+            'coordinator:1',
+        ],
+    )
+    aggregator.assert_metric('kafka.consumer_group.empty', value=1, count=1)
+    aggregator.assert_metric('kafka.consumer_group.members', value=0)
+
+
+def test_consumer_group_not_empty_when_members_present(check, aggregator):
+    """A stable group with members reports empty=0."""
+    describe_result = _make_group_describe(state_name='STABLE', members=[_make_member()])
+    _collect_groups(check, describe_result)
+    aggregator.assert_metric('kafka.consumer_group.empty', value=0)
+
+
+def test_consumer_group_dimensional_tags(check, aggregator):
+    """Group-level metadata is attached as tags on consumer_group.members."""
+    describe_result = _make_group_describe(
+        state_name='STABLE',
+        assignor='cooperative-sticky',
+        is_simple=True,
+        group_type='CONSUMER',
+        members=[_make_member()],
+    )
+    _collect_groups(check, describe_result)
+    aggregator.assert_metric(
+        'kafka.consumer_group.members',
+        value=1,
+        tags=[
+            'kafka_cluster_id:test-cluster-id',
+            'consumer_group:test-group',
+            'consumer_group_state:STABLE',
+            'coordinator:1',
+            'partition_assignor:cooperative-sticky',
+            'consumer_group_type:CONSUMER',
+            'is_simple_consumer_group:true',
+        ],
+    )
+
+
+def test_consumer_group_member_static_membership_tag(check, aggregator):
+    """A member with a group_instance_id is tagged as a static member."""
+    member = _make_member(group_instance_id='static-1')
+    describe_result = _make_group_describe(state_name='STABLE', members=[member])
+    _collect_groups(check, describe_result)
+    aggregator.assert_metric(
+        'kafka.consumer_group.member.partitions',
+        value=1,
+        tags=[
+            'kafka_cluster_id:test-cluster-id',
+            'consumer_group:test-group',
+            'consumer_group_state:STABLE',
+            'coordinator:1',
+            'client_id:c1',
+            'member_host:h1',
+            'group_instance_id:static-1',
+        ],
+    )

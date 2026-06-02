@@ -18,6 +18,8 @@ from confluent_kafka.admin import ConfigResource, OffsetSpec, ResourceType
 
 from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
 
+CONSUMER_GROUP_REBALANCING_STATES = frozenset({'PREPARING_REBALANCING', 'COMPLETING_REBALANCING'})
+
 
 class SchemaDefinition(TypedDict):
     schema: str
@@ -858,17 +860,29 @@ class ClusterMetadataCollector:
             if coordinator:
                 state_tags.append(f'coordinator:{coordinator.id}')
 
-            self.check.gauge('consumer_group.members', len(members), tags=state_tags)
+            group_meta_tags = list(state_tags)
+            assignor = getattr(group_info, 'partition_assignor', None)
+            if assignor:
+                group_meta_tags.append(f'partition_assignor:{assignor}')
+            group_type = getattr(group_info, 'type', None)
+            if group_type is not None:
+                type_name = group_type.name if hasattr(group_type, 'name') else str(group_type)
+                group_meta_tags.append(f'consumer_group_type:{type_name}')
+            is_simple = getattr(group_info, 'is_simple_consumer_group', None)
+            if is_simple is not None:
+                group_meta_tags.append(f'is_simple_consumer_group:{str(bool(is_simple)).lower()}')
 
-            member_info = []
-            topics_for_group = set()
+            self.check.gauge('consumer_group.members', len(members), tags=group_meta_tags)
+            self.check.gauge(
+                'consumer_group.rebalancing',
+                1 if self._is_group_rebalancing(state_name, members) else 0,
+                tags=state_tags,
+            )
+            self.check.gauge('consumer_group.empty', 1 if state_name == 'EMPTY' else 0, tags=state_tags)
 
             for member in members:
-                member_id = member.member_id
                 client_id = member.client_id
                 host = member.host
-
-                member_info.append({'member_id': member_id, 'client_id': client_id, 'host': host})
 
                 if hasattr(member, 'assignment') and member.assignment:
                     partition_count = len(member.assignment.topic_partitions)
@@ -877,10 +891,25 @@ class ClusterMetadataCollector:
                         f'client_id:{client_id}',
                         f'member_host:{host}',
                     ]
+                    group_instance_id = getattr(member, 'group_instance_id', None)
+                    if group_instance_id:
+                        member_tags.append(f'group_instance_id:{group_instance_id}')
                     self.check.gauge('consumer_group.member.partitions', partition_count, tags=member_tags)
 
-                    for tp in member.assignment.topic_partitions:
-                        topics_for_group.add(tp.topic)
+    def _is_group_rebalancing(self, state_name, members) -> bool:
+        """Detect an in-progress rebalance via group state (classic) or assignment drift (KIP-848)."""
+        if state_name in CONSUMER_GROUP_REBALANCING_STATES:
+            return True
+        for member in members:
+            target = getattr(member, 'target_assignment', None)
+            assignment = getattr(member, 'assignment', None)
+            if target is None or assignment is None:
+                continue
+            current_tps = {(tp.topic, tp.partition) for tp in assignment.topic_partitions}
+            target_tps = {(tp.topic, tp.partition) for tp in target.topic_partitions}
+            if current_tps != target_tps:
+                return True
+        return False
 
     def _load_schema_id_cache(self) -> dict[str, SchemaDefinition]:
         """Load the permanent schema ID cache from persistent storage.
