@@ -6,9 +6,11 @@ from contextlib import contextmanager
 from typing import Iterator  # noqa: F401
 from urllib.parse import urlparse
 
+import yaml
+
 from .conditions import CheckDockerLogs
 from .env import environment_run, get_state, save_state
-from .fs import create_file, file_exists
+from .fs import create_file, file_exists, read_file
 from .spec import load_spec
 from .structures import EnvVars, LazyFunction, TempDir
 from .subprocess import run_command
@@ -58,6 +60,49 @@ def using_windows_containers():
     """
     os_type = run_command(['docker', 'info', '--format', '{{.OSType}}'], capture=True, check=True).stdout.strip()
     return os_type == 'windows'
+
+
+def get_e2e_discovery_config(
+    check_root=None, *, site_packages='/opt/datadog-agent/embedded/lib/python3.13/site-packages'
+):
+    check_root = os.fspath(check_root or find_check_root(depth=1))
+    check_name = os.path.basename(check_root)
+    repo_root = os.path.dirname(check_root)
+    check_package_root = os.path.join(check_root, 'datadog_checks', check_name)
+    discovery_model_path = os.path.join(check_package_root, 'config_models', 'discovery.py')
+
+    config = yaml.safe_load(read_file(os.path.join(check_package_root, 'data', 'auto_conf.yaml')))
+
+    return (
+        config,
+        {
+            'docker_volumes': [
+                '{}:{}'.format(
+                    os.path.join(repo_root, 'datadog_checks_base', 'datadog_checks', 'base', 'utils', 'discovery'),
+                    f'{site_packages}/datadog_checks/base/utils/discovery:ro',
+                ),
+                '{}:{}'.format(
+                    os.path.join(
+                        repo_root,
+                        'datadog_checks_base',
+                        'datadog_checks',
+                        'base',
+                        'checks',
+                        'openmetrics',
+                        'v2',
+                        'base.py',
+                    ),
+                    f'{site_packages}/datadog_checks/base/checks/openmetrics/v2/base.py:ro',
+                ),
+                '{}:{}'.format(
+                    os.path.join(repo_root, 'datadog_checks_base', 'datadog_checks', 'base', 'checks', 'base.py'),
+                    f'{site_packages}/datadog_checks/base/checks/base.py:ro',
+                ),
+                f'{discovery_model_path}:{site_packages}/datadog_checks/{check_name}/config_models/discovery.py:ro',
+                '/var/run/docker.sock:/var/run/docker.sock:ro',
+            ],
+        },
+    )
 
 
 @contextmanager
