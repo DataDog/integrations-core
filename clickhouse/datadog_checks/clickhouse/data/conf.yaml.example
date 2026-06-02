@@ -220,13 +220,13 @@ instances:
     #
     # collect_schemas:
 
-        ## @param enabled - boolean - optional - default: true
+        ## @param enabled - boolean - optional - default: false
         ## Enable collection of catalog metadata. When enabled, the agent
         ## polls `system.tables`, `system.columns`, and
         ## `system.view_refreshes` (ClickHouse 24.3+) and emits one
         ## `kind=clickhouse_databases` payload per cycle.
         #
-        # enabled: true
+        # enabled: false
 
         ## @param collection_interval - number - optional - default: 600
         ## Set the schema collection interval (in seconds). Catalog data

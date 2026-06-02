@@ -359,7 +359,7 @@ files:
             `kind=clickhouse_databases` payload per cycle.
           value:
             type: boolean
-            example: true
+            example: false
         - name: collection_interval
           description: |
             Set the schema collection interval (in seconds). Catalog data

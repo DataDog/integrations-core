@@ -228,6 +228,13 @@ def _apply_validated_defaults(args: dict, instance: dict, validation_result: Val
             f"parts_and_merges.collection_interval must be greater than 0, defaulting to {default_value} seconds."
         )
 
+    if _safefloat(args.get('collect_schemas', {}).get('collection_interval')) <= 0:
+        default_value = dict_defaults.instance_collect_schemas().collection_interval
+        args['collect_schemas']['collection_interval'] = default_value
+        validation_result.add_warning(
+            f"collect_schemas.collection_interval must be greater than 0, defaulting to {default_value} seconds."
+        )
+
     _pm_defaults = dict_defaults.instance_parts_and_merges()
     for _field in (
         'max_parts_rows',
