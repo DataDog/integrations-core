@@ -87,20 +87,19 @@ def _merged_database(catalog_events, name):
 
     SchemaCollector emits one DatabaseObject per table/view; the same database
     name appears multiple times across chunks. The backend dedupes on its side;
-    tests need to do the same to assert on the full set of tables/views.
+    tests need to do the same to assert on the full set of tables. Tables and
+    views share a single `tables` list; views are identified by engine.
     """
     tables: list[dict] = []
-    views: list[dict] = []
     found = False
     for db in _databases(catalog_events):
         if db.get('name') != name:
             continue
         found = True
         tables.extend(db.get('tables') or [])
-        views.extend(db.get('views') or [])
     if not found:
         return None
-    return {'name': name, 'tables': tables, 'views': views}
+    return {'name': name, 'tables': tables}
 
 
 _find_database = _merged_database
@@ -196,8 +195,8 @@ def test_metadata_materialized_view_with_target(aggregator, metadata_instance, d
         db = _find_database(events, 'default')
         assert db is not None
 
-        view = next((v for v in db['views'] if v['name'] == mv), None)
-        assert view is not None, f'Expected view {mv} in payload; got: {[v["name"] for v in db["views"]]}'
+        view = next((t for t in db['tables'] if t['name'] == mv), None)
+        assert view is not None, f'Expected view {mv} in payload; got: {[t["name"] for t in db["tables"]]}'
         assert view['engine'] == 'MaterializedView'
         assert view['create_query']
         assert f'TO default.{target}' in view['create_query']
@@ -310,7 +309,7 @@ def test_metadata_refreshable_view_status_populated(aggregator, metadata_instanc
         db = _find_database(events, 'default')
         assert db is not None
 
-        view = next((v for v in db['views'] if v['name'] == mv), None)
+        view = next((t for t in db['tables'] if t['name'] == mv), None)
         assert view is not None, f'Expected refreshable view {mv} in payload'
         assert view['is_refreshable'] is True
     finally:

@@ -278,21 +278,21 @@ def test_collect_payload_tables_list_includes_views(check):
         ],
     )
     dbs = payloads[0]['metadata']
-    table_names = {t['name'] for db in dbs for t in db['tables']}
-    view_names = {v['name'] for db in dbs for v in db.get('views', [])}
-    assert 'events' in table_names
-    assert 'events_mv' in view_names
-    refreshable_view = next(v for db in dbs for v in db.get('views', []) if v['name'] == 'events_mv')
-    assert refreshable_view['is_refreshable'] is True
+    # Tables and views share a single `tables` list; views are identified by engine.
+    items = {t['name']: t for db in dbs for t in db['tables']}
+    assert 'events' in items
+    assert 'events_mv' in items
+    assert items['events_mv']['engine'] == 'MaterializedView'
+    assert items['events_mv']['is_refreshable'] is True
 
 
 @pytest.mark.parametrize('engine', ['View', 'LiveView', 'WindowView'])
-def test_collect_view_engines_appear_in_views(check, engine):
+def test_collect_view_engines_appear_in_tables_list(check, engine):
     payloads = _run_collect(check, table_rows=[_view_row(name='some_view', engine=engine)])
     dbs = payloads[0]['metadata']
-    views = [v for db in dbs for v in db.get('views', [])]
-    assert [v['name'] for v in views] == ['some_view']
-    assert views[0]['engine'] == engine
+    items = [t for db in dbs for t in db['tables']]
+    assert [t['name'] for t in items] == ['some_view']
+    assert items[0]['engine'] == engine
 
 
 def test_collect_dedupes_replica_rows_via_sql(check):
@@ -330,7 +330,7 @@ def test_collect_marks_view_refreshable_based_on_create_query(check):
             ),
         ],
     )
-    by_name = {v['name']: v for db in payloads[0]['metadata'] for v in db.get('views', [])}
+    by_name = {t['name']: t for db in payloads[0]['metadata'] for t in db['tables']}
     assert by_name['refreshable_mv']['is_refreshable'] is True
     assert by_name['vanilla_view']['is_refreshable'] is False
 
@@ -345,7 +345,7 @@ def test_collect_columns_attached_to_correct_parent(check):
     )
     dbs = payloads[0]['metadata']
     table = next(t for db in dbs for t in db['tables'] if t['name'] == 'events')
-    view = next(v for db in dbs for v in db.get('views', []) if v['name'] == 'events_mv')
+    view = next(t for db in dbs for t in db['tables'] if t['name'] == 'events_mv')
     assert [c['name'] for c in table['columns']] == ['id']
     assert [c['name'] for c in view['columns']] == ['count']
 

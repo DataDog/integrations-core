@@ -13,8 +13,6 @@ from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollecto
 
 _SYSTEM_DATABASE_NAMES = ("'system'", "'INFORMATION_SCHEMA'", "'information_schema'")
 
-_VIEW_ENGINES = frozenset(['View', 'MaterializedView', 'LiveView', 'WindowView'])
-
 # Single stub so the base-class loop runs exactly once; actual database names
 # come from the `database` column of each cursor row.
 _CLUSTER_STUB = {'name': '_cluster_'}
@@ -160,12 +158,12 @@ class ClickhouseSchemaCollector(SchemaCollector):
         return next(cursor, None)
 
     def _map_row(self, _database: dict[str, str], cursor_row: tuple) -> dict[str, Any]:
+        # Tables and views are emitted in a single `tables` list, matching the
+        # canonical DBM schema payload shape (postgres/mysql/sqlserver). The
+        # `engine` field on each item distinguishes views (View, MaterializedView,
+        # LiveView, WindowView) from regular tables.
         actual_db_name = cursor_row[0]
-        engine = cursor_row[2]
-        item = self._build_item(cursor_row)
-        if engine in _VIEW_ENGINES:
-            return {'name': actual_db_name, 'tables': [], 'views': [item]}
-        return {'name': actual_db_name, 'tables': [item], 'views': []}
+        return {'name': actual_db_name, 'tables': [self._build_item(cursor_row)]}
 
     def _build_item(self, row: tuple) -> dict[str, Any]:
         (
