@@ -195,7 +195,8 @@ def test_schema_collector_empty_last_database(aggregator):
     assert events[0]['metadata'][1]['name'] == 'db_with_tables'
     assert events[0]['metadata'][1]['tables'][0]['table_name'] == 'orders'
     assert events[0]['collection_payloads_count'] == 1
-    assert len(events[1]['metadata']) == 0
+    assert len(events[1]['metadata']) == 1
+    assert events[1]['metadata'][0]['name'] == 'db_empty_last'
     assert events[1]['collection_payloads_count'] == 1
 
 
