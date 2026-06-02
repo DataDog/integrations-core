@@ -860,25 +860,16 @@ class ClusterMetadataCollector:
             if coordinator:
                 state_tags.append(f'coordinator:{coordinator.id}')
 
-            group_meta_tags = list(state_tags)
-            assignor = getattr(group_info, 'partition_assignor', None)
-            if assignor:
-                group_meta_tags.append(f'partition_assignor:{assignor}')
-            group_type = getattr(group_info, 'type', None)
-            if group_type is not None:
-                type_name = group_type.name if hasattr(group_type, 'name') else str(group_type)
-                group_meta_tags.append(f'consumer_group_type:{type_name}')
-            is_simple = getattr(group_info, 'is_simple_consumer_group', None)
-            if is_simple is not None:
-                group_meta_tags.append(f'is_simple_consumer_group:{str(bool(is_simple)).lower()}')
+            # All group-level gauges share the same tag set so they can be correlated in dashboards.
+            group_meta_tags = self._build_group_meta_tags(state_tags, group_info)
 
             self.check.gauge('consumer_group.members', len(members), tags=group_meta_tags)
             self.check.gauge(
                 'consumer_group.rebalancing',
                 1 if self._is_group_rebalancing(state_name, members) else 0,
-                tags=state_tags,
+                tags=group_meta_tags,
             )
-            self.check.gauge('consumer_group.empty', 1 if state_name == 'EMPTY' else 0, tags=state_tags)
+            self.check.gauge('consumer_group.empty', 1 if state_name == 'EMPTY' else 0, tags=group_meta_tags)
 
             for member in members:
                 client_id = member.client_id
@@ -892,9 +883,24 @@ class ClusterMetadataCollector:
                         f'member_host:{host}',
                     ]
                     group_instance_id = getattr(member, 'group_instance_id', None)
-                    if group_instance_id:
+                    if group_instance_id is not None:
                         member_tags.append(f'group_instance_id:{group_instance_id}')
                     self.check.gauge('consumer_group.member.partitions', partition_count, tags=member_tags)
+
+    def _build_group_meta_tags(self, state_tags: list[str], group_info) -> list[str]:
+        """Build the group-level tag list, appending dimensional metadata when the broker provides it."""
+        tags = list(state_tags)
+        assignor = getattr(group_info, 'partition_assignor', None)
+        if assignor is not None:
+            tags.append(f'partition_assignor:{assignor}')
+        group_type = getattr(group_info, 'type', None)
+        if group_type is not None:
+            type_name = group_type.name if hasattr(group_type, 'name') else str(group_type)
+            tags.append(f'consumer_group_type:{type_name}')
+        is_simple = getattr(group_info, 'is_simple_consumer_group', None)
+        if is_simple is not None:
+            tags.append(f'is_simple_consumer_group:{str(bool(is_simple)).lower()}')
+        return tags
 
     def _is_group_rebalancing(self, state_name, members) -> bool:
         """Detect an in-progress rebalance via group state (classic) or assignment drift (KIP-848)."""
