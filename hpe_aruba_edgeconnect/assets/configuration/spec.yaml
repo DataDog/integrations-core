@@ -1,4 +1,5 @@
 name: HPE Aruba EdgeConnect
+fleet_configurable: true
 files:
 - name: hpe_aruba_edgeconnect.yaml
   options:
@@ -8,6 +9,7 @@ files:
   - template: instances
     options:
     - name: orchestrator_ip
+      fleet_configurable: true
       required: true
       description: Hostname or IP address of the HPE Aruba EdgeConnect Orchestrator.
       value:
@@ -15,6 +17,7 @@ files:
         example: 10.0.0.1
 
     - name: orchestrator_username
+      fleet_configurable: true
       required: true
       description: |
         Username for the Orchestrator. If no appliance-specific credentials are provided,
@@ -23,6 +26,7 @@ files:
         type: string
 
     - name: orchestrator_password
+      fleet_configurable: true
       required: true
       secret: true
       description: |
@@ -32,12 +36,14 @@ files:
         type: string
 
     - name: namespace
+      fleet_configurable: true
       description: Namespace to use for NDM device metadata. Defaults to "default".
       value:
         type: string
         example: default
         default: default
     - name: appliance_ips
+      fleet_configurable: true
       description: |
           HPE Aruba EdgeConnect appliance IP filters. CIDR entries match any appliance IP within the block.
           If no filters are configured, all discovered appliances are included.
@@ -62,6 +68,7 @@ files:
           exclude:
             - 10.0.0.99
     - name: max_concurrency
+      fleet_configurable: true
       description: Maximum number of appliances to poll concurrently.
       value:
         type: integer
@@ -69,6 +76,7 @@ files:
         default: 50
         example: 50
     - name: max_backfill_minutes
+      fleet_configurable: true
       description: |
         How many minutes of historical data to recover for each appliance after the Agent has been
         offline. If the Agent stops collecting for a while (for example, during a restart or an
@@ -83,6 +91,7 @@ files:
         default: 5
         example: 5
     - name: appliance_credentials_overrides
+      fleet_configurable: true
       description: |
         Per-appliance credential overrides matched by CIDR. When an appliance IP falls within a listed
         CIDR block, the associated username and password are used instead of the main credentials.
@@ -114,6 +123,7 @@ files:
         min_collection_interval.value.example: 60
         min_collection_interval.value.display_default: 60
     - name: send_ndm_metadata
+      fleet_configurable: true
       description: |
         Set to `true` to enable Network Device Monitoring metadata (for devices, interfaces, topology) to be sent.
       value:
@@ -126,4 +136,3 @@ files:
       port: 10514
       service: hpe_aruba_edgeconnect
       source: hpe_aruba_edgeconnect
- 
