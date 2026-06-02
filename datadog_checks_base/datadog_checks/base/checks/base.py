@@ -816,13 +816,14 @@ class AgentCheck(object):
             raw_event = to_native_string(raw_event)
         aggregator.submit_event_platform_event(self, self.check_id, raw_event, event_track_type)
 
-    def submit_generic_resource(self, *, type, key, fields, redact, seen_at=None, expire_at=None):
+    def submit_generic_resource(self, *, type, key, fields, include, seen_at=None, expire_at=None):
         # type: (str, str, dict | None, dict, int | None, int | None) -> None
         """Ship a resource on the ``genresources`` event-platform track.
 
-        ``redact`` is required: ``{"paths": [...], "annotation_keys": [...]}``.
-        Pass empty lists to skip redaction explicitly. ``seen_at`` / ``expire_at``
-        are optional ``int`` unix-seconds.
+        ``include`` is required: ``{"paths": [...], "map_paths": [...], "annotation_keys": [...]}``.
+        ``paths`` select scalar leaves; ``map_paths`` select whole flat maps (e.g. ``metadata.labels``);
+        ``annotation_keys`` glob ``metadata.annotations`` keys. A path that resolves to a structured
+        object is dropped. ``seen_at`` / ``expire_at`` are optional ``int`` unix-seconds.
         """
         if fields is None:
             return
@@ -837,7 +838,8 @@ class AgentCheck(object):
             MAX_FIELDS_JSON_BYTES,
             GenericResource,
             GenericResourceEvent,
-            apply_deny_list,
+            apply_allow_list,
+            find_invalid_include,
         )
 
         integration = self.name
@@ -860,26 +862,52 @@ class AgentCheck(object):
             _emit_dropped()
             return
 
-        if not isinstance(redact, dict):
+        if not isinstance(include, dict):
             self.log.warning(
-                "genresources: dropping resource with non-dict redact type=%s key=%s actual_type=%s",
+                "genresources: dropping resource with non-dict include type=%s key=%s actual_type=%s",
                 type,
                 key,
-                redact.__class__.__name__,
+                include.__class__.__name__,
             )
             _emit_dropped()
             return
 
-        redacted_fields = apply_deny_list(
-            fields,
-            paths=redact.get("paths", []),
-            annotation_keys=redact.get("annotation_keys", []),
-        )
+        paths = include.get("paths", [])
+        map_paths = include.get("map_paths", [])
+        annotation_keys = include.get("annotation_keys", [])
+
+        def _is_str_list(value):
+            return isinstance(value, list) and all(isinstance(item, str) for item in value)
+
+        if not (_is_str_list(paths) and _is_str_list(map_paths) and _is_str_list(annotation_keys)):
+            self.log.warning("genresources: dropping resource with malformed include type=%s key=%s", type, key)
+            _emit_dropped()
+            return
+
+        if any(not pattern.strip("*?") for pattern in annotation_keys):
+            self.log.warning(
+                "genresources: dropping resource with catch-all annotation pattern type=%s key=%s", type, key
+            )
+            _emit_dropped()
+            return
+
+        invalid = find_invalid_include(fields, paths, map_paths)
+        if invalid is not None:
+            offending_path, reason = invalid
+            self.log.warning(
+                "genresources: dropping resource (%s) path=%s type=%s key=%s", reason, offending_path, type, key
+            )
+            _emit_dropped()
+            return
+
+        included = apply_allow_list(fields, paths=paths, map_paths=map_paths, annotation_keys=annotation_keys)
+        if not included:
+            self.log.warning("genresources: dropping resource with empty inclusion type=%s key=%s", type, key)
+            _emit_dropped()
+            return
 
         try:
-            fields_json = _json.dumps(redacted_fields, sort_keys=True, separators=(",", ":"), allow_nan=False).encode(
-                "utf-8"
-            )
+            fields_json = _json.dumps(included, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
         except (TypeError, ValueError):
             self.log.exception("genresources: failed to encode fields for type=%s key=%s", type, key)
             _emit_dropped()
