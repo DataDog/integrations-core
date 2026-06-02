@@ -20,6 +20,24 @@
             "default": "*",
             "name": "port",
             "prefix": "port"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "link_layer",
+            "prefix": "link_layer"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "netdev",
+            "prefix": "netdev"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "gid_type",
+            "prefix": "gid_type"
         }
     ],
     "title": "InfiniBand Overview",
@@ -146,7 +164,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "count:infiniband.port_state{$host,$device,$port} by {port_state}"
+                                            "query": "count:infiniband.port_state{$host,$device,$port,$link_layer,$netdev,$gid_type} by {port_state}"
                                         }
                                     ],
                                     "response_format": "scalar",
@@ -195,7 +213,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "count:infiniband.port_phys_state{$host,$device,$port} by {port_phys_state}"
+                                            "query": "count:infiniband.port_phys_state{$host,$device,$port,$link_layer,$netdev,$gid_type} by {port_phys_state}"
                                         }
                                     ],
                                     "response_format": "scalar",
@@ -310,7 +328,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "count:infiniband.port_state{$host,$device,$port} by {port_state,host,device}"
+                                            "query": "count:infiniband.port_state{$host,$device,$port,$link_layer,$netdev,$gid_type} by {port_state,host,device}"
                                         }
                                     ],
                                     "response_format": "scalar",
@@ -360,7 +378,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "count:infiniband.port_phys_state{$host,$device,$port} by {port_phys_state,host,device}"
+                                            "query": "count:infiniband.port_phys_state{$host,$device,$port,$link_layer,$netdev,$gid_type} by {port_phys_state,host,device}"
                                         }
                                     ],
                                     "response_format": "scalar",
@@ -417,7 +435,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.symbol_error{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.symbol_error{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -466,7 +484,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.link_downed{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.link_downed{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -514,7 +532,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.link_error_recovery{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.link_error_recovery{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -563,7 +581,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.port_rcv_errors{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.port_rcv_errors{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -612,7 +630,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.port_rcv_remote_physical_errors{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.port_rcv_remote_physical_errors{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -661,7 +679,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.local_link_integrity_errors{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.local_link_integrity_errors{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -710,7 +728,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.port_rcv_discards{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.port_rcv_discards{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -759,7 +777,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.port_xmit_discards{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.port_xmit_discards{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -807,7 +825,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.port_xmit_wait{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.port_xmit_wait{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -859,12 +877,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.port_rcv_data{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.port_rcv_data{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:infiniband.port_rcv_data_64{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.port_rcv_data_64{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -917,12 +935,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.port_xmit_data{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.port_xmit_data{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:infiniband.port_xmit_data_64{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.port_xmit_data_64{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -975,12 +993,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.port_rcv_packets{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.port_rcv_packets{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:infiniband.port_rcv_packets_64{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.port_rcv_packets_64{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1028,7 +1046,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.excessive_buffer_overrun_errors{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.excessive_buffer_overrun_errors{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1077,7 +1095,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.port_rcv_switch_relay_errors{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.port_rcv_switch_relay_errors{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1126,7 +1144,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.port_rcv_constraint_errors{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.port_rcv_constraint_errors{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1214,7 +1232,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.local_ack_timeout_err{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.local_ack_timeout_err{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1263,7 +1281,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.packet_seq_err{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.packet_seq_err{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1312,7 +1330,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.rnr_nak_retry_err{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.rnr_nak_retry_err{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1360,7 +1378,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.np_cnp_sent{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.np_cnp_sent{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1407,7 +1425,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.np_ecn_marked_roce_packets{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.np_ecn_marked_roce_packets{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1454,7 +1472,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.roce_adp_retrans{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.roce_adp_retrans{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1501,7 +1519,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.out_of_buffer{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.out_of_buffer{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1549,7 +1567,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.out_of_sequence{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.out_of_sequence{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1597,7 +1615,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.duplicate_request{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.duplicate_request{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1645,7 +1663,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.req_cqe_error{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.req_cqe_error{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1693,7 +1711,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.resp_cqe_error{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.resp_cqe_error{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1741,7 +1759,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.resp_remote_access_errors{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.resp_remote_access_errors{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1789,7 +1807,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.resp_local_length_error{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.resp_local_length_error{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1837,7 +1855,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.req_remote_invalid_request{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.req_remote_invalid_request{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1885,7 +1903,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.rx_wqe_err{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.rx_wqe_err{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1933,7 +1951,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.roce_slow_restart{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.roce_slow_restart{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1980,7 +1998,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.rp_cnp_ignored{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.rp_cnp_ignored{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2028,7 +2046,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.rp_cnp_handled{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.rp_cnp_handled{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2114,7 +2132,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.rdma_write_wrs{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.rdma_write_wrs{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2161,7 +2179,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.tx_bytes{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.tx_bytes{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2208,7 +2226,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.rx_bytes{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.rx_bytes{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2255,7 +2273,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.rx_pkts{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.rx_pkts{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2302,7 +2320,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.rx_drops{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.rx_drops{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2349,7 +2367,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.tx_pkts{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.tx_pkts{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2396,7 +2414,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.send_wrs{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.send_wrs{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2443,7 +2461,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.recv_bytes{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.recv_bytes{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2490,7 +2508,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.send_bytes{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.send_bytes{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2537,7 +2555,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:infiniband.rdma.recv_wrs{$host,$device,$port} by {device,port,host}"
+                                            "query": "avg:infiniband.rdma.recv_wrs{$host,$device,$port,$link_layer,$netdev,$gid_type} by {device,port,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
