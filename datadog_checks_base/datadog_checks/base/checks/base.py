@@ -821,7 +821,7 @@ class AgentCheck(object):
         """Ship a resource on the ``genresources`` event-platform track.
 
         ``include`` is required: ``{"paths": [...], "map_paths": [...], "annotation_keys": [...]}``.
-        ``paths`` select scalar leaves; ``map_paths`` select whole flat maps (e.g. ``metadata.labels``);
+        ``paths`` select values; ``map_paths`` select whole flat maps (e.g. ``metadata.labels``);
         ``annotation_keys`` glob ``metadata.annotations`` keys. A path that resolves to a structured
         object is dropped. ``seen_at`` / ``expire_at`` are optional ``int`` unix-seconds.
         """

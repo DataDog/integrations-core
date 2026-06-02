@@ -30,7 +30,7 @@ def _fields():
     }
 
 
-def test_apply_allow_list_given_leaf_map_and_annotation_includes_returns_only_those():
+def test_apply_allow_list_given_value_map_and_annotation_includes_returns_only_those():
     result = apply_allow_list(
         _fields(),
         paths=["metadata.name", "spec.project", "status.health.status", "operation", "spec.missing"],
@@ -67,7 +67,7 @@ def test_apply_allow_list_given_partial_wildcard_match_drops_empty_elements():
     assert result == {"spec": {"sources": [{"repoURL": "a"}]}}
 
 
-def test_apply_allow_list_given_non_scalar_annotation_value_skips_it():
+def test_apply_allow_list_given_object_annotation_value_skips_it():
     fields = {"metadata": {"annotations": {"flat": "ok", "obj": {"x": 1}, "arr": [1]}}}
     result = apply_allow_list(fields, paths=[], map_paths=[], annotation_keys=["flat", "obj", "arr"])
     assert result == {"metadata": {"annotations": {"flat": "ok"}}}
@@ -91,7 +91,7 @@ def test_apply_allow_list_does_not_mutate_input():
         (["metadata.annotations"], [], None),
     ],
     ids=[
-        "scalar_paths_ok",
+        "value_paths_ok",
         "flat_object_in_paths_rejected",
         "nested_object_in_paths_rejected",
         "array_of_objects_rejected",
@@ -100,5 +100,5 @@ def test_apply_allow_list_does_not_mutate_input():
         "annotations_path_skipped",
     ],
 )
-def test_find_invalid_include_enforces_leaf_only_contract(paths, map_paths, expected):
+def test_find_invalid_include_enforces_value_and_map_contract(paths, map_paths, expected):
     assert find_invalid_include(_fields(), paths, map_paths) == expected

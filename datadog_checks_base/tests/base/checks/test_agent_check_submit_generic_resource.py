@@ -12,7 +12,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs import datadog_agent
 from datadog_checks.base.utils.genresources import GenericResourceEvent
 
-SCALAR_INCLUDE = {"paths": ["metadata.name"], "map_paths": [], "annotation_keys": []}
+VALUE_INCLUDE = {"paths": ["metadata.name"], "map_paths": [], "annotation_keys": []}
 
 
 @pytest.fixture
@@ -89,8 +89,8 @@ def test_submit_generic_resource_emits_expected_event(aggregator, check):
 @pytest.mark.parametrize(
     "kwargs",
     [
-        {"type": "t", "key": "", "fields": {"metadata": {"name": "x"}}, "include": SCALAR_INCLUDE},
-        {"type": "t", "key": "k", "fields": ["not", "a", "dict"], "include": SCALAR_INCLUDE},
+        {"type": "t", "key": "", "fields": {"metadata": {"name": "x"}}, "include": VALUE_INCLUDE},
+        {"type": "t", "key": "k", "fields": ["not", "a", "dict"], "include": VALUE_INCLUDE},
         {"type": "t", "key": "k", "fields": {"metadata": {"name": "x"}}, "include": None},
         {
             "type": "t",
@@ -128,7 +128,7 @@ def test_submit_generic_resource_emits_expected_event(aggregator, check):
             "fields": {"spec": {"ratio": float("nan")}},
             "include": {"paths": ["spec.ratio"], "map_paths": [], "annotation_keys": []},
         },
-        {"type": "t", "key": "k", "fields": {"metadata": {"name": "x" * 2_000_000}}, "include": SCALAR_INCLUDE},
+        {"type": "t", "key": "k", "fields": {"metadata": {"name": "x" * 2_000_000}}, "include": VALUE_INCLUDE},
     ],
     ids=[
         "empty_key",
@@ -154,7 +154,7 @@ def test_submit_generic_resource_ignores_non_int_timestamps(aggregator, check):
         type="argocd_application",
         key="k",
         fields={"metadata": {"name": "x"}},
-        include=SCALAR_INCLUDE,
+        include=VALUE_INCLUDE,
         seen_at=1700000000.9,
         expire_at=1700000000.5,
     )

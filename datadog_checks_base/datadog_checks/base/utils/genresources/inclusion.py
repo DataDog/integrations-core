@@ -20,7 +20,7 @@ def apply_allow_list(
 ) -> dict:
     """Return a new dict with only the allow-listed leaves of ``fields``.
 
-    ``paths`` select scalar leaves (dotted segments; ``[*]`` matches every array element).
+    ``paths`` select plain values (dotted segments; ``[*]`` matches every array element).
     ``map_paths`` select whole flat maps wholesale (e.g. ``metadata.labels``). ``annotation_keys``
     apply fnmatch globs to ``metadata.annotations`` keys; annotations never come in through
     ``paths``/``map_paths``. The input is never mutated.
@@ -46,16 +46,16 @@ def find_invalid_include(
     paths: Sequence[str],
     map_paths: Sequence[str],
 ) -> tuple[str, str] | None:
-    """Return ``(path, reason)`` for the first include that breaks the leaf-only contract, else None.
+    """Return ``(path, reason)`` for the first invalid include, else None.
 
-    ``paths`` must resolve to scalars or lists of scalars; ``map_paths`` must resolve to flat maps.
+    ``paths`` must resolve to values or lists of values; ``map_paths`` must resolve to flat maps.
     """
     for path in paths:
         segments = path.split(".")
         if _targets_annotations(segments):
             continue
         for value in _resolve(fields, segments):
-            if not _is_scalar_leaf(value):
+            if not _is_plain_value(value):
                 return path, "nested include value"
 
     for path in map_paths:
@@ -94,8 +94,8 @@ def _resolve(node: object, segments: list[str]) -> Iterator[object]:
         yield value
 
 
-def _is_scalar_leaf(value: object) -> bool:
-    """True for a scalar, ``None``, or a list of scalars/``None``; a map is never a scalar leaf."""
+def _is_plain_value(value: object) -> bool:
+    """True for a value (str/int/float/bool), ``None``, or a list of those; a map is never a plain value."""
     if isinstance(value, Mapping):
         return False
     if isinstance(value, list):
@@ -104,7 +104,7 @@ def _is_scalar_leaf(value: object) -> bool:
 
 
 def _is_flat_map(value: object) -> bool:
-    """True for a map whose values are all scalar/``None`` (no nested objects or lists)."""
+    """True for a map whose values are all plain (no nested objects or lists)."""
     return isinstance(value, Mapping) and all(not isinstance(v, (Mapping, list)) for v in value.values())
 
 
@@ -114,7 +114,7 @@ def _targets_annotations(segments: list[str]) -> bool:
 
 
 def _carve(src_node: object, dst_node: dict, segments: list[str]) -> bool:
-    """Copy the value at ``segments`` into ``dst_node``; return True iff a real leaf was copied.
+    """Copy the value at ``segments`` into ``dst_node``; return True iff a value was copied.
 
     A container is attached only once a descendant copies data, so a missing path leaves no shell.
     Existing containers are reused, so paths sharing a prefix merge (per element for ``[*]``).
@@ -164,7 +164,7 @@ def _carve(src_node: object, dst_node: dict, segments: list[str]) -> bool:
 
 
 def _carve_annotations(src: Mapping[str, object], dst: dict, annotation_keys: Sequence[str]) -> None:
-    """Add the allow-listed ``metadata.annotations`` (scalar values only) to ``dst``."""
+    """Add the allow-listed ``metadata.annotations`` (plain values only) to ``dst``."""
     metadata = src.get("metadata")
     annotations = metadata.get("annotations") if isinstance(metadata, Mapping) else None
     if not isinstance(annotations, Mapping):
@@ -181,7 +181,7 @@ def _carve_annotations(src: Mapping[str, object], dst: dict, annotation_keys: Se
 
 
 def _prune_empty(node: object) -> None:
-    """Remove empty dicts and empty lists in-place, bottom-up; scalars and ``None`` are kept."""
+    """Remove empty dicts and empty lists in-place, bottom-up; values and ``None`` are kept."""
     if isinstance(node, dict):
         for key in list(node):
             value = node[key]
