@@ -65,15 +65,6 @@
         "default": true
       }
     ],
-    "dataflow_config": [
-        {
-          "dataflow_id": "ringcentral-logs",
-          "additional_config_fields": []
-        },
-        {
-          "dataflow_id": "ringcentral-metrics",
-          "additional_config_fields": []
-        }
-    ]
+    "dataflow_config": []
   }
   

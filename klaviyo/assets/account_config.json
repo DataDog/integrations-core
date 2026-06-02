@@ -28,11 +28,6 @@
         "required": false
       }
     ],
-    "dataflow_config": [
-        {
-          "dataflow_id": "klaviyo-logs",
-          "additional_config_fields": []
-        }
-    ]
+    "dataflow_config": []
   }
   
