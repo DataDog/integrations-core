@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 from ddev.ai.phases.agentic_phase import AgenticPhase, render_memory_prompt, render_task_prompt
@@ -191,8 +192,8 @@ async def test_react_hook_failure_fails_phase(flow_dir, monkeypatch, message_que
 # ---------------------------------------------------------------------------
 
 
-async def test_flow_variables_rendered_in_system_prompt(flow_dir, monkeypatch, message_queue):
-    (flow_dir / "prompts" / "writer.md").write_text("Project: ${project}")
+async def test_build_runtime_receives_rendered_flow_context(flow_dir, monkeypatch, message_queue):
+    (flow_dir / "prompts" / "writer.md").write_text("Project: ${project}", encoding="utf-8")
     mock_agent = MockAgent([make_response("done", 100, 50), make_response("summary", 10, 5)])
     captured: dict = {}
     phase, _ = make_agent_phase(
@@ -201,16 +202,18 @@ async def test_flow_variables_rendered_in_system_prompt(flow_dir, monkeypatch, m
         monkeypatch,
         message_queue,
         flow_variables={"project": "myproj"},
-        captured_agent_kwargs=captured,
+        captured_worker_kwargs=captured,
     )
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
+    assert captured["owner_id"] == "p1"
     assert captured["system_prompt"] == "Project: myproj"
+    assert captured["agent_config"] == AgentConfig(tools=[])
 
 
-async def test_runtime_variables_override_flow_variables(flow_dir, monkeypatch, message_queue):
-    (flow_dir / "prompts" / "writer.md").write_text("Project: ${project}")
+async def test_build_runtime_receives_runtime_overrides(flow_dir, monkeypatch, message_queue):
+    (flow_dir / "prompts" / "writer.md").write_text("Project: ${project}", encoding="utf-8")
     mock_agent = MockAgent([make_response("done", 100, 50), make_response("summary", 10, 5)])
     captured: dict = {}
     phase, _ = make_agent_phase(
@@ -220,12 +223,30 @@ async def test_runtime_variables_override_flow_variables(flow_dir, monkeypatch, 
         message_queue,
         flow_variables={"project": "flow"},
         runtime_variables={"project": "runtime"},
-        captured_agent_kwargs=captured,
+        captured_worker_kwargs=captured,
     )
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     assert captured["system_prompt"] == "Project: runtime"
+
+
+async def test_build_runtime_receives_memory_resolver(flow_dir, monkeypatch, message_queue):
+    (flow_dir / "prompts" / "writer.md").write_text("Memory: ${draft_memory}", encoding="utf-8")
+    mock_agent = MockAgent([make_response("done", 100, 50), make_response("summary", 10, 5)])
+    captured: dict = {}
+    phase, mgr = make_agent_phase(
+        flow_dir,
+        mock_agent,
+        monkeypatch,
+        message_queue,
+        captured_worker_kwargs=captured,
+    )
+    mgr.write_memory("draft", "Created file.py")
+
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert captured["system_prompt"] == "Memory: Created file.py"
 
 
 async def test_task_prompt_resolves_memory_variable(flow_dir, monkeypatch, message_queue):
@@ -364,40 +385,8 @@ async def test_run_memory_step_returns_response_data_and_fires_callbacks(flow_di
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize(
-    ("tools", "expected"),
-    [(["spawn_subagent"], True), (["read_file"], False), ([], False)],
-    ids=["spawn", "regular_tool", "no_tools"],
-)
-def test_build_creates_subagent_builder_from_tool_metadata(
-    flow_context,
-    tools: list[str],
-    expected: bool,
-) -> None:
-    from ddev.ai.phases.checkpoint import CheckpointManager
-    from ddev.ai.phases.orchestrator import ResourceProvider
-
-    flow_dir = flow_context.config_dir
-    provider = ResourceProvider(
-        agent_clients={},
-        file_access_policy=FileAccessPolicy(write_root=flow_dir),
-        agents={"writer": AgentConfig(tools=tools)},
-    )
-    checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
-    phase = AgenticPhase.build(
-        phase_id="p1",
-        config=PhaseConfig(agent="writer", tasks=[TaskConfig(name="t1", prompt="Do the work.")]),
-        deps=[],
-        resources=provider,
-        checkpoint_manager=checkpoint_manager,
-        context=flow_context,
-    )
-
-    assert (phase._subagent_builder is not None) is expected
-
-
-async def test_spawn_subagent_wiring(flow_context, message_queue):
-    """Phase correctly passes subagent_builder + log_dir to the agent builder at execute time."""
+async def test_spawn_subagent_wiring(flow_context, monkeypatch, message_queue):
+    """Real runtime factory wires spawn_subagent logs under the checkpoint root."""
     flow_dir = flow_context.config_dir
 
     def make_usage() -> TokenUsage:
@@ -415,49 +404,34 @@ async def test_spawn_subagent_wiring(flow_context, message_queue):
             AgentResponse(stop_reason=StopReason.END_TURN, text="memory summary", tool_calls=[], usage=make_usage()),
         ]
     )
+    subagent = MockAgent([AgentResponse(stop_reason=StopReason.END_TURN, text="42", tool_calls=[], usage=make_usage())])
 
-    subagent_calls: list = []
+    agents = [parent_agent, subagent]
 
-    def mock_subagent_builder(system_prompt: str, owner_id: str, tool_names: list[str]):
-        subagent_calls.append(system_prompt)
-        return MockAgent(
-            [AgentResponse(stop_reason=StopReason.END_TURN, text="42", tool_calls=[], usage=make_usage())]
-        ), ToolRegistry([])
+    def fake_anthropic_agent(*, tools, system_prompt, name, **kwargs):
+        agent = agents.pop(0)
+        agent.name = name
+        agent._system_prompt = system_prompt
+        return agent
 
-    from ddev.ai.tools.agents.spawn_subagent import SpawnSubagentTool
+    monkeypatch.setattr("ddev.ai.agent.build.AnthropicAgent", fake_anthropic_agent)
 
-    captured_log_dirs: list[Path | None] = []
-
-    def agent_builder_fn(
-        system_prompt: str,
-        owner_id: str,
-        subagent_builder=None,
-        log_dir: Path | None = None,
-    ):
-        captured_log_dirs.append(log_dir)
-        assert subagent_builder is not None
-        assert log_dir is not None
-        parent_agent.name = owner_id
-        return parent_agent, ToolRegistry(
-            [
-                SpawnSubagentTool(
-                    owner_id=owner_id,
-                    subagent_builder=subagent_builder,
-                    allowed_tools=[],
-                    log_dir=log_dir,
-                )
-            ]
-        )
+    from ddev.ai.phases.orchestrator import ResourceProvider
 
     checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
-    phase = AgenticPhase(
+    resources = ResourceProvider(
+        agent_clients={"anthropic": object()},
+        file_access_policy=FileAccessPolicy(write_root=flow_dir),
+        agents={"writer": AgentConfig(tools=["spawn_subagent"])},
+        artifact_root=checkpoint_manager.root,
+    )
+    phase = AgenticPhase.build(
         phase_id="p1",
-        dependencies=[],
         config=PhaseConfig(agent="writer", tasks=[TaskConfig(name="t1", prompt="Do the work.")]),
+        deps=[],
+        resources=resources,
         checkpoint_manager=checkpoint_manager,
         context=flow_context,
-        agent_builder=agent_builder_fn,
-        subagent_builder=mock_subagent_builder,
     )
     phase.queue = message_queue
 
@@ -465,8 +439,7 @@ async def test_spawn_subagent_wiring(flow_context, message_queue):
 
     submitted = [message_queue.get_nowait() for _ in range(message_queue.qsize())]
     assert not any(isinstance(m, PhaseFailedMessage) for m in submitted)
-    assert subagent_calls == ["you are a helper"]
-    assert captured_log_dirs == [checkpoint_manager.root / "subagents" / "p1"]
+    assert subagent._system_prompt == "you are a helper"
 
     log_file = checkpoint_manager.root / "subagents" / "p1" / "001-child.jsonl"
     assert log_file.exists()
@@ -477,41 +450,6 @@ async def test_spawn_subagent_wiring(flow_context, message_queue):
 # ---------------------------------------------------------------------------
 # Goal validation integration tests
 # ---------------------------------------------------------------------------
-
-
-@pytest.mark.parametrize(
-    "tasks,expect_builder",
-    [
-        ([TaskConfig(name="t1", prompt="x")], False),
-        ([TaskConfig(name="t1", prompt="x", goal="verify")], True),
-        ([TaskConfig(name="t1", prompt="x"), TaskConfig(name="t2", prompt="y", goal="verify")], True),
-    ],
-    ids=["no_goal", "single_goal", "mixed"],
-)
-def test_build_creates_goal_agent_builder_when_any_task_has_goal(
-    flow_context,
-    tasks,
-    expect_builder,
-):
-    from ddev.ai.phases.checkpoint import CheckpointManager
-    from ddev.ai.phases.orchestrator import ResourceProvider
-
-    flow_dir = flow_context.config_dir
-    provider = ResourceProvider(
-        agent_clients={},
-        file_access_policy=FileAccessPolicy(write_root=flow_dir),
-        agents={"writer": AgentConfig()},
-    )
-    checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
-    phase = AgenticPhase.build(
-        phase_id="p1",
-        config=PhaseConfig(agent="writer", tasks=tasks),
-        deps=[],
-        resources=provider,
-        checkpoint_manager=checkpoint_manager,
-        context=flow_context,
-    )
-    assert (phase._goal_agent_builder is not None) is expect_builder
 
 
 async def test_phase_with_goal_passes_first_attempt(flow_dir, monkeypatch, message_queue):
@@ -525,10 +463,10 @@ async def test_phase_with_goal_passes_first_attempt(flow_dir, monkeypatch, messa
 
     captured_builder_calls: list = []
 
-    def goal_builder(owner_id):
+    def goal_builder(owner_id: str) -> AgentRuntime:
         captured_builder_calls.append(owner_id)
         agent = MockAgent(list(reviewer_responses))
-        return agent, ToolRegistry([])
+        return AgentRuntime(agent=agent, tool_registry=ToolRegistry([]))
 
     phase, mgr = make_agent_phase(
         flow_dir,
@@ -536,7 +474,7 @@ async def test_phase_with_goal_passes_first_attempt(flow_dir, monkeypatch, messa
         monkeypatch,
         message_queue,
         tasks=[TaskConfig(name="t1", prompt="Do it.", goal="verify it")],
-        goal_agent_builder=goal_builder,
+        goal_runtime_builder=goal_builder,
     )
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
@@ -563,14 +501,14 @@ async def test_phase_with_goal_exhausts_attempts_fails_phase(flow_dir, monkeypat
         ]
     )
 
-    def goal_builder(owner_id):
+    def goal_builder(owner_id: str) -> AgentRuntime:
         agent = MockAgent(
             [
                 make_response('{"valid": false, "reason": "first miss"}', 0, 0),
                 make_response('{"valid": false, "reason": "second miss"}', 0, 0),
             ]
         )
-        return agent, ToolRegistry([])
+        return AgentRuntime(agent=agent, tool_registry=ToolRegistry([]))
 
     phase, mgr = make_agent_phase(
         flow_dir,
@@ -578,7 +516,7 @@ async def test_phase_with_goal_exhausts_attempts_fails_phase(flow_dir, monkeypat
         monkeypatch,
         message_queue,
         tasks=[TaskConfig(name="t1", prompt="Do it.", goal="g", max_goal_attempts=2)],
-        goal_agent_builder=goal_builder,
+        goal_runtime_builder=goal_builder,
     )
 
     from ddev.ai.phases.goal import GoalAttemptsExhausted
@@ -608,7 +546,7 @@ async def test_phase_goal_partial_progress_preserved_on_exhaustion(flow_dir, mon
 
     call_count = 0
 
-    def goal_builder(owner_id):
+    def goal_builder(owner_id: str) -> AgentRuntime:
         nonlocal call_count
         call_count += 1
         if call_count == 1:
@@ -620,7 +558,7 @@ async def test_phase_goal_partial_progress_preserved_on_exhaustion(flow_dir, mon
                     make_response('{"valid": false, "reason": "miss 2"}', 0, 0),
                 ]
             )
-        return agent, ToolRegistry([])
+        return AgentRuntime(agent=agent, tool_registry=ToolRegistry([]))
 
     phase, _ = make_agent_phase(
         flow_dir,
@@ -631,7 +569,7 @@ async def test_phase_goal_partial_progress_preserved_on_exhaustion(flow_dir, mon
             TaskConfig(name="t1", prompt="First.", goal="check t1", max_goal_attempts=2),
             TaskConfig(name="t2", prompt="Second.", goal="check t2", max_goal_attempts=2),
         ],
-        goal_agent_builder=goal_builder,
+        goal_runtime_builder=goal_builder,
     )
 
     from ddev.ai.phases.goal import GoalAttemptsExhausted
@@ -654,13 +592,16 @@ async def test_goal_exhaustion_tokens_captured_on_phase(flow_dir, monkeypatch, m
         ]
     )
 
-    def goal_builder(owner_id):
-        return MockAgent(
-            [
-                make_response('{"valid": false, "reason": "miss 1"}', 8, 4),
-                make_response('{"valid": false, "reason": "miss 2"}', 8, 4),
-            ]
-        ), ToolRegistry([])
+    def goal_builder(owner_id: str) -> AgentRuntime:
+        return AgentRuntime(
+            agent=MockAgent(
+                [
+                    make_response('{"valid": false, "reason": "miss 1"}', 8, 4),
+                    make_response('{"valid": false, "reason": "miss 2"}', 8, 4),
+                ]
+            ),
+            tool_registry=ToolRegistry([]),
+        )
 
     phase, _ = make_agent_phase(
         flow_dir,
@@ -668,7 +609,7 @@ async def test_goal_exhaustion_tokens_captured_on_phase(flow_dir, monkeypatch, m
         monkeypatch,
         message_queue,
         tasks=[TaskConfig(name="t1", prompt="Do it.", goal="g", max_goal_attempts=2)],
-        goal_agent_builder=goal_builder,
+        goal_runtime_builder=goal_builder,
     )
 
     from ddev.ai.phases.goal import GoalAttemptsExhausted
@@ -713,13 +654,16 @@ async def test_goal_parse_error_logged_and_tokens_captured(flow_dir, monkeypatch
 
     worker = MockAgent([make_response("worker done", 10, 5)])
 
-    def goal_builder(owner_id):
-        return MockAgent(
-            [
-                make_response("not json", 8, 4),
-                make_response("still not json", 6, 3),
-            ]
-        ), ToolRegistry([])
+    def goal_builder(owner_id: str) -> AgentRuntime:
+        return AgentRuntime(
+            agent=MockAgent(
+                [
+                    make_response("not json", 8, 4),
+                    make_response("still not json", 6, 3),
+                ]
+            ),
+            tool_registry=ToolRegistry([]),
+        )
 
     phase, _ = make_agent_phase(
         flow_dir,
@@ -727,7 +671,7 @@ async def test_goal_parse_error_logged_and_tokens_captured(flow_dir, monkeypatch
         monkeypatch,
         message_queue,
         tasks=[TaskConfig(name="t1", prompt="Do it.", goal="g")],
-        goal_agent_builder=goal_builder,
+        goal_runtime_builder=goal_builder,
     )
 
     with pytest.raises(GoalParseError):

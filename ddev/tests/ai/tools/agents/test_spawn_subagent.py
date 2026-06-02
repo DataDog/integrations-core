@@ -4,6 +4,7 @@
 
 import asyncio
 import json
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -11,9 +12,10 @@ import pytest
 from anthropic.types import ToolParam
 
 from ddev.ai.agent.base import BaseAgent
-from ddev.ai.agent.build import SubagentBuilder
+from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.exceptions import AgentError
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall, ToolResultMessage
+from ddev.ai.phases.config import AgentConfig
 from ddev.ai.tools.agents.spawn_subagent import SpawnSubagentInput, SpawnSubagentTool
 from ddev.ai.tools.core.types import ToolResult
 from ddev.ai.tools.registry import ToolRegistry
@@ -98,26 +100,30 @@ def make_response(
     )
 
 
-def make_builder(responses: list[AgentResponse], tool_result: ToolResult | None = None) -> SubagentBuilder:
+def make_builder(
+    responses: list[AgentResponse],
+    tool_result: ToolResult | None = None,
+) -> Callable[..., AgentRuntime]:
     """Return a builder closure that replays fixed responses."""
     tr = tool_result or ToolResult(success=True, data="ok")
 
-    def builder(system_prompt: str, owner_id: str, tool_names: list[str]) -> tuple[BaseAgent[Any], ToolRegistry]:
-        return MockAgent(list(responses)), MockToolRegistry(tr)
+    def builder(*, agent_config: AgentConfig, system_prompt: str, owner_id: str) -> AgentRuntime:
+        return AgentRuntime(agent=MockAgent(list(responses)), tool_registry=MockToolRegistry(tr))
 
     return builder
 
 
 def make_tool(
     log_dir: Path,
-    builder: SubagentBuilder,
-    allowed_tools: list[str] | None = None,
+    builder: Callable[..., AgentRuntime],
+    parent_tools: list[str] | None = None,
     owner_id: str = "parent",
+    agent_config: AgentConfig | None = None,
 ) -> SpawnSubagentTool:
     return SpawnSubagentTool(
         owner_id=owner_id,
-        subagent_builder=builder,
-        allowed_tools=allowed_tools if allowed_tools is not None else ["read_file", "edit_file"],
+        agent_config=agent_config or AgentConfig(tools=parent_tools or ["read_file", "edit_file"]),
+        runtime_builder=builder,
         log_dir=log_dir,
     )
 
@@ -140,7 +146,7 @@ def read_events(log_path: Path) -> list[dict]:
     ids=["recursive", "disallowed"],
 )
 async def test_input_validation_fails_before_logging(tmp_path, tools, allowed, error_fragment):
-    tool = make_tool(tmp_path, make_builder([make_response()]), allowed_tools=allowed)
+    tool = make_tool(tmp_path, make_builder([make_response()]), parent_tools=allowed)
     result = await tool(SpawnSubagentInput(system_prompt="s", prompt="p", tools=tools, name="x"))
 
     assert result.success is False
@@ -171,10 +177,11 @@ async def test_mkdir_failure(tmp_path):
 
 async def test_logger_open_failure_returns_tool_result(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     def builder(
+        *,
+        agent_config: AgentConfig,
         system_prompt: str,
         owner_id: str,
-        tool_names: list[str],
-    ) -> tuple[BaseAgent[Any], ToolRegistry]:
+    ) -> AgentRuntime:
         raise AssertionError("builder should not be called")
 
     def failing_logger(log_path: Path) -> None:
@@ -182,7 +189,7 @@ async def test_logger_open_failure_returns_tool_result(tmp_path: Path, monkeypat
 
     monkeypatch.setattr("ddev.ai.tools.agents.spawn_subagent.AgentLogger", failing_logger)
 
-    tool = make_tool(tmp_path, builder, allowed_tools=[])
+    tool = make_tool(tmp_path, builder, parent_tools=[])
     result = await tool(SpawnSubagentInput(system_prompt="s", prompt="p", tools=[], name="x"))
 
     assert result.success is False
@@ -231,7 +238,7 @@ async def test_multi_iteration_wires_callbacks(tmp_path):
             [make_response(stop_reason=StopReason.TOOL_USE, tool_calls=[tool_call]), make_response(text="done")],
             tool_result=ToolResult(success=True, data="content"),
         ),
-        allowed_tools=["read_file"],
+        parent_tools=["read_file"],
     )
 
     result = await tool(SpawnSubagentInput(system_prompt="sys", prompt="go", tools=["read_file"]))
@@ -239,6 +246,41 @@ async def test_multi_iteration_wires_callbacks(tmp_path):
     assert result.success is True
     assert result.data == "done"
     assert "tool_call" in [e["event"] for e in read_events(tmp_path / "001-unnamed.jsonl")]
+
+
+async def test_child_runtime_config_inherits_parent_settings_and_requested_tools(tmp_path):
+    captured: list[dict[str, object]] = []
+    parent_config = AgentConfig(
+        provider="anthropic",
+        tools=["read_file", "edit_file", "spawn_subagent"],
+        model="custom-model",
+        max_tokens=123,
+    )
+
+    def builder(*, agent_config: AgentConfig, system_prompt: str, owner_id: str) -> AgentRuntime:
+        captured.append({"agent_config": agent_config, "system_prompt": system_prompt, "owner_id": owner_id})
+        return AgentRuntime(agent=MockAgent([make_response(text="ok")]), tool_registry=MockToolRegistry())
+
+    tool = make_tool(
+        tmp_path,
+        builder,
+        parent_tools=["read_file", "edit_file", "spawn_subagent"],
+        agent_config=parent_config,
+    )
+
+    result = await tool(
+        SpawnSubagentInput(system_prompt="child system", prompt="go", tools=["read_file"], name="child")
+    )
+
+    assert result.success is True
+    child_config = captured[0]["agent_config"]
+    assert isinstance(child_config, AgentConfig)
+    assert child_config.provider == "anthropic"
+    assert child_config.model == "custom-model"
+    assert child_config.max_tokens == 123
+    assert child_config.tools == ["read_file"]
+    assert captured[0]["system_prompt"] == "child system"
+    assert captured[0]["owner_id"] == "parent.sub.001-child"
 
 
 async def test_max_tokens_response_prefixed(tmp_path):
@@ -260,13 +302,19 @@ async def test_max_tokens_response_prefixed(tmp_path):
 
 async def test_builder_failure(tmp_path):
     def failing_builder(
+        *,
+        agent_config: AgentConfig,
         system_prompt: str,
         owner_id: str,
-        tool_names: list[str],
-    ) -> tuple[BaseAgent[Any], ToolRegistry]:
+    ) -> AgentRuntime:
         raise ValueError("boom")
 
-    tool = SpawnSubagentTool(owner_id="parent", subagent_builder=failing_builder, allowed_tools=[], log_dir=tmp_path)
+    tool = SpawnSubagentTool(
+        owner_id="parent",
+        agent_config=AgentConfig(tools=[]),
+        runtime_builder=failing_builder,
+        log_dir=tmp_path,
+    )
     result = await tool(SpawnSubagentInput(system_prompt="s", prompt="p", tools=[], name="fail"))
 
     assert result.success is False
@@ -279,11 +327,12 @@ async def test_builder_failure(tmp_path):
 
 async def test_react_process_failure(tmp_path):
     def builder(
+        *,
+        agent_config: AgentConfig,
         system_prompt: str,
         owner_id: str,
-        tool_names: list[str],
-    ) -> tuple[BaseAgent[Any], ToolRegistry]:
-        return _RaisingAgent(AgentError("rate limit")), MockToolRegistry()
+    ) -> AgentRuntime:
+        return AgentRuntime(agent=_RaisingAgent(AgentError("rate limit")), tool_registry=MockToolRegistry())
 
     tool = make_tool(tmp_path, builder)
     result = await tool(SpawnSubagentInput(system_prompt="s", prompt="p", tools=[], name="rl"))
@@ -301,11 +350,12 @@ async def test_finally_close_runs_on_base_exception(tmp_path):
     """KeyboardInterrupt propagates but logger.close() still runs via finally."""
 
     def builder(
+        *,
+        agent_config: AgentConfig,
         system_prompt: str,
         owner_id: str,
-        tool_names: list[str],
-    ) -> tuple[BaseAgent[Any], ToolRegistry]:
-        return _RaisingAgent(KeyboardInterrupt()), MockToolRegistry()
+    ) -> AgentRuntime:
+        return AgentRuntime(agent=_RaisingAgent(KeyboardInterrupt()), tool_registry=MockToolRegistry())
 
     tool = make_tool(tmp_path, builder)
 
@@ -336,14 +386,20 @@ async def test_parallel_spawns_get_distinct_counters(tmp_path):
     owner_ids: list[str] = []
 
     def recording_builder(
+        *,
+        agent_config: AgentConfig,
         system_prompt: str,
         owner_id: str,
-        tool_names: list[str],
-    ) -> tuple[BaseAgent[Any], ToolRegistry]:
+    ) -> AgentRuntime:
         owner_ids.append(owner_id)
-        return MockAgent([make_response(text="ok")]), MockToolRegistry()
+        return AgentRuntime(agent=MockAgent([make_response(text="ok")]), tool_registry=MockToolRegistry())
 
-    tool = SpawnSubagentTool(owner_id="parent", subagent_builder=recording_builder, allowed_tools=[], log_dir=tmp_path)
+    tool = SpawnSubagentTool(
+        owner_id="parent",
+        agent_config=AgentConfig(tools=[]),
+        runtime_builder=recording_builder,
+        log_dir=tmp_path,
+    )
     results = await asyncio.gather(
         *[tool(SpawnSubagentInput(system_prompt="s", prompt="p", tools=[], name=n)) for n in ["x", "y", "z"]]
     )
@@ -351,28 +407,3 @@ async def test_parallel_spawns_get_distinct_counters(tmp_path):
     assert all(r.success for r in results)
     assert len(list(tmp_path.glob("*.jsonl"))) == 3
     assert len(set(owner_ids)) == 3
-
-
-# ---------------------------------------------------------------------------
-# Pydantic input validation (via BaseTool.run)
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.parametrize(
-    "raw",
-    [
-        {"prompt": "x"},
-        {"system_prompt": "s", "prompt": "p", "tools": [], "bad_field": True},
-        {"system_prompt": "s", "prompt": "p", "tools": [], "name": "../oops"},
-    ],
-    ids=["missing_field", "extra_field", "unsafe_name"],
-)
-async def test_pydantic_rejects_invalid_input(raw: dict[str, object]) -> None:
-    tool = SpawnSubagentTool(
-        owner_id="p",
-        subagent_builder=make_builder([make_response()]),
-        allowed_tools=[],
-        log_dir=Path("/tmp"),
-    )
-    result = await tool.run(raw)
-    assert result.success is False

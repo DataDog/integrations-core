@@ -9,11 +9,6 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
-from ddev.ai.agent.build import (
-    make_agent_builder,
-    make_goal_agent_builder,
-    make_subagent_builder,
-)
 from ddev.ai.phases.base import FlowContext, Phase, PhaseOutcome
 from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
@@ -21,12 +16,11 @@ from ddev.ai.phases.goal import GOAL_TASK_SUFFIX, GoalValidationError, render_go
 from ddev.ai.phases.messages import PhaseFailedMessage
 from ddev.ai.phases.template import render_inline, render_prompt
 from ddev.ai.react.process import ReActProcess
-from ddev.ai.tools.registry import TOOL_MANIFEST
 from ddev.event_bus.exceptions import MessageProcessingError, ProcessorHookError
 
 if TYPE_CHECKING:
     from ddev.ai.agent.base import BaseAgent
-    from ddev.ai.agent.build import AgentBuilder, GoalAgentBuilder, SubagentBuilder
+    from ddev.ai.agent.build import AgentRuntimeFactory
     from ddev.ai.phases.goal import GoalLoopOutcome
     from ddev.ai.phases.orchestrator import ResourceProvider
     from ddev.ai.react.types import ReActResult
@@ -69,9 +63,8 @@ class AgenticPhase(Phase):
         config: PhaseConfig,
         checkpoint_manager: CheckpointManager,
         context: FlowContext,
-        agent_builder: AgentBuilder,
-        subagent_builder: SubagentBuilder | None = None,
-        goal_agent_builder: GoalAgentBuilder | None = None,
+        agent_config: AgentConfig,
+        runtime_factory: AgentRuntimeFactory,
     ) -> None:
         super().__init__(
             phase_id=phase_id,
@@ -80,15 +73,12 @@ class AgenticPhase(Phase):
             checkpoint_manager=checkpoint_manager,
             context=context,
         )
-        self._agent_builder = agent_builder
-        self._subagent_builder = subagent_builder
-        self._goal_agent_builder = goal_agent_builder
+        self._agent_name = cast(str, config.agent)
+        self._agent_config = agent_config
+        self._runtime_factory = runtime_factory
         self._goal_attempt_log: list[dict[str, Any]] = []
         self._total_input_tokens: int = 0
         self._total_output_tokens: int = 0
-        self._subagent_log_dir = (
-            checkpoint_manager.root / "subagents" / phase_id if subagent_builder is not None else None
-        )
 
     @classmethod
     def validate_config(
@@ -117,28 +107,7 @@ class AgenticPhase(Phase):
         # config.agent is guaranteed set & known by validate_config.
         agent_name = cast(str, config.agent)
         agent_config = resources.agent_config(agent_name)
-        agent_clients = resources.agent_clients()
-        file_registry = resources.file_registry()
-
-        subagent_builder = None
-        if any(
-            spec.requires_subagent_builder
-            for name in agent_config.tools
-            if (spec := TOOL_MANIFEST.get(name)) is not None
-        ):
-            subagent_builder = make_subagent_builder(
-                parent_agent_config=agent_config,
-                agent_clients=agent_clients,
-                file_registry=file_registry,
-            )
-
-        goal_agent_builder = None
-        if any((t.goal is not None or t.goal_path is not None) for t in config.tasks):
-            goal_agent_builder = make_goal_agent_builder(
-                parent_agent_config=agent_config,
-                agent_clients=agent_clients,
-                file_registry=file_registry,
-            )
+        runtime_factory = resources.agent_runtime_factory()
 
         return cls(
             phase_id=phase_id,
@@ -146,13 +115,8 @@ class AgenticPhase(Phase):
             config=config,
             checkpoint_manager=checkpoint_manager,
             context=context,
-            agent_builder=make_agent_builder(
-                agent_config=agent_config,
-                agent_clients=agent_clients,
-                file_registry=file_registry,
-            ),
-            subagent_builder=subagent_builder,
-            goal_agent_builder=goal_agent_builder,
+            agent_config=agent_config,
+            runtime_factory=runtime_factory,
         )
 
     def before_react(self) -> None:
@@ -199,8 +163,6 @@ class AgenticPhase(Phase):
             self._total_output_tokens += last_result.total_output_tokens
 
             if has_goal:
-                if self._goal_agent_builder is None:
-                    raise ValueError("Goal agent builder is required when tasks specify a goal")
                 goal_text = render_goal_text(task, self._config_dir, context, self._resolver)
                 try:
                     outcome: GoalLoopOutcome = await run_goal_loop(
@@ -209,7 +171,8 @@ class AgenticPhase(Phase):
                         rendered_task_prompt=prompt,
                         worker_process=process,
                         initial_result=last_result,
-                        goal_agent_builder=self._goal_agent_builder,
+                        parent_agent_config=self._agent_config,
+                        runtime_factory=self._runtime_factory,
                         callbacks=self._callbacks,
                         phase_id=self._phase_id,
                         log_root=self._checkpoint_manager.root,
@@ -237,26 +200,6 @@ class AgenticPhase(Phase):
                     }
                 )
 
-    def _build_agent_and_process(self, context: dict[str, Any]) -> tuple[BaseAgent[Any], ReActProcess]:
-        """Build the agent and ReAct process used to drive task execution."""
-        system_prompt = render_prompt(
-            self._config_dir / "prompts" / f"{self._config.agent}.md",
-            context,
-            self._resolver,
-        )
-        agent, tool_registry = self._agent_builder(
-            system_prompt,
-            self._phase_id,
-            self._subagent_builder,
-            self._subagent_log_dir,
-        )
-        process = ReActProcess(
-            agent=agent,
-            tool_registry=tool_registry,
-            callbacks=self._callbacks,
-        )
-        return agent, process
-
     async def _run_memory_step(
         self,
         agent: BaseAgent[Any],
@@ -275,11 +218,23 @@ class AgenticPhase(Phase):
 
     async def execute(self, context: dict[str, Any]) -> PhaseOutcome:
         self.before_react()
-        agent, process = self._build_agent_and_process(context)
+
+        system_prompt = render_prompt(
+            self._config_dir / "prompts" / f"{self._agent_name}.md",
+            context,
+            self._resolver,
+        )
+        runtime = self._runtime_factory.build_runtime(
+            agent_config=self._agent_config,
+            system_prompt=system_prompt,
+            owner_id=self._phase_id,
+        )
+        process = ReActProcess(runtime, callbacks=self._callbacks)
         await self.run_tasks(process, context)
+
         self.after_react()
 
-        memory_text, mem_in, mem_out = await self._run_memory_step(agent, context)
+        memory_text, mem_in, mem_out = await self._run_memory_step(runtime.agent, context)
 
         extra: dict[str, Any] = {}
         if self._goal_attempt_log:

@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from importlib import import_module
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -18,7 +18,10 @@ from .core.protocol import ToolProtocol
 from .core.types import ToolResult
 
 if TYPE_CHECKING:
-    from ddev.ai.agent.build import SubagentBuilder
+    from ddev.ai.agent.build import AgentRuntime
+    from ddev.ai.phases.config import AgentConfig
+
+    AgentRuntimeBuilder = Callable[..., AgentRuntime]
 
 
 @dataclass
@@ -27,9 +30,9 @@ class ToolContext:
 
     file_registry: FileRegistry
     owner_id: str
-    allowed_tool_names: tuple[str, ...] = field(default_factory=tuple)
-    subagent_builder: SubagentBuilder | None = None
-    log_dir: Path | None = None
+    agent_config: AgentConfig
+    runtime_builder: AgentRuntimeBuilder
+    artifact_root: Path
 
     @property
     def policy(self) -> FileAccessPolicy:
@@ -49,17 +52,11 @@ def _file_policy_factory(tool_cls: type, ctx: ToolContext) -> ToolProtocol:
 
 
 def _spawn_subagent_factory(tool_cls: type, ctx: ToolContext) -> ToolProtocol:
-    if ctx.subagent_builder is None or ctx.log_dir is None:
-        raise ValueError(
-            "Tool 'spawn_subagent' requires both 'subagent_builder' and 'log_dir' to be "
-            "passed to ToolRegistry.from_names."
-        )
-    allowed = [name for name in ctx.allowed_tool_names if name != "spawn_subagent"]
     return tool_cls(
         owner_id=ctx.owner_id,
-        subagent_builder=ctx.subagent_builder,
-        allowed_tools=allowed,
-        log_dir=ctx.log_dir,
+        agent_config=ctx.agent_config,
+        runtime_builder=ctx.runtime_builder,
+        log_dir=ctx.artifact_root / "subagents" / ctx.owner_id,
     )
 
 
@@ -70,14 +67,12 @@ class ToolSpec:
     ``module`` is relative to the registry's package (e.g. ``"fs.read_file"``).
     ``factory`` receives the already-imported class and the shared ToolContext
     and returns a constructed tool instance.
-    ``requires_subagent_builder`` marks agentic tools that need subagent wiring.
     ``read_only`` marks tools that only inspect state and never mutate it.
     """
 
     module: str
     cls: str
     factory: Callable[[type, ToolContext], ToolProtocol] = _plain_factory
-    requires_subagent_builder: bool = False
     read_only: bool = False
 
 
@@ -102,7 +97,6 @@ TOOL_MANIFEST: dict[str, ToolSpec] = {
         "agents.spawn_subagent",
         "SpawnSubagentTool",
         factory=_spawn_subagent_factory,
-        requires_subagent_builder=True,
         read_only=False,
     ),
 }
@@ -126,8 +120,9 @@ class ToolRegistry:
         *,
         owner_id: str,
         file_registry: FileRegistry,
-        subagent_builder: SubagentBuilder | None = None,
-        log_dir: Path | None = None,
+        agent_config: AgentConfig,
+        runtime_builder: AgentRuntimeBuilder,
+        artifact_root: Path,
     ) -> ToolRegistry:
         """Build a ToolRegistry from a list of tool name strings.
 
@@ -138,9 +133,9 @@ class ToolRegistry:
         ctx = ToolContext(
             file_registry=file_registry,
             owner_id=owner_id,
-            allowed_tool_names=tuple(tool_names),
-            subagent_builder=subagent_builder,
-            log_dir=log_dir,
+            agent_config=agent_config,
+            runtime_builder=runtime_builder,
+            artifact_root=artifact_root,
         )
         tools: list[ToolProtocol] = []
         for name in tool_names:

@@ -339,6 +339,7 @@ def test_resource_provider_agent_config_unknown_name_raises(file_access_policy):
         agent_clients={},
         file_access_policy=file_access_policy,
         agents={"a": MagicMock(), "b": MagicMock()},
+        artifact_root=file_access_policy.write_root,
     )
     with pytest.raises(ResourceUnavailableError, match="No agent definition named 'missing'"):
         provider.agent_config("missing")

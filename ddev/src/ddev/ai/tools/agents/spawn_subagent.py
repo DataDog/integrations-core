@@ -2,17 +2,22 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated
 
 from pydantic import Field
 
-from ddev.ai.agent.build import SubagentBuilder
 from ddev.ai.agent.types import StopReason
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.tools.agents.agent_logger import AgentLogger
 from ddev.ai.tools.core.base import BaseTool, BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
+
+if TYPE_CHECKING:
+    from ddev.ai.phases.config import AgentConfig
+    from ddev.ai.tools.registry import AgentRuntimeBuilder
 
 
 class SpawnSubagentInput(BaseToolInput):
@@ -54,14 +59,15 @@ class SpawnSubagentTool(BaseTool[SpawnSubagentInput]):
     def __init__(
         self,
         owner_id: str,
-        subagent_builder: SubagentBuilder,
-        allowed_tools: list[str],
+        agent_config: AgentConfig,
+        runtime_builder: AgentRuntimeBuilder,
         log_dir: Path,
     ) -> None:
         self._owner_id = owner_id
-        self._subagent_builder = subagent_builder
+        self._agent_config = agent_config
+        self._runtime_builder = runtime_builder
         # Parent may itself have spawn_subagent; never offer it to children.
-        self._allowed_tools = set(allowed_tools) - {self.name}
+        self._allowed_tools = set(agent_config.tools) - {self.name}
         self._log_dir = log_dir
         self._counter = 0
 
@@ -122,10 +128,11 @@ class SpawnSubagentTool(BaseTool[SpawnSubagentInput]):
             )
 
             try:
-                agent, tool_registry = self._subagent_builder(
-                    tool_input.system_prompt,
-                    subagent_id,
-                    tool_input.tools,
+                child_config = self._agent_config.model_copy(update={"tools": tool_input.tools})
+                runtime = self._runtime_builder(
+                    agent_config=child_config,
+                    system_prompt=tool_input.system_prompt,
+                    owner_id=subagent_id,
                 )
             except Exception as e:
                 logger.log_finish(success=False, error=f"build failed: {type(e).__name__}: {e}")
@@ -135,8 +142,7 @@ class SpawnSubagentTool(BaseTool[SpawnSubagentInput]):
                 )
 
             process = ReActProcess(
-                agent=agent,
-                tool_registry=tool_registry,
+                runtime,
                 callbacks=logger.build_callbacks(),
             )
             try:
