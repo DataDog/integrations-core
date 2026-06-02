@@ -16,9 +16,9 @@ HOST_STORAGE_STAT_KEYS: frozenset[str] = frozenset(
 # Disk status enum values that aggregate to ntnx_disk_status:degraded.
 DEGRADED_DISK_STATUSES: frozenset[str] = frozenset(
     {
-        "MARKED_FOR_REMOVAL_BUT_NOT_DETACHABLE",
-        "DATA_MIGRATION_INITIATED",
-        "DETACHABLE",
+        "marked_for_removal_but_not_detachable",
+        "data_migration_initiated",
+        "detachable",
     }
 )
 
