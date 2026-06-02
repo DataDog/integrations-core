@@ -772,6 +772,60 @@ class TestSchemaRegistryIntegration:
         assert result['id'] == '42'
         assert 'createdAt' in result
 
+    def test_protobuf_with_string_value_wrapper_dependency(self):
+        """Protobuf schema using google.protobuf.StringValue deserializes correctly.
+
+        StringValue imports google/protobuf/wrappers.proto. Covers two sub-cases:
+        - dep_schemas empty: preloading must supply wrappers.proto to the pool.
+        - dep_schemas includes wrappers.proto: registry explicitly returns the
+          reference (name='default' as Confluent SR serializes it); preloading
+          must still win and the duplicate-add must be a no-op.
+        """
+        # FileDescriptorProto for test.Order { string id = 1; google.protobuf.StringValue country = 2; }
+        schema_b64 = (
+            'CgtvcmRlci5wcm90bxIEdGVzdBoeZ29vZ2xlL3Byb3RvYnVmL3dyYXBwZXJzLnByb3RvIkIKBU9y'
+            'ZGVyEgoKAmlkGAEgASgJEi0KB2NvdW50cnkYAiABKAsyHC5nb29nbGUucHJvdG9idWYuU3RyaW5n'
+            'VmFsdWViBnByb3RvMw=='
+        )
+        # Order { id="US-001", country=StringValue("USA") }; country serializes as unwrapped "USA"
+        payload = bytes.fromhex('0a0655532d30303112050a03555341')
+
+        # wrappers.proto FileDescriptorProto with name='default' (Confluent SR renames all files)
+        wrappers_b64 = (
+            'CgdkZWZhdWx0Eg9nb29nbGUucHJvdG9idWYiIwoLRG91YmxlVmFsdWUSFAoFdmFsdWUYASABKAFS'
+            'BXZhbHVlIiIKCkZsb2F0VmFsdWUSFAoFdmFsdWUYASABKAJSBXZhbHVlIiIKCkludDY0VmFsdWUS'
+            'FAoFdmFsdWUYASABKANSBXZhbHVlIiMKC1VJbnQ2NFZhbHVlEhQKBXZhbHVlGAEgASgEUgV2YWx1'
+            'ZSIiCgpJbnQzMlZhbHVlEhQKBXZhbHVlGAEgASgFUgV2YWx1ZSIjCgtVSW50MzJWYWx1ZRIUCgV2'
+            'YWx1ZRgBIAEoDVIFdmFsdWUiIQoJQm9vbFZhbHVlEhQKBXZhbHVlGAEgASgIUgV2YWx1ZSIjCgtT'
+            'dHJpbmdWYWx1ZRIUCgV2YWx1ZRgBIAEoCVIFdmFsdWUiIgoKQnl0ZXNWYWx1ZRIUCgV2YWx1ZYAB'
+            'IgEoDFIFdmFsdWVCgwEKE2NvbS5nb29nbGUucHJvdG9idWZCDVdyYXBwZXJzUHJvdG9QAVoxZ29v'
+            'Z2xlLmdvbGFuZy5vcmcvcHJvdG9idWYvdHlwZXMva25vd24vd3JhcHBlcnNwYvgBAaICA0dQQqoC'
+            'Hkdvb2dsZS5Qcm90b2J1Zi5XZWxsS25vd25UeXBlc2IGcHJvdG8z'
+        )
+
+        log = MagicMock()
+
+        # Sub-case 1: registry returns no references — preloading handles wrappers.proto
+        registry = self._mock_registry(schema_b64, 'PROTOBUF')
+        deserializer = MessageDeserializer(log, schema_registry=registry)
+        raw = self._make_sr_message(201, payload, protobuf_indices=b'\x01\x00')
+        result_str, schema_id = deserializer.deserialize_message(raw, 'protobuf', None, True)
+        assert schema_id == 201
+        result = json.loads(result_str)
+        assert result['id'] == 'US-001'
+        assert result['country'] == 'USA'
+
+        # Sub-case 2: registry explicitly lists wrappers.proto as a dep_schema reference
+        dep_schemas = [('google/protobuf/wrappers.proto', wrappers_b64)]
+        registry2 = self._mock_registry(schema_b64, 'PROTOBUF', dep_schemas=dep_schemas)
+        deserializer2 = MessageDeserializer(log, schema_registry=registry2)
+        raw2 = self._make_sr_message(202, payload, protobuf_indices=b'\x01\x00')
+        result_str2, schema_id2 = deserializer2.deserialize_message(raw2, 'protobuf', None, True)
+        assert schema_id2 == 202
+        result2 = json.loads(result_str2)
+        assert result2['id'] == 'US-001'
+        assert result2['country'] == 'USA'
+
     def test_json_with_schema_registry_fetch(self):
         """JSON message with schema registry format fetches type from registry."""
         log = MagicMock()
