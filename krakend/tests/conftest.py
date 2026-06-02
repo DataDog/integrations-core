@@ -7,9 +7,8 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-import yaml
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, get_e2e_discovery_config
 from datadog_checks.dev.conditions import CheckEndpoints
 from datadog_checks.dev.structures import LazyFunction
 from datadog_checks.krakend import KrakendCheck
@@ -18,26 +17,6 @@ from tests.types import InstanceBuilder
 
 COMPOSE_FILE_E2E = Path(__file__).parent / "docker" / "docker-compose.yml"
 COMPOSE_FILE_LAB = Path(__file__).parent / "lab" / "docker-compose.yml"
-INTEGRATIONS_CORE_ROOT = Path(__file__).resolve().parents[2]
-DISCOVERY_HELPERS_DIR = (
-    INTEGRATIONS_CORE_ROOT / "datadog_checks_base" / "datadog_checks" / "base" / "utils" / "discovery"
-)
-OPENMETRICS_V2_BASE_PY = (
-    INTEGRATIONS_CORE_ROOT
-    / "datadog_checks_base"
-    / "datadog_checks"
-    / "base"
-    / "checks"
-    / "openmetrics"
-    / "v2"
-    / "base.py"
-)
-AGENTCHECK_BASE_PY = INTEGRATIONS_CORE_ROOT / "datadog_checks_base" / "datadog_checks" / "base" / "checks" / "base.py"
-KRAKEND_AUTO_CONF = INTEGRATIONS_CORE_ROOT / "krakend" / "datadog_checks" / "krakend" / "data" / "auto_conf.yaml"
-KRAKEND_DISCOVERY_MODEL_PY = (
-    INTEGRATIONS_CORE_ROOT / "krakend" / "datadog_checks" / "krakend" / "config_models" / "discovery.py"
-)
-SITE_PACKAGES = "/opt/datadog-agent/embedded/lib/python3.13/site-packages"
 
 
 @pytest.fixture(scope="session")
@@ -72,21 +51,8 @@ def run_docker_e2e(env_vars: dict[str, str], conditions: list[LazyFunction]):
         conditions=conditions,
     ):
         asyncio.run(generate_sample_traffic())
-        with KRAKEND_AUTO_CONF.open() as f:
-            discovery_config = yaml.safe_load(f)
 
-        yield (
-            discovery_config,
-            {
-                "docker_volumes": [
-                    f"{DISCOVERY_HELPERS_DIR}:{SITE_PACKAGES}/datadog_checks/base/utils/discovery:ro",
-                    f"{OPENMETRICS_V2_BASE_PY}:{SITE_PACKAGES}/datadog_checks/base/checks/openmetrics/v2/base.py:ro",
-                    f"{AGENTCHECK_BASE_PY}:{SITE_PACKAGES}/datadog_checks/base/checks/base.py:ro",
-                    f"{KRAKEND_DISCOVERY_MODEL_PY}:{SITE_PACKAGES}/datadog_checks/krakend/config_models/discovery.py:ro",
-                    "/var/run/docker.sock:/var/run/docker.sock:ro",
-                ],
-            },
-        )
+        yield get_e2e_discovery_config()
 
 
 @pytest.fixture(scope="session")
