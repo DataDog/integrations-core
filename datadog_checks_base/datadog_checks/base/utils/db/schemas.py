@@ -73,6 +73,7 @@ class SchemaCollector(ABC):
                 if not database_name:
                     self._log.warning("database has no name %v", database)
                     continue
+                rows_start = len(self._queued_rows)
                 try:
                     with self._get_cursor(database_name) as cursor:
                         # Get the next row from the cursor
@@ -86,6 +87,7 @@ class SchemaCollector(ABC):
                             self.maybe_flush(is_last_payload=False)
                     self._log.debug("Completed collection of schemas for database %s", database_name)
                 except Exception as e:
+                    del self._queued_rows[rows_start:]
                     self._log.warning("Skipping database %s due to error: %s", database_name, e, exc_info=True)
                     continue
             self.maybe_flush(is_last_payload=True)
