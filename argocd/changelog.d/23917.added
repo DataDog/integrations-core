@@ -1,0 +1,1 @@
+Add a beta collector that submits ArgoCD applications, clusters, and repositories to Datadog as generic resources.
