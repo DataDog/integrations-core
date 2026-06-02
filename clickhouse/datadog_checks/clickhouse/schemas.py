@@ -133,23 +133,31 @@ class ClickhouseSchemaCollector(SchemaCollector):
         self._db_client = self._check.create_dbm_client()
         self._db_client.set_client_setting('max_execution_time', self._config.max_query_duration)
         try:
-            db_filters = _build_match_clauses(
-                'database', self._config.include_databases, self._config.exclude_databases
+            db_filters, db_params = _build_match_clauses(
+                'database', self._config.include_databases, self._config.exclude_databases, 'db'
             )
-            table_filters = _build_match_clauses('name', self._config.include_tables, self._config.exclude_tables)
+            table_filters, table_params = _build_match_clauses(
+                'name', self._config.include_tables, self._config.exclude_tables, 'table'
+            )
 
+            # Only structural pieces (trusted system-table identifiers and
+            # validated integer limits) are interpolated; user-supplied regex
+            # patterns are bound as query parameters below.
             fmt = {
                 'tables_table': self._check.get_system_table('tables'),
                 'columns_table': self._check.get_system_table('columns'),
                 'system_dbs': ", ".join(_SYSTEM_DATABASE_NAMES),
-                'max_tables': self._config.max_tables,
-                'max_columns': self._config.max_columns,
-                'limit_columns': self._config.max_tables * self._config.max_columns,
+                'max_tables': int(self._config.max_tables),
+                'max_columns': int(self._config.max_columns),
+                'limit_columns': int(self._config.max_tables) * int(self._config.max_columns),
                 'db_filters': db_filters,
                 'table_filters': table_filters,
             }
+            query_parameters = {**db_params, **table_params}
             self._check_cancelled()
-            with self._db_client.query_rows_stream(_TABLES_COLUMNS_QUERY.format(**fmt)) as stream:
+            with self._db_client.query_rows_stream(
+                _TABLES_COLUMNS_QUERY.format(**fmt), parameters=query_parameters
+            ) as stream:
                 yield stream
         finally:
             self.close()
@@ -208,14 +216,25 @@ def _build_match_clauses(
     column: str,
     include_patterns: tuple[str, ...],
     exclude_patterns: tuple[str, ...],
-) -> str:
-    def escape(p: str) -> str:
-        return p.replace("'", "''")
+    param_prefix: str,
+) -> tuple[str, dict[str, str]]:
+    """Build regex match clauses using bound query parameters rather than string
+    interpolation, so user-supplied patterns cannot be used for SQL injection.
 
+    Returns the clause text (with ``{name:String}`` placeholders) and the dict of
+    parameter values to pass to ``query_rows_stream(parameters=...)``.
+    """
     clauses: list[str] = []
-    for pattern in exclude_patterns:
-        clauses.append(f"AND NOT match({column}, '{escape(pattern)}')")
+    params: dict[str, str] = {}
+    for i, pattern in enumerate(exclude_patterns):
+        key = f'{param_prefix}_exclude_{i}'
+        clauses.append(f"AND NOT match({column}, {{{key}:String}})")
+        params[key] = pattern
     if include_patterns:
-        ors = " OR ".join(f"match({column}, '{escape(p)}')" for p in include_patterns)
-        clauses.append(f"AND ({ors})")
-    return "\n  ".join(clauses)
+        ors = []
+        for i, pattern in enumerate(include_patterns):
+            key = f'{param_prefix}_include_{i}'
+            ors.append(f"match({column}, {{{key}:String}})")
+            params[key] = pattern
+        clauses.append(f"AND ({' OR '.join(ors)})")
+    return "\n  ".join(clauses), params

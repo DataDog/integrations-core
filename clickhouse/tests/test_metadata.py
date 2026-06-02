@@ -168,6 +168,23 @@ def _capture_all_queries(collector):
         yield seen
 
 
+@contextlib.contextmanager
+def _capture_query_params(collector):
+    """Records (query, parameters) for each query_rows_stream call."""
+    calls: list[tuple[str, dict]] = []
+
+    @contextlib.contextmanager
+    def fake_stream(query, *args, **kwargs):
+        calls.append((query, kwargs.get('parameters') or {}))
+        yield iter([])
+
+    mock_client = mock.MagicMock()
+    mock_client.query_rows_stream.side_effect = fake_stream
+
+    with mock.patch.object(collector._check, 'create_dbm_client', return_value=mock_client):
+        yield calls
+
+
 def test_initialization(check):
     assert isinstance(check.metadata, ClickhouseMetadata)
     assert isinstance(check.metadata._schema_collector, ClickhouseSchemaCollector)
@@ -434,43 +451,50 @@ def test_collect_routes_through_cluster_all_replicas_in_single_endpoint_mode(col
 
 
 def test_build_match_clauses_empty_returns_empty_string():
-    assert _build_match_clauses('database', (), ()) == ''
+    assert _build_match_clauses('database', (), (), 'db') == ('', {})
 
 
 def test_build_match_clauses_excludes_only():
-    out = _build_match_clauses('database', (), ('tmp_.*', 'shadow_.*'))
-    assert "AND NOT match(database, 'tmp_.*')" in out
-    assert "AND NOT match(database, 'shadow_.*')" in out
+    out, params = _build_match_clauses('database', (), ('tmp_.*', 'shadow_.*'), 'db')
+    assert "AND NOT match(database, {db_exclude_0:String})" in out
+    assert "AND NOT match(database, {db_exclude_1:String})" in out
+    assert params == {'db_exclude_0': 'tmp_.*', 'db_exclude_1': 'shadow_.*'}
 
 
 def test_build_match_clauses_includes_become_or_disjunction():
-    out = _build_match_clauses('name', ('events.*', 'orders.*'), ())
-    assert "AND (match(name, 'events.*') OR match(name, 'orders.*'))" in out
+    out, params = _build_match_clauses('name', ('events.*', 'orders.*'), (), 'table')
+    assert "AND (match(name, {table_include_0:String}) OR match(name, {table_include_1:String}))" in out
+    assert params == {'table_include_0': 'events.*', 'table_include_1': 'orders.*'}
 
 
 def test_build_match_clauses_single_include_pattern():
-    out = _build_match_clauses('name', ('only_one.*',), ())
-    assert "AND (match(name, 'only_one.*'))" in out
+    out, params = _build_match_clauses('name', ('only_one.*',), (), 'table')
+    assert "AND (match(name, {table_include_0:String}))" in out
     assert " OR " not in out
+    assert params == {'table_include_0': 'only_one.*'}
 
 
 def test_build_match_clauses_excludes_appear_before_includes():
-    out = _build_match_clauses('database', ('keep_.*',), ('drop_.*',))
-    exclude_idx = out.find("AND NOT match(database, 'drop_.*')")
-    include_idx = out.find("AND (match(database, 'keep_.*'))")
+    out, _ = _build_match_clauses('database', ('keep_.*',), ('drop_.*',), 'db')
+    exclude_idx = out.find("AND NOT match(database, {db_exclude_0:String})")
+    include_idx = out.find("AND (match(database, {db_include_0:String}))")
     assert exclude_idx >= 0 and include_idx >= 0
     assert exclude_idx < include_idx
 
 
 def test_build_match_clauses_combines_includes_and_excludes():
-    out = _build_match_clauses('database', ('keep_.*',), ('drop_.*',))
-    assert "AND NOT match(database, 'drop_.*')" in out
-    assert "AND (match(database, 'keep_.*'))" in out
+    out, params = _build_match_clauses('database', ('keep_.*',), ('drop_.*',), 'db')
+    assert "AND NOT match(database, {db_exclude_0:String})" in out
+    assert "AND (match(database, {db_include_0:String}))" in out
+    assert params == {'db_exclude_0': 'drop_.*', 'db_include_0': 'keep_.*'}
 
 
-def test_build_match_clauses_escapes_single_quotes():
-    out = _build_match_clauses('database', (), ("o'reilly_.*",))
-    assert "AND NOT match(database, 'o''reilly_.*')" in out
+def test_build_match_clauses_passes_pattern_verbatim_as_parameter():
+    # SQL-injection guard: a pattern containing a quote is bound as a parameter
+    # value, not escaped/interpolated into the SQL text.
+    out, params = _build_match_clauses('database', (), ("o'reilly_.*",), 'db')
+    assert out == "AND NOT match(database, {db_exclude_0:String})"
+    assert params == {'db_exclude_0': "o'reilly_.*"}
 
 
 def test_database_filters_appear_in_combined_query(collect_schemas_instance):
@@ -478,12 +502,14 @@ def test_database_filters_appear_in_combined_query(collect_schemas_instance):
     collect_schemas_instance['collect_schemas']['include_databases'] = ['keep_.*']
     check = ClickhouseCheck('clickhouse', {}, [collect_schemas_instance])
     _capture_payloads(check)
-    with _capture_all_queries(check.metadata._schema_collector) as seen_queries:
+    with _capture_query_params(check.metadata._schema_collector) as calls:
         check.metadata._schema_collector.collect_schemas()
 
-    combined_query = next(q for q in seen_queries if 'FROM system.tables' in q)
-    assert "AND NOT match(database, 'tmp_.*')" in combined_query
-    assert "AND (match(database, 'keep_.*'))" in combined_query
+    combined_query, params = next((q, p) for q, p in calls if 'FROM system.tables' in q)
+    assert "AND NOT match(database, {db_exclude_0:String})" in combined_query
+    assert "AND (match(database, {db_include_0:String}))" in combined_query
+    assert params['db_exclude_0'] == 'tmp_.*'
+    assert params['db_include_0'] == 'keep_.*'
 
 
 def test_table_filters_appear_in_combined_query(collect_schemas_instance):
@@ -491,12 +517,14 @@ def test_table_filters_appear_in_combined_query(collect_schemas_instance):
     collect_schemas_instance['collect_schemas']['exclude_tables'] = ['tmp_.*']
     check = ClickhouseCheck('clickhouse', {}, [collect_schemas_instance])
     _capture_payloads(check)
-    with _capture_all_queries(check.metadata._schema_collector) as seen_queries:
+    with _capture_query_params(check.metadata._schema_collector) as calls:
         check.metadata._schema_collector.collect_schemas()
 
-    combined_query = next(q for q in seen_queries if 'FROM system.tables' in q)
-    assert "AND NOT match(name, 'tmp_.*')" in combined_query
-    assert "AND (match(name, 'events.*'))" in combined_query
+    combined_query, params = next((q, p) for q, p in calls if 'FROM system.tables' in q)
+    assert "AND NOT match(name, {table_exclude_0:String})" in combined_query
+    assert "AND (match(name, {table_include_0:String}))" in combined_query
+    assert params['table_exclude_0'] == 'tmp_.*'
+    assert params['table_include_0'] == 'events.*'
 
 
 def test_all_cluster_fanout_queries_dedupe_replica_rows(check):
