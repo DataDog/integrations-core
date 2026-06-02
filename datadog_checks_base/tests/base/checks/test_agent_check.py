@@ -100,6 +100,31 @@ def test_discover_config_returns_empty_for_base_check():
     assert json.loads(AgentCheck.discover_config(payload)) == []
 
 
+def test_generate_configs_loads_generated_discovery_module():
+    from datadog_checks.base.utils.discovery import Port, Service
+
+    discovery_module = types.SimpleNamespace()
+
+    def candidates(service):
+        yield {'init_config': {}, 'instances': [{'host': service.host}]}
+
+    discovery_module.candidates = candidates
+
+    class GeneratedDiscoveryCheck(AgentCheck):
+        __module__ = 'datadog_checks.generated.check'
+
+    service = Service(id='svc', host='10.0.0.1', ports=(Port(number=9090),))
+
+    with patch(
+        'datadog_checks.base.checks.base.importlib.import_module', return_value=discovery_module
+    ) as import_module:
+        assert list(GeneratedDiscoveryCheck.generate_configs(service)) == [
+            {'init_config': {}, 'instances': [{'host': '10.0.0.1'}]},
+        ]
+
+    import_module.assert_called_once_with('datadog_checks.generated.config_models.discovery')
+
+
 @pytest.fixture
 def fresh_check():
     """Return an AgentCheck with no cached _package_dir."""

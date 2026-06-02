@@ -6,7 +6,7 @@ import re
 import mock
 import pytest
 
-from datadog_checks.base.utils.discovery import Discovery, Port, Service, candidate_ports
+from datadog_checks.base.utils.discovery import Discovery, Port, Service, candidate_ports, from_ports
 
 
 def test_include_empty():
@@ -206,4 +206,20 @@ def test_candidate_ports_prefers_hints_and_deduplicates():
         Port(number=9090, name='metrics'),
         Port(number=8080, name='http'),
         Port(number=8081, name='admin'),
+    ]
+
+
+def test_from_ports_yields_template_contexts():
+    service = Service(
+        id='svc',
+        host='127.0.0.1',
+        ports=(
+            Port(number=8080, name='http'),
+            Port(number=9090, name='metrics'),
+        ),
+    )
+
+    assert list(from_ports(service, port_hints=[9090])) == [
+        {'port': Port(number=9090, name='metrics')},
+        {'port': Port(number=8080, name='http')},
     ]

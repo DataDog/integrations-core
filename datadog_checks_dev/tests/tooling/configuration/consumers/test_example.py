@@ -39,6 +39,43 @@ def test_option_no_section():
     )
 
 
+def test_discovery_generates_auto_conf():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            ad_identifiers:
+            - foo
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['auto_conf.yaml']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ad_identifiers:
+          - foo
+        discovery: {}
+        init_config:
+        instances: []
+        """
+    )
+
+
 def test_section_with_option():
     consumer = get_example_consumer(
         """

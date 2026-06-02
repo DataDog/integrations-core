@@ -2,7 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from string import Formatter
+
 from .constants import ALLOWED_FORMATS, OPENAPI_DATA_TYPES
+
+DISCOVERY_STRATEGY_FIELDS = {'strategy', 'port_hints', 'candidates'}
+DISCOVERY_FIELDS = {'ad_identifiers', 'strategies'}
+DISCOVERY_FROM_PORTS_PLACEHOLDERS = {
+    'service': {'id', 'host'},
+    'port': {'name', 'number'},
+}
 
 
 def spec_validator(spec: dict, loader) -> None:
@@ -97,6 +106,18 @@ def files_validator(files, loader) -> None:
         else:
             example_file_names_origin[example_file_name] = file_index
 
+        if 'discovery' in config_file:
+            if 'auto_conf.yaml' in example_file_names_origin:
+                loader.errors.append(
+                    '{}, file #{}: Discovery auto_conf.yaml already used by file #{}'.format(
+                        loader.source, file_index, example_file_names_origin['auto_conf.yaml']
+                    )
+                )
+            else:
+                example_file_names_origin['auto_conf.yaml'] = file_index
+
+            discovery_validator(config_file['discovery'], loader, file_name)
+
         if 'options' not in config_file:
             loader.errors.append(f'{loader.source}, {file_name}: Every file must contain an `options` attribute')
             continue
@@ -107,6 +128,91 @@ def files_validator(files, loader) -> None:
             continue
 
         options_validator(options, loader, file_name)
+
+
+def discovery_validator(discovery, loader, file_name):
+    location = f'{loader.source}, {file_name}, discovery'
+    if not isinstance(discovery, dict):
+        loader.errors.append(f'{location}: Attribute `discovery` must be a mapping object')
+        return
+
+    invalid_fields = set(discovery) - DISCOVERY_FIELDS
+    if invalid_fields:
+        fields = ', '.join(sorted(invalid_fields))
+        loader.errors.append(f'{location}: Unknown field(s): {fields}')
+
+    ad_identifiers = discovery.get('ad_identifiers')
+    if (
+        not isinstance(ad_identifiers, list)
+        or not ad_identifiers
+        or not all(isinstance(identifier, str) for identifier in ad_identifiers)
+    ):
+        loader.errors.append(f'{location}: Attribute `ad_identifiers` must be a non-empty array of strings')
+
+    strategies = discovery.get('strategies')
+    if not isinstance(strategies, list) or not strategies:
+        loader.errors.append(f'{location}: Attribute `strategies` must be a non-empty array')
+        return
+
+    for strategy_index, strategy in enumerate(strategies, 1):
+        strategy_location = f'{location}, strategy #{strategy_index}'
+        if not isinstance(strategy, dict):
+            loader.errors.append(f'{strategy_location}: Strategy must be a mapping object')
+            continue
+
+        invalid_fields = set(strategy) - DISCOVERY_STRATEGY_FIELDS
+        if invalid_fields:
+            fields = ', '.join(sorted(invalid_fields))
+            loader.errors.append(f'{strategy_location}: Unknown field(s): {fields}')
+
+        strategy_name = strategy.get('strategy')
+        if strategy_name != 'from_ports':
+            loader.errors.append(f'{strategy_location}: Unsupported strategy `{strategy_name}`')
+            continue
+
+        port_hints = strategy.get('port_hints')
+        if not isinstance(port_hints, list) or not all(isinstance(port, int) for port in port_hints):
+            loader.errors.append(f'{strategy_location}: Attribute `port_hints` must be an array of integers')
+
+        candidates = strategy.get('candidates')
+        if not isinstance(candidates, list) or not candidates:
+            loader.errors.append(f'{strategy_location}: Attribute `candidates` must be a non-empty array')
+            continue
+
+        for candidate_index, candidate in enumerate(candidates, 1):
+            candidate_location = f'{strategy_location}, candidate #{candidate_index}'
+            if not isinstance(candidate, dict) or not candidate:
+                loader.errors.append(f'{candidate_location}: Candidate must be a non-empty mapping object')
+                continue
+
+            for field_name, template in candidate.items():
+                if not isinstance(field_name, str):
+                    loader.errors.append(f'{candidate_location}: Candidate field names must be strings')
+                if not isinstance(template, str):
+                    loader.errors.append(f'{candidate_location}, {field_name}: Candidate templates must be strings')
+                    continue
+
+                _validate_discovery_template(template, loader, candidate_location, field_name)
+
+
+def _validate_discovery_template(template, loader, location, field_name):
+    try:
+        parsed_template = Formatter().parse(template)
+    except ValueError as e:
+        loader.errors.append(f'{location}, {field_name}: Invalid candidate template: {e}')
+        return
+
+    for _, placeholder, _, _ in parsed_template:
+        if placeholder is None:
+            continue
+
+        root, separator, attr = placeholder.partition('.')
+        if not separator or root not in DISCOVERY_FROM_PORTS_PLACEHOLDERS:
+            loader.errors.append(f'{location}, {field_name}: Unknown placeholder `{placeholder}`')
+            continue
+
+        if attr not in DISCOVERY_FROM_PORTS_PLACEHOLDERS[root]:
+            loader.errors.append(f'{location}, {field_name}: Unknown placeholder `{placeholder}`')
 
 
 def options_validator(options, loader, file_name, *sections):

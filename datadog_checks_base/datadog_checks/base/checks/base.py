@@ -189,10 +189,13 @@ class AgentCheck(object):
         """
         Yield candidate full configurations for service discovery.
 
-        Integrations that opt into config discovery should override this method.
-        The base implementation deliberately produces no candidates.
+        Integrations can opt into config discovery by declaring a discovery
+        stanza in their spec and generating config_models.discovery.
         """
-        return ()
+        candidates = _generated_discovery_candidates(cls, service)
+        if candidates is None:
+            return ()
+        return candidates
 
     @classmethod
     def discover_config(cls, service_json):
@@ -1835,6 +1838,25 @@ def _discovery_check_name(cls):
     if len(module_parts) >= 2 and module_parts[0] == 'datadog_checks':
         return module_parts[1]
     return cls.__name__
+
+
+def _generated_discovery_candidates(cls, service):
+    module_parts = cls.__module__.split('.')
+    if len(module_parts) < 2 or module_parts[0] != 'datadog_checks':
+        return None
+
+    module_name = f'{module_parts[0]}.{module_parts[1]}.config_models.discovery'
+    try:
+        discovery = importlib.import_module(module_name)
+    except ImportError as e:
+        # Missing generated discovery is the normal "not opted in" case. If
+        # discovery.py exists and fails to import one of its own dependencies,
+        # let that error surface to the caller.
+        if e.name and module_name.startswith(e.name):
+            return None
+        raise
+
+    return discovery.candidates(service)
 
 
 def _discovery_service_from_json(service_json):
