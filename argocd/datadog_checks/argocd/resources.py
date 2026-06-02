@@ -10,7 +10,7 @@ import os
 import time
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Callable
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlunparse
 
 try:
     import datadog_agent
@@ -46,8 +46,7 @@ def _instance_prefix(endpoint: str | None) -> str:
             tags = datadog_agent.get_config("tags") or []
         except Exception:
             tags = []
-        env = next((t.split(":", 1)[1] for t in tags if t.startswith("env:")), "") \
-              or os.environ.get("DD_ENV", "")
+        env = next((t.split(":", 1)[1] for t in tags if t.startswith("env:")), "") or os.environ.get("DD_ENV", "")
         if env:
             parts.append(env)
     if not parts and endpoint:
@@ -56,6 +55,7 @@ def _instance_prefix(endpoint: str | None) -> str:
             parts.append(host)
     return ":".join(parts)
 
+
 GENRESOURCES_API_UP_METRIC = "argocd.genresources.api.up"
 
 
@@ -63,70 +63,108 @@ GENRESOURCES_API_UP_METRIC = "argocd.genresources.api.up"
 class ResourceTypeSpec:
     resource_type: str
     api_path: str
-    paths: tuple[str, ...]
-    annotation_keys: tuple[str, ...]
+    include: dict[str, tuple[str, ...]]
     key_builder: Callable[[dict], str]
 
 
-APPLICATION_REDACTION_PATHS: tuple[str, ...] = (
-    "spec.source.helm.parameters[*].value",
-    "spec.source.helm.values",
-    "spec.source.helm.valuesObject",
-    "spec.sources[*].helm.parameters[*].value",
-    "spec.sources[*].helm.values",
-    "spec.sources[*].helm.valuesObject",
-    "spec.source.directory.jsonnet.tlas[*].value",
-    "spec.source.directory.jsonnet.extVars[*].value",
-    "spec.sources[*].directory.jsonnet.tlas[*].value",
-    "spec.sources[*].directory.jsonnet.extVars[*].value",
-    "spec.source.plugin.env[*].value",
-    "spec.source.plugin.parameters[*].string",
-    "spec.sources[*].plugin.env[*].value",
-    "spec.sources[*].plugin.parameters[*].string",
-    "spec.source.kustomize.secretVars",
-    "spec.sources[*].kustomize.secretVars",
-)
+APPLICATION_INCLUDE: dict[str, tuple[str, ...]] = {
+    "paths": (
+        "metadata.name",
+        "metadata.namespace",
+        "spec.project",
+        "spec.source.repoURL",
+        "spec.source.path",
+        "spec.source.targetRevision",
+        "spec.source.chart",
+        "spec.sources[*].repoURL",
+        "spec.sources[*].path",
+        "spec.sources[*].targetRevision",
+        "spec.destination.server",
+        "spec.destination.namespace",
+        "spec.destination.name",
+        "spec.syncPolicy.automated.prune",
+        "spec.syncPolicy.automated.selfHeal",
+        "status.sync.status",
+        "status.sync.revision",
+        "status.health.status",
+        "status.health.message",
+        "status.operationState.phase",
+        "status.operationState.operation.initiatedBy.username",
+        "status.sourceType",
+        "status.reconciledAt",
+        "status.resources[*].kind",
+        "status.resources[*].name",
+        "status.resources[*].namespace",
+        "status.resources[*].status",
+        "status.resources[*].health.status",
+    ),
+    "map_paths": ("metadata.labels",),
+    "annotation_keys": (),
+}
 
-CLUSTER_REDACTION_PATHS: tuple[str, ...] = (
-    "config.username",
-    "config.password",
-    "config.bearerToken",
-    "config.tlsClientConfig.keyData",
-    "config.tlsClientConfig.certData",
-    "config.tlsClientConfig.caData",
-    "config.awsAuthConfig",
-    "config.execProviderConfig",
-)
+CLUSTER_INCLUDE: dict[str, tuple[str, ...]] = {
+    "paths": (
+        "name",
+        "server",
+        "serverVersion",
+        "namespaces[*]",
+        "connectionState.status",
+        "connectionState.message",
+        "info.applicationsCount",
+        "info.serverVersion",
+        "info.cacheInfo.resourcesCount",
+    ),
+    "map_paths": ("labels",),
+    "annotation_keys": (),
+}
 
-REPOSITORY_REDACTION_PATHS: tuple[str, ...] = (
-    "username",
-    "password",
-    "sshPrivateKey",
-    "tlsClientCertData",
-    "tlsClientCertKey",
-    "githubAppPrivateKey",
-    "gcpServiceAccountKey",
-)
+REPOSITORY_INCLUDE: dict[str, tuple[str, ...]] = {
+    "paths": (
+        "repo",
+        "type",
+        "name",
+        "project",
+        "connectionState.status",
+        "connectionState.message",
+    ),
+    "map_paths": (),
+    "annotation_keys": (),
+}
 
-APPLICATION_ANNOTATION_KEYS: tuple[str, ...] = ("*.kubernetes.io/last-applied-configuration",)
+
+def _strip_url_userinfo(url: str) -> str:
+    """Drop any embedded ``user:token@`` credentials from a URL."""
+    parsed = urlparse(url)
+    if not (parsed.username or parsed.password):
+        return url
+    netloc = parsed.hostname or ""
+    if parsed.port:
+        netloc = f"{netloc}:{parsed.port}"
+    return urlunparse(parsed._replace(netloc=netloc))
 
 
-IN_CLUSTER_API = "https://kubernetes.default.svc"
+def _sanitize_repo_urls(item: dict, resource_type: str) -> None:
+    """Strip embedded credentials from repo URLs in place before they ship or become keys."""
+    if resource_type == "argocd_application":
+        spec = item.get("spec") or {}
+        source = spec.get("source")
+        if isinstance(source, dict) and isinstance(source.get("repoURL"), str):
+            source["repoURL"] = _strip_url_userinfo(source["repoURL"])
+        for src in spec.get("sources") or []:
+            if isinstance(src, dict) and isinstance(src.get("repoURL"), str):
+                src["repoURL"] = _strip_url_userinfo(src["repoURL"])
+    elif resource_type == "argocd_repository":
+        if isinstance(item.get("repo"), str):
+            item["repo"] = _strip_url_userinfo(item["repo"])
 
 
 def _application_key(item: dict) -> str:
     metadata = item.get("metadata") or {}
-    spec = item.get("spec") or {}
-    destination = spec.get("destination") or {}
-    cluster = destination.get("server") or ""
-    namespace = destination.get("namespace") or metadata.get("namespace") or "default"
+    namespace = metadata.get("namespace") or "default"
     name = metadata.get("name")
     if not name:
         raise ValueError("argocd_application is missing metadata.name")
-    parts = [namespace, name]
-    if cluster and cluster != IN_CLUSTER_API:
-        parts.insert(0, cluster)
-    return ":".join(parts)
+    return f"{namespace}:{name}"
 
 
 def _cluster_key(item: dict) -> str:
@@ -147,22 +185,19 @@ RESOURCE_TYPE_SPECS: tuple[ResourceTypeSpec, ...] = (
     ResourceTypeSpec(
         resource_type="argocd_application",
         api_path="/api/v1/applications",
-        paths=APPLICATION_REDACTION_PATHS,
-        annotation_keys=APPLICATION_ANNOTATION_KEYS,
+        include=APPLICATION_INCLUDE,
         key_builder=_application_key,
     ),
     ResourceTypeSpec(
         resource_type="argocd_cluster",
         api_path="/api/v1/clusters",
-        paths=CLUSTER_REDACTION_PATHS,
-        annotation_keys=(),
+        include=CLUSTER_INCLUDE,
         key_builder=_cluster_key,
     ),
     ResourceTypeSpec(
         resource_type="argocd_repository",
         api_path="/api/v1/repositories",
-        paths=REPOSITORY_REDACTION_PATHS,
-        annotation_keys=(),
+        include=REPOSITORY_INCLUDE,
         key_builder=_repository_key,
     ),
 )
@@ -177,7 +212,7 @@ class ArgocdResourceCollector:
         self._endpoint: str | None = instance.get("generic_resources_endpoint")
         self._ttl_seconds: int = instance.get("genresources_ttl_seconds", 21600)
         self._max_resources: int = instance.get("max_resources_per_cycle", 10000)
-        self._extra_paths: list[str] = list(instance.get("extra_redaction_paths") or [])
+        self._extra_paths: list[str] = list(instance.get("extra_include_paths") or [])
         self._auth_token: str | None = instance.get("generic_resources_auth_token")
         self._instance_prefix: str = _instance_prefix(self._endpoint)
 
@@ -231,19 +266,25 @@ class ArgocdResourceCollector:
 
     def _emit_item(self, item: dict, spec: ResourceTypeSpec, *, seen_at: int, expire_at: int) -> None:
         try:
+            _sanitize_repo_urls(item, spec.resource_type)
             key = spec.key_builder(item)
-            if self._instance_prefix:
-                key = f"{self._instance_prefix}:{key}"
+        except Exception:
+            self.check.log.warning("genresources: skipping malformed %s", spec.resource_type, exc_info=True)
+            return
+        if self._instance_prefix:
+            key = f"{self._instance_prefix}:{key}"
+        try:
             self.check.submit_generic_resource(
                 type=spec.resource_type,
                 key=key,
                 fields=item,
-                redact={
-                    "paths": list(spec.paths) + self._extra_paths,
-                    "annotation_keys": list(spec.annotation_keys),
+                include={
+                    "paths": list(spec.include["paths"]) + self._extra_paths,
+                    "map_paths": list(spec.include["map_paths"]),
+                    "annotation_keys": list(spec.include["annotation_keys"]),
                 },
                 seen_at=seen_at,
                 expire_at=expire_at,
             )
         except Exception:
-            self.check.log.warning("genresources: skipping malformed %s", spec.resource_type, exc_info=True)
+            self.check.log.exception("genresources: failed to submit %s (key=%s)", spec.resource_type, key)

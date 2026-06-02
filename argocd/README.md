@@ -196,10 +196,11 @@ Operator-tunable options:
 
 - `genresources_ttl_seconds` (default `21600`): time-to-live applied to each emitted resource. Resources expire `ttl_seconds` after the last observation.
 - `max_resources_per_cycle` (default `10000`): per-cycle cap, applied independently to each resource type. When an Argo CD API endpoint returns more, the excess is dropped and a warning is logged.
-- `extra_redaction_paths` (default `[]`): additional JSON paths appended to the built-in redaction deny-list. The list is additive; it cannot remove paths from the baseline.
+- `extra_include_paths` (default `[]`): additional JSON paths appended to the built-in allow-list. Because only listed fields are shipped, this adds fields to the payload; it cannot remove baseline fields. Each path must resolve to a value or a list of values, not a whole object. A path that lands on an object causes that resource to be dropped.
 
 Behavioral notes:
 
+- Only an explicit allow-list of fields is shipped for each resource type. Anything not on the list never leaves the Agent, including any field a future Argo CD release might add. Secrets such as Helm values, repository credentials, and cluster auth config are excluded by omission. Repository URLs are additionally stripped of any embedded `user:token@` credentials before they ship or are used as keys.
 - On every Agent restart with `collect_genresources` enabled, the collector re-emits every `Application`, `Cluster`, and `Repository` on its first cycle. The burst is bounded by `max_resources_per_cycle` (applied per type) and self-corrects on subsequent cycles.
 - Disabling `collect_genresources` does not immediately delete previously-emitted resources. Resources expire on their own via `expire_at` (default 6 hours after the last observation).
 - Argo CD REST API reachability is reported as the `argocd.genresources.api.up` gauge tagged with `resource_type:argocd_application`, `resource_type:argocd_cluster`, or `resource_type:argocd_repository`. The gauge is `1` when the endpoint returns a successful response and `0` when it errors, so failures in one endpoint do not mask the health of the others.

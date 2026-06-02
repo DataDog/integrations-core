@@ -109,8 +109,8 @@ class InstanceConfig(BaseModel):
     exclude_metrics: Optional[tuple[str, ...]] = None
     exclude_metrics_by_labels: Optional[MappingProxyType[str, Union[bool, tuple[str, ...]]]] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
+    extra_include_paths: Optional[tuple[str, ...]] = None
     extra_metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, ExtraMetrics]]], ...]] = None
-    extra_redaction_paths: Optional[tuple[str, ...]] = None
     generic_resources_auth_token: Optional[str] = None
     generic_resources_endpoint: Optional[str] = None
     genresources_ttl_seconds: Optional[int] = Field(None, ge=1)

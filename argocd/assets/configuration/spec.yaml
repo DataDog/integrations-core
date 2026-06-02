@@ -102,13 +102,17 @@ files:
         type: integer
         example: 10000
         minimum: 1
-    - name: extra_redaction_paths
+    - name: extra_include_paths
       description: |
-        Additional dotted JSON paths appended to the baseline redaction
-        deny-list of every collected resource type. ``[*]`` denotes array
-        iteration. A path that does not match any field for a given type
-        is silently skipped. This list is additive; it cannot remove paths
-        from the baseline.
+        Additional dotted JSON paths appended to the baseline allow-list of
+        every collected resource type. Only enumerated paths are shipped;
+        anything not listed never leaves the Agent. ``[*]`` denotes array
+        iteration. A path that does not match any field for a given type is
+        silently skipped. This list is additive; it can add fields to ship but
+        cannot remove baseline fields. Each path must resolve to a value, or a
+        list of values, not a whole object: a path that lands on an object
+        causes that resource to be dropped, so enumerate leaf fields rather
+        than their parents.
       value:
         type: array
         items:

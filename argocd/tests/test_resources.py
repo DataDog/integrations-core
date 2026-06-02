@@ -8,8 +8,8 @@
 # end-to-end test that lets the real helper run and asserts on the captured
 # event-platform payload via
 # ``aggregator.get_event_platform_events("genresources", parse_json=False)``.
-# That catches ``redact=`` signature drift, redaction-contract regressions, and
-# proto serialization failures that the current mocks cannot see.
+# That catches ``include=`` signature drift, allow-list projection regressions,
+# and proto serialization failures that the current mocks cannot see.
 
 from __future__ import annotations
 
@@ -17,10 +17,10 @@ from unittest.mock import patch
 
 from datadog_checks.argocd import ArgocdCheck
 from datadog_checks.argocd.resources import (
-    APPLICATION_REDACTION_PATHS,
-    CLUSTER_REDACTION_PATHS,
+    APPLICATION_INCLUDE,
+    CLUSTER_INCLUDE,
     GENRESOURCES_API_UP_METRIC,
-    REPOSITORY_REDACTION_PATHS,
+    REPOSITORY_INCLUDE,
 )
 from datadog_checks.dev.http import MockResponse
 
@@ -30,10 +30,16 @@ CLUSTERS_URL = f"{ARGOCD_ENDPOINT}/api/v1/clusters"
 REPOSITORIES_URL = f"{ARGOCD_ENDPOINT}/api/v1/repositories"
 
 
-def _application(name: str, *, namespace: str = "argocd", cluster: str = "https://kubernetes.default.svc") -> dict:
+def _application(
+    name: str,
+    *,
+    namespace: str = "argocd",
+    cluster: str = "https://kubernetes.default.svc",
+    dest_namespace: str | None = None,
+) -> dict:
     return {
         "metadata": {"name": name, "namespace": namespace},
-        "spec": {"destination": {"server": cluster, "namespace": namespace}, "source": {}},
+        "spec": {"destination": {"server": cluster, "namespace": dest_namespace or namespace}, "source": {}},
         "status": {"sync": {"status": "Synced"}},
     }
 
@@ -79,20 +85,44 @@ def test_collect_emits_applications_clusters_and_repositories(aggregator, mock_h
         check._resource_collector.collect()
 
     by_type = {call.kwargs["type"]: call.kwargs for call in submit.call_args_list}
-    assert by_type["argocd_application"]["key"] == "argocd.example.com:https://kubernetes.default.svc:argocd:checkout"
+    assert by_type["argocd_application"]["key"] == "argocd.example.com:argocd:checkout"
     assert by_type["argocd_cluster"]["key"] == "argocd.example.com:https://cluster-a.example"
     assert by_type["argocd_repository"]["key"] == "argocd.example.com:https://github.com/team/repo"
-    for spec_type, redact_paths in (
-        ("argocd_application", APPLICATION_REDACTION_PATHS),
-        ("argocd_cluster", CLUSTER_REDACTION_PATHS),
-        ("argocd_repository", REPOSITORY_REDACTION_PATHS),
+    for spec_type, include in (
+        ("argocd_application", APPLICATION_INCLUDE),
+        ("argocd_cluster", CLUSTER_INCLUDE),
+        ("argocd_repository", REPOSITORY_INCLUDE),
     ):
-        assert by_type[spec_type]["redact"]["paths"][: len(redact_paths)] == list(redact_paths)
+        forwarded = by_type[spec_type]["include"]
+        assert forwarded["paths"] == list(include["paths"])
+        assert forwarded["map_paths"] == list(include["map_paths"])
+        assert forwarded["annotation_keys"] == list(include["annotation_keys"])
         aggregator.assert_metric(GENRESOURCES_API_UP_METRIC, value=1, tags=[f"resource_type:{spec_type}"])
 
 
-def test_collect_appends_extra_redaction_paths_to_every_type(mock_http_response_per_endpoint):
-    extra = ["spec.source.helm.fileParameters[*].value"]
+def test_application_key_uses_app_identity_not_destination(mock_http_response_per_endpoint):
+    apps = [
+        _application("web", namespace="team-a", cluster="https://remote", dest_namespace="prod"),
+        _application("web", namespace="team-b", cluster="https://remote", dest_namespace="prod"),
+    ]
+    mock_http_response_per_endpoint(
+        {
+            APPLICATIONS_URL: [_items_response(apps)],
+            CLUSTERS_URL: [_items_response([])],
+            REPOSITORIES_URL: [_items_response([])],
+        }
+    )
+    check = ArgocdCheck("argocd", {}, [_instance()])
+
+    with patch.object(check, "submit_generic_resource", create=True) as submit:
+        check._resource_collector.collect()
+
+    keys = {c.kwargs["key"] for c in submit.call_args_list if c.kwargs["type"] == "argocd_application"}
+    assert keys == {"argocd.example.com:team-a:web", "argocd.example.com:team-b:web"}
+
+
+def test_collect_appends_extra_include_paths_to_every_type(mock_http_response_per_endpoint):
+    extra = ["metadata.generation"]
     mock_http_response_per_endpoint(
         {
             APPLICATIONS_URL: [_items_response([_application("checkout")])],
@@ -100,13 +130,13 @@ def test_collect_appends_extra_redaction_paths_to_every_type(mock_http_response_
             REPOSITORIES_URL: [_items_response([_repository("https://github.com/team/repo")])],
         }
     )
-    check = ArgocdCheck("argocd", {}, [_instance(extra_redaction_paths=extra)])
+    check = ArgocdCheck("argocd", {}, [_instance(extra_include_paths=extra)])
 
     with patch.object(check, "submit_generic_resource", create=True) as submit:
         check._resource_collector.collect()
 
     for call in submit.call_args_list:
-        assert call.kwargs["redact"]["paths"][-1] == extra[0]
+        assert call.kwargs["include"]["paths"][-1] == extra[0]
 
 
 def test_collect_isolates_per_endpoint_failures(aggregator, mock_http_response_per_endpoint):
@@ -164,3 +194,42 @@ def test_collect_caps_per_type_with_warning(mock_http_response_per_endpoint, cap
     application_emits = [c for c in submit.call_args_list if c.kwargs["type"] == "argocd_application"]
     assert len(application_emits) == 3
     assert any("volume cap hit" in rec.message and "argocd_application" in rec.message for rec in caplog.records)
+
+
+def test_collect_logs_submit_failures_distinctly_from_malformed(mock_http_response_per_endpoint, caplog):
+    mock_http_response_per_endpoint(
+        {
+            APPLICATIONS_URL: [_items_response([_application("checkout")])],
+            CLUSTERS_URL: [_items_response([])],
+            REPOSITORIES_URL: [_items_response([])],
+        }
+    )
+    check = ArgocdCheck("argocd", {}, [_instance()])
+
+    with patch.object(check, "submit_generic_resource", create=True, side_effect=RuntimeError("helper boom")):
+        check._resource_collector.collect()
+
+    assert any("failed to submit argocd_application" in rec.message for rec in caplog.records)
+    assert not any("skipping malformed" in rec.message for rec in caplog.records)
+
+
+def test_collect_strips_credentials_from_repo_urls(mock_http_response_per_endpoint):
+    app = _application("web")
+    app["spec"]["source"] = {"repoURL": "https://user:t0ken@github.com/org/repo"}
+    repo = {"repo": "https://user:t0ken@github.com/org/repo", "type": "git"}
+    mock_http_response_per_endpoint(
+        {
+            APPLICATIONS_URL: [_items_response([app])],
+            CLUSTERS_URL: [_items_response([])],
+            REPOSITORIES_URL: [_items_response([repo])],
+        }
+    )
+    check = ArgocdCheck("argocd", {}, [_instance()])
+
+    with patch.object(check, "submit_generic_resource", create=True) as submit:
+        check._resource_collector.collect()
+
+    by_type = {c.kwargs["type"]: c.kwargs for c in submit.call_args_list}
+    assert by_type["argocd_application"]["fields"]["spec"]["source"]["repoURL"] == "https://github.com/org/repo"
+    assert by_type["argocd_repository"]["fields"]["repo"] == "https://github.com/org/repo"
+    assert by_type["argocd_repository"]["key"] == "argocd.example.com:https://github.com/org/repo"

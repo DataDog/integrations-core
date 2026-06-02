@@ -113,14 +113,18 @@ instances:
     #
     # max_resources_per_cycle: 10000
 
-    ## @param extra_redaction_paths - list of strings - optional
-    ## Additional dotted JSON paths appended to the baseline redaction
-    ## deny-list of every collected resource type. ``[*]`` denotes array
-    ## iteration. A path that does not match any field for a given type
-    ## is silently skipped. This list is additive; it cannot remove paths
-    ## from the baseline.
+    ## @param extra_include_paths - list of strings - optional
+    ## Additional dotted JSON paths appended to the baseline allow-list of
+    ## every collected resource type. Only enumerated paths are shipped;
+    ## anything not listed never leaves the Agent. ``[*]`` denotes array
+    ## iteration. A path that does not match any field for a given type is
+    ## silently skipped. This list is additive; it can add fields to ship but
+    ## cannot remove baseline fields. Each path must resolve to a value, or a
+    ## list of values, not a whole object: a path that lands on an object
+    ## causes that resource to be dropped, so enumerate leaf fields rather
+    ## than their parents.
     #
-    # extra_redaction_paths: []
+    # extra_include_paths: []
 
     ## @param raw_metric_prefix - string - optional
     ## A prefix that is removed from all exposed metric names, if present.
