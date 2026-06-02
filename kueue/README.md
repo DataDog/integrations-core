@@ -20,15 +20,42 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `kueue.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your kueue performance data. See the [sample kueue.d/conf.yaml][4] for all available configuration options.
+Kueue is a cluster-level service. Configure this integration as a Cluster Agent cluster check so only one Agent instance scrapes the Kueue metrics endpoint.
 
-2. To collect optional ClusterQueue resource metrics, such as `kueue.cluster_queue.resource_usage`, configure Kueue with `metrics.enableClusterQueueResources: true` and restart the Kueue controller manager.
+1. To collect optional ClusterQueue resource metrics, such as `kueue.cluster_queue.resource_usage.gpu`, configure Kueue with `metrics.enableClusterQueueResources: true` and restart the Kueue controller manager.
 
-3. [Restart the Agent][5].
+2. Provide a [cluster check configuration][10] to the Cluster Agent. For file or ConfigMap based configuration, set `cluster_check: true` in the instance:
+
+   ```yaml
+   clusterAgent:
+     confd:
+       kueue.yaml: |-
+         cluster_check: true
+         init_config:
+         instances:
+         - openmetrics_endpoint: http://kueue-controller-manager-metrics-service.kueue-system.svc:8080/metrics
+   ```
+
+3. Alternatively, annotate the Kueue metrics service with Autodiscovery cluster check annotations:
+
+   ```yaml
+   ad.datadoghq.com/endpoints.checks: |
+     {
+       "kueue": {
+         "instances": [
+           {
+             "openmetrics_endpoint": "http://%%host%%:%%port%%/metrics"
+           }
+         ]
+       }
+     }
+   ```
+
+See the [sample kueue.d/conf.yaml][4] for all available configuration options.
 
 ### Validation
 
-[Run the Agent's status subcommand][6] and look for `kueue` under the Checks section.
+[Run the Cluster Agent's `clusterchecks` subcommand][11] and look for `kueue` under the Checks section.
 
 ## Data Collected
 
@@ -60,3 +87,5 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/kueue/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/kueue/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://docs.datadoghq.com/containers/cluster_agent/clusterchecks/?tab=helm#configuration-from-configuration-files
+[11]: https://docs.datadoghq.com/containers/troubleshooting/cluster-and-endpoint-checks/#dispatching-logic-in-the-cluster-agent

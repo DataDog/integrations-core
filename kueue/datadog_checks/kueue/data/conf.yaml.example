@@ -641,6 +641,11 @@ instances:
     #   exclude:
     #   - <EXCLUDE_REGEX>
 
+    ## @param cluster_check - boolean - optional - default: true
+    ## Set to true when configuring this integration as a Cluster Agent cluster check.
+    #
+    # cluster_check: true
+
     ## @param resource_name_map - mapping - optional
     ## Mapping of Kueue resource label values to metric name suffixes for resource metrics.
     ##

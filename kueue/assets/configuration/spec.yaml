@@ -15,6 +15,12 @@ files:
         openmetrics_endpoint.value.example: http://localhost:8080/metrics
         openmetrics_endpoint.description: |
           Endpoint exposing Kueue's Prometheus metrics.
+    - name: cluster_check
+      description: |
+        Set to true when configuring this integration as a Cluster Agent cluster check.
+      value:
+        type: boolean
+        example: true
     - name: resource_name_map
       description: |
         Mapping of Kueue resource label values to metric name suffixes for resource metrics.
