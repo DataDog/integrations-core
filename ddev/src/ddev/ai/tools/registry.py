@@ -18,10 +18,8 @@ from .core.protocol import ToolProtocol
 from .core.types import ToolResult
 
 if TYPE_CHECKING:
-    from ddev.ai.agent.build import AgentRuntime
+    from ddev.ai.agent.build import AgentRuntimeBuilder
     from ddev.ai.phases.config import AgentConfig
-
-    AgentRuntimeBuilder = Callable[..., AgentRuntime]
 
 
 @dataclass

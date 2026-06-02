@@ -16,8 +16,8 @@ from ddev.ai.tools.core.base import BaseTool, BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
 
 if TYPE_CHECKING:
+    from ddev.ai.agent.build import AgentRuntimeBuilder
     from ddev.ai.phases.config import AgentConfig
-    from ddev.ai.tools.registry import AgentRuntimeBuilder
 
 
 class SpawnSubagentInput(BaseToolInput):

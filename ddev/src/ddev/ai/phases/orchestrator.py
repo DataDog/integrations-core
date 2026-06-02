@@ -61,6 +61,7 @@ class ResourceProvider:
         self._agents = agents
         self._artifact_root = artifact_root
         self._file_registry: FileRegistry | None = None
+        self._agent_runtime_factory: AgentRuntimeFactory | None = None
 
     def agent_clients(self) -> dict[str, Any]:
         """Raw provider-name -> SDK client map."""
@@ -81,11 +82,13 @@ class ResourceProvider:
 
     def agent_runtime_factory(self) -> AgentRuntimeFactory:
         """Return a ready-to-use generic runtime factory."""
-        return DefaultAgentRuntimeFactory(
-            agent_clients=self._agent_clients,
-            file_registry=self.file_registry(),
-            artifact_root=self._artifact_root,
-        )
+        if self._agent_runtime_factory is None:
+            self._agent_runtime_factory = DefaultAgentRuntimeFactory(
+                agent_clients=self._agent_clients,
+                file_registry=self.file_registry(),
+                artifact_root=self._artifact_root,
+            )
+        return self._agent_runtime_factory
 
 
 def _discover_and_register_phases(

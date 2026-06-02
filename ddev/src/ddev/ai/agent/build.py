@@ -33,7 +33,19 @@ class AgentRuntimeFactory(Protocol):
     ) -> AgentRuntime: ...
 
 
-class DefaultAgentRuntimeFactory(AgentRuntimeFactory):
+class AgentRuntimeBuilder(Protocol):
+    """Callable interface for building an AgentRuntime from explicit keyword inputs."""
+
+    def __call__(
+        self,
+        *,
+        agent_config: AgentConfig,
+        system_prompt: str,
+        owner_id: str,
+    ) -> AgentRuntime: ...
+
+
+class DefaultAgentRuntimeFactory:
     """Builds provider-specific agent runtimes from explicit runtime inputs."""
 
     def __init__(
