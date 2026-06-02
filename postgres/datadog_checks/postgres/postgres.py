@@ -8,6 +8,7 @@ import json as _stdlib_json
 import os
 import re
 import threading
+from collections.abc import Mapping
 from string import Template
 from time import time
 
@@ -118,20 +119,41 @@ DATA_SECURITY_SAMPLING_BUFFER_MULTIPLIER = 2  # over-sample by Nx then LIMIT
 # REPEATABLE seed is generated per scan from time() so each pass gets a fresh
 # (but still self-consistent within one query) random draw.
 
-# DEMO ONLY: very loose email matcher. We only need to demo PII detection on
-# scanned rows; this is intentionally not a strict RFC 5322 matcher.
-_DATA_SECURITY_PII_DETECTORS = (
-    ("PuXiVTCkTHOtj0Yad1ppsw", re.compile(r"[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}")),
-)
+def _compile_data_security_rules(rules, log=None):
+    """
+    Build a tuple of ``(rule_id, compiled_regex)`` detectors from the
+    ``data_security.rules`` config. Each rule entry is expected to be a mapping
+    with a ``pattern`` (treated as a regular expression) and a ``rule_id``.
+    Invalid entries (missing pattern or uncompilable regex) are skipped with a
+    warning. Returns an empty tuple when no usable rule is configured.
+    """
+    detectors = []
+    for rule in rules or ():
+        if not isinstance(rule, Mapping):
+            if log is not None:
+                log.warning("data_security: skipping malformed rule (not a mapping): %r", rule)
+            continue
+        pattern = rule.get("pattern")
+        rule_id = rule.get("rule_id") or "unknown"
+        if not pattern:
+            if log is not None:
+                log.warning("data_security: skipping rule without pattern: %r", rule)
+            continue
+        try:
+            detectors.append((rule_id, re.compile(pattern)))
+        except re.error as e:
+            if log is not None:
+                log.warning("data_security: skipping rule_id=%s with invalid pattern %r: %s", rule_id, pattern, e)
+    return tuple(detectors)
 
 
-def _detect_sensitive_data(rows):
+def _detect_sensitive_data(rows, detectors=()):
     """
     Walk a list of dict rows and return a (rows_affected, columns_affected,
     matched_kinds) tuple. A row is "affected" if any column value matched any
     of the configured PII detectors; a column is "affected" if it matched at
     least once across the sample. `matched_kinds` is the set of detector
-    names (e.g. {"email"}) that fired at least once on the sample.
+    rule ids that fired at least once on the sample.
     """
     rows_affected = 0
     columns_affected = set()
@@ -144,7 +166,7 @@ def _detect_sensitive_data(rows):
             if value is None:
                 continue
             text = value if isinstance(value, str) else str(value)
-            for kind, regex in _DATA_SECURITY_PII_DETECTORS:
+            for kind, regex in detectors:
                 if regex.search(text):
                     columns_affected.add(column)
                     matched_kinds.add(kind)
@@ -349,7 +371,7 @@ class PostgreSql(DatabaseCheck):
         return None, None
 
     def _scan_table_for_data_security(
-        self, table_name, scan_type, max_rows, min_rows, send_samples, send_sds_results=False
+        self, table_name, scan_type, max_rows, min_rows, send_samples, send_sds_results=False, detectors=None
     ):
         schema, table = self._split_qualified_table(table_name)
         query, params = self._build_data_security_query(schema, table, scan_type, max_rows, min_rows)
@@ -381,7 +403,7 @@ class PostgreSql(DatabaseCheck):
             parsed_rows = []
 
         sample_size = len(parsed_rows)
-        rows_affected, columns_affected, matched_kinds = _detect_sensitive_data(parsed_rows)
+        rows_affected, columns_affected, matched_kinds = _detect_sensitive_data(parsed_rows, detectors or ())
 
         if send_sds_results:
             self._emit_sds_results(
@@ -566,6 +588,11 @@ class PostgreSql(DatabaseCheck):
         # (DSPM), in addition to the Datadog event emitted per table.
         send_sds_results = bool(cfg.get("send_sds_results"))
 
+        # Build the PII detectors from the user-configured `data_security.rules`
+        # (list of {pattern, rule_id}). Falls back to the hardcoded default
+        # detector when no usable rule is configured.
+        detectors = _compile_data_security_rules(cfg.get("rules"), self.log)
+
         for entry in cfg.get("tables") or []:
             table_name = entry.get("table_name")
             scan_type = entry.get("scan_type", "sampling")
@@ -576,7 +603,7 @@ class PostgreSql(DatabaseCheck):
                 continue
             try:
                 self._scan_table_for_data_security(
-                    table_name, scan_type, max_rows, min_rows, send_samples, send_sds_results
+                    table_name, scan_type, max_rows, min_rows, send_samples, send_sds_results, detectors
                 )
             except Exception:
                 self.log.exception(

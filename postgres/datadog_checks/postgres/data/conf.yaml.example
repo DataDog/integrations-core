@@ -491,6 +491,14 @@ instances:
         #
         # send_samples: false
 
+        ## @param send_sds_results - boolean - optional - default: false
+        ## When true, sensitive-data findings are also forwarded to the
+        ## Sensitive Data Scanner (DSPM) intake as a protobuf `SdsResultPayload`,
+        ## in addition to the Datadog event emitted per table. When false (the
+        ## default), no SDS result is sent.
+        #
+        # send_sds_results: false
+
         ## @param tables - list of mappings - optional
         ## List of tables to scan on every interval. Each entry pairs a
         ## qualified `schema.table` name (defaults to the `public` schema if
@@ -505,6 +513,16 @@ instances:
         #     scan_type: sampling
         #     max_rows: 1000
         #     min_rows: 0
+
+        ## @param rules - list of mappings - optional
+        ## List of detection rules used to flag sensitive data in scanned rows.
+        ## Each entry pairs a `pattern` (a regular expression matched against
+        ## every column value) with a `rule_id` reported on matches. When no
+        ## rule is configured, no sensitive data is detected.
+        #
+        # rules:
+        #   - pattern: dave100@example.com
+        #     rule_id: PuXiVTCkTHOtj0Yad1ppsw
 
     ## @param pg_stat_statements_view - string - optional - default: pg_stat_statements
     ## Set this value if you want to define a custom view or function to allow the datadog user to query the

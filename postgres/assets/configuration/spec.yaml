@@ -734,6 +734,23 @@ files:
                   type: integer
                 - name: min_rows
                   type: integer
+        - name: rules
+          description: |
+            List of detection rules used to flag sensitive data in scanned rows.
+            Each entry pairs a `pattern` (a regular expression matched against
+            every column value) with a `rule_id` reported on matches. When no
+            rule is configured, no sensitive data is detected.
+          value:
+            type: array
+            items:
+              type: object
+              required:
+                - pattern
+              properties:
+                - name: pattern
+                  type: string
+                - name: rule_id
+                  type: string
     - name: pg_stat_statements_view
       display_priority: 0
       description: |

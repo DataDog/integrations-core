@@ -201,6 +201,15 @@ class DataSecurityTable(BaseModel):
     table_name: str
 
 
+class DataSecurityRule(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    pattern: str
+    rule_id: Optional[str] = None
+
+
 class DataSecurity(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -208,7 +217,9 @@ class DataSecurity(BaseModel):
     )
     enabled: Optional[bool] = None
     interval: Optional[int] = None
+    rules: Optional[tuple[DataSecurityRule, ...]] = None
     send_samples: Optional[bool] = None
+    send_sds_results: Optional[bool] = None
     tables: Optional[tuple[DataSecurityTable, ...]] = None
 
 
