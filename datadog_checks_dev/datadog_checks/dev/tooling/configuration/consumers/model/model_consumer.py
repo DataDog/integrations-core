@@ -66,6 +66,8 @@ class ModelConsumer:
                 continue
 
             model_files.update(self._build_model_files(model_info, package_info))
+            if 'discovery' in spec_file:
+                model_files['discovery.py'] = (self._build_discovery_file(spec_file['discovery']), [])
             rendered_files[spec_file['name']] = {file_name: model_files[file_name] for file_name in sorted(model_files)}
 
         return rendered_files
@@ -257,3 +259,37 @@ class ModelConsumer:
         if model_info.defaults_file_needs_value_normalization:
             defaults_file_contents = self.code_formatter.apply_black(defaults_file_contents)
         return defaults_file_contents
+
+    def _build_discovery_file(self, discovery):
+        lines = [
+            'from datadog_checks.base.utils.discovery import from_ports',
+            '',
+            '',
+            'def candidates(service):',
+        ]
+
+        for strategy_index, strategy in enumerate(discovery['strategies']):
+            lines.append(f'    # discovery[{strategy_index}]: from_ports')
+            lines.append(f'    for ctx in from_ports(service, port_hints={strategy["port_hints"]!r}):')
+
+            for candidate in strategy['candidates']:
+                lines.extend(
+                    [
+                        '        yield {',
+                        "            'init_config': {},",
+                        "            'instances': [",
+                        '                {',
+                    ]
+                )
+                for field_name, template in candidate.items():
+                    lines.append(f"                    {field_name!r}: {template!r}.format(service=service, **ctx),")
+                lines.extend(
+                    [
+                        '                }',
+                        '            ],',
+                        '        }',
+                    ]
+                )
+
+        lines.append('')
+        return self.code_formatter.apply_black('\n'.join(lines))

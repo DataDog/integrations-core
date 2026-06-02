@@ -50,7 +50,6 @@ class KrakendCheck(OpenMetricsBaseCheckV2):
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = "krakend.api"
     DEFAULT_METRIC_LIMIT = 0
-    DISCOVERY_PORT_HINTS = [9090]
 
     def create_scraper(self, config: InstanceType):
         return HttpCodeClassScraper(self, self.get_config_with_defaults(config))

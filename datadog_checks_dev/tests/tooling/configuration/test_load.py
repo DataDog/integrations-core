@@ -313,6 +313,117 @@ def test_sections_not_array():
     assert 'test, test.yaml: The `options` attribute must be an array' in spec.errors
 
 
+def test_discovery_valid():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            ad_identifiers:
+            - test
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert not spec.errors
+
+
+def test_discovery_reserves_auto_conf_name():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            ad_identifiers:
+            - test
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        - name: auto_conf.yaml
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert 'test, file #2: Example file name `auto_conf.yaml` already used by file #1' in spec.errors
+
+
+def test_discovery_unsupported_strategy():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            ad_identifiers:
+            - test
+            strategies:
+            - strategy: from_services
+              port_hints:
+              - 9090
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert 'test, test.yaml, discovery, strategy #1: Unsupported strategy `from_services`' in spec.errors
+
+
+def test_discovery_unknown_placeholder():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            ad_identifiers:
+            - test
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - openmetrics_endpoint: http://{service.hostname}:{port.number}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert (
+        'test, test.yaml, discovery, strategy #1, candidate #1, openmetrics_endpoint: '
+        'Unknown placeholder `service.hostname`'
+    ) in spec.errors
+
+
 def test_section_not_map():
     spec = get_spec(
         """

@@ -122,6 +122,11 @@ class OpenMetricsBaseCheckV2(AgentCheck):
     def generate_configs(cls, service):
         from datadog_checks.base.utils.discovery import candidate_ports
 
+        generated = super().generate_configs(service)
+        if generated:
+            yield from generated
+            return
+
         for port in candidate_ports(service, cls.DISCOVERY_PORT_HINTS):
             yield {
                 "init_config": {},
