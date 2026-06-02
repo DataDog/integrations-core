@@ -111,6 +111,34 @@ class TestSchemaCollectorEmptyLastDb(TestSchemaCollector):
         return None
 
 
+class TestSchemaCollectorWithInaccessibleDb(TestSchemaCollector):
+    """Simulates multiple databases where one raises an error on cursor open."""
+
+    __test__ = False
+
+    def __init__(self, check, config):
+        super().__init__(check, config)
+        self._current_rows = []
+
+    def _get_databases(self):
+        return [{'name': 'db_accessible'}, {'name': 'db_inaccessible'}, {'name': 'db_also_accessible'}]
+
+    @contextmanager
+    def _get_cursor(self, database: str):
+        if database == 'db_inaccessible':
+            raise RuntimeError("Cannot open database version 852")
+        self._current_rows = [{'table_name': 'users'}]
+        self._row_index = 0
+        yield {}
+
+    def _get_next(self, _cursor):
+        if self._row_index < len(self._current_rows):
+            row = self._current_rows[self._row_index]
+            self._row_index += 1
+            return row
+        return None
+
+
 @pytest.mark.unit
 def test_schema_collector(aggregator):
     check = TestDatabaseCheck()
@@ -134,20 +162,21 @@ def test_schema_collector(aggregator):
 
 @pytest.mark.unit
 def test_schema_collector_empty_last_database(aggregator):
-    """Verify that queued rows are flushed even when the last database returns 0 rows."""
+    """Verify that each database sends its own terminal payload, even when it returns 0 rows."""
     check = TestDatabaseCheck()
     collector = TestSchemaCollectorEmptyLastDb(check, SchemaCollectorConfig())
     collector.collect_schemas()
 
     events = aggregator.get_event_platform_events("dbm-metadata")
-    assert len(events) == 1, "Expected 1 payload but got {}".format(len(events))
-    event = events[0]
-    assert len(event['metadata']) == 2
-    assert event['metadata'][0]['name'] == 'db_with_tables'
-    assert event['metadata'][0]['tables'][0]['table_name'] == 'users'
-    assert event['metadata'][1]['name'] == 'db_with_tables'
-    assert event['metadata'][1]['tables'][0]['table_name'] == 'orders'
-    assert event['collection_payloads_count'] == 1
+    assert len(events) == 2, "Expected 2 payloads (one per database) but got {}".format(len(events))
+    assert len(events[0]['metadata']) == 2
+    assert events[0]['metadata'][0]['name'] == 'db_with_tables'
+    assert events[0]['metadata'][0]['tables'][0]['table_name'] == 'users'
+    assert events[0]['metadata'][1]['name'] == 'db_with_tables'
+    assert events[0]['metadata'][1]['tables'][0]['table_name'] == 'orders'
+    assert events[0]['collection_payloads_count'] == 1
+    assert len(events[1]['metadata']) == 0
+    assert events[1]['collection_payloads_count'] == 1
 
 
 @pytest.mark.unit
@@ -164,3 +193,19 @@ def test_schema_collector_chunk_size_flush(aggregator):
     assert len(events) == 2
     assert 'collection_payloads_count' not in events[0]
     assert events[-1]['collection_payloads_count'] == len(events)
+
+
+@pytest.mark.unit
+def test_schema_collector_skips_inaccessible_database(aggregator):
+    """An inaccessible database is skipped and collection continues for the remaining databases."""
+    check = TestDatabaseCheck()
+    collector = TestSchemaCollectorWithInaccessibleDb(check, SchemaCollectorConfig())
+    result = collector.collect_schemas()
+
+    assert result is True
+    events = aggregator.get_event_platform_events("dbm-metadata")
+    assert len(events) == 2
+    collected_names = [row['name'] for event in events for row in event['metadata']]
+    assert 'db_accessible' in collected_names
+    assert 'db_also_accessible' in collected_names
+    assert 'db_inaccessible' not in collected_names

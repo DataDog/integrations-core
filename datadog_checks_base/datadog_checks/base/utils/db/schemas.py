@@ -63,8 +63,9 @@ class SchemaCollector(ABC):
         This class relies on the owning check to handle scheduling this method.
         """
         status = "success"
+        run_started_at = now_ms()
+        total_payloads_count = 0
         try:
-            self._collection_started_at = now_ms()
             databases = self._get_databases()
             self._log.debug("Collecting schemas for %d databases", len(databases))
             for database in databases:
@@ -73,19 +74,27 @@ class SchemaCollector(ABC):
                 if not database_name:
                     self._log.warning("database has no name %v", database)
                     continue
-                with self._get_cursor(database_name) as cursor:
-                    # Get the next row from the cursor
-                    next_row = self._get_next(cursor)
-                    while next_row:
-                        self._queued_rows.append(self._map_row(database, next_row))
-                        self._total_rows_count += 1
-                        # Because we're iterating over a cursor we need to try to get
-                        # the next row to see if we've reached the last row
+                self._collection_started_at = now_ms()
+                self._collection_payloads_count = 0
+                rows_start = len(self._queued_rows)
+                try:
+                    with self._get_cursor(database_name) as cursor:
+                        # Get the next row from the cursor
                         next_row = self._get_next(cursor)
-                        self.maybe_flush(is_last_payload=False)
-                is_last_payload = database == databases[-1]
-                self.maybe_flush(is_last_payload)
-                self._log.debug("Completed collection of schemas for database %s", database_name)
+                        while next_row:
+                            self._queued_rows.append(self._map_row(database, next_row))
+                            self._total_rows_count += 1
+                            # Because we're iterating over a cursor we need to try to get
+                            # the next row to see if we've reached the last row
+                            next_row = self._get_next(cursor)
+                            self.maybe_flush(is_last_payload=False)
+                    self._log.debug("Completed collection of schemas for database %s", database_name)
+                    self.maybe_flush(is_last_payload=True)
+                    total_payloads_count += self._collection_payloads_count
+                except Exception as e:
+                    del self._queued_rows[rows_start:]
+                    self._log.warning("Skipping database %s due to error: %s", database_name, e, exc_info=True)
+                    continue
         except Exception as e:
             status = "error"
             self._log.error("Error collecting schema: %s", e)
@@ -93,7 +102,7 @@ class SchemaCollector(ABC):
         finally:
             self._check.histogram(
                 f"dd.{self._check.dbms}.schema.time",
-                now_ms() - self._collection_started_at,
+                now_ms() - run_started_at,
                 tags=self._check.tags + ["status:" + status],
                 hostname=self._check.reported_hostname,
                 raw=True,
@@ -107,12 +116,11 @@ class SchemaCollector(ABC):
             )
             self._check.gauge(
                 f"dd.{self._check.dbms}.schema.payloads_count",
-                self._collection_payloads_count,
+                total_payloads_count,
                 tags=self._check.tags + ["status:" + status],
                 hostname=self._check.reported_hostname,
                 raw=True,
             )
-
             self._reset()
         return True
 
