@@ -15,3 +15,13 @@ files:
         openmetrics_endpoint.value.example: http://localhost:8080/metrics
         openmetrics_endpoint.description: |
           Endpoint exposing Kueue's Prometheus metrics.
+    - name: resource_name_map
+      description: |
+        Mapping of Kueue resource label values to metric name suffixes for resource metrics.
+
+        By default, `cpu` is reported as `cpu`, `nvidia.com/gpu` is reported as `gpu`, and unmapped resources
+        are reported as `other`. Built-in resource names cannot be overridden.
+      value:
+        type: object
+        example:
+          example.com/fpga: fpga

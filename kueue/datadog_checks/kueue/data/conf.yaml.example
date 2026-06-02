@@ -640,3 +640,12 @@ instances:
     #   - <INCLUDE_REGEX>
     #   exclude:
     #   - <EXCLUDE_REGEX>
+
+    ## @param resource_name_map - mapping - optional
+    ## Mapping of Kueue resource label values to metric name suffixes for resource metrics.
+    ##
+    ## By default, `cpu` is reported as `cpu`, `nvidia.com/gpu` is reported as `gpu`, and unmapped resources
+    ## are reported as `other`. Built-in resource names cannot be overridden.
+    #
+    # resource_name_map:
+    #   example.com/fpga: fpga

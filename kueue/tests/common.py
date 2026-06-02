@@ -19,6 +19,9 @@ MOCKED_INSTANCE = {
 
 TEST_METRICS = [
     'kueue.go.goroutines',
-    'kueue.cluster_queue.resource_usage',
+    'kueue.cluster_queue.resource_usage.cpu',
+    'kueue.cluster_queue.resource_usage.gpu',
+    'kueue.cluster_queue.resource_usage.other',
+    'kueue.local_queue.pending_workloads',
     'kueue.resource_flavor.quota_reserved_workloads',
 ]

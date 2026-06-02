@@ -8,7 +8,13 @@ kueue_resource_flavor_quota_reserved_workloads{cluster_queue="default",flavor="o
 
 # HELP kueue_cluster_queue_resource_usage Reports the cluster_queue's total resource usage within all the flavors.
 # TYPE kueue_cluster_queue_resource_usage gauge
-kueue_cluster_queue_resource_usage{cohort="default",cluster_queue="default",flavor="on-demand",resource="cpu",replica_role="leader"} 2
+kueue_cluster_queue_resource_usage{cohort="default",cluster_queue="default",flavor="on-demand",resource="cpu",replica_role="leader"} 1
+kueue_cluster_queue_resource_usage{cohort="default",cluster_queue="default",flavor="on-demand",resource="example.com/fpga",replica_role="leader"} 3
+kueue_cluster_queue_resource_usage{cohort="default",cluster_queue="default",flavor="on-demand",resource="nvidia.com/gpu",replica_role="leader"} 2
+
+# HELP kueue_local_queue_pending_workloads The number of pending workloads, per local_queue and status.
+# TYPE kueue_local_queue_pending_workloads gauge
+kueue_local_queue_pending_workloads{name="gpu",namespace="team-a",status="active",replica_role="leader"} 1
 # HELP go_goroutines Number of goroutines that currently exist.
 # TYPE go_goroutines gauge
 go_goroutines 42

@@ -139,6 +139,7 @@ class InstanceConfig(BaseModel):
     read_timeout: Optional[float] = None
     rename_labels: Optional[MappingProxyType[str, Any]] = None
     request_size: Optional[float] = None
+    resource_name_map: Optional[MappingProxyType[str, Any]] = None
     service: Optional[str] = None
     share_labels: Optional[MappingProxyType[str, Union[bool, ShareLabels]]] = None
     skip_proxy: Optional[bool] = None
