@@ -1773,10 +1773,11 @@ def test_consumer_group_dimensional_tags(check, aggregator):
     )
 
 
-def test_consumer_group_dimensional_tags_absent_when_unset(check, aggregator):
-    """When the broker does not provide group metadata, no dimensional tags are attached."""
+@pytest.mark.parametrize('assignor', [None, ''], ids=['none', 'empty_string'])
+def test_consumer_group_dimensional_tags_absent_when_unset(check, aggregator, assignor):
+    """When the broker reports no assignor (None or empty for KIP-848 groups), no dimensional tags are attached."""
     describe_result = _make_group_describe(
-        state_name='STABLE', assignor=None, is_simple=None, group_type=None, members=[_make_member()]
+        state_name='STABLE', assignor=assignor, is_simple=None, group_type=None, members=[_make_member()]
     )
     _collect_groups(check, describe_result)
     aggregator.assert_metric(

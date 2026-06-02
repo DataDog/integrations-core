@@ -869,6 +869,8 @@ class ClusterMetadataCollector:
                 1 if self._is_group_rebalancing(state_name, members) else 0,
                 tags=group_meta_tags,
             )
+            # Keyed off the broker-reported EMPTY state, not member count, to avoid false positives
+            # during rebalances when members can momentarily be zero.
             self.check.gauge('consumer_group.empty', 1 if state_name == 'EMPTY' else 0, tags=group_meta_tags)
 
             for member in members:
@@ -878,6 +880,8 @@ class ClusterMetadataCollector:
                 if hasattr(member, 'assignment') and member.assignment:
                     partition_count = len(member.assignment.topic_partitions)
 
+                    # Member-level gauges deliberately use state_tags, not group_meta_tags: the
+                    # group-level dimensional tags are omitted here to keep per-member cardinality bounded.
                     member_tags = state_tags + [
                         f'client_id:{client_id}',
                         f'member_host:{host}',
@@ -891,7 +895,8 @@ class ClusterMetadataCollector:
         """Build the group-level tag list, appending dimensional metadata when the broker provides it."""
         tags = list(state_tags)
         assignor = getattr(group_info, 'partition_assignor', None)
-        if assignor is not None:
+        # KIP-848 and EMPTY-state groups report an empty assignor; skip it to avoid a blank-value tag.
+        if assignor:
             tags.append(f'partition_assignor:{assignor}')
         group_type = getattr(group_info, 'type', None)
         if group_type is not None:
@@ -902,7 +907,7 @@ class ClusterMetadataCollector:
             tags.append(f'is_simple_consumer_group:{str(bool(is_simple)).lower()}')
         return tags
 
-    def _is_group_rebalancing(self, state_name, members) -> bool:
+    def _is_group_rebalancing(self, state_name: str, members) -> bool:
         """Detect an in-progress rebalance via group state (classic) or assignment drift (KIP-848)."""
         if state_name in CONSUMER_GROUP_REBALANCING_STATES:
             return True
