@@ -5,6 +5,10 @@ go_goroutines 42
 # HELP kueue_resource_flavor_quota_reserved_workloads Number of reserved workloads.
 # TYPE kueue_resource_flavor_quota_reserved_workloads gauge
 kueue_resource_flavor_quota_reserved_workloads{cluster_queue="default",flavor="on-demand"} 3
+
+# HELP kueue_cluster_queue_resource_usage Reports the cluster_queue's total resource usage within all the flavors.
+# TYPE kueue_cluster_queue_resource_usage gauge
+kueue_cluster_queue_resource_usage{cohort="default",cluster_queue="default",flavor="on-demand",resource="cpu",replica_role="leader"} 2
 # HELP go_goroutines Number of goroutines that currently exist.
 # TYPE go_goroutines gauge
 go_goroutines 42

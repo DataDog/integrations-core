@@ -22,7 +22,9 @@ No additional installation is needed on your server.
 
 1. Edit the `kueue.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your kueue performance data. See the [sample kueue.d/conf.yaml][4] for all available configuration options.
 
-2. [Restart the Agent][5].
+2. To collect optional ClusterQueue resource metrics, such as `kueue.cluster_queue.resource_usage`, configure Kueue with `metrics.enableClusterQueueResources: true` and restart the Kueue controller manager.
+
+3. [Restart the Agent][5].
 
 ### Validation
 

@@ -1,3 +1,4 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
-kueue.go_goroutines,gauge,0,,,Number of goroutines that currently exist.,0,kueue,go_goroutines,false,
-kueue.kueue_resource_flavor_quota_reserved_workloads,gauge,0,,,Number of reserved workloads.,0,kueue,kueue_resource_flavor_quota_reserved_workloads,false,"cluster_queue:default,flavor:on-demand"
+kueue.go.goroutines,gauge,0,,,Number of goroutines that currently exist.,0,kueue,go_goroutines,false,
+kueue.cluster_queue.resource_usage,gauge,0,,,Reports the cluster_queue's total resource usage within all the flavors.,0,kueue,cluster_queue_resource_usage,false,"cluster_queue:default,cohort:default,flavor:on-demand,resource:cpu,replica_role:leader"
+kueue.resource_flavor.quota_reserved_workloads,gauge,0,,,Number of reserved workloads.,0,kueue,resource_flavor_quota_reserved_workloads,false,"cluster_queue:default,flavor:on-demand"

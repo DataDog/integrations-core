@@ -18,6 +18,7 @@ MOCKED_INSTANCE = {
 }
 
 TEST_METRICS = [
-    'kueue.go_goroutines',
-    'kueue.kueue_resource_flavor_quota_reserved_workloads',
+    'kueue.go.goroutines',
+    'kueue.cluster_queue.resource_usage',
+    'kueue.resource_flavor.quota_reserved_workloads',
 ]
