@@ -41,6 +41,7 @@ class SaslOauthTokenProvider(BaseModel):
     client_id: Optional[str] = None
     client_secret: Optional[str] = None
     extensions: Optional[str] = None
+    gcp_credentials_file: Optional[str] = None
     method: Optional[str] = None
     scope: Optional[str] = None
     tls_ca_cert: Optional[str] = None

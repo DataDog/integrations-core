@@ -15,6 +15,46 @@ try:
 except ImportError:
     AWS_MSK_IAM_AVAILABLE = False
 
+# GCP Cloud Managed Kafka IAM authentication support
+try:
+    import google.auth
+    import google.auth.transport.requests
+
+    GCP_IAM_AVAILABLE = True
+except ImportError:
+    GCP_IAM_AVAILABLE = False
+
+
+def _build_gcp_managed_kafka_token(credentials):
+    """Wrap a Google IAM access token in the envelope Managed Kafka's OAUTHBEARER validator expects.
+
+    See https://github.com/googleapis/managedkafka/blob/main/kafka-auth-local-server/kafka_gcp_credentials_server.py
+    """
+    import base64
+    import datetime
+    import json
+
+    def _b64(s):
+        return base64.urlsafe_b64encode(s.encode("utf-8")).decode("utf-8").rstrip("=")
+
+    header = json.dumps({"typ": "JWT", "alg": "GOOG_OAUTH2_TOKEN"})
+    now = datetime.datetime.now(datetime.timezone.utc)
+    expiry = (
+        credentials.expiry.replace(tzinfo=datetime.timezone.utc)
+        if credentials.expiry is not None
+        else now + datetime.timedelta(hours=1)
+    )
+    claims = json.dumps(
+        {
+            "exp": expiry.timestamp(),
+            "iss": "Google",
+            "iat": now.timestamp(),
+            "sub": getattr(credentials, "service_account_email", "user"),
+        }
+    )
+    token = ".".join([_b64(header), _b64(claims), _b64(credentials.token)])
+    return token, expiry.timestamp()
+
 
 class KafkaClient:
     def __init__(self, config, log) -> None:
@@ -111,6 +151,41 @@ class KafkaClient:
                         raise
 
                 extras_parameters['oauth_cb'] = _aws_msk_iam_oauth_cb
+
+            elif method == "gcp_cloud_managed_kafka":
+                if not GCP_IAM_AVAILABLE:
+                    raise Exception(
+                        "GCP Cloud Managed Kafka IAM authentication requires 'google-auth' library. "
+                        "Install it with: pip install google-auth"
+                    )
+
+                def _gcp_oauth_cb(oauth_config):
+                    """OAuth callback that generates GCP IAM access tokens for Cloud Managed Kafka."""
+                    try:
+                        credentials_file = self.config._sasl_oauth_token_provider.get("gcp_credentials_file")
+                        scopes = ["https://www.googleapis.com/auth/cloud-platform"]
+
+                        if credentials_file:
+                            credentials, project = google.auth.load_credentials_from_file(
+                                credentials_file, scopes=scopes
+                            )
+                        else:
+                            credentials, project = google.auth.default(scopes=scopes)
+
+                        request = google.auth.transport.requests.Request()
+                        credentials.refresh(request)
+
+                        token, expiry_seconds = _build_gcp_managed_kafka_token(credentials)
+                        self.log.debug(
+                            "Generated GCP Managed Kafka token, expires at %s",
+                            credentials.expiry,
+                        )
+                        return token, expiry_seconds
+                    except Exception as e:
+                        self.log.error("Failed to generate GCP IAM token: %s", e)
+                        raise
+
+                extras_parameters['oauth_cb'] = _gcp_oauth_cb
 
             elif method == "oidc":
                 extras_parameters['sasl.oauthbearer.method'] = "oidc"
