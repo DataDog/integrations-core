@@ -93,16 +93,6 @@ class SQLServerSchemaCollector(SchemaCollector):
     def kind(self):
         return "sqlserver_databases"
 
-    def _is_connection_error(self, e: Exception) -> bool:
-        """Return True only for pyodbc database-level errors, preventing internal errors
-        from being silently classified as per-database skips.
-        """
-        try:
-            import pyodbc
-        except ImportError:
-            return True
-        return isinstance(e, pyodbc.Error)
-
     def _get_databases(self) -> list[DatabaseInfo]:
         database_names = self._check.get_databases()
         with self._check.connection.open_managed_default_connection(KEY_PREFIX):

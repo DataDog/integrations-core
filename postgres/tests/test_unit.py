@@ -535,12 +535,3 @@ def test_collect_column_statistics_updates_timestamp_on_failure(pg_instance):
             metadata._collect_column_statistics()
         after = metadata._last_column_statistics_query_time
     assert after > before
-
-
-def test_schema_collector_is_connection_error():
-    check = mock.MagicMock()
-    collector = PostgresSchemaCollector(check)
-
-    assert collector._is_connection_error(psycopg.OperationalError())
-    assert not collector._is_connection_error(psycopg.ProgrammingError())
-    assert not collector._is_connection_error(RuntimeError("internal error"))

@@ -56,7 +56,6 @@ class SchemaCollector(ABC):
         self._collection_payloads_count = 0
         self._queued_rows = []
         self._total_rows_count = 0
-        self._skipped_databases_count = 0
 
     def collect_schemas(self) -> bool:
         """
@@ -69,9 +68,26 @@ class SchemaCollector(ABC):
             databases = self._get_databases()
             self._log.debug("Collecting schemas for %d databases", len(databases))
             for database in databases:
-                self._collect_database_schemas(database)
-            if self._skipped_databases_count > 0:
-                status = "partial"
+                self._log.debug("Starting collection of schemas for database %s", database['name'])
+                database_name = database['name']
+                if not database_name:
+                    self._log.warning("database has no name %v", database)
+                    continue
+                try:
+                    with self._get_cursor(database_name) as cursor:
+                        # Get the next row from the cursor
+                        next_row = self._get_next(cursor)
+                        while next_row:
+                            self._queued_rows.append(self._map_row(database, next_row))
+                            self._total_rows_count += 1
+                            # Because we're iterating over a cursor we need to try to get
+                            # the next row to see if we've reached the last row
+                            next_row = self._get_next(cursor)
+                            self.maybe_flush(is_last_payload=False)
+                    self._log.debug("Completed collection of schemas for database %s", database_name)
+                except Exception as e:
+                    self._log.warning("Skipping database %s due to error: %s", database_name, e, exc_info=True)
+                    continue
             self.maybe_flush(is_last_payload=True)
         except Exception as e:
             status = "error"
@@ -99,53 +115,8 @@ class SchemaCollector(ABC):
                 hostname=self._check.reported_hostname,
                 raw=True,
             )
-            self._check.gauge(
-                f"dd.{self._check.dbms}.schema.skipped_databases_count",
-                self._skipped_databases_count,
-                tags=self._check.tags + ["status:" + status],
-                hostname=self._check.reported_hostname,
-                raw=True,
-            )
-
             self._reset()
         return True
-
-    def _collect_database_schemas(self, database: DatabaseInfo) -> None:
-        database_name = database['name']
-        if not database_name:
-            self._log.warning("database has no name %v", database)
-            return
-        rows_start = len(self._queued_rows)
-        payloads_before = self._collection_payloads_count
-        try:
-            self._log.debug("Starting collection of schemas for database %s", database_name)
-            with self._get_cursor(database_name) as cursor:
-                # Because we're iterating over a cursor we need to try to get
-                # the next row to see if we've reached the last row
-                next_row = self._get_next(cursor)
-                while next_row:
-                    self._queued_rows.append(self._map_row(database, next_row))
-                    self._total_rows_count += 1
-                    next_row = self._get_next(cursor)
-                    self.maybe_flush(is_last_payload=False)
-            self._log.debug("Completed collection of schemas for database %s", database_name)
-        except Exception as e:
-            if not self._is_connection_error(e):
-                raise
-            # Discard any unflushed rows buffered so far for this database so they
-            # don't pollute the snapshot with partial data.
-            discarded = len(self._queued_rows) - rows_start
-            if discarded > 0:
-                del self._queued_rows[rows_start:]
-                self._total_rows_count -= discarded
-            # Rows already sent via maybe_flush cannot be recalled.
-            if self._collection_payloads_count > payloads_before:
-                self._log.warning(
-                    "Database %s skipped after partial flush — snapshot may contain incomplete rows",
-                    database_name,
-                )
-            self._skipped_databases_count += 1
-            self._log.warning("Skipping database %s due to error", database_name, exc_info=True)
 
     @property
     def base_event(self):
@@ -209,15 +180,6 @@ class SchemaCollector(ABC):
         Subclasses should override this method to return the next row from the cursor.
         """
         raise NotImplementedError("Subclasses must implement _get_next")
-
-    def _is_connection_error(self, e: Exception) -> bool:
-        """Return True if e is a recoverable per-database error that allows skipping this database.
-
-        Defaults to True so all exceptions are treated as recoverable. Override in subclasses
-        to restrict skipping to specific driver-level connection errors, which prevents
-        programming errors or logic bugs from being silently swallowed.
-        """
-        return True
 
     def _map_row(self, database: DatabaseInfo, _cursor_row) -> DatabaseObject:
         """

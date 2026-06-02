@@ -9,7 +9,6 @@ import re
 from collections import namedtuple
 
 import mock
-import pyodbc
 import pytest
 
 from datadog_checks.base.stubs.datadog_agent import datadog_agent
@@ -1402,11 +1401,3 @@ def test_debug_stats_kwargs_respects_exclude_hostname(exclude_hostname, expected
     with mock.patch('datadog_checks.sqlserver.SQLServer.resolve_db_host', return_value='resolved.hostname'):
         check = SQLServer(CHECK_NAME, {}, [instance])
     assert check.debug_stats_kwargs()['hostname'] == expected_hostname
-
-
-def test_schema_collector_is_connection_error():
-    collector = create_schema_collector()
-    assert collector._is_connection_error(pyodbc.Error())
-    assert collector._is_connection_error(pyodbc.ProgrammingError())
-    assert not collector._is_connection_error(RuntimeError("internal error"))
-    assert not collector._is_connection_error(ValueError("unexpected"))

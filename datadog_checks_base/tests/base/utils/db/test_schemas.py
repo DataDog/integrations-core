@@ -111,20 +111,6 @@ class TestSchemaCollectorEmptyLastDb(TestSchemaCollector):
         return None
 
 
-class TestSchemaCollectorAllFailing(TestSchemaCollector):
-    """Simulates all databases raising errors on cursor open."""
-
-    __test__ = False
-
-    def _get_databases(self):
-        return [{'name': 'db_a'}, {'name': 'db_b'}]
-
-    @contextmanager
-    def _get_cursor(self, database: str):
-        raise RuntimeError("Cannot open database")
-        yield  # make it a generator
-
-
 class TestSchemaCollectorWithInaccessibleDb(TestSchemaCollector):
     """Simulates multiple databases where one raises an error on cursor open."""
 
@@ -213,54 +199,12 @@ def test_schema_collector_skips_inaccessible_database(aggregator):
     """An inaccessible database is skipped and collection continues for the remaining databases."""
     check = TestDatabaseCheck()
     collector = TestSchemaCollectorWithInaccessibleDb(check, SchemaCollectorConfig())
-    collector.collect_schemas()
+    result = collector.collect_schemas()
 
+    assert result is True
     events = aggregator.get_event_platform_events("dbm-metadata")
     assert len(events) == 1
-    event = events[0]
-    assert len(event['metadata']) == 2
-    assert all(row['name'] != 'db_inaccessible' for row in event['metadata'])
-    assert event['collection_payloads_count'] == 1
-
-    skipped_metrics = aggregator.metrics(f"dd.{check.dbms}.schema.skipped_databases_count")
-    assert len(skipped_metrics) == 1
-    assert skipped_metrics[0].value == 1
-
-    time_metrics = aggregator.metrics(f"dd.{check.dbms}.schema.time")
-    assert any("status:partial" in m.tags for m in time_metrics)
-
-
-@pytest.mark.unit
-def test_schema_collector_all_databases_skipped(aggregator):
-    """When every database is skipped, a terminal payload is still emitted and status is partial."""
-    check = TestDatabaseCheck()
-    collector = TestSchemaCollectorAllFailing(check, SchemaCollectorConfig())
-    collector.collect_schemas()
-
-    events = aggregator.get_event_platform_events("dbm-metadata")
-    assert len(events) == 1
-    assert events[0]['metadata'] == []
-    assert events[0]['collection_payloads_count'] == 1
-
-    skipped_metrics = aggregator.metrics(f"dd.{check.dbms}.schema.skipped_databases_count")
-    assert len(skipped_metrics) == 1
-    assert skipped_metrics[0].value == 2
-
-    time_metrics = aggregator.metrics(f"dd.{check.dbms}.schema.time")
-    assert any("status:partial" in m.tags for m in time_metrics)
-
-
-@pytest.mark.unit
-def test_schema_collector_reraises_non_connection_error(aggregator):
-    """When _is_connection_error returns False, errors propagate instead of being swallowed."""
-
-    class StrictCollector(TestSchemaCollectorWithInaccessibleDb):
-        __test__ = False
-
-        def _is_connection_error(self, e: Exception) -> bool:
-            return False
-
-    check = TestDatabaseCheck()
-    collector = StrictCollector(check, SchemaCollectorConfig())
-    with pytest.raises(RuntimeError, match="Cannot open database version 852"):
-        collector.collect_schemas()
+    collected_names = [row['name'] for row in events[0]['metadata']]
+    assert 'db_accessible' in collected_names
+    assert 'db_also_accessible' in collected_names
+    assert 'db_inaccessible' not in collected_names
