@@ -13,22 +13,22 @@ init_config:
 #
 instances:
 
-    ## @param orch_ip - string - required
+    ## @param orchestrator_ip - string - required
     ## Hostname or IP address of the HPE Aruba EdgeConnect Orchestrator.
     #
-  - orch_ip: 10.0.0.1
+  - orchestrator_ip: 10.0.0.1
 
-    ## @param orch_username - string - required
+    ## @param orchestrator_username - string - required
     ## Username for the Orchestrator. If no appliance-specific credentials are provided,
     ## this username is used as the default for appliances.
     #
-    orch_username: <ORCH_USERNAME>
+    orchestrator_username: <ORCHESTRATOR_USERNAME>
 
-    ## @param orch_password - string - required
+    ## @param orchestrator_password - string - required
     ## Password for the Orchestrator. If no appliance-specific credentials are provided,
     ## this password is used as the default for appliances.
     #
-    orch_password: <ORCH_PASSWORD>
+    orchestrator_password: <ORCHESTRATOR_PASSWORD>
 
     ## @param namespace - string - optional - default: default
     ## Namespace to use for NDM device metadata. Defaults to "default".
@@ -36,7 +36,8 @@ instances:
     # namespace: default
 
     ## @param appliance_ips - mapping - optional
-    ## HPE Aruba EdgeConnect appliance targets. CIDR entries match any appliance IP within the block.
+    ## HPE Aruba EdgeConnect appliance IP filters. CIDR entries match any appliance IP within the block.
+    ## If no filters are configured, all discovered appliances are included.
     ## Use `include` to specify which appliances to poll and `exclude` to skip individual appliances.
     ## `exclude` takes precedence over `include`.
     #
@@ -63,12 +64,13 @@ instances:
     #
     # max_backfill_minutes: 5
 
-    ## @param appliance_credentials - list of mappings - optional
+    ## @param appliance_credentials_overrides - list of mappings - optional
     ## Per-appliance credential overrides matched by CIDR. When an appliance IP falls within a listed
     ## CIDR block, the associated username and password are used instead of the main credentials.
-    ## Each entry must specify all three fields: `cidr`, `username`, and `password`.
+    ## If multiple CIDR blocks match, the first match is used. Each entry must specify all three
+    ## fields: `cidr`, `username`, and `password`.
     #
-    # appliance_credentials:
+    # appliance_credentials_overrides:
     #   - cidr: 10.0.0.0/24
     #     username: admin
     #     password: secret

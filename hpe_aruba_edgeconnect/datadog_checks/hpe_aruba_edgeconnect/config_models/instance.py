@@ -26,7 +26,7 @@ SECURE_FIELD_NAMES = frozenset(
 )
 
 
-class ApplianceCredential(BaseModel):
+class ApplianceCredentialsOverride(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -80,7 +80,7 @@ class InstanceConfig(BaseModel):
         frozen=True,
     )
     allow_redirects: Optional[bool] = None
-    appliance_credentials: Optional[tuple[ApplianceCredential, ...]] = None
+    appliance_credentials_overrides: Optional[tuple[ApplianceCredentialsOverride, ...]] = None
     appliance_ips: Optional[ApplianceIps] = None
     auth_token: Optional[AuthToken] = None
     auth_type: Optional[str] = None
@@ -107,9 +107,9 @@ class InstanceConfig(BaseModel):
     min_collection_interval: Optional[float] = None
     namespace: Optional[str] = None
     ntlm_domain: Optional[str] = None
-    orch_ip: str
-    orch_password: str
-    orch_username: str
+    orchestrator_ip: str
+    orchestrator_password: str
+    orchestrator_username: str
     password: Optional[str] = None
     persist_connections: Optional[bool] = None
     proxy: Optional[Proxy] = None

@@ -5,6 +5,13 @@ from __future__ import annotations
 
 MINUTE_STATS_INTERVAL = 60
 
+CPU_STATE_FIELDS = {
+    'user': 'pUser',
+    'system': 'pSys',
+    'irq': 'pIRQ',
+    'nice': 'pNice',
+}
+
 # tunnel_availability_v2.txt column indices (0-based, no header)
 TUNNEL_AVAIL_COL_TUNNEL_ID = 1
 TUNNEL_AVAIL_COL_ALIAS = 2

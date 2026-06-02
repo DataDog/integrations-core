@@ -15,8 +15,8 @@ from .minute_stats import parse_tunnel_alias
 if TYPE_CHECKING:
     from datadog_checks.base.log import CheckLoggingAdapter
 
+    from .appliance_models import Appliance
     from .minute_stats import TunnelV2Stats
-    from .models import Appliance
 
 INTEGRATION = 'hpe_aruba_edgeconnect'
 VENDOR = 'aruba'

@@ -5,10 +5,10 @@ hpe_aruba_edgeconnect.circuit.sla.latency,gauge,,millisecond,,Average SLA probe 
 hpe_aruba_edgeconnect.circuit.sla.loss,gauge,,percent,,Average SLA probe packet loss.,0,hpe_aruba_edgeconnect,circuit sla loss,,probe_name:om_passThrough_6
 hpe_aruba_edgeconnect.device.cpu.usage,gauge,,percent,,"CPU usage percentage on the appliance broken down by state (user, system, IRQ, and nice).",0,hpe_aruba_edgeconnect,device cpu usage,,cpu_state:user
 hpe_aruba_edgeconnect.device.disk.usage,gauge,,percent,,Disk usage percentage on the appliance per mount.,0,hpe_aruba_edgeconnect,device disk usage,,mount:/var
-hpe_aruba_edgeconnect.device.hardware.ok,gauge,,,,"Hardware alarm status of the appliance (1 = ok, 0 = alarm active).",0,hpe_aruba_edgeconnect,device hardware ok,,appliance_ip:10.0.0.1
-hpe_aruba_edgeconnect.device.memory.usage,gauge,,percent,,Memory usage percentage on the appliance.,0,hpe_aruba_edgeconnect,device memory usage,,appliance_ip:10.0.0.1
-hpe_aruba_edgeconnect.device.reachability,gauge,,,,"Whether the appliance is reachable from the Orchestrator (1 = reachable, 0 = not reachable).",0,hpe_aruba_edgeconnect,device reachability,,appliance_name:SydneySP01
-hpe_aruba_edgeconnect.device.uptime,gauge,,second,,Uptime of the appliance in seconds.,0,hpe_aruba_edgeconnect,device uptime,,appliance_name:SydneySP01
+hpe_aruba_edgeconnect.device.hardware.ok,gauge,,,,"Hardware alarm status of the appliance (1 = ok, 0 = alarm active).",0,hpe_aruba_edgeconnect,device hardware ok,,device_ip:10.0.0.1
+hpe_aruba_edgeconnect.device.memory.usage,gauge,,percent,,Memory usage percentage on the appliance.,0,hpe_aruba_edgeconnect,device memory usage,,device_ip:10.0.0.1
+hpe_aruba_edgeconnect.device.reachability,gauge,,,,"Whether the appliance is reachable from the Orchestrator (1 = reachable, 0 = not reachable).",0,hpe_aruba_edgeconnect,device reachability,,device_hostname:SydneySP01
+hpe_aruba_edgeconnect.device.uptime,gauge,,second,,Uptime of the appliance in seconds.,0,hpe_aruba_edgeconnect,device uptime,,device_hostname:SydneySP01
 hpe_aruba_edgeconnect.interface.bandwidth.rx.count,gauge,,byte,,Bytes received on the interface. Cumulative across recovered minutes after Agent restart backfill.,0,hpe_aruba_edgeconnect,interface bandwidth rx count,,interface_name:wan0
 hpe_aruba_edgeconnect.interface.bandwidth.rx.max,gauge,,byte,,Peak bytes received on the interface.,0,hpe_aruba_edgeconnect,interface bandwidth rx max,,interface_name:wan0
 hpe_aruba_edgeconnect.interface.bandwidth.rx.rate,gauge,,byte,second,Receive rate on the interface in bytes per second.,0,hpe_aruba_edgeconnect,interface bandwidth rx rate,,interface_name:wan0

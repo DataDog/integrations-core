@@ -11,9 +11,10 @@ import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.hpe_aruba_edgeconnect import HpeArubaEdgeconnectCheck
+from datadog_checks.hpe_aruba_edgeconnect.appliance_models import Appliance, Appliances, _ip_matches_any
 from datadog_checks.hpe_aruba_edgeconnect.check import _parse_speed
 from datadog_checks.hpe_aruba_edgeconnect.client import ApplianceClient, OrchestratorClient
-from datadog_checks.hpe_aruba_edgeconnect.config_models.instance import ApplianceCredential, ApplianceIps
+from datadog_checks.hpe_aruba_edgeconnect.config_models.instance import ApplianceCredentialsOverride, ApplianceIps
 from datadog_checks.hpe_aruba_edgeconnect.metrics_store import AggType, MetricsStore
 from datadog_checks.hpe_aruba_edgeconnect.minute_stats import (
     AppperfStats,
@@ -31,7 +32,6 @@ from datadog_checks.hpe_aruba_edgeconnect.minute_stats import (
     TunnelPeakStats,
     TunnelV2Stats,
 )
-from datadog_checks.hpe_aruba_edgeconnect.models import Appliance, Appliances, _ip_matches_any
 from datadog_checks.hpe_aruba_edgeconnect.ndm_models import PAYLOAD_METADATA_BATCH_SIZE
 
 pytestmark = pytest.mark.unit
@@ -39,10 +39,22 @@ pytestmark = pytest.mark.unit
 FIXTURE_DIR = Path(__file__).parent / 'fixtures'
 
 
-def _pack_dir_to_tgz_bytes(directory: Path) -> bytes:
+def _pack_dir_to_tgz_bytes(directory: Path, file_overrides: dict[str, str] | None = None) -> bytes:
     buf = io.BytesIO()
     with tarfile.open(fileobj=buf, mode='w:gz') as tf:
-        tf.add(directory, arcname=directory.name)
+        if not file_overrides:
+            tf.add(directory, arcname=directory.name)
+        else:
+            for path in sorted(directory.iterdir()):
+                arcname = f'{directory.name}/{path.name}'
+                data = file_overrides.get(path.name)
+                if data is None:
+                    tf.add(path, arcname=arcname)
+                    continue
+                encoded = data.encode('utf-8')
+                info = tarfile.TarInfo(arcname)
+                info.size = len(encoded)
+                tf.addfile(info, io.BytesIO(encoded))
     return buf.getvalue()
 
 
@@ -223,6 +235,7 @@ EXPECTED_METRIC_COUNTS = {
 }
 
 BASE_DEVICE_TAGS = [
+    'orch_ip:localhost:8443',
     'device_namespace:default',
     'device_ip:10.0.0.1',
     'device_model:EC-V',
@@ -570,6 +583,26 @@ def _parse(parser_cls, content, logger):
 
 
 # ---------------------------------------------------------------------------
+# Configuration
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    'appliance_ips',
+    [
+        pytest.param({'include': ['bad-pattern']}, id='include'),
+        pytest.param({'exclude': ['bad-pattern']}, id='exclude'),
+    ],
+)
+def test_config_rejects_invalid_appliance_ip_patterns(instance, appliance_ips):
+    inst = instance('localhost:8443', appliance_ips=appliance_ips)
+    c = HpeArubaEdgeconnectCheck('hpe_aruba_edgeconnect', {}, [inst])
+
+    with pytest.raises(Exception, match='Invalid appliance_ips pattern'):
+        c.load_configuration_models()
+
+
+# ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
 
@@ -579,7 +612,6 @@ def check(instance):
     inst = instance('localhost:8443', appliance_ips=['10.0.0.1'], max_backfill_minutes=10)
     c = HpeArubaEdgeconnectCheck('hpe_aruba_edgeconnect', {}, [inst])
     c.load_configuration_models()
-    c._parse_config()
     return c
 
 
@@ -695,8 +727,8 @@ def test_aggregation(agg_type, records, expected_value, expected_tags):
         ),
     ],
 )
-def test_appliances_filter(ips, filter_config, expected_ips):
-    appliances = Appliances([_make_appliance(ip=ip) for ip in ips])
+def test_appliances_filter(mocker, ips, filter_config, expected_ips):
+    appliances = Appliances([_make_appliance(ip=ip) for ip in ips], mocker.Mock())
     ip_filter = ApplianceIps(**filter_config) if filter_config else None
     appliances.filter(ip_filter)
     assert [a.ip for a in appliances] == expected_ips
@@ -783,14 +815,16 @@ def test_parse_speed(value, expected):
         ),
     ],
 )
-def test_resolve_credentials(ip, overrides, expected_username, expected_password):
+def test_resolve_credentials(mocker, ip, overrides, expected_username, expected_password):
     a = _make_appliance(ip=ip)
-    appliances = Appliances([a])
-    creds = [ApplianceCredential(**o) for o in overrides] if overrides else None
+    log = mocker.Mock()
+    appliances = Appliances([a], log)
+    creds = [ApplianceCredentialsOverride(**o) for o in overrides] if overrides else None
     appliances.resolve_credentials('admin', 'default_pass', creds)
 
     assert a.username == expected_username
     assert a.password == expected_password
+    log.debug.assert_called()
 
 
 @pytest.mark.parametrize(
@@ -1147,6 +1181,46 @@ def test_ndm_metadata_submitted(dd_run_check, aggregator, mocker, instance):
         assert 0 < size <= PAYLOAD_METADATA_BATCH_SIZE
         assert payload['namespace'] == 'default'
         assert payload['collect_timestamp'] is not None
+
+
+def test_tunnel_metadata_uses_source_minute_stats_timestamp_during_backfill(dd_run_check, aggregator, mocker, instance):
+    inst = instance(
+        'localhost:8443',
+        appliance_ips=['10.0.0.1'],
+        max_backfill_minutes=10,
+        send_ndm_metadata=True,
+    )
+    check = HpeArubaEdgeconnectCheck('hpe_aruba_edgeconnect', {}, [inst])
+    check.load_configuration_models()
+
+    tunnel_stats_ts = NEWEST_TS - 60
+    newest_without_tunnels = _pack_dir_to_tgz_bytes(
+        FIXTURE_DIR / f'st2-{NEWEST_TS}',
+        {'tunnel_v2.txt': ''},
+    )
+    client = _mock_appliance_client(
+        {
+            f'st2-{NEWEST_TS}.tgz': newest_without_tunnels,
+            f'st2-{tunnel_stats_ts}.tgz': TGZ_DATA[f'st2-{tunnel_stats_ts}.tgz'],
+        }
+    )
+    _setup_mocks(
+        mocker,
+        check,
+        APPLIANCE_PAYLOAD,
+        appliance_client=client,
+        cached_timestamp=str(tunnel_stats_ts - 60),
+    )
+
+    dd_run_check(check)
+
+    payloads = [
+        e if isinstance(e, dict) else json.loads(e)
+        for e in aggregator.get_event_platform_events('network-devices-metadata')
+    ]
+    tunnel_payloads = [p for p in payloads if p.get('tunnels')]
+    assert tunnel_payloads, 'expected tunnel metadata to be submitted'
+    assert {p['collect_timestamp'] for p in tunnel_payloads} == {tunnel_stats_ts}
 
 
 def test_stale_appliance_clients_cleaned_up(dd_run_check, mocker, instance):

@@ -7,14 +7,14 @@ files:
     - template: init_config/default
   - template: instances
     options:
-    - name: orch_ip
+    - name: orchestrator_ip
       required: true
       description: Hostname or IP address of the HPE Aruba EdgeConnect Orchestrator.
       value:
         type: string
         example: 10.0.0.1
 
-    - name: orch_username
+    - name: orchestrator_username
       required: true
       description: |
         Username for the Orchestrator. If no appliance-specific credentials are provided,
@@ -22,7 +22,7 @@ files:
       value:
         type: string
 
-    - name: orch_password
+    - name: orchestrator_password
       required: true
       secret: true
       description: |
@@ -39,9 +39,10 @@ files:
         default: default
     - name: appliance_ips
       description: |
-        HPE Aruba EdgeConnect appliance targets. CIDR entries match any appliance IP within the block.
-        Use `include` to specify which appliances to poll and `exclude` to skip individual appliances.
-        `exclude` takes precedence over `include`.
+          HPE Aruba EdgeConnect appliance IP filters. CIDR entries match any appliance IP within the block.
+          If no filters are configured, all discovered appliances are included.
+          Use `include` to specify which appliances to poll and `exclude` to skip individual appliances.
+          `exclude` takes precedence over `include`.
       value:
         type: object
         properties:
@@ -81,11 +82,12 @@ files:
         minimum: 1
         default: 5
         example: 5
-    - name: appliance_credentials
+    - name: appliance_credentials_overrides
       description: |
         Per-appliance credential overrides matched by CIDR. When an appliance IP falls within a listed
         CIDR block, the associated username and password are used instead of the main credentials.
-        Each entry must specify all three fields: `cidr`, `username`, and `password`.
+        If multiple CIDR blocks match, the first match is used. Each entry must specify all three
+        fields: `cidr`, `username`, and `password`.
       value:
         type: array
         items:

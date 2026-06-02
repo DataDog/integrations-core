@@ -4,14 +4,14 @@
 from __future__ import annotations
 
 import ipaddress
-import logging
 from collections.abc import Iterable, Iterator
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from .config_models.instance import ApplianceCredential, ApplianceIps
+from .config_models.instance import ApplianceCredentialsOverride, ApplianceIps
 from .constants import NDM_DEVICE_RESOURCE_TAG, NDM_DEVICE_USER_TAGS_RESOURCE_TAG
 
-log = logging.getLogger(__name__)
+if TYPE_CHECKING:
+    from datadog_checks.base.log import CheckLoggingAdapter
 
 
 class Appliance:
@@ -79,8 +79,9 @@ class Appliance:
 class Appliances:
     """Collection of appliances with filtering and credential resolution."""
 
-    def __init__(self, raw: list[Appliance]) -> None:
+    def __init__(self, raw: list[Appliance], log: CheckLoggingAdapter) -> None:
         self._appliances = list(raw)
+        self.log = log
 
     def __iter__(self) -> Iterator[Appliance]:
         return iter(self._appliances)
@@ -100,7 +101,7 @@ class Appliances:
         self,
         default_username: str,
         default_password: str,
-        overrides: Iterable[ApplianceCredential] | None = None,
+        overrides: Iterable[ApplianceCredentialsOverride] | None = None,
     ) -> None:
         overrides = list(overrides or [])
         for appliance in self._appliances:
@@ -111,16 +112,17 @@ class Appliances:
                     if ipaddress.ip_address(appliance.ip) in ipaddress.ip_network(cred.cidr, strict=False):
                         appliance.username = cred.username
                         appliance.password = cred.password
-                        log.debug(
+                        self.log.debug(
                             "Using CIDR-matched credentials for appliance %s (matched %s)",
                             appliance.ip,
                             cred.cidr,
                         )
                         break
                 except (ValueError, TypeError):
+                    self.log.warning("Invalid CIDR %s for appliance %s, skipping", cred.cidr, appliance.ip)
                     continue
             else:
-                log.debug("Using shared credentials for appliance %s", appliance.ip)
+                self.log.debug("Using shared credentials for appliance %s", appliance.ip)
 
 
 def _ip_matches_any(ip: str, patterns: Iterable[str]) -> bool:

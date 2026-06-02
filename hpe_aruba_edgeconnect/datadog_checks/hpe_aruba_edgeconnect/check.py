@@ -13,12 +13,12 @@ from typing import Any
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http import RequestsWrapper
 
+from .appliance_models import Appliance, Appliances
 from .client import ApplianceClient, OrchestratorClient
 from .config_models import ConfigMixin
-from .constants import MINUTE_STATS_INTERVAL, NDM_INTERFACE_RESOURCE_TAG
+from .constants import CPU_STATE_FIELDS, MINUTE_STATS_INTERVAL, NDM_INTERFACE_RESOURCE_TAG
 from .metrics_store import MetricsStore
 from .minute_stats import MinuteStats, TunnelV2Stats
-from .models import Appliance, Appliances
 from .ndm_models import (
     DeviceMetadata,
     InterfaceMetadata,
@@ -28,13 +28,6 @@ from .ndm_models import (
     create_interface_metadata,
     create_tunnel_metadata,
 )
-
-_CPU_STATE_FIELDS = {
-    'user': 'pUser',
-    'system': 'pSys',
-    'irq': 'pIRQ',
-    'nice': 'pNice',
-}
 
 
 class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
@@ -52,37 +45,29 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         self.check_initializations.append(self._parse_config)
 
     def _parse_config(self) -> None:
-        self.orch_ip = self.config.orch_ip
-        self.orch_username = self.config.orch_username
-        self.orch_password = self.config.orch_password
-        self.max_concurrency = self.config.max_concurrency
-        self.send_ndm_metadata = self.config.send_ndm_metadata
+        self.tags = list(self.config.tags or []) + [f'orch_ip:{self.config.orchestrator_ip}']
         self.namespace = self.config.namespace or 'default'
-        self.appliance_ips = self.config.appliance_ips
-        self.appliance_credentials = self.config.appliance_credentials
-        self.max_backfill_minutes = self.config.max_backfill_minutes or 5
-        self.tags = list(self.config.tags or [])
+        self.max_backfill = self.config.max_backfill_minutes or 5
 
     def _get_orch_client(self) -> OrchestratorClient:
         if self._orch_client is not None:
             return self._orch_client
-        client = OrchestratorClient(self.http, self.orch_ip)
-        client.login(self.orch_username, self.orch_password)
+        client = OrchestratorClient(self.http, self.config.orchestrator_ip)
+        client.login(self.config.orchestrator_username, self.config.orchestrator_password)
         self._orch_client = client
         return client
 
     def check(self, _: Any) -> None:
-        orch_tags = self.tags + [f'orch_ip:{self.orch_ip}']
         try:
             orch_client = self._get_orch_client()
         except Exception:
-            self.gauge('orchestrator.reachability', 0, tags=orch_tags)
+            self.gauge('orchestrator.reachability', 0, tags=self.tags)
             self._orch_client = None
             raise
-        self.gauge('orchestrator.reachability', 1, tags=orch_tags)
+        self.gauge('orchestrator.reachability', 1, tags=self.tags)
         appliances = self._collect_appliances_from_orch(orch_client)
         self._remove_stale_appliance_clients({ap.ip for ap in appliances})
-        with ThreadPoolExecutor(max_workers=self.max_concurrency) as pool:
+        with ThreadPoolExecutor(max_workers=self.config.max_concurrency) as pool:
             futs = {
                 pool.submit(
                     self._collect_appliance,
@@ -112,7 +97,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         items: list[DeviceMetadata] | list[InterfaceMetadata] | list[TunnelMetadata],
         collect_timestamp: int | None = None,
     ) -> None:
-        if not items or not self.send_ndm_metadata:
+        if not items or not self.config.send_ndm_metadata:
             return
         for batch in batch_payloads(self.namespace, items, collect_timestamp):
             self.event_platform_event(
@@ -123,27 +108,27 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
     def _collect_appliances_from_orch(self, client: OrchestratorClient) -> Appliances:
         raw_appliances = client.get_appliances()
         if not raw_appliances:
-            self.log.warning("No appliances returned from orchestrator %s", self.orch_ip)
-            return Appliances([])
+            self.log.warning("No appliances returned from orchestrator %s", self.config.orchestrator_ip)
+            return Appliances([], self.log)
         self.log.debug("Found %d appliances from orchestrator before filtering", len(raw_appliances))
         all_appliances = [Appliance(a) for a in raw_appliances]
         self._peer_lookup = {ap.host_name: (ap.ip, ap.site or 'unknown') for ap in all_appliances if ap.host_name}
-        appliances = Appliances(all_appliances)
-        appliances.filter(self.appliance_ips)
-        self.log.debug("Monitoring %d appliances after filtering", len(appliances))
+        appliances = Appliances(all_appliances, self.log)
+        appliances.filter(self.config.appliance_ips)
+        self.log.debug("Monitoring %d appliances after filtering: %s", len(appliances), [ap.ip for ap in appliances])
         appliances.resolve_credentials(
-            self.orch_username,
-            self.orch_password,
-            self.appliance_credentials,
+            self.config.orchestrator_username,
+            self.config.orchestrator_password,
+            self.config.appliance_credentials_overrides,
         )
         namespace = self.namespace
         devices: list[DeviceMetadata] = []
         for ap in appliances:
             tags = self.tags + ap.tags(namespace)
             self.gauge('device.reachability', 1 if ap.is_reachable else 0, tags=tags)
-            if self.send_ndm_metadata:
+            if self.config.send_ndm_metadata:
                 devices.append(create_device_metadata(ap, namespace))
-        if self.send_ndm_metadata:
+        if self.config.send_ndm_metadata:
             self._submit_metadata(devices)
         try:
             self._overlay_map, self._traffic_class_map = client.get_overlay_config()
@@ -175,14 +160,13 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         if last_ts is not None and newest == last_ts:
             return []
 
-        max_backfill = self.max_backfill_minutes
         if last_ts is None:
             self.log.debug("First run for %s, collecting only the newest timestamp %d", app_ip, newest)
             return [newest]
 
         timestamps: list[int] = []
         ts = newest
-        while ts > last_ts and len(timestamps) < max_backfill:
+        while ts > last_ts and len(timestamps) < self.max_backfill:
             timestamps.append(ts)
             ts -= MINUTE_STATS_INTERVAL
 
@@ -191,7 +175,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
                 "Appliance %s is %d minutes behind; capping backfill at %d minute(s). Older data will be skipped.",
                 app_ip,
                 (newest - last_ts) // MINUTE_STATS_INTERVAL,
-                max_backfill,
+                self.max_backfill,
             )
         else:
             self.log.debug(
@@ -212,9 +196,10 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         device_id: str,
         traffic_class_map: dict[str, str],
         overlay_map: dict[str, str],
-    ) -> list[TunnelV2Stats]:
+    ) -> tuple[list[TunnelV2Stats], int | None]:
         store = MetricsStore()
         latest_tunnel_stats: list[TunnelV2Stats] = []
+        latest_tunnel_stats_ts: int | None = None
         last_successful_ts: int | None = None
         contents: dict[int, bytes] = {}
         failed_ts: set[int] = set()
@@ -235,7 +220,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
                     failed_ts.add(ts)
         for ts in reversed(timestamps):
             if ts in failed_ts:
-                break
+                continue
             try:
                 minute_stats = MinuteStats(contents[ts], app_ip, ts, self.log)
                 minute_stats.record(store, base_tags, device_id, traffic_class_map, overlay_map)
@@ -246,14 +231,15 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
                     app_ip,
                     exc_info=True,
                 )
-                break
+                continue
             last_successful_ts = ts
             if minute_stats.tunnels:
                 latest_tunnel_stats = minute_stats.tunnels
+                latest_tunnel_stats_ts = ts
         store.flush(self)
         if last_successful_ts is not None:
             self.write_persistent_cache(f'last_timestamp:{app_ip}', str(last_successful_ts))
-        return latest_tunnel_stats
+        return latest_tunnel_stats, latest_tunnel_stats_ts
 
     def _collect_appliance(
         self,
@@ -273,11 +259,12 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
 
         timestamps = self._timestamps_to_fetch(app_ip, newest)
         if timestamps:
-            latest_tunnel_stats = self._collect_minute_stats(
+            latest_tunnel_stats, latest_tunnel_stats_ts = self._collect_minute_stats(
                 client, app_ip, timestamps, base_tags, device_id, traffic_class_map, overlay_map
             )
         else:
             latest_tunnel_stats = []
+            latest_tunnel_stats_ts = None
             self.log.debug("Appliance %s stats are up to date (last timestamp: %d)", app_ip, newest)
 
         collectors: list[tuple[str, Callable[[], None]]] = [
@@ -288,7 +275,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
             ('alarm_stats', lambda: self._collect_alarm_stats(client, base_tags)),
             ('system_info', lambda: self._collect_system_info(client, base_tags)),
         ]
-        if latest_tunnel_stats and self.send_ndm_metadata:
+        if latest_tunnel_stats and latest_tunnel_stats_ts and self.config.send_ndm_metadata:
             collectors.append(
                 (
                     'tunnel_metadata',
@@ -299,11 +286,11 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
                         peer_lookup,
                         overlay_map,
                         namespace,
-                        newest,
+                        latest_tunnel_stats_ts,
                     ),
                 )
             )
-        max_workers = min(len(collectors), self.max_concurrency or len(collectors))
+        max_workers = min(len(collectors), self.config.max_concurrency or len(collectors))
         with ThreadPoolExecutor(max_workers=max_workers) as pool:
             futs = {pool.submit(fn): name for name, fn in collectors}
             for f in as_completed(futs):
@@ -374,7 +361,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
             speed = _parse_speed(iface.get('speed'))
             if speed is not None:
                 self.gauge('interface.speed', speed, tags=iface_tags)
-            if self.send_ndm_metadata:
+            if self.config.send_ndm_metadata:
                 interfaces.append(create_interface_metadata(client.app_ip, iface, namespace))
         self._submit_metadata(interfaces, collect_timestamp)
 
@@ -392,14 +379,18 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         if aggregate is None:
             self.log.warning("No aggregate CPU data found for appliance %s", client.app_ip)
             return
-        for state, field in _CPU_STATE_FIELDS.items():
+        for state, field in CPU_STATE_FIELDS.items():
             value = aggregate.get(field)
             if value is None:
                 continue
             try:
-                self.gauge('device.cpu.usage', float(value), tags=base_tags + [f'cpu_state:{state}'])
+                cpu = float(value)
             except (TypeError, ValueError):
+                self.log.warning(
+                    "Failed to convert CPU %s value %s to float for appliance %s, skipping", state, value, client.app_ip
+                )
                 continue
+            self.gauge('device.cpu.usage', cpu, tags=base_tags + [f'cpu_state:{state}'])
 
     def _collect_memory_stats(self, client: ApplianceClient, base_tags: list[str]) -> None:
         mem_data = client.get_memory_stats()

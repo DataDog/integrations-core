@@ -72,6 +72,13 @@ def _nonzero(raw: str | None) -> bool:
         return False
 
 
+def _get_float(raw: str, divisor: float = 1.0) -> float | None:
+    try:
+        return float(raw) / divisor
+    except (TypeError, ValueError):
+        return None
+
+
 def parse_tunnel_alias(alias: str, wan_labels: set[str] | None = None) -> tuple[str, str]:
     """Returns (peer_hostname, tunnel_color) parsed from a tunnel alias."""
     m = _TUNNEL_ALIAS_WITH_LABELS_RE.match(alias)
@@ -115,21 +122,21 @@ class TunnelV2Stats:
             self.is_sdwan = 'true' if cols[TUNNEL_V2_COL_IS_SDWAN] == '1' else 'false'
         else:
             self.is_sdwan = ''
-        self.bytes_wan_tx = float(cols[TUNNEL_V2_COL_BYTES_WAN_TX]) if n > TUNNEL_V2_COL_BYTES_WAN_TX else None
-        self.bytes_wan_rx = float(cols[TUNNEL_V2_COL_BYTES_WAN_RX]) if n > TUNNEL_V2_COL_BYTES_WAN_RX else None
-        self.bytes_lan_tx = float(cols[TUNNEL_V2_COL_BYTES_LAN_TX]) if n > TUNNEL_V2_COL_BYTES_LAN_TX else None
-        self.bytes_lan_rx = float(cols[TUNNEL_V2_COL_BYTES_LAN_RX]) if n > TUNNEL_V2_COL_BYTES_LAN_RX else None
-        self.pkts_wan_tx = float(cols[TUNNEL_V2_COL_PKTS_WAN_TX]) if n > TUNNEL_V2_COL_PKTS_WAN_TX else None
-        self.pkts_wan_rx = float(cols[TUNNEL_V2_COL_PKTS_WAN_RX]) if n > TUNNEL_V2_COL_PKTS_WAN_RX else None
-        self.pkts_lan_tx = float(cols[TUNNEL_V2_COL_PKTS_LAN_TX]) if n > TUNNEL_V2_COL_PKTS_LAN_TX else None
-        self.pkts_lan_rx = float(cols[TUNNEL_V2_COL_PKTS_LAN_RX]) if n > TUNNEL_V2_COL_PKTS_LAN_RX else None
-        self.latency = float(cols[TUNNEL_V2_COL_LATENCY_AVG]) / 100 if n > TUNNEL_V2_COL_LATENCY_AVG else None
-        self.latency_min = float(cols[TUNNEL_V2_COL_LATENCY_MIN]) / 100 if n > TUNNEL_V2_COL_LATENCY_MIN else None
+        self.bytes_wan_tx = _get_float(cols[TUNNEL_V2_COL_BYTES_WAN_TX]) if n > TUNNEL_V2_COL_BYTES_WAN_TX else None
+        self.bytes_wan_rx = _get_float(cols[TUNNEL_V2_COL_BYTES_WAN_RX]) if n > TUNNEL_V2_COL_BYTES_WAN_RX else None
+        self.bytes_lan_tx = _get_float(cols[TUNNEL_V2_COL_BYTES_LAN_TX]) if n > TUNNEL_V2_COL_BYTES_LAN_TX else None
+        self.bytes_lan_rx = _get_float(cols[TUNNEL_V2_COL_BYTES_LAN_RX]) if n > TUNNEL_V2_COL_BYTES_LAN_RX else None
+        self.pkts_wan_tx = _get_float(cols[TUNNEL_V2_COL_PKTS_WAN_TX]) if n > TUNNEL_V2_COL_PKTS_WAN_TX else None
+        self.pkts_wan_rx = _get_float(cols[TUNNEL_V2_COL_PKTS_WAN_RX]) if n > TUNNEL_V2_COL_PKTS_WAN_RX else None
+        self.pkts_lan_tx = _get_float(cols[TUNNEL_V2_COL_PKTS_LAN_TX]) if n > TUNNEL_V2_COL_PKTS_LAN_TX else None
+        self.pkts_lan_rx = _get_float(cols[TUNNEL_V2_COL_PKTS_LAN_RX]) if n > TUNNEL_V2_COL_PKTS_LAN_RX else None
+        self.latency = _get_float(cols[TUNNEL_V2_COL_LATENCY_AVG], 100) if n > TUNNEL_V2_COL_LATENCY_AVG else None
+        self.latency_min = _get_float(cols[TUNNEL_V2_COL_LATENCY_MIN], 100) if n > TUNNEL_V2_COL_LATENCY_MIN else None
         self.loss_prefec = (
-            float(cols[TUNNEL_V2_COL_LOSS_PCT_PREFEC]) / 100 if n > TUNNEL_V2_COL_LOSS_PCT_PREFEC else None
+            _get_float(cols[TUNNEL_V2_COL_LOSS_PCT_PREFEC], 100) if n > TUNNEL_V2_COL_LOSS_PCT_PREFEC else None
         )
         self.loss_postfec = (
-            float(cols[TUNNEL_V2_COL_LOSS_PCT_POSTFEC]) / 100 if n > TUNNEL_V2_COL_LOSS_PCT_POSTFEC else None
+            _get_float(cols[TUNNEL_V2_COL_LOSS_PCT_POSTFEC], 100) if n > TUNNEL_V2_COL_LOSS_PCT_POSTFEC else None
         )
 
     def record(self, store: MetricsStore, base_tags: list[str], overlay_map: dict[str, str] | None = None) -> list[str]:
@@ -627,11 +634,11 @@ class ProbeStats:
     def __init__(self, cols: list[str]) -> None:
         n = len(cols)
         self.probe_name = cols[PROBE_COL_PROBE_NAME] if n > PROBE_COL_PROBE_NAME else ''
-        self.avg_latency = float(cols[PROBE_COL_AVG_LATENCY]) if n > PROBE_COL_AVG_LATENCY else None
-        self.avg_loss = float(cols[PROBE_COL_AVG_LOSS]) if n > PROBE_COL_AVG_LOSS else None
-        self.avg_jitter = float(cols[PROBE_COL_AVG_JITTER]) if n > PROBE_COL_AVG_JITTER else None
-        self.admin_up = float(cols[PROBE_COL_ADMIN_UP]) if n > PROBE_COL_ADMIN_UP else None
-        self.oper_up = float(cols[PROBE_COL_OPER_UP]) if n > PROBE_COL_OPER_UP else None
+        self.avg_latency = _get_float(cols[PROBE_COL_AVG_LATENCY]) if n > PROBE_COL_AVG_LATENCY else None
+        self.avg_loss = _get_float(cols[PROBE_COL_AVG_LOSS]) if n > PROBE_COL_AVG_LOSS else None
+        self.avg_jitter = _get_float(cols[PROBE_COL_AVG_JITTER]) if n > PROBE_COL_AVG_JITTER else None
+        self.admin_up = _get_float(cols[PROBE_COL_ADMIN_UP]) if n > PROBE_COL_ADMIN_UP else None
+        self.oper_up = _get_float(cols[PROBE_COL_OPER_UP]) if n > PROBE_COL_OPER_UP else None
 
     def record(self, store: MetricsStore, base_tags: list[str]) -> None:
         tags = base_tags + [f'probe_name:{self.probe_name}']
@@ -714,9 +721,9 @@ class AppperfStats:
         self.app_name = cols[APPPERF_COL_APP_NAME] if n > APPPERF_COL_APP_NAME else ""
         self.tunnel_name = cols[APPPERF_COL_TUNNEL_NAME] if n > APPPERF_COL_TUNNEL_NAME else ""
         self.transport_type = cols[APPPERF_COL_TRANSPORT_TYPE] if n > APPPERF_COL_TRANSPORT_TYPE else ""
-        self.cnd_delay = float(cols[APPPERF_COL_CND_DELAY]) if n > APPPERF_COL_CND_DELAY else None
-        self.snd_delay = float(cols[APPPERF_COL_SND_DELAY]) if n > APPPERF_COL_SND_DELAY else None
-        self.app_delay = float(cols[APPPERF_COL_APP_DELAY]) if n > APPPERF_COL_APP_DELAY else None
+        self.cnd_delay = _get_float(cols[APPPERF_COL_CND_DELAY]) if n > APPPERF_COL_CND_DELAY else None
+        self.snd_delay = _get_float(cols[APPPERF_COL_SND_DELAY]) if n > APPPERF_COL_SND_DELAY else None
+        self.app_delay = _get_float(cols[APPPERF_COL_APP_DELAY]) if n > APPPERF_COL_APP_DELAY else None
 
     def record(self, store: MetricsStore, base_tags: list[str]) -> None:
         app_tags = base_tags + [f'application:{self.app_name}']
@@ -750,7 +757,7 @@ class _Parseable(Protocol):
 class MinuteStats:
     """Represents the contents of a per-appliance minute-stats .tgz archive."""
 
-    _PARSERS: ClassVar[list[tuple[str, str, type[_Parseable]]]] = [
+    PARSERS: ClassVar[list[tuple[str, str, type[_Parseable]]]] = [
         ('interface.csv', 'interfaces', InterfaceStats),
         ('interface_peak.csv', 'interface_peaks', InterfacePeakStats),
         ('tunnel_v2.txt', 'tunnels', TunnelV2Stats),
@@ -765,7 +772,7 @@ class MinuteStats:
         ('shaper.csv', 'shaper', ShaperStats),
         ('appperf_v2.txt', 'appperf', AppperfStats),
     ]
-    FILES_NEEDED: ClassVar[frozenset[str]] = frozenset(filename for filename, _, _ in _PARSERS)
+    FILES_NEEDED: ClassVar[frozenset[str]] = frozenset(filename for filename, _, _ in PARSERS)
 
     appliance_ip: str
     timestamp: int
@@ -816,7 +823,7 @@ class MinuteStats:
                     timestamp,
                 )
 
-        for filename, field_name, parser_cls in self._PARSERS:
+        for filename, field_name, parser_cls in self.PARSERS:
             setattr(self, field_name, self._safe_parse(filename, parser_cls))
 
     def _safe_parse(self, filename: str, parser_cls: type[_Parseable]) -> list:
@@ -852,10 +859,14 @@ class MinuteStats:
         self._record_dscp_stats(store, base_tags)
 
     def _record_interface_stats(self, store: MetricsStore, base_tags: list[str], device_id: str) -> None:
-        iface_max_bw: dict[str, tuple[float | None, float | None]] = {}
+        iface_max_bw: dict[str, tuple[float, float]] = {}
         for iface in self.interfaces:
             iface.record(store, base_tags, device_id)
-            iface_max_bw[iface.ifname] = (iface.max_bw_tx, iface.max_bw_rx)
+            last_max_bw = iface_max_bw.get(iface.ifname, (0.0, 0.0))
+            iface_max_bw[iface.ifname] = (
+                max(iface.max_bw_tx or 0.0, last_max_bw[0]),
+                max(iface.max_bw_rx or 0.0, last_max_bw[1]),
+            )
         for peak in self.interface_peaks:
             peak.record(store, base_tags, device_id, iface_max_bw.get(peak.ifname, (None, None)))
 
