@@ -89,7 +89,7 @@ class SchemaCollector(ABC):
                             # the next row to see if we've reached the last row
                             next_row = self._get_next(cursor)
                             self.maybe_flush(is_last_payload=False)
-                    self._log.debug("Completed collection of schemas for database %s (%d rows)", database_name, db_rows_count)
+                    self._log.debug("Completed collection of schemas for database %s (%d rows, %d payloads)", database_name, db_rows_count, self._collection_payloads_count)
                     self.maybe_flush(is_last_payload=True)
                     self._total_rows_count += db_rows_count
                     total_payloads_count += self._collection_payloads_count
