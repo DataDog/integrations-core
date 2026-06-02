@@ -823,7 +823,9 @@ class AgentCheck(object):
         ``include`` is required: ``{"paths": [...], "map_paths": [...], "annotation_keys": [...]}``.
         ``paths`` select values; ``map_paths`` select whole flat maps (e.g. ``metadata.labels``);
         ``annotation_keys`` glob ``metadata.annotations`` keys. A path that resolves to a structured
-        object is dropped. ``seen_at`` / ``expire_at`` are optional ``int`` unix-seconds.
+        object is dropped. Pass ``include=INCLUDE_ALL`` to ship a dict you built in code as-is — only
+        safe when your code constructed every value, never for a raw upstream object. ``seen_at`` /
+        ``expire_at`` are optional ``int`` unix-seconds.
         """
         if fields is None:
             return
@@ -834,6 +836,7 @@ class AgentCheck(object):
         # Lazy import: avoids loading the protobuf runtime for every check that imports base.py.
         from datadog_checks.base.utils.genresources import (
             GENRESOURCES_TRACK,
+            INCLUDE_ALL,
             INTEGRATIONS_CORE_SOURCE,
             MAX_FIELDS_JSON_BYTES,
             GenericResource,
@@ -862,45 +865,50 @@ class AgentCheck(object):
             _emit_dropped()
             return
 
-        if not isinstance(include, dict):
-            self.log.warning(
-                "genresources: dropping resource with non-dict include type=%s key=%s actual_type=%s",
-                type,
-                key,
-                include.__class__.__name__,
-            )
-            _emit_dropped()
-            return
+        if include is INCLUDE_ALL:
+            # Caller built `fields` in code and owns its contents; ship as-is, no allow-list.
+            included = fields
+        else:
+            if not isinstance(include, dict):
+                self.log.warning(
+                    "genresources: dropping resource with non-dict include type=%s key=%s actual_type=%s",
+                    type,
+                    key,
+                    include.__class__.__name__,
+                )
+                _emit_dropped()
+                return
 
-        paths = include.get("paths", [])
-        map_paths = include.get("map_paths", [])
-        annotation_keys = include.get("annotation_keys", [])
+            paths = include.get("paths", [])
+            map_paths = include.get("map_paths", [])
+            annotation_keys = include.get("annotation_keys", [])
 
-        def _is_str_list(value):
-            return isinstance(value, list) and all(isinstance(item, str) for item in value)
+            def _is_str_list(value):
+                return isinstance(value, list) and all(isinstance(item, str) for item in value)
 
-        if not (_is_str_list(paths) and _is_str_list(map_paths) and _is_str_list(annotation_keys)):
-            self.log.warning("genresources: dropping resource with malformed include type=%s key=%s", type, key)
-            _emit_dropped()
-            return
+            if not (_is_str_list(paths) and _is_str_list(map_paths) and _is_str_list(annotation_keys)):
+                self.log.warning("genresources: dropping resource with malformed include type=%s key=%s", type, key)
+                _emit_dropped()
+                return
 
-        if any(not pattern.strip("*?") for pattern in annotation_keys):
-            self.log.warning(
-                "genresources: dropping resource with catch-all annotation pattern type=%s key=%s", type, key
-            )
-            _emit_dropped()
-            return
+            if any(not pattern.strip("*?") for pattern in annotation_keys):
+                self.log.warning(
+                    "genresources: dropping resource with catch-all annotation pattern type=%s key=%s", type, key
+                )
+                _emit_dropped()
+                return
 
-        invalid = find_invalid_include(fields, paths, map_paths)
-        if invalid is not None:
-            offending_path, reason = invalid
-            self.log.warning(
-                "genresources: dropping resource (%s) path=%s type=%s key=%s", reason, offending_path, type, key
-            )
-            _emit_dropped()
-            return
+            invalid = find_invalid_include(fields, paths, map_paths)
+            if invalid is not None:
+                offending_path, reason = invalid
+                self.log.warning(
+                    "genresources: dropping resource (%s) path=%s type=%s key=%s", reason, offending_path, type, key
+                )
+                _emit_dropped()
+                return
 
-        included = apply_allow_list(fields, paths=paths, map_paths=map_paths, annotation_keys=annotation_keys)
+            included = apply_allow_list(fields, paths=paths, map_paths=map_paths, annotation_keys=annotation_keys)
+
         if not included:
             self.log.warning("genresources: dropping resource with empty inclusion type=%s key=%s", type, key)
             _emit_dropped()

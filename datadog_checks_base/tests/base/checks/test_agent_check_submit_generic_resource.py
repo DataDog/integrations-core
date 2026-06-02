@@ -10,7 +10,7 @@ import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs import datadog_agent
-from datadog_checks.base.utils.genresources import GenericResourceEvent
+from datadog_checks.base.utils.genresources import INCLUDE_ALL, GenericResourceEvent
 
 VALUE_INCLUDE = {"paths": ["metadata.name"], "map_paths": [], "annotation_keys": []}
 
@@ -84,6 +84,20 @@ def test_submit_generic_resource_emits_expected_event(aggregator, check):
         "status": {"health": {"status": "Healthy"}},
     }
     datadog_agent.assert_telemetry("argocd", "datadog.agent.check.genresources.emitted", "count", 1)
+
+
+def test_submit_generic_resource_given_include_all_ships_constructed_fields(aggregator, check):
+    check.submit_generic_resource(
+        type="sonarqube_project",
+        key="my-proj",
+        fields={"name": "my-proj", "quality_gate": "OK", "ncloc": 1234},
+        include=INCLUDE_ALL,
+    )
+
+    [payload] = aggregator.get_event_platform_events("genresources", parse_json=False)
+    event = _decode(payload)
+    assert event.resource.type == "sonarqube_project"
+    assert json.loads(event.resource.fields_json) == {"name": "my-proj", "quality_gate": "OK", "ncloc": 1234}
 
 
 @pytest.mark.parametrize(

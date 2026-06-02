@@ -11,6 +11,20 @@ import fnmatch
 from collections.abc import Iterator, Mapping, Sequence
 
 
+class _IncludeAll:
+    """Sentinel for ``submit_generic_resource(include=INCLUDE_ALL)``: ship the whole dict as-is."""
+
+    __slots__ = ()
+
+    def __repr__(self) -> str:
+        return "INCLUDE_ALL"
+
+
+#: Pass as ``include`` to ship a caller-constructed dict without an allow-list. Only safe when the
+#: integration built every value itself; never use it on a raw upstream object, or it re-opens the leak.
+INCLUDE_ALL = _IncludeAll()
+
+
 def apply_allow_list(
     fields: Mapping[str, object],
     *,
@@ -18,7 +32,7 @@ def apply_allow_list(
     map_paths: Sequence[str],
     annotation_keys: Sequence[str],
 ) -> dict:
-    """Return a new dict with only the allow-listed leaves of ``fields``.
+    """Return a new dict with only the allow-listed parts of ``fields``.
 
     ``paths`` select plain values (dotted segments; ``[*]`` matches every array element).
     ``map_paths`` select whole flat maps wholesale (e.g. ``metadata.labels``). ``annotation_keys``
