@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import json
-import re
 import threading
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -28,6 +27,7 @@ from .ndm_models import (
     create_interface_metadata,
     create_tunnel_metadata,
 )
+from .utils import parse_speed
 
 
 class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
@@ -358,7 +358,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
                 if raw is None:
                     continue
                 self.gauge('interface.status', 1 if raw else 0, tags=iface_tags + [f'status_type:{status_type}'])
-            speed = _parse_speed(iface.get('speed'))
+            speed = parse_speed(iface.get('speed'))
             if speed is not None:
                 self.gauge('interface.speed', speed, tags=iface_tags)
             if self.config.send_ndm_metadata:
@@ -450,24 +450,3 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         if hw_alarm:
             self.log.debug("Hardware alarm detected on appliance %s", client.app_ip)
         self.gauge('device.hardware.ok', 0 if hw_alarm else 1, tags=base_tags)
-
-
-_SPEED_RE = re.compile(r'^(\d+)\s*(Mb/s|Gb/s|Kb/s)', re.IGNORECASE)
-
-_SPEED_MULTIPLIERS = {
-    'kb/s': 1_000,
-    'mb/s': 1_000_000,
-    'gb/s': 1_000_000_000,
-}
-
-
-def _parse_speed(value: Any) -> float | None:
-    """Parse interface speed to bits per second."""
-    if value is None:
-        return None
-    if isinstance(value, (int, float)):
-        return float(value)
-    m = _SPEED_RE.match(str(value))
-    if m:
-        return float(m.group(1)) * _SPEED_MULTIPLIERS[m.group(2).lower()]
-    return None
