@@ -1,0 +1,1 @@
+Add consumer group rebalance and empty-group detection metrics, plus partition assignor, group type, simple-group, and static-membership tags, when cluster monitoring is enabled.
