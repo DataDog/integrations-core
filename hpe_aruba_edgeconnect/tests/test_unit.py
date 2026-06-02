@@ -844,6 +844,8 @@ def test_resolve_credentials(mocker, ip, overrides, expected_username, expected_
 def test_timestamps_to_fetch(check, mocker, cached_value, latest_timestamp, expected):
     mocker.patch.object(check, 'read_persistent_cache', return_value=cached_value)
     warning = mocker.patch.object(check.log, 'warning')
+    check.load_configuration_models()
+    check._parse_config()
 
     result = check._timestamps_to_fetch('10.0.0.1', latest_timestamp)
 
