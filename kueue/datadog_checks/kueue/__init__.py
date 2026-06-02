@@ -4,4 +4,7 @@
 from .__about__ import __version__
 from .check import KueueCheck
 
-__all__ = ['__version__', 'KueueCheck']
+# Some Agent loader paths look for a generic `Check` symbol.
+Check = KueueCheck
+
+__all__ = ['__version__', 'KueueCheck', 'Check']
