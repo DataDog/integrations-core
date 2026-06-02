@@ -40,12 +40,12 @@ class DueQuery:
     scheduled_time: float
     mode: Mode
 
-
 class PostgresDataObservability(DBMAsyncJob):
     def __init__(self, check: PostgreSql, config: InstanceConfig):
         self._check = check
         self._config = config
-        self._last_execution: dict[int, float] = {}  # interval mode: last fire timestamp
+        self._last_execution: dict[int, float] = {}
+        self._loaded_config_id: str | None = None
         collection_interval = config.data_observability.collection_interval or 10
         super(PostgresDataObservability, self).__init__(
             check,
@@ -131,7 +131,7 @@ class PostgresDataObservability(DBMAsyncJob):
         try:
             if self._cancel_event.is_set():
                 raise Exception("Job loop cancelled. Aborting query.")
-            timeout_ms = (query_spec.timeout_seconds or DEFAULT_DO_QUERY_TIMEOUT_S) * 1000
+            timeout_ms = query_spec.timeout_seconds * 1000
             # Pool connections run with autocommit=True, so SET LOCAL only takes
             # effect inside an explicit transaction; it also reverts on commit,
             # avoiding timeout leakage onto the shared connection.
