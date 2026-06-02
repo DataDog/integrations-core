@@ -10,19 +10,19 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
 from ddev.ai.phases.base import FlowContext, Phase, PhaseOutcome
-from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
 from ddev.ai.phases.goal import GOAL_TASK_SUFFIX, GoalValidationError, render_goal_text, run_goal_loop
 from ddev.ai.phases.messages import PhaseFailedMessage
 from ddev.ai.phases.template import render_inline, render_prompt
 from ddev.ai.react.process import ReActProcess
+from ddev.ai.runtime.checkpoints import CheckpointManager
 from ddev.event_bus.exceptions import MessageProcessingError, ProcessorHookError
 
 if TYPE_CHECKING:
     from ddev.ai.agent.base import BaseAgent
     from ddev.ai.agent.build import AgentRuntimeFactory
     from ddev.ai.phases.goal import GoalLoopOutcome
-    from ddev.ai.phases.orchestrator import ResourceProvider
+    from ddev.ai.phases.resources import PhaseResources
     from ddev.ai.react.types import ReActResult
 
 
@@ -100,7 +100,7 @@ class AgenticPhase(Phase):
         phase_id: str,
         config: PhaseConfig,
         deps: list[str],
-        resources: ResourceProvider,
+        resources: PhaseResources,
         checkpoint_manager: CheckpointManager,
         context: FlowContext,
     ) -> AgenticPhase:

@@ -2,116 +2,20 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import importlib
-import inspect
 import logging
 from pathlib import Path
 from typing import Any
 
-from ddev.ai.agent.build import AgentRuntimeFactory, DefaultAgentRuntimeFactory
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.phases.base import FlowContext, Phase
-from ddev.ai.phases.checkpoint import CheckpointManager
-from ddev.ai.phases.config import AgentConfig, FlowConfig, FlowConfigError
+from ddev.ai.phases.base import FlowContext
+from ddev.ai.phases.config import FlowConfig, FlowConfigError
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
+from ddev.ai.phases.registry import PhaseRegistry, _discover_and_register_phases
+from ddev.ai.runtime.checkpoints import CheckpointManager
+from ddev.ai.runtime.resources import RunResources
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
-from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.event_bus.exceptions import FatalProcessingError
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
-
-
-class PhaseRegistry:
-    def __init__(self) -> None:
-        self._registry: dict[str, type[Phase]] = {}
-
-    def register(self, name: str, phase_cls: type[Phase]) -> None:
-        self._registry[name] = phase_cls
-
-    def known_names(self) -> list[str]:
-        return sorted(self._registry)
-
-    def get(self, name: str) -> type[Phase]:
-        if name not in self._registry:
-            raise ValueError(f"Unknown phase type: {name!r}. Known: {self.known_names()}")
-        return self._registry[name]
-
-
-class ResourceUnavailableError(Exception):
-    """Raised when a phase requests a resource the provider cannot supply."""
-
-
-class ResourceProvider:
-    """Supplies the raw resources phases use to build their runtime factories.
-
-    Holds raw infrastructure (agent clients, file access policy) and the flow's agent
-    definitions. Runtime factories are constructed on demand via agent_runtime_factory().
-    One instance is shared by every phase in a run, so file_registry() is a
-    lazily-constructed singleton (global read-before-write consistency).
-    """
-
-    def __init__(
-        self,
-        agent_clients: dict[str, Any],
-        file_access_policy: FileAccessPolicy,
-        agents: dict[str, AgentConfig],
-        artifact_root: Path,
-    ) -> None:
-        self._agent_clients = agent_clients
-        self._file_access_policy = file_access_policy
-        self._agents = agents
-        self._artifact_root = artifact_root
-        self._file_registry: FileRegistry | None = None
-        self._agent_runtime_factory: AgentRuntimeFactory | None = None
-
-    def agent_clients(self) -> dict[str, Any]:
-        """Raw provider-name -> SDK client map."""
-        return dict(self._agent_clients)
-
-    def file_registry(self) -> FileRegistry:
-        """Lazily-built, run-wide singleton FileRegistry."""
-        if self._file_registry is None:
-            self._file_registry = FileRegistry(policy=self._file_access_policy)
-        return self._file_registry
-
-    def agent_config(self, name: str) -> AgentConfig:
-        """Resolve a flow agent definition by name; typed error if absent."""
-        try:
-            return self._agents[name]
-        except KeyError as e:
-            raise ResourceUnavailableError(f"No agent definition named {name!r}. Known: {sorted(self._agents)}") from e
-
-    def agent_runtime_factory(self) -> AgentRuntimeFactory:
-        """Return a ready-to-use generic runtime factory."""
-        if self._agent_runtime_factory is None:
-            self._agent_runtime_factory = DefaultAgentRuntimeFactory(
-                agent_clients=self._agent_clients,
-                file_registry=self.file_registry(),
-                artifact_root=self._artifact_root,
-            )
-        return self._agent_runtime_factory
-
-
-def _discover_and_register_phases(
-    registry: PhaseRegistry,
-    phases_dir: Path,
-    import_prefix: str,
-) -> None:
-    """Import every non-private *.py in phases_dir and register Phase subclasses.
-
-    Modules are imported by dotted path: ``{import_prefix}.{file_stem}``. The
-    caller is responsible for choosing the right pair (dir, prefix). Import
-    errors are fatal — a syntax error in any discovered module aborts startup.
-    """
-    for py_file in phases_dir.glob("*.py"):
-        if py_file.stem.startswith("_"):
-            continue
-        try:
-            module = importlib.import_module(f"{import_prefix}.{py_file.stem}")
-        except Exception as e:
-            raise FlowConfigError(f"Failed to import phase module '{py_file.stem}': {e}") from e
-        for _, obj in inspect.getmembers(module, inspect.isclass):
-            if issubclass(obj, Phase) and not inspect.isabstract(obj) and obj.__module__ == module.__name__:
-                registry.register(obj.__name__, obj)
 
 
 class PhaseOrchestrator(EventBusOrchestrator):
@@ -145,7 +49,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._phase_registry = PhaseRegistry()
         self._failed_phase: str | None = None
         self._failed_error: str | None = None
-        self._resources: ResourceProvider | None = None
+        self._resources: RunResources | None = None
 
     async def on_initialize(self) -> None:
         """Discover custom phases, parse flow.yaml, construct phases, submit PhaseTrigger."""
@@ -153,7 +57,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
 
         _discover_and_register_phases(
             self._phase_registry,
-            Path(__file__).parent,
+            Path(__file__).parent.parent / "phases",
             "ddev.ai.phases",
         )
 
@@ -189,7 +93,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         checkpoint_manager = CheckpointManager(self._checkpoint_path)
         dependency_map: dict[str, list[str]] = {entry.phase: entry.dependencies for entry in config.flow}
 
-        self._resources = ResourceProvider(
+        self._resources = RunResources(
             agent_clients=self._agent_clients,
             file_access_policy=self._file_access_policy,
             agents=config.agents,

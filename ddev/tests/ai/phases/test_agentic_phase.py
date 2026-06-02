@@ -11,9 +11,9 @@ from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 from ddev.ai.phases.agentic_phase import AgenticPhase, render_memory_prompt, render_task_prompt
-from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
+from ddev.ai.runtime.checkpoints import CheckpointManager
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.registry import ToolRegistry
 
@@ -306,7 +306,7 @@ async def test_disk_failure_on_write_memory_fails_phase(flow_dir, monkeypatch, m
     mock_agent = MockAgent([make_response("task done", 100, 50), make_response("summary", 10, 5)])
     phase, mgr = make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
     monkeypatch.setattr(
-        "ddev.ai.phases.checkpoint.CheckpointManager.write_memory",
+        "ddev.ai.runtime.checkpoints.CheckpointManager.write_memory",
         lambda *a, **kw: (_ for _ in ()).throw(PermissionError("read-only")),
     )
 
@@ -416,10 +416,10 @@ async def test_spawn_subagent_wiring(flow_context, monkeypatch, message_queue):
 
     monkeypatch.setattr("ddev.ai.agent.build.AnthropicAgent", fake_anthropic_agent)
 
-    from ddev.ai.phases.orchestrator import ResourceProvider
+    from ddev.ai.runtime.resources import RunResources
 
     checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
-    resources = ResourceProvider(
+    resources = RunResources(
         agent_clients={"anthropic": object()},
         file_access_policy=FileAccessPolicy(write_root=flow_dir),
         agents={"writer": AgentConfig(tools=["spawn_subagent"])},

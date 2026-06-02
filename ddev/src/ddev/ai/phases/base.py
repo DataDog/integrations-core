@@ -13,14 +13,14 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import AgentConfig, PhaseConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
+from ddev.ai.runtime.checkpoints import CheckpointManager
 from ddev.event_bus.exceptions import MessageProcessingError, ProcessorHookError
 from ddev.event_bus.orchestrator import AsyncProcessor, BaseMessage
 
 if TYPE_CHECKING:
-    from ddev.ai.phases.orchestrator import ResourceProvider
+    from ddev.ai.phases.resources import PhaseResources
 
 
 @dataclass(frozen=True)
@@ -105,7 +105,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         phase_id: str,
         config: PhaseConfig,
         deps: list[str],
-        resources: ResourceProvider,
+        resources: PhaseResources,
         checkpoint_manager: CheckpointManager,
         context: FlowContext,
     ) -> Phase:
