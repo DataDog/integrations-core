@@ -15,7 +15,13 @@ from datadog_checks.base.utils.http import RequestsWrapper
 from .appliance_models import Appliance, Appliances
 from .client import ApplianceClient, OrchestratorClient
 from .config_models import ConfigMixin
-from .constants import CPU_STATE_FIELDS, MINUTE_STATS_INTERVAL, NDM_INTERFACE_RESOURCE_TAG
+from .constants import (
+    ALARM_SEVERITY_BY_ID,
+    ALARM_SEVERITY_TO_ALERT_TYPE,
+    CPU_STATE_FIELDS,
+    MINUTE_STATS_INTERVAL,
+    NDM_INTERFACE_RESOURCE_TAG,
+)
 from .metrics_store import MetricsStore
 from .minute_stats import MinuteStats, TunnelV2Stats
 from .ndm_models import (
@@ -444,9 +450,40 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
 
     def _collect_alarm_stats(self, client: ApplianceClient, base_tags: list[str]) -> None:
         alarms = client.get_alarms()
-        hw_alarm = False
+        outstanding: list[dict[str, Any]] = []
         if isinstance(alarms, dict) and isinstance(alarms.get('outstanding'), list):
-            hw_alarm = any(a.get('type') == 'HW' for a in alarms['outstanding'])
+            outstanding = [a for a in alarms['outstanding'] if isinstance(a, dict)]
+        hw_alarm = any(a.get('type') == 'HW' for a in outstanding)
         if hw_alarm:
             self.log.debug("Hardware alarm detected on appliance %s", client.app_ip)
         self.gauge('device.hardware.ok', 0 if hw_alarm else 1, tags=base_tags)
+        for alarm in outstanding:
+            self._submit_alarm_event(alarm, client.app_ip, base_tags)
+
+    def _submit_alarm_event(self, alarm: dict[str, Any], app_ip: str, base_tags: list[str]) -> None:
+        severity_id = alarm.get('severity')
+        severity = ALARM_SEVERITY_BY_ID.get(severity_id, 'unknown') if isinstance(severity_id, int) else 'unknown'
+        alert_type = ALARM_SEVERITY_TO_ALERT_TYPE.get(severity, 'info')
+        description = alarm.get('description') or alarm.get('name') or 'Alarm'
+        recommendation = alarm.get('recommendation')
+        msg_text = f'{description}\n\nRecommendation: {recommendation}' if recommendation else description
+        tags = base_tags + [
+            f'alarm_severity:{severity}',
+            f'alarm_source:{alarm.get("source", "unknown")}',
+            f'alarm_name:{alarm.get("name", "unknown")}',
+        ]
+        event: dict[str, Any] = {
+            'event_type': alarm.get("type", "unknown"),
+            'source_type_name': self.__NAMESPACE__,
+            'msg_title': f'{severity.capitalize()}: {description}',
+            'msg_text': msg_text,
+            'alert_type': alert_type,
+            'tags': tags,
+        }
+        sequence_id = alarm.get('sequenceId')
+        if sequence_id is not None:
+            event['aggregation_key'] = f'{app_ip}:{sequence_id}'
+        raised_ms = alarm.get('time')
+        if isinstance(raised_ms, (int, float)):
+            event['timestamp'] = int(raised_ms / 1000)
+        self.event(event)

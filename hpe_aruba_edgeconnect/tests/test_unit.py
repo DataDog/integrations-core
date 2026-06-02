@@ -14,6 +14,7 @@ from datadog_checks.hpe_aruba_edgeconnect.ndm_models import PAYLOAD_METADATA_BAT
 
 from .conftest import _mock_appliance_client, _setup_mocks
 from .constants import (
+    ALARM_PAYLOAD,
     APPLIANCE_PAYLOAD,
     BASE_DEVICE_TAGS,
     CHECK_MODULE,
@@ -409,6 +410,34 @@ def test_collection_step_failure_does_not_block_others(dd_run_check, aggregator,
     aggregator.assert_metric(f'{NS}.device.cpu.usage', count=4)
     aggregator.assert_metric(f'{NS}.device.cpu.usage', value=42 * 0.6, tags=BASE_DEVICE_TAGS + ['cpu_state:user'])
     aggregator.assert_metric(f'{NS}.device.hardware.ok', count=1)
+
+
+def test_alarm_events_submitted(dd_run_check, aggregator, mocker, check):
+    client = _mock_appliance_client(TGZ_BYTES[0], alarms=ALARM_PAYLOAD)
+    _setup_mocks(mocker, check, APPLIANCE_PAYLOAD[:1], appliance_client=client)
+
+    dd_run_check(check)
+
+    aggregator.assert_event(
+        'All NTP servers are unreachable',
+        count=1,
+        exact_match=False,
+        alert_type='warning',
+        msg_title='Warning: All NTP servers are unreachable',
+        event_type='SW',
+        tags=BASE_DEVICE_TAGS
+        + [
+            'alarm_severity:warning',
+            'alarm_source:System',
+            'alarm_name:ntpd_server_unreachable',
+        ],
+    )
+    events = aggregator.events
+    assert len(events) == 1
+    event = events[0]
+    assert event['aggregation_key'] == '10.0.0.1:3777'
+    assert event['timestamp'] == 1779178081
+    assert 'Recommendation:' in event['msg_text']
 
 
 def test_orchestrator_login_failure_emits_no_metrics(dd_run_check, aggregator, mocker, check):

@@ -61,3 +61,17 @@ TUNNEL_TYPE_INTERNET_BREAKOUT = (
 NDM_DEVICE_RESOURCE_TAG = 'dd.internal.resource:ndm_device'
 NDM_DEVICE_USER_TAGS_RESOURCE_TAG = 'dd.internal.resource:ndm_device_user_tags'
 NDM_INTERFACE_RESOURCE_TAG = 'dd.internal.resource:ndm_interface'
+
+ALARM_SEVERITY_BY_ID = {
+    1: 'warning',
+    2: 'minor',
+    3: 'major',
+    4: 'critical',
+}
+
+ALARM_SEVERITY_TO_ALERT_TYPE = {
+    'critical': 'error',
+    'major': 'error',
+    'minor': 'warning',
+    'warning': 'warning',
+}

@@ -330,6 +330,49 @@ EXPECTED_VALUES = [
     ('nexthop.status', 0, ['probe_name:om_passThrough_6', 'status_type:oper']),
 ]
 
+ALARM_PAYLOAD = {
+    'outstanding': [
+        {
+            'severity': 1,
+            'sequenceId': 3777,
+            'source': 'System',
+            'acknowledged': False,
+            'clearable': False,
+            'time': 1779178081000,
+            'description': 'All NTP servers are unreachable',
+            'type': 'SW',
+            'recommendation': (
+                "Check appliance's NTP server IP and version config. Can appliance reach the NTP server? "
+                "Is UDP port 123 open between Appliance's mgmt0 IP and NTP server?"
+            ),
+            'serviceAffect': True,
+            'typeId': 262153,
+            'name': 'ntpd_server_unreachable',
+            'occurrenceCount': 1,
+            'active': True,
+            'ackedBy': '',
+            'ackedTime': 0,
+            'clearedBy': '',
+            'clearedTime': 0,
+            'note': '',
+        }
+    ],
+    'summary': {
+        'num_cleared': 0,
+        'num_critical': 0,
+        'num_equipment_outstanding': 0,
+        'num_major': 0,
+        'num_minor': 0,
+        'num_outstanding': 1,
+        'num_raise_ignore': 0,
+        'num_software_outstanding': 1,
+        'num_tca_outstanding': 0,
+        'num_traffic_class_outstanding': 0,
+        'num_tunnel_outstanding': 0,
+        'num_warning': 1,
+    },
+}
+
 MEMORY_PAYLOAD = {
     'total': 3945080,
     'free': 770848,
