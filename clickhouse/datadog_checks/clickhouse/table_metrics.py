@@ -89,7 +89,9 @@ class ClickhouseTableMetrics(DBMAsyncJob):
             self._log.exception("Failed to collect clickhouse table sizes")
             return
 
-        base_tags = list(self._check.tags)
+        # Drop the instance-level `db:` base tag (the connection database) so each
+        # per-table series carries exactly one `db:` tag — the table's own database.
+        base_tags = [t for t in self._check.tags if not t.startswith('db:')]
         seen: set[tuple[str, str]] = set()
         for database, name, total_rows, total_bytes in rows:
             if (database, name) in seen:

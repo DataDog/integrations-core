@@ -104,6 +104,22 @@ def test_run_job_emits_table_size_gauges(check):
     assert 'table:events' in tags
 
 
+def test_run_job_uses_table_database_not_connection_db(check):
+    # A table in a non-connection database must be tagged with its own `db:` only —
+    # not the instance's `db:default` base tag (which would double-tag the series).
+    job = check.table_metrics
+    emitted = []
+    check.gauge = lambda name, value, tags=None: emitted.append((name, value, tags))
+
+    with _patch_query(job, table_rows=[_table_size_row(database='dd_test', name='orders')]):
+        job.run_job()
+
+    tags = next(t for n, _, t in emitted if n == 'table.rows')
+    db_tags = [t for t in tags if t.startswith('db:')]
+    assert db_tags == ['db:dd_test'], db_tags
+    assert 'table:orders' in tags
+
+
 def test_run_job_dedupes_duplicate_table_rows(check):
     job = check.table_metrics
     emitted = []

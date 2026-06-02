@@ -628,7 +628,9 @@ class ClickhouseCheck(DatabaseCheck):
             self._handle_view_refreshes_error(e)
             return
 
-        base_tags = list(self.tags)
+        # Drop the instance-level `db:` base tag (the connection database) so each
+        # per-view series carries exactly one `db:` tag — the view's own database.
+        base_tags = [t for t in self.tags if not t.startswith('db:')]
         seen: set[tuple[str, str]] = set()
         for database, view_name, status, exception, last_time, next_time, written_rows, written_bytes in rows:
             if (database, view_name) in seen:
