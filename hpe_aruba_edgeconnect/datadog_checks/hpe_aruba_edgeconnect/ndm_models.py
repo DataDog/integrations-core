@@ -30,7 +30,7 @@ STATUS_UP = 1
 STATUS_DOWN = 2
 OPER_STATUS_UNKNOWN = 4
 
-_VLAN_RE = re.compile(r':v(\d+)$')
+VLAN_RE = re.compile(r':v(\d+)$')
 
 # https://github.com/DataDog/datadog-agent/blob/main/pkg/collector/corechecks/snmp/internal/report/report_device_metadata.go#L46C1-L61C2
 SUPPORTED_DEVICE_TYPES = frozenset(
@@ -223,5 +223,5 @@ def _bool_to_status(value: bool | None, up: int, down: int, unknown: int | None 
 
 
 def _parse_vlan(ifname: str) -> int | None:
-    m = _VLAN_RE.search(ifname)
+    m = VLAN_RE.search(ifname)
     return int(m.group(1)) if m else None

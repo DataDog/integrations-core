@@ -13,7 +13,7 @@ from flask import Flask, jsonify, request, send_file
 app = Flask(__name__)
 
 MINUTE_STATS_INTERVAL = 60
-_BASE_TIMESTAMP = 100000060
+BASE_TIMESTAMP = 100000060
 
 DATA_DIR = "/app/data"
 CERT_FILE = "/app/certs/cert.pem"
@@ -34,7 +34,7 @@ def login():
 @app.route("/rest/json/stats/minuteRange")
 def minute_range():
     app.config["minute_counter"] = app.config.get("minute_counter", 0) + 1
-    newest = _BASE_TIMESTAMP + app.config["minute_counter"]
+    newest = BASE_TIMESTAMP + app.config["minute_counter"]
     return jsonify({"newest": str(newest)})
 
 
@@ -43,7 +43,7 @@ def minute_stats(filename: str):
     archive = os.path.join(DATA_DIR, filename)
     if not os.path.isfile(archive):
         # Serve the canonical fixture for any timestamp the check requests
-        archive = os.path.join(DATA_DIR, f"st2-{_BASE_TIMESTAMP}.tgz")
+        archive = os.path.join(DATA_DIR, f"st2-{BASE_TIMESTAMP}.tgz")
     return send_file(archive, mimetype="application/gzip")
 
 
@@ -60,7 +60,7 @@ def network_interfaces():
 
 @app.route("/rest/json/cpustat")
 def cpu_stats():
-    timestamp = _BASE_TIMESTAMP * 1000
+    timestamp = BASE_TIMESTAMP * 1000
     return jsonify(
         {
             "latestTimestamp": timestamp,

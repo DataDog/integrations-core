@@ -55,12 +55,12 @@ if TYPE_CHECKING:
     from datadog_checks.base.log import CheckLoggingAdapter
 
 
-_TUNNEL_ALIAS_WITH_LABELS_RE = re.compile(r'^to_(.+)_(\w+-\w+)$')
-_TUNNEL_ALIAS_RE = re.compile(r'^to_(.+)_\w+$')
-_NON_PEER_ALIAS_RE = re.compile(r'^\w+_(\w+)_.+$')
+TUNNEL_ALIAS_WITH_LABELS_RE = re.compile(r'^to_(.+)_(\w+-\w+)$')
+TUNNEL_ALIAS_RE = re.compile(r'^to_(.+)_\w+$')
+NON_PEER_ALIAS_RE = re.compile(r'^\w+_(\w+)_.+$')
 
 
-_TUNNEL_AGGREGATE_ALIASES = frozenset({'all traffic', 'optimized traffic', 'pass-through', 'pass-through-unshaped'})
+TUNNEL_AGGREGATE_ALIASES = frozenset({'all traffic', 'optimized traffic', 'pass-through', 'pass-through-unshaped'})
 
 
 def _nonzero(raw: str | None) -> bool:
@@ -72,7 +72,9 @@ def _nonzero(raw: str | None) -> bool:
         return False
 
 
-def _get_float(raw: str, divisor: float = 1.0) -> float | None:
+def _get_float(raw: str | None, divisor: float = 1.0) -> float | None:
+    if raw is None:
+        return None
     try:
         return float(raw) / divisor
     except (TypeError, ValueError):
@@ -81,14 +83,14 @@ def _get_float(raw: str, divisor: float = 1.0) -> float | None:
 
 def parse_tunnel_alias(alias: str, wan_labels: set[str] | None = None) -> tuple[str, str]:
     """Returns (peer_hostname, tunnel_color) parsed from a tunnel alias."""
-    m = _TUNNEL_ALIAS_WITH_LABELS_RE.match(alias)
+    m = TUNNEL_ALIAS_WITH_LABELS_RE.match(alias)
     if m:
         return m.group(1), m.group(2)
-    m = _TUNNEL_ALIAS_RE.match(alias)
+    m = TUNNEL_ALIAS_RE.match(alias)
     if m:
         return m.group(1), ''
     if wan_labels:
-        m = _NON_PEER_ALIAS_RE.match(alias)
+        m = NON_PEER_ALIAS_RE.match(alias)
         if m and m.group(1) in wan_labels:
             return '', m.group(1)
     return '', ''
@@ -177,7 +179,7 @@ class TunnelV2Stats:
             if not line:
                 continue
             stat = cls(line.split(','))
-            if stat.tunnel_id in _TUNNEL_AGGREGATE_ALIASES and stat.tunnel_id == stat.tunnel_alias:
+            if stat.tunnel_id in TUNNEL_AGGREGATE_ALIASES and stat.tunnel_id == stat.tunnel_alias:
                 continue
             yield stat
 
@@ -197,15 +199,15 @@ class TunnelPeakStats:
 
     def __init__(self, row: dict[str, str]) -> None:
         self.tunname = v.strip() if (v := row.get('tunname')) is not None else ""
-        self.peak_bytes_wan_tx = float(v) if (v := row.get('bytes_wtx')) is not None else None
-        self.peak_bytes_wan_rx = float(v) if (v := row.get('bytes_wrx')) is not None else None
-        self.peak_bytes_lan_tx = float(v) if (v := row.get('bytes_ltx')) is not None else None
-        self.peak_bytes_lan_rx = float(v) if (v := row.get('bytes_lrx')) is not None else None
-        self.peak_pkts_wan_tx = float(v) if (v := row.get('pkts_wtx')) is not None else None
-        self.peak_pkts_wan_rx = float(v) if (v := row.get('pkts_wrx')) is not None else None
-        self.peak_pkts_lan_tx = float(v) if (v := row.get('pkts_ltx')) is not None else None
-        self.peak_pkts_lan_rx = float(v) if (v := row.get('pkts_lrx')) is not None else None
-        self.peak_latency = float(v) / 100 if (v := row.get('latency_s')) is not None else None
+        self.peak_bytes_wan_tx = _get_float(row.get('bytes_wtx'))
+        self.peak_bytes_wan_rx = _get_float(row.get('bytes_wrx'))
+        self.peak_bytes_lan_tx = _get_float(row.get('bytes_ltx'))
+        self.peak_bytes_lan_rx = _get_float(row.get('bytes_lrx'))
+        self.peak_pkts_wan_tx = _get_float(row.get('pkts_wtx'))
+        self.peak_pkts_wan_rx = _get_float(row.get('pkts_wrx'))
+        self.peak_pkts_lan_tx = _get_float(row.get('pkts_ltx'))
+        self.peak_pkts_lan_rx = _get_float(row.get('pkts_lrx'))
+        self.peak_latency = _get_float(row.get('latency_s'), 100)
 
     def record(self, store: MetricsStore, base_tags: list[str], extra_tags: list[str]) -> None:
         base_tunnel_tags = base_tags + [f'tunnel_name:{self.tunname}'] + extra_tags
@@ -231,7 +233,7 @@ class TunnelPeakStats:
     def parse(cls, content: str, logger: CheckLoggingAdapter | None = None) -> Iterator[TunnelPeakStats]:
         reader = csv.DictReader(StringIO(content))
         for row in reader:
-            if row.get('tunname', '').strip() in _TUNNEL_AGGREGATE_ALIASES:
+            if row.get('tunname', '').strip() in TUNNEL_AGGREGATE_ALIASES:
                 continue
             yield cls(row)
 
@@ -244,8 +246,8 @@ class JitterStats:
 
     def __init__(self, row: dict[str, str]) -> None:
         self.tunnel = v.strip() if (v := row.get('tunnel')) is not None else ""
-        self.jitter = float(v) if (v := row.get(' jitter') or row.get('jitter')) is not None else None
-        self.peak_jitter = float(v) if (v := row.get(' peak_jitter') or row.get('peak_jitter')) is not None else None
+        self.jitter = _get_float(row.get(' jitter') or row.get('jitter'))
+        self.peak_jitter = _get_float(row.get(' peak_jitter') or row.get('peak_jitter'))
 
     def record(self, store: MetricsStore, tags: list[str]) -> None:
         store.record('tunnel.jitter', self.jitter, tags, AggType.AVG)
@@ -268,10 +270,10 @@ class MosStats:
 
     def __init__(self, row: dict[str, str]) -> None:
         self.tunnel = v.strip() if (v := row.get('tunnel')) is not None else ""
-        self.mos_postfec = float(v) if (v := row.get(' mos_postfec')) is not None else None
-        self.mos_prefec = float(v) if (v := row.get(' mos_prefec')) is not None else None
-        self.min_mos_postfec = float(v) if (v := row.get(' min_mos_postfec')) is not None else None
-        self.min_mos_prefec = float(v) if (v := row.get(' min_mos_prefec')) is not None else None
+        self.mos_postfec = _get_float(row.get(' mos_postfec'))
+        self.mos_prefec = _get_float(row.get(' mos_prefec'))
+        self.min_mos_postfec = _get_float(row.get(' min_mos_postfec'))
+        self.min_mos_prefec = _get_float(row.get(' min_mos_prefec'))
 
     def record(self, store: MetricsStore, base_tags: list[str]) -> None:
         store.record('tunnel.qoe.mos', self.mos_postfec, base_tags + ['fec:post'], AggType.AVG)
@@ -298,7 +300,9 @@ class TunnelAvailability:
         n = len(cols)
         self.tunnel_id = cols[TUNNEL_AVAIL_COL_TUNNEL_ID] if n > TUNNEL_AVAIL_COL_TUNNEL_ID else ''
         self.alias = cols[TUNNEL_AVAIL_COL_ALIAS] if n > TUNNEL_AVAIL_COL_ALIAS else ''
-        self.seconds_down = float(cols[TUNNEL_AVAIL_COL_SECONDS_DOWN]) if n > TUNNEL_AVAIL_COL_SECONDS_DOWN else None
+        self.seconds_down = (
+            _get_float(cols[TUNNEL_AVAIL_COL_SECONDS_DOWN]) if n > TUNNEL_AVAIL_COL_SECONDS_DOWN else None
+        )
         self.color = cols[TUNNEL_AVAIL_COL_COLOR] if n > TUNNEL_AVAIL_COL_COLOR else ''
         peer, _ = parse_tunnel_alias(self.alias)
         self.peer = peer or None
@@ -322,7 +326,7 @@ class TunnelAvailability:
             if not line:
                 continue
             stat = cls(line.split(','))
-            if stat.tunnel_id in _TUNNEL_AGGREGATE_ALIASES and stat.tunnel_id == stat.alias:
+            if stat.tunnel_id in TUNNEL_AGGREGATE_ALIASES and stat.tunnel_id == stat.alias:
                 continue
             yield stat
 
@@ -343,14 +347,14 @@ class InterfaceStats:
 
     def __init__(self, row: dict[str, str], logger: CheckLoggingAdapter) -> None:
         self.ifname = v.strip() if (v := row.get('ifname')) is not None else ""
-        self.bytes_tx = float(v) if (v := row.get('bytes_tx')) is not None else None
-        self.bytes_rx = float(v) if (v := row.get('bytes_rx')) is not None else None
-        self.fwdrops_bytes_tx = float(v) if (v := row.get('fwdrops_bytes_tx')) is not None else None
-        self.fwdrops_bytes_rx = float(v) if (v := row.get('fwdrops_bytes_rx')) is not None else None
-        self.fwdrops_pkts_tx = float(v) if (v := row.get('fwdrops_pkts_tx')) is not None else None
-        self.fwdrops_pkts_rx = float(v) if (v := row.get('fwdrops_pkts_rx')) is not None else None
-        self.max_bw_tx = float(v) if (v := row.get('max_bw_tx')) is not None else None
-        self.max_bw_rx = float(v) if (v := row.get('max_bw_rx')) is not None else None
+        self.bytes_tx = _get_float(row.get('bytes_tx'))
+        self.bytes_rx = _get_float(row.get('bytes_rx'))
+        self.fwdrops_bytes_tx = _get_float(row.get('fwdrops_bytes_tx'))
+        self.fwdrops_bytes_rx = _get_float(row.get('fwdrops_bytes_rx'))
+        self.fwdrops_pkts_tx = _get_float(row.get('fwdrops_pkts_tx'))
+        self.fwdrops_pkts_rx = _get_float(row.get('fwdrops_pkts_rx'))
+        self.max_bw_tx = _get_float(row.get('max_bw_tx'))
+        self.max_bw_rx = _get_float(row.get('max_bw_rx'))
         self.traftype = v.strip() if (v := row.get('traftype')) is not None else ""
         self._log = logger
 
@@ -435,14 +439,14 @@ class InterfacePeakStats:
 
     def __init__(self, row: dict[str, str], logger: CheckLoggingAdapter) -> None:
         self.ifname = v.strip() if (v := row.get('ifname')) is not None else ""
-        self.peak_bytes_tx = float(v) if (v := row.get('bytes_tx')) is not None else None
-        self.peak_bytes_rx = float(v) if (v := row.get('bytes_rx')) is not None else None
-        self.peak_fwdrops_pkts_tx = float(v) if (v := row.get('fwdrops_pkts_tx')) is not None else None
-        self.peak_fwdrops_pkts_rx = float(v) if (v := row.get('fwdrops_pkts_rx')) is not None else None
-        self.peak_fwdrops_bytes_tx = float(v) if (v := row.get('fwdrops_bytes_tx')) is not None else None
-        self.peak_fwdrops_bytes_rx = float(v) if (v := row.get('fwdrops_bytes_rx')) is not None else None
-        self.peak_max_bw_tx = float(v) if (v := row.get('max_bw_tx')) is not None else None
-        self.peak_max_bw_rx = float(v) if (v := row.get('max_bw_rx')) is not None else None
+        self.peak_bytes_tx = _get_float(row.get('bytes_tx'))
+        self.peak_bytes_rx = _get_float(row.get('bytes_rx'))
+        self.peak_fwdrops_pkts_tx = _get_float(row.get('fwdrops_pkts_tx'))
+        self.peak_fwdrops_pkts_rx = _get_float(row.get('fwdrops_pkts_rx'))
+        self.peak_fwdrops_bytes_tx = _get_float(row.get('fwdrops_bytes_tx'))
+        self.peak_fwdrops_bytes_rx = _get_float(row.get('fwdrops_bytes_rx'))
+        self.peak_max_bw_tx = _get_float(row.get('max_bw_tx'))
+        self.peak_max_bw_rx = _get_float(row.get('max_bw_rx'))
         self.traftype = v.strip() if (v := row.get('traftype')) is not None else ""
         self._log = logger
 
@@ -494,10 +498,10 @@ class InterfaceOverlayStats:
 
     def __init__(self, row: dict[str, str]) -> None:
         self.ifname = v.strip() if (v := row.get('ifname')) is not None else ""
-        self.bytes_tx = float(v) if (v := row.get('bytes_tx')) is not None else None
-        self.bytes_rx = float(v) if (v := row.get('bytes_rx')) is not None else None
-        self.max_bw_tx = float(v) if (v := row.get('max_bw_tx')) is not None else None
-        self.max_bw_rx = float(v) if (v := row.get('max_bw_rx')) is not None else None
+        self.bytes_tx = _get_float(row.get('bytes_tx'))
+        self.bytes_rx = _get_float(row.get('bytes_rx'))
+        self.max_bw_tx = _get_float(row.get('max_bw_tx'))
+        self.max_bw_rx = _get_float(row.get('max_bw_rx'))
 
     def record(self, store: MetricsStore, base_tags: list[str], device_id: str) -> None:
         tags = base_tags + [
@@ -538,10 +542,10 @@ class DscpStats:
     def __init__(self, row: dict[str, str]) -> None:
         self.dscp = v.strip() if (v := row.get('dscp')) is not None else ""
         self.traftype = v.strip() if (v := row.get('traftype')) is not None else ""
-        self.bytes_wan_tx = float(v) if (v := row.get('bytes_wtx')) is not None else None
-        self.bytes_wan_rx = float(v) if (v := row.get('bytes_wrx')) is not None else None
-        self.bytes_lan_tx = float(v) if (v := row.get('bytes_ltx')) is not None else None
-        self.bytes_lan_rx = float(v) if (v := row.get('bytes_lrx')) is not None else None
+        self.bytes_wan_tx = _get_float(row.get('bytes_wtx'))
+        self.bytes_wan_rx = _get_float(row.get('bytes_wrx'))
+        self.bytes_lan_tx = _get_float(row.get('bytes_ltx'))
+        self.bytes_lan_rx = _get_float(row.get('bytes_lrx'))
 
     def record(self, store: MetricsStore, base_tags: list[str]) -> None:
         dscp_tags = base_tags + [f'dscp:{self.dscp}', f'traffic_type:{self.traftype}']
@@ -599,10 +603,10 @@ class DscpPeakStats:
     def __init__(self, row: dict[str, str]) -> None:
         self.dscp = v.strip() if (v := row.get('dscp')) is not None else ""
         self.traftype = v.strip() if (v := row.get('traftype')) is not None else ""
-        self.peak_bytes_wan_tx = float(v) if (v := row.get('bytes_wtx')) is not None else None
-        self.peak_bytes_wan_rx = float(v) if (v := row.get('bytes_wrx')) is not None else None
-        self.peak_bytes_lan_tx = float(v) if (v := row.get('bytes_ltx')) is not None else None
-        self.peak_bytes_lan_rx = float(v) if (v := row.get('bytes_lrx')) is not None else None
+        self.peak_bytes_wan_tx = _get_float(row.get('bytes_wtx'))
+        self.peak_bytes_wan_rx = _get_float(row.get('bytes_wrx'))
+        self.peak_bytes_lan_tx = _get_float(row.get('bytes_ltx'))
+        self.peak_bytes_lan_rx = _get_float(row.get('bytes_lrx'))
 
     def record(self, store: MetricsStore, base_tags: list[str]) -> None:
         dscp_tags = base_tags + [f'dscp:{self.dscp}', f'traffic_type:{self.traftype}']
@@ -657,7 +661,7 @@ class ProbeStats:
             yield cls(line.split(','))
 
 
-_SHAPER_DIRECTION_LABELS = {'0': 'outbound', '1': 'inbound'}
+SHAPER_DIRECTION_LABELS = {'0': 'outbound', '1': 'inbound'}
 
 
 @dataclass(init=False, slots=True)
@@ -671,10 +675,10 @@ class ShaperStats:
     def __init__(self, row: dict[str, str]) -> None:
         self.traffic_class = v.strip() if (v := row.get('traffic_class')) is not None else ""
         raw_direction = v.strip() if (v := row.get('direction')) is not None else ""
-        self.direction = _SHAPER_DIRECTION_LABELS.get(raw_direction, raw_direction)
-        self.qos_drops = float(v) if (v := row.get('qos_drops')) is not None else None
-        self.other_drops = float(v) if (v := row.get('other_drops')) is not None else None
-        self.total_shaped_packets = float(v) if (v := row.get('shaped_packets')) is not None else None
+        self.direction = SHAPER_DIRECTION_LABELS.get(raw_direction, raw_direction)
+        self.qos_drops = _get_float(row.get('qos_drops'))
+        self.other_drops = _get_float(row.get('other_drops'))
+        self.total_shaped_packets = _get_float(row.get('shaped_packets'))
 
     def record(
         self,

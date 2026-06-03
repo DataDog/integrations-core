@@ -204,6 +204,7 @@ EXPECTED_METRIC_COUNTS = {
     'qos.class.bandwidth.rx.rate': 6,
     'qos.class.bandwidth.tx.max': 6,
     'qos.class.bandwidth.rx.max': 6,
+    'application.latency': 6,
 }
 
 BASE_DEVICE_TAGS = [
@@ -332,6 +333,7 @@ EXPECTED_VALUES = [
     ('circuit.sla.jitter', 59.5, ['probe_name:om_passThrough_9']),
     ('nexthop.status', 60, ['probe_name:om_passThrough_6', 'status_type:admin']),
     ('nexthop.status', 0, ['probe_name:om_passThrough_6', 'status_type:oper']),
+    ('application.latency', 5.1, ['application:microsoft', 'tunnel_name:bondedTunnel_16', 'latency_type:cnd']),
 ]
 
 ALARM_PAYLOAD = {
