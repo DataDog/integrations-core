@@ -2942,10 +2942,10 @@ def test_cisco_catalyst(aggregator):
 @pytest.mark.usefixtures("dd_environment")
 def test_cisco_catalyst_entity_serial_fallback(aggregator):
     # Exercises the entPhysicalSerialNum fallback when chassisSerialNumberString is absent.
-    run_profile_check('cisco-catalyst-9k', 'cisco-catalyst')
+    run_profile_check('cisco-catalyst-1300', 'cisco-catalyst')
     common_tags = common.CHECK_TAGS + [
-        'snmp_host:catalyst-9k.example',
-        'device_hostname:catalyst-9k.example',
+        'snmp_host:catalyst-1300.example',
+        'device_hostname:catalyst-1300.example',
         'snmp_profile:cisco-catalyst',
         'device_vendor:cisco',
     ]

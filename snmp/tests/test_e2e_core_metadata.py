@@ -313,7 +313,7 @@ def test_e2e_core_metadata_cisco_catalyst_entity_serial_fallback(dd_agent_check)
     instance = config['instances'][0]
     instance.update(
         {
-            'community_string': 'cisco-catalyst-9k',
+            'community_string': 'cisco-catalyst-1300',
             'loader': 'core',
         }
     )
@@ -330,10 +330,10 @@ def test_e2e_core_metadata_cisco_catalyst_entity_serial_fallback(dd_agent_check)
             'snmp_device:' + device_ip,
         ],
         'ip_address': device_ip,
-        'name': 'catalyst-9k.example',
+        'name': 'catalyst-1300.example',
         'profile': 'cisco-catalyst',
         'status': 1,
-        'sys_object_id': '1.3.6.1.4.1.9.1.2804',
+        'sys_object_id': '1.3.6.1.4.1.9.1.3233',
         'tags': [
             'agent_host:' + common.get_agent_hostname(),
             'device_id:' + device_id,
@@ -341,12 +341,12 @@ def test_e2e_core_metadata_cisco_catalyst_entity_serial_fallback(dd_agent_check)
             'device_namespace:default',
             'device_vendor:cisco',
             'snmp_device:' + device_ip,
-            'snmp_host:catalyst-9k.example',
-            'device_hostname:catalyst-9k.example',
+            'snmp_host:catalyst-1300.example',
+            'device_hostname:catalyst-1300.example',
             'snmp_profile:cisco-catalyst',
         ],
         'vendor': 'cisco',
-        'serial_number': 'FOCXXXXXXXX.1',
+        'serial_number': 'FOCXXXXXXXX',
         'device_type': 'switch',
         'integration': 'snmp',
     }
