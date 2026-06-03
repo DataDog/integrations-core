@@ -857,7 +857,7 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
         'database_instance:{}'.format(expected_database_instance),
     ]
     check = integration_check(pg_instance)
-    run_one_check(check)
+    run_one_check(check, cancel=False)
 
     # These tags are a bit dynamic in value, so we get them from the check and ensure they are present
     expected_tags.append('postgresql_version:{}'.format(check.raw_version))

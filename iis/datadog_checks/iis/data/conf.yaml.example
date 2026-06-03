@@ -19,7 +19,16 @@ init_config:
 #
 instances:
 
-  -
+    ## @param username - string - optional
+    ## The username used to connect to the `server`.
+    #
+    # username: <USERNAME>
+
+    ## @param password - string - optional
+    ## The password of `username`.
+    #
+    # password: <PASSWORD>
+
     ## @param sites - list of strings or mapping - optional
     ## The `sites` parameter allows you to specify a list of sites you want to
     ## read metrics from. With sites specified, metrics are tagged with the
@@ -61,16 +70,6 @@ instances:
     #
     # server: <SERVER>
 
-    ## @param username - string - optional
-    ## The username used to connect to the `server`.
-    #
-    # username: <USERNAME>
-
-    ## @param password - string - optional
-    ## The password of `username`.
-    #
-    # password: <PASSWORD>
-
     ## @param enable_health_service_check - boolean - optional - default: true
     ## Whether or not to send a service check named `<NAMESPACE>.windows.perf.health`, which reports
     ## the health of the `server`.
@@ -107,7 +106,15 @@ instances:
     ##   include: This is the list of regular expressions used to select which instances to monitor.
     ##            If not set, all instances are monitored.
     ##   exclude: This is the list of regular expressions used to select which instances to ignore.
-    ##            If not set, no instances are ignored. Note: `_Total` instances are always ignored.
+    ##            If not set, no instances are ignored. Note: `_Total` instances are ignored by default;
+    ##            set `include_total` to `true` to collect them.
+    ##   include_total: Whether to collect the `_Total` aggregate instance for this performance object.
+    ##                  Defaults to `false`. Most performance objects report `_Total` as the sum of the
+    ##                  individual instances, in which case it is preferable to compute the total in
+    ##                  Datadog. However, some perf objects (e.g. `MSExchangeTransport Queues`) report
+    ##                  data on `_Total` that is not derivable from the visible instances, and in that
+    ##                  case opting in restores the missing data without forcing the collection of every
+    ##                  individual instance.
     ##   include_fast: This is the list of wildcards or exact instance names used to select which
     ##                 instances to monitor. It is faster than the regular expression `include` filter
     ##                 because it relies on the Windows PDH built-in wildcard filtering.

@@ -8,7 +8,7 @@ import pytest
 import tenacity
 
 from datadog_checks.dev.ci import running_on_ci
-from datadog_checks.dev.docker import compose_file_active, docker_run
+from datadog_checks.dev.docker import ComposeFileUp, compose_file_active, docker_run
 from datadog_checks.dev.subprocess import run_command
 
 from .common import not_windows_ci
@@ -36,6 +36,33 @@ class TestComposeFileActive:
 
 
 class TestDockerRun:
+    def test_wait_for_health_default(self):
+        set_up = self.get_set_up()
+
+        assert '--wait' in set_up.command
+
+    def test_wait_for_health_explicit_disable(self):
+        set_up = self.get_set_up(wait_for_health=False)
+
+        assert '--wait' not in set_up.command
+
+    def test_wait_for_health_typo_rejected(self):
+        compose_file = os.path.join(DOCKER_DIR, 'test_default.yaml')
+
+        with pytest.raises(TypeError, match='unexpected keyword argument'):
+            with docker_run(compose_file, waith_for_health=False):
+                pass
+
+    def get_set_up(self, **kwargs):
+        compose_file = os.path.join(DOCKER_DIR, 'test_default.yaml')
+
+        with mock.patch('datadog_checks.dev.docker.environment_run') as environment_run:
+            environment_run.return_value.__enter__.return_value = None
+            with docker_run(compose_file, **kwargs):
+                pass
+
+        return environment_run.call_args[1]['up']
+
     @pytest.mark.parametrize(
         "capture",
         [
@@ -93,3 +120,25 @@ class TestDockerRun:
 
         with docker_run(up=up, down=mock.MagicMock(), attempts=3, conditions=[condition], attempts_wait=0):
             assert condition.call_count == 2
+
+
+class TestComposeFileUp:
+    def test_wait_for_health_default(self):
+        compose_file = os.path.join(DOCKER_DIR, 'test_default.yaml')
+
+        compose_file_up = ComposeFileUp(compose_file)
+
+        assert '--wait' in compose_file_up.command
+
+    def test_wait_for_health_explicit_disable(self):
+        compose_file = os.path.join(DOCKER_DIR, 'test_default.yaml')
+
+        compose_file_up = ComposeFileUp(compose_file, wait_for_health=False)
+
+        assert '--wait' not in compose_file_up.command
+
+    def test_wait_for_health_typo_rejected(self):
+        compose_file = os.path.join(DOCKER_DIR, 'test_default.yaml')
+
+        with pytest.raises(TypeError, match='unexpected keyword argument'):
+            ComposeFileUp(compose_file, waith_for_health=False)

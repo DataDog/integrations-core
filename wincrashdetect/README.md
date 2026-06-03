@@ -38,7 +38,7 @@ No metrics are collected by this integration.
 
 ### Events
 
-The Windows crash detection integration submits an event when a previously unreported crash is detected at agent startup.  The integration will report one event per crash.
+The Windows Crash Detection integration submits an event when it detects a previously unreported system crash (BSOD) at Agent startup. The integration submits one event per crash.
 
 ### Service Checks
 

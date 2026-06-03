@@ -328,6 +328,9 @@ class SQLServer(DatabaseCheck):
         return self.host_and_port[1]
 
     def resolve_db_host(self):
+        if "\\" in self.host:
+            # SQL Server instance names are not resolvable, this preserves original fallback behavior prior to v7.79.0
+            return datadog_agent.get_hostname()
         return agent_host_resolver(self.host)
 
     @property
@@ -1064,13 +1067,16 @@ class SQLServer(DatabaseCheck):
                 with self.connection.get_managed_cursor(KEY_PREFIX) as cursor:
                     cursor.execute("SET NOCOUNT OFF")
 
-    def execute_query_raw(self, query, db=None):
+    def execute_query_raw(self, query, db=None, params=None):
         with self.connection.get_managed_cursor(KEY_PREFIX) as cursor:
             if db:
                 ctx = construct_use_statement(db)
                 self.log.debug("changing cursor context via use statement: %s", ctx)
                 cursor.execute(ctx)
-            cursor.execute(query)
+            if params is not None:
+                cursor.execute(query, params)
+            else:
+                cursor.execute(query)
             return cursor.fetchall()
 
     def do_stored_procedure_check(self):

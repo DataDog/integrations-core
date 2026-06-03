@@ -146,6 +146,7 @@ def seed_mock_kafka_client(cluster_id='test-cluster-id'):
 
     # Set kafka_client as an attribute (not a property mock)
     client.kafka_client = mock_admin_client
+    client._cluster_metadata = metadata
     client.get_topic_partitions.return_value = {'test-topic': [0, 1]}
 
     def mock_offsets_for_times(partitions, offset=-1):
@@ -155,6 +156,18 @@ def seed_mock_kafka_client(cluster_id='test-cluster-id'):
             return [(topic, partition, 10 if partition == 0 else 20) for topic, partition in partitions]
 
     client.consumer_offsets_for_times = mock_offsets_for_times
+
+    def mock_list_offsets(requests, **_kwargs):
+        result = {}
+        for tp in requests:
+            info = mock.MagicMock()
+            info.offset = 10 if tp.partition == 0 else 20
+            future = mock.MagicMock()
+            future.result.return_value = info
+            result[tp] = future
+        return result
+
+    mock_admin_client.list_offsets.side_effect = mock_list_offsets
     client.consumer_get_cluster_id_and_list_topics.return_value = (cluster_id, [('test-topic', [0, 1])])
     client.list_consumer_group_offsets.return_value = []
     client.open_consumer.return_value = None
@@ -1351,3 +1364,97 @@ def test_schema_registry_url_encodes_subject_names(check):
     collector.http.get.assert_called_with(
         'http://localhost:8081/subjects/google%2Fprotobuf%2Ftimestamp.proto/versions/latest'
     )
+
+
+@pytest.mark.parametrize(
+    "replicas, isrs, expected_oos, expected_under",
+    [
+        pytest.param([1, 2], [1, 2], [], 0, id="fully_in_sync"),
+        pytest.param([1, 2], [1], [2], 1, id="single_oos"),
+        pytest.param([1, 2, 3], [1], [2, 3], 1, id="multiple_oos"),
+        pytest.param([1, 2], [], [1, 2], 1, id="empty_isr"),
+        pytest.param([1], [1], [], 0, id="single_replica"),
+    ],
+)
+def test_partition_out_of_sync_broker_id_tag(
+    check, dd_run_check, aggregator, replicas, isrs, expected_oos, expected_under
+):
+    """Under-replicated partitions expose an ``out_of_sync_broker_id`` tag per replica missing from the ISR."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+        'tags': ['test_tag:test_value'],
+    }
+
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+
+    topic_metadata = mock_kafka_client.kafka_client.list_topics.return_value.topics['test-topic']
+    topic_metadata.partitions[0].replicas = replicas
+    topic_metadata.partitions[0].isrs = isrs
+
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+    mock_schema_registry_methods(kafka_consumer_check.metadata_collector)
+
+    kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=None)
+    kafka_consumer_check.write_persistent_cache = mock.Mock()
+    kafka_consumer_check.event_platform_event = mock.Mock()
+
+    dd_run_check(kafka_consumer_check)
+
+    expected_tags = [
+        'test_tag:test_value',
+        'kafka_cluster_id:test-cluster-id',
+        'topic:test-topic',
+        'partition:0',
+        'leader_broker_id:1',
+        *(f'replica_broker_id:{r}' for r in replicas),
+        *(f'out_of_sync_broker_id:{b}' for b in expected_oos),
+    ]
+    aggregator.assert_metric('kafka.partition.under_replicated', value=expected_under, tags=expected_tags)
+    for metric in (
+        'kafka.partition.replicas',
+        'kafka.partition.isr',
+        'kafka.partition.size',
+        'kafka.partition.offline',
+    ):
+        aggregator.assert_metric(metric, tags=expected_tags)
+
+
+def test_heartbeat_brokers_populated(check):
+    """Heartbeat payload includes the broker list when metadata is available."""
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.event_platform_event = mock.Mock()
+
+    kafka_consumer_check._send_cluster_monitoring_heartbeat(total_contexts=5, cluster_id='test-cluster-id')
+
+    calls = kafka_consumer_check.event_platform_event.call_args_list
+    hb_events = [json.loads(c[0][0]) for c in calls if c[0][1] == 'data-streams-message']
+    hb_events = [e for e in hb_events if e.get('config_type') == 'heartbeat']
+    assert len(hb_events) == 1
+    assert hb_events[0]['brokers'] == [
+        {'id': '1', 'host': 'broker1', 'port': 9092},
+        {'id': '2', 'host': 'broker2', 'port': 9092},
+    ]
+
+
+def test_heartbeat_brokers_empty_when_no_metadata(check):
+    """Heartbeat payload has an empty broker list when _cluster_metadata is None."""
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+    mock_kafka_client._cluster_metadata = None
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.event_platform_event = mock.Mock()
+
+    kafka_consumer_check._send_cluster_monitoring_heartbeat(total_contexts=0, cluster_id='test-cluster-id')
+
+    calls = kafka_consumer_check.event_platform_event.call_args_list
+    hb_events = [json.loads(c[0][0]) for c in calls if c[0][1] == 'data-streams-message']
+    hb_events = [e for e in hb_events if e.get('config_type') == 'heartbeat']
+    assert len(hb_events) == 1
+    assert hb_events[0]['brokers'] == []

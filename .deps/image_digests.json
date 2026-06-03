@@ -1,1 +1,5 @@
-{}
+{
+  "linux-aarch64": "sha256:67ce10febfd314cd2fcdc3ae33209c3b37277a3e4a452c7dfd408f885de06bfd",
+  "linux-x86_64": "sha256:41a0b42f62074e6200f8a8e59d0f27f3913a9aab0ea610ba17ed51bb307a70ed",
+  "windows-x86_64": "sha256:8cd1f72c73611f520596d3788da7e7b62bcb6c0d40fdcee3612e845a5aad8ad5"
+}

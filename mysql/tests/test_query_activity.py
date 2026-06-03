@@ -667,6 +667,97 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance):
     )
 
 
+@pytest.mark.skipif(
+    MYSQL_FLAVOR == 'mariadb' or MYSQL_VERSION_PARSED < parse_version('8.0'),
+    reason='MDL blocking detection requires MySQL 8.0+ with metadata_locks instrument enabled by default',
+)
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_mdl_blocking_activity(aggregator, dbm_instance, dd_run_check, root_conn):
+    """Verify that metadata lock contention appears in the activity payload with blocking relationships."""
+    config = deepcopy(dbm_instance)
+    config['query_activity']['collect_blocking_queries'] = True
+    # Disable all metrics that could query information_schema or touch user table
+    # metadata — those queries acquire SHARED_READ metadata locks which would get
+    # queued behind the ALTER TABLE's pending EXCLUSIVE lock, deadlocking the check.
+    config['options'] = {
+        'extra_performance_metrics': False,
+        'replication': False,
+        'extra_status_metrics': False,
+        'extra_innodb_metrics': False,
+        'schema_size_metrics': False,
+        'table_size_metrics': False,
+        'system_table_size_metrics': False,
+        'table_rows_stats_metrics': False,
+    }
+    config['index_metrics'] = {'enabled': False}
+    config['only_custom_queries'] = True
+    check = MySql(CHECK_NAME, {}, instances=[config])
+
+    MDL_TABLE = 'testdb.mdl_test_table'
+
+    with closing(root_conn.cursor()) as cur:
+        # Ensure the consumer is enabled — other tests in this session may disable it.
+        cur.execute("UPDATE performance_schema.setup_consumers SET enabled='YES' WHERE name = 'events_waits_current'")
+        cur.execute('DROP TABLE IF EXISTS {}'.format(MDL_TABLE))
+        cur.execute('CREATE TABLE {} (id INT PRIMARY KEY, val VARCHAR(50))'.format(MDL_TABLE))
+        cur.execute('INSERT INTO {} VALUES (1, %s)'.format(MDL_TABLE), ('hello',))
+    # PyMySQL defaults to autocommit=False, so the DDL/DML above opened an
+    # implicit transaction that holds a SHARED_WRITE metadata lock on the table.
+    # Commit to release it before we set up the intentional MDL contention.
+    root_conn.commit()
+
+    root_password = 'mypass' if MYSQL_FLAVOR == 'percona' or MYSQL_REPLICATION in ('group', 'hybrid') else None
+    holder_conn = pymysql.connect(host=HOST, port=PORT, user='root', password=root_password)
+    ddl_conn = pymysql.connect(host=HOST, port=PORT, user='root', password=root_password)
+    ddl_ready = Event()
+
+    def _hold_shared_mdl(conn):
+        conn.begin()
+        conn.cursor().execute('SELECT * FROM {}'.format(MDL_TABLE))
+
+    def _run_ddl(conn, ready_event):
+        ready_event.set()
+        try:
+            conn.cursor().execute('ALTER TABLE {} ADD COLUMN new_col INT'.format(MDL_TABLE))
+        except Exception:
+            pass
+
+    executor = ThreadPoolExecutor(2)
+    try:
+        executor.submit(_hold_shared_mdl, holder_conn)
+        time.sleep(0.2)
+        executor.submit(_run_ddl, ddl_conn, ddl_ready)
+        ddl_ready.wait(timeout=5)
+        time.sleep(0.5)
+
+        dd_run_check(check)
+
+        dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+        assert dbm_activity, "should have collected at least one activity payload"
+
+        all_rows = [row for event in dbm_activity for row in event['mysql_activity']]
+        mdl_blocked_rows = [r for r in all_rows if r.get('mdl_object_name') == 'mdl_test_table']
+        assert mdl_blocked_rows, "should have at least one activity row with MDL blocking context; all rows: {}".format(
+            [(r.get('sql_text', '?')[:60], r.get('mdl_object_name')) for r in all_rows]
+        )
+
+        mdl_row = mdl_blocked_rows[0]
+        assert mdl_row['mdl_object_type'] == 'TABLE'
+        assert mdl_row['mdl_object_schema'] == 'testdb'
+        assert mdl_row.get('blocking_thread_id'), "MDL blocked row should have a blocking_thread_id"
+    finally:
+        holder_conn.commit()
+        holder_conn.close()
+        # Wait for the ALTER TABLE to complete now that the MDL holder released.
+        # Must shutdown before closing ddl_conn — closing a socket that another
+        # thread is recv()ing on deadlocks on macOS.
+        executor.shutdown(wait=True)
+        ddl_conn.close()
+        with closing(root_conn.cursor()) as cur:
+            cur.execute('DROP TABLE IF EXISTS {}'.format(MDL_TABLE))
+
+
 def _get_conn_for_user(user, _autocommit=False):
     return pymysql.connect(host=HOST, port=PORT, user=user, password=user, autocommit=_autocommit)
 

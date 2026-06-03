@@ -138,15 +138,16 @@ def test_on_initialize_submits_one_message_per_validation(mock_app):
 # --- ValidationOrchestrator exit code logic ---
 
 
-def test_all_pass_abort_not_called(mock_app):
+def test_all_pass_had_failures_is_false(mock_app):
     with patch("subprocess.run", return_value=completed_process(returncode=0)):
         orch = ValidationOrchestrator(app=mock_app, validations=["config", "ci"], target=None, grace_period=0)
         orch.run()
 
+    assert orch.had_failures is False
     mock_app.abort.assert_not_called()
 
 
-def test_any_failure_calls_abort(mock_app):
+def test_any_failure_marks_had_failures(mock_app):
     def fake_run(cmd, **kwargs):
         if "config" in cmd:
             return completed_process(returncode=1, stderr="bad config")
@@ -154,22 +155,25 @@ def test_any_failure_calls_abort(mock_app):
 
     with patch("subprocess.run", side_effect=fake_run):
         orch = ValidationOrchestrator(app=mock_app, validations=["config", "ci"], target=None, grace_period=0)
-        with pytest.raises(SystemExit):
-            orch.run()
+        orch.run()
 
-    mock_app.abort.assert_called_once()
+    assert orch.had_failures is True
+    # Aborting is the CLI command's responsibility, not the orchestrator's.
+    mock_app.abort.assert_not_called()
 
 
-def test_on_finalize_warns_on_incomplete_validations(mock_app):
+def test_incomplete_validations_marks_had_failures(mock_app):
     orch = ValidationOrchestrator(app=mock_app, validations=["config", "ci", "metadata"], target=None)
     orch._results = {
         "config": ValidationResult(name="config", success=True, stdout="ok", stderr="", duration=1.0),
     }
-    with pytest.raises(SystemExit):
-        asyncio.run(orch.on_finalize(exception=None))
+    asyncio.run(orch.on_finalize(exception=None))
+
+    assert orch.had_failures is True
     mock_app.display_warning.assert_called()
     warning_args = [str(c) for c in mock_app.display_warning.call_args_list]
     assert any("2 validation(s) did not complete" in w for w in warning_args)
+    mock_app.abort.assert_not_called()
 
 
 def test_on_finalize_logs_exception(mock_app):
@@ -209,8 +213,7 @@ def test_on_finalize_posts_pr_comment_on_failure(mock_app):
     orch._results = {
         "config": ValidationResult(name="config", success=False, stdout="err", stderr="", duration=1.0),
     }
-    with pytest.raises(SystemExit):
-        asyncio.run(orch.on_finalize(exception=None))
+    asyncio.run(orch.on_finalize(exception=None))
 
     mock_app.github.post_pull_request_comment.assert_called_once()
     body = mock_app.github.post_pull_request_comment.call_args[0][1]
@@ -230,8 +233,7 @@ def test_on_finalize_pr_comment_omits_run_link_when_env_missing(mock_app, monkey
     orch._results = {
         "config": ValidationResult(name="config", success=False, stdout="err", stderr="", duration=1.0),
     }
-    with pytest.raises(SystemExit):
-        asyncio.run(orch.on_finalize(exception=None))
+    asyncio.run(orch.on_finalize(exception=None))
 
     body = mock_app.github.post_pull_request_comment.call_args[0][1]
     assert "[View full run]" not in body
@@ -246,8 +248,7 @@ def test_on_finalize_step_summary_does_not_include_run_link(mock_app, tmp_path, 
     orch._results = {
         "config": ValidationResult(name="config", success=False, stdout="err", stderr="", duration=1.0),
     }
-    with pytest.raises(SystemExit):
-        asyncio.run(orch.on_finalize(exception=None))
+    asyncio.run(orch.on_finalize(exception=None))
 
     content = summary_file.read_text(encoding="utf-8")
     assert "[View full run]" not in content
@@ -312,8 +313,7 @@ def test_on_finalize_handles_post_failure(mock_app):
     orch._results = {
         "config": ValidationResult(name="config", success=False, stdout="err", stderr="", duration=1.0),
     }
-    with pytest.raises(SystemExit):
-        asyncio.run(orch.on_finalize(exception=None))
+    asyncio.run(orch.on_finalize(exception=None))
 
     mock_app.display_warning.assert_called()
     warning_args = [str(c) for c in mock_app.display_warning.call_args_list]

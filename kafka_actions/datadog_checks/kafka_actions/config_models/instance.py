@@ -124,6 +124,11 @@ class ReadMessages(BaseModel):
         examples=['json'],
     )
     key_schema: Optional[str] = Field(None, description='Schema definition for protobuf/avro key')
+    key_skip_bytes: Optional[int] = Field(
+        0,
+        description='Number of bytes to drop from the start of the message key before\ndeserialization. See value_skip_bytes for details. Default 0.\n',
+        examples=[1],
+    )
     key_uses_schema_registry: Optional[bool] = Field(False, description='Whether key uses Schema Registry format')
     max_scanned_messages: Optional[int] = Field(
         1000,
@@ -155,6 +160,11 @@ class ReadMessages(BaseModel):
         examples=['json'],
     )
     value_schema: Optional[str] = Field(None, description='Schema definition for protobuf/avro value')
+    value_skip_bytes: Optional[int] = Field(
+        0,
+        description="Number of bytes to drop from the start of the message value before\ndeserialization. Use this to strip a producer-side prefix that\nkafka_actions doesn't recognize natively — for example a 1-byte\nversion flag, a non-Confluent schema-registry envelope, or a\ntenant id prepended to every record. Applied before raw / json /\nbson / protobuf / avro decoding, and before Schema Registry\nmagic-byte detection. Default 0 (no bytes skipped).\n",
+        examples=[1],
+    )
     value_uses_schema_registry: Optional[bool] = Field(False, description='Whether value uses Schema Registry format')
 
 

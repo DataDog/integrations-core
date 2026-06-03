@@ -12,6 +12,8 @@ from zipfile import ZipFile
 
 from google.cloud import storage
 
+import inputs_hash
+
 if TYPE_CHECKING:
     from google.cloud.storage.bucket import Bucket as GCSBucket
 
@@ -20,7 +22,6 @@ BUILDER_DIR = Path(__file__).parent
 REPO_DIR = BUILDER_DIR.parent
 RESOLUTION_DIR = REPO_DIR / '.deps'
 LOCK_FILE_DIR = RESOLUTION_DIR / 'resolved'
-DIRECT_DEP_FILE = REPO_DIR / 'agent_requirements.in'
 CACHE_CONTROL = 'public, max-age=15'
 VALID_PROJECT_NAME = re.compile(r'^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$', re.IGNORECASE)
 UNNORMALIZED_PROJECT_NAME_CHARS = re.compile(r'[-_.]+')
@@ -274,34 +275,38 @@ class Bucket:
             blob.patch()
 
 
-def generate_lockfiles(targets_dir, lockfiles):
+def generate_lockfiles(targets_dir, lockfiles, resolution_hash):
     targets_dir = Path(targets_dir)
     LOCK_FILE_DIR.mkdir(parents=True, exist_ok=True)
-    with RESOLUTION_DIR.joinpath('metadata.json').open('w', encoding='utf-8') as f:
-        contents = json.dumps(
-            {
-                'sha256': sha256(DIRECT_DEP_FILE.read_bytes()).hexdigest(),
-            },
-            indent=2,
-            sort_keys=True,
-        )
-        f.write(f'{contents}\n')
 
     image_digests = {}
+    builder_inputs = {}
     for target_name, lockfile_lines in lockfiles.items():
         # The lockfiles contain the major.minor Python version
         # so that the Agent can transition safely
         lock_file = LOCK_FILE_DIR / f'{target_name}_{CURRENT_PYTHON_VERSION}.txt'
+        if not any(line.strip() for line in lockfile_lines):
+            print(f'Skipping lockfile for {target_name}: no wheels were uploaded.')
+            lock_file.unlink(missing_ok=True)
+            continue
         lock_file.write_text('\n'.join(lockfile_lines), encoding='utf-8')
 
-        # these `image_digest` files are generated in the 'Save new image digest'
-        # step of the github workflow
+        # The `image_digest` and `inputs_sha256` files are written by the
+        # 'Save new image digest' / 'Persist current image digest' steps of
+        # the github workflow; macOS targets don't produce them.
         if (image_digest_file := targets_dir / target_name / 'image_digest').is_file():
             image_digests[target_name] = image_digest_file.read_text(encoding='utf-8').strip()
+        if (inputs_hash_file := targets_dir / target_name / 'inputs_sha256').is_file():
+            builder_inputs[target_name] = inputs_hash_file.read_text(encoding='utf-8').strip()
 
     with RESOLUTION_DIR.joinpath('image_digests.json').open('w', encoding='utf-8') as f:
         contents = json.dumps(image_digests, indent=2, sort_keys=True)
         f.write(f'{contents}\n')
+
+    inputs_hash.write_pinned_hashes(
+        RESOLUTION_DIR / 'builder_inputs.toml',
+        inputs_hash.PinnedHashes(resolution=resolution_hash, images=builder_inputs),
+    )
 
 
 def upload(targets_dir: Path, bucket: Bucket | None = None) -> dict[str, list[str]]:
@@ -350,6 +355,14 @@ def upload(targets_dir: Path, bucket: Bucket | None = None) -> dict[str, list[st
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='builder', allow_abbrev=False)
     parser.add_argument('targets_dir')
+    parser.add_argument(
+        '--resolution-hash',
+        required=True,
+        help=(
+            'Hex sha256 of the resolution inputs, computed by the gate job '
+            'and passed in to avoid recomputing against the working tree.'
+        ),
+    )
     args = parser.parse_args()
     lockfiles = upload(args.targets_dir)
-    generate_lockfiles(args.targets_dir, lockfiles)
+    generate_lockfiles(args.targets_dir, lockfiles, args.resolution_hash)

@@ -148,11 +148,10 @@ class DatabasesData:
         self._data_submitter.submit()
 
     def _cursor_run(self, cursor, query, params=None):
-        """
-        Run and log the query. If provided, obfuscated params are logged in place of the regular params.
-        """
+        """Run the query, log it, and emit a metric on database error."""
         try:
-            self._log.debug("Running query [{}] params={}".format(query, params))
+            params_repr = "({} params)".format(len(params)) if isinstance(params, list) else params
+            self._log.debug("Running query [{}] params={}".format(query, params_repr))
             cursor.execute(query, params)
         except pymysql.DatabaseError as e:
             self._check.count(
@@ -321,21 +320,30 @@ class DatabasesData:
         table_name_to_table_index = {}
         for i, table in enumerate(table_list):
             table_name_to_table_index[table["name"]] = i
-        table_names = ','.join(f'"{str(table["name"])}"' for table in table_list)
+        table_name_list = [str(table["name"]) for table in table_list]
+        placeholders = ','.join(['%s'] * len(table_name_list))
         total_columns_number = self._populate_with_columns_data(
-            table_name_to_table_index, table_list, table_names, db_name, cursor
+            table_name_to_table_index, table_list, table_name_list, placeholders, db_name, cursor
         )
-        self._populate_with_partitions_data(table_name_to_table_index, table_list, table_names, db_name, cursor)
-        self._populate_with_foreign_keys_data(table_name_to_table_index, table_list, table_names, db_name, cursor)
-        self._populate_with_index_data(table_name_to_table_index, table_list, table_names, db_name, cursor)
+        self._populate_with_partitions_data(
+            table_name_to_table_index, table_list, table_name_list, placeholders, db_name, cursor
+        )
+        self._populate_with_foreign_keys_data(
+            table_name_to_table_index, table_list, table_name_list, placeholders, db_name, cursor
+        )
+        self._populate_with_index_data(
+            table_name_to_table_index, table_list, table_name_list, placeholders, db_name, cursor
+        )
         return total_columns_number, table_list
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _populate_with_columns_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
+    def _populate_with_columns_data(
+        self, table_name_to_table_index, table_list, table_name_list, placeholders, db_name, cursor
+    ):
         self._cursor_run(
             cursor,
-            query=SQL_COLUMNS.format(table_names),
-            params=db_name,
+            query=SQL_COLUMNS.format(placeholders),
+            params=[db_name] + table_name_list,
         )
         rows = cursor.fetchall()
         for row in rows:
@@ -354,9 +362,11 @@ class DatabasesData:
         return len(rows)
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _populate_with_index_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
-        query = get_indexes_query(self._check.version, self._check.is_mariadb, table_names)
-        self._cursor_run(cursor, query=query, params=db_name)
+    def _populate_with_index_data(
+        self, table_name_to_table_index, table_list, table_name_list, placeholders, db_name, cursor
+    ):
+        query = get_indexes_query(self._check.version, self._check.is_mariadb, placeholders)
+        self._cursor_run(cursor, query=query, params=[db_name] + table_name_list)
         rows = cursor.fetchall()
         if not rows:
             return
@@ -394,8 +404,10 @@ class DatabasesData:
             table_list[table_name_to_table_index[table_name]]["indexes"] = list(index_dict.values())
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _populate_with_foreign_keys_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
-        self._cursor_run(cursor, query=SQL_FOREIGN_KEYS.format(table_names), params=db_name)
+    def _populate_with_foreign_keys_data(
+        self, table_name_to_table_index, table_list, table_name_list, placeholders, db_name, cursor
+    ):
+        self._cursor_run(cursor, query=SQL_FOREIGN_KEYS.format(placeholders), params=[db_name] + table_name_list)
         rows = cursor.fetchall()
         for row in rows:
             table_name = row["table_name"]
@@ -403,8 +415,10 @@ class DatabasesData:
             table_list[table_name_to_table_index[table_name]]["foreign_keys"].append(row)
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _populate_with_partitions_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
-        self._cursor_run(cursor, query=SQL_PARTITION.format(table_names), params=db_name)
+    def _populate_with_partitions_data(
+        self, table_name_to_table_index, table_list, table_name_list, placeholders, db_name, cursor
+    ):
+        self._cursor_run(cursor, query=SQL_PARTITION.format(placeholders), params=[db_name] + table_name_list)
         rows = cursor.fetchall()
         if not rows:
             return

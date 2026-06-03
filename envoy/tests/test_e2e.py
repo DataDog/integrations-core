@@ -21,7 +21,7 @@ pytestmark = [requires_new_environment]
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check):
+def test_e2e(dd_agent_check, exercise_envoy):
     aggregator = dd_agent_check(DEFAULT_INSTANCE, rate=True)
 
     for metric in PROMETHEUS_METRICS + LOCAL_RATE_LIMIT_METRICS + CONNECTION_LIMIT_METRICS + TLS_INSPECTOR_METRICS:

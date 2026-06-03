@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+
 import pytest
 
 from ddev.utils.github import PullRequest
@@ -49,6 +51,31 @@ class TestGetPullRequest:
         )
 
 
+class TestListOpenPullRequestsTargetingBase:
+    def test_returns_pull_requests(self, github_manager, mocker):
+        response = mocker.MagicMock()
+        response.text = (
+            '{"items":[{"number":10,"title":"PR title","pull_request":{"html_url":"https://example.invalid/pr/10","diff_url":"https://example.invalid/pr/10.diff"},'
+            '"body":"","user":{"login":"someone"},"labels":[{"name":"foo"}]}]}'
+        )
+        mocker.patch('ddev.utils.github.GitHubManager._GitHubManager__api_get', return_value=response)
+
+        prs = github_manager.list_open_pull_requests_targeting_base('7.99.x')
+        assert len(prs) == 1
+        assert prs[0].number == 10
+        assert prs[0].title == 'PR title'
+        assert prs[0].html_url == 'https://example.invalid/pr/10'
+        assert prs[0].labels == ['foo']
+
+    def test_returns_empty_list_when_no_results(self, github_manager, mocker):
+        response = mocker.MagicMock()
+        response.text = '{"items":[],"total_count":0}'
+        mocker.patch('ddev.utils.github.GitHubManager._GitHubManager__api_get', return_value=response)
+
+        prs = github_manager.list_open_pull_requests_targeting_base('7.99.x')
+        assert prs == []
+
+
 class TestCreateLabel:
     def test_create_label(self, network_replay, github_manager):
         network_replay('github/create_label.yaml', record_mode='none')
@@ -58,3 +85,46 @@ class TestCreateLabel:
 
         assert label.json()['name'] == 'my_custom_label'
         assert label.json()['color'] == 'ff0000'
+
+
+def test_dispatch_workflow_default_returns_none(github_manager, mocker):
+    """Default dispatch_workflow keeps the prior fire-and-forget behavior."""
+    response = mocker.MagicMock()
+    api_post = mocker.patch('ddev.utils.github.GitHubManager._GitHubManager__api_post', return_value=response)
+
+    result = github_manager.dispatch_workflow(
+        workflow_id='example.yaml',
+        ref='master',
+        inputs={'pr_number': '123', 'head_sha': 'deadbeef'},
+    )
+
+    assert result is None
+    api_post.assert_called_once()
+    payload = json.loads(api_post.call_args.kwargs['content'])
+    assert payload == {'ref': 'master', 'inputs': {'pr_number': '123', 'head_sha': 'deadbeef'}}
+    assert 'return_run_details' not in payload
+
+
+def test_dispatch_workflow_return_run_details_sends_flag_and_returns_json(github_manager, mocker):
+    """When return_run_details is true, the payload includes the flag and the parsed JSON is returned."""
+    run_details = {
+        'workflow_run_id': 42,
+        'run_url': 'https://api.github.com/repos/o/r/actions/runs/42',
+        'html_url': 'https://github.com/o/r/actions/runs/42',
+    }
+    response = mocker.MagicMock()
+    response.json.return_value = run_details
+    api_post = mocker.patch('ddev.utils.github.GitHubManager._GitHubManager__api_post', return_value=response)
+
+    result = github_manager.dispatch_workflow(
+        workflow_id='example.yaml',
+        ref='master',
+        inputs={'pr_number': '123', 'head_sha': 'deadbeef'},
+        return_run_details=True,
+    )
+
+    assert result == run_details
+    payload = json.loads(api_post.call_args.kwargs['content'])
+    assert payload['return_run_details'] is True
+    assert payload['ref'] == 'master'
+    assert payload['inputs'] == {'pr_number': '123', 'head_sha': 'deadbeef'}

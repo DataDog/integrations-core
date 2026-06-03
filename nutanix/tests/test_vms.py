@@ -49,9 +49,7 @@ def test_vm_status_off(dd_run_check, aggregator, mock_instance, mock_http_get):
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 
-    aggregator.assert_metric(
-        "nutanix.vm.status", value=2, tags=OFF_VM_TAGS + ['ntnx_power_state:OFF'], hostname=OFF_VM_NAME
-    )
+    aggregator.assert_metric("nutanix.vm.status", value=2, tags=OFF_VM_TAGS, hostname=OFF_VM_NAME)
 
 
 @pytest.mark.parametrize("batch_vm_collection", [True, False])
