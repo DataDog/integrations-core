@@ -94,10 +94,10 @@ class ClickhouseSchemaCollector(SchemaCollector):
         config.max_tables = check._config.collect_schemas.max_tables
         config.max_columns = check._config.collect_schemas.max_columns
         config.max_query_duration = check._config.collect_schemas.max_query_duration
-        config.include_databases = tuple(check._config.collect_schemas.include_databases or ())
-        config.exclude_databases = tuple(check._config.collect_schemas.exclude_databases or ())
-        config.include_tables = tuple(check._config.collect_schemas.include_tables or ())
-        config.exclude_tables = tuple(check._config.collect_schemas.exclude_tables or ())
+        config.include_databases = check._config.collect_schemas.include_databases
+        config.exclude_databases = check._config.collect_schemas.exclude_databases
+        config.include_tables = check._config.collect_schemas.include_tables
+        config.exclude_tables = check._config.collect_schemas.exclude_tables
 
         super().__init__(check, config)
         self._db_client = None
