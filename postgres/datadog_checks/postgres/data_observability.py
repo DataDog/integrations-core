@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import time
 from dataclasses import dataclass
+from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, Literal
 
 import psycopg
@@ -42,7 +43,6 @@ class PostgresDataObservability(DBMAsyncJob):
         self._check = check
         self._config = config
         self._last_execution: dict[int, float] = {}  # interval mode: last fire timestamp
-        self._schedulers: dict[int, CronScheduler] = {}  # cron mode: one scheduler per monitor_id
         collection_interval = config.data_observability.collection_interval or 10
         super(PostgresDataObservability, self).__init__(
             check,
@@ -55,7 +55,7 @@ class PostgresDataObservability(DBMAsyncJob):
             job_name="data-observability",
         )
         # Filter bad queries on check construction.
-        self._queries = self._filter_valid_queries(self._do_config.queries or ())
+        self._queries, self._schedulers = self._filter_valid_queries(self._do_config.queries or ())
 
     def _shutdown(self):
         self._check = None
@@ -64,12 +64,15 @@ class PostgresDataObservability(DBMAsyncJob):
     def _do_config(self):
         return self._config.data_observability
 
-    def _filter_valid_queries(self, queries) -> tuple[Query, ...]:
-        valid = []
+    def _filter_valid_queries(
+        self, queries: Iterable[Query]
+    ) -> tuple[tuple[Query, ...], dict[int, CronScheduler]]:
+        valid: list[Query] = []
+        schedulers: dict[int, CronScheduler] = {}
         for q in queries:
             if q.schedule:
                 try:
-                    self._schedulers[q.monitor_id] = CronScheduler(
+                    schedulers[q.monitor_id] = CronScheduler(
                         q.schedule, startup_lookback=CRON_STARTUP_LOOKBACK_SECONDS
                     )
                 except (ValueError, TypeError):
@@ -86,7 +89,7 @@ class PostgresDataObservability(DBMAsyncJob):
                 )
                 continue
             valid.append(q)
-        return tuple(valid)
+        return tuple(valid), schedulers
 
     def _get_due_queries(self) -> list[DueQuery]:
         now = time.time()
@@ -99,10 +102,12 @@ class PostgresDataObservability(DBMAsyncJob):
                     # and do not need separate execution.
                     due.append(DueQuery(q, ticks[-1], "cron"))
             else:
-                # On first sight, backdate one interval so the first fire reports lateness = 0.
-                last = self._last_execution.setdefault(q.monitor_id, now - q.interval_seconds)
-                if now - last >= q.interval_seconds:
-                    due.append(DueQuery(q, last + q.interval_seconds, "interval"))
+                last = self._last_execution.get(q.monitor_id)
+                if last is None or now - last >= q.interval_seconds:
+                    # Seed: treat first sight as if the previous interval just completed,
+                    # so the scheduled_time for DueQuery is now and lateness is 0.
+                    scheduled = (last + q.interval_seconds) if last is not None else now
+                    due.append(DueQuery(q, scheduled, "interval"))
         return due
 
     def _build_base_tags(self) -> list[str]:
@@ -228,6 +233,8 @@ class PostgresDataObservability(DBMAsyncJob):
                     raw=True,
                 )
 
+                # Lateness measures scheduling delay only (time from tick to query start),
+                # not end-to-end result latency — query execution time is reported separately.
                 lateness = max(0.0, now_at_fire_start - due.scheduled_time)
                 self._check.gauge(
                     'dd.postgres.data_observability.query_fire_lateness_seconds',
@@ -251,10 +258,13 @@ class PostgresDataObservability(DBMAsyncJob):
                     "Failed to emit metrics/event for monitor_id=%d",
                     q.monitor_id,
                 )
-                self._check.count(
-                    'dd.postgres.data_observability.emit_failures',
-                    1,
-                    tags=tags + [f'exc_class:{type(e).__name__}'],
-                    hostname=self._check.reported_hostname,
-                    raw=True,
-                )
+                try:
+                    self._check.count(
+                        'dd.postgres.data_observability.emit_failures',
+                        1,
+                        tags=tags + [f'exc_class:{type(e).__name__}'],
+                        hostname=self._check.reported_hostname,
+                        raw=True,
+                    )
+                except Exception:
+                    pass
