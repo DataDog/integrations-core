@@ -35,7 +35,7 @@ class TestDeltaDetector:
         rows = [self._make_row(101, calls=10, rows=100)]
         result = dd.compute(rows)
         assert result.derivative_rows == []
-        assert result.changed_queryids == set()
+        assert result.changed_pgss_keys == set()
 
     def test_second_cycle_returns_derivatives_for_changed_rows(self):
         dd = DeltaDetector(metric_columns=METRIC_COLS, execution_indicators=frozenset({'calls'}))
@@ -47,7 +47,7 @@ class TestDeltaDetector:
         assert dr['calls'] == 5
         assert dr['rows'] == 50
         assert dr['queryid'] == 101
-        assert 101 in result.changed_queryids
+        assert (101, 1, 1) in result.changed_pgss_keys
 
     def test_unchanged_rows_are_not_emitted(self):
         dd = DeltaDetector(metric_columns=METRIC_COLS, execution_indicators=frozenset({'calls'}))
@@ -70,11 +70,11 @@ class TestDeltaDetector:
         result = dd.compute([self._make_row(101, calls=5, rows=50)])
         assert result.derivative_rows == []
 
-    def test_vanished_queryids_detected(self):
+    def test_vanished_pgss_keys_detected(self):
         dd = DeltaDetector(metric_columns=METRIC_COLS, execution_indicators=frozenset({'calls'}))
         dd.compute([self._make_row(101, calls=10), self._make_row(102, calls=20)])
         result = dd.compute([self._make_row(101, calls=15)])
-        assert 102 in result.vanished_queryids
+        assert (102, 1, 1) in result.vanished_pgss_keys
 
     def test_execution_indicator_required(self):
         dd = DeltaDetector(metric_columns=METRIC_COLS, execution_indicators=frozenset({'calls'}))
@@ -86,8 +86,8 @@ class TestDeltaDetector:
         dd = DeltaDetector(metric_columns=METRIC_COLS, execution_indicators=frozenset({'calls'}))
         dd.compute([self._make_row(101, calls=10)])
         result = dd.compute([self._make_row(101, calls=15), self._make_row(102, calls=5)])
-        assert 101 in result.changed_queryids
-        assert 102 not in result.changed_queryids
+        assert (101, 1, 1) in result.changed_pgss_keys
+        assert (102, 1, 1) not in result.changed_pgss_keys
 
     def test_duplicate_queryid_rows_are_merged(self):
         dd = DeltaDetector(metric_columns=METRIC_COLS, execution_indicators=frozenset({'calls'}))
@@ -120,73 +120,73 @@ class TestObfuscationLookup:
 
     def test_empty_lookup_all_misses(self):
         lk = self._make_lookup()
-        hits, misses = lk.lookup({1, 2, 3})
+        hits, misses = lk.lookup({(1, 1, 1), (2, 1, 1), (3, 1, 1)})
         assert hits == {}
-        assert misses == {1, 2, 3}
+        assert misses == {(1, 1, 1), (2, 1, 1), (3, 1, 1)}
 
     def test_populate_then_lookup(self):
         lk = self._make_lookup()
-        lk.populate({1: 'SELECT 1', 2: 'SELECT 2'})
-        hits, misses = lk.lookup({1, 2, 3})
-        assert 1 in hits
-        assert 2 in hits
-        assert misses == {3}
-        assert hits[1].obfuscated_query is not None
-        assert hits[1].query_signature is not None
+        lk.populate({(1, 1, 1): 'SELECT 1', (2, 1, 1): 'SELECT 2'})
+        hits, misses = lk.lookup({(1, 1, 1), (2, 1, 1), (3, 1, 1)})
+        assert (1, 1, 1) in hits
+        assert (2, 1, 1) in hits
+        assert misses == {(3, 1, 1)}
+        assert hits[(1, 1, 1)].obfuscated_query is not None
+        assert hits[(1, 1, 1)].query_signature is not None
 
     def test_hit_and_miss_counters(self):
         lk = self._make_lookup()
-        lk.populate({1: 'SELECT 1'})
+        lk.populate({(1, 1, 1): 'SELECT 1'})
         lk.reset_stats()
-        lk.lookup({1, 2})
+        lk.lookup({(1, 1, 1), (2, 1, 1)})
         assert lk.hits == 1
         assert lk.misses == 1
 
-    def test_evict_removes_queryid(self):
+    def test_evict_removes_pgss_key(self):
         lk = self._make_lookup()
-        lk.populate({1: 'SELECT 1', 2: 'SELECT 2'})
-        lk.evict({1})
-        hits, misses = lk.lookup({1, 2})
-        assert 1 in misses
-        assert 2 in hits
+        lk.populate({(1, 1, 1): 'SELECT 1', (2, 1, 1): 'SELECT 2'})
+        lk.evict({(1, 1, 1)})
+        hits, misses = lk.lookup({(1, 1, 1), (2, 1, 1)})
+        assert (1, 1, 1) in misses
+        assert (2, 1, 1) in hits
 
-    def test_multiple_queryids_share_signature(self):
-        """Different queryids with the same normalized SQL share one ObfuscationResult."""
+    def test_multiple_pgss_keys_share_signature(self):
+        """Different pgss keys with the same normalized SQL share one ObfuscationResult."""
         lk = self._make_lookup()
-        lk.populate({1: 'SELECT 1', 2: 'SELECT 1'})
-        hits, _ = lk.lookup({1, 2})
-        assert hits[1].query_signature == hits[2].query_signature
+        lk.populate({(1, 1, 1): 'SELECT 1', (2, 1, 1): 'SELECT 1'})
+        hits, _ = lk.lookup({(1, 1, 1), (2, 1, 1)})
+        assert hits[(1, 1, 1)].query_signature == hits[(2, 1, 1)].query_signature
         assert lk.queryid_map_size == 2
         assert lk.signature_map_size == 1
 
     def test_lru_eviction_on_max_size(self):
         lk = self._make_lookup(maxsize=2)
-        lk.populate({1: 'SELECT 1', 2: 'SELECT 2', 3: 'SELECT 3'})
+        lk.populate({(1, 1, 1): 'SELECT 1', (2, 2, 2): 'SELECT 2', (3, 3, 3): 'SELECT 3'})
         assert lk.queryid_map_size == 2
-        _, misses = lk.lookup({1})
-        assert 1 in misses
+        _, misses = lk.lookup({(1, 1, 1)})
+        assert (1, 1, 1) in misses
 
     def test_populate_returns_results(self):
         lk = self._make_lookup()
-        results = lk.populate({1: 'SELECT 1', 2: 'SELECT 2'})
-        assert 1 in results
-        assert 2 in results
-        assert results[1].obfuscated_query is not None
+        results = lk.populate({(1, 1, 1): 'SELECT 1', (2, 1, 1): 'SELECT 2'})
+        assert (1, 1, 1) in results
+        assert (2, 1, 1) in results
+        assert results[(1, 1, 1)].obfuscated_query is not None
 
     def test_evict_does_not_remove_shared_signature(self):
-        """Evicting a queryid removes tier-1 mapping but keeps tier-2 if other queryids share it."""
+        """Evicting one pgss key removes tier-1 mapping but keeps tier-2 if other keys share it."""
         lk = self._make_lookup()
-        lk.populate({1: 'SELECT 1', 2: 'SELECT 1'})
-        lk.evict({1})
-        hits, _ = lk.lookup({2})
-        assert 2 in hits
+        lk.populate({(1, 1, 1): 'SELECT 1', (2, 1, 1): 'SELECT 1'})
+        lk.evict({(1, 1, 1)})
+        hits, _ = lk.lookup({(2, 1, 1)})
+        assert (2, 1, 1) in hits
 
     def test_lookup_updates_lru_order(self):
         lk = self._make_lookup(maxsize=2)
-        lk.populate({1: 'SELECT 1', 2: 'SELECT 2'})
-        lk.lookup({1})
-        lk.populate({3: 'SELECT 3'})
-        hits, _ = lk.lookup({1})
-        assert 1 in hits
-        _, misses = lk.lookup({2})
-        assert 2 in misses
+        lk.populate({(1, 1, 1): 'SELECT 1', (2, 2, 2): 'SELECT 2'})
+        lk.lookup({(1, 1, 1)})
+        lk.populate({(3, 3, 3): 'SELECT 3'})
+        hits, _ = lk.lookup({(1, 1, 1)})
+        assert (1, 1, 1) in hits
+        _, misses = lk.lookup({(2, 2, 2)})
+        assert (2, 2, 2) in misses
