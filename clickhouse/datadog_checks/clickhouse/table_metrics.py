@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.tracking import tracked_method
 
-_DEFAULT_COLLECTION_INTERVAL = 60
+DEFAULT_COLLECTION_INTERVAL = 60
 
 
 _TABLE_SIZES_QUERY = """\
@@ -38,7 +38,7 @@ class ClickhouseTableMetrics(DBMAsyncJob):
     def __init__(self, check: ClickhouseCheck, config: SchemaMetrics):
         collection_interval = config.collection_interval
         if collection_interval is None or collection_interval <= 0:
-            collection_interval = _DEFAULT_COLLECTION_INTERVAL
+            collection_interval = DEFAULT_COLLECTION_INTERVAL
 
         super(ClickhouseTableMetrics, self).__init__(
             check,

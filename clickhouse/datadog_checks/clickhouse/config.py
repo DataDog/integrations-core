@@ -319,6 +319,11 @@ def _apply_features(config: InstanceConfig, validation_result: ValidationResult)
         config.parts_and_merges.enabled and config.dbm,
         None if config.dbm else "Requires `dbm: true`",
     )
+    validation_result.add_feature(
+        FeatureKey.SCHEMA_METRICS,
+        config.schema_metrics.enabled and config.dbm,
+        None if config.dbm else "Requires `dbm: true`",
+    )
     validation_result.add_feature(FeatureKey.SINGLE_ENDPOINT_MODE, config.single_endpoint_mode)
 
 

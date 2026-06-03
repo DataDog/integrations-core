@@ -152,7 +152,7 @@ class ClickhouseCheck(DatabaseCheck):
             self.query_errors = None
 
         # Initialize schema metrics (per-table size and per-view refresh gauges)
-        if self._config.dbm and self._config.schema_metrics and self._config.schema_metrics.enabled:
+        if self._config.dbm and self._config.schema_metrics.enabled:
             self.table_metrics = ClickhouseTableMetrics(self, self._config.schema_metrics)
         else:
             self.table_metrics = None
@@ -659,7 +659,8 @@ class ClickhouseCheck(DatabaseCheck):
             if not self._view_refreshes_permission_logged:
                 self.log.warning(
                     "Agent user lacks SELECT on system.view_refreshes; refresh status will not be populated. "
-                    "Grant with: GRANT SELECT ON system.view_refreshes TO <agent_user>"
+                    "Grant with: GRANT SELECT ON system.view_refreshes TO <agent_user>. "
+                    "Restart the agent after granting access."
                 )
                 self._view_refreshes_permission_logged = True
             self._view_refreshes_skip = True

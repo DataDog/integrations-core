@@ -5,6 +5,7 @@ from unittest import mock
 
 import pytest
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.clickhouse import ClickhouseCheck
 from datadog_checks.clickhouse.table_metrics import ClickhouseTableMetrics
 
@@ -13,6 +14,19 @@ pytestmark = pytest.mark.unit
 
 def _table_size_row(database='default', name='events', total_rows=1000, total_bytes=2048):
     return (database, name, total_rows, total_bytes)
+
+
+def _view_refresh_row(
+    database='mydb',
+    view='mv_orders',
+    status='Scheduled',
+    exception='',
+    last_time=1700000000,
+    next_time=1700003600,
+    written_rows=500,
+    written_bytes=4096,
+):
+    return (database, view, status, exception, last_time, next_time, written_rows, written_bytes)
 
 
 @pytest.fixture
@@ -159,3 +173,119 @@ def test_routes_through_cluster_all_replicas_in_single_endpoint_mode(schema_metr
 
     joined = '\n'.join(seen_queries)
     assert "clusterAllReplicas('default', system.tables)" in joined
+
+
+# --- View refresh metric tests ---
+
+
+def _patch_view_refresh_query(check, rows):
+    return mock.patch.object(check, 'execute_query_raw', return_value=rows)
+
+
+def test_collect_view_refresh_emits_gauges_and_service_check(check):
+    gauges = []
+    service_checks = []
+    check.gauge = lambda name, value, tags=None: gauges.append((name, value, tags))
+    check.service_check = lambda name, status, tags=None, message=None: service_checks.append(
+        (name, status, tags, message)
+    )
+
+    row = _view_refresh_row(status='Scheduled', written_rows=500, written_bytes=4096)
+    with _patch_view_refresh_query(check, [row]):
+        check._collect_view_refresh_metrics()
+
+    sc = service_checks[0]
+    assert sc[0] == 'view.refresh'
+    assert sc[1] == AgentCheck.OK
+    assert 'db:mydb' in sc[2]
+    assert 'view:mv_orders' in sc[2]
+    assert sc[3] == ''
+
+    by_name = {n: v for n, v, _ in gauges}
+    assert by_name['view.refresh.status'] == AgentCheck.OK
+    assert by_name['view.refresh.rows'] == 500
+    assert by_name['view.refresh.bytes'] == 4096
+
+
+def test_collect_view_refresh_error_status_sets_critical_with_message(check):
+    service_checks = []
+    check.gauge = lambda *a, **kw: None
+    check.service_check = lambda name, status, tags=None, message=None: service_checks.append((status, message))
+
+    row = _view_refresh_row(status='Error', exception='Timeout exceeded\nmore detail')
+    with _patch_view_refresh_query(check, [row]):
+        check._collect_view_refresh_metrics()
+
+    status, msg = service_checks[0]
+    assert status == AgentCheck.CRITICAL
+    assert msg == 'Timeout exceeded'
+
+
+def test_collect_view_refresh_unknown_status_maps_to_unknown(check):
+    service_checks = []
+    check.gauge = lambda *a, **kw: None
+    check.service_check = lambda name, status, tags=None, message=None: service_checks.append(status)
+
+    with _patch_view_refresh_query(check, [_view_refresh_row(status='SomeFutureStatus')]):
+        check._collect_view_refresh_metrics()
+
+    assert service_checks[0] == AgentCheck.UNKNOWN
+
+
+def test_collect_view_refresh_drops_instance_db_tag(check):
+    emitted_tags = []
+    check.gauge = lambda name, value, tags=None: emitted_tags.append(tags)
+    check.service_check = lambda *a, **kw: None
+
+    with _patch_view_refresh_query(check, [_view_refresh_row(database='analytics')]):
+        check._collect_view_refresh_metrics()
+
+    db_tags = [t for tags in emitted_tags for t in tags if t.startswith('db:')]
+    assert all(t == 'db:analytics' for t in db_tags), db_tags
+
+
+def test_collect_view_refresh_dedupes_rows(check):
+    service_checks = []
+    check.gauge = lambda *a, **kw: None
+    check.service_check = lambda name, status, tags=None, message=None: service_checks.append(name)
+
+    row = _view_refresh_row()
+    with _patch_view_refresh_query(check, [row, row, row]):
+        check._collect_view_refresh_metrics()
+
+    assert len(service_checks) == 1
+
+
+def test_collect_view_refresh_skips_when_flag_set(check):
+    check._view_refreshes_skip = True
+
+    with mock.patch.object(check, 'execute_query_raw') as mock_query:
+        check._collect_view_refresh_metrics()
+
+    mock_query.assert_not_called()
+
+
+def test_handle_view_refreshes_unknown_table_sets_skip_and_logs_once(check):
+    with mock.patch.object(check.log, 'info') as mock_log:
+        check._handle_view_refreshes_error(Exception("DB::Exception: Unknown table system.view_refreshes"))
+        check._handle_view_refreshes_error(Exception("DB::Exception: Unknown table system.view_refreshes"))
+
+    assert check._view_refreshes_skip is True
+    mock_log.assert_called_once()
+
+
+def test_handle_view_refreshes_permission_denied_sets_skip_and_logs_once(check):
+    with mock.patch.object(check.log, 'warning') as mock_log:
+        check._handle_view_refreshes_error(Exception("Not enough privileges"))
+        check._handle_view_refreshes_error(Exception("Not enough privileges"))
+
+    assert check._view_refreshes_skip is True
+    mock_log.assert_called_once()
+    assert 'Restart the agent' in mock_log.call_args[0][0]
+
+
+def test_handle_view_refreshes_unexpected_error_does_not_set_skip(check):
+    with mock.patch.object(check.log, 'exception'):
+        check._handle_view_refreshes_error(Exception("some random error"))
+
+    assert check._view_refreshes_skip is False
