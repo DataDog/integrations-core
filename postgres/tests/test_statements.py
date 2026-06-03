@@ -415,6 +415,29 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
     assert row['calls'] == 2
 
 
+def test_obfuscate_sql_options(aggregator, integration_check, dbm_instance, datadog_agent):
+    """Assert that obfuscate_sql is called with the expected options for both metrics and samples."""
+    dbm_instance['collect_schemas'] = {'enabled': False}
+
+    captured_options = []
+
+    def obfuscate_sql(query, options=None):
+        if options is not None:
+            captured_options.append(json.loads(options))
+        return json.dumps({'query': query, 'metadata': {}})
+
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = obfuscate_sql
+        run_one_check(check, cancel=False)
+
+    assert captured_options, "obfuscate_sql was never called with options"
+    for opts in captured_options:
+        assert opts.get('dbms') == 'postgresql', f"missing dbms=postgresql in obfuscation options: {opts}"
+
+
 @pytest.fixture
 def bob_conn():
     conn = psycopg.connect(host=HOST, dbname=DB_NAME, user="bob", password="bob")
