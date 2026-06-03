@@ -14,8 +14,6 @@ from datadog_checks.nutanix.infrastructure_monitor import InfrastructureMonitor
 from datadog_checks.nutanix.resource_filters import parse_resource_filters
 from datadog_checks.nutanix.utils import retry_on_rate_limit
 
-HOSTNAME_TRANSFORM_OPTIONS = frozenset({'upper', 'lower', 'default'})
-
 
 class NutanixCheck(AgentCheck, ConfigMixin):
     __NAMESPACE__ = 'nutanix'
@@ -38,13 +36,6 @@ class NutanixCheck(AgentCheck, ConfigMixin):
                         f"Conflicting port configuration between pc_ip ({port}) and pc_port ({self.pc_port})"
                     )
                 self.pc_ip, self.pc_port = host, int(port)
-
-        hostname_transform = self.config.hostname_transform
-        if hostname_transform not in HOSTNAME_TRANSFORM_OPTIONS:
-            raise ConfigurationError(
-                f"Invalid value for `hostname_transform`: '{hostname_transform}'. "
-                f"Must be one of: {sorted(HOSTNAME_TRANSFORM_OPTIONS)}"
-            )
 
         self.resource_filters = parse_resource_filters(
             [rf.model_dump() for rf in (self.config.resource_filters or ())], self.log
