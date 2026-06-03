@@ -57,17 +57,17 @@ tests:
         application_id: 572
         application_name: "Hao123"
         categories:
-        - 40
+          - 40
         categories_names:
-        - "Content Servers"
+          - "Content Servers"
         collection_id: 12500
         collection_name: "testing collection"
         collections:
-        - 12500
-        - 12580
+          - 12500
+          - 12580
         collections_names:
-        - "testing collection"
-        - "Blocked Requests"
+          - "testing collection"
+          - "Blocked Requests"
         dns:
           flags:
             rcode: "NOERROR"
@@ -106,6 +106,68 @@ tests:
         usr:
           id: 4568300
           name: "John"
+        local_user_id: 4568300
+        local_user_name: John
+        ocsf:
+          severity: Informational
+          activity_name: Query
+          metadata:
+            uid: '2800'
+            product:
+              name: DNSFilter
+              vendor_name: DNSFilter
+            event_code: Category
+            original_time: '2025-05-23 05:20:24.085'
+            version: 1.5.0
+            profiles:
+              - security_control
+          category_uid: 4
+          category_name: Network Activity
+          status_code: NOERROR
+          src_endpoint:
+            uid: 69290bde-69c4-4205-b320-56a8712b9abc
+            hostname: AssetTag-EID
+            intermediate_ips:
+              - 10.0.0.1
+            ip: 172.0.0.1
+            name: AssetTag-EID
+            mac: c0b883203abc
+            owner:
+              uid: '4568300'
+              name: John
+          query:
+            hostname: gum.criteo.com
+            type: A
+          rcode: NoError
+          duration: 0
+          rcode_id: 0
+          status_id: 1
+          connection_info:
+            protocol_name: udp
+            direction_id: 2
+            direction: Outbound
+          class_uid: 4003
+          activity_id: 1
+          severity_id: 1
+          time: 1747977624085
+          class_name: DNS Activity
+          status: Success
+          dst_endpoint:
+            uid: '212800'
+            ip: 10.0.0.2
+          disposition: Allowed
+          action_id: 1
+          action: Allowed
+          disposition_id: 1
+          is_alert: false
+          firewall_rule:
+            uid: '40'
+            name: Content Servers
+        domain: criteo.com
+        code: NOERROR
+        result: allowed
+        request_address: 10.0.0.1
+        question_type: A
       message: |-
         {
           "local_user_id" : 4568300,
@@ -153,7 +215,7 @@ tests:
         }
       status: "info"
       tags:
-      - "source:LOGS_SOURCE"
+        - "source:LOGS_SOURCE"
       timestamp: 1747977624085
   - 
     sample: |-
@@ -212,17 +274,17 @@ tests:
         application_id: 570
         application_name: "Hao123"
         categories:
-        - 52
+          - 52
         categories_names:
-        - "Phishing"
+          - "Phishing"
         collection_id: 12500
         collection_name: "testing collection"
         collections:
-        - 12500
-        - 12580
+          - 12500
+          - 12580
         collections_names:
-        - "testing collection"
-        - "Blocked Requests"
+          - "testing collection"
+          - "Blocked Requests"
         dns:
           flags:
             rcode: "NOERROR"
@@ -261,6 +323,68 @@ tests:
         usr:
           id: 4532000
           name: "admin"
+        local_user_id: 4532000
+        local_user_name: admin
+        ocsf:
+          severity: High
+          activity_name: Response
+          metadata:
+            uid: '2100'
+            product:
+              name: DNSFilter
+              vendor_name: DNSFilter
+            event_code: Security
+            original_time: '2025-04-22 08:38:53.161'
+            version: 1.5.0
+            profiles:
+              - security_control
+          category_uid: 4
+          category_name: Network Activity
+          status_code: NOERROR
+          src_endpoint:
+            uid: 2b63f879-3439-43e5-86b6-d46f0f12cabc
+            hostname: WIN11-50-8-1
+            intermediate_ips:
+              - 10.0.0.1
+            ip: 10.50.8.1
+            name: WIN11-50-8-1
+            mac: '00505692e336'
+            owner:
+              uid: '4532000'
+              name: admin
+          query:
+            hostname: www.cricketbettingpro.com
+            type: A
+          rcode: NoError
+          duration: 0
+          rcode_id: 0
+          status_id: 2
+          connection_info:
+            protocol_name: udp
+            direction_id: 2
+            direction: Outbound
+          class_uid: 4003
+          activity_id: 2
+          severity_id: 4
+          time: 1745311133161
+          class_name: DNS Activity
+          status: Failure
+          dst_endpoint:
+            uid: '212800'
+            ip: 10.0.0.2
+          disposition: Blocked
+          action_id: 2
+          action: Denied
+          disposition_id: 2
+          is_alert: true
+          firewall_rule:
+            uid: '52'
+            name: Phishing
+        domain: cricketbettingpro.com
+        code: NOERROR
+        result: blocked
+        request_address: 10.0.0.1
+        question_type: A
       message: |-
         {
           "local_user_id" : 4532000,
@@ -308,7 +432,7 @@ tests:
         }
       status: "info"
       tags:
-      - "source:LOGS_SOURCE"
+        - "source:LOGS_SOURCE"
       timestamp: 1745311133161
   - 
     sample: |-
@@ -367,17 +491,17 @@ tests:
         application_id: 570
         application_name: "Hao123"
         categories:
-        - 83
+          - 83
         categories_names:
-        - "Suspicious & Deceptive"
+          - "Suspicious & Deceptive"
         collection_id: 12500
         collection_name: "testing collection"
         collections:
-        - 12500
-        - 12580
+          - 12500
+          - 12580
         collections_names:
-        - "testing collection"
-        - "Blocked Requests"
+          - "testing collection"
+          - "Blocked Requests"
         dns:
           flags:
             rcode: "NOERROR"
@@ -416,6 +540,68 @@ tests:
         usr:
           id: 4532000
           name: "admin"
+        local_user_id: 4532000
+        local_user_name: admin
+        ocsf:
+          severity: Medium
+          activity_name: Query
+          metadata:
+            uid: '8200'
+            product:
+              name: DNSFilter
+              vendor_name: DNSFilter
+            event_code: Security Category
+            original_time: '2025-04-22 08:39:23.988'
+            version: 1.5.0
+            profiles:
+              - security_control
+          category_uid: 4
+          category_name: Network Activity
+          status_code: NOERROR
+          src_endpoint:
+            uid: 2b63f879-3439-43e5-86b6-d46f0f12cabc
+            hostname: WIN11-50-8-1
+            intermediate_ips:
+              - 10.0.0.1
+            ip: 10.50.8.1
+            name: WIN11-50-8-1
+            mac: '00505692e123'
+            owner:
+              uid: '4532000'
+              name: admin
+          query:
+            hostname: www.chalmerset.byethost6.com
+            type: HTTPS
+          rcode: NoError
+          duration: 451
+          rcode_id: 0
+          status_id: 1
+          connection_info:
+            protocol_name: udp
+            direction_id: 2
+            direction: Outbound
+          class_uid: 4003
+          activity_id: 1
+          severity_id: 3
+          time: 1745311163988
+          class_name: DNS Activity
+          status: Success
+          dst_endpoint:
+            uid: '212800'
+            ip: 10.0.0.2
+          disposition: Allowed
+          action_id: 1
+          action: Allowed
+          disposition_id: 1
+          is_alert: true
+          firewall_rule:
+            uid: '83'
+            name: Suspicious & Deceptive
+        domain: byethost6.com
+        code: NOERROR
+        result: allowed
+        request_address: 10.0.0.1
+        question_type: HTTPS
       message: |-
         {
           "local_user_id" : 4532000,
@@ -463,7 +649,7 @@ tests:
         }
       status: "warn"
       tags:
-      - "source:LOGS_SOURCE"
+        - "source:LOGS_SOURCE"
       timestamp: 1745311163988
   - 
     sample: |-
@@ -522,17 +708,17 @@ tests:
         application_id: 570
         application_name: "Hao123"
         categories:
-        - 24
+          - 24
         categories_names:
-        - "Parked Sites & Domains"
+          - "Parked Sites & Domains"
         collection_id: 12500
         collection_name: "testing collection"
         collections:
-        - 12500
-        - 12580
+          - 12500
+          - 12580
         collections_names:
-        - "testing collection"
-        - "Blocked Requests"
+          - "testing collection"
+          - "Blocked Requests"
         dns:
           flags:
             rcode: "NOERROR"
@@ -571,6 +757,68 @@ tests:
         usr:
           id: 4682000
           name: "John"
+        local_user_id: 4682000
+        local_user_name: John
+        ocsf:
+          severity: Low
+          activity_name: Response
+          metadata:
+            uid: '2600'
+            product:
+              name: DNSFilter
+              vendor_name: DNSFilter
+            event_code: Category
+            original_time: '2025-05-19 11:54:37.118'
+            version: 1.5.0
+            profiles:
+              - security_control
+          category_uid: 4
+          category_name: Network Activity
+          status_code: NOERROR
+          src_endpoint:
+            uid: ca652fb5-f2e9-499d-8f8d-466aa8db5abc
+            hostname: AssetTag-EID
+            intermediate_ips:
+              - 10.0.0.1
+            ip: 192.169.190.1
+            name: AssetTag-EID
+            mac: c0b88320cabc
+            owner:
+              uid: '4682000'
+              name: John
+          query:
+            hostname: wwwassuranceretraite.fr
+            type: AAAA
+          rcode: NoError
+          duration: 301
+          rcode_id: 0
+          status_id: 2
+          connection_info:
+            protocol_name: tcp
+            direction_id: 2
+            direction: Outbound
+          class_uid: 4003
+          activity_id: 2
+          severity_id: 2
+          time: 1747655677118
+          class_name: DNS Activity
+          status: Failure
+          dst_endpoint:
+            uid: '212800'
+            ip: 10.0.0.2
+          disposition: Blocked
+          action_id: 2
+          action: Denied
+          disposition_id: 2
+          is_alert: false
+          firewall_rule:
+            uid: '24'
+            name: Parked Sites & Domains
+        domain: wwwassuranceretraite.fr
+        code: NOERROR
+        result: blocked
+        request_address: 10.0.0.1
+        question_type: AAAA
       message: |-
         {
           "local_user_id" : 4682000,
@@ -618,5 +866,5 @@ tests:
         }
       status: "info"
       tags:
-      - "source:LOGS_SOURCE"
+        - "source:LOGS_SOURCE"
       timestamp: 1747655677118
