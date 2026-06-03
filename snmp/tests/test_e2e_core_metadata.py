@@ -308,6 +308,104 @@ def test_e2e_core_metadata_cisco_catalyst(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
 
+def test_e2e_core_metadata_cisco_catalyst_1200(dd_agent_check):
+    # Catalyst 1200 runs the SMB OS: serial_number comes from ENTITY-MIB
+    # entPhysicalSerialNum at the fixed chassis index 67109120.
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'cisco-catalyst-1200',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+    device_id = 'default:' + device_ip
+
+    device = {
+        'id': device_id,
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+        ],
+        'ip_address': device_ip,
+        'name': 'catalyst-1200.example',
+        'description': 'Cisco Catalyst 1200 C1200-24P-4G Smart Switch',
+        'profile': 'cisco-catalyst-1200',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.9.1.3217',
+        'tags': [
+            'agent_host:' + common.get_agent_hostname(),
+            'device_id:' + device_id,
+            'device_ip:' + device_ip,
+            'device_namespace:default',
+            'device_vendor:cisco',
+            'snmp_device:' + device_ip,
+            'snmp_host:catalyst-1200.example',
+            'device_hostname:catalyst-1200.example',
+            'snmp_profile:cisco-catalyst-1200',
+        ],
+        'vendor': 'cisco',
+        'serial_number': 'FOC1200ABCD',
+        'version': '4.1.3.36',
+        'device_type': 'switch',
+        'integration': 'snmp',
+    }
+    assert_device_metadata(aggregator, device)
+
+
+def test_e2e_core_metadata_cisco_catalyst_1300(dd_agent_check):
+    # Catalyst 1300/1300X runs the SMB OS: serial_number comes from ENTITY-MIB
+    # entPhysicalSerialNum at the fixed chassis index 67109120.
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'cisco-catalyst-1300',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+    device_id = 'default:' + device_ip
+
+    device = {
+        'id': device_id,
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+        ],
+        'ip_address': device_ip,
+        'name': 'catalyst-1300.example',
+        'description': 'Cisco Catalyst 1300 C1300-24P-4G Managed Switch',
+        'profile': 'cisco-catalyst-1300',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.9.1.3233',
+        'tags': [
+            'agent_host:' + common.get_agent_hostname(),
+            'device_id:' + device_id,
+            'device_ip:' + device_ip,
+            'device_namespace:default',
+            'device_vendor:cisco',
+            'snmp_device:' + device_ip,
+            'snmp_host:catalyst-1300.example',
+            'device_hostname:catalyst-1300.example',
+            'snmp_profile:cisco-catalyst-1300',
+        ],
+        'vendor': 'cisco',
+        'serial_number': 'FOC1300WXYZ',
+        'version': '4.1.3.36',
+        'device_type': 'switch',
+        'integration': 'snmp',
+    }
+    assert_device_metadata(aggregator, device)
+
+
 def test_e2e_core_metadata_hp_ilo4(dd_agent_check):
     config = common.generate_container_instance_config([])
     instance = config['instances'][0]
