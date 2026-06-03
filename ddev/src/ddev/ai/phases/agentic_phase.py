@@ -148,7 +148,7 @@ class AgenticPhase(Phase):
         last_result: ReActResult | None,
     ) -> ReActResult:
         """Run one task and return the result to use for the next task."""
-        await self._compact_context_if_needed(process, last_result)
+        await self._compact_context(process, last_result)
 
         has_goal = self._task_has_goal(task)
         prompt = self._render_task_prompt(task, context, has_goal)
@@ -159,17 +159,24 @@ class AgenticPhase(Phase):
 
         return await self._run_goal_validation(process, task, context, prompt, result)
 
-    async def _compact_context_if_needed(
+    async def _compact_context(
         self,
         process: ReActProcess,
         last_result: ReActResult | None,
     ) -> None:
-        if last_result is None or last_result.context_usage is None:
-            return
-        if last_result.context_usage.context_pct < self._config.context_compact_threshold_pct:
-            return
-        input_tokens, output_tokens = await process.compact()
+        input_tokens, output_tokens = await self._compact_if_needed(process, last_result)
         self._add_tokens(input_tokens, output_tokens)
+
+    async def _compact_if_needed(
+        self,
+        process: ReActProcess,
+        last_result: ReActResult | None,
+    ) -> tuple[int, int]:
+        if last_result is None or last_result.context_usage is None:
+            return 0, 0
+        if last_result.context_usage.context_pct < self._config.context_compact_threshold_pct:
+            return 0, 0
+        return await process.compact()
 
     def _task_has_goal(self, task: TaskConfig) -> bool:
         return task.goal is not None or task.goal_path is not None
