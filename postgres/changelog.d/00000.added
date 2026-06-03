@@ -1,0 +1,1 @@
+Cache obfuscated statements on the query-metrics path to skip the obfuscation FFI crossing for queries already seen this collection, reducing per-interval allocations and GC pressure.

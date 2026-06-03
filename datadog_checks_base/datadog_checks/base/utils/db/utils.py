@@ -15,7 +15,7 @@ from enum import Enum, auto
 from ipaddress import IPv4Address
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union  # noqa: F401
 
-from cachetools import TTLCache
+from cachetools import LRUCache, TTLCache
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.agent import datadog_agent
@@ -268,6 +268,68 @@ def obfuscate_sql_with_metadata(query, options=None, replace_null_character=Fals
     tables = [table.strip() for table in tables.split(',') if table != ''] if tables else None
     statement_with_metadata['metadata']['tables'] = tables
     return statement_with_metadata
+
+
+# Default bound for ObfuscatedSqlCache. Sized to comfortably cover the per-interval statement
+# working set (pg_stat_statements.max defaults to 5000, performance_schema_digests_size to 10000).
+# The cache must be >= that set or it evicts entries it needs next interval (anti-caching), so
+# operators who raise those database limits should size the cache accordingly.
+DEFAULT_OBFUSCATION_CACHE_MAX_SIZE = 10000
+
+
+class ObfuscatedSqlCache:
+    """A per-job cache around obfuscate_sql_with_metadata that skips the Python->Go FFI crossing
+    for repeated queries.
+
+    The Go obfuscator's own result cache lives *after* the FFI boundary, so a hit there still pays
+    the crossing (C.GoString in, json.Marshal + C.CString out, plus the Python-side decode). This
+    cache sits *before* the boundary, so a hit avoids it entirely.
+
+    Intended to be owned by a single DBMAsyncJob: a job's collection runs are serial, so access is
+    single-threaded and no locking is required. The obfuscator options and replace_null_character
+    are pinned per job, so the cache key is just the (null-stripped) query text -- or an optional
+    caller-supplied stable id (e.g. a namespaced queryid/digest) when one is available, to avoid
+    retaining the query text as the key.
+
+    Obfuscation of (query, fixed-options) is deterministic, so entries never need invalidation; a
+    bounded LRU reclaims queries that churn out of the statement table. Size the cache >= the
+    statement table or it will evict exactly the rows it needs next interval (anti-caching).
+    """
+
+    def __init__(self, options=None, replace_null_character=False, max_size=DEFAULT_OBFUSCATION_CACHE_MAX_SIZE):
+        self._options = options
+        self._replace_null_character = replace_null_character
+        self._cache = LRUCache(maxsize=max_size)
+        self.hits = 0
+        self.misses = 0
+
+    def obfuscate(self, query, cache_key=None):
+        if not query:
+            # mirror the funnel's empty short-circuit; nothing to cache
+            return {'query': '', 'metadata': {}}
+        if self._replace_null_character:
+            # strip once here so the key is computed on the post-strip text and the funnel
+            # (called below without replace_null_character) does not strip again
+            query = query.replace('\x00', '')
+        key = query if cache_key is None else cache_key
+        cached = self._cache.get(key)
+        if cached is not None:
+            self.hits += 1
+            return self._copy(cached)
+        self.misses += 1
+        # On a parse/obfuscation failure the funnel raises; we let it propagate and cache nothing.
+        result = obfuscate_sql_with_metadata(query, self._options)
+        self._cache[key] = result
+        return self._copy(result)
+
+    @property
+    def size(self):
+        return len(self._cache)
+
+    @staticmethod
+    def _copy(result):
+        # Return a fresh dict so callers can never mutate the cached entry (e.g. metadata.pop).
+        return {'query': result.get('query'), 'metadata': dict(result.get('metadata') or {})}
 
 
 class DBMAsyncJob(object):

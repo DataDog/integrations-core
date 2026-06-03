@@ -17,6 +17,7 @@ from datadog_checks.base.utils.db.health import Health, HealthEvent, HealthStatu
 from datadog_checks.base.utils.db.utils import (
     ConstantRateLimiter,
     DBMAsyncJob,
+    ObfuscatedSqlCache,
     RateLimitingTTLCache,
     TagManager,
     TagType,
@@ -303,6 +304,85 @@ def test_obfuscate_sql_with_metadata_replace_null_character(input_query, expecte
         mock_agent.side_effect = _mock_obfuscate_sql
         statement = obfuscate_sql_with_metadata(input_query, None, replace_null_character=replace_null_character)
         assert statement['query'] == expected_query
+
+
+def _obfuscator_stub(query, options=None):
+    # Mirror the real obfuscator's JSON-with-metadata contract closely enough to exercise the
+    # tables_csv -> tables post-processing path.
+    return json.encode({'query': query, 'metadata': {'commands': ['SELECT'], 'tables_csv': 'a,b'}})
+
+
+def test_obfuscated_sql_cache_hit_equals_miss():
+    """A cached hit must be byte-for-byte equal to a fresh miss, and the FFI must run only once."""
+    cache = ObfuscatedSqlCache(options=None)
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscator_stub
+        miss = cache.obfuscate('SELECT * FROM t WHERE id = $1')
+        hit = cache.obfuscate('SELECT * FROM t WHERE id = $1')
+    assert miss == hit
+    assert miss == {'query': 'SELECT * FROM t WHERE id = $1', 'metadata': {'commands': ['SELECT'], 'tables': ['a', 'b']}}
+    assert mock_agent.call_count == 1  # second call served from cache
+    assert (cache.hits, cache.misses, cache.size) == (1, 1, 1)
+
+
+def test_obfuscated_sql_cache_distinct_keys():
+    cache = ObfuscatedSqlCache(options=None)
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscator_stub
+        cache.obfuscate('SELECT 1')
+        cache.obfuscate('SELECT 2')
+        cache.obfuscate('SELECT 1')
+    assert mock_agent.call_count == 2  # two distinct queries, third is a hit
+    assert (cache.hits, cache.misses, cache.size) == (1, 2, 2)
+
+
+def test_obfuscated_sql_cache_returns_isolated_copies():
+    """Mutating a returned result must not corrupt the cached entry."""
+    cache = ObfuscatedSqlCache(options=None)
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscator_stub
+        first = cache.obfuscate('SELECT 1')
+        first['metadata'].pop('tables', None)  # caller mutates the returned dict
+        second = cache.obfuscate('SELECT 1')  # served from cache
+    assert 'tables' in second['metadata']  # cached entry was not corrupted
+
+
+def test_obfuscated_sql_cache_does_not_cache_failures():
+    cache = ObfuscatedSqlCache(options=None)
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = ValueError("boom")
+        with pytest.raises(ValueError):
+            cache.obfuscate('SELECT 1')
+    assert cache.size == 0 and cache.misses == 1
+
+
+def test_obfuscated_sql_cache_empty_query_not_cached():
+    cache = ObfuscatedSqlCache(options=None)
+    assert cache.obfuscate('') == {'query': '', 'metadata': {}}
+    assert (cache.hits, cache.misses, cache.size) == (0, 0, 0)
+
+
+def test_obfuscated_sql_cache_lru_eviction():
+    cache = ObfuscatedSqlCache(options=None, max_size=2)
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscator_stub
+        cache.obfuscate('q1')
+        cache.obfuscate('q2')
+        cache.obfuscate('q3')  # evicts q1 (LRU)
+        cache.obfuscate('q1')  # miss again -> re-obfuscated
+    assert cache.size == 2
+    assert mock_agent.call_count == 4  # q1 obfuscated twice due to eviction
+
+
+def test_obfuscated_sql_cache_custom_key():
+    """When a stable cache_key is supplied, different query texts under the same key hit."""
+    cache = ObfuscatedSqlCache(options=None)
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscator_stub
+        cache.obfuscate('SELECT * FROM t WHERE id = $1', cache_key=('db1', 42))
+        cache.obfuscate('SELECT * FROM t WHERE id = $1', cache_key=('db1', 42))
+    assert mock_agent.call_count == 1
+    assert (cache.hits, cache.misses) == (1, 1)
 
 
 class JobForTesting(DBMAsyncJob):

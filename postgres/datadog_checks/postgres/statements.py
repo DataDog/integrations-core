@@ -14,7 +14,12 @@ from psycopg.rows import dict_row
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
+from datadog_checks.base.utils.db.utils import (
+    DBMAsyncJob,
+    ObfuscatedSqlCache,
+    default_json_event_encoding,
+    obfuscate_sql_with_metadata,
+)
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.config_models import InstanceConfig
@@ -196,6 +201,10 @@ class PostgresStatementMetrics(DBMAsyncJob):
         obfuscate_options['dollar_quoted_func'] = self._config.obfuscator_options.keep_dollar_quoted_func
         obfuscate_options['return_json_metadata'] = self._config.obfuscator_options.collect_metadata
         self._obfuscate_options = to_native_string(json.dumps(obfuscate_options))
+        # Pre-FFI obfuscation cache: skips the Python->Go crossing for queries already seen this
+        # job. pg_stat_statements is cumulative so the same texts recur every interval -> high hit
+        # rate after warmup. Owned per-job (single-threaded run loop) so no locking is needed.
+        self._obfuscation_cache = ObfuscatedSqlCache(self._obfuscate_options)
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
         self._full_statement_text_cache = TTLCache(
             maxsize=config.query_metrics.full_statement_text_cache_max_size,
@@ -646,7 +655,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             normalized_row = dict(copy.copy(row))
             try:
                 query_text = row['query']
-                statement = obfuscate_sql_with_metadata(query_text, self._obfuscate_options)
+                statement = self._obfuscation_cache.obfuscate(query_text)
             except Exception as e:
                 if self._config.log_unobfuscated_queries:
                     self._log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['query'], e)
@@ -663,6 +672,21 @@ class PostgresStatementMetrics(DBMAsyncJob):
             normalized_row['dd_commands'] = metadata.get('commands', None)
             normalized_row['dd_comments'] = metadata.get('comments', None)
             normalized_rows.append(normalized_row)
+
+        # Pre-FFI obfuscation cache telemetry (cumulative; diff across intervals for hit rate).
+        debug_tags = self.tags + self._check._get_debug_tags()
+        for name, value in (
+            ('hits', self._obfuscation_cache.hits),
+            ('misses', self._obfuscation_cache.misses),
+            ('size', self._obfuscation_cache.size),
+        ):
+            self._check.gauge(
+                'dd.postgres.obfuscation_cache.{}'.format(name),
+                value,
+                tags=debug_tags,
+                hostname=self._check.reported_hostname,
+                raw=True,
+            )
 
         return normalized_rows
 
