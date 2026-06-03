@@ -124,7 +124,7 @@ class ClickhouseCheck(DatabaseCheck):
             self.query_errors = None
 
         # Initialize schema collection (catalog metadata for Schema Explorer)
-        if self._config.dbm and self._config.collect_schemas and self._config.collect_schemas.enabled:
+        if self._config.dbm and self._config.collect_schemas.enabled:
             self.metadata = ClickhouseMetadata(self)
         else:
             self.metadata = None
