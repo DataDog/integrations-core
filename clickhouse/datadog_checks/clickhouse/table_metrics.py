@@ -25,6 +25,7 @@ SELECT
     toInt64(total_bytes) AS total_bytes
 FROM {tables_table}
 WHERE database NOT IN ('system', 'INFORMATION_SCHEMA', 'information_schema')
+LIMIT 1 BY database, name
 """
 
 _VIEW_REFRESHES_QUERY = """\
@@ -120,11 +121,7 @@ class ClickhouseTableMetrics(DBMAsyncJob):
         # Drop the instance-level `db:` base tag (the connection database) so each
         # per-table series carries exactly one `db:` tag — the table's own database.
         base_tags = [t for t in self._check.tags if not t.startswith('db:')]
-        seen: set[tuple[str, str]] = set()
         for database, name, total_rows, total_bytes in rows:
-            if (database, name) in seen:
-                continue
-            seen.add((database, name))
             entity_tags = base_tags + [f'db:{database}', f'table:{name}']
             self._check.gauge('table.rows', int(total_rows or 0), tags=entity_tags)
             self._check.gauge('table.bytes', int(total_bytes or 0), tags=entity_tags)
