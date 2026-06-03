@@ -370,6 +370,44 @@ class PostgreSql(DatabaseCheck):
             return query, params
         return None, None
 
+    def scan_with_sds(self, rows):
+        """
+        Walk a list of dict rows and scan each column value through the Agent's
+        Sensitive Data Scanner (the ``datadog_agent.scan`` binding). A value is
+        considered a match when the scanner mutated it (e.g. redacted it).
+
+        Returns the same ``(rows_affected, columns_affected, matched_kinds)``
+        tuple as ``_detect_sensitive_data`` so the rest of the pipeline is
+        unchanged.
+
+        Note: this relies on the Agent-side default SDS scanner. The
+        RC-provided ``data_security.rules`` are intentionally NOT forwarded to
+        the scanner here for now.
+        """
+        rows_affected = 0
+        columns_affected = set()
+        matched_kinds = set()
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            row_has_match = False
+            for column, value in row.items():
+                if value is None:
+                    continue
+                text = value if isinstance(value, str) else str(value)
+                try:
+                    processed = datadog_agent.scan(text)
+                except Exception as e:
+                    self.log.debug("data_security: sds scan failed for column=%s: %s", column, e)
+                    continue
+                if processed is not None and processed != text:
+                    columns_affected.add(column)
+                    matched_kinds.add("sds")
+                    row_has_match = True
+            if row_has_match:
+                rows_affected += 1
+        return rows_affected, columns_affected, matched_kinds
+
     def _scan_table_for_data_security(
         self, table_name, scan_type, max_rows, min_rows, send_samples, send_sds_results=False, detectors=None
     ):
@@ -403,7 +441,10 @@ class PostgreSql(DatabaseCheck):
             parsed_rows = []
 
         sample_size = len(parsed_rows)
-        rows_affected, columns_affected, matched_kinds = _detect_sensitive_data(parsed_rows, detectors or ())
+        # Use the Agent-side Sensitive Data Scanner (datadog_agent.scan) rather than the
+        # local regex detectors. _detect_sensitive_data and the RC rule compilation are
+        # kept in place for now but no longer drive this scan.
+        rows_affected, columns_affected, matched_kinds = self.scan_with_sds(parsed_rows)
 
         if send_sds_results:
             self._emit_sds_results(
@@ -582,6 +623,12 @@ class PostgreSql(DatabaseCheck):
         if now - self._last_data_security_run < interval:
             return
         self._last_data_security_run = now
+
+        # POC: ping the new datadog_agent.hello_world binding (backed by the Agent's
+        # pkg/util/sds package) when the data_security scan initializes. Guarded with
+        # hasattr so it never breaks the scan on Agents without the new binding.
+        if hasattr(datadog_agent, "hello_world"):
+            datadog_agent.hello_world()
 
         send_samples = bool(cfg.get("send_samples"))
         # When enabled, also forward findings to the sds-intake as a protobuf SdsResultPayload
