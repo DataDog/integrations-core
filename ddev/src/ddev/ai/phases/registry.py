@@ -26,7 +26,7 @@ class PhaseRegistry:
         return self._registry[name]
 
 
-def _discover_and_register_phases(
+def discover_and_register_phases(
     registry: PhaseRegistry,
     phases_dir: Path,
     import_prefix: str,

@@ -44,9 +44,7 @@ class RunResources:
         try:
             return self._agents[name]
         except KeyError as e:
-            raise ResourceUnavailableError(
-                f"No agent definition named {name!r}. Known: {sorted(self._agents)}"
-            ) from e
+            raise ResourceUnavailableError(f"No agent definition named {name!r}. Known: {sorted(self._agents)}") from e
 
     def agent_runtime_factory(self) -> AgentRuntimeFactory:
         """Return a ready-to-use generic runtime factory."""

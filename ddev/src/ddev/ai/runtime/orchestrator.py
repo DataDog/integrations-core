@@ -10,7 +10,7 @@ from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.base import FlowContext
 from ddev.ai.phases.config import FlowConfig, FlowConfigError
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
-from ddev.ai.phases.registry import PhaseRegistry, _discover_and_register_phases
+from ddev.ai.phases.registry import PhaseRegistry, discover_and_register_phases
 from ddev.ai.runtime.checkpoints import CheckpointManager
 from ddev.ai.runtime.resources import RunResources
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
@@ -55,7 +55,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         """Discover custom phases, parse flow.yaml, construct phases, submit PhaseTrigger."""
         config_dir = self._flow_yaml_path.parent
 
-        _discover_and_register_phases(
+        discover_and_register_phases(
             self._phase_registry,
             Path(__file__).parent.parent / "phases",
             "ddev.ai.phases",
@@ -71,7 +71,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
                     f"Flow phases directory {flow_phases_dir} must be inside the ddev.ai package tree ({ai_root})"
                 ) from e
             flow_import_prefix = "ddev.ai." + ".".join(rel.parts)
-            _discover_and_register_phases(
+            discover_and_register_phases(
                 self._phase_registry,
                 flow_phases_dir,
                 flow_import_prefix,

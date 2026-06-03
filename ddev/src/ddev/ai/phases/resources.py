@@ -2,11 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from typing import Protocol
+from __future__ import annotations
 
-from ddev.ai.agent.build import AgentRuntimeFactory
-from ddev.ai.phases.config import AgentConfig
-from ddev.ai.tools.fs.file_registry import FileRegistry
+from typing import TYPE_CHECKING, Protocol
+
+if TYPE_CHECKING:
+    from ddev.ai.agent.build import AgentRuntimeFactory
+    from ddev.ai.phases.config import AgentConfig
 
 
 class ResourceUnavailableError(Exception):
@@ -19,5 +21,3 @@ class PhaseResources(Protocol):
     def agent_config(self, name: str) -> AgentConfig: ...
 
     def agent_runtime_factory(self) -> AgentRuntimeFactory: ...
-
-    def file_registry(self) -> FileRegistry: ...
