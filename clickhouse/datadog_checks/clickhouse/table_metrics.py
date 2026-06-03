@@ -31,6 +31,7 @@ _VIEW_REFRESHES_QUERY = """\
 SELECT
     database,
     view,
+    hostName() AS host,
     status,
     exception,
     toInt64(toUnixTimestamp(last_success_time)) AS last_refresh_time,
@@ -142,12 +143,12 @@ class ClickhouseTableMetrics(DBMAsyncJob):
         # Drop the instance-level `db:` base tag (the connection database) so each
         # per-view series carries exactly one `db:` tag — the view's own database.
         base_tags = [t for t in self._check.tags if not t.startswith('db:')]
-        seen: set[tuple[str, str]] = set()
-        for database, view_name, status, exception, last_time, next_time, written_rows, written_bytes in rows:
-            if (database, view_name) in seen:
+        seen: set[tuple[str, str, str]] = set()
+        for database, view_name, host, status, exception, last_time, next_time, written_rows, written_bytes in rows:
+            if (database, view_name, host) in seen:
                 continue
-            seen.add((database, view_name))
-            view_tags = base_tags + [f'db:{database}', f'view:{view_name}']
+            seen.add((database, view_name, host))
+            view_tags = base_tags + [f'db:{database}', f'view:{view_name}', f'host:{host}']
             sc_status = _VIEW_REFRESH_STATUS_MAP.get(status, AgentCheck.UNKNOWN)
             sc_msg = '' if sc_status == AgentCheck.OK else ((exception or '').split('\n')[0] or status)
             self._check.service_check(self.SERVICE_CHECK_VIEW_REFRESH, sc_status, tags=view_tags, message=sc_msg)
