@@ -119,6 +119,7 @@ DATA_SECURITY_SAMPLING_BUFFER_MULTIPLIER = 2  # over-sample by Nx then LIMIT
 # REPEATABLE seed is generated per scan from time() so each pass gets a fresh
 # (but still self-consistent within one query) random draw.
 
+
 def _compile_data_security_rules(rules, log=None):
     """
     Build a tuple of ``(rule_id, compiled_regex)`` detectors from the
@@ -396,7 +397,9 @@ class PostgreSql(DatabaseCheck):
                     continue
                 text = value if isinstance(value, str) else str(value)
                 try:
+                    self.log.info("data_security: scan_with_sds - input text: %s", text)
                     processed = datadog_agent.scan(text)
+                    self.log.info("data_security: scan_with_sds - output text: %s", processed)
                 except Exception as e:
                     self.log.debug("data_security: sds scan failed for column=%s: %s", column, e)
                     continue
