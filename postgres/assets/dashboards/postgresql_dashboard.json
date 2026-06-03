@@ -91,7 +91,7 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "avg:postgresql.connections{$scope} by {db}",
+                                "query": "sum:postgresql.connections{$scope} by {db}.weighted()",
                                 "semantic_mode": "combined"
                             }
                         ],

@@ -1021,7 +1021,7 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "avg:postgresql.connections{$scope,$db,$host} by {db}.rollup(max)",
+                      "query": "sum:postgresql.connections{$scope,$db,$host} by {db}.rollup(max)",
                       "data_source": "metrics",
                       "name": "query1",
                       "semantic_mode": "combined"
@@ -1090,7 +1090,7 @@
                   "response_format": "scalar",
                   "queries": [
                     {
-                      "query": "max:postgresql.connections{$scope,$db,$host} by {db}",
+                      "query": "sum:postgresql.connections{$scope,$db,$host} by {db}.weighted()",
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "avg",
