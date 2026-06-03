@@ -35,6 +35,7 @@ except ImportError:
 # Database instance collection interval in seconds (not user-configurable)
 DATABASE_INSTANCE_COLLECTION_INTERVAL = 300
 
+
 class ClickhouseCheck(DatabaseCheck):
     __NAMESPACE__ = 'clickhouse'
     SERVICE_CHECK_CONNECT = 'can_connect'

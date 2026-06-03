@@ -133,9 +133,7 @@ class ClickhouseTableMetrics(DBMAsyncJob):
             return
         try:
             rows = self._check.execute_query_raw(
-                _VIEW_REFRESHES_QUERY.format(
-                    view_refreshes_table=self._check.get_system_table('view_refreshes')
-                )
+                _VIEW_REFRESHES_QUERY.format(view_refreshes_table=self._check.get_system_table('view_refreshes'))
             )
         except Exception as e:
             self._handle_view_refreshes_error(e)

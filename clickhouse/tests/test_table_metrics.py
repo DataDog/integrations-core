@@ -52,8 +52,10 @@ def check(schema_metrics_instance):
 @contextlib.contextmanager
 def _patch_query(job, table_rows=None):
     table_rows = table_rows or []
-    with mock.patch.object(job, '_execute_query', side_effect=lambda q: table_rows), \
-         mock.patch.object(job._check, 'execute_query_raw', return_value=[]):
+    with (
+        mock.patch.object(job, '_execute_query', side_effect=lambda q: table_rows),
+        mock.patch.object(job._check, 'execute_query_raw', return_value=[]),
+    ):
         yield
 
 
@@ -166,8 +168,10 @@ def test_routes_through_cluster_all_replicas_in_single_endpoint_mode(schema_metr
 
     check.gauge = lambda *a, **kw: None
     check.service_check = lambda *a, **kw: None
-    with mock.patch.object(check.table_metrics, '_execute_query', side_effect=lambda q: dbm_queries.append(q) or []), \
-         mock.patch.object(check, 'execute_query_raw', side_effect=lambda q: raw_queries.append(q) or []):
+    with (
+        mock.patch.object(check.table_metrics, '_execute_query', side_effect=lambda q: dbm_queries.append(q) or []),
+        mock.patch.object(check, 'execute_query_raw', side_effect=lambda q: raw_queries.append(q) or []),
+    ):
         check.table_metrics.run_job()
 
     assert any("clusterAllReplicas('default', system.tables)" in q for q in dbm_queries)
