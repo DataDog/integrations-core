@@ -569,7 +569,7 @@ def test_schedule_query_fires_at_cron_tick(pg_instance, aggregator, monkeypatch)
 
 
 def test_schedule_advances_after_run(pg_instance, monkeypatch):
-    """After a cron fire, _next_run is advanced to the NEXT future tick (not the same tick)."""
+    """After a cron fire, the scheduler advances to the NEXT future tick (not the same tick)."""
     current_time = [float(_BASE_EPOCH + 65)]  # 00:50:05 — already past the tick
     monkeypatch.setattr('datadog_checks.postgres.data_observability.time.time', lambda: current_time[0])
 
@@ -577,16 +577,17 @@ def test_schedule_advances_after_run(pg_instance, monkeypatch):
     check = _make_cron_check(pg_instance)
     check.db_pool = _mock_db_pool(mock_conn)
 
-    # First run at 00:50:05: registers next_run = 01:50:00 (croniter.get_next is strictly after now); no fire.
+    # First run at 00:50:05: lookback recovery fires (5s within 300s window); scheduler
+    # caches next_tick = 01:50:00.
     check.data_observability.run_job()
     mid = CRON_QUERY['monitor_id']
-    first_next_run = check.data_observability._next_run[mid]
+    first_next_run = check.data_observability._schedulers[mid].next_tick
 
     current_time[0] = _BASE_EPOCH + 3665  # ~01:50:05
     check.data_observability.run_job()
 
-    second_next_run = check.data_observability._next_run[mid]
-    # After firing at 01:50:05, next_run should advance to 02:50:00
+    second_next_run = check.data_observability._schedulers[mid].next_tick
+    # After firing at 01:50:05, next_tick should advance to 02:50:00
     assert second_next_run > first_next_run
     # Should be approximately 1 hour later
     assert second_next_run - first_next_run >= 3600 - 10
@@ -683,10 +684,11 @@ def test_lateness_metric_emitted_for_cron(pg_instance, aggregator, monkeypatch):
     check = _make_cron_check(pg_instance)
     check.db_pool = _mock_db_pool(mock_conn)
 
-    # Step 1: Register next_run (00:50:00)
+    # Step 1: First poll at 00:49:00 — prev tick is 23:50:00 (>>300s ago), no lookback recovery.
+    # Scheduler caches next_tick = 00:50:00.
     check.data_observability.run_job()
     mid = CRON_QUERY['monitor_id']
-    scheduled_tick = check.data_observability._next_run[mid]
+    scheduled_tick = check.data_observability._schedulers[mid].next_tick
 
     # Step 2: Advance to 00:52:00 — 2 minutes late
     current_time[0] = fire_time
@@ -927,7 +929,7 @@ def test_cron_startup_lookback_does_not_double_fire(pg_instance, aggregator, mon
 
 
 def test_failed_cron_query_advances_next_run(pg_instance, aggregator, monkeypatch):
-    """A failing cron query still advances next_run, so it does not hot-loop on the same tick."""
+    """A failing cron query still advances the scheduler, so it does not hot-loop on the same tick."""
     current_time = [float(_BASE_EPOCH + 65)]  # 00:50:05 -- already past the 00:50 tick
     monkeypatch.setattr('datadog_checks.postgres.data_observability.time.time', lambda: current_time[0])
 
@@ -936,12 +938,13 @@ def test_failed_cron_query_advances_next_run(pg_instance, aggregator, monkeypatc
 
     check = _make_cron_check(pg_instance)
     check.db_pool = _mock_db_pool(mock_conn)
-    # First run: registers next_run (01:50:00) without firing.
+    # First run: lookback recovery fires (5s within 300s window); scheduler caches next_tick = 01:50:00.
+    # The query fails; aggregator records an error metric that we discard below.
     check.data_observability.run_job()
     mid = CRON_QUERY['monitor_id']
-    registered = check.data_observability._next_run[mid]
+    registered = check.data_observability._schedulers[mid].next_tick
 
-    # Jump past the next tick and let the failing query fire.
+    # Jump past the next tick and let the failing query fire again.
     current_time[0] = _BASE_EPOCH + 3665  # ~01:50:05
     aggregator.reset()
     check.data_observability.run_job()
@@ -949,16 +952,18 @@ def test_failed_cron_query_advances_next_run(pg_instance, aggregator, monkeypatc
     assert len(metrics) == 1
     assert 'status:error' in metrics[0].tags
 
-    # next_run must have advanced past the just-fired tick; otherwise the very next
-    # tick would re-fire the same tick in a tight loop.
-    advanced = check.data_observability._next_run[mid]
+    # next_tick must have advanced past the just-fired tick; otherwise the very next
+    # poll would re-fire the same tick in a tight loop.
+    advanced = check.data_observability._schedulers[mid].next_tick
     assert advanced > registered
     assert advanced >= current_time[0]
 
 
-def test_cron_startup_lookback_boundary_strict_less_than(pg_instance, aggregator, monkeypatch):
-    """At exactly the catch-up window since prev_tick, recovery does NOT fire (strict <)."""
-    # prev_tick = 00:50:00; window = 60s; clock = 00:51:00 means (now - prev_tick) == 60.
+def test_cron_startup_lookback_boundary_inclusive(pg_instance, aggregator, monkeypatch):
+    """CronScheduler uses an inclusive (<=) boundary: at exactly the window recovery fires;
+    1 second past the window it does not."""
+    # prev_tick = 00:50:00; window = 60s; clock = 00:51:00 means (now - prev_tick) == 60s == window.
+    # CronScheduler: 60 <= 60 → recovery fires.
     current_time = [float(_BASE_EPOCH + 120)]  # 00:51:00 exactly
     monkeypatch.setattr('datadog_checks.postgres.data_observability.time.time', lambda: current_time[0])
 
@@ -966,15 +971,15 @@ def test_cron_startup_lookback_boundary_strict_less_than(pg_instance, aggregator
     check = _make_cron_lookback_check(pg_instance, monkeypatch=monkeypatch, window_seconds=60)
     check.db_pool = _mock_db_pool(mock_conn)
     check.data_observability.run_job()
-    assert len(aggregator.metrics('dd.postgres.data_observability.query_executions')) == 0
+    assert len(aggregator.metrics('dd.postgres.data_observability.query_executions')) == 1
 
-    # 1 second earlier: (now - prev_tick) == 59 < 60, recovery fires.
+    # 1 second past the boundary: (now - prev_tick) == 61 > 60, recovery does NOT fire.
     check2 = _make_cron_lookback_check(pg_instance, monkeypatch=monkeypatch, window_seconds=60)
     check2.db_pool = _mock_db_pool(mock_conn)
-    current_time[0] = float(_BASE_EPOCH + 119)
+    current_time[0] = float(_BASE_EPOCH + 121)
     aggregator.reset()
     check2.data_observability.run_job()
-    assert len(aggregator.metrics('dd.postgres.data_observability.query_executions')) == 1
+    assert len(aggregator.metrics('dd.postgres.data_observability.query_executions')) == 0
 
 
 def test_emit_failures_metric_on_emit_path_exception(pg_instance, aggregator, monkeypatch):

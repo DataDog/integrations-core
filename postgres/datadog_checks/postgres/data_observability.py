@@ -9,8 +9,8 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
 import psycopg
-from croniter import croniter
 
+from datadog_checks.base.utils.cron import CronScheduler
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 
 if TYPE_CHECKING:
@@ -42,7 +42,7 @@ class PostgresDataObservability(DBMAsyncJob):
         self._check = check
         self._config = config
         self._last_execution: dict[int, float] = {}  # interval mode: last fire timestamp
-        self._next_run: dict[int, float] = {}  # cron mode: next fire time
+        self._schedulers: dict[int, CronScheduler] = {}  # cron mode: one scheduler per monitor_id
         collection_interval = config.data_observability.collection_interval or 10
         super(PostgresDataObservability, self).__init__(
             check,
@@ -68,7 +68,11 @@ class PostgresDataObservability(DBMAsyncJob):
         valid = []
         for q in queries:
             if q.schedule:
-                if not croniter.is_valid(q.schedule):
+                try:
+                    self._schedulers[q.monitor_id] = CronScheduler(
+                        q.schedule, startup_lookback=CRON_STARTUP_LOOKBACK_SECONDS
+                    )
+                except (ValueError, TypeError):
                     self._log.warning(
                         "Skipping DO query monitor_id=%d: invalid cron schedule %r",
                         q.monitor_id,
@@ -89,17 +93,11 @@ class PostgresDataObservability(DBMAsyncJob):
         due: list[DueQuery] = []
         for q in self._queries:
             if q.schedule:
-                cached = self._next_run.get(q.monitor_id)
-                if cached is None:
-                    it = croniter(q.schedule, now)
-                    prev_tick = it.get_prev(float)
-                    self._next_run[q.monitor_id] = it.get_next(float)
-                    # Startup recovery: catch up if the previous tick fell within the lookback window.
-                    if 0 < CRON_STARTUP_LOOKBACK_SECONDS and (now - prev_tick) < CRON_STARTUP_LOOKBACK_SECONDS:
-                        due.append(DueQuery(q, prev_tick, "cron"))
-                    continue
-                if now >= cached:
-                    due.append(DueQuery(q, cached, "cron"))
+                ticks = self._schedulers[q.monitor_id].due_ticks(now)
+                if ticks:
+                    # Take the latest elapsed tick; earlier ones are already in the past
+                    # and do not need separate execution.
+                    due.append(DueQuery(q, ticks[-1], "cron"))
             else:
                 # On first sight, backdate one interval so the first fire reports lateness = 0.
                 last = self._last_execution.setdefault(q.monitor_id, now - q.interval_seconds)
@@ -209,10 +207,9 @@ class PostgresDataObservability(DBMAsyncJob):
 
             # Advance scheduling state before emission so an emit-side error cannot
             # leave the query stuck re-firing the same tick.
+            # For cron mode, due_ticks() already advanced the scheduler's internal state.
             now_at_fire_end = time.time()
-            if due.mode == "cron":
-                self._next_run[q.monitor_id] = croniter(q.schedule, now_at_fire_end).get_next(float)
-            else:
+            if due.mode == "interval":
                 self._last_execution[q.monitor_id] = now_at_fire_end
 
             try:
