@@ -12,6 +12,14 @@ kueue_cluster_queue_resource_usage{cohort="default",cluster_queue="default",flav
 kueue_cluster_queue_resource_usage{cohort="default",cluster_queue="default",flavor="on-demand",resource="example.com/fpga",replica_role="leader"} 3
 kueue_cluster_queue_resource_usage{cohort="default",cluster_queue="default",flavor="on-demand",resource="nvidia.com/gpu",replica_role="leader"} 2
 
+# HELP kueue_cluster_queue_resource_pending Reports the cluster_queue's total pending resource requests within all the flavors.
+# TYPE kueue_cluster_queue_resource_pending gauge
+kueue_cluster_queue_resource_pending{cohort="default",cluster_queue="default",flavor="on-demand",resource="nvidia.com/gpu",replica_role="leader"} 2
+
+# HELP kueue_pending_workloads The number of pending workloads per cluster_queue and status.
+# TYPE kueue_pending_workloads gauge
+kueue_pending_workloads{cluster_queue="default",status="inadmissible",replica_role="leader"} 2
+
 # HELP kueue_local_queue_pending_workloads The number of pending workloads, per local_queue and status.
 # TYPE kueue_local_queue_pending_workloads gauge
 kueue_local_queue_pending_workloads{name="gpu",namespace="team-a",status="active",replica_role="leader"} 1

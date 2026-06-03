@@ -101,7 +101,7 @@ METRIC_MAP = {
     'kueue_evicted_workloads_once': 'evicted_workloads_once',
     'kueue_finished_workloads': 'finished_workloads',
     'kueue_finished_workloads_total': 'finished_workloads',
-    'kueue_pending_workloads': 'pending_workloads',
+    'kueue_pending_workloads': 'cluster_queue.pending_workloads',
     'kueue_pods_ready_to_evicted_time_seconds': 'pods_ready_to_evicted_time.seconds',
     'kueue_preempted_workloads': 'preempted_workloads',
     'kueue_quota_reserved_wait_time_seconds': 'quota_reserved.wait_time.seconds',

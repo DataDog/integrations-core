@@ -1,7 +1,9 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
-kueue.go.goroutines,gauge,0,,,Number of goroutines that currently exist.,0,kueue,go_goroutines,false,
-kueue.cluster_queue.resource_usage.cpu,gauge,0,,,Reports the cluster_queue's CPU resource usage within all the flavors.,0,kueue,cluster_queue_resource_usage_cpu,false,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
-kueue.cluster_queue.resource_usage.gpu,gauge,0,,,Reports the cluster_queue's GPU resource usage within all the flavors.,0,kueue,cluster_queue_resource_usage_gpu,false,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
-kueue.cluster_queue.resource_usage.other,gauge,0,,,Reports uncategorized cluster_queue resource usage within all the flavors.,0,kueue,cluster_queue_resource_usage_other,false,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
-kueue.local_queue.pending_workloads,gauge,0,,,The number of pending workloads per local queue and status.,0,kueue,local_queue_pending_workloads,false,"kueue_local_queue:gpu,namespace:team-a,status:active,replica_role:leader"
-kueue.resource_flavor.quota_reserved_workloads,gauge,0,,,Number of reserved workloads.,0,kueue,resource_flavor_quota_reserved_workloads,false,"kueue_cluster_queue:default,flavor:on-demand"
+kueue.cluster_queue.pending_workloads,gauge,0,,,The number of pending workloads per cluster queue and status.,0,kueue,cluster_queue_pending_workloads,,"kueue_cluster_queue:default,status:inadmissible,replica_role:leader"
+kueue.cluster_queue.resource_pending.gpu,gauge,0,,,Reports the cluster_queue's pending GPU resource requests within all the flavors.,0,kueue,cluster_queue_resource_pending_gpu,,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
+kueue.cluster_queue.resource_usage.cpu,gauge,0,,,Reports the cluster_queue's CPU resource usage within all the flavors.,0,kueue,cluster_queue_resource_usage_cpu,,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
+kueue.cluster_queue.resource_usage.gpu,gauge,0,,,Reports the cluster_queue's GPU resource usage within all the flavors.,0,kueue,cluster_queue_resource_usage_gpu,,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
+kueue.cluster_queue.resource_usage.other,gauge,0,,,Reports uncategorized cluster_queue resource usage within all the flavors.,0,kueue,cluster_queue_resource_usage_other,,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
+kueue.go.goroutines,gauge,0,,,Number of goroutines that currently exist.,0,kueue,go_goroutines,,
+kueue.local_queue.pending_workloads,gauge,0,,,The number of pending workloads per local queue and status.,0,kueue,local_queue_pending_workloads,,"kueue_local_queue:gpu,namespace:team-a,status:active,replica_role:leader"
+kueue.resource_flavor.quota_reserved_workloads,gauge,0,,,Number of reserved workloads.,0,kueue,resource_flavor_quota_reserved_workloads,,"kueue_cluster_queue:default,flavor:on-demand"

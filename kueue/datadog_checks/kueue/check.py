@@ -6,7 +6,6 @@ from datadog_checks.base.checks.openmetrics.v2.transform import get_native_dynam
 
 from .metrics import LOCAL_QUEUE_METRIC_MAP, METRIC_MAP, RESOURCE_METRIC_MAP
 
-
 RESOURCE_METRIC_PATTERN = '|'.join(RESOURCE_METRIC_MAP)
 LOCAL_QUEUE_METRIC_PATTERN = '|'.join(LOCAL_QUEUE_METRIC_MAP)
 
@@ -85,7 +84,9 @@ class KueueCheck(OpenMetricsBaseCheckV2):
             metric_name = LOCAL_QUEUE_METRIC_MAP[metric.name]
             native_transformer = cached_transformers.get(metric_name)
             if native_transformer is None:
-                native_transformer = get_native_dynamic_transformer(self, metric_name, None, metric_transformer.global_options)
+                native_transformer = get_native_dynamic_transformer(
+                    self, metric_name, None, metric_transformer.global_options
+                )
                 cached_transformers[metric_name] = native_transformer
 
             new_sample_data = [
