@@ -122,6 +122,7 @@ files:
           type: string
           example: aws_msk_iam
           display_default: oidc
+        fleet_configurable: false
       - name: aws_region
         description: |
           AWS region for MSK IAM authentication. Required when method is `aws_msk_iam` and the region
@@ -131,6 +132,7 @@ files:
         value:
           type: string
           example: us-west-2
+        fleet_configurable: false
       - name: url
         fleet_configurable: true
         description: |
@@ -157,6 +159,7 @@ files:
           For example, a custom scope like 'kafka' or 'api://default'.
         value:
           type: string
+        fleet_configurable: false
       - name: extensions
         enabled: false
         description: |
@@ -166,6 +169,7 @@ files:
           Format: 'logicalCluster=lkc-xxxxx' or 'logicalCluster=lkc-xxxxx,identityPoolId=pool-xxxxx'
         value:
           type: string
+        fleet_configurable: false
       - name: tls_ca_cert
         enabled: false
         description: |
@@ -175,6 +179,7 @@ files:
         value:
           type: string
           example: /path/to/oauth_ca_cert.pem
+        fleet_configurable: false
 
     - template: instances/tls
 
@@ -434,6 +439,7 @@ files:
           example:
             - retention.bytes
             - compression.type
+      fleet_configurable: false
     
     # ========================================================================
     # Action #4: delete_topic
@@ -459,6 +465,7 @@ files:
           type: string
           description: Topic name to delete
           example: old-orders
+      fleet_configurable: false
     
     # ========================================================================
     # Action #5: delete_consumer_group
@@ -484,6 +491,7 @@ files:
           type: string
           description: Consumer group ID to delete
           example: old-service-v1
+      fleet_configurable: false
     
     # ========================================================================
     # Action #6: update_consumer_group_offsets
@@ -544,6 +552,7 @@ files:
             - topic: orders
               partition: 1
               offset: 1500
+      fleet_configurable: false
     
     # ========================================================================
     # Action #7: produce_message
@@ -601,6 +610,7 @@ files:
             Example: source: "datadog-agent" -> base64 -> "ZGF0YWRvZy1hZ2VudA=="
           example:
             source: "ZGF0YWRvZy1hZ2VudA=="
+      fleet_configurable: false
     
     # ========================================================================
     # Schema Registry Configuration
@@ -705,6 +715,7 @@ files:
           The OAuth scope to request.
         value:
           type: string
+        fleet_configurable: false
       - name: custom_headers
         enabled: false
         description: |
@@ -718,6 +729,7 @@ files:
           type: object
           additionalProperties:
             type: string
+        fleet_configurable: false
       - name: tls_ca_cert
         enabled: false
         description: |
@@ -725,5 +737,6 @@ files:
         value:
           type: string
           example: /path/to/oauth_ca_cert.pem
+        fleet_configurable: false
 
     - template: instances/default
