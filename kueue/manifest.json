@@ -8,18 +8,18 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "<FILL IN - A brief description of what this offering provides>",
+    "description": "This integration collects metrics from the Kueue controller manager and the Kueue API server and enables you to monitor the health and performance of your Kueue cluster.",
     "title": "Kueue",
     "media": [],
     "classifier_tags": [
-      "<Add relevant tags from this list: https://docs.datadoghq.com/developers/integrations/check_references/#classifier-tags>",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::<FILL IN>",
-      "Offering::<FILL IN>",
-      "Queried Data Type::<FILL IN>",
-      "Submitted Data Type::<FILL IN>"
+      "Category::Kubernetes",
+      "Category::Containers",
+      "Category::Metrics",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics"
     ]
   },
   "assets": {
@@ -39,9 +39,7 @@
         "metadata_path": "metadata.csv"
       }
     },
-    "dashboards": {
-        "<FILL IN dashboard short_name ex: integration name overview>": "assets/dashboards/<FILL IN>.json"
-    },
+    "dashboards": {},
     "monitors": {},
     "saved_views": {}
   },
