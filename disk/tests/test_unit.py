@@ -658,6 +658,35 @@ def test_device_include_exclude():
     assert c.exclude_disk(MockPart(device='/dev/sda4')) is True
 
 
+def test_latency_metrics_respect_device_include(aggregator, dd_run_check):
+    """
+    Latency metrics (read_time, write_time) must honour device_include/device_exclude,
+    not emit metrics for every disk regardless of configuration.
+    """
+    included_device = '/dev/sda1'
+    excluded_device = '/dev/sdb1'
+
+    io_counters = {included_device: MockDiskMetrics(), excluded_device: MockDiskMetrics()}
+
+    instance = {'device_include': [included_device], 'tag_by_label': False}
+    c = Disk('disk', {}, [instance])
+
+    with (
+        mock.patch('psutil.disk_partitions', return_value=[MockPart(device=included_device)]),
+        mock.patch('psutil.disk_usage', return_value=MockDiskMetrics()),
+        mock.patch('psutil.disk_io_counters', return_value=io_counters),
+    ):
+        dd_run_check(c)
+
+    latency_metrics = ['system.disk.read_time', 'system.disk.write_time',
+                       'system.disk.read_time_pct', 'system.disk.write_time_pct']
+    for metric in latency_metrics:
+        aggregator.assert_metric(metric, tags=['device:{}'.format(included_device),
+                                               'device_name:sda1'], count=1)
+        aggregator.assert_metric(metric, tags=['device:{}'.format(excluded_device),
+                                               'device_name:sdb1'], count=0)
+
+
 def test_mount_point_include():
     instance = {'mount_point_include': ['/dev/sda[1-3]', 'c:']}
     c = Disk('disk', {}, [instance])
