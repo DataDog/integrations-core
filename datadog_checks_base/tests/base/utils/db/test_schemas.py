@@ -254,3 +254,29 @@ def test_schema_collector_skips_inaccessible_database(aggregator):
     assert 'db_accessible' in collected_names
     assert 'db_also_accessible' in collected_names
     assert 'db_inaccessible' not in collected_names
+
+
+@pytest.mark.unit
+def test_schema_collector_skips_malformed_database_entry(aggregator):
+    """A database entry missing the 'name' key is skipped without aborting the run."""
+
+    class MalformedDbCollector(TestSchemaCollector):
+        __test__ = False
+
+        def _get_databases(self):
+            return [{'name': 'db_good'}, {'no_name_key': 'bad'}, {'name': 'db_also_good'}]
+
+        @contextmanager
+        def _get_cursor(self, database: str):
+            self._row_index = 0
+            yield {}
+
+    check = TestDatabaseCheck()
+    collector = MalformedDbCollector(check, SchemaCollectorConfig())
+    result = collector.collect_schemas()
+
+    assert result is True
+    events = aggregator.get_event_platform_events("dbm-metadata")
+    collected_names = [row['name'] for event in events for row in event['metadata']]
+    assert 'db_good' in collected_names
+    assert 'db_also_good' in collected_names

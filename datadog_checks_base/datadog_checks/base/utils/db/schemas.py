@@ -69,11 +69,11 @@ class SchemaCollector(ABC):
             databases = self._get_databases()
             self._log.debug("Collecting schemas for %d databases", len(databases))
             for database in databases:
-                self._log.debug("Starting collection of schemas for database %s", database['name'])
-                database_name = database['name']
+                database_name = database.get('name')
                 if not database_name:
-                    self._log.warning("database has no name %v", database)
+                    self._log.warning("database has no name: %s", database)
                     continue
+                self._log.debug("Starting collection of schemas for database %s", database_name)
                 self._collection_started_at = now_ms()
                 self._collection_payloads_count = 0
                 self._queued_rows = []
