@@ -35,32 +35,9 @@ except ImportError:
 # Database instance collection interval in seconds (not user-configurable)
 DATABASE_INSTANCE_COLLECTION_INTERVAL = 300
 
-_VIEW_REFRESHES_QUERY = """\
-SELECT
-    database,
-    view,
-    status,
-    exception,
-    toInt64(toUnixTimestamp(last_success_time)) AS last_refresh_time,
-    toInt64(toUnixTimestamp(next_refresh_time)) AS next_refresh_time,
-    toInt64(written_rows) AS written_rows,
-    toInt64(written_bytes) AS written_bytes
-FROM {view_refreshes_table}
-"""
-
-_VIEW_REFRESH_STATUS_MAP = {
-    'Scheduled': AgentCheck.OK,
-    'Running': AgentCheck.OK,
-    'WaitingForDependencies': AgentCheck.WARNING,
-    'Disabled': AgentCheck.UNKNOWN,
-    'Error': AgentCheck.CRITICAL,
-}
-
-
 class ClickhouseCheck(DatabaseCheck):
     __NAMESPACE__ = 'clickhouse'
     SERVICE_CHECK_CONNECT = 'can_connect'
-    SERVICE_CHECK_VIEW_REFRESH = 'view.refresh'
 
     def __init__(self, name, init_config, instances):
         super(ClickhouseCheck, self).__init__(name, init_config, instances)
@@ -85,11 +62,6 @@ class ClickhouseCheck(DatabaseCheck):
 
         # Track last emission time for database instance metadata (rate limiting)
         self._database_instance_last_emitted = 0
-
-        # View refresh metric collection state
-        self._view_refreshes_unsupported_logged = False
-        self._view_refreshes_permission_logged = False
-        self._view_refreshes_skip = False
 
         # Initialize TagManager for tag management (similar to MySQL)
         self.tag_manager = TagManager()
@@ -312,10 +284,6 @@ class ClickhouseCheck(DatabaseCheck):
         # Run parts and merges monitoring if enabled
         if self.parts_and_merges:
             self.parts_and_merges.run_job_loop(self.tags)
-
-        # Collect view refresh metrics only when schema_metrics is enabled
-        if self.table_metrics:
-            self._collect_view_refresh_metrics()
 
     def get_queries(self) -> list[dict]:
         query_list = []
@@ -616,56 +584,6 @@ class ClickhouseCheck(DatabaseCheck):
         # Clear the shared pool manager
         # Note: urllib3 pool connections are automatically closed when idle
         self._pool_manager = None
-
-    def _collect_view_refresh_metrics(self) -> None:
-        if self._view_refreshes_skip:
-            return
-        try:
-            rows = self.execute_query_raw(
-                _VIEW_REFRESHES_QUERY.format(view_refreshes_table=self.get_system_table('view_refreshes'))
-            )
-        except Exception as e:
-            self._handle_view_refreshes_error(e)
-            return
-
-        # Drop the instance-level `db:` base tag (the connection database) so each
-        # per-view series carries exactly one `db:` tag — the view's own database.
-        base_tags = [t for t in self.tags if not t.startswith('db:')]
-        seen: set[tuple[str, str]] = set()
-        for database, view_name, status, exception, last_time, next_time, written_rows, written_bytes in rows:
-            if (database, view_name) in seen:
-                continue
-            seen.add((database, view_name))
-            view_tags = base_tags + [f'db:{database}', f'view:{view_name}']
-            sc_status = _VIEW_REFRESH_STATUS_MAP.get(status, AgentCheck.UNKNOWN)
-            sc_msg = '' if sc_status == AgentCheck.OK else ((exception or '').split('\n')[0] or status)
-            self.service_check(self.SERVICE_CHECK_VIEW_REFRESH, sc_status, tags=view_tags, message=sc_msg)
-            self.gauge('view.refresh.status', sc_status, tags=view_tags)
-            self.gauge('view.refresh.last_time', int(last_time or 0), tags=view_tags)
-            self.gauge('view.refresh.next_time', int(next_time or 0), tags=view_tags)
-            self.gauge('view.refresh.rows', int(written_rows or 0), tags=view_tags)
-            self.gauge('view.refresh.bytes', int(written_bytes or 0), tags=view_tags)
-
-    def _handle_view_refreshes_error(self, e: Exception) -> None:
-        lowered = str(e).lower()
-        if 'unknown table' in lowered or 'unknowntable' in lowered or 'unknown_table' in lowered:
-            if not self._view_refreshes_unsupported_logged:
-                self.log.info(
-                    "system.view_refreshes not present (ClickHouse < 24.3); refresh status will not be populated."
-                )
-                self._view_refreshes_unsupported_logged = True
-            self._view_refreshes_skip = True
-        elif 'not enough privileges' in lowered or 'access_denied' in lowered:
-            if not self._view_refreshes_permission_logged:
-                self.log.warning(
-                    "Agent user lacks SELECT on system.view_refreshes; refresh status will not be populated. "
-                    "Grant with: GRANT SELECT ON system.view_refreshes TO <agent_user>. "
-                    "Restart the agent after granting access."
-                )
-                self._view_refreshes_permission_logged = True
-            self._view_refreshes_skip = True
-        else:
-            self.log.exception("Unexpected error querying system.view_refreshes")
 
     def version_lt(self, version: str) -> bool:
         """

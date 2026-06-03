@@ -11,11 +11,11 @@ if TYPE_CHECKING:
     from datadog_checks.clickhouse import ClickhouseCheck
     from datadog_checks.clickhouse.config_models.instance import SchemaMetrics
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.tracking import tracked_method
 
 DEFAULT_COLLECTION_INTERVAL = 60
-
 
 _TABLE_SIZES_QUERY = """\
 SELECT
@@ -27,13 +27,36 @@ FROM {tables_table}
 WHERE database NOT IN ('system', 'INFORMATION_SCHEMA', 'information_schema')
 """
 
+_VIEW_REFRESHES_QUERY = """\
+SELECT
+    database,
+    view,
+    status,
+    exception,
+    toInt64(toUnixTimestamp(last_success_time)) AS last_refresh_time,
+    toInt64(toUnixTimestamp(next_refresh_time)) AS next_refresh_time,
+    toInt64(written_rows) AS written_rows,
+    toInt64(written_bytes) AS written_bytes
+FROM {view_refreshes_table}
+"""
+
+_VIEW_REFRESH_STATUS_MAP = {
+    'Scheduled': AgentCheck.OK,
+    'Running': AgentCheck.OK,
+    'WaitingForDependencies': AgentCheck.WARNING,
+    'Disabled': AgentCheck.UNKNOWN,
+    'Error': AgentCheck.CRITICAL,
+}
+
 
 def agent_check_getter(self):
     return self._check
 
 
 class ClickhouseTableMetrics(DBMAsyncJob):
-    """Per-table size gauges from system.tables."""
+    """Per-table size and per-view refresh gauges from system.tables and system.view_refreshes."""
+
+    SERVICE_CHECK_VIEW_REFRESH = 'view.refresh'
 
     def __init__(self, check: ClickhouseCheck, config: SchemaMetrics):
         collection_interval = config.collection_interval
@@ -54,6 +77,9 @@ class ClickhouseTableMetrics(DBMAsyncJob):
         self._config = config
         self._collection_interval = collection_interval
         self._db_client = None
+        self._view_refreshes_unsupported_logged = False
+        self._view_refreshes_permission_logged = False
+        self._view_refreshes_skip = False
 
     def cancel(self):
         super(ClickhouseTableMetrics, self).cancel()
@@ -81,6 +107,7 @@ class ClickhouseTableMetrics(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def run_job(self):
         self._emit_table_size_gauges()
+        self._collect_view_refresh_metrics()
 
     def _emit_table_size_gauges(self) -> None:
         try:
@@ -100,3 +127,55 @@ class ClickhouseTableMetrics(DBMAsyncJob):
             entity_tags = base_tags + [f'db:{database}', f'table:{name}']
             self._check.gauge('table.rows', int(total_rows or 0), tags=entity_tags)
             self._check.gauge('table.bytes', int(total_bytes or 0), tags=entity_tags)
+
+    def _collect_view_refresh_metrics(self) -> None:
+        if self._view_refreshes_skip:
+            return
+        try:
+            rows = self._check.execute_query_raw(
+                _VIEW_REFRESHES_QUERY.format(
+                    view_refreshes_table=self._check.get_system_table('view_refreshes')
+                )
+            )
+        except Exception as e:
+            self._handle_view_refreshes_error(e)
+            return
+
+        # Drop the instance-level `db:` base tag (the connection database) so each
+        # per-view series carries exactly one `db:` tag — the view's own database.
+        base_tags = [t for t in self._check.tags if not t.startswith('db:')]
+        seen: set[tuple[str, str]] = set()
+        for database, view_name, status, exception, last_time, next_time, written_rows, written_bytes in rows:
+            if (database, view_name) in seen:
+                continue
+            seen.add((database, view_name))
+            view_tags = base_tags + [f'db:{database}', f'view:{view_name}']
+            sc_status = _VIEW_REFRESH_STATUS_MAP.get(status, AgentCheck.UNKNOWN)
+            sc_msg = '' if sc_status == AgentCheck.OK else ((exception or '').split('\n')[0] or status)
+            self._check.service_check(self.SERVICE_CHECK_VIEW_REFRESH, sc_status, tags=view_tags, message=sc_msg)
+            self._check.gauge('view.refresh.status', sc_status, tags=view_tags)
+            self._check.gauge('view.refresh.last_time', int(last_time or 0), tags=view_tags)
+            self._check.gauge('view.refresh.next_time', int(next_time or 0), tags=view_tags)
+            self._check.gauge('view.refresh.rows', int(written_rows or 0), tags=view_tags)
+            self._check.gauge('view.refresh.bytes', int(written_bytes or 0), tags=view_tags)
+
+    def _handle_view_refreshes_error(self, e: Exception) -> None:
+        lowered = str(e).lower()
+        if 'unknown table' in lowered or 'unknowntable' in lowered or 'unknown_table' in lowered:
+            if not self._view_refreshes_unsupported_logged:
+                self._log.info(
+                    "system.view_refreshes not present (ClickHouse < 24.3); refresh status will not be populated."
+                )
+                self._view_refreshes_unsupported_logged = True
+            self._view_refreshes_skip = True
+        elif 'not enough privileges' in lowered or 'access_denied' in lowered:
+            if not self._view_refreshes_permission_logged:
+                self._log.warning(
+                    "Agent user lacks SELECT on system.view_refreshes; refresh status will not be populated. "
+                    "Grant with: GRANT SELECT ON system.view_refreshes TO <agent_user>. "
+                    "Restart the agent after granting access."
+                )
+                self._view_refreshes_permission_logged = True
+            self._view_refreshes_skip = True
+        else:
+            self._log.exception("Unexpected error querying system.view_refreshes")

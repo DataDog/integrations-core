@@ -183,6 +183,7 @@ def _patch_view_refresh_query(check, rows):
 
 
 def test_collect_view_refresh_emits_gauges_and_service_check(check):
+    job = check.table_metrics
     gauges = []
     service_checks = []
     check.gauge = lambda name, value, tags=None: gauges.append((name, value, tags))
@@ -192,7 +193,7 @@ def test_collect_view_refresh_emits_gauges_and_service_check(check):
 
     row = _view_refresh_row(status='Scheduled', written_rows=500, written_bytes=4096)
     with _patch_view_refresh_query(check, [row]):
-        check._collect_view_refresh_metrics()
+        job._collect_view_refresh_metrics()
 
     sc = service_checks[0]
     assert sc[0] == 'view.refresh'
@@ -208,13 +209,14 @@ def test_collect_view_refresh_emits_gauges_and_service_check(check):
 
 
 def test_collect_view_refresh_error_status_sets_critical_with_message(check):
+    job = check.table_metrics
     service_checks = []
     check.gauge = lambda *a, **kw: None
     check.service_check = lambda name, status, tags=None, message=None: service_checks.append((status, message))
 
     row = _view_refresh_row(status='Error', exception='Timeout exceeded\nmore detail')
     with _patch_view_refresh_query(check, [row]):
-        check._collect_view_refresh_metrics()
+        job._collect_view_refresh_metrics()
 
     status, msg = service_checks[0]
     assert status == AgentCheck.CRITICAL
@@ -222,70 +224,77 @@ def test_collect_view_refresh_error_status_sets_critical_with_message(check):
 
 
 def test_collect_view_refresh_unknown_status_maps_to_unknown(check):
+    job = check.table_metrics
     service_checks = []
     check.gauge = lambda *a, **kw: None
     check.service_check = lambda name, status, tags=None, message=None: service_checks.append(status)
 
     with _patch_view_refresh_query(check, [_view_refresh_row(status='SomeFutureStatus')]):
-        check._collect_view_refresh_metrics()
+        job._collect_view_refresh_metrics()
 
     assert service_checks[0] == AgentCheck.UNKNOWN
 
 
 def test_collect_view_refresh_drops_instance_db_tag(check):
+    job = check.table_metrics
     emitted_tags = []
     check.gauge = lambda name, value, tags=None: emitted_tags.append(tags)
     check.service_check = lambda *a, **kw: None
 
     with _patch_view_refresh_query(check, [_view_refresh_row(database='analytics')]):
-        check._collect_view_refresh_metrics()
+        job._collect_view_refresh_metrics()
 
     db_tags = [t for tags in emitted_tags for t in tags if t.startswith('db:')]
     assert all(t == 'db:analytics' for t in db_tags), db_tags
 
 
 def test_collect_view_refresh_dedupes_rows(check):
+    job = check.table_metrics
     service_checks = []
     check.gauge = lambda *a, **kw: None
     check.service_check = lambda name, status, tags=None, message=None: service_checks.append(name)
 
     row = _view_refresh_row()
     with _patch_view_refresh_query(check, [row, row, row]):
-        check._collect_view_refresh_metrics()
+        job._collect_view_refresh_metrics()
 
     assert len(service_checks) == 1
 
 
 def test_collect_view_refresh_skips_when_flag_set(check):
-    check._view_refreshes_skip = True
+    job = check.table_metrics
+    job._view_refreshes_skip = True
 
     with mock.patch.object(check, 'execute_query_raw') as mock_query:
-        check._collect_view_refresh_metrics()
+        job._collect_view_refresh_metrics()
 
     mock_query.assert_not_called()
 
 
 def test_handle_view_refreshes_unknown_table_sets_skip_and_logs_once(check):
-    with mock.patch.object(check.log, 'info') as mock_log:
-        check._handle_view_refreshes_error(Exception("DB::Exception: Unknown table system.view_refreshes"))
-        check._handle_view_refreshes_error(Exception("DB::Exception: Unknown table system.view_refreshes"))
+    job = check.table_metrics
+    with mock.patch.object(job._log, 'info') as mock_log:
+        job._handle_view_refreshes_error(Exception("DB::Exception: Unknown table system.view_refreshes"))
+        job._handle_view_refreshes_error(Exception("DB::Exception: Unknown table system.view_refreshes"))
 
-    assert check._view_refreshes_skip is True
+    assert job._view_refreshes_skip is True
     mock_log.assert_called_once()
 
 
 def test_handle_view_refreshes_permission_denied_sets_skip_and_logs_once(check):
-    with mock.patch.object(check.log, 'warning') as mock_log:
-        check._handle_view_refreshes_error(Exception("Not enough privileges"))
-        check._handle_view_refreshes_error(Exception("Not enough privileges"))
+    job = check.table_metrics
+    with mock.patch.object(job._log, 'warning') as mock_log:
+        job._handle_view_refreshes_error(Exception("Not enough privileges"))
+        job._handle_view_refreshes_error(Exception("Not enough privileges"))
 
-    assert check._view_refreshes_skip is True
+    assert job._view_refreshes_skip is True
     mock_log.assert_called_once()
     assert 'Restart the agent' in mock_log.call_args[0][0]
 
 
 def test_handle_view_refreshes_unexpected_error_does_not_set_skip(check):
-    with mock.patch.object(check.log, 'exception'):
-        check._handle_view_refreshes_error(Exception("some random error"))
+    job = check.table_metrics
+    with mock.patch.object(job._log, 'exception'):
+        job._handle_view_refreshes_error(Exception("some random error"))
 
-    assert check._view_refreshes_skip is False
+    assert job._view_refreshes_skip is False
