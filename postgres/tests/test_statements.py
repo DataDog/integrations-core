@@ -416,8 +416,18 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
 
 
 def test_obfuscate_sql_options(aggregator, integration_check, dbm_instance, datadog_agent):
-    """Assert that obfuscate_sql is called with the expected options for both metrics and samples."""
+    """Verify obfuscate_sql is called with dbms=postgresql for both metrics and samples."""
     dbm_instance['collect_schemas'] = {'enabled': False}
+
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    # Unconditionally verify both classes have the correct options set at init time,
+    # independent of whether the DB produces any queries to obfuscate.
+    for name, obj in [('statement_metrics', check.statement_metrics), ('statement_samples', check.statement_samples)]:
+        opts = json.loads(obj._obfuscate_options)
+        assert opts.get('dbms') == 'postgresql', f"{name}: missing dbms=postgresql in obfuscation options"
+        assert opts.get('return_json_metadata') is True, f"{name}: missing return_json_metadata=True in obfuscation options"
 
     captured_options = []
 
@@ -425,9 +435,6 @@ def test_obfuscate_sql_options(aggregator, integration_check, dbm_instance, data
         if options is not None:
             captured_options.append(json.loads(options))
         return json.dumps({'query': query, 'metadata': {}})
-
-    check = integration_check(dbm_instance)
-    check._connect()
 
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = obfuscate_sql
