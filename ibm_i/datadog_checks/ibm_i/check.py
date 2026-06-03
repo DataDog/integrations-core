@@ -28,12 +28,9 @@ class IbmICheck(AgentCheck, ConfigMixin):
         self._connection_string = None
         self._subprocess = None
         self._query_manager = None
-        self._current_errors = 0
         self.check_initializations.append(self.set_up_query_manager)
 
     def check(self, _):
-        self._current_errors = 0
-
         try:
             self.query_manager.execute()
             check_status = AgentCheck.OK
@@ -58,10 +55,6 @@ class IbmICheck(AgentCheck, ConfigMixin):
     def cancel(self):
         # When the check gets cancelled, clean up the connection subprocess.
         self._delete_connection_subprocess()
-
-    def handle_query_error(self, error):
-        self._current_errors += 1
-        return error
 
     @property
     def connection_subprocess(self):
@@ -249,7 +242,6 @@ class IbmICheck(AgentCheck, ConfigMixin):
                 tags=self.config.tags,
                 queries=query_list,
                 hostname=hostname,
-                error_handler=self.handle_query_error,
             )
             self._query_manager.compile_queries()
 
