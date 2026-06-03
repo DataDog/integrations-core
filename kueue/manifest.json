@@ -36,6 +36,9 @@
         "prefix": "kueue.",
         "check": "kueue.build_info",
         "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
       }
     },
     "dashboards": {},

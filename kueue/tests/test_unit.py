@@ -23,7 +23,9 @@ def test_mapped_metrics_are_in_metadata():
 
     resource_names = {OTHER_RESOURCE_NAME, *RESOURCE_NAME_MAP.values()}
     for metric_name in RESOURCE_METRIC_MAP.values():
-        mapped_metrics.update(_metadata_metric_name(f'{metric_name}.{resource_name}') for resource_name in resource_names)
+        mapped_metrics.update(
+            _metadata_metric_name(f'{metric_name}.{resource_name}') for resource_name in resource_names
+        )
 
     assert mapped_metrics.issubset(set(get_metadata_metrics()))
 
