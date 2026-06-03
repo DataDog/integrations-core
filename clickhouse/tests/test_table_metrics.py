@@ -20,6 +20,7 @@ def _table_size_row(database='default', name='events', total_rows=1000, total_by
 def _view_refresh_row(
     database='mydb',
     view='mv_orders',
+    host='replica-1',
     status='Scheduled',
     exception='',
     last_time=1700000000,
@@ -27,7 +28,7 @@ def _view_refresh_row(
     written_rows=500,
     written_bytes=4096,
 ):
-    return (database, view, status, exception, last_time, next_time, written_rows, written_bytes)
+    return (database, view, host, status, exception, last_time, next_time, written_rows, written_bytes)
 
 
 @pytest.fixture
@@ -136,17 +137,18 @@ def test_run_job_uses_table_database_not_connection_db(check):
     assert 'table:orders' in tags
 
 
-def test_run_job_dedupes_duplicate_table_rows(check):
+def test_run_job_table_sizes_query_dedupes_via_limit_by(check):
+    # Dedup across clusterAllReplicas replica rows is handled in SQL via
+    # LIMIT 1 BY database, name — not in Python.
     job = check.table_metrics
-    emitted = []
-    check.gauge = lambda name, value, tags=None: emitted.append((name, value, tags))
+    captured = []
 
-    row = _table_size_row(name='events')
-    with _patch_query(job, table_rows=[row, row, row]):
-        job.run_job()
+    with mock.patch.object(job, '_execute_query', side_effect=lambda q: captured.append(q) or []):
+        with mock.patch.object(job._check, 'execute_query_raw', return_value=[]):
+            job.run_job()
 
-    rows_emissions = [m for m in emitted if m[0] == 'table.rows']
-    assert len(rows_emissions) == 1
+    assert len(captured) == 1
+    assert 'LIMIT 1 BY database, name' in captured[0]
 
 
 def test_cancel_closes_db_client(check):
@@ -203,6 +205,7 @@ def test_collect_view_refresh_emits_gauges_and_service_check(check):
     assert sc[1] == AgentCheck.OK
     assert 'db:mydb' in sc[2]
     assert 'view:mv_orders' in sc[2]
+    assert 'host:replica-1' in sc[2]
     assert sc[3] == ''
 
     by_name = {n: v for n, v, _ in gauges}
