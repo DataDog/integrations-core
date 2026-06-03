@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import ssl
-from unittest.mock import MagicMock
 from urllib.request import urlopen
 
 import pytest
@@ -11,17 +10,13 @@ import pytest
 from datadog_checks.dev import WaitFor, docker_run, get_docker_hostname, get_here
 from datadog_checks.dev.utils import find_free_port
 from datadog_checks.hpe_aruba_edgeconnect import HpeArubaEdgeconnectCheck
-from datadog_checks.hpe_aruba_edgeconnect.client import OrchestratorClient
 
-from .constants import (
+from .common import (
     APPLIANCE_PAYLOAD,
-    CHECK_MODULE,
-    DISK_PAYLOAD,
-    MEMORY_PAYLOAD,
-    NEWEST_TS,
+    EXCLUDED_APPLIANCE_IP,
     TGZ_DATA,
-    _build_cpu_payload,
-    _build_system_info,
+    _mock_appliance_client,
+    _setup_mocks,
 )
 
 USE_EDGECONNECT_LAB = os.environ.get('USE_EDGECONNECT_LAB')
@@ -30,7 +25,6 @@ USE_EDGECONNECT_LAB = os.environ.get('USE_EDGECONNECT_LAB')
 HERE = get_here()
 HOST = get_docker_hostname()
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
-EXCLUDED_APPLIANCE_IP = '10.0.0.3'
 
 
 @pytest.fixture(scope='session')
@@ -50,6 +44,7 @@ def dd_environment(instance, dd_save_state):
             orchestrator_password=orch_password,
             appliance_credentials_overrides=appliance_credentials,
             send_ndm_metadata=True,
+            collect_events=True,
         )
         dd_save_state('e2e_instance', inst)
         yield {
@@ -125,88 +120,6 @@ def instance():
         return inst
 
     return builder
-
-
-# ---------------------------------------------------------------------------
-# Unit test helpers
-# ---------------------------------------------------------------------------
-
-
-def _mock_orch_client(appliance_payload, overlay_config=None):
-    overlays_response = MagicMock(
-        raise_for_status=MagicMock(),
-        json=MagicMock(return_value=overlay_config if overlay_config is not None else []),
-    )
-
-    def http_get(url, **kwargs):
-        if url.endswith('/gms/rest/gms/overlays/config'):
-            return overlays_response
-        raise AssertionError(f'unexpected orchestrator GET request: {url}')
-
-    http = MagicMock()
-    http.get.side_effect = http_get
-    client = OrchestratorClient(http, 'localhost:8443')
-    client.get_appliances = MagicMock(return_value=appliance_payload)
-    return client
-
-
-def _mock_appliance_client(
-    tgz_data,
-    newest_timestamp=NEWEST_TS,
-    cpu=50,
-    mem=None,
-    disk=None,
-    alarms=None,
-    system_info=None,
-    app_ip='10.0.0.1',
-):
-    client = MagicMock()
-    client.get_newest_timestamp.return_value = newest_timestamp
-    if isinstance(tgz_data, dict):
-        client.get_minute_stats.side_effect = lambda fname: tgz_data[fname]
-    else:
-        client.get_minute_stats.return_value = tgz_data
-    client.get_network_interfaces.return_value = {
-        'ifInfo': [{'ifname': 'wan0', 'admin': 1, 'oper': 1, 'speed': '1000Mb/s (auto)'}]
-    }
-    client.get_cpu_stats.return_value = _build_cpu_payload(cpu)
-    client.get_memory_stats.return_value = mem if mem is not None else MEMORY_PAYLOAD
-    client.get_disk_usage.return_value = disk if disk is not None else DISK_PAYLOAD
-    client.get_alarms.return_value = (
-        alarms if alarms is not None else {'outstanding': [{'type': 'HW'}, {'type': 'TUNNEL'}]}
-    )
-    client.get_system_info.return_value = system_info if system_info is not None else _build_system_info(app_ip)
-    client.get_interface_labels.return_value = {'wan': {}, 'lan': {}}
-    client.app_ip = app_ip
-    return client
-
-
-def _setup_mocks(
-    mocker,
-    check,
-    appliance_payload,
-    tgz_bytes=None,
-    appliance_client=None,
-    overlay_config=None,
-    cached_timestamp=None,
-):
-    orch = _mock_orch_client(appliance_payload, overlay_config)
-    mocker.patch(f'{CHECK_MODULE}.OrchestratorClient', return_value=orch)
-    check._orch_client = None
-
-    if appliance_client is not None:
-        mocker.patch.object(check, '_create_appliance_client', return_value=appliance_client)
-    elif tgz_bytes is not None:
-        mocker.patch.object(check, '_create_appliance_client', return_value=_mock_appliance_client(tgz_bytes))
-
-    mocker.patch.object(check, 'read_persistent_cache', return_value=cached_timestamp)
-    mocker.patch.object(check, 'write_persistent_cache')
-    return orch
-
-
-# ---------------------------------------------------------------------------
-# Unit test fixtures
-# ---------------------------------------------------------------------------
 
 
 @pytest.fixture

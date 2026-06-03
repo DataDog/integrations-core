@@ -93,9 +93,25 @@ class Appliances:
         if not ip_filter:
             return
         if ip_filter.include:
-            self._appliances = [a for a in self._appliances if _ip_matches_any(a.ip, ip_filter.include)]
+            kept = [a for a in self._appliances if _ip_matches_any(a.ip, ip_filter.include)]
+            removed = [a for a in self._appliances if a not in kept]
+            if removed:
+                self.log.debug(
+                    "Filtered out %d appliance(s) not matching include filter: %s",
+                    len(removed),
+                    ', '.join(a.ip for a in removed),
+                )
+            self._appliances = kept
         if ip_filter.exclude:
-            self._appliances = [a for a in self._appliances if not _ip_matches_any(a.ip, ip_filter.exclude)]
+            kept = [a for a in self._appliances if not _ip_matches_any(a.ip, ip_filter.exclude)]
+            removed = [a for a in self._appliances if a not in kept]
+            if removed:
+                self.log.debug(
+                    "Filtered out %d appliance(s) matching exclude filter: %s",
+                    len(removed),
+                    ', '.join(a.ip for a in removed),
+                )
+            self._appliances = kept
 
     def resolve_credentials(
         self,

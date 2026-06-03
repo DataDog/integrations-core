@@ -12,8 +12,7 @@ from datadog_checks.hpe_aruba_edgeconnect.client import ApplianceClient, Orchest
 from datadog_checks.hpe_aruba_edgeconnect.minute_stats import MinuteStats
 from datadog_checks.hpe_aruba_edgeconnect.ndm_models import PAYLOAD_METADATA_BATCH_SIZE
 
-from .conftest import _mock_appliance_client, _setup_mocks
-from .constants import (
+from .common import (
     ALARM_PAYLOAD,
     APPLIANCE_PAYLOAD,
     BASE_DEVICE_TAGS,
@@ -25,7 +24,9 @@ from .constants import (
     NS,
     TGZ_BYTES,
     TGZ_DATA,
+    _mock_appliance_client,
     _pack_dir_to_tgz_bytes,
+    _setup_mocks,
 )
 
 pytestmark = pytest.mark.unit
@@ -412,7 +413,13 @@ def test_collection_step_failure_does_not_block_others(dd_run_check, aggregator,
     aggregator.assert_metric(f'{NS}.device.hardware.ok', count=1)
 
 
-def test_alarm_events_submitted(dd_run_check, aggregator, mocker, check):
+def _events_check(instance):
+    inst = instance('localhost:8443', appliance_ips=['10.0.0.1'], max_backfill_minutes=10, collect_events=True)
+    return HpeArubaEdgeconnectCheck('hpe_aruba_edgeconnect', {}, [inst])
+
+
+def test_alarm_events_submitted(dd_run_check, aggregator, mocker, instance):
+    check = _events_check(instance)
     client = _mock_appliance_client(TGZ_BYTES[0], alarms=ALARM_PAYLOAD)
     _setup_mocks(mocker, check, APPLIANCE_PAYLOAD[:1], appliance_client=client)
 
@@ -423,7 +430,7 @@ def test_alarm_events_submitted(dd_run_check, aggregator, mocker, check):
         count=1,
         exact_match=False,
         alert_type='warning',
-        msg_title='Warning: All NTP servers are unreachable',
+        msg_title='[HPE Aruba EdgeConnect] Warning: All NTP servers are unreachable',
         event_type='SW',
         tags=BASE_DEVICE_TAGS
         + [
@@ -438,6 +445,47 @@ def test_alarm_events_submitted(dd_run_check, aggregator, mocker, check):
     assert event['aggregation_key'] == '10.0.0.1:3777'
     assert event['timestamp'] == 1779178081
     assert 'Recommendation:' in event['msg_text']
+    check.write_persistent_cache.assert_any_call('last_alarm_ts:10.0.0.1', '1779178081000')
+
+
+def test_alarm_events_not_collected_when_disabled(dd_run_check, aggregator, mocker, check):
+    client = _mock_appliance_client(TGZ_BYTES[0], alarms=ALARM_PAYLOAD)
+    _setup_mocks(mocker, check, APPLIANCE_PAYLOAD[:1], appliance_client=client)
+
+    dd_run_check(check)
+
+    assert aggregator.events == []
+
+
+def test_alarm_events_deduped_across_runs(dd_run_check, aggregator, mocker, instance):
+    check = _events_check(instance)
+    client = _mock_appliance_client(TGZ_BYTES[0], alarms=ALARM_PAYLOAD)
+    _setup_mocks(mocker, check, APPLIANCE_PAYLOAD[:1], appliance_client=client)
+
+    cache: dict[str, str] = {}
+    check.read_persistent_cache.side_effect = lambda key: cache.get(key)
+    check.write_persistent_cache.side_effect = lambda key, value: cache.__setitem__(key, value)
+
+    dd_run_check(check)
+    assert len([e for e in aggregator.events if 'NTP' in e['msg_text']]) == 1
+    assert cache['last_alarm_ts:10.0.0.1'] == '1779178081000'
+
+    aggregator.reset()
+    dd_run_check(check)
+    assert [e for e in aggregator.events if 'NTP' in e['msg_text']] == []
+
+
+def test_alarm_events_emitted_when_newer_than_watermark(dd_run_check, aggregator, mocker, instance):
+    check = _events_check(instance)
+    client = _mock_appliance_client(TGZ_BYTES[0], alarms=ALARM_PAYLOAD)
+    _setup_mocks(mocker, check, APPLIANCE_PAYLOAD[:1], appliance_client=client)
+    # Watermark sits just before the alarm's raised time, so the alarm is still new.
+    check.read_persistent_cache.return_value = '1779178080999'
+
+    dd_run_check(check)
+
+    assert len([e for e in aggregator.events if 'NTP' in e['msg_text']]) == 1
+    check.write_persistent_cache.assert_any_call('last_alarm_ts:10.0.0.1', '1779178081000')
 
 
 def test_orchestrator_login_failure_emits_no_metrics(dd_run_check, aggregator, mocker, check):

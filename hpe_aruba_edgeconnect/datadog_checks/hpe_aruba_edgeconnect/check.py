@@ -457,8 +457,21 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         if hw_alarm:
             self.log.debug("Hardware alarm detected on appliance %s", client.app_ip)
         self.gauge('device.hardware.ok', 0 if hw_alarm else 1, tags=base_tags)
+        if not self.config.collect_events:
+            return
+        cache_key = f'last_alarm_ts:{client.app_ip}'
+        raw = self.read_persistent_cache(cache_key)
+        last_ts = int(raw) if raw else 0
+        newest_ts = last_ts
         for alarm in outstanding:
+            raised_ms = alarm.get('time')
+            if isinstance(raised_ms, (int, float)):
+                if raised_ms <= last_ts:
+                    continue
+                newest_ts = max(newest_ts, int(raised_ms))
             self._submit_alarm_event(alarm, client.app_ip, base_tags)
+        if newest_ts > last_ts:
+            self.write_persistent_cache(cache_key, str(newest_ts))
 
     def _submit_alarm_event(self, alarm: dict[str, Any], app_ip: str, base_tags: list[str]) -> None:
         severity_id = alarm.get('severity')
@@ -475,7 +488,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         event: dict[str, Any] = {
             'event_type': alarm.get("type", "unknown"),
             'source_type_name': self.__NAMESPACE__,
-            'msg_title': f'{severity.capitalize()}: {description}',
+            'msg_title': f'[HPE Aruba EdgeConnect] {severity.capitalize()}: {description}',
             'msg_text': msg_text,
             'alert_type': alert_type,
             'tags': tags,

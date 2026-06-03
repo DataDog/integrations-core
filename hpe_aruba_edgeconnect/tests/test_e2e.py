@@ -5,8 +5,7 @@ import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .conftest import EXCLUDED_APPLIANCE_IP
-from .constants import E2E_EXPECTED_METRIC_COUNTS, E2E_EXPECTED_VALUES, NS
+from .common import E2E_EXPECTED_METRIC_COUNTS, E2E_EXPECTED_VALUES, EXCLUDED_APPLIANCE_IP, NS
 
 
 @pytest.mark.e2e

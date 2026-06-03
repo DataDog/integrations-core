@@ -415,6 +415,8 @@ instances:
     ## @param min_collection_interval - number - optional - default: 60
     ## This changes the collection interval of the check. For more information, see:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    ## The default is 60 seconds. Statistics are only available at one-minute intervals, 
+    ## so more frequent runs do not collect additional data.
     #
     # min_collection_interval: 60
 
@@ -440,6 +442,11 @@ instances:
     ## Set to `true` to enable Network Device Monitoring metadata (for devices, interfaces, topology) to be sent.
     #
     # send_ndm_metadata: false
+
+    ## @param collect_events - boolean - optional - default: false
+    ## Set to `true` to enable collection of HPE Aruba EdgeConnect alarm events.
+    #
+    # collect_events: false
 
 ## Log Section
 ##

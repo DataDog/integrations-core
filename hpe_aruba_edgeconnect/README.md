@@ -68,7 +68,8 @@ The recommended way to collect logs from HPE Aruba EdgeConnect is to configure t
 
 ### Events
 
-The HPE Aruba EdgeConnect integration does not include any events.
+The HPE Aruba EdgeConnect integration includes alarm event support. Events are disabled by default; to enable them, set `collect_events` to `true` in the configuration.
+
 
 ### Service Checks
 

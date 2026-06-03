@@ -122,10 +122,24 @@ files:
       overrides:
         min_collection_interval.value.example: 60
         min_collection_interval.value.display_default: 60
+        min_collection_interval.description: |
+          This changes the collection interval of the check. For more information, see:
+          https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+          The default is 60 seconds. Statistics are only available at one-minute intervals, 
+          so more frequent runs do not collect additional data.
+
     - name: send_ndm_metadata
       fleet_configurable: true
       description: |
         Set to `true` to enable Network Device Monitoring metadata (for devices, interfaces, topology) to be sent.
+      value:
+        type: boolean
+        example: False
+        default: False
+    - name: collect_events
+      fleet_configurable: true
+      description: |
+        Set to `true` to enable collection of HPE Aruba EdgeConnect alarm events.
       value:
         type: boolean
         example: False
