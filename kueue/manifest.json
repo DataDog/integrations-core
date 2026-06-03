@@ -3,12 +3,13 @@
   "app_uuid": "41a064e8-00d3-42a5-a212-f8db17961d05",
   "app_id": "kueue",
   "display_on_public_website": false,
+  "owner": "ebpf-platform",
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "This integration collects metrics from the Kueue controller manager and the Kueue API server and enables you to monitor the health and performance of your Kueue cluster.",
+    "description": "Monitor Kueue controller manager and API server metrics.",
     "title": "Kueue",
     "media": [],
     "classifier_tags": [
@@ -16,8 +17,6 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Category::Kubernetes",
-      "Category::Containers",
-      "Category::Metrics",
       "Offering::Integration",
       "Submitted Data Type::Metrics"
     ]
@@ -35,7 +34,7 @@
       },
       "metrics": {
         "prefix": "kueue.",
-        "check": "",
+        "check": "kueue.build_info",
         "metadata_path": "metadata.csv"
       }
     },
