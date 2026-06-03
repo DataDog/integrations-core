@@ -1,0 +1,26 @@
+name: Check TUF root metadata
+
+on:
+  schedule:
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: "Post a debug Slack message showing whether the files match and when the metadata expires, without triggering alerts"
+        type: boolean
+        default: false
+
+jobs:
+  check-tuf-root:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Check TUF root metadata
+        env:
+          SLACK_API_TOKEN: ${{ secrets.SLACK_API_TOKEN }}
+          SLACK_CHANNEL_IDS: ${{ secrets.SLACK_CHANNEL_ID }},${{ secrets.SLACK_CHANNEL_ID_AGENT_INTEGRATIONS_REVIEWS }}
+          DEBUG_RUN: ${{ inputs.debug }}
+        run: python3 .github/workflows/scripts/check_tuf_root.py
