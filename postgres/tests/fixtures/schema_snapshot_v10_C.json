@@ -53,7 +53,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -113,7 +114,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -167,7 +169,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "f"
                     }
                 ]
             }
@@ -227,7 +230,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -287,7 +291,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -362,7 +367,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -422,7 +428,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -482,7 +489,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -542,7 +550,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -602,7 +611,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -662,7 +672,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -722,7 +733,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -782,7 +794,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -848,7 +861,8 @@
                                 "definition": "FOREIGN KEY (city) REFERENCES cities(city)",
                                 "table_id": "16641"
                             }
-                        ]
+                        ],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -908,7 +922,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -963,7 +978,8 @@
                                 "is_partial": false
                             }
                         ],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -1018,7 +1034,8 @@
                                 "is_partial": false
                             }
                         ],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -1078,7 +1095,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -1138,7 +1156,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -1214,7 +1233,8 @@
                                 "is_partial": false
                             }
                         ],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }

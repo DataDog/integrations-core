@@ -12,6 +12,8 @@ dependencies = [
   "pyyaml",
   "pytest-asyncio",
   "vcrpy",
+  # vcrpy uses aiohttp.streams.AsyncStreamReaderMixin, removed in aiohttp 3.14
+  "aiohttp<3.14",
 ]
 # TODO: remove this when the old CLI is gone
 pre-install-commands = [
