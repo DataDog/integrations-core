@@ -17,7 +17,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.config_models import InstanceConfig
 
-from .delta_detector import DeltaDetector
+from .delta_detector import DeltaDetector, PgssKey
 from .obfuscation_lookup import ObfuscationLookup, ObfuscationResult
 from .statements import (
     PG_STAT_STATEMENTS_COUNT_QUERY,
@@ -54,9 +54,10 @@ SELECT {cols}
 """
 
 QUERY_TEXT_FETCH = """
-SELECT queryid, query
-  FROM pg_stat_statements
-  WHERE queryid = ANY(%s::bigint[])
+SELECT s.queryid, s.dbid, s.userid, s.query
+  FROM pg_stat_statements AS s
+  INNER JOIN unnest(%s::bigint[], %s::oid[], %s::oid[]) AS v(queryid, dbid, userid)
+         ON s.queryid = v.queryid AND s.dbid = v.dbid AND s.userid = v.userid
 """
 
 DEFAULT_PGSS_MAX = 5000
@@ -84,7 +85,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
     Each collection cycle:
       1. Query pg_stat_statements(false) for counters only (no query text).
       2. Diff against the previous snapshot to find changed rows.
-      3. For changed queryids, look up cached ObfuscationResults; on miss,
+      3. For changed (queryid, dbid, userid) keys, look up cached ObfuscationResults; on miss,
          fetch text from PG, obfuscate via FFI, cache, and discard raw text.
       4. Merge derivative rows by (query_signature, datname, rolname) and emit.
     """
@@ -147,7 +148,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
             with self._check._get_main_db() as conn:
                 with conn.cursor(row_factory=row_factory) as cursor:
                     self._log.debug("Executing query [%s] params=%s", query, params)
-                    cursor.execute(query, params=params)
+                    cursor.execute(query, params=params, ignore_query_metric=True)
                     return cursor.fetchall(), cursor.description
         except psycopg.Error as e:
             self._log.warning("Failed to run query [%s] %s", query, params)
@@ -304,14 +305,14 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _resolve_obfuscations(
-        self, changed_queryids: set[int], vanished_queryids: set[int]
-    ) -> dict[int, ObfuscationResult]:
-        self._obfuscation_lookup.evict(vanished_queryids)
+        self, changed_pgss_keys: set[PgssKey], vanished_pgss_keys: set[PgssKey]
+    ) -> dict[PgssKey, ObfuscationResult]:
+        self._obfuscation_lookup.evict(vanished_pgss_keys)
 
-        if not changed_queryids:
+        if not changed_pgss_keys:
             return {}
 
-        hits, misses = self._obfuscation_lookup.lookup(changed_queryids)
+        hits, misses = self._obfuscation_lookup.lookup(changed_pgss_keys)
 
         self._check.gauge(
             "dd.postgres.statement_metrics.lookup.hits",
@@ -331,8 +332,8 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
         if misses:
             raw_texts = self._fetch_query_texts(misses)
             filtered = {
-                qid: text
-                for qid, text in raw_texts.items()
+                pgss_key: text
+                for pgss_key, text in raw_texts.items()
                 if text and text != '<insufficient privilege>' and not text.startswith('/* DDIGNORE */')
             }
             self._log.debug(
@@ -346,22 +347,33 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
 
         return hits
 
-    def _fetch_query_texts(self, queryids: set[int]) -> dict[int, str]:
-        query = QUERY_TEXT_FETCH
+    def _fetch_query_texts(self, keys: set[PgssKey]) -> dict[PgssKey, str]:
+        if not keys:
+            return {}
+        ordered = sorted(keys)
+        qids = [k[0] for k in ordered]
+        dbids = [k[1] for k in ordered]
+        userids = [k[2] for k in ordered]
         try:
-            rows, _ = self._execute_query(query, params=(list(queryids),), row_factory=dict_row)
-            return {row['queryid']: row['query'] for row in rows}
+            rows, _ = self._execute_query(
+                QUERY_TEXT_FETCH,
+                params=(qids, dbids, userids),
+                row_factory=dict_row,
+            )
+            return {(row['queryid'], row['dbid'], row['userid']): row['query'] for row in rows}
         except psycopg.Error as e:
-            self._log.warning("Failed to fetch query text for %d queryids: %s", len(queryids), e)
+            self._log.warning("Failed to fetch query text for %d pgss keys: %s", len(keys), e)
             return {}
 
     # -- Row assembly -----------------------------------------------------
 
-    def _assemble_rows(self, derivative_rows: list[dict], obfuscations: dict[int, ObfuscationResult]) -> list[dict]:
+    def _assemble_rows(
+        self, derivative_rows: list[dict], obfuscations: dict[PgssKey, ObfuscationResult]
+    ) -> list[dict]:
         assembled: list[dict] = []
         for row in derivative_rows:
-            qid = row['queryid']
-            obf = obfuscations.get(qid)
+            pgss_key: PgssKey = (row['queryid'], row['dbid'], row['userid'])
+            obf = obfuscations.get(pgss_key)
             if obf is None:
                 continue
             out = dict(row)
@@ -449,7 +461,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
         )
         self._check.gauge(
             "dd.postgres.statement_metrics.delta.changed_queryids",
-            len(delta.changed_queryids),
+            len(delta.changed_pgss_keys),
             tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.reported_hostname,
             raw=True,
@@ -458,7 +470,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
         if not delta.derivative_rows:
             return []
 
-        obfuscations = self._resolve_obfuscations(delta.changed_queryids, delta.vanished_queryids)
+        obfuscations = self._resolve_obfuscations(delta.changed_pgss_keys, delta.vanished_pgss_keys)
         rows = self._assemble_rows(delta.derivative_rows, obfuscations)
         self._log.debug(
             "collect: snapshot=%d derivative=%d obfuscated=%d output=%d",

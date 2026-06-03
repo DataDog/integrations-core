@@ -14,8 +14,10 @@ PgssKey = tuple[int, int, int]  # (queryid, dbid, userid)
 @dataclass
 class DeltaResult:
     derivative_rows: list[dict]
-    changed_queryids: set[int]
-    vanished_queryids: set[int]
+    """Full pg_stat_statements row keys that changed and need obfuscation resolution."""
+    changed_pgss_keys: set[PgssKey]
+    """Keys that disappeared from pgss since the last snapshot; drop from obfuscation cache."""
+    vanished_pgss_keys: set[PgssKey]
 
 
 class DeltaDetector:
@@ -42,7 +44,7 @@ class DeltaDetector:
                 current[key] = row
 
         derivative_rows: list[dict] = []
-        changed_queryids: set[int] = set()
+        changed_pgss_keys: set[PgssKey] = set()
 
         available_metrics: frozenset[str] | None = None
         indicator_cols: frozenset[str] | None = None
@@ -81,25 +83,25 @@ class DeltaDetector:
                 else:
                     derivative[col] = row[col]
             derivative_rows.append(derivative)
-            changed_queryids.add(key[0])
+            changed_pgss_keys.add(key)
 
-        vanished_queryids = {k[0] for k in self._previous if k not in current}
+        vanished_pgss_keys = set(self._previous.keys()) - set(current.keys())
 
         logger.debug(
             "delta: snapshot=%d prev=%d derivative=%d changed=%d vanished=%d",
             len(current),
             len(self._previous),
             len(derivative_rows),
-            len(changed_queryids),
-            len(vanished_queryids),
+            len(changed_pgss_keys),
+            len(vanished_pgss_keys),
         )
 
         self._update_cache(current)
 
         return DeltaResult(
             derivative_rows=derivative_rows,
-            changed_queryids=changed_queryids,
-            vanished_queryids=vanished_queryids,
+            changed_pgss_keys=changed_pgss_keys,
+            vanished_pgss_keys=vanished_pgss_keys,
         )
 
     def _update_cache(self, current: dict[PgssKey, dict]):
