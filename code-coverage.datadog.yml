@@ -415,6 +415,9 @@ services:
 - id: kubevirt_handler
   paths:
   - kubevirt_handler/datadog_checks/kubevirt_handler/
+- id: kueue
+  paths:
+  - kueue/datadog_checks/kueue/
 - id: kuma
   paths:
   - kuma/datadog_checks/kuma/
