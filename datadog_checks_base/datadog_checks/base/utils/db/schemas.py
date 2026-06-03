@@ -89,6 +89,12 @@ class SchemaCollector(ABC):
                             # the next row to see if we've reached the last row
                             next_row = self._get_next(cursor)
                             self.maybe_flush(is_last_payload=False)
+                    if db_rows_count == 0:
+                        # Empty database: the terminal payload would otherwise have metadata=[]
+                        # with no DatabaseName, so the backend cannot attribute snapshot
+                        # completion/deletion to this DB. Include a sentinel entry carrying
+                        # the DB identity so the backend can clean up stale schemas.
+                        self._queued_rows.append({**database})
                     self.maybe_flush(is_last_payload=True)
                     self._total_rows_count += db_rows_count
                     total_payloads_count += self._collection_payloads_count
