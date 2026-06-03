@@ -1,1 +1,0 @@
-Require trusted provider for `gstatus_path` to prevent untrusted config sources from pointing the option at an arbitrary executable.
