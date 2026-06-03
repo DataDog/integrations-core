@@ -122,6 +122,7 @@ files:
               type: number
               example: 60
               default: 60
+            fleet_configurable: false
 
           - name: statistics_components
             fleet_configurable: true
