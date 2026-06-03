@@ -147,9 +147,9 @@ class ClickhouseSchemaCollector(SchemaCollector):
                 'tables_table': self._check.get_system_table('tables'),
                 'columns_table': self._check.get_system_table('columns'),
                 'system_dbs': ", ".join(_SYSTEM_DATABASE_NAMES),
-                'max_tables': int(self._config.max_tables),
-                'max_columns': int(self._config.max_columns),
-                'limit_columns': int(self._config.max_tables) * int(self._config.max_columns),
+                'max_tables': self._config.max_tables,
+                'max_columns': self._config.max_columns,
+                'limit_columns': self._config.max_tables * self._config.max_columns,
                 'db_filters': db_filters,
                 'table_filters': table_filters,
             }
