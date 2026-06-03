@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import contextlib
 from unittest import mock
 
 import pytest
@@ -48,13 +49,12 @@ def check(schema_metrics_instance):
     return ClickhouseCheck('clickhouse', {}, [schema_metrics_instance])
 
 
+@contextlib.contextmanager
 def _patch_query(job, table_rows=None):
     table_rows = table_rows or []
-
-    def fake_query(query):
-        return table_rows
-
-    return mock.patch.object(job, '_execute_query', side_effect=fake_query)
+    with mock.patch.object(job, '_execute_query', side_effect=lambda q: table_rows), \
+         mock.patch.object(job._check, 'execute_query_raw', return_value=[]):
+        yield
 
 
 def test_initialization(check):
@@ -161,18 +161,17 @@ def test_cancel_closes_db_client(check):
 def test_routes_through_cluster_all_replicas_in_single_endpoint_mode(schema_metrics_instance):
     schema_metrics_instance['single_endpoint_mode'] = True
     check = ClickhouseCheck('clickhouse', {}, [schema_metrics_instance])
-    seen_queries = []
-
-    def fake_query(query):
-        seen_queries.append(query)
-        return []
+    dbm_queries = []
+    raw_queries = []
 
     check.gauge = lambda *a, **kw: None
-    with mock.patch.object(check.table_metrics, '_execute_query', side_effect=fake_query):
+    check.service_check = lambda *a, **kw: None
+    with mock.patch.object(check.table_metrics, '_execute_query', side_effect=lambda q: dbm_queries.append(q) or []), \
+         mock.patch.object(check, 'execute_query_raw', side_effect=lambda q: raw_queries.append(q) or []):
         check.table_metrics.run_job()
 
-    joined = '\n'.join(seen_queries)
-    assert "clusterAllReplicas('default', system.tables)" in joined
+    assert any("clusterAllReplicas('default', system.tables)" in q for q in dbm_queries)
+    assert any("clusterAllReplicas('default', system.view_refreshes)" in q for q in raw_queries)
 
 
 # --- View refresh metric tests ---
