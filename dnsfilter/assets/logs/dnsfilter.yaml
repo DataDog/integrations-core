@@ -457,7 +457,7 @@ pipeline:
                   name: YXDomain
                   id: 6
                 - filter:
-                    query: "@code:YXRRSET"
+                    query: "@code:(YXRRSET OR XRRSET)"
                   name: YXRRSet
                   id: 7
                 - filter:
