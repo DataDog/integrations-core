@@ -13,7 +13,7 @@ from typing import List  # noqa: F401
 from prometheus_client import Metric
 from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
 from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
-from requests.exceptions import ConnectionError
+from requests.exceptions import ConnectionError as RequestsConnectionError
 
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.checks.openmetrics.v2.first_scrape_handler import first_scrape_handler
@@ -406,7 +406,7 @@ class OpenMetricsScraper:
                 self._content_type = connection.headers.get('Content-Type', '')
                 for line in connection.iter_lines(decode_unicode=True):
                     yield line
-        except (ConnectionError, HTTPConnectionError) as e:
+        except (RequestsConnectionError, HTTPConnectionError) as e:
             if self.ignore_connection_errors:
                 self.log.warning("OpenMetrics endpoint %s is not accessible: %s", self.endpoint, e)
             else:

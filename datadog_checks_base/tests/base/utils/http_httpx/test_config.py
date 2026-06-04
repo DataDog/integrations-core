@@ -123,6 +123,37 @@ def test_remapper_renames_field(capturing_transport):
     assert http.options['verify'] is False
 
 
+def test_remapper_invert_flips_value(capturing_transport):
+    # disable_ssl_validation=True means "do NOT verify" -> options['verify'] is False.
+    remapper = {'disable_ssl_validation': {'name': 'tls_verify', 'invert': True}}
+    http = HTTPXWrapper({'disable_ssl_validation': True}, {}, remapper=remapper, transport=capturing_transport)
+    assert http.options['verify'] is False
+
+
+def test_remapper_invert_with_explicit_default(capturing_transport):
+    # Remapped field absent from instance, explicit default takes effect, then invert flips it.
+    remapper = {'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': False}}
+    http = HTTPXWrapper({}, {}, remapper=remapper, transport=capturing_transport)
+    # default=False, invert flips to True -> verify is True.
+    assert http.options['verify'] is True
+
+
+def test_remapper_instance_wins_over_remapped_field(capturing_transport):
+    # If the standard field is present in instance, the remapped alternative is ignored.
+    remapper = {'ssl_validation': {'name': 'tls_verify'}}
+    http = HTTPXWrapper(
+        {'ssl_validation': False, 'tls_verify': True}, {}, remapper=remapper, transport=capturing_transport
+    )
+    assert http.options['verify'] is True
+
+
+def test_remapper_ignores_unknown_target_field(capturing_transport):
+    # Remapper targeting a non-STANDARD_FIELDS key is silently ignored.
+    remapper = {'some_alias': {'name': 'definitely_not_a_known_field'}}
+    http = HTTPXWrapper({'some_alias': 'ignored'}, {}, remapper=remapper, transport=capturing_transport)
+    assert 'definitely_not_a_known_field' not in http.options
+
+
 @pytest.mark.parametrize(
     'kwarg,value',
     [
@@ -134,3 +165,27 @@ def test_request_rejects_unknown_kwarg(capturing_transport, kwarg, value):
     http = HTTPXWrapper({}, {}, transport=capturing_transport)
     with pytest.raises(TypeError, match=kwarg):
         http.get('http://example.test/', **{kwarg: value})
+
+
+def test_init_config_timeout_used_when_instance_has_none(capturing_transport):
+    http = HTTPXWrapper({}, {'timeout': 42}, transport=capturing_transport)
+    connect, read = http.options['timeout']
+    assert connect == 42.0
+    assert read == 42.0
+
+
+def test_instance_timeout_overrides_init_config_timeout(capturing_transport):
+    http = HTTPXWrapper({'timeout': 7}, {'timeout': 42}, transport=capturing_transport)
+    connect, read = http.options['timeout']
+    assert connect == 7.0
+    assert read == 7.0
+
+
+def test_init_config_log_requests_used_when_instance_has_none(capturing_transport):
+    http = HTTPXWrapper({}, {'log_requests': True}, transport=capturing_transport)
+    assert http._log_requests is True
+
+
+def test_instance_log_requests_overrides_init_config(capturing_transport):
+    http = HTTPXWrapper({'log_requests': False}, {'log_requests': True}, transport=capturing_transport)
+    assert http._log_requests is False

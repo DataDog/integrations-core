@@ -113,14 +113,12 @@ def test_response_iter_lines_rejects_delimiter(status_transport_factory):
 
 
 def test_response_elapsed_returns_zero_on_runtime_error(caplog):
-    class _FakeResponse:
-        url = 'http://example.test/'
-
-        @property
-        def elapsed(self):
-            raise RuntimeError('not measured')
-
-    adapter = HTTPXResponseAdapter(_FakeResponse())  # type: ignore[arg-type]
+    # httpx2 raises RuntimeError from ``.elapsed`` if the response was constructed in-memory
+    # rather than measured against a real network round-trip. Use a real httpx.Response with
+    # an attached request so the adapter can format its debug log without secondary errors.
+    request = httpx.Request('GET', 'http://example.test/')
+    response = httpx.Response(200, content=b'x', request=request)
+    adapter = HTTPXResponseAdapter(response)
     with caplog.at_level(logging.DEBUG, logger='datadog_checks.base.utils.http_httpx'):
         assert adapter.elapsed == timedelta(0)
     assert any('elapsed unavailable' in record.message for record in caplog.records)
@@ -180,13 +178,23 @@ def test_response_url_reflects_request_url(status_transport_factory):
     assert str(response.url) == 'http://example.test/path'
 
 
-def test_response_encoding_property_exposed(status_transport_factory):
-    transport = status_transport_factory(200, b'hello')
-    http = HTTPXWrapper({}, {}, transport=transport)
+def test_response_encoding_property_reflects_declared_charset():
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, content=b'data', headers={'Content-Type': 'text/plain; charset=iso-8859-1'})
+
+    http = HTTPXWrapper({}, {}, transport=httpx.MockTransport(handler))
     response = http.get('http://example.test/')
-    assert hasattr(response, 'encoding')
-    encoding = response.encoding
-    assert encoding is None or isinstance(encoding, str)
+    assert response.encoding == 'iso-8859-1'
+
+
+def test_response_encoding_property_settable_through_adapter():
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, content=b'data', headers={'Content-Type': 'text/plain; charset=utf-8'})
+
+    http = HTTPXWrapper({}, {}, transport=httpx.MockTransport(handler))
+    response = http.get('http://example.test/')
+    response.encoding = 'iso-8859-1'
+    assert response.encoding == 'iso-8859-1'
 
 
 def test_response_cookies_exposed():

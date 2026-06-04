@@ -23,8 +23,14 @@ def test_context_manager(capturing_transport):
 def test_module_import_fails_without_httpx2(monkeypatch):
     monkeypatch.setitem(sys.modules, 'httpx2', None)
     monkeypatch.delitem(sys.modules, 'datadog_checks.base.utils.http_httpx', raising=False)
-    with pytest.raises(ImportError):
+    with pytest.raises(ImportError, match='httpx2'):
         import datadog_checks.base.utils.http_httpx  # noqa: F401
+    # After monkeypatch teardown the module must import cleanly again so sibling tests are
+    # not affected by a leaked broken import state.
+    monkeypatch.undo()
+    import datadog_checks.base.utils.http_httpx as restored
+
+    assert hasattr(restored, 'HTTPXWrapper')
 
 
 @pytest.mark.parametrize(
@@ -42,6 +48,9 @@ def test_agentcheck_http_dispatch(instance, expected_cls_name):
     try:
         assert type(check.http).__name__ == expected_cls_name
     finally:
-        close = getattr(check.http, 'close', None)
-        if close is not None:
-            close()
+        # Read the cached attribute directly (AgentCheck.http is a property that may rebuild).
+        http = check._http
+        if http is not None:
+            close = getattr(http, 'close', None)
+            if close is not None:
+                close()
