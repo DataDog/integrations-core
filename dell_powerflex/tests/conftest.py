@@ -73,7 +73,7 @@ def _get_url_path(url):
     return parsed.path.replace('::', '__')
 
 
-@pytest.fixture
+@pytest.fixture(scope='function')
 def mock_responses():
     responses_map = {}
 
