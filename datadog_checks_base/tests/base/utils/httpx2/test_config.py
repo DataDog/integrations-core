@@ -29,6 +29,37 @@ def test_per_request_headers_merge_into_request(capturing_transport, captured_re
     assert captured_requests[0].headers['x-per-request'] == 'yes'
 
 
+@pytest.mark.parametrize(
+    'headers,extra_headers,canonical_key,expected_value',
+    [
+        pytest.param({'X-Foo': 'a'}, {'x-foo': 'b'}, 'x-foo', 'b', id='extra-wins-on-case-different-overlap'),
+        pytest.param(
+            {'Content-Type': 'application/json'},
+            {'content-type': 'text/plain'},
+            'content-type',
+            'text/plain',
+            id='extra-wins-same-case',
+        ),
+        pytest.param({'X-Foo': 'a'}, None, 'x-foo', 'a', id='headers-only'),
+        pytest.param(None, {'X-Foo': 'b'}, 'x-foo', 'b', id='extra-only'),
+    ],
+)
+def test_per_request_headers_extra_headers_case_fold(
+    capturing_transport, captured_requests, headers, extra_headers, canonical_key, expected_value
+):
+    http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
+    kwargs = {}
+    if headers is not None:
+        kwargs['headers'] = headers
+    if extra_headers is not None:
+        kwargs['extra_headers'] = extra_headers
+    http.get('http://example.test/', **kwargs)
+
+    sent = captured_requests[0].headers
+    # Single case-folded entry on the outgoing request.
+    assert sent.get_list(canonical_key) == [expected_value]
+
+
 def test_timeout_from_instance(capturing_transport):
     http = HTTPX2Wrapper({'timeout': 25}, {}, transport=capturing_transport)
     connect, read = http.options['timeout']

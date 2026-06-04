@@ -394,7 +394,12 @@ class HTTPX2Wrapper:
         headers = options.get('headers')
         extra_headers = options.get('extra_headers')
         if headers is not None or extra_headers is not None:
-            kwargs['headers'] = {**(headers or {}), **(extra_headers or {})}
+            # httpx2.Headers folds keys case-insensitively so overlapping headers/extra_headers collapse
+            # to a single entry, matching RequestsWrapper's CaseInsensitiveDict behavior.
+            merged = httpx2.Headers(headers or {})
+            if extra_headers:
+                merged.update(extra_headers)
+            kwargs['headers'] = merged
 
         if 'timeout' in options:
             timeout_value = options['timeout']
