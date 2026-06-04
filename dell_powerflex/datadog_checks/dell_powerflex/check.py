@@ -367,7 +367,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             self.event(self._build_dd_event(alert, 'powerflex_alert_name', 'service', 'dell_powerflex.alert'))
         return True
 
-    def _build_dd_event(self, raw: dict, name_tag_key: str, service_key: str, event_type: str) -> dict:
+    def _build_dd_event(self, raw: dict, name_tag_key: str, service_key: str, event_type: str) -> dict[str, Any]:
         raw_ts = raw.get('timestamp')
         timestamp = datetime.fromisoformat(raw_ts).timestamp() if raw_ts else datetime.now(tz=timezone.utc).timestamp()
 
