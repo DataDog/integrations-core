@@ -77,6 +77,8 @@ class QueueMetricCollector(object):
 
     def discover_queues(self, queue_manager):
         # type: (pymqi.QueueManager) -> Set[str]
+        # Clear each run so a config without queue_patterns/queue_regex does not reuse a prior run's set.
+        self.filtered_queues = None
 
         _discover = (
             self._discover_queues_via_names if self.config.auto_discover_queues_via_names else self._discover_queues
