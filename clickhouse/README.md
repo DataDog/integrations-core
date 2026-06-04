@@ -4,9 +4,9 @@
 
 This check monitors [ClickHouse][1] through the Datadog Agent.
 
-Enable [Database Monitoring][11] (DBM) for enhanced insights into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live query samples, and query completions.
+Enable [Database Monitoring][11] (DBM) for enhanced insights into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live and historical query snapshots, query explain plans, query errors, and parts and merges observability.
 
-**Note**: Database Monitoring for ClickHouse is in Preview. Requires Datadog Agent version 7.78+.
+**Note**: Database Monitoring for ClickHouse is in Preview.
 
 **Minimum Agent version:** 7.16.0
 
