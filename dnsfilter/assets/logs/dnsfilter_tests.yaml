@@ -761,7 +761,7 @@ tests:
         local_user_name: John
         ocsf:
           severity: Low
-          activity_name: Response
+          activity_name: Query
           metadata:
             uid: '2600'
             product:
@@ -798,7 +798,7 @@ tests:
             direction_id: 2
             direction: Outbound
           class_uid: 4003
-          activity_id: 2
+          activity_id: 1
           severity_id: 2
           time: 1747655677118
           class_name: DNS Activity

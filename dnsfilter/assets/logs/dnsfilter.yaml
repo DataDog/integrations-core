@@ -354,27 +354,9 @@ pipeline:
             - name: ocsf.activity_id
               categories:
                 - filter:
-                    query: "@result:allowed"
+                    query: "*"
                   name: Query
                   id: 1
-                - filter:
-                    query: "@result:blocked"
-                  name: Response
-                  id: 2
-                - filter:
-                    query: "@result:*"
-                  name: Other
-                  id: 99
-              targets:
-                name: ocsf.activity_name
-                id: ocsf.activity_id
-              fallback:
-                values:
-                  ocsf.activity_name: Other
-                  ocsf.activity_id: "99"
-                sources:
-                  ocsf.activity_name:
-                    - result
               type: schema-category-mapper
             - name: ocsf.status_id
               categories:
