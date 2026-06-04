@@ -64,9 +64,7 @@ REQUEST_KWARGS = frozenset(
 
 
 def _make_timeout(connect: float, read: float) -> httpx.Timeout:
-    # Apply read to write and pool so the tuple form has the same all-phase coverage as
-    # passing a scalar timeout to httpx.Timeout(<float>). Leaving write/pool unbounded would
-    # let a slow connection-pool acquisition or write phase hang the check.
+    # Pass the read timeout to every phase so write and pool aren't left unbounded.
     return httpx.Timeout(connect=connect, read=read, write=read, pool=read)
 
 
@@ -103,8 +101,6 @@ def _build_timeout(config: dict[str, Any]) -> tuple[float, float]:
 
 def _map_httpx_exception(exc: httpx.HTTPError | httpx.InvalidURL) -> HTTPError:
     """Translate an httpx2 exception into the library-agnostic equivalent."""
-    # ConnectError -> HTTPConnectionError pairs 1:1 with the Step 3a widening (PR #22864).
-    # Mid-stream NetworkError/ReadError/WriteError stay HTTPRequestError on purpose.
     if isinstance(exc, httpx.InvalidURL):
         return HTTPInvalidURLError(str(exc) or exc.__class__.__name__, request=getattr(exc, 'request', None))
     if isinstance(exc, httpx.TimeoutException):
@@ -161,10 +157,8 @@ class HTTPXResponseAdapter:
 
     @encoding.setter
     def encoding(self, value: str | None) -> None:
-        # Pass through to httpx2. Note: in httpx2 the encoding only affects subsequent
-        # ``.text`` and ``iter_text``/``iter_lines`` decoding. It does NOT retroactively
-        # change ``response.content`` or already-yielded chunks. Callers that mutate
-        # encoding after streaming has started will see the new value only on the next read.
+        # Encoding is consulted at decode time, not when set. Bytes already read by
+        # iter_text or iter_lines stay decoded under the previous encoding.
         self._response.encoding = value
 
     @property
@@ -173,9 +167,8 @@ class HTTPXResponseAdapter:
 
     @property
     def cookies(self) -> Mapping[str, str]:
-        # httpx.Cookies satisfies Mapping[str, str] structurally. The narrower annotation
-        # avoids leaking the httpx2 type through the wrapper surface; callers wanting the
-        # richer httpx2 API can still read ``response._response.cookies`` directly.
+        # Narrowed to Mapping to keep httpx2 out of the wrapper surface. Callers needing
+        # the richer httpx.Cookies API can reach self._response.cookies directly.
         return self._response.cookies
 
     @property
@@ -205,15 +198,15 @@ class HTTPXResponseAdapter:
     def iter_content(self, chunk_size: int | None = None, decode_unicode: bool = False) -> Iterator[bytes | str]:
         effective_size = chunk_size if chunk_size is not None else DEFAULT_CHUNK_SIZE
         if decode_unicode:
-            # httpx2 iter_text uses an incremental decoder so a multibyte char straddling a
-            # byte-chunk boundary does not raise UnicodeDecodeError.
+            # iter_text uses an incremental decoder. Manual chunk decoding breaks on
+            # multibyte chars split across boundaries.
             yield from self._response.iter_text(chunk_size=effective_size)
             return
         yield from self._response.iter_bytes(chunk_size=effective_size)
 
     def iter_lines(
         self,
-        chunk_size: int | None = None,  # noqa: ARG002 - httpx2 buffers lines internally; kept for HTTPResponseProtocol parity
+        chunk_size: int | None = None,  # noqa: ARG002 - httpx2 buffers lines internally. Kept for HTTPResponseProtocol parity
         decode_unicode: bool = False,
         delimiter: bytes | str | None = None,
     ) -> Iterator[bytes | str]:
@@ -221,9 +214,7 @@ class HTTPXResponseAdapter:
             raise NotImplementedError("HTTPXResponseAdapter.iter_lines does not support custom delimiters")
         encoding = self._response.encoding or 'utf-8'
         for line in self._response.iter_lines():
-            # httpx2 already decoded the line using the declared charset. Re-encoding can corrupt
-            # bytes that round-trip lossily under that charset, so substitute with the Unicode
-            # replacement char on errors rather than raising.
+            # errors='replace' tolerates bytes that don't round-trip under the declared charset.
             yield line if decode_unicode else line.encode(encoding, errors='replace')
 
     def __enter__(self) -> Self:
@@ -270,7 +261,8 @@ class HTTPXWrapper:
         timeout = _build_timeout(config)
         allow_redirects = is_affirmative(config['allow_redirects'])
 
-        # proxies=None mirrors RequestsWrapper.options for consumers (e.g. http_check). Wiring is Phase 3.
+        # proxies=None mirrors RequestsWrapper.options for consumers (e.g. http_check).
+        # TODO: wire proxies through to httpx2 as part of the ongoing httpx migration.
         self.options: dict[str, Any] = {
             'auth': auth,
             'cert': cert,
@@ -370,10 +362,8 @@ class HTTPXWrapper:
         return self._request('OPTIONS', url, options)
 
     def _request(self, method: str, url: str, options: dict[str, Any]) -> HTTPXResponseAdapter:
-        # All requests stream by default (stream=True). The returned HTTPXResponseAdapter holds
-        # the connection open until the body is read (via .content/.text/.json/.iter_*) or close()
-        # is called. Callers that do not fully consume the body should use it as a context manager
-        # or call .close() to release the connection back to the pool.
+        # stream=True keeps the connection open until the body is consumed (.content/.text/.iter_*)
+        # or close() is called. Callers should use it as a context manager when not reading the body.
         if self._log_requests:
             self.logger.debug('Sending %s request to %s', method, url)
 
@@ -388,9 +378,8 @@ class HTTPXWrapper:
 
     def _build_request_kwargs(self, options: dict[str, Any], *, method: str = '', url: str = '') -> dict[str, Any]:
         """Translate call-site options to httpx2.Client.request kwargs."""
-        # OM v2 scraper injects stream=True unconditionally (base_scraper.py:459). The wrapper
-        # always streams internally, so drop the kwarg rather than raising on it. Log at debug
-        # so the silent drop is observable when investigating per-request behavior.
+        # Drop stream silently because OM v2 scraper passes it unconditionally (base_scraper.py:459).
+        # The wrapper streams internally, so the kwarg is meaningless.
         if 'stream' in options:
             self.logger.debug('HTTPXWrapper dropping unsupported per-request kwarg: stream')
         options = {k: v for k, v in options.items() if k != 'stream'}
@@ -438,10 +427,8 @@ class HTTPXWrapper:
         try:
             self.close()
         except AttributeError:
-            # A request was never made or an error occurred during instantiation before _client
-            # was ever defined (since __del__ executes even if __init__ fails).
+            # __del__ runs even if __init__ failed before self._client was set.
             pass
         except Exception as exc:
-            # Don't propagate from __del__; interpreter would only log a warning and continue.
-            # Log at debug so the swallow is observable when investigating.
+            # Don't propagate from __del__ (interpreter handles it). Log at debug so the swallow is observable.
             self.logger.debug('HTTPXWrapper.close raised during __del__: %r', exc)

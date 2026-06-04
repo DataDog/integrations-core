@@ -113,9 +113,8 @@ def test_response_iter_lines_rejects_delimiter(status_transport_factory):
 
 
 def test_response_elapsed_returns_zero_on_runtime_error(caplog):
-    # httpx2 raises RuntimeError from ``.elapsed`` if the response was constructed in-memory
-    # rather than measured against a real network round-trip. Use a real httpx.Response with
-    # an attached request so the adapter can format its debug log without secondary errors.
+    # httpx2's .elapsed raises RuntimeError for in-memory responses. The real httpx.Request is
+    # attached so the adapter's debug log can format request info without a secondary error.
     request = httpx.Request('GET', 'http://example.test/')
     response = httpx.Response(200, content=b'x', request=request)
     adapter = HTTPXResponseAdapter(response)
