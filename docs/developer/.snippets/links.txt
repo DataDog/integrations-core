@@ -13,7 +13,6 @@
 [azp-templates-windows]: https://github.com/DataDog/integrations-core/blob/master/.azure-pipelines/templates/test-single-windows.yml
 [black-github]: https://github.com/psf/black
 [click-github]: https://github.com/pallets/click
-[codecov-home]: https://codecov.io
 [config-spec-example-consumer]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/configuration/consumers/example.py
 [config-spec-model-consumer]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/configuration/consumers/model.py
 [config-spec-producer]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/configuration/core.py

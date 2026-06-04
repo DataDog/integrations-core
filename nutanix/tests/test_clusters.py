@@ -4,10 +4,12 @@
 
 
 import logging
+from copy import deepcopy
 
 import pytest
 
 from datadog_checks.nutanix import NutanixCheck
+from tests.conftest import load_fixture_page
 from tests.constants import BASE_TAGS, CLUSTER_TAGS
 
 pytestmark = [pytest.mark.unit]
@@ -90,6 +92,24 @@ def test_prism_central_cluster_skipped(dd_run_check, aggregator, mock_instance, 
         m for m in aggregator.metrics("nutanix.cluster.count") if any("prism-central-deployment" in t for t in m.tags)
     ]
     assert len(pc_metrics) == 0
+
+
+def test_cluster_with_no_name_is_skipped(
+    dd_run_check, aggregator, mock_instance, mock_http_get, mocker, caplog
+) -> None:
+    clusters = deepcopy(load_fixture_page("clusters.json", 0)["data"])
+    clusters.append({"extId": "no-name-cluster-id", "config": {"clusterFunction": ["AOS"]}})
+    mocker.patch(
+        "datadog_checks.nutanix.infrastructure_monitor.InfrastructureMonitor._list_clusters",
+        return_value=clusters,
+    )
+
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    with caplog.at_level(logging.WARNING):
+        dd_run_check(check)
+
+    assert check.infrastructure_monitor.cluster_count == 2
+    assert any("no-name-cluster-id" in r.message and "has no name" in r.message for r in caplog.records)
 
 
 def test_missing_pc_ip_raises_error(dd_run_check):

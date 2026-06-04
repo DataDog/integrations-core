@@ -51,6 +51,7 @@ files:
     - name: commit_server_endpoint
       description: |
         Endpoint exposing Commit Server's Prometheus metrics.
+      fleet_configurable: false
       value:
         display_default: null
         example: http://argocd-commit-server:8087/metrics
