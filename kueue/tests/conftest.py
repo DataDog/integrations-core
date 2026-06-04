@@ -41,7 +41,9 @@ def setup_kueue():
     run_command(['kubectl', 'apply', '-f', os.path.join(HERE, 'kind', 'metrics-reader.yaml')])
     run_command(['kubectl', 'apply', '-f', os.path.join(HERE, 'kind', 'queue.yaml')])
     run_command(['kubectl', 'wait', 'clusterqueue/cluster-queue', '--for=condition=Active', '--timeout=300s'])
-    run_command(['kubectl', 'wait', 'localqueue/user-queue', '--for=condition=Active', '--timeout=300s'])
+    run_command(
+        ['kubectl', 'wait', 'localqueue/user-queue', '-n', 'default', '--for=condition=Active', '--timeout=300s']
+    )
 
 
 def get_service_account_token():
@@ -54,7 +56,8 @@ def get_service_account_token():
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with kind_run(conditions=[setup_kueue], sleep=10) as kubeconfig, ExitStack() as stack:
+    kind_config = os.path.join(HERE, 'kind', 'kind-config.yaml')
+    with kind_run(conditions=[setup_kueue], kind_config=kind_config, sleep=10) as kubeconfig, ExitStack() as stack:
         kueue_host, kueue_port = stack.enter_context(
             port_forward(kubeconfig, 'kueue-system', 8443, 'service', 'kueue-controller-manager-metrics-service')
         )
