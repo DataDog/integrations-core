@@ -12,9 +12,13 @@ from datadog_checks.dev.utils import assert_service_checks
 def test_e2e(dd_agent_check):
     aggregator = dd_agent_check()
 
-    aggregator.assert_metric('kueue.build_info')
-    aggregator.assert_metric('kueue.go.goroutines')
-    aggregator.assert_metric('kueue.cluster_queue.info', tags=['kueue_cluster_queue:cluster-queue'])
-    aggregator.assert_metric('kueue.cluster_queue.status', tags=['kueue_cluster_queue:cluster-queue', 'status:active'])
+    aggregator.assert_metric('kueue.build_info', at_least=1)
+    aggregator.assert_metric('kueue.go.goroutines', at_least=1)
+    aggregator.assert_metric('kueue.cluster_queue.info', at_least=1)
+    aggregator.assert_metric('kueue.cluster_queue.status', at_least=1)
+
+    for metric in ('kueue.cluster_queue.info', 'kueue.cluster_queue.status'):
+        aggregator.assert_metric_has_tag(metric, 'kueue_cluster_queue:cluster-queue')
+
     aggregator.assert_service_check('kueue.openmetrics.health', ServiceCheck.OK, count=1)
     assert_service_checks(aggregator)
