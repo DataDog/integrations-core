@@ -62,7 +62,7 @@ def parse_resource_filters(
         filter_type = str(f.get('type', 'include')).lower()
         if filter_type not in FILTER_TYPES:
             logger.warning('Invalid filter type in resource_filters for %s: %s', resource, filter_type)
-            filter_type = 'include'
+            continue
 
         compiled = _compile_patterns(f.get('patterns', []), resource, logger)
         collect_statistics = f.get('collect_statistics', True)

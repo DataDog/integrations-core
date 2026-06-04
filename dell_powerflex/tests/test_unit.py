@@ -485,6 +485,16 @@ def test_filter_validation_warning(
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
 
 
+def test_invalid_filter_type_is_skipped(dd_run_check, aggregator, instance, mock_http_get):
+    # test that a restrictive pattern with an invalid type is skipped
+    instance['resource_filters'] = [
+        {'resource': 'sds', 'property': 'name', 'type': 'exculde', 'patterns': ['^nonexistent$']},
+    ]
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric('dell_powerflex.sds.count', at_least=1)
+
+
 def test_include_filter_missing_property(dd_run_check, aggregator, instance, mock_http_get, caplog):
     instance['resource_filters'] = [
         {'resource': 'sds', 'property': 'nonexistent_field', 'patterns': ['.*']},
