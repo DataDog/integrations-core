@@ -47,9 +47,9 @@ class QueueInfo(object):
 
 
 class QueueStats(BaseStats):
-    def __init__(self, raw_message, filtered_queue_names, timezone=None):
+    def __init__(self, raw_message, filtered_queue_names, timezone=None, filter_queue_statistics_metrics=False):
         super(QueueStats, self).__init__(raw_message, timezone=timezone)
-        if filtered_queue_names is not None:
+        if filter_queue_statistics_metrics and filtered_queue_names is not None:
             self.queues = [
                 queue_info for queue_info in (QueueInfo(channel) for channel in raw_message[MQGACF_Q_STATISTICS_DATA])
                 if queue_info.name in filtered_queue_names]
