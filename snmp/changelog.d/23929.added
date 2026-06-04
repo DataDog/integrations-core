@@ -1,0 +1,1 @@
+Add Cisco Catalyst 1200 and Catalyst 1300/1300X SNMP profiles, with `serial_number` sourced from `ENTITY-MIB` `entPhysicalSerialNum` at the fixed SMB chassis index `67109120`.
