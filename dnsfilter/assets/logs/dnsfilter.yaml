@@ -77,9 +77,10 @@ facets:
     name: Activity ID
     path: ocsf.activity_id
     source: log
+    type: integer
   - groups:
       - OCSF
-    name: Activity
+    name: Activity Name
     path: ocsf.activity_name
     source: log
   - groups:
@@ -87,6 +88,7 @@ facets:
     name: Category ID
     path: ocsf.category_uid
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Category
@@ -97,6 +99,7 @@ facets:
     name: Class ID
     path: ocsf.class_uid
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Class
@@ -112,6 +115,7 @@ facets:
     name: Status ID
     path: ocsf.status_id
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Severity
@@ -122,6 +126,7 @@ facets:
     name: Severity ID
     path: ocsf.severity_id
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Source IP Address
@@ -139,12 +144,12 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Query Hostname
+    name: DNS Query Hostname
     path: ocsf.query.hostname
     source: log
   - groups:
       - OCSF
-    name: Query Type
+    name: Query Resource Record Type
     path: ocsf.query.type
     source: log
   - groups:
@@ -172,6 +177,7 @@ facets:
     name: Disposition ID
     path: ocsf.disposition_id
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Action
@@ -182,11 +188,14 @@ facets:
     name: Action ID
     path: ocsf.action_id
     source: log
-  - groups:
+    type: integer
+  - facetType: range
+    groups:
       - OCSF
-    name: Duration
+    name: Duration Milliseconds
     path: ocsf.duration
     source: log
+    type: integer
 pipeline:
   type: pipeline
   name: DNSFilter
