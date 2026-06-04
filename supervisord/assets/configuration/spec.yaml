@@ -78,6 +78,7 @@ files:
             items:
               type: string
             example: [<PROC_REGEX>]
+          fleet_configurable: false
         - name: proc_names_exclude
           description: |
             The process not to monitor within this supervisord instance.
@@ -86,6 +87,7 @@ files:
             items:
               type: string
             example: [<PROCESS_NAME_EXCLUDE_1>, <PROCESS_NAME_EXCLUDE_2>]
+          fleet_configurable: false
         - name: status_mapping_override
           description: |
             The process status mapping override between supervisord status and Datadog status.
@@ -106,6 +108,7 @@ files:
             example:
               <SUPERVISORD_STATUS_1>: <DATADOG_STATUS_1>
               <SUPERVISORD_STATUS_2>: <DATADOG_STATUS_2>
+          fleet_configurable: false
         - template: instances/default
     - template: logs
       example:
