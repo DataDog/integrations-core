@@ -29,7 +29,7 @@ class StatsCollector(object):
         self.send_metrics_from_properties = send_metrics_from_properties
         self.log = log
 
-    def collect(self, queue_manager):
+    def collect(self, queue_manager, filtered_queue_names):
         """
         Collect Statistics Messages
 
@@ -47,7 +47,7 @@ class StatsCollector(object):
                 message, header = pymqi.PCFExecute.unpack(bin_message)
                 self.log.trace('Stats unpacked message: %s, Stats unpacked header: %s', message, header)
 
-                stats = self._get_stats(message, header, self.config.qm_stats_tz)
+                stats = self._get_stats(message, header, filtered_queue_names, self.config.qm_stats_tz)
 
                 # We only collect metrics generated after the check instance creation.
                 if stats.start_datetime < self.config.instance_creation_datetime:
@@ -106,11 +106,11 @@ class StatsCollector(object):
             )
 
     @staticmethod
-    def _get_stats(message, header, timezone=None):
+    def _get_stats(message, header, filtered_queue_names, timezone=None):
         if header.Command == MQCMD_STATISTICS_CHANNEL:
             stats = ChannelStats(message, timezone)
         elif header.Command == MQCMD_STATISTICS_Q:
-            stats = QueueStats(message, timezone)
+            stats = QueueStats(message, filtered_queue_names, timezone)
         else:
             stats = BaseStats(message, timezone)
         return stats

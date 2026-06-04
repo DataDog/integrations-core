@@ -41,6 +41,7 @@ class QueueMetricCollector(object):
         self.send_metrics_from_properties = send_metrics_from_properties  # type: Callable[[Dict, Dict, str, List[str]], None]
         self.log = log  # type: logging.LoggerAdapter
         self.user_provided_queues = set(self.config.queues)  # type: Set[str]
+        self.filtered_queues = None
 
     def collect_queue_metrics(self, queue_manager):
         queues = self.discover_queues(queue_manager)
@@ -88,6 +89,7 @@ class QueueMetricCollector(object):
         if self.config.queue_patterns:
             for pattern in self.config.queue_patterns:
                 discovered_queues.update(_discover(queue_manager, pattern))
+            self.filtered_queues = discovered_queues
 
         if self.config.queue_regex:
             keep_queues = set()
@@ -99,6 +101,7 @@ class QueueMetricCollector(object):
                 "%s of the %s discovered queues match the queue_regex", len(keep_queues), len(discovered_queues)
             )
             discovered_queues = keep_queues
+            self.filtered_queues = discovered_queues
 
         discovered_queues.update(self.user_provided_queues)
         return discovered_queues

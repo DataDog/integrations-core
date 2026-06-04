@@ -94,7 +94,7 @@ class IbmMqCheck(AgentCheck):
             self.channel_metric_collector.get_pcf_channel_metrics(queue_manager)
             self.queue_metric_collector.collect_queue_metrics(queue_manager)
             if self._config.collect_statistics_metrics:
-                self.stats_collector.collect(queue_manager)
+                self.stats_collector.collect(queue_manager, filtered_queue_names=self.queue_metric_collector.filtered_queues)
         finally:
             queue_manager.disconnect()
 
