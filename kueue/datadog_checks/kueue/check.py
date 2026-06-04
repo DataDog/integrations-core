@@ -22,6 +22,7 @@ OTHER_RESOURCE_NAME = 'other'
 
 DEFAULT_RENAME_LABELS = {
     'cluster_queue': 'kueue_cluster_queue',
+    'version': 'go_version',
 }
 
 

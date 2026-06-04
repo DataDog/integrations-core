@@ -59,6 +59,7 @@ def test_check(dd_run_check, aggregator, instance, mock_http_response):
         aggregator.assert_metric(metric)
         aggregator.assert_metric_has_tag(metric, 'test:tag')
 
+    aggregator.assert_metric_has_tag('kueue.go.info', 'go_version:go1.24.4')
     aggregator.assert_metric_has_tag('kueue.cluster_queue.resource_usage.gpu', 'kueue_cluster_queue:default')
     aggregator.assert_metric_has_tag('kueue.cluster_queue.resource_pending.gpu', 'kueue_cluster_queue:default')
     aggregator.assert_metric_has_tag('kueue.cluster_queue.pending_workloads', 'kueue_cluster_queue:default')

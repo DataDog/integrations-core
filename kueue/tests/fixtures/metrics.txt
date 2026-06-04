@@ -76,7 +76,7 @@ go_goroutines{replica_role="leader"} 1
 
 # HELP go_info Kueue go info metric.
 # TYPE go_info gauge
-go_info{replica_role="leader"} 1
+go_info{replica_role="leader",version="go1.24.4"} 1
 
 # HELP go_memstats_alloc_bytes Kueue go memstats alloc bytes metric.
 # TYPE go_memstats_alloc_bytes gauge
