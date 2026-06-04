@@ -39,6 +39,8 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
+import httpx
+
 from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import Label, PullRequest
 
@@ -69,6 +71,13 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
             headers={},
         ),
         'add_labels_to_issue': lambda: GitHubResponse.model_validate({'data': [], 'headers': {}}),
+        # Default to "PR not found" so tests that don't care about PR lookup auto-fall-through
+        # to commit resolution. Tests that need a specific PR register their own mock_response.
+        'get_pull_request': lambda: httpx.HTTPStatusError(
+            'Not Found',
+            request=httpx.Request('GET', 'https://api.github.com/'),
+            response=httpx.Response(404),
+        ),
     }
 
 
@@ -129,6 +138,21 @@ class FakeAsyncGitHubClient:
     # ------------------------------------------------------------------
     # Mirrored API surface
     # ------------------------------------------------------------------
+
+    async def get_pull_request(
+        self,
+        owner: str,
+        repo: str,
+        pull_number: int,
+        timeout: float | None = None,
+    ) -> GitHubResponse[PullRequest]:
+        return self._call(
+            'get_pull_request',
+            owner=owner,
+            repo=repo,
+            pull_number=pull_number,
+            timeout=timeout,
+        )
 
     async def create_pull_request(
         self,
