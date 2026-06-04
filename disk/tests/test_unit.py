@@ -678,13 +678,15 @@ def test_latency_metrics_respect_device_include(aggregator, dd_run_check):
     ):
         dd_run_check(c)
 
-    latency_metrics = ['system.disk.read_time', 'system.disk.write_time',
-                       'system.disk.read_time_pct', 'system.disk.write_time_pct']
+    latency_metrics = [
+        'system.disk.read_time',
+        'system.disk.write_time',
+        'system.disk.read_time_pct',
+        'system.disk.write_time_pct',
+    ]
     for metric in latency_metrics:
-        aggregator.assert_metric(metric, tags=['device:{}'.format(included_device),
-                                               'device_name:sda1'], count=1)
-        aggregator.assert_metric(metric, tags=['device:{}'.format(excluded_device),
-                                               'device_name:sdb1'], count=0)
+        aggregator.assert_metric(metric, tags=['device:{}'.format(included_device), 'device_name:sda1'], count=1)
+        aggregator.assert_metric(metric, tags=['device:{}'.format(excluded_device), 'device_name:sdb1'], count=0)
 
 
 def test_mount_point_include():
