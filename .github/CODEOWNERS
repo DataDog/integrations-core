@@ -635,9 +635,9 @@ plaid/assets/logs/                                                  @DataDog/saa
 /gpu/*.md                                                            @DataDog/ebpf-platform @DataDog/documentation
 /gpu/manifest.json                                                   @DataDog/ebpf-platform @DataDog/agent-integrations @DataDog/documentation
 
-/kueue/                                                                @DataDog/ebpf-platform
-/kueue/*.md                                                            @DataDog/ebpf-platform @DataDog/documentation
-/kueue/manifest.json                                                   @DataDog/ebpf-platform @DataDog/agent-integrations @DataDog/documentation
+/kueue/                                                                @DataDog/ebpf-platform @DataDog/gpu-monitoring-agent
+/kueue/*.md                                                            @DataDog/ebpf-platform @DataDog/gpu-monitoring-agent @DataDog/documentation
+/kueue/manifest.json                                                   @DataDog/ebpf-platform @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
 
 /linux_audit_logs/                                                  @DataDog/agent-integrations
 /linux_audit_logs/*.md                                              @DataDog/agent-integrations @DataDog/documentation
