@@ -167,12 +167,7 @@ class PostgreSql(DatabaseCheck):
             token_provider=self.build_token_provider(),
         )
         self.metrics_cache = PostgresMetricsCache(self._config)
-        if self._config.query_metrics.incremental_query_metrics:
-            self.log.info("Using incremental query metrics collector")
-            self.statement_metrics = PostgresStatementMetricsV2(self, self._config)
-        else:
-            self.log.info("Using legacy query metrics collector (full pg_stat_statements load)")
-            self.statement_metrics = PostgresStatementMetrics(self, self._config)
+        self.statement_metrics = None
         self.statement_samples = PostgresStatementSamples(self, self._config)
         self.metadata_samples = PostgresMetadata(self, self._config)
         self.data_observability = PostgresDataObservability(self, self._config)
@@ -186,6 +181,7 @@ class PostgreSql(DatabaseCheck):
         self.check_initializations.append(self._connect)
         self.check_initializations.append(self.load_cluster_name)
         self.check_initializations.append(self.load_version)
+        self.check_initializations.append(self._initialize_statement_metrics)
         self.check_initializations.append(self.load_system_identifier)
         self.check_initializations.append(self.initialize_is_aurora)
         self.check_initializations.append(self._query_manager.compile_queries)
@@ -643,6 +639,34 @@ class PostgreSql(DatabaseCheck):
         self.raw_version = self._version_utils.get_raw_version(self.db())
         self.version = self._version_utils.parse_version(self.raw_version)
         self.set_metadata('version', self.raw_version)
+
+    def _initialize_statement_metrics(self):
+        custom_pgss_view = self._config.pg_stat_statements_view != 'pg_stat_statements'
+        if self._config.query_metrics.incremental_query_metrics and self.version < V10:
+            self.log.warning(
+                "incremental_query_metrics requires PostgreSQL 10 or later (detected version: %s). "
+                "Falling back to the legacy query metrics collector.",
+                self.version,
+            )
+        elif self._config.query_metrics.incremental_query_metrics and custom_pgss_view:
+            self.log.warning(
+                "incremental_query_metrics is not compatible with a custom pg_stat_statements_view (%s) "
+                "because it requires the pg_stat_statements(false) function form. "
+                "Falling back to the legacy query metrics collector.",
+                self._config.pg_stat_statements_view,
+            )
+
+        if (
+            self._config.query_metrics.incremental_query_metrics
+            and self.version >= V10
+            and not custom_pgss_view
+        ):
+            self.log.info("Using incremental query metrics collector")
+            self.statement_metrics = PostgresStatementMetricsV2(self, self._config)
+        else:
+            if not self._config.query_metrics.incremental_query_metrics:
+                self.log.info("Using legacy query metrics collector (full pg_stat_statements load)")
+            self.statement_metrics = PostgresStatementMetrics(self, self._config)
 
     def initialize_is_aurora(self):
         if self.is_aurora is None:

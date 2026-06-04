@@ -199,7 +199,7 @@ def test_statement_metrics_with_duplicates_v2(aggregator, integration_check, dbm
                 mock_agent.side_effect = obfuscate_sql
                 cursor.execute(query, (['app1', 'app2'],))
                 cursor.execute(query, (['app1', 'app2', 'app3'],))
-                check.check(dbm_instance_v2)
+                check.run()
 
                 cursor.execute(query, (['app1', 'app2'],))
                 cursor.execute(query, (['app1', 'app2', 'app3'],))
@@ -220,6 +220,7 @@ def test_statement_metrics_with_duplicates_v2(aggregator, integration_check, dbm
 # ---------------------------------------------------------------------------
 
 
+@requires_over_10
 @pytest.mark.parametrize(
     "error,metric_columns,expected_error_tag,expected_warnings",
     [
@@ -399,6 +400,7 @@ def test_wal_metrics_v2(aggregator, integration_check, dbm_instance_v2):
 # ---------------------------------------------------------------------------
 
 
+@requires_over_10
 def test_internal_telemetry_gauges_v2(aggregator, integration_check, dbm_instance_v2):
     conn = psycopg.connect(
         host=HOST, dbname=DB_NAME, user="bob", password="bob", autocommit=True, cursor_factory=ClientCursor
@@ -445,6 +447,7 @@ def test_internal_telemetry_gauges_v2(aggregator, integration_check, dbm_instanc
 # ---------------------------------------------------------------------------
 
 
+@requires_over_10
 def test_statement_metrics_pgss_not_loaded_v2(aggregator, integration_check, dbm_instance_v2):
     check = integration_check(dbm_instance_v2)
 
