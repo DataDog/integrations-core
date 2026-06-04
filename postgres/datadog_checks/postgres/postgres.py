@@ -656,11 +656,7 @@ class PostgreSql(DatabaseCheck):
                 self._config.pg_stat_statements_view,
             )
 
-        if (
-            self._config.query_metrics.incremental_query_metrics
-            and self.version >= V10
-            and not custom_pgss_view
-        ):
+        if self._config.query_metrics.incremental_query_metrics and self.version >= V10 and not custom_pgss_view:
             self.log.info("Using incremental query metrics collector")
             self.statement_metrics = PostgresStatementMetricsV2(self, self._config)
         else:

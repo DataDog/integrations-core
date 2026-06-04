@@ -373,9 +373,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
 
     # -- Row assembly -----------------------------------------------------
 
-    def _assemble_rows(
-        self, derivative_rows: list[dict], obfuscations: dict[PgssKey, ObfuscationResult]
-    ) -> list[dict]:
+    def _assemble_rows(self, derivative_rows: list[dict], obfuscations: dict[PgssKey, ObfuscationResult]) -> list[dict]:
         assembled: list[dict] = []
         for row in derivative_rows:
             pgss_key: PgssKey = (row['queryid'], row['dbid'], row['userid'])

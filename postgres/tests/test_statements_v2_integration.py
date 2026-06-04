@@ -345,7 +345,12 @@ def test_pg_stat_statements_dealloc_v2(aggregator, integration_check, pg_instanc
     pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
     pg_instance['query_samples'] = {'enabled': False}
     pg_instance['query_activity'] = {'enabled': False}
-    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2, 'incremental_query_metrics': True}
+    pg_instance['query_metrics'] = {
+        'enabled': True,
+        'run_sync': True,
+        'collection_interval': 0.2,
+        'incremental_query_metrics': True,
+    }
 
     with _get_superconn(pg_instance) as superconn:
         with superconn.cursor() as cur:
@@ -511,6 +516,5 @@ def test_fqt_cache_deduplication_v2(aggregator, integration_check, dbm_instance_
     matching = [e for e in fqt_events if e['db']['query_signature'] == query_signature]
 
     assert len(matching) == 1, (
-        f"Expected exactly 1 FQT event across 3 cycles but got {len(matching)}; "
-        "TTL cache deduplication may be broken"
+        f"Expected exactly 1 FQT event across 3 cycles but got {len(matching)}; TTL cache deduplication may be broken"
     )

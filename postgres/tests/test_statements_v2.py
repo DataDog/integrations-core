@@ -14,7 +14,6 @@ from datadog_checks.postgres.config import build_config
 from datadog_checks.postgres.delta_detector import DeltaDetector
 from datadog_checks.postgres.obfuscation_lookup import ObfuscationLookup
 from datadog_checks.postgres.statements import (
-    PG_STAT_STATEMENTS_METRICS_COLUMNS,
     PG_STAT_STATEMENTS_TIMING_COLUMNS,
     PG_STAT_STATEMENTS_TIMING_COLUMNS_LT_17,
 )
@@ -346,11 +345,13 @@ class TestPostgresStatementMetricsV2:
         v2 = self._make()
         snapshot = [{'queryid': 1, 'dbid': 1, 'userid': 1, 'datname': 'db', 'rolname': 'r', 'calls': 10}]
 
-        with mock.patch.object(v2, '_emit_pg_stat_statements_metrics'), \
-             mock.patch.object(v2, '_emit_pg_stat_statements_dealloc'), \
-             mock.patch.object(v2, '_emit_pg_stat_statements_max_warning'), \
-             mock.patch.object(v2, '_sync_cache_sizes'), \
-             mock.patch.object(v2, '_load_lightweight_snapshot', return_value=snapshot):
+        with (
+            mock.patch.object(v2, '_emit_pg_stat_statements_metrics'),
+            mock.patch.object(v2, '_emit_pg_stat_statements_dealloc'),
+            mock.patch.object(v2, '_emit_pg_stat_statements_max_warning'),
+            mock.patch.object(v2, '_sync_cache_sizes'),
+            mock.patch.object(v2, '_load_lightweight_snapshot', return_value=snapshot),
+        ):
             # First call: seeds DeltaDetector (no previous) → no derivatives
             assert v2._collect_metrics_rows() == []
             # Second call: identical snapshot, zero counter change → no derivatives
@@ -358,7 +359,8 @@ class TestPostgresStatementMetricsV2:
 
         # Delta gauges were still emitted with value 0 on both calls
         derivative_gauge_calls = [
-            c for c in v2._check.gauge.call_args_list
+            c
+            for c in v2._check.gauge.call_args_list
             if c[0][0] == 'dd.postgres.statement_metrics.delta.derivative_rows'
         ]
         assert all(c[0][1] == 0 for c in derivative_gauge_calls)
@@ -385,8 +387,10 @@ class TestPostgresStatementMetricsV2:
             captured['query'] = query
             return [], None
 
-        with mock.patch.object(v2, '_get_pg_stat_statements_columns', return_value=all_columns), \
-             mock.patch.object(v2, '_execute_query', side_effect=capture_execute):
+        with (
+            mock.patch.object(v2, '_get_pg_stat_statements_columns', return_value=all_columns),
+            mock.patch.object(v2, '_execute_query', side_effect=capture_execute),
+        ):
             v2._load_lightweight_snapshot()
 
         assert 'query' in captured
