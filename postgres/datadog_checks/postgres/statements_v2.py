@@ -119,6 +119,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
         obfuscate_options['table_names'] = config.obfuscator_options.collect_tables
         obfuscate_options['dollar_quoted_func'] = config.obfuscator_options.keep_dollar_quoted_func
         obfuscate_options['return_json_metadata'] = config.obfuscator_options.collect_metadata
+        obfuscate_options['dbms'] = 'postgresql'
         obfuscate_options_str = to_native_string(json.dumps(obfuscate_options))
 
         self._obfuscation_lookup = ObfuscationLookup(
