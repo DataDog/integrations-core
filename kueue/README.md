@@ -64,13 +64,9 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 The Kueue integration does not include any events.
 
-### Service Checks
-
-See [service_checks.json][8] for a list of service checks provided by this integration.
-
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][8].
 
 
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -79,7 +75,6 @@ Need help? Contact [Datadog support][9].
 [5]: https://docs.datadoghq.com/agent/configuration/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/configuration/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/kueue/metadata.csv
-[8]: https://github.com/DataDog/integrations-core/blob/master/kueue/assets/service_checks.json
-[9]: https://docs.datadoghq.com/help/
+[8]: https://docs.datadoghq.com/help/
 [10]: https://docs.datadoghq.com/containers/cluster_agent/clusterchecks/?tab=helm#configuration-from-configuration-files
 [11]: https://docs.datadoghq.com/containers/troubleshooting/cluster-and-endpoint-checks/#dispatching-logic-in-the-cluster-agent

@@ -13,4 +13,4 @@ def dd_environment():
 
 @pytest.fixture
 def instance():
-    return MOCKED_INSTANCE
+    return MOCKED_INSTANCE.copy()

@@ -1,47 +1,55 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
-kueue.admission.attempts,gauge,0,,,Kueue admission attempts metric.,0,kueue,admission_attempts,,
-kueue.admission.wait_time.seconds,gauge,0,second,,Kueue admission wait time seconds metric.,0,kueue,admission_wait_time_seconds,,
-kueue.admission_attempt.duration.seconds,gauge,0,second,,Kueue admission attempt duration seconds metric.,0,kueue,admission_attempt_duration_seconds,,
-kueue.admission_checks.wait_time.seconds,gauge,0,second,,Kueue admission checks wait time seconds metric.,0,kueue,admission_checks_wait_time_seconds,,
-kueue.admission_cycle.preemption_skips,gauge,0,,,Kueue admission cycle preemption skips metric.,0,kueue,admission_cycle_preemption_skips,,
-kueue.admitted.active_workloads,gauge,0,,,Kueue admitted active workloads metric.,0,kueue,admitted_active_workloads,,
-kueue.admitted.workloads,gauge,0,,,Kueue admitted workloads metric.,0,kueue,admitted_workloads,,
-kueue.admitted_until_ready.wait_time.seconds,gauge,0,second,,Kueue admitted until ready wait time seconds metric.,0,kueue,admitted_until_ready_wait_time_seconds,,
-kueue.build_info,gauge,0,,,Kueue build info metric.,0,kueue,build_info,,
+kueue.admission.attempts.count,count,0,,,"The total number of attempts to admit workloads.Each admission attempt might try to admit more than one workload. The label 'result' can have the following values:- 'success' means that at least one workload was admitted.,- 'inadmissible' means that no workload was admitted.",0,kueue,admission_attempts_count,,
+kueue.admission.wait_time.seconds.bucket,count,0,second,,"The time between a workload was created or requeued until admission, per 'cluster_queue'",0,kueue,admission_wait_time_seconds_bucket,,
+kueue.admission.wait_time.seconds.count,count,0,second,,"The time between a workload was created or requeued until admission, per 'cluster_queue'",0,kueue,admission_wait_time_seconds_count,,
+kueue.admission.wait_time.seconds.sum,count,0,second,,"The time between a workload was created or requeued until admission, per 'cluster_queue'",0,kueue,admission_wait_time_seconds_sum,,
+kueue.admission_attempt.duration.seconds.bucket,count,0,second,,"The latency of an admission attempt. The label 'result' can have the following values:- 'success' means that at least one workload was admitted.,- 'inadmissible' means that no workload was admitted.",0,kueue,admission_attempt_duration_seconds_bucket,,
+kueue.admission_attempt.duration.seconds.count,count,0,second,,"The latency of an admission attempt. The label 'result' can have the following values:- 'success' means that at least one workload was admitted.,- 'inadmissible' means that no workload was admitted.",0,kueue,admission_attempt_duration_seconds_count,,
+kueue.admission_attempt.duration.seconds.sum,count,0,second,,"The latency of an admission attempt. The label 'result' can have the following values:- 'success' means that at least one workload was admitted.,- 'inadmissible' means that no workload was admitted.",0,kueue,admission_attempt_duration_seconds_sum,,
+kueue.admission_checks.wait_time.seconds.bucket,count,0,second,,"The time from when a workload got the quota reservation until admission, per 'cluster_queue'",0,kueue,admission_checks_wait_time_seconds_bucket,,
+kueue.admission_checks.wait_time.seconds.count,count,0,second,,"The time from when a workload got the quota reservation until admission, per 'cluster_queue'",0,kueue,admission_checks_wait_time_seconds_count,,
+kueue.admission_checks.wait_time.seconds.sum,count,0,second,,"The time from when a workload got the quota reservation until admission, per 'cluster_queue'",0,kueue,admission_checks_wait_time_seconds_sum,,
+kueue.admission_cycle.preemption_skips,gauge,0,,,The number of Workloads in the ClusterQueue that got preemption candidates but had to be skipped because other ClusterQueues needed the same resources in the same cycle,0,kueue,admission_cycle_preemption_skips,,
+kueue.admitted.active_workloads,gauge,0,,,"The number of admitted Workloads that are active, per 'cluster_queue'",0,kueue,admitted_active_workloads,,
+kueue.admitted.workloads.count,count,0,,,The total number of admitted workloads per 'cluster_queue',0,kueue,admitted_workloads_count,,
+kueue.admitted_until_ready.wait_time.seconds.bucket,count,0,second,,"The time between a workload was admitted until ready, per 'cluster_queue'",0,kueue,admitted_until_ready_wait_time_seconds_bucket,,
+kueue.admitted_until_ready.wait_time.seconds.count,count,0,second,,"The time between a workload was admitted until ready, per 'cluster_queue'",0,kueue,admitted_until_ready_wait_time_seconds_count,,
+kueue.admitted_until_ready.wait_time.seconds.sum,count,0,second,,"The time between a workload was admitted until ready, per 'cluster_queue'",0,kueue,admitted_until_ready_wait_time_seconds_sum,,
+kueue.build_info,gauge,0,,,"Kueue build information. 1 labeled by git version, git commit, build date, go version, compiler, platform",0,kueue,build_info,,
 kueue.certwatcher.read_certificate,gauge,0,,,Kueue certwatcher read certificate metric.,0,kueue,certwatcher_read_certificate,,
 kueue.certwatcher.read_certificate_errors,gauge,0,,,Kueue certwatcher read certificate errors metric.,0,kueue,certwatcher_read_certificate_errors,,
-kueue.cluster_queue.borrowing_limit.cpu,gauge,0,,,Kueue cluster queue borrowing limit cpu metric.,0,kueue,cluster_queue_borrowing_limit_cpu,,
-kueue.cluster_queue.borrowing_limit.gpu,gauge,0,,,Kueue cluster queue borrowing limit gpu metric.,0,kueue,cluster_queue_borrowing_limit_gpu,,
-kueue.cluster_queue.borrowing_limit.other,gauge,0,,,Kueue cluster queue borrowing limit other metric.,0,kueue,cluster_queue_borrowing_limit_other,,
-kueue.cluster_queue.info,gauge,0,,,Kueue cluster queue info metric.,0,kueue,cluster_queue_info,,
-kueue.cluster_queue.lending_limit.cpu,gauge,0,,,Kueue cluster queue lending limit cpu metric.,0,kueue,cluster_queue_lending_limit_cpu,,
-kueue.cluster_queue.lending_limit.gpu,gauge,0,,,Kueue cluster queue lending limit gpu metric.,0,kueue,cluster_queue_lending_limit_gpu,,
-kueue.cluster_queue.lending_limit.other,gauge,0,,,Kueue cluster queue lending limit other metric.,0,kueue,cluster_queue_lending_limit_other,,
-kueue.cluster_queue.nominal_quota.cpu,gauge,0,,,Kueue cluster queue nominal quota cpu metric.,0,kueue,cluster_queue_nominal_quota_cpu,,
-kueue.cluster_queue.nominal_quota.gpu,gauge,0,,,Kueue cluster queue nominal quota gpu metric.,0,kueue,cluster_queue_nominal_quota_gpu,,
-kueue.cluster_queue.nominal_quota.other,gauge,0,,,Kueue cluster queue nominal quota other metric.,0,kueue,cluster_queue_nominal_quota_other,,
-kueue.cluster_queue.pending_workloads,gauge,0,,,The number of pending workloads per cluster queue and status.,0,kueue,cluster_queue_pending_workloads,,"kueue_cluster_queue:default,status:inadmissible,replica_role:leader"
-kueue.cluster_queue.resource_pending.cpu,gauge,0,,,Kueue cluster queue resource pending cpu metric.,0,kueue,cluster_queue_resource_pending_cpu,,
-kueue.cluster_queue.resource_pending.gpu,gauge,0,,,Reports the cluster_queue's pending GPU resource requests within all the flavors.,0,kueue,cluster_queue_resource_pending_gpu,,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
-kueue.cluster_queue.resource_pending.other,gauge,0,,,Kueue cluster queue resource pending other metric.,0,kueue,cluster_queue_resource_pending_other,,
-kueue.cluster_queue.resource_reservation.cpu,gauge,0,,,Kueue cluster queue resource reservation cpu metric.,0,kueue,cluster_queue_resource_reservation_cpu,,
-kueue.cluster_queue.resource_reservation.gpu,gauge,0,,,Kueue cluster queue resource reservation gpu metric.,0,kueue,cluster_queue_resource_reservation_gpu,,
-kueue.cluster_queue.resource_reservation.other,gauge,0,,,Kueue cluster queue resource reservation other metric.,0,kueue,cluster_queue_resource_reservation_other,,
-kueue.cluster_queue.resource_usage.cpu,gauge,0,,,Reports the cluster_queue's CPU resource usage within all the flavors.,0,kueue,cluster_queue_resource_usage_cpu,,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
-kueue.cluster_queue.resource_usage.gpu,gauge,0,,,Reports the cluster_queue's GPU resource usage within all the flavors.,0,kueue,cluster_queue_resource_usage_gpu,,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
-kueue.cluster_queue.resource_usage.other,gauge,0,,,Reports uncategorized cluster_queue resource usage within all the flavors.,0,kueue,cluster_queue_resource_usage_other,,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
-kueue.cluster_queue.status,gauge,0,,,Kueue cluster queue status metric.,0,kueue,cluster_queue_status,,
-kueue.cluster_queue.weighted_share,gauge,0,,,Kueue cluster queue weighted share metric.,0,kueue,cluster_queue_weighted_share,,
-kueue.cohort.info,gauge,0,,,Kueue cohort info metric.,0,kueue,cohort_info,,
-kueue.cohort.weighted_share,gauge,0,,,Kueue cohort weighted share metric.,0,kueue,cohort_weighted_share,,
-kueue.cohort_subtree.admitted.active_workloads,gauge,0,,,Kueue cohort subtree admitted active workloads metric.,0,kueue,cohort_subtree_admitted_active_workloads,,
-kueue.cohort_subtree.admitted.workloads,gauge,0,,,Kueue cohort subtree admitted workloads metric.,0,kueue,cohort_subtree_admitted_workloads,,
-kueue.cohort_subtree.quota.cpu,gauge,0,,,Kueue cohort subtree quota cpu metric.,0,kueue,cohort_subtree_quota_cpu,,
-kueue.cohort_subtree.quota.gpu,gauge,0,,,Kueue cohort subtree quota gpu metric.,0,kueue,cohort_subtree_quota_gpu,,
-kueue.cohort_subtree.quota.other,gauge,0,,,Kueue cohort subtree quota other metric.,0,kueue,cohort_subtree_quota_other,,
-kueue.cohort_subtree.resource_reservations.cpu,gauge,0,,,Kueue cohort subtree resource reservations cpu metric.,0,kueue,cohort_subtree_resource_reservations_cpu,,
-kueue.cohort_subtree.resource_reservations.gpu,gauge,0,,,Kueue cohort subtree resource reservations gpu metric.,0,kueue,cohort_subtree_resource_reservations_gpu,,
-kueue.cohort_subtree.resource_reservations.other,gauge,0,,,Kueue cohort subtree resource reservations other metric.,0,kueue,cohort_subtree_resource_reservations_other,,
+kueue.cluster_queue.borrowing_limit.cpu,gauge,0,,,Reports the cluster_queue's resource borrowing limit within all the flavors,0,kueue,cluster_queue_borrowing_limit_cpu,,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
+kueue.cluster_queue.borrowing_limit.gpu,gauge,0,,,Reports the cluster_queue's resource borrowing limit within all the flavors,0,kueue,cluster_queue_borrowing_limit_gpu,,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
+kueue.cluster_queue.borrowing_limit.other,gauge,0,,,Reports the cluster_queue's resource borrowing limit within all the flavors,0,kueue,cluster_queue_borrowing_limit_other,,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
+kueue.cluster_queue.info,gauge,0,,,Reports ClusterQueue hierarchy information. The metric has value 1 and can be joined using labels.,0,kueue,cluster_queue_info,,
+kueue.cluster_queue.lending_limit.cpu,gauge,0,,,Reports the cluster_queue's resource lending limit within all the flavors,0,kueue,cluster_queue_lending_limit_cpu,,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
+kueue.cluster_queue.lending_limit.gpu,gauge,0,,,Reports the cluster_queue's resource lending limit within all the flavors,0,kueue,cluster_queue_lending_limit_gpu,,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
+kueue.cluster_queue.lending_limit.other,gauge,0,,,Reports the cluster_queue's resource lending limit within all the flavors,0,kueue,cluster_queue_lending_limit_other,,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
+kueue.cluster_queue.nominal_quota.cpu,gauge,0,,,Reports the cluster_queue's resource nominal quota within all the flavors,0,kueue,cluster_queue_nominal_quota_cpu,,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
+kueue.cluster_queue.nominal_quota.gpu,gauge,0,,,Reports the cluster_queue's resource nominal quota within all the flavors,0,kueue,cluster_queue_nominal_quota_gpu,,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
+kueue.cluster_queue.nominal_quota.other,gauge,0,,,Reports the cluster_queue's resource nominal quota within all the flavors,0,kueue,cluster_queue_nominal_quota_other,,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
+kueue.cluster_queue.pending_workloads,gauge,0,,,"The number of pending workloads, per 'cluster_queue' and 'status'.'status' can have the following values:- ""active"" means that the workloads are in the admission queue.- ""inadmissible"" means there was a failed admission attempt for these workloads and they won't be retried until cluster conditions, which could make this workload admissible, change",0,kueue,cluster_queue_pending_workloads,,"kueue_cluster_queue:default,status:inadmissible,replica_role:leader"
+kueue.cluster_queue.resource_pending.cpu,gauge,0,,,"Reports the cluster_queue's total pending resource requests. Unlike resource_reservation, pending workloads have not yet been assigned to flavors.",0,kueue,cluster_queue_resource_pending_cpu,,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
+kueue.cluster_queue.resource_pending.gpu,gauge,0,,,"Reports the cluster_queue's total pending resource requests. Unlike resource_reservation, pending workloads have not yet been assigned to flavors.",0,kueue,cluster_queue_resource_pending_gpu,,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
+kueue.cluster_queue.resource_pending.other,gauge,0,,,"Reports the cluster_queue's total pending resource requests. Unlike resource_reservation, pending workloads have not yet been assigned to flavors.",0,kueue,cluster_queue_resource_pending_other,,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
+kueue.cluster_queue.resource_reservation.cpu,gauge,0,,,Reports the cluster_queue's total resource reservation within all the flavors,0,kueue,cluster_queue_resource_reservation_cpu,,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
+kueue.cluster_queue.resource_reservation.gpu,gauge,0,,,Reports the cluster_queue's total resource reservation within all the flavors,0,kueue,cluster_queue_resource_reservation_gpu,,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
+kueue.cluster_queue.resource_reservation.other,gauge,0,,,Reports the cluster_queue's total resource reservation within all the flavors,0,kueue,cluster_queue_resource_reservation_other,,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
+kueue.cluster_queue.resource_usage.cpu,gauge,0,,,Reports the cluster_queue's total resource usage within all the flavors,0,kueue,cluster_queue_resource_usage_cpu,,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
+kueue.cluster_queue.resource_usage.gpu,gauge,0,,,Reports the cluster_queue's total resource usage within all the flavors,0,kueue,cluster_queue_resource_usage_gpu,,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
+kueue.cluster_queue.resource_usage.other,gauge,0,,,Reports the cluster_queue's total resource usage within all the flavors,0,kueue,cluster_queue_resource_usage_other,,"kueue_cluster_queue:default,cohort:default,flavor:on-demand,replica_role:leader"
+kueue.cluster_queue.status,gauge,0,,,"Reports 'cluster_queue' with its 'status' (with possible values 'pending', 'active' or 'terminated').For a ClusterQueue, the metric only reports a value of 1 for one of the statuses.",0,kueue,cluster_queue_status,,
+kueue.cluster_queue.weighted_share,gauge,0,,,"Reports a value that representing the maximum of the ratios of usage above nominalquota to the lendable resources in the cohort, among all the resources provided bythe ClusterQueue, and divided by the weight.If zero, it means that the usage of the ClusterQueue is below the nominal quota.If the ClusterQueue has a weight of zero and is borrowing, this will return NaN.",0,kueue,cluster_queue_weighted_share,,
+kueue.cohort.info,gauge,0,,,Reports Cohort hierarchy information. The metric has value 1 and can be joined using labels.,0,kueue,cohort_info,,
+kueue.cohort.weighted_share,gauge,0,,,"Reports a value that representing the maximum of the ratios of usage above nominalquota to the lendable resources in the Cohort, among all the resources provided bythe Cohort, and divided by the weight.If zero, it means that the usage of the Cohort is below the nominal quota.If the Cohort has a weight of zero and is borrowing, this will return NaN.",0,kueue,cohort_weighted_share,,
+kueue.cohort_subtree.admitted.active_workloads,gauge,0,,,"The number of admitted Workloads that are active, per cohort's subtree",0,kueue,cohort_subtree_admitted_active_workloads,,
+kueue.cohort_subtree.admitted.workloads.count,count,0,,,The total number of admitted workloads per cohort's subtree,0,kueue,cohort_subtree_admitted_workloads_count,,
+kueue.cohort_subtree.quota.cpu,gauge,0,,,Reports the cohort's nominal quota aggregated within the cohort's subtree. The values are reported per resource and flavor,0,kueue,cohort_subtree_quota_cpu,,"cohort:default,flavor:on-demand,replica_role:leader"
+kueue.cohort_subtree.quota.gpu,gauge,0,,,Reports the cohort's nominal quota aggregated within the cohort's subtree. The values are reported per resource and flavor,0,kueue,cohort_subtree_quota_gpu,,"cohort:default,flavor:on-demand,replica_role:leader"
+kueue.cohort_subtree.quota.other,gauge,0,,,Reports the cohort's nominal quota aggregated within the cohort's subtree. The values are reported per resource and flavor,0,kueue,cohort_subtree_quota_other,,"cohort:default,flavor:on-demand,replica_role:leader"
+kueue.cohort_subtree.resource_reservations.cpu,gauge,0,,,Reports the cohort's resource reservations aggregated within the cohort's subtree. The values are reported per resource and flavor,0,kueue,cohort_subtree_resource_reservations_cpu,,"cohort:default,flavor:on-demand,replica_role:leader"
+kueue.cohort_subtree.resource_reservations.gpu,gauge,0,,,Reports the cohort's resource reservations aggregated within the cohort's subtree. The values are reported per resource and flavor,0,kueue,cohort_subtree_resource_reservations_gpu,,"cohort:default,flavor:on-demand,replica_role:leader"
+kueue.cohort_subtree.resource_reservations.other,gauge,0,,,Reports the cohort's resource reservations aggregated within the cohort's subtree. The values are reported per resource and flavor,0,kueue,cohort_subtree_resource_reservations_other,,"cohort:default,flavor:on-demand,replica_role:leader"
 kueue.controller.runtime.active_workers,gauge,0,,,Kueue controller runtime active workers metric.,0,kueue,controller_runtime_active_workers,,
 kueue.controller.runtime.conversion_webhook_panics,gauge,0,,,Kueue controller runtime conversion webhook panics metric.,0,kueue,controller_runtime_conversion_webhook_panics,,
 kueue.controller.runtime.max_concurrent_reconciles,gauge,0,,,Kueue controller runtime max concurrent reconciles metric.,0,kueue,controller_runtime_max_concurrent_reconciles,,
@@ -55,9 +63,9 @@ kueue.controller.runtime.webhook_latency.seconds,gauge,0,second,,Kueue controlle
 kueue.controller.runtime.webhook_panics,gauge,0,,,Kueue controller runtime webhook panics metric.,0,kueue,controller_runtime_webhook_panics,,
 kueue.controller.runtime.webhook_requests,gauge,0,,,Kueue controller runtime webhook requests metric.,0,kueue,controller_runtime_webhook_requests,,
 kueue.controller.runtime.webhook_requests_in_flight,gauge,0,,,Kueue controller runtime webhook requests in flight metric.,0,kueue,controller_runtime_webhook_requests_in_flight,,
-kueue.evicted_workloads,gauge,0,,,Kueue evicted workloads metric.,0,kueue,evicted_workloads,,
-kueue.evicted_workloads_once,gauge,0,,,Kueue evicted workloads once metric.,0,kueue,evicted_workloads_once,,
-kueue.finished_workloads,gauge,0,,,Kueue finished workloads metric.,0,kueue,finished_workloads,,
+kueue.evicted_workloads.count,count,0,,,"The number of evicted workloads per cluster queue, tagged by reason, underlying cause, priority class, and replica role.",0,kueue,evicted_workloads_count,,
+kueue.evicted_workloads_once.count,count,0,,,"The number of unique workload evictions per cluster queue, tagged by eviction reason, underlying cause, priority class, and replica role.",0,kueue,evicted_workloads_once_count,,
+kueue.finished_workloads,gauge,0,,,The number of finished workloads per 'cluster_queue'.,0,kueue,finished_workloads,,
 kueue.go.gc.duration.seconds,gauge,0,second,,Kueue go gc duration seconds metric.,0,kueue,go_gc_duration_seconds,,
 kueue.go.gc.gogc.percent,gauge,0,percent,,Kueue go gc gogc percent metric.,0,kueue,go_gc_gogc_percent,,
 kueue.go.gc.gomemlimit.bytes,gauge,0,byte,,Kueue go gc gomemlimit bytes metric.,0,kueue,go_gc_gomemlimit_bytes,,
@@ -86,27 +94,40 @@ kueue.go.memstats.sys.bytes,gauge,0,byte,,Kueue go memstats sys bytes metric.,0,
 kueue.go.memstats.time_since_last_gc.seconds,gauge,0,second,,Kueue go memstats time since last gc seconds metric.,0,kueue,go_memstats_time_since_last_gc_seconds,,
 kueue.go.threads,gauge,0,,,Kueue go threads metric.,0,kueue,go_threads,,
 kueue.leader_election.master_status,gauge,0,,,Kueue leader election master status metric.,0,kueue,leader_election_master_status,,
-kueue.local_queue.admission.wait_time.seconds,gauge,0,second,,Kueue local queue admission wait time seconds metric.,0,kueue,local_queue_admission_wait_time_seconds,,
-kueue.local_queue.admission_checks.wait_time.seconds,gauge,0,second,,Kueue local queue admission checks wait time seconds metric.,0,kueue,local_queue_admission_checks_wait_time_seconds,,
-kueue.local_queue.admitted.active_workloads,gauge,0,,,Kueue local queue admitted active workloads metric.,0,kueue,local_queue_admitted_active_workloads,,
-kueue.local_queue.admitted.workloads,gauge,0,,,Kueue local queue admitted workloads metric.,0,kueue,local_queue_admitted_workloads,,
-kueue.local_queue.admitted_until_ready.wait_time.seconds,gauge,0,second,,Kueue local queue admitted until ready wait time seconds metric.,0,kueue,local_queue_admitted_until_ready_wait_time_seconds,,
-kueue.local_queue.evicted_workloads,gauge,0,,,Kueue local queue evicted workloads metric.,0,kueue,local_queue_evicted_workloads,,
-kueue.local_queue.finished_workloads,gauge,0,,,Kueue local queue finished workloads metric.,0,kueue,local_queue_finished_workloads,,
-kueue.local_queue.pending_workloads,gauge,0,,,The number of pending workloads per local queue and status.,0,kueue,local_queue_pending_workloads,,"kueue_local_queue:gpu,namespace:team-a,status:active,replica_role:leader"
-kueue.local_queue.quota_reserved.wait_time.seconds,gauge,0,second,,Kueue local queue quota reserved wait time seconds metric.,0,kueue,local_queue_quota_reserved_wait_time_seconds,,
-kueue.local_queue.quota_reserved.workloads,gauge,0,,,Kueue local queue quota reserved workloads metric.,0,kueue,local_queue_quota_reserved_workloads,,
-kueue.local_queue.ready_wait_time.seconds,gauge,0,second,,Kueue local queue ready wait time seconds metric.,0,kueue,local_queue_ready_wait_time_seconds,,
-kueue.local_queue.reserving.active_workloads,gauge,0,,,Kueue local queue reserving active workloads metric.,0,kueue,local_queue_reserving_active_workloads,,
-kueue.local_queue.resource_reservation.cpu,gauge,0,,,Kueue local queue resource reservation cpu metric.,0,kueue,local_queue_resource_reservation_cpu,,
-kueue.local_queue.resource_reservation.gpu,gauge,0,,,Kueue local queue resource reservation gpu metric.,0,kueue,local_queue_resource_reservation_gpu,,
-kueue.local_queue.resource_reservation.other,gauge,0,,,Kueue local queue resource reservation other metric.,0,kueue,local_queue_resource_reservation_other,,
-kueue.local_queue.resource_usage.cpu,gauge,0,,,Kueue local queue resource usage cpu metric.,0,kueue,local_queue_resource_usage_cpu,,
-kueue.local_queue.resource_usage.gpu,gauge,0,,,Kueue local queue resource usage gpu metric.,0,kueue,local_queue_resource_usage_gpu,,
-kueue.local_queue.resource_usage.other,gauge,0,,,Kueue local queue resource usage other metric.,0,kueue,local_queue_resource_usage_other,,
-kueue.local_queue.status,gauge,0,,,Kueue local queue status metric.,0,kueue,local_queue_status,,
-kueue.pods_ready_to_evicted_time.seconds,gauge,0,second,,Kueue pods ready to evicted time seconds metric.,0,kueue,pods_ready_to_evicted_time_seconds,,
-kueue.preempted_workloads,gauge,0,,,Kueue preempted workloads metric.,0,kueue,preempted_workloads,,
+kueue.local_queue.admission.wait_time.seconds.bucket,count,0,second,,"The time between a workload was created or requeued until admission, per 'local_queue'",0,kueue,local_queue_admission_wait_time_seconds_bucket,,
+kueue.local_queue.admission.wait_time.seconds.count,count,0,second,,"The time between a workload was created or requeued until admission, per 'local_queue'",0,kueue,local_queue_admission_wait_time_seconds_count,,
+kueue.local_queue.admission.wait_time.seconds.sum,count,0,second,,"The time between a workload was created or requeued until admission, per 'local_queue'",0,kueue,local_queue_admission_wait_time_seconds_sum,,
+kueue.local_queue.admission_checks.wait_time.seconds.bucket,count,0,second,,"The time from when a workload got the quota reservation until admission, per 'local_queue'",0,kueue,local_queue_admission_checks_wait_time_seconds_bucket,,
+kueue.local_queue.admission_checks.wait_time.seconds.count,count,0,second,,"The time from when a workload got the quota reservation until admission, per 'local_queue'",0,kueue,local_queue_admission_checks_wait_time_seconds_count,,
+kueue.local_queue.admission_checks.wait_time.seconds.sum,count,0,second,,"The time from when a workload got the quota reservation until admission, per 'local_queue'",0,kueue,local_queue_admission_checks_wait_time_seconds_sum,,
+kueue.local_queue.admitted.active_workloads,gauge,0,,,"The number of admitted Workloads that are active, per 'localQueue'",0,kueue,local_queue_admitted_active_workloads,,
+kueue.local_queue.admitted.workloads.count,count,0,,,The total number of admitted workloads per 'local_queue',0,kueue,local_queue_admitted_workloads_count,,
+kueue.local_queue.admitted_until_ready.wait_time.seconds.bucket,count,0,second,,"The time between a workload was admitted until ready, per 'local_queue'",0,kueue,local_queue_admitted_until_ready_wait_time_seconds_bucket,,
+kueue.local_queue.admitted_until_ready.wait_time.seconds.count,count,0,second,,"The time between a workload was admitted until ready, per 'local_queue'",0,kueue,local_queue_admitted_until_ready_wait_time_seconds_count,,
+kueue.local_queue.admitted_until_ready.wait_time.seconds.sum,count,0,second,,"The time between a workload was admitted until ready, per 'local_queue'",0,kueue,local_queue_admitted_until_ready_wait_time_seconds_sum,,
+kueue.local_queue.evicted_workloads.count,count,0,,,"The number of evicted workloads per local queue, tagged by namespace, reason, underlying cause, priority class, and replica role.",0,kueue,local_queue_evicted_workloads_count,,
+kueue.local_queue.finished_workloads,gauge,0,,,"The number of finished workloads, per 'local_queue'.",0,kueue,local_queue_finished_workloads,,
+kueue.local_queue.finished_workloads.count,count,0,,,The total number of finished workloads per 'local_queue',0,kueue,local_queue_finished_workloads_count,,
+kueue.local_queue.pending_workloads,gauge,0,,,"The number of pending workloads, per 'local_queue' and 'status'.'status' can have the following values:- ""active"" means that the workloads are in the admission queue.- ""inadmissible"" means there was a failed admission attempt for these workloads and they won't be retried until cluster conditions, which could make this workload admissible, change",0,kueue,local_queue_pending_workloads,,"kueue_local_queue:gpu,namespace:team-a,status:active,replica_role:leader"
+kueue.local_queue.quota_reserved.wait_time.seconds.bucket,count,0,second,,"The time between a workload was created or requeued until it got quota reservation, per 'local_queue'",0,kueue,local_queue_quota_reserved_wait_time_seconds_bucket,,
+kueue.local_queue.quota_reserved.wait_time.seconds.count,count,0,second,,"The time between a workload was created or requeued until it got quota reservation, per 'local_queue'",0,kueue,local_queue_quota_reserved_wait_time_seconds_count,,
+kueue.local_queue.quota_reserved.wait_time.seconds.sum,count,0,second,,"The time between a workload was created or requeued until it got quota reservation, per 'local_queue'",0,kueue,local_queue_quota_reserved_wait_time_seconds_sum,,
+kueue.local_queue.quota_reserved.workloads.count,count,0,,,The total number of quota reserved workloads per 'local_queue',0,kueue,local_queue_quota_reserved_workloads_count,,
+kueue.local_queue.ready_wait_time.seconds.bucket,count,0,second,,"The time between a workload was created or requeued until ready, per 'local_queue'",0,kueue,local_queue_ready_wait_time_seconds_bucket,,
+kueue.local_queue.ready_wait_time.seconds.count,count,0,second,,"The time between a workload was created or requeued until ready, per 'local_queue'",0,kueue,local_queue_ready_wait_time_seconds_count,,
+kueue.local_queue.ready_wait_time.seconds.sum,count,0,second,,"The time between a workload was created or requeued until ready, per 'local_queue'",0,kueue,local_queue_ready_wait_time_seconds_sum,,
+kueue.local_queue.reserving.active_workloads,gauge,0,,,"The number of Workloads that are reserving quota, per 'localQueue'",0,kueue,local_queue_reserving_active_workloads,,
+kueue.local_queue.resource_reservation.cpu,gauge,0,,,Reports the localQueue's total resource reservation within all the flavors,0,kueue,local_queue_resource_reservation_cpu,,"kueue_local_queue:gpu,namespace:team-a,flavor:on-demand,replica_role:leader"
+kueue.local_queue.resource_reservation.gpu,gauge,0,,,Reports the localQueue's total resource reservation within all the flavors,0,kueue,local_queue_resource_reservation_gpu,,"kueue_local_queue:gpu,namespace:team-a,flavor:on-demand,replica_role:leader"
+kueue.local_queue.resource_reservation.other,gauge,0,,,Reports the localQueue's total resource reservation within all the flavors,0,kueue,local_queue_resource_reservation_other,,"kueue_local_queue:gpu,namespace:team-a,flavor:on-demand,replica_role:leader"
+kueue.local_queue.resource_usage.cpu,gauge,0,,,Reports the localQueue's total resource usage within all the flavors,0,kueue,local_queue_resource_usage_cpu,,"kueue_local_queue:gpu,namespace:team-a,flavor:on-demand,replica_role:leader"
+kueue.local_queue.resource_usage.gpu,gauge,0,,,Reports the localQueue's total resource usage within all the flavors,0,kueue,local_queue_resource_usage_gpu,,"kueue_local_queue:gpu,namespace:team-a,flavor:on-demand,replica_role:leader"
+kueue.local_queue.resource_usage.other,gauge,0,,,Reports the localQueue's total resource usage within all the flavors,0,kueue,local_queue_resource_usage_other,,"kueue_local_queue:gpu,namespace:team-a,flavor:on-demand,replica_role:leader"
+kueue.local_queue.status,gauge,0,,,"Reports 'localQueue' with its 'active' status (with possible values 'True', 'False', or 'Unknown').For a LocalQueue, the metric only reports a value of 1 for one of the statuses.",0,kueue,local_queue_status,,
+kueue.pods_ready_to_evicted_time.seconds.bucket,count,0,second,,"Bucket counts for the time between a workload pods becoming ready and workload eviction, tagged by cluster queue, reason, underlying cause, and replica role.",0,kueue,pods_ready_to_evicted_time_seconds_bucket,,
+kueue.pods_ready_to_evicted_time.seconds.count,count,0,second,,"Count of observations for the time between a workload pods becoming ready and workload eviction, tagged by cluster queue, reason, underlying cause, and replica role.",0,kueue,pods_ready_to_evicted_time_seconds_count,,
+kueue.pods_ready_to_evicted_time.seconds.sum,count,0,second,,"Sum of time between workload pods becoming ready and workload eviction, tagged by cluster queue, reason, underlying cause, and replica role.",0,kueue,pods_ready_to_evicted_time_seconds_sum,,
+kueue.preempted_workloads.count,count,0,,,"The number of preempted workloads per preempting cluster queue, tagged by preemption reason and replica role.",0,kueue,preempted_workloads_count,,
 kueue.process.cpu.seconds,gauge,0,second,,Kueue process cpu seconds metric.,0,kueue,process_cpu_seconds,,
 kueue.process.max_fds,gauge,0,,,Kueue process max fds metric.,0,kueue,process_max_fds,,
 kueue.process.network_receive.bytes,gauge,0,byte,,Kueue process network receive bytes metric.,0,kueue,process_network_receive_bytes,,
@@ -116,14 +137,22 @@ kueue.process.resident_memory.bytes,gauge,0,byte,,Kueue process resident memory 
 kueue.process.uptime.seconds,gauge,0,second,,Kueue process uptime seconds metric.,0,kueue,process_uptime_seconds,,
 kueue.process.virtual_memory.bytes,gauge,0,byte,,Kueue process virtual memory bytes metric.,0,kueue,process_virtual_memory_bytes,,
 kueue.process.virtual_memory.max_bytes,gauge,0,,,Kueue process virtual memory max bytes metric.,0,kueue,process_virtual_memory_max_bytes,,
-kueue.quota_reserved.wait_time.seconds,gauge,0,second,,Kueue quota reserved wait time seconds metric.,0,kueue,quota_reserved_wait_time_seconds,,
-kueue.quota_reserved.workloads,gauge,0,,,Kueue quota reserved workloads metric.,0,kueue,quota_reserved_workloads,,
-kueue.ready_wait_time.seconds,gauge,0,second,,Kueue ready wait time seconds metric.,0,kueue,ready_wait_time_seconds,,
-kueue.replaced_workload_slices,gauge,0,,,Kueue replaced workload slices metric.,0,kueue,replaced_workload_slices,,
-kueue.reserving.active_workloads,gauge,0,,,Kueue reserving active workloads metric.,0,kueue,reserving_active_workloads,,
+kueue.quota_reserved.wait_time.seconds.bucket,count,0,second,,"The time between a workload was created or requeued until it got quota reservation, per 'cluster_queue'",0,kueue,quota_reserved_wait_time_seconds_bucket,,
+kueue.quota_reserved.wait_time.seconds.count,count,0,second,,"The time between a workload was created or requeued until it got quota reservation, per 'cluster_queue'",0,kueue,quota_reserved_wait_time_seconds_count,,
+kueue.quota_reserved.wait_time.seconds.sum,count,0,second,,"The time between a workload was created or requeued until it got quota reservation, per 'cluster_queue'",0,kueue,quota_reserved_wait_time_seconds_sum,,
+kueue.quota_reserved.workloads.count,count,0,,,The total number of quota reserved workloads per 'cluster_queue',0,kueue,quota_reserved_workloads_count,,
+kueue.ready_wait_time.seconds.bucket,count,0,second,,"The time between a workload was created or requeued until ready, per 'cluster_queue'",0,kueue,ready_wait_time_seconds_bucket,,
+kueue.ready_wait_time.seconds.count,count,0,second,,"The time between a workload was created or requeued until ready, per 'cluster_queue'",0,kueue,ready_wait_time_seconds_count,,
+kueue.ready_wait_time.seconds.sum,count,0,second,,"The time between a workload was created or requeued until ready, per 'cluster_queue'",0,kueue,ready_wait_time_seconds_sum,,
+kueue.replaced_workload_slices.count,count,0,,,The number of replaced workload slices per 'cluster_queue',0,kueue,replaced_workload_slices_count,,
+kueue.reserving.active_workloads,gauge,0,,,"The number of Workloads that are reserving quota, per 'cluster_queue'",0,kueue,reserving_active_workloads,,
 kueue.resource_flavor.quota_reserved_workloads,gauge,0,,,Number of reserved workloads.,0,kueue,resource_flavor_quota_reserved_workloads,,"kueue_cluster_queue:default,flavor:on-demand"
-kueue.workload.creation_latency.seconds,gauge,0,second,,Kueue workload creation latency seconds metric.,0,kueue,workload_creation_latency_seconds,,
-kueue.workload.eviction_latency.seconds,gauge,0,second,,Kueue workload eviction latency seconds metric.,0,kueue,workload_eviction_latency_seconds,,
+kueue.workload.creation_latency.seconds.bucket,count,0,second,,"The time between a job was created until its workload was created, per 'job_kind'. Entries are only recorded for objects with generation 1.",0,kueue,workload_creation_latency_seconds_bucket,,
+kueue.workload.creation_latency.seconds.count,count,0,second,,"The time between a job was created until its workload was created, per 'job_kind'. Entries are only recorded for objects with generation 1.",0,kueue,workload_creation_latency_seconds_count,,
+kueue.workload.creation_latency.seconds.sum,count,0,second,,"The time between a job was created until its workload was created, per 'job_kind'. Entries are only recorded for objects with generation 1.",0,kueue,workload_creation_latency_seconds_sum,,
+kueue.workload.eviction_latency.seconds.bucket,count,0,second,,"Bucket counts for the time from workload eviction until the workload returns to pending and releases quota, tagged by cluster queue, reason, and replica role.",0,kueue,workload_eviction_latency_seconds_bucket,,
+kueue.workload.eviction_latency.seconds.count,count,0,second,,"Count of observations for the time from workload eviction until the workload returns to pending and releases quota, tagged by cluster queue, reason, and replica role.",0,kueue,workload_eviction_latency_seconds_count,,
+kueue.workload.eviction_latency.seconds.sum,count,0,second,,"Sum of time from workload eviction until the workload returns to pending and releases quota, tagged by cluster queue, reason, and replica role.",0,kueue,workload_eviction_latency_seconds_sum,,
 kueue.workqueue.adds,gauge,0,,,Kueue workqueue adds metric.,0,kueue,workqueue_adds,,
 kueue.workqueue.depth,gauge,0,,,Kueue workqueue depth metric.,0,kueue,workqueue_depth,,
 kueue.workqueue.longest_running_processor.seconds,gauge,0,second,,Kueue workqueue longest running processor seconds metric.,0,kueue,workqueue_longest_running_processor_seconds,,

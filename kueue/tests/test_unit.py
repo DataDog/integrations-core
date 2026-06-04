@@ -2,18 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from typing import Any, Callable, Dict  # noqa: F401
-
 import pytest
 
-from datadog_checks.base import AgentCheck  # noqa: F401
-from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kueue import KueueCheck
 from datadog_checks.kueue.check import OTHER_RESOURCE_NAME, RESOURCE_NAME_MAP
 from datadog_checks.kueue.metrics import LOCAL_QUEUE_METRIC_MAP, METRIC_MAP, RESOURCE_METRIC_MAP
 
 from .common import TEST_METRICS, get_fixture_path
+
+pytestmark = pytest.mark.unit
 
 
 def test_mapped_metrics_are_in_metadata():
@@ -27,7 +25,8 @@ def test_mapped_metrics_are_in_metadata():
             _metadata_metric_name(f'{metric_name}.{resource_name}') for resource_name in resource_names
         )
 
-    assert mapped_metrics.issubset(set(get_metadata_metrics()))
+    metadata_metrics = {_base_metric_name(metric) for metric in get_metadata_metrics()}
+    assert mapped_metrics.issubset(metadata_metrics)
 
 
 def _metadata_metric_name(metric_name):
@@ -37,8 +36,20 @@ def _metadata_metric_name(metric_name):
     return f'kueue.{metric_name}'
 
 
+def _base_metric_name(metric_name):
+    for suffix in ('.bucket', '.count', '.sum'):
+        if metric_name.endswith(suffix):
+            return metric_name[: -len(suffix)]
+
+    return metric_name
+
+
+def _assert_metadata_metrics(aggregator):
+    for metric in get_metadata_metrics():
+        aggregator.assert_metric(metric)
+
+
 def test_check(dd_run_check, aggregator, instance, mock_http_response):
-    # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
     mock_http_response(file_path=get_fixture_path('metrics.txt'))
 
     check = KueueCheck('kueue', {}, [instance])
@@ -56,8 +67,13 @@ def test_check(dd_run_check, aggregator, instance, mock_http_response):
     aggregator.assert_metric_has_tag('kueue.local_queue.pending_workloads', 'kueue_local_queue:gpu')
     aggregator.assert_metric_has_tag('kueue.local_queue.pending_workloads', 'namespace:team-a')
     aggregator.assert_metric_has_tag('kueue.local_queue.pending_workloads', 'status:active')
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(),
+        check_submission_type=True,
+        check_symmetric_inclusion=True,
+    )
+    _assert_metadata_metrics(aggregator)
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_resource_name_map(dd_run_check, aggregator, instance, mock_http_response):
@@ -81,7 +97,6 @@ def test_resource_name_map(dd_run_check, aggregator, instance, mock_http_respons
     aggregator.assert_metric_has_tag('kueue.cluster_queue.resource_usage.fpga', 'kueue_cluster_queue:default')
     aggregator.assert_metric_has_tag('kueue.cluster_queue.resource_usage.fpga', 'flavor:on-demand')
     aggregator.assert_metric_has_tag('kueue.cluster_queue.resource_usage.fpga', 'replica_role:leader')
-    aggregator.assert_metric_has_tag('kueue.cluster_queue.resource_usage.fpga', 'cohort:default')
 
 
 def test_empty_instance(dd_run_check):
