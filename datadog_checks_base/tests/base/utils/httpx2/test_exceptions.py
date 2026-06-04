@@ -42,3 +42,29 @@ def test_request_raises_invalid_url_error(raising_transport_factory):
     http = HTTPX2Wrapper({}, {}, transport=transport)
     with pytest.raises(HTTPInvalidURLError):
         http.get('http://example.test/')
+
+
+@pytest.mark.parametrize(
+    'raised,expected',
+    [
+        pytest.param(httpx2.ReadError('mid-stream'), HTTPRequestError, id='read-error'),
+        pytest.param(httpx2.ReadTimeout('slow'), HTTPTimeoutError, id='read-timeout'),
+    ],
+)
+@pytest.mark.parametrize(
+    'iter_method,iter_kwargs',
+    [
+        pytest.param('iter_lines', {}, id='iter_lines'),
+        pytest.param('iter_lines', {'decode_unicode': True}, id='iter_lines-decoded'),
+        pytest.param('iter_content', {}, id='iter_content-bytes'),
+        pytest.param('iter_content', {'decode_unicode': True}, id='iter_content-decoded'),
+    ],
+)
+def test_iter_methods_map_mid_stream_exceptions(
+    mid_stream_raising_transport_factory, raised, expected, iter_method, iter_kwargs
+):
+    transport = mid_stream_raising_transport_factory(raised)
+    http = HTTPX2Wrapper({}, {}, transport=transport)
+    response = http.get('http://example.test/')
+    with pytest.raises(expected):
+        list(getattr(response, iter_method)(**iter_kwargs))

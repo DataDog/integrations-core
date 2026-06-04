@@ -195,12 +195,15 @@ class HTTPX2ResponseAdapter:
 
     def iter_content(self, chunk_size: int | None = None, decode_unicode: bool = False) -> Iterator[bytes | str]:
         effective_size = chunk_size if chunk_size is not None else DEFAULT_CHUNK_SIZE
-        if decode_unicode:
-            # iter_text uses an incremental decoder. Manual chunk decoding breaks on
-            # multibyte chars split across boundaries.
-            yield from self._response.iter_text(chunk_size=effective_size)
-            return
-        yield from self._response.iter_bytes(chunk_size=effective_size)
+        try:
+            if decode_unicode:
+                # iter_text uses an incremental decoder. Manual chunk decoding breaks on
+                # multibyte chars split across boundaries.
+                yield from self._response.iter_text(chunk_size=effective_size)
+                return
+            yield from self._response.iter_bytes(chunk_size=effective_size)
+        except (httpx2.HTTPError, httpx2.InvalidURL) as exc:
+            raise _map_httpx2_exception(exc) from exc
 
     def iter_lines(
         self,
@@ -211,9 +214,12 @@ class HTTPX2ResponseAdapter:
         if delimiter is not None:
             raise NotImplementedError("HTTPX2ResponseAdapter.iter_lines does not support custom delimiters")
         encoding = self._response.encoding or 'utf-8'
-        for line in self._response.iter_lines():
-            # errors='replace' tolerates bytes that don't round-trip under the declared charset.
-            yield line if decode_unicode else line.encode(encoding, errors='replace')
+        try:
+            for line in self._response.iter_lines():
+                # errors='replace' tolerates bytes that don't round-trip under the declared charset.
+                yield line if decode_unicode else line.encode(encoding, errors='replace')
+        except (httpx2.HTTPError, httpx2.InvalidURL) as exc:
+            raise _map_httpx2_exception(exc) from exc
 
     def __enter__(self) -> Self:
         return self

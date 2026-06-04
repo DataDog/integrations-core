@@ -32,6 +32,21 @@ def raising_transport_factory() -> Callable[[Exception], httpx2.MockTransport]:
 
 
 @pytest.fixture
+def mid_stream_raising_transport_factory() -> Callable[[Exception], httpx2.MockTransport]:
+    def _factory(exc: Exception):
+        def body():
+            yield b'first\n'
+            raise exc
+
+        def handler(_request: httpx2.Request) -> httpx2.Response:
+            return httpx2.Response(200, content=body())
+
+        return httpx2.MockTransport(handler)
+
+    return _factory
+
+
+@pytest.fixture
 def captured_requests() -> list[httpx2.Request]:
     return []
 
