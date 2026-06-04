@@ -13,6 +13,7 @@ files:
         type: string
       description: |
         SOCKS Proxy to use for all instances.
+      fleet_configurable: false
   - template: instances
     options:
         - name: host
@@ -89,6 +90,7 @@ files:
                 type: array
                 items:
                   type: string
+          fleet_configurable: false
         - name: resource_filters
           description: |
             Each filter in the list is composed of three parameters.
@@ -158,6 +160,7 @@ files:
                 type: array
                 items:
                   type: string
+          fleet_configurable: false
         - name: excluded_host_tags
           description: |
             Use this option to send a subset of host tags as metric tags.
@@ -177,6 +180,7 @@ files:
             display_default: []
             example:
               - <HOST_TAG>
+          fleet_configurable: false
         - name: proxy
           value:
             example: socks5://<PROXY_SERVER>:<PORT>
@@ -184,6 +188,7 @@ files:
             type: string
           description: |
             SOCKS Proxy to use for this instance. Overrides the `proxy` setting in `init_config`.
+          fleet_configurable: false
         - name: ssl_verify
           description: Set to false to disable SSL verification when connecting to the ESXi host
           fleet_configurable: true

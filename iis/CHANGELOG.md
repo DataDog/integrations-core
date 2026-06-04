@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 5.7.0 / 2026-05-14
+
+***Added***:
+
+* Expose the `include_total` option in the perf-counter spec, allowing the `_Total` aggregate instance to be collected for selected performance objects. ([#23530](https://github.com/DataDog/integrations-core/pull/23530))
+
+***Fixed***:
+
+* Re-order configuration fields by usage frequency. ([#23323](https://github.com/DataDog/integrations-core/pull/23323))
+
 ## 5.6.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:

@@ -1,0 +1,1 @@
+Remove the Data Streams live messages reading feature, which has moved to the kafka_actions integration.
